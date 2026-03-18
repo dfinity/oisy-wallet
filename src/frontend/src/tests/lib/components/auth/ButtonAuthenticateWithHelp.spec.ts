@@ -3,6 +3,7 @@ import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 import * as auth from '$lib/services/auth.services';
 import { authLocked } from '$lib/stores/locked.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { tokenCategoryFilterStore, tokensSortStore } from '$lib/stores/settings.store';
 import { InternetIdentityDomain } from '$lib/types/auth';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -104,5 +105,44 @@ describe('ButtonAuthenticateWithHelp', () => {
 		expect(authLocked.unlock).toHaveBeenCalledExactlyOnceWith({
 			source: 'login from landing page'
 		});
+	});
+
+	it('should reset tokens sort and token category filter stores on successful sign in', async () => {
+		vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'ok' });
+		vi.spyOn(authLocked, 'unlock').mockImplementationOnce(vi.fn());
+
+		const tokensSortResetSpy = vi.spyOn(tokensSortStore, 'reset');
+		const tokenCategoryFilterResetSpy = vi.spyOn(tokenCategoryFilterStore, 'reset');
+
+		const { container } = render(ButtonAuthenticateWithHelp);
+
+		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+		expect(signInButton).toBeInTheDocument();
+
+		await waitFor(() => signInButton?.click());
+
+		expect(tokensSortResetSpy).toHaveBeenCalledExactlyOnceWith({ key: 'tokens-sort' });
+		expect(tokenCategoryFilterResetSpy).toHaveBeenCalledExactlyOnceWith({
+			key: 'token-category-filter'
+		});
+	});
+
+	it('should not reset stores on failed sign in', async () => {
+		vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+
+		const tokensSortResetSpy = vi.spyOn(tokensSortStore, 'reset');
+		const tokenCategoryFilterResetSpy = vi.spyOn(tokenCategoryFilterStore, 'reset');
+
+		const { container } = render(ButtonAuthenticateWithHelp);
+
+		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+		expect(signInButton).toBeInTheDocument();
+
+		await waitFor(() => signInButton?.click());
+
+		expect(tokensSortResetSpy).not.toHaveBeenCalled();
+		expect(tokenCategoryFilterResetSpy).not.toHaveBeenCalled();
 	});
 });

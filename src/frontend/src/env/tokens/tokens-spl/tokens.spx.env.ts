@@ -18,7 +18,7 @@ export const SPX_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
-	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'SPX6900 (Wormhole)',
 	symbol: SPX_SYMBOL,
 	decimals: SPX_DECIMALS,

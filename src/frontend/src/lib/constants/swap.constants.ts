@@ -46,7 +46,7 @@ export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 export const SWAP_MODE = 'all';
 export const SWAP_SIDE = 'SELL';
 
-export const swapProvidersDetails: Record<string, SwapProvidersConfig> = {
+export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersConfig>> = {
 	[SwapProvider.VELORA]: {
 		website: 'https://app.velora.xyz/',
 		name: 'Velora',
