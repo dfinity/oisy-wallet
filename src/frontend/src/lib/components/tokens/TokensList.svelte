@@ -21,12 +21,12 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { filterTokensByCategory } from '$lib/utils/token-tag.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
-	import {replacePlaceholders} from "$lib/utils/i18n.utils";
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
