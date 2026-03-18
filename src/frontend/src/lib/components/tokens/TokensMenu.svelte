@@ -8,7 +8,7 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { hideZeroBalances, tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
+	import { hideZeroBalances } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
@@ -42,7 +42,7 @@
 >
 	{#snippet icon()}
 		<NotificationBlob
-			display={$hideZeroBalances || $tokenCategoryFilterEnabled}
+			display={$hideZeroBalances}
 			position="top-right"
 		>
 			<IconManage />
