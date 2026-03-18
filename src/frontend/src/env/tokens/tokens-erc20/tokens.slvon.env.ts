@@ -17,7 +17,7 @@ export const SLVON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.COMMODITY }],
 	name: 'iShares Silver Trust (Ondo Tokenized Stock)',
 	symbol: SLVON_SYMBOL,
 	decimals: SLVON_DECIMALS,
