@@ -26,6 +26,7 @@
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { filterTokensByCategory } from '$lib/utils/token-tag.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import {replacePlaceholders} from "$lib/utils/i18n.utils";
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -149,7 +150,16 @@
 		</div>
 
 		{#if filteredTokens?.length === 0}
-			{#if $tokenListStore.filter === ''}
+			{#if $showTokenCategoryFilter && nonNullish($tokenCategoryFilter)}
+				<NothingFoundPlaceholder
+					description={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type_description, {
+						$count: `${$allFungibleNetworkTokens.length}`
+					})}
+					title={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type, {
+						$asset_type: $i18n.token_tag.category[$tokenCategoryFilter]
+					})}
+				/>
+			{:else if $tokenListStore.filter === ''}
 				<NoTokensPlaceholder />
 			{:else}
 				<NothingFoundPlaceholder />
