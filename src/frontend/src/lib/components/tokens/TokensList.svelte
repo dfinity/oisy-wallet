@@ -2,11 +2,13 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
+	import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -131,6 +133,12 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
+		{#if $showTokenCategoryFilter}
+			<div class="mb-4" transition:slide>
+				<TokenTypeFilterBar />
+			</div>
+		{/if}
+
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each tokensWithKey as { tokenOrGroup, key } (key)}
 				<div class="overflow-hidden rounded-xl">

@@ -1,0 +1,22 @@
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		selected?: boolean;
+		onClick?: () => void;
+		children: Snippet;
+	}
+
+	let { selected = false, onClick, children }: Props = $props();
+</script>
+
+<button
+	class="bg- shrink-0 rounded-full border px-3 py-1 text-xs transition-colors"
+	class:bg-brand-primary={selected}
+	class:bg-primary={!selected}
+	class:text-primary-inverted={selected}
+	class:text-secondary={!selected}
+	onclick={onClick}
+>
+	{@render children()}
+</button>
