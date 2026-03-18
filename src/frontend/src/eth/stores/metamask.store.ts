@@ -1,8 +1,8 @@
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
 
 interface MetamaskData {
-	available: Option<boolean>;
+	available: Nullish<boolean>;
 }
 
 interface MetamaskStore extends Readable<MetamaskData> {

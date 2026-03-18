@@ -9,8 +9,8 @@ import type {
 	OnramperNetworkWallet,
 	OnramperWalletAddress
 } from '$lib/types/onramper';
-import type { Option } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 export interface BuildOnramperLinkParams {
 	mode: OnramperMode;
@@ -94,7 +94,7 @@ export const mapOnramperNetworkWallets = ({
 	walletMap
 }: {
 	networks: Network[];
-	walletMap: Map<symbol, Option<OnramperWalletAddress>>;
+	walletMap: Map<symbol, Nullish<OnramperWalletAddress>>;
 }): OnramperNetworkWallet[] =>
 	networks.reduce<OnramperNetworkWallet[]>((acc, { buy, id }) => {
 		const { onramperId: networkId } = buy ?? {};

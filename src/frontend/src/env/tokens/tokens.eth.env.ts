@@ -5,6 +5,7 @@ import {
 } from '$env/networks/networks.eth.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import eth from '$icp-eth/assets/eth.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -20,7 +21,7 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'ethereum' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Ethereum',
 	symbol: ETHEREUM_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
@@ -42,7 +43,7 @@ export const SEPOLIA_TOKEN: RequiredTokenWithLinkedData = {
 	network: SEPOLIA_NETWORK,
 	standard: { code: 'ethereum' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'SepoliaETH',
 	symbol: SEPOLIA_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,

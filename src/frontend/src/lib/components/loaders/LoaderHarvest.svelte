@@ -3,6 +3,7 @@
 	import { EARNING_ENABLED } from '$env/earning';
 	import { fetchHarvestVaults } from '$lib/rest/harvest.rest';
 	import { harvestVaultsStore } from '$lib/stores/harvest.store';
+	import { consoleWarn } from '$lib/utils/console.utils';
 
 	onMount(async () => {
 		if (!EARNING_ENABLED) {
@@ -14,7 +15,7 @@
 
 			harvestVaultsStore.set(vaults);
 		} catch (err: unknown) {
-			console.warn('Failed to load Harvest vaults.', err);
+			consoleWarn('Failed to load Harvest vaults.', err);
 		}
 	});
 </script>

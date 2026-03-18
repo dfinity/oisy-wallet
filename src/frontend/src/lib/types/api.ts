@@ -5,6 +5,7 @@ import type {
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
+	IIDelegationChain,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -74,6 +75,7 @@ export interface BtcGetPendingTransactionParams {
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
 	txId: Uint8Array;
 	utxos: Utxo[];
+	iiDelegationChain: [] | [IIDelegationChain];
 }
 
 export interface SendBtcParams {

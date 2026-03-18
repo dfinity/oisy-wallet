@@ -1,9 +1,9 @@
 import type { UtxosFee } from '$btc/types/btc-send';
 import type { OptionAmount } from '$lib/types/send';
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
 
-export type UtxosFeeStoreData = Option<{
+export type UtxosFeeStoreData = Nullish<{
 	utxosFee?: UtxosFee;
 	// We need to save the inputted amount for which UTXOs have been already fetched.
 	// It allows us to compare it with the new value to prevent a re-fetch on consumer component re-render.

@@ -60,6 +60,12 @@ export const mapBtcAddPendingTransactionError = (
 		return mapRateLimitError(err.RateLimited);
 	}
 
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcAddPendingTransactionError'));
 };
 

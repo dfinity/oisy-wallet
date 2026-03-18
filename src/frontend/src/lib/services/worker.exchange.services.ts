@@ -7,6 +7,7 @@ import type {
 	PostMessageDataResponseExchangeError
 } from '$lib/types/post-message';
 import type { WorkerData } from '$lib/types/worker';
+import { consoleError } from '$lib/utils/console.utils';
 
 export class ExchangeWorker extends AppWorker {
 	private constructor(worker: WorkerData) {
@@ -25,7 +26,7 @@ export class ExchangeWorker extends AppWorker {
 						syncExchange(data as PostMessageDataResponseExchange | undefined);
 						return;
 					case 'syncExchangeError':
-						console.error(
+						consoleError(
 							'An error occurred while attempting to retrieve the USD exchange rates.',
 							(data as PostMessageDataResponseExchangeError | undefined)?.err
 						);

@@ -58,7 +58,7 @@ describe('certified-setter.store', () => {
 			});
 
 			it('should not throw an error when setting an unknown tokenId', () => {
-				expect(() => mockStore.set({ id: SEPOLIA_TOKEN_ID, data })).not.toThrowError();
+				expect(() => mockStore.set({ id: SEPOLIA_TOKEN_ID, data })).not.toThrow();
 			});
 		});
 

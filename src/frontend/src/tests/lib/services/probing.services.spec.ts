@@ -112,7 +112,7 @@ describe('probing.services', () => {
 			mockFn2.mockRejectedValue(new Error('Probe 2 failed'));
 			mockFn31.mockRejectedValue(new Error('Probe 3 failed'));
 
-			await expect(resolveByProbing(groups)).rejects.toThrowError(
+			await expect(resolveByProbing(groups)).rejects.toThrow(
 				new ResolveByProbingError(
 					'All probing groups failed: Error: Probe 1 failed | Error: Probe 2 failed | Error: Probe 3 failed'
 				)
@@ -129,7 +129,7 @@ describe('probing.services', () => {
 		});
 
 		it('should throw if the list of groups is empty', async () => {
-			await expect(resolveByProbing([])).rejects.toThrowError('No probing groups provided');
+			await expect(resolveByProbing([])).rejects.toThrow('No probing groups provided');
 		});
 	});
 });

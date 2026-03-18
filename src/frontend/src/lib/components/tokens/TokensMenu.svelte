@@ -1,8 +1,6 @@
 <script lang="ts">
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconHide from '$lib/components/icons/IconHide.svelte';
-	import IconFilter from '$lib/components/icons/lucide/IconFilter.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import TokensAssetTypeToggle from '$lib/components/tokens/TokensAssetTypeToggle.svelte';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
@@ -58,9 +56,6 @@
 		<List condensed noPadding>
 			<ListItem>
 				<LogoButton fullWidth onClick={toggleHideZeros}>
-					{#snippet logo()}
-						<IconHide />
-					{/snippet}
 					{#snippet title()}
 						<span class="text-sm font-normal">{$i18n.tokens.text.hide_zero_balances}</span>
 					{/snippet}
@@ -72,9 +67,6 @@
 
 			<ListItem>
 				<LogoButton fullWidth onClick={toggleAssetTypes}>
-					{#snippet logo()}
-						<IconFilter />
-					{/snippet}
 					{#snippet title()}
 						<span class="text-sm font-normal">{$i18n.tokens.text.hide_asset_types}</span>
 					{/snippet}

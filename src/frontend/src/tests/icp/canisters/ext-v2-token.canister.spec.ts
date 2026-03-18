@@ -94,7 +94,7 @@ describe('ext-v2-token.canister', () => {
 
 			const res = transactions(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 		});
 	});
 
@@ -140,7 +140,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
 			);
 
@@ -156,9 +156,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(balance(mockParams)).rejects.toThrowError(
-				new CanisterInternalError('other error')
-			);
+			await expect(balance(mockParams)).rejects.toThrow(new CanisterInternalError('other error'));
 
 			expect(service.balance).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
@@ -171,7 +169,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
 			);
 
@@ -188,7 +186,7 @@ describe('ext-v2-token.canister', () => {
 
 			const res = balance(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 		});
 	});
 
@@ -239,7 +237,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
 			);
 
@@ -255,7 +253,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('other error')
 			);
 
@@ -285,7 +283,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
 			);
 
@@ -302,7 +300,7 @@ describe('ext-v2-token.canister', () => {
 
 			const res = getTokensByOwner(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 		});
 	});
 
@@ -356,7 +354,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getTokensByOwnerLegacy(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwnerLegacy(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
 			);
 
@@ -372,7 +370,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getTokensByOwnerLegacy(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwnerLegacy(mockParams)).rejects.toThrow(
 				new CanisterInternalError('other error')
 			);
 
@@ -402,7 +400,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getTokensByOwnerLegacy(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwnerLegacy(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
 			);
 
@@ -419,7 +417,7 @@ describe('ext-v2-token.canister', () => {
 
 			const res = getTokensByOwnerLegacy(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 		});
 	});
 
@@ -470,7 +468,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transfer(mockParams)).rejects.toThrowError(
+			await expect(transfer(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`Cannot notify account: ${mockAccountIdentifier}`)
 			);
 
@@ -486,7 +484,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transfer(mockParams)).rejects.toThrowError(
+			await expect(transfer(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Insufficient balance for the transfer')
 			);
 
@@ -502,7 +500,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transfer(mockParams)).rejects.toThrowError(
+			await expect(transfer(mockParams)).rejects.toThrow(
 				new CanisterInternalError('The transfer was rejected')
 			);
 
@@ -520,7 +518,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transfer(mockParams)).rejects.toThrowError(
+			await expect(transfer(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`Unauthorized account: ${mockAccountIdentifier}`)
 			);
 
@@ -536,7 +534,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transfer(mockParams)).rejects.toThrowError(
+			await expect(transfer(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
 			);
 
@@ -552,9 +550,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transfer(mockParams)).rejects.toThrowError(
-				new CanisterInternalError('other error')
-			);
+			await expect(transfer(mockParams)).rejects.toThrow(new CanisterInternalError('other error'));
 
 			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
@@ -567,7 +563,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transfer(mockParams)).rejects.toThrowError(
+			await expect(transfer(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
 			);
 
@@ -584,7 +580,7 @@ describe('ext-v2-token.canister', () => {
 
 			const res = transfer(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 		});
 	});
 
@@ -635,7 +631,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transferAlias(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`Cannot notify account: ${mockAccountIdentifier}`)
 			);
 
@@ -651,7 +647,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transferAlias(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Insufficient balance for the transfer')
 			);
 
@@ -667,7 +663,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transferAlias(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrow(
 				new CanisterInternalError('The transfer was rejected')
 			);
 
@@ -685,7 +681,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transferAlias(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`Unauthorized account: ${mockAccountIdentifier}`)
 			);
 
@@ -701,7 +697,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transferAlias(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
 			);
 
@@ -717,7 +713,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transferAlias(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrow(
 				new CanisterInternalError('other error')
 			);
 
@@ -732,7 +728,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transferAlias(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
 			);
 
@@ -749,7 +745,7 @@ describe('ext-v2-token.canister', () => {
 
 			const res = transferAlias(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 		});
 	});
 
@@ -822,7 +818,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(metadata(mockParams)).rejects.toThrowError(
+			await expect(metadata(mockParams)).rejects.toThrow(
 				new CanisterInternalError('first method error')
 			);
 
@@ -854,7 +850,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(metadata(mockParams)).rejects.toThrowError(
+			await expect(metadata(mockParams)).rejects.toThrow(
 				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
 			);
 
@@ -870,9 +866,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(metadata(mockParams)).rejects.toThrowError(
-				new CanisterInternalError('other error')
-			);
+			await expect(metadata(mockParams)).rejects.toThrow(new CanisterInternalError('other error'));
 
 			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
 		});
@@ -885,7 +879,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(metadata(mockParams)).rejects.toThrowError(
+			await expect(metadata(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
 			);
 

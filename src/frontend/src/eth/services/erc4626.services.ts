@@ -24,6 +24,7 @@ import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -32,6 +33,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { Vault } from '$lib/types/vaults';
+import { consoleError } from '$lib/utils/console.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -143,7 +145,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: ETHEREUM_DEFAULT_DECIMALS,
 					standard: { code: 'erc4626' as const },
 					category: 'custom' as const,
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					assetAddress: '' as Erc4626ContractAddress,
 					assetDecimals: ETHEREUM_DEFAULT_DECIMALS,
 					assetSymbol: '',
@@ -170,7 +172,7 @@ const loadCustomTokensWithMetadata = async ({
 				// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
 				return await infuraErc4626Providers(networkId).metadata({ address });
 			} catch (err: unknown) {
-				console.error(
+				consoleError(
 					`Error loading metadata for custom ERC4626 token ${address} on network ${networkId.description}`,
 					err
 				);
@@ -187,7 +189,7 @@ const loadCustomTokensWithMetadata = async ({
 			try {
 				return await infuraErc4626Providers(networkId).getAssetAddress(address);
 			} catch (err: unknown) {
-				console.error(
+				consoleError(
 					`Error loading asset address for custom ERC4626 token ${address} on network ${networkId.description}`,
 					err
 				);

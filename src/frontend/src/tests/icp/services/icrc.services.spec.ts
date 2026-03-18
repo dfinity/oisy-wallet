@@ -19,6 +19,7 @@ import {
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS
 } from '$lib/enums/plausible';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -141,7 +142,7 @@ describe('icrc.services', () => {
 					certified: true,
 					data: {
 						category: 'custom',
-						tags: [],
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 						decimals: Number(mockDecimals),
 						enabled: true,
 						fee: mockFee,
@@ -221,7 +222,7 @@ describe('icrc.services', () => {
 					certified: true,
 					data: {
 						category: 'custom',
-						tags: [],
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 						decimals: 8,
 						enabled: true,
 						fee: 100000n,
@@ -770,7 +771,7 @@ describe('icrc.services', () => {
 					spender: mockSpender,
 					amount: mockAmount
 				})
-			).rejects.toThrowError(err);
+			).rejects.toThrow(err);
 		});
 	});
 

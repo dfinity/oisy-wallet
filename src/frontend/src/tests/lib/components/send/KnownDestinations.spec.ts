@@ -51,8 +51,8 @@ describe('KnownDestinations', () => {
 		});
 
 		expect(getByText(shortenWithMiddleEllipsis({ text: mockBtcAddress }))).toBeInTheDocument();
-		expect(() => getByText(shortenWithMiddleEllipsis({ text: mockEthAddress }))).toThrowError();
-		expect(() => getByText(shortenWithMiddleEllipsis({ text: mockSolAddress }))).toThrowError();
+		expect(() => getByText(shortenWithMiddleEllipsis({ text: mockEthAddress }))).toThrow();
+		expect(() => getByText(shortenWithMiddleEllipsis({ text: mockSolAddress }))).toThrow();
 	});
 
 	it('renders empty state component if data is empty', () => {

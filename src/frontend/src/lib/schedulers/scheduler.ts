@@ -5,6 +5,7 @@ import type {
 	PostMessageScheduler
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
@@ -48,7 +49,7 @@ export class SchedulerTimer {
 
 		if (isNullish(identity)) {
 			// We do nothing if no identity
-			console.error('Attempted to initiate a worker without an authenticated identity.');
+			consoleError('Attempted to initiate a worker without an authenticated identity.');
 			return;
 		}
 
@@ -86,7 +87,7 @@ export class SchedulerTimer {
 
 		if (isNullish(identity)) {
 			// We cannot execute without an identity
-			console.error('Attempted to execute a worker without an authenticated identity.');
+			consoleError('Attempted to execute a worker without an authenticated identity.');
 			return;
 		}
 
@@ -109,7 +110,7 @@ export class SchedulerTimer {
 
 			this.setStatus('idle');
 		} catch (err: unknown) {
-			console.error(err);
+			consoleError(err);
 
 			// Once the status becomes "error", the job will no longer be called and the status will remain "error"
 			this.setStatus('error');

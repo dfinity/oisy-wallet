@@ -4,6 +4,7 @@ import type { EthNonFungibleToken } from '$eth/types/nft';
 import { createBatches } from '$lib/services/batch.services';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 
 export const loadNftsByNetwork = async ({
@@ -29,7 +30,7 @@ export const loadNftsByNetwork = async ({
 			nfts.push(...(await getNftsByOwner({ address: walletAddress, tokens: batch })));
 		} catch (err: unknown) {
 			const tokenAddresses = batch.map((token) => token.address);
-			console.warn(
+			consoleWarn(
 				`Failed to load NFTs for tokens: ${tokenAddresses} on network: ${networkId.toString()}.`,
 				err
 			);

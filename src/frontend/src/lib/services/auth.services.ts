@@ -32,6 +32,7 @@ import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastMsg } from '$lib/types/toast';
+import { consoleError, consoleWarn } from '$lib/utils/console.utils';
 import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
@@ -190,7 +191,7 @@ const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 	} catch (err: unknown) {
 		// We silence the error.
 		// Effective logout is more important here.
-		console.error(err);
+		consoleError(err);
 	}
 };
 
@@ -250,7 +251,7 @@ const logout = async ({
 	try {
 		await clearSessionStorage();
 	} catch (err: unknown) {
-		console.warn('Error clearing session storage on logout', err);
+		consoleWarn('Error clearing session storage on logout', err);
 	}
 
 	await authStore.signOut();
@@ -313,7 +314,7 @@ export const displayAndCleanLogoutMsg = async () => {
 		try {
 			await deleteIdbAllOisyRelated();
 		} catch (err: unknown) {
-			console.error('Error deleting cache after logout', err);
+			consoleError('Error deleting cache after logout', err);
 		}
 	}
 

@@ -8,7 +8,6 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import type { Option } from '$lib/types/utils';
 import {
 	getNftDisplayId,
 	getNftDisplayImageUrl,
@@ -32,6 +31,7 @@ import {
 import { MOCK_EXT_TOKENS, mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 describe('nft.utils', () => {
 	describe('isTokenNonFungible', () => {
@@ -221,7 +221,7 @@ describe('nft.utils', () => {
 		it('should map NFT attributes correctly (input as list)', () => {
 			const mockAttributes: {
 				trait_type: string;
-				value?: Option<string | number | boolean>;
+				value?: Nullish<string | number | boolean>;
 			}[] = [
 				{ trait_type: 'Color', value: 'Blue' },
 				{ trait_type: 'Size', value: 'Large' },
@@ -246,7 +246,7 @@ describe('nft.utils', () => {
 		});
 
 		it('should map NFT attributes correctly (input as object)', () => {
-			const mockAttributes: Record<string, Option<string | number | boolean>> = {
+			const mockAttributes: Record<string, Nullish<string | number | boolean>> = {
 				Color: 'Blue',
 				Size: 'Large',
 				Tall: false,

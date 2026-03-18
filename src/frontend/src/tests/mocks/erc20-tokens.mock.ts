@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -31,7 +32,7 @@ export const createMockErc20Tokens = ({
 		network: networkEnv === 'mainnet' ? ETHEREUM_NETWORK : SEPOLIA_NETWORK,
 		standard: { code: 'erc20' },
 		category: 'default',
-		tags: [],
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		decimals: 8,
 		address: `0x${start + i + 1}-${networkEnv}`
 	}));

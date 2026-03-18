@@ -100,9 +100,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					new SolRpcCanisterError(error)
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(new SolRpcCanisterError(error));
 			});
 
 			it('should throw an error if getAccountInfo returns a ProviderError.TooFewCycles error', async () => {
@@ -119,9 +117,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					new SolRpcCanisterError(error)
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(new SolRpcCanisterError(error));
 			});
 
 			it('should throw an error if getAccountInfo returns a ProviderError.InvalidRpcConfig error', async () => {
@@ -138,9 +134,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					new SolRpcCanisterError(error)
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(new SolRpcCanisterError(error));
 			});
 
 			it('should throw an error if getAccountInfo returns a ProviderError.UnsupportedCluster error', async () => {
@@ -157,9 +151,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					new SolRpcCanisterError(error)
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(new SolRpcCanisterError(error));
 			});
 
 			it('should throw an error if getAccountInfo returns a ValidationError error', async () => {
@@ -172,9 +164,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					new SolRpcCanisterError(error)
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(new SolRpcCanisterError(error));
 			});
 
 			it('should throw an error if getAccountInfo returns an HttpOutcallError.IcError error', async () => {
@@ -191,9 +181,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					new SolRpcCanisterError(error)
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(new SolRpcCanisterError(error));
 			});
 
 			it('should throw an error if getAccountInfo returns an HttpOutcallError.InvalidHttpJsonRpcResponse error', async () => {
@@ -214,9 +202,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					new SolRpcCanisterError(error)
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(new SolRpcCanisterError(error));
 			});
 
 			it('should throw an error if getAccountInfo returns a generic canister error', async () => {
@@ -228,9 +214,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					expectedUnknownRpcError.message
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(expectedUnknownRpcError.message);
 			});
 
 			it('should throw an error if getAccountInfo returns an unexpected response', async () => {
@@ -244,9 +228,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					expectedUnknownRpcError.message
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(expectedUnknownRpcError.message);
 			});
 
 			it('should throw an error if getAccountInfo returns an Inconsistent response', async () => {
@@ -259,9 +241,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
-					expectedInconsistentErrorResponse
-				);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(expectedInconsistentErrorResponse);
 			});
 
 			it('should throw an error if getAccountInfo throws', async () => {
@@ -273,7 +253,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(mockResponseError);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(mockResponseError);
 			});
 
 			it('should throw an error if the network is unknown', async () => {
@@ -286,7 +266,7 @@ describe('sol-rpc.canister', () => {
 				await expect(
 					// @ts-expect-error we test this in purposes
 					getAccountInfo({ ...mockParams, network: 'unknown-network' })
-				).rejects.toThrowError(expectedUnknownNetworkError);
+				).rejects.toThrow(expectedUnknownNetworkError);
 			});
 		});
 	});

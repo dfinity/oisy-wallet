@@ -2,7 +2,6 @@ import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.d
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { swap } from '$eth/services/swap.services';
-import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -35,13 +34,12 @@ import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import {
 	ICP_SWAP_POOL_FEE,
 	SWAP_DELTA_INTERVAL_MS,
-	SWAP_DELTA_TIMEOUT_MS,
-	SWAP_MODE,
-	SWAP_SIDE
+	SWAP_DELTA_TIMEOUT_MS
 } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
@@ -56,17 +54,17 @@ import {
 	SwapErrorCodes,
 	SwapProvider,
 	type CheckDeltaOrderStatusParams,
+	type EvmQuoteParams,
 	type FetchSwapAmountsParams,
-	type GetQuoteParams,
 	type ICPSwapResult,
 	type IcpSwapManualWithdrawParams,
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
 	type SwapMappedResult,
 	type SwapParams,
-	type SwapVeloraParams,
-	type VeloraQuoteParams
+	type SwapVeloraParams
 } from '$lib/types/swap';
+import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
@@ -74,9 +72,7 @@ import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
 	geSwapEthTokenAddress,
-	getWithdrawableToken,
-	mapVeloraMarketSwapResult,
-	mapVeloraSwapResult
+	getWithdrawableToken
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
@@ -268,7 +264,8 @@ export const fetchSwapAmounts = async ({
 				sourceToken: sourceToken as Erc20Token,
 				destinationToken: destinationToken as Erc20Token,
 				amount: sourceAmount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 };
 
@@ -381,7 +378,9 @@ const fetchSwapAmountsICP = async ({
 		[]
 	);
 
-	return mappedProvidersResults.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
+	return mappedProvidersResults.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
 };
 
 export const fetchIcpSwap = async ({
@@ -507,7 +506,7 @@ export const fetchIcpSwap = async ({
 			});
 		}
 	} catch (err: unknown) {
-		console.error(err);
+		consoleError(err);
 
 		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
 
@@ -705,144 +704,32 @@ export const fetchSwapAmountsEVM = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userEthAddress
-}: VeloraQuoteParams): Promise<SwapMappedResult[]> => {
+	userEthAddress,
+	slippage
+}: EvmQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userEthAddress)) {
 		return [];
 	}
-	const swapAmountsResults = await fetchVeloraSwapAmount({
-		sourceToken,
-		destinationToken,
-		amount,
-		userEthAddress
-	});
 
-	if (isNullish(swapAmountsResults)) {
-		return [];
-	}
+	const enabledProviders = evmSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	return [swapAmountsResults];
-};
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ sourceToken, destinationToken, amount, userEthAddress, slippage })
+		)
+	);
 
-const fetchVeloraSwapAmount = async ({
-	sourceToken,
-	destinationToken,
-	amount,
-	userEthAddress
-}: VeloraQuoteParams & { userEthAddress: EthAddress }): Promise<SwapMappedResult | null> => {
-	const {
-		network: { chainId: destChainId }
-	} = destinationToken;
-
-	const {
-		network: { chainId: srcChainId }
-	} = sourceToken;
-
-	const sdk = constructSimpleSDK({
-		chainId: Number(srcChainId),
-		fetch: window.fetch
-	});
-
-	const baseParams: GetQuoteParams = {
-		amount: `${amount}`,
-		srcToken: geSwapEthTokenAddress(sourceToken),
-		destToken: geSwapEthTokenAddress(destinationToken),
-		srcDecimals: sourceToken.decimals,
-		destDecimals: destinationToken.decimals,
-		mode: SWAP_MODE,
-		side: SWAP_SIDE,
-		userAddress: userEthAddress,
-		partner: OISY_URL_HOSTNAME
-	};
-
-	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
-	const sourceTokenToDecimals = formatToken({
-		value: amount,
-		unitName: sourceToken.decimals
-	});
-
-	const trackEventBaseParams = {
-		event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
-		event_subcontext: SwapProvider.VELORA,
-		token_symbol: sourceToken.symbol,
-		token_network: sourceToken.network.name,
-		token_address: sourceToken.address,
-		token_name: sourceToken.name,
-		token_standard: sourceToken.standard.code,
-		token_id: String(sourceToken.id),
-		token2_symbol: destinationToken.symbol,
-		token2_network: destinationToken.network.name,
-		token2_address: destinationToken.address,
-		token2_name: destinationToken.name,
-		token2_standard: destinationToken.standard.code,
-		token2_id: String(destinationToken.id),
-		...(nonNullish(sourceTokenUsdValue) && {
-			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
-		})
-	};
-
-	try {
-		const data = await sdk.quote.getQuote(
-			srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
-		);
-
-		const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
-
-		if ('delta' in data) {
-			const destinationTokenToDecimals = formatToken({
-				value: BigInt(data.delta.destAmount),
-				unitName: destinationToken.decimals
-			});
-
-			trackEvent({
-				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
-				metadata: {
-					...trackEventBaseParams,
-					result_status: 'success',
-					event_type: 'delta',
-					...(nonNullish(destinationUsdValue) && {
-						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
-					})
-				}
-			});
-			return mapVeloraSwapResult(data);
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
 		}
 
-		if ('market' in data) {
-			const destinationTokenToDecimals = formatToken({
-				value: BigInt(data.market.destAmount),
-				unitName: destinationToken.decimals
-			});
+		return acc;
+	}, []);
 
-			trackEvent({
-				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
-				metadata: {
-					...trackEventBaseParams,
-					result_status: 'success',
-					event_type: 'market',
-					...(nonNullish(destinationUsdValue) && {
-						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
-					})
-				}
-			});
-			return mapVeloraMarketSwapResult(data.market);
-		}
-
-		return null;
-	} catch (error: unknown) {
-		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-		trackEvent({
-			name: PLAUSIBLE_EVENTS.SWAP_OFFER,
-			metadata: {
-				...trackEventBaseParams,
-				result_status: 'error',
-				result_error: errorMessage
-			}
-		});
-
-		return null;
-	}
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
 };
 
 export const withdrawUserUnusedBalance = async ({
