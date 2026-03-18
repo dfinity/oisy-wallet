@@ -34,7 +34,7 @@ sequenceDiagram
     participant P as Payer (User A)
     participant F as Frontend
     participant E as Escrow Canister
-    participant L as Token Ledger (ICRC-1/2)
+    participant L as Token Ledger (ICRC)
     participant R as Recipient (User B)
 
     %% --- CREATE DEAL ---
