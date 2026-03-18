@@ -1,4 +1,7 @@
 <script lang="ts">
+	import PillButton from '$lib/components/ui/PillButton.svelte';
+	import { isNullish } from '@dfinity/utils';
+	import ScrollableBar from '$lib/components/ui/ScrollableBar.svelte';
 	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -13,29 +16,14 @@
 		tokenCategoryFilterStore.set({ key: 'token-category-filter', value: { value } });
 </script>
 
-<div class="flex gap-2 overflow-x-auto pb-1">
-	<button
-		class="shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-		class:bg-brand-primary={$tokenCategoryFilter === undefined}
-		class:border-brand-primary={$tokenCategoryFilter === undefined}
-		class:border-secondary={$tokenCategoryFilter !== undefined}
-		class:text-primary-inverted={$tokenCategoryFilter === undefined}
-		class:text-secondary={$tokenCategoryFilter !== undefined}
-		onclick={() => select(undefined)}
-	>
+<ScrollableBar>
+	<PillButton onClick={() => select(undefined)} selected={isNullish($tokenCategoryFilter)}>
 		{$i18n.tokens.text.asset_type_all}
-	</button>
+	</PillButton>
+
 	{#each categories as category (category)}
-		<button
-			class="shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-			class:bg-brand-primary={$tokenCategoryFilter === category}
-			class:border-brand-primary={$tokenCategoryFilter === category}
-			class:border-secondary={$tokenCategoryFilter !== category}
-			class:text-primary-inverted={$tokenCategoryFilter === category}
-			class:text-secondary={$tokenCategoryFilter !== category}
-			onclick={() => select(category)}
-		>
+		<PillButton onClick={() => select(category)} selected={$tokenCategoryFilter === category}>
 			{getCategoryLabel(category)}
-		</button>
+		</PillButton>
 	{/each}
-</div>
+</ScrollableBar>

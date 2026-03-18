@@ -60,7 +60,7 @@ describe('TokensMenu', () => {
 			expect(blob?.classList.contains('opacity-100')).toBeTruthy();
 		});
 
-		it('should show blue dot when asset type filter is enabled', () => {
+		it('should not show blue dot when only asset type filter is enabled', () => {
 			hideTokenCategoryFilterStore.set({
 				key: 'hide-token-category-filter',
 				value: { enabled: true }
@@ -70,10 +70,10 @@ describe('TokensMenu', () => {
 
 			const blob = getNotificationBlob(container);
 
-			expect(blob?.classList.contains('opacity-100')).toBeTruthy();
+			expect(blob?.classList.contains('opacity-0')).toBeTruthy();
 		});
 
-		it('should show blue dot when both are enabled', () => {
+		it('should show blue dot when both are enabled because of hide zero balances', () => {
 			hideZeroBalancesStore.set({
 				key: 'hide-zero-balances',
 				value: { enabled: true }

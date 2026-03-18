@@ -3,7 +3,6 @@
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { goto } from '$app/navigation';
-	import shocked from '$lib/assets/images/shocked.png';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
@@ -13,7 +12,6 @@
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -30,15 +28,21 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
+	import { filterTokensByCategory } from '$lib/utils/token-tag.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
 	let loading: boolean = $derived(isNullish(tokens));
 
-	// Default token / tokenGroup list
+	let tokenTypeFiltered: TokenUiOrGroupUi[] = $derived(
+		$showTokenCategoryFilter
+			? filterTokensByCategory({ tokens: tokens ?? [], category: $tokenCategoryFilter })
+			: (tokens ?? [])
+	);
+
 	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
-		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
+		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokenTypeFiltered })
 	);
 
 	// Token list for enabling when filtering
@@ -147,17 +151,12 @@
 
 		{#if filteredTokens?.length === 0}
 			{#if $showTokenCategoryFilter && nonNullish($tokenCategoryFilter)}
-				<div class="py-12">
-					<div class="mb-2 flex justify-center p-2">
-						<Img height="64" src={shocked} width="64" />
-					</div>
-
-					<div class="space-y-4">
-						<p class="m-0 text-center text-lg font-bold">
-							{replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type, {
-								$asset_type: $i18n.token_tag.category[$tokenCategoryFilter]
-							})}
-						</p>
+				<NothingFoundPlaceholder
+					title={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type, {
+						$asset_type: $i18n.token_tag.category[$tokenCategoryFilter]
+					})}
+				>
+					{#snippet description()}
 						<p class="m-0 text-center text-tertiary">
 							{$i18n.tokens.text.no_tokens_for_asset_type_description_prefix}
 							<strong>
@@ -167,19 +166,21 @@
 							</strong>
 							{$i18n.tokens.text.no_tokens_for_asset_type_description_suffix}
 						</p>
-					</div>
+					{/snippet}
 
-					<div class="mt-6 flex justify-center">
-						<Button
-							fullWidth={false}
-							link
-							onclick={() => modalStore.openManageTokens({ id: Symbol() })}
-						>
-							<IconManage />
-							{$i18n.tokens.manage.text.manage_list}
-						</Button>
-					</div>
-				</div>
+					{#snippet action()}
+						<div class="mt-6 flex justify-center">
+							<Button
+								fullWidth={false}
+								link
+								onclick={() => modalStore.openManageTokens({ id: Symbol() })}
+							>
+								<IconManage />
+								{$i18n.tokens.manage.text.manage_list}
+							</Button>
+						</div>
+					{/snippet}
+				</NothingFoundPlaceholder>
 			{:else if $tokenListStore.filter === ''}
 				<NoTokensPlaceholder />
 			{:else}

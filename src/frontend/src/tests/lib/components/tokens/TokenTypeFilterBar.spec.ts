@@ -1,12 +1,12 @@
 import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
-import { hideTokenCategoryFilterStore } from '$lib/stores/settings.store';
+import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('TokenTypeFilterBar', () => {
 	beforeEach(() => {
-		hideTokenCategoryFilterStore.reset({ key: 'token-category-filter' });
+		tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 	});
 
 	it('should render the "All asset types" button', () => {
@@ -33,8 +33,17 @@ describe('TokenTypeFilterBar', () => {
 		expect(allButton.classList.contains('text-primary-inverted')).toBeTruthy();
 	});
 
+	it('should have unselected styles on category buttons by default', () => {
+		const { getByText } = render(TokenTypeFilterBar);
+
+		const cryptoButton = getByText(en.token_tag.category.crypto);
+
+		expect(cryptoButton.classList.contains('border-secondary')).toBeTruthy();
+		expect(cryptoButton.classList.contains('text-secondary')).toBeTruthy();
+	});
+
 	it('should update store when a category is clicked', async () => {
-		const spy = vi.spyOn(hideTokenCategoryFilterStore, 'set');
+		const spy = vi.spyOn(tokenCategoryFilterStore, 'set');
 		const { getByText } = render(TokenTypeFilterBar);
 
 		const cryptoButton = getByText(en.token_tag.category.crypto);

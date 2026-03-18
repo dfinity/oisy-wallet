@@ -132,9 +132,16 @@ describe('TokenModalContent', () => {
 	});
 
 	it('does not render asset type when token has no category tag', () => {
+		const tokenWithoutCategoryTag: Token = {
+			...mockValidIcrcToken,
+			indexCanisterId: mockIndexCanisterId,
+			// @ts-expect-error Testing invalid input types
+			tags: []
+		};
+
 		const { queryByText } = render(TokenModalContent, {
 			props: {
-				token: ICP_TOKEN
+				token: tokenWithoutCategoryTag
 			}
 		});
 
