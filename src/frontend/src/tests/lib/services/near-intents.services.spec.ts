@@ -286,7 +286,7 @@ describe('near-intents.services', () => {
 				mockNearIntentsStatusFailed
 			);
 
-			await expect(pollNearIntentsStatus({ depositAddress: '0xDeposit' })).rejects.toThrowError(
+			await expect(pollNearIntentsStatus({ depositAddress: '0xDeposit' })).rejects.toThrow(
 				'NEAR Intents swap failed'
 			);
 		});
