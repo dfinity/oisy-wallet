@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use ic_cdk::{
-    api::{msg_caller, time},
+    api::{is_controller, msg_caller, time},
     query, update,
 };
 use shared::types::{
@@ -20,8 +20,8 @@ use shared::types::{
 
 use crate::{
     bitcoin::{api, pending_tx_model::BtcUserPendingTransactionsModel, utils},
-    signer,
-    state::mutate_state,
+    delegation, signer,
+    state::{mutate_state, read_config},
     utils::{
         guards::caller_is_not_anonymous,
         housekeeping::{
@@ -140,6 +140,10 @@ pub async fn btc_select_user_utxos_fee(
 
 /// Adds a pending Bitcoin transaction for the caller.
 ///
+/// Requires a valid II delegation chain to verify the caller authenticated
+/// through Internet Identity. This protects against unauthorised CLI callers.
+/// Controllers bypass this check.
+///
 /// # Errors
 /// Errors are enumerated by: `BtcAddPendingTransactionError`.
 #[update(guard = "caller_is_not_anonymous")]
@@ -152,6 +156,39 @@ pub async fn btc_add_pending_transaction(
         BTC_ADD_PENDING_TX_RATE_LIMITER
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(BtcAddPendingTransactionError::RateLimited)?;
+
+        let principal = msg_caller();
+        let now_ns = time();
+
+        if !is_controller(&principal) {
+            let chain = params.ii_delegation_chain.as_ref().ok_or_else(|| {
+                BtcAddPendingTransactionError::InvalidDelegationChain {
+                    msg: "II delegation chain is required".to_string(),
+                }
+            })?;
+
+            let (known_ii_canister_ids, ic_root_key_raw) = read_config(|config| {
+                let ii_ids = config
+                    .supported_credentials
+                    .as_ref()
+                    .map(|creds| creds.iter().map(|c| c.ii_canister_id).collect::<Vec<_>>())
+                    .unwrap_or_default();
+                let root_key = config
+                    .ic_root_key_raw
+                    .clone()
+                    .expect("IC root key not configured");
+                (ii_ids, root_key)
+            });
+
+            delegation::verify_ii_delegation_chain(
+                chain,
+                principal,
+                &known_ii_canister_ids,
+                &ic_root_key_raw,
+                now_ns,
+            )
+            .map_err(|msg| BtcAddPendingTransactionError::InvalidDelegationChain { msg })?;
+        }
 
         if params.utxos.is_empty() {
             return Err(BtcAddPendingTransactionError::EmptyUtxos);
@@ -167,8 +204,6 @@ pub async fn btc_add_pending_transaction(
             return Err(BtcAddPendingTransactionError::DuplicateUtxos);
         }
 
-        let principal = msg_caller();
-
         let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
@@ -180,8 +215,6 @@ pub async fn btc_add_pending_transaction(
         )
         .await
         .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-
-        let now_ns = time();
 
         let current_keys: HashSet<(&[u8], u32)> = current_utxos
             .iter()
