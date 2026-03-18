@@ -4,6 +4,7 @@ import {
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import bnb from '$evm/bsc/assets/bnb.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -19,7 +20,7 @@ export const BNB_MAINNET_TOKEN: RequiredToken = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'ethereum' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'BNB',
 	symbol: BNB_MAINNET_SYMBOL,
 	decimals: BNB_DECIMALS,
@@ -38,7 +39,7 @@ export const BNB_TESTNET_TOKEN: RequiredToken = {
 	network: BSC_TESTNET_NETWORK,
 	standard: { code: 'ethereum' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'BNB (Testnet)',
 	symbol: BNB_TESTNET_SYMBOL,
 	decimals: BNB_DECIMALS,

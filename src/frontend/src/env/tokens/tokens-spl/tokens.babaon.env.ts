@@ -1,6 +1,7 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { BABAON_TOKEN_GROUP } from '$env/tokens/groups/groups.babaon.env';
 import babaon from '$eth/assets/babaon.webp';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -17,7 +18,7 @@ export const BABAON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Alibaba (Ondo Tokenized)',
 	symbol: BABAON_SYMBOL,
 	decimals: BABAON_DECIMALS,
