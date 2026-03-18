@@ -5,7 +5,25 @@ The tip flow is a simple **YES/YES escrow flow**:
 - the payer creates and funds a tip deal
 - the recipient receives a QR code or link
 - if the recipient signs up and accepts before expiry, the funds are released
-- if the recipient never claims the tip, the payer gets refunded after the deadline
+- if the recipient never claims the tip, the funds are refunded after the deadline
+
+### ⏱️ Expiry & Refund Mechanism
+
+Refunds after expiry can be handled in two ways (implementation choice):
+
+- **Manual reclaim (lazy execution)**
+  - the payer explicitly calls `reclaim(deal_id)` after expiry
+  - simplest and safest MVP approach
+
+- **Automatic refund (cron / heartbeat)**
+  - the escrow canister periodically scans expired deals
+  - automatically refunds without user interaction
+
+Both approaches can coexist: cron for convenience, manual reclaim as fallback.
+
+> [!WARNING]
+> All funding, settlement, and refund operations **must be idempotent**.
+> This prevents double execution in case of retries, race conditions, or partial failures.
 
 ---
 
@@ -50,8 +68,13 @@ sequenceDiagram
 
     %% --- EXPIRY PATH ---
     alt Not claimed before expiry
-        P->>F: reclaim(deal_id)
-        F->>E: reclaim(deal_id)
+        opt Manual reclaim
+            P->>F: reclaim(deal_id)
+            F->>E: reclaim(deal_id)
+        end
+        opt Cron / heartbeat
+            E->>E: detect expired deal
+        end
         E->>L: transfer(escrow_subaccount -> P)
         E-->>F: status = REFUNDED
     end
@@ -86,7 +109,10 @@ flowchart TD
 
     F --> P{Expiry reached before claim?}
     P -- No --> H
-    P -- Yes --> Q[Payer calls reclaim or cleanup is triggered]
-    Q --> R[Escrow canister refunds payer]
-    R --> S[Deal status = Refunded]
+    P -- Yes --> Q{Refund mechanism}
+    Q -- Manual --> R[Payer calls reclaim]
+    Q -- Cron --> S[Canister detects expiry]
+    R --> T[Escrow refunds payer]
+    S --> T
+    T --> U[Deal status = Refunded]
 ```
