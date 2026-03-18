@@ -2,18 +2,16 @@
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
+	import TokenCategoryFilterDropdown from '$lib/components/tokens/TokenCategoryFilterDropdown.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import {
 		MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
 		MODAL_TOKENS_LIST
 	} from '$lib/constants/test-ids.constants';
-	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
-	import { tokenCategoryFilter, showTokenCategoryFilter } from '$lib/derived/settings.derived';
+	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -92,13 +90,11 @@
 			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 			<IconExpandMore size="24" />
 		</button>
-	</div>
 
-	{#if $showTokenCategoryFilter}
-		<div class="mt-3" transition:slide={SLIDE_PARAMS}>
-			<TokenTypeFilterBar />
-		</div>
-	{/if}
+		{#if $showTokenCategoryFilter}
+			<TokenCategoryFilterDropdown />
+		{/if}
+	</div>
 </div>
 
 <div class="my-4 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
