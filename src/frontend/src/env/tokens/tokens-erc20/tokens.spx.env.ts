@@ -17,7 +17,7 @@ export const SPX_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'SPX6900',
 	symbol: SPX_SYMBOL,
 	decimals: SPX_DECIMALS,
