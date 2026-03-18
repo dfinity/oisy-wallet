@@ -17,6 +17,7 @@ import {
 	IcTokenSchema,
 	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 describe('ic-token.schema', () => {
@@ -27,7 +28,7 @@ describe('ic-token.schema', () => {
 		network: mockNetwork,
 		standard: { code: 'icp' },
 		category: 'default',
-		tags: [],
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8,

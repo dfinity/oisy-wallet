@@ -6,6 +6,7 @@ import { loadCustomTokens, loadIcPunksTokens } from '$icp/services/icpunks.servi
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icPunksDefaultTokensStore } from '$icp/stores/icpunks-default-tokens.store';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -174,7 +175,7 @@ describe('icpunks.services', () => {
 						enabled: true,
 						standard: { code: 'icpunks' },
 						category: 'custom',
-						tags: [],
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 						canisterId: mockCanisterId,
 						symbol: mockFetchedMetadata.symbol,
 						name: mockFetchedMetadata.name,

@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { AMDON_TOKEN_GROUP } from '$env/tokens/groups/groups.amdon.env';
 import amdon from '$eth/assets/amdon.webp';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,7 +17,7 @@ export const AMDON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'AMD (Ondo Tokenized Stock)',
 	symbol: AMDON_SYMBOL,
 	decimals: AMDON_DECIMALS,
