@@ -10,7 +10,7 @@
 		MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
 		MODAL_TOKENS_LIST
 	} from '$lib/constants/test-ids.constants';
-	import { tokenCategoryFilter, tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
+	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -60,7 +60,7 @@
 	});
 
 	let displayTokens = $derived(
-		$tokenCategoryFilterEnabled
+		$showTokenCategoryFilter
 			? filterTokensUiByCategory({ tokens: $filteredTokens, category: $tokenCategoryFilter })
 			: $filteredTokens
 	);
