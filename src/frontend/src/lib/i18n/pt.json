@@ -1156,7 +1156,8 @@
 			"edit_token": "Editar token",
 			"sort_by_value": "",
 			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_symbol": "",
+			"hide_asset_types": ""
 		},
 		"details": {
 			"title": "Detalhes do token",

@@ -1,4 +1,5 @@
 import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	TokenAppearanceSchema,
 	TokenBuyableSchema,
@@ -319,7 +320,7 @@ describe('token.schema', () => {
 			network: mockNetwork,
 			standard: { code: 'ethereum' },
 			category: 'default',
-			tags: [],
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			name: 'SampleToken',
 			symbol: 'STK',
 			decimals: 8

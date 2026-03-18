@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.en
 import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import link from '$icp-eth/assets/link.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,7 +17,7 @@ export const LINK_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'ChainLink Token',
 	symbol: LINK_SYMBOL,
 	decimals: LINK_DECIMALS,
@@ -39,7 +40,7 @@ export const SEPOLIA_LINK_TOKEN: RequiredErc20Token = {
 	network: SEPOLIA_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'ChainLink Token',
 	symbol: LINK_SYMBOL,
 	decimals: LINK_DECIMALS,

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use ic_cdk::{api::time, management_canister::HttpHeader};
 use serde_json::{from_slice, Value};
+use serde::Deserialize;
 use shared::types::exchange::ExchangeData;
 
 use crate::utils::http_outcall::get;
@@ -10,6 +11,27 @@ const DEFAULT_BASE_URL: &str = "https://pro-api.coingecko.com/api/v3";
 const SIMPLE_PRICE_PATH: &str = "/simple/price";
 const TOKEN_PRICE_PATH: &str = "/simple/token_price";
 const MAX_RESPONSE_BYTES: u64 = 8192;
+
+#[derive(Deserialize)]
+struct CoinGeckoPrice {
+    usd: Option<f64>,
+    usd_24h_change: Option<f64>,
+    usd_market_cap: Option<f64>,
+    last_updated_at: Option<u64>,
+}
+
+impl From<CoinGeckoPrice> for ExchangeData {
+    fn from(p: CoinGeckoPrice) -> Self {
+        Self {
+            timestamp_ns: p
+                .last_updated_at
+                .map_or_else(time, |secs| secs * 1_000_000_000),
+            price: p.usd,
+            price_24h_change_pct: p.usd_24h_change,
+            market_cap: p.usd_market_cap,
+        }
+    }
+}
 
 pub struct CoinGeckoClient {
     base_url: String,

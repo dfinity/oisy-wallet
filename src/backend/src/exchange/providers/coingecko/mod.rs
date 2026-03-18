@@ -114,6 +114,8 @@ fn classify_tokens<'a>(token_ids: &'a [StoredTokenId]) -> ClassifiedTokens<'a> {
                 );
             }
 
+            // Testnet tokens, NFTs (ERC-721/1155), and ERC-4626 vaults are
+            // intentionally skipped — no exchange rates are fetched for them.
             _ => {}
         }
     }

@@ -79,14 +79,14 @@ async fn fetch_and_update_prices(
     }
 }
 
-pub async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
+pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     let api_key =
         with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
 
     let provider = CoinGeckoProvider::new(api_key);
 
     let now = time();
-    let threshold = now - PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000;
+    let threshold = now.saturating_sub(PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000);
 
     let mut tokens_to_fetch: Vec<StoredTokenId> = native_token_ids();
 
@@ -99,6 +99,8 @@ pub async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     });
 
     tokens_to_fetch.extend(active_custom_tokens);
+    tokens_to_fetch.sort_unstable();
+    tokens_to_fetch.dedup();
 
     if tokens_to_fetch.is_empty() {
         return Ok(());

@@ -13,6 +13,7 @@ import {
 	isTokenIcPunksCustomToken,
 	mapIcPunksToken
 } from '$icp/utils/icpunks.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenStandardCode } from '$lib/types/token';
 import { mockIcPunksCanisterId, mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -92,7 +93,7 @@ describe('icpunks.utils', () => {
 			decimals: 0,
 			standard: { code: 'icpunks' },
 			category: 'custom',
-			tags: []
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 		};
 
 		it('should correctly map an ICPunks token', () => {

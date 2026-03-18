@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { sendNft } from '$eth/services/nft-send.services';
 import * as nftTransferServices from '$eth/services/nft-transfer.services';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -33,7 +34,7 @@ describe('nft-send.services', () => {
 		const token721: NonFungibleToken = {
 			address: from,
 			category: 'custom',
-			tags: [],
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			decimals: 0,
 			id: parseTokenId('721'),
 			name: 'My721',
@@ -45,7 +46,7 @@ describe('nft-send.services', () => {
 		const token1155: NonFungibleToken = {
 			address: from,
 			category: 'custom',
-			tags: [],
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			decimals: 0,
 			id: parseTokenId('1155'),
 			name: 'My1155',

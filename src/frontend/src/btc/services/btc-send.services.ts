@@ -13,6 +13,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Amount } from '$lib/types/send';
+import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { invalidAmount } from '$lib/utils/input.utils';
 import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -264,8 +265,7 @@ export const sendBtc = async ({
 		address: source,
 		txId: txidStringToUint8Array(txid),
 		utxos: utxosFee.utxos,
-		// TODO: add the correct delegation chain here
-		iiDelegationChain: []
+		iiDelegationChain: extractIIDelegationChain(identity)
 	});
 
 	onProgress?.();
