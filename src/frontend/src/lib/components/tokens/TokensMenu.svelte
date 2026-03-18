@@ -55,23 +55,23 @@
 		<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 		<List condensed noPadding>
 			<ListItem>
-				<LogoButton fullWidth onClick={toggleHideZeros}>
-					{#snippet title()}
-						<span class="text-sm font-normal">{$i18n.tokens.text.hide_zero_balances}</span>
-					{/snippet}
-					{#snippet action()}
-						<TokensZeroBalanceToggle />
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-
-			<ListItem>
 				<LogoButton fullWidth onClick={toggleTokenCategoryFilter}>
 					{#snippet title()}
 						<span class="text-sm font-normal">{$i18n.tokens.text.hide_asset_types}</span>
 					{/snippet}
 					{#snippet action()}
 						<TokensCategoryFilterToggle />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+
+			<ListItem>
+				<LogoButton fullWidth onClick={toggleHideZeros}>
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.tokens.text.hide_zero_balances}</span>
+					{/snippet}
+					{#snippet action()}
+						<TokensZeroBalanceToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
