@@ -14,7 +14,7 @@
 	class="bg- shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition-colors"
 	class:bg-brand-primary={selected}
 	class:bg-primary={!selected}
-	class:border-brand-primary={selected}
+	class:border-brand-tertiary={selected}
 	class:border-secondary={!selected}
 	class:text-primary-inverted={selected}
 	class:text-secondary={!selected}
