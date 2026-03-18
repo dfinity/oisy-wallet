@@ -1,10 +1,7 @@
 import TokensCategoryFilterToggle from '$lib/components/tokens/TokensCategoryFilterToggle.svelte';
 import { hideTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
-import {
-	hideTokenCategoryFilterStore,
-	tokenCategoryFilterStore
-} from '$lib/stores/settings.store';
+import { hideTokenCategoryFilterStore, tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
