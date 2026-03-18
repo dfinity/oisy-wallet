@@ -9,7 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { tokenCategoryFilterStore, tokensSortStore } from '$lib/stores/settings.store';
+	import {tokensSortStore } from '$lib/stores/settings.store';
 	import { InternetIdentityDomain } from '$lib/types/auth';
 	import { componentToHtml } from '$lib/utils/component.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -41,7 +41,6 @@
 
 			tokensSortStore.reset({ key: 'tokens-sort' });
 
-			tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 		} else if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
