@@ -92,17 +92,17 @@ type BtcGetFeePercentilesResult = variant {
 	Err : SelectedUtxosFeeError
 };
 type BtcGetPendingTransactionsError = variant {
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
-	InternalError : record { msg : text };
-	InvalidDelegationChain : record { msg : text }
+	InternalError : record { msg : text }
 };
 type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
 type BtcGetPendingTransactionsRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
-	address : text;
-	ii_delegation_chain : opt IIDelegationChain
+	address : text
 };
 type BtcGetPendingTransactionsResult = variant {
 	Ok : BtcGetPendingTransactionsReponse;
@@ -298,15 +298,15 @@ type SaveNetworksSettingsRequest = record {
 };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
-	InternalError : record { msg : text };
-	InvalidDelegationChain : record { msg : text }
+	InternalError : record { msg : text }
 };
 type SelectedUtxosFeeRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
 	amount_satoshis : nat64;
-	min_confirmations : opt nat32;
-	ii_delegation_chain : opt IIDelegationChain
+	min_confirmations : opt nat32
 };
 type SelectedUtxosFeeResponse = record {
 	fee_satoshis : nat64;
@@ -508,12 +508,18 @@ service : (Arg) -> {
 	) query;
 	// Returns the pending Bitcoin transactions for the caller.
 	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
 	// # Errors
 	// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
 	// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
 	//
 	// # Errors
 	// Errors are enumerated by: `SelectedUtxosFeeError`.
