@@ -37,7 +37,9 @@ describe('delegation.utils', () => {
 			const [extracted] = result;
 
 			expect(extracted).toBeDefined();
+
 			expect(new Uint8Array(extracted?.public_key ?? [])).toEqual(new Uint8Array(mockPublicKey));
+
 			expect(extracted?.delegations).toHaveLength(1);
 			expect(new Uint8Array(extracted?.delegations[0].signature ?? [])).toEqual(mockSignature);
 			expect(new Uint8Array(extracted?.delegations[0].delegation.pubkey ?? [])).toEqual(
