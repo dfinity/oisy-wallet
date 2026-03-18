@@ -151,15 +151,12 @@
 		{#if filteredTokens?.length === 0}
 			{#if $showTokenCategoryFilter && nonNullish($tokenCategoryFilter)}
 				<NothingFoundPlaceholder
+					description={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type_description, {
+						$count: `${$allFungibleNetworkTokens.length}`
+					})}
 					title={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type, {
 						$asset_type: $i18n.token_tag.category[$tokenCategoryFilter]
 					})}
-					description={replacePlaceholders(
-						$i18n.tokens.text.no_tokens_for_asset_type_description,
-						{
-							$count: `${$allFungibleNetworkTokens.length}`
-						}
-					)}
 				/>
 			{:else if $tokenListStore.filter === ''}
 				<NoTokensPlaceholder />
