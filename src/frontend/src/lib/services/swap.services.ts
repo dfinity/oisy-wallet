@@ -602,6 +602,9 @@ export const swapService = {
 	//TODO: Will be fixed and updated in the next PRs
 	[SwapProvider.VELORA]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	[SwapProvider.NEAR_INTENTS]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
 	}
 };
 
