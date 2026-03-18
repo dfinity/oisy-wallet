@@ -41,7 +41,13 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	fromNullable,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
@@ -386,25 +392,28 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
-	getExchangeRate = ({
+	getExchangeRate = async ({
 		token_id,
 		certified
 	}: {
 		token_id: TokenId;
 		certified: boolean;
-	}): Promise<[] | [ExchangeRate]> => {
+	}): Promise<ExchangeRate | undefined> => {
 		const { get_exchange_rate } = this.caller({ certified });
-		return get_exchange_rate(token_id);
+		return fromNullable(await get_exchange_rate(token_id));
 	};
 
-	getExchangeRates = ({
+	getExchangeRates = async ({
 		token_ids,
 		certified
 	}: {
 		token_ids: TokenId[];
 		certified: boolean;
-	}): Promise<Array<[TokenId, [] | [ExchangeRate]]>> => {
+	}): Promise<Array<[TokenId, ExchangeRate | undefined]>> => {
 		const { get_exchange_rates } = this.caller({ certified });
-		return get_exchange_rates(token_ids);
+
+		const results = await get_exchange_rates(token_ids);
+
+		return results.map(([id, rate]) => [id, fromNullable(rate)]);
 	};
 }

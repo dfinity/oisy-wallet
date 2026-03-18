@@ -1457,25 +1457,25 @@ describe('backend.canister', () => {
 			}
 		};
 
-		it('should return the exchange rate for a token', async () => {
+		it('should return the unwrapped exchange rate for a token', async () => {
 			service.get_exchange_rate.mockResolvedValue([mockExchangeRate]);
 
 			const { getExchangeRate } = await createBackendCanister({ serviceOverride: service });
 
 			const result = await getExchangeRate({ token_id: tokenId, certified: false });
 
-			expect(result).toEqual([mockExchangeRate]);
+			expect(result).toEqual(mockExchangeRate);
 			expect(service.get_exchange_rate).toHaveBeenCalledExactlyOnceWith(tokenId);
 		});
 
-		it('should return empty array when no rate exists', async () => {
+		it('should return undefined when no rate exists', async () => {
 			service.get_exchange_rate.mockResolvedValue([]);
 
 			const { getExchangeRate } = await createBackendCanister({ serviceOverride: service });
 
 			const result = await getExchangeRate({ token_id: tokenId, certified: false });
 
-			expect(result).toEqual([]);
+			expect(result).toBeUndefined();
 		});
 
 		it('should throw an error if the service throws', async () => {
@@ -1503,17 +1503,17 @@ describe('backend.canister', () => {
 			}
 		};
 
-		it('should return exchange rates for multiple tokens', async () => {
-			const response = tokenIds.map(
+		it('should return unwrapped exchange rates for multiple tokens', async () => {
+			const rawResponse = tokenIds.map(
 				(id) => [id, [mockExchangeRate]] as [typeof id, [typeof mockExchangeRate]]
 			);
-			service.get_exchange_rates.mockResolvedValue(response);
+			service.get_exchange_rates.mockResolvedValue(rawResponse);
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
 			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
 
-			expect(result).toEqual(response);
+			expect(result).toEqual(tokenIds.map((id) => [id, mockExchangeRate]));
 			expect(service.get_exchange_rates).toHaveBeenCalledExactlyOnceWith(tokenIds);
 		});
 

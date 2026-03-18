@@ -330,9 +330,9 @@ describe('exchange.services', () => {
 			const splTokenId: TokenId = { SplMainnet: 'SoLaddr1' };
 
 			vi.mocked(getExchangeRates).mockResolvedValue([
-				[erc20TokenId, [mockExchangeRate]],
-				[icrcTokenId, [mockExchangeRate]],
-				[splTokenId, [mockExchangeRate]]
+				[erc20TokenId, mockExchangeRate],
+				[icrcTokenId, mockExchangeRate],
+				[splTokenId, mockExchangeRate]
 			]);
 
 			const result = await fetchAllExchangeRatesFromBackend({
@@ -380,7 +380,7 @@ describe('exchange.services', () => {
 				}
 			};
 
-			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, [noPriceRate]]]);
+			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, noPriceRate]]);
 
 			const result = await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
@@ -392,7 +392,7 @@ describe('exchange.services', () => {
 		});
 
 		it('should handle empty exchange rate (not found)', async () => {
-			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, []]]);
+			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, undefined]]);
 
 			const result = await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
@@ -428,12 +428,12 @@ describe('exchange.services', () => {
 
 		it('should return native token prices from backend', async () => {
 			vi.mocked(getExchangeRates).mockResolvedValue([
-				[{ EvmNative: 1n }, [mockExchangeRate]],
-				[{ BtcNativeMainnet: null }, [mockExchangeRate]],
-				[{ IcpNative: null }, [mockExchangeRate]],
-				[{ SolNativeMainnet: null }, [mockExchangeRate]],
-				[{ EvmNative: 56n }, [mockExchangeRate]],
-				[{ EvmNative: 137n }, [mockExchangeRate]]
+				[{ EvmNative: 1n }, mockExchangeRate],
+				[{ BtcNativeMainnet: null }, mockExchangeRate],
+				[{ IcpNative: null }, mockExchangeRate],
+				[{ SolNativeMainnet: null }, mockExchangeRate],
+				[{ EvmNative: 56n }, mockExchangeRate],
+				[{ EvmNative: 137n }, mockExchangeRate]
 			]);
 
 			const result = await fetchAllExchangeRatesFromBackend({
@@ -462,7 +462,7 @@ describe('exchange.services', () => {
 				}
 			};
 
-			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, [partialRate]]]);
+			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, partialRate]]);
 
 			const result = await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],

@@ -452,7 +452,7 @@ describe('backend.api', () => {
 		};
 
 		beforeEach(() => {
-			backendCanisterMock.getExchangeRate.mockResolvedValue([mockRate]);
+			backendCanisterMock.getExchangeRate.mockResolvedValue(mockRate);
 		});
 
 		it('should successfully call getExchangeRate endpoint', async () => {
@@ -462,7 +462,7 @@ describe('backend.api', () => {
 				certified: false
 			});
 
-			expect(result).toEqual([mockRate]);
+			expect(result).toEqual(mockRate);
 			expect(backendCanisterMock.getExchangeRate).toHaveBeenCalledExactlyOnceWith({
 				token_id: tokenId,
 				certified: false
@@ -502,7 +502,7 @@ describe('backend.api', () => {
 
 		beforeEach(() => {
 			backendCanisterMock.getExchangeRates.mockResolvedValue(
-				tokenIds.map((id) => [id, [mockRate]])
+				tokenIds.map((id) => [id, mockRate])
 			);
 		});
 

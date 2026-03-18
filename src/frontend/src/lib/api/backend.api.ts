@@ -244,7 +244,7 @@ export const getExchangeRate = async ({
 }: CanisterApiFunctionParams<{
 	token_id: TokenId;
 	certified: boolean;
-}>): Promise<[] | [ExchangeRate]> => {
+}>): Promise<ExchangeRate | undefined> => {
 	const { getExchangeRate } = await backendCanister({ identity });
 
 	return getExchangeRate(params);
@@ -256,7 +256,7 @@ export const getExchangeRates = async ({
 }: CanisterApiFunctionParams<{
 	token_ids: TokenId[];
 	certified: boolean;
-}>): Promise<Array<[TokenId, [] | [ExchangeRate]]>> => {
+}>): Promise<Array<[TokenId, ExchangeRate | undefined]>> => {
 	const { getExchangeRates } = await backendCanister({ identity });
 
 	return getExchangeRates(params);

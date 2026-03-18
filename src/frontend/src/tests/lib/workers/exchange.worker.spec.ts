@@ -956,8 +956,8 @@ describe('exchange.worker', () => {
 				};
 
 				vi.mocked(getExchangeRates).mockResolvedValue([
-					[erc20TokenId, [mockExchangeRate]],
-					[icrcTokenId, [mockExchangeRate]]
+					[erc20TokenId, mockExchangeRate],
+					[icrcTokenId, mockExchangeRate]
 				]);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
@@ -1026,12 +1026,12 @@ describe('exchange.worker', () => {
 
 			it('should include native token prices when backend provides them', async () => {
 				vi.mocked(getExchangeRates).mockResolvedValue([
-					[{ EvmNative: 1n }, [mockExchangeRate]],
-					[{ BtcNativeMainnet: null }, [mockExchangeRate]],
-					[{ IcpNative: null }, [mockExchangeRate]],
-					[{ SolNativeMainnet: null }, [mockExchangeRate]],
-					[{ EvmNative: 56n }, [mockExchangeRate]],
-					[{ EvmNative: 137n }, [mockExchangeRate]]
+					[{ EvmNative: 1n }, mockExchangeRate],
+					[{ BtcNativeMainnet: null }, mockExchangeRate],
+					[{ IcpNative: null }, mockExchangeRate],
+					[{ SolNativeMainnet: null }, mockExchangeRate],
+					[{ EvmNative: 56n }, mockExchangeRate],
+					[{ EvmNative: 137n }, mockExchangeRate]
 				]);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {

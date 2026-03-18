@@ -211,22 +211,22 @@ export const toTokenId = (token: {
 };
 
 const mapExchangeRateToCoingecko = (
-	rate: [] | [ExchangeRate]
+	rate: ExchangeRate | undefined
 ): { usd: number; usd_24h_change?: number; usd_market_cap: number } | undefined => {
-	const r = rate[0];
-	if (isNullish(r)) {
-		return undefined;
+	if (isNullish(rate)) {
+		return;
 	}
-	const price = r.usd.price[0];
+
+	const price = rate.usd.price[0];
+
 	if (isNullish(price)) {
-		return undefined;
+		return;
 	}
-	const change = r.usd.price_24h_change_pct[0];
-	const marketCap = r.usd.market_cap[0] ?? 0;
+
 	return {
 		usd: price,
-		usd_24h_change: change,
-		usd_market_cap: marketCap
+		usd_24h_change: rate.usd.price_24h_change_pct[0],
+		usd_market_cap: rate.usd.market_cap[0] ?? 0
 	};
 };
 
@@ -306,15 +306,14 @@ export const fetchAllExchangeRatesFromBackend = async ({
 
 	const findRate = (
 		id: TokenId
-	): { usd: number; usd_24h_change?: number; usd_market_cap: number } | undefined => {
-		const rate = ratesByKey.get(tokenIdKey(id));
-		return nonNullish(rate) ? mapExchangeRateToCoingecko(rate) : undefined;
-	};
+	): { usd: number; usd_24h_change?: number; usd_market_cap: number } | undefined =>
+		mapExchangeRateToCoingecko(ratesByKey.get(tokenIdKey(id)));
 
 	const nativePrice = (
 		entry: (typeof NATIVE_TOKEN_IDS)[number]
 	): CoingeckoSimplePriceResponse | undefined => {
 		const rate = findRate(entry.tokenId);
+
 		return nonNullish(rate) ? { [entry.coingeckoKey]: rate } : undefined;
 	};
 
