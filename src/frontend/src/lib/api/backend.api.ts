@@ -3,7 +3,6 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
-	ExchangeRate,
 	GetAllowedCyclesResponse,
 	TokenId,
 	UserProfile
@@ -32,6 +31,7 @@ import type {
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -244,7 +244,7 @@ export const getExchangeRate = async ({
 }: CanisterApiFunctionParams<{
 	token_id: TokenId;
 	certified: boolean;
-}>): Promise<ExchangeRate | undefined> => {
+}>): Promise<BackendExchangeRate | undefined> => {
 	const { getExchangeRate } = await backendCanister({ identity });
 
 	return getExchangeRate(params);
@@ -256,7 +256,7 @@ export const getExchangeRates = async ({
 }: CanisterApiFunctionParams<{
 	token_ids: TokenId[];
 	certified: boolean;
-}>): Promise<Array<[TokenId, ExchangeRate | undefined]>> => {
+}>): Promise<Map<string, BackendExchangeRate>> => {
 	const { getExchangeRates } = await backendCanister({ identity });
 
 	return getExchangeRates(params);

@@ -1,7 +1,6 @@
 import type {
 	AddUserCredentialResult,
 	CustomToken,
-	ExchangeRate,
 	PendingTransaction,
 	TokenId
 } from '$declarations/backend/backend.did';
@@ -31,6 +30,7 @@ import type {
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -442,12 +442,12 @@ describe('backend.api', () => {
 
 	describe('getExchangeRate', () => {
 		const tokenId: TokenId = { Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
-		const mockRate: ExchangeRate = {
+		const mockRate: BackendExchangeRate = {
 			usd: {
-				price: [42000],
-				price_24h_change_pct: [1.5],
-				market_cap: [800_000_000_000],
-				timestamp_ns: 1_000_000_000n
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
 			}
 		};
 
@@ -491,19 +491,22 @@ describe('backend.api', () => {
 			{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
 			{ Erc20: ['0xabc', 1n] }
 		];
-		const mockRate: ExchangeRate = {
+		const mockRate: BackendExchangeRate = {
 			usd: {
-				price: [42000],
-				price_24h_change_pct: [1.5],
-				market_cap: [800_000_000_000],
-				timestamp_ns: 1_000_000_000n
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
 			}
 		};
 
+		const mockMap = new Map([
+			['Icrc:ryjl3-tyaaa-aaaaa-aaaba-cai', mockRate],
+			['Erc20:0xabc:1', mockRate]
+		]);
+
 		beforeEach(() => {
-			backendCanisterMock.getExchangeRates.mockResolvedValue(
-				tokenIds.map((id) => [id, mockRate])
-			);
+			backendCanisterMock.getExchangeRates.mockResolvedValue(mockMap);
 		});
 
 		it('should successfully call getExchangeRates endpoint', async () => {
@@ -513,7 +516,8 @@ describe('backend.api', () => {
 				certified: false
 			});
 
-			expect(result).toHaveLength(2);
+			expect(result).toBeInstanceOf(Map);
+			expect(result.size).toBe(2);
 			expect(backendCanisterMock.getExchangeRates).toHaveBeenCalledExactlyOnceWith({
 				token_ids: tokenIds,
 				certified: false

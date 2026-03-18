@@ -1,4 +1,4 @@
-import type { ExchangeRate, TokenId } from '$declarations/backend/backend.did';
+import type { TokenId } from '$declarations/backend/backend.did';
 import { getExchangeRates } from '$lib/api/backend.api';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
@@ -13,11 +13,13 @@ import {
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import {
 	findMissingLedgerCanisterIds,
 	formatKongSwapToCoingeckoPrices
 } from '$lib/utils/exchange.utils';
+import { tokenIdKey } from '$lib/utils/token-id.utils';
 import {
 	MOCK_CANISTER_ID_1,
 	MOCK_CANISTER_ID_2,
@@ -283,21 +285,26 @@ describe('exchange.services', () => {
 	});
 
 	describe('fetchAllExchangeRatesFromBackend', () => {
-		const mockExchangeRate: ExchangeRate = {
+		const mockExchangeRate: BackendExchangeRate = {
 			usd: {
-				price: [42000],
-				price_24h_change_pct: [1.5],
-				market_cap: [800_000_000_000],
-				timestamp_ns: 1_000_000_000n
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
 			}
 		};
+
+		const mockRatesMap = (
+			...entries: [TokenId, BackendExchangeRate][]
+		): Map<string, BackendExchangeRate> =>
+			new Map(entries.map(([id, rate]) => [tokenIdKey(id), rate]));
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 		});
 
 		it('should call getExchangeRates with native + mapped token IDs', async () => {
-			vi.mocked(getExchangeRates).mockResolvedValue([]);
+			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
@@ -329,11 +336,13 @@ describe('exchange.services', () => {
 			};
 			const splTokenId: TokenId = { SplMainnet: 'SoLaddr1' };
 
-			vi.mocked(getExchangeRates).mockResolvedValue([
-				[erc20TokenId, mockExchangeRate],
-				[icrcTokenId, mockExchangeRate],
-				[splTokenId, mockExchangeRate]
-			]);
+			vi.mocked(getExchangeRates).mockResolvedValue(
+				mockRatesMap(
+					[erc20TokenId, mockExchangeRate],
+					[icrcTokenId, mockExchangeRate],
+					[splTokenId, mockExchangeRate]
+				)
+			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
@@ -351,7 +360,7 @@ describe('exchange.services', () => {
 		});
 
 		it('should return empty objects and undefined native prices when no rates are returned', async () => {
-			vi.mocked(getExchangeRates).mockResolvedValue([]);
+			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			const result = await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
@@ -371,16 +380,18 @@ describe('exchange.services', () => {
 		});
 
 		it('should skip rates with no price', async () => {
-			const noPriceRate: ExchangeRate = {
+			const noPriceRate: BackendExchangeRate = {
 				usd: {
-					price: [],
-					price_24h_change_pct: [1.5],
-					market_cap: [100],
-					timestamp_ns: 1n
+					price: undefined,
+					price24hChangePct: 1.5,
+					marketCap: 100,
+					timestampNs: 1n
 				}
 			};
 
-			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, noPriceRate]]);
+			vi.mocked(getExchangeRates).mockResolvedValue(
+				mockRatesMap([{ Erc20: ['0xabc', 1n] }, noPriceRate])
+			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
@@ -392,7 +403,7 @@ describe('exchange.services', () => {
 		});
 
 		it('should handle empty exchange rate (not found)', async () => {
-			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, undefined]]);
+			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			const result = await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
@@ -404,9 +415,10 @@ describe('exchange.services', () => {
 		});
 
 		it('should skip erc20 addresses with unknown coingeckoId but still include native tokens', async () => {
-			vi.mocked(getExchangeRates).mockResolvedValue([]);
+			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			await fetchAllExchangeRatesFromBackend({
+				// @ts-expect-error Testing invalid input types
 				erc20Addresses: [{ address: '0xunknown', coingeckoId: 'some-unknown-chain' }],
 				icrcCanisterIds: [],
 				splTokenAddresses: []
@@ -427,14 +439,16 @@ describe('exchange.services', () => {
 		});
 
 		it('should return native token prices from backend', async () => {
-			vi.mocked(getExchangeRates).mockResolvedValue([
-				[{ EvmNative: 1n }, mockExchangeRate],
-				[{ BtcNativeMainnet: null }, mockExchangeRate],
-				[{ IcpNative: null }, mockExchangeRate],
-				[{ SolNativeMainnet: null }, mockExchangeRate],
-				[{ EvmNative: 56n }, mockExchangeRate],
-				[{ EvmNative: 137n }, mockExchangeRate]
-			]);
+			vi.mocked(getExchangeRates).mockResolvedValue(
+				mockRatesMap(
+					[{ EvmNative: 1n }, mockExchangeRate],
+					[{ BtcNativeMainnet: null }, mockExchangeRate],
+					[{ IcpNative: null }, mockExchangeRate],
+					[{ SolNativeMainnet: null }, mockExchangeRate],
+					[{ EvmNative: 56n }, mockExchangeRate],
+					[{ EvmNative: 137n }, mockExchangeRate]
+				)
+			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [],
@@ -452,17 +466,19 @@ describe('exchange.services', () => {
 			expect(result.currentPolPrice).toEqual({ 'polygon-ecosystem-token': expectedPrice });
 		});
 
-		it('should handle missing optional fields in ExchangeRate', async () => {
-			const partialRate: ExchangeRate = {
+		it('should handle missing optional fields in BackendExchangeRate', async () => {
+			const partialRate: BackendExchangeRate = {
 				usd: {
-					price: [100],
-					price_24h_change_pct: [],
-					market_cap: [],
-					timestamp_ns: 1n
+					price: 100,
+					price24hChangePct: undefined,
+					marketCap: undefined,
+					timestampNs: 1n
 				}
 			};
 
-			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, partialRate]]);
+			vi.mocked(getExchangeRates).mockResolvedValue(
+				mockRatesMap([{ Erc20: ['0xabc', 1n] }, partialRate])
+			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],

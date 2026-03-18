@@ -1448,7 +1448,7 @@ describe('backend.canister', () => {
 
 	describe('getExchangeRate', () => {
 		const tokenId = { Icrc: mockPrincipal };
-		const mockExchangeRate = {
+		const mockCandidRate = {
 			usd: {
 				price: [42000] as [] | [number],
 				price_24h_change_pct: [1.5] as [] | [number],
@@ -1457,14 +1457,23 @@ describe('backend.canister', () => {
 			}
 		};
 
-		it('should return the unwrapped exchange rate for a token', async () => {
-			service.get_exchange_rate.mockResolvedValue([mockExchangeRate]);
+		const expectedUnwrapped = {
+			usd: {
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
+			}
+		};
+
+		it('should return fully unwrapped exchange rate for a token', async () => {
+			service.get_exchange_rate.mockResolvedValue([mockCandidRate]);
 
 			const { getExchangeRate } = await createBackendCanister({ serviceOverride: service });
 
 			const result = await getExchangeRate({ token_id: tokenId, certified: false });
 
-			expect(result).toEqual(mockExchangeRate);
+			expect(result).toEqual(expectedUnwrapped);
 			expect(service.get_exchange_rate).toHaveBeenCalledExactlyOnceWith(tokenId);
 		});
 
@@ -1476,6 +1485,31 @@ describe('backend.canister', () => {
 			const result = await getExchangeRate({ token_id: tokenId, certified: false });
 
 			expect(result).toBeUndefined();
+		});
+
+		it('should unwrap nested optional fields as undefined', async () => {
+			const partialCandidRate = {
+				usd: {
+					price: [100] as [] | [number],
+					price_24h_change_pct: [] as [] | [number],
+					market_cap: [] as [] | [number],
+					timestamp_ns: 1_000_000_000n
+				}
+			};
+			service.get_exchange_rate.mockResolvedValue([partialCandidRate]);
+
+			const { getExchangeRate } = await createBackendCanister({ serviceOverride: service });
+
+			const result = await getExchangeRate({ token_id: tokenId, certified: false });
+
+			expect(result).toEqual({
+				usd: {
+					price: 100,
+					price24hChangePct: undefined,
+					marketCap: undefined,
+					timestampNs: 1_000_000_000n
+				}
+			});
 		});
 
 		it('should throw an error if the service throws', async () => {
@@ -1494,7 +1528,7 @@ describe('backend.canister', () => {
 
 	describe('getExchangeRates', () => {
 		const tokenIds = [{ Icrc: mockPrincipal }, { Erc20: ['0xabc', 1n] as [string, bigint] }];
-		const mockExchangeRate = {
+		const mockCandidRate = {
 			usd: {
 				price: [42000] as [] | [number],
 				price_24h_change_pct: [1.5] as [] | [number],
@@ -1503,9 +1537,18 @@ describe('backend.canister', () => {
 			}
 		};
 
-		it('should return unwrapped exchange rates for multiple tokens', async () => {
+		const expectedUnwrapped = {
+			usd: {
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
+			}
+		};
+
+		it('should return a Map with fully unwrapped exchange rates', async () => {
 			const rawResponse = tokenIds.map(
-				(id) => [id, [mockExchangeRate]] as [typeof id, [typeof mockExchangeRate]]
+				(id) => [id, [mockCandidRate]] as [typeof id, [typeof mockCandidRate]]
 			);
 			service.get_exchange_rates.mockResolvedValue(rawResponse);
 
@@ -1513,8 +1556,28 @@ describe('backend.canister', () => {
 
 			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
 
-			expect(result).toEqual(tokenIds.map((id) => [id, mockExchangeRate]));
+			expect(result).toBeInstanceOf(Map);
+			expect(result.size).toBe(2);
+
+			for (const rate of result.values()) {
+				expect(rate).toEqual(expectedUnwrapped);
+			}
+
 			expect(service.get_exchange_rates).toHaveBeenCalledExactlyOnceWith(tokenIds);
+		});
+
+		it('should omit entries with no rate from the Map', async () => {
+			const rawResponse = [
+				[tokenIds[0], [mockCandidRate]],
+				[tokenIds[1], []]
+			] as Array<[(typeof tokenIds)[number], [] | [typeof mockCandidRate]]>;
+			service.get_exchange_rates.mockResolvedValue(rawResponse);
+
+			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
+
+			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
+
+			expect(result.size).toBe(1);
 		});
 
 		it('should throw an error if the service throws', async () => {
