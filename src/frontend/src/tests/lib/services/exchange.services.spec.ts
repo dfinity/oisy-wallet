@@ -1,8 +1,19 @@
+import type { ExchangeRate, TokenId } from '$declarations/backend/backend.did';
+import { getExchangeRates } from '$lib/api/backend.api';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
-import { exchangeRateICRCToUsd, exchangeRateUsdToCurrency } from '$lib/services/exchange.services';
+import {
+	exchangeRateICRCToUsd,
+	exchangeRateUsdToCurrency,
+	fetchAllExchangeRatesFromBackend,
+	syncExchange,
+	toTokenId
+} from '$lib/services/exchange.services';
+import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import {
 	findMissingLedgerCanisterIds,
 	formatKongSwapToCoingeckoPrices
@@ -12,6 +23,7 @@ import {
 	MOCK_CANISTER_ID_2,
 	createMockCoingeckoTokenPrice
 } from '$tests/mocks/exchanges.mock';
+import { Principal } from '@dfinity/principal';
 
 vi.mock('$lib/rest/coingecko.rest', () => ({
 	simplePrice: vi.fn(),
@@ -23,6 +35,9 @@ vi.mock('$lib/rest/kongswap.rest', () => ({
 vi.mock('$lib/utils/exchange.utils', () => ({
 	formatKongSwapToCoingeckoPrices: vi.fn(),
 	findMissingLedgerCanisterIds: vi.fn()
+}));
+vi.mock('$lib/api/backend.api', () => ({
+	getExchangeRates: vi.fn()
 }));
 
 const mockPrice1 = createMockCoingeckoTokenPrice({ usd: 1.11 });
@@ -208,6 +223,344 @@ describe('exchange.services', () => {
 			expect(fetchBatchKongSwapPrices).not.toHaveBeenCalled();
 			expect(formatKongSwapToCoingeckoPrices).not.toHaveBeenCalled();
 			expect(result).toEqual(coingeckoResponse);
+		});
+	});
+
+	describe('toTokenId', () => {
+		it('should return Icrc variant for icrc standard', () => {
+			const result = toTokenId({ address: 'ryjl3-tyaaa-aaaaa-aaaba-cai', standard: 'icrc' });
+
+			expect(result).toEqual({ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') });
+		});
+
+		it('should return Erc20 variant for ethereum coingeckoId', () => {
+			const result = toTokenId({ address: '0xabc', coingeckoId: 'ethereum' });
+
+			expect(result).toEqual({ Erc20: ['0xabc', 1n] });
+		});
+
+		it('should return Erc20 variant for binance-smart-chain coingeckoId', () => {
+			const result = toTokenId({ address: '0xdef', coingeckoId: 'binance-smart-chain' });
+
+			expect(result).toEqual({ Erc20: ['0xdef', 56n] });
+		});
+
+		it('should return Erc20 variant for polygon-pos coingeckoId', () => {
+			const result = toTokenId({ address: '0x123', coingeckoId: 'polygon-pos' });
+
+			expect(result).toEqual({ Erc20: ['0x123', 137n] });
+		});
+
+		it('should return Erc20 variant for base coingeckoId', () => {
+			const result = toTokenId({ address: '0x456', coingeckoId: 'base' });
+
+			expect(result).toEqual({ Erc20: ['0x456', 8453n] });
+		});
+
+		it('should return Erc20 variant for arbitrum-one coingeckoId', () => {
+			const result = toTokenId({ address: '0x789', coingeckoId: 'arbitrum-one' });
+
+			expect(result).toEqual({ Erc20: ['0x789', 42161n] });
+		});
+
+		it('should use explicit chain_id over coingeckoId mapping', () => {
+			const result = toTokenId({ address: '0xabc', coingeckoId: 'ethereum', chain_id: 999n });
+
+			expect(result).toEqual({ Erc20: ['0xabc', 999n] });
+		});
+
+		it('should return undefined for unknown coingeckoId without chain_id', () => {
+			const result = toTokenId({ address: '0xabc', coingeckoId: 'unknown-chain' });
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when no standard, coingeckoId, or chain_id is provided', () => {
+			const result = toTokenId({ address: '0xabc' });
+
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('fetchAllExchangeRatesFromBackend', () => {
+		const mockExchangeRate: ExchangeRate = {
+			usd: {
+				price: [42000],
+				price_24h_change_pct: [1.5],
+				market_cap: [800_000_000_000],
+				timestamp_ns: 1_000_000_000n
+			}
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should call getExchangeRates with native + mapped token IDs', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue([]);
+
+			await fetchAllExchangeRatesFromBackend({
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
+				splTokenAddresses: ['SoLaddr1']
+			});
+
+			expect(getExchangeRates).toHaveBeenCalledExactlyOnceWith({
+				token_ids: [
+					{ EvmNative: 1n },
+					{ BtcNativeMainnet: null },
+					{ IcpNative: null },
+					{ SolNativeMainnet: null },
+					{ EvmNative: 56n },
+					{ EvmNative: 137n },
+					{ Erc20: ['0xabc', 1n] },
+					{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
+					{ SplMainnet: 'SoLaddr1' }
+				],
+				certified: false,
+				identity: undefined
+			});
+		});
+
+		it('should map backend response to coingecko-shaped prices', async () => {
+			const erc20TokenId: TokenId = { Erc20: ['0xabc', 1n] };
+			const icrcTokenId: TokenId = {
+				Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+			};
+			const splTokenId: TokenId = { SplMainnet: 'SoLaddr1' };
+
+			vi.mocked(getExchangeRates).mockResolvedValue([
+				[erc20TokenId, [mockExchangeRate]],
+				[icrcTokenId, [mockExchangeRate]],
+				[splTokenId, [mockExchangeRate]]
+			]);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
+				splTokenAddresses: ['SoLaddr1']
+			});
+
+			const expectedPrice = { usd: 42000, usd_24h_change: 1.5, usd_market_cap: 800_000_000_000 };
+
+			expect(result.currentErc20Prices).toEqual({ '0xabc': expectedPrice });
+			expect(result.currentIcrcPrices).toEqual({
+				'ryjl3-tyaaa-aaaaa-aaaba-cai': expectedPrice
+			});
+			expect(result.currentSplPrices).toEqual({ soladdr1: expectedPrice });
+		});
+
+		it('should return empty objects and undefined native prices when no rates are returned', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue([]);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
+				splTokenAddresses: ['SoLaddr1']
+			});
+
+			expect(result.currentEthPrice).toBeUndefined();
+			expect(result.currentBtcPrice).toBeUndefined();
+			expect(result.currentIcpPrice).toBeUndefined();
+			expect(result.currentSolPrice).toBeUndefined();
+			expect(result.currentBnbPrice).toBeUndefined();
+			expect(result.currentPolPrice).toBeUndefined();
+			expect(result.currentErc20Prices).toEqual({});
+			expect(result.currentIcrcPrices).toEqual({});
+			expect(result.currentSplPrices).toEqual({});
+		});
+
+		it('should skip rates with no price', async () => {
+			const noPriceRate: ExchangeRate = {
+				usd: {
+					price: [],
+					price_24h_change_pct: [1.5],
+					market_cap: [100],
+					timestamp_ns: 1n
+				}
+			};
+
+			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, [noPriceRate]]]);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			expect(result.currentErc20Prices).toEqual({});
+		});
+
+		it('should handle empty exchange rate (not found)', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, []]]);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			expect(result.currentErc20Prices).toEqual({});
+		});
+
+		it('should skip erc20 addresses with unknown coingeckoId but still include native tokens', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue([]);
+
+			await fetchAllExchangeRatesFromBackend({
+				erc20Addresses: [{ address: '0xunknown', coingeckoId: 'some-unknown-chain' }],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			expect(getExchangeRates).toHaveBeenCalledWith(
+				expect.objectContaining({
+					token_ids: [
+						{ EvmNative: 1n },
+						{ BtcNativeMainnet: null },
+						{ IcpNative: null },
+						{ SolNativeMainnet: null },
+						{ EvmNative: 56n },
+						{ EvmNative: 137n }
+					]
+				})
+			);
+		});
+
+		it('should return native token prices from backend', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue([
+				[{ EvmNative: 1n }, [mockExchangeRate]],
+				[{ BtcNativeMainnet: null }, [mockExchangeRate]],
+				[{ IcpNative: null }, [mockExchangeRate]],
+				[{ SolNativeMainnet: null }, [mockExchangeRate]],
+				[{ EvmNative: 56n }, [mockExchangeRate]],
+				[{ EvmNative: 137n }, [mockExchangeRate]]
+			]);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				erc20Addresses: [],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			const expectedPrice = { usd: 42000, usd_24h_change: 1.5, usd_market_cap: 800_000_000_000 };
+
+			expect(result.currentEthPrice).toEqual({ ethereum: expectedPrice });
+			expect(result.currentBtcPrice).toEqual({ bitcoin: expectedPrice });
+			expect(result.currentIcpPrice).toEqual({ 'internet-computer': expectedPrice });
+			expect(result.currentSolPrice).toEqual({ solana: expectedPrice });
+			expect(result.currentBnbPrice).toEqual({ binancecoin: expectedPrice });
+			expect(result.currentPolPrice).toEqual({ 'polygon-ecosystem-token': expectedPrice });
+		});
+
+		it('should handle missing optional fields in ExchangeRate', async () => {
+			const partialRate: ExchangeRate = {
+				usd: {
+					price: [100],
+					price_24h_change_pct: [],
+					market_cap: [],
+					timestamp_ns: 1n
+				}
+			};
+
+			vi.mocked(getExchangeRates).mockResolvedValue([[{ Erc20: ['0xabc', 1n] }, [partialRate]]]);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			expect(result.currentErc20Prices).toEqual({
+				'0xabc': { usd: 100, usd_24h_change: undefined, usd_market_cap: 0 }
+			});
+		});
+	});
+
+	describe('syncExchange', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+			exchangeStore.reset();
+		});
+
+		it('should not update stores when data is undefined', () => {
+			const exchangeSetSpy = vi.spyOn(exchangeStore, 'set');
+			const currencySetSpy = vi.spyOn(currencyExchangeStore, 'setExchangeRateCurrency');
+
+			syncExchange(undefined);
+
+			expect(exchangeSetSpy).not.toHaveBeenCalled();
+			expect(currencySetSpy).not.toHaveBeenCalled();
+		});
+
+		it('should update exchange store with non-nullish price data', () => {
+			const exchangeSetSpy = vi.spyOn(exchangeStore, 'set');
+
+			const data: PostMessageDataResponseExchange = {
+				currentExchangeRate: {
+					exchangeRateToUsd: 1,
+					exchangeRate24hChangeMultiplier: 1,
+					currency: Currency.USD
+				},
+				currentEthPrice: { ethereum: { usd: 3000 } },
+				currentBtcPrice: undefined,
+				currentErc20Prices: { '0xabc': { usd: 1, usd_market_cap: 100 } },
+				currentIcpPrice: undefined,
+				currentIcrcPrices: {},
+				currentSolPrice: undefined,
+				currentSplPrices: {},
+				currentErc4626Prices: {},
+				currentBnbPrice: undefined,
+				currentPolPrice: undefined
+			};
+
+			syncExchange(data);
+
+			expect(exchangeSetSpy).toHaveBeenCalledExactlyOnceWith([
+				{ ethereum: { usd: 3000 } },
+				{ '0xabc': { usd: 1, usd_market_cap: 100 } },
+				{},
+				{},
+				{}
+			]);
+		});
+
+		it('should update currency exchange store when currentExchangeRate is provided', () => {
+			const currencySpy = vi.spyOn(currencyExchangeStore, 'setExchangeRateCurrency');
+			const rateSpy = vi.spyOn(currencyExchangeStore, 'setExchangeRate');
+			const multiplierSpy = vi.spyOn(currencyExchangeStore, 'setExchangeRate24hChangeMultiplier');
+
+			const data: PostMessageDataResponseExchange = {
+				currentExchangeRate: {
+					exchangeRateToUsd: 0.85,
+					exchangeRate24hChangeMultiplier: 1.02,
+					currency: Currency.EUR
+				},
+				currentErc20Prices: {},
+				currentIcrcPrices: {},
+				currentSplPrices: {},
+				currentErc4626Prices: {}
+			};
+
+			syncExchange(data);
+
+			expect(currencySpy).toHaveBeenCalledExactlyOnceWith(Currency.EUR);
+			expect(rateSpy).toHaveBeenCalledExactlyOnceWith(0.85);
+			expect(multiplierSpy).toHaveBeenCalledExactlyOnceWith(1.02);
+		});
+
+		it('should not update currency exchange store when currentExchangeRate is missing', () => {
+			const currencySpy = vi.spyOn(currencyExchangeStore, 'setExchangeRateCurrency');
+
+			const data: PostMessageDataResponseExchange = {
+				currentErc20Prices: {},
+				currentIcrcPrices: {},
+				currentSplPrices: {},
+				currentErc4626Prices: {}
+			};
+
+			syncExchange(data);
+
+			expect(currencySpy).not.toHaveBeenCalled();
 		});
 	});
 });

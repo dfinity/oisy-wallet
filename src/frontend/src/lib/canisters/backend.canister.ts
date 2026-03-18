@@ -4,9 +4,9 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
-	CustomTokenId,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -390,7 +390,7 @@ export class BackendCanister extends Canister<BackendService> {
 		token_id,
 		certified
 	}: {
-		token_id: CustomTokenId;
+		token_id: TokenId;
 		certified: boolean;
 	}): Promise<[] | [ExchangeRate]> => {
 		const { get_exchange_rate } = this.caller({ certified });
@@ -401,9 +401,9 @@ export class BackendCanister extends Canister<BackendService> {
 		token_ids,
 		certified
 	}: {
-		token_ids: CustomTokenId[];
+		token_ids: TokenId[];
 		certified: boolean;
-	}): Promise<Array<[CustomTokenId, [] | [ExchangeRate]]>> => {
+	}): Promise<Array<[TokenId, [] | [ExchangeRate]]>> => {
 		const { get_exchange_rates } = this.caller({ certified });
 		return get_exchange_rates(token_ids);
 	};

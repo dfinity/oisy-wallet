@@ -143,7 +143,17 @@ const syncExchangeFromBackend = async ({
 		})
 	]);
 
-	const { currentErc20Prices, currentIcrcPrices, currentSplPrices } = backendPrices;
+	const {
+		currentEthPrice,
+		currentBtcPrice,
+		currentIcpPrice,
+		currentSolPrice,
+		currentBnbPrice,
+		currentPolPrice,
+		currentErc20Prices,
+		currentIcrcPrices,
+		currentSplPrices
+	} = backendPrices;
 
 	const currentErc4626Prices = await calculateErc4626Prices({
 		erc20Prices: currentErc20Prices,
@@ -152,20 +162,20 @@ const syncExchangeFromBackend = async ({
 
 	return {
 		currentExchangeRate: {
-			exchangeRateToUsd: currentExchangeRate?.rate,
-			exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier,
+			exchangeRateToUsd: currentExchangeRate?.rate ?? null,
+			exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier ?? null,
 			currency: currentCurrency
 		},
-		currentEthPrice: undefined,
-		currentBtcPrice: undefined,
+		currentEthPrice,
+		currentBtcPrice,
 		currentErc20Prices,
-		currentIcpPrice: undefined,
+		currentIcpPrice,
 		currentIcrcPrices,
-		currentSolPrice: undefined,
+		currentSolPrice,
 		currentSplPrices,
 		currentErc4626Prices,
-		currentBnbPrice: undefined,
-		currentPolPrice: undefined
+		currentBnbPrice,
+		currentPolPrice
 	};
 };
 
@@ -206,7 +216,7 @@ const syncExchangeFromCoingecko = async ({
 
 	results.forEach((result) => {
 		if (result.status === 'rejected') {
-			console.error('Error while fetching exchange rate:', result.reason);
+			consoleError('Error while fetching exchange rate:', result.reason);
 		}
 	});
 
@@ -248,20 +258,20 @@ const syncExchangeFromCoingecko = async ({
 
 	return {
 		currentExchangeRate: {
-			exchangeRateToUsd: currentExchangeRate?.rate,
-			exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier,
+			exchangeRateToUsd: currentExchangeRate?.rate ?? null,
+			exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier ?? null,
 			currency: currentCurrency
 		},
-		currentEthPrice,
-		currentBtcPrice,
+		currentEthPrice: currentEthPrice ?? undefined,
+		currentBtcPrice: currentBtcPrice ?? undefined,
 		currentErc20Prices,
-		currentIcpPrice,
-		currentIcrcPrices,
-		currentSolPrice,
-		currentSplPrices,
+		currentIcpPrice: currentIcpPrice ?? undefined,
+		currentIcrcPrices: currentIcrcPrices ?? {},
+		currentSolPrice: currentSolPrice ?? undefined,
+		currentSplPrices: currentSplPrices ?? {},
 		currentErc4626Prices,
-		currentBnbPrice,
-		currentPolPrice
+		currentBnbPrice: currentBnbPrice ?? undefined,
+		currentPolPrice: currentPolPrice ?? undefined
 	};
 };
 

@@ -3,9 +3,9 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
-	CustomTokenId,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -242,7 +242,7 @@ export const getExchangeRate = async ({
 	identity,
 	...params
 }: CanisterApiFunctionParams<{
-	token_id: CustomTokenId;
+	token_id: TokenId;
 	certified: boolean;
 }>): Promise<[] | [ExchangeRate]> => {
 	const { getExchangeRate } = await backendCanister({ identity });
@@ -254,9 +254,9 @@ export const getExchangeRates = async ({
 	identity,
 	...params
 }: CanisterApiFunctionParams<{
-	token_ids: CustomTokenId[];
+	token_ids: TokenId[];
 	certified: boolean;
-}>): Promise<Array<[CustomTokenId, [] | [ExchangeRate]]>> => {
+}>): Promise<Array<[TokenId, [] | [ExchangeRate]]>> => {
 	const { getExchangeRates } = await backendCanister({ identity });
 
 	return getExchangeRates(params);

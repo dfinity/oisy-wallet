@@ -1445,4 +1445,89 @@ describe('backend.canister', () => {
 			await expect(res).rejects.toThrow();
 		});
 	});
+
+	describe('getExchangeRate', () => {
+		const tokenId = { Icrc: mockPrincipal };
+		const mockExchangeRate = {
+			usd: {
+				price: [42000] as [] | [number],
+				price_24h_change_pct: [1.5] as [] | [number],
+				market_cap: [800_000_000_000] as [] | [number],
+				timestamp_ns: 1_000_000_000n
+			}
+		};
+
+		it('should return the exchange rate for a token', async () => {
+			service.get_exchange_rate.mockResolvedValue([mockExchangeRate]);
+
+			const { getExchangeRate } = await createBackendCanister({ serviceOverride: service });
+
+			const result = await getExchangeRate({ token_id: tokenId, certified: false });
+
+			expect(result).toEqual([mockExchangeRate]);
+			expect(service.get_exchange_rate).toHaveBeenCalledExactlyOnceWith(tokenId);
+		});
+
+		it('should return empty array when no rate exists', async () => {
+			service.get_exchange_rate.mockResolvedValue([]);
+
+			const { getExchangeRate } = await createBackendCanister({ serviceOverride: service });
+
+			const result = await getExchangeRate({ token_id: tokenId, certified: false });
+
+			expect(result).toEqual([]);
+		});
+
+		it('should throw an error if the service throws', async () => {
+			service.get_exchange_rate.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getExchangeRate } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(getExchangeRate({ token_id: tokenId, certified: false })).rejects.toThrow(
+				mockResponseError
+			);
+		});
+	});
+
+	describe('getExchangeRates', () => {
+		const tokenIds = [{ Icrc: mockPrincipal }, { Erc20: ['0xabc', 1n] as [string, bigint] }];
+		const mockExchangeRate = {
+			usd: {
+				price: [42000] as [] | [number],
+				price_24h_change_pct: [1.5] as [] | [number],
+				market_cap: [800_000_000_000] as [] | [number],
+				timestamp_ns: 1_000_000_000n
+			}
+		};
+
+		it('should return exchange rates for multiple tokens', async () => {
+			const response = tokenIds.map(
+				(id) => [id, [mockExchangeRate]] as [typeof id, [typeof mockExchangeRate]]
+			);
+			service.get_exchange_rates.mockResolvedValue(response);
+
+			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
+
+			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
+
+			expect(result).toEqual(response);
+			expect(service.get_exchange_rates).toHaveBeenCalledExactlyOnceWith(tokenIds);
+		});
+
+		it('should throw an error if the service throws', async () => {
+			service.get_exchange_rates.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(getExchangeRates({ token_ids: tokenIds, certified: false })).rejects.toThrow(
+				mockResponseError
+			);
+		});
+	});
 });

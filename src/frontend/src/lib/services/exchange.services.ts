@@ -1,4 +1,4 @@
-import type { CustomTokenId, ExchangeRate } from '$declarations/backend/backend.did';
+import type { ExchangeRate, TokenId } from '$declarations/backend/backend.did';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
@@ -179,12 +179,12 @@ export const exchangeRateSPLToUsd = async (
 	});
 };
 
-export const toCustomTokenId = (token: {
+export const toTokenId = (token: {
 	address: string;
 	coingeckoId?: string;
 	standard?: string;
 	chain_id?: bigint;
-}): CustomTokenId | undefined => {
+}): TokenId | undefined => {
 	if (token.standard === 'icrc') {
 		return { Icrc: Principal.fromText(token.address) };
 	}
@@ -204,7 +204,7 @@ export const toCustomTokenId = (token: {
 							: undefined);
 
 	if (nonNullish(chainId)) {
-		return { Ethereum: [token.address, chainId] };
+		return { Erc20: [token.address, chainId] };
 	}
 
 	return undefined;
@@ -213,16 +213,55 @@ export const toCustomTokenId = (token: {
 const mapExchangeRateToCoingecko = (
 	rate: [] | [ExchangeRate]
 ): { usd: number; usd_24h_change?: number; usd_market_cap: number } | undefined => {
-	const r = rate.length > 0 ? rate[0] : undefined;
+	const r = rate[0];
 	if (isNullish(r)) {
 		return undefined;
 	}
-	const change = r.usd.price_24h_change_pct.length > 0 ? r.usd.price_24h_change_pct[0] : undefined;
+	const price = r.usd.price[0];
+	if (isNullish(price)) {
+		return undefined;
+	}
+	const change = r.usd.price_24h_change_pct[0];
+	const marketCap = r.usd.market_cap[0] ?? 0;
 	return {
-		usd: r.usd.price,
+		usd: price,
 		usd_24h_change: change,
-		usd_market_cap: r.usd.market_cap
+		usd_market_cap: marketCap
 	};
+};
+
+const NATIVE_TOKEN_IDS: { tokenId: TokenId; coingeckoKey: string }[] = [
+	{ tokenId: { EvmNative: 1n }, coingeckoKey: 'ethereum' },
+	{ tokenId: { BtcNativeMainnet: null }, coingeckoKey: 'bitcoin' },
+	{ tokenId: { IcpNative: null }, coingeckoKey: 'internet-computer' },
+	{ tokenId: { SolNativeMainnet: null }, coingeckoKey: 'solana' },
+	{ tokenId: { EvmNative: 56n }, coingeckoKey: 'binancecoin' },
+	{ tokenId: { EvmNative: 137n }, coingeckoKey: 'polygon-ecosystem-token' }
+];
+
+const tokenIdKey = (id: TokenId): string => {
+	if ('Icrc' in id) {
+		return `Icrc:${id.Icrc.toText()}`;
+	}
+	if ('Erc20' in id) {
+		return `Erc20:${id.Erc20[0].toLowerCase()}:${id.Erc20[1]}`;
+	}
+	if ('SplMainnet' in id) {
+		return `SplMainnet:${id.SplMainnet.toLowerCase()}`;
+	}
+	if ('EvmNative' in id) {
+		return `EvmNative:${id.EvmNative}`;
+	}
+	if ('BtcNativeMainnet' in id) {
+		return 'BtcNativeMainnet';
+	}
+	if ('IcpNative' in id) {
+		return 'IcpNative';
+	}
+	if ('SolNativeMainnet' in id) {
+		return 'SolNativeMainnet';
+	}
+	return `unknown:${Object.keys(id)[0]}`;
 };
 
 export const fetchAllExchangeRatesFromBackend = async ({
@@ -234,42 +273,56 @@ export const fetchAllExchangeRatesFromBackend = async ({
 	icrcCanisterIds: LedgerCanisterIdText[];
 	splTokenAddresses: SplTokenAddress[];
 }): Promise<{
+	currentEthPrice: CoingeckoSimplePriceResponse | undefined;
+	currentBtcPrice: CoingeckoSimplePriceResponse | undefined;
+	currentIcpPrice: CoingeckoSimplePriceResponse | undefined;
+	currentSolPrice: CoingeckoSimplePriceResponse | undefined;
+	currentBnbPrice: CoingeckoSimplePriceResponse | undefined;
+	currentPolPrice: CoingeckoSimplePriceResponse | undefined;
 	currentErc20Prices: CoingeckoSimpleTokenPriceResponse;
 	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
 	currentSplPrices: CoingeckoSimpleTokenPriceResponse;
 }> => {
-	const tokenIds: CustomTokenId[] = [];
+	const tokenIds: TokenId[] = NATIVE_TOKEN_IDS.map(({ tokenId }) => tokenId);
 
-	// Map ERC20
 	const erc20TokenIds = erc20Addresses
-		.map((t) => toCustomTokenId({ address: t.address, coingeckoId: t.coingeckoId }))
+		.map((t) => toTokenId({ address: t.address, coingeckoId: t.coingeckoId }))
 		.filter(nonNullish);
 	tokenIds.push(...erc20TokenIds);
 
-	// Map ICRC
 	const icrcTokenIds = icrcCanisterIds.map((id) => ({ Icrc: Principal.fromText(id) }));
 	tokenIds.push(...icrcTokenIds);
 
-	// Map SPL
-	const splIds = splTokenAddresses.map((addr) => ({ SolMainnet: addr }) as CustomTokenId);
+	const splIds: TokenId[] = splTokenAddresses.map((addr) => ({ SplMainnet: addr }));
 	tokenIds.push(...splIds);
 
 	const response = await getExchangeRates({
 		token_ids: tokenIds,
 		certified: false,
-		identity: undefined // Anonymous
+		identity: undefined
 	});
 
+	const ratesByKey = new Map(response.map(([id, rate]) => [tokenIdKey(id), rate]));
+
 	const findRate = (
-		id: CustomTokenId
+		id: TokenId
 	): { usd: number; usd_24h_change?: number; usd_market_cap: number } | undefined => {
-		const match = response.find(([tokenId]) => JSON.stringify(tokenId) === JSON.stringify(id));
-		return match ? mapExchangeRateToCoingecko(match[1]) : undefined;
+		const rate = ratesByKey.get(tokenIdKey(id));
+		return nonNullish(rate) ? mapExchangeRateToCoingecko(rate) : undefined;
 	};
+
+	const nativePrice = (
+		entry: (typeof NATIVE_TOKEN_IDS)[number]
+	): CoingeckoSimplePriceResponse | undefined => {
+		const rate = findRate(entry.tokenId);
+		return nonNullish(rate) ? { [entry.coingeckoKey]: rate } : undefined;
+	};
+
+	const [ethEntry, btcEntry, icpEntry, solEntry, bnbEntry, polEntry] = NATIVE_TOKEN_IDS;
 
 	const erc20Prices: CoingeckoSimpleTokenPriceResponse = {};
 	erc20Addresses.forEach((t) => {
-		const id = toCustomTokenId({ address: t.address, coingeckoId: t.coingeckoId });
+		const id = toTokenId({ address: t.address, coingeckoId: t.coingeckoId });
 		if (nonNullish(id)) {
 			const rate = findRate(id);
 			if (nonNullish(rate)) {
@@ -288,13 +341,19 @@ export const fetchAllExchangeRatesFromBackend = async ({
 
 	const splPrices: CoingeckoSimpleTokenPriceResponse = {};
 	splTokenAddresses.forEach((addr) => {
-		const rate = findRate({ SolMainnet: addr } as CustomTokenId);
+		const rate = findRate({ SplMainnet: addr });
 		if (nonNullish(rate)) {
 			splPrices[addr.toLowerCase()] = rate;
 		}
 	});
 
 	return {
+		currentEthPrice: nativePrice(ethEntry),
+		currentBtcPrice: nativePrice(btcEntry),
+		currentIcpPrice: nativePrice(icpEntry),
+		currentSolPrice: nativePrice(solEntry),
+		currentBnbPrice: nativePrice(bnbEntry),
+		currentPolPrice: nativePrice(polEntry),
 		currentErc20Prices: erc20Prices,
 		currentIcrcPrices: icrcPrices,
 		currentSplPrices: splPrices
