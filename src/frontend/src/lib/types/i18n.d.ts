@@ -906,6 +906,7 @@ interface I18nTokens {
 		sort_by_value: string;
 		sort_by_performance: string;
 		sort_by_symbol: string;
+		hide_asset_types: string;
 	};
 	details: {
 		title: string;
