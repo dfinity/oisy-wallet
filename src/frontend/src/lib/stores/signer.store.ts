@@ -1,5 +1,4 @@
 import { REPLICA_HOST } from '$lib/constants/app.constants';
-import type { Option } from '$lib/types/utils';
 import {
 	ICRC21_CALL_CONSENT_MESSAGE,
 	ICRC25_REQUEST_PERMISSIONS,
@@ -12,6 +11,7 @@ import {
 } from '@dfinity/oisy-wallet-signer';
 import { Signer } from '@dfinity/oisy-wallet-signer/signer';
 import { isNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { Identity } from '@icp-sdk/core/agent';
 import { derived, writable, type Readable } from 'svelte/store';
 
@@ -108,7 +108,7 @@ export interface SignerContext {
  * @returns {SignerContext} The initialized signer context, providing functions and stores to interact with the signer.
  */
 export const initSignerContext = (): SignerContext => {
-	let signer: Option<Signer>;
+	let signer: Nullish<Signer>;
 
 	const accountsPromptPayloadStore = writable<AccountsPromptPayload | undefined | null>(undefined);
 
