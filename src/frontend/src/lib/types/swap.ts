@@ -25,7 +25,8 @@ export type DisplayUnit = 'token' | 'usd';
 export enum SwapProvider {
 	ICP_SWAP = 'icpSwap',
 	KONG_SWAP = 'kongSwap',
-	VELORA = 'velora'
+	VELORA = 'velora',
+	NEAR_INTENTS = 'nearIntents'
 }
 
 export enum VeloraSwapTypes {

@@ -5,6 +5,7 @@ import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/ne
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import type { NetworkId } from '$lib/types/network';
 import { SwapProvider, type SwapProvidersConfig } from '$lib/types/swap';
 
@@ -38,7 +39,16 @@ export const swapProvidersDetails: Record<string, SwapProvidersConfig> = {
 		website: 'https://app.velora.xyz/',
 		name: 'Velora',
 		logo: '/images/dapps/velora-logo.svg'
-	}
+	},
+	...(NEAR_INTENTS_SWAP_ENABLED
+		? {
+				[SwapProvider.NEAR_INTENTS]: {
+					website: 'https://near-intents.org/',
+					name: 'NEAR Intents',
+					logo: '/images/dapps/near-intents-logo.svg'
+				}
+			}
+		: {})
 };
 
 const SUPPORTED_CROSS_SWAP_EVM_NETWORK_IDS = [
