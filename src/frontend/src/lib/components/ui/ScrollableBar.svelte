@@ -12,7 +12,7 @@
 	{@render children()}
 </div>
 
-<style>
+<style lang="scss">
 	.scrollable-bar {
 		overflow-x: auto;
 		scrollbar-width: none;

@@ -2,6 +2,7 @@
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
@@ -21,6 +22,7 @@
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 
 	interface Props {
 		networkSelectorViewOnly?: boolean;
@@ -94,7 +96,7 @@
 	</div>
 
 	{#if $showTokenCategoryFilter}
-		<div class="mt-3">
+		<div class="mt-3" transition:slide={SLIDE_PARAMS}>
 			<TokenTypeFilterBar />
 		</div>
 	{/if}

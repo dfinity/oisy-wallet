@@ -7,10 +7,9 @@
 	interface Props {
 		title?: string;
 		description?: Snippet;
-		action?: Snippet;
 	}
 
-	let { title, description, action }: Props = $props();
+	let { title, description }: Props = $props();
 </script>
 
 <div class="py-12">
@@ -32,8 +31,4 @@
 			</p>
 		{/if}
 	</div>
-
-	{#if action}
-		{@render action()}
-	{/if}
 </div>
