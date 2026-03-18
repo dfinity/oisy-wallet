@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use ic_cdk::{
-    api::{msg_caller, time},
+    api::{is_controller, msg_caller, time},
     query, update,
 };
 use shared::types::{
@@ -142,6 +142,7 @@ pub async fn btc_select_user_utxos_fee(
 ///
 /// Requires a valid II delegation chain to verify the caller authenticated
 /// through Internet Identity. This protects against unauthorised CLI callers.
+/// Controllers bypass this check.
 ///
 /// # Errors
 /// Errors are enumerated by: `BtcAddPendingTransactionError`.
@@ -159,33 +160,35 @@ pub async fn btc_add_pending_transaction(
         let principal = msg_caller();
         let now_ns = time();
 
-        let chain = params.ii_delegation_chain.as_ref().ok_or_else(|| {
-            BtcAddPendingTransactionError::InvalidDelegationChain {
-                msg: "II delegation chain is required".to_string(),
-            }
-        })?;
+        if !is_controller(&principal) {
+            let chain = params.ii_delegation_chain.as_ref().ok_or_else(|| {
+                BtcAddPendingTransactionError::InvalidDelegationChain {
+                    msg: "II delegation chain is required".to_string(),
+                }
+            })?;
 
-        let (known_ii_canister_ids, ic_root_key_raw) = read_config(|config| {
-            let ii_ids = config
-                .supported_credentials
-                .as_ref()
-                .map(|creds| creds.iter().map(|c| c.ii_canister_id).collect::<Vec<_>>())
-                .unwrap_or_default();
-            let root_key = config
-                .ic_root_key_raw
-                .clone()
-                .expect("IC root key not configured");
-            (ii_ids, root_key)
-        });
+            let (known_ii_canister_ids, ic_root_key_raw) = read_config(|config| {
+                let ii_ids = config
+                    .supported_credentials
+                    .as_ref()
+                    .map(|creds| creds.iter().map(|c| c.ii_canister_id).collect::<Vec<_>>())
+                    .unwrap_or_default();
+                let root_key = config
+                    .ic_root_key_raw
+                    .clone()
+                    .expect("IC root key not configured");
+                (ii_ids, root_key)
+            });
 
-        delegation::verify_ii_delegation_chain(
-            chain,
-            principal,
-            &known_ii_canister_ids,
-            &ic_root_key_raw,
-            now_ns,
-        )
-        .map_err(|msg| BtcAddPendingTransactionError::InvalidDelegationChain { msg })?;
+            delegation::verify_ii_delegation_chain(
+                chain,
+                principal,
+                &known_ii_canister_ids,
+                &ic_root_key_raw,
+                now_ns,
+            )
+            .map_err(|msg| BtcAddPendingTransactionError::InvalidDelegationChain { msg })?;
+        }
 
         if params.utxos.is_empty() {
             return Err(BtcAddPendingTransactionError::EmptyUtxos);

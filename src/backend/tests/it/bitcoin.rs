@@ -15,7 +15,7 @@ use shared::types::{
 
 use crate::utils::{
     mock::CALLER,
-    pocketic::{setup, setup_with_ii, PicCanisterTrait},
+    pocketic::{controller, setup, setup_with_ii, PicCanisterTrait},
 };
 
 const MOCK_ADDRESS: &str = "bcrt1qpg7udjvq7gx2fp480pgt4hnhj3qc4nhrkstc33";
@@ -148,6 +148,34 @@ fn test_add_pending_transaction_with_valid_delegation() {
     // The delegation passed verification. The call may still fail for other reasons
     // (e.g., InvalidUtxos because PocketIC's bitcoin canister doesn't have real UTXOs),
     // but that's fine — we're testing delegation verification, not the full BTC flow.
+}
+
+#[test]
+fn test_controller_bypasses_delegation_check() {
+    let pic_setup = setup();
+
+    let add_request = BtcAddPendingTransactionRequest {
+        txid: vec![],
+        utxos: vec![UTXO_1],
+        network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
+    };
+
+    let add_response = pic_setup
+        .update::<Result<(), BtcAddPendingTransactionError>>(
+            controller(),
+            "btc_add_pending_transaction",
+            add_request,
+        )
+        .expect("Canister call failed");
+
+    assert!(
+        !matches!(
+            add_response,
+            Err(BtcAddPendingTransactionError::InvalidDelegationChain { .. })
+        ),
+        "Controller should bypass delegation check, got: {add_response:?}"
+    );
 }
 
 // -------------------------------------------------------------------------------------------------
