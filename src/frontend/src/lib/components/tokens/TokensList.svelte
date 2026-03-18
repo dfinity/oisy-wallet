@@ -21,6 +21,7 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
@@ -149,7 +150,16 @@
 		</div>
 
 		{#if filteredTokens?.length === 0}
-			{#if $tokenListStore.filter === ''}
+			{#if $showTokenCategoryFilter && nonNullish($tokenCategoryFilter)}
+				<NothingFoundPlaceholder
+					description={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type_description, {
+						$count: `${$allFungibleNetworkTokens.length}`
+					})}
+					title={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type, {
+						$asset_type: $i18n.token_tag.category[$tokenCategoryFilter]
+					})}
+				/>
+			{:else if $tokenListStore.filter === ''}
 				<NoTokensPlaceholder />
 			{:else}
 				<NothingFoundPlaceholder />
