@@ -48,7 +48,7 @@ describe('near-intents.rest', () => {
 
 	describe('fetchNearIntentsQuote', () => {
 		const quoteRequest = {
-			dry: true,
+			dry: false,
 			swapType: 'EXACT_INPUT' as const,
 			slippageTolerance: 100,
 			originAsset: 'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
