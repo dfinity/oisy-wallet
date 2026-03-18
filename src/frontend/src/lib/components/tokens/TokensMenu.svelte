@@ -41,10 +41,7 @@
 	bind:button
 >
 	{#snippet icon()}
-		<NotificationBlob
-			display={$hideZeroBalances}
-			position="top-right"
-		>
+		<NotificationBlob display={$hideZeroBalances} position="top-right">
 			<IconManage />
 		</NotificationBlob>
 	{/snippet}
