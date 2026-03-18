@@ -59,6 +59,7 @@ describe('token-tag.utils', () => {
 		const cryptoTokenUi = mkTokenUi(cryptoToken.tags);
 		const stableTokenUi = mkTokenUi(stablecoinToken.tags);
 		const stockTokenUi = mkTokenUi(stockToken.tags);
+		// @ts-expect-error Testing invalid input types
 		const noTagTokenUi = mkTokenUi([]);
 
 		const items: TokenUiOrGroupUi[] = [
