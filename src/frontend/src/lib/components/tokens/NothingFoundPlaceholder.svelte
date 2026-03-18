@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
 	import shocked from '$lib/assets/shocked.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
