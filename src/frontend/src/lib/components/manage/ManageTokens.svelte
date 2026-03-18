@@ -227,7 +227,7 @@
 				<IconPlus />
 				{isNftsPage ? $i18n.tokens.manage.text.import_nft : $i18n.tokens.manage.text.import_token}
 			</Button>
-			<Button disabled={saveDisabled} onclick={save} testId={MANAGE_TOKENS_MODAL_SAVE}>
+			<Button styleClass="whitespace-nowrap" disabled={saveDisabled} onclick={save} testId={MANAGE_TOKENS_MODAL_SAVE}>
 				{$i18n.core.text.save}
 			</Button>
 		{/snippet}
