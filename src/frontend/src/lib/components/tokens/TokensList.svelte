@@ -14,6 +14,7 @@
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
@@ -23,23 +24,38 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
+	import { filterTokensByCategory } from '$lib/utils/token-tag.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
 	let loading: boolean = $derived(isNullish(tokens));
 
-	// Default token / tokenGroup list
+	let tokenTypeFiltered: TokenUiOrGroupUi[] = $derived(
+		$showTokenCategoryFilter
+			? filterTokensByCategory({ tokens: tokens ?? [], category: $tokenCategoryFilter })
+			: (tokens ?? [])
+	);
+
 	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
-		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
+		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokenTypeFiltered })
 	);
 
 	// Token list for enabling when filtering
-	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
+	let enableMoreTokensListRaw: TokenUiOrGroupUi[] = $state([]);
+
+	let enableMoreTokensList: TokenUiOrGroupUi[] = $derived(
+		$showTokenCategoryFilter
+			? filterTokensByCategory({
+					tokens: enableMoreTokensListRaw,
+					category: $tokenCategoryFilter
+				})
+			: enableMoreTokensListRaw
+	);
 
 	const updateFilterList = ({ filter }: { filter: string }) => {
 		// Sort alphabetically and apply filter
-		enableMoreTokensList = getFilteredTokenList({
+		enableMoreTokensListRaw = getFilteredTokenList({
 			filter,
 			list: sortTokenOrGroupUi(
 				getDisabledOrModifiedTokens({
