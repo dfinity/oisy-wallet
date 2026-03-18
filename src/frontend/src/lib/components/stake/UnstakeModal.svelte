@@ -6,18 +6,18 @@
 	import { ProgressStepsUnstake } from '$lib/enums/progress-steps';
 	import { WizardStepsUnstake } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import type { Vault } from '$lib/types/vaults';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: Token;
-		totalStaked: OptionBalance;
+		totalStaked: bigint;
+		vault?: Vault;
 	}
 
-	let { token, totalStaked }: Props = $props();
+	let { token, totalStaked, vault }: Props = $props();
 
 	let modal: WizardModal<WizardStepsUnstake> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsUnstake> | undefined = $state();
@@ -26,8 +26,7 @@
 
 	let steps: WizardSteps<WizardStepsUnstake> = $derived(
 		unstakeWizardSteps({
-			i18n: $i18n,
-			tokenSymbol: getTokenDisplaySymbol(token)
+			i18n: $i18n
 		})
 	);
 
@@ -60,6 +59,7 @@
 			onBack={modal.back}
 			onClose={close}
 			onNext={modal.next}
+			{vault}
 			bind:amount
 			bind:unstakeProgressStep
 		/>
