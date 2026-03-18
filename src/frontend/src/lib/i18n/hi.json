@@ -1161,9 +1161,7 @@
 			"asset_type": "",
 			"asset_type_all": "",
 			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description_prefix": "",
-			"no_tokens_for_asset_type_description_bold": "",
-			"no_tokens_for_asset_type_description_suffix": ""
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "टोकन विवरण",
