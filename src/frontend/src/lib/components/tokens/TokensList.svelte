@@ -14,7 +14,7 @@
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { tokenCategoryFilter, tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
+	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
@@ -32,7 +32,7 @@
 	let loading: boolean = $derived(isNullish(tokens));
 
 	let tokenTypeFiltered: TokenUiOrGroupUi[] = $derived(
-		$tokenCategoryFilterEnabled
+		$showTokenCategoryFilter
 			? filterTokensByCategory({ tokens: tokens ?? [], category: $tokenCategoryFilter })
 			: (tokens ?? [])
 	);
@@ -42,11 +42,20 @@
 	);
 
 	// Token list for enabling when filtering
-	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
+	let enableMoreTokensListRaw: TokenUiOrGroupUi[] = $state([]);
+
+	let enableMoreTokensList: TokenUiOrGroupUi[] = $derived(
+		$showTokenCategoryFilter
+			? filterTokensByCategory({
+					tokens: enableMoreTokensListRaw,
+					category: $tokenCategoryFilter
+				})
+			: enableMoreTokensListRaw
+	);
 
 	const updateFilterList = ({ filter }: { filter: string }) => {
 		// Sort alphabetically and apply filter
-		enableMoreTokensList = getFilteredTokenList({
+		enableMoreTokensListRaw = getFilteredTokenList({
 			filter,
 			list: sortTokenOrGroupUi(
 				getDisabledOrModifiedTokens({
