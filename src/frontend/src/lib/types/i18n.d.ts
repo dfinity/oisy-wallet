@@ -910,9 +910,7 @@ interface I18nTokens {
 		asset_type: string;
 		asset_type_all: string;
 		no_tokens_for_asset_type: string;
-		no_tokens_for_asset_type_description_prefix: string;
-		no_tokens_for_asset_type_description_bold: string;
-		no_tokens_for_asset_type_description_suffix: string;
+		no_tokens_for_asset_type_description: string;
 	};
 	details: {
 		title: string;

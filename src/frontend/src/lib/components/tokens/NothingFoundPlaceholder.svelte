@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { Html } from '@dfinity/gix-components';
 	import shocked from '$lib/assets/shocked.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		title?: string;
-		description?: Snippet;
+		description?: string;
 	}
 
 	let { title, description }: Props = $props();
@@ -23,12 +23,8 @@
 		<p class="m-0 text-center text-lg font-bold">
 			{title ?? $i18n.tokens.text.filter_nothing_found}
 		</p>
-		{#if description}
-			{@render description()}
-		{:else}
-			<p class="m-0 text-center text-tertiary">
-				{$i18n.tokens.text.filter_nothing_found_description}
-			</p>
-		{/if}
+		<p class="m-0 text-center text-tertiary">
+			<Html text={description ?? $i18n.tokens.text.filter_nothing_found_description} />
+		</p>
 	</div>
 </div>

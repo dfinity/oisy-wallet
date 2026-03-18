@@ -12,8 +12,8 @@
 		MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
 		MODAL_TOKENS_LIST
 	} from '$lib/constants/test-ids.constants';
-	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
-	import { showTokenCategoryFilter } from '$lib/derived/settings.derived';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { tokenCategoryFilter, showTokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -22,7 +22,6 @@
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
-	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 
 	interface Props {
 		networkSelectorViewOnly?: boolean;

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import { isNullish } from '@dfinity/utils';
+	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import ScrollableBar from '$lib/components/ui/ScrollableBar.svelte';
 	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { TokenCategoryTagValue } from '$lib/enums/token-tag';

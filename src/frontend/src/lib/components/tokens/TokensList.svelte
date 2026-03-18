@@ -2,8 +2,8 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -18,7 +18,6 @@
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
@@ -126,7 +125,7 @@
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		{#if $showTokenCategoryFilter}
-			<div class="mb-4">
+			<div class="mb-4" transition:slide>
 				<TokenTypeFilterBar />
 			</div>
 		{/if}
@@ -155,32 +154,13 @@
 					title={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type, {
 						$asset_type: $i18n.token_tag.category[$tokenCategoryFilter]
 					})}
-				>
-					{#snippet description()}
-						<p class="m-0 text-center text-tertiary">
-							{$i18n.tokens.text.no_tokens_for_asset_type_description_prefix}
-							<strong>
-								{replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type_description_bold, {
-									$count: `${$allFungibleNetworkTokens.length}`
-								})}
-							</strong>
-							{$i18n.tokens.text.no_tokens_for_asset_type_description_suffix}
-						</p>
-					{/snippet}
-
-					{#snippet action()}
-						<div class="mt-6 flex justify-center">
-							<Button
-								fullWidth={false}
-								link
-								onclick={() => modalStore.openManageTokens({ id: Symbol() })}
-							>
-								<IconManage />
-								{$i18n.tokens.manage.text.manage_list}
-							</Button>
-						</div>
-					{/snippet}
-				</NothingFoundPlaceholder>
+					description={replacePlaceholders(
+						$i18n.tokens.text.no_tokens_for_asset_type_description,
+						{
+							$count: `${$allFungibleNetworkTokens.length}`
+						}
+					)}
+				/>
 			{:else if $tokenListStore.filter === ''}
 				<NoTokensPlaceholder />
 			{:else}

@@ -1,7 +1,6 @@
 import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
-import { createRawSnippet } from 'svelte';
 
 describe('NothingFoundPlaceholder', () => {
 	it('should render the default title', () => {
@@ -27,39 +26,16 @@ describe('NothingFoundPlaceholder', () => {
 		expect(queryByText(en.tokens.text.filter_nothing_found)).not.toBeInTheDocument();
 	});
 
-	it('should render a custom description snippet when provided', () => {
-		const descriptionTestId = 'custom-description';
-		const description = createRawSnippet(() => ({
-			render: () => `<p data-tid="${descriptionTestId}">Custom description content</p>`
-		}));
+	it('should render a custom description string when provided', () => {
+		const customDescription = 'Choose from <strong>500 supported tokens</strong> to customize.';
 
-		const { getByTestId, queryByText } = render(NothingFoundPlaceholder, {
-			props: { description }
+		const { container, queryByText } = render(NothingFoundPlaceholder, {
+			props: { description: customDescription }
 		});
 
-		expect(getByTestId(descriptionTestId)).toBeInTheDocument();
+		expect(container).toHaveTextContent('Choose from 500 supported tokens to customize.');
+		expect(container.querySelector('strong')).toBeInTheDocument();
 		expect(queryByText(en.tokens.text.filter_nothing_found_description)).not.toBeInTheDocument();
-	});
-
-	it('should render an action snippet when provided', () => {
-		const actionTestId = 'custom-action';
-		const action = createRawSnippet(() => ({
-			render: () => `<button data-tid="${actionTestId}">Manage tokens</button>`
-		}));
-
-		const { getByTestId } = render(NothingFoundPlaceholder, {
-			props: { action }
-		});
-
-		expect(getByTestId(actionTestId)).toBeInTheDocument();
-	});
-
-	it('should not render an action area by default', () => {
-		const { container } = render(NothingFoundPlaceholder);
-
-		const buttons = container.querySelectorAll('button');
-
-		expect(buttons).toHaveLength(0);
 	});
 
 	it('should always render the shocked image', () => {
