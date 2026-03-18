@@ -82,6 +82,12 @@
 			<IconExpandMore size="24" />
 		</button>
 	</div>
+
+	{#if $tokenCategoryFilterEnabled}
+		<div class="mt-3">
+			<TokenTypeFilterBar />
+		</div>
+	{/if}
 </div>
 
 <div class="my-4 flex flex-col overflow-y-hidden sm:max-h-[26rem]">

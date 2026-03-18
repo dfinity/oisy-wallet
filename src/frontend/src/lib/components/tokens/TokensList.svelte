@@ -114,6 +114,12 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
+		{#if $tokenCategoryFilterEnabled}
+			<div class="mb-4">
+				<TokenTypeFilterBar />
+			</div>
+		{/if}
+
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each tokensWithKey as { tokenOrGroup, key } (key)}
 				<div class="overflow-hidden rounded-xl">
@@ -133,7 +139,41 @@
 		</div>
 
 		{#if filteredTokens?.length === 0}
-			{#if $tokenListStore.filter === ''}
+			{#if $tokenCategoryFilterEnabled && nonNullish($tokenCategoryFilter)}
+				<div class="py-12">
+					<div class="mb-2 flex justify-center p-2">
+						<Img height="64" src={shocked} width="64" />
+					</div>
+
+					<div class="space-y-4">
+						<p class="m-0 text-center text-lg font-bold">
+							{replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type, {
+								$asset_type: $i18n.token_tag.category[$tokenCategoryFilter]
+							})}
+						</p>
+						<p class="m-0 text-center text-tertiary">
+							{$i18n.tokens.text.no_tokens_for_asset_type_description_prefix}
+							<strong>
+								{replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type_description_bold, {
+									$count: `${$allFungibleNetworkTokens.length}`
+								})}
+							</strong>
+							{$i18n.tokens.text.no_tokens_for_asset_type_description_suffix}
+						</p>
+					</div>
+
+					<div class="mt-6 flex justify-center">
+						<Button
+							fullWidth={false}
+							link
+							onclick={() => modalStore.openManageTokens({ id: Symbol() })}
+						>
+							<IconManage />
+							{$i18n.tokens.manage.text.manage_list}
+						</Button>
+					</div>
+				</div>
+			{:else if $tokenListStore.filter === ''}
 				<NoTokensPlaceholder />
 			{:else}
 				<NothingFoundPlaceholder />

@@ -9,12 +9,17 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
-	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import {
+		tokenCategoryFilter,
+		tokenCategoryFilterEnabled,
+		isPrivacyMode
+	} from '$lib/derived/settings.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
+	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
 	import { sumTokensUiUsdBalance, sumTokensUiUsdStakeBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
@@ -25,9 +30,18 @@
 
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-	const totalUsd = $derived(sumTokensUiUsdBalance($enabledFungibleNetworkTokensUi));
+	const heroTokens = $derived(
+		$tokenCategoryFilterEnabled
+			? filterTokensUiByCategory({
+					tokens: $enabledFungibleNetworkTokensUi,
+					category: $tokenCategoryFilter
+				})
+			: $enabledFungibleNetworkTokensUi
+	);
 
-	const totalStakeUsd = $derived(sumTokensUiUsdStakeBalance($enabledFungibleNetworkTokensUi));
+	const totalUsd = $derived(sumTokensUiUsdBalance(heroTokens));
+
+	const totalStakeUsd = $derived(sumTokensUiUsdStakeBalance(heroTokens));
 
 	let balance = $derived(
 		formatCurrency({

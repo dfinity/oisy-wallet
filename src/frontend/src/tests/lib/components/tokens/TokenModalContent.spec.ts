@@ -1,5 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -128,5 +129,56 @@ describe('TokenModalContent', () => {
 				})} ${mockValidIcrcToken.symbol}`
 			)
 		).toBeInTheDocument();
+	});
+
+	it('does not render asset type when token has no category tag', () => {
+		const { queryByText } = render(TokenModalContent, {
+			props: {
+				token: ICP_TOKEN
+			}
+		});
+
+		expect(queryByText(en.tokens.text.asset_type)).not.toBeInTheDocument();
+	});
+
+	it('renders asset type label and badge for a token with a category tag', () => {
+		const cryptoIcrcToken = {
+			...mockValidIcrcToken,
+			indexCanisterId: mockIndexCanisterId,
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
+		} as Token;
+
+		const { getByText } = render(TokenModalContent, {
+			props: {
+				token: cryptoIcrcToken
+			}
+		});
+
+		expect(getByText(en.tokens.text.asset_type)).toBeInTheDocument();
+
+		const badge = getByText(en.token_tag.category.crypto);
+
+		expect(badge).toBeInTheDocument();
+		expect(badge.tagName.toLowerCase()).toBe('span');
+		expect(badge.classList.contains('rounded-md')).toBeTruthy();
+	});
+
+	it('renders the correct asset type badge for a stablecoin token', () => {
+		const stablecoinIcrcToken = {
+			...mockValidIcrcToken,
+			indexCanisterId: mockIndexCanisterId,
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }]
+		} as Token;
+
+		const { getByText } = render(TokenModalContent, {
+			props: {
+				token: stablecoinIcrcToken
+			}
+		});
+
+		const badge = getByText(en.token_tag.category.stablecoin);
+
+		expect(badge).toBeInTheDocument();
+		expect(badge.classList.contains('rounded-md')).toBeTruthy();
 	});
 });
