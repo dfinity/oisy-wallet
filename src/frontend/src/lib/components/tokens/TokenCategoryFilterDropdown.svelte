@@ -33,7 +33,7 @@
 </script>
 
 <ModalFilterButton
-	ariaLabel={$i18n.tokens.text.asset_type_all}
+	ariaLabel={currentLabel}
 	onclick={() => (visible = !visible)}
 	bind:button
 >
