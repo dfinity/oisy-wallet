@@ -523,6 +523,7 @@ export interface _SERVICE {
 	 *
 	 * Requires a valid II delegation chain to verify the caller authenticated
 	 * through Internet Identity. This protects against unauthorised CLI callers.
+	 * Controllers bypass this check.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `BtcAddPendingTransactionError`.
