@@ -2,6 +2,7 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { CBBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.cbbtc.env';
 import cbbtc from '$eth/assets/cbbtc.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,7 +17,7 @@ export const CBBTC_TOKEN: RequiredEvmErc20Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Coinbase Wrapped BTC',
 	symbol: CBBTC_SYMBOL,
 	decimals: CBBTC_DECIMALS,

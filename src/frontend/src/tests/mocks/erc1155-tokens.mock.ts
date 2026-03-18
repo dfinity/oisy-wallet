@@ -3,6 +3,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
@@ -18,7 +19,7 @@ export const NYAN_CAT_TOKEN: Erc1155Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc1155' },
 	category: 'custom',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Nyan Cat',
 	symbol: NYAN_CAT_SYMBOL,
 	decimals: 0,
@@ -35,7 +36,7 @@ export const BUILD_AN_APE_TOKEN: Erc1155Token = {
 	network: POLYGON_AMOY_NETWORK,
 	standard: { code: 'erc1155' },
 	category: 'custom',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Build an Ape by Reido',
 	symbol: BUILD_AN_APE_SYMBOL,
 	decimals: 0,
@@ -69,7 +70,7 @@ export const createMockErc1155Tokens = ({
 		network: ETHEREUM_NETWORK,
 		standard: { code: 'erc1155' },
 		category: 'custom',
-		tags: [],
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		decimals: 0,
 		address: `0x${start + i + 1}-${networkEnv}`
 	}));
