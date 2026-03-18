@@ -11,7 +11,7 @@
 </script>
 
 <button
-	class="bg- shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition-colors"
+	class="bg- shrink-0 rounded-full border px-3 py-1 text-xs transition-colors"
 	class:bg-brand-primary={selected}
 	class:bg-primary={!selected}
 	class:text-primary-inverted={selected}

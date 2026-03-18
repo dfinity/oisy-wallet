@@ -8,16 +8,14 @@
 
 	let { children }: Props = $props();
 
-	type FadeState = 'none' | 'left' | 'right' | 'both';
+	const BLUR_SIZE = '60px';
+	const FADE_BOTH = `linear-gradient(to right, transparent, black ${BLUR_SIZE}, black calc(100% - ${BLUR_SIZE}), transparent)`;
+	const FADE_LEFT = `linear-gradient(to right, transparent, black ${BLUR_SIZE})`;
+	const FADE_RIGHT = `linear-gradient(to right, black calc(100% - ${BLUR_SIZE}), transparent)`;
 
-	const setFadeState = ({
-		node,
-		fadeState
-	}: {
-		node: HTMLDivElement;
-		fadeState: FadeState;
-	}): void => {
-		node.setAttribute('data-fade', fadeState);
+	const setMask = ({ node, mask }: { node: HTMLDivElement; mask: string }): void => {
+		node.style.maskImage = mask;
+		node.style.webkitMaskImage = mask;
 	};
 
 	const scrollFade: Action<HTMLDivElement, undefined> = (node) => {
@@ -26,8 +24,7 @@
 
 		const update = (): void => {
 			if (mediaQuery.matches) {
-				setFadeState({ node, fadeState: 'none' });
-
+				setMask({ node, mask: 'none' });
 				return;
 			}
 
@@ -37,16 +34,16 @@
 			const hasLeftFade = scrollLeft > threshold;
 			const hasRightFade = scrollLeft < maxScrollLeft - threshold;
 
-			const fadeState: FadeState =
+			const mask =
 				hasLeftFade && hasRightFade
-					? 'both'
+					? FADE_BOTH
 					: hasLeftFade
-						? 'left'
+						? FADE_LEFT
 						: hasRightFade
-							? 'right'
+							? FADE_RIGHT
 							: 'none';
 
-			setFadeState({ node, fadeState });
+			setMask({ node, mask });
 		};
 
 		const resizeObserver = new ResizeObserver(update);
@@ -75,7 +72,6 @@
 
 <div
 	class="scrollable-bar flex items-center gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible"
-	data-fade="none"
 	use:scrollFade
 >
 	{@render children()}
@@ -88,39 +84,5 @@
 
 	.scrollable-bar::-webkit-scrollbar {
 		display: none;
-	}
-
-	.scrollable-bar[data-fade='both'] {
-		-webkit-mask-image: linear-gradient(
-			to right,
-			transparent,
-			black 40px,
-			black calc(100% - 40px),
-			transparent
-		);
-
-		mask-image: linear-gradient(
-			to right,
-			transparent,
-			black 40px,
-			black calc(100% - 40px),
-			transparent
-		);
-	}
-
-	.scrollable-bar[data-fade='left'] {
-		-webkit-mask-image: linear-gradient(to right, transparent, black 40px);
-
-		mask-image: linear-gradient(to right, transparent, black 40px);
-	}
-
-	.scrollable-bar[data-fade='right'] {
-		-webkit-mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
-		mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
-	}
-
-	.scrollable-bar[data-fade='none'] {
-		-webkit-mask-image: none;
-		mask-image: none;
 	}
 </style>
