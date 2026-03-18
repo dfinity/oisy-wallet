@@ -4,6 +4,11 @@ body {
 
 	overflow-y: auto;
 	overflow-x: hidden;
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
 
 	&:has([role='menu']),
 	&:has([role='dialog']:not(.toast)) {
