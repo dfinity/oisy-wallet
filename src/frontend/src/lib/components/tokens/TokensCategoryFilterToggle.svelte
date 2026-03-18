@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
-	import { tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
+	import { hideTokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { tokenCategoryFilterEnabledStore } from '$lib/stores/settings.store';
+	import { hideTokenCategoryFilterStore } from '$lib/stores/settings.store';
 
-	let checked = $derived($tokenCategoryFilterEnabled);
+	let checked = $derived($hideTokenCategoryFilter);
 
 	const toggleHide = () =>
-		tokenCategoryFilterEnabledStore.set({
-			key: 'token-category-filter-enabled',
+		hideTokenCategoryFilterStore.set({
+			key: 'hide-token-category-filter',
 			value: { enabled: !checked }
 		});
 </script>
