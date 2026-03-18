@@ -10,6 +10,7 @@
 		MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
 		MODAL_TOKENS_LIST
 	} from '$lib/constants/test-ids.constants';
+	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -17,6 +18,7 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
 
 	interface Props {
 		networkSelectorViewOnly?: boolean;
@@ -57,7 +59,13 @@
 		setFilterQuery(filter);
 	});
 
-	let noTokensMatch = $derived($filteredTokens.length === 0);
+	let displayTokens = $derived(
+		$showTokenCategoryFilter
+			? filterTokensUiByCategory({ tokens: $filteredTokens, category: $tokenCategoryFilter })
+			: $filteredTokens
+	);
+
+	let noTokensMatch = $derived(displayTokens.length === 0);
 </script>
 
 <div data-tid={MODAL_TOKENS_LIST}>
@@ -96,7 +104,7 @@
 			{/if}
 		{:else}
 			<List noPadding>
-				{#each $filteredTokens as token (token.id)}
+				{#each displayTokens as token (token.id)}
 					<ListItem styleClass="first-of-type:border-t-1">
 						{@render tokenListItem(token, () => onTokenButtonClick?.(token))}
 					</ListItem>
