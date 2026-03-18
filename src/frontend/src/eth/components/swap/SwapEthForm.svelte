@@ -35,6 +35,7 @@
 		isSwapAmountsLoading: boolean;
 		isApproveNeeded: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		isGasless: boolean;
@@ -48,6 +49,7 @@
 		isSwapAmountsLoading,
 		isApproveNeeded,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext,
 		isGasless
@@ -166,7 +168,7 @@
 			{/if}
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider {slippageValue} />
+				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
 
 				{#if nonNullish($swapAmountsStore?.selectedProvider)}
 					{#if isGasless}
