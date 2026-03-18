@@ -4,7 +4,6 @@
 	import { getContext, type Snippet } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import {
