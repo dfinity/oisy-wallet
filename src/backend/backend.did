@@ -93,14 +93,16 @@ type BtcGetFeePercentilesResult = variant {
 };
 type BtcGetPendingTransactionsError = variant {
 	RateLimited : RateLimitError;
-	InternalError : record { msg : text }
+	InternalError : record { msg : text };
+	InvalidDelegationChain : record { msg : text }
 };
 type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
 type BtcGetPendingTransactionsRequest = record {
 	network : Network;
-	address : text
+	address : text;
+	ii_delegation_chain : opt IIDelegationChain
 };
 type BtcGetPendingTransactionsResult = variant {
 	Ok : BtcGetPendingTransactionsReponse;
@@ -297,12 +299,14 @@ type SaveNetworksSettingsRequest = record {
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
 	RateLimited : RateLimitError;
-	InternalError : record { msg : text }
+	InternalError : record { msg : text };
+	InvalidDelegationChain : record { msg : text }
 };
 type SelectedUtxosFeeRequest = record {
 	network : Network;
 	amount_satoshis : nat64;
-	min_confirmations : opt nat32
+	min_confirmations : opt nat32;
+	ii_delegation_chain : opt IIDelegationChain
 };
 type SelectedUtxosFeeResponse = record {
 	fee_satoshis : nat64;
