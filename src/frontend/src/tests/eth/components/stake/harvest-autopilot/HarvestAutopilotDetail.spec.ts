@@ -3,12 +3,12 @@ import * as erc20Derived from '$eth/derived/erc20.derived';
 import * as harvestAutopilotsDerived from '$eth/derived/harvest-autopilots.derived';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import { ZERO } from '$lib/constants/app.constants';
-import type { ExchangesData } from '$lib/types/exchange';
 import * as addressDerived from '$lib/derived/address.derived';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as navDerived from '$lib/derived/nav.derived';
 import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { ExchangesData } from '$lib/types/exchange';
 import type { Vault } from '$lib/types/vaults';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -176,9 +176,7 @@ describe('HarvestAutopilotDetail', () => {
 	it('should not render the unstake button when vault balance is greater than zero but exchange data is missing', () => {
 		vi.spyOn(erc20Derived, 'erc20Tokens', 'get').mockReturnValue(readable([mockAssetToken]));
 
-		vi.spyOn(exchangeDerived, 'exchanges', 'get').mockReturnValue(
-			readable({} as ExchangesData)
-		);
+		vi.spyOn(exchangeDerived, 'exchanges', 'get').mockReturnValue(readable({} as ExchangesData));
 
 		const { queryByText } = render(HarvestAutopilotDetail);
 
