@@ -67,6 +67,7 @@ describe('SwapFormEth', () => {
 		isApproveNeeded: false,
 		isGasless: false,
 		onShowTokensList: () => {},
+		onShowProviderList: () => {},
 		onClose: () => {},
 		onNext: () => {}
 	};
