@@ -3,23 +3,30 @@
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { goto } from '$app/navigation';
+	import shocked from '$lib/assets/images/shocked.png';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
+	import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
@@ -114,7 +121,7 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
-		{#if $tokenCategoryFilterEnabled}
+		{#if $showTokenCategoryFilter}
 			<div class="mb-4">
 				<TokenTypeFilterBar />
 			</div>
@@ -139,7 +146,7 @@
 		</div>
 
 		{#if filteredTokens?.length === 0}
-			{#if $tokenCategoryFilterEnabled && nonNullish($tokenCategoryFilter)}
+			{#if $showTokenCategoryFilter && nonNullish($tokenCategoryFilter)}
 				<div class="py-12">
 					<div class="mb-2 flex justify-center p-2">
 						<Img height="64" src={shocked} width="64" />

@@ -11,7 +11,7 @@
 	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
 	import {
 		tokenCategoryFilter,
-		tokenCategoryFilterEnabled,
+		showTokenCategoryFilter,
 		isPrivacyMode
 	} from '$lib/derived/settings.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -31,7 +31,7 @@
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
 	const heroTokens = $derived(
-		$tokenCategoryFilterEnabled
+		$showTokenCategoryFilter
 			? filterTokensUiByCategory({
 					tokens: $enabledFungibleNetworkTokensUi,
 					category: $tokenCategoryFilter

@@ -1,5 +1,5 @@
 import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
-import { hideZeroBalancesStore, tokenCategoryFilterEnabledStore } from '$lib/stores/settings.store';
+import { hideTokenCategoryFilterStore, hideZeroBalancesStore } from '$lib/stores/settings.store';
 import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -7,7 +7,7 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 describe('TokensMenu', () => {
 	beforeEach(() => {
 		hideZeroBalancesStore.reset({ key: 'hide-zero-balances' });
-		tokenCategoryFilterEnabledStore.reset({ key: 'token-category-filter-enabled' });
+		hideTokenCategoryFilterStore.reset({ key: 'hide-token-category-filter' });
 	});
 
 	it('should render the menu button', () => {
@@ -61,8 +61,8 @@ describe('TokensMenu', () => {
 		});
 
 		it('should show blue dot when asset type filter is enabled', () => {
-			tokenCategoryFilterEnabledStore.set({
-				key: 'token-category-filter-enabled',
+			hideTokenCategoryFilterStore.set({
+				key: 'hide-token-category-filter',
 				value: { enabled: true }
 			});
 
@@ -78,8 +78,8 @@ describe('TokensMenu', () => {
 				key: 'hide-zero-balances',
 				value: { enabled: true }
 			});
-			tokenCategoryFilterEnabledStore.set({
-				key: 'token-category-filter-enabled',
+			hideTokenCategoryFilterStore.set({
+				key: 'hide-token-category-filter',
 				value: { enabled: true }
 			});
 

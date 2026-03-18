@@ -1,12 +1,12 @@
 import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
-import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
+import { hideTokenCategoryFilterStore } from '$lib/stores/settings.store';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('TokenTypeFilterBar', () => {
 	beforeEach(() => {
-		tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
+		hideTokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 	});
 
 	it('should render the "All asset types" button', () => {
@@ -34,7 +34,7 @@ describe('TokenTypeFilterBar', () => {
 	});
 
 	it('should update store when a category is clicked', async () => {
-		const spy = vi.spyOn(tokenCategoryFilterStore, 'set');
+		const spy = vi.spyOn(hideTokenCategoryFilterStore, 'set');
 		const { getByText } = render(TokenTypeFilterBar);
 
 		const cryptoButton = getByText(en.token_tag.category.crypto);
