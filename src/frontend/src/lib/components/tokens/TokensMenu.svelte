@@ -1,7 +1,6 @@
 <script lang="ts">
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconHide from '$lib/components/icons/IconHide.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
@@ -49,9 +48,6 @@
 		<List condensed noPadding>
 			<ListItem>
 				<LogoButton fullWidth onClick={toggleHideZeros}>
-					{#snippet logo()}
-						<IconHide />
-					{/snippet}
 					{#snippet title()}
 						<span class="text-sm font-normal">{$i18n.tokens.text.hide_zero_balances}</span>
 					{/snippet}
