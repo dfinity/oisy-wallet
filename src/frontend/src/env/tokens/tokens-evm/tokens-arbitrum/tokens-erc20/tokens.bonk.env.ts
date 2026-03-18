@@ -1,6 +1,7 @@
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BONK_TOKEN_GROUP } from '$env/tokens/groups/groups.bonk.env';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import bonk from '$sol/assets/bonk.svg';
@@ -16,7 +17,7 @@ export const BONK_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Bonk',
 	symbol: BONK_SYMBOL,
 	decimals: BONK_DECIMALS,

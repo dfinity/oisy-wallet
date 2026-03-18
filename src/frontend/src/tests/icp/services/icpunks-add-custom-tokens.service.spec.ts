@@ -2,6 +2,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { collectionMetadata } from '$icp/api/icpunks.api';
 import { loadAndAssertAddCustomToken } from '$icp/services/icpunks-add-custom-tokens.service';
 import type { IcPunksTokenWithoutId } from '$icp/types/icpunks-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -37,7 +38,7 @@ describe('icpunks-add-custom-tokens.service', () => {
 			canisterId: mockCanisterId,
 			standard: { code: 'icpunks' },
 			category: 'custom',
-			tags: [],
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			name: mockFetchedMetadata.name,
 			symbol: mockFetchedMetadata.symbol,
 			decimals: 0,

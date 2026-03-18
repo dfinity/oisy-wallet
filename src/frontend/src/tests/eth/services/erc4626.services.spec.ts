@@ -23,6 +23,7 @@ import { listCustomTokens } from '$lib/api/backend.api';
 import * as signerApiModule from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
 import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Vault } from '$lib/types/vaults';
@@ -93,7 +94,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					version: 1n,
 					allowExternalContentSource: undefined,
 					enabled: true,
@@ -113,7 +114,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					version: 2n,
 					allowExternalContentSource: true,
 					enabled: true,
@@ -133,7 +134,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					version: undefined,
 					allowExternalContentSource: false,
 					enabled: false,

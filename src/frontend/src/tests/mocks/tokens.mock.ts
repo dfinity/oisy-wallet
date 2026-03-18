@@ -2,6 +2,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -12,7 +13,7 @@ export const mockValidToken: Token = {
 	network: ICP_NETWORK,
 	standard: { code: 'icp' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'SampleToken',
 	symbol: 'STK',
 	decimals: 8

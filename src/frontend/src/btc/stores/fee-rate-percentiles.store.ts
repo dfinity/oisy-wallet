@@ -1,7 +1,7 @@
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
 
-export type FeeRatePercentilesStoreData = Option<{
+export type FeeRatePercentilesStoreData = Nullish<{
 	feeRateFromPercentiles?: bigint;
 }>;
 

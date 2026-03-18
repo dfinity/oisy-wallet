@@ -8,6 +8,7 @@ import EarningsList from '$lib/components/earning/EarningsList.svelte';
 import { stakeProvidersConfig } from '$lib/config/stake.config';
 import { ZERO } from '$lib/constants/app.constants';
 import { EARNING_CARD, EARNING_NO_POSITION_PLACEHOLDER } from '$lib/constants/test-ids.constants';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { StakeProvider } from '$lib/types/stake';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -46,7 +47,7 @@ describe('EarningsList', () => {
 			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 			fee: 100n,
 			category: 'custom',
-			tags: []
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 		};
 
 		beforeEach(() => {
