@@ -16,9 +16,9 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
-import type { Option } from '$lib/types/utils';
 import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
 const normalizePath = (s: string | null) =>
@@ -96,7 +96,7 @@ export const networkUrl = ({
 	fromRoute
 }: {
 	path: AppPath;
-	networkId: Option<NetworkId>;
+	networkId: Nullish<NetworkId>;
 	usePreviousRoute: boolean;
 	fromRoute: NavigationTarget | null;
 }) =>
@@ -176,7 +176,7 @@ export const resetRouteParams = (): RouteParams => ({
 	[VAULT_PARAM]: null
 });
 
-export const switchNetwork = async ({ networkId }: { networkId: Option<NetworkId> }) => {
+export const switchNetwork = async ({ networkId }: { networkId: Nullish<NetworkId> }) => {
 	const url = new URL(window.location.href);
 
 	if (isNullish(networkId) || isNullish(networkId.description)) {
