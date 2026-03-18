@@ -1,5 +1,6 @@
 import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import {
+	hideTokenCategoryFilterStore,
 	hideZeroBalancesStore,
 	nftGroupByCollectionStore,
 	nftSortStore,
@@ -60,12 +61,21 @@ export const nftGroupByCollection: Readable<boolean> = derived(
 	([$nftGroupByCollectionStore]) => $nftGroupByCollectionStore
 );
 
-export const tokenCategoryFilterEnabled: Readable<boolean> = derived(
-	[tokenCategoryFilterEnabledStore],
+export const hideTokenCategoryFilter: Readable<boolean> = derived(
+	[hideTokenCategoryFilterStore],
 	([$store]) => $store.enabled
 );
+
+export const showTokenCategoryFilter: Readable<boolean> = derived(
+	[hideTokenCategoryFilter],
+	([$hideTokenCategoryFilter]) => !$hideTokenCategoryFilter
+);
+
 
 export const tokenCategoryFilter: Readable<TokenCategoryTagValue | undefined> = derived(
 	[tokenCategoryFilterStore],
 	([$store]) => $store.value
-);
+  );
+
+
+
