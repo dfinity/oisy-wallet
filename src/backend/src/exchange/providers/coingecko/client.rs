@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use ic_cdk::{api::time, management_canister::HttpHeader};
-use serde_json::{from_slice, Value};
 use serde::Deserialize;
 use shared::types::exchange::ExchangeData;
 
@@ -58,17 +57,13 @@ impl CoinGeckoClient {
         }
     }
 
-    fn parse_exchange_data(data: &Value) -> ExchangeData {
-        let timestamp_ns = data["last_updated_at"]
-            .as_u64()
-            .map_or_else(time, |secs| secs * 1_000_000_000);
+    async fn fetch_prices(&self, url: &str) -> Result<HashMap<String, ExchangeData>, String> {
+        let response = get(url, vec![self.auth_header()], MAX_RESPONSE_BYTES).await?;
 
-        ExchangeData {
-            timestamp_ns,
-            price: data["usd"].as_f64(),
-            price_24h_change_pct: data["usd_24h_change"].as_f64(),
-            market_cap: data["usd_market_cap"].as_f64(),
-        }
+        let prices: HashMap<String, CoinGeckoPrice> = serde_json::from_slice(&response.body)
+            .map_err(|e| format!("Failed to parse CoinGecko response: {e}"))?;
+
+        Ok(prices.into_iter().map(|(k, v)| (k, v.into())).collect())
     }
 
     /// Fetches prices for native coins (e.g. ETH, BTC, SOL) from the `CoinGecko`
@@ -90,20 +85,7 @@ impl CoinGeckoClient {
             self.base_url
         );
 
-        let response = get(&url, vec![self.auth_header()], MAX_RESPONSE_BYTES).await?;
-
-        let json: Value =
-            from_slice(&response.body).map_err(|e| format!("Failed to parse JSON: {e}"))?;
-
-        let mut result = HashMap::new();
-
-        for &coin_id in coin_ids {
-            if let Some(data) = json.get(coin_id) {
-                result.insert(coin_id.to_string(), Self::parse_exchange_data(data));
-            }
-        }
-
-        Ok(result)
+        self.fetch_prices(&url).await
     }
 
     /// Fetches token prices from the `CoinGecko`
@@ -120,19 +102,6 @@ impl CoinGeckoClient {
             self.base_url
         );
 
-        let response = get(&url, vec![self.auth_header()], MAX_RESPONSE_BYTES).await?;
-
-        let json: Value =
-            from_slice(&response.body).map_err(|e| format!("Failed to parse JSON: {e}"))?;
-
-        let mut result = HashMap::new();
-
-        for addr in addresses {
-            if let Some(data) = json.get(addr.to_lowercase()) {
-                result.insert(addr.clone(), Self::parse_exchange_data(data));
-            }
-        }
-
-        Ok(result)
+        self.fetch_prices(&url).await
     }
 }
