@@ -152,6 +152,12 @@ export const mapAllowSigningError = (
 		);
 	}
 
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}

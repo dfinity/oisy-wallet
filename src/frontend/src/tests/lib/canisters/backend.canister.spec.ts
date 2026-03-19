@@ -814,6 +814,8 @@ describe('backend.canister', () => {
 	});
 
 	describe('allowSigning', () => {
+		const allowSigningParams = { iiDelegationChain: mockIIDelegationChain };
+
 		it('should allow signing', async () => {
 			const okResponse: AllowSigningResponse = {
 				status: { Executed: null },
@@ -829,7 +831,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning();
+			const res = await allowSigning(allowSigningParams);
 
 			expect(service.allow_signing).toHaveBeenCalledOnce();
 			expect(res).toStrictEqual({ response: okResponse });
@@ -845,7 +847,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = allowSigning();
+			const res = allowSigning(allowSigningParams);
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
@@ -863,7 +865,9 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
+			await expect(allowSigning(allowSigningParams)).rejects.toThrow(
+				mapIcrc2ApproveError(response.Err.ApproveError)
+			);
 		});
 
 		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
@@ -875,7 +879,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(
+			await expect(allowSigning(allowSigningParams)).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -890,7 +894,9 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(allowSigning(allowSigningParams)).rejects.toThrow(
+				new CanisterInternalError(errorMsg)
+			);
 		});
 
 		it('should throw a CanisterInternalError with message if unrecognized error is returned', async () => {
@@ -902,7 +908,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(
+			await expect(allowSigning(allowSigningParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
@@ -918,7 +924,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning();
+			const res = await allowSigning(allowSigningParams);
 
 			expect(service.allow_signing).toHaveBeenCalledOnce();
 			expect(res).toStrictEqual({
@@ -951,7 +957,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning();
+			const res = await allowSigning(allowSigningParams);
 
 			expect(service.allow_signing).toHaveBeenCalledOnce();
 			expect(res).toStrictEqual({
@@ -965,6 +971,22 @@ describe('backend.canister', () => {
 					limiter: 'ALLOW_SIGNING_GUARD_LIMITER'
 				}
 			});
+		});
+
+		it('should throw a CanisterInternalError if InvalidDelegationChain error is returned', async () => {
+			const response = {
+				Err: { InvalidDelegationChain: { msg: 'chain expired' } }
+			};
+
+			service.allow_signing.mockResolvedValue(response as unknown as AllowSigningResult);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning(allowSigningParams)).rejects.toThrow(
+				new CanisterInternalError('II delegation chain verification failed: chain expired')
+			);
 		});
 	});
 
