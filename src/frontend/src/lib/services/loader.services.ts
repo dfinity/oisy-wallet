@@ -18,6 +18,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
+import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -41,7 +42,10 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		const { rateLimitInfo } = await allowSigning({ identity });
+		const { rateLimitInfo } = await allowSigning({
+			identity,
+			iiDelegationChain: nonNullish(identity) ? extractIIDelegationChain(identity) : []
+		});
 
 		if (nonNullish(rateLimitInfo)) {
 			trackRateLimited(rateLimitInfo);

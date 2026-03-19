@@ -57,6 +57,10 @@ export interface SelectedUtxosFeeOutcome {
 	rateLimitInfo?: RateLimitInfo;
 }
 
+export interface AllowSigningParams {
+	iiDelegationChain: Nullable<IIDelegationChain>;
+}
+
 export interface AllowSigningOutcome {
 	response: AllowSigningResponse;
 	rateLimitInfo?: RateLimitInfo;
