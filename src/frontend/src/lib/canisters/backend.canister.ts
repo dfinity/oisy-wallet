@@ -395,6 +395,21 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
+	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
+		if (!nonNullish(rate)) {
+			return;
+		}
+
+		return {
+			usd: {
+				price: fromNullable(rate.usd.price),
+				price24hChangePct: fromNullable(rate.usd.price_24h_change_pct),
+				marketCap: fromNullable(rate.usd.market_cap),
+				timestampNs: rate.usd.timestamp_ns
+			}
+		};
+	};
+
 	getExchangeRate = async ({
 		token_id,
 		certified
@@ -403,18 +418,7 @@ export class BackendCanister extends Canister<BackendService> {
 
 		const response = await get_exchange_rate(token_id);
 
-		const rate = fromNullable(response);
-
-		return nonNullish(rate)
-			? {
-					usd: {
-						price: fromNullable(rate.usd.price),
-						price24hChangePct: fromNullable(rate.usd.price_24h_change_pct),
-						marketCap: fromNullable(rate.usd.market_cap),
-						timestampNs: rate.usd.timestamp_ns
-					}
-				}
-			: undefined;
+		return this.mapExchangeRate(fromNullable(response));
 	};
 
 	getExchangeRates = async ({
@@ -426,18 +430,7 @@ export class BackendCanister extends Canister<BackendService> {
 		const results = await get_exchange_rates(token_ids);
 
 		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
-			const rateValue = fromNullable(rate);
-
-			const unwrapped = nonNullish(rateValue)
-				? {
-						usd: {
-							price: fromNullable(rateValue.usd.price),
-							price24hChangePct: fromNullable(rateValue.usd.price_24h_change_pct),
-							marketCap: fromNullable(rateValue.usd.market_cap),
-							timestampNs: rateValue.usd.timestamp_ns
-						}
-					}
-				: undefined;
+			const unwrapped = this.mapExchangeRate(fromNullable(rate));
 
 			const key = tokenIdKey(id);
 
