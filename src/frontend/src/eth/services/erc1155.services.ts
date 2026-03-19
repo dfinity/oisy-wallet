@@ -6,12 +6,12 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
 } from '$lib/enums/plausible';
-import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
