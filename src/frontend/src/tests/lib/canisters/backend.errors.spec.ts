@@ -233,6 +233,15 @@ describe('backend.errors', () => {
 			);
 		});
 
+		it('should map InvalidDelegationChain', () => {
+			const err = mapAllowSigningError({
+				InvalidDelegationChain: { msg: 'test message' }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('II delegation chain verification failed: test message');
+		});
+
 		it('should map Other', () => {
 			const err = mapAllowSigningError({
 				Other: 'some other error'
