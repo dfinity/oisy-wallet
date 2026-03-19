@@ -222,12 +222,17 @@
 				disabled={$pseudoNetworkICPTestnet ||
 					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
 				onclick={onAddToken}
-				><IconPlus />
-				{isNftsPage
-					? $i18n.tokens.manage.text.import_nft
-					: $i18n.tokens.manage.text.import_token}</Button
+				styleClass="whitespace-nowrap"
 			>
-			<Button disabled={saveDisabled} onclick={save} testId={MANAGE_TOKENS_MODAL_SAVE}>
+				<IconPlus />
+				{isNftsPage ? $i18n.tokens.manage.text.import_nft : $i18n.tokens.manage.text.import_token}
+			</Button>
+			<Button
+				disabled={saveDisabled}
+				onclick={save}
+				styleClass="whitespace-nowrap"
+				testId={MANAGE_TOKENS_MODAL_SAVE}
+			>
 				{$i18n.core.text.save}
 			</Button>
 		{/snippet}
