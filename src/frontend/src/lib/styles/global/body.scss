@@ -1,14 +1,18 @@
+html,
+body {
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
 body {
 	width: 100vw;
 	height: inherit; // needed for window on:scroll to work
 
 	overflow-y: auto;
 	overflow-x: hidden;
-	scrollbar-width: none;
-
-	&::-webkit-scrollbar {
-		display: none;
-	}
 
 	&:has([role='menu']),
 	&:has([role='dialog']:not(.toast)) {
