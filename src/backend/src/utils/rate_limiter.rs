@@ -7,6 +7,32 @@ use candid::Principal;
 use ic_cdk::api::msg_caller;
 use shared::types::signer::RateLimitError;
 
+thread_local! {
+    /// High-frequency guard rate limiter checked **before** any inter-canister
+    /// call.  Designed to cheaply reject rapid-fire requests that would otherwise
+    /// drain cycles through the allowance check.
+    ///
+    /// Limit: 10 calls per caller per minute.
+    pub(crate) static ALLOW_SIGNING_GUARD_LIMITER: RateLimiter =
+        RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `allow_signing`: max 3 calls per caller per hour.
+    pub(crate) static ALLOW_SIGNING_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(3, 60 * 60 * 1_000_000_000);
+
+    /// Rate-limits `btc_select_user_utxos_fee`: max 10 calls per caller per minute.
+    pub(crate) static BTC_SELECT_UTXOS_FEE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `btc_add_pending_transaction`: max 10 calls per caller per minute.
+    pub(crate) static BTC_ADD_PENDING_TX_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
+    pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(15, 60 * 1_000_000_000);
+}
+
 /// Per-caller sliding-window rate limiter for IC canister methods.
 ///
 /// Tracks timestamps of recent calls per principal and rejects any call
