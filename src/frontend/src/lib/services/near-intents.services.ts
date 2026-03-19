@@ -93,7 +93,7 @@ export const pollNearIntentsStatus = async ({
 	for (let i = 0; i < NEAR_INTENTS_POLL_MAX_ATTEMPTS; i++) {
 		const { status } = await fetchNearIntentsStatus({
 			depositAddress,
-			depositMemo: depositMemo ?? undefined
+			depositMemo
 		});
 
 		if (NEAR_INTENTS_TERMINAL_STATUSES.includes(status)) {
