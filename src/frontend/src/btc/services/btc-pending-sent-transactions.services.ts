@@ -5,6 +5,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapNetworkIdToBitcoinNetwork, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -40,7 +41,8 @@ export const loadBtcPendingSentTransactions = async ({
 		const pendingTransactions = await getPendingBtcTransactions({
 			identity,
 			address,
-			network: mapToSignerBitcoinNetwork({ network })
+			network: mapToSignerBitcoinNetwork({ network }),
+			iiDelegationChain: extractIIDelegationChain(identity)
 		});
 		btcPendingSentTransactionsStore.setPendingTransactions({
 			address,

@@ -14,6 +14,7 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkICPTestnet, selectedNetwork } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
+	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -110,7 +111,8 @@
 			// TODO: This statement is not reactive. Check if it is intentional or not.
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally
-			filterNfts: isNftsPage
+			filterNfts: isNftsPage,
+			filterCategoryTag: $tokenCategoryFilter
 		})
 	);
 

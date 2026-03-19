@@ -1,7 +1,9 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -128,5 +130,63 @@ describe('TokenModalContent', () => {
 				})} ${mockValidIcrcToken.symbol}`
 			)
 		).toBeInTheDocument();
+	});
+
+	it('does not render asset type when token has no category tag', () => {
+		const tokenWithoutCategoryTag: Token = {
+			...mockValidIcrcToken,
+			indexCanisterId: mockIndexCanisterId,
+			// @ts-expect-error Testing invalid input types
+			tags: []
+		};
+
+		const { queryByText } = render(TokenModalContent, {
+			props: {
+				token: tokenWithoutCategoryTag
+			}
+		});
+
+		expect(queryByText(replaceOisyPlaceholders(en.tokens.text.asset_type))).not.toBeInTheDocument();
+	});
+
+	it('renders asset type label and badge for a token with a category tag', () => {
+		const cryptoIcrcToken = {
+			...mockValidIcrcToken,
+			indexCanisterId: mockIndexCanisterId,
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
+		} as Token;
+
+		const { getByText } = render(TokenModalContent, {
+			props: {
+				token: cryptoIcrcToken
+			}
+		});
+
+		expect(getByText(replaceOisyPlaceholders(en.tokens.text.asset_type))).toBeInTheDocument();
+
+		const badge = getByText(en.token_tag.category.crypto);
+
+		expect(badge).toBeInTheDocument();
+		expect(badge.tagName.toLowerCase()).toBe('span');
+		expect(badge.classList.contains('rounded-md')).toBeTruthy();
+	});
+
+	it('renders the correct asset type badge for a stablecoin token', () => {
+		const stablecoinIcrcToken = {
+			...mockValidIcrcToken,
+			indexCanisterId: mockIndexCanisterId,
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }]
+		} as Token;
+
+		const { getByText } = render(TokenModalContent, {
+			props: {
+				token: stablecoinIcrcToken
+			}
+		});
+
+		const badge = getByText(en.token_tag.category.stablecoin);
+
+		expect(badge).toBeInTheDocument();
+		expect(badge.classList.contains('rounded-md')).toBeTruthy();
 	});
 });

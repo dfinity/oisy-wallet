@@ -3,6 +3,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { networks } from '$lib/derived/networks.derived';
 import { stakeBalances } from '$lib/derived/stake.derived';
 import { tokensToPin } from '$lib/derived/tokens.derived';
+import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -24,6 +25,7 @@ export interface ModalTokensListData {
 	sortByBalance?: boolean;
 	filterNetworksIds?: NetworkId[];
 	filterNfts?: boolean;
+	filterCategoryTag?: TokenCategoryTagValue;
 }
 
 export const initModalTokensListContext = (
@@ -39,6 +41,7 @@ export const initModalTokensListContext = (
 	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
 	const filterNetworksIds = derived([data], ([{ filterNetworksIds }]) => filterNetworksIds);
 	const filterNfts = derived([data], ([{ filterNfts }]) => filterNfts);
+	const filterCategoryTag = derived([data], ([{ filterCategoryTag }]) => filterCategoryTag);
 
 	const filteredTokens = derived(
 		[
@@ -119,6 +122,7 @@ export const initModalTokensListContext = (
 	return {
 		filterQuery,
 		filterNetwork,
+		filterCategoryTag,
 		filteredTokens,
 		setTokens: (tokens: Token[]) =>
 			update((state) => ({
@@ -140,6 +144,11 @@ export const initModalTokensListContext = (
 				...state,
 				filterNetworksIds: networksIds
 			})),
+		setFilterCategoryTag: (categoryTag: TokenCategoryTagValue | undefined) =>
+			update((state) => ({
+				...state,
+				filterCategoryTag: categoryTag
+			})),
 		resetFilters: () => {
 			update((state) => ({
 				...state,
@@ -148,7 +157,8 @@ export const initModalTokensListContext = (
 				filterZeroBalance: undefined,
 				sortByBalance: undefined,
 				filterNetworksIds: undefined,
-				filterNfts: undefined
+				filterNfts: undefined,
+				filterCategoryTag: undefined
 			}));
 		}
 	};
@@ -157,11 +167,13 @@ export const initModalTokensListContext = (
 export interface ModalTokensListContext {
 	filterQuery: Readable<string | undefined>;
 	filterNetwork: Readable<Network | undefined>;
+	filterCategoryTag: Readable<TokenCategoryTagValue | undefined>;
 	filteredTokens: Readable<TokenUi[]>;
 	setTokens: (tokens: Token[]) => void;
 	setFilterQuery: (query: string) => void;
 	setFilterNetwork: (network: Network | undefined) => void;
 	setFilterNetworksIds: (networksIds: NetworkId[] | undefined) => void;
+	setFilterCategoryTag: (categoryTag: TokenCategoryTagValue | undefined) => void;
 	resetFilters: () => void;
 }
 

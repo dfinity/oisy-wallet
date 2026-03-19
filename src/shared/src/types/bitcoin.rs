@@ -54,6 +54,7 @@ pub struct SelectedUtxosFeeRequest {
     pub amount_satoshis: u64,
     pub network: BitcoinNetwork,
     pub min_confirmations: Option<u32>,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -71,6 +72,10 @@ pub enum SelectedUtxosFeeError {
     PendingTransactions,
     /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain {
+        msg: String,
+    },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -105,6 +110,7 @@ pub enum BtcAddPendingTransactionError {
 pub struct BtcGetPendingTransactionsRequest {
     pub address: String,
     pub network: BitcoinNetwork,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -135,4 +141,8 @@ pub enum BtcGetPendingTransactionsError {
     },
     /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain {
+        msg: String,
+    },
 }

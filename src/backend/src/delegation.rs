@@ -5,6 +5,54 @@ use ic_canister_sig_creation::{
 use ic_signature_verification::verify_canister_sig;
 use shared::types::delegation::IIDelegationChain;
 
+use crate::state::read_config;
+
+/// Reads the II verification parameters (known II canister IDs and IC root key)
+/// from the backend configuration.
+pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>) {
+    read_config(|config| {
+        let ii_ids = config
+            .supported_credentials
+            .as_ref()
+            .map(|creds| creds.iter().map(|c| c.ii_canister_id).collect::<Vec<_>>())
+            .unwrap_or_default();
+        let root_key = config
+            .ic_root_key_raw
+            .clone()
+            .expect("IC root key not configured");
+        (ii_ids, root_key)
+    })
+}
+
+/// Requires a valid II delegation chain for non-controller callers.
+///
+/// Controllers bypass the check entirely and `Ok(())` is returned regardless
+/// of whether a chain is provided.  For all other callers the chain must be
+/// present and pass full cryptographic verification via
+/// [`verify_ii_delegation_chain`].
+pub fn require_ii_delegation(
+    chain: Option<&IIDelegationChain>,
+    caller_is_controller: bool,
+    caller: Principal,
+    known_ii_canister_ids: &[Principal],
+    ic_root_key_raw: &[u8],
+    now_ns: u64,
+) -> Result<(), String> {
+    if caller_is_controller {
+        return Ok(());
+    }
+
+    let chain = chain.ok_or_else(|| "II delegation chain is required".to_string())?;
+
+    verify_ii_delegation_chain(
+        chain,
+        caller,
+        known_ii_canister_ids,
+        ic_root_key_raw,
+        now_ns,
+    )
+}
+
 /// Verifies the provided II delegation chain against the caller's principal.
 ///
 /// II delegation chains always contain exactly one delegation with no targets.
@@ -81,4 +129,154 @@ pub fn verify_ii_delegation_chain(
     .map_err(|e| format!("delegation signature verification failed: {e}"))?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use shared::types::delegation::{Delegation, SignedDelegation};
+
+    use super::*;
+
+    const FAR_FUTURE_NS: u64 = 9_999_999_999_000_000_000;
+
+    fn test_ii_canister_id() -> Principal {
+        Principal::from_text("rwlgt-iiaaa-aaaaa-aaaaa-cai").unwrap()
+    }
+
+    fn make_canister_sig_public_key(canister_id: Principal) -> Vec<u8> {
+        CanisterSigPublicKey::new(canister_id, b"test-seed".to_vec()).to_der()
+    }
+
+    fn make_chain(public_key: Vec<u8>, delegation: Delegation) -> IIDelegationChain {
+        IIDelegationChain {
+            public_key,
+            delegations: vec![SignedDelegation {
+                delegation,
+                signature: vec![0u8; 32],
+            }],
+        }
+    }
+
+    fn valid_delegation(session_pubkey: &[u8]) -> Delegation {
+        Delegation {
+            pubkey: session_pubkey.to_vec(),
+            expiration: FAR_FUTURE_NS,
+            targets: None,
+        }
+    }
+
+    // ---- require_ii_delegation ----
+
+    #[test]
+    fn test_require_controller_bypasses_without_chain() {
+        let result = require_ii_delegation(None, true, Principal::anonymous(), &[], &[], 0);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_require_controller_bypasses_with_chain() {
+        let pk = make_canister_sig_public_key(test_ii_canister_id());
+        let chain = make_chain(pk, valid_delegation(b"session"));
+        let result = require_ii_delegation(Some(&chain), true, Principal::anonymous(), &[], &[], 0);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_require_non_controller_missing_chain() {
+        let result = require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0);
+        assert_eq!(result.unwrap_err(), "II delegation chain is required");
+    }
+
+    // ---- verify_ii_delegation_chain ----
+
+    #[test]
+    fn test_verify_rejects_empty_delegations() {
+        let chain = IIDelegationChain {
+            public_key: vec![1, 2, 3],
+            delegations: vec![],
+        };
+        let err =
+            verify_ii_delegation_chain(&chain, Principal::anonymous(), &[], &[], 0).unwrap_err();
+        assert!(err.contains("expected exactly one delegation, got 0"));
+    }
+
+    #[test]
+    fn test_verify_rejects_multiple_delegations() {
+        let del = SignedDelegation {
+            delegation: valid_delegation(b"k"),
+            signature: vec![],
+        };
+        let chain = IIDelegationChain {
+            public_key: vec![1, 2, 3],
+            delegations: vec![del.clone(), del],
+        };
+        let err =
+            verify_ii_delegation_chain(&chain, Principal::anonymous(), &[], &[], 0).unwrap_err();
+        assert!(err.contains("expected exactly one delegation, got 2"));
+    }
+
+    #[test]
+    fn test_verify_rejects_delegation_with_targets() {
+        let pk = make_canister_sig_public_key(test_ii_canister_id());
+        let caller = Principal::self_authenticating(&pk);
+        let mut delegation = valid_delegation(b"session");
+        delegation.targets = Some(vec![Principal::anonymous()]);
+        let chain = make_chain(pk, delegation);
+
+        let err = verify_ii_delegation_chain(&chain, caller, &[test_ii_canister_id()], &[], 0)
+            .unwrap_err();
+        assert!(err.contains("delegation must not have targets set"));
+    }
+
+    #[test]
+    fn test_verify_rejects_principal_mismatch() {
+        let pk = make_canister_sig_public_key(test_ii_canister_id());
+        let wrong_caller = Principal::self_authenticating(b"someone-else");
+        let chain = make_chain(pk, valid_delegation(b"session"));
+
+        let err =
+            verify_ii_delegation_chain(&chain, wrong_caller, &[test_ii_canister_id()], &[], 0)
+                .unwrap_err();
+        assert!(err.contains("does not match caller"));
+    }
+
+    #[test]
+    fn test_verify_rejects_unknown_ii_canister() {
+        let unknown_canister = Principal::from_text("rrkah-fqaaa-aaaaa-aaaaq-cai").unwrap();
+        let pk = make_canister_sig_public_key(unknown_canister);
+        let caller = Principal::self_authenticating(&pk);
+        let chain = make_chain(pk, valid_delegation(b"session"));
+
+        let err = verify_ii_delegation_chain(&chain, caller, &[test_ii_canister_id()], &[], 0)
+            .unwrap_err();
+        assert!(err.contains("not a known II canister"));
+    }
+
+    #[test]
+    fn test_verify_rejects_expired_delegation() {
+        let pk = make_canister_sig_public_key(test_ii_canister_id());
+        let caller = Principal::self_authenticating(&pk);
+        let mut delegation = valid_delegation(b"session");
+        delegation.expiration = 1_000;
+        let chain = make_chain(pk, delegation);
+
+        let err = verify_ii_delegation_chain(&chain, caller, &[test_ii_canister_id()], &[], 2_000)
+            .unwrap_err();
+        assert!(err.contains("delegation expired"));
+    }
+
+    #[test]
+    fn test_verify_rejects_invalid_public_key() {
+        let bad_pk = vec![
+            0x30, 0x20, 0x30, 0x0c, 0x06, 0x0a, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x82, 0xdc, 0x7c,
+            0x05, 0x01, 0x03, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x99,
+        ];
+        let caller = Principal::self_authenticating(&bad_pk);
+        let chain = make_chain(bad_pk, valid_delegation(b"session"));
+
+        let err = verify_ii_delegation_chain(&chain, caller, &[test_ii_canister_id()], &[], 0)
+            .unwrap_err();
+        assert!(err.contains("not a valid canister signature key"));
+    }
 }
