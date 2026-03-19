@@ -32,7 +32,9 @@ pub enum AllowSigningError {
     /// cycle-draining attacks before any inter-canister call is made.
     RateLimitedByGuard(RateLimitError),
     /// The provided II delegation chain is missing or failed verification.
-    InvalidDelegationChain { msg: String },
+    InvalidDelegationChain {
+        msg: String,
+    },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

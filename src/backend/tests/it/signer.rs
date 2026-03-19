@@ -594,8 +594,7 @@ fn test_allow_signing_with_valid_delegation() {
 
     let caller = Principal::self_authenticating(&delegation_chain.public_key);
 
-    let result =
-        call_allow_signing_with_delegation(&pic_setup, caller, 0, Some(delegation_chain));
+    let result = call_allow_signing_with_delegation(&pic_setup, caller, 0, Some(delegation_chain));
 
     if let Err(AllowSigningError::InvalidDelegationChain { msg }) = result {
         panic!("Delegation verification failed unexpectedly: {msg}");
