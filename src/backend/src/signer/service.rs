@@ -124,14 +124,12 @@ pub async fn has_sufficient_allowance() -> Option<Nat> {
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
-/// TODO Remove the Option type (that has been added for backward-compatibility)
-/// as soon as the `PoW` feature has been stabilized
-pub async fn approve_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
+pub async fn approve_signing() -> Result<(), AllowSigningError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
     let caller = msg_caller();
 
-    let amount = Nat::from(allowed_cycles.unwrap_or_else(per_user_cycles_allowance));
+    let amount = Nat::from(per_user_cycles_allowance());
 
     CyclesLedgerService(cycles_ledger)
         .icrc_2_approve(&ApproveArgs {
@@ -163,12 +161,12 @@ pub async fn approve_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSig
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
-pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
+pub async fn allow_signing() -> Result<(), AllowSigningError> {
     if has_sufficient_allowance().await.is_some() {
         return Ok(());
     }
 
-    approve_signing(allowed_cycles).await
+    approve_signing().await
 }
 
 const SUB_ACCOUNT_ZERO: Subaccount = Subaccount([0; 32]);

@@ -40,11 +40,11 @@ vi.mock('$lib/services/analytics.services', () => ({
 
 describe('loader.services', () => {
 	const mockExecutedOutcome: AllowSigningOutcome = {
-		response: { status: { Executed: null }, challenge_completion: [], allowed_cycles: 100n }
+		response: { status: { Executed: null }, allowed_cycles: 100n }
 	};
 
 	const mockRateLimitedOutcome: AllowSigningOutcome = {
-		response: { status: { Skipped: null }, challenge_completion: [], allowed_cycles: ZERO },
+		response: { status: { Skipped: null }, allowed_cycles: ZERO },
 		rateLimitInfo: { endpoint: 'allow_signing', limiter: 'ALLOW_SIGNING_RATE_LIMITER' }
 	};
 
