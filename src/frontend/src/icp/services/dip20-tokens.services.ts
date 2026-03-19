@@ -3,7 +3,7 @@ import { EnvDip20TokenSchema, EnvDip20TokensSchema } from '$env/schema/env-dip20
 import dip20Tokens from '$env/tokens/tokens.dip20.json';
 import type { EnvDip20Token } from '$env/types/env-dip20-token';
 import type { IcTokenWithoutId } from '$icp/types/ic-token';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
@@ -41,7 +41,8 @@ export const buildDip20Tokens = (): IcTokenWithoutId[] => {
 
 const mapDip20Token = ({
 	ledgerCanisterId,
-	metadata: { name, decimals, symbol, fee, alternativeName }
+	metadata: { name, decimals, symbol, fee, alternativeName },
+	tags
 }: EnvDip20Token): IcTokenWithoutId => ({
 	ledgerCanisterId,
 	network: ICP_NETWORK,
@@ -51,7 +52,7 @@ const mapDip20Token = ({
 	exchangeCoinId: undefined,
 	standard: { code: 'dip20' },
 	category: 'custom',
-	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+	tags: tags ?? DEFAULT_TOKEN_TAGS,
 	fee,
 	alternativeName,
 	icon: `/icons/dip20/${ledgerCanisterId}.png`
