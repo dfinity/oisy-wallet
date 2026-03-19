@@ -18,8 +18,11 @@ use shared::types::{
 };
 
 use crate::utils::{
-    mock::VC_HOLDER,
-    pocketic::{controller, pic_canister::PicCanisterTrait, setup, BackendBuilder, PicBackend},
+    mock::{CALLER, VC_HOLDER},
+    pocketic::{
+        controller, pic_canister::PicCanisterTrait, setup, setup_with_ii, BackendBuilder,
+        PicBackend,
+    },
 };
 
 pub fn call_create_user_profile(
@@ -40,12 +43,24 @@ pub fn call_allow_signing(
     caller: Principal,
     nonce: u64,
 ) -> Result<AllowSigningResponse, AllowSigningError> {
+    call_allow_signing_with_delegation(pic_setup, caller, nonce, None)
+}
+
+pub fn call_allow_signing_with_delegation(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    nonce: u64,
+    ii_delegation_chain: Option<shared::types::delegation::IIDelegationChain>,
+) -> Result<AllowSigningResponse, AllowSigningError> {
     let wrapped_result = pic_setup.update::<Result<AllowSigningResponse, AllowSigningError>>(
         caller,
         "allow_signing",
-        AllowSigningRequest { nonce },
+        Some(AllowSigningRequest {
+            nonce,
+            ii_delegation_chain,
+        }),
     );
-    wrapped_result.expect("that create_pow_challenge exists")
+    wrapped_result.expect("that allow_signing exists")
 }
 
 #[test]
@@ -523,4 +538,66 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
         ),
         "should not be rate-limited after both windows elapse: {result:?}"
     );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - II delegation chain integration tests for allow_signing
+// -------------------------------------------------------------------------------------------------
+
+#[test]
+fn test_allow_signing_requires_delegation_chain() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let result = call_allow_signing_with_delegation(&pic_setup, caller, 0, None);
+
+    assert!(
+        matches!(
+            result,
+            Err(AllowSigningError::InvalidDelegationChain { .. })
+        ),
+        "Expected InvalidDelegationChain error, got: {result:?}"
+    );
+}
+
+#[test]
+fn test_allow_signing_controller_bypasses_delegation_check() {
+    let pic_setup = setup();
+
+    let result = call_allow_signing_with_delegation(&pic_setup, controller(), 0, None);
+
+    assert!(
+        !matches!(
+            result,
+            Err(AllowSigningError::InvalidDelegationChain { .. })
+        ),
+        "Controller should bypass delegation check, got: {result:?}"
+    );
+}
+
+#[test]
+fn test_allow_signing_with_valid_delegation() {
+    let (pic_setup, ii) = setup_with_ii();
+
+    let device_pubkey = b"test-device-key-for-allow-signing";
+    let (user_number, device_principal) = ii.register_identity(device_pubkey);
+
+    let session_pubkey = b"test-session-key-allow-signing";
+
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
+
+    let result =
+        call_allow_signing_with_delegation(&pic_setup, caller, 0, Some(delegation_chain));
+
+    if let Err(AllowSigningError::InvalidDelegationChain { msg }) = result {
+        panic!("Delegation verification failed unexpectedly: {msg}");
+    }
 }

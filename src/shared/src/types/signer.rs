@@ -31,11 +31,14 @@ pub enum AllowSigningError {
     /// The caller hit the high-frequency guard rate limit designed to prevent
     /// cycle-draining attacks before any inter-canister call is made.
     RateLimitedByGuard(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain { msg: String },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct AllowSigningRequest {
     pub nonce: u64,
+    pub ii_delegation_chain: Option<super::delegation::IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

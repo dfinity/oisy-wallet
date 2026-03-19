@@ -98,6 +98,7 @@ export const idlFactory = ({ IDL }) => {
 		ApproveError: ApproveError,
 		RateLimited: RateLimitError,
 		RateLimitedByGuard: RateLimitError,
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
@@ -117,6 +118,10 @@ export const idlFactory = ({ IDL }) => {
 	const IIDelegationChain = IDL.Record({
 		public_key: IDL.Vec(IDL.Nat8),
 		delegations: IDL.Vec(SignedDelegation)
+	});
+	const AllowSigningRequest = IDL.Record({
+		nonce: IDL.Nat64,
+		ii_delegation_chain: IDL.Opt(IIDelegationChain)
 	});
 	const Network = IDL.Variant({
 		mainnet: IDL.Null,
@@ -531,7 +536,7 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [AddUserHiddenDappIdResult], []),
-		allow_signing: IDL.Func([], [AllowSigningResult], []),
+		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
 		btc_add_pending_transaction: IDL.Func(
 			[BtcAddPendingTransactionRequest],
 			[BtcAddPendingTransactionResult],

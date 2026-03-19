@@ -1,16 +1,19 @@
 use candid::Nat;
-use ic_cdk::update;
+use ic_cdk::{
+    api::{is_controller, msg_caller, time},
+    update,
+};
 use shared::types::{
     pow::AllowSigningStatus,
     result_types::{AllowSigningResult, GetAllowedCyclesResult},
     signer::{
         topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-        AllowSigningError, AllowSigningResponse, GetAllowedCyclesResponse,
+        AllowSigningError, AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
     },
 };
 
 use crate::{
-    signer,
+    delegation, signer,
     utils::{
         guards::{caller_is_controller, caller_is_not_anonymous},
         housekeeping::{ALLOW_SIGNING_GUARD_LIMITER, ALLOW_SIGNING_RATE_LIMITER},
@@ -50,6 +53,9 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 /// Ensures the caller has enough cycles allowance for chain-fusion signer
 /// operations (providing public keys, creating signatures, etc.).
 ///
+/// Requires a valid II delegation chain to verify the caller authenticated
+/// through Internet Identity. Controllers bypass this check.
+///
 /// If the caller already has sufficient allowance the call returns
 /// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
 /// call is made.  Otherwise, the endpoint is rate-limited and a new
@@ -64,11 +70,29 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub async fn allow_signing() -> AllowSigningResult {
-    async fn inner() -> Result<AllowSigningResponse, AllowSigningError> {
+pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
+    async fn inner(
+        request: Option<AllowSigningRequest>,
+    ) -> Result<AllowSigningResponse, AllowSigningError> {
         ALLOW_SIGNING_GUARD_LIMITER
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(AllowSigningError::RateLimitedByGuard)?;
+
+        let principal = msg_caller();
+        let now_ns = time();
+
+        let (ii_canister_ids, root_key) = delegation::read_ii_verification_config();
+        delegation::require_ii_delegation(
+            request
+                .as_ref()
+                .and_then(|r| r.ii_delegation_chain.as_ref()),
+            is_controller(&principal),
+            principal,
+            &ii_canister_ids,
+            &root_key,
+            now_ns,
+        )
+        .map_err(|msg| AllowSigningError::InvalidDelegationChain { msg })?;
 
         if let Some(current) = signer::has_sufficient_allowance().await {
             return Ok(AllowSigningResponse {
@@ -84,12 +108,11 @@ pub async fn allow_signing() -> AllowSigningResult {
 
         signer::approve_signing(None).await?;
 
-        // Returning a placeholder response that can be ignored by the frontend.
         Ok(AllowSigningResponse {
             status: AllowSigningStatus::Skipped,
             allowed_cycles: Nat::from(0u64),
             challenge_completion: None,
         })
     }
-    inner().await.into()
+    inner(request).await.into()
 }

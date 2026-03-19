@@ -39,8 +39,13 @@ export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { RateLimited: RateLimitError }
 	| { RateLimitedByGuard: RateLimitError }
+	| { InvalidDelegationChain: { msg: string } }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
+export interface AllowSigningRequest {
+	nonce: bigint;
+	ii_delegation_chain: [] | [IIDelegationChain];
+}
 export interface AllowSigningResponse {
 	status: AllowSigningStatus;
 	challenge_completion: [] | [ChallengeCompletion];
@@ -521,7 +526,7 @@ export interface _SERVICE {
 	 * # Errors
 	 * Errors are enumerated by: `AllowSigningError`.
 	 */
-	allow_signing: ActorMethod<[], AllowSigningResult>;
+	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
 	/**
 	 * Adds a pending Bitcoin transaction for the caller.
 	 *
