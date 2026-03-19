@@ -5,6 +5,7 @@ import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
+import type { TipClaimParams } from '$lib/types/tip';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
@@ -309,4 +310,19 @@ export const modalUniversalScannerOpen: Readable<boolean> = derived(
 export const modalPayDialogOpen: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'pay-dialog'
+);
+
+export const modalTipCreate: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'tip-create'
+);
+
+export const modalTipClaim: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'tip-claim'
+);
+export const modalTipClaimData: Readable<TipClaimParams | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'tip-claim' ? ($modalStore?.data as TipClaimParams) : undefined
 );

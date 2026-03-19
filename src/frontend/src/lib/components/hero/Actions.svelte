@@ -16,6 +16,7 @@
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import Swap from '$lib/components/swap/Swap.svelte';
+	import Tip from '$lib/components/tip/Tip.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import {
@@ -81,6 +82,10 @@
 
 		{#if sendAction}
 			<Send {isNftsPage} {isTransactionsPage} />
+		{/if}
+
+		{#if !isNftsPage && !isTransactionsPage}
+			<Tip />
 		{/if}
 
 		{#if swapAction}

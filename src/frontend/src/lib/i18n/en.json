@@ -1653,6 +1653,45 @@
 			}
 		}
 	},
+	"tip": {
+		"text": {
+			"send_tip": "Send Tip",
+			"select_token": "Select token",
+			"amount": "Amount",
+			"title_label": "Title (optional)",
+			"title_placeholder": "e.g. Coffee on me!",
+			"note_label": "Note (optional)",
+			"note_placeholder": "Add a personal message...",
+			"expiry": "Expires in",
+			"expiry_24h": "24 hours",
+			"expiry_48h": "48 hours",
+			"expiry_7d": "7 days",
+			"review": "Review tip",
+			"creating": "Creating tip...",
+			"share": "Share tip",
+			"share_description": "Share this QR code or link with the recipient. They can claim the tip by scanning the code or opening the link in OISY.",
+			"link_copied": "Tip link copied to clipboard.",
+			"claim_title": "You received a tip!",
+			"claim_description": "Someone sent you a tip. Claim it to receive the funds.",
+			"claim_button": "Claim tip",
+			"claiming": "Claiming tip...",
+			"claim_success": "Tip claimed successfully!",
+			"claim_expired": "This tip has expired.",
+			"token": "Token",
+			"recipient": "Recipient",
+			"expires": "Expires",
+			"tip_amount": "Tip amount",
+			"status": "Status"
+		},
+		"error": {
+			"create_failed": "Failed to create tip. Please try again.",
+			"claim_failed": "Failed to claim tip. Please try again.",
+			"preview_failed": "Could not load tip details.",
+			"invalid_link": "Invalid tip link.",
+			"expired": "This tip has expired and can no longer be claimed.",
+			"already_claimed": "This tip has already been claimed."
+		}
+	},
 	"address_book": {
 		"text": {
 			"title": "Contacts",

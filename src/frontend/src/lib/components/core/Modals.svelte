@@ -9,6 +9,7 @@
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
+	import TipCreateModal from '$lib/components/tip/TipCreateModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
@@ -30,7 +31,8 @@
 		modalNftFullscreenDisplayData,
 		modalNftFullscreenDisplayOpen,
 		modalReceive,
-		modalReceiveId
+		modalReceiveId,
+		modalTipCreate
 	} from '$lib/derived/modal.derived';
 	import { getSymbol } from '$lib/utils/modal.utils';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
@@ -63,5 +65,7 @@
 		<FullscreenMediaModal mediaSrc={$modalNftFullscreenDisplayData.imageUrl} />
 	{:else if $modalReceive && $modalReceiveId === getSymbol('menu-addresses')}
 		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
+	{:else if $modalTipCreate}
+		<TipCreateModal />
 	{/if}
 {/if}

@@ -9,6 +9,7 @@ import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
+import type { TipClaimParams } from '$lib/types/tip';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -69,7 +70,9 @@ export interface Modal<T> {
 		| 'harvest-stake'
 		| 'harvest-unstake'
 		| 'universal-scanner'
-		| 'pay-dialog';
+		| 'pay-dialog'
+		| 'tip-create'
+		| 'tip-claim';
 	data?: T;
 	id?: symbol;
 }
@@ -141,6 +144,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openUniversalScanner: (id: symbol) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
+	openTipCreate: (id: symbol) => void;
+	openTipClaim: (params: SetWithDataParams<TipClaimParams>) => void;
 	close: () => void;
 }
 
@@ -249,6 +254,8 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openUniversalScanner: setType('universal-scanner'),
 		openPayDialog: setType('pay-dialog'),
 		openGetToken: setType('get-token'),
+		openTipCreate: setType('tip-create'),
+		openTipClaim: <(params: SetWithDataParams<TipClaimParams>) => void>setTypeWithData('tip-claim'),
 		close: () => set(null),
 		subscribe
 	};

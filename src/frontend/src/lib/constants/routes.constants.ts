@@ -24,6 +24,9 @@ export const NFT_PARAM = 'nft';
 export const URI_PARAM = 'uri';
 export const VAULT_PARAM = 'vault';
 
+export const TIP_DEAL_PARAM = 'tip';
+export const TIP_CLAIM_CODE_PARAM = 'claim';
+
 export const PARAM_MSG = 'msg';
 export const PARAM_LEVEL = 'level';
 export const PARAM_DELETE_IDB_CACHE = 'delete-idb-cache';

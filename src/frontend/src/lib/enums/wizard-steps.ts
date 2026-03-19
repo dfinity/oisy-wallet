@@ -100,6 +100,14 @@ export const WizardStepsGetToken = {
 	...WizardStepsHowToConvert
 } as const;
 
+export enum WizardStepsTip {
+	TOKENS_LIST = 'Tokens List',
+	AMOUNT = 'Amount',
+	REVIEW = 'Review',
+	CREATING = 'Creating',
+	SHARE = 'Share'
+}
+
 export enum WizardStepsScanner {
 	SCAN = 'Scan',
 	PAY = 'Pay',

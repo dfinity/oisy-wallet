@@ -1339,6 +1339,46 @@ interface I18nReferral {
 	};
 }
 
+interface I18nTip {
+	text: {
+		send_tip: string;
+		select_token: string;
+		amount: string;
+		title_label: string;
+		title_placeholder: string;
+		note_label: string;
+		note_placeholder: string;
+		expiry: string;
+		expiry_24h: string;
+		expiry_48h: string;
+		expiry_7d: string;
+		review: string;
+		creating: string;
+		share: string;
+		share_description: string;
+		link_copied: string;
+		claim_title: string;
+		claim_description: string;
+		claim_button: string;
+		claiming: string;
+		claim_success: string;
+		claim_expired: string;
+		token: string;
+		recipient: string;
+		expires: string;
+		tip_amount: string;
+		status: string;
+	};
+	error: {
+		create_failed: string;
+		claim_failed: string;
+		preview_failed: string;
+		invalid_link: string;
+		expired: string;
+		already_claimed: string;
+	};
+}
+
 interface I18nAddress_book {
 	text: {
 		title: string;
@@ -1698,6 +1738,7 @@ interface I18n {
 	about: I18nAbout;
 	vip: I18nVip;
 	referral: I18nReferral;
+	tip: I18nTip;
 	address_book: I18nAddress_book;
 	contact: I18nContact;
 	address: I18nAddress;
