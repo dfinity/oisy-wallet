@@ -368,11 +368,9 @@ impl From<Result<GetUserTransactionsResponse, UserTransactionError>> for GetUser
         match result {
             Ok(response) => GetUserTransactionsResult::Ok(response),
             Err(err) => GetUserTransactionsResult::Err(err),
-                  }
+        }
     }
 }
-
-
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SaveUserTransactionsResult {
@@ -384,7 +382,6 @@ impl From<Result<(), UserTransactionError>> for SaveUserTransactionsResult {
         match result {
             Ok(()) => SaveUserTransactionsResult::Ok(()),
             Err(err) => SaveUserTransactionsResult::Err(err),
-                  }
+        }
     }
 }
-

@@ -14,16 +14,15 @@ use crate::{
         USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
-        maps::{ApiKeysCell, ExchangeRateMap},
-        BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
-        PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-        UserTransactionsMap,
         maps::{
             ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap,
             ExchangeRateMap, PowChallengeMap, TokenActivityMap, UserProfileMap,
             UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
+        BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
+        PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
+        UserTransactionsMap,
     },
 };
 
