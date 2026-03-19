@@ -746,8 +746,10 @@ describe('swap utils', () => {
 
 			expect(result).toStrictEqual({
 				provider: SwapProvider.NEAR_INTENTS,
-				receiveAmount: BigInt(mockNearIntentsQuoteResponse.quote.amountOut),
-				receiveOutMinimum: BigInt(mockNearIntentsQuoteResponse.quote.minAmountOut ?? '0'),
+				receiveAmount: BigInt(Math.floor(Number(mockNearIntentsQuoteResponse.quote.amountOut))),
+				receiveOutMinimum: BigInt(
+					Math.floor(Number(mockNearIntentsQuoteResponse.quote.minAmountOut ?? '0'))
+				),
 				swapDetails: mockNearIntentsQuoteResponse
 			});
 		});
@@ -762,9 +764,29 @@ describe('swap utils', () => {
 
 			expect(result).toStrictEqual({
 				provider: SwapProvider.NEAR_INTENTS,
-				receiveAmount: BigInt(mockNearIntentsQuoteResponse.quote.amountOut),
+				receiveAmount: BigInt(Math.floor(Number(mockNearIntentsQuoteResponse.quote.amountOut))),
 				receiveOutMinimum: undefined,
 				swapDetails: quoteWithoutMin
+			});
+		});
+
+		it('should floor decimal amountOut and minAmountOut', () => {
+			const quoteWithDecimals = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000.7',
+					minAmountOut: '891000.9'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithDecimals);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000n,
+				receiveOutMinimum: 891000n,
+				swapDetails: quoteWithDecimals
 			});
 		});
 	});
