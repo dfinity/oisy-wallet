@@ -31,14 +31,27 @@ const UTXO_1: Utxo = Utxo {
 
 #[test]
 fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
-    let pic_setup = setup();
+    let (pic_setup, ii) = setup_with_ii();
 
-    let caller = Principal::from_text(CALLER).unwrap();
+    let device_pubkey = b"test-device-key-for-insufficient-funds";
+    let (user_number, device_principal) = ii.register_identity(device_pubkey);
+
+    let session_pubkey = b"test-session-key-insufficient";
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
         network: BitcoinNetwork::Regtest,
         min_confirmations: None,
+        ii_delegation_chain: Some(delegation_chain),
     };
     let response = pic_setup.update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
         caller,
@@ -88,13 +101,26 @@ fn test_add_pending_transaction_requires_delegation_chain() {
 
 #[test]
 fn test_get_pending_transactions_returns_empty_for_new_user() {
-    let pic_setup = setup();
+    let (pic_setup, ii) = setup_with_ii();
 
-    let caller = Principal::from_text(CALLER).unwrap();
+    let device_pubkey = b"test-device-key-for-empty-pending";
+    let (user_number, device_principal) = ii.register_identity(device_pubkey);
+
+    let session_pubkey = b"test-session-key-empty-pending";
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
 
     let read_request = BtcGetPendingTransactionsRequest {
         address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: Some(delegation_chain),
     };
     let read_response = pic_setup.update::<Result<
         BtcGetPendingTransactionsReponse,
@@ -179,6 +205,203 @@ fn test_controller_bypasses_delegation_check() {
 }
 
 // -------------------------------------------------------------------------------------------------
+// - Delegation chain integration tests for btc_select_user_utxos_fee
+// -------------------------------------------------------------------------------------------------
+
+#[test]
+fn test_select_user_utxos_fee_requires_delegation_chain() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let request = SelectedUtxosFeeRequest {
+        amount_satoshis: 100_000_000u64,
+        network: BitcoinNetwork::Regtest,
+        min_confirmations: None,
+        ii_delegation_chain: None,
+    };
+
+    let response = pic_setup
+        .update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
+            caller,
+            "btc_select_user_utxos_fee",
+            request,
+        )
+        .expect("Canister call failed");
+
+    assert!(
+        matches!(
+            response,
+            Err(SelectedUtxosFeeError::InvalidDelegationChain { .. })
+        ),
+        "Expected InvalidDelegationChain error, got: {response:?}"
+    );
+}
+
+#[test]
+fn test_select_user_utxos_fee_controller_bypasses_delegation_check() {
+    let pic_setup = setup();
+
+    let request = SelectedUtxosFeeRequest {
+        amount_satoshis: 100_000_000u64,
+        network: BitcoinNetwork::Regtest,
+        min_confirmations: None,
+        ii_delegation_chain: None,
+    };
+
+    let response = pic_setup
+        .update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
+            controller(),
+            "btc_select_user_utxos_fee",
+            request,
+        )
+        .expect("Canister call failed");
+
+    assert!(
+        !matches!(
+            response,
+            Err(SelectedUtxosFeeError::InvalidDelegationChain { .. })
+        ),
+        "Controller should bypass delegation check, got: {response:?}"
+    );
+}
+
+#[test]
+fn test_select_user_utxos_fee_with_valid_delegation() {
+    let (pic_setup, ii) = setup_with_ii();
+
+    let device_pubkey = b"test-device-key-for-utxos-fee";
+    let (user_number, device_principal) = ii.register_identity(device_pubkey);
+
+    let session_pubkey = b"test-session-key-utxos";
+
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
+
+    let request = SelectedUtxosFeeRequest {
+        amount_satoshis: 100_000_000u64,
+        network: BitcoinNetwork::Regtest,
+        min_confirmations: None,
+        ii_delegation_chain: Some(delegation_chain),
+    };
+
+    let response = pic_setup
+        .update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
+            caller,
+            "btc_select_user_utxos_fee",
+            request,
+        )
+        .expect("Canister call failed");
+
+    if let Err(SelectedUtxosFeeError::InvalidDelegationChain { msg }) = response {
+        panic!("Delegation verification failed unexpectedly: {msg}");
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Delegation chain integration tests for btc_get_pending_transactions
+// -------------------------------------------------------------------------------------------------
+
+#[test]
+fn test_get_pending_transactions_requires_delegation_chain() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let request = BtcGetPendingTransactionsRequest {
+        address: MOCK_ADDRESS.to_string(),
+        network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
+    };
+
+    let response = pic_setup
+        .update::<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>>(
+            caller,
+            "btc_get_pending_transactions",
+            request,
+        )
+        .expect("Canister call failed");
+
+    assert!(
+        matches!(
+            response,
+            Err(BtcGetPendingTransactionsError::InvalidDelegationChain { .. })
+        ),
+        "Expected InvalidDelegationChain error, got: {response:?}"
+    );
+}
+
+#[test]
+fn test_get_pending_transactions_controller_bypasses_delegation_check() {
+    let pic_setup = setup();
+
+    let request = BtcGetPendingTransactionsRequest {
+        address: MOCK_ADDRESS.to_string(),
+        network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
+    };
+
+    let response = pic_setup
+        .update::<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>>(
+            controller(),
+            "btc_get_pending_transactions",
+            request,
+        )
+        .expect("Canister call failed");
+
+    assert!(
+        !matches!(
+            response,
+            Err(BtcGetPendingTransactionsError::InvalidDelegationChain { .. })
+        ),
+        "Controller should bypass delegation check, got: {response:?}"
+    );
+}
+
+#[test]
+fn test_get_pending_transactions_with_valid_delegation() {
+    let (pic_setup, ii) = setup_with_ii();
+
+    let device_pubkey = b"test-device-key-for-get-pending";
+    let (user_number, device_principal) = ii.register_identity(device_pubkey);
+
+    let session_pubkey = b"test-session-key-pending";
+
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
+
+    let request = BtcGetPendingTransactionsRequest {
+        address: MOCK_ADDRESS.to_string(),
+        network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: Some(delegation_chain),
+    };
+
+    let response = pic_setup
+        .update::<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>>(
+            caller,
+            "btc_get_pending_transactions",
+            request,
+        )
+        .expect("Canister call failed");
+
+    if let Err(BtcGetPendingTransactionsError::InvalidDelegationChain { msg }) = response {
+        panic!("Delegation verification failed unexpectedly: {msg}");
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
 // - Rate-limit integration tests for btc_select_user_utxos_fee
 // -------------------------------------------------------------------------------------------------
 
@@ -190,6 +413,7 @@ fn call_btc_select_user_utxos_fee(
         amount_satoshis: 100_000_000u64,
         network: BitcoinNetwork::Regtest,
         min_confirmations: None,
+        ii_delegation_chain: None,
     };
     pic_setup
         .update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
@@ -323,6 +547,7 @@ fn call_btc_get_pending_transactions(
     let request = BtcGetPendingTransactionsRequest {
         address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
     };
     pic_setup
         .update::<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>>(
