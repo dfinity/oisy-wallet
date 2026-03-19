@@ -146,7 +146,7 @@ describe('TokenModalContent', () => {
 			}
 		});
 
-		expect(queryByText(en.tokens.text.asset_type)).not.toBeInTheDocument();
+		expect(queryByText(replaceOisyPlaceholders(en.tokens.text.asset_type))).not.toBeInTheDocument();
 	});
 
 	it('renders asset type label and badge for a token with a category tag', () => {
