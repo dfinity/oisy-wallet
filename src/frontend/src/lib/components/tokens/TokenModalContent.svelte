@@ -202,7 +202,7 @@
 
 					{#snippet content()}
 						<span
-							class="inline-block rounded-md border border-secondary px-2 py-0.5 text-xs font-medium"
+							class="inline-block rounded-md border bg-secondary border-secondary px-2 py-0.5 text-xs font-medium"
 						>
 							{$i18n.token_tag.category[categoryTag]}
 						</span>
