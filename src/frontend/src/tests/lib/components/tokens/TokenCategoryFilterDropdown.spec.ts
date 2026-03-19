@@ -165,6 +165,22 @@ describe('TokenCategoryFilterDropdown', () => {
 			expect(getByText(get(i18n).token_tag.category.stablecoin)).toBeInTheDocument();
 		});
 
+		it('should display "All" when selectedCategory is undefined even if store has a value', () => {
+			tokenCategoryFilterStore.set({
+				key: 'token-category-filter',
+				value: { value: TokenCategoryTagValue.STABLECOIN }
+			});
+
+			const { getByText } = render(TokenCategoryFilterDropdown, {
+				props: {
+					selectedCategory: undefined,
+					onSelect: vi.fn()
+				}
+			});
+
+			expect(getByText(get(i18n).tokens.text.asset_type_all)).toBeInTheDocument();
+		});
+
 		it('should call onSelect instead of updating the store', async () => {
 			const onSelectSpy = vi.fn();
 

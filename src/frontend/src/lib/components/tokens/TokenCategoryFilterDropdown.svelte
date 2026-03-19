@@ -27,7 +27,7 @@
 	const getCategoryLabel = (value: TokenCategoryTagValue): string =>
 		$i18n.token_tag.category[value] ?? value;
 
-	let activeCategory = $derived(selectedCategory ?? $tokenCategoryFilter);
+	let activeCategory = $derived(onSelect ? selectedCategory : $tokenCategoryFilter);
 
 	const currentLabel: string = $derived(
 		isNullish(activeCategory) ? $i18n.tokens.text.asset_type_all : getCategoryLabel(activeCategory)
