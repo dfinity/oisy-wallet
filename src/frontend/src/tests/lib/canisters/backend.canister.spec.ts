@@ -101,18 +101,27 @@ describe('backend.canister', () => {
 
 	const btcGetPendingTransactionParams = {
 		network: btcAddPendingTransactionParams.network,
-		address: btcAddPendingTransactionParams.address
+		address: btcAddPendingTransactionParams.address,
+		iiDelegationChain: mockIIDelegationChain
+	};
+
+	const btcGetPendingTransactionEndpointParams = {
+		network: btcGetPendingTransactionParams.network,
+		address: btcGetPendingTransactionParams.address,
+		ii_delegation_chain: btcGetPendingTransactionParams.iiDelegationChain
 	};
 
 	const btcSelectUserUtxosFeeParams = {
 		network: btcAddPendingTransactionParams.network,
 		minConfirmations: [100],
-		amountSatoshis: 100n
+		amountSatoshis: 100n,
+		iiDelegationChain: mockIIDelegationChain
 	} as BtcSelectUserUtxosFeeParams;
 	const btcSelectUserUtxosFeeEndpointParams = {
 		network: btcSelectUserUtxosFeeParams.network,
 		min_confirmations: btcSelectUserUtxosFeeParams.minConfirmations,
-		amount_satoshis: btcSelectUserUtxosFeeParams.amountSatoshis
+		amount_satoshis: btcSelectUserUtxosFeeParams.amountSatoshis,
+		ii_delegation_chain: btcSelectUserUtxosFeeParams.iiDelegationChain
 	};
 
 	const mockedUserProfile = {
@@ -480,7 +489,7 @@ describe('backend.canister', () => {
 			const res = await btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			expect(service.btc_get_pending_transactions).toHaveBeenCalledWith(
-				btcGetPendingTransactionParams
+				btcGetPendingTransactionEndpointParams
 			);
 			expect(res).toEqual({ response: response.Ok.transactions });
 		});
@@ -543,7 +552,7 @@ describe('backend.canister', () => {
 			const res = await btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			expect(service.btc_get_pending_transactions).toHaveBeenCalledWith(
-				btcGetPendingTransactionParams
+				btcGetPendingTransactionEndpointParams
 			);
 			expect(res).toStrictEqual({
 				response: [],
@@ -552,6 +561,24 @@ describe('backend.canister', () => {
 					limiter: 'BTC_GET_PENDING_TX_RATE_LIMITER'
 				}
 			});
+		});
+
+		it('should throw a CanisterInternalError if InvalidDelegationChain error is returned', async () => {
+			const response = {
+				Err: { InvalidDelegationChain: { msg: 'chain expired' } }
+			};
+
+			service.btc_get_pending_transactions.mockResolvedValue(
+				response as unknown as BtcGetPendingTransactionsResult
+			);
+
+			const { btcGetPendingTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcGetPendingTransactions(btcGetPendingTransactionParams)).rejects.toThrow(
+				new CanisterInternalError('II delegation chain verification failed: chain expired')
+			);
 		});
 	});
 
@@ -679,6 +706,24 @@ describe('backend.canister', () => {
 					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
 				}
 			});
+		});
+
+		it('should throw a CanisterInternalError if InvalidDelegationChain error is returned', async () => {
+			const response = {
+				Err: { InvalidDelegationChain: { msg: 'unknown canister' } }
+			};
+
+			service.btc_select_user_utxos_fee.mockResolvedValue(
+				response as unknown as BtcSelectUserUtxosFeeResult
+			);
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams)).rejects.toThrow(
+				new CanisterInternalError('II delegation chain verification failed: unknown canister')
+			);
 		});
 	});
 

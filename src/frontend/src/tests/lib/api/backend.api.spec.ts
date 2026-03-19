@@ -359,7 +359,8 @@ describe('backend.api', () => {
 		const mockParams: CanisterApiFunctionParams<BtcGetPendingTransactionParams> = {
 			...baseParams,
 			network: { mainnet: null },
-			address: 'address'
+			address: 'address',
+			iiDelegationChain: mockIIDelegationChain
 		};
 
 		const mockResponse: PendingTransaction[] = [
@@ -379,7 +380,8 @@ describe('backend.api', () => {
 			expect(result).toEqual({ response: mockResponse });
 			expect(backendCanisterMock.btcGetPendingTransactions).toHaveBeenCalledExactlyOnceWith({
 				network: { mainnet: null },
-				address: 'address'
+				address: 'address',
+				iiDelegationChain: mockIIDelegationChain
 			});
 		});
 

@@ -102,6 +102,15 @@ describe('backend.errors', () => {
 			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
 		});
 
+		it('should map InvalidDelegationChain', () => {
+			const err = mapBtcGetPendingTransactionsError({
+				InvalidDelegationChain: { msg: 'chain expired' }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('II delegation chain verification failed: chain expired');
+		});
+
 		it('should return unknown error for unrecognized variant', () => {
 			// @ts-expect-error testing unknown error variant
 			const err = mapBtcGetPendingTransactionsError({ SomeOther: null });
@@ -137,6 +146,15 @@ describe('backend.errors', () => {
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
 			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
+		});
+
+		it('should map InvalidDelegationChain', () => {
+			const err = mapBtcSelectUserUtxosFeeError({
+				InvalidDelegationChain: { msg: 'unknown canister' }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('II delegation chain verification failed: unknown canister');
 		});
 
 		it('should return unknown error for unrecognized variant', () => {
