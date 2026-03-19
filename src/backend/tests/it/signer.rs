@@ -337,8 +337,7 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
 
     // 2 more explicit calls should still be within the business limit.
     for i in 0..2 {
-        let result =
-            call_allow_signing_with_delegation(&pic_setup, caller, 0, Some(chain.clone()));
+        let result = call_allow_signing_with_delegation(&pic_setup, caller, 0, Some(chain.clone()));
         assert!(
             !matches!(result, Err(AllowSigningError::RateLimited(_))),
             "call {i} (0-indexed) should not be rate-limited: {result:?}",
@@ -384,8 +383,7 @@ fn test_allow_signing_rate_limit_is_per_caller() {
 
     // Exhaust caller_a's remaining 2 entries, then confirm the next is blocked.
     for _ in 0..2 {
-        let _ =
-            call_allow_signing_with_delegation(&pic_setup, caller_a, 0, Some(chain_a.clone()));
+        let _ = call_allow_signing_with_delegation(&pic_setup, caller_a, 0, Some(chain_a.clone()));
     }
     assert!(
         matches!(
@@ -396,8 +394,7 @@ fn test_allow_signing_rate_limit_is_per_caller() {
     );
 
     // caller_b should still be allowed (only 1 entry used by profile creation).
-    let result =
-        call_allow_signing_with_delegation(&pic_setup, caller_b, 0, Some(chain_b.clone()));
+    let result = call_allow_signing_with_delegation(&pic_setup, caller_b, 0, Some(chain_b.clone()));
     assert!(
         !matches!(result, Err(AllowSigningError::RateLimited(_))),
         "caller_b should not be rate-limited: {result:?}"
