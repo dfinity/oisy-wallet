@@ -11,7 +11,7 @@ import {
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
 } from '$lib/enums/plausible';
-import { DEFAULT_TOKEN_TAGS } from '$lib/schema/token-tag.schema';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';

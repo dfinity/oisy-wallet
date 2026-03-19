@@ -21,7 +21,7 @@ import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20'
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token } from '$eth/utils/erc20.utils';
-import { DEFAULT_TOKEN_TAGS } from '$lib/schema/token-tag.schema';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';

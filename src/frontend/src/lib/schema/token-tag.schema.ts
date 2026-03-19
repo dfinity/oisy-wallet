@@ -30,7 +30,3 @@ export const TokenTagsSchema = z.object({
 export const OptionalTokenTagsSchema = z.object({
 	tags: z.tuple([TokenTagSchema]).optional()
 });
-
-export const DEFAULT_TOKEN_TAGS: z.infer<typeof TokenTagsSchema>['tags'] = [
-	{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
-];

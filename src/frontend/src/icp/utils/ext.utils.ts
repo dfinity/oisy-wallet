@@ -4,7 +4,7 @@ import type { EnvExtToken, EnvExtTokenStandardVersion } from '$env/types/env-ext
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { ExtToken, ExtTokenWithoutId } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
-import { DEFAULT_TOKEN_TAGS } from '$lib/schema/token-tag.schema';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { Principal } from '@icp-sdk/core/principal';
