@@ -137,6 +137,7 @@
 		{#if currentStep?.name === WizardStepsTip.TOKENS_LIST}
 			<ModalTokensList
 				networkSelectorViewOnly={nonNullish($selectedNetwork)}
+				onSelectNetworkFilter={() => {}}
 				onTokenButtonClick={onSelectToken}
 			>
 				{#snippet tokenListItem(token, onClick)}

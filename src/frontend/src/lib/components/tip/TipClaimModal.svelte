@@ -18,6 +18,9 @@
 	const claimCode = $derived($tipClaimStore?.claimCode);
 	const loadError = $derived($tipClaimStore?.error);
 
+	const previewTitle = $derived(preview ? fromNullable(preview.title) : undefined);
+	const previewNote = $derived(preview ? fromNullable(preview.note) : undefined);
+
 	const onClaim = async () => {
 		if (!dealId || !claimCode || !$authIdentity) {
 			return;
@@ -82,9 +85,6 @@
 						<span class="text-tertiary">{$i18n.tip.text.tip_amount}</span>
 						<span class="font-bold">{formatAmount(preview.amount)}</span>
 					</div>
-
-					{@const previewTitle = fromNullable(preview.title)}
-					{@const previewNote = fromNullable(preview.note)}
 
 					{#if nonNullish(previewTitle)}
 						<div class="flex justify-between">

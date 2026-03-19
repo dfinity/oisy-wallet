@@ -15,18 +15,24 @@
 
 	$effect(() => {
 		const handleTipParams = async () => {
-			const hasTip = page.url.searchParams.has(TIP_DEAL_PARAM);
-			const hasClaim = page.url.searchParams.has(TIP_CLAIM_CODE_PARAM);
+			const { url } = page;
+
+			if (!nonNullish(url)) {
+				return;
+			}
+
+			const hasTip = url.searchParams.has(TIP_DEAL_PARAM);
+			const hasClaim = url.searchParams.has(TIP_CLAIM_CODE_PARAM);
 
 			if (!$initialLoading && hasTip && hasClaim && nonNullish($authIdentity)) {
-				const dealIdStr = page.url.searchParams.get(TIP_DEAL_PARAM);
-				const claimCode = page.url.searchParams.get(TIP_CLAIM_CODE_PARAM);
+				const dealIdStr = url.searchParams.get(TIP_DEAL_PARAM);
+				const claimCode = url.searchParams.get(TIP_CLAIM_CODE_PARAM);
 
 				if (nonNullish(dealIdStr) && nonNullish(claimCode)) {
 					const dealId = BigInt(dealIdStr);
 
-					removeSearchParam({ url: page.url, searchParam: TIP_DEAL_PARAM });
-					removeSearchParam({ url: page.url, searchParam: TIP_CLAIM_CODE_PARAM });
+					removeSearchParam({ url, searchParam: TIP_DEAL_PARAM });
+					removeSearchParam({ url, searchParam: TIP_CLAIM_CODE_PARAM });
 
 					const result = await previewTip({
 						identity: $authIdentity,
