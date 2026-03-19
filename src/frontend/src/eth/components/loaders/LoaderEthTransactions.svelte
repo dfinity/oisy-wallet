@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
+	import { harvestAutopilotTokens } from '$eth/derived/harvest-autopilots.derived';
 	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
+	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 	import {
 		COLLECTION_TIMER_INTERVAL_MILLIS,
 		MILLISECONDS_IN_DAY,
@@ -17,7 +19,8 @@
 	let fungibleTokens = $derived([
 		...$enabledEthEvmNativeTokens,
 		...$enabledErc20Tokens,
-		...$enabledErc4626Tokens
+		...$harvestAutopilotTokens,
+		...$enabledErc4626Tokens.filter((token) => !isTokenHarvestAutopilot(token))
 	]);
 
 	let nonFungibleTokens = $derived([...$enabledNonFungibleTokensWithoutSpam]);
