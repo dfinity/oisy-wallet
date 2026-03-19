@@ -520,6 +520,12 @@
 			"candid": "target/xtc_ledger.did",
 			"wasm": "target/xtc_ledger.wasm.gz"
 		},
+		"escrow": {
+			"type": "custom",
+			"build": "scripts/build.escrow.sh",
+			"candid": "target/escrow.did",
+			"wasm": "target/escrow.wasm.gz"
+		},
 		"rewards": {
 			"type": "custom",
 			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.10/rewards.did",
