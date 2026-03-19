@@ -69,6 +69,25 @@ describe('console.utils', () => {
 
 			expect(debugSpy).toHaveBeenCalledExactlyOnceWith('[verbose]', 'Loading failed:', err);
 		});
+
+		it('should not log verbose output in prod environments', async () => {
+			vi.doMock('$lib/constants/app.constants', () => ({
+				LOCAL: false,
+				STAGING: false
+			}));
+
+			vi.resetModules();
+
+			const { consoleError: consoleErrorProd } = await import('$lib/utils/console.utils');
+
+			const err = new Error(
+				'Reject\nCall context:\n  Canister ID: abc-cai\n  Method name: test\n  HTTP details: {"status":200}'
+			);
+
+			consoleErrorProd('Loading failed:', err);
+
+			expect(debugSpy).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('consoleWarn', () => {
@@ -100,6 +119,25 @@ describe('console.utils', () => {
 			consoleWarn(err);
 
 			expect(debugSpy).toHaveBeenCalledExactlyOnceWith('[verbose]', err);
+		});
+
+		it('should not log verbose output in prod environments', async () => {
+			vi.doMock('$lib/constants/app.constants', () => ({
+				LOCAL: false,
+				STAGING: false
+			}));
+
+			vi.resetModules();
+
+			const { consoleWarn: consoleWarnProd } = await import('$lib/utils/console.utils');
+
+			const err = new Error(
+				'Reject\nCall context:\n  Canister ID: xyz-cai\n  Method name: balance\n  HTTP details: {"status":200}'
+			);
+
+			consoleWarnProd(err);
+
+			expect(debugSpy).not.toHaveBeenCalled();
 		});
 	});
 });
