@@ -51,6 +51,7 @@ describe('LoaderHarvest', () => {
 		it('should handle fetch errors gracefully', async () => {
 			const error = new Error('Network error');
 			const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			vi.spyOn(console, 'debug').mockImplementation(() => {});
 			vi.spyOn(harvestRest, 'fetchHarvestVaults').mockRejectedValueOnce(error);
 
 			render(LoaderHarvest);
