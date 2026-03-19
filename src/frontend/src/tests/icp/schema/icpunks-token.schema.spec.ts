@@ -4,6 +4,7 @@ import {
 	IcPunksInterfaceSchema,
 	IcPunksTokenSchema
 } from '$icp/schema/icpunks-token.schema';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 
@@ -13,7 +14,7 @@ describe('icpunks-token.schema', () => {
 		network: ICP_NETWORK,
 		standard: { code: 'icpunks' },
 		category: 'default',
-		tags: [],
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8

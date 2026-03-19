@@ -1156,7 +1156,12 @@
 			"edit_token": "Modifier le token",
 			"sort_by_value": "",
 			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_symbol": "",
+			"hide_asset_types": "",
+			"asset_type": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "Détails du token",
@@ -1281,6 +1286,23 @@
 			"unexpected_undefined": "Le token est indéfini. C'est inattendu.",
 			"unexpected_error_on_token_delete": "Quelque chose s'est mal passé lors de la suppression du token.",
 			"unexpected_error_on_token_update": "Quelque chose s'est mal passé lors de la mise à jour du token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
 		}
 	},
 	"nfts": {

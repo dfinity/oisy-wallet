@@ -27,6 +27,7 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { consoleError } from '$lib/utils/console.utils';
+import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import {
 	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapToSignerBitcoinNetwork
@@ -115,7 +116,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			const pendingTransactions = await getPendingBtcTransactions({
 				identity,
 				network: mapCkBtcBitcoinNetworkToBackendBitcoinNetwork(bitcoinNetwork),
-				address: btcAddress
+				address: btcAddress,
+				iiDelegationChain: extractIIDelegationChain(identity)
 			});
 
 			return {

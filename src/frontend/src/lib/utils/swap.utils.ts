@@ -10,6 +10,7 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	NEAR_INTENTS_BLOCKCHAIN_MAP,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
 	swapProvidersDetails
@@ -17,6 +18,12 @@ import {
 import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
+import type {
+	NearIntentsQuoteRequest,
+	NearIntentsQuoteResponse,
+	NearIntentsToken
+} from '$lib/types/near-intents';
+import type { NetworkId } from '$lib/types/network';
 import type { OptionAmount } from '$lib/types/send';
 import {
 	SwapProvider,
@@ -32,6 +39,7 @@ import {
 	type VeloraSwapDetails
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { findToken } from '$lib/utils/tokens.utils';
@@ -200,6 +208,105 @@ export const mapVeloraMarketSwapResult = (swap: OptimalRate): SwapMappedResult =
 	type: VeloraSwapTypes.MARKET
 });
 
+export const mapNearIntentsQuoteResult = (quote: NearIntentsQuoteResponse): SwapMappedResult => ({
+	provider: SwapProvider.NEAR_INTENTS,
+	receiveAmount: BigInt(Math.floor(Number(quote.quote.amountOut))),
+	receiveOutMinimum: nonNullish(quote.quote.minAmountOut)
+		? BigInt(Math.floor(Number(quote.quote.minAmountOut)))
+		: undefined,
+	swapDetails: quote
+});
+
+export const resolveNearIntentsBlockchain = (networkId: NetworkId): string | undefined =>
+	NEAR_INTENTS_BLOCKCHAIN_MAP[networkId];
+
+export const findNearIntentsAsset = ({
+	tokens,
+	token,
+	blockchain
+}: {
+	tokens: NearIntentsToken[];
+	token: Erc20Token;
+	blockchain: string;
+}): NearIntentsToken | undefined =>
+	tokens.find(
+		(t) =>
+			t.blockchain === blockchain &&
+			(isNullish(t.contractAddress)
+				? // Native tokens
+					t.symbol.toLowerCase() === token.symbol.toLowerCase()
+				: // ERC tokens
+					areAddressesEqual({
+						address1: t.contractAddress,
+						address2: token.address,
+						addressType: 'Eth'
+					}))
+	);
+
+export const resolveNearIntentsSwapAssets = ({
+	nearTokens,
+	sourceToken,
+	destinationToken
+}: {
+	nearTokens: NearIntentsToken[];
+	sourceToken: Erc20Token;
+	destinationToken: Erc20Token;
+}): { srcAsset: NearIntentsToken; destAsset: NearIntentsToken } | undefined => {
+	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.id);
+	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.id);
+
+	if (isNullish(srcBlockchain) || isNullish(destBlockchain)) {
+		return;
+	}
+
+	const srcAsset = findNearIntentsAsset({
+		tokens: nearTokens,
+		token: sourceToken,
+		blockchain: srcBlockchain
+	});
+
+	const destAsset = findNearIntentsAsset({
+		tokens: nearTokens,
+		token: destinationToken,
+		blockchain: destBlockchain
+	});
+
+	if (isNullish(srcAsset) || isNullish(destAsset)) {
+		return;
+	}
+
+	return { srcAsset, destAsset };
+};
+
+export const buildNearIntentsQuoteRequest = ({
+	slippageTolerance,
+	srcAsset,
+	destAsset,
+	amount,
+	userEthAddress,
+	deadlineMs
+}: {
+	slippageTolerance: number;
+	srcAsset: NearIntentsToken;
+	destAsset: NearIntentsToken;
+	amount: bigint;
+	userEthAddress: string;
+	deadlineMs: number;
+}): NearIntentsQuoteRequest => ({
+	dry: false,
+	swapType: 'EXACT_INPUT',
+	slippageTolerance,
+	originAsset: srcAsset.assetId,
+	depositType: 'ORIGIN_CHAIN',
+	destinationAsset: destAsset.assetId,
+	amount: amount.toString(),
+	recipient: userEthAddress,
+	recipientType: 'DESTINATION_CHAIN',
+	refundTo: userEthAddress,
+	refundType: 'ORIGIN_CHAIN',
+	deadline: new Date(Date.now() + deadlineMs).toISOString()
+});
+
 export const geSwapEthTokenAddress = (token: Erc20Token) => {
 	if (isDefaultEthereumToken(token)) {
 		return SWAP_ETH_TOKEN_PLACEHOLDER;
@@ -236,13 +343,13 @@ export const findSwapProvider = (
 		return icDAppProvider;
 	}
 
-	const exactMatch = swapProvidersDetails[providerId];
+	const exactMatch = swapProvidersDetails[providerId as SwapProvider];
 
 	if (nonNullish(exactMatch)) {
 		return { id: providerId, ...exactMatch };
 	}
 
-	const normalizedMatch = swapProvidersDetails[normalizedId];
+	const normalizedMatch = swapProvidersDetails[normalizedId as SwapProvider];
 
 	if (nonNullish(normalizedMatch)) {
 		return { id: normalizedId, ...normalizedMatch };

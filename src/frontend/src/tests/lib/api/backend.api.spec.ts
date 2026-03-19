@@ -1,12 +1,15 @@
 import type {
 	AddUserCredentialResult,
 	CustomToken,
-	PendingTransaction
+	PendingTransaction,
+	TokenId
 } from '$declarations/backend/backend.did';
 import {
 	addPendingBtcTransaction,
 	addUserCredential,
 	createUserProfile,
+	getExchangeRate,
+	getExchangeRates,
 	getPendingBtcTransactions,
 	getUserProfile,
 	listCustomTokens,
@@ -27,6 +30,7 @@ import type {
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -359,7 +363,8 @@ describe('backend.api', () => {
 		const mockParams: CanisterApiFunctionParams<BtcGetPendingTransactionParams> = {
 			...baseParams,
 			network: { mainnet: null },
-			address: 'address'
+			address: 'address',
+			iiDelegationChain: mockIIDelegationChain
 		};
 
 		const mockResponse: PendingTransaction[] = [
@@ -379,7 +384,8 @@ describe('backend.api', () => {
 			expect(result).toEqual({ response: mockResponse });
 			expect(backendCanisterMock.btcGetPendingTransactions).toHaveBeenCalledExactlyOnceWith({
 				network: { mainnet: null },
-				address: 'address'
+				address: 'address',
+				iiDelegationChain: mockIIDelegationChain
 			});
 		});
 
@@ -433,6 +439,107 @@ describe('backend.api', () => {
 			});
 
 			await expect(updateUserExperimentalFeatureSettings(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('getExchangeRate', () => {
+		const tokenId: TokenId = { Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
+		const mockRate: BackendExchangeRate = {
+			usd: {
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
+			}
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.getExchangeRate.mockResolvedValue(mockRate);
+		});
+
+		it('should successfully call getExchangeRate endpoint', async () => {
+			const result = await getExchangeRate({
+				...baseParams,
+				token_id: tokenId,
+				certified: false
+			});
+
+			expect(result).toEqual(mockRate);
+			expect(backendCanisterMock.getExchangeRate).toHaveBeenCalledExactlyOnceWith({
+				token_id: tokenId,
+				certified: false
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				getExchangeRate({ identity: undefined, token_id: tokenId, certified: false })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if getExchangeRate throws', async () => {
+			backendCanisterMock.getExchangeRate.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(
+				getExchangeRate({ ...baseParams, token_id: tokenId, certified: false })
+			).rejects.toThrow();
+		});
+	});
+
+	describe('getExchangeRates', () => {
+		const tokenIds: TokenId[] = [
+			{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
+			{ Erc20: ['0xabc', 1n] }
+		];
+		const mockRate: BackendExchangeRate = {
+			usd: {
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
+			}
+		};
+
+		const mockMap = new Map([
+			['Icrc:ryjl3-tyaaa-aaaaa-aaaba-cai', mockRate],
+			['Erc20:0xabc:1', mockRate]
+		]);
+
+		beforeEach(() => {
+			backendCanisterMock.getExchangeRates.mockResolvedValue(mockMap);
+		});
+
+		it('should successfully call getExchangeRates endpoint', async () => {
+			const result = await getExchangeRates({
+				...baseParams,
+				token_ids: tokenIds,
+				certified: false
+			});
+
+			expect(result).toBeInstanceOf(Map);
+			expect(result.size).toBe(2);
+			expect(backendCanisterMock.getExchangeRates).toHaveBeenCalledExactlyOnceWith({
+				token_ids: tokenIds,
+				certified: false
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				getExchangeRates({ identity: undefined, token_ids: tokenIds, certified: false })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if getExchangeRates throws', async () => {
+			backendCanisterMock.getExchangeRates.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(
+				getExchangeRates({ ...baseParams, token_ids: tokenIds, certified: false })
+			).rejects.toThrow();
 		});
 	});
 });

@@ -4,6 +4,7 @@ import {
 	ExtInterfaceSchema,
 	ExtTokenSchema
 } from '$icp/schema/ext-token.schema';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 
@@ -13,7 +14,7 @@ describe('ext-token.schema', () => {
 		network: ICP_NETWORK,
 		standard: { code: 'ext' },
 		category: 'default',
-		tags: [],
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8

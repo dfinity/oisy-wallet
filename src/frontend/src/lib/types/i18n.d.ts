@@ -906,6 +906,11 @@ interface I18nTokens {
 		sort_by_value: string;
 		sort_by_performance: string;
 		sort_by_symbol: string;
+		hide_asset_types: string;
+		asset_type: string;
+		asset_type_all: string;
+		no_tokens_for_asset_type: string;
+		no_tokens_for_asset_type_description: string;
 	};
 	details: {
 		title: string;
@@ -1010,6 +1015,12 @@ interface I18nTokens {
 		unexpected_error_on_token_delete: string;
 		unexpected_error_on_token_update: string;
 	};
+}
+
+interface I18nToken_tag {
+	type: { category: string; risk: string };
+	category: { crypto: string; stablecoin: string; stock: string; commodity: string };
+	risk: { low: string; medium: string; high: string };
 }
 
 interface I18nNfts {
@@ -1677,6 +1688,7 @@ interface I18n {
 	buy: I18nBuy;
 	pay: I18nPay;
 	tokens: I18nTokens;
+	token_tag: I18nToken_tag;
 	nfts: I18nNfts;
 	fee: I18nFee;
 	info: I18nInfo;

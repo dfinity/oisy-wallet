@@ -1,10 +1,13 @@
+import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import {
+	hideTokenCategoryFilterStore,
 	hideZeroBalancesStore,
 	nftGroupByCollectionStore,
 	nftSortStore,
 	privacyModeStore,
 	showHiddenStore,
 	showSpamStore,
+	tokenCategoryFilterStore,
 	tokensSortStore,
 	type NftSortOrder,
 	type NftSortType
@@ -55,4 +58,19 @@ export const nftSortType: Readable<NftSortType> = derived(
 export const nftGroupByCollection: Readable<boolean> = derived(
 	[nftGroupByCollectionStore],
 	([$nftGroupByCollectionStore]) => $nftGroupByCollectionStore
+);
+
+export const hideTokenCategoryFilter: Readable<boolean> = derived(
+	[hideTokenCategoryFilterStore],
+	([$store]) => $store.enabled
+);
+
+export const showTokenCategoryFilter: Readable<boolean> = derived(
+	[hideTokenCategoryFilter],
+	([$hideTokenCategoryFilter]) => !$hideTokenCategoryFilter
+);
+
+export const tokenCategoryFilter: Readable<TokenCategoryTagValue | undefined> = derived(
+	[tokenCategoryFilterStore],
+	([$store]) => $store.value
 );
