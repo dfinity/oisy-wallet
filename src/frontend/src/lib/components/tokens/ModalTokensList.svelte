@@ -96,8 +96,8 @@
 
 		{#if $showTokenCategoryFilter}
 			<TokenCategoryFilterDropdown
-				selectedCategory={$filterCategoryTag}
 				onSelect={setFilterCategoryTag}
+				selectedCategory={$filterCategoryTag}
 			/>
 		{/if}
 	</div>
