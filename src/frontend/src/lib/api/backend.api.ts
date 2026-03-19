@@ -4,6 +4,7 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
+	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -30,6 +31,7 @@ import type {
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -234,6 +236,30 @@ export const updateUserExperimentalFeatureSettings = async ({
 	const { updateUserExperimentalFeatureSettings } = await backendCanister({ identity });
 
 	return updateUserExperimentalFeatureSettings(params);
+};
+
+export const getExchangeRate = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<{
+	token_id: TokenId;
+	certified: boolean;
+}>): Promise<BackendExchangeRate | undefined> => {
+	const { getExchangeRate } = await backendCanister({ identity });
+
+	return getExchangeRate(params);
+};
+
+export const getExchangeRates = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<{
+	token_ids: TokenId[];
+	certified: boolean;
+}>): Promise<Map<string, BackendExchangeRate>> => {
+	const { getExchangeRates } = await backendCanister({ identity });
+
+	return getExchangeRates(params);
 };
 
 const backendCanister = async ({
