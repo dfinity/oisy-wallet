@@ -25,19 +25,19 @@
 		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai",
 		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
 		"mintingAccount": "6f6ua-hqaaa-aaaar-qairq-cai",
+		"tags": [
+			{
+				"type": "category",
+				"value": "commodity"
+			}
+		],
 		"decimals": 8,
 		"name": "Gold Token",
 		"symbol": "GLDT",
 		"fee": {
 			"__bigint__": "10000000"
 		},
-		"icon": "/icons/icrc/6c7su-kiaaa-aaaar-qaira-cai.png",
-		"tags": [
-			{
-				"type": "category",
-				"value": "commodity"
-			}
-		]
+		"icon": "/icons/icrc/6c7su-kiaaa-aaaar-qaira-cai.png"
 	},
 	"nICP": {
 		"ledgerCanisterId": "buwm7-7yaaa-aaaar-qagva-cai",
@@ -85,19 +85,19 @@
 		"ledgerCanisterId": "wu6g4-6qaaa-aaaan-qmrza-cai",
 		"indexCanisterId": "wi24n-jqaaa-aaaan-qmr3a-cai",
 		"mintingAccount": "6csfo-tvgcf-7i47c-4ohs3-tdxbt-wr3dw-bstba-koumv-oiwcb-jnfu3-nqe",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
 		"decimals": 8,
 		"name": "VNX Euro",
 		"symbol": "VEUR",
 		"fee": {
 			"__bigint__": "10000"
 		},
-		"icon": "/icons/icrc/wu6g4-6qaaa-aaaan-qmrza-cai.png",
-		"tags": [
-			{
-				"type": "category",
-				"value": "stablecoin"
-			}
-		]
+		"icon": "/icons/icrc/wu6g4-6qaaa-aaaan-qmrza-cai.png"
 	},
 	"GHOSTNODE": {
 		"ledgerCanisterId": "sx3gz-hqaaa-aaaar-qaoca-cai",
@@ -195,19 +195,19 @@
 	"TCYCLES": {
 		"ledgerCanisterId": "um5iw-rqaaa-aaaaq-qaaba-cai",
 		"indexCanisterId": "ul4oc-4iaaa-aaaaq-qaabq-cai",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
 		"decimals": 12,
 		"name": "Trillion Cycles",
 		"symbol": "TCYCLES",
 		"fee": {
 			"__bigint__": "100000000"
 		},
-		"icon": "/icons/icrc/um5iw-rqaaa-aaaaq-qaaba-cai.svg",
-		"tags": [
-			{
-				"type": "category",
-				"value": "stablecoin"
-			}
-		]
+		"icon": "/icons/icrc/um5iw-rqaaa-aaaaq-qaaba-cai.svg"
 	},
 	"BITTYICP": {
 		"ledgerCanisterId": "qroj6-lyaaa-aaaam-qeqta-cai",
