@@ -11,6 +11,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 
+	interface Props {
+		selectedCategory?: TokenCategoryTagValue | undefined;
+		onSelect?: (value: TokenCategoryTagValue | undefined) => void;
+	}
+
+	let { selectedCategory, onSelect }: Props = $props();
+
 	let visible = $state(false);
 
 	let button = $state<HTMLButtonElement | undefined>();
@@ -20,14 +27,18 @@
 	const getCategoryLabel = (value: TokenCategoryTagValue): string =>
 		$i18n.token_tag.category[value] ?? value;
 
+	let activeCategory = $derived(selectedCategory ?? $tokenCategoryFilter);
+
 	const currentLabel: string = $derived(
-		isNullish($tokenCategoryFilter)
-			? $i18n.tokens.text.asset_type_all
-			: getCategoryLabel($tokenCategoryFilter)
+		isNullish(activeCategory) ? $i18n.tokens.text.asset_type_all : getCategoryLabel(activeCategory)
 	);
 
 	const select = (value: TokenCategoryTagValue | undefined) => {
-		tokenCategoryFilterStore.set({ key: 'token-category-filter', value: { value } });
+		if (onSelect) {
+			onSelect(value);
+		} else {
+			tokenCategoryFilterStore.set({ key: 'token-category-filter', value: { value } });
+		}
 		visible = false;
 	};
 </script>
@@ -50,7 +61,7 @@
 				transparent
 			>
 				<span class="w-[20px] pt-0.75 text-brand-primary">
-					{#if isNullish($tokenCategoryFilter)}
+					{#if isNullish(activeCategory)}
 						<IconCheck size="20" />
 					{/if}
 				</span>
@@ -71,7 +82,7 @@
 					transparent
 				>
 					<span class="w-[20px] pt-0.75 text-brand-primary">
-						{#if $tokenCategoryFilter === category}
+						{#if activeCategory === category}
 							<IconCheck size="20" />
 						{/if}
 					</span>

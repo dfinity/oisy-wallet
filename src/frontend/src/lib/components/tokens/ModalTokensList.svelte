@@ -12,6 +12,7 @@
 		MODAL_TOKENS_LIST
 	} from '$lib/constants/test-ids.constants';
 	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
+	import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -60,9 +61,11 @@
 		setFilterQuery(filter);
 	});
 
+	let localCategoryFilter = $state<TokenCategoryTagValue | undefined>($tokenCategoryFilter);
+
 	let displayTokens = $derived(
 		$showTokenCategoryFilter
-			? filterTokensUiByCategory({ tokens: $filteredTokens, category: $tokenCategoryFilter })
+			? filterTokensUiByCategory({ tokens: $filteredTokens, category: localCategoryFilter })
 			: $filteredTokens
 	);
 
@@ -89,7 +92,10 @@
 		</ModalFilterButton>
 
 		{#if $showTokenCategoryFilter}
-			<TokenCategoryFilterDropdown />
+			<TokenCategoryFilterDropdown
+				onSelect={(value) => (localCategoryFilter = value)}
+				selectedCategory={localCategoryFilter}
+			/>
 		{/if}
 	</div>
 </div>
