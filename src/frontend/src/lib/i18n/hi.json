@@ -1157,7 +1157,10 @@
 			"sort_by_value": "",
 			"sort_by_performance": "",
 			"sort_by_symbol": "",
-			"hide_asset_types": ""
+			"hide_asset_types": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "टोकन विवरण",
@@ -1282,6 +1285,23 @@
 			"unexpected_undefined": "टोकन अपरिभाषित है। यह अप्रत्याशित है।",
 			"unexpected_error_on_token_delete": "टोकन हटाते समय कुछ गलत हो गया।",
 			"unexpected_error_on_token_update": "टोकन अपडेट करते समय कुछ गलत हो गया।"
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
 		}
 	},
 	"nfts": {

@@ -4,6 +4,7 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
+	ExchangeRate,
 	GetAllowedCyclesResponse,
 	TokenId,
 	UserProfile
@@ -47,8 +48,8 @@ import {
 	createServices,
 	fromNullable,
 	nonNullish,
-	type QueryParams,
-	toNullable
+	toNullable,
+	type QueryParams
 } from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
@@ -394,58 +395,47 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
+	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
+		if (!nonNullish(rate)) {
+			return;
+		}
+
+		return {
+			usd: {
+				price: fromNullable(rate.usd.price),
+				price24hChangePct: fromNullable(rate.usd.price_24h_change_pct),
+				marketCap: fromNullable(rate.usd.market_cap),
+				timestampNs: rate.usd.timestamp_ns
+			}
+		};
+	};
+
 	getExchangeRate = async ({
 		token_id,
 		certified
-	}: {
-		token_id: TokenId;
-		certified: boolean;
-	}): Promise<BackendExchangeRate | undefined> => {
+	}: { token_id: TokenId } & QueryParams): Promise<BackendExchangeRate | undefined> => {
 		const { get_exchange_rate } = this.caller({ certified });
 
 		const response = await get_exchange_rate(token_id);
 
-		const rate = fromNullable(response);
-
-		return nonNullish(rate)
-			? {
-					usd: {
-						price: fromNullable(rate.usd.price),
-						price24hChangePct: fromNullable(rate.usd.price_24h_change_pct),
-						marketCap: fromNullable(rate.usd.market_cap),
-						timestampNs: rate.usd.timestamp_ns
-					}
-				}
-			: undefined;
+		return this.mapExchangeRate(fromNullable(response));
 	};
 
 	getExchangeRates = async ({
 		token_ids,
 		certified
-	}: {
-		token_ids: TokenId[];
-		certified: boolean;
-	}): Promise<Map<string, BackendExchangeRate>> => {
+	}: { token_ids: TokenId[] } & QueryParams): Promise<Map<string, BackendExchangeRate>> => {
 		const { get_exchange_rates } = this.caller({ certified });
 
 		const results = await get_exchange_rates(token_ids);
 
 		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
-			const rateValue = fromNullable(rate);
+			const unwrapped = this.mapExchangeRate(fromNullable(rate));
 
-			const unwrapped = nonNullish(rateValue)
-				? {
-						usd: {
-							price: fromNullable(rateValue.usd.price),
-							price24hChangePct: fromNullable(rateValue.usd.price_24h_change_pct),
-							marketCap: fromNullable(rateValue.usd.market_cap),
-							timestampNs: rateValue.usd.timestamp_ns
-						}
-					}
-				: undefined;
+			const key = tokenIdKey(id);
 
-			if (nonNullish(unwrapped)) {
-				acc.set(tokenIdKey(id), unwrapped);
+			if (nonNullish(unwrapped) && nonNullish(key)) {
+				acc.set(key, unwrapped);
 			}
 
 			return acc;

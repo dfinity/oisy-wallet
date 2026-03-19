@@ -38,6 +38,7 @@ use crate::state::{read_state, set_config};
 mod api;
 mod bitcoin;
 mod contacts;
+mod delegation;
 mod exchange;
 mod signer;
 mod state;

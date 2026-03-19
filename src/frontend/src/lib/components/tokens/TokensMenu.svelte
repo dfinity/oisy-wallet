@@ -8,7 +8,7 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { hideZeroBalances, tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
+	import { hideZeroBalances } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
@@ -41,10 +41,7 @@
 	bind:button
 >
 	{#snippet icon()}
-		<NotificationBlob
-			display={$hideZeroBalances || $tokenCategoryFilterEnabled}
-			position="top-right"
-		>
+		<NotificationBlob display={$hideZeroBalances} position="top-right">
 			<IconManage />
 		</NotificationBlob>
 	{/snippet}
@@ -55,23 +52,23 @@
 		<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 		<List condensed noPadding>
 			<ListItem>
-				<LogoButton fullWidth onClick={toggleHideZeros}>
-					{#snippet title()}
-						<span class="text-sm font-normal">{$i18n.tokens.text.hide_zero_balances}</span>
-					{/snippet}
-					{#snippet action()}
-						<TokensZeroBalanceToggle />
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-
-			<ListItem>
 				<LogoButton fullWidth onClick={toggleTokenCategoryFilter}>
 					{#snippet title()}
 						<span class="text-sm font-normal">{$i18n.tokens.text.hide_asset_types}</span>
 					{/snippet}
 					{#snippet action()}
 						<TokensCategoryFilterToggle />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+
+			<ListItem>
+				<LogoButton fullWidth onClick={toggleHideZeros}>
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.tokens.text.hide_zero_balances}</span>
+					{/snippet}
+					{#snippet action()}
+						<TokensZeroBalanceToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
