@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import HarvestAutopilotVaultInfo from '$eth/components/stake/harvest-autopilot/HarvestAutopilotVaultInfo.svelte';
@@ -27,7 +27,6 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
@@ -36,7 +35,6 @@
 		modalHarvestUnstake
 	} from '$lib/derived/modal.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
-	import { networkId } from '$lib/derived/network.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -44,7 +42,7 @@
 	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { networkUrl } from '$lib/utils/nav.utils';
+	import { back } from '$lib/utils/nav.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
@@ -147,15 +145,7 @@
 					ariaLabel="icon"
 					colorStyle="tertiary"
 					link={false}
-					onclick={() =>
-						goto(
-							networkUrl({
-								path: AppPath.EarnAutopilot,
-								networkId: $networkId,
-								usePreviousRoute: true,
-								fromRoute
-							})
-						)}
+					onclick={() => back({ pop: nonNullish(fromRoute) })}
 				>
 					{#snippet icon()}
 						<IconBackArrow />
