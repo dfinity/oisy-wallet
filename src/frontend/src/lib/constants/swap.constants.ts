@@ -28,6 +28,14 @@ export const SWAP_DELTA_TIMEOUT_MS = 5 * 60_000;
 export const SWAP_DELTA_INTERVAL_MS = 3_000;
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
+export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
+	[ETHEREUM_NETWORK_ID]: 'eth',
+	[ARBITRUM_MAINNET_NETWORK_ID]: 'arb',
+	[BASE_NETWORK_ID]: 'base',
+	[BSC_MAINNET_NETWORK_ID]: 'bsc',
+	[POLYGON_MAINNET_NETWORK_ID]: 'pol'
+};
+
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
 
