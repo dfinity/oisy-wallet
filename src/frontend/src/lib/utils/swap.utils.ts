@@ -210,9 +210,9 @@ export const mapVeloraMarketSwapResult = (swap: OptimalRate): SwapMappedResult =
 
 export const mapNearIntentsQuoteResult = (quote: NearIntentsQuoteResponse): SwapMappedResult => ({
 	provider: SwapProvider.NEAR_INTENTS,
-	receiveAmount: BigInt(quote.quote.amountOut),
+	receiveAmount: BigInt(Math.floor(Number(quote.quote.amountOut))),
 	receiveOutMinimum: nonNullish(quote.quote.minAmountOut)
-		? BigInt(quote.quote.minAmountOut)
+		? BigInt(Math.floor(Number(quote.quote.minAmountOut)))
 		: undefined,
 	swapDetails: quote
 });
