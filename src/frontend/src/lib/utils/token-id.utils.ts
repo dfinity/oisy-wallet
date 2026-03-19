@@ -21,7 +21,7 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 	}
 
 	if ('SplMainnet' in id) {
-		return `SplMainnet:${id.SplMainnet.toLowerCase()}`;
+		return `SplMainnet:${id.SplMainnet}`;
 	}
 
 	if ('EvmNative' in id) {

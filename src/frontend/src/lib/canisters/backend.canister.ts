@@ -4,6 +4,7 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
+	ExchangeRate,
 	GetAllowedCyclesResponse,
 	TokenId,
 	UserProfile
@@ -397,10 +398,7 @@ export class BackendCanister extends Canister<BackendService> {
 	getExchangeRate = async ({
 		token_id,
 		certified
-	}: {
-		token_id: TokenId;
-		certified: boolean;
-	}): Promise<BackendExchangeRate | undefined> => {
+	}: { token_id: TokenId } & QueryParams): Promise<BackendExchangeRate | undefined> => {
 		const { get_exchange_rate } = this.caller({ certified });
 
 		const response = await get_exchange_rate(token_id);
@@ -422,10 +420,7 @@ export class BackendCanister extends Canister<BackendService> {
 	getExchangeRates = async ({
 		token_ids,
 		certified
-	}: {
-		token_ids: TokenId[];
-		certified: boolean;
-	}): Promise<Map<string, BackendExchangeRate>> => {
+	}: { token_ids: TokenId[] } & QueryParams): Promise<Map<string, BackendExchangeRate>> => {
 		const { get_exchange_rates } = this.caller({ certified });
 
 		const results = await get_exchange_rates(token_ids);
