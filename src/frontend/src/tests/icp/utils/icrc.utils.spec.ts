@@ -216,21 +216,19 @@ describe('icrc.utils', () => {
 		});
 
 		it('should use tags from icrcCustomTokens when provided', () => {
-			const stablecoinTags: [{ type: TokenTagType; value: TokenCategoryTagValue }] = [
-				{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
-			];
-
 			const token = mapIcrcToken({
 				...mockParams,
 				icrcCustomTokens: {
 					[mockToken.ledgerCanisterId]: {
 						...mockToken,
-						tags: stablecoinTags
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }]
 					}
 				}
 			});
 
-			expect(token?.tags).toStrictEqual(stablecoinTags);
+			expect(token?.tags).toStrictEqual([
+				{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+			]);
 		});
 
 		it('should default tags to crypto when token is not in icrcCustomTokens', () => {
