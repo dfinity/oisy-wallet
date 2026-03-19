@@ -80,6 +80,12 @@ export const mapBtcGetPendingTransactionsError = (
 		return mapRateLimitError(err.RateLimited);
 	}
 
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetPendingTransactionsError'));
 };
 
@@ -98,6 +104,12 @@ export const mapBtcSelectUserUtxosFeeError = (
 
 	if ('RateLimited' in err) {
 		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
