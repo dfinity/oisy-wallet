@@ -2,6 +2,7 @@ import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
+import { send as sendEvm } from '$eth/services/send.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
@@ -14,7 +15,9 @@ import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
+import * as nearIntentsServices from '$lib/services/near-intents.services';
 import {
+	fetchNearIntentsSwap,
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
 	fetchVeloraDeltaSwap,
@@ -73,6 +76,15 @@ vi.mock('$lib/providers/evm-swap.providers', () => ({
 			isEnabled: true
 		}
 	]
+}));
+
+vi.mock('$lib/services/near-intents.services', () => ({
+	submitNearIntentsDepositTx: vi.fn(),
+	pollNearIntentsStatus: vi.fn()
+}));
+
+vi.mock('$eth/services/send.services', () => ({
+	send: vi.fn()
 }));
 
 vi.mock('@velora-dex/sdk', () => ({
@@ -1463,6 +1475,138 @@ describe('swap.services', () => {
 					})
 				})
 			);
+		});
+	});
+
+	describe('fetchNearIntentsSwap', () => {
+		const sourceToken = {
+			...mockValidErc20Token,
+			decimals: 6,
+			address: '0xUSDC'
+		};
+
+		const destinationToken = {
+			...mockValidErc20Token,
+			decimals: 6,
+			address: '0xARB_USDC'
+		};
+
+		const mockProgress = vi.fn();
+
+		const mockWetQuote = {
+			correlationId: 'test-id',
+			timestamp: '2026-03-16T00:00:00.000Z',
+			signature: 'sig',
+			quoteRequest: {} as never,
+			quote: {
+				depositAddress: '0xDepositAddr',
+				depositMemo: null,
+				amountIn: '1000000',
+				amountInFormatted: '1.00',
+				amountInUsd: '1.00',
+				amountOut: '900000',
+				amountOutFormatted: '0.90',
+				amountOutUsd: '0.90',
+				deadline: '2026-03-16T00:10:00.000Z',
+				timeEstimate: 120,
+				refundFee: '0'
+			}
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+		});
+
+		it('should execute the full NEAR Intents swap flow using swapDetails directly', async () => {
+			await fetchNearIntentsSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockWetQuote
+			});
+
+			expect(sendEvm).toHaveBeenCalledWith(
+				expect.objectContaining({
+					from: mockEthAddress,
+					to: '0xDepositAddr'
+				})
+			);
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
+				depositAddress: '0xDepositAddr',
+				txHash: '0xTxHash123'
+			});
+			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
+				depositAddress: '0xDepositAddr'
+			});
+		});
+
+		it('should report progress steps in correct order', async () => {
+			await fetchNearIntentsSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockWetQuote
+			});
+
+			expect(mockProgress).toHaveBeenCalledTimes(3);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SIGN_TRANSFER);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('should pass depositMemo when present in quote', async () => {
+			const quoteWithMemo = {
+				...mockWetQuote,
+				quote: { ...mockWetQuote.quote, depositMemo: 'stellar-memo' }
+			};
+
+			await fetchNearIntentsSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: quoteWithMemo
+			});
+
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
+				depositAddress: '0xDepositAddr',
+				txHash: '0xTxHash123',
+				depositMemo: 'stellar-memo'
+			});
+			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
+				depositAddress: '0xDepositAddr',
+				depositMemo: 'stellar-memo'
+			});
 		});
 	});
 });
