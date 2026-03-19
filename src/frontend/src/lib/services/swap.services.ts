@@ -1,6 +1,7 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
+import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
@@ -42,6 +43,10 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
+import {
+	pollNearIntentsStatus,
+	submitNearIntentsDepositTx
+} from '$lib/services/near-intents.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { throwSwapError } from '$lib/services/swap-errors.services';
 import { autoLoadSingleToken } from '$lib/services/token.services';
@@ -61,6 +66,7 @@ import {
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
 	type SwapMappedResult,
+	type SwapNearIntentsParams,
 	type SwapParams,
 	type SwapVeloraParams
 } from '$lib/types/swap';
@@ -592,6 +598,57 @@ export const fetchIcpSwap = async ({
 			errorMessage: get(i18n).init.error.icrc_custom_token
 		});
 	}
+
+	await waitAndTriggerWallet();
+};
+
+export const fetchNearIntentsSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	swapAmount,
+	sourceNetwork,
+	userAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapNearIntentsParams): Promise<void> => {
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
+
+	const { depositAddress, depositMemo } = swapDetails.quote;
+
+	progress(ProgressStepsSwap.SIGN_TRANSFER);
+
+	const { hash: txHash } = await sendEvm({
+		from: userAddress,
+		to: depositAddress,
+		amount: parsedSwapAmount,
+		token: sourceToken,
+		sourceNetwork,
+		identity,
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas
+	});
+
+	progress(ProgressStepsSwap.SWAP);
+
+	await submitNearIntentsDepositTx({
+		depositAddress,
+		txHash,
+		depositMemo: depositMemo ?? undefined
+	});
+
+	await pollNearIntentsStatus({
+		depositAddress,
+		depositMemo: depositMemo ?? undefined
+	});
+
+	progress(ProgressStepsSwap.UPDATE_UI);
 
 	await waitAndTriggerWallet();
 };
