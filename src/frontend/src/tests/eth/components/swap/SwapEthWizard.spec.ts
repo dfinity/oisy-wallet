@@ -1,13 +1,7 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
+import type { EthFeeStore, FeeStoreData } from '$eth/stores/eth-fee.store';
 import * as feeStoreMod from '$eth/stores/eth-fee.store';
-import {
-	ETH_FEE_CONTEXT_KEY,
-	initEthFeeContext,
-	initEthFeeStore,
-	type EthFeeStore,
-	type FeeStoreData
-} from '$eth/stores/eth-fee.store';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -78,9 +72,9 @@ describe('SwapEthWizard', () => {
 	mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
 
 	mockContext.set(
-		ETH_FEE_CONTEXT_KEY,
-		initEthFeeContext({
-			feeStore: initEthFeeStore(),
+		feeStoreMod.ETH_FEE_CONTEXT_KEY,
+		feeStoreMod.initEthFeeContext({
+			feeStore: feeStoreMod.initEthFeeStore(),
 			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
@@ -228,8 +222,8 @@ describe('SwapEthWizard', () => {
 			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: executionSwapAmountsStore });
 
 			ctx.set(
-				ETH_FEE_CONTEXT_KEY,
-				initEthFeeContext({
+				feeStoreMod.ETH_FEE_CONTEXT_KEY,
+				feeStoreMod.initEthFeeContext({
 					feeStore,
 					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
@@ -285,17 +279,16 @@ describe('SwapEthWizard', () => {
 			expect(swapServices.fetchVeloraMarketSwap).toHaveBeenCalledOnce();
 			expect(onClose).toHaveBeenCalledOnce();
 			expect(onBack).not.toHaveBeenCalled();
-			expect(toasts.toastsError).not.toHaveBeenCalledWith(
-				expect.objectContaining({
-					msg: expect.objectContaining({ text: 'Something went wrong while swapping tokens.' })
-				})
-			);
+
+			const swapErrors = vi
+				.mocked(toasts.toastsError)
+				.mock.calls.filter(([{ msg }]) => msg.text !== 'Cannot fetch gas fee.');
+
+			expect(swapErrors).toHaveLength(0);
 		});
 
 		it('calls onBack when swap fails', async () => {
-			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(
-				new Error('Swap failed')
-			);
+			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(new Error('Swap failed'));
 
 			const { getByText, onClose, onBack } = renderExecution();
 
@@ -308,9 +301,7 @@ describe('SwapEthWizard', () => {
 		});
 
 		it('calls onBack even when trackEvent throws in the error path', async () => {
-			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(
-				new Error('Swap failed')
-			);
+			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(new Error('Swap failed'));
 			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => {
 				throw new Error("undefined is not an object (evaluating 'n().symbol')");
 			});
