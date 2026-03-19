@@ -61,6 +61,12 @@
 		"ledgerCanisterId": "ly36x-wiaaa-aaaai-aqj7q-cai",
 		"indexCanisterId": "4cx56-naaaa-aaaai-aqkaa-cai",
 		"mintingAccount": "6csfo-tvgcf-7i47c-4ohs3-tdxbt-wr3dw-bstba-koumv-oiwcb-jnfu3-nqe",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
 		"decimals": 8,
 		"name": "VNX Franc",
 		"symbol": "VCHF",

@@ -171,7 +171,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [
@@ -208,7 +211,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_MAINNET_NETWORK_ID]);
@@ -239,7 +245,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [ETHEREUM_NETWORK_ID]);
@@ -251,7 +260,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, []);

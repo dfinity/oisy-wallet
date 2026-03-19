@@ -7,6 +7,7 @@ import type {
 import {
 	addPendingBtcTransaction,
 	addUserCredential,
+	allowSigning,
 	createUserProfile,
 	getExchangeRate,
 	getExchangeRates,
@@ -24,6 +25,8 @@ import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import type {
 	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
+	AllowSigningOutcome,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	GetUserProfileResponse,
@@ -401,6 +404,42 @@ describe('backend.api', () => {
 			});
 
 			await expect(getPendingBtcTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('allowSigning', () => {
+		const mockParams: CanisterApiFunctionParams<AllowSigningParams> = {
+			...baseParams,
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		const mockResponse: AllowSigningOutcome = {
+			response: { status: { Executed: null }, challenge_completion: [], allowed_cycles: 100n }
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.allowSigning.mockResolvedValue(mockResponse);
+		});
+
+		it('should successfully call allowSigning endpoint', async () => {
+			const result = await allowSigning(mockParams);
+
+			expect(result).toEqual(mockResponse);
+			expect(backendCanisterMock.allowSigning).toHaveBeenCalledExactlyOnceWith({
+				iiDelegationChain: mockIIDelegationChain
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(allowSigning({ ...mockParams, identity: undefined })).rejects.toThrow();
+		});
+
+		it('should throw an error if allowSigning throws', async () => {
+			backendCanisterMock.allowSigning.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(allowSigning(mockParams)).rejects.toThrow();
 		});
 	});
 

@@ -59,6 +59,23 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddDappSettingsError
 	});
+	const Delegation = IDL.Record({
+		pubkey: IDL.Vec(IDL.Nat8),
+		targets: IDL.Opt(IDL.Vec(IDL.Principal)),
+		expiration: IDL.Nat64
+	});
+	const SignedDelegation = IDL.Record({
+		signature: IDL.Vec(IDL.Nat8),
+		delegation: Delegation
+	});
+	const IIDelegationChain = IDL.Record({
+		public_key: IDL.Vec(IDL.Nat8),
+		delegations: IDL.Vec(SignedDelegation)
+	});
+	const AllowSigningRequest = IDL.Record({
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		nonce: IDL.Nat64
+	});
 	const AllowSigningStatus = IDL.Variant({
 		Skipped: IDL.Null,
 		Failed: IDL.Null,
@@ -96,6 +113,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const AllowSigningError = IDL.Variant({
 		ApproveError: ApproveError,
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
 		RateLimited: RateLimitError,
 		RateLimitedByGuard: RateLimitError,
 		Other: IDL.Text,
@@ -104,19 +122,6 @@ export const idlFactory = ({ IDL }) => {
 	const AllowSigningResult = IDL.Variant({
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
-	});
-	const Delegation = IDL.Record({
-		pubkey: IDL.Vec(IDL.Nat8),
-		targets: IDL.Opt(IDL.Vec(IDL.Principal)),
-		expiration: IDL.Nat64
-	});
-	const SignedDelegation = IDL.Record({
-		signature: IDL.Vec(IDL.Nat8),
-		delegation: Delegation
-	});
-	const IIDelegationChain = IDL.Record({
-		public_key: IDL.Vec(IDL.Nat8),
-		delegations: IDL.Vec(SignedDelegation)
 	});
 	const Network = IDL.Variant({
 		mainnet: IDL.Null,
@@ -531,7 +536,7 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [AddUserHiddenDappIdResult], []),
-		allow_signing: IDL.Func([], [AllowSigningResult], []),
+		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
 		btc_add_pending_transaction: IDL.Func(
 			[BtcAddPendingTransactionRequest],
 			[BtcAddPendingTransactionResult],
