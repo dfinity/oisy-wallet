@@ -1158,6 +1158,7 @@
 			"sort_by_performance": "토큰 성과",
 			"sort_by_symbol": "심볼",
 			"hide_asset_types": "",
+			"asset_type_all": "",
 			"no_tokens_for_asset_type": "",
 			"no_tokens_for_asset_type_description": ""
 		},

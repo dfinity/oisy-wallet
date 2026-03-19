@@ -2,15 +2,18 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
+	import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -131,6 +134,12 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
+		{#if $showTokenCategoryFilter}
+			<div class="mb-4" transition:slide={SLIDE_PARAMS}>
+				<TokenTypeFilterBar />
+			</div>
+		{/if}
+
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each tokensWithKey as { tokenOrGroup, key } (key)}
 				<div class="overflow-hidden rounded-xl">

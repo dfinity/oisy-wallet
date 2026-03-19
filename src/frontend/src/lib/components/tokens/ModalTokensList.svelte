@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { IconExpandMore } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
+	import TokenCategoryFilterDropdown from '$lib/components/tokens/TokenCategoryFilterDropdown.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import ModalFilterButton from '$lib/components/ui/ModalFilterButton.svelte';
 	import {
 		MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
 		MODAL_TOKENS_LIST
@@ -79,16 +80,17 @@
 	</div>
 
 	<div class="flex items-center gap-2">
-		<button
-			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
-			class:hover:border-brand-primary={networkSelectorViewOnly}
-			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+		<ModalFilterButton
+			ariaLabel={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			disabled={networkSelectorViewOnly}
 			onclick={() => !networkSelectorViewOnly && onSelectNetworkFilter()}
 		>
-			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
-			<IconExpandMore size="24" />
-		</button>
+			{$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+		</ModalFilterButton>
+
+		{#if $showTokenCategoryFilter}
+			<TokenCategoryFilterDropdown />
+		{/if}
 	</div>
 </div>
 
