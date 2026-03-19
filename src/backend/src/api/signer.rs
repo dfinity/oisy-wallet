@@ -107,9 +107,13 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
 
         signer::approve_signing(None).await?;
 
+        let allowed_cycles = signer::has_sufficient_allowance()
+            .await
+            .unwrap_or_else(|| Nat::from(0u64));
+
         Ok(AllowSigningResponse {
-            status: AllowSigningStatus::Skipped,
-            allowed_cycles: Nat::from(0u64),
+            status: AllowSigningStatus::Executed,
+            allowed_cycles,
             challenge_completion: None,
         })
     }
