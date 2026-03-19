@@ -4,37 +4,13 @@ use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
-use super::rate_limiter;
+use super::rate_limiter::ALLOW_SIGNING_RATE_LIMITER;
 use crate::{api, signer, types::StoredPrincipal};
 
 thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
     static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
     static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
-
-    /// High-frequency guard rate limiter checked **before** any inter-canister
-    /// call.  Designed to cheaply reject rapid-fire requests that would otherwise
-    /// drain cycles through the allowance check.
-    ///
-    /// Limit: 10 calls per caller per minute.
-    pub(crate) static ALLOW_SIGNING_GUARD_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
-
-    /// Rate-limits `allow_signing`: max 3 calls per caller per hour.
-    pub(crate) static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(3, 60 * 60 * 1_000_000_000);
-
-    /// Rate-limits `btc_select_user_utxos_fee`: max 10 calls per caller per minute.
-    pub(crate) static BTC_SELECT_UTXOS_FEE_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
-
-    /// Rate-limits `btc_add_pending_transaction`: max 10 calls per caller per minute.
-    pub(crate) static BTC_ADD_PENDING_TX_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
-
-    /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
-    pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(15, 60 * 1_000_000_000);
 }
 
 /// 2 hours in nanoseconds — if a housekeeping run has been in progress for
