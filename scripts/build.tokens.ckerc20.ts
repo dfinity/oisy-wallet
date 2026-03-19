@@ -195,8 +195,12 @@ const readExistingCkErc20Tags = (): EnvTagsRecord => {
 
 			return envAcc;
 		}, {});
-	} catch (_err: unknown) {
-		return {};
+	} catch (err: unknown) {
+		console.error(
+			`Failed to parse existing CK ERC20 tags from ${CK_ERC20_JSON_FILE}. Aborting to avoid losing curated tags.`,
+			err
+		);
+		throw err;
 	}
 };
 
