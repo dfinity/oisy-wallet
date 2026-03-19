@@ -36,6 +36,10 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[POLYGON_MAINNET_NETWORK_ID]: 'pol'
 };
 
+export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
+export const NEAR_INTENTS_POLL_INTERVAL_MS = 2_000;
+export const NEAR_INTENTS_POLL_MAX_ATTEMPTS = 120;
+
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
 
