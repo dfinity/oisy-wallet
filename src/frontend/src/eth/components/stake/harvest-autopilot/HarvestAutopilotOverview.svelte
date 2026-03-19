@@ -18,11 +18,10 @@
 	import { stakeProvidersConfig } from '$lib/config/stake.config';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { earningData } from '$lib/derived/earning.derived';
-	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { StakeProvider } from '$lib/types/stake';
 	import type { Vault } from '$lib/types/vaults';
-	import { networkUrl } from '$lib/utils/nav.utils';
+	import { back } from '$lib/utils/nav.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -66,15 +65,7 @@
 					ariaLabel="icon"
 					colorStyle="tertiary"
 					link={false}
-					onclick={() =>
-						goto(
-							networkUrl({
-								path: AppPath.Earn,
-								networkId: $networkId,
-								usePreviousRoute: true,
-								fromRoute
-							})
-						)}
+					onclick={() => back({ pop: nonNullish(fromRoute) })}
 				>
 					{#snippet icon()}
 						<IconBackArrow />
