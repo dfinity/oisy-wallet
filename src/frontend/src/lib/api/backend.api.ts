@@ -15,6 +15,7 @@ import type {
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
@@ -150,11 +151,12 @@ export const getAllowedCycles = async ({
 };
 
 export const allowSigning = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<AllowSigningOutcome> => {
+	identity,
+	...params
+}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningOutcome> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	return allowSigning();
+	return allowSigning(params);
 };
 
 export const addUserHiddenDappId = async ({

@@ -25,10 +25,15 @@ type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	RateLimitedByGuard : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
+};
+type AllowSigningRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
+	nonce : nat64
 };
 type AllowSigningResponse = record {
 	status : AllowSigningStatus;
@@ -523,6 +528,9 @@ service : (Arg) -> {
 	// Ensures the caller has enough cycles allowance for chain-fusion signer
 	// operations (providing public keys, creating signatures, etc.).
 	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
 	// If the caller already has sufficient allowance the call returns
 	// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
 	// call is made.  Otherwise, the endpoint is rate-limited and a new
@@ -536,7 +544,7 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// Errors are enumerated by: `AllowSigningError`.
-	allow_signing : () -> (AllowSigningResult);
+	allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
 	// Adds a pending Bitcoin transaction for the caller.
 	//
 	// Requires a valid II delegation chain to verify the caller authenticated

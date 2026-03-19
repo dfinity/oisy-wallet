@@ -26,6 +26,7 @@ import type {
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
@@ -261,10 +262,17 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async (): Promise<AllowSigningOutcome> => {
+	allowSigning = async ({
+		iiDelegationChain
+	}: AllowSigningParams): Promise<AllowSigningOutcome> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await allow_signing();
+		const response = await allow_signing(
+			toNullable({
+				nonce: BigInt(0),
+				ii_delegation_chain: iiDelegationChain
+			})
+		);
 
 		if ('Ok' in response) {
 			return { response: response.Ok };

@@ -37,10 +37,15 @@ export interface Agreements {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
+	| { InvalidDelegationChain: { msg: string } }
 	| { RateLimited: RateLimitError }
 	| { RateLimitedByGuard: RateLimitError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
+export interface AllowSigningRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
+	nonce: bigint;
+}
 export interface AllowSigningResponse {
 	status: AllowSigningStatus;
 	challenge_completion: [] | [ChallengeCompletion];
@@ -587,6 +592,9 @@ export interface _SERVICE {
 	 * Ensures the caller has enough cycles allowance for chain-fusion signer
 	 * operations (providing public keys, creating signatures, etc.).
 	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
 	 * If the caller already has sufficient allowance the call returns
 	 * immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
 	 * call is made.  Otherwise, the endpoint is rate-limited and a new
@@ -601,7 +609,7 @@ export interface _SERVICE {
 	 * # Errors
 	 * Errors are enumerated by: `AllowSigningError`.
 	 */
-	allow_signing: ActorMethod<[], AllowSigningResult>;
+	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
 	/**
 	 * Adds a pending Bitcoin transaction for the caller.
 	 *

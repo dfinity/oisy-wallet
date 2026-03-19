@@ -1,7 +1,7 @@
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken, EthereumCustomToken } from '$eth/types/erc20-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -16,7 +16,7 @@ export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams
 	name,
 	symbol,
 	icon: undefined,
-	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+	tags: DEFAULT_TOKEN_TAGS,
 	...rest
 });
 

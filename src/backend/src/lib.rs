@@ -27,7 +27,10 @@ use shared::{
             UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
             UpdateUserNetworkSettingsResult,
         },
-        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        signer::{
+            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+            AllowSigningRequest,
+        },
         token_id::TokenId,
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
