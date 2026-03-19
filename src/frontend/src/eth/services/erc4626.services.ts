@@ -24,7 +24,7 @@ import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { DEFAULT_TOKEN_TAGS } from '$lib/schema/token-tag.schema';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -145,7 +145,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: ETHEREUM_DEFAULT_DECIMALS,
 					standard: { code: 'erc4626' as const },
 					category: 'custom' as const,
-					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+					tags: DEFAULT_TOKEN_TAGS,
 					assetAddress: '' as Erc4626ContractAddress,
 					assetDecimals: ETHEREUM_DEFAULT_DECIMALS,
 					assetSymbol: '',

@@ -15,7 +15,7 @@ import type {
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { DEFAULT_TOKEN_TAGS } from '$lib/schema/token-tag.schema';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -102,7 +102,7 @@ export const mapIcrcToken = ({
 		...(nonNullish(customTokenSymbol?.deprecated) && {
 			deprecated: customTokenSymbol.deprecated
 		}),
-		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+		tags: customTokenSymbol?.tags ?? DEFAULT_TOKEN_TAGS,
 		ledgerCanisterId,
 		...metadataToken,
 		...rest

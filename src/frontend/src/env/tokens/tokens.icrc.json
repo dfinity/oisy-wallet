@@ -67,7 +67,13 @@
 		"fee": {
 			"__bigint__": "10000"
 		},
-		"icon": "/icons/icrc/ly36x-wiaaa-aaaai-aqj7q-cai.png"
+		"icon": "/icons/icrc/ly36x-wiaaa-aaaai-aqj7q-cai.png",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		]
 	},
 	"VEUR": {
 		"ledgerCanisterId": "wu6g4-6qaaa-aaaan-qmrza-cai",

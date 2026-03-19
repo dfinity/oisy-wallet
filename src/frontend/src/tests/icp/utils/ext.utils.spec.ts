@@ -183,5 +183,22 @@ describe('ext.utils', () => {
 				symbol: ''
 			});
 		});
+
+		it('should default tags to crypto when not provided', () => {
+			const token = mapExtToken(mockParams);
+			expect(token.tags).toStrictEqual([
+				{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+			]);
+		});
+
+		it('should use tags from input when provided', () => {
+			const customTags: [{ type: TokenTagType; value: TokenCategoryTagValue }] = [
+				{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+			];
+
+			const token = mapExtToken({ ...mockParams, tags: customTags });
+
+			expect(token.tags).toStrictEqual(customTags);
+		});
 	});
 });

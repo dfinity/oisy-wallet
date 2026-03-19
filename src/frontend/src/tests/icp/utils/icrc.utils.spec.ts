@@ -15,6 +15,7 @@ import {
 	sortIcTokens,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
 import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -201,6 +202,48 @@ describe('icrc.utils', () => {
 				id: token?.id,
 				standard: { code: 'icrc' }
 			});
+		});
+
+		it('should default tags to crypto when icrcCustomTokens is not provided', () => {
+			const token = mapIcrcToken({
+				...mockParams,
+				icrcCustomTokens: undefined
+			});
+
+			expect(token?.tags).toStrictEqual([
+				{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+			]);
+		});
+
+		it('should use tags from icrcCustomTokens when provided', () => {
+			const stablecoinTags: [{ type: TokenTagType; value: TokenCategoryTagValue }] = [
+				{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+			];
+
+			const token = mapIcrcToken({
+				...mockParams,
+				icrcCustomTokens: {
+					[mockToken.ledgerCanisterId]: {
+						...mockToken,
+						tags: stablecoinTags
+					}
+				}
+			});
+
+			expect(token?.tags).toStrictEqual(stablecoinTags);
+		});
+
+		it('should default tags to crypto when token is not in icrcCustomTokens', () => {
+			const token = mapIcrcToken({
+				...mockParams,
+				icrcCustomTokens: {
+					['other-canister-id']: mockToken
+				}
+			});
+
+			expect(token?.tags).toStrictEqual([
+				{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+			]);
 		});
 	});
 

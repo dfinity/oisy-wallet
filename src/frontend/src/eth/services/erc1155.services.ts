@@ -11,7 +11,7 @@ import {
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
 } from '$lib/enums/plausible';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { DEFAULT_TOKEN_TAGS } from '$lib/schema/token-tag.schema';
 import { trackEvent } from '$lib/services/analytics.services';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -138,7 +138,7 @@ const mapErc1155CustomToken = async ({
 			decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 			standard: { code: 'erc1155' as const },
 			category: 'custom' as const,
-			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+			tags: DEFAULT_TOKEN_TAGS,
 			enabled,
 			version,
 			...(nonNullish(mappedSection) && {
