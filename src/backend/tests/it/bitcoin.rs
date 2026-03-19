@@ -31,15 +31,27 @@ const UTXO_1: Utxo = Utxo {
 
 #[test]
 fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
-    let pic_setup = setup();
+    let (pic_setup, ii) = setup_with_ii();
 
-    let caller = Principal::from_text(CALLER).unwrap();
+    let device_pubkey = b"test-device-key-for-insufficient-funds";
+    let (user_number, device_principal) = ii.register_identity(device_pubkey);
+
+    let session_pubkey = b"test-session-key-insufficient";
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
         network: BitcoinNetwork::Regtest,
         min_confirmations: None,
-        ii_delegation_chain: None,
+        ii_delegation_chain: Some(delegation_chain),
     };
     let response = pic_setup.update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
         caller,
@@ -89,14 +101,26 @@ fn test_add_pending_transaction_requires_delegation_chain() {
 
 #[test]
 fn test_get_pending_transactions_returns_empty_for_new_user() {
-    let pic_setup = setup();
+    let (pic_setup, ii) = setup_with_ii();
 
-    let caller = Principal::from_text(CALLER).unwrap();
+    let device_pubkey = b"test-device-key-for-empty-pending";
+    let (user_number, device_principal) = ii.register_identity(device_pubkey);
+
+    let session_pubkey = b"test-session-key-empty-pending";
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
 
     let read_request = BtcGetPendingTransactionsRequest {
         address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
-        ii_delegation_chain: None,
+        ii_delegation_chain: Some(delegation_chain),
     };
     let read_response = pic_setup.update::<Result<
         BtcGetPendingTransactionsReponse,
