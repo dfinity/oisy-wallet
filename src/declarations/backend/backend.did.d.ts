@@ -37,14 +37,14 @@ export interface Agreements {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
+	| { InvalidDelegationChain: { msg: string } }
 	| { RateLimited: RateLimitError }
 	| { RateLimitedByGuard: RateLimitError }
-	| { InvalidDelegationChain: { msg: string } }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
 export interface AllowSigningRequest {
-	nonce: bigint;
 	ii_delegation_chain: [] | [IIDelegationChain];
+	nonce: bigint;
 }
 export interface AllowSigningResponse {
 	status: AllowSigningStatus;
@@ -511,6 +511,9 @@ export interface _SERVICE {
 	/**
 	 * Ensures the caller has enough cycles allowance for chain-fusion signer
 	 * operations (providing public keys, creating signatures, etc.).
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
 	 *
 	 * If the caller already has sufficient allowance the call returns
 	 * immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
