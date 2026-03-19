@@ -186,6 +186,7 @@ describe('ext.utils', () => {
 
 		it('should default tags to crypto when not provided', () => {
 			const token = mapExtToken(mockParams);
+
 			expect(token.tags).toStrictEqual([
 				{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
 			]);
