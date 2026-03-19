@@ -144,6 +144,16 @@
 			return;
 		}
 
+		const swapTrackingMetadata = {
+			sourceToken: $sourceToken.symbol,
+			destinationToken: $destinationToken.symbol,
+			dApp: $swapAmountsStore.selectedProvider.provider,
+			usdSourceValue: sourceTokenUsdValue ?? ''
+		};
+
+		const sourceLedgerCanisterId = ($sourceToken as IcToken).ledgerCanisterId;
+		const destinationLedgerCanisterId = ($destinationToken as IcToken).ledgerCanisterId;
+
 		onNext();
 
 		try {
@@ -176,12 +186,7 @@
 			try {
 				trackEvent({
 					name: TRACK_COUNT_SWAP_SUCCESS,
-					metadata: {
-						sourceToken: $sourceToken?.symbol ?? '',
-						destinationToken: $destinationToken?.symbol ?? '',
-						dApp: $swapAmountsStore?.selectedProvider?.provider ?? '',
-						usdSourceValue: sourceTokenUsdValue ?? ''
-					}
+					metadata: swapTrackingMetadata
 				});
 			} catch (_: unknown) {
 				// Non-critical: tracking failure should not prevent the modal from closing.
@@ -206,7 +211,7 @@
 					errorType: err.code,
 					swapSucceded: err.swapSucceded,
 					url: {
-						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcToken | undefined)?.ledgerCanisterId ?? ''}&output=${($destinationToken as IcToken | undefined)?.ledgerCanisterId ?? ''}`,
+						url: `https://app.icpswap.com/swap?input=${sourceLedgerCanisterId}&output=${destinationLedgerCanisterId}`,
 						text: 'icpswap.com'
 					}
 				});
@@ -240,11 +245,8 @@
 					trackEvent({
 						name: TRACK_COUNT_SWAP_ERROR,
 						metadata: {
-							sourceToken: $sourceToken?.symbol ?? '',
-							destinationToken: $destinationToken?.symbol ?? '',
-							dApp: $swapAmountsStore?.selectedProvider?.provider ?? '',
-							errorKey: isSwapError(err) ? err.code : '',
-							usdSourceValue: sourceTokenUsdValue ?? ''
+							...swapTrackingMetadata,
+							errorKey: isSwapError(err) ? err.code : ''
 						}
 					});
 				}

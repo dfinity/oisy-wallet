@@ -223,6 +223,16 @@
 			return;
 		}
 
+		const swapTrackingMetadata = {
+			sourceToken: $sourceToken.symbol,
+			destinationToken: $destinationToken.symbol,
+			dApp: $swapAmountsStore.selectedProvider.provider,
+			usdSourceValue: sourceTokenUsdValue ?? '',
+			swapType: $swapAmountsStore.swaps[0].type ?? '',
+			sourceNetwork: $sourceToken.network.name,
+			destinationNetwork: $destinationToken.network.name
+		};
+
 		onNext();
 		onStopTriggerAmount();
 
@@ -258,15 +268,7 @@
 			try {
 				trackEvent({
 					name: TRACK_COUNT_SWAP_SUCCESS,
-					metadata: {
-						sourceToken: $sourceToken?.symbol ?? '',
-						destinationToken: $destinationToken?.symbol ?? '',
-						dApp: $swapAmountsStore?.selectedProvider?.provider ?? '',
-						usdSourceValue: sourceTokenUsdValue ?? '',
-						swapType: $swapAmountsStore?.swaps?.[0]?.type ?? '',
-						sourceNetwork: $sourceToken?.network?.name ?? '',
-						destinationNetwork: $destinationToken?.network?.name ?? ''
-					}
+					metadata: swapTrackingMetadata
 				});
 			} catch (_: unknown) {
 				// Non-critical: tracking failure should not prevent the modal from closing.
@@ -286,13 +288,8 @@
 				trackEvent({
 					name: TRACK_COUNT_SWAP_ERROR,
 					metadata: {
-						sourceToken: $sourceToken?.symbol ?? '',
-						destinationToken: $destinationToken?.symbol ?? '',
-						dApp: $swapAmountsStore?.selectedProvider?.provider ?? '',
-						swapType: $swapAmountsStore?.swaps?.[0]?.type ?? '',
-						error: errorDetailToString(err) ?? '',
-						sourceNetwork: $sourceToken?.network?.name ?? '',
-						destinationNetwork: $destinationToken?.network?.name ?? ''
+						...swapTrackingMetadata,
+						error: errorDetailToString(err) ?? ''
 					}
 				});
 			} catch (_: unknown) {
