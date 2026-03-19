@@ -35,7 +35,6 @@
 	let title = $state<string>('');
 	let note = $state<string>('');
 	let expiryHours = $state<number>(24);
-	let creating = $state(false);
 	let tipUrl = $state<string | undefined>();
 	let error = $state<string | undefined>();
 
@@ -54,7 +53,6 @@
 		title = '';
 		note = '';
 		expiryHours = 24;
-		creating = false;
 		tipUrl = undefined;
 		error = undefined;
 		tipWizardStore.reset();
@@ -84,22 +82,21 @@
 
 	const parsedAmount = $derived.by(() => {
 		if (!selectedToken || !amount) {
-			return 0n;
+			return ZERO;
 		}
 		const { decimals } = selectedToken;
 		const parsed = parseFloat(amount);
 		if (isNaN(parsed) || parsed <= 0) {
-			return 0n;
+			return ZERO;
 		}
 		return BigInt(Math.floor(parsed * 10 ** decimals));
 	});
 
 	const onConfirm = async () => {
-		if (!selectedToken || parsedAmount <= 0n || !$authIdentity) {
+		if (!selectedToken || parsedAmount <= ZERO || !$authIdentity) {
 			return;
 		}
 
-		creating = true;
 		error = undefined;
 		goToStep(WizardStepsTip.CREATING);
 
@@ -115,15 +112,13 @@
 			expiresAtNs
 		});
 
-		creating = false;
-
 		if (result.success) {
 			const { shareData } = result;
 			tipWizardStore.setShareData(shareData);
 			tipUrl = `${window.location.origin}/?tip=${shareData.dealId}&claim=${shareData.claimCode}`;
 			goToStep(WizardStepsTip.SHARE);
 		} else {
-			error = result.error;
+			({ error } = result);
 			goToStep(WizardStepsTip.REVIEW);
 		}
 	};
