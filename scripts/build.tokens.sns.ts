@@ -215,8 +215,9 @@ const readExistingTags = (): Record<CanisterIdText, EnvSnsTokenWithIcon['tags']>
 			},
 			{}
 		);
-	} catch (_err: unknown) {
-		return {};
+	} catch (err: unknown) {
+		console.error(`Failed to read or parse existing SNS tags from "${SNS_JSON_FILE}". Aborting to avoid overwriting manual tags.`, err);
+		throw err instanceof Error ? err : new Error('Failed to read existing SNS tags');
 	}
 };
 
