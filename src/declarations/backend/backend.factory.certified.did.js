@@ -157,6 +157,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const SelectedUtxosFeeError = IDL.Variant({
 		PendingTransactions: IDL.Null,
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
 		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
@@ -165,6 +166,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: SelectedUtxosFeeError
 	});
 	const BtcGetPendingTransactionsRequest = IDL.Record({
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
 		network: Network,
 		address: IDL.Text
 	});
@@ -176,6 +178,7 @@ export const idlFactory = ({ IDL }) => {
 		transactions: IDL.Vec(PendingTransaction)
 	});
 	const BtcGetPendingTransactionsError = IDL.Variant({
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
 		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
@@ -184,6 +187,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: BtcGetPendingTransactionsError
 	});
 	const SelectedUtxosFeeRequest = IDL.Record({
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
 		network: Network,
 		amount_satoshis: IDL.Nat64,
 		min_confirmations: IDL.Opt(IDL.Nat32)

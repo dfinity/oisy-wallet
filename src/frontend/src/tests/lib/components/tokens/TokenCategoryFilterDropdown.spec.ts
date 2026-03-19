@@ -152,4 +152,90 @@ describe('TokenCategoryFilterDropdown', () => {
 
 		expect(get(tokenCategoryFilter)).toBe(TokenCategoryTagValue.COMMODITY);
 	});
+
+	describe('controlled mode', () => {
+		it('should display selectedCategory label instead of store value', () => {
+			const { getByText } = render(TokenCategoryFilterDropdown, {
+				props: {
+					selectedCategory: TokenCategoryTagValue.STABLECOIN,
+					onSelect: vi.fn()
+				}
+			});
+
+			expect(getByText(get(i18n).token_tag.category.stablecoin)).toBeInTheDocument();
+		});
+
+		it('should display "All" when selectedCategory is undefined even if store has a value', () => {
+			tokenCategoryFilterStore.set({
+				key: 'token-category-filter',
+				value: { value: TokenCategoryTagValue.STABLECOIN }
+			});
+
+			const { getByText } = render(TokenCategoryFilterDropdown, {
+				props: {
+					selectedCategory: undefined,
+					onSelect: vi.fn()
+				}
+			});
+
+			expect(getByText(get(i18n).tokens.text.asset_type_all)).toBeInTheDocument();
+		});
+
+		it('should call onSelect instead of updating the store', async () => {
+			const onSelectSpy = vi.fn();
+
+			const { container, getByText } = render(TokenCategoryFilterDropdown, {
+				props: {
+					selectedCategory: undefined,
+					onSelect: onSelectSpy
+				}
+			});
+
+			const button = container.querySelector('button');
+			assertNonNullish(button);
+
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				expect(getByText(get(i18n).token_tag.category.crypto)).toBeInTheDocument();
+			});
+
+			const option = getByText(get(i18n).token_tag.category.crypto);
+			await fireEvent.click(option);
+
+			expect(onSelectSpy).toHaveBeenCalledWith(TokenCategoryTagValue.CRYPTO);
+			expect(tokenCategoryFilterStoreSpy).not.toHaveBeenCalled();
+		});
+
+		it('should call onSelect with undefined when "All" is selected', async () => {
+			const onSelectSpy = vi.fn();
+
+			const { container, getAllByText } = render(TokenCategoryFilterDropdown, {
+				props: {
+					selectedCategory: TokenCategoryTagValue.STOCK,
+					onSelect: onSelectSpy
+				}
+			});
+
+			const button = container.querySelector('button');
+			assertNonNullish(button);
+
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				const allOptions = getAllByText(get(i18n).tokens.text.asset_type_all);
+
+				expect(allOptions.length).toBeGreaterThan(0);
+			});
+
+			const allOptions = getAllByText(get(i18n).tokens.text.asset_type_all);
+			const popoverAllOption = allOptions.find((el) => el.closest('ul'));
+			assertNonNullish(popoverAllOption);
+
+			await fireEvent.click(popoverAllOption);
+
+			expect(onSelectSpy).toHaveBeenCalledWith(undefined);
+			expect(tokenCategoryFilterStoreSpy).not.toHaveBeenCalled();
+		});
+	});
 });

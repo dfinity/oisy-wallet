@@ -102,13 +102,15 @@ export type BtcGetFeePercentilesResult =
 	| { Err: SelectedUtxosFeeError };
 export type BtcGetPendingTransactionsError =
 	| {
-			RateLimited: RateLimitError;
+			InvalidDelegationChain: { msg: string };
 	  }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
 export interface BtcGetPendingTransactionsRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
 	address: string;
 }
@@ -329,9 +331,11 @@ export interface SaveNetworksSettingsRequest {
 }
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
+	| { InvalidDelegationChain: { msg: string } }
 	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
 	amount_satoshis: bigint;
 	min_confirmations: [] | [number];
@@ -555,6 +559,9 @@ export interface _SERVICE {
 	/**
 	 * Returns the pending Bitcoin transactions for the caller.
 	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
 	 * # Errors
 	 * Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	 */
@@ -564,6 +571,9 @@ export interface _SERVICE {
 	>;
 	/**
 	 * Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `SelectedUtxosFeeError`.

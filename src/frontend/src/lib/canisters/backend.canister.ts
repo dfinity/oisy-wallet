@@ -157,13 +157,15 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcGetPendingTransactions = async ({
 		network,
-		address
+		address,
+		iiDelegationChain
 	}: BtcGetPendingTransactionParams): Promise<GetPendingTransactionsOutcome> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
 			network,
-			address
+			address,
+			ii_delegation_chain: iiDelegationChain
 		});
 
 		if ('Ok' in response) {
@@ -191,14 +193,16 @@ export class BackendCanister extends Canister<BackendService> {
 	btcSelectUserUtxosFee = async ({
 		network,
 		minConfirmations,
-		amountSatoshis
+		amountSatoshis,
+		iiDelegationChain
 	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeOutcome> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
 			network,
 			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis
+			amount_satoshis: amountSatoshis,
+			ii_delegation_chain: iiDelegationChain
 		});
 
 		if ('Ok' in response) {

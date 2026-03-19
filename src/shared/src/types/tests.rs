@@ -101,6 +101,7 @@ mod bitcoin {
                 input: BtcGetPendingTransactionsRequest {
                     address: "1".repeat(MAX_ADDRESS_LEN),
                     network: BitcoinNetwork::Mainnet,
+                    ii_delegation_chain: None,
                 },
                 valid: true,
             },
@@ -109,6 +110,7 @@ mod bitcoin {
                 input: BtcGetPendingTransactionsRequest {
                     address: "1".repeat(MAX_ADDRESS_LEN + 1),
                     network: BitcoinNetwork::Mainnet,
+                    ii_delegation_chain: None,
                 },
                 valid: false,
             }
