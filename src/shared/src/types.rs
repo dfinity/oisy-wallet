@@ -12,6 +12,7 @@ pub mod bitcoin;
 pub mod contact;
 pub mod custom_token;
 pub mod dapp;
+pub mod delegation;
 pub mod exchange;
 pub mod experimental_feature;
 pub mod network;
@@ -57,4 +58,5 @@ pub struct Stats {
     pub custom_token_count: u64,
     pub token_activity_count: u64,
     pub exchange_rates_count: u64,
+    pub user_transactions_count: u64,
 }

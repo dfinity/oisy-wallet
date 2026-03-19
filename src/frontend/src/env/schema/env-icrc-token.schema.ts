@@ -21,7 +21,8 @@ export const EnvIcrcTokenMetadataWithIconSchema = z.object({
 export const EnvIcTokenSchema = z.object({
 	ledgerCanisterId: z.string(),
 	indexCanisterId: z.string().optional(),
-	mintingAccount: z.string().optional()
+	mintingAccount: z.string().optional(),
+	icon: z.string().optional()
 });
 
 const OptionalEnvIcrcTokenMetadataSchema = z.union([

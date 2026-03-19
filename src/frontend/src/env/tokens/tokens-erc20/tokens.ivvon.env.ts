@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { IVVON_TOKEN_GROUP } from '$env/tokens/groups/groups.ivvon.env';
 import isharesPurple from '$eth/assets/ishares_purple.webp';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,6 +17,7 @@ export const IVVON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'iShares Core S&P 500 ETF (Ondo Tokenized)',
 	symbol: IVVON_SYMBOL,
 	decimals: IVVON_DECIMALS,

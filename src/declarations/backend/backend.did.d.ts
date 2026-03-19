@@ -72,11 +72,13 @@ export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
 	| { DuplicateUtxos: null }
+	| { InvalidDelegationChain: { msg: string } }
 	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } }
 	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
+	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
 	utxos: Array<Utxo>;
 }
@@ -100,13 +102,15 @@ export type BtcGetFeePercentilesResult =
 	| { Err: SelectedUtxosFeeError };
 export type BtcGetPendingTransactionsError =
 	| {
-			RateLimited: RateLimitError;
+			InvalidDelegationChain: { msg: string };
 	  }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
 export interface BtcGetPendingTransactionsRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
 	address: string;
 }
@@ -200,6 +204,11 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+export interface Delegation {
+	pubkey: Uint8Array;
+	targets: [] | [Array<Principal>];
+	expiration: bigint;
+}
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export interface ErcToken {
 	token_address: string;
@@ -264,6 +273,10 @@ export interface HttpResponse {
 	body: Uint8Array;
 	headers: Array<[string, string]>;
 	status_code: number;
+}
+export interface IIDelegationChain {
+	public_key: Uint8Array;
+	delegations: Array<SignedDelegation>;
 }
 export interface IcrcToken {
 	ledger_id: Principal;
@@ -333,9 +346,11 @@ export interface SaveNetworksSettingsRequest {
 }
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
+	| { InvalidDelegationChain: { msg: string } }
 	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
 	amount_satoshis: bigint;
 	min_confirmations: [] | [number];
@@ -354,6 +369,10 @@ export interface Settings {
 	networks: NetworksSettings;
 	dapp: DappSettings;
 	experimental_features: ExperimentalFeaturesSettings;
+}
+export interface SignedDelegation {
+	signature: Uint8Array;
+	delegation: Delegation;
 }
 export interface SplToken {
 	decimals: [] | [number];
@@ -414,6 +433,7 @@ export type UserTransactionError =
 	| { UserNotFound: null };
 export interface Stats {
 	user_profile_count: bigint;
+	user_transactions_count: bigint;
 	custom_token_count: bigint;
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;
@@ -585,6 +605,10 @@ export interface _SERVICE {
 	/**
 	 * Adds a pending Bitcoin transaction for the caller.
 	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. This protects against unauthorised CLI callers.
+	 * Controllers bypass this check.
+	 *
 	 * # Errors
 	 * Errors are enumerated by: `BtcAddPendingTransactionError`.
 	 */
@@ -615,6 +639,9 @@ export interface _SERVICE {
 	/**
 	 * Returns the pending Bitcoin transactions for the caller.
 	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
 	 * # Errors
 	 * Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	 */
@@ -624,6 +651,9 @@ export interface _SERVICE {
 	>;
 	/**
 	 * Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `SelectedUtxosFeeError`.

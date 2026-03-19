@@ -92,13 +92,13 @@ describe('custom-tokens.services', () => {
 		it('should throw if listCustomTokens fails', async () => {
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Backend error'));
 
-			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrowError('Backend error');
+			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('Backend error');
 		});
 
 		it('should throw if setIdbTokens fails', async () => {
 			mockSetIdbTokens.mockRejectedValue(new Error('IDB error'));
 
-			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrowError('IDB error');
+			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('IDB error');
 		});
 
 		it('should fetch the cached tokens if useCache is true and certified is false', async () => {

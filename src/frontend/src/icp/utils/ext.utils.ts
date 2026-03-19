@@ -4,6 +4,7 @@ import type { EnvExtToken, EnvExtTokenStandardVersion } from '$env/types/env-ext
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { ExtToken, ExtTokenWithoutId } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -81,5 +82,6 @@ export const mapExtToken = ({
 		code: 'ext',
 		version: mapStandardVersion(standardVersion)
 	},
-	category: 'custom'
+	category: 'custom',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 });

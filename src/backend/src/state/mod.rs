@@ -18,6 +18,12 @@ use crate::{
         BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
         PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
         UserTransactionsMap,
+        maps::{
+            ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap,
+            ExchangeRateMap, PowChallengeMap, TokenActivityMap, UserProfileMap,
+            UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
+        },
+        storable::Candid,
     },
 };
 
@@ -57,6 +63,7 @@ impl From<&State> for Stats {
             custom_token_count: state.custom_token.len(),
             token_activity_count: state.token_activity.len(),
             exchange_rates_count: state.exchange_rates.len(),
+            user_transactions_count: state.user_transactions.len(),
         }
     }
 }

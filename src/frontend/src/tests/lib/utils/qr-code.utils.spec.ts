@@ -241,11 +241,99 @@ describe('decodeUrn', () => {
 
 		describe('malformed URIs', () => {
 			it('should not throw on unexpected input', () => {
-				expect(() => decodeQrCodeUrn({ urn: 'ethereum:???@@@' })).not.toThrowError();
+				expect(() => decodeQrCodeUrn({ urn: 'ethereum:???@@@' })).not.toThrow();
 			});
 
 			it('should not throw on special characters', () => {
-				expect(() => decodeQrCodeUrn({ urn: 'ethereum:$%^&*()@1?value=1000' })).not.toThrowError();
+				expect(() => decodeQrCodeUrn({ urn: 'ethereum:$%^&*()@1?value=1000' })).not.toThrow();
+			});
+		});
+
+		describe('ICP URIs', () => {
+			const icpLedgerCanisterId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+			const vchfLedgerCanisterId = 'ly36x-wiaaa-aaaai-aqj7q-cai';
+			const spenderPrincipal = 'ygf2v-iniac-cojwe-damoz-s4act-k4xft-xgpjy-776wl-wr754-qxkgo-4ae';
+			const digitLeadingPrincipal = '2vxsx-fae';
+
+			describe('new format: icp:{canister-id}/transfer?to={principal}&amount={amount}', () => {
+				it('should parse ICP new format URI', () => {
+					const result = decodeQrCodeUrn({
+						urn: `icp:${icpLedgerCanisterId}/transfer?to=${spenderPrincipal}&amount=0.47311479`
+					});
+
+					expect(result).toEqual({
+						prefix: 'icp',
+						destination: icpLedgerCanisterId,
+						functionName: 'transfer',
+						to: spenderPrincipal,
+						amount: 0.47311479
+					});
+				});
+
+				it('should keep digit-leading principal as string, not coerce to number', () => {
+					const result = decodeQrCodeUrn({
+						urn: `icp:${icpLedgerCanisterId}/transfer?to=${digitLeadingPrincipal}&amount=0.1`
+					});
+
+					expect(result).toEqual({
+						prefix: 'icp',
+						destination: icpLedgerCanisterId,
+						functionName: 'transfer',
+						to: digitLeadingPrincipal,
+						amount: 0.1
+					});
+				});
+
+				it('should parse vCHF new format URI', () => {
+					const result = decodeQrCodeUrn({
+						urn: `icp:${vchfLedgerCanisterId}/transfer?to=${spenderPrincipal}&amount=1.01010101`
+					});
+
+					expect(result).toEqual({
+						prefix: 'icp',
+						destination: vchfLedgerCanisterId,
+						functionName: 'transfer',
+						to: spenderPrincipal,
+						amount: 1.01010101
+					});
+				});
+
+				it('should parse new format URI with integer amount', () => {
+					const result = decodeQrCodeUrn({
+						urn: `icp:${icpLedgerCanisterId}/transfer?to=${spenderPrincipal}&amount=100`
+					});
+
+					expect(result?.amount).toBe(100);
+					expect(result?.to).toBe(spenderPrincipal);
+					expect(result?.functionName).toBe('transfer');
+				});
+			});
+
+			// TODO: Remove legacy format tests once DFX completes migration to the new URI format.
+			describe('legacy format: icp:{principal}?amount={amount}', () => {
+				it('should parse legacy ICP URI', () => {
+					const result = decodeQrCodeUrn({
+						urn: `icp:${spenderPrincipal}?amount=0.47311479`
+					});
+
+					expect(result).toEqual({
+						prefix: 'icp',
+						destination: spenderPrincipal,
+						amount: 0.47311479
+					});
+				});
+
+				it('should parse legacy vCHF URI (same format, no canister ID)', () => {
+					const result = decodeQrCodeUrn({
+						urn: `icp:${spenderPrincipal}?amount=1.01010101`
+					});
+
+					expect(result).toEqual({
+						prefix: 'icp',
+						destination: spenderPrincipal,
+						amount: 1.01010101
+					});
+				});
 			});
 		});
 	});

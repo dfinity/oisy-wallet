@@ -2,6 +2,7 @@ import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.ev
 import { ARB_TOKEN_GROUP } from '$env/tokens/groups/groups.arb.env';
 import arb from '$eth/assets/arb.svg';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,6 +17,7 @@ export const ARB_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Arbitrum',
 	symbol: ARB_SYMBOL,
 	decimals: ARB_DECIMALS,

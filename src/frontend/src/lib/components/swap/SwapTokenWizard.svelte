@@ -88,6 +88,7 @@
 			{onBack}
 			{onClose}
 			{onNext}
+			{onShowProviderList}
 			{onShowTokensList}
 			{onStartTriggerAmount}
 			{onStopTriggerAmount}

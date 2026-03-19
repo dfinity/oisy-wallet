@@ -4,6 +4,7 @@ import usdc from '$eth/assets/usdc.svg';
 import type { Erc721Token } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { RequiredEvmErc721Token } from '$evm/types/erc721';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
@@ -19,6 +20,7 @@ export const AZUKI_ELEMENTAL_BEANS_TOKEN: RequiredEvmErc721Token = {
 	network: POLYGON_AMOY_NETWORK,
 	standard: { code: 'erc721' },
 	category: 'custom',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Mbean',
 	symbol: AZUKI_ELEMENTAL_BEANS_SYMBOL,
 	decimals: 0,
@@ -36,6 +38,7 @@ export const DE_GODS_TOKEN: RequiredEvmErc721Token = {
 	network: POLYGON_AMOY_NETWORK,
 	standard: { code: 'erc721' },
 	category: 'custom',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'DeGods',
 	symbol: DE_GODS_SYMBOL,
 	decimals: 0,
@@ -52,6 +55,7 @@ export const PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc721' },
 	category: 'custom',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Pudgy Penguins',
 	symbol: PUDGY_PENGUINS_SYMBOL,
 	decimals: 0,
@@ -68,6 +72,7 @@ export const SEPOLIA_PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	network: SEPOLIA_NETWORK,
 	standard: { code: 'erc721' },
 	category: 'custom',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Pudgy Penguins',
 	symbol: SEPOLIA_PUDGY_PENGUINS_SYMBOL,
 	decimals: 0,
@@ -105,6 +110,7 @@ export const createMockErc721Tokens = ({
 		network: ETHEREUM_NETWORK,
 		standard: { code: 'erc721' },
 		category: 'custom',
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		decimals: 0,
 		address: `0x${start + i + 1}-${networkEnv}`
 	}));

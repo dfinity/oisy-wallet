@@ -65,7 +65,7 @@ describe('Harvest REST client', () => {
 				ok: false
 			} as Response);
 
-			await expect(fetchHarvestVaults()).rejects.toThrowError('Fetching Harvest failed.');
+			await expect(fetchHarvestVaults()).rejects.toThrow('Fetching Harvest failed.');
 		});
 
 		it('throws when response fails Zod validation', async () => {
@@ -77,7 +77,7 @@ describe('Harvest REST client', () => {
 					})
 			} as unknown as Response);
 
-			await expect(fetchHarvestVaults()).rejects.toThrowError('Invalid Harvest vaults response.');
+			await expect(fetchHarvestVaults()).rejects.toThrow('Invalid Harvest vaults response.');
 		});
 
 		it('returns an empty array when all networks are empty', async () => {

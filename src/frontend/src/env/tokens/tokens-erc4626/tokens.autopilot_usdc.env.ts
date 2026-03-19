@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import type { RequiredErc4626Token } from '$eth/types/erc4626';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -15,6 +16,7 @@ export const AUTOPILOT_USDC_TOKEN: RequiredErc4626Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc4626' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'Autopilot USDC Ethereum',
 	symbol: AUTOPILOT_USDC_SYMBOL,
 	decimals: AUTOPILOT_USDC_DECIMALS,

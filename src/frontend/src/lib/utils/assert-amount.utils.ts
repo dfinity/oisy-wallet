@@ -3,8 +3,8 @@ import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Balance } from '$lib/types/balance';
 import type { TokenActionErrorType } from '$lib/types/token-action';
-import type { Option } from '$lib/types/utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 interface CommonParams {
 	userAmount: bigint;
@@ -13,7 +13,7 @@ interface CommonParams {
 }
 
 interface CommonParamsWithMinter extends CommonParams {
-	minterInfo: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
+	minterInfo: Nullish<CkBtcMinterInfoData | CkEthMinterInfoData>;
 }
 
 interface CommonParamsWithBalanceForFee extends CommonParams {
@@ -41,7 +41,7 @@ const assertMinterInfo = ({
 	userAmount
 }: {
 	userAmount: bigint;
-	minterInfo: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
+	minterInfo: Nullish<CkBtcMinterInfoData | CkEthMinterInfoData>;
 }): TokenActionErrorType => {
 	if (isNullish(minterInfo)) {
 		return 'unknown-minimum-amount';

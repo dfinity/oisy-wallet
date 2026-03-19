@@ -1,6 +1,7 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ext-add-custom-tokens.service';
 import type { ExtTokenWithoutId } from '$icp/types/ext-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -31,6 +32,7 @@ describe('ext-add-custom-tokens.service', () => {
 			canisterId: mockCanisterId,
 			standard: { code: 'ext', version: 'v2' },
 			category: 'custom',
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			name: expectedName,
 			symbol: expectedName,
 			decimals: 0,
@@ -49,7 +51,7 @@ describe('ext-add-custom-tokens.service', () => {
 					...validParams,
 					identity: undefined
 				})
-			).toThrowError();
+			).toThrow();
 		});
 
 		it('should return error if canisterId is missing', () => {

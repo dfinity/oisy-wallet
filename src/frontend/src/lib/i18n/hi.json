@@ -1156,7 +1156,12 @@
 			"edit_token": "टोकन संपादित करें",
 			"sort_by_value": "",
 			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_symbol": "",
+			"hide_asset_types": "",
+			"asset_type": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "टोकन विवरण",
@@ -1281,6 +1286,23 @@
 			"unexpected_undefined": "टोकन अपरिभाषित है। यह अप्रत्याशित है।",
 			"unexpected_error_on_token_delete": "टोकन हटाते समय कुछ गलत हो गया।",
 			"unexpected_error_on_token_update": "टोकन अपडेट करते समय कुछ गलत हो गया।"
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
 		}
 	},
 	"nfts": {
@@ -1906,9 +1928,10 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "",
 			"available_autopilots": "",
 			"vault_info": "",
@@ -1923,6 +1946,8 @@
 			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "",
 			"unstake_now": "",
 			"unstaking": "",
@@ -1982,33 +2007,10 @@
 		"error": {
 			"unexpected_error_on_withdraw": "",
 			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": ""
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",

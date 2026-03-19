@@ -8,22 +8,12 @@ import {
 } from '$lib/enums/wizard-steps';
 import { StakeProvider, type StakeProviderConfig } from '$lib/types/stake';
 import type { WizardStepsParams } from '$lib/types/steps';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { WizardSteps } from '@dfinity/gix-components';
 
-export interface StakeWizardStepsParams extends WizardStepsParams {
-	tokenSymbol: string;
-}
-
-export const stakeWizardSteps = ({
-	i18n,
-	tokenSymbol
-}: StakeWizardStepsParams): WizardSteps<WizardStepsStake> => [
+export const stakeWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<WizardStepsStake> => [
 	{
 		name: WizardStepsStake.STAKE,
-		title: replacePlaceholders(i18n.stake.text.stake, {
-			$token_symbol: tokenSymbol
-		})
+		title: i18n.stake.text.stake
 	},
 	{
 		name: WizardStepsStake.REVIEW,
@@ -36,14 +26,11 @@ export const stakeWizardSteps = ({
 ];
 
 export const unstakeWizardSteps = ({
-	i18n,
-	tokenSymbol
-}: StakeWizardStepsParams): WizardSteps<WizardStepsUnstake> => [
+	i18n
+}: WizardStepsParams): WizardSteps<WizardStepsUnstake> => [
 	{
 		name: WizardStepsUnstake.UNSTAKE,
-		title: replacePlaceholders(i18n.stake.text.unstake_token, {
-			$token_symbol: tokenSymbol
-		})
+		title: i18n.stake.text.unstake
 	},
 	{
 		name: WizardStepsUnstake.REVIEW,
@@ -71,6 +58,7 @@ export const claimStakingRewardWizardSteps = ({
 export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = {
 	[StakeProvider.GLDT]: {
 		name: 'Gold DAO',
+		description: 'Gold DAO',
 		logo: '/images/dapps/gold-dao-logo.svg',
 		url: 'https://app.gldt.org/earn/',
 		card: {
@@ -80,6 +68,7 @@ export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = 
 	},
 	[StakeProvider.HARVEST_AUTOPILOTS]: {
 		name: 'Harvest - Autopilot',
+		description: 'Harvest Autopilot: Smart Yield Farming',
 		logo: '/images/dapps/harvest-autopilot-logo.svg',
 		url: `${HARVEST_AUTOPILOT_URL}autopilot/`,
 		card: {

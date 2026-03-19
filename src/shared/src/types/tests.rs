@@ -22,6 +22,7 @@ mod bitcoin {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![],
                     network: BitcoinNetwork::Mainnet,
+                    ii_delegation_chain: None,
                 },
                 valid: true,
             },
@@ -31,6 +32,7 @@ mod bitcoin {
                     txid: vec![0; MAX_TXID_BYTES + 1],
                     utxos: vec![],
                     network: BitcoinNetwork::Mainnet,
+                    ii_delegation_chain: None,
                 },
                 valid: false,
             },
@@ -47,6 +49,7 @@ mod bitcoin {
                         height: 0,
                     }],
                     network: BitcoinNetwork::Mainnet,
+                    ii_delegation_chain: None,
                 },
                 valid: true,
             },
@@ -63,6 +66,7 @@ mod bitcoin {
                         height: 0,
                     }],
                     network: BitcoinNetwork::Mainnet,
+                    ii_delegation_chain: None,
                 },
                 valid: false,
             },
@@ -82,6 +86,7 @@ mod bitcoin {
                         MAX_UTXOS_LEN + 1
                     ],
                     network: BitcoinNetwork::Mainnet,
+                    ii_delegation_chain: None,
                 },
                 valid: false,
             }
@@ -96,6 +101,7 @@ mod bitcoin {
                 input: BtcGetPendingTransactionsRequest {
                     address: "1".repeat(MAX_ADDRESS_LEN),
                     network: BitcoinNetwork::Mainnet,
+                    ii_delegation_chain: None,
                 },
                 valid: true,
             },
@@ -104,6 +110,7 @@ mod bitcoin {
                 input: BtcGetPendingTransactionsRequest {
                     address: "1".repeat(MAX_ADDRESS_LEN + 1),
                     network: BitcoinNetwork::Mainnet,
+                    ii_delegation_chain: None,
                 },
                 valid: false,
             }

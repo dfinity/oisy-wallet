@@ -49,14 +49,14 @@ pub enum NetworkTransactionData {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct EvmTransactionData {
     pub chain_id: Option<ChainId>,
-    pub nonce: Option<u32>,
+    pub nonce: Option<u64>,
     pub gas_limit: Option<Nat>,
     pub gas_price: Option<Nat>,
     pub gas_used: Option<Nat>,
     /// Hex-encoded input data.
     pub data: Option<String>,
     /// NFT token ID (ERC-721 / ERC-1155).
-    pub nft_token_id: Option<u32>,
+    pub nft_token_id: Option<Nat>,
 }
 
 /// ICRC / ICP transaction data.
@@ -94,7 +94,7 @@ pub struct SolTransactionData {
 }
 
 /// Request to retrieve stored transactions with cursor-based pagination.
-#[derive(CandidType, Deserialize, Clone, Debug)]
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct GetUserTransactionsRequest {
     /// Which token's transactions to retrieve
     pub token_id: TokenId,
@@ -106,7 +106,7 @@ pub struct GetUserTransactionsRequest {
 }
 
 /// Response containing stored transactions and pagination info.
-#[derive(CandidType, Deserialize, Clone, Debug)]
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct GetUserTransactionsResponse {
     /// The requested transactions, sorted newest first
     pub transactions: Vec<UserTransaction>,

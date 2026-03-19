@@ -906,6 +906,11 @@ interface I18nTokens {
 		sort_by_value: string;
 		sort_by_performance: string;
 		sort_by_symbol: string;
+		hide_asset_types: string;
+		asset_type: string;
+		asset_type_all: string;
+		no_tokens_for_asset_type: string;
+		no_tokens_for_asset_type_description: string;
 	};
 	details: {
 		title: string;
@@ -1010,6 +1015,12 @@ interface I18nTokens {
 		unexpected_error_on_token_delete: string;
 		unexpected_error_on_token_update: string;
 	};
+}
+
+interface I18nToken_tag {
+	type: { category: string; risk: string };
+	category: { crypto: string; stablecoin: string; stock: string; commodity: string };
+	risk: { low: string; medium: string; high: string };
 }
 
 interface I18nNfts {
@@ -1489,9 +1500,10 @@ interface I18nVaults {
 
 interface I18nStake {
 	text: {
-		gldt_stake_page_description: string;
 		harvest_autopilot_page_description: string;
 		harvest_autopilot_vault_page_description: string;
+		harvest_autopilot_provider_description: string;
+		harvest_autopilot_stake_terms: string;
 		my_positions: string;
 		available_autopilots: string;
 		vault_info: string;
@@ -1506,6 +1518,8 @@ interface I18nStake {
 		stake_now: string;
 		stake_amount: string;
 		not_enough_to_stake: string;
+		estimated_received: string;
+		estimated_yearly_yield: string;
 		unstake: string;
 		unstake_now: string;
 		unstaking: string;
@@ -1565,33 +1579,10 @@ interface I18nStake {
 	error: {
 		unexpected_error_on_withdraw: string;
 		unexpected_error_on_unstake: string;
+		unexpected_error_on_stake: string;
 		dissolvement_limit_reached: string;
 	};
-	terms: {
-		gldt: {
-			item1_title: string;
-			item1_description: string;
-			item2_title_1: string;
-			item2_title_2: string;
-			item3_title: string;
-			item3_description: string;
-			item4_title: string;
-			item4_description: string;
-			item5_title: string;
-		};
-	};
 	info: {
-		gldt: {
-			title: string;
-			description: string;
-			fact_1_title: string;
-			fact_1_description: string;
-			fact_2_title: string;
-			fact_2_description: string;
-			fact_3_title: string;
-			fact_3_description: string;
-			fact_3_description_fallback: string;
-		};
 		harvest_autopilot: {
 			title: string;
 			description: string;
@@ -1697,6 +1688,7 @@ interface I18n {
 	buy: I18nBuy;
 	pay: I18nPay;
 	tokens: I18nTokens;
+	token_tag: I18nToken_tag;
 	nfts: I18nNfts;
 	fee: I18nFee;
 	info: I18nInfo;

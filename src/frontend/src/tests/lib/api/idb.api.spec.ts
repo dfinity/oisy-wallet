@@ -27,7 +27,7 @@ describe('idb.api', () => {
 		it('should not fail if the browser does not support indexedDB.databases()', async () => {
 			vi.stubGlobal('indexedDB', {});
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			const indexedDBMock = {
 				databases: vi.fn(() => {
@@ -37,7 +37,7 @@ describe('idb.api', () => {
 
 			vi.stubGlobal('indexedDB', indexedDBMock);
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(indexedDBMock.databases).toHaveBeenCalledExactlyOnceWith();
 		});
@@ -45,7 +45,7 @@ describe('idb.api', () => {
 		it('should handle an empty list of databases', async () => {
 			mockDatabases.mockResolvedValueOnce([]);
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
@@ -55,7 +55,7 @@ describe('idb.api', () => {
 		it('should handle missing names in the database info', async () => {
 			mockDatabases.mockResolvedValueOnce([{ name: null }, { name: undefined }, { version: 123 }]);
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
@@ -65,7 +65,7 @@ describe('idb.api', () => {
 		it('should do nothing if there is no OISY-related database', async () => {
 			mockDatabases.mockResolvedValueOnce([{ name: 'other-db-1' }, { name: 'test-db' }]);
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
@@ -88,7 +88,7 @@ describe('idb.api', () => {
 				}
 			}));
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
@@ -121,7 +121,7 @@ describe('idb.api', () => {
 					}
 				}));
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
@@ -154,7 +154,7 @@ describe('idb.api', () => {
 					}
 				}));
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 

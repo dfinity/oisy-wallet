@@ -3,6 +3,7 @@ import type { EnvIcPunksToken } from '$env/types/env-icpunks-token';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
 import type { IcPunksToken, IcPunksTokenWithoutId } from '$icp/types/icpunks-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 
@@ -25,5 +26,6 @@ export const mapIcPunksToken = ({
 	standard: {
 		code: 'icpunks'
 	},
-	category: 'custom'
+	category: 'custom',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 });

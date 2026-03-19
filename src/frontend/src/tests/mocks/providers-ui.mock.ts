@@ -2,6 +2,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { stakeProvidersConfig } from '$lib/config/stake.config';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { ProviderUi } from '$lib/types/provider-ui';
 import { StakeProvider } from '$lib/types/stake';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -15,7 +16,8 @@ const mockGldtToken: IcToken = {
 	standard: { code: 'icrc' },
 	ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 	fee: 100n,
-	category: 'custom'
+	category: 'custom',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 };
 
 export const mockProviderUi: ProviderUi = {

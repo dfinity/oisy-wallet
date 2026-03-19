@@ -164,7 +164,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when fee is undefined', () => {
@@ -176,7 +176,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when fee has error', () => {
@@ -190,7 +190,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when destination is undefined', () => {
@@ -202,7 +202,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when amount param is undefined', () => {
@@ -214,7 +214,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when destination is not a valid BTC address', () => {
@@ -226,7 +226,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.recipient_address_is_not_valid);
+			).toThrow(en.pay.error.recipient_address_is_not_valid);
 		});
 
 		it('should throw error when amounts do not match', () => {
@@ -239,7 +239,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: differentAmount,
 					token
 				})
-			).toThrowError(en.pay.error.amount_does_not_match);
+			).toThrow(en.pay.error.amount_does_not_match);
 		});
 
 		it('should return validated data when all conditions are met', () => {

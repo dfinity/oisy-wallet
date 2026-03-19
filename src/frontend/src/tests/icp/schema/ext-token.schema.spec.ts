@@ -4,6 +4,7 @@ import {
 	ExtInterfaceSchema,
 	ExtTokenSchema
 } from '$icp/schema/ext-token.schema';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 
@@ -13,6 +14,7 @@ describe('ext-token.schema', () => {
 		network: ICP_NETWORK,
 		standard: { code: 'ext' },
 		category: 'default',
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8
@@ -35,13 +37,13 @@ describe('ext-token.schema', () => {
 				canisterId: 'abc'
 			};
 
-			expect(() => ExtCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtCanistersSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with missing canister field', () => {
 			const invalidData = {};
 
-			expect(() => ExtCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtCanistersSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -60,7 +62,7 @@ describe('ext-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => ExtInterfaceSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtInterfaceSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -80,7 +82,7 @@ describe('ext-token.schema', () => {
 				id: 'not-a-symbol'
 			};
 
-			expect(() => ExtTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtTokenSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid canister', () => {
@@ -89,7 +91,7 @@ describe('ext-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => ExtTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtTokenSchema.parse(invalidData)).toThrow();
 		});
 	});
 });

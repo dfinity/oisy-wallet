@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
+	import type { Nullish } from '@dfinity/zod-schemas';
 	import { onMount, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
@@ -10,7 +11,6 @@
 	import { MediaType } from '$lib/enums/media-type';
 	import { extractMediaTypeAndSize } from '$lib/services/url.services';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Option } from '$lib/types/utils';
 
 	interface Props {
 		mediaSrc: string;
@@ -20,7 +20,7 @@
 
 	// Value `null` means that the media type is not supported, or it is not possible to fetch the type.
 	// Value `undefined` means that we have not yet fetched the media type.
-	let mediaType = $state<Option<MediaType>>();
+	let mediaType = $state<Nullish<MediaType>>();
 
 	const updateMediaType = async () => {
 		const { type } = await extractMediaTypeAndSize(mediaSrc);

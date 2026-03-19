@@ -31,6 +31,7 @@ const BASE_PROPS = {
 	swapProgressStep: ProgressStepsSwap.INITIALIZATION,
 	isSwapAmountsLoading: false,
 	onShowTokensList: () => {},
+	onShowProviderList: () => {},
 	onClose: () => {},
 	onNext: () => {},
 	onBack: () => {}

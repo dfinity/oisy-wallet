@@ -1156,7 +1156,12 @@
 			"edit_token": "Upravit token",
 			"sort_by_value": "",
 			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_symbol": "",
+			"hide_asset_types": "",
+			"asset_type": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "Podrobnosti o tokenu",
@@ -1281,6 +1286,23 @@
 			"unexpected_undefined": "Token je nedefinovaný. To je neočekávané.",
 			"unexpected_error_on_token_delete": "Při odstraňování tokenu došlo k chybě.",
 			"unexpected_error_on_token_update": "Při aktualizaci tokenu došlo k chybě."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
 		}
 	},
 	"nfts": {
@@ -1906,9 +1928,10 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Stakujte tokeny GLDT a získávejte odměny kryté fyzickým zlatem",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "",
 			"available_autopilots": "",
 			"vault_info": "",
@@ -1919,10 +1942,12 @@
 			"total_value_locked": "",
 			"manager": "",
 			"vault_description": "",
-			"stake": "Stakovat $token_symbol",
+			"stake": "",
 			"stake_now": "Stakovat nyní",
 			"stake_amount": "Stakovat $amount $token_symbol",
 			"not_enough_to_stake": "Nemáte žádné $token_symbol ke stakování",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "Odstakovat",
 			"unstake_now": "Odstakovat nyní",
 			"unstaking": "Odstakování...",
@@ -1982,33 +2007,10 @@
 		"error": {
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",
 			"unexpected_error_on_unstake": "Při odstakování tokenů došlo k chybě.",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": "Dosáhli jste maximálního počtu $limit aktivních žádostí o odemčení. Nejprve některé dokončete, než vytvoříte novou.<br/>Vždy můžete použít možnost „okamžitě“."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "Aktuální APY $apy%",
-				"item1_description": "Na základě nejnovějších odměn. Efektivní APY závisí na celkovém množství $token stakovaného každý den.",
-				"item2_title_1": "Odměny za stakování jsou vypláceny v ",
-				"item2_title_2": " GOLDAO tokenech",
-				"item3_title": "Zpoždění odemčení 1 týden",
-				"item3_description": "Při odemykání GLDT ze stakování jsou tokeny uzamčeny na 1 týden bez dalších odměn, než je možné je vybrat. Okamžité odemčení je možné za poplatek 5 %.",
-				"item4_title": "Věkový bonus",
-				"item4_description": "GLDT staky získávají věkový bonus od 1. dne. Čím starší je stake, tím vyšší bonus — lineárně až 100 % ročně.",
-				"item5_title": "Jakmile zahájíte odemykání svého GLDT staku, přestanete dostávat nové odměny"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "Co je GLDT",
-				"description": "GLDT znamená „Gold Token“ a je to zastupitelný token krytý GLD NFT. GLD NFT představují nezpochybnitelné vlastnictví fyzických zlatých slitků. 1 GLDT představuje přesně 0,01 g zlata a GLD NFT lze směnit v poměru 1 g za 100 GLDT.",
-				"fact_1_title": "Kryto skutečným zlatem",
-				"fact_1_description": "Každý token GLDT je kryt skutečným zlatem uloženým v zabezpečených trezorech",
-				"fact_2_title": "Flexibilní podmínky",
-				"fact_2_description": "Žádné uzamykací lhůty, stakujte a odstakujte kdykoli",
-				"fact_3_title": "Stabilní výnosy",
-				"fact_3_description": "Získejte $apy% APY s minimálním rizikem volatility",
-				"fact_3_description_fallback": "Získejte stabilní odměny s minimálním rizikem volatility"
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",

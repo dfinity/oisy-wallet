@@ -8,4 +8,6 @@ pub(crate) use self::{
         VMem,
     },
     storable::{Candid, StoredBackendTokenId, StoredPrincipal, StoredTokenId, UserTransactionKey},
+    maps::{BtcUserPendingTransactionsMap, UserProfileMap, UserProfileUpdatedMap, VMem},
+    storable::{Candid, StoredPrincipal, StoredTokenId},
 };

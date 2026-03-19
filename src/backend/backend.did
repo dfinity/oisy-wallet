@@ -63,12 +63,14 @@ type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
 	DuplicateUtxos;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	InternalError : record { msg : text };
 	UtxosAlreadyReserved
 };
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
 	utxos : vec Utxo
 };
@@ -90,6 +92,7 @@ type BtcGetFeePercentilesResult = variant {
 	Err : SelectedUtxosFeeError
 };
 type BtcGetPendingTransactionsError = variant {
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
@@ -97,6 +100,7 @@ type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
 type BtcGetPendingTransactionsRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
 	address : text
 };
@@ -181,6 +185,11 @@ type DefiniteCanisterSettingsArgs = record {
 	memory_allocation : nat;
 	compute_allocation : nat
 };
+type Delegation = record {
+	pubkey : blob;
+	targets : opt vec principal;
+	expiration : nat64
+};
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
@@ -243,6 +252,10 @@ type HttpResponse = record {
 	body : blob;
 	headers : vec record { text; text };
 	status_code : nat16
+};
+type IIDelegationChain = record {
+	public_key : blob;
+	delegations : vec SignedDelegation
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type Icrcv2AccountId = variant {
@@ -309,10 +322,12 @@ type SaveNetworksSettingsRequest = record {
 };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
 type SelectedUtxosFeeRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
 	amount_satoshis : nat64;
 	min_confirmations : opt nat32
@@ -332,6 +347,7 @@ type Settings = record {
 	dapp : DappSettings;
 	experimental_features : ExperimentalFeaturesSettings
 };
+type SignedDelegation = record { signature : blob; delegation : Delegation };
 type SplToken = record {
 	decimals : opt nat8;
 	token_address : text;
@@ -360,6 +376,7 @@ type UserTransactionError = variant {
 };
 type Stats = record {
 	user_profile_count : nat64;
+	user_transactions_count : nat64;
 	custom_token_count : nat64;
 	exchange_rates_count : nat64;
 	token_activity_count : nat64;
@@ -522,6 +539,10 @@ service : (Arg) -> {
 	allow_signing : () -> (AllowSigningResult);
 	// Adds a pending Bitcoin transaction for the caller.
 	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. This protects against unauthorised CLI callers.
+	// Controllers bypass this check.
+	//
 	// # Errors
 	// Errors are enumerated by: `BtcAddPendingTransactionError`.
 	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (
@@ -546,12 +567,18 @@ service : (Arg) -> {
 	) query;
 	// Returns the pending Bitcoin transactions for the caller.
 	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
 	// # Errors
 	// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
 	// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
 	//
 	// # Errors
 	// Errors are enumerated by: `SelectedUtxosFeeError`.

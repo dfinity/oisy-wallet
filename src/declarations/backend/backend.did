@@ -58,6 +58,7 @@ type BtcAddPendingTransactionError = variant {
 	EmptyUtxos;
 	DuplicateUtxos;
 	RateLimited : RateLimitError;
+	InvalidDelegationChain : record { msg : text };
 	InternalError : record { msg : text };
 	UtxosAlreadyReserved
 };
@@ -517,6 +518,10 @@ service : (Arg) -> {
 	// Errors are enumerated by: `AllowSigningError`.
 	allow_signing : () -> (AllowSigningResult);
 	// Adds a pending Bitcoin transaction for the caller.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. This protects against unauthorised CLI callers.
+	// Controllers bypass this check.
 	//
 	// # Errors
 	// Errors are enumerated by: `BtcAddPendingTransactionError`.

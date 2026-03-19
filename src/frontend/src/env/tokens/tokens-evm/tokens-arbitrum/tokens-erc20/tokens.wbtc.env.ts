@@ -2,6 +2,7 @@ import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.ev
 import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
 import wbtc from '$eth/assets/wbtc.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,6 +17,7 @@ export const WBTC_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Wrapped BTC',
 	symbol: WBTC_SYMBOL,
 	decimals: WBTC_DECIMALS,

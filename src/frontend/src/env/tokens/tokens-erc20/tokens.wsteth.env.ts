@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { WSTETH_TOKEN_GROUP } from '$env/tokens/groups/groups.wsteth.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import wsteth from '$icp-eth/assets/wsteth.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,6 +17,7 @@ export const WSTETH_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Wrapped liquid staked Ether 2.0',
 	symbol: WSTETH_SYMBOL,
 	decimals: WSTETH_DECIMALS,
