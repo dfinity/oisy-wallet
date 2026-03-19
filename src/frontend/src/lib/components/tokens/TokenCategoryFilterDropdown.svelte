@@ -12,8 +12,8 @@
 	import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 
 	interface Props {
-		selectedCategory?: TokenCategoryTagValue | undefined;
-		onSelect?: (value: TokenCategoryTagValue | undefined) => void;
+		selectedCategory?: TokenCategoryTagValue;
+		onSelect?: (value?: TokenCategoryTagValue) => void;
 	}
 
 	let { selectedCategory, onSelect }: Props = $props();
