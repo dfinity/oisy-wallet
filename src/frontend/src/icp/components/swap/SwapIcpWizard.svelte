@@ -173,17 +173,29 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
-				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
-					usdSourceValue: sourceTokenUsdValue ?? ''
-				}
-			});
+			try {
+				trackEvent({
+					name: TRACK_COUNT_SWAP_SUCCESS,
+					metadata: {
+						sourceToken: $sourceToken?.symbol ?? '',
+						destinationToken: $destinationToken?.symbol ?? '',
+						dApp: $swapAmountsStore?.selectedProvider?.provider ?? '',
+						usdSourceValue: sourceTokenUsdValue ?? ''
+					}
+				});
+			} catch (_: unknown) {
+				// Non-critical: tracking failure should not prevent the modal from closing.
+			}
 
-			setTimeout(() => onClose(), 2500);
+			setTimeout(() => {
+				try {
+					onClose();
+				} catch (_: unknown) {
+					toastsError({
+						msg: { text: $i18n.swap.error.swap_completed_close_failed }
+					});
+				}
+			}, 2500);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
 
@@ -194,7 +206,7 @@
 					errorType: err.code,
 					swapSucceded: err.swapSucceded,
 					url: {
-						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcToken).ledgerCanisterId}&output=${($destinationToken as IcToken).ledgerCanisterId}`,
+						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcToken | undefined)?.ledgerCanisterId ?? ''}&output=${($destinationToken as IcToken | undefined)?.ledgerCanisterId ?? ''}`,
 						text: 'icpswap.com'
 					}
 				});
@@ -217,23 +229,27 @@
 				});
 			}
 
-			if (
-				!(
-					isSwapError(err) &&
-					(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
-						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
-				)
-			) {
-				trackEvent({
-					name: TRACK_COUNT_SWAP_ERROR,
-					metadata: {
-						sourceToken: $sourceToken.symbol,
-						destinationToken: $destinationToken.symbol,
-						dApp: $swapAmountsStore.selectedProvider.provider,
-						errorKey: isSwapError(err) ? err.code : '',
-						usdSourceValue: sourceTokenUsdValue ?? ''
-					}
-				});
+			try {
+				if (
+					!(
+						isSwapError(err) &&
+						(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
+							err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
+					)
+				) {
+					trackEvent({
+						name: TRACK_COUNT_SWAP_ERROR,
+						metadata: {
+							sourceToken: $sourceToken?.symbol ?? '',
+							destinationToken: $destinationToken?.symbol ?? '',
+							dApp: $swapAmountsStore?.selectedProvider?.provider ?? '',
+							errorKey: isSwapError(err) ? err.code : '',
+							usdSourceValue: sourceTokenUsdValue ?? ''
+						}
+					});
+				}
+			} catch (_: unknown) {
+				// Non-critical: tracking failure should not prevent navigation.
 			}
 
 			setTimeout(() => onBack(), 2000);

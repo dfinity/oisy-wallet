@@ -255,33 +255,49 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
-				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
-					usdSourceValue: sourceTokenUsdValue ?? '',
-					swapType: $swapAmountsStore.swaps[0].type ?? '',
-					sourceNetwork: $sourceToken.network.name,
-					destinationNetwork: $destinationToken.network.name
-				}
-			});
+			try {
+				trackEvent({
+					name: TRACK_COUNT_SWAP_SUCCESS,
+					metadata: {
+						sourceToken: $sourceToken?.symbol ?? '',
+						destinationToken: $destinationToken?.symbol ?? '',
+						dApp: $swapAmountsStore?.selectedProvider?.provider ?? '',
+						usdSourceValue: sourceTokenUsdValue ?? '',
+						swapType: $swapAmountsStore?.swaps?.[0]?.type ?? '',
+						sourceNetwork: $sourceToken?.network?.name ?? '',
+						destinationNetwork: $destinationToken?.network?.name ?? ''
+					}
+				});
+			} catch (_: unknown) {
+				// Non-critical: tracking failure should not prevent the modal from closing.
+			}
 
-			setTimeout(() => onClose(), 750);
-		} catch (err: unknown) {
-			trackEvent({
-				name: TRACK_COUNT_SWAP_ERROR,
-				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
-					swapType: $swapAmountsStore.swaps[0].type ?? '',
-					error: errorDetailToString(err) ?? '',
-					sourceNetwork: $sourceToken.network.name,
-					destinationNetwork: $destinationToken.network.name
+			setTimeout(() => {
+				try {
+					onClose();
+				} catch (_: unknown) {
+					toastsError({
+						msg: { text: $i18n.swap.error.swap_completed_close_failed }
+					});
 				}
-			});
+			}, 750);
+		} catch (err: unknown) {
+			try {
+				trackEvent({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: {
+						sourceToken: $sourceToken?.symbol ?? '',
+						destinationToken: $destinationToken?.symbol ?? '',
+						dApp: $swapAmountsStore?.selectedProvider?.provider ?? '',
+						swapType: $swapAmountsStore?.swaps?.[0]?.type ?? '',
+						error: errorDetailToString(err) ?? '',
+						sourceNetwork: $sourceToken?.network?.name ?? '',
+						destinationNetwork: $destinationToken?.network?.name ?? ''
+					}
+				});
+			} catch (_: unknown) {
+				// Non-critical: tracking failure should not prevent navigation.
+			}
 
 			failedSwapError.set(undefined);
 
