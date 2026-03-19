@@ -1653,6 +1653,45 @@
 			}
 		}
 	},
+	"tip": {
+		"text": {
+			"send_tip": "",
+			"select_token": "",
+			"amount": "",
+			"title_label": "",
+			"title_placeholder": "",
+			"note_label": "",
+			"note_placeholder": "",
+			"expiry": "",
+			"expiry_24h": "",
+			"expiry_48h": "",
+			"expiry_7d": "",
+			"review": "",
+			"creating": "",
+			"share": "",
+			"share_description": "",
+			"link_copied": "",
+			"claim_title": "",
+			"claim_description": "",
+			"claim_button": "",
+			"claiming": "",
+			"claim_success": "",
+			"claim_expired": "",
+			"token": "",
+			"recipient": "",
+			"expires": "",
+			"tip_amount": "",
+			"status": ""
+		},
+		"error": {
+			"create_failed": "",
+			"claim_failed": "",
+			"preview_failed": "",
+			"invalid_link": "",
+			"expired": "",
+			"already_claimed": ""
+		}
+	},
 	"address_book": {
 		"text": {
 			"title": "جهات الاتصال",
