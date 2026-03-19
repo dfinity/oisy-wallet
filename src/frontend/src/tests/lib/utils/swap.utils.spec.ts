@@ -746,9 +746,7 @@ describe('swap utils', () => {
 
 			expect(result).toStrictEqual({
 				provider: SwapProvider.NEAR_INTENTS,
-				receiveAmount: BigInt(
-					Math.floor(Number(mockNearIntentsQuoteResponse.quote.amountOut))
-				),
+				receiveAmount: BigInt(Math.floor(Number(mockNearIntentsQuoteResponse.quote.amountOut))),
 				receiveOutMinimum: BigInt(
 					Math.floor(Number(mockNearIntentsQuoteResponse.quote.minAmountOut ?? '0'))
 				),
@@ -766,9 +764,7 @@ describe('swap utils', () => {
 
 			expect(result).toStrictEqual({
 				provider: SwapProvider.NEAR_INTENTS,
-				receiveAmount: BigInt(
-					Math.floor(Number(mockNearIntentsQuoteResponse.quote.amountOut))
-				),
+				receiveAmount: BigInt(Math.floor(Number(mockNearIntentsQuoteResponse.quote.amountOut))),
 				receiveOutMinimum: undefined,
 				swapDetails: quoteWithoutMin
 			});
