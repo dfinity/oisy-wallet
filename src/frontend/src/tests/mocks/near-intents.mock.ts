@@ -97,3 +97,17 @@ export const mockNearIntentsStatusSuccess: NearIntentsStatusResponse = {
 		]
 	}
 };
+
+export const mockNearIntentsStatusPending: NearIntentsStatusResponse = {
+	...mockNearIntentsStatusSuccess,
+	status: 'PENDING_DEPOSIT',
+	swapDetails: {}
+};
+
+export const mockNearIntentsStatusFailed: NearIntentsStatusResponse = {
+	...mockNearIntentsStatusSuccess,
+	status: 'FAILED',
+	swapDetails: {
+		refundReason: 'Swap execution failed'
+	}
+};
