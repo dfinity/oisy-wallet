@@ -21,6 +21,7 @@
 	aria-label={ariaLabel}
 	{disabled}
 	{onclick}
+	type="button"
 >
 	<span class="font-medium">{@render children()}</span>
 	<IconExpandMore size="24" />

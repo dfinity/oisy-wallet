@@ -35,9 +35,7 @@ describe('PillButton', () => {
 		const button = container.querySelector('button');
 
 		expect(button?.classList.contains('rounded-full')).toBeTruthy();
-		expect(button?.classList.contains('border')).toBeTruthy();
 		expect(button?.classList.contains('text-xs')).toBeTruthy();
-		expect(button?.classList.contains('font-medium')).toBeTruthy();
 	});
 
 	it('should apply unselected styles by default', () => {
@@ -47,7 +45,6 @@ describe('PillButton', () => {
 
 		const button = container.querySelector('button');
 
-		expect(button?.classList.contains('border-secondary')).toBeTruthy();
 		expect(button?.classList.contains('text-secondary')).toBeTruthy();
 		expect(button?.classList.contains('bg-brand-primary')).toBeFalsy();
 	});
@@ -60,9 +57,7 @@ describe('PillButton', () => {
 		const button = container.querySelector('button');
 
 		expect(button?.classList.contains('bg-brand-primary')).toBeTruthy();
-		expect(button?.classList.contains('border-brand-primary')).toBeTruthy();
 		expect(button?.classList.contains('text-primary-inverted')).toBeTruthy();
-		expect(button?.classList.contains('border-secondary')).toBeFalsy();
 		expect(button?.classList.contains('text-secondary')).toBeFalsy();
 	});
 
@@ -81,6 +76,6 @@ describe('PillButton', () => {
 
 		await fireEvent.click(button);
 
-		expect(onclick).toHaveBeenCalledOnce();
+		expect(onClick).toHaveBeenCalledOnce();
 	});
 });

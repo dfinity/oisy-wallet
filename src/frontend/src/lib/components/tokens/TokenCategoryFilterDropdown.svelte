@@ -32,11 +32,7 @@
 	};
 </script>
 
-<ModalFilterButton
-	ariaLabel={$i18n.tokens.text.asset_type_all}
-	onclick={() => (visible = !visible)}
-	bind:button
->
+<ModalFilterButton ariaLabel={currentLabel} onclick={() => (visible = !visible)} bind:button>
 	{currentLabel}
 </ModalFilterButton>
 

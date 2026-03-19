@@ -13,6 +13,7 @@
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -134,7 +135,7 @@
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		{#if $showTokenCategoryFilter}
-			<div class="mb-4" transition:slide>
+			<div class="mb-4" transition:slide={SLIDE_PARAMS}>
 				<TokenTypeFilterBar />
 			</div>
 		{/if}
