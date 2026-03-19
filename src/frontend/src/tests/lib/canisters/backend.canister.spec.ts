@@ -865,7 +865,9 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning(allowSigningParams)).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
+			await expect(allowSigning(allowSigningParams)).rejects.toThrow(
+				mapIcrc2ApproveError(response.Err.ApproveError)
+			);
 		});
 
 		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
@@ -892,7 +894,9 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning(allowSigningParams)).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(allowSigning(allowSigningParams)).rejects.toThrow(
+				new CanisterInternalError(errorMsg)
+			);
 		});
 
 		it('should throw a CanisterInternalError with message if unrecognized error is returned', async () => {

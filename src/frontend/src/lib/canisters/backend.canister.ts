@@ -259,7 +259,9 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async ({ iiDelegationChain }: AllowSigningParams): Promise<AllowSigningOutcome> => {
+	allowSigning = async ({
+		iiDelegationChain
+	}: AllowSigningParams): Promise<AllowSigningOutcome> => {
 		const { allow_signing } = this.caller({ certified: true });
 
 		const response = await allow_signing(
