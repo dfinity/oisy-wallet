@@ -78,6 +78,20 @@ describe('eth-transactions-spam.utils', () => {
 			expect(result).toStrictEqual(txs);
 		});
 
+		it('should keep zero-value transfers when getTransactionSender returns null', async () => {
+			const getTransactionSender = vi.fn().mockResolvedValue(null);
+
+			const txs = [makeTx({ hash: '0xnullsender', value: ZERO })];
+
+			const result = await filterSpamErc20Transfers({
+				transactions: txs,
+				userAddress,
+				getTransactionSender
+			});
+
+			expect(result).toStrictEqual(txs);
+		});
+
 		it('should keep zero-value transfers when getTransactionSender throws', async () => {
 			const getTransactionSender = vi.fn().mockRejectedValue(new Error('RPC error'));
 
