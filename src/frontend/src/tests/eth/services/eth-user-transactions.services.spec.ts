@@ -12,10 +12,10 @@ import {
 	saveFinalizedTransactions
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { ZERO } from '$lib/constants/app.constants';
 import { ethAddressStore } from '$lib/stores/address.store';
 import type { Transaction } from '$lib/types/transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { ZERO } from '$lib/constants/app.constants';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -201,7 +201,7 @@ describe('eth-user-transactions.services', () => {
 				oldestLoadedBlockNumber: undefined
 			});
 
-			expect(hasMore).toBe(false);
+			expect(hasMore).toBeFalsy();
 			expect(mockTransactionsProvider).not.toHaveBeenCalled();
 		});
 
@@ -230,11 +230,12 @@ describe('eth-user-transactions.services', () => {
 				oldestLoadedBlockNumber: 300
 			});
 
-			expect(hasMore).toBe(true);
+			expect(hasMore).toBeTruthy();
 			expect(mockGetUserTransactions).toHaveBeenCalledOnce();
 			expect(mockTransactionsProvider).not.toHaveBeenCalled();
 
 			const store = get(ethTransactionsStore);
+
 			expect(store?.[mockTokenId]).toHaveLength(2);
 		});
 
@@ -263,7 +264,7 @@ describe('eth-user-transactions.services', () => {
 			});
 
 			// nextStart is None but oldestBlockIndex is defined → Etherscan may have older
-			expect(hasMore).toBe(true);
+			expect(hasMore).toBeTruthy();
 		});
 
 		// Case 3: Backend exhausted, falls back to Etherscan for older data
@@ -284,13 +285,14 @@ describe('eth-user-transactions.services', () => {
 				beAtCapacity: false
 			});
 
-			expect(hasMore).toBe(true);
+			expect(hasMore).toBeTruthy();
 			expect(mockTransactionsProvider).toHaveBeenCalledWith({
 				address: mockEthAddress,
 				endBlock: 99
 			});
 
 			const store = get(ethTransactionsStore);
+
 			expect(store?.[mockTokenId]).toHaveLength(2);
 		});
 
@@ -306,7 +308,7 @@ describe('eth-user-transactions.services', () => {
 				oldestLoadedBlockNumber: 50
 			});
 
-			expect(hasMore).toBe(false);
+			expect(hasMore).toBeFalsy();
 			expect(mockTransactionsProvider).toHaveBeenCalledWith({
 				address: mockEthAddress,
 				endBlock: 49
@@ -362,7 +364,7 @@ describe('eth-user-transactions.services', () => {
 				oldestLoadedBlockNumber: 0
 			});
 
-			expect(hasMore).toBe(false);
+			expect(hasMore).toBeFalsy();
 			expect(mockTransactionsProvider).not.toHaveBeenCalled();
 		});
 
@@ -378,7 +380,7 @@ describe('eth-user-transactions.services', () => {
 				oldestLoadedBlockNumber: 100
 			});
 
-			expect(hasMore).toBe(false);
+			expect(hasMore).toBeFalsy();
 			expect(mockTransactionsProvider).not.toHaveBeenCalled();
 		});
 
@@ -394,7 +396,7 @@ describe('eth-user-transactions.services', () => {
 				oldestLoadedBlockNumber: 100
 			});
 
-			expect(hasMore).toBe(false);
+			expect(hasMore).toBeFalsy();
 		});
 
 		// Case 9: Backend returns empty on cursor — falls through to Etherscan
@@ -412,7 +414,7 @@ describe('eth-user-transactions.services', () => {
 				oldestLoadedBlockNumber: 100
 			});
 
-			expect(hasMore).toBe(true);
+			expect(hasMore).toBeTruthy();
 			expect(mockGetUserTransactions).toHaveBeenCalledOnce();
 			expect(mockTransactionsProvider).toHaveBeenCalledWith({
 				address: mockEthAddress,
@@ -444,6 +446,7 @@ describe('eth-user-transactions.services', () => {
 			});
 
 			const store = get(ethTransactionsStore);
+
 			// The store's append method deduplicates by hash
 			expect(store?.[mockTokenId]).toHaveLength(2);
 		});
@@ -489,10 +492,12 @@ describe('eth-user-transactions.services', () => {
 
 			expect(result).toEqual({ success: true });
 			expect(mockSaveUserTransactions).toHaveBeenCalledOnce();
+
 			// Only the finalized transaction (block 100, depth=100 >= 64) should be saved
 			const savedTxs = (
 				mockSaveUserTransactions.mock.calls[0][0] as { transactions: UserTransaction[] }
 			).transactions;
+
 			expect(savedTxs).toHaveLength(1);
 			expect(savedTxs[0].id).toBe('0xfinalized');
 		});

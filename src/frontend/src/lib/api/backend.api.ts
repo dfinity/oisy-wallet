@@ -265,10 +265,7 @@ export const getExchangeRates = async ({
 	const { getExchangeRates } = await backendCanister({ identity });
 
 	return getExchangeRates(params);
-  };
-
-
-
+};
 
 export const getUserTransactions = async ({
 	identity,
@@ -286,8 +283,7 @@ export const saveUserTransactions = async ({
 	const { saveUserTransactions } = await backendCanister({ identity });
 
 	return saveUserTransactions(params);
-  };
-
+};
 
 const backendCanister = async ({
 	identity,

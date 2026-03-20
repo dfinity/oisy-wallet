@@ -648,9 +648,7 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// Errors are enumerated by: `UserTransactionError`.
-	get_user_transactions : (GetUserTransactionsRequest) -> (
-		GetUserTransactionsResult
-	get_exchange_rate : (TokenId) -> (opt ExchangeRate) query;
+	get_user_transactions : (GetUserTransactionsRequest) -> (GetUserTransactionsResult get_exchange_rate : (TokenId) -> (opt ExchangeRate) query;
 	get_exchange_rates : (vec TokenId) -> (
 		vec record { TokenId; opt ExchangeRate }
 	) query;

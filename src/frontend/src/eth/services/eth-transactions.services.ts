@@ -34,8 +34,8 @@ import type { NetworkId } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -120,9 +120,7 @@ const loadEthTransactions = async ({
 		// This means only transactions at least ETH_FINALITY_BLOCKS behind this tip will
 		// be saved — the most recent transactions in the batch will be saved on a future load.
 		if (newTransactions.length > 0 && nonNullish(transactionTokenId)) {
-			const blockNumbers = newTransactions
-				.map((tx) => tx.blockNumber)
-				.filter(nonNullish);
+			const blockNumbers = newTransactions.map((tx) => tx.blockNumber).filter(nonNullish);
 			const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
 
 			if (maxBlockNumber > 0) {

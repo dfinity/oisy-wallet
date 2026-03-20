@@ -406,8 +406,7 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
-
-private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
+	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
 		if (!nonNullish(rate)) {
 			return;
 		}
@@ -452,9 +451,7 @@ private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate 
 
 			return acc;
 		}, new Map());
-    	};
-
-
+	};
 
 	getUserTransactions = async ({
 		tokenId,
@@ -492,6 +489,5 @@ private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate 
 		}
 
 		throw response.Err;
-    	};
-
+	};
 }
