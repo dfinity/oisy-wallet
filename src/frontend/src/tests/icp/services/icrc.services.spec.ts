@@ -376,10 +376,7 @@ describe('icrc.services', () => {
 				expect(trackEvent).toHaveBeenNthCalledWith(1, {
 					name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 					metadata: {
-						error: err.message,
-						toast_shown: 'true',
-						toast_severity: 'error',
-						is_retry: 'false'
+						error: err.message
 					}
 				});
 			});
