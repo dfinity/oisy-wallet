@@ -70,6 +70,37 @@ fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
 }
 
 #[test]
+#[ignore = "Enable when II_DELEGATION_CHAIN_GUARD_ENABLED is set to true"]
+fn test_add_pending_transaction_requires_delegation_chain() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let add_request = BtcAddPendingTransactionRequest {
+        txid: vec![],
+        utxos: vec![UTXO_1],
+        network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
+    };
+
+    let add_response = pic_setup
+        .update::<Result<(), BtcAddPendingTransactionError>>(
+            caller,
+            "btc_add_pending_transaction",
+            add_request,
+        )
+        .expect("Canister call failed");
+
+    assert!(
+        matches!(
+            add_response,
+            Err(BtcAddPendingTransactionError::InvalidDelegationChain { .. })
+        ),
+        "Expected InvalidDelegationChain error, got: {add_response:?}"
+    );
+}
+
+#[test]
 fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disabled() {
     let pic_setup = setup();
 
@@ -90,7 +121,6 @@ fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disab
         )
         .expect("Canister call failed");
 
-    // II_DELEGATION_CHAIN_GUARD_ENABLED is false, so missing chain is not rejected.
     assert!(
         !matches!(
             add_response,
@@ -210,6 +240,36 @@ fn test_controller_bypasses_delegation_check() {
 // -------------------------------------------------------------------------------------------------
 
 #[test]
+#[ignore = "Enable when II_DELEGATION_CHAIN_GUARD_ENABLED is set to true"]
+fn test_select_user_utxos_fee_requires_delegation_chain() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let request = SelectedUtxosFeeRequest {
+        amount_satoshis: 100_000_000u64,
+        network: BitcoinNetwork::Regtest,
+        min_confirmations: None,
+        ii_delegation_chain: None,
+    };
+
+    let response = pic_setup
+        .update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
+            caller,
+            "btc_select_user_utxos_fee",
+            request,
+        )
+        .expect("Canister call failed");
+
+    assert!(
+        matches!(
+            response,
+            Err(SelectedUtxosFeeError::InvalidDelegationChain { .. })
+        ),
+        "Expected InvalidDelegationChain error, got: {response:?}"
+    );
+}
+
+#[test]
 fn test_select_user_utxos_fee_without_delegation_chain_passes_when_guard_disabled() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
@@ -229,7 +289,6 @@ fn test_select_user_utxos_fee_without_delegation_chain_passes_when_guard_disable
         )
         .expect("Canister call failed");
 
-    // II_DELEGATION_CHAIN_GUARD_ENABLED is false, so missing chain is not rejected.
     assert!(
         !matches!(
             response,
@@ -311,6 +370,35 @@ fn test_select_user_utxos_fee_with_valid_delegation() {
 // -------------------------------------------------------------------------------------------------
 
 #[test]
+#[ignore = "Enable when II_DELEGATION_CHAIN_GUARD_ENABLED is set to true"]
+fn test_get_pending_transactions_requires_delegation_chain() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let request = BtcGetPendingTransactionsRequest {
+        address: MOCK_ADDRESS.to_string(),
+        network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
+    };
+
+    let response = pic_setup
+        .update::<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>>(
+            caller,
+            "btc_get_pending_transactions",
+            request,
+        )
+        .expect("Canister call failed");
+
+    assert!(
+        matches!(
+            response,
+            Err(BtcGetPendingTransactionsError::InvalidDelegationChain { .. })
+        ),
+        "Expected InvalidDelegationChain error, got: {response:?}"
+    );
+}
+
+#[test]
 fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disabled() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
@@ -329,7 +417,6 @@ fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disa
         )
         .expect("Canister call failed");
 
-    // II_DELEGATION_CHAIN_GUARD_ENABLED is false, so missing chain is not rejected.
     assert!(
         !matches!(
             response,

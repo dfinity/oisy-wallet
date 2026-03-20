@@ -191,10 +191,13 @@ mod tests {
     }
 
     #[test]
-    fn test_require_non_controller_missing_chain_passes_when_guard_disabled() {
-        // With II_DELEGATION_CHAIN_GUARD_ENABLED = false the check is a no-op.
+    fn test_require_non_controller_missing_chain() {
         let result = require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0);
-        assert!(result.is_ok());
+        if II_DELEGATION_CHAIN_GUARD_ENABLED {
+            assert_eq!(result.unwrap_err(), "II delegation chain is required");
+        } else {
+            assert!(result.is_ok());
+        }
     }
 
     // ---- verify_ii_delegation_chain ----
