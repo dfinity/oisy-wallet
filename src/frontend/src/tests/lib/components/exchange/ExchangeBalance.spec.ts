@@ -1,4 +1,5 @@
 import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import * as balancesDerived from '$lib/derived/balances.derived';
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as i18nDerived from '$lib/derived/i18n.derived';
@@ -12,6 +13,7 @@ import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores
 import type { TokenUi } from '$lib/types/token-ui';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -38,6 +40,9 @@ describe('ExchangeBalance', () => {
 		vi.restoreAllMocks();
 
 		mockHeroContext = initHeroContext();
+
+		mockPage.reset();
+		mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
 
 		vi.spyOn(i18nDerived, 'currentLanguage', 'get').mockReturnValue(staticStore(Languages.ENGLISH));
 		vi.spyOn(currencyDerived, 'currentCurrency', 'get').mockReturnValue(staticStore(Currency.USD));
@@ -123,6 +128,27 @@ describe('ExchangeBalance', () => {
 	});
 
 	describe('token category filtering', () => {
+		const cryptoTag = { type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO };
+		const stablecoinTag = {
+			type: TokenTagType.CATEGORY,
+			value: TokenCategoryTagValue.STABLECOIN
+		};
+
+		const tokensWithTags: TokenUi[] = [
+			{
+				usdBalance: 50,
+				stakeUsdBalance: 0,
+				claimableStakeBalanceUsd: 0,
+				tags: [cryptoTag]
+			} as unknown as TokenUi,
+			{
+				usdBalance: 200,
+				stakeUsdBalance: 0,
+				claimableStakeBalanceUsd: 0,
+				tags: [stablecoinTag]
+			} as unknown as TokenUi
+		];
+
 		beforeEach(() => {
 			mockHeroContext.loading.set(false);
 		});
@@ -137,27 +163,8 @@ describe('ExchangeBalance', () => {
 			expect(getByText('$335.00')).toBeInTheDocument();
 		});
 
-		it('should filter tokens by category when showTokenCategoryFilter is true', () => {
-			const cryptoTag = { type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO };
-			const stablecoinTag = {
-				type: TokenTagType.CATEGORY,
-				value: TokenCategoryTagValue.STABLECOIN
-			};
-
-			const tokensWithTags: TokenUi[] = [
-				{
-					usdBalance: 50,
-					stakeUsdBalance: 0,
-					claimableStakeBalanceUsd: 0,
-					tags: [cryptoTag]
-				} as unknown as TokenUi,
-				{
-					usdBalance: 200,
-					stakeUsdBalance: 0,
-					claimableStakeBalanceUsd: 0,
-					tags: [stablecoinTag]
-				} as unknown as TokenUi
-			];
+		it('should filter tokens by category when on tokens route and showTokenCategoryFilter is true', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
 
 			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
 				staticStore(true)
@@ -173,6 +180,37 @@ describe('ExchangeBalance', () => {
 			const { getByText } = renderComponent();
 
 			expect(getByText('$50.00')).toBeInTheDocument();
+		});
+
+		it('should not filter tokens by category when not on tokens route even if showTokenCategoryFilter is true', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.CRYPTO as TokenCategoryTagValue | undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$250.00')).toBeInTheDocument();
+		});
+
+		it('should use all tokens on non-tokens route when showTokenCategoryFilter is false', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Settings}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(false)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$335.00')).toBeInTheDocument();
 		});
 	});
 

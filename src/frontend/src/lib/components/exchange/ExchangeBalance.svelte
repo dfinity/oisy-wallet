@@ -21,6 +21,8 @@
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
 	import { sumTokensUiUsdBalance, sumTokensUiUsdStakeBalance } from '$lib/utils/tokens.utils';
+	import {isRouteTokens} from "$lib/utils/nav.utils";
+	import {page} from "$app/state";
 
 	interface Props {
 		hideBalance?: boolean;
@@ -30,8 +32,11 @@
 
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
+		const isTokensRoute = $derived(isRouteTokens(page));
+
+
 	const heroTokens = $derived(
-		$showTokenCategoryFilter
+		$showTokenCategoryFilter && isTokensRoute
 			? filterTokensUiByCategory({
 					tokens: $enabledFungibleNetworkTokensUi,
 					category: $tokenCategoryFilter
