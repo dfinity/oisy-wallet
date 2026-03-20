@@ -50,14 +50,6 @@ pub fn call_allow_signing_with_delegation(
     caller: Principal,
     ii_delegation_chain: Option<shared::types::delegation::IIDelegationChain>,
 ) -> Result<AllowSigningResponse, AllowSigningError> {
-    call_allow_signing_with_delegation(pic_setup, caller, None)
-}
-
-pub fn call_allow_signing_with_delegation(
-    pic_setup: &PicBackend,
-    caller: Principal,
-    ii_delegation_chain: Option<shared::types::delegation::IIDelegationChain>,
-) -> Result<AllowSigningResponse, AllowSigningError> {
     let wrapped_result = pic_setup.update::<Result<AllowSigningResponse, AllowSigningError>>(
         caller,
         "allow_signing",
