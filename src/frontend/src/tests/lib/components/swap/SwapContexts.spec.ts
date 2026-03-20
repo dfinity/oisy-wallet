@@ -136,6 +136,28 @@ describe('SwapContexts', () => {
 			]);
 		});
 
+		it('should only include ICP when all other networks are disabled before mount', () => {
+			setupUserNetworksStore('allDisabled');
+
+			render(SwapContexts, { children: mockSnippet });
+
+			const networksListContext = getNetworksListContext();
+			const networks = get(networksListContext.filteredNetworks);
+
+			expect(networks).toEqual([ICP_NETWORK]);
+		});
+
+		it('should only include ICP and Ethereum when only Ethereum is enabled before mount', () => {
+			setupUserNetworksStore([ETHEREUM_NETWORK.id]);
+
+			render(SwapContexts, { children: mockSnippet });
+
+			const networksListContext = getNetworksListContext();
+			const networks = get(networksListContext.filteredNetworks);
+
+			expect(networks).toEqual([ICP_NETWORK, ETHEREUM_NETWORK]);
+		});
+
 		it('should update networks list context when networks are disabled', async () => {
 			render(SwapContexts, { children: mockSnippet });
 
