@@ -216,6 +216,28 @@ describe('btc-utxos.service', () => {
 			expect(result.utxos.length).toBeGreaterThan(0);
 		});
 
+		it('should return UtxoLocked error when all UTXOs are filtered out by confirmations', () => {
+			const unconfirmedUtxo: CkBtcMinterDid.Utxo = {
+				value: 500000n,
+				height: 0,
+				outpoint: {
+					txid: new Uint8Array([1, 2, 3, 4]),
+					vout: 0
+				}
+			};
+
+			const result = prepareBtcSend({
+				...defaultParams,
+				allUtxos: [unconfirmedUtxo]
+			});
+
+			expect(result).toEqual({
+				feeSatoshis: ZERO,
+				utxos: [],
+				error: BtcPrepareSendError.UtxoLocked
+			});
+		});
+
 		it('should handle insufficient balance for fee scenario', () => {
 			// Mock a scenario where there are UTXOs but insufficient balance for fee
 			const smallUtxo: CkBtcMinterDid.Utxo = {

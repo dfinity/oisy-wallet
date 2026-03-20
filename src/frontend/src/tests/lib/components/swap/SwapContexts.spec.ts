@@ -1,14 +1,21 @@
+import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
-import { MODAL_NETWORKS_LIST_CONTEXT_KEY } from '$lib/stores/modal-networks-list.store';
+import {
+	MODAL_NETWORKS_LIST_CONTEXT_KEY,
+	type ModalNetworksListContext
+} from '$lib/stores/modal-networks-list.store';
 import { MODAL_TOKENS_LIST_CONTEXT_KEY } from '$lib/stores/modal-tokens-list.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import * as swapStoreModule from '$lib/stores/swap.store';
 import { initSwapContext, SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import * as sveltePackage from 'svelte';
-import { setContext } from 'svelte';
+import { setContext, tick } from 'svelte';
 import { get } from 'svelte/store';
 
 describe('SwapContexts', () => {
@@ -21,6 +28,8 @@ describe('SwapContexts', () => {
 
 		vi.spyOn(sveltePackage, 'setContext');
 		vi.spyOn(swapStoreModule, 'initSwapContext').mockReturnValue(swapContext);
+
+		setupUserNetworksStore('allEnabled');
 	});
 
 	it('should render children snippet', () => {
@@ -103,6 +112,61 @@ describe('SwapContexts', () => {
 			render(SwapContexts, { children: mockSnippet });
 
 			expect(setContext).toHaveBeenCalledTimes(5);
+		});
+	});
+
+	describe('reactive network sync', () => {
+		const getNetworksListContext = (): ModalNetworksListContext => {
+			const call = (setContext as ReturnType<typeof vi.fn>).mock.calls.find(
+				([key]) => key === MODAL_NETWORKS_LIST_CONTEXT_KEY
+			);
+			return call?.[1] as ModalNetworksListContext;
+		};
+
+		it('should include all cross-chain swap mainnets when all networks are enabled', () => {
+			render(SwapContexts, { children: mockSnippet });
+
+			const networksListContext = getNetworksListContext();
+			const networks = get(networksListContext.filteredNetworks);
+
+			expect(networks).toEqual([ICP_NETWORK, ETHEREUM_NETWORK, ...SUPPORTED_EVM_MAINNET_NETWORKS]);
+		});
+
+		it('should only include ICP when all other networks are disabled before mount', () => {
+			setupUserNetworksStore('allDisabled');
+
+			render(SwapContexts, { children: mockSnippet });
+
+			const networksListContext = getNetworksListContext();
+			const networks = get(networksListContext.filteredNetworks);
+
+			expect(networks).toEqual([ICP_NETWORK]);
+		});
+
+		it('should only include ICP and Ethereum when only Ethereum is enabled before mount', () => {
+			setupUserNetworksStore([ETHEREUM_NETWORK.id]);
+
+			render(SwapContexts, { children: mockSnippet });
+
+			const networksListContext = getNetworksListContext();
+			const networks = get(networksListContext.filteredNetworks);
+
+			expect(networks).toEqual([ICP_NETWORK, ETHEREUM_NETWORK]);
+		});
+
+		it('should update networks list context when networks are disabled', async () => {
+			render(SwapContexts, { children: mockSnippet });
+
+			const networksListContext = getNetworksListContext();
+
+			expect(get(networksListContext.filteredNetworks).length).toBeGreaterThan(1);
+
+			setupUserNetworksStore('allDisabled');
+			await tick();
+
+			const updatedNetworks = get(networksListContext.filteredNetworks);
+
+			expect(updatedNetworks).toEqual([ICP_NETWORK]);
 		});
 	});
 });

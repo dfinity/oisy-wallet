@@ -1,3 +1,4 @@
+import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
@@ -12,6 +13,7 @@ import { POL_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens.
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { DEFAULT_ARBITRUM_TOKEN } from '$lib/constants/tokens.constants';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -87,6 +89,15 @@ describe('token.derived', () => {
 				mockPage.mockNetwork(networkId.description);
 
 				expect(get(defaultFallbackToken)).toEqual(POL_MAINNET_TOKEN);
+			}
+		);
+
+		it.each(SUPPORTED_ARBITRUM_NETWORK_IDS)(
+			`should return default token for Arbitrum network %s`,
+			(networkId) => {
+				mockPage.mockNetwork(networkId.description);
+
+				expect(get(defaultFallbackToken)).toEqual(DEFAULT_ARBITRUM_TOKEN);
 			}
 		);
 
