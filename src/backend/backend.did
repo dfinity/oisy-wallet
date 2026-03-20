@@ -32,12 +32,10 @@ type AllowSigningError = variant {
 	FailedToContactCyclesLedger
 };
 type AllowSigningRequest = record {
-	ii_delegation_chain : opt IIDelegationChain;
-	nonce : nat64
+	ii_delegation_chain : opt IIDelegationChain
 };
 type AllowSigningResponse = record {
 	status : AllowSigningStatus;
-	challenge_completion : opt ChallengeCompletion;
 	allowed_cycles : nat
 };
 type AllowSigningResult = variant {
@@ -129,12 +127,6 @@ type CanisterStatusResultV2 = record {
 	module_hash : opt blob
 };
 type CanisterStatusType = variant { stopped; stopping; running };
-type ChallengeCompletion = record {
-	solved_duration_ms : nat64;
-	next_allowance_ms : nat64;
-	next_difficulty : nat32;
-	current_difficulty : nat32
-};
 type Config = record {
 	derivation_origin : opt text;
 	ecdsa_key_name : text;

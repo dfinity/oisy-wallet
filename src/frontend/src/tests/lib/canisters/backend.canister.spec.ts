@@ -819,7 +819,6 @@ describe('backend.canister', () => {
 		it('should allow signing', async () => {
 			const okResponse: AllowSigningResponse = {
 				status: { Executed: null },
-				challenge_completion: toNullable(),
 				allowed_cycles: ZERO
 			};
 
@@ -930,7 +929,6 @@ describe('backend.canister', () => {
 			expect(res).toStrictEqual({
 				response: {
 					status: { Skipped: null },
-					challenge_completion: toNullable(),
 					allowed_cycles: ZERO
 				},
 				rateLimitInfo: {
@@ -963,7 +961,6 @@ describe('backend.canister', () => {
 			expect(res).toStrictEqual({
 				response: {
 					status: { Skipped: null },
-					challenge_completion: toNullable(),
 					allowed_cycles: ZERO
 				},
 				rateLimitInfo: {

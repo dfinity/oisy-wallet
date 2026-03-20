@@ -97,7 +97,6 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
             return Ok(AllowSigningResponse {
                 status: AllowSigningStatus::Skipped,
                 allowed_cycles: current,
-                challenge_completion: None,
             });
         }
 
@@ -105,7 +104,7 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(AllowSigningError::RateLimited)?;
 
-        signer::approve_signing(None).await?;
+        signer::approve_signing().await?;
 
         let allowed_cycles = signer::has_sufficient_allowance()
             .await
@@ -114,7 +113,6 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
         Ok(AllowSigningResponse {
             status: AllowSigningStatus::Executed,
             allowed_cycles,
-            challenge_completion: None,
         })
     }
     inner(request).await.into()
