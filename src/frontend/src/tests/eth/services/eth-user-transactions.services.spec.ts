@@ -89,7 +89,7 @@ const makeBackendUserTx = ({
 	value: 1000n,
 	network_data: {
 		Evm: {
-			chain_id: [1],
+			chain_id: [1n],
 			nonce: [1],
 			gas_limit: [21000n],
 			gas_price: [20_000_000_000n],

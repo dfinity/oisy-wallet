@@ -51,15 +51,15 @@ export const mapUserTransactionToTransaction = (stored: UserTransaction): Transa
 		blockNumber: Number(stored.block_index),
 		timestamp: Number(stored.timestamp),
 		from: stored.from,
-		to: stored.to.length > 0 ? stored.to[0] : undefined,
+		to: stored.to[0],
 		value: stored.value,
-		chainId: evm.chain_id.length > 0 ? BigInt(evm.chain_id[0]) : ZERO,
-		nonce: evm.nonce.length > 0 ? evm.nonce[0] : 0,
-		gasLimit: evm.gas_limit.length > 0 ? evm.gas_limit[0] : ZERO,
-		gasPrice: evm.gas_price.length > 0 ? evm.gas_price[0] : undefined,
-		gasUsed: evm.gas_used.length > 0 ? evm.gas_used[0] : undefined,
-		data: evm.data.length > 0 ? evm.data[0] : '',
-		tokenId: evm.nft_token_id.length > 0 ? evm.nft_token_id[0] : undefined
+		chainId: evm.chain_id[0] ?? ZERO,
+		nonce: evm.nonce[0] ?? 0,
+		gasLimit: evm.gas_limit[0] ?? ZERO,
+		gasPrice: evm.gas_price[0],
+		gasUsed: evm.gas_used[0],
+		data: evm.data[0] ?? '',
+		tokenId: evm.nft_token_id[0]
 	};
 };
 
