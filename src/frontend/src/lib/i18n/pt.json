@@ -1075,7 +1075,8 @@
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
-			"cross_chain_networks_info": ""
+			"cross_chain_networks_info": "",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",

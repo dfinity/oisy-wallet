@@ -4,7 +4,6 @@ import type { IcToken } from '$icp/types/ic-token';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
-import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
@@ -20,6 +19,14 @@ vi.mock('$icp/services/icrc.services', () => ({
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({
 	icrc1SupportedStandards: vi.fn()
+}));
+
+const mockSwapFn = vi.fn();
+
+vi.mock('$lib/services/swap.services', () => ({
+	swapService: {
+		icpSwap: (...args: unknown[]) => mockSwapFn(...args)
+	}
 }));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
@@ -144,15 +151,11 @@ describe('SwapIcpWizard', () => {
 	});
 
 	describe('swap execution', () => {
-		const mockSwapFn = vi.fn();
-
 		beforeEach(() => {
 			vi.useFakeTimers();
-			vi.spyOn(swapServices, 'swapService', 'get').mockReturnValue({
-				icpSwap: mockSwapFn
-			} as unknown as typeof swapServices.swapService);
-			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
 			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			mockSwapFn.mockResolvedValue(undefined);
 		});
 
 		afterEach(() => {
@@ -160,8 +163,6 @@ describe('SwapIcpWizard', () => {
 		});
 
 		it('calls onClose after successful swap', async () => {
-			mockSwapFn.mockResolvedValue(undefined);
-
 			const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
 
 			await fireEvent.click(getByText('Swap now'));

@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
+	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
@@ -10,9 +11,9 @@
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import {
 		ETH_FEE_CONTEXT_KEY,
+		type EthFeeContext as FeeContextType,
 		initEthFeeContext,
-		initEthFeeStore,
-		type EthFeeContext as FeeContextType
+		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { ProgressStep } from '$eth/types/send';
@@ -31,7 +32,11 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { fetchVeloraDeltaSwap, fetchVeloraMarketSwap } from '$lib/services/swap.services';
+	import {
+		fetchNearIntentsSwap,
+		fetchVeloraDeltaSwap,
+		fetchVeloraMarketSwap
+	} from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -40,7 +45,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
+	import { SwapProvider, type VeloraSwapDetails, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
@@ -170,13 +175,19 @@
 		})
 	);
 
+	const isNearIntentsProvider = $derived<boolean>(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
+	);
+
 	const isApproveNeeded = $derived<boolean>(
-		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
+		!isNearIntentsProvider &&
+			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.MARKET &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
 	const isGasless = $derived<boolean>(
-		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.DELTA &&
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
+			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.DELTA &&
 			nonNullish($isSourceTokenPermitSupported) &&
 			$isSourceTokenPermitSupported
 	);
@@ -236,31 +247,47 @@
 		onNext();
 		onStopTriggerAmount();
 
+		const { selectedProvider } = $swapAmountsStore;
+
 		try {
 			failedSwapError.set(undefined);
 
-			const params = {
+			const baseParams = {
 				identity: $authIdentity,
 				progress: (step: ProgressStep) => (swapProgressStep = step),
 				sourceToken: $sourceToken as Erc20Token,
 				destinationToken: $destinationToken as Erc20Token,
 				swapAmount,
 				sourceNetwork: $sourceToken.network,
-				receiveAmount: $swapAmountsStore?.selectedProvider?.receiveAmount,
 				slippageValue,
 				destinationNetwork: $destinationToken.network,
 				userAddress: $ethAddress,
 				gas,
 				maxFeePerGas,
-				maxPriorityFeePerGas,
-				isGasless: $isSourceTokenPermitSupported ?? false,
-				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
+				maxPriorityFeePerGas
 			};
 
-			if ($swapAmountsStore.swaps[0].type === VeloraSwapTypes.DELTA) {
-				await fetchVeloraDeltaSwap(params);
+			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED) {
+				const params = {
+					...baseParams,
+					receiveAmount: selectedProvider.receiveAmount,
+					swapDetails: selectedProvider.swapDetails
+				};
+
+				await fetchNearIntentsSwap(params);
 			} else {
-				await fetchVeloraMarketSwap(params);
+				const params = {
+					...baseParams,
+					receiveAmount: selectedProvider.receiveAmount,
+					isGasless: $isSourceTokenPermitSupported ?? false,
+					swapDetails: selectedProvider.swapDetails as VeloraSwapDetails
+				};
+
+				if (selectedProvider.type === VeloraSwapTypes.DELTA) {
+					await fetchVeloraDeltaSwap(params);
+				} else {
+					await fetchVeloraMarketSwap(params);
+				}
 			}
 
 			progress(ProgressStepsSwap.DONE);

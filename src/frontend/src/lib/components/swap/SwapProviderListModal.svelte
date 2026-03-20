@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -18,6 +17,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { SwapMappedResult } from '$lib/types/swap';
 	import { formatTokenBigintToNumber, formatCurrency } from '$lib/utils/format.utils';
+	import { findSwapProvider } from '$lib/utils/swap.utils';
 
 	interface Props {
 		onSelectProvider: (swap: SwapMappedResult) => void;
@@ -70,7 +70,7 @@
 				<li class="logo-button-list-item" data-testid="provider-item">
 					<SwapProviderListItem
 						amount={swap.receiveAmount}
-						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
+						dapp={findSwapProvider(swap.provider)}
 						destinationToken={$destinationToken as IcTokenToggleable}
 						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
 						onClick={() => onSelectProvider(swap)}
