@@ -165,15 +165,23 @@ fn make_key(principal: Principal, token_id: &TokenId) -> UserTransactionKey {
 mod tests {
     use std::cell::RefCell;
 
-    use candid::Nat;
+    use candid::{Nat, Principal};
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
     };
     use pretty_assertions::assert_eq;
-    use shared::types::user_transaction::{EvmTransactionData, NetworkTransactionData};
+    use shared::types::{
+        token_id::TokenId,
+        user_transaction::{
+            EvmTransactionData, NetworkTransactionData, UserTransaction, UserTransactionError,
+            MAX_GET_USER_TRANSACTIONS_RESULTS, MAX_SAVE_USER_TRANSACTIONS_BATCH,
+            MAX_USER_TRANSACTIONS_PER_TOKEN,
+        },
+    };
 
-    use super::*;
+    use super::{get_transactions, save_transactions};
+    use crate::types::UserTransactionsMap;
 
     const PRINCIPAL_TEXT: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
 
