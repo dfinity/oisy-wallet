@@ -75,6 +75,8 @@ export const trackEvent = ({ name, metadata, warning }: TrackEventParams) => {
 			}
 		}
 	} catch (err: unknown) {
+		// Non-critical: tracking failure should not prevent the continuation of the user flow.
+
 		if (LOCAL || STAGING) {
 			// eslint-disable-next-line no-console
 			console.debug('[analytics]', err);
