@@ -187,7 +187,8 @@
 
 	const isGasless = $derived<boolean>(
 		!isNearIntentsProvider &&
-			$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.DELTA &&
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
+			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.DELTA &&
 			nonNullish($isSourceTokenPermitSupported) &&
 			$isSourceTokenPermitSupported
 	);
