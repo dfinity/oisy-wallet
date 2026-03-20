@@ -190,6 +190,15 @@ type Delegation = record {
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
+type EvmTransactionData = record {
+	nft_token_id : opt nat;
+	data : opt text;
+	chain_id : opt nat64;
+	nonce : opt nat64;
+	gas_limit : opt nat;
+	gas_used : opt nat;
+	gas_price : opt nat
+};
 type ExchangeData = record {
 	price_24h_change_pct : opt float64;
 	market_cap : opt float64;
@@ -221,6 +230,22 @@ type GetUserProfileError = variant { NotFound };
 type GetUserProfileResult = variant {
 	Ok : UserProfile;
 	Err : GetUserProfileError
+};
+type GetUserTransactionsRequest = record {
+	token_id : TokenId;
+	max_results : nat64;
+	start : opt nat64
+};
+type GetUserTransactionsResponse = record {
+	next_start : opt nat64;
+	total_stored : nat64;
+	oldest_block_index : opt nat64;
+	newest_block_index : opt nat64;
+	transactions : vec UserTransaction
+};
+type GetUserTransactionsResult = variant {
+	Ok : GetUserTransactionsResponse;
+	Err : UserTransactionError
 };
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
@@ -278,6 +303,7 @@ type NetworkSettingsFor = variant {
 	BitcoinMainnet;
 	BscTestnet
 };
+type NetworkTransactionData = variant { Evm : EvmTransactionData };
 type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
@@ -438,6 +464,21 @@ type UserProfile = record {
 	created_timestamp : nat64;
 	updated_timestamp : nat64
 };
+type UserTransaction = record {
+	id : text;
+	to : opt text;
+	block_index : nat64;
+	value : nat;
+	from : text;
+	network_data : NetworkTransactionData;
+	timestamp : nat64
+};
+type UserTransactionError = variant {
+	DuplicateTransaction : record { id : text };
+	InternalError : record { msg : text };
+	TooManyTransactions;
+	UserNotFound
+};
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
 	// Adds a verifiable credential to the user profile.
@@ -594,6 +635,16 @@ service : (Arg) -> {
 	// # Panics
 	// - If the caller is anonymous.  See: `may_read_user_data`.
 	get_user_profile : () -> (GetUserProfileResult) query;
+	// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
+	//
+	// # Returns
+	// - `Ok(GetUserTransactionsResponse)` with the requested page of transactions.
+	//
+	// Currently, this function always returns `Ok` for valid (non-anonymous) calls.
+	// The `Err(UserTransactionError)` variant is reserved for future validation logic.
+	get_user_transactions : (GetUserTransactionsRequest) -> (
+		GetUserTransactionsResult
+	) query;
 	// Checks if the caller has an associated user profile.
 	//
 	// # Returns
