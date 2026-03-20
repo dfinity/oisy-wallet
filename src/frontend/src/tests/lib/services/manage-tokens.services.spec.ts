@@ -128,10 +128,7 @@ describe('manage-tokens.services', () => {
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
 				metadata: {
-					error: 'Save failed',
-					is_version_mismatch: 'false',
-					toast_shown: 'true',
-					toast_severity: 'error'
+					error: 'Save failed'
 				}
 			});
 		});
@@ -150,11 +147,9 @@ describe('manage-tokens.services', () => {
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
-				metadata: expect.objectContaining({
-					is_version_mismatch: 'true',
-					toast_shown: 'true',
-					toast_severity: 'warn'
-				})
+				metadata: {
+					error: 'Version mismatch, token update not allowed'
+				}
 			});
 		});
 
@@ -182,10 +177,7 @@ describe('manage-tokens.services', () => {
 					Method: 'set_many_custom_tokens (update)',
 					'Reject code': '5',
 					'Reject message':
-						"Error from Canister doked-biaaa-aaaar-qag2a-cai: Canister called `ic0.trap` with message: 'Version mismatch, token update not allowed'.",
-					is_version_mismatch: 'true',
-					toast_shown: 'true',
-					toast_severity: 'warn'
+						"Error from Canister doked-biaaa-aaaar-qag2a-cai: Canister called `ic0.trap` with message: 'Version mismatch, token update not allowed'."
 				}
 			});
 		});
