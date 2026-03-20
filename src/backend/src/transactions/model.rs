@@ -73,7 +73,7 @@ pub fn save_transactions(
     map: &mut UserTransactionsMap,
     principal: Principal,
     token_id: &TokenId,
-    transactions: &Vec<UserTransaction>,
+    transactions: &[UserTransaction],
 ) -> Result<(), UserTransactionError> {
     if transactions.len() > MAX_SAVE_USER_TRANSACTIONS_BATCH {
         return Err(UserTransactionError::TooManyTransactions);
@@ -83,11 +83,11 @@ pub fn save_transactions(
 
     let mut existing = map.get(&key).map(|c| c.0).unwrap_or_default();
 
-    let known_ids: HashSet<&str> = existing.iter().map(|e| e.id.as_str()).collect();
+    let mut known_ids: HashSet<String> = existing.iter().map(|e| e.id.clone()).collect();
 
     let mut new_txs = Vec::new();
     for tx in transactions {
-        if known_ids.contains(tx.id.as_str()) {
+        if !known_ids.insert(tx.id.clone()) {
             continue;
         }
         new_txs.push(tx.clone());
@@ -101,7 +101,7 @@ pub fn save_transactions(
             let mut trim_at = existing.len() - MAX_USER_TRANSACTIONS_PER_TOKEN;
 
             // If the trim lands mid-block, advance to the next complete block boundary
-            // so we never store a partial block at the oldest end.
+            // so we avoid storing a partial block at the oldest end.
             if trim_at < existing.len() {
                 let boundary_block = existing[trim_at].block_index;
                 if trim_at > 0 && existing[trim_at - 1].block_index == boundary_block {
@@ -435,7 +435,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![tx1.clone(), tx2.clone(), tx3.clone()],
+            &[tx1.clone(), tx2.clone(), tx3.clone()],
         )
         .unwrap();
 
@@ -492,8 +492,8 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
         let tx = make_tx("0xhash1", 100, 1000);
 
-        save_transactions(&mut map, principal, &eth_native_token(), &vec![tx.clone()]).unwrap();
-        save_transactions(&mut map, principal, &eth_native_token(), &vec![tx]).unwrap();
+        save_transactions(&mut map, principal, &eth_native_token(), std::slice::from_ref(&tx)).unwrap();
+        save_transactions(&mut map, principal, &eth_native_token(), std::slice::from_ref(&tx)).unwrap();
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
 
@@ -514,8 +514,8 @@ mod tests {
         );
         let erc20_tx = make_tx("0xerc20_hash", 200, 2000);
 
-        save_transactions(&mut map, principal, &eth_native_token(), &vec![eth_tx]).unwrap();
-        save_transactions(&mut map, principal, &erc20_token_id, &vec![erc20_tx]).unwrap();
+        save_transactions(&mut map, principal, &eth_native_token(), &[eth_tx]).unwrap();
+        save_transactions(&mut map, principal, &erc20_token_id, &[erc20_tx]).unwrap();
 
         let eth_result = get_transactions(&map, principal, &eth_native_token(), None, 10);
         assert_eq!(eth_result.transactions.len(), 1);
@@ -537,8 +537,8 @@ mod tests {
         let tx1 = make_tx("0xuser1_hash", 100, 1000);
         let tx2 = make_tx("0xuser2_hash", 200, 2000);
 
-        save_transactions(&mut map, principal1, &eth_native_token(), &vec![tx1]).unwrap();
-        save_transactions(&mut map, principal2, &eth_native_token(), &vec![tx2]).unwrap();
+        save_transactions(&mut map, principal1, &eth_native_token(), &[tx1]).unwrap();
+        save_transactions(&mut map, principal2, &eth_native_token(), &[tx2]).unwrap();
 
         let result1 = get_transactions(&map, principal1, &eth_native_token(), None, 10);
         assert_eq!(result1.transactions.len(), 1);
@@ -562,7 +562,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![tx3, tx1, tx2],
+            &[tx3, tx1, tx2],
         )
         .unwrap();
 
@@ -582,7 +582,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xhash1", 100, 1000)],
+            &[make_tx("0xhash1", 100, 1000)],
         )
         .unwrap();
 
@@ -590,7 +590,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xhash2", 200, 2000), make_tx("0xhash3", 300, 3000)],
+            &[make_tx("0xhash2", 200, 2000), make_tx("0xhash3", 300, 3000)],
         )
         .unwrap();
 
@@ -609,7 +609,7 @@ mod tests {
         {
             let memory = memory_manager.borrow().get(MemoryId::new(0));
             let mut map = UserTransactionsMap::init(memory);
-            save_transactions(&mut map, principal, &eth_native_token(), &vec![tx.clone()]).unwrap();
+            save_transactions(&mut map, principal, &eth_native_token(), std::slice::from_ref(&tx)).unwrap();
         }
 
         // Re-init with same memory
@@ -636,7 +636,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![tx0.clone(), tx1.clone()],
+            &[tx0.clone(), tx1.clone()],
         )
         .unwrap();
 
@@ -662,7 +662,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xonly", 50, 500)],
+            &[make_tx("0xonly", 50, 500)],
         )
         .unwrap();
 
@@ -750,7 +750,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xoverflow", 999_999, 9_999_990)],
+            &[make_tx("0xoverflow", 999_999, 9_999_990)],
         );
         assert!(overflow.is_ok());
 
@@ -767,7 +767,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xfill1", 1, 10)],
+            &[make_tx("0xfill1", 1, 10)],
         );
         assert!(dup_ok.is_ok());
     }
@@ -899,7 +899,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xnew", 100_000, 1_000_000)],
+            &[make_tx("0xnew", 100_000, 1_000_000)],
         )
         .unwrap();
 
@@ -1051,7 +1051,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xhash1", 100, 1000)],
+            &[make_tx("0xhash1", 100, 1000)],
         )
         .unwrap();
 
@@ -1069,7 +1069,7 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let result = save_transactions(&mut map, principal, &eth_native_token(), &vec![]);
+        let result = save_transactions(&mut map, principal, &eth_native_token(), &[]);
 
         assert!(result.is_ok());
     }
@@ -1087,7 +1087,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![tx_a, tx_b, tx_c],
+            &[tx_a, tx_b, tx_c],
         )
         .unwrap();
 

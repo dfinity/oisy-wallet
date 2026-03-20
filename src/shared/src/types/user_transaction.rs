@@ -90,7 +90,7 @@ pub struct GetUserTransactionsResponse {
 }
 
 /// Request to save finalized transactions.
-#[derive(CandidType, Deserialize, Clone, Debug)]
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct SaveUserTransactionsRequest {
     /// Which token these transactions belong to
     pub token_id: TokenId,
