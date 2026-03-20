@@ -54,12 +54,6 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 			trackRateLimited(rateLimitInfo);
 		}
 	} catch (err: unknown) {
-		consoleError('allow_signing failed', err);
-
-		trackEvent({
-			name: TRACK_ALLOW_SIGNING_ERROR,
-			metadata: { error: `${errorDetailToString(err)}` }
-		});
 
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
