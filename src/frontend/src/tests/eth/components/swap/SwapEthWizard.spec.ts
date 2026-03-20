@@ -10,7 +10,7 @@ import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
-import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
+import { SwapProvider, VeloraSwapTypes, type SwapMappedResult, type VeloraSwapDetails } from '$lib/types/swap';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
@@ -149,12 +149,12 @@ describe('SwapEthWizard', () => {
 	describe('swap execution', () => {
 		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
-		const veloraSwapProviders = [
+		const veloraSwapProviders: SwapMappedResult[] = [
 			{
 				provider: SwapProvider.VELORA,
 				receiveAmount: 1000000000n,
 				type: VeloraSwapTypes.MARKET,
-				swapDetails: {}
+				swapDetails: {} as VeloraSwapDetails
 			}
 		];
 
