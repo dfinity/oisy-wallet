@@ -283,6 +283,5 @@ describe('SwapEthWizard', () => {
 			expect(onClose).not.toHaveBeenCalled();
 			expect(toasts.toastsError).toHaveBeenCalled();
 		});
-
 	});
 });
