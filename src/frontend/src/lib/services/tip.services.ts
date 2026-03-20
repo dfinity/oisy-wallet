@@ -1,10 +1,11 @@
-import { approve } from '$icp/api/icrc-ledger.api';
+import { approve, transfer } from '$icp/api/icrc-ledger.api';
 import { getTokenFee } from '$icp/utils/token.utils';
 import {
 	acceptDeal as acceptDealApi,
 	createDeal as createDealApi,
 	fundDeal as fundDealApi,
-	getClaimableDeal as getClaimableDealApi
+	getClaimableDeal as getClaimableDealApi,
+	getEscrowAccount as getEscrowAccountApi
 } from '$lib/api/escrow.api';
 import { ESCROW_CANISTER_ID, NANO_SECONDS_IN_MINUTE, ZERO } from '$lib/constants/app.constants';
 import type {
@@ -17,6 +18,7 @@ import type {
 	TipShareData
 } from '$lib/types/tip';
 import { assertNonNullish, fromNullable, nowInBigIntNanoSeconds } from '@dfinity/utils';
+import { fromCandidAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 
 export const createAndFundTip = async ({
@@ -62,6 +64,16 @@ export const createAndFundTip = async ({
 			identity,
 			dealId: deal.id
 		});
+
+		if (fee > ZERO) {
+			const escrowAccount = await getEscrowAccountApi({ identity, dealId: deal.id });
+			await transfer({
+				identity,
+				ledgerCanisterId,
+				to: fromCandidAccount(escrowAccount),
+				amount: fee
+			});
+		}
 
 		const shareData: TipShareData = {
 			dealId: fundedDeal.id,
