@@ -1499,6 +1499,21 @@ describe('format.utils', () => {
 				).toBe(expected);
 			}
 		);
+
+		it('should return undefined when currency does not match exchange rate currency', () => {
+			expect(
+				formatCurrencyAsNumber({
+					value: 100,
+					currency: Currency.EUR,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH
+				})
+			).toBeUndefined();
+		});
 	});
 
 	describe('formatStakeApyNumber', () => {
