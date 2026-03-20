@@ -139,12 +139,14 @@ describe('load-user-profile.services', () => {
 			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 			let callCount = 0;
-			vi.spyOn(backendApi, 'getUserProfile').mockImplementation(async ({ certified }) => {
+			vi.spyOn(backendApi, 'getUserProfile').mockImplementation(({ certified }) => {
 				callCount++;
+
 				if (!certified) {
-					return { Ok: mockProfile };
+					return Promise.resolve({ Ok: mockProfile });
 				}
-				throw new Error('Certified load failed');
+
+				return Promise.reject(new Error('Certified load failed'));
 			});
 
 			const result = await loadUserProfile({ identity: mockIdentity });
