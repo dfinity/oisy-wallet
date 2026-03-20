@@ -53,5 +53,6 @@ export const disableConsoleLog = () => {
 		// We mock console just to avoid unnecessary logs while running the tests
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		vi.spyOn(console, 'debug').mockImplementation(() => {});
 	});
 };
