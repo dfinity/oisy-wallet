@@ -1,6 +1,7 @@
 import {
 	errorDetailToString,
 	formatIcCallError,
+	isVersionMismatchError,
 	mapIcErrorMetadata,
 	parseIcErrorMessage,
 	replaceErrorFields,
@@ -824,6 +825,42 @@ Call context:
 
 			expect(result).toContain('"0":1');
 			expect(result).not.toContain('bytes');
+		});
+	});
+
+	describe('isVersionMismatchError', () => {
+		it('should return true for an Error with "Version mismatch" in the message', () => {
+			expect(
+				isVersionMismatchError(
+					new Error('Version mismatch, token update not allowed. Existing token: ...')
+				)
+			).toBeTruthy();
+		});
+
+		it('should return true for an IC agent error containing "Version mismatch"', () => {
+			expect(
+				isVersionMismatchError(
+					new Error(
+						'AgentError: Call failed:\n  Reject message: "Version mismatch, token update not allowed"'
+					)
+				)
+			).toBeTruthy();
+		});
+
+		it('should return false for an Error without "Version mismatch"', () => {
+			expect(isVersionMismatchError(new Error('Some other error'))).toBeFalsy();
+		});
+
+		it('should return false for a string', () => {
+			expect(isVersionMismatchError('Version mismatch')).toBeFalsy();
+		});
+
+		it('should return false for null', () => {
+			expect(isVersionMismatchError(null)).toBeFalsy();
+		});
+
+		it('should return false for undefined', () => {
+			expect(isVersionMismatchError(undefined)).toBeFalsy();
 		});
 	});
 });

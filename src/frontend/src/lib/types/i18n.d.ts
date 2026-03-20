@@ -428,6 +428,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		load_token_list: string;
 		icrc_canister_loading_curated: string;
 		icrc_canister_loading_custom: string;
 		erc20_custom_tokens: string;
@@ -1008,6 +1009,7 @@ interface I18nTokens {
 		unrecognised_erc_interface: string;
 		no_metadata: string;
 		unexpected: string;
+		version_mismatch: string;
 		unexpected_hiding: string;
 		already_available: string;
 		not_toggleable: string;

@@ -14,7 +14,7 @@ import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import { saveTokens } from '$lib/services/manage-tokens.services';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
@@ -56,6 +56,7 @@ describe('manage-tokens.services', () => {
 			vi.clearAllMocks();
 
 			vi.spyOn(toastsStore, 'toastsError');
+			vi.spyOn(toastsStore, 'toastsShow');
 		});
 
 		it('should return early if identity is nullish', async () => {
@@ -121,11 +122,39 @@ describe('manage-tokens.services', () => {
 				msg: { text: en.tokens.error.unexpected },
 				err: new Error('Save failed')
 			});
+			expect(toastsShow).not.toHaveBeenCalled();
 			expect(mockOnError).toHaveBeenCalledOnce();
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
-				metadata: { error: 'Save failed' }
+				metadata: {
+					error: 'Save failed',
+					is_version_mismatch: 'false',
+					toast_shown: 'true',
+					toast_severity: 'error'
+				}
+			});
+		});
+
+		it('should show a warning toast on version mismatch error', async () => {
+			mockSave.mockRejectedValueOnce(new Error('Version mismatch, token update not allowed'));
+
+			await saveTokens(params);
+
+			expect(toastsError).not.toHaveBeenCalled();
+			expect(toastsShow).toHaveBeenCalledWith({
+				text: en.tokens.error.version_mismatch,
+				level: 'warn'
+			});
+			expect(mockOnError).toHaveBeenCalledOnce();
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
+				metadata: expect.objectContaining({
+					is_version_mismatch: 'true',
+					toast_shown: 'true',
+					toast_severity: 'warn'
+				})
 			});
 		});
 
@@ -153,7 +182,10 @@ describe('manage-tokens.services', () => {
 					Method: 'set_many_custom_tokens (update)',
 					'Reject code': '5',
 					'Reject message':
-						"Error from Canister doked-biaaa-aaaar-qag2a-cai: Canister called `ic0.trap` with message: 'Version mismatch, token update not allowed'."
+						"Error from Canister doked-biaaa-aaaar-qag2a-cai: Canister called `ic0.trap` with message: 'Version mismatch, token update not allowed'.",
+					is_version_mismatch: 'true',
+					toast_shown: 'true',
+					toast_severity: 'warn'
 				}
 			});
 		});

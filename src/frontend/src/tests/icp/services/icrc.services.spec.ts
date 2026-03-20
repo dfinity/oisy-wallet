@@ -359,9 +359,10 @@ describe('icrc.services', () => {
 
 				await loadCustomTokens({ identity: mockIdentity });
 
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).init.error.icrc_canisters },
-					err
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(spyToastsShow).toHaveBeenCalledWith({
+					text: get(i18n).init.error.load_token_list,
+					level: 'error'
 				});
 			});
 
@@ -375,7 +376,10 @@ describe('icrc.services', () => {
 				expect(trackEvent).toHaveBeenNthCalledWith(1, {
 					name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 					metadata: {
-						error: err.message
+						error: err.message,
+						toast_shown: 'true',
+						toast_severity: 'error',
+						is_retry: 'false'
 					}
 				});
 			});
