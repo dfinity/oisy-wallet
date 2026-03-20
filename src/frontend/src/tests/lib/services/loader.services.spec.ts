@@ -40,11 +40,11 @@ vi.mock('$lib/services/analytics.services', () => ({
 
 describe('loader.services', () => {
 	const mockExecutedOutcome: AllowSigningOutcome = {
-		response: { status: { Executed: null }, challenge_completion: [], allowed_cycles: 100n }
+		response: { status: { Executed: null }, allowed_cycles: 100n }
 	};
 
 	const mockRateLimitedOutcome: AllowSigningOutcome = {
-		response: { status: { Skipped: null }, challenge_completion: [], allowed_cycles: ZERO },
+		response: { status: { Skipped: null }, allowed_cycles: ZERO },
 		rateLimitInfo: { endpoint: 'allow_signing', limiter: 'ALLOW_SIGNING_RATE_LIMITER' }
 	};
 
@@ -171,7 +171,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [
@@ -208,7 +211,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_MAINNET_NETWORK_ID]);
@@ -239,7 +245,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [ETHEREUM_NETWORK_ID]);
@@ -251,7 +260,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, []);

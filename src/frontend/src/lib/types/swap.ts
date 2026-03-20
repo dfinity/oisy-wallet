@@ -6,6 +6,7 @@ import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
@@ -90,6 +91,13 @@ export type SwapMappedResult =
 			receiveOutMinimum?: bigint;
 			swapDetails: VeloraSwapDetails;
 			type: string;
+	  }
+	| {
+			provider: SwapProvider.NEAR_INTENTS;
+			receiveAmount: bigint;
+			receiveOutMinimum?: bigint;
+			swapDetails: NearIntentsQuoteResponse;
+			type?: string;
 	  };
 
 interface KongQuoteParams {
@@ -215,6 +223,19 @@ export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	userAddress: EthAddress;
 	swapDetails: VeloraSwapDetails;
 	isGasless: boolean;
+}
+
+export interface SwapNearIntentsParams extends RequiredTransactionFeeData {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Erc20Token;
+	destinationToken: Erc20Token;
+	swapAmount: Amount;
+	receiveAmount: bigint;
+	slippageValue: Amount;
+	sourceNetwork: EthereumNetwork;
+	userAddress: EthAddress;
+	swapDetails: NearIntentsQuoteResponse;
 }
 
 export interface CheckDeltaOrderStatusParams {

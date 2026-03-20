@@ -6,12 +6,12 @@ import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721ContractAddress } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
 } from '$lib/enums/plausible';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { trackEvent } from '$lib/services/analytics.services';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -138,7 +138,7 @@ const mapErc721CustomToken = async ({
 			decimals: 0, // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 			standard: { code: 'erc721' as const },
 			category: 'custom' as const,
-			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+			tags: DEFAULT_TOKEN_TAGS,
 			enabled,
 			version,
 			...(nonNullish(mappedSection) && {

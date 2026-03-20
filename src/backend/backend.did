@@ -25,14 +25,17 @@ type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	RateLimitedByGuard : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
 };
+type AllowSigningRequest = record {
+	ii_delegation_chain : opt IIDelegationChain
+};
 type AllowSigningResponse = record {
 	status : AllowSigningStatus;
-	challenge_completion : opt ChallengeCompletion;
 	allowed_cycles : nat
 };
 type AllowSigningResult = variant {
@@ -92,6 +95,7 @@ type BtcGetFeePercentilesResult = variant {
 	Err : SelectedUtxosFeeError
 };
 type BtcGetPendingTransactionsError = variant {
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
@@ -99,6 +103,7 @@ type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
 type BtcGetPendingTransactionsRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
 	address : text
 };
@@ -122,12 +127,6 @@ type CanisterStatusResultV2 = record {
 	module_hash : opt blob
 };
 type CanisterStatusType = variant { stopped; stopping; running };
-type ChallengeCompletion = record {
-	solved_duration_ms : nat64;
-	next_allowance_ms : nat64;
-	next_difficulty : nat32;
-	current_difficulty : nat32
-};
 type Config = record {
 	derivation_origin : opt text;
 	ecdsa_key_name : text;
@@ -296,10 +295,12 @@ type SaveNetworksSettingsRequest = record {
 };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
 type SelectedUtxosFeeRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
 	amount_satoshis : nat64;
 	min_confirmations : opt nat32
@@ -460,6 +461,9 @@ service : (Arg) -> {
 	// Ensures the caller has enough cycles allowance for chain-fusion signer
 	// operations (providing public keys, creating signatures, etc.).
 	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
 	// If the caller already has sufficient allowance the call returns
 	// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
 	// call is made.  Otherwise, the endpoint is rate-limited and a new
@@ -473,7 +477,7 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// Errors are enumerated by: `AllowSigningError`.
-	allow_signing : () -> (AllowSigningResult);
+	allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
 	// Adds a pending Bitcoin transaction for the caller.
 	//
 	// Requires a valid II delegation chain to verify the caller authenticated
@@ -504,12 +508,18 @@ service : (Arg) -> {
 	) query;
 	// Returns the pending Bitcoin transactions for the caller.
 	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
 	// # Errors
 	// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
 	// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
 	//
 	// # Errors
 	// Errors are enumerated by: `SelectedUtxosFeeError`.

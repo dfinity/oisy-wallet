@@ -73,18 +73,16 @@
 		{/snippet}
 
 		{#snippet description()}
-			{#if nonNullish(apy)}
-				<Badge variant={Number(apy) > 0 ? 'success' : 'default'} width="w-fit">
-					{`${$i18n.vaults.text.live_apy} ${apy}%`}
-				</Badge>
-			{/if}
+			<Badge variant={Number(apy ?? 0) > 0 ? 'success' : 'default'} width="w-fit">
+				{`${$i18n.vaults.text.live_apy} ${nonNullish(apy) ? `${apy}%` : `${$i18n.core.text.not_available}`}`}
+			</Badge>
 		{/snippet}
 
 		{#snippet titleEnd()}
 			<span
 				class="flex min-w-12 items-center justify-end gap-1 text-sm text-nowrap sm:gap-2 sm:text-base"
 			>
-				{#if (token?.usdBalance ?? 0) > 0}
+				{#if currentlyEarning > 0}
 					<EarningYearlyAmount
 						showAsSuccess
 						showPlusSign
