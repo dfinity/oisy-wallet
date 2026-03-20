@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import { Modal, Spinner } from '@dfinity/gix-components';
 	import { fromNullable, nonNullish } from '@dfinity/utils';
+	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
