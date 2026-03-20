@@ -1,4 +1,5 @@
 import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import * as balancesDerived from '$lib/derived/balances.derived';
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as i18nDerived from '$lib/derived/i18n.derived';
@@ -12,11 +13,15 @@ import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores
 import type { TokenUi } from '$lib/types/token-ui';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
+import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 const staticStore = <T>(v: T) => readable<T>(v);
+
+const mkTokenUi = (overrides: Partial<TokenUi>): TokenUi => ({ ...mockValidToken, ...overrides });
 
 describe('ExchangeBalance', () => {
 	let mockHeroContext: HeroContext;
@@ -24,8 +29,8 @@ describe('ExchangeBalance', () => {
 	const mockContext = (ctx: HeroContext) => new Map([[HERO_CONTEXT_KEY, ctx]]);
 
 	const mockTokens: TokenUi[] = [
-		{ usdBalance: 100, stakeUsdBalance: 10, claimableStakeBalanceUsd: 5 } as TokenUi,
-		{ usdBalance: 200, stakeUsdBalance: 20, claimableStakeBalanceUsd: 0 } as TokenUi
+		mkTokenUi({ usdBalance: 100, stakeUsdBalance: 10, claimableStakeBalanceUsd: 5 }),
+		mkTokenUi({ usdBalance: 200, stakeUsdBalance: 20, claimableStakeBalanceUsd: 0 })
 	];
 
 	const renderComponent = (props: { hideBalance?: boolean } = {}) =>
@@ -38,6 +43,9 @@ describe('ExchangeBalance', () => {
 		vi.restoreAllMocks();
 
 		mockHeroContext = initHeroContext();
+
+		mockPage.reset();
+		mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
 
 		vi.spyOn(i18nDerived, 'currentLanguage', 'get').mockReturnValue(staticStore(Languages.ENGLISH));
 		vi.spyOn(currencyDerived, 'currentCurrency', 'get').mockReturnValue(staticStore(Currency.USD));
@@ -123,6 +131,21 @@ describe('ExchangeBalance', () => {
 	});
 
 	describe('token category filtering', () => {
+		const tokensWithTags: TokenUi[] = [
+			mkTokenUi({
+				usdBalance: 50,
+				stakeUsdBalance: 0,
+				claimableStakeBalanceUsd: 0,
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
+			}),
+			mkTokenUi({
+				usdBalance: 200,
+				stakeUsdBalance: 0,
+				claimableStakeBalanceUsd: 0,
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }]
+			})
+		];
+
 		beforeEach(() => {
 			mockHeroContext.loading.set(false);
 		});
@@ -137,27 +160,8 @@ describe('ExchangeBalance', () => {
 			expect(getByText('$335.00')).toBeInTheDocument();
 		});
 
-		it('should filter tokens by category when showTokenCategoryFilter is true', () => {
-			const cryptoTag = { type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO };
-			const stablecoinTag = {
-				type: TokenTagType.CATEGORY,
-				value: TokenCategoryTagValue.STABLECOIN
-			};
-
-			const tokensWithTags: TokenUi[] = [
-				{
-					usdBalance: 50,
-					stakeUsdBalance: 0,
-					claimableStakeBalanceUsd: 0,
-					tags: [cryptoTag]
-				} as unknown as TokenUi,
-				{
-					usdBalance: 200,
-					stakeUsdBalance: 0,
-					claimableStakeBalanceUsd: 0,
-					tags: [stablecoinTag]
-				} as unknown as TokenUi
-			];
+		it('should filter tokens by category when on tokens route and showTokenCategoryFilter is true', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
 
 			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
 				staticStore(true)
@@ -173,6 +177,113 @@ describe('ExchangeBalance', () => {
 			const { getByText } = renderComponent();
 
 			expect(getByText('$50.00')).toBeInTheDocument();
+		});
+
+		it('should not filter tokens by category when not on tokens route even if showTokenCategoryFilter is true', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.CRYPTO as TokenCategoryTagValue | undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$250.00')).toBeInTheDocument();
+		});
+
+		it('should use all tokens on non-tokens route when showTokenCategoryFilter is false', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Settings}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(false)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$335.00')).toBeInTheDocument();
+		});
+
+		it('should filter tokens on WalletConnect route since it is treated as tokens route', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.STABLECOIN as TokenCategoryTagValue | undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$200.00')).toBeInTheDocument();
+		});
+
+		it('should show all tokens on tokens route when filter is enabled but category is undefined', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$250.00')).toBeInTheDocument();
+		});
+
+		it('should filter by stablecoin category on tokens route', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.STABLECOIN as TokenCategoryTagValue | undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$200.00')).toBeInTheDocument();
+		});
+
+		it('should not filter tokens on earning route even if filter and category are set', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Earning}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.STABLECOIN as TokenCategoryTagValue | undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$250.00')).toBeInTheDocument();
 		});
 	});
 
@@ -231,7 +342,7 @@ describe('ExchangeBalance', () => {
 
 		it('should sum usdBalance and stakeUsdBalance including claimable rewards', () => {
 			const tokens: TokenUi[] = [
-				{ usdBalance: 1000, stakeUsdBalance: 50, claimableStakeBalanceUsd: 25 } as TokenUi
+				mkTokenUi({ usdBalance: 1000, stakeUsdBalance: 50, claimableStakeBalanceUsd: 25 })
 			];
 
 			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
@@ -245,11 +356,11 @@ describe('ExchangeBalance', () => {
 
 		it('should handle tokens with undefined balances', () => {
 			const tokens: TokenUi[] = [
-				{
+				mkTokenUi({
 					usdBalance: undefined,
 					stakeUsdBalance: undefined,
 					claimableStakeBalanceUsd: undefined
-				} as unknown as TokenUi
+				})
 			];
 
 			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
