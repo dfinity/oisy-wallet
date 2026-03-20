@@ -351,6 +351,11 @@ export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
+export interface SaveUserTransactionsRequest {
+	token_id: TokenId;
+	transactions: Array<UserTransaction>;
+}
+export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InvalidDelegationChain: { msg: string } }
@@ -750,6 +755,13 @@ export interface _SERVICE {
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Saves finalized transactions for the caller. Transactions are deduplicated by hash.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `UserTransactionError`.
+	 */
+	save_user_transactions: ActorMethod<[SaveUserTransactionsRequest], SaveUserTransactionsResult>;
 	/**
 	 * Overwrites the stored API keys.
 	 *

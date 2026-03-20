@@ -22,9 +22,10 @@ use shared::{
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, GetUserTransactionsResult, SetUserShowTestnetsResult,
-            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
-            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+            GetUserProfileResult, GetUserTransactionsResult, SaveUserTransactionsResult,
+            SetUserShowTestnetsResult, UpdateContactResult,
+            UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
+            UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -32,7 +33,7 @@ use shared::{
         },
         token_id::TokenId,
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
-        user_transaction::GetUserTransactionsRequest,
+        user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
         Stats, Timestamp,
     },
 };
