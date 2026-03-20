@@ -7,6 +7,11 @@ use shared::types::delegation::IIDelegationChain;
 
 use crate::state::read_config;
 
+/// When `false`, [`require_ii_delegation`] is a no-op for every caller,
+/// effectively disabling the II delegation chain guard.
+/// Flip to `true` to enforce the full cryptographic verification.
+const II_DELEGATION_CHAIN_GUARD_ENABLED: bool = false;
+
 /// Reads the II verification parameters (known II canister IDs and IC root key)
 /// from the backend configuration.
 pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>) {
@@ -38,6 +43,10 @@ pub fn require_ii_delegation(
     ic_root_key_raw: &[u8],
     now_ns: u64,
 ) -> Result<(), String> {
+    if !II_DELEGATION_CHAIN_GUARD_ENABLED {
+        return Ok(());
+    }
+
     if caller_is_controller {
         return Ok(());
     }
