@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 	import { onMount, untrack } from 'svelte';
-	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { processCustomTokens as processErc1155CustomTokens } from '$eth/services/erc1155.services';
 	import {
@@ -27,6 +26,7 @@
 	} from '$icp/services/icrc.services';
 	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
+	import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
 		ethAddress,
@@ -45,10 +45,12 @@
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { LoadCustomTokenParams } from '$lib/types/custom-token';
+	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import {
 		loadDefaultSplTokens,
 		processCustomTokens as processSplCustomTokens
@@ -126,8 +128,12 @@
 				}
 
 				toastsError({
-					msg: { text: get(i18n).init.error.custom_tokens },
-					err
+					msg: { text: $i18n.init.error.load_token_list }
+				});
+
+				trackEvent({
+					name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+					metadata: mapIcErrorMetadata(err)
 				});
 			},
 			identity
