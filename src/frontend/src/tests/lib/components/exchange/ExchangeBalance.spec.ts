@@ -7,10 +7,9 @@ import * as networkTokensUiDerived from '$lib/derived/network-tokens-ui.derived'
 import * as settingsDerived from '$lib/derived/settings.derived';
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import * as currencyExchangeStore from '$lib/stores/currency-exchange.store';
 import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores/hero.store';
-import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
@@ -22,8 +21,7 @@ import { readable } from 'svelte/store';
 
 const staticStore = <T>(v: T) => readable<T>(v);
 
-const mkTokenUi = (overrides: Partial<TokenUi> & { tags?: Token['tags'] }): TokenUi =>
-	({ ...mockValidToken, ...overrides }) as TokenUi;
+const mkTokenUi = (overrides: Partial<TokenUi>): TokenUi => ({ ...mockValidToken, ...overrides });
 
 describe('ExchangeBalance', () => {
 	let mockHeroContext: HeroContext;
@@ -133,24 +131,16 @@ describe('ExchangeBalance', () => {
 	});
 
 	describe('token category filtering', () => {
-		const cryptoTag = { type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO };
-		const stablecoinTag = {
-			type: TokenTagType.CATEGORY,
-			value: TokenCategoryTagValue.STABLECOIN
-		};
-
 		const tokensWithTags: TokenUi[] = [
 			mkTokenUi({
 				usdBalance: 50,
 				stakeUsdBalance: 0,
-				claimableStakeBalanceUsd: 0,
-				tags: [cryptoTag]
+				claimableStakeBalanceUsd: 0
 			}),
 			mkTokenUi({
 				usdBalance: 200,
 				stakeUsdBalance: 0,
-				claimableStakeBalanceUsd: 0,
-				tags: [stablecoinTag]
+				claimableStakeBalanceUsd: 0
 			})
 		];
 
