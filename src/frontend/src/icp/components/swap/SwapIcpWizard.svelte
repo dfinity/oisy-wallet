@@ -183,14 +183,10 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			try {
-				trackEvent({
-					name: TRACK_COUNT_SWAP_SUCCESS,
-					metadata: swapTrackingMetadata
-				});
-			} catch (_: unknown) {
-				// Non-critical: tracking failure should not prevent the modal from closing.
-			}
+			trackEvent({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: swapTrackingMetadata
+			});
 
 			setTimeout(() => {
 				try {
@@ -234,24 +230,20 @@
 				});
 			}
 
-			try {
-				if (
-					!(
-						isSwapError(err) &&
-						(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
-							err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
-					)
-				) {
-					trackEvent({
-						name: TRACK_COUNT_SWAP_ERROR,
-						metadata: {
-							...swapTrackingMetadata,
-							errorKey: isSwapError(err) ? err.code : ''
-						}
-					});
-				}
-			} catch (_: unknown) {
-				// Non-critical: tracking failure should not prevent navigation.
+			if (
+				!(
+					isSwapError(err) &&
+					(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
+						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
+				)
+			) {
+				trackEvent({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: {
+						...swapTrackingMetadata,
+						errorKey: isSwapError(err) ? err.code : ''
+					}
+				});
 			}
 
 			setTimeout(() => onBack(), 2000);

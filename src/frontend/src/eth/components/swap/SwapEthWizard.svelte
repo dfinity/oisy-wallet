@@ -265,14 +265,10 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			try {
-				trackEvent({
-					name: TRACK_COUNT_SWAP_SUCCESS,
-					metadata: swapTrackingMetadata
-				});
-			} catch (_: unknown) {
-				// Non-critical: tracking failure should not prevent the modal from closing.
-			}
+			trackEvent({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: swapTrackingMetadata
+			});
 
 			setTimeout(() => {
 				try {
@@ -284,17 +280,13 @@
 				}
 			}, 750);
 		} catch (err: unknown) {
-			try {
-				trackEvent({
-					name: TRACK_COUNT_SWAP_ERROR,
-					metadata: {
-						...swapTrackingMetadata,
-						error: errorDetailToString(err) ?? ''
-					}
-				});
-			} catch (_: unknown) {
-				// Non-critical: tracking failure should not prevent navigation.
-			}
+			trackEvent({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: {
+					...swapTrackingMetadata,
+					error: errorDetailToString(err) ?? ''
+				}
+			});
 
 			failedSwapError.set(undefined);
 
