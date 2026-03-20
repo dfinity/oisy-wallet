@@ -4,9 +4,12 @@ import type {
 } from '$declarations/kong_backend/kong_backend.did';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
@@ -47,6 +50,7 @@ import {
 	resolveNearIntentsSwapAssets
 } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import type { SplToken } from '$sol/types/spl';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -800,6 +804,10 @@ describe('swap utils', () => {
 			expect(resolveNearIntentsBlockchain(ARBITRUM_MAINNET_NETWORK.id)).toBe('arb');
 		});
 
+		it('should resolve Solana mainnet network to sol', () => {
+			expect(resolveNearIntentsBlockchain(SOLANA_MAINNET_NETWORK.id)).toBe('sol');
+		});
+
 		it('should return undefined for unsupported network', () => {
 			expect(resolveNearIntentsBlockchain(parseNetworkId('UNSUPPORTED'))).toBeUndefined();
 		});
@@ -865,6 +873,26 @@ describe('swap utils', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+
+		it('should find an SPL token by contract address', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: USDC_TOKEN,
+				blockchain: 'sol'
+			});
+
+			expect(result).toStrictEqual(mockNearIntentsTokens[5]);
+		});
+
+		it('should find native SOL token by symbol', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: SOLANA_TOKEN,
+				blockchain: 'sol'
+			});
+
+			expect(result).toStrictEqual(mockNearIntentsTokens[4]);
 		});
 	});
 
@@ -953,6 +981,21 @@ describe('swap utils', () => {
 
 			expect(result).toBeUndefined();
 		});
+
+		it('should resolve cross-chain EVM to Solana swap assets', () => {
+			const solDestinationToken: SplToken = USDC_TOKEN;
+
+			const result = resolveNearIntentsSwapAssets({
+				nearTokens: mockNearIntentsTokens,
+				sourceToken,
+				destinationToken: solDestinationToken
+			});
+
+			expect(result).toStrictEqual({
+				srcAsset: mockNearIntentsTokens[0],
+				destAsset: mockNearIntentsTokens[5]
+			});
+		});
 	});
 
 	describe('buildNearIntentsQuoteRequest', () => {
@@ -964,7 +1007,7 @@ describe('swap utils', () => {
 				srcAsset,
 				destAsset,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				deadlineMs: 180_000
 			});
 
@@ -984,6 +1027,23 @@ describe('swap utils', () => {
 			});
 		});
 
+		it('should use separate recipientAddress when provided', () => {
+			const recipientAddress = '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1';
+
+			const result = buildNearIntentsQuoteRequest({
+				slippageTolerance: 150,
+				srcAsset,
+				destAsset,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				recipientAddress,
+				deadlineMs: 180_000
+			});
+
+			expect(result.recipient).toBe(recipientAddress);
+			expect(result.refundTo).toBe(mockEthAddress);
+		});
+
 		it('should set deadline as ISO string in the future', () => {
 			const before = Date.now();
 
@@ -992,7 +1052,7 @@ describe('swap utils', () => {
 				srcAsset,
 				destAsset,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				deadlineMs: 180_000
 			});
 
