@@ -3,6 +3,8 @@ import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import * as analytics from '$lib/services/analytics.services';
+import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
@@ -54,7 +56,8 @@ describe('SwapIcpWizard', () => {
 			destinationToken: readable(mockDestToken),
 			isSourceTokenIcrc2: readable(true),
 			failedSwapError: writable(undefined),
-			sourceTokenExchangeRate: readable(10)
+			sourceTokenExchangeRate: readable(10),
+			setIsTokensIcrc2: vi.fn()
 		};
 
 		const swapAmountsStore = initSwapAmountsStore();
@@ -152,6 +155,7 @@ describe('SwapIcpWizard', () => {
 		beforeEach(() => {
 			vi.useFakeTimers();
 			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
 			mockSwapFn.mockResolvedValue(undefined);
 		});
 
