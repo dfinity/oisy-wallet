@@ -1,11 +1,12 @@
 import { approve } from '$icp/api/icrc-ledger.api';
+import { getTokenFee } from '$icp/utils/token.utils';
 import {
 	acceptDeal as acceptDealApi,
 	createDeal as createDealApi,
 	fundDeal as fundDealApi,
 	getClaimableDeal as getClaimableDealApi
 } from '$lib/api/escrow.api';
-import { ESCROW_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
+import { ESCROW_CANISTER_ID, NANO_SECONDS_IN_MINUTE, ZERO } from '$lib/constants/app.constants';
 import type {
 	TipClaimResult,
 	TipClaimServiceParams,
@@ -47,10 +48,12 @@ export const createAndFundTip = async ({
 		const claimCode = fromNullable(deal.claim_code);
 		assertNonNullish(claimCode, 'Deal did not return a claim code');
 
+		const fee = getTokenFee(token) ?? ZERO;
+
 		await approve({
 			identity,
 			ledgerCanisterId,
-			amount,
+			amount: amount + fee,
 			spender: { owner: Principal.fromText(ESCROW_CANISTER_ID) },
 			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE
 		});
