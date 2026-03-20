@@ -1,12 +1,3 @@
-html,
-body {
-	scrollbar-width: none;
-
-	&::-webkit-scrollbar {
-		display: none;
-	}
-}
-
 body {
 	width: 100vw;
 	height: inherit; // needed for window on:scroll to work
