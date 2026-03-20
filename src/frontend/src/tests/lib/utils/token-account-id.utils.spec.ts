@@ -3,6 +3,7 @@ import { TOKEN_ACCOUNT_ID_TO_NETWORKS } from '$lib/constants/token-account-id.co
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import {
+	getDiscriminatorForTokenAccountId,
 	getNetworksForTokenAccountIdType,
 	getTokenAccountIdAddressString
 } from '$lib/utils/token-account-id.utils';
@@ -127,6 +128,42 @@ describe('token-account-id.utils', () => {
 			const result = getTokenAccountIdAddressString(tokenAccountId);
 
 			expect(result).toEqual(icrcAccount);
+		});
+	});
+
+	describe('getDiscriminatorForTokenAccountId', () => {
+		it('should return Btc for BTC address', () => {
+			const tokenAccountId = TokenAccountIdSchema.parse('1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2');
+
+			expect(getDiscriminatorForTokenAccountId(tokenAccountId)).toBe('Btc');
+		});
+
+		it('should return Eth for ETH address', () => {
+			const tokenAccountId = TokenAccountIdSchema.parse(
+				'0x71C7656EC7ab88b098defB751B7401B5f6d8976F'
+			);
+
+			expect(getDiscriminatorForTokenAccountId(tokenAccountId)).toBe('Eth');
+		});
+
+		it('should return Sol for SOL address', () => {
+			const tokenAccountId = TokenAccountIdSchema.parse(
+				'HN7cABqLq46Es1jh92dQQisAq662SmxELLLsHHe4YWrH'
+			);
+
+			expect(getDiscriminatorForTokenAccountId(tokenAccountId)).toBe('Sol');
+		});
+
+		it('should return Icrcv2 for ICP principal', () => {
+			const tokenAccountId = TokenAccountIdSchema.parse('rrkah-fqaaa-aaaaa-aaaaq-cai');
+
+			expect(getDiscriminatorForTokenAccountId(tokenAccountId)).toBe('Icrcv2');
+		});
+
+		it('should throw for invalid token account ID types', () => {
+			const invalidTokenAccountId = {} as TokenAccountId;
+
+			expect(() => getDiscriminatorForTokenAccountId(invalidTokenAccountId)).toThrow();
 		});
 	});
 
