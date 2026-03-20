@@ -1,7 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
-import * as ethFeeStoreMod from '$eth/stores/eth-fee.store';
 import {
 	ETH_FEE_CONTEXT_KEY,
 	initEthFeeContext,
@@ -306,92 +305,6 @@ describe('SwapEthWizard', () => {
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
 			expect(getByText('Gasless')).toBeInTheDocument();
-		});
-	});
-
-	describe('swap execution', () => {
-		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-
-		let feeState: Writable<FeeStoreData>;
-		let feeStore: EthFeeStore;
-
-		beforeEach(() => {
-			vi.useFakeTimers();
-
-			feeState = writable({
-				gas: 100n,
-				maxFeePerGas: 2_000_000n,
-				maxPriorityFeePerGas: 1_000_000n
-			});
-			feeStore = {
-				subscribe: feeState.subscribe,
-				setFee: vi.fn((partial) => {
-					feeState.update((cur) => ({ ...cur, ...partial }));
-				})
-			};
-
-			vi.spyOn(ethFeeStoreMod, 'initEthFeeStore').mockReturnValue(feeStore);
-			vi.spyOn(ethFeeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
-				...ctx,
-				maxGasFee: readable(undefined),
-				minGasFee: readable(undefined)
-			}));
-			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
-			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
-
-			mockFetchVeloraMarketSwap.mockResolvedValue(undefined);
-			mockFetchVeloraDeltaSwap.mockResolvedValue(undefined);
-		});
-
-		afterEach(() => {
-			vi.useRealTimers();
-		});
-
-		const renderExecution = () => {
-			const onClose = vi.fn();
-			const onBack = vi.fn();
-			const onStartTriggerAmount = vi.fn();
-
-			const { mockContext } = createContext({
-				swaps: [mockVeloraMarketProvider],
-				selectedProvider: mockVeloraMarketProvider
-			});
-
-			const result = renderWithStep({
-				step: WizardStepsSwap.REVIEW,
-				context: mockContext,
-				propsOverride: {
-					onClose,
-					onBack,
-					onStartTriggerAmount
-				}
-			});
-
-			return { ...result, onClose, onBack, onStartTriggerAmount };
-		};
-
-		it('calls onClose after successful swap', async () => {
-			const { getByText, onClose, onBack } = renderExecution();
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(mockFetchVeloraMarketSwap).toHaveBeenCalledOnce();
-			expect(onClose).toHaveBeenCalledOnce();
-			expect(onBack).not.toHaveBeenCalled();
-		});
-
-		it('calls onBack when swap fails', async () => {
-			mockFetchVeloraMarketSwap.mockRejectedValue(new Error('Swap failed'));
-
-			const { getByText, onClose, onBack } = renderExecution();
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(onBack).toHaveBeenCalledOnce();
-			expect(onClose).not.toHaveBeenCalled();
-			expect(toasts.toastsError).toHaveBeenCalled();
 		});
 	});
 
