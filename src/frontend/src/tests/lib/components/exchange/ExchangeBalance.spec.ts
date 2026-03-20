@@ -11,14 +11,19 @@ import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as currencyExchangeStore from '$lib/stores/currency-exchange.store';
 import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores/hero.store';
 import type { TokenUi } from '$lib/types/token-ui';
+import type { Token } from '$lib/types/token';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 const staticStore = <T>(v: T) => readable<T>(v);
+
+const mkTokenUi = (overrides: Partial<TokenUi> & { tags?: Token['tags'] }): TokenUi =>
+	({ ...mockValidToken, ...overrides }) as TokenUi;
 
 describe('ExchangeBalance', () => {
 	let mockHeroContext: HeroContext;
@@ -26,8 +31,8 @@ describe('ExchangeBalance', () => {
 	const mockContext = (ctx: HeroContext) => new Map([[HERO_CONTEXT_KEY, ctx]]);
 
 	const mockTokens: TokenUi[] = [
-		{ usdBalance: 100, stakeUsdBalance: 10, claimableStakeBalanceUsd: 5 } as TokenUi,
-		{ usdBalance: 200, stakeUsdBalance: 20, claimableStakeBalanceUsd: 0 } as TokenUi
+		mkTokenUi({ usdBalance: 100, stakeUsdBalance: 10, claimableStakeBalanceUsd: 5 }),
+		mkTokenUi({ usdBalance: 200, stakeUsdBalance: 20, claimableStakeBalanceUsd: 0 })
 	];
 
 	const renderComponent = (props: { hideBalance?: boolean } = {}) =>
@@ -135,18 +140,8 @@ describe('ExchangeBalance', () => {
 		};
 
 		const tokensWithTags: TokenUi[] = [
-			{
-				usdBalance: 50,
-				stakeUsdBalance: 0,
-				claimableStakeBalanceUsd: 0,
-				tags: [cryptoTag]
-			} as unknown as TokenUi,
-			{
-				usdBalance: 200,
-				stakeUsdBalance: 0,
-				claimableStakeBalanceUsd: 0,
-				tags: [stablecoinTag]
-			} as unknown as TokenUi
+			mkTokenUi({ usdBalance: 50, stakeUsdBalance: 0, claimableStakeBalanceUsd: 0, tags: [cryptoTag] }),
+			mkTokenUi({ usdBalance: 200, stakeUsdBalance: 0, claimableStakeBalanceUsd: 0, tags: [stablecoinTag] })
 		];
 
 		beforeEach(() => {
@@ -345,7 +340,7 @@ describe('ExchangeBalance', () => {
 
 		it('should sum usdBalance and stakeUsdBalance including claimable rewards', () => {
 			const tokens: TokenUi[] = [
-				{ usdBalance: 1000, stakeUsdBalance: 50, claimableStakeBalanceUsd: 25 } as TokenUi
+				mkTokenUi({ usdBalance: 1000, stakeUsdBalance: 50, claimableStakeBalanceUsd: 25 })
 			];
 
 			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
@@ -359,11 +354,11 @@ describe('ExchangeBalance', () => {
 
 		it('should handle tokens with undefined balances', () => {
 			const tokens: TokenUi[] = [
-				{
+				mkTokenUi({
 					usdBalance: undefined,
 					stakeUsdBalance: undefined,
 					claimableStakeBalanceUsd: undefined
-				} as unknown as TokenUi
+				})
 			];
 
 			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
