@@ -2,6 +2,7 @@
 	import { isIOS } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { page } from '$app/state';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
@@ -18,11 +19,10 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
 	import { sumTokensUiUsdBalance, sumTokensUiUsdStakeBalance } from '$lib/utils/tokens.utils';
-	import {isRouteTokens} from "$lib/utils/nav.utils";
-	import {page} from "$app/state";
 
 	interface Props {
 		hideBalance?: boolean;
@@ -32,8 +32,7 @@
 
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-		const isTokensRoute = $derived(isRouteTokens(page));
-
+	const isTokensRoute = $derived(isRouteTokens(page));
 
 	const heroTokens = $derived(
 		$showTokenCategoryFilter && isTokensRoute

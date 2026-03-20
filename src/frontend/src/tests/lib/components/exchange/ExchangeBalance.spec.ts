@@ -10,8 +10,8 @@ import { Languages } from '$lib/enums/languages';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as currencyExchangeStore from '$lib/stores/currency-exchange.store';
 import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores/hero.store';
-import type { TokenUi } from '$lib/types/token-ui';
 import type { Token } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -140,8 +140,18 @@ describe('ExchangeBalance', () => {
 		};
 
 		const tokensWithTags: TokenUi[] = [
-			mkTokenUi({ usdBalance: 50, stakeUsdBalance: 0, claimableStakeBalanceUsd: 0, tags: [cryptoTag] }),
-			mkTokenUi({ usdBalance: 200, stakeUsdBalance: 0, claimableStakeBalanceUsd: 0, tags: [stablecoinTag] })
+			mkTokenUi({
+				usdBalance: 50,
+				stakeUsdBalance: 0,
+				claimableStakeBalanceUsd: 0,
+				tags: [cryptoTag]
+			}),
+			mkTokenUi({
+				usdBalance: 200,
+				stakeUsdBalance: 0,
+				claimableStakeBalanceUsd: 0,
+				tags: [stablecoinTag]
+			})
 		];
 
 		beforeEach(() => {
