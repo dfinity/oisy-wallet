@@ -11,8 +11,8 @@
 // Upstream issue context: the crate has had no release since Aug 2024 and
 // predates the routing-table changes introduced in spec v0.45.0 / v0.50.0.
 
-use ic_canister_sig_creation::{extract_raw_root_pk_from_der, CanisterSigPublicKey};
 use candid::Principal;
+use ic_canister_sig_creation::{extract_raw_root_pk_from_der, CanisterSigPublicKey};
 use ic_certification::{
     leaf, Certificate, Delegation, HashTree, LookupResult, SubtreeLookupResult,
 };
@@ -114,19 +114,12 @@ fn verify_certificate(
     check_bls_signature(certificate, &bls_pk_raw)
 }
 
-fn lookup_canister_ranges<'a>(
-    cert: &'a Certificate,
-    subnet_id: &[u8],
-) -> Result<&'a [u8], String> {
+fn lookup_canister_ranges<'a>(cert: &'a Certificate, subnet_id: &[u8]) -> Result<&'a [u8], String> {
     let sharded_path = ["canister_ranges".as_bytes(), subnet_id];
     if let LookupResult::Found(range) = cert.tree.lookup_path(&sharded_path) {
         return Ok(range);
     }
-    let legacy_path = [
-        "subnet".as_bytes(),
-        subnet_id,
-        "canister_ranges".as_bytes(),
-    ];
+    let legacy_path = ["subnet".as_bytes(), subnet_id, "canister_ranges".as_bytes()];
     if let LookupResult::Found(range) = cert.tree.lookup_path(&legacy_path) {
         return Ok(range);
     }
@@ -162,8 +155,7 @@ fn verify_delegation(
         delegation.subnet_id.as_ref(),
         "public_key".as_bytes(),
     ];
-    let LookupResult::Found(subnet_public_key_der) = cert.tree.lookup_path(&public_key_path)
-    else {
+    let LookupResult::Found(subnet_public_key_der) = cert.tree.lookup_path(&public_key_path) else {
         return Err("subnet public key not found".to_string());
     };
     extract_raw_root_pk_from_der(subnet_public_key_der)

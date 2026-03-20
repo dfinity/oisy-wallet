@@ -19,8 +19,8 @@ ic-certification = { workspace = true }
 ic-cycles-ledger-client = { workspace = true }
 ic-ledger-types = { workspace = true }
 ic-stable-structures = { workspace = true }
-ic-verify-bls-signature = { workspace = true }
 ic-verifiable-credentials = { workspace = true }
+ic-verify-bls-signature = { workspace = true }
 lazy_static = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
