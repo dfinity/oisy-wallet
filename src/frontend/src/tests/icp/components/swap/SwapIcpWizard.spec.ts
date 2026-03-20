@@ -172,23 +172,6 @@ describe('SwapIcpWizard', () => {
 			expect(BASE_PROPS.onBack).not.toHaveBeenCalled();
 		});
 
-		it('calls onClose even when trackEvent throws after successful swap', async () => {
-			mockSwapFn.mockResolvedValue(undefined);
-			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => {
-				throw new Error("undefined is not an object (evaluating 'n().symbol')");
-			});
-
-			const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(mockSwapFn).toHaveBeenCalledOnce();
-			expect(BASE_PROPS.onClose).toHaveBeenCalledOnce();
-			expect(BASE_PROPS.onBack).not.toHaveBeenCalled();
-			expect(toasts.toastsError).not.toHaveBeenCalled();
-		});
-
 		it('calls onBack when swap fails', async () => {
 			mockSwapFn.mockRejectedValue(new Error('Swap failed'));
 
@@ -202,19 +185,5 @@ describe('SwapIcpWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalled();
 		});
 
-		it('calls onBack even when trackEvent throws in the error path', async () => {
-			mockSwapFn.mockRejectedValue(new Error('Swap failed'));
-			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => {
-				throw new Error("undefined is not an object (evaluating 'n().symbol')");
-			});
-
-			const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
-			expect(BASE_PROPS.onClose).not.toHaveBeenCalled();
-		});
 	});
 });

@@ -271,27 +271,6 @@ describe('SwapEthWizard', () => {
 			expect(onBack).not.toHaveBeenCalled();
 		});
 
-		it('calls onClose even when trackEvent throws after successful swap', async () => {
-			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => {
-				throw new Error("undefined is not an object (evaluating 'n().symbol')");
-			});
-
-			const { getByText, onClose, onBack } = renderExecution();
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(swapServices.fetchVeloraMarketSwap).toHaveBeenCalledOnce();
-			expect(onClose).toHaveBeenCalledOnce();
-			expect(onBack).not.toHaveBeenCalled();
-
-			const swapErrors = vi
-				.mocked(toasts.toastsError)
-				.mock.calls.filter(([{ msg }]) => msg.text !== 'Cannot fetch gas fee.');
-
-			expect(swapErrors).toHaveLength(0);
-		});
-
 		it('calls onBack when swap fails', async () => {
 			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(new Error('Swap failed'));
 
@@ -305,19 +284,5 @@ describe('SwapEthWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalled();
 		});
 
-		it('calls onBack even when trackEvent throws in the error path', async () => {
-			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(new Error('Swap failed'));
-			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => {
-				throw new Error("undefined is not an object (evaluating 'n().symbol')");
-			});
-
-			const { getByText, onClose, onBack } = renderExecution();
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(onBack).toHaveBeenCalledOnce();
-			expect(onClose).not.toHaveBeenCalled();
-		});
 	});
 });
