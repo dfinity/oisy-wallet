@@ -266,7 +266,6 @@ export class BackendCanister extends Canister<BackendService> {
 
 		const response = await allow_signing(
 			toNullable({
-				nonce: BigInt(0),
 				ii_delegation_chain: iiDelegationChain
 			})
 		);
@@ -275,13 +274,10 @@ export class BackendCanister extends Canister<BackendService> {
 			return { response: response.Ok };
 		}
 
-		// In case of rate limit reached, we ignore the error and let the user continue (for now).
-		// TODO: improve placeholder with significant data, for now we do not use them
 		if ('RateLimited' in response.Err || 'RateLimitedByGuard' in response.Err) {
 			return {
 				response: {
 					status: { Skipped: null },
-					challenge_completion: toNullable(),
 					allowed_cycles: ZERO
 				},
 				rateLimitInfo: {
