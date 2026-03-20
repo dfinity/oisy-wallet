@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { EARNING_ENABLED } from '$env/earning';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import { harvestAutopilotTokens } from '$eth/derived/harvest-autopilots.derived';
 	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
@@ -19,8 +20,10 @@
 	let fungibleTokens = $derived([
 		...$enabledEthEvmNativeTokens,
 		...$enabledErc20Tokens,
-		...$harvestAutopilotTokens,
-		...$enabledErc4626Tokens.filter((token) => !isTokenHarvestAutopilot(token))
+		...(EARNING_ENABLED ? $harvestAutopilotTokens : []),
+		...$enabledErc4626Tokens.filter((token) =>
+			EARNING_ENABLED ? !isTokenHarvestAutopilot(token) : true
+		)
 	]);
 
 	let nonFungibleTokens = $derived([...$enabledNonFungibleTokensWithoutSpam]);

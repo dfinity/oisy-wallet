@@ -21,4 +21,6 @@
 	});
 </script>
 
-<LoadersHarvestAutopilotBalances />
+{#if EARNING_ENABLED}
+	<LoadersHarvestAutopilotBalances />
+{/if}

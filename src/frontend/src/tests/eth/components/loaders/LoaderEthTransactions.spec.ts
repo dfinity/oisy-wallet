@@ -53,6 +53,12 @@ vi.mock('$eth/constants/harvest-autopilots.constants', () => ({
 	HARVEST_AUTOPILOT_ADDRESSES: ['0xerc4626-1-mainnet', '0xerc4626-2-mainnet']
 }));
 
+vi.mock('$env/earning', () => ({
+	get EARNING_ENABLED() {
+		return true;
+	}
+}));
+
 describe('LoaderEthTransactions', () => {
 	const timeout = WALLET_TIMER_INTERVAL_MILLIS;
 
