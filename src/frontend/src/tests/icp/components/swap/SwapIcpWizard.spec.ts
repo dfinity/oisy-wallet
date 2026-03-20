@@ -182,6 +182,5 @@ describe('SwapIcpWizard', () => {
 			expect(BASE_PROPS.onClose).not.toHaveBeenCalled();
 			expect(toasts.toastsError).toHaveBeenCalled();
 		});
-
 	});
 });

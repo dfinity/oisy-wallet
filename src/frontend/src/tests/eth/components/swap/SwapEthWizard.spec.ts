@@ -4,10 +4,10 @@ import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
 import * as ethFeeStoreMod from '$eth/stores/eth-fee.store';
 import {
 	ETH_FEE_CONTEXT_KEY,
-	type EthFeeStore,
-	type FeeStoreData,
 	initEthFeeContext,
-	initEthFeeStore
+	initEthFeeStore,
+	type EthFeeStore,
+	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -220,7 +220,10 @@ describe('SwapEthWizard', () => {
 				selectedProvider: mockSwapProviders[0]
 			});
 
-			const { container } = renderWithStep({ step: WizardStepsSwap.SWAPPING, context: mockContext });
+			const { container } = renderWithStep({
+				step: WizardStepsSwap.SWAPPING,
+				context: mockContext
+			});
 
 			expect(container).toBeInTheDocument();
 		});
@@ -382,6 +385,5 @@ describe('SwapEthWizard', () => {
 			expect(onClose).not.toHaveBeenCalled();
 			expect(toasts.toastsError).toHaveBeenCalled();
 		});
-
 	});
 });
