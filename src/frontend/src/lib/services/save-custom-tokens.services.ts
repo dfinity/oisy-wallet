@@ -91,28 +91,30 @@ export const saveCustomTokens = async ({
 }: SaveTokensParams<SaveCustomTokenWithKey>) => {
 	progress?.(ProgressStepsAddToken.SAVE);
 
-	await setManyCustomTokens({
-		identity,
-		tokens: tokens.map(toCustomToken),
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-	});
+	try {
+		await setManyCustomTokens({
+			identity,
+			tokens: tokens.map(toCustomToken),
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
 
-	progress?.(ProgressStepsAddToken.UPDATE_UI);
+		progress?.(ProgressStepsAddToken.UPDATE_UI);
 
-	// Hide tokens that have been disabled
-	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
-	disabledTokens.forEach(hideTokenByKey);
-
-	// Reload all custom tokens for simplicity reason.
-	await Promise.all([
-		loadCustomErc20Tokens({ identity }),
-		loadCustomErc4626Tokens({ identity }),
-		loadCustomErc721Tokens({ identity }),
-		loadCustomErc1155Tokens({ identity }),
-		loadCustomIcrcTokens({ identity }),
-		loadCustomExtTokens({ identity }),
-		// TODO: add loadCustomDip721Tokens here (and in the tests)
-		loadCustomIcPunksTokens({ identity }),
-		loadCustomSplTokens({ identity })
-	]);
+		// Hide tokens that have been disabled
+		const disabledTokens = tokens.filter(({ enabled }) => !enabled);
+		disabledTokens.forEach(hideTokenByKey);
+	} finally {
+		// Reload all custom tokens as ultimate safety measure
+		await Promise.all([
+			loadCustomErc20Tokens({ identity }),
+			loadCustomErc4626Tokens({ identity }),
+			loadCustomErc721Tokens({ identity }),
+			loadCustomErc1155Tokens({ identity }),
+			loadCustomIcrcTokens({ identity }),
+			loadCustomExtTokens({ identity }),
+			// TODO: add loadCustomDip721Tokens here (and in the tests)
+			loadCustomIcPunksTokens({ identity }),
+			loadCustomSplTokens({ identity })
+		]);
+	}
 };
