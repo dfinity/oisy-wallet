@@ -7,7 +7,7 @@ import * as networkTokensUiDerived from '$lib/derived/network-tokens-ui.derived'
 import * as settingsDerived from '$lib/derived/settings.derived';
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
-import { TokenCategoryTagValue } from '$lib/enums/token-tag';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as currencyExchangeStore from '$lib/stores/currency-exchange.store';
 import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores/hero.store';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -135,12 +135,14 @@ describe('ExchangeBalance', () => {
 			mkTokenUi({
 				usdBalance: 50,
 				stakeUsdBalance: 0,
-				claimableStakeBalanceUsd: 0
+				claimableStakeBalanceUsd: 0,
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 			}),
 			mkTokenUi({
 				usdBalance: 200,
 				stakeUsdBalance: 0,
-				claimableStakeBalanceUsd: 0
+				claimableStakeBalanceUsd: 0,
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }]
 			})
 		];
 
