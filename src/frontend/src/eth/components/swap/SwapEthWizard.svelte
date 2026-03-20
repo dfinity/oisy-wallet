@@ -283,33 +283,41 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
-				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: selectedProvider.provider,
-					usdSourceValue: sourceTokenUsdValue ?? '',
-					swapType: selectedProvider.type ?? '',
-					sourceNetwork: $sourceToken.network.name,
-					destinationNetwork: $destinationToken.network.name
-				}
-			});
+			try {
+				trackEvent({
+					name: TRACK_COUNT_SWAP_SUCCESS,
+					metadata: {
+						sourceToken: $sourceToken.symbol,
+						destinationToken: $destinationToken.symbol,
+						dApp: selectedProvider.provider,
+						usdSourceValue: sourceTokenUsdValue ?? '',
+						swapType: selectedProvider.type ?? '',
+						sourceNetwork: $sourceToken.network.name,
+						destinationNetwork: $destinationToken.network.name
+					}
+				});
+			} catch (_: unknown) {
+				// Non-critical: tracking failure must never prevent the modal from closing.
+			}
 
 			setTimeout(() => onClose(), 750);
 		} catch (err: unknown) {
-			trackEvent({
-				name: TRACK_COUNT_SWAP_ERROR,
-				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: selectedProvider.provider,
-					swapType: selectedProvider.type ?? '',
-					error: errorDetailToString(err) ?? '',
-					sourceNetwork: $sourceToken.network.name,
-					destinationNetwork: $destinationToken.network.name
-				}
-			});
+			try {
+				trackEvent({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: {
+						sourceToken: $sourceToken.symbol,
+						destinationToken: $destinationToken.symbol,
+						dApp: selectedProvider.provider,
+						swapType: selectedProvider.type ?? '',
+						error: errorDetailToString(err) ?? '',
+						sourceNetwork: $sourceToken.network.name,
+						destinationNetwork: $destinationToken.network.name
+					}
+				});
+			} catch (_: unknown) {
+				// Non-critical: tracking failure must never prevent error recovery.
+			}
 
 			failedSwapError.set(undefined);
 
