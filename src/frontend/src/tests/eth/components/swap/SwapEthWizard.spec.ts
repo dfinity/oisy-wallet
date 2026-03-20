@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
+import * as feeStoreMod from '$eth/stores/eth-fee.store';
 import {
 	ETH_FEE_CONTEXT_KEY,
 	initEthFeeContext,
@@ -8,7 +9,6 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
-import * as feeStoreMod from '$eth/stores/eth-fee.store';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';

@@ -4,7 +4,6 @@ import type { IcToken } from '$icp/types/ic-token';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
-import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
