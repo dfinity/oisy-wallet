@@ -5,6 +5,7 @@ import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/ne
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import type { NetworkId } from '$lib/types/network';
 import { SwapProvider, type SwapProvidersConfig } from '$lib/types/swap';
@@ -33,7 +34,8 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[ARBITRUM_MAINNET_NETWORK_ID]: 'arb',
 	[BASE_NETWORK_ID]: 'base',
 	[BSC_MAINNET_NETWORK_ID]: 'bsc',
-	[POLYGON_MAINNET_NETWORK_ID]: 'pol'
+	[POLYGON_MAINNET_NETWORK_ID]: 'pol',
+	[SOLANA_MAINNET_NETWORK_ID]: 'sol'
 };
 
 export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
