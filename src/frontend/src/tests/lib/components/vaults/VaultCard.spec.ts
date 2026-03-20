@@ -36,12 +36,14 @@ describe('VaultCard', () => {
 		expect(getByText(`${en.vaults.text.live_apy} ${mockVault.apy}%`)).toBeInTheDocument();
 	});
 
-	it('should not render the live APY badge when apy is undefined', () => {
+	it('should render the live APY badge with N/A when apy is undefined', () => {
 		const vaultWithoutApy: Vault = { ...mockVault, apy: undefined };
 
-		const { queryByText } = render(VaultCard, { props: { data: vaultWithoutApy } });
+		const { getByText } = render(VaultCard, { props: { data: vaultWithoutApy } });
 
-		expect(queryByText(en.vaults.text.live_apy, { exact: false })).not.toBeInTheDocument();
+		expect(
+			getByText(`${en.vaults.text.live_apy} ${en.core.text.not_available}`)
+		).toBeInTheDocument();
 	});
 
 	it('should render the asset symbol when exchange is initialized', () => {
