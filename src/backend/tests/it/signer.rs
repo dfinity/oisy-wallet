@@ -50,6 +50,14 @@ pub fn call_allow_signing_with_delegation(
     caller: Principal,
     ii_delegation_chain: Option<shared::types::delegation::IIDelegationChain>,
 ) -> Result<AllowSigningResponse, AllowSigningError> {
+    call_allow_signing_with_delegation(pic_setup, caller, None)
+}
+
+pub fn call_allow_signing_with_delegation(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    ii_delegation_chain: Option<shared::types::delegation::IIDelegationChain>,
+) -> Result<AllowSigningResponse, AllowSigningError> {
     let wrapped_result = pic_setup.update::<Result<AllowSigningResponse, AllowSigningError>>(
         caller,
         "allow_signing",
@@ -58,6 +66,25 @@ pub fn call_allow_signing_with_delegation(
         }),
     );
     wrapped_result.expect("that allow_signing exists")
+}
+
+/// Registers a new II identity and returns the caller principal together with
+/// a valid delegation chain ready for `call_allow_signing_with_delegation`.
+fn register_ii_caller(
+    ii: &crate::utils::ii::IICanister,
+    device_key: &[u8],
+) -> (Principal, shared::types::delegation::IIDelegationChain) {
+    let (user_number, device_principal) = ii.register_identity(device_key);
+    let session_pubkey = b"session-key-for-rate-limit-tests";
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
+    (caller, delegation_chain)
 }
 
 #[test]
@@ -300,8 +327,8 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
 /// guard and business limiters).
 #[test]
 fn test_allow_signing_rate_limited_after_exceeding_limit() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
+    let (pic_setup, ii) = setup_with_ii();
+    let (caller, chain) = register_ii_caller(&ii, b"rate-limit-exceed-device");
 
     // 1 of 3 business rate-limit entries consumed here.
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
@@ -313,7 +340,7 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
 
     // 2 more explicit calls should still be within the business limit.
     for i in 0..2 {
-        let result = call_allow_signing(&pic_setup, caller);
+        let result = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
         assert!(
             !matches!(result, Err(AllowSigningError::RateLimited(_))),
             "call {i} (0-indexed) should not be rate-limited: {result:?}",
@@ -321,7 +348,7 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
     }
 
     // The next call exceeds 3 total and must be rate-limited by the business limiter.
-    let result = call_allow_signing(&pic_setup, caller);
+    let result = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     match result {
         Err(AllowSigningError::RateLimited(RateLimitError {
             max_calls,
@@ -346,9 +373,9 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
 /// Each `create_user_profile` consumes 1 rate-limit entry for that caller.
 #[test]
 fn test_allow_signing_rate_limit_is_per_caller() {
-    let pic_setup = setup();
-    let caller_a = Principal::from_text(VC_HOLDER).unwrap();
-    let caller_b = Principal::self_authenticating("rate-limit-b");
+    let (pic_setup, ii) = setup_with_ii();
+    let (caller_a, chain_a) = register_ii_caller(&ii, b"rate-limit-per-caller-a");
+    let (caller_b, chain_b) = register_ii_caller(&ii, b"rate-limit-per-caller-b");
 
     call_create_user_profile(&pic_setup, caller_a).expect("profile A");
     call_create_user_profile(&pic_setup, caller_b).expect("profile B");
@@ -359,18 +386,18 @@ fn test_allow_signing_rate_limit_is_per_caller() {
 
     // Exhaust caller_a's remaining 2 entries, then confirm the next is blocked.
     for _ in 0..2 {
-        let _ = call_allow_signing(&pic_setup, caller_a);
+        let _ = call_allow_signing_with_delegation(&pic_setup, caller_a, Some(chain_a.clone()));
     }
     assert!(
         matches!(
-            call_allow_signing(&pic_setup, caller_a),
+            call_allow_signing_with_delegation(&pic_setup, caller_a, Some(chain_a.clone())),
             Err(AllowSigningError::RateLimited(_))
         ),
         "caller_a should be rate-limited"
     );
 
     // caller_b should still be allowed (only 1 entry used by profile creation).
-    let result = call_allow_signing(&pic_setup, caller_b);
+    let result = call_allow_signing_with_delegation(&pic_setup, caller_b, Some(chain_b.clone()));
     assert!(
         !matches!(result, Err(AllowSigningError::RateLimited(_))),
         "caller_b should not be rate-limited: {result:?}"
@@ -422,8 +449,8 @@ fn test_allow_signing_skips_rate_limit_when_allowance_sufficient() {
 /// `create_user_profile` consumes 1 rate-limit entry for the caller.
 #[test]
 fn test_allow_signing_rate_limit_resets_after_window() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
+    let (pic_setup, ii) = setup_with_ii();
+    let (caller, chain) = register_ii_caller(&ii, b"rate-limit-window-device");
 
     // 1 of 3 entries consumed.
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
@@ -434,11 +461,11 @@ fn test_allow_signing_rate_limit_resets_after_window() {
 
     // Use remaining 2 entries, then confirm the next is blocked.
     for _ in 0..2 {
-        let _ = call_allow_signing(&pic_setup, caller);
+        let _ = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     }
     assert!(
         matches!(
-            call_allow_signing(&pic_setup, caller),
+            call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone())),
             Err(AllowSigningError::RateLimited(_))
         ),
         "should be rate-limited before window elapses"
@@ -451,7 +478,7 @@ fn test_allow_signing_rate_limit_resets_after_window() {
     }
 
     // The next call should pass the rate-limit check again.
-    let result = call_allow_signing(&pic_setup, caller);
+    let result = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     assert!(
         !matches!(result, Err(AllowSigningError::RateLimited(_))),
         "should not be rate-limited after window elapses: {result:?}"
@@ -470,8 +497,8 @@ fn test_allow_signing_rate_limit_resets_after_window() {
 /// usage.  The guard protects against rapid automated abuse.
 #[test]
 fn test_allow_signing_guard_does_not_interfere_with_business_limiter() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
+    let (pic_setup, ii) = setup_with_ii();
+    let (caller, chain) = register_ii_caller(&ii, b"guard-no-interfere-device");
 
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
@@ -481,11 +508,11 @@ fn test_allow_signing_guard_does_not_interfere_with_business_limiter() {
 
     // Exhaust the business limiter (3 entries: 1 from profile + 2 explicit).
     for _ in 0..2 {
-        let _ = call_allow_signing(&pic_setup, caller);
+        let _ = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     }
 
     // The 4th call must hit the business limiter, NOT the guard.
-    let result = call_allow_signing(&pic_setup, caller);
+    let result = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     assert!(
         matches!(result, Err(AllowSigningError::RateLimited(_))),
         "expected RateLimited (business), got {result:?}"
@@ -496,8 +523,8 @@ fn test_allow_signing_guard_does_not_interfere_with_business_limiter() {
 /// long expired (1-minute window), so neither limiter blocks the caller.
 #[test]
 fn test_allow_signing_guard_resets_independently_of_business_limiter() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
+    let (pic_setup, ii) = setup_with_ii();
+    let (caller, chain) = register_ii_caller(&ii, b"guard-resets-device");
 
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
@@ -507,11 +534,11 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
 
     // Exhaust the business limiter.
     for _ in 0..2 {
-        let _ = call_allow_signing(&pic_setup, caller);
+        let _ = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     }
     assert!(
         matches!(
-            call_allow_signing(&pic_setup, caller),
+            call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone())),
             Err(AllowSigningError::RateLimited(_))
         ),
         "should be rate-limited"
@@ -525,7 +552,7 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
     }
 
     // Both limiters should have reset; the next call passes.
-    let result = call_allow_signing(&pic_setup, caller);
+    let result = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     assert!(
         !matches!(
             result,
