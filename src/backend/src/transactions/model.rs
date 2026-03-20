@@ -492,8 +492,20 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
         let tx = make_tx("0xhash1", 100, 1000);
 
-        save_transactions(&mut map, principal, &eth_native_token(), std::slice::from_ref(&tx)).unwrap();
-        save_transactions(&mut map, principal, &eth_native_token(), std::slice::from_ref(&tx)).unwrap();
+        save_transactions(
+            &mut map,
+            principal,
+            &eth_native_token(),
+            std::slice::from_ref(&tx),
+        )
+        .unwrap();
+        save_transactions(
+            &mut map,
+            principal,
+            &eth_native_token(),
+            std::slice::from_ref(&tx),
+        )
+        .unwrap();
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
 
@@ -558,13 +570,7 @@ mod tests {
         let tx1 = make_tx("0xhash1", 100, 1000);
         let tx2 = make_tx("0xhash2", 200, 2000);
 
-        save_transactions(
-            &mut map,
-            principal,
-            &eth_native_token(),
-            &[tx3, tx1, tx2],
-        )
-        .unwrap();
+        save_transactions(&mut map, principal, &eth_native_token(), &[tx3, tx1, tx2]).unwrap();
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
 
@@ -609,7 +615,13 @@ mod tests {
         {
             let memory = memory_manager.borrow().get(MemoryId::new(0));
             let mut map = UserTransactionsMap::init(memory);
-            save_transactions(&mut map, principal, &eth_native_token(), std::slice::from_ref(&tx)).unwrap();
+            save_transactions(
+                &mut map,
+                principal,
+                &eth_native_token(),
+                std::slice::from_ref(&tx),
+            )
+            .unwrap();
         }
 
         // Re-init with same memory
