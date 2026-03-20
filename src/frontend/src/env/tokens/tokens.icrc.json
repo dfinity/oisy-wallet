@@ -25,6 +25,12 @@
 		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai",
 		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
 		"mintingAccount": "6f6ua-hqaaa-aaaar-qairq-cai",
+		"tags": [
+			{
+				"type": "category",
+				"value": "commodity"
+			}
+		],
 		"decimals": 8,
 		"name": "Gold Token",
 		"symbol": "GLDT",
@@ -79,6 +85,12 @@
 		"ledgerCanisterId": "wu6g4-6qaaa-aaaan-qmrza-cai",
 		"indexCanisterId": "wi24n-jqaaa-aaaan-qmr3a-cai",
 		"mintingAccount": "6csfo-tvgcf-7i47c-4ohs3-tdxbt-wr3dw-bstba-koumv-oiwcb-jnfu3-nqe",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
 		"decimals": 8,
 		"name": "VNX Euro",
 		"symbol": "VEUR",
@@ -183,6 +195,12 @@
 	"TCYCLES": {
 		"ledgerCanisterId": "um5iw-rqaaa-aaaaq-qaaba-cai",
 		"indexCanisterId": "ul4oc-4iaaa-aaaaq-qaabq-cai",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
 		"decimals": 12,
 		"name": "Trillion Cycles",
 		"symbol": "TCYCLES",
