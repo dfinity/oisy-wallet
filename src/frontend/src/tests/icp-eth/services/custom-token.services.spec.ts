@@ -244,9 +244,8 @@ describe('custom-token.services', () => {
 
 				expect(result).toBe('loaded');
 
-				expect(spyToastsShow).toHaveBeenCalledWith({
-					text: get(i18n).init.error.load_token_list,
-					level: 'error'
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: get(i18n).init.error.load_token_list }
 				});
 			});
 
