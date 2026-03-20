@@ -125,6 +125,10 @@ export type BtcGetPendingTransactionsResult =
 export type BtcSelectUserUtxosFeeResult =
 	| { Ok: SelectedUtxosFeeResponse }
 	| { Err: SelectedUtxosFeeError };
+export interface BtcTransactionData {
+	fee: [] | [bigint];
+	confirmations: [] | [number];
+}
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -212,6 +216,15 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export interface EvmTransactionData {
+	nft_token_id: [] | [bigint];
+	data: [] | [string];
+	chain_id: [] | [bigint];
+	nonce: [] | [bigint];
+	gas_limit: [] | [bigint];
+	gas_used: [] | [bigint];
+	gas_price: [] | [bigint];
+}
 export interface ExchangeData {
 	price_24h_change_pct: [] | [number];
 	market_cap: [] | [number];
@@ -240,6 +253,8 @@ export type GetAllowedCyclesResult =
 	| { Err: GetAllowedCyclesError };
 export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
+export type GetUserProfileError = { NotFound: null };
+export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface GetUserTransactionsRequest {
 	token_id: TokenId;
 	max_results: bigint;
@@ -247,16 +262,14 @@ export interface GetUserTransactionsRequest {
 }
 export interface GetUserTransactionsResponse {
 	next_start: [] | [bigint];
-	newest_block_index: [] | [bigint];
-	oldest_block_index: [] | [bigint];
 	total_stored: bigint;
+	oldest_block_index: [] | [bigint];
+	newest_block_index: [] | [bigint];
 	transactions: Array<UserTransaction>;
 }
 export type GetUserTransactionsResult =
 	| { Ok: GetUserTransactionsResponse }
 	| { Err: UserTransactionError };
-export type GetUserProfileError = { NotFound: null };
-export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -279,6 +292,16 @@ export interface IcrcToken {
 	ledger_id: Principal;
 	index_id: [] | [Principal];
 }
+export interface IcrcTransactionData {
+	fee: [] | [bigint];
+	memo: [] | [Uint8Array];
+	tx_type: IcrcTransactionType;
+}
+export type IcrcTransactionType =
+	| { Approve: { spender: string } }
+	| { Burn: null }
+	| { Mint: null }
+	| { Transfer: null };
 export type Icrcv2AccountId =
 	| { Account: Uint8Array }
 	| {
@@ -320,6 +343,11 @@ export type NetworkSettingsFor =
 	| { SolanaMainnet: null }
 	| { BitcoinMainnet: null }
 	| { BscTestnet: null };
+export type NetworkTransactionData =
+	| { Btc: BtcTransactionData }
+	| { Evm: EvmTransactionData }
+	| { Sol: SolTransactionData }
+	| { Icrc: IcrcTransactionData };
 export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
@@ -341,6 +369,11 @@ export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
+export interface SaveUserTransactionsRequest {
+	token_id: TokenId;
+	transactions: Array<UserTransaction>;
+}
+export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InvalidDelegationChain: { msg: string } }
@@ -371,63 +404,16 @@ export interface SignedDelegation {
 	signature: Uint8Array;
 	delegation: Delegation;
 }
+export interface SolTransactionData {
+	fee: [] | [bigint];
+	to_owner: [] | [string];
+	from_owner: [] | [string];
+}
 export interface SplToken {
 	decimals: [] | [number];
 	token_address: string;
 	symbol: [] | [string];
 }
-export interface SaveUserTransactionsRequest {
-	token_id: TokenId;
-	transactions: Array<UserTransaction>;
-}
-export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
-export interface EvmTransactionData {
-	chain_id: [] | [bigint];
-	nonce: [] | [number];
-	gas_limit: [] | [bigint];
-	gas_price: [] | [bigint];
-	gas_used: [] | [bigint];
-	data: [] | [string];
-	nft_token_id: [] | [number];
-}
-export type IcrcTransactionType =
-	| { Transfer: null }
-	| { Approve: { spender: string } }
-	| { Mint: null }
-	| { Burn: null };
-export interface IcrcTransactionData {
-	fee: [] | [bigint];
-	memo: [] | [Uint8Array | number[]];
-	tx_type: IcrcTransactionType;
-}
-export interface BtcTransactionData {
-	fee: [] | [bigint];
-	confirmations: [] | [number];
-}
-export interface SolTransactionData {
-	fee: [] | [bigint];
-	from_owner: [] | [string];
-	to_owner: [] | [string];
-}
-export type NetworkTransactionData =
-	| { Evm: EvmTransactionData }
-	| { Icrc: IcrcTransactionData }
-	| { Btc: BtcTransactionData }
-	| { Sol: SolTransactionData };
-export interface UserTransaction {
-	id: string;
-	block_index: bigint;
-	timestamp: bigint;
-	from: string;
-	to: [] | [string];
-	value: bigint;
-	network_data: NetworkTransactionData;
-}
-export type UserTransactionError =
-	| { DuplicateTransaction: { id: string } }
-	| { InternalError: { msg: string } }
-	| { TooManyTransactions: null }
-	| { UserNotFound: null };
 export interface Stats {
 	user_profile_count: bigint;
 	user_transactions_count: bigint;
@@ -481,19 +467,6 @@ export type TokenId =
 	| { Erc4626: [string, bigint] }
 	| { Dip721: Principal };
 export type TokenSection = { Spam: null } | { Hidden: null };
-export type TokenId =
-	| { Erc20: [string, bigint] }
-	| { SolNativeDevnet: null }
-	| { Icrc: Principal }
-	| { EvmNative: bigint }
-	| { Erc721: [string, bigint] }
-	| { SolNativeMainnet: null }
-	| { SplDevnet: string }
-	| { BtcNative: null }
-	| { SplMainnet: string }
-	| { IcpNative: null }
-	| { Erc1155: [string, bigint] }
-	| { Erc4626: [string, bigint] };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {
@@ -554,6 +527,22 @@ export interface UserProfile {
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }
+export interface UserTransaction {
+	id: string;
+	to: [] | [string];
+	block_index: bigint;
+	value: bigint;
+	from: string;
+	network_data: NetworkTransactionData;
+	timestamp: bigint;
+}
+export type UserTransactionError =
+	| {
+			DuplicateTransaction: { id: string };
+	  }
+	| { InternalError: { msg: string } }
+	| { TooManyTransactions: null }
+	| { UserNotFound: null };
 export interface Utxo {
 	height: number;
 	value: bigint;
@@ -744,8 +733,17 @@ export interface _SERVICE {
 	 * # Panics
 	 * - If the caller is anonymous.  See: `may_read_user_data`.
 	 */
-	get_user_transactions: ActorMethod<[GetUserTransactionsRequest], GetUserTransactionsResult>;
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
+	/**
+	 * Retrieves stored finalized transactions for the caller, with cursor-based pagination.
+	 *
+	 * # Returns
+	 * - `Ok(GetUserTransactionsResponse)` with the requested page of transactions
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `UserTransactionError`.
+	 */
+	get_user_transactions: ActorMethod<[GetUserTransactionsRequest], GetUserTransactionsResult>;
 	/**
 	 * Checks if the caller has an associated user profile.
 	 *
@@ -780,6 +778,12 @@ export interface _SERVICE {
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Saves finalized transactions for the caller. Transactions are deduplicated by hash.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `UserTransactionError`.
+	 */
 	save_user_transactions: ActorMethod<[SaveUserTransactionsRequest], SaveUserTransactionsResult>;
 	/**
 	 * Overwrites the stored API keys.

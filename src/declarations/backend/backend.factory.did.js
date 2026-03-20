@@ -418,6 +418,72 @@ export const idlFactory = ({ IDL }) => {
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
+	const GetUserTransactionsRequest = IDL.Record({
+		token_id: TokenId,
+		max_results: IDL.Nat64,
+		start: IDL.Opt(IDL.Nat64)
+	});
+	const BtcTransactionData = IDL.Record({
+		fee: IDL.Opt(IDL.Nat64),
+		confirmations: IDL.Opt(IDL.Nat32)
+	});
+	const EvmTransactionData = IDL.Record({
+		nft_token_id: IDL.Opt(IDL.Nat),
+		data: IDL.Opt(IDL.Text),
+		chain_id: IDL.Opt(IDL.Nat64),
+		nonce: IDL.Opt(IDL.Nat64),
+		gas_limit: IDL.Opt(IDL.Nat),
+		gas_used: IDL.Opt(IDL.Nat),
+		gas_price: IDL.Opt(IDL.Nat)
+	});
+	const SolTransactionData = IDL.Record({
+		fee: IDL.Opt(IDL.Nat64),
+		to_owner: IDL.Opt(IDL.Text),
+		from_owner: IDL.Opt(IDL.Text)
+	});
+	const IcrcTransactionType = IDL.Variant({
+		Approve: IDL.Record({ spender: IDL.Text }),
+		Burn: IDL.Null,
+		Mint: IDL.Null,
+		Transfer: IDL.Null
+	});
+	const IcrcTransactionData = IDL.Record({
+		fee: IDL.Opt(IDL.Nat),
+		memo: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		tx_type: IcrcTransactionType
+	});
+	const NetworkTransactionData = IDL.Variant({
+		Btc: BtcTransactionData,
+		Evm: EvmTransactionData,
+		Sol: SolTransactionData,
+		Icrc: IcrcTransactionData
+	});
+	const UserTransaction = IDL.Record({
+		id: IDL.Text,
+		to: IDL.Opt(IDL.Text),
+		block_index: IDL.Nat64,
+		value: IDL.Nat,
+		from: IDL.Text,
+		network_data: NetworkTransactionData,
+		timestamp: IDL.Nat64
+	});
+	const GetUserTransactionsResponse = IDL.Record({
+		next_start: IDL.Opt(IDL.Nat64),
+		total_stored: IDL.Nat64,
+		oldest_block_index: IDL.Opt(IDL.Nat64),
+		newest_block_index: IDL.Opt(IDL.Nat64),
+		transactions: IDL.Vec(UserTransaction)
+	});
+	const UserTransactionError = IDL.Variant({
+		DuplicateTransaction: IDL.Record({ id: IDL.Text }),
+		InternalError: IDL.Record({ msg: IDL.Text }),
+		TooManyTransactions: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const GetUserTransactionsResult = IDL.Variant({
+		Ok: GetUserTransactionsResponse,
+		Err: UserTransactionError
+	});
 	const HasUserProfileResponse = IDL.Record({ has_user_profile: IDL.Bool });
 	const HttpRequest = IDL.Record({
 		url: IDL.Text,
@@ -463,6 +529,14 @@ export const idlFactory = ({ IDL }) => {
 		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
+	});
+	const SaveUserTransactionsRequest = IDL.Record({
+		token_id: TokenId,
+		transactions: IDL.Vec(UserTransaction)
+	});
+	const SaveUserTransactionsResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: UserTransactionError
 	});
 	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
@@ -523,94 +597,6 @@ export const idlFactory = ({ IDL }) => {
 	const SaveNetworksSettingsRequest = IDL.Record({
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		current_user_version: IDL.Opt(IDL.Nat64)
-	});
-	let TokenId = IDL.Variant({
-		Erc20: IDL.Tuple(IDL.Text, IDL.Nat64),
-		SolNativeDevnet: IDL.Null,
-		Icrc: IDL.Principal,
-		EvmNative: IDL.Nat64,
-		Erc721: IDL.Tuple(IDL.Text, IDL.Nat64),
-		SolNativeMainnet: IDL.Null,
-		SplDevnet: IDL.Text,
-		BtcNative: IDL.Null,
-		SplMainnet: IDL.Text,
-		IcpNative: IDL.Null,
-		Erc1155: IDL.Tuple(IDL.Text, IDL.Nat64),
-		Erc4626: IDL.Tuple(IDL.Text, IDL.Nat64)
-	});
-	const GetUserTransactionsRequest = IDL.Record({
-		token_id: TokenId,
-		max_results: IDL.Nat64,
-		start: IDL.Opt(IDL.Nat64)
-	});
-	const EvmTransactionData = IDL.Record({
-		chain_id: IDL.Opt(IDL.Nat64),
-		nonce: IDL.Opt(IDL.Nat32),
-		gas_limit: IDL.Opt(IDL.Nat),
-		gas_price: IDL.Opt(IDL.Nat),
-		gas_used: IDL.Opt(IDL.Nat),
-		data: IDL.Opt(IDL.Text),
-		nft_token_id: IDL.Opt(IDL.Nat32)
-	});
-	const IcrcTransactionType = IDL.Variant({
-		Transfer: IDL.Null,
-		Approve: IDL.Record({ spender: IDL.Text }),
-		Mint: IDL.Null,
-		Burn: IDL.Null
-	});
-	const IcrcTransactionData = IDL.Record({
-		fee: IDL.Opt(IDL.Nat),
-		memo: IDL.Opt(IDL.Vec(IDL.Nat8)),
-		tx_type: IcrcTransactionType
-	});
-	const BtcTransactionData = IDL.Record({
-		fee: IDL.Opt(IDL.Nat64),
-		confirmations: IDL.Opt(IDL.Nat32)
-	});
-	const SolTransactionData = IDL.Record({
-		fee: IDL.Opt(IDL.Nat64),
-		from_owner: IDL.Opt(IDL.Text),
-		to_owner: IDL.Opt(IDL.Text)
-	});
-	const NetworkTransactionData = IDL.Variant({
-		Evm: EvmTransactionData,
-		Icrc: IcrcTransactionData,
-		Btc: BtcTransactionData,
-		Sol: SolTransactionData
-	});
-	const UserTransaction = IDL.Record({
-		id: IDL.Text,
-		block_index: IDL.Nat64,
-		timestamp: IDL.Nat64,
-		from: IDL.Text,
-		to: IDL.Opt(IDL.Text),
-		value: IDL.Nat,
-		network_data: NetworkTransactionData
-	});
-	const GetUserTransactionsResponse = IDL.Record({
-		next_start: IDL.Opt(IDL.Nat64),
-		newest_block_index: IDL.Opt(IDL.Nat64),
-		oldest_block_index: IDL.Opt(IDL.Nat64),
-		total_stored: IDL.Nat64,
-		transactions: IDL.Vec(UserTransaction)
-	});
-	const UserTransactionError = IDL.Variant({
-		DuplicateTransaction: IDL.Record({ id: IDL.Text }),
-		InternalError: IDL.Record({ msg: IDL.Text }),
-		TooManyTransactions: IDL.Null,
-		UserNotFound: IDL.Null
-	});
-	const GetUserTransactionsResult = IDL.Variant({
-		Ok: GetUserTransactionsResponse,
-		Err: UserTransactionError
-	});
-	const SaveUserTransactionsRequest = IDL.Record({
-		token_id: TokenId,
-		transactions: IDL.Vec(UserTransaction)
-	});
-	const SaveUserTransactionsResult = IDL.Variant({
-		Ok: IDL.Null,
-		Err: UserTransactionError
 	});
 
 	return IDL.Service({

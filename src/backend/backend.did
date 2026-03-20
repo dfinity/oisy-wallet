@@ -115,6 +115,7 @@ type BtcSelectUserUtxosFeeResult = variant {
 	Ok : SelectedUtxosFeeResponse;
 	Err : SelectedUtxosFeeError
 };
+type BtcTransactionData = record { fee : opt nat64; confirmations : opt nat32 };
 type CanisterStatusResultV2 = record {
 	controller : principal;
 	status : CanisterStatusType;
@@ -190,6 +191,15 @@ type Delegation = record {
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
+type EvmTransactionData = record {
+	nft_token_id : opt nat;
+	data : opt text;
+	chain_id : opt nat64;
+	nonce : opt nat64;
+	gas_limit : opt nat;
+	gas_used : opt nat;
+	gas_price : opt nat
+};
 type ExchangeData = record {
 	price_24h_change_pct : opt float64;
 	market_cap : opt float64;
@@ -217,6 +227,11 @@ type GetAllowedCyclesResult = variant {
 };
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
+type GetUserProfileError = variant { NotFound };
+type GetUserProfileResult = variant {
+	Ok : UserProfile;
+	Err : GetUserProfileError
+};
 type GetUserTransactionsRequest = record {
 	token_id : TokenId;
 	max_results : nat64;
@@ -224,19 +239,14 @@ type GetUserTransactionsRequest = record {
 };
 type GetUserTransactionsResponse = record {
 	next_start : opt nat64;
-	newest_block_index : opt nat64;
-	oldest_block_index : opt nat64;
 	total_stored : nat64;
+	oldest_block_index : opt nat64;
+	newest_block_index : opt nat64;
 	transactions : vec UserTransaction
 };
 type GetUserTransactionsResult = variant {
 	Ok : GetUserTransactionsResponse;
 	Err : UserTransactionError
-};
-type GetUserProfileError = variant { NotFound };
-type GetUserProfileResult = variant {
-	Ok : UserProfile;
-	Err : GetUserProfileError
 };
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
@@ -255,6 +265,17 @@ type IIDelegationChain = record {
 	delegations : vec SignedDelegation
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
+type IcrcTransactionData = record {
+	fee : opt nat;
+	memo : opt blob;
+	tx_type : IcrcTransactionType
+};
+type IcrcTransactionType = variant {
+	Approve : record { spender : text };
+	Burn;
+	Mint;
+	Transfer
+};
 type Icrcv2AccountId = variant {
 	Account : blob;
 	WithPrincipal : record { owner : principal; subaccount : opt blob }
@@ -294,6 +315,12 @@ type NetworkSettingsFor = variant {
 	BitcoinMainnet;
 	BscTestnet
 };
+type NetworkTransactionData = variant {
+	Btc : BtcTransactionData;
+	Evm : EvmTransactionData;
+	Sol : SolTransactionData;
+	Icrc : IcrcTransactionData
+};
 type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
@@ -305,18 +332,15 @@ type RateLimitError = record {
 	window_ns : nat64;
 	caller : principal
 };
-type SaveUserTransactionsRequest = record {
-	token_id : TokenId;
-	transactions : vec UserTransaction
-};
-type SaveUserTransactionsResult = variant {
-	Ok;
-	Err : UserTransactionError
-};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
 };
+type SaveUserTransactionsRequest = record {
+	token_id : TokenId;
+	transactions : vec UserTransaction
+};
+type SaveUserTransactionsResult = variant { Ok; Err : UserTransactionError };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
 	InvalidDelegationChain : record { msg : text };
@@ -345,31 +369,15 @@ type Settings = record {
 	experimental_features : ExperimentalFeaturesSettings
 };
 type SignedDelegation = record { signature : blob; delegation : Delegation };
+type SolTransactionData = record {
+	fee : opt nat64;
+	to_owner : opt text;
+	from_owner : opt text
+};
 type SplToken = record {
 	decimals : opt nat8;
 	token_address : text;
 	symbol : opt text
-};
-type UserTransaction = record {
-	to : opt text;
-	token_id : opt nat32;
-	value : nat;
-	data : opt text;
-	from : text;
-	hash : text;
-	block_index : nat64;
-	chain_id : opt nat64;
-	nonce : opt nat32;
-	timestamp : nat64;
-	gas_limit : opt nat;
-	gas_used : opt nat;
-	gas_price : opt nat
-};
-type UserTransactionError = variant {
-	DuplicateTransaction : record { hash : text };
-	InternalError : record { msg : text };
-	TooManyTransactions;
-	UserNotFound
 };
 type Stats = record {
 	user_profile_count : nat64;
@@ -425,20 +433,6 @@ type TokenId = variant {
 	Dip721 : principal
 };
 type TokenSection = variant { Spam; Hidden };
-type TokenId = variant {
-	Erc20 : record { text; nat64 };
-	SolNativeDevnet;
-	Icrc : principal;
-	EvmNative : nat64;
-	Erc721 : record { text; nat64 };
-	SolNativeMainnet;
-	SplDevnet : text;
-	BtcNative;
-	SplMainnet : text;
-	IcpNative;
-	Erc1155 : record { text; nat64 };
-	Erc4626 : record { text; nat64 }
-};
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;
@@ -496,6 +490,21 @@ type UserProfile = record {
 	settings : opt Settings;
 	created_timestamp : nat64;
 	updated_timestamp : nat64
+};
+type UserTransaction = record {
+	id : text;
+	to : opt text;
+	block_index : nat64;
+	value : nat;
+	from : text;
+	network_data : NetworkTransactionData;
+	timestamp : nat64
+};
+type UserTransactionError = variant {
+	DuplicateTransaction : record { id : text };
+	InternalError : record { msg : text };
+	TooManyTransactions;
+	UserNotFound
 };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
@@ -641,14 +650,7 @@ service : (Arg) -> {
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
-	// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
-	//
-	// # Returns
-	// - `Ok(GetUserTransactionsResponse)` with the requested page of transactions
-	//
-	// # Errors
-	// Errors are enumerated by: `UserTransactionError`.
-	get_user_transactions : (GetUserTransactionsRequest) -> (GetUserTransactionsResult get_exchange_rate : (TokenId) -> (opt ExchangeRate) query;
+	get_exchange_rate : (TokenId) -> (opt ExchangeRate) query;
 	get_exchange_rates : (vec TokenId) -> (
 		vec record { TokenId; opt ExchangeRate }
 	) query;
@@ -660,6 +662,16 @@ service : (Arg) -> {
 	// # Panics
 	// - If the caller is anonymous.  See: `may_read_user_data`.
 	get_user_profile : () -> (GetUserProfileResult) query;
+	// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
+	//
+	// # Returns
+	// - `Ok(GetUserTransactionsResponse)` with the requested page of transactions
+	//
+	// # Errors
+	// Errors are enumerated by: `UserTransactionError`.
+	get_user_transactions : (GetUserTransactionsRequest) -> (
+		GetUserTransactionsResult
+	) query;
 	// Checks if the caller has an associated user profile.
 	//
 	// # Returns
