@@ -155,10 +155,7 @@ fn merge_sorted(a: Vec<UserTransaction>, b: Vec<UserTransaction>) -> Vec<UserTra
 }
 
 fn make_key(principal: Principal, token_id: &TokenId) -> UserTransactionKey {
-    UserTransactionKey(
-        StoredPrincipal(principal),
-        StoredTokenId(token_id.clone()),
-    )
+    UserTransactionKey(StoredPrincipal(principal), StoredTokenId(token_id.clone()))
 }
 
 #[cfg(test)]
