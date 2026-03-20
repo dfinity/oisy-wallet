@@ -15,6 +15,7 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ethAddressStore } from '$lib/stores/address.store';
 import type { Transaction } from '$lib/types/transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { ZERO } from '$lib/constants/app.constants';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -28,16 +29,22 @@ vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn()
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-let mockGetUserTransactions: MockInstance<any>;
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-let mockSaveUserTransactions: MockInstance<any>;
+let mockGetUserTransactions: MockInstance;
+let mockSaveUserTransactions: MockInstance;
 
 const mockBackendTokenId = { EvmNative: 1n };
 const mockNetworkId = ETHEREUM_NETWORK_ID;
 const mockTokenId = ETHEREUM_TOKEN_ID;
 
-const makeTx = (hash: string, blockNumber: number, timestamp?: number): Transaction => ({
+const makeTx = ({
+	hash,
+	blockNumber,
+	timestamp
+}: {
+	hash: string;
+	blockNumber: number;
+	timestamp?: number;
+}): Transaction => ({
 	hash,
 	blockNumber,
 	timestamp: timestamp ?? blockNumber * 10,
@@ -52,22 +59,28 @@ const makeTx = (hash: string, blockNumber: number, timestamp?: number): Transact
 	data: ''
 });
 
-const makeBackendResponse = (
-	overrides: Partial<GetUserTransactionsResponse> = {}
-): GetUserTransactionsResponse => ({
+const makeBackendResponse = ({
+	overrides = {}
+}: {
+	overrides?: Partial<GetUserTransactionsResponse>;
+} = {}): GetUserTransactionsResponse => ({
 	transactions: [],
 	newest_block_index: [],
 	oldest_block_index: [],
-	total_stored: 0n,
+	total_stored: ZERO,
 	next_start: [],
 	...overrides
 });
 
-const makeBackendUserTx = (
-	hash: string,
-	blockIndex: bigint,
-	timestamp: bigint
-): UserTransaction => ({
+const makeBackendUserTx = ({
+	hash,
+	blockIndex,
+	timestamp
+}: {
+	hash: string;
+	blockIndex: bigint;
+	timestamp: bigint;
+}): UserTransaction => ({
 	id: hash,
 	block_index: blockIndex,
 	timestamp,
@@ -122,26 +135,33 @@ describe('eth-user-transactions.services', () => {
 		it('returns mapped transactions with block index boundaries', async () => {
 			mockGetUserTransactions.mockResolvedValue(
 				makeBackendResponse({
-					transactions: [
-						makeBackendUserTx('0xhash3', 300n, 3000n),
-						makeBackendUserTx('0xhash2', 200n, 2000n),
-						makeBackendUserTx('0xhash1', 100n, 1000n)
-					],
-					newest_block_index: [300n],
-					oldest_block_index: [100n],
-					total_stored: 3n,
-					next_start: []
+					overrides: {
+						transactions: [
+							makeBackendUserTx({ hash: '0xhash3', blockIndex: 300n, timestamp: 3000n }),
+							makeBackendUserTx({ hash: '0xhash2', blockIndex: 200n, timestamp: 2000n }),
+							makeBackendUserTx({ hash: '0xhash1', blockIndex: 100n, timestamp: 1000n })
+						],
+						newest_block_index: [300n],
+						oldest_block_index: [100n],
+						total_stored: 3n,
+						next_start: []
+					}
 				})
 			);
 
 			const result = await loadUserTransactions({ tokenId: mockBackendTokenId });
 
 			expect(result).not.toBeNull();
-			expect(result!.transactions).toHaveLength(3);
-			expect(result!.newestBlockIndex).toBe(300);
-			expect(result!.oldestBlockIndex).toBe(100);
-			expect(result!.totalStored).toBe(3n);
-			expect(result!.nextStart).toBeUndefined();
+
+			if (result === null) {
+				return;
+			}
+
+			expect(result.transactions).toHaveLength(3);
+			expect(result.newestBlockIndex).toBe(300);
+			expect(result.oldestBlockIndex).toBe(100);
+			expect(result.totalStored).toBe(3n);
+			expect(result.nextStart).toBeUndefined();
 		});
 
 		it('returns empty result for empty backend', async () => {
@@ -150,10 +170,15 @@ describe('eth-user-transactions.services', () => {
 			const result = await loadUserTransactions({ tokenId: mockBackendTokenId });
 
 			expect(result).not.toBeNull();
-			expect(result!.transactions).toHaveLength(0);
-			expect(result!.newestBlockIndex).toBeUndefined();
-			expect(result!.oldestBlockIndex).toBeUndefined();
-			expect(result!.totalStored).toBe(0n);
+
+			if (result === null) {
+				return;
+			}
+
+			expect(result.transactions).toHaveLength(0);
+			expect(result.newestBlockIndex).toBeUndefined();
+			expect(result.oldestBlockIndex).toBeUndefined();
+			expect(result.totalStored).toBe(ZERO);
 		});
 
 		it('returns null on backend error', async () => {
@@ -184,14 +209,16 @@ describe('eth-user-transactions.services', () => {
 		it('paginates through backend when cursor is defined', async () => {
 			mockGetUserTransactions.mockResolvedValue(
 				makeBackendResponse({
-					transactions: [
-						makeBackendUserTx('0xhash2', 200n, 2000n),
-						makeBackendUserTx('0xhash1', 100n, 1000n)
-					],
-					newest_block_index: [500n],
-					oldest_block_index: [50n],
-					total_stored: 300n,
-					next_start: [100n]
+					overrides: {
+						transactions: [
+							makeBackendUserTx({ hash: '0xhash2', blockIndex: 200n, timestamp: 2000n }),
+							makeBackendUserTx({ hash: '0xhash1', blockIndex: 100n, timestamp: 1000n })
+						],
+						newest_block_index: [500n],
+						oldest_block_index: [50n],
+						total_stored: 300n,
+						next_start: [100n]
+					}
 				})
 			);
 
@@ -215,11 +242,15 @@ describe('eth-user-transactions.services', () => {
 		it('signals hasMore when backend exhausted but Etherscan may have older', async () => {
 			mockGetUserTransactions.mockResolvedValue(
 				makeBackendResponse({
-					transactions: [makeBackendUserTx('0xhash1', 100n, 1000n)],
-					newest_block_index: [500n],
-					oldest_block_index: [100n],
-					total_stored: 50n,
-					next_start: []
+					overrides: {
+						transactions: [
+							makeBackendUserTx({ hash: '0xhash1', blockIndex: 100n, timestamp: 1000n })
+						],
+						newest_block_index: [500n],
+						oldest_block_index: [100n],
+						total_stored: 50n,
+						next_start: []
+					}
 				})
 			);
 
@@ -237,7 +268,10 @@ describe('eth-user-transactions.services', () => {
 
 		// Case 3: Backend exhausted, falls back to Etherscan for older data
 		it('falls back to Etherscan when cursor is undefined and older data exists', async () => {
-			const olderTxs = [makeTx('0xold2', 90), makeTx('0xold1', 80)];
+			const olderTxs = [
+				makeTx({ hash: '0xold2', blockNumber: 90 }),
+				makeTx({ hash: '0xold1', blockNumber: 80 })
+			];
 			mockTransactionsProvider.mockResolvedValue(olderTxs);
 			mockSaveUserTransactions.mockResolvedValue(undefined);
 
@@ -281,7 +315,7 @@ describe('eth-user-transactions.services', () => {
 
 		// Case 5: Backend at capacity — skips saving older Etherscan data
 		it('skips saving to backend when beAtCapacity is true', async () => {
-			const olderTxs = [makeTx('0xold1', 80)];
+			const olderTxs = [makeTx({ hash: '0xold1', blockNumber: 80 })];
 			mockTransactionsProvider.mockResolvedValue(olderTxs);
 
 			await loadNextEthUserTransactions({
@@ -298,7 +332,7 @@ describe('eth-user-transactions.services', () => {
 
 		// Case 5b: Backend NOT at capacity — saves older Etherscan data
 		it('saves older transactions to backend when not at capacity', async () => {
-			const olderTxs = [makeTx('0xold1', 80, 800)];
+			const olderTxs = [makeTx({ hash: '0xold1', blockNumber: 80, timestamp: 800 })];
 			mockTransactionsProvider.mockResolvedValue(olderTxs);
 			mockSaveUserTransactions.mockResolvedValue(undefined);
 
@@ -367,7 +401,7 @@ describe('eth-user-transactions.services', () => {
 		it('falls to Etherscan when backend returns empty for a cursor', async () => {
 			mockGetUserTransactions.mockResolvedValue(makeBackendResponse());
 
-			const olderTxs = [makeTx('0xold1', 80)];
+			const olderTxs = [makeTx({ hash: '0xold1', blockNumber: 80 })];
 			mockTransactionsProvider.mockResolvedValue(olderTxs);
 
 			const { hasMore } = await loadNextEthUserTransactions({
@@ -388,13 +422,16 @@ describe('eth-user-transactions.services', () => {
 
 		// Case 10: Appending Etherscan results deduplicates against store
 		it('appends Etherscan results without duplicating existing store entries', async () => {
-			const existingTx = makeTx('0xexisting', 100);
+			const existingTx = makeTx({ hash: '0xexisting', blockNumber: 100 });
 			ethTransactionsStore.set({
 				tokenId: mockTokenId,
 				transactions: [{ data: existingTx, certified: false }]
 			});
 
-			const olderTxs = [makeTx('0xexisting', 100), makeTx('0xnew', 90)];
+			const olderTxs = [
+				makeTx({ hash: '0xexisting', blockNumber: 100 }),
+				makeTx({ hash: '0xnew', blockNumber: 90 })
+			];
 			mockTransactionsProvider.mockResolvedValue(olderTxs);
 
 			await loadNextEthUserTransactions({
@@ -418,7 +455,7 @@ describe('eth-user-transactions.services', () => {
 
 			const result = await saveFinalizedTransactions({
 				tokenId: mockBackendTokenId,
-				transactions: [makeTx('0xhash1', 100)],
+				transactions: [makeTx({ hash: '0xhash1', blockNumber: 100 })],
 				currentBlockNumber: 200
 			});
 
@@ -430,7 +467,7 @@ describe('eth-user-transactions.services', () => {
 			// Block 100 with currentBlockNumber 100 — not enough depth (needs 64+ blocks)
 			const result = await saveFinalizedTransactions({
 				tokenId: mockBackendTokenId,
-				transactions: [makeTx('0xhash1', 100)],
+				transactions: [makeTx({ hash: '0xhash1', blockNumber: 100 })],
 				currentBlockNumber: 100
 			});
 
@@ -439,8 +476,8 @@ describe('eth-user-transactions.services', () => {
 		});
 
 		it('saves only finalized transactions', async () => {
-			const finalized = makeTx('0xfinalized', 100);
-			const pending = makeTx('0xpending', 190);
+			const finalized = makeTx({ hash: '0xfinalized', blockNumber: 100 });
+			const pending = makeTx({ hash: '0xpending', blockNumber: 190 });
 
 			mockSaveUserTransactions.mockResolvedValue(undefined);
 
@@ -465,7 +502,7 @@ describe('eth-user-transactions.services', () => {
 
 			const result = await saveFinalizedTransactions({
 				tokenId: mockBackendTokenId,
-				transactions: [makeTx('0xfinalized', 100)],
+				transactions: [makeTx({ hash: '0xfinalized', blockNumber: 100 })],
 				currentBlockNumber: 200
 			});
 

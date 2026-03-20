@@ -14,6 +14,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -62,7 +63,7 @@ export const loadUserTransactions = async ({
 
 		return { transactions, newestBlockIndex, oldestBlockIndex, totalStored, nextStart };
 	} catch (err) {
-		console.error('Failed to load stored transactions from backend:', err);
+		consoleError('Failed to load stored transactions from backend:', err);
 		return null;
 	}
 };
@@ -105,7 +106,7 @@ export const saveFinalizedTransactions = async ({
 		});
 		return { success: true };
 	} catch (err) {
-		console.error('Failed to save finalized transactions to backend:', err);
+		consoleError('Failed to save finalized transactions to backend:', err);
 		return { success: false };
 	}
 };
@@ -213,13 +214,13 @@ const loadOlderFromEtherscan = async ({
 				transactions: olderTransactions,
 				currentBlockNumber: oldestLoadedBlockNumber - 1
 			}).catch((err) =>
-				console.error('Background save of older finalized transactions failed:', err)
+				consoleError('Background save of older finalized transactions failed:', err)
 			);
 		}
 
 		return { hasMore: true };
 	} catch (err) {
-		console.error('Failed to fetch older transactions from Etherscan:', err);
+		consoleError('Failed to fetch older transactions from Etherscan:', err);
 		return { hasMore: false };
 	}
 };
