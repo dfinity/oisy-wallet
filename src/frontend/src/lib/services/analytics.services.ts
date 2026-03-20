@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
+import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_SOURCES,
@@ -44,24 +45,41 @@ export const initPlausibleAnalytics = async () => {
 	}
 };
 
+/**
+ * Sends an analytics event to Plausible. Wrapped in a try/catch so that any tracking
+ * failure is silently swallowed — analytics are non-critical and must never interrupt
+ * the user flow or propagate errors to callers.
+ *
+ * @param params.name - The Plausible event name to track.
+ * @param params.metadata - Optional key/value properties attached to the event.
+ * @param params.warning - Optional warning message logged via {@link consoleWarn} after the event is sent.
+ */
 export const trackEvent = ({ name, metadata, warning }: TrackEventParams) => {
-	/**
-	 * We use the `PLAUSIBLE_ENABLED` feature flag to allow flexibility in enabling or disabling
-	 * analytics in specific builds. This ensures that analytics
-	 * can be disabled even in production-like environments during testing.
-	 *
-	 * TODO: Once testing is complete and Plausible should only run in production,
-	 * replace the `PLAUSIBLE_ENABLED` check with a `PROD` check and remove the feature flag.
-	 */
-	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
-		// Important: This library only works in browser environments. The `init` and `track`
-		// functions rely on browser APIs, so they should only be initialized and called on the client side.
+	try {
+		/**
+		 * We use the `PLAUSIBLE_ENABLED` feature flag to allow flexibility in enabling or disabling
+		 * analytics in specific builds. This ensures that analytics
+		 * can be disabled even in production-like environments during testing.
+		 *
+		 * TODO: Once testing is complete and Plausible should only run in production,
+		 * replace the `PLAUSIBLE_ENABLED` check with a `PROD` check and remove the feature flag.
+		 */
+		if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
+			// Important: This library only works in browser environments. The `init` and `track`
+			// functions rely on browser APIs, so they should only be initialized and called on the client side.
 
-		plausibleTracker.track(name, { props: metadata });
+			plausibleTracker.track(name, { props: metadata });
 
-		if (nonNullish(warning)) {
-			// We print the error to console just for debugging purposes
-			consoleWarn(warning);
+			if (nonNullish(warning)) {
+				consoleWarn(warning);
+			}
+		}
+	} catch (err: unknown) {
+		// Non-critical: tracking failure should not prevent the continuation of the user flow.
+
+		if (LOCAL || STAGING) {
+			// eslint-disable-next-line no-console
+			console.debug('[analytics]', err);
 		}
 	}
 };
