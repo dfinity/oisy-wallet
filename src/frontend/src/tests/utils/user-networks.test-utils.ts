@@ -1,14 +1,17 @@
 import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 import { userProfileStore, type UserProfileStoreData } from '$lib/stores/user-profile.store';
+import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
-import { fromNullable, toNullable } from '@dfinity/utils';
+import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const setupUserNetworksStore = (
-	value: 'allEnabled' | 'allDisabled' | 'onlyMainnets' | 'onlyTestnets'
+	value: 'allEnabled' | 'allDisabled' | 'onlyMainnets' | 'onlyTestnets' | NetworkId[]
 ) => {
+	const enabledIds = Array.isArray(value) ? value : undefined;
+
 	const userProfile: UserProfileStoreData = get(userProfileStore) ?? {
 		profile: mockUserProfile,
 		certified: false
@@ -20,8 +23,9 @@ export const setupUserNetworksStore = (
 		(acc, { id, env }) => ({
 			...acc,
 			[id]: {
-				enabled:
-					value === 'onlyMainnets'
+				enabled: nonNullish(enabledIds)
+					? enabledIds.includes(id)
+					: value === 'onlyMainnets'
 						? env === 'mainnet'
 						: value === 'onlyTestnets'
 							? env === 'testnet'
