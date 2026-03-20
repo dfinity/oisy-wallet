@@ -830,6 +830,7 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		near_intents_estimated_time: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -847,6 +848,7 @@ interface I18nSwap {
 		manually_withdraw_failed: string;
 		swap_sucess_withdraw_failed: string;
 		swap_sucess_manually_withdraw_success: string;
+		swap_completed_close_failed: string;
 	};
 }
 

@@ -73,7 +73,7 @@ pub fn save_transactions(
     map: &mut UserTransactionsMap,
     principal: Principal,
     token_id: &TokenId,
-    transactions: &Vec<UserTransaction>,
+    transactions: &[UserTransaction],
 ) -> Result<(), UserTransactionError> {
     if transactions.len() > MAX_SAVE_USER_TRANSACTIONS_BATCH {
         return Err(UserTransactionError::TooManyTransactions);
@@ -83,11 +83,11 @@ pub fn save_transactions(
 
     let mut existing = map.get(&key).map(|c| c.0).unwrap_or_default();
 
-    let known_ids: HashSet<&str> = existing.iter().map(|e| e.id.as_str()).collect();
+    let mut known_ids: HashSet<String> = existing.iter().map(|e| e.id.clone()).collect();
 
     let mut new_txs = Vec::new();
     for tx in transactions {
-        if known_ids.contains(tx.id.as_str()) {
+        if !known_ids.insert(tx.id.clone()) {
             continue;
         }
         new_txs.push(tx.clone());
@@ -101,7 +101,7 @@ pub fn save_transactions(
             let mut trim_at = existing.len() - MAX_USER_TRANSACTIONS_PER_TOKEN;
 
             // If the trim lands mid-block, advance to the next complete block boundary
-            // so we never store a partial block at the oldest end.
+            // so we avoid storing a partial block at the oldest end.
             if trim_at < existing.len() {
                 let boundary_block = existing[trim_at].block_index;
                 if trim_at > 0 && existing[trim_at - 1].block_index == boundary_block {
@@ -177,8 +177,8 @@ mod tests {
         },
     };
 
-    use super::{get_transactions, save_transactions};
-    use crate::types::UserTransactionsMap;
+    use super::{get_transactions, make_key, save_transactions};
+    use crate::types::{maps::UserTransactionsMap, storable::Candid};
 
     const PRINCIPAL_TEXT: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
 
@@ -215,6 +215,12 @@ mod tests {
         TokenId::EvmNative(1)
     }
 
+    fn insert_transactions(map: &mut UserTransactionsMap, txs: Vec<UserTransaction>) {
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+        let key = make_key(principal, &eth_native_token());
+        map.insert(key, Candid(txs));
+    }
+
     #[test]
     fn test_get_transactions_empty() {
         let (map, _mm) = setup();
@@ -226,6 +232,193 @@ mod tests {
         assert!(result.newest_block_index.is_none());
         assert!(result.oldest_block_index.is_none());
         assert_eq!(result.total_stored, 0);
+        assert!(result.next_start.is_none());
+    }
+
+    #[test]
+    fn test_newest_first_ordering() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<UserTransaction> = (10..15)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
+        insert_transactions(&mut map, txs);
+
+        let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
+
+        let block_indices: Vec<u64> = result.transactions.iter().map(|t| t.block_index).collect();
+        assert_eq!(block_indices, vec![14, 13, 12, 11, 10]);
+    }
+
+    #[test]
+    fn test_newest_and_oldest_block_index() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<UserTransaction> = (5..10)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
+        insert_transactions(&mut map, txs);
+
+        let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
+
+        assert_eq!(result.oldest_block_index, Some(5));
+        assert_eq!(result.newest_block_index, Some(9));
+        assert_eq!(result.total_stored, 5);
+    }
+
+    #[test]
+    fn test_max_results_capping() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let count = MAX_GET_USER_TRANSACTIONS_RESULTS + 50;
+        let txs: Vec<UserTransaction> = (0..count)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
+        insert_transactions(&mut map, txs);
+
+        let result = get_transactions(&map, principal, &eth_native_token(), None, count + 1000);
+
+        assert_eq!(
+            result.transactions.len(),
+            usize::try_from(MAX_GET_USER_TRANSACTIONS_RESULTS).unwrap(),
+            "should be capped to MAX_GET_USER_TRANSACTIONS_RESULTS"
+        );
+    }
+
+    #[test]
+    fn test_multi_page_iteration() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<UserTransaction> = (0..7)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
+        insert_transactions(&mut map, txs);
+
+        // Page 1: newest 3
+        let page1 = get_transactions(&map, principal, &eth_native_token(), None, 3);
+        let p1_indices: Vec<u64> = page1.transactions.iter().map(|t| t.block_index).collect();
+        assert_eq!(p1_indices, vec![6, 5, 4]);
+        assert!(page1.next_start.is_some());
+
+        // Page 2
+        let page2 = get_transactions(&map, principal, &eth_native_token(), page1.next_start, 3);
+        let p2_indices: Vec<u64> = page2.transactions.iter().map(|t| t.block_index).collect();
+        assert_eq!(p2_indices, vec![3, 2, 1]);
+        assert!(page2.next_start.is_some());
+
+        // Page 3: last remaining
+        let page3 = get_transactions(&map, principal, &eth_native_token(), page2.next_start, 3);
+        let p3_indices: Vec<u64> = page3.transactions.iter().map(|t| t.block_index).collect();
+        assert_eq!(p3_indices, vec![0]);
+        assert!(
+            page3.next_start.is_none(),
+            "no more pages after all transactions are returned"
+        );
+    }
+
+    #[test]
+    fn test_multi_page_no_duplicates_no_gaps() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<UserTransaction> = (0..10)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
+        insert_transactions(&mut map, txs);
+
+        let mut all_indices = Vec::new();
+        let mut cursor: Option<u64> = None;
+
+        loop {
+            let page = get_transactions(&map, principal, &eth_native_token(), cursor, 3);
+            let indices: Vec<u64> = page.transactions.iter().map(|t| t.block_index).collect();
+            all_indices.extend(indices);
+            cursor = page.next_start;
+            if cursor.is_none() {
+                break;
+            }
+        }
+
+        assert_eq!(all_indices, vec![9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
+    }
+
+    #[test]
+    fn test_cursor_zero() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<UserTransaction> = (0..5)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
+        insert_transactions(&mut map, txs);
+
+        let result = get_transactions(&map, principal, &eth_native_token(), Some(0), 10);
+
+        assert!(
+            result.transactions.is_empty(),
+            "cursor 0 means end=0, so no transactions before index 0"
+        );
+        assert!(result.next_start.is_none());
+        assert_eq!(result.total_stored, 5);
+    }
+
+    #[test]
+    fn test_cursor_equal_to_len() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<UserTransaction> = (0..5)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
+        insert_transactions(&mut map, txs);
+
+        let result_none = get_transactions(&map, principal, &eth_native_token(), None, 10);
+        let result_len = get_transactions(&map, principal, &eth_native_token(), Some(5), 10);
+
+        assert_eq!(
+            result_none.transactions, result_len.transactions,
+            "cursor=len should behave the same as cursor=None"
+        );
+    }
+
+    #[test]
+    fn test_cursor_beyond_len() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<UserTransaction> = (0..5)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
+        insert_transactions(&mut map, txs);
+
+        let result = get_transactions(&map, principal, &eth_native_token(), Some(999), 10);
+
+        let block_indices: Vec<u64> = result.transactions.iter().map(|t| t.block_index).collect();
+        assert_eq!(
+            block_indices,
+            vec![4, 3, 2, 1, 0],
+            "cursor beyond len should be clamped to len"
+        );
+    }
+
+    #[test]
+    fn test_single_transaction() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        insert_transactions(&mut map, vec![make_tx("0xhash42", 42, 420)]);
+
+        let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
+
+        assert_eq!(result.transactions.len(), 1);
+        assert_eq!(result.transactions[0].block_index, 42);
+        assert_eq!(result.newest_block_index, Some(42));
+        assert_eq!(result.oldest_block_index, Some(42));
+        assert_eq!(result.total_stored, 1);
         assert!(result.next_start.is_none());
     }
 
@@ -242,7 +435,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![tx1.clone(), tx2.clone(), tx3.clone()],
+            &[tx1.clone(), tx2.clone(), tx3.clone()],
         )
         .unwrap();
 
@@ -299,8 +492,20 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
         let tx = make_tx("0xhash1", 100, 1000);
 
-        save_transactions(&mut map, principal, &eth_native_token(), &vec![tx.clone()]).unwrap();
-        save_transactions(&mut map, principal, &eth_native_token(), &vec![tx]).unwrap();
+        save_transactions(
+            &mut map,
+            principal,
+            &eth_native_token(),
+            std::slice::from_ref(&tx),
+        )
+        .unwrap();
+        save_transactions(
+            &mut map,
+            principal,
+            &eth_native_token(),
+            std::slice::from_ref(&tx),
+        )
+        .unwrap();
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
 
@@ -321,8 +526,8 @@ mod tests {
         );
         let erc20_tx = make_tx("0xerc20_hash", 200, 2000);
 
-        save_transactions(&mut map, principal, &eth_native_token(), &vec![eth_tx]).unwrap();
-        save_transactions(&mut map, principal, &erc20_token_id, &vec![erc20_tx]).unwrap();
+        save_transactions(&mut map, principal, &eth_native_token(), &[eth_tx]).unwrap();
+        save_transactions(&mut map, principal, &erc20_token_id, &[erc20_tx]).unwrap();
 
         let eth_result = get_transactions(&map, principal, &eth_native_token(), None, 10);
         assert_eq!(eth_result.transactions.len(), 1);
@@ -344,8 +549,8 @@ mod tests {
         let tx1 = make_tx("0xuser1_hash", 100, 1000);
         let tx2 = make_tx("0xuser2_hash", 200, 2000);
 
-        save_transactions(&mut map, principal1, &eth_native_token(), &vec![tx1]).unwrap();
-        save_transactions(&mut map, principal2, &eth_native_token(), &vec![tx2]).unwrap();
+        save_transactions(&mut map, principal1, &eth_native_token(), &[tx1]).unwrap();
+        save_transactions(&mut map, principal2, &eth_native_token(), &[tx2]).unwrap();
 
         let result1 = get_transactions(&map, principal1, &eth_native_token(), None, 10);
         assert_eq!(result1.transactions.len(), 1);
@@ -357,25 +562,6 @@ mod tests {
     }
 
     #[test]
-    fn test_max_results_capped() {
-        let (mut map, _mm) = setup();
-        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
-
-        let txs: Vec<UserTransaction> = (1..=200)
-            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
-            .collect();
-
-        save_transactions(&mut map, principal, &eth_native_token(), &txs).unwrap();
-
-        let result = get_transactions(&map, principal, &eth_native_token(), None, 1000);
-
-        assert_eq!(
-            result.transactions.len(),
-            usize::try_from(MAX_GET_USER_TRANSACTIONS_RESULTS).unwrap()
-        );
-    }
-
-    #[test]
     fn test_transactions_sorted_newest_first() {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
@@ -384,13 +570,7 @@ mod tests {
         let tx1 = make_tx("0xhash1", 100, 1000);
         let tx2 = make_tx("0xhash2", 200, 2000);
 
-        save_transactions(
-            &mut map,
-            principal,
-            &eth_native_token(),
-            &vec![tx3, tx1, tx2],
-        )
-        .unwrap();
+        save_transactions(&mut map, principal, &eth_native_token(), &[tx3, tx1, tx2]).unwrap();
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
 
@@ -408,7 +588,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xhash1", 100, 1000)],
+            &[make_tx("0xhash1", 100, 1000)],
         )
         .unwrap();
 
@@ -416,7 +596,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xhash2", 200, 2000), make_tx("0xhash3", 300, 3000)],
+            &[make_tx("0xhash2", 200, 2000), make_tx("0xhash3", 300, 3000)],
         )
         .unwrap();
 
@@ -435,7 +615,13 @@ mod tests {
         {
             let memory = memory_manager.borrow().get(MemoryId::new(0));
             let mut map = UserTransactionsMap::init(memory);
-            save_transactions(&mut map, principal, &eth_native_token(), &vec![tx.clone()]).unwrap();
+            save_transactions(
+                &mut map,
+                principal,
+                &eth_native_token(),
+                std::slice::from_ref(&tx),
+            )
+            .unwrap();
         }
 
         // Re-init with same memory
@@ -462,7 +648,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![tx0.clone(), tx1.clone()],
+            &[tx0.clone(), tx1.clone()],
         )
         .unwrap();
 
@@ -488,7 +674,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xonly", 50, 500)],
+            &[make_tx("0xonly", 50, 500)],
         )
         .unwrap();
 
@@ -576,7 +762,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xoverflow", 999_999, 9_999_990)],
+            &[make_tx("0xoverflow", 999_999, 9_999_990)],
         );
         assert!(overflow.is_ok());
 
@@ -593,7 +779,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xfill1", 1, 10)],
+            &[make_tx("0xfill1", 1, 10)],
         );
         assert!(dup_ok.is_ok());
     }
@@ -725,7 +911,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xnew", 100_000, 1_000_000)],
+            &[make_tx("0xnew", 100_000, 1_000_000)],
         )
         .unwrap();
 
@@ -877,7 +1063,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![make_tx("0xhash1", 100, 1000)],
+            &[make_tx("0xhash1", 100, 1000)],
         )
         .unwrap();
 
@@ -895,7 +1081,7 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let result = save_transactions(&mut map, principal, &eth_native_token(), &vec![]);
+        let result = save_transactions(&mut map, principal, &eth_native_token(), &[]);
 
         assert!(result.is_ok());
     }
@@ -913,7 +1099,7 @@ mod tests {
             &mut map,
             principal,
             &eth_native_token(),
-            &vec![tx_a, tx_b, tx_c],
+            &[tx_a, tx_b, tx_c],
         )
         .unwrap();
 

@@ -1075,7 +1075,8 @@
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
-			"cross_chain_networks_info": "跨链网络信息"
+			"cross_chain_networks_info": "跨链网络信息",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "手动取款成功",
 			"manually_withdraw_failed": "手动取款失败",
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
-			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功"
+			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {

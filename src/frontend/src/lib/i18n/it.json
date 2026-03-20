@@ -1075,7 +1075,8 @@
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
-			"cross_chain_networks_info": ""
+			"cross_chain_networks_info": "",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "",
 			"manually_withdraw_failed": "",
 			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": ""
+			"swap_sucess_manually_withdraw_success": "",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
