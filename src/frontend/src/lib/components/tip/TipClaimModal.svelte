@@ -1,13 +1,16 @@
 <script lang="ts">
+	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import { Modal, Spinner } from '@dfinity/gix-components';
 	import { fromNullable, nonNullish } from '@dfinity/utils';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { claimTip } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { tipClaimStore } from '$lib/stores/tip.store';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	let claiming = $state(false);
 	let success = $state(false);
@@ -20,6 +23,24 @@
 
 	const previewTitle = $derived(preview ? fromNullable(preview.title) : undefined);
 	const previewNote = $derived(preview ? fromNullable(preview.note) : undefined);
+
+	const matchedToken = $derived.by(() => {
+		if (!preview) {
+			return undefined;
+		}
+		const ledgerId = preview.token_ledger.toText();
+		return $enabledTokens.find((t) => isTokenIc(t) && t.ledgerCanisterId === ledgerId);
+	});
+
+	const formattedAmount = $derived.by(() => {
+		if (!preview) {
+			return '';
+		}
+		if (nonNullish(matchedToken)) {
+			return `${formatToken({ value: preview.amount, unitName: matchedToken.decimals, displayDecimals: matchedToken.decimals })} ${matchedToken.symbol}`;
+		}
+		return preview.amount.toString();
+	});
 
 	const onClaim = async () => {
 		if (!dealId || !claimCode || !$authIdentity) {
@@ -48,8 +69,6 @@
 		tipClaimStore.reset();
 		modalStore.close();
 	};
-
-	const formatAmount = (amount: bigint): string => amount.toString();
 </script>
 
 <Modal {onClose}>
@@ -83,7 +102,7 @@
 				<div class="bg-dust flex flex-col gap-3 rounded-lg p-4">
 					<div class="flex justify-between">
 						<span class="text-tertiary">{$i18n.tip.text.tip_amount}</span>
-						<span class="font-bold">{formatAmount(preview.amount)}</span>
+						<span class="font-bold">{formattedAmount}</span>
 					</div>
 
 					{#if nonNullish(previewTitle)}
