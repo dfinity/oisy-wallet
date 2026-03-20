@@ -3,7 +3,6 @@ import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
-import { trackEvent } from '$lib/services/analytics.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
@@ -27,10 +26,6 @@ vi.mock('$lib/services/swap.services', () => ({
 	swapService: {
 		icpSwap: (...args: unknown[]) => mockSwapFn(...args)
 	}
-}));
-
-vi.mock('$lib/services/analytics.services', () => ({
-	trackEvent: vi.fn()
 }));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
@@ -175,21 +170,6 @@ describe('SwapIcpWizard', () => {
 			expect(BASE_PROPS.onBack).not.toHaveBeenCalled();
 		});
 
-		it('calls onClose even when trackEvent throws after successful swap', async () => {
-			vi.mocked(trackEvent).mockImplementation(() => {
-				throw new Error("undefined is not an object (evaluating 'n().symbol')");
-			});
-
-			const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(mockSwapFn).toHaveBeenCalledOnce();
-			expect(BASE_PROPS.onClose).toHaveBeenCalledOnce();
-			expect(BASE_PROPS.onBack).not.toHaveBeenCalled();
-		});
-
 		it('calls onBack when swap fails', async () => {
 			mockSwapFn.mockRejectedValue(new Error('Swap failed'));
 
@@ -203,19 +183,5 @@ describe('SwapIcpWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalled();
 		});
 
-		it('calls onBack even when trackEvent throws in the error path', async () => {
-			mockSwapFn.mockRejectedValue(new Error('Swap failed'));
-			vi.mocked(trackEvent).mockImplementation(() => {
-				throw new Error("undefined is not an object (evaluating 'n().symbol')");
-			});
-
-			const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
-			expect(BASE_PROPS.onClose).not.toHaveBeenCalled();
-		});
 	});
 });

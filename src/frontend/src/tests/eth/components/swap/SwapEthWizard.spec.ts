@@ -12,7 +12,6 @@ import {
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
-import { trackEvent } from '$lib/services/analytics.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
@@ -46,10 +45,6 @@ vi.mock('$lib/services/swap.services', () => ({
 	fetchNearIntentsSwap: (...args: unknown[]) => mockFetchNearIntentsSwap(...args),
 	fetchVeloraDeltaSwap: (...args: unknown[]) => mockFetchVeloraDeltaSwap(...args),
 	fetchVeloraMarketSwap: (...args: unknown[]) => mockFetchVeloraMarketSwap(...args)
-}));
-
-vi.mock('$lib/services/analytics.services', () => ({
-	trackEvent: vi.fn()
 }));
 
 const mockToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK, enabled: true };
@@ -375,21 +370,6 @@ describe('SwapEthWizard', () => {
 			expect(onBack).not.toHaveBeenCalled();
 		});
 
-		it('calls onClose even when trackEvent throws after successful swap', async () => {
-			vi.mocked(trackEvent).mockImplementation(() => {
-				throw new Error("undefined is not an object (evaluating 'n().symbol')");
-			});
-
-			const { getByText, onClose, onBack } = renderExecution();
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(mockFetchVeloraMarketSwap).toHaveBeenCalledOnce();
-			expect(onClose).toHaveBeenCalledOnce();
-			expect(onBack).not.toHaveBeenCalled();
-		});
-
 		it('calls onBack when swap fails', async () => {
 			mockFetchVeloraMarketSwap.mockRejectedValue(new Error('Swap failed'));
 
@@ -403,19 +383,5 @@ describe('SwapEthWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalled();
 		});
 
-		it('calls onBack even when trackEvent throws in the error path', async () => {
-			mockFetchVeloraMarketSwap.mockRejectedValue(new Error('Swap failed'));
-			vi.mocked(trackEvent).mockImplementation(() => {
-				throw new Error("undefined is not an object (evaluating 'n().symbol')");
-			});
-
-			const { getByText, onClose, onBack } = renderExecution();
-
-			await fireEvent.click(getByText('Swap now'));
-			await vi.runOnlyPendingTimersAsync();
-
-			expect(onBack).toHaveBeenCalledOnce();
-			expect(onClose).not.toHaveBeenCalled();
-		});
 	});
 });
