@@ -10,6 +10,11 @@ Additionally, we need to explicitly set the base path in order to avoid issues w
 @config '../../../../../tailwind.config.ts';
 
 @layer base {
+	::view-transition-old(header),
+	::view-transition-new(header) {
+		animation: none;
+	}
+
 	/*
 	The default border color has changed to `currentColor` in Tailwind CSS v4,
 	so we've added these compatibility styles to make sure everything still

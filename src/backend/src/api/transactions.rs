@@ -1,9 +1,14 @@
-use ic_cdk::{api::msg_caller, query};
+use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
-    result_types::GetUserTransactionsResult, user_transaction::GetUserTransactionsRequest,
+    result_types::{GetUserTransactionsResult, SaveUserTransactionsResult},
+    user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
 };
 
-use crate::{state::read_state, transactions::model, utils::guards::caller_is_not_anonymous};
+use crate::{
+    state::{mutate_state, read_state},
+    transactions::model,
+    utils::guards::caller_is_not_anonymous,
+};
 
 /// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
 ///
@@ -34,4 +39,29 @@ pub fn get_user_transactions(request: GetUserTransactionsRequest) -> GetUserTran
     });
 
     GetUserTransactionsResult::Ok(response)
+}
+
+/// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
+///
+/// # Errors
+/// Errors are enumerated by: `UserTransactionError`.
+#[update(guard = "caller_is_not_anonymous")]
+pub fn save_user_transactions(request: SaveUserTransactionsRequest) -> SaveUserTransactionsResult {
+    let SaveUserTransactionsRequest {
+        token_id,
+        transactions,
+    } = request;
+
+    let principal = msg_caller();
+
+    let result = mutate_state(|state| {
+        model::save_transactions(
+            &mut state.user_transactions,
+            principal,
+            &token_id,
+            &transactions,
+        )
+    });
+
+    result.into()
 }
