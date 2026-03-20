@@ -47,8 +47,6 @@ export const TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR = 'ic_loading_icrc_canis
 export const TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR =
 	'ic_loading_nfts_from_collection_error';
 
-
-
 // Solana
 export const TRACK_COUNT_SOL_SEND_SUCCESS = 'sol_send_success';
 export const TRACK_COUNT_SOL_SEND_ERROR = 'sol_send_error';
