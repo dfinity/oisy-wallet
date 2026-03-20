@@ -86,8 +86,7 @@ mod tests {
     use super::{get_transactions, make_key};
     use crate::types::{maps::UserTransactionsMap, storable::Candid};
 
-    const PRINCIPAL_TEXT: &str =
-        "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
+    const PRINCIPAL_TEXT: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
 
     fn setup() -> (
         UserTransactionsMap,
@@ -176,21 +175,15 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let count = (MAX_GET_USER_TRANSACTIONS_RESULTS + 50) as u64;
+        let count = MAX_GET_USER_TRANSACTIONS_RESULTS + 50;
         let txs: Vec<UserTransaction> = (0..count).map(make_tx).collect();
         insert_transactions(&mut map, txs);
 
-        let result = get_transactions(
-            &map,
-            principal,
-            &eth_native_token(),
-            None,
-            count + 1000,
-        );
+        let result = get_transactions(&map, principal, &eth_native_token(), None, count + 1000);
 
         assert_eq!(
             result.transactions.len(),
-            MAX_GET_USER_TRANSACTIONS_RESULTS as usize,
+            usize::try_from(MAX_GET_USER_TRANSACTIONS_RESULTS).unwrap(),
             "should be capped to MAX_GET_USER_TRANSACTIONS_RESULTS"
         );
     }
@@ -210,25 +203,13 @@ mod tests {
         assert!(page1.next_start.is_some());
 
         // Page 2
-        let page2 = get_transactions(
-            &map,
-            principal,
-            &eth_native_token(),
-            page1.next_start,
-            3,
-        );
+        let page2 = get_transactions(&map, principal, &eth_native_token(), page1.next_start, 3);
         let p2_indices: Vec<u64> = page2.transactions.iter().map(|t| t.block_index).collect();
         assert_eq!(p2_indices, vec![3, 2, 1]);
         assert!(page2.next_start.is_some());
 
         // Page 3: last remaining
-        let page3 = get_transactions(
-            &map,
-            principal,
-            &eth_native_token(),
-            page2.next_start,
-            3,
-        );
+        let page3 = get_transactions(&map, principal, &eth_native_token(), page2.next_start, 3);
         let p3_indices: Vec<u64> = page3.transactions.iter().map(|t| t.block_index).collect();
         assert_eq!(p3_indices, vec![0]);
         assert!(
