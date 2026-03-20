@@ -1,15 +1,26 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
-import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
+import type { EthFeeStore, FeeStoreData } from '$eth/stores/eth-fee.store';
+import * as feeStoreMod from '$eth/stores/eth-fee.store';
+import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import * as analytics from '$lib/services/analytics.services';
+import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import * as toasts from '$lib/stores/toasts.store';
+import {
+	SwapProvider,
+	VeloraSwapTypes,
+	type SwapMappedResult,
+	type VeloraSwapDetails
+} from '$lib/types/swap';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
-import { render } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
+import { fireEvent, render } from '@testing-library/svelte';
+import { readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$lib/utils/parse.utils', () => ({
 	parseToken: vi.fn()
@@ -30,11 +41,11 @@ const BASE_PROPS = {
 	slippageValue: '0.5',
 	swapProgressStep: ProgressStepsSwap.INITIALIZATION,
 	isSwapAmountsLoading: false,
-	onShowTokensList: () => {},
-	onShowProviderList: () => {},
-	onClose: () => {},
-	onNext: () => {},
-	onBack: () => {}
+	onShowTokensList: vi.fn(),
+	onShowProviderList: vi.fn(),
+	onClose: vi.fn(),
+	onNext: vi.fn(),
+	onBack: vi.fn()
 };
 
 describe('SwapEthWizard', () => {
@@ -49,8 +60,10 @@ describe('SwapEthWizard', () => {
 		destinationTokenBalance: readable(undefined),
 		destinationTokenExchangeRate: readable(20),
 		isSourceTokenIcrc2: readable(false),
+		isSourceTokenPermitSupported: readable(false),
 		setSourceToken: () => {},
 		setDestinationToken: () => {},
+		setIsTokenPermitSupported: () => {},
 		switchTokens: () => {}
 	});
 
@@ -64,9 +77,9 @@ describe('SwapEthWizard', () => {
 	mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
 
 	mockContext.set(
-		ETH_FEE_CONTEXT_KEY,
-		initEthFeeContext({
-			feeStore: initEthFeeStore(),
+		feeStoreMod.ETH_FEE_CONTEXT_KEY,
+		feeStoreMod.initEthFeeContext({
+			feeStore: feeStoreMod.initEthFeeStore(),
 			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
@@ -74,6 +87,7 @@ describe('SwapEthWizard', () => {
 	);
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		mockAuthStore();
 	});
 
@@ -135,5 +149,139 @@ describe('SwapEthWizard', () => {
 		const { container } = renderWithStep(WizardStepsSwap.SWAPPING);
 
 		expect(container).toBeInTheDocument();
+	});
+
+	describe('swap execution', () => {
+		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
+		const veloraSwapProviders: SwapMappedResult[] = [
+			{
+				provider: SwapProvider.VELORA,
+				receiveAmount: 1000000000n,
+				type: VeloraSwapTypes.MARKET,
+				swapDetails: {} as VeloraSwapDetails
+			}
+		];
+
+		let feeState: Writable<FeeStoreData>;
+		let feeStore: EthFeeStore;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			feeState = writable({
+				gas: 100n,
+				maxFeePerGas: 2_000_000n,
+				maxPriorityFeePerGas: 1_000_000n
+			});
+			feeStore = {
+				subscribe: feeState.subscribe,
+				setFee: vi.fn((partial) => {
+					feeState.update((cur) => ({ ...cur, ...partial }));
+				})
+			};
+
+			vi.spyOn(feeStoreMod, 'initEthFeeStore').mockReturnValue(feeStore);
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(undefined),
+				minGasFee: readable(undefined)
+			}));
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockResolvedValue(undefined);
+			vi.spyOn(swapServices, 'fetchVeloraDeltaSwap').mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const createExecutionContext = () => {
+			const executionSwapAmountsStore = initSwapAmountsStore();
+			executionSwapAmountsStore.setSwaps({
+				swaps: veloraSwapProviders,
+				amountForSwap: 1,
+				selectedProvider: veloraSwapProviders[0]
+			});
+
+			const ctx = new Map();
+
+			ctx.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable(mockToken),
+				destinationToken: readable(mockDestToken),
+				failedSwapError: writable(undefined),
+				sourceTokenExchangeRate: readable(10),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				destinationTokenExchangeRate: readable(20),
+				isSourceTokenIcrc2: readable(false),
+				isSourceTokenPermitSupported: readable(false),
+				setSourceToken: () => {},
+				setDestinationToken: () => {},
+				setIsTokenPermitSupported: () => {},
+				switchTokens: () => {}
+			});
+
+			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: executionSwapAmountsStore });
+
+			ctx.set(
+				feeStoreMod.ETH_FEE_CONTEXT_KEY,
+				feeStoreMod.initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+				})
+			);
+
+			return ctx;
+		};
+
+		const renderExecution = () => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+			const onStartTriggerAmount = vi.fn();
+
+			const result = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount,
+					onStopTriggerAmount: vi.fn()
+				},
+				context: createExecutionContext()
+			});
+
+			return { ...result, onClose, onBack, onStartTriggerAmount };
+		};
+
+		it('calls onClose after successful swap', async () => {
+			const { getByText, onClose, onBack } = renderExecution();
+
+			await fireEvent.click(getByText('Swap now'));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(swapServices.fetchVeloraMarketSwap).toHaveBeenCalledOnce();
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it('calls onBack when swap fails', async () => {
+			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(new Error('Swap failed'));
+
+			const { getByText, onClose, onBack } = renderExecution();
+
+			await fireEvent.click(getByText('Swap now'));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalled();
+		});
 	});
 });
