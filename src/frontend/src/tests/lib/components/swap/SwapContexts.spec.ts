@@ -129,11 +129,7 @@ describe('SwapContexts', () => {
 			const networksListContext = getNetworksListContext();
 			const networks = get(networksListContext.filteredNetworks);
 
-			expect(networks).toEqual([
-				ICP_NETWORK,
-				ETHEREUM_NETWORK,
-				...SUPPORTED_EVM_MAINNET_NETWORKS
-			]);
+			expect(networks).toEqual([ICP_NETWORK, ETHEREUM_NETWORK, ...SUPPORTED_EVM_MAINNET_NETWORKS]);
 		});
 
 		it('should only include ICP when all other networks are disabled before mount', () => {
