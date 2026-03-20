@@ -5,7 +5,7 @@
 	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 	import NoStakePlaceholder from '$lib/components/stake/NoStakePlaceholder.svelte';
 	import VaultCard from '$lib/components/vaults/VaultCard.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
+	import { AppPath, VAULT_PARAM } from '$lib/constants/routes.constants';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { filterEnabledToken } from '$lib/utils/token.utils';
 
@@ -29,7 +29,7 @@
 					onClick={() =>
 						goto(
 							isTokenHarvestAutopilot(vault.token)
-								? `${AppPath.EarnAutopilot}?vault=${vault.token.address}`
+								? `${AppPath.EarnAutopilot}?${VAULT_PARAM}=${vault.token.address}`
 								: transactionsUrl({ token: vault.token })
 						)}
 				/>
