@@ -173,19 +173,15 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			try {
-				trackEvent({
-					name: TRACK_COUNT_SWAP_SUCCESS,
-					metadata: {
-						sourceToken: $sourceToken.symbol,
-						destinationToken: $destinationToken.symbol,
-						dApp: $swapAmountsStore.selectedProvider.provider,
-						usdSourceValue: sourceTokenUsdValue ?? ''
-					}
-				});
-			} catch (_: unknown) {
-				// Non-critical: tracking failure must never prevent the modal from closing.
-			}
+			trackEvent({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: {
+					sourceToken: $sourceToken.symbol,
+					destinationToken: $destinationToken.symbol,
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					usdSourceValue: sourceTokenUsdValue ?? ''
+				}
+			});
 
 			setTimeout(() => onClose(), 2500);
 		} catch (err: unknown) {
@@ -228,20 +224,16 @@
 						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
 				)
 			) {
-				try {
-					trackEvent({
-						name: TRACK_COUNT_SWAP_ERROR,
-						metadata: {
-							sourceToken: $sourceToken.symbol,
-							destinationToken: $destinationToken.symbol,
-							dApp: $swapAmountsStore.selectedProvider.provider,
-							errorKey: isSwapError(err) ? err.code : '',
-							usdSourceValue: sourceTokenUsdValue ?? ''
-						}
-					});
-				} catch (_: unknown) {
-					// Non-critical: tracking failure must never prevent error recovery.
-				}
+				trackEvent({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: {
+						sourceToken: $sourceToken.symbol,
+						destinationToken: $destinationToken.symbol,
+						dApp: $swapAmountsStore.selectedProvider.provider,
+						errorKey: isSwapError(err) ? err.code : '',
+						usdSourceValue: sourceTokenUsdValue ?? ''
+					}
+				});
 			}
 
 			setTimeout(() => onBack(), 2000);
