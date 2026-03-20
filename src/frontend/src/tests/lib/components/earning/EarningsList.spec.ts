@@ -1,105 +1,134 @@
-import type { StakePositionResponse } from '$declarations/gldt_stake/gldt_stake.did';
-import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
-import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
-import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { allVaults } from '$eth/derived/vaults.derived';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import EarningsList from '$lib/components/earning/EarningsList.svelte';
-import { stakeProvidersConfig } from '$lib/config/stake.config';
 import { ZERO } from '$lib/constants/app.constants';
-import { EARNING_CARD, EARNING_NO_POSITION_PLACEHOLDER } from '$lib/constants/test-ids.constants';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
-import { exchangeStore } from '$lib/stores/exchange.store';
-import { StakeProvider } from '$lib/types/stake';
-import { parseTokenId } from '$lib/validation/token.validation';
-import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
-import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import { EARNING_NO_POSITION_PLACEHOLDER } from '$lib/constants/test-ids.constants';
+import type { Vault } from '$lib/types/vaults';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { render } from '@testing-library/svelte';
 
+vi.mock('$eth/constants/harvest-autopilots.constants', () => ({
+	HARVEST_AUTOPILOT_ADDRESSES: ['0xautopilotaddress']
+}));
+
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn()
+}));
+
 describe('EarningsList', () => {
-	beforeEach(() => {
-		setupTestnetsStore('reset');
-		setupUserNetworksStore('allEnabled');
+	const mockAutopilotToken: Erc4626CustomToken = {
+		...mockValidErc4626Token,
+		id: Symbol('AutopilotToken') as unknown as typeof mockValidErc4626Token.id,
+		name: 'Autopilot Vault',
+		address: '0xAutopilotAddress',
+		enabled: true
+	};
 
-		gldtStakeStore.reset();
+	const mockEnabledToken: Erc4626CustomToken = {
+		...mockValidErc4626Token,
+		id: Symbol('EnabledToken') as unknown as typeof mockValidErc4626Token.id,
+		name: 'Enabled Vault',
+		address: '0xEnabledAddress',
+		enabled: true
+	};
 
-		exchangeStore.reset();
+	const mockDisabledToken: Erc4626CustomToken = {
+		...mockValidErc4626Token,
+		id: Symbol('DisabledToken') as unknown as typeof mockValidErc4626Token.id,
+		name: 'Disabled Vault',
+		address: '0xDisabledAddress',
+		enabled: false
+	};
+
+	const toVault = ({
+		token,
+		overrides
+	}: {
+		token: Erc4626CustomToken;
+		overrides?: { usdBalance?: number; apy?: string };
+	}): Vault => ({
+		token: {
+			...token,
+			network: ETHEREUM_NETWORK,
+			usdBalance: overrides?.usdBalance ?? 100,
+			balance: ZERO
+		},
+		apy: overrides?.apy ?? '5.00'
 	});
 
-	it('should render the placeholder if there are no earning positions', () => {
+	const mockAllVaultsStore = (vaults: Vault[]) => {
+		vi.spyOn(allVaults, 'subscribe').mockImplementation((fn) => {
+			fn(vaults);
+			return () => {};
+		});
+	};
+
+	beforeEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it('should render the placeholder when there are no vaults', () => {
+		mockAllVaultsStore([]);
+
 		const { getByTestId } = render(EarningsList);
 
 		expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
 	});
 
-	describe('when there are GLDT staking positions', () => {
-		const mockApy = 12;
-		const mockStaked = 1000000000n;
+	it('should render the placeholder when all vaults have zero usd balance', () => {
+		mockAllVaultsStore([toVault({ token: mockAutopilotToken, overrides: { usdBalance: 0 } })]);
 
-		const mockGldtToken: IcrcCustomToken = {
-			id: parseTokenId('GOLDAO'),
-			symbol: 'GLDT',
-			name: 'Gold DAO Token',
-			decimals: 8,
-			network: ICP_NETWORK,
-			enabled: true,
-			standard: { code: 'icrc' },
-			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
-			fee: 100n,
-			category: 'custom',
-			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
+		const { getByTestId } = render(EarningsList);
+
+		expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
+	});
+
+	it('should render vault cards for vaults with positive usd balance', () => {
+		mockAllVaultsStore([
+			toVault({ token: mockAutopilotToken }),
+			toVault({ token: mockEnabledToken })
+		]);
+
+		const { getByText, queryByTestId } = render(EarningsList);
+
+		expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).not.toBeInTheDocument();
+		expect(getByText('Autopilot Vault')).toBeInTheDocument();
+		expect(getByText('Enabled Vault')).toBeInTheDocument();
+	});
+
+	it('should not display disabled non-autopilot vaults', () => {
+		mockAllVaultsStore([toVault({ token: mockDisabledToken })]);
+
+		const { getByTestId, queryByText } = render(EarningsList);
+
+		expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
+		expect(queryByText('Disabled Vault')).not.toBeInTheDocument();
+	});
+
+	it('should display disabled harvest autopilot vaults with positive balance', () => {
+		const disabledAutopilot: Erc4626CustomToken = {
+			...mockAutopilotToken,
+			enabled: false
 		};
 
-		beforeEach(() => {
-			gldtStakeStore.setApy(mockApy);
-			gldtStakeStore.setPosition({ staked: mockStaked } as unknown as StakePositionResponse);
+		mockAllVaultsStore([toVault({ token: disabledAutopilot })]);
 
-			icrcCustomTokensStore.resetAll();
-			icrcCustomTokensStore.setAll([{ data: mockGldtToken, certified: true }]);
+		const { getByText, queryByTestId } = render(EarningsList);
 
-			exchangeStore.reset();
-			exchangeStore.set([{ [mockGldtToken.ledgerCanisterId]: { usd: 1 } }]);
-		});
+		expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).not.toBeInTheDocument();
+		expect(getByText('Autopilot Vault')).toBeInTheDocument();
+	});
 
-		it('should not render the placeholder', () => {
-			const { queryByTestId } = render(EarningsList);
+	it('should filter out vaults with zero balance even if token is enabled', () => {
+		mockAllVaultsStore([
+			toVault({ token: mockEnabledToken, overrides: { usdBalance: 0 } }),
+			toVault({ token: mockAutopilotToken, overrides: { usdBalance: 50 } })
+		]);
 
-			expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeNull();
-		});
+		const { getByText, queryByText } = render(EarningsList);
 
-		it('should render the card for the provider', () => {
-			const { getByTestId } = render(EarningsList);
-
-			expect(
-				getByTestId(`${EARNING_CARD}-${stakeProvidersConfig[StakeProvider.GLDT].name}`)
-			).toBeInTheDocument();
-		});
-
-		it('should render the placeholder if GLDT token is not enabled', () => {
-			icrcCustomTokensStore.resetAll();
-			icrcCustomTokensStore.setAll([
-				{ data: { ...mockGldtToken, enabled: false }, certified: true }
-			]);
-
-			const { getByTestId } = render(EarningsList);
-
-			expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
-		});
-
-		it('should render the placeholder if GLDT token is not among the tokens', () => {
-			icrcCustomTokensStore.resetAll();
-
-			const { getByTestId } = render(EarningsList);
-
-			expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
-		});
-
-		it('should render the placeholder if the staked amount is zero', () => {
-			gldtStakeStore.setPosition({ staked: ZERO } as unknown as StakePositionResponse);
-
-			const { getByTestId } = render(EarningsList);
-
-			expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
-		});
+		expect(queryByText('Enabled Vault')).not.toBeInTheDocument();
+		expect(getByText('Autopilot Vault')).toBeInTheDocument();
 	});
 });
