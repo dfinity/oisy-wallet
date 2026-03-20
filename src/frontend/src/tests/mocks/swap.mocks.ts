@@ -1,12 +1,7 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
-import {
-	SwapProvider,
-	VeloraSwapTypes,
-	type SwapMappedResult,
-	type VeloraSwapDetails
-} from '$lib/types/swap';
+import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockVeloraSwapDetails } from '$tests/mocks/velora.mock';
 

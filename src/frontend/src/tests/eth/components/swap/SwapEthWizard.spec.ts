@@ -4,13 +4,9 @@ import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
-import type { SwapMappedResult } from '$lib/types/swap';
-import {
-	SWAP_AMOUNTS_CONTEXT_KEY,
-	initSwapAmountsStore,
-	type SwapAmountsStore
-} from '$lib/stores/swap-amounts.store';
+import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import type { SwapMappedResult } from '$lib/types/swap';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import {
