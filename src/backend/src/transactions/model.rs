@@ -11,7 +11,7 @@ use shared::types::{
 };
 
 use crate::types::{
-    Candid, StoredBackendTokenId, StoredPrincipal, UserTransactionKey, UserTransactionsMap,
+    Candid, StoredPrincipal, StoredTokenId, UserTransactionKey, UserTransactionsMap,
 };
 
 /// Read paginated transactions from the map without mutating state.
@@ -157,7 +157,7 @@ fn merge_sorted(a: Vec<UserTransaction>, b: Vec<UserTransaction>) -> Vec<UserTra
 fn make_key(principal: Principal, token_id: &TokenId) -> UserTransactionKey {
     UserTransactionKey(
         StoredPrincipal(principal),
-        StoredBackendTokenId(token_id.clone()),
+        StoredTokenId(token_id.clone()),
     )
 }
 

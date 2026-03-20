@@ -7,5 +7,5 @@ pub(crate) use self::{
         TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
         VMem,
     },
-    storable::{Candid, StoredBackendTokenId, StoredPrincipal, StoredTokenId, UserTransactionKey},
+    storable::{Candid, StoredPrincipal, StoredTokenId, UserTransactionKey},
 };
