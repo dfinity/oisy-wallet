@@ -159,7 +159,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(result).toHaveLength(2);
@@ -196,7 +196,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: false,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(result).toHaveLength(1);
@@ -226,7 +226,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledTimes(0);
@@ -260,7 +260,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(result).toHaveLength(1);
@@ -285,7 +285,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(result).toHaveLength(1);
@@ -310,7 +310,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(result).toHaveLength(2);
@@ -336,7 +336,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: false,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(result).toHaveLength(1);
@@ -364,7 +364,7 @@ describe('swap.services', () => {
 				tokens: [evmToken, mockValidErc20Token],
 				slippage: 0.5,
 				isSourceTokenIcrc2: true,
-				userEthAddress: '0xUser'
+				userAddress: '0xUser'
 			});
 
 			expect(mockVeloraGetQuote).toHaveBeenCalled();
@@ -389,7 +389,7 @@ describe('swap.services', () => {
 		};
 
 		const amount = BigInt('1000000000000000000');
-		const userEthAddress = '0xUser';
+		const userAddress = '0xUser';
 		const slippage = 1.5;
 
 		beforeEach(() => {
@@ -403,7 +403,7 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress,
+				userAddress,
 				slippage
 			});
 
@@ -422,7 +422,7 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress,
+				userAddress,
 				slippage
 			});
 
@@ -430,7 +430,7 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress,
+				userAddress,
 				slippage
 			});
 			expect(result).toHaveLength(1);
@@ -439,12 +439,12 @@ describe('swap.services', () => {
 			expect(result[0].type).toBe('delta');
 		});
 
-		it('returns [] when userEthAddress is nullish', async () => {
+		it('returns [] when userAddress is nullish', async () => {
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress: undefined,
+				userAddress: undefined,
 				slippage
 			});
 
@@ -464,7 +464,7 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress,
+				userAddress,
 				slippage
 			});
 
@@ -479,7 +479,7 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress,
+				userAddress,
 				slippage
 			});
 
@@ -1172,7 +1172,7 @@ describe('swap.services', () => {
 		};
 
 		const amount = BigInt('1000000000000000000');
-		const userEthAddress = '0xUser';
+		const userAddress = '0xUser';
 		const slippage = 1.5;
 
 		const mockGetQuote = vi.fn();
@@ -1206,7 +1206,7 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress,
+				userAddress,
 				slippage
 			});
 
@@ -1234,7 +1234,7 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress,
+				userAddress,
 				slippage
 			});
 
@@ -1257,7 +1257,7 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress,
+				userAddress,
 				slippage
 			});
 
@@ -1284,7 +1284,7 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress,
+				userAddress,
 				slippage
 			});
 
@@ -1332,7 +1332,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: false,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1369,7 +1369,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: false,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1399,7 +1399,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith(
@@ -1425,7 +1425,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith(
@@ -1461,7 +1461,7 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userAddress: mockEthAddress
 			});
 
 			expect(trackEvent).toHaveBeenCalledTimes(2);

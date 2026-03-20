@@ -128,7 +128,7 @@ describe('near-intents.services', () => {
 				sourceToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
@@ -149,7 +149,7 @@ describe('near-intents.services', () => {
 				sourceToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
@@ -169,12 +169,12 @@ describe('near-intents.services', () => {
 			);
 		});
 
-		it('should return undefined when userEthAddress is nullish', async () => {
+		it('should return undefined when userAddress is nullish', async () => {
 			const result = await fetchNearIntentsSwapQuote({
 				sourceToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: undefined,
+				userAddress: undefined,
 				slippage
 			});
 
@@ -192,7 +192,7 @@ describe('near-intents.services', () => {
 				sourceToken: unsupportedToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
@@ -209,7 +209,7 @@ describe('near-intents.services', () => {
 				sourceToken: unknownToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
@@ -226,7 +226,7 @@ describe('near-intents.services', () => {
 				sourceToken,
 				destinationToken: unknownDest,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
