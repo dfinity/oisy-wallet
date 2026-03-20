@@ -1,13 +1,24 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
-import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import type { SwapMappedResult } from '$lib/types/swap';
+import {
+	SWAP_AMOUNTS_CONTEXT_KEY,
+	initSwapAmountsStore,
+	type SwapAmountsStore
+} from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { mockSwapProviders } from '$tests/mocks/swap.mocks';
+import {
+	mockNearIntentsProvider,
+	mockSwapProviders,
+	mockVeloraDeltaProvider,
+	mockVeloraMarketProvider
+} from '$tests/mocks/swap.mocks';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
@@ -21,7 +32,21 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 	})
 }));
 
-const mockToken = { ...mockValidErc20Token, enabled: true };
+const mockFetchNearIntentsSwap = vi.fn();
+const mockFetchVeloraDeltaSwap = vi.fn();
+const mockFetchVeloraMarketSwap = vi.fn();
+
+vi.mock('$lib/services/swap.services', () => ({
+	fetchNearIntentsSwap: (...args: unknown[]) => mockFetchNearIntentsSwap(...args),
+	fetchVeloraDeltaSwap: (...args: unknown[]) => mockFetchVeloraDeltaSwap(...args),
+	fetchVeloraMarketSwap: (...args: unknown[]) => mockFetchVeloraMarketSwap(...args)
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
+
+const mockToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK, enabled: true };
 const mockDestToken = { ...ETHEREUM_TOKEN, enabled: true };
 
 const BASE_PROPS = {
@@ -30,110 +55,241 @@ const BASE_PROPS = {
 	slippageValue: '0.5',
 	swapProgressStep: ProgressStepsSwap.INITIALIZATION,
 	isSwapAmountsLoading: false,
-	onShowTokensList: () => {},
-	onShowProviderList: () => {},
-	onClose: () => {},
-	onNext: () => {},
-	onBack: () => {}
+	onShowTokensList: vi.fn(),
+	onShowProviderList: vi.fn(),
+	onClose: vi.fn(),
+	onNext: vi.fn(),
+	onBack: vi.fn(),
+	onStartTriggerAmount: vi.fn(),
+	onStopTriggerAmount: vi.fn()
 };
 
 describe('SwapEthWizard', () => {
-	const mockContext = new Map([]);
+	const createContext = ({
+		swaps,
+		selectedProvider,
+		isPermitSupported
+	}: {
+		swaps: SwapMappedResult[];
+		selectedProvider: SwapMappedResult;
+		isPermitSupported?: boolean;
+	}) => {
+		const mockContext = new Map([]);
 
-	mockContext.set(SWAP_CONTEXT_KEY, {
-		sourceToken: readable(mockToken),
-		destinationToken: readable(mockDestToken),
-		failedSwapError: writable(undefined),
-		sourceTokenExchangeRate: readable(10),
-		sourceTokenBalance: readable(undefined),
-		destinationTokenBalance: readable(undefined),
-		destinationTokenExchangeRate: readable(20),
-		isSourceTokenIcrc2: readable(false),
-		setSourceToken: () => {},
-		setDestinationToken: () => {},
-		switchTokens: () => {}
-	});
+		mockContext.set(SWAP_CONTEXT_KEY, {
+			sourceToken: readable(mockToken),
+			destinationToken: readable(mockDestToken),
+			failedSwapError: writable(undefined),
+			sourceTokenExchangeRate: readable(10),
+			sourceTokenBalance: readable(undefined),
+			destinationTokenBalance: readable(undefined),
+			destinationTokenExchangeRate: readable(20),
+			isSourceTokenIcrc2: readable(false),
+			isSourceTokenPermitSupported: readable(isPermitSupported ?? undefined),
+			setIsTokenPermitSupported: vi.fn(),
+			setSourceToken: () => {},
+			setDestinationToken: () => {},
+			switchTokens: () => {}
+		});
 
-	const swapAmountsStore = initSwapAmountsStore();
-	swapAmountsStore.setSwaps({
-		swaps: mockSwapProviders,
-		amountForSwap: 1,
-		selectedProvider: mockSwapProviders[0]
-	});
+		const swapAmountsStore = initSwapAmountsStore();
+		swapAmountsStore.setSwaps({
+			swaps,
+			amountForSwap: 1,
+			selectedProvider
+		});
 
-	mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
 
-	mockContext.set(
-		ETH_FEE_CONTEXT_KEY,
-		initEthFeeContext({
-			feeStore: initEthFeeStore(),
-			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
-			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
-			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
-		})
-	);
+		mockContext.set(
+			ETH_FEE_CONTEXT_KEY,
+			initEthFeeContext({
+				feeStore: initEthFeeStore(),
+				feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+				feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+			})
+		);
+
+		return { mockContext, swapAmountsStore };
+	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		mockAuthStore();
 	});
 
-	const renderWithStep = (step: WizardStepsSwap) =>
+	const renderWithStep = (
+		step: WizardStepsSwap,
+		context: Map<unknown, unknown>,
+		propsOverride?: Record<string, unknown>
+	) =>
 		render(SwapEthWizard, {
 			props: {
 				...BASE_PROPS,
 				currentStep: { name: step, title: 'Swap' },
-				onStartTriggerAmount: vi.fn(),
-				onStopTriggerAmount: vi.fn()
+				...propsOverride
 			},
-			context: mockContext
+			context
 		});
 
-	it('renders SwapEthForm on SWAP step', () => {
-		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
+	describe('basic rendering', () => {
+		it('renders SwapEthForm on SWAP step', () => {
+			const { mockContext } = createContext({
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
 
-		expect(getByText('You pay')).toBeInTheDocument();
-		expect(getByText('You receive')).toBeInTheDocument();
-		expect(getByText('Review swap')).toBeInTheDocument();
-		expect(getByText('Cancel')).toBeInTheDocument();
+			const { getByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
+
+			expect(getByText('You pay')).toBeInTheDocument();
+			expect(getByText('You receive')).toBeInTheDocument();
+			expect(getByText('Review swap')).toBeInTheDocument();
+			expect(getByText('Cancel')).toBeInTheDocument();
+		});
+
+		it('renders slippage section', () => {
+			const { mockContext } = createContext({
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
+
+			const { getByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
+
+			expect(getByText('Max slippage')).toBeInTheDocument();
+		});
+
+		it('renders swap provider information', () => {
+			const { mockContext } = createContext({
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
+
+			const { getByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
+
+			expect(getByText('Swap provider')).toBeInTheDocument();
+		});
+
+		it('renders fee information', () => {
+			const { mockContext } = createContext({
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
+
+			const { getByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
+
+			expect(getByText('Total fee')).toBeInTheDocument();
+		});
+
+		it('renders token input fields', () => {
+			const { mockContext } = createContext({
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
+
+			const { container } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
+
+			const tokenInputs = container.querySelectorAll(
+				'input[data-tid="token-input-currency-token"]'
+			);
+
+			expect(tokenInputs).toHaveLength(2);
+		});
+
+		it('renders switch tokens button', () => {
+			const { mockContext } = createContext({
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
+
+			const { container } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
+
+			const switchButton = container.querySelector('[data-tid="swap-switch-tokens-button"]');
+
+			expect(switchButton).toBeInTheDocument();
+		});
+
+		it('renders SwapProgress on SWAPPING step', () => {
+			const { mockContext } = createContext({
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
+
+			const { container } = renderWithStep(WizardStepsSwap.SWAPPING, mockContext);
+
+			expect(container).toBeInTheDocument();
+		});
 	});
 
-	it('renders slippage section', () => {
-		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
+	describe('provider-specific rendering', () => {
+		it('shows approval fee when Velora MARKET is selected with non-default token', () => {
+			const { mockContext } = createContext({
+				swaps: [mockVeloraMarketProvider],
+				selectedProvider: mockVeloraMarketProvider
+			});
 
-		expect(getByText('Max slippage')).toBeInTheDocument();
-	});
+			const { getByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
 
-	it('renders swap provider information', () => {
-		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
+			expect(getByText('Total fee')).toBeInTheDocument();
+		});
 
-		expect(getByText('Swap provider')).toBeInTheDocument();
-	});
+		it('shows gasless fee when Velora DELTA is selected and permit is supported', () => {
+			const { mockContext } = createContext({
+				swaps: [mockVeloraDeltaProvider],
+				selectedProvider: mockVeloraDeltaProvider,
+				isPermitSupported: true
+			});
 
-	it('renders fee information', () => {
-		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
+			const { getByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
 
-		expect(getByText('Total fee')).toBeInTheDocument();
-	});
+			expect(getByText('Gasless')).toBeInTheDocument();
+		});
 
-	it('renders token input fields', () => {
-		const { container } = renderWithStep(WizardStepsSwap.SWAP);
+		it('does not show gasless fee when Velora MARKET is selected', () => {
+			const { mockContext } = createContext({
+				swaps: [mockVeloraMarketProvider],
+				selectedProvider: mockVeloraMarketProvider,
+				isPermitSupported: true
+			});
 
-		const tokenInputs = container.querySelectorAll('input[data-tid="token-input-currency-token"]');
+			const { queryByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
 
-		expect(tokenInputs).toHaveLength(2);
-	});
+			expect(queryByText('Gasless')).not.toBeInTheDocument();
+		});
 
-	it('renders switch tokens button', () => {
-		const { container } = renderWithStep(WizardStepsSwap.SWAP);
+		it('does not show gasless fee when NEAR Intents is selected even with permit support', () => {
+			const { mockContext } = createContext({
+				swaps: [mockNearIntentsProvider, mockVeloraDeltaProvider],
+				selectedProvider: mockNearIntentsProvider,
+				isPermitSupported: true
+			});
 
-		const switchButton = container.querySelector('[data-tid="swap-switch-tokens-button"]');
+			const { queryByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
 
-		expect(switchButton).toBeInTheDocument();
-	});
+			expect(queryByText('Gasless')).not.toBeInTheDocument();
+		});
 
-	it('renders SwapProgress on SWAPPING step', () => {
-		const { container } = renderWithStep(WizardStepsSwap.SWAPPING);
+		it('derives isApproveNeeded from selectedProvider, not swaps[0]', () => {
+			const { mockContext } = createContext({
+				swaps: [mockNearIntentsProvider, mockVeloraMarketProvider],
+				selectedProvider: mockVeloraMarketProvider
+			});
 
-		expect(container).toBeInTheDocument();
+			const { getByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
+
+			expect(getByText('Total fee')).toBeInTheDocument();
+		});
+
+		it('derives isGasless from selectedProvider, not swaps[0]', () => {
+			const { mockContext } = createContext({
+				swaps: [mockVeloraMarketProvider, mockVeloraDeltaProvider],
+				selectedProvider: mockVeloraDeltaProvider,
+				isPermitSupported: true
+			});
+
+			const { getByText } = renderWithStep(WizardStepsSwap.SWAP, mockContext);
+
+			expect(getByText('Gasless')).toBeInTheDocument();
+		});
 	});
 });
