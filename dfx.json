@@ -588,7 +588,22 @@
 			"type": "custom",
 			"build": "scripts/build.escrow.sh",
 			"candid": "target/escrow.did",
-			"wasm": "target/escrow.wasm.gz"
+			"wasm": "target/escrow.wasm.gz",
+			"remote": {
+				"id": {
+					"ic": "umxj5-niaaa-aaaae-af2sq-cai",
+					"beta": "umxj5-niaaa-aaaae-af2sq-cai",
+					"staging": "umxj5-niaaa-aaaae-af2sq-cai",
+					"test_fe_1": "umxj5-niaaa-aaaae-af2sq-cai",
+					"test_fe_2": "umxj5-niaaa-aaaae-af2sq-cai",
+					"test_fe_3": "umxj5-niaaa-aaaae-af2sq-cai",
+					"test_fe_4": "umxj5-niaaa-aaaae-af2sq-cai",
+					"test_fe_5": "umxj5-niaaa-aaaae-af2sq-cai",
+					"test_fe_6": "umxj5-niaaa-aaaae-af2sq-cai",
+					"e2e": "umxj5-niaaa-aaaae-af2sq-cai",
+					"audit": "umxj5-niaaa-aaaae-af2sq-cai"
+				}
+			}
 		}
 	},
 	"defaults": {
