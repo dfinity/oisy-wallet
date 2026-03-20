@@ -436,6 +436,7 @@ describe('swap.services', () => {
 			expect(result).toHaveLength(1);
 			expect(result[0].provider).toBe(SwapProvider.VELORA);
 			expect(result[0].receiveAmount).toBe(123n);
+			expect(result[0].type).toBe('delta');
 		});
 
 		it('returns [] when userEthAddress is nullish', async () => {
