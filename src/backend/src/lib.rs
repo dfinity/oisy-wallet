@@ -22,7 +22,8 @@ use shared::{
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            GetUserProfileResult, GetUserTransactionsResult, SaveUserTransactionsResult,
+            SetUserShowTestnetsResult, UpdateContactResult,
             UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
             UpdateUserNetworkSettingsResult,
         },
@@ -32,6 +33,7 @@ use shared::{
         },
         token_id::TokenId,
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
+        user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
         Stats, Timestamp,
     },
 };
@@ -46,6 +48,7 @@ mod exchange;
 mod signer;
 mod state;
 mod token;
+mod transactions;
 mod types;
 mod user_profile;
 mod utils;

@@ -151,6 +151,20 @@ describe('save-custom-tokens.services', () => {
 			vi.spyOn(splCustomTokensStore, 'resetByIdentifier');
 		});
 
+		const expectAllCustomTokensReloaded = () => {
+			expect(loadCustomErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomErc1155Tokens).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity
+			});
+			expect(loadCustomIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomIcPunksTokens).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity
+			});
+			expect(loadCustomSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+		};
+
 		it('should call the endpoint to set many custom tokens', async () => {
 			await saveCustomTokens(mockParams);
 
@@ -208,19 +222,13 @@ describe('save-custom-tokens.services', () => {
 			);
 		});
 
-		it('should reload custom tokens at the end', async () => {
+		it('should reload custom tokens on success', async () => {
 			await saveCustomTokens(mockParams);
 
-			expect(loadCustomErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
-			expect(loadCustomErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
-			expect(loadCustomErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
-			expect(loadCustomIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
-			expect(loadCustomExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
-			expect(loadCustomIcPunksTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
-			expect(loadCustomSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expectAllCustomTokensReloaded();
 		});
 
-		it('should fail if the setManyCustomTokens fails', async () => {
+		it('should still reload custom tokens when setManyCustomTokens fails', async () => {
 			const mockError = new Error('Mocked error when setting tokens');
 
 			vi.mocked(setManyCustomTokens).mockRejectedValueOnce(mockError);
@@ -229,13 +237,7 @@ describe('save-custom-tokens.services', () => {
 
 			expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsAddToken.SAVE);
 
-			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
-			expect(loadCustomErc721Tokens).not.toHaveBeenCalled();
-			expect(loadCustomErc1155Tokens).not.toHaveBeenCalled();
-			expect(loadCustomIcrcTokens).not.toHaveBeenCalled();
-			expect(loadCustomExtTokens).not.toHaveBeenCalled();
-			expect(loadCustomIcPunksTokens).not.toHaveBeenCalled();
-			expect(loadCustomSplTokens).not.toHaveBeenCalled();
+			expectAllCustomTokensReloaded();
 		});
 
 		it('should fail if any loadCustomTokens fails', async () => {

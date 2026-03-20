@@ -1075,7 +1075,8 @@
 			"network_cost": "ネットワークコスト",
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
-			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。"
+			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "前回の失敗したスワップのトークンは正常に出金されました。再度スワップをお試しいただくか、スワッププロバイダーを変更してください。",
 			"manually_withdraw_failed": "資金の出金に失敗しました。<br>再度お試しいただくか、以下に従ってください。",
 			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください。",
-			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。"
+			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {

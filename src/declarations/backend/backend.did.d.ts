@@ -44,11 +44,9 @@ export type AllowSigningError =
 	| { FailedToContactCyclesLedger: null };
 export interface AllowSigningRequest {
 	ii_delegation_chain: [] | [IIDelegationChain];
-	nonce: bigint;
 }
 export interface AllowSigningResponse {
 	status: AllowSigningStatus;
-	challenge_completion: [] | [ChallengeCompletion];
 	allowed_cycles: bigint;
 }
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
@@ -139,12 +137,6 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
-export interface ChallengeCompletion {
-	solved_duration_ms: bigint;
-	next_allowance_ms: bigint;
-	next_difficulty: number;
-	current_difficulty: number;
-}
 export interface Config {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
@@ -220,6 +212,15 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export interface EvmTransactionData {
+	nft_token_id: [] | [bigint];
+	data: [] | [string];
+	chain_id: [] | [bigint];
+	nonce: [] | [bigint];
+	gas_limit: [] | [bigint];
+	gas_used: [] | [bigint];
+	gas_price: [] | [bigint];
+}
 export interface ExchangeData {
 	price_24h_change_pct: [] | [number];
 	market_cap: [] | [number];
@@ -250,6 +251,21 @@ export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
+export interface GetUserTransactionsRequest {
+	token_id: TokenId;
+	max_results: bigint;
+	start: [] | [bigint];
+}
+export interface GetUserTransactionsResponse {
+	next_start: [] | [bigint];
+	total_stored: bigint;
+	oldest_block_index: [] | [bigint];
+	newest_block_index: [] | [bigint];
+	transactions: Array<UserTransaction>;
+}
+export type GetUserTransactionsResult =
+	| { Ok: GetUserTransactionsResponse }
+	| { Err: UserTransactionError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -313,6 +329,7 @@ export type NetworkSettingsFor =
 	| { SolanaMainnet: null }
 	| { BitcoinMainnet: null }
 	| { BscTestnet: null };
+export type NetworkTransactionData = { Evm: EvmTransactionData };
 export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
@@ -334,6 +351,11 @@ export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
+export interface SaveUserTransactionsRequest {
+	token_id: TokenId;
+	transactions: Array<UserTransaction>;
+}
+export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InvalidDelegationChain: { msg: string } }
@@ -482,6 +504,22 @@ export interface UserProfile {
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }
+export interface UserTransaction {
+	id: string;
+	to: [] | [string];
+	block_index: bigint;
+	value: bigint;
+	from: string;
+	network_data: NetworkTransactionData;
+	timestamp: bigint;
+}
+export type UserTransactionError =
+	| {
+			DuplicateTransaction: { id: string };
+	  }
+	| { InternalError: { msg: string } }
+	| { TooManyTransactions: null }
+	| { UserNotFound: null };
 export interface Utxo {
 	height: number;
 	value: bigint;
@@ -674,6 +712,16 @@ export interface _SERVICE {
 	 */
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
 	/**
+	 * Retrieves stored finalized transactions for the caller, with cursor-based pagination.
+	 *
+	 * # Returns
+	 * - `Ok(GetUserTransactionsResponse)` with the requested page of transactions.
+	 *
+	 * Currently, this function always returns `Ok` for valid (non-anonymous) calls.
+	 * The `Err(UserTransactionError)` variant is reserved for future validation logic.
+	 */
+	get_user_transactions: ActorMethod<[GetUserTransactionsRequest], GetUserTransactionsResult>;
+	/**
 	 * Checks if the caller has an associated user profile.
 	 *
 	 * # Returns
@@ -707,6 +755,13 @@ export interface _SERVICE {
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Saves finalized transactions for the caller. Transactions are deduplicated by hash.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `UserTransactionError`.
+	 */
+	save_user_transactions: ActorMethod<[SaveUserTransactionsRequest], SaveUserTransactionsResult>;
 	/**
 	 * Overwrites the stored API keys.
 	 *

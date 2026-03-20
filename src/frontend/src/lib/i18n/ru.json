@@ -1075,7 +1075,8 @@
 			"network_cost": "Комиссия за транзакцию",
 			"gasless": "Без комиссии за газ",
 			"swap_fees": "Комиссия за обмен",
-			"cross_chain_networks_info": "Информация о кросс-чейн сетях"
+			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Сейчас обмен недоступен. Попробуйте позже.",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "Вывод прошел успешно",
 			"manually_withdraw_failed": "Вывод не удался",
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
-			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно"
+			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {

@@ -414,7 +414,7 @@ describe('backend.api', () => {
 		};
 
 		const mockResponse: AllowSigningOutcome = {
-			response: { status: { Executed: null }, challenge_completion: [], allowed_cycles: 100n }
+			response: { status: { Executed: null }, allowed_cycles: 100n }
 		};
 
 		beforeEach(() => {
