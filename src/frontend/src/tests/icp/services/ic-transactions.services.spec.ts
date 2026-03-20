@@ -205,6 +205,16 @@ describe('ic-transactions.services', () => {
 			expect(getTransactionsIcrc).not.toHaveBeenCalled();
 		});
 
+		it('should not load transactions if the token is nullish', async () => {
+			await loadNextIcTransactions({
+				...mockParams,
+				token: undefined as unknown as typeof mockToken
+			});
+
+			expect(getTransactionsIcp).not.toHaveBeenCalled();
+			expect(getTransactionsIcrc).not.toHaveBeenCalled();
+		});
+
 		it('should not load transactions if the token is not an IC token', async () => {
 			await loadNextIcTransactions({ ...mockParams, token: ETHEREUM_TOKEN });
 
