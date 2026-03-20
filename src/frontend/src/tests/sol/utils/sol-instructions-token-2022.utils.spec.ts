@@ -53,6 +53,7 @@ import {
 	parseInitializeNonTransferableMintInstruction,
 	parseInitializePausableConfigInstruction,
 	parseInitializePermanentDelegateInstruction,
+	parseInitializePermissionedBurnInstruction,
 	parseInitializeScaledUiAmountMintInstruction,
 	parseInitializeTokenGroupInstruction,
 	parseInitializeTokenGroupMemberInstruction,
@@ -62,6 +63,8 @@ import {
 	parseMintToCheckedInstruction,
 	parseMintToInstruction,
 	parsePauseInstruction,
+	parsePermissionedBurnCheckedInstruction,
+	parsePermissionedBurnInstruction,
 	parseReallocateInstruction,
 	parseRemoveTokenMetadataKeyInstruction,
 	parseResumeInstruction,
@@ -74,6 +77,7 @@ import {
 	parseTransferCheckedWithFeeInstruction,
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction,
+	parseUnwrapLamportsInstruction,
 	parseUpdateConfidentialTransferMintInstruction,
 	parseUpdateDefaultAccountStateInstruction,
 	parseUpdateGroupMemberPointerInstruction,
@@ -90,10 +94,6 @@ import {
 	parseWithdrawWithheldTokensFromAccountsForConfidentialTransferFeeInstruction,
 	parseWithdrawWithheldTokensFromAccountsInstruction,
 	parseWithdrawWithheldTokensFromMintForConfidentialTransferFeeInstruction,
-	parseUnwrapLamportsInstruction,
-	parseInitializePermissionedBurnInstruction,
-	parsePermissionedBurnInstruction,
-	parsePermissionedBurnCheckedInstruction,
 	parseWithdrawWithheldTokensFromMintInstruction
 } from '@solana-program/token-2022';
 import { address } from '@solana/kit';
@@ -1318,9 +1318,7 @@ describe('sol-instructions-token-2022.utils', () => {
 		});
 
 		it('should parse an UnwrapLamports instruction', () => {
-			vi.mocked(identifyToken2022Instruction).mockReturnValue(
-				Token2022Instruction.UnwrapLamports
-			);
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(Token2022Instruction.UnwrapLamports);
 
 			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
 				instructionType: Token2022Instruction.UnwrapLamports
