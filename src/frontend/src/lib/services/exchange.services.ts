@@ -284,8 +284,10 @@ export const fetchAllExchangeRatesFromBackend = async ({
 
 	const findRate = (
 		id: TokenId
-	): { usd: number; usd_24h_change?: number; usd_market_cap: number } | undefined =>
-		mapExchangeRateToCoingecko(ratesByKey.get(tokenIdKey(id)));
+	): { usd: number; usd_24h_change?: number; usd_market_cap: number } | undefined => {
+		const key = tokenIdKey(id);
+		return nonNullish(key) ? mapExchangeRateToCoingecko(ratesByKey.get(key)) : undefined;
+	};
 
 	const nativePrice = (
 		entry: (typeof NATIVE_TOKEN_IDS)[number]
