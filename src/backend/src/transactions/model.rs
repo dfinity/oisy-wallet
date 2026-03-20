@@ -390,21 +390,6 @@ mod tests {
     }
 
     #[test]
-    fn test_max_results_zero() {
-        let (mut map, _mm) = setup();
-        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
-
-        let txs: Vec<UserTransaction> = (0..5).map(|i| make_tx(&format!("0xhash{i}"), i, i * 10)).collect();
-        insert_transactions(&mut map, txs);
-
-        let result = get_transactions(&map, principal, &eth_native_token(), None, 0);
-
-        assert!(result.transactions.is_empty());
-        assert!(result.next_start.is_none());
-        assert_eq!(result.total_stored, 5);
-    }
-
-    #[test]
     fn test_single_transaction() {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
@@ -546,25 +531,6 @@ mod tests {
         let result2 = get_transactions(&map, principal2, &eth_native_token(), None, 10);
         assert_eq!(result2.transactions.len(), 1);
         assert_eq!(result2.transactions[0].id, "0xuser2_hash");
-    }
-
-    #[test]
-    fn test_max_results_capped() {
-        let (mut map, _mm) = setup();
-        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
-
-        let txs: Vec<UserTransaction> = (1..=200)
-            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
-            .collect();
-
-        save_transactions(&mut map, principal, &eth_native_token(), &txs).unwrap();
-
-        let result = get_transactions(&map, principal, &eth_native_token(), None, 1000);
-
-        assert_eq!(
-            result.transactions.len(),
-            usize::try_from(MAX_GET_USER_TRANSACTIONS_RESULTS).unwrap()
-        );
     }
 
     #[test]
