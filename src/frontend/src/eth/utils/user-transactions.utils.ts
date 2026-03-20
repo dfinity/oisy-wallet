@@ -53,12 +53,12 @@ export const mapUserTransactionToTransaction = (stored: UserTransaction): Transa
 		from: stored.from,
 		to: stored.to.length > 0 ? stored.to[0] : undefined,
 		value: stored.value,
-		chainId: evm.chain_id.length > 0 ? Number(evm.chain_id[0]) : undefined,
-		nonce: evm.nonce.length > 0 ? evm.nonce[0] : undefined,
-		gasLimit: evm.gas_limit.length > 0 ? evm.gas_limit[0] : undefined,
+		chainId: evm.chain_id.length > 0 ? BigInt(evm.chain_id[0]) : 0n,
+		nonce: evm.nonce.length > 0 ? evm.nonce[0] : 0,
+		gasLimit: evm.gas_limit.length > 0 ? evm.gas_limit[0] : 0n,
 		gasPrice: evm.gas_price.length > 0 ? evm.gas_price[0] : undefined,
 		gasUsed: evm.gas_used.length > 0 ? evm.gas_used[0] : undefined,
-		data: evm.data.length > 0 ? evm.data[0] : undefined,
+		data: evm.data.length > 0 ? evm.data[0] : '',
 		tokenId: evm.nft_token_id.length > 0 ? evm.nft_token_id[0] : undefined
 	};
 };
@@ -111,7 +111,7 @@ export const buildErcBackendTokenId = ({
 		return undefined;
 	}
 	const pair: [string, bigint] = [contractAddress, network.chainId];
-	switch (standard) {
+	switch (standard.code) {
 		case 'erc20':
 			return { Erc20: pair };
 		case 'erc721':

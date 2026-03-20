@@ -1,3 +1,7 @@
+import type {
+	GetUserTransactionsResponse,
+	UserTransaction
+} from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
@@ -8,11 +12,10 @@ import {
 	saveFinalizedTransactions
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import type { GetUserTransactionsResponse } from '$declarations/backend/backend.did';
 import { ethAddressStore } from '$lib/stores/address.store';
+import type { Transaction } from '$lib/types/transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import type { Transaction } from '$lib/types/transaction';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -45,7 +48,8 @@ const makeTx = (hash: string, blockNumber: number, timestamp?: number): Transact
 	chainId: 1n,
 	gasLimit: 21000n,
 	gasPrice: 20_000_000_000n,
-	gasUsed: 21000n
+	gasUsed: 21000n,
+	data: ''
 });
 
 const makeBackendResponse = (
@@ -59,7 +63,11 @@ const makeBackendResponse = (
 	...overrides
 });
 
-const makeBackendUserTx = (hash: string, blockIndex: bigint, timestamp: bigint) => ({
+const makeBackendUserTx = (
+	hash: string,
+	blockIndex: bigint,
+	timestamp: bigint
+): UserTransaction => ({
 	id: hash,
 	block_index: blockIndex,
 	timestamp,
@@ -445,7 +453,9 @@ describe('eth-user-transactions.services', () => {
 			expect(result).toEqual({ success: true });
 			expect(mockSaveUserTransactions).toHaveBeenCalledOnce();
 			// Only the finalized transaction (block 100, depth=100 >= 64) should be saved
-			const savedTxs = mockSaveUserTransactions.mock.calls[0][0].transactions;
+			const savedTxs = (
+				mockSaveUserTransactions.mock.calls[0][0] as { transactions: UserTransaction[] }
+			).transactions;
 			expect(savedTxs).toHaveLength(1);
 			expect(savedTxs[0].id).toBe('0xfinalized');
 		});
