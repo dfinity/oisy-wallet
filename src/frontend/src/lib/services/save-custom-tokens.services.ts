@@ -22,6 +22,7 @@ import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { assertNever } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 const parseErcIdentifier = (token: SaveCustomErcVariant) => `${token.address}#${token.chainId}`;
@@ -84,6 +85,19 @@ const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 	assertNever(token.networkKey, `Unexpected networkKey: ${token.networkKey}`);
 };
 
+const reloadAllCustomTokens = ({ identity }: { identity: Identity }) =>
+	Promise.all([
+		loadCustomErc20Tokens({ identity }),
+		loadCustomErc4626Tokens({ identity }),
+		loadCustomErc721Tokens({ identity }),
+		loadCustomErc1155Tokens({ identity }),
+		loadCustomIcrcTokens({ identity }),
+		loadCustomExtTokens({ identity }),
+		// TODO: add loadCustomDip721Tokens here (and in the tests)
+		loadCustomIcPunksTokens({ identity }),
+		loadCustomSplTokens({ identity })
+	]);
+
 export const saveCustomTokens = async ({
 	progress,
 	identity,
@@ -91,7 +105,7 @@ export const saveCustomTokens = async ({
 }: SaveTokensParams<SaveCustomTokenWithKey>) => {
 	progress?.(ProgressStepsAddToken.SAVE);
 
-	try {
+	const save = async () => {
 		await setManyCustomTokens({
 			identity,
 			tokens: tokens.map(toCustomToken),
@@ -103,18 +117,11 @@ export const saveCustomTokens = async ({
 		// Hide tokens that have been disabled
 		const disabledTokens = tokens.filter(({ enabled }) => !enabled);
 		disabledTokens.forEach(hideTokenByKey);
+	};
+
+	try {
+		await save();
 	} finally {
-		// Reload all custom tokens as ultimate safety measure
-		await Promise.all([
-			loadCustomErc20Tokens({ identity }),
-			loadCustomErc4626Tokens({ identity }),
-			loadCustomErc721Tokens({ identity }),
-			loadCustomErc1155Tokens({ identity }),
-			loadCustomIcrcTokens({ identity }),
-			loadCustomExtTokens({ identity }),
-			// TODO: add loadCustomDip721Tokens here (and in the tests)
-			loadCustomIcPunksTokens({ identity }),
-			loadCustomSplTokens({ identity })
-		]);
+		await reloadAllCustomTokens({ identity });
 	}
 };
