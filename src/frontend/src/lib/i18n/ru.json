@@ -1075,7 +1075,8 @@
 			"network_cost": "Комиссия за транзакцию",
 			"gasless": "Без комиссии за газ",
 			"swap_fees": "Комиссия за обмен",
-			"cross_chain_networks_info": "Информация о кросс-чейн сетях"
+			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Сейчас обмен недоступен. Попробуйте позже.",
