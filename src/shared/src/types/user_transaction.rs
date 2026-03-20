@@ -89,6 +89,15 @@ pub struct GetUserTransactionsResponse {
     pub next_start: Option<u64>,
 }
 
+/// Request to save finalized transactions.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct SaveUserTransactionsRequest {
+    /// Which token these transactions belong to
+    pub token_id: TokenId,
+    /// Transactions to save (must be finalized/immutable)
+    pub transactions: Vec<UserTransaction>,
+}
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum UserTransactionError {
     /// Reserved for future caller-validation logic.

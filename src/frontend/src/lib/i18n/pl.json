@@ -1075,7 +1075,8 @@
 			"network_cost": "Koszt sieci",
 			"gasless": "Bez gazu",
 			"swap_fees": "Opłaty za wymianę",
-			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>"
+			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Obecnie nie ma dostępnej giełdy do wymiany tokenów. Spróbuj ponownie później.",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "Tokeny z poprzedniej nieudanej wymiany zostały pomyślnie wypłacone. Możesz spróbować wymiany ponownie lub zmienić dostawcę wymiany.",
 			"manually_withdraw_failed": "Wypłata środków nie powiodła się. <br> Spróbuj ponownie lub postępuj zgodnie z",
 			"swap_sucess_withdraw_failed": "Wymiana została zakończona, ale Twoje tokeny nie mogły zostać automatycznie wypłacone. Kliknij przycisk Wypłać poniżej, aby wypłacić je ręcznie.<br> Lub postępuj zgodnie z",
-			"swap_sucess_manually_withdraw_success": "Tokeny z poprzedniej wymiany zostały pomyślnie wypłacone. Możesz teraz zamknąć to okno."
+			"swap_sucess_manually_withdraw_success": "Tokeny z poprzedniej wymiany zostały pomyślnie wypłacone. Możesz teraz zamknąć to okno.",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1156,7 +1158,12 @@
 			"edit_token": "Edytuj token",
 			"sort_by_value": "",
 			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_symbol": "",
+			"hide_asset_types": "",
+			"asset_type": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "Szczegóły tokena",
@@ -1281,6 +1288,23 @@
 			"unexpected_undefined": "Token jest niezdefiniowany. To nieoczekiwane.",
 			"unexpected_error_on_token_delete": "Coś poszło nie tak podczas usuwania tokena.",
 			"unexpected_error_on_token_update": "Coś poszło nie tak podczas aktualizacji tokena."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
 		}
 	},
 	"nfts": {

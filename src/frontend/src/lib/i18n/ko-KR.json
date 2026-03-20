@@ -1075,7 +1075,8 @@
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
-			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다"
+			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "이전에 실패한 스왑의 토큰이 성공적으로 출금되었습니다. 스왑을 다시 시도하거나 스왑 제공자를 변경할 수 있습니다.",
 			"manually_withdraw_failed": "자금 출금에 실패했습니다. <br> 다시 시도하거나 다음을 따르세요",
 			"swap_sucess_withdraw_failed": "스왑은 완료되었으나 토큰을 자동으로 출금할 수 없습니다. 아래 출금 버튼을 클릭하여 수동으로 출금하세요.<br> 또는 다음을 따르세요",
-			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다."
+			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다.",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1156,7 +1158,12 @@
 			"edit_token": "토큰 편집",
 			"sort_by_value": "가치",
 			"sort_by_performance": "토큰 성과",
-			"sort_by_symbol": "심볼"
+			"sort_by_symbol": "심볼",
+			"hide_asset_types": "",
+			"asset_type": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "토큰 상세 정보",
@@ -1281,6 +1288,23 @@
 			"unexpected_undefined": "토큰이 정의되지 않았습니다. 이는 예상치 못한 상황입니다.",
 			"unexpected_error_on_token_delete": "토큰을 제거하는 중 문제가 발생했습니다.",
 			"unexpected_error_on_token_update": "토큰을 업데이트하는 중 문제가 발생했습니다."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
 		}
 	},
 	"nfts": {

@@ -31,7 +31,7 @@ describe('SendFeeInfo', () => {
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
-		expect(() => getByTestId(SEND_FEE_INFO)).toThrowError();
+		expect(() => getByTestId(SEND_FEE_INFO)).toThrow();
 	});
 
 	it('renders the info message if fee symbol is not the same as send token symbol', () => {

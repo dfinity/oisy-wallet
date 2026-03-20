@@ -5,6 +5,7 @@ import type {
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
+	IIDelegationChain,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -23,6 +24,7 @@ import type { Token } from '$lib/types/token';
 import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';
 import type { UserNetworks } from '$lib/types/user-networks';
+import type { Nullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -55,6 +57,10 @@ export interface SelectedUtxosFeeOutcome {
 	rateLimitInfo?: RateLimitInfo;
 }
 
+export interface AllowSigningParams {
+	iiDelegationChain: Nullable<IIDelegationChain>;
+}
+
 export interface AllowSigningOutcome {
 	response: AllowSigningResponse;
 	rateLimitInfo?: RateLimitInfo;
@@ -64,11 +70,13 @@ export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
 	amountSatoshis: bigint;
 	minConfirmations: [number];
+	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
 export interface BtcGetPendingTransactionParams {
 	network: BitcoinNetwork;
 	address: BtcAddress;
+	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {

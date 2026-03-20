@@ -2,6 +2,7 @@ import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc
 import { EFAON_TOKEN_GROUP } from '$env/tokens/groups/groups.efaon.env';
 import iSharesPurple from '$eth/assets/ishares_purple.webp';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,7 +17,7 @@ export const EFAON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'iShares MSCI EAFE ETF (Ondo Tokenized)',
 	symbol: EFAON_SYMBOL,
 	decimals: EFAON_DECIMALS,

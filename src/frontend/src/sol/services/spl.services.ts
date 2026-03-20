@@ -1,6 +1,7 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -8,6 +9,7 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { hardenMetadata } from '$lib/utils/metadata.utils';
 import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
@@ -113,7 +115,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
 					standard: { code: 'spl' as const },
 					category: 'custom' as const,
-					tags: [],
+					tags: DEFAULT_TOKEN_TAGS,
 					enabled,
 					version,
 					allowExternalContentSource
@@ -254,6 +256,6 @@ export const getSplMetadata = async ({
 		};
 	} catch (err: unknown) {
 		// We care only for development purposes.
-		console.warn(`Failed to fetch SPL metadata for token ${address} on ${network} network`, err);
+		consoleWarn(`Failed to fetch SPL metadata for token ${address} on ${network} network`, err);
 	}
 };

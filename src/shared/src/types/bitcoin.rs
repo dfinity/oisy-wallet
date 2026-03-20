@@ -6,6 +6,7 @@ use candid::CandidType;
 use ic_cdk::bitcoin_canister::{MillisatoshiPerByte, Network as BitcoinNetwork, Utxo};
 use serde::Deserialize;
 
+use super::delegation::IIDelegationChain;
 use crate::types::signer::RateLimitError;
 
 /// The maximum length of a bitcoin address, expressed as a string.
@@ -53,6 +54,7 @@ pub struct SelectedUtxosFeeRequest {
     pub amount_satoshis: u64,
     pub network: BitcoinNetwork,
     pub min_confirmations: Option<u32>,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -70,6 +72,10 @@ pub enum SelectedUtxosFeeError {
     PendingTransactions,
     /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain {
+        msg: String,
+    },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -78,6 +84,7 @@ pub struct BtcAddPendingTransactionRequest {
     pub txid: Vec<u8>,
     pub utxos: Vec<Utxo>,
     pub network: BitcoinNetwork,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -94,6 +101,8 @@ pub enum BtcAddPendingTransactionError {
     InternalError { msg: String },
     /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain { msg: String },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -101,6 +110,7 @@ pub enum BtcAddPendingTransactionError {
 pub struct BtcGetPendingTransactionsRequest {
     pub address: String,
     pub network: BitcoinNetwork,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -131,4 +141,8 @@ pub enum BtcGetPendingTransactionsError {
     },
     /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain {
+        msg: String,
+    },
 }

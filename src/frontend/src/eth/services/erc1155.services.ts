@@ -6,6 +6,7 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -137,7 +138,7 @@ const mapErc1155CustomToken = async ({
 			decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 			standard: { code: 'erc1155' as const },
 			category: 'custom' as const,
-			tags: [],
+			tags: DEFAULT_TOKEN_TAGS,
 			enabled,
 			version,
 			...(nonNullish(mappedSection) && {

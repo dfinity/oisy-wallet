@@ -7,7 +7,6 @@ use super::{
         BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
     dapp::AddDappSettingsError,
-    pow::{CreateChallengeError, CreateChallengeResponse},
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
@@ -206,22 +205,6 @@ impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowe
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum CreatePowChallengeResult {
-    /// The pow challenge was created successfully.
-    Ok(CreateChallengeResponse),
-    /// The pow challenge was not created due to an error.
-    Err(CreateChallengeError),
-}
-impl From<Result<CreateChallengeResponse, CreateChallengeError>> for CreatePowChallengeResult {
-    fn from(result: Result<CreateChallengeResponse, CreateChallengeError>) -> Self {
-        match result {
-            Ok(response) => CreatePowChallengeResult::Ok(response),
-            Err(err) => CreatePowChallengeResult::Err(err),
-        }
-    }
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcSelectUserUtxosFeeResult {
     /// The fee was selected successfully.
     Ok(SelectedUtxosFeeResponse),
@@ -367,6 +350,20 @@ impl From<Result<GetUserTransactionsResponse, UserTransactionError>> for GetUser
         match result {
             Ok(response) => GetUserTransactionsResult::Ok(response),
             Err(err) => GetUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SaveUserTransactionsResult {
+    Ok(()),
+    Err(UserTransactionError),
+}
+impl From<Result<(), UserTransactionError>> for SaveUserTransactionsResult {
+    fn from(result: Result<(), UserTransactionError>) -> Self {
+        match result {
+            Ok(()) => SaveUserTransactionsResult::Ok(()),
+            Err(err) => SaveUserTransactionsResult::Err(err),
         }
     }
 }

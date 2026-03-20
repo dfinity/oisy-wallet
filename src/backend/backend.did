@@ -25,14 +25,17 @@ type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	RateLimitedByGuard : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
 };
+type AllowSigningRequest = record {
+	ii_delegation_chain : opt IIDelegationChain
+};
 type AllowSigningResponse = record {
 	status : AllowSigningStatus;
-	challenge_completion : opt ChallengeCompletion;
 	allowed_cycles : nat
 };
 type AllowSigningResult = variant {
@@ -63,12 +66,14 @@ type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
 	DuplicateUtxos;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	InternalError : record { msg : text };
 	UtxosAlreadyReserved
 };
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
 	utxos : vec Utxo
 };
@@ -90,6 +95,7 @@ type BtcGetFeePercentilesResult = variant {
 	Err : SelectedUtxosFeeError
 };
 type BtcGetPendingTransactionsError = variant {
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
@@ -97,6 +103,7 @@ type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
 type BtcGetPendingTransactionsRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
 	address : text
 };
@@ -120,12 +127,6 @@ type CanisterStatusResultV2 = record {
 	module_hash : opt blob
 };
 type CanisterStatusType = variant { stopped; stopping; running };
-type ChallengeCompletion = record {
-	solved_duration_ms : nat64;
-	next_allowance_ms : nat64;
-	next_difficulty : nat32;
-	current_difficulty : nat32
-};
 type Config = record {
 	derivation_origin : opt text;
 	ecdsa_key_name : text;
@@ -181,9 +182,23 @@ type DefiniteCanisterSettingsArgs = record {
 	memory_allocation : nat;
 	compute_allocation : nat
 };
+type Delegation = record {
+	pubkey : blob;
+	targets : opt vec principal;
+	expiration : nat64
+};
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
+type EvmTransactionData = record {
+	nft_token_id : opt nat;
+	data : opt text;
+	chain_id : opt nat64;
+	nonce : opt nat64;
+	gas_limit : opt nat;
+	gas_used : opt nat;
+	gas_price : opt nat
+};
 type ExchangeData = record {
 	price_24h_change_pct : opt float64;
 	market_cap : opt float64;
@@ -216,6 +231,22 @@ type GetUserProfileResult = variant {
 	Ok : UserProfile;
 	Err : GetUserProfileError
 };
+type GetUserTransactionsRequest = record {
+	token_id : TokenId;
+	max_results : nat64;
+	start : opt nat64
+};
+type GetUserTransactionsResponse = record {
+	next_start : opt nat64;
+	total_stored : nat64;
+	oldest_block_index : opt nat64;
+	newest_block_index : opt nat64;
+	transactions : vec UserTransaction
+};
+type GetUserTransactionsResult = variant {
+	Ok : GetUserTransactionsResponse;
+	Err : UserTransactionError
+};
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
 	url : text;
@@ -227,6 +258,10 @@ type HttpResponse = record {
 	body : blob;
 	headers : vec record { text; text };
 	status_code : nat16
+};
+type IIDelegationChain = record {
+	public_key : blob;
+	delegations : vec SignedDelegation
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type Icrcv2AccountId = variant {
@@ -268,6 +303,7 @@ type NetworkSettingsFor = variant {
 	BitcoinMainnet;
 	BscTestnet
 };
+type NetworkTransactionData = variant { Evm : EvmTransactionData };
 type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
@@ -283,12 +319,19 @@ type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
 };
+type SaveUserTransactionsRequest = record {
+	token_id : TokenId;
+	transactions : vec UserTransaction
+};
+type SaveUserTransactionsResult = variant { Ok; Err : UserTransactionError };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
 type SelectedUtxosFeeRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
 	network : Network;
 	amount_satoshis : nat64;
 	min_confirmations : opt nat32
@@ -308,6 +351,7 @@ type Settings = record {
 	dapp : DappSettings;
 	experimental_features : ExperimentalFeaturesSettings
 };
+type SignedDelegation = record { signature : blob; delegation : Delegation };
 type SplToken = record {
 	decimals : opt nat8;
 	token_address : text;
@@ -425,6 +469,21 @@ type UserProfile = record {
 	created_timestamp : nat64;
 	updated_timestamp : nat64
 };
+type UserTransaction = record {
+	id : text;
+	to : opt text;
+	block_index : nat64;
+	value : nat;
+	from : text;
+	network_data : NetworkTransactionData;
+	timestamp : nat64
+};
+type UserTransactionError = variant {
+	DuplicateTransaction : record { id : text };
+	InternalError : record { msg : text };
+	TooManyTransactions;
+	UserNotFound
+};
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
 	// Adds a verifiable credential to the user profile.
@@ -448,6 +507,9 @@ service : (Arg) -> {
 	// Ensures the caller has enough cycles allowance for chain-fusion signer
 	// operations (providing public keys, creating signatures, etc.).
 	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
 	// If the caller already has sufficient allowance the call returns
 	// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
 	// call is made.  Otherwise, the endpoint is rate-limited and a new
@@ -461,8 +523,12 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// Errors are enumerated by: `AllowSigningError`.
-	allow_signing : () -> (AllowSigningResult);
+	allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
 	// Adds a pending Bitcoin transaction for the caller.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. This protects against unauthorised CLI callers.
+	// Controllers bypass this check.
 	//
 	// # Errors
 	// Errors are enumerated by: `BtcAddPendingTransactionError`.
@@ -488,12 +554,18 @@ service : (Arg) -> {
 	) query;
 	// Returns the pending Bitcoin transactions for the caller.
 	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
 	// # Errors
 	// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
 	// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
 	//
 	// # Errors
 	// Errors are enumerated by: `SelectedUtxosFeeError`.
@@ -568,6 +640,16 @@ service : (Arg) -> {
 	// # Panics
 	// - If the caller is anonymous.  See: `may_read_user_data`.
 	get_user_profile : () -> (GetUserProfileResult) query;
+	// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
+	//
+	// # Returns
+	// - `Ok(GetUserTransactionsResponse)` with the requested page of transactions.
+	//
+	// Currently, this function always returns `Ok` for valid (non-anonymous) calls.
+	// The `Err(UserTransactionError)` variant is reserved for future validation logic.
+	get_user_transactions : (GetUserTransactionsRequest) -> (
+		GetUserTransactionsResult
+	) query;
 	// Checks if the caller has an associated user profile.
 	//
 	// # Returns
@@ -594,6 +676,13 @@ service : (Arg) -> {
 	list_custom_tokens : () -> (vec CustomToken);
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
+	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
+	//
+	// # Errors
+	// Errors are enumerated by: `UserTransactionError`.
+	save_user_transactions : (SaveUserTransactionsRequest) -> (
+		SaveUserTransactionsResult
+	);
 	// Overwrites the stored API keys.
 	//
 	// Restricted to canister controllers only.

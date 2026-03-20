@@ -342,7 +342,7 @@ describe('btc-open-crypto-pay.services', () => {
 					quoteId: 'quote-123',
 					callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
 				})
-			).rejects.toThrowError('Signing failed');
+			).rejects.toThrow('Signing failed');
 		});
 
 		it('should propagate errors from fetchOpenCryptoPay', async () => {
@@ -357,7 +357,7 @@ describe('btc-open-crypto-pay.services', () => {
 					quoteId: 'quote-123',
 					callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
 				})
-			).rejects.toThrowError('API request failed');
+			).rejects.toThrow('API request failed');
 		});
 	});
 });

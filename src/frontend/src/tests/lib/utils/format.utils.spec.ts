@@ -316,9 +316,7 @@ describe('format.utils', () => {
 				futureDate.setDate(currentDate.getDate() + 1);
 				const futureTimestamp = Math.floor(futureDate.getTime() / 1000);
 
-				expect(() =>
-					formatSecondsToNormalizedDate({ seconds: futureTimestamp })
-				).not.toThrowError();
+				expect(() => formatSecondsToNormalizedDate({ seconds: futureTimestamp })).not.toThrow();
 			});
 
 			it('should return "yesterday" even if the date was in the past year', () => {
@@ -1501,6 +1499,21 @@ describe('format.utils', () => {
 				).toBe(expected);
 			}
 		);
+
+		it('should return undefined when currency does not match exchange rate currency', () => {
+			expect(
+				formatCurrencyAsNumber({
+					value: 100,
+					currency: Currency.EUR,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH
+				})
+			).toBeUndefined();
+		});
 	});
 
 	describe('formatStakeApyNumber', () => {

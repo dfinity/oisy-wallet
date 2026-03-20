@@ -53,6 +53,7 @@ import {
 	parseInitializeNonTransferableMintInstruction,
 	parseInitializePausableConfigInstruction,
 	parseInitializePermanentDelegateInstruction,
+	parseInitializePermissionedBurnInstruction,
 	parseInitializeScaledUiAmountMintInstruction,
 	parseInitializeTokenGroupInstruction,
 	parseInitializeTokenGroupMemberInstruction,
@@ -62,6 +63,8 @@ import {
 	parseMintToCheckedInstruction,
 	parseMintToInstruction,
 	parsePauseInstruction,
+	parsePermissionedBurnCheckedInstruction,
+	parsePermissionedBurnInstruction,
 	parseReallocateInstruction,
 	parseRemoveTokenMetadataKeyInstruction,
 	parseResumeInstruction,
@@ -74,6 +77,7 @@ import {
 	parseTransferCheckedWithFeeInstruction,
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction,
+	parseUnwrapLamportsInstruction,
 	parseUpdateConfidentialTransferMintInstruction,
 	parseUpdateDefaultAccountStateInstruction,
 	parseUpdateGroupMemberPointerInstruction,
@@ -185,6 +189,10 @@ vi.mock(import('@solana-program/token-2022'), async (importOriginal) => {
 		parseWithdrawWithheldTokensFromAccountsForConfidentialTransferFeeInstruction: vi.fn(),
 		parseWithdrawWithheldTokensFromAccountsInstruction: vi.fn(),
 		parseWithdrawWithheldTokensFromMintForConfidentialTransferFeeInstruction: vi.fn(),
+		parseUnwrapLamportsInstruction: vi.fn(),
+		parseInitializePermissionedBurnInstruction: vi.fn(),
+		parsePermissionedBurnInstruction: vi.fn(),
+		parsePermissionedBurnCheckedInstruction: vi.fn(),
 		parseWithdrawWithheldTokensFromMintInstruction: vi.fn()
 	};
 });
@@ -204,7 +212,7 @@ describe('sol-instructions-token-2022.utils', () => {
 		it('should raise an error if the instruction is missing the data', () => {
 			const { data: _, ...withoutData } = mockInstruction;
 
-			expect(() => parseSolToken2022Instruction(withoutData)).toThrowError(
+			expect(() => parseSolToken2022Instruction(withoutData)).toThrow(
 				'The instruction does not have any data'
 			);
 		});
@@ -214,7 +222,7 @@ describe('sol-instructions-token-2022.utils', () => {
 
 			expect(() =>
 				parseSolToken2022Instruction(withoutAccounts as unknown as SolInstruction)
-			).toThrowError('The instruction does not have any accounts');
+			).toThrow('The instruction does not have any accounts');
 		});
 
 		it('should parse an InitializeMint instruction', () => {
@@ -1309,11 +1317,61 @@ describe('sol-instructions-token-2022.utils', () => {
 			);
 		});
 
+		it('should parse an UnwrapLamports instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(Token2022Instruction.UnwrapLamports);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.UnwrapLamports
+			});
+
+			expect(parseUnwrapLamportsInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse an InitializePermissionedBurn instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.InitializePermissionedBurn
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.InitializePermissionedBurn
+			});
+
+			expect(parseInitializePermissionedBurnInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
+		it('should parse a PermissionedBurn instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.PermissionedBurn
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.PermissionedBurn
+			});
+
+			expect(parsePermissionedBurnInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse a PermissionedBurnChecked instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.PermissionedBurnChecked
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.PermissionedBurnChecked
+			});
+
+			expect(parsePermissionedBurnCheckedInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
 		it('should raise an error if it is not a recognised Token-2022 instruction', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifyToken2022Instruction).mockReturnValue('unknown-instruction');
 
-			expect(() => parseSolToken2022Instruction(mockInstruction)).toThrowError(
+			expect(() => parseSolToken2022Instruction(mockInstruction)).toThrow(
 				'Unknown Solana Token 2022 instruction: unknown-instruction'
 			);
 		});

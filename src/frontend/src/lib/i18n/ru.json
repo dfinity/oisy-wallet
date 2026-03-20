@@ -1075,7 +1075,8 @@
 			"network_cost": "Комиссия за транзакцию",
 			"gasless": "Без комиссии за газ",
 			"swap_fees": "Комиссия за обмен",
-			"cross_chain_networks_info": "Информация о кросс-чейн сетях"
+			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Сейчас обмен недоступен. Попробуйте позже.",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "Вывод прошел успешно",
 			"manually_withdraw_failed": "Вывод не удался",
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
-			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно"
+			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1156,7 +1158,12 @@
 			"edit_token": "Редактировать токен",
 			"sort_by_value": "",
 			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_symbol": "",
+			"hide_asset_types": "",
+			"asset_type": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "Сведения о токене",
@@ -1281,6 +1288,23 @@
 			"unexpected_undefined": "Токен не определен. Это неожиданно.",
 			"unexpected_error_on_token_delete": "При удалении токена произошла ошибка.",
 			"unexpected_error_on_token_update": "При обновлении токена произошла ошибка."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
 		}
 	},
 	"nfts": {

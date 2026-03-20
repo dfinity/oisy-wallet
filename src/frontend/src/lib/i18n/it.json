@@ -1075,7 +1075,8 @@
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
-			"cross_chain_networks_info": ""
+			"cross_chain_networks_info": "",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "",
 			"manually_withdraw_failed": "",
 			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": ""
+			"swap_sucess_manually_withdraw_success": "",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1156,7 +1158,12 @@
 			"edit_token": "Modifica token",
 			"sort_by_value": "",
 			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_symbol": "",
+			"hide_asset_types": "",
+			"asset_type": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "Dettagli del token",
@@ -1281,6 +1288,23 @@
 			"unexpected_undefined": "Il token non è definito. Questo è inaspettato.",
 			"unexpected_error_on_token_delete": "Si è verificato un errore durante la rimozione del token.",
 			"unexpected_error_on_token_update": "Si è verificato un errore durante l'aggiornamento del token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
 		}
 	},
 	"nfts": {

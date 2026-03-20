@@ -4,6 +4,7 @@ import {
 	IcPunksInterfaceSchema,
 	IcPunksTokenSchema
 } from '$icp/schema/icpunks-token.schema';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 
@@ -13,7 +14,7 @@ describe('icpunks-token.schema', () => {
 		network: ICP_NETWORK,
 		standard: { code: 'icpunks' },
 		category: 'default',
-		tags: [],
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8
@@ -36,13 +37,13 @@ describe('icpunks-token.schema', () => {
 				canisterId: 'abc'
 			};
 
-			expect(() => IcPunksCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksCanistersSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with missing canister field', () => {
 			const invalidData = {};
 
-			expect(() => IcPunksCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksCanistersSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -61,7 +62,7 @@ describe('icpunks-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => IcPunksInterfaceSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksInterfaceSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -81,7 +82,7 @@ describe('icpunks-token.schema', () => {
 				id: 'not-a-symbol'
 			};
 
-			expect(() => IcPunksTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksTokenSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid canister', () => {
@@ -90,7 +91,7 @@ describe('icpunks-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => IcPunksTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksTokenSchema.parse(invalidData)).toThrow();
 		});
 	});
 });

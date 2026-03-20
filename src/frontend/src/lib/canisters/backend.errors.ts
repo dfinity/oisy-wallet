@@ -60,6 +60,12 @@ export const mapBtcAddPendingTransactionError = (
 		return mapRateLimitError(err.RateLimited);
 	}
 
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcAddPendingTransactionError'));
 };
 
@@ -72,6 +78,12 @@ export const mapBtcGetPendingTransactionsError = (
 
 	if ('RateLimited' in err) {
 		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetPendingTransactionsError'));
@@ -92,6 +104,12 @@ export const mapBtcSelectUserUtxosFeeError = (
 
 	if ('RateLimited' in err) {
 		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
@@ -131,6 +149,12 @@ export const mapAllowSigningError = (
 
 		return new CanisterInternalError(
 			`Guard rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+		);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
 		);
 	}
 

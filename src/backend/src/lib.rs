@@ -22,13 +22,18 @@ use shared::{
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            GetUserProfileResult, GetUserTransactionsResult, SaveUserTransactionsResult,
+            SetUserShowTestnetsResult, UpdateContactResult,
             UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
             UpdateUserNetworkSettingsResult,
         },
-        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        signer::{
+            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+            AllowSigningRequest,
+        },
         token_id::TokenId,
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
+        user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
         Stats, Timestamp,
     },
 };
@@ -38,9 +43,12 @@ use crate::state::{read_state, set_config};
 mod api;
 mod bitcoin;
 mod contacts;
+mod delegation;
+mod exchange;
 mod signer;
 mod state;
 mod token;
+mod transactions;
 mod types;
 mod user_profile;
 mod utils;
@@ -59,6 +67,8 @@ pub fn init(arg: Arg) {
     bitcoin::api::init_fee_percentiles_cache();
 
     utils::housekeeping::start_periodic_housekeeping_timers();
+
+    exchange::start_exchange_rate_timer();
 }
 
 /// Post-upgrade handler.
@@ -90,6 +100,8 @@ pub fn post_upgrade(arg: Option<Arg>) {
     bitcoin::api::init_fee_percentiles_cache();
 
     utils::housekeeping::start_periodic_housekeeping_timers();
+
+    exchange::start_exchange_rate_timer();
 }
 
 export_candid!();

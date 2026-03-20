@@ -12,6 +12,7 @@ import { collectionMetadata } from '$icp/api/icpunks.api';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icPunksDefaultTokensStore } from '$icp/stores/icpunks-default-tokens.store';
 import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -102,7 +103,7 @@ const mapIcPunksCustomToken = async ({
 		symbol,
 		standard: { code: 'icpunks' as const },
 		category: 'custom' as const,
-		tags: [],
+		tags: DEFAULT_TOKEN_TAGS,
 		enabled,
 		version,
 		...(nonNullish(mappedSection) && {

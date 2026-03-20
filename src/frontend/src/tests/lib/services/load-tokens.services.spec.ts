@@ -1,6 +1,7 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -50,7 +51,7 @@ describe('load-tokens.services', () => {
 				network: ICP_NETWORK,
 				standard: { code: 'icrc' as const },
 				category: 'custom' as const,
-				tags: [],
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				fee: 123n,
 				name: `Token ${ledgerCanisterId}`,
 				symbol: `TKN${ledgerCanisterId.slice(0, 4)}`,
@@ -118,7 +119,7 @@ describe('load-tokens.services', () => {
 
 			const { tokens: _, ...paramsWithoutTokens } = params;
 
-			await expect(mapBackendTokensTyped(paramsWithoutTokens)).rejects.toThrowError(mockError);
+			await expect(mapBackendTokensTyped(paramsWithoutTokens)).rejects.toThrow(mockError);
 
 			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith(loadParams);
 

@@ -6,6 +6,7 @@ import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
@@ -25,7 +26,8 @@ export type DisplayUnit = 'token' | 'usd';
 export enum SwapProvider {
 	ICP_SWAP = 'icpSwap',
 	KONG_SWAP = 'kongSwap',
-	VELORA = 'velora'
+	VELORA = 'velora',
+	NEAR_INTENTS = 'nearIntents'
 }
 
 export enum VeloraSwapTypes {
@@ -89,6 +91,13 @@ export type SwapMappedResult =
 			receiveOutMinimum?: bigint;
 			swapDetails: VeloraSwapDetails;
 			type: string;
+	  }
+	| {
+			provider: SwapProvider.NEAR_INTENTS;
+			receiveAmount: bigint;
+			receiveOutMinimum?: bigint;
+			swapDetails: NearIntentsQuoteResponse;
+			type?: string;
 	  };
 
 interface KongQuoteParams {
@@ -120,6 +129,12 @@ type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsRepl
 type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
 
 export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
+
+export interface EvmSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: EvmQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+}
 
 export interface SwapParams {
 	identity: Identity;
@@ -175,11 +190,12 @@ export interface GetQuoteParams extends QuoteParams<'all'> {
 	destChainId?: number;
 }
 
-export interface VeloraQuoteParams {
+export interface EvmQuoteParams {
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token;
 	amount: bigint;
 	userEthAddress: OptionEthAddress;
+	slippage: Slippage;
 }
 
 export interface GetWithdrawableTokenParams {
@@ -207,6 +223,19 @@ export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	userAddress: EthAddress;
 	swapDetails: VeloraSwapDetails;
 	isGasless: boolean;
+}
+
+export interface SwapNearIntentsParams extends RequiredTransactionFeeData {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Erc20Token;
+	destinationToken: Erc20Token;
+	swapAmount: Amount;
+	receiveAmount: bigint;
+	slippageValue: Amount;
+	sourceNetwork: EthereumNetwork;
+	userAddress: EthAddress;
+	swapDetails: NearIntentsQuoteResponse;
 }
 
 export interface CheckDeltaOrderStatusParams {

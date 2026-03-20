@@ -1075,7 +1075,8 @@
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
-			"cross_chain_networks_info": "跨链网络信息"
+			"cross_chain_networks_info": "跨链网络信息",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "手动取款成功",
 			"manually_withdraw_failed": "手动取款失败",
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
-			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功"
+			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1156,7 +1158,12 @@
 			"edit_token": "编辑代币",
 			"sort_by_value": "",
 			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_symbol": "",
+			"hide_asset_types": "",
+			"asset_type": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_description": ""
 		},
 		"details": {
 			"title": "代币详情",
@@ -1281,6 +1288,23 @@
 			"unexpected_undefined": "代币未定义。这是异常情况。",
 			"unexpected_error_on_token_delete": "移除代币时发生错误。",
 			"unexpected_error_on_token_update": "更新代币时发生错误。"
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
 		}
 	},
 	"nfts": {

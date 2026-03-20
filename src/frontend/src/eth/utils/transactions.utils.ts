@@ -11,10 +11,10 @@ import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';
-import type { Option } from '$lib/types/utils';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { getContactForAddress } from '$lib/utils/contact.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { AbiCoder } from 'ethers/abi';
 import { dataSlice } from 'ethers/utils';
 
@@ -126,5 +126,5 @@ export const mapEthTransactionUi = ({
 	};
 };
 
-export const isMaxUint256 = (value: Option<bigint>): boolean =>
+export const isMaxUint256 = (value: Nullish<bigint>): boolean =>
 	nonNullish(value) && value === MAX_UINT_256;

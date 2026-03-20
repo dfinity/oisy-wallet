@@ -17,6 +17,7 @@ import {
 	IcTokenSchema,
 	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 describe('ic-token.schema', () => {
@@ -27,7 +28,7 @@ describe('ic-token.schema', () => {
 		network: mockNetwork,
 		standard: { code: 'icp' },
 		category: 'default',
-		tags: [],
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8,
@@ -58,7 +59,7 @@ describe('ic-token.schema', () => {
 		it('should fail with invalid fee type', () => {
 			const invalidData = { fee: 1000 };
 
-			expect(() => IcFeeSchema.parse(invalidData)).toThrowError();
+			expect(() => IcFeeSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -75,7 +76,7 @@ describe('ic-token.schema', () => {
 				explorerUrl: 'http://localhost:8080'
 			};
 
-			expect(() => IcAppMetadataSchema.parse(invalidData)).toThrowError();
+			expect(() => IcAppMetadataSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid exchangeCoinId', () => {
@@ -84,7 +85,7 @@ describe('ic-token.schema', () => {
 				exchangeCoinId: 'test'
 			};
 
-			expect(() => IcAppMetadataSchema.parse(invalidData)).toThrowError();
+			expect(() => IcAppMetadataSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -109,7 +110,7 @@ describe('ic-token.schema', () => {
 				ledgerCanisterId: 'abc'
 			};
 
-			expect(() => IcCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => IcCanistersSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid index canister id', () => {
@@ -118,7 +119,7 @@ describe('ic-token.schema', () => {
 				indexCanisterId: 'abc'
 			};
 
-			expect(() => IcCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => IcCanistersSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with missing ledger canister field', () => {
@@ -126,7 +127,7 @@ describe('ic-token.schema', () => {
 				indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID
 			};
 
-			expect(() => IcCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => IcCanistersSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -148,7 +149,7 @@ describe('ic-token.schema', () => {
 		});
 
 		it('should validate a token with index canister correct data', () => {
-			expect(() => IcCanistersStrictSchema.parse(validToken)).not.toThrowError();
+			expect(() => IcCanistersStrictSchema.parse(validToken)).not.toThrow();
 		});
 
 		it('should fail with missing index canister field', () => {
@@ -156,13 +157,13 @@ describe('ic-token.schema', () => {
 				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
 			};
 
-			expect(() => IcCanistersStrictSchema.parse(invalidData)).toThrowError();
+			expect(() => IcCanistersStrictSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail for token with missing index canister field', () => {
 			const { indexCanisterId: _, ...tokenWithoutIndexCanisterId } = validToken;
 
-			expect(() => IcCanistersStrictSchema.parse(tokenWithoutIndexCanisterId)).toThrowError();
+			expect(() => IcCanistersStrictSchema.parse(tokenWithoutIndexCanisterId)).toThrow();
 		});
 	});
 
@@ -182,7 +183,7 @@ describe('ic-token.schema', () => {
 				twinToken: { id: 'not-a-symbol' }
 			};
 
-			expect(() => IcCkLinkedAssetsSchema.parse(invalidData)).toThrowError();
+			expect(() => IcCkLinkedAssetsSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid feeLedgerCanisterId', () => {
@@ -191,7 +192,7 @@ describe('ic-token.schema', () => {
 				feeLedgerCanisterId: 123
 			};
 
-			expect(() => IcCkLinkedAssetsSchema.parse(invalidData)).toThrowError();
+			expect(() => IcCkLinkedAssetsSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -209,7 +210,7 @@ describe('ic-token.schema', () => {
 		it('should fail with missing minterCanisterId', () => {
 			const { minterCanisterId: _, ...invalidData } = validData;
 
-			expect(() => IcCkMetadataSchema.parse(invalidData)).toThrowError();
+			expect(() => IcCkMetadataSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -235,7 +236,7 @@ describe('ic-token.schema', () => {
 				ledgerCanisterId: 123
 			};
 
-			expect(() => IcInterfaceSchema.parse(invalidData)).toThrowError();
+			expect(() => IcInterfaceSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -257,7 +258,7 @@ describe('ic-token.schema', () => {
 				id: 'not-a-symbol'
 			};
 
-			expect(() => IcTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => IcTokenSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid fee', () => {
@@ -266,7 +267,7 @@ describe('ic-token.schema', () => {
 				fee: 1000
 			};
 
-			expect(() => IcTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => IcTokenSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid canister', () => {
@@ -275,7 +276,7 @@ describe('ic-token.schema', () => {
 				ledgerCanisterId: 123
 			};
 
-			expect(() => IcTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => IcTokenSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -299,7 +300,7 @@ describe('ic-token.schema', () => {
 				id
 			};
 
-			expect(() => IcTokenWithoutIdSchema.parse(invalidData)).toThrowError();
+			expect(() => IcTokenWithoutIdSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -358,13 +359,13 @@ describe('ic-token.schema', () => {
 				ledgerCanisterId: 123
 			};
 
-			expect(() => IcCkInterfaceSchema.parse(invalidData)).toThrowError();
+			expect(() => IcCkInterfaceSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with incorrect IcCkMetadataSchema data', () => {
 			const { minterCanisterId: _, ...invalidData } = validData;
 
-			expect(() => IcCkInterfaceSchema.parse(invalidData)).toThrowError();
+			expect(() => IcCkInterfaceSchema.parse(invalidData)).toThrow();
 		});
 	});
 });

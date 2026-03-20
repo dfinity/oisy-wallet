@@ -7,6 +7,7 @@ import {
 	BTC_TESTNET_NETWORK
 } from '$env/networks/networks.btc.env';
 import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { RequiredToken, RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -22,7 +23,7 @@ export const BTC_MAINNET_TOKEN: RequiredTokenWithLinkedData = {
 	network: BTC_MAINNET_NETWORK,
 	standard: { code: 'bitcoin' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Bitcoin',
 	symbol: BTC_MAINNET_SYMBOL,
 	decimals: BTC_DECIMALS,
@@ -42,7 +43,7 @@ export const BTC_TESTNET_TOKEN: RequiredToken = {
 	network: BTC_TESTNET_NETWORK,
 	standard: { code: 'bitcoin' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Bitcoin (Testnet)',
 	symbol: BTC_TESTNET_SYMBOL,
 	decimals: BTC_DECIMALS,
@@ -58,7 +59,7 @@ export const BTC_REGTEST_TOKEN: RequiredToken = {
 	network: BTC_REGTEST_NETWORK,
 	standard: { code: 'bitcoin' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Bitcoin (Regtest)',
 	symbol: BTC_REGTEST_SYMBOL,
 	decimals: BTC_DECIMALS,

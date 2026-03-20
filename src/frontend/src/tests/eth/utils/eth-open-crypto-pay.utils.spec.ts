@@ -351,6 +351,15 @@ describe('eth-open-crypto-pay.utils', () => {
 			});
 		});
 
+		describe('Non-finite scientific notation', () => {
+			it('should return undefined when scientific notation resolves to Infinity', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1e99999';
+				const result = getERC681Value(uri);
+
+				expect(result).toBeUndefined();
+			});
+		});
+
 		describe('Missing or invalid parameters', () => {
 			it('should return undefined when no query string', () => {
 				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1';
@@ -585,7 +594,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: nativeToken,
 						uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1'
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when URI value cannot be parsed', () => {
@@ -602,7 +611,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: nativeToken,
 						uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=invalid'
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when amount does not match URI value', () => {
@@ -619,7 +628,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: nativeToken,
 						uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when destination is not valid Ethereum address', () => {
@@ -636,7 +645,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: nativeToken,
 						uri: 'ethereum:not-an-address@1?value=1000000000000000000'
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should handle zero value transfers', () => {
@@ -781,7 +790,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: erc20Token,
 						uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=1000000`
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when URI uint256 is missing', () => {
@@ -800,7 +809,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: erc20Token,
 						uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}`
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when URI uint256 cannot be parsed', () => {
@@ -819,7 +828,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: erc20Token,
 						uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=invalid`
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when token contract mismatch', () => {
@@ -838,7 +847,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: erc20Token,
 						uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=1000000`
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when amount does not match URI uint256', () => {
@@ -857,7 +866,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: erc20Token,
 						uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=1000000`
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when recipient address is not valid', () => {
@@ -876,7 +885,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						token: erc20Token,
 						uri: `ethereum:${tokenContract}@1/transfer?address=not-an-address&uint256=1000000`
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should preserve BigInt types', () => {
@@ -964,7 +973,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						amount: 1000000000000000000n,
 						uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when fee data is missing', () => {
@@ -986,7 +995,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						amount: 1000000000000000000n,
 						uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when maxFeePerGas is missing', () => {
@@ -1013,7 +1022,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						amount: 1000000000000000000n,
 						uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
 					})
-				).toThrowError();
+				).toThrow();
 			});
 
 			it('should throw error when estimatedGasLimit is missing', () => {
@@ -1041,7 +1050,7 @@ describe('eth-open-crypto-pay.utils', () => {
 						amount: 1000000000000000000n,
 						uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
 					})
-				).toThrowError();
+				).toThrow();
 			});
 		});
 	});

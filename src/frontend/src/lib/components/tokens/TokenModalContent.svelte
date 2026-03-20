@@ -28,6 +28,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { getTokenCategoryTag } from '$lib/utils/token-tag.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface BaseTokenModalProps {
@@ -38,6 +39,8 @@
 	}
 
 	let { children, token, onDeleteClick, onEditClick }: BaseTokenModalProps = $props();
+
+	let categoryTag = $derived(nonNullish(token) ? getTokenCategoryTag(token) : undefined);
 </script>
 
 <ContentWithToolbar>
@@ -187,6 +190,22 @@
 							displayDecimals: token.decimals
 						})}
 						{token.symbol}
+					{/snippet}
+				</ModalListItem>
+			{/if}
+
+			{#if nonNullish(categoryTag)}
+				<ModalListItem>
+					{#snippet label()}
+						{replaceOisyPlaceholders($i18n.tokens.text.asset_type)}
+					{/snippet}
+
+					{#snippet content()}
+						<span
+							class="inline-block rounded-md border border-secondary bg-secondary px-2 py-0.5 text-xs font-medium"
+						>
+							{$i18n.token_tag.category[categoryTag] ?? categoryTag}
+						</span>
 					{/snippet}
 				</ModalListItem>
 			{/if}

@@ -1075,7 +1075,8 @@
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
-			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network"
+			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
+			"near_intents_estimated_time": "NEAR Intents (~$minutes min)"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -1092,7 +1093,8 @@
 			"manually_withdraw_success": "The tokens from your previous failed swap were successfully withdrawn. You can try the swap again or change the swap provider.",
 			"manually_withdraw_failed": "Withdrawing your funds failed. <br> Please try again or follow",
 			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
-			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal."
+			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
+			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page."
 		}
 	},
 	"buy": {
@@ -1156,7 +1158,12 @@
 			"edit_token": "Edit token",
 			"sort_by_value": "Value",
 			"sort_by_performance": "Token performance",
-			"sort_by_symbol": "Symbol"
+			"sort_by_symbol": "Symbol",
+			"hide_asset_types": "Hide asset types",
+			"asset_type": "Asset type in $oisy_name",
+			"asset_type_all": "All asset types",
+			"no_tokens_for_asset_type": "There are no $asset_type in your wallet",
+			"no_tokens_for_asset_type_description": "Choose from <strong>$count supported tokens</strong> to customize your portfolio view."
 		},
 		"details": {
 			"title": "Token details",
@@ -1281,6 +1288,23 @@
 			"unexpected_undefined": "Token is undefined. This is unexpected.",
 			"unexpected_error_on_token_delete": "Something went wrong while removing the token.",
 			"unexpected_error_on_token_update": "Something went wrong while updating the token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Category",
+			"risk": "Risk"
+		},
+		"category": {
+			"crypto": "Crypto",
+			"stablecoin": "Stablecoins",
+			"stock": "Stocks",
+			"commodity": "Commodities"
+		},
+		"risk": {
+			"low": "Low risk",
+			"medium": "Medium risk",
+			"high": "High risk"
 		}
 	},
 	"nfts": {

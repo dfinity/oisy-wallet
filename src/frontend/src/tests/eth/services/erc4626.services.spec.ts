@@ -23,6 +23,7 @@ import { listCustomTokens } from '$lib/api/backend.api';
 import * as signerApiModule from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
 import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Vault } from '$lib/types/vaults';
@@ -93,7 +94,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					version: 1n,
 					allowExternalContentSource: undefined,
 					enabled: true,
@@ -113,7 +114,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					version: 2n,
 					allowExternalContentSource: true,
 					enabled: true,
@@ -133,7 +134,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					version: undefined,
 					allowExternalContentSource: false,
 					enabled: false,
@@ -239,13 +240,13 @@ describe('erc4626.services', () => {
 			it('should not throw error if metadata throws', async () => {
 				vi.mocked(mockMetadataFn).mockRejectedValue(new Error('Error loading metadata'));
 
-				await expect(loadErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
+				await expect(loadErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 			});
 
 			it('should not throw error if list custom tokens throws', async () => {
 				vi.mocked(listCustomTokens).mockRejectedValue(new Error('Error loading custom tokens'));
 
-				await expect(loadErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
+				await expect(loadErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 			});
 		});
 
@@ -408,9 +409,7 @@ describe('erc4626.services', () => {
 			it('should not throw if getAssetAddress fails', async () => {
 				mockGetAssetAddress.mockRejectedValue(new Error('Error fetching asset'));
 
-				await expect(
-					loadCustomErc4626Tokens({ identity: mockIdentity })
-				).resolves.not.toThrowError();
+				await expect(loadCustomErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 			});
 
 			it('should cache the custom tokens in IDB on update call', async () => {

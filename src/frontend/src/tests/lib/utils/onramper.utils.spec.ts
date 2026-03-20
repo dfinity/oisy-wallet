@@ -8,7 +8,6 @@ import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/rest/onramper.env';
 import { Currency } from '$lib/enums/currency';
 import type { OnramperNetworkWallet, OnramperWalletAddress } from '$lib/types/onramper';
-import type { Option } from '$lib/types/utils';
 import {
 	buildOnramperLink,
 	mapOnramperNetworkWallets,
@@ -17,6 +16,7 @@ import {
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 describe('onramper.utils', () => {
 	describe('buildOnramperLink', () => {
@@ -185,7 +185,7 @@ describe('onramper.utils', () => {
 	});
 
 	describe('mapOnramperNetworkWallets', () => {
-		const walletMap: Map<symbol, Option<OnramperWalletAddress>> = new Map([
+		const walletMap: Map<symbol, Nullish<OnramperWalletAddress>> = new Map([
 			[BTC_MAINNET_NETWORK_ID, mockBtcAddress],
 			[ETHEREUM_NETWORK_ID, mockEthAddress],
 			[ICP_NETWORK_ID, mockAccountIdentifierText]
@@ -215,7 +215,7 @@ describe('onramper.utils', () => {
 		it('should handle cases where wallet addresses are null or undefined', () => {
 			const networks = [ICP_NETWORK, ETHEREUM_NETWORK];
 
-			const newWalletMap: Map<symbol, Option<OnramperWalletAddress>> = new Map(walletMap);
+			const newWalletMap: Map<symbol, Nullish<OnramperWalletAddress>> = new Map(walletMap);
 			newWalletMap.set(ETHEREUM_NETWORK_ID, undefined);
 
 			const expectedWallets: OnramperNetworkWallet[] = [

@@ -24,5 +24,9 @@ export const TokenTagSchema = z.discriminatedUnion('type', [
 ]);
 
 export const TokenTagsSchema = z.object({
-	tags: z.array(TokenTagSchema)
+	tags: z.tuple([TokenTagSchema])
+});
+
+export const OptionalTokenTagsSchema = z.object({
+	tags: z.tuple([TokenTagSchema]).optional()
 });

@@ -4,7 +4,9 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
+	ExchangeRate,
 	GetAllowedCyclesResponse,
+	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -23,6 +25,7 @@ import type {
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
@@ -36,10 +39,19 @@ import type {
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
+import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	fromNullable,
+	nonNullish,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
@@ -114,12 +126,14 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcAddPendingTransaction = async ({
 		txId,
+		iiDelegationChain,
 		...rest
 	}: BtcAddPendingTransactionParams): Promise<AddPendingTransactionOutcome> => {
 		const { btc_add_pending_transaction } = this.caller({ certified: true });
 
 		const response = await btc_add_pending_transaction({
 			txid: txId,
+			ii_delegation_chain: iiDelegationChain,
 			...rest
 		});
 
@@ -144,13 +158,15 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcGetPendingTransactions = async ({
 		network,
-		address
+		address,
+		iiDelegationChain
 	}: BtcGetPendingTransactionParams): Promise<GetPendingTransactionsOutcome> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
 			network,
-			address
+			address,
+			ii_delegation_chain: iiDelegationChain
 		});
 
 		if ('Ok' in response) {
@@ -178,14 +194,16 @@ export class BackendCanister extends Canister<BackendService> {
 	btcSelectUserUtxosFee = async ({
 		network,
 		minConfirmations,
-		amountSatoshis
+		amountSatoshis,
+		iiDelegationChain
 	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeOutcome> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
 			network,
 			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis
+			amount_satoshis: amountSatoshis,
+			ii_delegation_chain: iiDelegationChain
 		});
 
 		if ('Ok' in response) {
@@ -241,22 +259,25 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async (): Promise<AllowSigningOutcome> => {
+	allowSigning = async ({
+		iiDelegationChain
+	}: AllowSigningParams): Promise<AllowSigningOutcome> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await allow_signing();
+		const response = await allow_signing(
+			toNullable({
+				ii_delegation_chain: iiDelegationChain
+			})
+		);
 
 		if ('Ok' in response) {
 			return { response: response.Ok };
 		}
 
-		// In case of rate limit reached, we ignore the error and let the user continue (for now).
-		// TODO: improve placeholder with significant data, for now we do not use them
 		if ('RateLimited' in response.Err || 'RateLimitedByGuard' in response.Err) {
 			return {
 				response: {
 					status: { Skipped: null },
-					challenge_completion: toNullable(),
 					allowed_cycles: ZERO
 				},
 				rateLimitInfo: {
@@ -380,5 +401,52 @@ export class BackendCanister extends Canister<BackendService> {
 			experimental_features: mapUserExperimentalFeatures(experimentalFeatures),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
+		if (!nonNullish(rate)) {
+			return;
+		}
+
+		return {
+			usd: {
+				price: fromNullable(rate.usd.price),
+				price24hChangePct: fromNullable(rate.usd.price_24h_change_pct),
+				marketCap: fromNullable(rate.usd.market_cap),
+				timestampNs: rate.usd.timestamp_ns
+			}
+		};
+	};
+
+	getExchangeRate = async ({
+		token_id,
+		certified
+	}: { token_id: TokenId } & QueryParams): Promise<BackendExchangeRate | undefined> => {
+		const { get_exchange_rate } = this.caller({ certified });
+
+		const response = await get_exchange_rate(token_id);
+
+		return this.mapExchangeRate(fromNullable(response));
+	};
+
+	getExchangeRates = async ({
+		token_ids,
+		certified
+	}: { token_ids: TokenId[] } & QueryParams): Promise<Map<string, BackendExchangeRate>> => {
+		const { get_exchange_rates } = this.caller({ certified });
+
+		const results = await get_exchange_rates(token_ids);
+
+		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
+			const unwrapped = this.mapExchangeRate(fromNullable(rate));
+
+			const key = tokenIdKey(id);
+
+			if (nonNullish(unwrapped) && nonNullish(key)) {
+				acc.set(key, unwrapped);
+			}
+
+			return acc;
+		}, new Map());
 	};
 }
