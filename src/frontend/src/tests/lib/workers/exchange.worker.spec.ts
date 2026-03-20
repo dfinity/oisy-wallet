@@ -20,6 +20,7 @@ import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
 import { Principal } from '@dfinity/principal';
+import { nonNullish } from '@dfinity/utils';
 
 const { backendExchangeEnabled } = vi.hoisted(() => ({
 	backendExchangeEnabled: { current: false }
@@ -923,7 +924,12 @@ describe('exchange.worker', () => {
 			const mockRatesMap = (
 				...entries: [TokenId, BackendExchangeRate][]
 			): Map<string, BackendExchangeRate> =>
-				new Map(entries.map(([id, rate]) => [tokenIdKey(id), rate]));
+				new Map(
+					entries.reduce<[string, BackendExchangeRate][]>((acc, [id, rate]) => {
+						const key = tokenIdKey(id);
+						return nonNullish(key) ? [...acc, [key, rate]] : acc;
+					}, [])
+				);
 
 			beforeEach(() => {
 				backendExchangeEnabled.current = true;

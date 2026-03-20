@@ -26,6 +26,7 @@ import {
 	createMockCoingeckoTokenPrice
 } from '$tests/mocks/exchanges.mock';
 import { Principal } from '@dfinity/principal';
+import { nonNullish } from '@dfinity/utils';
 
 vi.mock('$lib/rest/coingecko.rest', () => ({
 	simplePrice: vi.fn(),
@@ -297,7 +298,12 @@ describe('exchange.services', () => {
 		const mockRatesMap = (
 			...entries: [TokenId, BackendExchangeRate][]
 		): Map<string, BackendExchangeRate> =>
-			new Map(entries.map(([id, rate]) => [tokenIdKey(id), rate]));
+			new Map(
+				entries.reduce<[string, BackendExchangeRate][]>((acc, [id, rate]) => {
+					const key = tokenIdKey(id);
+					return nonNullish(key) ? [...acc, [key, rate]] : acc;
+				}, [])
+			);
 
 		beforeEach(() => {
 			vi.clearAllMocks();
