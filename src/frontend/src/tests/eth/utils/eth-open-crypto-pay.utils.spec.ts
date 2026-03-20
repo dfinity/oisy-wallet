@@ -351,6 +351,15 @@ describe('eth-open-crypto-pay.utils', () => {
 			});
 		});
 
+		describe('Non-finite scientific notation', () => {
+			it('should return undefined when scientific notation resolves to Infinity', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1e99999';
+				const result = getERC681Value(uri);
+
+				expect(result).toBeUndefined();
+			});
+		});
+
 		describe('Missing or invalid parameters', () => {
 			it('should return undefined when no query string', () => {
 				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1';
