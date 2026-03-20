@@ -654,7 +654,16 @@ describe('token-group.utils', () => {
 			expect(result).toEqual([nonAlpha2, nonAlpha1]);
 		});
 
-		it('should keep order the same if groups passed', () => {
+		it('should sort alphanumeric name before non-alphanumeric name', () => {
+		const alpha = toTokenUiOrGroupUi({ ...ETHEREUM_TOKEN, name: 'Aaa' });
+		const nonAlpha = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- ZZZ' });
+
+		const result = sortTokenOrGroupUi([nonAlpha, alpha]);
+
+		expect(result).toEqual([alpha, nonAlpha]);
+	});
+
+	it('should keep order the same if groups passed', () => {
 			const expected = [
 				{ group: { id: 'Bgroup1', tokens: [mockToken] } as unknown as TokenUiGroup },
 				{
