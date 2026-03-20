@@ -359,11 +359,9 @@ describe('icrc.services', () => {
 
 				await loadCustomTokens({ identity: mockIdentity });
 
-				expect(spyToastsError).not.toHaveBeenCalled();
-				expect(spyToastsShow).toHaveBeenCalledWith({
-					text: get(i18n).init.error.load_token_list,
-					level: 'error'
-				});
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: get(i18n).init.error.load_token_list }
+			});
 			});
 
 			it('should show track event on list custom tokens error', async () => {
