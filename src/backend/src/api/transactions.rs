@@ -10,7 +10,7 @@ use crate::{state::read_state, transactions::model, utils::guards::caller_is_not
 /// # Returns
 /// - `Ok(GetUserTransactionsResponse)` with the requested page of transactions.
 ///
-/// Currently this function always returns `Ok` for valid (non-anonymous) calls.
+/// Currently, this function always returns `Ok` for valid (non-anonymous) calls.
 /// The `Err(UserTransactionError)` variant is reserved for future validation logic.
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
