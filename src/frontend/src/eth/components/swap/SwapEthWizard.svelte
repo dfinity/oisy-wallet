@@ -181,7 +181,7 @@
 
 	const isApproveNeeded = $derived<boolean>(
 		!isNearIntentsProvider &&
-			$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
+			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.MARKET &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
@@ -238,6 +238,8 @@
 		onNext();
 		onStopTriggerAmount();
 
+		const { selectedProvider } = $swapAmountsStore;
+
 		try {
 			failedSwapError.set(undefined);
 
@@ -256,8 +258,6 @@
 				maxPriorityFeePerGas
 			};
 
-			const { selectedProvider } = $swapAmountsStore;
-
 			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED) {
 				const params = {
 					...baseParams,
@@ -269,12 +269,12 @@
 			} else {
 				const params = {
 					...baseParams,
-					receiveAmount: $swapAmountsStore?.selectedProvider?.receiveAmount,
+					receiveAmount: selectedProvider.receiveAmount,
 					isGasless: $isSourceTokenPermitSupported ?? false,
-					swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
+					swapDetails: selectedProvider.swapDetails as VeloraSwapDetails
 				};
 
-				if ($swapAmountsStore.swaps[0].type === VeloraSwapTypes.DELTA) {
+				if (selectedProvider.type === VeloraSwapTypes.DELTA) {
 					await fetchVeloraDeltaSwap(params);
 				} else {
 					await fetchVeloraMarketSwap(params);
@@ -288,9 +288,9 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
+					dApp: selectedProvider.provider,
 					usdSourceValue: sourceTokenUsdValue ?? '',
-					swapType: $swapAmountsStore.swaps[0].type ?? '',
+					swapType: selectedProvider.type ?? '',
 					sourceNetwork: $sourceToken.network.name,
 					destinationNetwork: $destinationToken.network.name
 				}
@@ -303,8 +303,8 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
-					swapType: $swapAmountsStore.swaps[0].type ?? '',
+					dApp: selectedProvider.provider,
+					swapType: selectedProvider.type ?? '',
 					error: errorDetailToString(err) ?? '',
 					sourceNetwork: $sourceToken.network.name,
 					destinationNetwork: $destinationToken.network.name
