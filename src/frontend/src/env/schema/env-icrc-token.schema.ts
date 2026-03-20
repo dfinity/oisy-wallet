@@ -1,3 +1,4 @@
+import { OptionalTokenTagsSchema } from '$lib/schema/token-tag.schema';
 import * as z from 'zod';
 
 export const EnvIcrcTokenMetadataSchema = z.object({
@@ -22,7 +23,8 @@ export const EnvIcTokenSchema = z.object({
 	ledgerCanisterId: z.string(),
 	indexCanisterId: z.string().optional(),
 	mintingAccount: z.string().optional(),
-	icon: z.string().optional()
+	icon: z.string().optional(),
+	...OptionalTokenTagsSchema.shape
 });
 
 const OptionalEnvIcrcTokenMetadataSchema = z.union([

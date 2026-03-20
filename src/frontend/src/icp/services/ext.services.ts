@@ -7,7 +7,7 @@ import {
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -87,7 +87,7 @@ const mapExtCustomToken = async ({
 		symbol,
 		standard: { code: 'ext' as const, version: 'v2' },
 		category: 'custom' as const,
-		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+		tags: DEFAULT_TOKEN_TAGS,
 		enabled,
 		version,
 		...(nonNullish(mappedSection) && {
