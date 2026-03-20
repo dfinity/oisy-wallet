@@ -49,9 +49,7 @@ describe('SwapDetailsNearIntents', () => {
 
 		expect(getByText(en.swap.text.swap_route)).toBeInTheDocument();
 		expect(
-			getByText(
-				replacePlaceholders(en.swap.text.near_intents_estimated_time, { $minutes: '2' })
-			)
+			getByText(replacePlaceholders(en.swap.text.near_intents_estimated_time, { $minutes: '2' }))
 		).toBeInTheDocument();
 	});
 
