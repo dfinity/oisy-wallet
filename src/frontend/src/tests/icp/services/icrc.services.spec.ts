@@ -359,9 +359,8 @@ describe('icrc.services', () => {
 
 				await loadCustomTokens({ identity: mockIdentity });
 
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).init.error.icrc_canisters },
-					err
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: get(i18n).init.error.load_token_list }
 				});
 			});
 

@@ -39,10 +39,10 @@ export const fetchNearIntentsSwapQuote = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userEthAddress,
+	userAddress,
 	slippage
 }: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
-	if (!NEAR_INTENTS_SWAP_ENABLED || isNullish(userEthAddress)) {
+	if (!NEAR_INTENTS_SWAP_ENABLED || isNullish(userAddress)) {
 		return;
 	}
 
@@ -59,7 +59,7 @@ export const fetchNearIntentsSwapQuote = async ({
 			slippageTolerance: Math.round(Number(slippage) * 100),
 			...assets,
 			amount,
-			userEthAddress,
+			userAddress,
 			deadlineMs: NEAR_INTENTS_QUOTE_DEADLINE_MS
 		})
 	);
