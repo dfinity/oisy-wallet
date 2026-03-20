@@ -6,6 +6,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { formatReceiveOutMinimum } from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -51,8 +52,9 @@
 		{/snippet}
 
 		{#snippet mainValue()}
-			<!-- TODO: localize -->
-			NEAR Intents (~{Math.ceil(estimatedTime / 60)}min)
+			{replacePlaceholders($i18n.swap.text.near_intents_estimated_time, {
+				$minutes: `${Math.ceil(estimatedTime / 60)}`
+			})}
 		{/snippet}
 	</ModalValue>
 {/if}
