@@ -41,6 +41,7 @@ use crate::state::{read_state, set_config};
 
 mod api;
 mod bitcoin;
+mod canister_sig_verification;
 mod contacts;
 mod delegation;
 mod exchange;

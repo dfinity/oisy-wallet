@@ -2,7 +2,7 @@ use candid::Principal;
 use ic_canister_sig_creation::{
     delegation_signature_msg, CanisterSigPublicKey, DELEGATION_SIG_DOMAIN,
 };
-use ic_signature_verification::verify_canister_sig;
+use crate::canister_sig_verification::verify_canister_sig;
 use shared::types::delegation::IIDelegationChain;
 
 use crate::state::read_config;

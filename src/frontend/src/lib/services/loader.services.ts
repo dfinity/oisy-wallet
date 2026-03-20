@@ -3,6 +3,7 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { allowSigning } from '$lib/api/backend.api';
+import { TRACK_ALLOW_SIGNING_ERROR } from '$lib/constants/analytics.constants';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -10,7 +11,7 @@ import {
 	networkSolanaMainnetEnabled
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
-import { trackRateLimited } from '$lib/services/analytics.services';
+import { trackEvent, trackRateLimited } from '$lib/services/analytics.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
@@ -18,7 +19,9 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
+import { errorDetailToString } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -50,12 +53,20 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 		if (nonNullish(rateLimitInfo)) {
 			trackRateLimited(rateLimitInfo);
 		}
-	} catch (_err: unknown) {
+	} catch (err: unknown) {
+		consoleError('allow_signing failed', err);
+
+		trackEvent({
+			name: TRACK_ALLOW_SIGNING_ERROR,
+			metadata: { error: `${errorDetailToString(err)}` }
+		});
+
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
 
 		return { success: false };
 	}
+
 	return { success: true };
 };
 
