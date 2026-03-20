@@ -830,6 +830,7 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		near_intents_estimated_time: string;
 	};
 	error: {
 		kong_not_available: string;

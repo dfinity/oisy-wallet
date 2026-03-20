@@ -1075,7 +1075,8 @@
 			"network_cost": "Netzwerk Kosten",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Gebühren",
-			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk"
+			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
