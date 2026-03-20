@@ -559,18 +559,19 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
 // -------------------------------------------------------------------------------------------------
 
 #[test]
-fn test_allow_signing_requires_delegation_chain() {
+fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
 
     let result = call_allow_signing_with_delegation(&pic_setup, caller, None);
 
+    // II_DELEGATION_CHAIN_GUARD_ENABLED is false, so missing chain is not rejected.
     assert!(
-        matches!(
+        !matches!(
             result,
             Err(AllowSigningError::InvalidDelegationChain { .. })
         ),
-        "Expected InvalidDelegationChain error, got: {result:?}"
+        "Delegation guard is disabled, should not get InvalidDelegationChain: {result:?}"
     );
 }
 
