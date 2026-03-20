@@ -9,15 +9,15 @@ use shared::types::{
 use crate::{
     state::memory::{
         API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID,
-        CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID,
-        TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
-        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
+        CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, TOKEN_ACTIVITY_MEMORY_ID,
+        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
+        USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
         maps::{
             ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap,
-            ExchangeRateMap, PowChallengeMap, TokenActivityMap, UserProfileMap,
-            UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
+            ExchangeRateMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
+            UserTransactionsMap,
         },
         storable::Candid,
         BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
@@ -40,10 +40,6 @@ pub(crate) struct State {
     pub(crate) custom_token: CustomTokenMap,
     pub(crate) user_profile: UserProfileMap,
     pub(crate) user_profile_updated: UserProfileUpdatedMap,
-    // Not used any more, but we keep it for now to avoid breaking changes and data migration. Will
-    // be removed in the future.
-    #[expect(dead_code)]
-    pub(crate) pow_challenge: PowChallengeMap,
     pub(crate) contact: ContactMap,
     pub(crate) btc_user_pending_transactions: BtcUserPendingTransactionsMap,
     // TODO: implement a periodic cleanup of old entries
@@ -77,7 +73,6 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
-            pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
             btc_user_pending_transactions: BtcUserPendingTransactionsMap::init(
                 mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),

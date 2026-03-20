@@ -10,7 +10,12 @@ pub(crate) const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 pub(crate) const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 pub(crate) const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 pub(crate) const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
-pub(crate) const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
+// MemoryId 5 was previously used by PowChallengeMap. Do NOT reuse this ID;
+// deployed canisters still have data serialized at this slot and the
+// MemoryManager would hand out overlapping virtual memory if the ID is
+// reassigned.
+#[expect(dead_code)]
+pub(crate) const RESERVED_POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 pub(crate) const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 pub(crate) const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
 pub(crate) const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);

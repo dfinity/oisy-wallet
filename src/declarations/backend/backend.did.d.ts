@@ -44,11 +44,9 @@ export type AllowSigningError =
 	| { FailedToContactCyclesLedger: null };
 export interface AllowSigningRequest {
 	ii_delegation_chain: [] | [IIDelegationChain];
-	nonce: bigint;
 }
 export interface AllowSigningResponse {
 	status: AllowSigningStatus;
-	challenge_completion: [] | [ChallengeCompletion];
 	allowed_cycles: bigint;
 }
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
@@ -139,12 +137,6 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
-export interface ChallengeCompletion {
-	solved_duration_ms: bigint;
-	next_allowance_ms: bigint;
-	next_difficulty: number;
-	current_difficulty: number;
-}
 export interface Config {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;

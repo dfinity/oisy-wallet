@@ -73,23 +73,15 @@ export const idlFactory = ({ IDL }) => {
 		delegations: IDL.Vec(SignedDelegation)
 	});
 	const AllowSigningRequest = IDL.Record({
-		ii_delegation_chain: IDL.Opt(IIDelegationChain),
-		nonce: IDL.Nat64
+		ii_delegation_chain: IDL.Opt(IIDelegationChain)
 	});
 	const AllowSigningStatus = IDL.Variant({
 		Skipped: IDL.Null,
 		Failed: IDL.Null,
 		Executed: IDL.Null
 	});
-	const ChallengeCompletion = IDL.Record({
-		solved_duration_ms: IDL.Nat64,
-		next_allowance_ms: IDL.Nat64,
-		next_difficulty: IDL.Nat32,
-		current_difficulty: IDL.Nat32
-	});
 	const AllowSigningResponse = IDL.Record({
 		status: AllowSigningStatus,
-		challenge_completion: IDL.Opt(ChallengeCompletion),
 		allowed_cycles: IDL.Nat
 	});
 	const ApproveError = IDL.Variant({
