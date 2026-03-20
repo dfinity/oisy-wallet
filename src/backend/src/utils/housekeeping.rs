@@ -110,7 +110,7 @@ pub(crate) fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincip
     }
 
     ic_cdk::futures::spawn(async move {
-        if let Err(e) = signer::allow_signing(None).await {
+        if let Err(e) = signer::allow_signing().await {
             ic_cdk::println!(
                 "Error enabling signing for user {}: {:?}",
                 stored_principal.0,
