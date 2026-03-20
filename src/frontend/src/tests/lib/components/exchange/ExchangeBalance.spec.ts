@@ -212,6 +212,82 @@ describe('ExchangeBalance', () => {
 
 			expect(getByText('$335.00')).toBeInTheDocument();
 		});
+
+		it('should filter tokens on WalletConnect route since it is treated as tokens route', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.STABLECOIN as TokenCategoryTagValue | undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$200.00')).toBeInTheDocument();
+		});
+
+		it('should show all tokens on tokens route when filter is enabled but category is undefined', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$250.00')).toBeInTheDocument();
+		});
+
+		it('should filter by stablecoin category on tokens route', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.STABLECOIN as TokenCategoryTagValue | undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$200.00')).toBeInTheDocument();
+		});
+
+		it('should not filter tokens on earning route even if filter and category are set', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Earning}` });
+
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.STABLECOIN as TokenCategoryTagValue | undefined)
+			);
+
+			vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
+				staticStore(tokensWithTags)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$250.00')).toBeInTheDocument();
+		});
 	});
 
 	describe('privacy mode toggle', () => {
