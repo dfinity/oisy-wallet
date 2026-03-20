@@ -53,7 +53,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 		if (nonNullish(rateLimitInfo)) {
 			trackRateLimited(rateLimitInfo);
 		}
-	} catch (err: unknown) {
+	} catch (_: unknown) {
 
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
