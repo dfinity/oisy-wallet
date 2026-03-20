@@ -36,7 +36,6 @@ describe('custom-token.services', () => {
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 
 	let spyToastsError: MockInstance;
-	let spyToastsShow: MockInstance;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -47,7 +46,6 @@ describe('custom-token.services', () => {
 		vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
-		spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
 	});
 
 	describe('autoLoadCustomToken', () => {
