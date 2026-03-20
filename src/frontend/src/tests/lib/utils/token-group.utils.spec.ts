@@ -655,15 +655,15 @@ describe('token-group.utils', () => {
 		});
 
 		it('should sort alphanumeric name before non-alphanumeric name', () => {
-		const alpha = toTokenUiOrGroupUi({ ...ETHEREUM_TOKEN, name: 'Aaa' });
-		const nonAlpha = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- ZZZ' });
+			const alpha = toTokenUiOrGroupUi({ ...ETHEREUM_TOKEN, name: 'Aaa' });
+			const nonAlpha = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- ZZZ' });
 
-		const result = sortTokenOrGroupUi([nonAlpha, alpha]);
+			const result = sortTokenOrGroupUi([nonAlpha, alpha]);
 
-		expect(result).toEqual([alpha, nonAlpha]);
-	});
+			expect(result).toEqual([alpha, nonAlpha]);
+		});
 
-	it('should keep order the same if groups passed', () => {
+		it('should keep order the same if groups passed', () => {
 			const expected = [
 				{ group: { id: 'Bgroup1', tokens: [mockToken] } as unknown as TokenUiGroup },
 				{
