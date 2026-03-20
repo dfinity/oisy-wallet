@@ -240,7 +240,9 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<UserTransaction> = (10..15).map(|i| make_tx(&format!("0xhash{i}"), i, i * 10)).collect();
+        let txs: Vec<UserTransaction> = (10..15)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
         insert_transactions(&mut map, txs);
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
@@ -254,7 +256,9 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<UserTransaction> = (5..10).map(|i| make_tx(&format!("0xhash{i}"), i, i * 10)).collect();
+        let txs: Vec<UserTransaction> = (5..10)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
         insert_transactions(&mut map, txs);
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
@@ -270,7 +274,9 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
         let count = MAX_GET_USER_TRANSACTIONS_RESULTS + 50;
-        let txs: Vec<UserTransaction> = (0..count).map(|i| make_tx(&format!("0xhash{i}"), i, i * 10)).collect();
+        let txs: Vec<UserTransaction> = (0..count)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
         insert_transactions(&mut map, txs);
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, count + 1000);
@@ -287,7 +293,9 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<UserTransaction> = (0..7).map(|i| make_tx(&format!("0xhash{i}"), i, i * 10)).collect();
+        let txs: Vec<UserTransaction> = (0..7)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
         insert_transactions(&mut map, txs);
 
         // Page 1: newest 3
@@ -317,7 +325,9 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<UserTransaction> = (0..10).map(|i| make_tx(&format!("0xhash{i}"), i, i * 10)).collect();
+        let txs: Vec<UserTransaction> = (0..10)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
         insert_transactions(&mut map, txs);
 
         let mut all_indices = Vec::new();
@@ -341,7 +351,9 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<UserTransaction> = (0..5).map(|i| make_tx(&format!("0xhash{i}"), i, i * 10)).collect();
+        let txs: Vec<UserTransaction> = (0..5)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
         insert_transactions(&mut map, txs);
 
         let result = get_transactions(&map, principal, &eth_native_token(), Some(0), 10);
@@ -359,7 +371,9 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<UserTransaction> = (0..5).map(|i| make_tx(&format!("0xhash{i}"), i, i * 10)).collect();
+        let txs: Vec<UserTransaction> = (0..5)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
         insert_transactions(&mut map, txs);
 
         let result_none = get_transactions(&map, principal, &eth_native_token(), None, 10);
@@ -376,7 +390,9 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<UserTransaction> = (0..5).map(|i| make_tx(&format!("0xhash{i}"), i, i * 10)).collect();
+        let txs: Vec<UserTransaction> = (0..5)
+            .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
+            .collect();
         insert_transactions(&mut map, txs);
 
         let result = get_transactions(&map, principal, &eth_native_token(), Some(999), 10);
