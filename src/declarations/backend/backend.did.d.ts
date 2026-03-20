@@ -220,6 +220,15 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export interface EvmTransactionData {
+	nft_token_id: [] | [bigint];
+	data: [] | [string];
+	chain_id: [] | [bigint];
+	nonce: [] | [bigint];
+	gas_limit: [] | [bigint];
+	gas_used: [] | [bigint];
+	gas_price: [] | [bigint];
+}
 export interface ExchangeData {
 	price_24h_change_pct: [] | [number];
 	market_cap: [] | [number];
@@ -250,6 +259,21 @@ export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
+export interface GetUserTransactionsRequest {
+	token_id: TokenId;
+	max_results: bigint;
+	start: [] | [bigint];
+}
+export interface GetUserTransactionsResponse {
+	next_start: [] | [bigint];
+	total_stored: bigint;
+	oldest_block_index: [] | [bigint];
+	newest_block_index: [] | [bigint];
+	transactions: Array<UserTransaction>;
+}
+export type GetUserTransactionsResult =
+	| { Ok: GetUserTransactionsResponse }
+	| { Err: UserTransactionError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -313,6 +337,7 @@ export type NetworkSettingsFor =
 	| { SolanaMainnet: null }
 	| { BitcoinMainnet: null }
 	| { BscTestnet: null };
+export type NetworkTransactionData = { Evm: EvmTransactionData };
 export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
@@ -482,6 +507,22 @@ export interface UserProfile {
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }
+export interface UserTransaction {
+	id: string;
+	to: [] | [string];
+	block_index: bigint;
+	value: bigint;
+	from: string;
+	network_data: NetworkTransactionData;
+	timestamp: bigint;
+}
+export type UserTransactionError =
+	| {
+			DuplicateTransaction: { id: string };
+	  }
+	| { InternalError: { msg: string } }
+	| { TooManyTransactions: null }
+	| { UserNotFound: null };
 export interface Utxo {
 	height: number;
 	value: bigint;
@@ -673,6 +714,16 @@ export interface _SERVICE {
 	 * - If the caller is anonymous.  See: `may_read_user_data`.
 	 */
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
+	/**
+	 * Retrieves stored finalized transactions for the caller, with cursor-based pagination.
+	 *
+	 * # Returns
+	 * - `Ok(GetUserTransactionsResponse)` with the requested page of transactions
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `UserTransactionError`.
+	 */
+	get_user_transactions: ActorMethod<[GetUserTransactionsRequest], GetUserTransactionsResult>;
 	/**
 	 * Checks if the caller has an associated user profile.
 	 *

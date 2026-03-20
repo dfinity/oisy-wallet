@@ -426,6 +426,47 @@ export const idlFactory = ({ IDL }) => {
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
+	const GetUserTransactionsRequest = IDL.Record({
+		token_id: TokenId,
+		max_results: IDL.Nat64,
+		start: IDL.Opt(IDL.Nat64)
+	});
+	const EvmTransactionData = IDL.Record({
+		nft_token_id: IDL.Opt(IDL.Nat),
+		data: IDL.Opt(IDL.Text),
+		chain_id: IDL.Opt(IDL.Nat64),
+		nonce: IDL.Opt(IDL.Nat64),
+		gas_limit: IDL.Opt(IDL.Nat),
+		gas_used: IDL.Opt(IDL.Nat),
+		gas_price: IDL.Opt(IDL.Nat)
+	});
+	const NetworkTransactionData = IDL.Variant({ Evm: EvmTransactionData });
+	const UserTransaction = IDL.Record({
+		id: IDL.Text,
+		to: IDL.Opt(IDL.Text),
+		block_index: IDL.Nat64,
+		value: IDL.Nat,
+		from: IDL.Text,
+		network_data: NetworkTransactionData,
+		timestamp: IDL.Nat64
+	});
+	const GetUserTransactionsResponse = IDL.Record({
+		next_start: IDL.Opt(IDL.Nat64),
+		total_stored: IDL.Nat64,
+		oldest_block_index: IDL.Opt(IDL.Nat64),
+		newest_block_index: IDL.Opt(IDL.Nat64),
+		transactions: IDL.Vec(UserTransaction)
+	});
+	const UserTransactionError = IDL.Variant({
+		DuplicateTransaction: IDL.Record({ id: IDL.Text }),
+		InternalError: IDL.Record({ msg: IDL.Text }),
+		TooManyTransactions: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const GetUserTransactionsResult = IDL.Variant({
+		Ok: GetUserTransactionsResponse,
+		Err: UserTransactionError
+	});
 	const HasUserProfileResponse = IDL.Record({ has_user_profile: IDL.Bool });
 	const HttpRequest = IDL.Record({
 		url: IDL.Text,
@@ -572,6 +613,7 @@ export const idlFactory = ({ IDL }) => {
 			[IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))]
 		),
 		get_user_profile: IDL.Func([], [GetUserProfileResult]),
+		get_user_transactions: IDL.Func([GetUserTransactionsRequest], [GetUserTransactionsResult]),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
