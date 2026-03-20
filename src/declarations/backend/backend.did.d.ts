@@ -710,10 +710,10 @@ export interface _SERVICE {
 	 * Retrieves stored finalized transactions for the caller, with cursor-based pagination.
 	 *
 	 * # Returns
-	 * - `Ok(GetUserTransactionsResponse)` with the requested page of transactions
+	 * - `Ok(GetUserTransactionsResponse)` with the requested page of transactions.
 	 *
-	 * # Errors
-	 * Errors are enumerated by: `UserTransactionError`.
+	 * Currently, this function always returns `Ok` for valid (non-anonymous) calls.
+	 * The `Err(UserTransactionError)` variant is reserved for future validation logic.
 	 */
 	get_user_transactions: ActorMethod<[GetUserTransactionsRequest], GetUserTransactionsResult>;
 	/**
