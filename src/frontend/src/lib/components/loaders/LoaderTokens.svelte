@@ -128,7 +128,7 @@
 				}
 
 				toastsError({
-					msg: { text: $i18n.init.error.load_token_list },
+					msg: { text: $i18n.init.error.load_token_list }
 				});
 
 				trackEvent({
