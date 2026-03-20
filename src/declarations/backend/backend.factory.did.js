@@ -505,6 +505,14 @@ export const idlFactory = ({ IDL }) => {
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});
+	const SaveUserTransactionsRequest = IDL.Record({
+		token_id: TokenId,
+		transactions: IDL.Vec(UserTransaction)
+	});
+	const SaveUserTransactionsResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: UserTransactionError
+	});
 	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
@@ -620,6 +628,11 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
+		save_user_transactions: IDL.Func(
+			[SaveUserTransactionsRequest],
+			[SaveUserTransactionsResult],
+			[]
+		),
 		set_api_keys: IDL.Func([ApiKeys], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),

@@ -23,9 +23,9 @@ export const fetchVeloraSwapAmount = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userEthAddress
+	userAddress
 }: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
-	if (isNullish(userEthAddress)) {
+	if (isNullish(userAddress)) {
 		return;
 	}
 
@@ -50,7 +50,7 @@ export const fetchVeloraSwapAmount = async ({
 		destDecimals: destinationToken.decimals,
 		mode: SWAP_MODE,
 		side: SWAP_SIDE,
-		userAddress: userEthAddress,
+		userAddress,
 		partner: OISY_URL_HOSTNAME
 	};
 

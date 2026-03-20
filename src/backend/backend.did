@@ -319,6 +319,11 @@ type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
 };
+type SaveUserTransactionsRequest = record {
+	token_id : TokenId;
+	transactions : vec UserTransaction
+};
+type SaveUserTransactionsResult = variant { Ok; Err : UserTransactionError };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
 	InvalidDelegationChain : record { msg : text };
@@ -671,6 +676,13 @@ service : (Arg) -> {
 	list_custom_tokens : () -> (vec CustomToken);
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
+	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
+	//
+	// # Errors
+	// Errors are enumerated by: `UserTransactionError`.
+	save_user_transactions : (SaveUserTransactionsRequest) -> (
+		SaveUserTransactionsResult
+	);
 	// Overwrites the stored API keys.
 	//
 	// Restricted to canister controllers only.

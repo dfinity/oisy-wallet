@@ -62,7 +62,7 @@ export interface FetchSwapAmountsParams {
 	tokens: Token[];
 	slippage: string | number;
 	isSourceTokenIcrc2?: boolean;
-	userEthAddress: OptionEthAddress;
+	userAddress: OptionEthAddress;
 }
 
 export type Slippage = string | number;
@@ -194,7 +194,7 @@ export interface EvmQuoteParams {
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token;
 	amount: bigint;
-	userEthAddress: OptionEthAddress;
+	userAddress: OptionEthAddress;
 	slippage: Slippage;
 }
 
