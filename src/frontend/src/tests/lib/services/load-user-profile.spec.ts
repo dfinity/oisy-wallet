@@ -124,5 +124,37 @@ describe('load-user-profile.services', () => {
 
 			expect(result).toEqual({ success: false });
 		});
+
+		it('should handle unknown error from getUserProfile', async () => {
+			vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue({
+				Err: { InternalError: null } as never
+			});
+
+			const result = await loadUserProfile({ identity: mockIdentity });
+
+			expect(result).toEqual({ success: false });
+		});
+
+		it('should handle certified profile load failure gracefully', async () => {
+			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			let callCount = 0;
+			vi.spyOn(backendApi, 'getUserProfile').mockImplementation(async ({ certified }) => {
+				callCount++;
+				if (!certified) {
+					return { Ok: mockProfile };
+				}
+				throw new Error('Certified load failed');
+			});
+
+			const result = await loadUserProfile({ identity: mockIdentity });
+
+			expect(result).toEqual({ success: true });
+			expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
+
+			await waitFor(() => expect(callCount).toBe(2));
+
+			consoleErrorSpy.mockRestore();
+		});
 	});
 });
