@@ -4,6 +4,7 @@ import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.
 import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { render } from '@testing-library/svelte';
@@ -47,7 +48,11 @@ describe('SwapDetailsNearIntents', () => {
 		});
 
 		expect(getByText(en.swap.text.swap_route)).toBeInTheDocument();
-		expect(getByText('NEAR Intents (~2min)')).toBeInTheDocument();
+		expect(
+			getByText(
+				replacePlaceholders(en.swap.text.near_intents_estimated_time, { $minutes: '2' })
+			)
+		).toBeInTheDocument();
 	});
 
 	it('does not render expected minimum when slippage is undefined', () => {
