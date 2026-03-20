@@ -524,7 +524,7 @@ export const idlFactory = ({ IDL }) => {
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
-	const TokenId = IDL.Variant({
+	const TokenId_ = IDL.Variant({
 		Erc20: IDL.Tuple(IDL.Text, IDL.Nat64),
 		SolNativeDevnet: IDL.Null,
 		Icrc: IDL.Principal,
@@ -539,7 +539,7 @@ export const idlFactory = ({ IDL }) => {
 		Erc4626: IDL.Tuple(IDL.Text, IDL.Nat64)
 	});
 	const GetUserTransactionsRequest = IDL.Record({
-		token_id: TokenId,
+		token_id: TokenId_,
 		max_results: IDL.Nat64,
 		start: IDL.Opt(IDL.Nat64)
 	});
