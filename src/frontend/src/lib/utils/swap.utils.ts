@@ -4,6 +4,7 @@ import type {
 } from '$declarations/kong_backend/kong_backend.did';
 import { dAppDescriptions } from '$env/dapp-descriptions.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
@@ -43,6 +44,7 @@ import { areAddressesEqual } from '$lib/utils/address.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { findToken } from '$lib/utils/tokens.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { OptimalRate } from '@velora-dex/sdk';
 
@@ -226,7 +228,7 @@ export const findNearIntentsAsset = ({
 	blockchain
 }: {
 	tokens: NearIntentsToken[];
-	token: Erc20Token;
+	token: Token;
 	blockchain: string;
 }): NearIntentsToken | undefined =>
 	tokens.find(
@@ -235,12 +237,13 @@ export const findNearIntentsAsset = ({
 			(isNullish(t.contractAddress)
 				? // Native tokens
 					t.symbol.toLowerCase() === token.symbol.toLowerCase()
-				: // ERC tokens
-					areAddressesEqual({
-						address1: t.contractAddress,
-						address2: token.address,
-						addressType: 'Eth'
-					}))
+				: isTokenErc20(token) || isTokenSpl(token)
+					? areAddressesEqual({
+							address1: t.contractAddress,
+							address2: token.address,
+							networkId: token.network.id
+						})
+					: false)
 	);
 
 export const resolveNearIntentsSwapAssets = ({
@@ -249,8 +252,8 @@ export const resolveNearIntentsSwapAssets = ({
 	destinationToken
 }: {
 	nearTokens: NearIntentsToken[];
-	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
+	sourceToken: Token;
+	destinationToken: Token;
 }): { srcAsset: NearIntentsToken; destAsset: NearIntentsToken } | undefined => {
 	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.id);
 	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.id);
@@ -283,14 +286,16 @@ export const buildNearIntentsQuoteRequest = ({
 	srcAsset,
 	destAsset,
 	amount,
-	userEthAddress,
+	userAddress,
+	recipientAddress,
 	deadlineMs
 }: {
 	slippageTolerance: number;
 	srcAsset: NearIntentsToken;
 	destAsset: NearIntentsToken;
 	amount: bigint;
-	userEthAddress: string;
+	userAddress: string;
+	recipientAddress?: string;
 	deadlineMs: number;
 }): NearIntentsQuoteRequest => ({
 	dry: false,
@@ -300,9 +305,9 @@ export const buildNearIntentsQuoteRequest = ({
 	depositType: 'ORIGIN_CHAIN',
 	destinationAsset: destAsset.assetId,
 	amount: amount.toString(),
-	recipient: userEthAddress,
+	recipient: recipientAddress ?? userAddress,
 	recipientType: 'DESTINATION_CHAIN',
-	refundTo: userEthAddress,
+	refundTo: userAddress,
 	refundType: 'ORIGIN_CHAIN',
 	deadline: new Date(Date.now() + deadlineMs).toISOString()
 });

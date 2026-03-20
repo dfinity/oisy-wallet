@@ -290,8 +290,7 @@ const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
 	});
 
 	toastsError({
-		msg: { text: get(i18n).init.error.icrc_canisters },
-		err
+		msg: { text: get(i18n).init.error.load_token_list }
 	});
 };
 
