@@ -2005,8 +2005,8 @@
 			"description_empty": "Похоже, вы ещё не стейкали токены.",
 			"full_history": "Показать полную историю",
 			"recent_history": "Скрыть полную историю",
-			"gldt_stake_carousel_slide_title": "Зарабатывай APY с Gold DAO Staking",
-			"gldt_stake_carousel_slide_cta": "Узнать больше о Gold DAO Staking"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Что-то пошло не так при выводе токенов.",

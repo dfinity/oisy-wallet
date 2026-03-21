@@ -2005,8 +2005,8 @@
 			"description_empty": "아직 스테이킹한 토큰이 없는 것 같습니다",
 			"full_history": "전체 기록 보기",
 			"recent_history": "전체 기록 닫기",
-			"gldt_stake_carousel_slide_title": "Gold DAO 스테이킹으로 APY 수익 창출",
-			"gldt_stake_carousel_slide_cta": "자세히 알아보기"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "토큰 출금 중 문제가 발생했습니다.",

@@ -2005,8 +2005,8 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",
