@@ -2005,8 +2005,8 @@
 			"description_empty": "Il semble que vous n'ayez pas encore staké de tokens",
 			"full_history": "Afficher l'historique complet",
 			"recent_history": "Fermer l'historique complet",
-			"gldt_stake_carousel_slide_title": "Gagnez un APY avec le Staking Gold DAO",
-			"gldt_stake_carousel_slide_cta": "En savoir plus"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Quelque chose s'est mal passé lors du retrait des tokens.",
