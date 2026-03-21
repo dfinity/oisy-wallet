@@ -2,10 +2,9 @@ use candid::Principal;
 use ic_canister_sig_creation::{
     delegation_signature_msg, CanisterSigPublicKey, DELEGATION_SIG_DOMAIN,
 };
-use ic_signature_verification::verify_canister_sig;
 use shared::types::delegation::IIDelegationChain;
 
-use crate::state::read_config;
+use crate::{canister_sig_verification::verify_canister_sig, state::read_config};
 
 /// When `false`, [`require_ii_delegation`] is a no-op for every caller,
 /// effectively disabling the II delegation chain guard.
