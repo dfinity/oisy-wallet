@@ -2005,8 +2005,8 @@
 			"description_empty": "Zdá se, že jste zatím nestakovali žádné tokeny",
 			"full_history": "Zobrazit celou historii",
 			"recent_history": "Zavřít celou historii",
-			"gldt_stake_carousel_slide_title": "Získejte APY se stakováním Gold DAO",
-			"gldt_stake_carousel_slide_cta": "Zjistit více"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",

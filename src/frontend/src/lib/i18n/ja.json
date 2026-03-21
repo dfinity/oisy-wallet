@@ -2005,8 +2005,8 @@
 			"description_empty": "まだトークンをステーキングしていないようです。",
 			"full_history": "履歴を全て表示",
 			"recent_history": "履歴を閉じる",
-			"gldt_stake_carousel_slide_title": "Gold DAOステーキングでAPYを獲得",
-			"gldt_stake_carousel_slide_cta": "詳細を見る"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "出金中に問題が発生しました。",
