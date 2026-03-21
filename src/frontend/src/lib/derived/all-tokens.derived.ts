@@ -1,3 +1,4 @@
+import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -15,6 +16,8 @@ import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { isTokenFungible } from '$lib/utils/nft.utils';
 import { tokenListEqual } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
+import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -72,8 +75,14 @@ export const allFungibleTokens: Readable<Token[]> = derivedMemo(
 );
 
 export const allCrossChainSwapTokens: Readable<
-	TokenToggleable<RequiredToken | Erc20CustomToken>[]
-> = derived([erc20Tokens, enabledEthEvmNativeTokens], ([$erc20Tokens, $ethEvmNativeTokens]) => [
-	...$ethEvmNativeTokens.map((token) => ({ ...token, enabled: true })),
-	...$erc20Tokens
-]);
+	TokenToggleable<RequiredToken | Erc20CustomToken | SplCustomToken>[]
+> = derived(
+	[erc20Tokens, enabledEthEvmNativeTokens, splTokens, enabledSolanaTokens],
+	([$erc20Tokens, $ethEvmNativeTokens, $splTokens, $enabledSolanaTokens]) => [
+		...$ethEvmNativeTokens.map((token) => ({ ...token, enabled: true })),
+		...$erc20Tokens,
+		...(NEAR_INTENTS_SWAP_ENABLED
+			? [...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })), ...$splTokens]
+			: [])
+	]
+);
