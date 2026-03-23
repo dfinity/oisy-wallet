@@ -68,5 +68,6 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 }
 
 export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
-	SUCCESS = 'success'
+	SUCCESS = 'success',
+	ERROR = 'error'
 }
