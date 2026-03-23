@@ -62,7 +62,7 @@ export interface FetchSwapAmountsParams {
 	tokens: Token[];
 	slippage: string | number;
 	isSourceTokenIcrc2?: boolean;
-	userAddress: OptionEthAddress;
+	userEthAddress: OptionEthAddress;
 }
 
 export type Slippage = string | number;

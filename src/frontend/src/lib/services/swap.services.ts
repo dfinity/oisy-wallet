@@ -249,7 +249,7 @@ export const fetchSwapAmounts = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2,
-	userAddress
+	userEthAddress
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -272,7 +272,7 @@ export const fetchSwapAmounts = async ({
 		sourceToken: sourceToken as Erc20Token,
 		destinationToken: destinationToken as Erc20Token,
 		amount: sourceAmount,
-		userAddress,
+		userAddress: userEthAddress,
 		slippage
 	});
 };
@@ -285,7 +285,7 @@ const fetchSwapAmountsICP = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2
-}: Omit<FetchSwapAmountsParams, 'userAddress' | 'amount'> & {
+}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & {
 	amount: bigint;
 }): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
