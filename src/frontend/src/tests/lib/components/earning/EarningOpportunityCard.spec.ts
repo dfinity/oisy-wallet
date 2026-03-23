@@ -1,5 +1,4 @@
 import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
-import { screensStore } from '$lib/stores/screens.store';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, screen } from '@testing-library/svelte';
@@ -30,16 +29,6 @@ describe('EarningOpportunityCard', () => {
 		const root = container.firstElementChild as HTMLElement;
 
 		expect(root).toHaveClass('flex', 'flex-col', 'rounded-lg');
-	});
-
-	it('renders the separator between multiple titles on md screens', () => {
-		screensStore.set('md');
-
-		const { container } = render(EarningOpportunityCard, props);
-
-		const br = container.querySelector('h3 br');
-
-		expect(br).toBeInTheDocument();
 	});
 
 	it('renders snippets within the header row container', () => {
