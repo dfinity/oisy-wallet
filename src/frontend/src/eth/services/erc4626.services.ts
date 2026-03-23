@@ -291,6 +291,22 @@ export const encodeErc4626Withdraw = ({
 	return { to: contractAddress, data };
 };
 
+export const encodeErc4626Redeem = ({
+	contractAddress,
+	shares,
+	receiver,
+	owner
+}: {
+	contractAddress: Erc4626ContractAddress;
+	shares: bigint;
+	receiver: EthAddress;
+	owner: EthAddress;
+}): { to: string; data: string } => {
+	const data = new Interface(ERC4626_ABI).encodeFunctionData('redeem', [shares, receiver, owner]);
+
+	return { to: contractAddress, data };
+};
+
 export const depositErc4626 = async ({
 	identity,
 	progress,
@@ -389,6 +405,57 @@ export const withdrawErc4626 = async ({
 	const { data } = encodeErc4626Withdraw({
 		contractAddress: address,
 		assets,
+		receiver: from,
+		owner: from
+	});
+
+	const transaction = prepare({
+		data,
+		to: address,
+		amount: ZERO,
+		nonce,
+		chainId,
+		...feeData
+	});
+
+	const rawTransaction = await signTransaction({
+		identity,
+		transaction,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	const { sendTransaction } = infuraProviders(networkId);
+	await sendTransaction(rawTransaction);
+
+	progress?.(ProgressStepsUnstake.UPDATE_UI);
+
+	await waitAndTriggerWallet();
+};
+
+export const redeemErc4626 = async ({
+	identity,
+	progress,
+	vault,
+	shares,
+	from,
+	...feeData
+}: {
+	identity: OptionIdentity;
+	vault: Vault;
+	shares: bigint;
+	from: EthAddress;
+	progress?: (step: ProgressStepsUnstake) => void;
+} & RequiredTransactionFeeData): Promise<void> => {
+	const { network, address } = vault.token;
+	const { id: networkId, chainId } = network;
+
+	progress?.(ProgressStepsUnstake.UNSTAKE);
+
+	const nonce = await getNonce({ from, networkId });
+
+	const { data } = encodeErc4626Redeem({
+		contractAddress: address,
+		shares,
 		receiver: from,
 		owner: from
 	});
