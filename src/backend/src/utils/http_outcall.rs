@@ -138,9 +138,11 @@ pub(crate) async fn post(
 
 #[cfg(test)]
 mod tests {
+    use candid::Nat;
+    use ic_cdk::management_canister::{HttpHeader, HttpMethod, HttpRequestResult};
     use pretty_assertions::assert_eq;
 
-    use super::*;
+    use super::{build_request, validate_response, USER_AGENT};
 
     #[test]
     fn test_build_request_sets_url() {
