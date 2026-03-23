@@ -142,9 +142,13 @@ pub fn verify_ii_delegation_chain(
 
 #[cfg(test)]
 mod tests {
-    use shared::types::delegation::{Delegation, SignedDelegation};
+    use candid::Principal;
+    use ic_canister_sig_creation::CanisterSigPublicKey;
+    use shared::types::delegation::{Delegation, IIDelegationChain, SignedDelegation};
 
-    use super::*;
+    use super::{
+        require_ii_delegation, verify_ii_delegation_chain, II_DELEGATION_CHAIN_GUARD_ENABLED,
+    };
 
     const FAR_FUTURE_NS: u64 = 9_999_999_999_000_000_000;
 

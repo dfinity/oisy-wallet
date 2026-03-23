@@ -151,7 +151,11 @@ async fn hourly_housekeeping_tasks() {
 mod tests {
     use pretty_assertions::assert_eq;
 
-    use super::*;
+    use super::{
+        is_housekeeping_in_progress, release_allow_signing_slot, try_acquire_allow_signing_slot,
+        ALLOW_SIGNING_IN_PROGRESS, HOUSEKEEPING_STARTED_AT, HOUSEKEEPING_TIMEOUT_NS,
+        MAX_CONCURRENT_ALLOW_SIGNING,
+    };
 
     fn reset_housekeeping() {
         HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = None);

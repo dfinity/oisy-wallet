@@ -4,6 +4,7 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
+	GetUserTransactionsResponse,
 	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
@@ -24,8 +25,10 @@ import type {
 	GetContactParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
+	GetUserTransactionsParams,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
@@ -262,6 +265,24 @@ export const getExchangeRates = async ({
 	const { getExchangeRates } = await backendCanister({ identity });
 
 	return getExchangeRates(params);
+};
+
+export const getUserTransactions = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<GetUserTransactionsParams>): Promise<GetUserTransactionsResponse> => {
+	const { getUserTransactions } = await backendCanister({ identity });
+
+	return getUserTransactions(params);
+};
+
+export const saveUserTransactions = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserTransactionsParams>): Promise<void> => {
+	const { saveUserTransactions } = await backendCanister({ identity });
+
+	return saveUserTransactions(params);
 };
 
 const backendCanister = async ({

@@ -115,11 +115,10 @@ pub fn estimate_fee(
 
 #[cfg(test)]
 mod tests {
-    use ic_cdk::bitcoin_canister::Outpoint;
+    use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
     use pretty_assertions::assert_eq;
 
-    // Import the outer scope
-    use super::*;
+    use super::{estimate_fee, utxos_selection, TX_OVERHEAD_VBYTES};
 
     fn assert_utxos_eq(result_utxos: &[Utxo], expected_utxos: &[Utxo]) {
         assert_eq!(result_utxos.len(), expected_utxos.len(),);
