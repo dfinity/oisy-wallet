@@ -9,7 +9,6 @@ export enum AppPath {
 	WalletConnect = '/wc/',
 	Rewards = '/rewards/', // Todo: remove when feature is completed
 	Earn = '/earn/',
-	EarnGold = '/earn/gold/',
 	EarnAutopilot = '/earn/autopilot/',
 	EarnRewards = '/earn/rewards/'
 }
