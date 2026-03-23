@@ -27,6 +27,5 @@ export const get = <T>({ key }: { key: string }): T | undefined => {
 	} catch (err: unknown) {
 		// We use the local storage for the operational part of the app but, not crucial
 		consoleError(err);
-		return undefined;
 	}
 };
