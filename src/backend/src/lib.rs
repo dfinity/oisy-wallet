@@ -1,3 +1,5 @@
+#![warn(clippy::wildcard_imports)]
+
 use candid::Principal;
 use ic_cdk::{export_candid, init, post_upgrade};
 use shared::{

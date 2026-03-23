@@ -223,7 +223,8 @@ mod contact_image {
 
     mod spl {
         //! Tests for the spl module.
-        use super::*;
+        use candid::{Decode, Encode};
+
         use crate::{
             types::{
                 custom_token::{SplToken, SplTokenId},
@@ -295,7 +296,8 @@ mod contact_image {
 
     mod erc20 {
         //! Tests for the erc20 module.
-        use super::*;
+        use candid::{Decode, Encode};
+
         use crate::{
             types::custom_token::{ErcToken, ErcTokenId},
             validate::{test_validate_on_deserialize, TestVector, Validate},
@@ -358,9 +360,8 @@ mod contact_image {
 
     mod icrc {
         //! Tests for the icrc module.
-        use candid::Principal;
+        use candid::{Decode, Encode, Principal};
 
-        use super::*;
         use crate::{
             types::custom_token::IcrcToken,
             validate::{test_validate_on_deserialize, TestVector, Validate},
@@ -468,9 +469,8 @@ mod contact_image {
 
     mod ext_v2 {
         //! Tests for the `ext_v2` module.
-        use candid::Principal;
+        use candid::{Decode, Encode, Principal};
 
-        use super::*;
         use crate::{
             types::custom_token::ExtV2Token,
             validate::{test_validate_on_deserialize, TestVector, Validate},
@@ -521,9 +521,8 @@ mod contact_image {
 
     mod dip721 {
         //! Tests for the dip721 module.
-        use candid::Principal;
+        use candid::{Decode, Encode, Principal};
 
-        use super::*;
         use crate::{
             types::custom_token::Dip721Token,
             validate::{test_validate_on_deserialize, TestVector, Validate},
@@ -574,9 +573,8 @@ mod contact_image {
 
     mod icpunks {
         //! Tests for the icpunks module.
-        use candid::Principal;
+        use candid::{Decode, Encode, Principal};
 
-        use super::*;
         use crate::{
             types::custom_token::IcPunksToken,
             validate::{test_validate_on_deserialize, TestVector, Validate},

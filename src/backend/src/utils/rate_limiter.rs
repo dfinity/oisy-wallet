@@ -123,6 +123,7 @@ impl RateLimiter {
 
 #[cfg(test)]
 mod tests {
+    use candid::Principal;
     use pretty_assertions::assert_eq;
     use shared::types::{
         bitcoin::{
@@ -131,7 +132,7 @@ mod tests {
         signer::AllowSigningError,
     };
 
-    use super::*;
+    use super::RateLimiter;
 
     fn test_principal(id: u8) -> Principal {
         Principal::from_slice(&[id])

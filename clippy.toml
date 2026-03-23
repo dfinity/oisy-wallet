@@ -1,3 +1,5 @@
+warn-on-all-wildcard-imports = true
+
 disallowed-macros = [
     { path = "std::print", reason = "Use ic_cdk::print instead" },
     { path = "std::println", reason = "Use ic_cdk::println instead" },
