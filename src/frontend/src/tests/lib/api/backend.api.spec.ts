@@ -498,9 +498,7 @@ describe('backend.api', () => {
 		};
 
 		beforeEach(() => {
-			backendCanisterMock.getUserTransactions.mockResolvedValue(
-				mockGetUserTransactionsResponse
-			);
+			backendCanisterMock.getUserTransactions.mockResolvedValue(mockGetUserTransactionsResponse);
 		});
 
 		it('should successfully call getUserTransactions endpoint', async () => {
@@ -515,9 +513,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(
-				getUserTransactions({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			await expect(getUserTransactions({ ...mockParams, identity: undefined })).rejects.toThrow();
 		});
 
 		it('should throw an error if getUserTransactions throws', async () => {
@@ -551,9 +547,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(
-				saveUserTransactions({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			await expect(saveUserTransactions({ ...mockParams, identity: undefined })).rejects.toThrow();
 		});
 
 		it('should throw an error if saveUserTransactions throws', async () => {
