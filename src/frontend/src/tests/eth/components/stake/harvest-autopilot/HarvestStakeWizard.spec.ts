@@ -93,6 +93,10 @@ describe('HarvestStakeWizard', () => {
 		vi.clearAllMocks();
 	});
 
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
 	it('should render HarvestStakeForm when current step is STAKE', () => {
 		const { container } = render(HarvestStakeWizard, {
 			props: {
@@ -171,8 +175,34 @@ describe('HarvestStakeWizard', () => {
 			}));
 		});
 
-		afterEach(() => {
-			vi.useRealTimers();
+		it('should call trackEvent with error metadata when stake fails', async () => {
+			const stakeError = new Error('execution reverted');
+			Object.assign(stakeError, { code: 'CALL_EXCEPTION' });
+			vi.spyOn(erc4626Services, 'depositErc4626').mockRejectedValue(stakeError);
+
+			const { getByTestId } = render(HarvestStakeWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsStake.REVIEW, title: 'Review' }
+				},
+				context: buildContext()
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(analytics.trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.STAKE,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.EARN,
+					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_EARN.HARVEST_AUTOPILOT,
+					source_location: PLAUSIBLE_EVENT_SOURCES.HARVEST_AUTOPILOT,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_error_text: 'execution reverted',
+					result_error: 'Error',
+					result_error_code: 'CALL_EXCEPTION'
+				})
+			});
 		});
 
 		it('should call trackEvent with correct metadata on successful stake', async () => {

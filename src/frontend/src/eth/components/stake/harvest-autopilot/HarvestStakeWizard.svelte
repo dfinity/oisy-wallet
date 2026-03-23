@@ -18,7 +18,6 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import StakeProgress from '$lib/components/stake/StakeProgress.svelte';
-	import { TRACK_COUNT_STAKE_ERROR } from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -38,6 +37,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { Vault } from '$lib/types/vaults';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -61,7 +61,7 @@
 		onBack
 	}: Props = $props();
 
-	const { sendTokenDecimals, sendTokenSymbol, sendToken, sendTokenId, sendTokenExchangeRate } =
+	const { sendTokenDecimals, sendToken, sendTokenId, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let sourceNetwork = $derived($sendToken.network as EthereumNetwork);
@@ -217,17 +217,30 @@
 			stakeProgressStep = ProgressStepsStake.DONE;
 
 			setTimeout(() => onClose(), 750);
-		} catch (err: unknown) {
+		} catch (error: unknown) {
+			const duration = performance.now() - startTime;
+			const durationInSeconds = duration / 1000;
+			const errorMessage =
+				errorDetailToString(error) ?? $i18n.stake.error.unexpected_error_on_stake;
+			const errorName = error instanceof Error ? error.name : undefined;
+			const errorCode = (error as { code?: string }).code;
+
 			trackEvent({
-				name: TRACK_COUNT_STAKE_ERROR,
+				name: PLAUSIBLE_EVENTS.STAKE,
 				metadata: {
-					token: $sendTokenSymbol
+					...trackEventBaseParams,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_duration_in_seconds: `${durationInSeconds}`,
+					result_duration_in_seconds_rounded: `${Math.round(durationInSeconds)}`,
+					result_error_text: errorMessage,
+					...(nonNullish(errorName) ? { result_error: errorName } : {}),
+					...(nonNullish(errorCode) ? { result_error_code: errorCode } : {})
 				}
 			});
 
 			toastsError({
 				msg: { text: $i18n.stake.error.unexpected_error_on_stake },
-				err
+				err: error
 			});
 
 			onBack();

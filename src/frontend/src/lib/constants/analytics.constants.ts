@@ -183,6 +183,5 @@ export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
 export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
 
 // Stake
-export const TRACK_COUNT_STAKE_ERROR = 'stake_error';
 export const TRACK_COUNT_UNSTAKE_SUCCESS = 'unstake_success';
 export const TRACK_COUNT_UNSTAKE_ERROR = 'unstake_error';
