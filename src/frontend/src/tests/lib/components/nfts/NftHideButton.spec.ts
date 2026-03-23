@@ -105,6 +105,29 @@ describe('NftHideButton', () => {
 		expect(svg).toBeInTheDocument();
 	});
 
+	it('should track error event and show toast when updateNftSection fails', async () => {
+		nftStore.addAll([mockNft]);
+		vi.spyOn(nftsServices, 'updateNftSection').mockRejectedValue(new Error('Network error'));
+
+		const { getByTestId } = render(NftHideButton, {
+			props: { token: mockToken, source: 'collection' }
+		});
+
+		const hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+		await fireEvent.click(hideBtn);
+
+		await waitFor(() => {
+			expect(trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
+					metadata: expect.objectContaining({
+						result_status: 'error'
+					})
+				})
+			);
+		});
+	});
+
 	it('should track event with "hide" action when hide button is clicked', async () => {
 		nftStore.addAll([mockNft]);
 		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
