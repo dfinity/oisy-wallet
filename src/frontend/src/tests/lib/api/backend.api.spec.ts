@@ -13,8 +13,10 @@ import {
 	getExchangeRates,
 	getPendingBtcTransactions,
 	getUserProfile,
+	getUserTransactions,
 	listCustomTokens,
 	removeCustomToken,
+	saveUserTransactions,
 	setCustomToken,
 	setManyCustomTokens,
 	updateUserExperimentalFeatureSettings
@@ -30,6 +32,8 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	GetUserProfileResponse,
+	GetUserTransactionsParams,
+	SaveUserTransactionsParams,
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -40,6 +44,10 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockIIDelegationChain } from '$tests/mocks/ii-delegation.mock';
 import { mockUserExperimentalFeatures } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
+import {
+	mockGetUserTransactionsResponse,
+	mockUserTransactionTokenId
+} from '$tests/mocks/user-transactions.mock';
 import type { QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
@@ -478,6 +486,82 @@ describe('backend.api', () => {
 			});
 
 			await expect(updateUserExperimentalFeatureSettings(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('getUserTransactions', () => {
+		const mockParams: CanisterApiFunctionParams<GetUserTransactionsParams> = {
+			...baseParams,
+			tokenId: mockUserTransactionTokenId,
+			start: 5n,
+			maxResults: 10n
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.getUserTransactions.mockResolvedValue(
+				mockGetUserTransactionsResponse
+			);
+		});
+
+		it('should successfully call getUserTransactions endpoint', async () => {
+			const result = await getUserTransactions(mockParams);
+
+			expect(result).toEqual(mockGetUserTransactionsResponse);
+			expect(backendCanisterMock.getUserTransactions).toHaveBeenCalledExactlyOnceWith({
+				tokenId: mockUserTransactionTokenId,
+				start: 5n,
+				maxResults: 10n
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				getUserTransactions({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if getUserTransactions throws', async () => {
+			backendCanisterMock.getUserTransactions.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(getUserTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('saveUserTransactions', () => {
+		const mockParams: CanisterApiFunctionParams<SaveUserTransactionsParams> = {
+			...baseParams,
+			tokenId: mockUserTransactionTokenId,
+			transactions: []
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.saveUserTransactions.mockResolvedValue();
+		});
+
+		it('should successfully call saveUserTransactions endpoint', async () => {
+			const result = await saveUserTransactions(mockParams);
+
+			expect(result).toEqual(undefined);
+			expect(backendCanisterMock.saveUserTransactions).toHaveBeenCalledExactlyOnceWith({
+				tokenId: mockUserTransactionTokenId,
+				transactions: []
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				saveUserTransactions({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if saveUserTransactions throws', async () => {
+			backendCanisterMock.saveUserTransactions.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(saveUserTransactions(mockParams)).rejects.toThrow();
 		});
 	});
 
