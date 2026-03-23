@@ -19,7 +19,9 @@ export const mockUserTransaction: UserTransaction = {
 			data: [],
 			chain_id: [1n],
 			nonce: [42n],
-			gas_limit: []
+			gas_limit: [],
+			gas_used: [],
+			gas_price: []
 		}
 	},
 	timestamp: 1_000_000_000n
@@ -37,7 +39,9 @@ export const mockUserTransaction2: UserTransaction = {
 			data: ['0xdata'],
 			chain_id: [1n],
 			nonce: [43n],
-			gas_limit: [21000n]
+			gas_limit: [21000n],
+			gas_used: [21000n],
+			gas_price: [20_000_000_000n]
 		}
 	},
 	timestamp: 1_000_001_000n
