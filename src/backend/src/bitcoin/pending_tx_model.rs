@@ -185,14 +185,17 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
 mod tests {
     use std::{cell::RefCell, collections::HashMap, sync::LazyLock};
 
-    use ic_cdk::bitcoin_canister::Outpoint;
+    use candid::Principal;
+    use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
     };
     use pretty_assertions::assert_eq;
+    use shared::types::bitcoin::StoredPendingTransaction;
 
-    use super::*;
+    use super::{BtcUserPendingTransactionsModel, HOUR_IN_NS};
+    use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
 
     const TXID_A: &[u8] = &[0xAA; 32];
     const TXID_B: &[u8] = &[0xBB; 32];

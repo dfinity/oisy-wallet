@@ -78,7 +78,8 @@ mod tests {
     use pretty_assertions::assert_eq;
     use shared::types::{user_profile::StoredUserProfile, Timestamp};
 
-    use super::*;
+    use super::UserProfileModel;
+    use crate::types::{Candid, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap};
 
     const USER_1: &str = "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae";
     const USER_2: &str = "ufjdl-kewp5-bgfaq-d7k34-e5w62-nyad4-7r3s5-m2pt2-owqga-kcr5z-jae";

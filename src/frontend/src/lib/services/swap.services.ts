@@ -256,23 +256,25 @@ export const fetchSwapAmounts = async ({
 		unitName: sourceToken.decimals
 	});
 
-	return isNetworkIdICP(sourceToken.network.id)
-		? await fetchSwapAmountsICP({
-				identity,
-				sourceToken,
-				destinationToken,
-				amount: sourceAmount,
-				tokens,
-				slippage,
-				isSourceTokenIcrc2
-			})
-		: await fetchSwapAmountsEVM({
-				sourceToken: sourceToken as Erc20Token,
-				destinationToken: destinationToken as Erc20Token,
-				amount: sourceAmount,
-				userAddress,
-				slippage
-			});
+	if (isNetworkIdICP(sourceToken.network.id)) {
+		return await fetchSwapAmountsICP({
+			identity,
+			sourceToken,
+			destinationToken,
+			amount: sourceAmount,
+			tokens,
+			slippage,
+			isSourceTokenIcrc2
+		});
+	}
+
+	return await fetchSwapAmountsEVM({
+		sourceToken: sourceToken as Erc20Token,
+		destinationToken: destinationToken as Erc20Token,
+		amount: sourceAmount,
+		userAddress,
+		slippage
+	});
 };
 
 const fetchSwapAmountsICP = async ({

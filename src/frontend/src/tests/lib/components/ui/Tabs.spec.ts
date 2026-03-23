@@ -1,5 +1,6 @@
 import { goto } from '$app/navigation';
 import Tabs from '$lib/components/ui/Tabs.svelte';
+import * as analyticsServices from '$lib/services/analytics.services';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -58,5 +59,36 @@ describe('Tabs', () => {
 		expect(goto).toHaveBeenCalledTimes(2);
 		expect(goto).toHaveBeenNthCalledWith(1, 'test1');
 		expect(goto).toHaveBeenNthCalledWith(2, 'test2');
+	});
+
+	it('should track event when navigating to a path with trackEventName set', async () => {
+		const trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
+
+		const trackEventName = 'test_event';
+
+		const { getByText } = render(Tabs, {
+			props: {
+				...props,
+				trackEventName,
+				tabs: props.tabs.map((t) => ({ ...t, path: t.id })) as NonEmptyArray<{
+					label: string;
+					id: string;
+					path?: string | undefined;
+				}>
+			}
+		});
+
+		await fireEvent.click(getByText(props.tabs[0].label));
+
+		expect(trackEventSpy).toHaveBeenCalledWith({
+			name: trackEventName,
+			metadata: {
+				event_context: 'assets_tab',
+				event_value: 'test1',
+				location_source: 'assets_page'
+			}
+		});
+
+		expect(goto).toHaveBeenCalledWith('test1');
 	});
 });
