@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "BTC निकासी स्थिति लाते समय त्रुटइ।",
 			"transaction_price": "लेनदेन की कीमत का अनुमान लोड करते समय त्रुटि।",
 			"icrc_canisters": "ICRC कैनिस्टर लोड करते समय त्रुटि।",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "",
 			"icrc_canister_loading_custom": "",
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
@@ -1280,6 +1281,7 @@
 			"unrecognised_erc_interface": "अपरिचित ERC इंटरफ़ेस।",
 			"no_metadata": "कोई मेटाडेटा प्राप्त नहीं हुआ।",
 			"unexpected": "टोकन सहेजते समय कुछ गलत हो गया।",
+			"version_mismatch": "",
 			"unexpected_hiding": "टोकन छिपाते समय कुछ गलत हो गया।",
 			"already_available": "टोकन पहले से उपलब्ध है।",
 			"not_toggleable": "टोकन टॉगलेबल नहीं है, इसे छिपाया नहीं जा सकता।",
@@ -2003,8 +2005,8 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",

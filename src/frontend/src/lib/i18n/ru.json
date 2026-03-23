@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "Ошибка при получении статусов вывода BTC.",
 			"transaction_price": "Ошибка при загрузке оценки стоимости транзакции.",
 			"icrc_canisters": "Ошибка при загрузке контейнеров ICRC.",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "Токен $tokenSymbol не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
 			"icrc_canister_loading_custom": "Токен с канистером леджера $ledgerCanisterId не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
 			"erc20_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-20.",
@@ -1280,6 +1281,7 @@
 			"unrecognised_erc_interface": "Неопознанный интерфейс ERC.",
 			"no_metadata": "Метаданные не были получены.",
 			"unexpected": "Что-то пошло не так при сохранении токена.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Что-то пошло не так при скрытии токена.",
 			"already_available": "Токен уже доступен.",
 			"not_toggleable": "Токен не переключаем, его нельзя скрыть.",
@@ -2003,8 +2005,8 @@
 			"description_empty": "Похоже, вы ещё не стейкали токены.",
 			"full_history": "Показать полную историю",
 			"recent_history": "Скрыть полную историю",
-			"gldt_stake_carousel_slide_title": "Зарабатывай APY с Gold DAO Staking",
-			"gldt_stake_carousel_slide_cta": "Узнать больше о Gold DAO Staking"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Что-то пошло не так при выводе токенов.",

@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "خطأ أثناء جلب حالات سحب BTC.",
 			"transaction_price": "خطأ أثناء تحميل تقدير سعر المعاملة.",
 			"icrc_canisters": "خطأ أثناء تحميل حاويات ICRC.",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "",
 			"icrc_canister_loading_custom": "",
 			"erc20_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20 المخصصة.",
@@ -1280,6 +1281,7 @@
 			"unrecognised_erc_interface": "",
 			"no_metadata": "لم يتم جلب أي بيانات وصفية.",
 			"unexpected": "حدث خطأ ما أثناء حفظ التوكن.",
+			"version_mismatch": "",
 			"unexpected_hiding": "حدث خطأ ما أثناء إخفاء التوكن.",
 			"already_available": "التوكن متاح بالفعل.",
 			"not_toggleable": "لا يمكن تبديل التوكن، لا يمكن إخفاؤه.",
@@ -2003,8 +2005,8 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",

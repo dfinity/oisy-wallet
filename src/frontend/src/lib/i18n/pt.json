@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "Erro ao buscar os status de retirada de BTC.",
 			"transaction_price": "Erro ao carregar a estimativa do preço de uma transação.",
 			"icrc_canisters": "Erro ao carregar os canisters ICRC.",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "O token $tokenSymbol não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
 			"icrc_canister_loading_custom": "O token com canister de ledger $ledgerCanisterId não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
@@ -1280,6 +1281,7 @@
 			"unrecognised_erc_interface": "Interface erc não reconhecida",
 			"no_metadata": "Nenhum metadado foi encontrado.",
 			"unexpected": "Algo deu errado ao salvar o token.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Algo deu errado ao ocultar o token.",
 			"already_available": "Token já disponível.",
 			"not_toggleable": "O token não é alternável, não pode ser ocultado.",
@@ -2003,8 +2005,8 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",
