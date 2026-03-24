@@ -4,7 +4,7 @@
 	import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { encodeErc20Approve } from '$eth/services/approve.services';
-	import { encodeErc4626Withdraw } from '$eth/services/erc4626.services';
+	import { encodeErc4626Redeem, encodeErc4626Withdraw } from '$eth/services/erc4626.services';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import {
 		getCkErc20FeeData,
@@ -48,7 +48,8 @@
 		amount?: OptionAmount;
 		data?: string;
 		erc4626ContractAddress?: Erc4626ContractAddress;
-		erc4626Operation?: 'deposit' | 'withdraw';
+		erc4626Operation?: 'deposit' | 'withdraw' | 'redeem';
+		erc4626Shares?: bigint;
 		maxAmount?: bigint;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork?: Network;
@@ -66,6 +67,7 @@
 		data,
 		erc4626ContractAddress,
 		erc4626Operation = 'deposit',
+		erc4626Shares,
 		maxAmount,
 		sourceNetwork,
 		targetNetwork,
@@ -140,6 +142,28 @@
 					value: `${nonNullish(amount) && Number(amount) > 0 ? amount : '1'}`,
 					unitName: sendToken.decimals
 				});
+
+				if (erc4626Operation === 'redeem' && nonNullish(erc4626Shares)) {
+					const { to, data: encodedData } = encodeErc4626Redeem({
+						contractAddress: erc4626ContractAddress,
+						shares: erc4626Shares,
+						receiver: $ethAddress,
+						owner: $ethAddress
+					});
+
+					const estimatedGas = await safeEstimateGas({
+						from: $ethAddress,
+						to,
+						data: encodedData
+					});
+
+					feeStore.setFee({
+						...feeData,
+						gas: estimatedGas ?? ERC20_FALLBACK_FEE
+					});
+
+					return;
+				}
 
 				if (erc4626Operation === 'withdraw') {
 					// Withdraw gas can only be estimated for available positive erc4626 token balance.

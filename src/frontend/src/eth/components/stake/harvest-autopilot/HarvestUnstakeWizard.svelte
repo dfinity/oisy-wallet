@@ -7,7 +7,7 @@
 	import HarvestUnstakeForm from '$eth/components/stake/harvest-autopilot/HarvestUnstakeForm.svelte';
 	import HarvestUnstakeReview from '$eth/components/stake/harvest-autopilot/HarvestUnstakeReview.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { withdrawErc4626 } from '$eth/services/erc4626.services';
+	import { redeemErc4626, withdrawErc4626 } from '$eth/services/erc4626.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		type EthFeeContext as FeeContextType,
@@ -21,6 +21,7 @@
 		TRACK_COUNT_UNSTAKE_ERROR,
 		TRACK_COUNT_UNSTAKE_SUCCESS
 	} from '$lib/constants/analytics.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -55,6 +56,8 @@
 		onNext,
 		onBack
 	}: Props = $props();
+
+	let amountSetToMax = $state(false);
 
 	const { sendTokenDecimals, sendTokenSymbol, sendToken, sendTokenId, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -150,19 +153,30 @@
 		onNext();
 
 		try {
-			await withdrawErc4626({
+			const feeParams = {
 				identity: $authIdentity,
 				vault,
-				assets: parseToken({
-					value: `${amount}`,
-					unitName: $sendTokenDecimals
-				}),
 				from: $ethAddress,
 				gas,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				progress: (step: ProgressStepsUnstake) => (unstakeProgressStep = step)
-			});
+			};
+
+			if (amountSetToMax && nonNullish(vault.token.balance)) {
+				await redeemErc4626({
+					...feeParams,
+					shares: vault.token.balance
+				});
+			} else {
+				await withdrawErc4626({
+					...feeParams,
+					assets: parseToken({
+						value: `${amount}`,
+						unitName: $sendTokenDecimals
+					})
+				});
+			}
 
 			trackEvent({
 				name: TRACK_COUNT_UNSTAKE_SUCCESS,
@@ -197,7 +211,8 @@
 		bind:this={feeContext}
 		{amount}
 		erc4626ContractAddress={vault.token.address}
-		erc4626Operation="withdraw"
+		erc4626Operation={amountSetToMax ? 'redeem' : 'withdraw'}
+		erc4626Shares={vault.token.balance ?? ZERO}
 		maxAmount={nonNullish($sendBalance) ? $sendBalance : undefined}
 		{nativeEthereumToken}
 		observe={currentStep?.name !== WizardStepsUnstake.UNSTAKING}
@@ -207,7 +222,7 @@
 	>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsUnstake.UNSTAKE}
-				<HarvestUnstakeForm {onClose} {onNext} bind:amount />
+				<HarvestUnstakeForm {onClose} {onNext} bind:amount bind:amountSetToMax />
 			{:else if currentStep?.name === WizardStepsUnstake.REVIEW}
 				<HarvestUnstakeReview {amount} {onBack} onUnstake={unstake} />
 			{:else if currentStep?.name === WizardStepsUnstake.UNSTAKING}
