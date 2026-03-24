@@ -6,6 +6,7 @@ import { getExchangeRates } from '$lib/api/backend.api';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
+import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import type {
 	CoingeckoSimpleErc4626TokenPriceResponse,
 	CoingeckoSimplePriceParams,
@@ -36,6 +37,10 @@ vi.mock('$env/exchange.env', () => ({
 vi.mock('$lib/rest/coingecko.rest', () => ({
 	simplePrice: vi.fn(),
 	simpleTokenPrice: vi.fn()
+}));
+
+vi.mock('$lib/rest/kongswap.rest', () => ({
+	fetchBatchKongSwapPrices: vi.fn()
 }));
 
 vi.mock('$eth/services/erc4626-exchange.services', () => ({
@@ -493,7 +498,91 @@ describe('exchange.worker', () => {
 					});
 				});
 
-				it.todo('should fallback on prices for ICRC tokens from Kong Swap', async () => {});
+				it('should fallback on prices for ICRC tokens from Kong Swap', async () => {
+					const updatedAt = '2024-01-01T00:00:00.000Z';
+
+					vi.mocked(simpleTokenPrice).mockResolvedValueOnce({
+						icrc1: { usd: 2, usd_market_cap: 1000, usd_24h_change: 0.5 }
+					});
+
+					vi.mocked(fetchBatchKongSwapPrices).mockResolvedValueOnce([
+						{
+							token: {
+								token_id: 1,
+								name: 'Token 2',
+								symbol: 'TKN2',
+								canister_id: 'icrc2',
+								address: null,
+								decimals: 8,
+								fee: 0,
+								fee_fixed: null,
+								has_custom_logo: false,
+								icrc1: true,
+								icrc2: false,
+								icrc3: false,
+								is_removed: false,
+								logo_url: null,
+								logo_updated_at: null,
+								token_type: 'icrc1'
+							},
+							metrics: {
+								token_id: 1,
+								total_supply: null,
+								market_cap: 500,
+								price: 3,
+								updated_at: updatedAt,
+								volume_24h: 100,
+								tvl: null,
+								price_change_24h: 0.1,
+								previous_price: null,
+								is_verified: true
+							}
+						}
+					]);
+
+					const mockEvent = {
+						...event,
+						data: {
+							...event.data,
+							msg,
+							data: {
+								currentCurrency: Currency.CHF,
+								erc20Addresses: [],
+								icrcCanisterIds: mockIcrcLedgerCanisterIds,
+								splAddresses: [],
+								erc4626TokensExchangeData: []
+							}
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
+						id: 'internet-computer',
+						vs_currencies: Currency.USD,
+						contract_addresses: mockIcrcLedgerCanisterIds,
+						include_market_cap: true,
+						include_24hr_change: true
+					});
+
+					expect(fetchBatchKongSwapPrices).toHaveBeenCalledExactlyOnceWith(['icrc2']);
+
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+						msg: 'syncExchange',
+						data: expect.objectContaining({
+							currentIcrcPrices: {
+								icrc1: { usd: 2, usd_market_cap: 1000, usd_24h_change: 0.5 },
+								icrc2: {
+									usd: 3,
+									usd_market_cap: 500,
+									usd_24h_vol: 100,
+									usd_24h_change: 0.1,
+									last_updated_at: new Date(updatedAt).getTime()
+								}
+							}
+						})
+					});
+				});
 
 				it('should sync prices for SPL tokens', async () => {
 					const mockEvent = {

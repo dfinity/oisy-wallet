@@ -1,4 +1,9 @@
 import type { TokenId } from '$declarations/backend/backend.did';
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
@@ -8,6 +13,7 @@ import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
+	CoingeckoCoinsId,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPrice,
 	CoingeckoSimpleTokenPriceResponse
@@ -196,15 +202,18 @@ const mapExchangeRateToCoingecko = (
 	};
 };
 
-const NATIVE_TOKEN_IDS: { tokenId: TokenId; coingeckoKey: string }[] = [
-	{ tokenId: { EvmNative: 1n }, coingeckoKey: 'ethereum' },
+const NATIVE_TOKEN_IDS: { tokenId: TokenId; coingeckoKey: CoingeckoCoinsId }[] = [
+	{ tokenId: { EvmNative: ETHEREUM_NETWORK.chainId }, coingeckoKey: 'ethereum' },
 	{ tokenId: { BtcNativeMainnet: null }, coingeckoKey: 'bitcoin' },
 	{ tokenId: { IcpNative: null }, coingeckoKey: 'internet-computer' },
 	{ tokenId: { SolNativeMainnet: null }, coingeckoKey: 'solana' },
-	{ tokenId: { EvmNative: 56n }, coingeckoKey: 'binancecoin' },
-	{ tokenId: { EvmNative: 137n }, coingeckoKey: 'polygon-ecosystem-token' },
-	{ tokenId: { EvmNative: 8453n }, coingeckoKey: 'ethereum' },
-	{ tokenId: { EvmNative: 42161n }, coingeckoKey: 'ethereum' }
+	{ tokenId: { EvmNative: BSC_MAINNET_NETWORK.chainId }, coingeckoKey: 'binancecoin' },
+	{
+		tokenId: { EvmNative: POLYGON_MAINNET_NETWORK.chainId },
+		coingeckoKey: 'polygon-ecosystem-token'
+	},
+	{ tokenId: { EvmNative: BASE_NETWORK.chainId }, coingeckoKey: 'ethereum' },
+	{ tokenId: { EvmNative: ARBITRUM_MAINNET_NETWORK.chainId }, coingeckoKey: 'ethereum' }
 ];
 
 export const fetchAllExchangeRatesFromBackend = async ({
@@ -228,7 +237,9 @@ export const fetchAllExchangeRatesFromBackend = async ({
 }> => {
 	const tokenIds: TokenId[] = NATIVE_TOKEN_IDS.map(({ tokenId }) => tokenId);
 
-	const erc20TokenPairs = erc20Addresses.reduce<{ address: string; key: string }[]>((acc, t) => {
+	const erc20TokenPairs = erc20Addresses.reduce<
+		{ address: Erc20ContractAddressWithNetwork['address']; key: string }[]
+	>((acc, t) => {
 		const tokenId: TokenId = { Erc20: [t.address, t.chainId] };
 
 		const key = tokenIdKey(tokenId);
@@ -239,7 +250,9 @@ export const fetchAllExchangeRatesFromBackend = async ({
 
 		tokenIds.push(tokenId);
 
-		return [...acc, { address: t.address, key }];
+		acc.push({ address: t.address, key });
+
+		return acc;
 	}, []);
 
 	const icrcTokenPairs = icrcCanisterIds.reduce<{ id: string; key: string }[]>((acc, id) => {
