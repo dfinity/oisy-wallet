@@ -215,7 +215,7 @@ const nativePrice = ({
 	return nonNullish(rate) ? { [coingeckoKey]: rate } : undefined;
 };
 
-type NativeTokenEntry = { tokenId: TokenId; coingeckoKey: CoingeckoCoinsId };
+interface NativeTokenEntry { tokenId: TokenId; coingeckoKey: CoingeckoCoinsId }
 
 const ETH_NATIVE_ENTRY: NativeTokenEntry = {
 	tokenId: { EvmNative: ETHEREUM_NETWORK.chainId },
