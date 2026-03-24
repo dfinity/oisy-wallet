@@ -1,4 +1,5 @@
 import { clearAgents } from '$lib/actors/agents.ic';
+import { consoleError } from '$lib/utils/console.utils';
 
 type ResetFn = () => void;
 
@@ -21,6 +22,10 @@ export const resetActors = (): void => {
 	clearAgents();
 
 	for (const fn of registry) {
-		fn();
+		try {
+			fn();
+		} catch (_: unknown) {
+			// We do not care if the reset fail, since it is purely a clean-up chore
+		}
 	}
 };

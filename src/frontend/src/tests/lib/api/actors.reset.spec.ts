@@ -26,12 +26,6 @@ describe('actors.reset', () => {
 			expect(mockClearAgents).toHaveBeenCalledOnce();
 		});
 
-		it('should call clearAgents when no reset functions are registered', () => {
-			resetFn();
-
-			expect(mockClearAgents).toHaveBeenCalledOnce();
-		});
-
 		it('should call all registered reset functions', () => {
 			const resetFn1 = vi.fn();
 			const resetFn2 = vi.fn();
@@ -41,6 +35,20 @@ describe('actors.reset', () => {
 
 			resetFn();
 
+			expect(resetFn1).toHaveBeenCalledOnce();
+			expect(resetFn2).toHaveBeenCalledOnce();
+		});
+
+		it('should continue calling remaining callbacks if one throws', () => {
+			const resetFn1 = vi.fn(() => {
+				throw new Error('boom');
+			});
+			const resetFn2 = vi.fn();
+
+			registerFn(resetFn1);
+			registerFn(resetFn2);
+
+			expect(() => resetFn()).not.toThrow();
 			expect(resetFn1).toHaveBeenCalledOnce();
 			expect(resetFn2).toHaveBeenCalledOnce();
 		});
