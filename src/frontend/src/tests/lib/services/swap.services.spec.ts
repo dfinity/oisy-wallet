@@ -17,7 +17,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
 import {
-	fetchNearIntentsSwap,
+	fetchNearIntentsEvmSwap,
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
 	fetchSwapAmountsSOL,
@@ -1694,7 +1694,7 @@ describe('swap.services', () => {
 		});
 	});
 
-	describe('fetchNearIntentsSwap', () => {
+	describe('fetchNearIntentsEvmSwap', () => {
 		const sourceToken = {
 			...mockValidErc20Token,
 			decimals: 6,
@@ -1719,7 +1719,7 @@ describe('swap.services', () => {
 		});
 
 		it('should execute the full NEAR Intents swap flow using swapDetails directly', async () => {
-			await fetchNearIntentsSwap({
+			await fetchNearIntentsEvmSwap({
 				identity: mockIdentity,
 				progress: mockProgress,
 				sourceToken,
@@ -1751,7 +1751,7 @@ describe('swap.services', () => {
 		});
 
 		it('should report progress steps in correct order', async () => {
-			await fetchNearIntentsSwap({
+			await fetchNearIntentsEvmSwap({
 				identity: mockIdentity,
 				progress: mockProgress,
 				sourceToken,
@@ -1779,7 +1779,7 @@ describe('swap.services', () => {
 				quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: 'stellar-memo' }
 			};
 
-			await fetchNearIntentsSwap({
+			await fetchNearIntentsEvmSwap({
 				identity: mockIdentity,
 				progress: mockProgress,
 				sourceToken,

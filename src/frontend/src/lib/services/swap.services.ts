@@ -628,7 +628,7 @@ export const fetchIcpSwap = async ({
 	await waitAndTriggerWallet();
 };
 
-export const fetchNearIntentsSwap = async ({
+export const fetchNearIntentsEvmSwap = async ({
 	identity,
 	progress,
 	sourceToken,

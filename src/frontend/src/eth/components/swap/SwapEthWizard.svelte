@@ -33,7 +33,7 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
-		fetchNearIntentsSwap,
+		fetchNearIntentsEvmSwap,
 		fetchVeloraDeltaSwap,
 		fetchVeloraMarketSwap
 	} from '$lib/services/swap.services';
@@ -274,7 +274,7 @@
 					swapDetails: selectedProvider.swapDetails
 				};
 
-				await fetchNearIntentsSwap(params);
+				await fetchNearIntentsEvmSwap(params);
 			} else {
 				const params = {
 					...baseParams,
