@@ -1,9 +1,10 @@
 //! Types related to the signer & topping up the cycles ledger account for use with the signer.
 
-use candid::{Nat, Principal};
+use std::fmt::Debug;
+
+use candid::{CandidType, Deserialize, Nat, Principal};
 use ic_cycles_ledger_client::ApproveError;
 
-use super::{CandidType, Debug, Deserialize};
 use crate::types::pow::AllowSigningStatus;
 /// Types related to topping up the cycles ledger account for use with the signer.
 
@@ -54,10 +55,10 @@ pub struct GetAllowedCyclesResponse {
 }
 
 pub mod topup {
-    use candid::Nat;
-    use serde::Serialize;
+    use std::fmt::Debug;
 
-    use super::{CandidType, Debug, Deserialize};
+    use candid::{CandidType, Deserialize, Nat};
+    use serde::Serialize;
     /// A request to top up the cycles ledger.
     #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq, Default)]
     pub struct TopUpCyclesLedgerRequest {

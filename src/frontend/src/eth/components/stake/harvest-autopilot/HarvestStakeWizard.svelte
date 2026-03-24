@@ -18,13 +18,16 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import StakeProgress from '$lib/components/stake/StakeProgress.svelte';
-	import {
-		TRACK_COUNT_STAKE_ERROR,
-		TRACK_COUNT_STAKE_SUCCESS
-	} from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SOURCES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_EARN,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import { ProgressStepsStake } from '$lib/enums/progress-steps';
 	import { WizardStepsStake } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -34,6 +37,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { Vault } from '$lib/types/vaults';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -57,7 +61,7 @@
 		onBack
 	}: Props = $props();
 
-	const { sendTokenDecimals, sendTokenSymbol, sendToken, sendTokenId } =
+	const { sendTokenDecimals, sendToken, sendTokenId, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let sourceNetwork = $derived($sendToken.network as EthereumNetwork);
@@ -113,6 +117,8 @@
 		untrack(() => evaluateFee());
 	});
 
+	let estimatedSharesToReceive = $state<OptionAmount>();
+
 	const stake = async () => {
 		if (isNullish($authIdentity)) {
 			return;
@@ -150,6 +156,35 @@
 
 		onNext();
 
+		const startTime = performance.now();
+
+		const trackEventBaseParams = {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.EARN,
+			event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_EARN.HARVEST_AUTOPILOT,
+			source_location: PLAUSIBLE_EVENT_SOURCES.HARVEST_AUTOPILOT,
+			source_sublocation: vault.token.name,
+			token_network: $sendToken.network.name,
+			token_address: ($sendToken as Erc20Token).address,
+			token_standard: $sendToken.standard.code,
+			token_symbol: $sendToken.symbol,
+			token_name: $sendToken.name,
+			token_amount: `${amount}`,
+			token2_network: vault.token.network.name,
+			token2_address: vault.token.address,
+			token2_standard: vault.token.standard.code,
+			token2_symbol: vault.token.symbol,
+			token2_name: vault.token.name,
+			...(nonNullish($sendTokenExchangeRate)
+				? {
+						token_usd_value: `${Number(amount) * $sendTokenExchangeRate}`,
+						token_usd_price: `${$sendTokenExchangeRate}`
+					}
+				: {}),
+			...(nonNullish(estimatedSharesToReceive)
+				? { token2_amount: `${estimatedSharesToReceive}` }
+				: {})
+		};
+
 		try {
 			await depositErc4626({
 				identity: $authIdentity,
@@ -166,27 +201,46 @@
 				progress: (step: ProgressStepsStake) => (stakeProgressStep = step)
 			});
 
+			const duration = performance.now() - startTime;
+			const durationInSeconds = duration / 1000;
+
 			trackEvent({
-				name: TRACK_COUNT_STAKE_SUCCESS,
+				name: PLAUSIBLE_EVENTS.STAKE,
 				metadata: {
-					token: $sendTokenSymbol
+					...trackEventBaseParams,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+					result_duration_in_seconds: `${durationInSeconds}`,
+					result_duration_in_seconds_rounded: `${Math.round(durationInSeconds)}`
 				}
 			});
 
 			stakeProgressStep = ProgressStepsStake.DONE;
 
 			setTimeout(() => onClose(), 750);
-		} catch (err: unknown) {
+		} catch (error: unknown) {
+			const duration = performance.now() - startTime;
+			const durationInSeconds = duration / 1000;
+			const errorMessage =
+				errorDetailToString(error) ?? $i18n.stake.error.unexpected_error_on_stake;
+			const errorName = error instanceof Error ? error.name : undefined;
+			const errorCode = (error as { code?: string }).code;
+
 			trackEvent({
-				name: TRACK_COUNT_STAKE_ERROR,
+				name: PLAUSIBLE_EVENTS.STAKE,
 				metadata: {
-					token: $sendTokenSymbol
+					...trackEventBaseParams,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_duration_in_seconds: `${durationInSeconds}`,
+					result_duration_in_seconds_rounded: `${Math.round(durationInSeconds)}`,
+					result_error_text: errorMessage,
+					...(nonNullish(errorName) ? { result_error: errorName } : {}),
+					...(nonNullish(errorCode) ? { result_error_code: errorCode } : {})
 				}
 			});
 
 			toastsError({
 				msg: { text: $i18n.stake.error.unexpected_error_on_stake },
-				err
+				err: error
 			});
 
 			onBack();
@@ -207,7 +261,7 @@
 	>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsStake.STAKE}
-				<HarvestStakeForm {onClose} {onNext} {vault} bind:amount />
+				<HarvestStakeForm {onClose} {onNext} {vault} bind:amount bind:estimatedSharesToReceive />
 			{:else if currentStep?.name === WizardStepsStake.REVIEW}
 				<HarvestStakeReview {amount} {onBack} onStake={stake} {vault} />
 			{:else if currentStep?.name === WizardStepsStake.STAKING}

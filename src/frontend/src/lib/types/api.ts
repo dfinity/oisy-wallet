@@ -1,6 +1,7 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
 	AllowSigningResponse,
+	TokenId as BackendTokenId,
 	Network as BitcoinNetwork,
 	Contact,
 	CredentialSpec,
@@ -9,6 +10,7 @@ import type {
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
+	UserTransaction,
 	Utxo
 } from '$declarations/backend/backend.did';
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
@@ -209,4 +211,15 @@ export interface DeleteContactParams {
 export interface UpdateUserExperimentalFeatureSettings {
 	experimentalFeatures: UserExperimentalFeatures;
 	currentUserVersion?: bigint;
+}
+
+export interface GetUserTransactionsParams {
+	tokenId: BackendTokenId;
+	start?: bigint;
+	maxResults: bigint;
+}
+
+export interface SaveUserTransactionsParams {
+	tokenId: BackendTokenId;
+	transactions: UserTransaction[];
 }

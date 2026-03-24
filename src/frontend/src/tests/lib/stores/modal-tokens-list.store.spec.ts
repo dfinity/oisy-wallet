@@ -115,6 +115,36 @@ describe('modalTokensListStore', () => {
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
 	});
 
+	it('should update tokens via setTokens', () => {
+		const { filteredTokens, setTokens } = initModalTokensListContext({
+			tokens: [mockToken1, mockToken2]
+		});
+
+		expect(get(filteredTokens)).toHaveLength(2);
+
+		setTokens([mockToken1]);
+
+		expect(get(filteredTokens)).toHaveLength(1);
+	});
+
+	it('should update filter network via setFilterNetwork', () => {
+		const { filterNetwork, filteredTokens, setFilterNetwork } = initModalTokensListContext({
+			filterZeroBalance: true,
+			tokens: [mockToken1, mockToken2]
+		});
+
+		expect(get(filterNetwork)).toBeUndefined();
+
+		setFilterNetwork(ICP_NETWORK);
+
+		expect(get(filterNetwork)).toBe(ICP_NETWORK);
+		expect(get(filteredTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
+
+		setFilterNetwork(undefined);
+
+		expect(get(filterNetwork)).toBeUndefined();
+	});
+
 	it('should filter tokens by network', () => {
 		const { filterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
 			filterNetwork: ETHEREUM_NETWORK,

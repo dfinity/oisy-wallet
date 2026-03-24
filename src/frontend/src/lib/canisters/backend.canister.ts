@@ -6,6 +6,7 @@ import type {
 	CustomToken,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	GetUserTransactionsResponse,
 	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
@@ -32,8 +33,10 @@ import type {
 	BtcSelectUserUtxosFeeParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
+	GetUserTransactionsParams,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateUserExperimentalFeatureSettings
@@ -448,5 +451,43 @@ export class BackendCanister extends Canister<BackendService> {
 
 			return acc;
 		}, new Map());
+	};
+
+	getUserTransactions = async ({
+		tokenId,
+		start,
+		maxResults
+	}: GetUserTransactionsParams): Promise<GetUserTransactionsResponse> => {
+		const { get_user_transactions } = this.caller({ certified: false });
+
+		const response = await get_user_transactions({
+			token_id: tokenId,
+			start: toNullable(start),
+			max_results: maxResults
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw response.Err;
+	};
+
+	saveUserTransactions = async ({
+		tokenId,
+		transactions
+	}: SaveUserTransactionsParams): Promise<void> => {
+		const { save_user_transactions } = this.caller({ certified: true });
+
+		const response = await save_user_transactions({
+			token_id: tokenId,
+			transactions
+		});
+
+		if ('Ok' in response) {
+			return;
+		}
+
+		throw response.Err;
 	};
 }

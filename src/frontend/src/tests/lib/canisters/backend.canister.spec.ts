@@ -29,6 +29,11 @@ import {
 } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockDefinedUserAgreements, mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
+import {
+	mockGetUserTransactionsResponse,
+	mockUserTransaction,
+	mockUserTransactionTokenId
+} from '$tests/mocks/user-transactions.mock';
 import { toNullable } from '@dfinity/utils';
 import { mapIcrc2ApproveError } from '@icp-sdk/canisters/ledger/icp';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
@@ -1507,6 +1512,128 @@ describe('backend.canister', () => {
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
 			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('getUserTransactions', () => {
+		const getUserTransactionsParams = {
+			tokenId: mockUserTransactionTokenId,
+			start: 5n,
+			maxResults: 10n
+		};
+
+		it('should return user transactions with success response', async () => {
+			service.get_user_transactions.mockResolvedValue({
+				Ok: mockGetUserTransactionsResponse
+			});
+
+			const { getUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getUserTransactions(getUserTransactionsParams);
+
+			expect(service.get_user_transactions).toHaveBeenCalledWith({
+				token_id: mockUserTransactionTokenId,
+				start: [5n],
+				max_results: 10n
+			});
+			expect(res).toEqual(mockGetUserTransactionsResponse);
+		});
+
+		it('should pass empty array for start when undefined', async () => {
+			service.get_user_transactions.mockResolvedValue({
+				Ok: mockGetUserTransactionsResponse
+			});
+
+			const { getUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await getUserTransactions({ tokenId: mockUserTransactionTokenId, maxResults: 10n });
+
+			expect(service.get_user_transactions).toHaveBeenCalledWith({
+				token_id: mockUserTransactionTokenId,
+				start: [],
+				max_results: 10n
+			});
+		});
+
+		it('should throw an error if get_user_transactions returns an error', async () => {
+			service.get_user_transactions.mockResolvedValue(errorResponse);
+
+			const { getUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getUserTransactions(getUserTransactionsParams)).rejects.toEqual(
+				errorResponse.Err
+			);
+		});
+
+		it('should throw an error if get_user_transactions throws', async () => {
+			service.get_user_transactions.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getUserTransactions(getUserTransactionsParams)).rejects.toThrow(
+				mockResponseError
+			);
+		});
+	});
+
+	describe('saveUserTransactions', () => {
+		const saveUserTransactionsParams = {
+			tokenId: mockUserTransactionTokenId,
+			transactions: [mockUserTransaction]
+		};
+
+		it('should save user transactions with success response', async () => {
+			service.save_user_transactions.mockResolvedValue({ Ok: null });
+
+			const { saveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await saveUserTransactions(saveUserTransactionsParams);
+
+			expect(service.save_user_transactions).toHaveBeenCalledWith({
+				token_id: mockUserTransactionTokenId,
+				transactions: [mockUserTransaction]
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if save_user_transactions returns an error', async () => {
+			service.save_user_transactions.mockResolvedValue(errorResponse);
+
+			const { saveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(saveUserTransactions(saveUserTransactionsParams)).rejects.toEqual(
+				errorResponse.Err
+			);
+		});
+
+		it('should throw an error if save_user_transactions throws', async () => {
+			service.save_user_transactions.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { saveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(saveUserTransactions(saveUserTransactionsParams)).rejects.toThrow(
+				mockResponseError
+			);
 		});
 	});
 
