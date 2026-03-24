@@ -1136,113 +1136,113 @@
 			"contract_address": "Vertragsadresse",
 			"token_address": "Token-Adresse",
 			"balance": "Guthaben",
-			"hide_zero_balances": "Nullsalden ausblenden",
-			"all_tokens_with_zero_hidden": "Alle Assets mit Nullsaldo sind derzeit verborgen",
-			"filter_nothing_found": "Keine aktiven Token gefunden",
-			"filter_nothing_found_description": "Suche unten nach verfügbaren Token oder importiere zusätzliche Token mittels \"Token verwalten\"",
+			"hide_zero_balances": "Nullguthaben ausblenden",
+			"all_tokens_with_zero_hidden": "Alle Vermögenswerte mit Nullguthaben sind derzeit ausgeblendet",
+			"filter_nothing_found": "Keine aktivierten Token gefunden",
+			"filter_nothing_found_description": "Suche unten nach verfügbaren Vermögenswerten oder verwende „Token verwalten", um weitere Token zu importieren",
 			"filter_placeholder": "Nach Token oder Symbol filtern",
 			"buy_or_receive": "Kaufe oder empfange jetzt deine ersten Token, um sie in der Liste zu sehen",
-			"initializing": "Initialisiere...",
-			"updating_ui": "UI aktualisieren...",
+			"initializing": "Initialisierung...",
+			"updating_ui": "Benutzeroberfläche wird aktualisiert...",
 			"show_token": "Token anzeigen",
-			"hide_token": "Token verbergen",
+			"hide_token": "Token ausblenden",
 			"select_token": "Token auswählen",
 			"exchange_is_not_available": "USD-Wert ist derzeit nicht verfügbar.",
 			"exchange_is_not_available_short": "USD-Wert nicht verfügbar",
 			"source_token_title": "Du zahlst",
 			"destination_token_title": "Du erhältst",
-			"chain_key": "Chain-Key",
-			"show_more_networks": "Zeige $number weitere Netzwerke",
-			"hide_more_networks": "Weitere Netzwerke verbergen",
+			"chain_key": "Chain Key",
+			"show_more_networks": "$number weitere Netzwerke anzeigen",
+			"hide_more_networks": "Weitere Netzwerke ausblenden",
 			"on_network": " auf $network",
 			"delete_token": "Token löschen",
 			"edit_token": "Token bearbeiten",
-			"sort_by_value": "Saldo",
-			"sort_by_performance": "Performance",
+			"sort_by_value": "Wert",
+			"sort_by_performance": "Token-Performance",
 			"sort_by_symbol": "Symbol",
-			"hide_asset_types": "Asset-Typen ausblenden",
-			"asset_type": "Asset-Typ in $oisy_name",
-			"asset_type_all": "Alle Asset-Typen",
-			"no_tokens_for_asset_type": "Es hat keine $asset_type in deiner Wallet",
-			"no_tokens_for_asset_type_description": "Wähle aus <strong>$count unterstützten Tokens</strong> um deine Portfolio Ansicht zu konfigurieren."
+			"hide_asset_types": "Anlageklassen ausblenden",
+			"asset_type": "Anlageklasse in $oisy_name",
+			"asset_type_all": "Alle Anlageklassen",
+			"no_tokens_for_asset_type": "Es gibt keine $asset_type in deiner Wallet",
+			"no_tokens_for_asset_type_description": "Wähle aus <strong>$count unterstützten Token</strong>, um deine Portfolioansicht anzupassen."
 		},
 		"details": {
 			"title": "Token-Details",
 			"token": "Token",
 			"network": "Netzwerk",
-			"contract_address_copied": "Vertragsadresse in Zwischenablage kopiert.",
-			"token_address_copied": "Token-Adresse in Zwischenablage kopiert.",
-			"twin_token": "Twin-Token",
+			"contract_address_copied": "Vertragsadresse in die Zwischenablage kopiert.",
+			"token_address_copied": "Token-Adresse in die Zwischenablage kopiert.",
+			"twin_token": "Zwillingstoken",
 			"standard": "Standard",
-			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen.",
-			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Tokenliste entfernt.",
+			"confirm_deletion_description": "Dadurch wird <span class=\"font-bold\">$token</span> aus deiner $oisy_short Token-Liste entfernt. Deine Mittel bleiben unberührt – du kannst den Token jederzeit wieder hinzufügen.",
+			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Token-Liste entfernt.",
 			"update_confirmation": "$token wurde erfolgreich aktualisiert.",
 			"missing_index_canister_id_label": "Nicht zugewiesen",
-			"missing_index_canister_id_warning": "Index Canister fehlt, und $oisy_short kann die Transaktionshistorie nicht anzeigen",
-			"missing_index_canister_id_button": "Index Canister angeben"
+			"missing_index_canister_id_warning": "Index-Canister fehlt, daher kann $oisy_short keine Transaktionsliste abrufen",
+			"missing_index_canister_id_button": "Index-Canister festlegen"
 		},
 		"balance": {
 			"error": {
-				"not_applicable": "k. A."
+				"not_applicable": "n/v"
 			}
 		},
 		"import": {
 			"text": {
 				"title": "Token importieren",
-				"title_nft": "",
+				"title_nft": "NFT-Kollektion importieren",
 				"review": "Überprüfen",
-				"saving": "Speichere...",
-				"updating": "Aktualisiere Token-Liste",
-				"canister_id": "",
+				"saving": "Wird gespeichert...",
+				"updating": "Token-Liste wird aktualisiert",
+				"canister_id": "Canister-ID",
 				"ledger_canister_id": "Ledger-Canister-ID",
 				"index_canister_id": "Index-Canister-ID",
 				"minter_canister_id": "Minter-Canister-ID",
-				"ledger_canister_id_copied": "Ledger-Canister-ID in Zwischenablage kopiert.",
-				"index_canister_id_copied": "Index-Canister-ID in Zwischenablage kopiert.",
-				"minter_canister_id_copied": "Minter-Canister-ID in Zwischenablage kopiert.",
-				"verifying": "Überprüfe Token-Details...",
+				"ledger_canister_id_copied": "Ledger-Canister-ID in die Zwischenablage kopiert.",
+				"index_canister_id_copied": "Index-Canister-ID in die Zwischenablage kopiert.",
+				"minter_canister_id_copied": "Minter-Canister-ID in die Zwischenablage kopiert.",
+				"verifying": "Token-Details werden verifiziert...",
 				"add_the_token": "Token hinzufügen",
-				"info": "Ledger- und Index-Canister-IDs sind normalerweise auf der Website des Projekts verfügbar.",
-				"info_ext": "",
-				"info_index": "Die Index-Canister-ID ist optional, aber ohne sie kann $oisy_short den Transaktionsverlauf nicht anzeigen.",
+				"info": "Ledger- und Index-Canister-IDs sind in der Regel auf der Projektwebsite verfügbar.",
+				"info_ext": "Die Canister-ID ist in der Regel auf der Projektwebsite verfügbar.",
+				"info_index": "Die Index-Canister-ID ist optional, aber ohne sie kann $oisy_short keinen Transaktionsverlauf anzeigen.",
 				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
 			},
 			"error": {
-				"loading_metadata": "Die angegebene Adresse ist kein gültiges Token in der gewählten Blockchain",
-				"no_metadata": "Keine Metadaten für das Token verfügbar. Das ist unerwartet.",
-				"unexpected_ledger": "Beim Validieren des Ledger-Canisters ist etwas schiefgelaufen.",
-				"unexpected_index": "Beim Validieren des Index-Canisters ist etwas schiefgelaufen.",
-				"unexpected_index_ledger": "Beim Laden der Ledger-ID im Zusammenhang mit dem Index-Canister ist etwas schiefgelaufen.",
-				"unrecognized_nft_canister_id_standard": "",
-				"invalid_ledger_id": "Die Ledger-ID gehört nicht zum Index-Canister.",
+				"loading_metadata": "Die angegebene Adresse ist kein gültiger Token im ausgewählten Netzwerk.",
+				"no_metadata": "Es wurden keine Metadaten für den Token angegeben. Dies ist unerwartet.",
+				"unexpected_ledger": "Beim Validieren des Ledger-Canisters ist ein Fehler aufgetreten.",
+				"unexpected_index": "Beim Validieren des Index-Canisters ist ein Fehler aufgetreten.",
+				"unexpected_index_ledger": "Beim Laden der Ledger-ID zum Index-Canister ist ein Fehler aufgetreten.",
+				"unrecognized_nft_canister_id_standard": "Der NFT-Kollektion-Canister-ID-Standard konnte nicht erkannt werden. Bitte überprüfe die angegebene Canister-ID und versuche es erneut. Kontaktiere den Support, wenn das Problem weiterhin besteht.",
+				"invalid_ledger_id": "Die Ledger-ID ist nicht mit dem Index-Canister verknüpft.",
 				"missing_ledger_id": "Die Ledger-ID fehlt. Hast du einen Wert angegeben?",
-				"missing_canister_id": "",
+				"missing_canister_id": "Die Canister-ID fehlt. Hast du einen Wert angegeben?",
 				"missing_contract_address": "Die Vertragsadresse fehlt. Hast du einen Wert angegeben?",
 				"missing_token_address": "Die Token-Adresse fehlt. Hast du einen Wert angegeben?",
-				"no_network": "Kein Netzwerk ausgewählt. Das ist unerwartet."
+				"no_network": "Es ist kein Netzwerk ausgewählt. Dies ist unerwartet."
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name bereitet neue Token vor und sichert sie. Bitte schließe diesen Tab nicht, bis der Vorgang abgeschlossen ist."
+				"do_not_close_manage": "$oisy_name bereitet die neuen Token vor und sichert sie. Bitte schließe diesen Tab nicht, bis der Vorgang abgeschlossen ist."
 			}
 		},
 		"manage": {
 			"text": {
 				"title": "Token verwalten",
-				"title_nft": "",
+				"title_nft": "NFT-Kollektionen verwalten",
 				"manage_list": "Token verwalten",
-				"manage_list_nft": "",
-				"list_settings": "Listen-Einstellungen",
+				"manage_list_nft": "NFTs verwalten",
+				"list_settings": "Listeneinstellungen",
 				"import_token": "Token importieren",
-				"import_nft": "",
+				"import_nft": "NFT-Kollektion importieren",
 				"network": "Netzwerk",
-				"all_tokens_zero_balance": "Alle Token haben Nullsaldo.",
+				"all_tokens_zero_balance": "Alle Token haben ein Nullguthaben.",
 				"enable_more_assets": "Weitere Token aktivieren"
 			},
 			"placeholder": {
 				"select_network": "Netzwerk auswählen"
 			},
 			"info": {
-				"no_changes": "Keine Änderungen zum Speichern."
+				"no_changes": "Es gibt keine Änderungen, die gespeichert werden müssen."
 			},
 			"error": {
 				"unexpected_build": "Beim Erstellen der Liste bekannter Token ist ein unerwarteter Fehler aufgetreten.",
@@ -1250,46 +1250,46 @@
 			}
 		},
 		"hide": {
-			"title": "Token verbergen?",
-			"token": "Verberge $token",
-			"info": "Du kannst dieses Token später wieder hinzufügen, indem du im Wallet-Bereich auf <strong>„Token verwalten“</strong> gehst.",
-			"confirm": "Verbergen",
-			"hiding": "Verberge..."
+			"title": "Token ausblenden?",
+			"token": "$token ausblenden",
+			"info": "Du kannst diesen Token in Zukunft wieder hinzufügen, indem du in deiner Wallet-Ansicht auf <strong>„Token verwalten"</strong> gehst.",
+			"confirm": "Ausblenden",
+			"hiding": "Wird ausgeblendet..."
 		},
 		"alt": {
-			"context_menu": "Kontextmenü für das ausgewählte Token",
-			"open_etherscan": "Details des Tokens auf Etherscan öffnen",
-			"open_blockstream": "Details des Tokens auf Blockstream öffnen",
-			"open_dashboard": "Details des Tokens im ICP-Dashboard öffnen",
-			"open_contract_address_block_explorer": "Vertragsadresse im Block-Explorer öffnen",
-			"open_token_address_block_explorer": "Token-Adresse im Block-Explorer öffnen",
-			"token_group_number": "Gesamtanzahl der Token in der Gruppe für das native Token $token",
+			"context_menu": "Kontextmenü für den ausgewählten Token",
+			"open_etherscan": "Token-Details auf Etherscan öffnen",
+			"open_blockstream": "Token-Details auf Blockstream öffnen",
+			"open_dashboard": "Token-Details auf dem ICP-Dashboard öffnen",
+			"open_contract_address_block_explorer": "Vertragsadresse in einem Block-Explorer öffnen",
+			"open_token_address_block_explorer": "Token-Adresse in einem Block-Explorer öffnen",
+			"token_group_number": "Gesamtanzahl der Token in der Gruppe für nativen Token $token",
 			"filter_button": "Filter öffnen/schließen"
 		},
 		"placeholder": {
-			"enter_contract_address": "Gib eine ERC20-Vertragsadresse ein",
-			"enter_token_address": "Gib eine SPL-Token-Adresse ein",
+			"enter_contract_address": "ERC20-Vertragsadresse eingeben",
+			"enter_token_address": "SPL-Token-Adresse eingeben",
 			"search_token": "Nach Token suchen"
 		},
 		"warning": {
-			"trust_token": "Stelle sicher, dass du dem Token vertraust, das du hinzufügst. Wenn das Token von einer böswilligen Partei kontrolliert wird, könnten sie versuchen, Dich zu betrügen, z. B. indem sie Dir glauben machen, du hättest eine beträchtliche Menge Token erhalten, um Dich dazu zu bringen, Token zurückzusenden oder andere unerwünschte Aktionen vorzunehmen. Erfahre mehr über Betrugs- und Sicherheitsrisiken z. B. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">hier</a>."
+			"trust_token": "Stelle sicher, dass du dem Token vertraust, den du hinzufügst. Wenn der Token, den du hinzufügst, von einer böswilligen Partei kontrolliert wird, könnten diese versuchen, dich zu betrügen – z. B. indem sie dich glauben lassen, du hättest eine erhebliche Menge Token erhalten, um dich dazu zu bringen, ihnen Token zurückzusenden oder andere unerwünschte Aktionen durchzuführen. Erfahre mehr über Betrug und Sicherheitsrisiken z. B. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">hier</a>."
 		},
 		"error": {
 			"invalid_contract_address": "Vertragsadresse ist ungültig.",
 			"invalid_token_address": "Token-Adresse ist ungültig.",
-			"invalid_ledger": "Das ausgewählte Token ist nicht mit einem ICRC-Ledger-Canister verknüpft.",
-			"unrecognised_erc_interface": "Unbekanntes ERC Interface.",
+			"invalid_ledger": "Der ausgewählte Token ist nicht mit einem ICRC-Ledger-Canister verknüpft.",
+			"unrecognised_erc_interface": "Unbekannte ERC-Schnittstelle.",
 			"no_metadata": "Es wurden keine Metadaten abgerufen.",
-			"unexpected": "Beim Speichern des Tokens ist etwas schiefgelaufen.",
-			"version_mismatch": "",
-			"unexpected_hiding": "Beim Verbergen des Tokens ist etwas schiefgelaufen.",
+			"unexpected": "Beim Speichern des Tokens ist ein Fehler aufgetreten.",
+			"version_mismatch": "Der Token wurde seit dem Laden aktualisiert. Bitte überprüfe seinen Status erneut und wiederhole den Vorgang bei Bedarf.",
+			"unexpected_hiding": "Beim Ausblenden des Tokens ist ein Fehler aufgetreten.",
 			"already_available": "Token ist bereits verfügbar.",
-			"not_toggleable": "Token kann nicht ausgeblendet werden.",
-			"incomplete_metadata": "Kein Name oder Symbol in den Metadaten vorhanden.",
-			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol existiert bereits.",
-			"unexpected_undefined": "Token ist undefiniert. Das ist unerwartet.",
-			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen.",
-			"unexpected_error_on_token_update": "Beim Aktualisieren des Tokens ist etwas schiefgelaufen."
+			"not_toggleable": "Token kann nicht umgeschaltet werden und lässt sich nicht ausblenden.",
+			"incomplete_metadata": "In den Metadaten ist kein Name oder Symbol angegeben.",
+			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol ist bereits vorhanden.",
+			"unexpected_undefined": "Token ist nicht definiert. Dies ist unerwartet.",
+			"unexpected_error_on_token_delete": "Beim Entfernen des Tokens ist ein Fehler aufgetreten.",
+			"unexpected_error_on_token_update": "Beim Aktualisieren des Tokens ist ein Fehler aufgetreten."
 		}
 	},
 	"token_tag": {
@@ -1298,15 +1298,15 @@
 			"risk": "Risiko"
 		},
 		"category": {
-			"crypto": "Crypto",
-			"stablecoin": "Stablecoin",
+			"crypto": "Krypto",
+			"stablecoin": "Stablecoins",
 			"stock": "Aktien",
 			"commodity": "Rohstoffe"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Geringes Risiko",
+			"medium": "Mittleres Risiko",
+			"high": "Hohes Risiko"
 		}
 	},
 	"nfts": {
