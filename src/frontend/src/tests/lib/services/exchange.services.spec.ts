@@ -7,8 +7,7 @@ import {
 	exchangeRateICRCToUsd,
 	exchangeRateUsdToCurrency,
 	fetchAllExchangeRatesFromBackend,
-	syncExchange,
-	toTokenId
+	syncExchange
 } from '$lib/services/exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -229,62 +228,6 @@ describe('exchange.services', () => {
 		});
 	});
 
-	describe('toTokenId', () => {
-		it('should return Icrc variant for icrc standard', () => {
-			const result = toTokenId({ address: 'ryjl3-tyaaa-aaaaa-aaaba-cai', standard: 'icrc' });
-
-			expect(result).toEqual({ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') });
-		});
-
-		it('should return Erc20 variant for ethereum coingeckoId', () => {
-			const result = toTokenId({ address: '0xabc', coingeckoId: 'ethereum' });
-
-			expect(result).toEqual({ Erc20: ['0xabc', 1n] });
-		});
-
-		it('should return Erc20 variant for binance-smart-chain coingeckoId', () => {
-			const result = toTokenId({ address: '0xdef', coingeckoId: 'binance-smart-chain' });
-
-			expect(result).toEqual({ Erc20: ['0xdef', 56n] });
-		});
-
-		it('should return Erc20 variant for polygon-pos coingeckoId', () => {
-			const result = toTokenId({ address: '0x123', coingeckoId: 'polygon-pos' });
-
-			expect(result).toEqual({ Erc20: ['0x123', 137n] });
-		});
-
-		it('should return Erc20 variant for base coingeckoId', () => {
-			const result = toTokenId({ address: '0x456', coingeckoId: 'base' });
-
-			expect(result).toEqual({ Erc20: ['0x456', 8453n] });
-		});
-
-		it('should return Erc20 variant for arbitrum-one coingeckoId', () => {
-			const result = toTokenId({ address: '0x789', coingeckoId: 'arbitrum-one' });
-
-			expect(result).toEqual({ Erc20: ['0x789', 42161n] });
-		});
-
-		it('should use explicit chain_id over coingeckoId mapping', () => {
-			const result = toTokenId({ address: '0xabc', coingeckoId: 'ethereum', chain_id: 999n });
-
-			expect(result).toEqual({ Erc20: ['0xabc', 999n] });
-		});
-
-		it('should return undefined for unknown coingeckoId without chain_id', () => {
-			const result = toTokenId({ address: '0xabc', coingeckoId: 'unknown-chain' });
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should return undefined when no standard, coingeckoId, or chain_id is provided', () => {
-			const result = toTokenId({ address: '0xabc' });
-
-			expect(result).toBeUndefined();
-		});
-	});
-
 	describe('fetchAllExchangeRatesFromBackend', () => {
 		const mockExchangeRate: BackendExchangeRate = {
 			usd: {
@@ -313,7 +256,7 @@ describe('exchange.services', () => {
 			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			await fetchAllExchangeRatesFromBackend({
-				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
 				splTokenAddresses: ['SoLaddr1']
 			});
@@ -353,7 +296,7 @@ describe('exchange.services', () => {
 			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
-				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
 				splTokenAddresses: ['SoLaddr1']
 			});
@@ -364,14 +307,14 @@ describe('exchange.services', () => {
 			expect(result.currentIcrcPrices).toEqual({
 				'ryjl3-tyaaa-aaaaa-aaaba-cai': expectedPrice
 			});
-			expect(result.currentSplPrices).toEqual({ soladdr1: expectedPrice });
+			expect(result.currentSplPrices).toEqual({ SoLaddr1: expectedPrice });
 		});
 
 		it('should return empty objects and undefined native prices when no rates are returned', async () => {
 			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			const result = await fetchAllExchangeRatesFromBackend({
-				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
 				splTokenAddresses: ['SoLaddr1']
 			});
@@ -402,7 +345,7 @@ describe('exchange.services', () => {
 			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
-				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: [],
 				splTokenAddresses: []
 			});
@@ -414,7 +357,7 @@ describe('exchange.services', () => {
 			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			const result = await fetchAllExchangeRatesFromBackend({
-				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: [],
 				splTokenAddresses: []
 			});
@@ -422,12 +365,12 @@ describe('exchange.services', () => {
 			expect(result.currentErc20Prices).toEqual({});
 		});
 
-		it('should skip erc20 addresses with unknown coingeckoId but still include native tokens', async () => {
+		it('should include erc20 addresses via chainId regardless of coingeckoId', async () => {
 			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			await fetchAllExchangeRatesFromBackend({
-				// @ts-expect-error Testing invalid input types
-				erc20Addresses: [{ address: '0xunknown', coingeckoId: 'some-unknown-chain' }],
+				// @ts-expect-error Testing with non-standard coingeckoId
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'some-unknown-chain', chainId: 999n }],
 				icrcCanisterIds: [],
 				splTokenAddresses: []
 			});
@@ -442,7 +385,8 @@ describe('exchange.services', () => {
 						{ EvmNative: 56n },
 						{ EvmNative: 137n },
 						{ EvmNative: 8453n },
-						{ EvmNative: 42161n }
+						{ EvmNative: 42161n },
+						{ Erc20: ['0xabc', 999n] }
 					]
 				})
 			);
@@ -491,7 +435,7 @@ describe('exchange.services', () => {
 			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
-				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum' }],
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: [],
 				splTokenAddresses: []
 			});
