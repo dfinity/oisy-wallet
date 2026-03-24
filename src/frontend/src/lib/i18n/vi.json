@@ -1157,14 +1157,14 @@
 			"on_network": " trên mạng $network",
 			"delete_token": "Xóa token",
 			"edit_token": "Chỉnh sửa token",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Giá trị",
+			"sort_by_performance": "Hiệu suất token",
+			"sort_by_symbol": "Ký hiệu",
+			"hide_asset_types": "Ẩn loại tài sản",
+			"asset_type": "Loại tài sản trong $oisy_name",
+			"asset_type_all": "Tất cả loại tài sản",
+			"no_tokens_for_asset_type": "Ví của bạn không có $asset_type nào",
+			"no_tokens_for_asset_type_description": "Chọn từ <strong>$count token được hỗ trợ</strong> để tùy chỉnh chế độ xem danh mục đầu tư của bạn."
 		},
 		"details": {
 			"title": "Chi tiết token",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Danh mục",
+			"risk": "Rủi ro"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Tiền mã hóa",
+			"stablecoin": "Stablecoin",
+			"stock": "Cổ phiếu",
+			"commodity": "Hàng hóa"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Rủi ro thấp",
+			"medium": "Rủi ro trung bình",
+			"high": "Rủi ro cao"
 		}
 	},
 	"nfts": {
