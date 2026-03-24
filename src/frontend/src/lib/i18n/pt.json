@@ -1157,14 +1157,14 @@
 			"on_network": " na rede $network",
 			"delete_token": "Excluir token",
 			"edit_token": "Editar token",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Valor",
+			"sort_by_performance": "Desempenho do token",
+			"sort_by_symbol": "Símbolo",
+			"hide_asset_types": "Ocultar tipos de ativos",
+			"asset_type": "Tipo de ativo em $oisy_name",
+			"asset_type_all": "Todos os tipos de ativos",
+			"no_tokens_for_asset_type": "Não há $asset_type na sua carteira",
+			"no_tokens_for_asset_type_description": "Escolha entre <strong>$count tokens suportados</strong> para personalizar a visualização do seu portfólio."
 		},
 		"details": {
 			"title": "Detalhes do token",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Categoria",
+			"risk": "Risco"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Criptomoedas",
+			"stablecoin": "Stablecoins",
+			"stock": "Ações",
+			"commodity": "Commodities"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Risco baixo",
+			"medium": "Risco médio",
+			"high": "Risco alto"
 		}
 	},
 	"nfts": {

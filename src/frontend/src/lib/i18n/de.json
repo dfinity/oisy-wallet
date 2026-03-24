@@ -1136,8 +1136,8 @@
 			"contract_address": "Vertragsadresse",
 			"token_address": "Token-Adresse",
 			"balance": "Guthaben",
-			"hide_zero_balances": "Nullsalden verbergen",
-			"all_tokens_with_zero_hidden": "Alle Assets mit Nullsaldo sind derzeit verborgen",
+			"hide_zero_balances": "Nullsalden ausblenden",
+			"all_tokens_with_zero_hidden": "Alle Assets mit Nullsaldo sind derzeit ausgeblendet",
 			"filter_nothing_found": "Keine aktiven Token gefunden",
 			"filter_nothing_found_description": "Suche unten nach verfügbaren Token oder importiere zusätzliche Token mittels \"Token verwalten\"",
 			"filter_placeholder": "Nach Token oder Symbol filtern",
@@ -1157,14 +1157,14 @@
 			"on_network": " auf $network",
 			"delete_token": "Token löschen",
 			"edit_token": "Token bearbeiten",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Wert",
+			"sort_by_performance": "Token-Performance",
+			"sort_by_symbol": "Symbol",
+			"hide_asset_types": "Anlageklassen ausblenden",
+			"asset_type": "Anlageklasse in $oisy_name",
+			"asset_type_all": "Alle Anlageklassen",
+			"no_tokens_for_asset_type": "Es gibt keine $asset_type in deiner Wallet",
+			"no_tokens_for_asset_type_description": "Wähle aus <strong>$count unterstützten Token</strong>, um deine Portfolioansicht anzupassen."
 		},
 		"details": {
 			"title": "Token-Details",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Kategorie",
+			"risk": "Risiko"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Krypto",
+			"stablecoin": "Stablecoins",
+			"stock": "Aktien",
+			"commodity": "Rohstoffe"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Geringes Risiko",
+			"medium": "Mittleres Risiko",
+			"high": "Hohes Risiko"
 		}
 	},
 	"nfts": {

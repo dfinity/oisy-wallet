@@ -1157,14 +1157,14 @@
 			"on_network": "$network上",
 			"delete_token": "トークンを削除",
 			"edit_token": "トークンを編集",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "価値",
+			"sort_by_performance": "トークンのパフォーマンス",
+			"sort_by_symbol": "シンボル",
+			"hide_asset_types": "アセットタイプを非表示",
+			"asset_type": "$oisy_nameのアセットタイプ",
+			"asset_type_all": "すべてのアセットタイプ",
+			"no_tokens_for_asset_type": "ウォレットに$asset_typeはありません",
+			"no_tokens_for_asset_type_description": "<strong>$count種類の対応トークン</strong>から選択してポートフォリオ表示をカスタマイズしてください。"
 		},
 		"details": {
 			"title": "トークンの詳細",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "カテゴリー",
+			"risk": "リスク"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "暗号資産",
+			"stablecoin": "ステーブルコイン",
+			"stock": "株式",
+			"commodity": "コモディティ"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "低リスク",
+			"medium": "中リスク",
+			"high": "高リスク"
 		}
 	},
 	"nfts": {

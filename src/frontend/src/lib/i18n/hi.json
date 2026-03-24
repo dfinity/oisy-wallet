@@ -1157,14 +1157,14 @@
 			"on_network": " $network पर",
 			"delete_token": "टोकन मिटाएँ",
 			"edit_token": "टोकन संपादित करें",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "मूल्य",
+			"sort_by_performance": "टोकन प्रदर्शन",
+			"sort_by_symbol": "प्रतीक",
+			"hide_asset_types": "असेट प्रकार छुपाएं",
+			"asset_type": "$oisy_name में असेट प्रकार",
+			"asset_type_all": "सभी असेट प्रकार",
+			"no_tokens_for_asset_type": "आपके वॉलेट में कोई $asset_type नहीं है",
+			"no_tokens_for_asset_type_description": "अपना पोर्टफोलियो दृश्य अनुकूलित करने के लिए <strong>$count समर्थित टोकन</strong> में से चुनें।"
 		},
 		"details": {
 			"title": "टोकन विवरण",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "श्रेणी",
+			"risk": "जोखिम"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "क्रिप्टो",
+			"stablecoin": "स्टेबलकॉइन",
+			"stock": "शेयर",
+			"commodity": "कमोडिटी"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "कम जोखिम",
+			"medium": "मध्यम जोखिम",
+			"high": "उच्च जोखिम"
 		}
 	},
 	"nfts": {
