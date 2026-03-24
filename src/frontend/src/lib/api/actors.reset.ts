@@ -1,5 +1,4 @@
 import { clearAgents } from '$lib/actors/agents.ic';
-import { consoleError } from '$lib/utils/console.utils';
 
 type ResetFn = () => void;
 

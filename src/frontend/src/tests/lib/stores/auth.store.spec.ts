@@ -26,6 +26,14 @@ vi.mock('$lib/providers/auth-client.providers', () => ({
 	}
 }));
 
+vi.mock('$lib/providers/auth-broadcast.providers', () => ({
+	AuthBroadcastChannel: {
+		getInstance: () => ({
+			postLoginSuccess: vi.fn()
+		})
+	}
+}));
+
 describe('auth.store', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -71,6 +79,21 @@ describe('auth.store', () => {
 			mockAuthClient.getIdentity.mockReturnValue(identity);
 
 			await authStore.forceSync();
+
+			expect(mockResetActors).toHaveBeenCalledOnce();
+		});
+
+		it('should call resetActors on signIn success', async () => {
+			mockAuthClient.isAuthenticated.mockResolvedValue(true);
+			mockAuthClient.getIdentity.mockReturnValue(identity);
+			mockAuthClient.login.mockImplementation(async ({ onSuccess }: { onSuccess: () => void }) => {
+				onSuccess();
+			});
+
+			await authStore.sync();
+			mockResetActors.mockClear();
+
+			await authStore.signIn({});
 
 			expect(mockResetActors).toHaveBeenCalledOnce();
 		});
