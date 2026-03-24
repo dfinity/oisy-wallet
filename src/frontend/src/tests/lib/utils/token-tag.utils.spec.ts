@@ -177,5 +177,78 @@ describe('token-tag.utils', () => {
 
 			expect(result).toHaveLength(0);
 		});
+
+		describe('group token counts', () => {
+			const mkTokenUiWithOverrides = (tags: Token['tags'], overrides?: Partial<Token>): TokenUi =>
+				({ ...mockValidToken, ...overrides, tags }) as TokenUi;
+
+			const cryptoTokenUiGroup = mkTokenUiWithOverrides(cryptoToken.tags, {
+				name: 'CryptoToken',
+				symbol: 'CRY'
+			});
+			const stableTokenUiGroup = mkTokenUiWithOverrides(stablecoinToken.tags, {
+				name: 'StableToken',
+				symbol: 'STB'
+			});
+			const stockTokenUiGroup = mkTokenUiWithOverrides(stockToken.tags, {
+				name: 'StockToken',
+				symbol: 'STK'
+			});
+
+			it('should filter group tokens to only those matching the selected category', () => {
+				const groupTokens: TokenUi[] = [cryptoTokenUiGroup, stableTokenUiGroup, stockTokenUiGroup];
+
+				const filtered = filterTokensUiByCategory({
+					tokens: groupTokens,
+					category: TokenCategoryTagValue.CRYPTO
+				});
+
+				expect(filtered).toHaveLength(1);
+				expect(filtered[0]).toBe(cryptoTokenUiGroup);
+			});
+
+			it('should return all group tokens when no category is selected', () => {
+				const groupTokens: TokenUi[] = [cryptoTokenUiGroup, stableTokenUiGroup, stockTokenUiGroup];
+
+				const filtered = filterTokensUiByCategory({
+					tokens: groupTokens,
+					category: undefined
+				});
+
+				expect(filtered).toHaveLength(3);
+			});
+
+			it('should return correct count when multiple tokens match the category', () => {
+				const anotherCryptoTokenUi = mkTokenUiWithOverrides(cryptoToken.tags, {
+					name: 'AnotherCrypto',
+					symbol: 'AC'
+				});
+				const groupTokens: TokenUi[] = [
+					cryptoTokenUiGroup,
+					stableTokenUiGroup,
+					anotherCryptoTokenUi
+				];
+
+				const filtered = filterTokensUiByCategory({
+					tokens: groupTokens,
+					category: TokenCategoryTagValue.CRYPTO
+				});
+
+				expect(filtered).toHaveLength(2);
+				expect(filtered).toContain(cryptoTokenUiGroup);
+				expect(filtered).toContain(anotherCryptoTokenUi);
+			});
+
+			it('should return empty when no group tokens match the category', () => {
+				const groupTokens: TokenUi[] = [stableTokenUiGroup, stockTokenUiGroup];
+
+				const filtered = filterTokensUiByCategory({
+					tokens: groupTokens,
+					category: TokenCategoryTagValue.CRYPTO
+				});
+
+				expect(filtered).toHaveLength(0);
+			});
+		});
 	});
 });
