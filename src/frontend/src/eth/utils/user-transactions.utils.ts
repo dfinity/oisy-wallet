@@ -1,6 +1,5 @@
-import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
+import type { UserTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
-import type { TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 
@@ -105,27 +104,3 @@ export const isTransactionFinalized = ({
 	blockNumber?: number;
 	currentBlockNumber: number;
 }): boolean => nonNullish(blockNumber) && currentBlockNumber - blockNumber >= ETH_FINALITY_BLOCKS;
-
-export const ercTokenId = ({
-	contractAddress,
-	chainId,
-	standard
-}: {
-	contractAddress: string;
-	chainId: bigint;
-	standard: TokenStandard;
-}): BackendTokenId | undefined => {
-	const pair: [string, bigint] = [contractAddress, chainId];
-	switch (standard.code) {
-		case 'erc20':
-			return { Erc20: pair };
-		case 'erc721':
-			return { Erc721: pair };
-		case 'erc1155':
-			return { Erc1155: pair };
-		case 'erc4626':
-			return { Erc4626: pair };
-		default:
-			return undefined;
-	}
-};
