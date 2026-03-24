@@ -15,11 +15,7 @@ import {
 	sortIcTokens,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import {
-	TokenCategoryTagValue,
-	TokenRiskTagValue,
-	TokenTagType
-} from '$lib/enums/token-tag';
+import { TokenCategoryTagValue, TokenRiskTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
 import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -397,9 +393,7 @@ describe('icrc.utils', () => {
 						icrcCustomTokens: {
 							[mockToken.ledgerCanisterId]: {
 								...mockToken,
-								tags: [
-									{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
-								]
+								tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }]
 							}
 						},
 						twinToken: mockCryptoTwinToken
