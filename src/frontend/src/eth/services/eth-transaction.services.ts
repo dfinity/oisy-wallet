@@ -33,11 +33,20 @@ export const processTransactionSent = async ({
 	// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
 	const value = decodeErc20AbiDataValue({ data: transaction.data });
 
-	await processErc20Transaction({ identity, hash: transaction.hash, value, token, type: 'pending' });
+	await processErc20Transaction({
+		identity,
+		hash: transaction.hash,
+		value,
+		token,
+		type: 'pending'
+	});
 };
 
-export const processEthTransaction = async (params: { identity: OptionIdentity; hash: string; token: Token }) =>
-	await processPendingTransaction(params);
+export const processEthTransaction = async (params: {
+	identity: OptionIdentity;
+	hash: string;
+	token: Token;
+}) => await processPendingTransaction(params);
 
 export const processErc20Transaction = async ({
 	type,
@@ -118,7 +127,13 @@ const processPendingTransaction = async ({
 // we noticed that, even if the transaction is mined, the source or the destination address is not
 // the real address, but the token address. That gave wrong data in the UI.
 // So, we decided to call the service that reloads all transactions.
-const processMinedTransaction = async ({ identity, token }: { identity: OptionIdentity; token: Token }) => {
+const processMinedTransaction = async ({
+	identity,
+	token
+}: {
+	identity: OptionIdentity;
+	token: Token;
+}) => {
 	const { id: tokenId, standard, network } = token;
 
 	assertIsNetworkEthereum(network);
