@@ -11,7 +11,7 @@ import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
-import type { OptionSolAddress } from '$sol/types/address';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { Identity } from '@icp-sdk/core/agent';
 import type {
 	BridgePrice,
@@ -243,17 +243,26 @@ export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	isGasless: boolean;
 }
 
-export interface SwapNearIntentsParams extends RequiredTransactionFeeData {
+interface SwapNearIntentsParams {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
+	sourceToken: Token;
+	swapAmount: Amount;
+	swapDetails: NearIntentsQuoteResponse;
+}
+
+export interface SwapNearIntentsEvmParams
+	extends SwapNearIntentsParams, RequiredTransactionFeeData {
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token;
-	swapAmount: Amount;
 	receiveAmount: bigint;
 	slippageValue: Amount;
 	sourceNetwork: EthereumNetwork;
 	userAddress: EthAddress;
-	swapDetails: NearIntentsQuoteResponse;
+}
+
+export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
+	userAddress: SolAddress;
 }
 
 export interface CheckDeltaOrderStatusParams {

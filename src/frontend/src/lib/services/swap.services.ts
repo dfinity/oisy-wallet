@@ -56,6 +56,8 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import type { Amount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -68,10 +70,12 @@ import {
 	type IcpSwapWithdrawResponse,
 	type NearIntentsQuoteParams,
 	type SwapMappedResult,
-	type SwapNearIntentsParams,
+	type SwapNearIntentsEvmParams,
+	type SwapNearIntentsSolParams,
 	type SwapParams,
 	type SwapVeloraParams
 } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
@@ -83,6 +87,7 @@ import {
 	getWithdrawableToken
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+import { sendSol } from '$sol/services/sol-send.services';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -628,18 +633,19 @@ export const fetchIcpSwap = async ({
 	await waitAndTriggerWallet();
 };
 
-export const fetchNearIntentsEvmSwap = async ({
-	identity,
+const executeNearIntentsSwap = async ({
 	progress,
 	sourceToken,
 	swapAmount,
-	sourceNetwork,
-	userAddress,
-	gas,
-	maxFeePerGas,
-	maxPriorityFeePerGas,
-	swapDetails
-}: SwapNearIntentsParams): Promise<void> => {
+	swapDetails,
+	sendTransaction
+}: {
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: Token;
+	swapAmount: Amount;
+	swapDetails: NearIntentsQuoteResponse;
+	sendTransaction: (params: { amount: bigint; depositAddress: string }) => Promise<string>;
+}): Promise<void> => {
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
@@ -649,17 +655,7 @@ export const fetchNearIntentsEvmSwap = async ({
 
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
 
-	const { hash: txHash } = await sendEvm({
-		from: userAddress,
-		to: depositAddress,
-		amount: parsedSwapAmount,
-		token: sourceToken,
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		maxPriorityFeePerGas
-	});
+	const txHash = await sendTransaction({ amount: parsedSwapAmount, depositAddress });
 
 	progress(ProgressStepsSwap.SWAP);
 
@@ -677,6 +673,65 @@ export const fetchNearIntentsEvmSwap = async ({
 	progress(ProgressStepsSwap.UPDATE_UI);
 
 	await waitAndTriggerWallet();
+};
+
+export const fetchNearIntentsEvmSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	swapAmount,
+	sourceNetwork,
+	userAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapNearIntentsEvmParams): Promise<void> => {
+	await executeNearIntentsSwap({
+		progress,
+		sourceToken,
+		swapAmount,
+		swapDetails,
+		sendTransaction: async ({ amount, depositAddress }) => {
+			const { hash } = await sendEvm({
+				from: userAddress,
+				to: depositAddress,
+				amount,
+				token: sourceToken,
+				sourceNetwork,
+				identity,
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
+			});
+			return hash;
+		}
+	});
+};
+
+export const fetchNearIntentsSolSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	swapAmount,
+	userAddress,
+	swapDetails
+}: SwapNearIntentsSolParams): Promise<void> => {
+	await executeNearIntentsSwap({
+		progress,
+		sourceToken,
+		swapAmount,
+		swapDetails,
+		sendTransaction: async ({ amount, depositAddress }) =>
+			await sendSol({
+				identity,
+				token: sourceToken,
+				amount,
+				destination: depositAddress,
+				source: userAddress,
+				prioritizationFee: ZERO
+			})
+	});
 };
 
 export const swapService = {
