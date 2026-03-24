@@ -230,7 +230,9 @@ const NATIVE_TOKEN_IDS: { tokenId: TokenId; coingeckoKey: string }[] = [
 	{ tokenId: { IcpNative: null }, coingeckoKey: 'internet-computer' },
 	{ tokenId: { SolNativeMainnet: null }, coingeckoKey: 'solana' },
 	{ tokenId: { EvmNative: 56n }, coingeckoKey: 'binancecoin' },
-	{ tokenId: { EvmNative: 137n }, coingeckoKey: 'polygon-ecosystem-token' }
+	{ tokenId: { EvmNative: 137n }, coingeckoKey: 'polygon-ecosystem-token' },
+	{ tokenId: { EvmNative: 8453n }, coingeckoKey: 'ethereum' },
+	{ tokenId: { EvmNative: 42161n }, coingeckoKey: 'ethereum' }
 ];
 
 export const fetchAllExchangeRatesFromBackend = async ({

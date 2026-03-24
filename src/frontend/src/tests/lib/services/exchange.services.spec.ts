@@ -326,6 +326,8 @@ describe('exchange.services', () => {
 					{ SolNativeMainnet: null },
 					{ EvmNative: 56n },
 					{ EvmNative: 137n },
+					{ EvmNative: 8453n },
+					{ EvmNative: 42161n },
 					{ Erc20: ['0xabc', 1n] },
 					{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
 					{ SplMainnet: 'SoLaddr1' }
@@ -438,7 +440,9 @@ describe('exchange.services', () => {
 						{ IcpNative: null },
 						{ SolNativeMainnet: null },
 						{ EvmNative: 56n },
-						{ EvmNative: 137n }
+						{ EvmNative: 137n },
+						{ EvmNative: 8453n },
+						{ EvmNative: 42161n }
 					]
 				})
 			);
