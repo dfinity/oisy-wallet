@@ -3,6 +3,7 @@
 	import shocked from '$lib/assets/shocked.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { notEmptyString } from '@dfinity/utils';
 
 	interface Props {
 		title?: string;
@@ -10,6 +11,10 @@
 	}
 
 	let { title, description }: Props = $props();
+
+	let descriptionText: string = $derived(
+		description ?? $i18n.tokens.text.filter_nothing_found_description
+	);
 </script>
 
 <div class="py-12">
@@ -23,8 +28,10 @@
 		<p class="m-0 text-center text-lg font-bold">
 			{title ?? $i18n.tokens.text.filter_nothing_found}
 		</p>
-		<p class="m-0 text-center text-tertiary">
-			<Html text={description ?? $i18n.tokens.text.filter_nothing_found_description} />
-		</p>
+		{#if notEmptyString(descriptionText)}
+			<p class="m-0 text-center text-tertiary">
+				<Html text={descriptionText} />
+			</p>
+		{/if}
 	</div>
 </div>
