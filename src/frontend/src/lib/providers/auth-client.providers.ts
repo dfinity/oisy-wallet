@@ -1,5 +1,5 @@
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
+import { AuthClient, IdbStorage, KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
 
 export class AuthClientProvider {
@@ -68,12 +68,18 @@ export class AuthClientProvider {
 	/**
 	 * Since icp-js-core persists identity keys in IndexedDB by default,
 	 * they could be tampered with and affect the next login.
-	 * To ensure each session starts clean and safe, we clear the stored keys before creating a new AuthClient.
+	 * To ensure each session starts clean and safe, we clear the stored keys
+	 * AND delegation before creating a new AuthClient. Both must be removed
+	 * together because a leftover delegation paired with a freshly generated
+	 * key produces an ECDSA P256 signature / delegation mismatch.
 	 */
 	safeCreateAuthClient = async (
 		args: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
 	): Promise<AuthClient> => {
-		await this.#storage.remove(KEY_STORAGE_KEY);
+		await Promise.all([
+			this.#storage.remove(KEY_STORAGE_KEY),
+			this.#storage.remove(KEY_STORAGE_DELEGATION)
+		]);
 
 		return await this.createAuthClient({ ...args, forceRecreate: true });
 	};
