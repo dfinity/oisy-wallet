@@ -35,14 +35,14 @@ const enabledIcrcTwinTokensAddresses: Readable<Erc20ContractAddressWithNetwork[]
 
 				return isTokenErc20(twinToken) && nonNullish(twinToken.address);
 			})
-		.map((token) => {
-			const {
-				address,
-				network: { exchange, chainId }
-			} = (token as IcCkToken).twinToken as Erc20Token;
+			.map((token) => {
+				const {
+					address,
+					network: { exchange, chainId }
+				} = (token as IcCkToken).twinToken as Erc20Token;
 
-			return { address, coingeckoId: exchange?.coingeckoId ?? 'ethereum', chainId };
-		})
+				return { address, coingeckoId: exchange?.coingeckoId ?? 'ethereum', chainId };
+			})
 );
 
 export const enabledMergedErc20TokensAddresses: Readable<Erc20ContractAddressWithNetwork[]> =
