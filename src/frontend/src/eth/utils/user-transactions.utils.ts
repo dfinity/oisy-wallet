@@ -2,66 +2,97 @@ import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/b
 import { ZERO } from '$lib/constants/app.constants';
 import type { TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
-import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+
+export const mapTransactionToUserTransaction = (transaction: Transaction): UserTransaction => {
+	if (isNullish(transaction.hash)) {
+		throw new Error('Cannot store a transaction without a hash');
+	}
+
+	const {
+		hash: id,
+		blockNumber,
+		timestamp,
+		from,
+		to,
+		value,
+		chainId,
+		nonce,
+		gasLimit,
+		gasPrice,
+		gasUsed,
+		data,
+		tokenId
+	} = transaction;
+
+	return {
+		id,
+		block_index: BigInt(blockNumber ?? 0),
+		timestamp: BigInt(timestamp ?? 0),
+		from,
+		to: toNullable(to),
+		value,
+		network_data: {
+			Evm: {
+				chain_id: toNullable(nonNullish(chainId) ? BigInt(chainId) : undefined),
+				nonce: toNullable(nonNullish(nonce) ? BigInt(nonce) : undefined),
+				gas_limit: toNullable(gasLimit),
+				gas_price: toNullable(gasPrice),
+				gas_used: toNullable(gasUsed),
+				data: toNullable(data),
+				nft_token_id: toNullable(nonNullish(tokenId) ? BigInt(tokenId) : undefined)
+			}
+		}
+	};
+};
+
+export const mapUserTransactionToTransaction = (transaction: UserTransaction): Transaction => {
+	if (!('Evm' in transaction.network_data)) {
+		throw new Error('Expected Evm network data for ETH transaction mapping');
+	}
+
+	const {
+		id: hash,
+		block_index,
+		timestamp,
+		from,
+		to,
+		value,
+		network_data: { Evm: evm }
+	} = transaction;
+
+	const {
+		nonce,
+		chain_id: chainId,
+		gas_limit: gasLimit,
+		gas_price: gasPrice,
+		gas_used: gasUsed,
+		data,
+		nft_token_id: nftTokenId
+	} = evm;
+
+	return {
+		hash,
+		blockNumber: Number(block_index),
+		timestamp: Number(timestamp),
+		from,
+		to: fromNullable(to),
+		value,
+		chainId: fromNullable(chainId) ?? ZERO,
+		nonce: nonNullish(nonce) ? Number(fromNullable(nonce)) : 0,
+		gasLimit: fromNullable(gasLimit) ?? ZERO,
+		gasPrice: fromNullable(gasPrice),
+		gasUsed: fromNullable(gasUsed),
+		data: fromNullable(data) ?? '',
+		tokenId: nonNullish(nftTokenId) ? Number(fromNullable(nftTokenId)) : undefined
+	};
+};
 
 /**
  * Number of blocks behind the tip at which an ETH transaction is considered finalized.
  * 64 blocks ≈ 2 finality checkpoints on Ethereum PoS.
  */
 export const ETH_FINALITY_BLOCKS = 64;
-
-export const mapTransactionToUserTransaction = (tx: Transaction): UserTransaction => {
-	if (tx.hash === undefined || tx.hash === null) {
-		throw new Error('Cannot store a transaction without a hash');
-	}
-
-	return {
-		id: tx.hash,
-		block_index: BigInt(tx.blockNumber ?? 0),
-		timestamp: BigInt(tx.timestamp ?? 0),
-		from: tx.from,
-		to: toNullable(tx.to ?? undefined),
-		value: tx.value ?? ZERO,
-		network_data: {
-			Evm: {
-				chain_id: toNullable(nonNullish(tx.chainId) ? BigInt(tx.chainId) : undefined),
-				nonce: toNullable(nonNullish(tx.nonce) ? BigInt(tx.nonce) : undefined),
-				gas_limit: toNullable(tx.gasLimit ?? undefined),
-				gas_price: toNullable(tx.gasPrice ?? undefined),
-				gas_used: toNullable(tx.gasUsed ?? undefined),
-				data: toNullable(tx.data ?? undefined),
-				nft_token_id: toNullable(nonNullish(tx.tokenId) ? BigInt(tx.tokenId) : undefined)
-			}
-		}
-	};
-};
-
-export const mapUserTransactionToTransaction = (stored: UserTransaction): Transaction => {
-	if (!('Evm' in stored.network_data)) {
-		throw new Error('Expected Evm network data for ETH transaction mapping');
-	}
-
-	const evm = stored.network_data.Evm;
-
-	const nonce = fromNullable(evm.nonce);
-	const nftTokenId = fromNullable(evm.nft_token_id);
-
-	return {
-		hash: stored.id,
-		blockNumber: Number(stored.block_index),
-		timestamp: Number(stored.timestamp),
-		from: stored.from,
-		to: fromNullable(stored.to),
-		value: stored.value,
-		chainId: fromNullable(evm.chain_id) ?? ZERO,
-		nonce: nonNullish(nonce) ? Number(nonce) : 0,
-		gasLimit: fromNullable(evm.gas_limit) ?? ZERO,
-		gasPrice: fromNullable(evm.gas_price),
-		gasUsed: fromNullable(evm.gas_used),
-		data: fromNullable(evm.data) ?? '',
-		tokenId: nonNullish(nftTokenId) ? Number(nftTokenId) : undefined
-	};
-};
 
 /**
  * Returns true if a transaction is finalized (immutable) based on the current block number.
@@ -71,18 +102,9 @@ export const isTransactionFinalized = ({
 	blockNumber,
 	currentBlockNumber
 }: {
-	blockNumber: number | undefined;
+	blockNumber?: number;
 	currentBlockNumber: number;
-}): boolean => {
-	if (blockNumber === undefined) {
-		return false;
-	}
-	return currentBlockNumber - blockNumber >= ETH_FINALITY_BLOCKS;
-};
-
-export const evmNativeTokenId = (chainId: bigint): BackendTokenId => ({
-	EvmNative: chainId
-});
+}): boolean => nonNullish(blockNumber) && currentBlockNumber - blockNumber >= ETH_FINALITY_BLOCKS;
 
 export const ercTokenId = ({
 	contractAddress,

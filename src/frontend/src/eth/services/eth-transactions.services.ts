@@ -1,3 +1,4 @@
+import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
@@ -22,7 +23,6 @@ import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { filterSpamErc20Transfers } from '$eth/utils/eth-transactions-spam.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { evmNativeTokenId } from '$eth/utils/user-transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
@@ -95,7 +95,7 @@ const loadEthTransactions = async ({
 	const identity = get(authIdentity);
 
 	try {
-		const transactionTokenId = evmNativeTokenId(chainId);
+		const transactionTokenId: BackendTokenId = { EvmNative: chainId };
 
 		const stored = await loadEthUserTransactions({ identity, tokenId: transactionTokenId });
 
