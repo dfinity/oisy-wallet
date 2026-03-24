@@ -62,6 +62,20 @@
 	const { sendTokenDecimals, sendTokenSymbol, sendToken, sendTokenId, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	let isMaxAmount = $derived.by(() => {
+		if (amountSetToMax) {
+			return true;
+		}
+
+		if (isNullish(amount) || isNullish($sendBalance) || invalidAmount(amount)) {
+			return false;
+		}
+
+		const parsedAmount = parseToken({ value: `${amount}`, unitName: $sendTokenDecimals });
+
+		return parsedAmount === $sendBalance;
+	});
+
 	let sourceNetwork = $derived($sendToken.network as EthereumNetwork);
 
 	/**
@@ -163,7 +177,7 @@
 				progress: (step: ProgressStepsUnstake) => (unstakeProgressStep = step)
 			};
 
-			if (amountSetToMax && nonNullish(vault.token.balance)) {
+			if (isMaxAmount && nonNullish(vault.token.balance)) {
 				await redeemErc4626({
 					...feeParams,
 					shares: vault.token.balance
@@ -211,7 +225,7 @@
 		bind:this={feeContext}
 		{amount}
 		erc4626ContractAddress={vault.token.address}
-		erc4626Operation={amountSetToMax ? 'redeem' : 'withdraw'}
+		erc4626Operation={isMaxAmount ? 'redeem' : 'withdraw'}
 		erc4626Shares={vault.token.balance ?? ZERO}
 		maxAmount={nonNullish($sendBalance) ? $sendBalance : undefined}
 		{nativeEthereumToken}
