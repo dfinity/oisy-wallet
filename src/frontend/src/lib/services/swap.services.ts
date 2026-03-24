@@ -4,9 +4,6 @@ import { createPermit } from '$eth/services/eip2612-permit.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
-import type { Amount } from '$lib/types/send';
-import type { Token } from '$lib/types/token';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
@@ -59,6 +56,8 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import type { Amount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -76,6 +75,7 @@ import {
 	type SwapParams,
 	type SwapVeloraParams
 } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';

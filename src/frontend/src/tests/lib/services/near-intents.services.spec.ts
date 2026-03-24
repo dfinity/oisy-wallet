@@ -249,9 +249,7 @@ describe('near-intents.services', () => {
 			};
 
 			beforeEach(() => {
-				vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(
-					mockNearIntentsTokens
-				);
+				vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
 			});
 
 			it('should return a SwapMappedResult for SOL-SPL to EVM quote', async () => {
@@ -320,10 +318,8 @@ describe('near-intents.services', () => {
 
 				expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledWith(
 					expect.objectContaining({
-						originAsset:
-							'nep141:sol-EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v.omft.near',
-						destinationAsset:
-							'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
+						originAsset: 'nep141:sol-EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v.omft.near',
+						destinationAsset: 'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
 						recipient: mockSolAddress,
 						refundTo: mockSolAddress
 					})
