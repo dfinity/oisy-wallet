@@ -1160,11 +1160,11 @@
 			"sort_by_value": "가치",
 			"sort_by_performance": "토큰 성과",
 			"sort_by_symbol": "심볼",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"hide_asset_types": "자산 유형 숨기기",
+			"asset_type": "$oisy_name의 자산 유형",
+			"asset_type_all": "모든 자산 유형",
+			"no_tokens_for_asset_type": "지갑에 $asset_type이(가) 없습니다",
+			"no_tokens_for_asset_type_description": "<strong>$count개의 지원 토큰</strong> 중에서 선택하여 포트폴리오 보기를 맞춤 설정하세요."
 		},
 		"details": {
 			"title": "토큰 상세 정보",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "카테고리",
+			"risk": "위험도"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "암호화폐",
+			"stablecoin": "스테이블코인",
+			"stock": "주식",
+			"commodity": "원자재"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "낮은 위험",
+			"medium": "중간 위험",
+			"high": "높은 위험"
 		}
 	},
 	"nfts": {
