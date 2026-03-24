@@ -27,11 +27,11 @@ import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
-import { authIdentity } from '$lib/derived/auth.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Address } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
@@ -42,6 +42,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadEthereumTransactions = ({
+	identity,
 	networkId,
 	tokenId,
 	chainId,
@@ -49,6 +50,7 @@ export const loadEthereumTransactions = ({
 	updateOnly = false,
 	silent = false
 }: {
+	identity: OptionIdentity;
 	tokenId: TokenId;
 	networkId: NetworkId;
 	chainId: EthereumChainId;
@@ -57,7 +59,7 @@ export const loadEthereumTransactions = ({
 	silent?: boolean;
 }): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(tokenId) || isSupportedEvmNativeTokenId(tokenId)) {
-		return loadEthTransactions({ networkId, tokenId, chainId, updateOnly, silent });
+		return loadEthTransactions({ identity, networkId, tokenId, chainId, updateOnly, silent });
 	}
 
 	return loadErcTransactions({ networkId, tokenId, standard, updateOnly });
@@ -66,6 +68,7 @@ export const loadEthereumTransactions = ({
 // If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
 // Plus, we add new transactions to the existing ones.
 export const reloadEthereumTransactions = (params: {
+	identity: OptionIdentity;
 	tokenId: TokenId;
 	networkId: NetworkId;
 	chainId: EthereumChainId;
@@ -74,12 +77,14 @@ export const reloadEthereumTransactions = (params: {
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
 const loadEthTransactions = async ({
+	identity,
 	networkId,
 	tokenId,
 	chainId,
 	updateOnly = false,
 	silent = false
 }: {
+	identity: OptionIdentity;
 	networkId: NetworkId;
 	tokenId: TokenId;
 	chainId: EthereumChainId;
@@ -91,8 +96,6 @@ const loadEthTransactions = async ({
 	if (isNullish(address)) {
 		return { success: false };
 	}
-
-	const identity = get(authIdentity);
 
 	try {
 		const transactionTokenId: BackendTokenId = { EvmNative: chainId };
