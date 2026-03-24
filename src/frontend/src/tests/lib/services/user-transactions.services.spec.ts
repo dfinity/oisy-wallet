@@ -14,7 +14,10 @@ import {
 	mockUserTransactionTokenId
 } from '$tests/mocks/user-transactions.mock';
 
-vi.mock('$lib/api/backend.api');
+vi.mock('$lib/api/backend.api', () => ({
+	getUserTransactions: vi.fn(),
+	saveUserTransactions: vi.fn()
+}));
 
 describe('user-transactions.services', () => {
 	const mapFromBackend = (tx: UserTransaction): Transaction => ({
