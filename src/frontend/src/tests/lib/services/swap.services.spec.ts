@@ -18,6 +18,7 @@ import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
 import {
 	fetchNearIntentsEvmSwap,
+	fetchNearIntentsSolSwap,
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
 	fetchSwapAmountsSOL,
@@ -35,6 +36,7 @@ import type { ICPSwapAmountReply } from '$lib/types/api';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { sendSol } from '$sol/services/sol-send.services';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -42,6 +44,7 @@ import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
+import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockVeloraSwapDetails } from '$tests/mocks/velora.mock';
@@ -1803,6 +1806,90 @@ describe('swap.services', () => {
 			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
 				depositAddress,
 				depositMemo: 'stellar-memo'
+			});
+		});
+	});
+
+	describe('fetchNearIntentsSolSwap', () => {
+		const sourceToken = mockValidSplToken;
+		const mockProgress = vi.fn();
+		const solTxSignature = mockSolSignature();
+		const { depositAddress } = mockNearIntentsQuoteResponse.quote;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(sendSol).mockResolvedValue(solTxSignature);
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+		});
+
+		it('should execute the full Solana swap flow', async () => {
+			await fetchNearIntentsSolSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				swapAmount: '1',
+				userAddress: mockSolAddress,
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+
+			expect(sendSol).toHaveBeenCalledWith(
+				expect.objectContaining({
+					token: sourceToken,
+					destination: depositAddress,
+					source: mockSolAddress,
+					prioritizationFee: ZERO
+				})
+			);
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
+				depositAddress,
+				txHash: solTxSignature
+			});
+			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
+				depositAddress
+			});
+		});
+
+		it('should report progress steps in correct order', async () => {
+			await fetchNearIntentsSolSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				swapAmount: '1',
+				userAddress: mockSolAddress,
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+
+			expect(mockProgress).toHaveBeenCalledTimes(3);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SIGN_TRANSFER);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('should pass depositMemo when present in quote', async () => {
+			const quoteWithMemo = {
+				...mockNearIntentsQuoteResponse,
+				quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: 'sol-memo-123' }
+			};
+
+			await fetchNearIntentsSolSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				swapAmount: '1',
+				userAddress: mockSolAddress,
+				swapDetails: quoteWithMemo
+			});
+
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
+				depositAddress,
+				txHash: solTxSignature,
+				depositMemo: 'sol-memo-123'
+			});
+			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
+				depositAddress,
+				depositMemo: 'sol-memo-123'
 			});
 		});
 	});

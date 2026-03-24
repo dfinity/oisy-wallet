@@ -69,6 +69,7 @@ import {
 	type NearIntentsQuoteParams,
 	type SwapMappedResult,
 	type SwapNearIntentsParams,
+	type SwapNearIntentsSolanaParams,
 	type SwapParams,
 	type SwapVeloraParams
 } from '$lib/types/swap';
@@ -83,6 +84,7 @@ import {
 	getWithdrawableToken
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+import { sendSol } from '$sol/services/sol-send.services';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -666,6 +668,50 @@ export const fetchNearIntentsEvmSwap = async ({
 	await submitNearIntentsDepositTx({
 		depositAddress,
 		txHash,
+		depositMemo: depositMemo ?? undefined
+	});
+
+	await pollNearIntentsStatus({
+		depositAddress,
+		depositMemo: depositMemo ?? undefined
+	});
+
+	progress(ProgressStepsSwap.UPDATE_UI);
+
+	await waitAndTriggerWallet();
+};
+
+export const fetchNearIntentsSolSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	swapAmount,
+	userAddress,
+	swapDetails
+}: SwapNearIntentsSolanaParams): Promise<void> => {
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
+
+	const { depositAddress, depositMemo } = swapDetails.quote;
+
+	progress(ProgressStepsSwap.SIGN_TRANSFER);
+
+	const signature = await sendSol({
+		identity,
+		token: sourceToken,
+		amount: parsedSwapAmount,
+		destination: depositAddress,
+		source: userAddress,
+		prioritizationFee: ZERO
+	});
+
+	progress(ProgressStepsSwap.SWAP);
+
+	await submitNearIntentsDepositTx({
+		depositAddress,
+		txHash: signature,
 		depositMemo: depositMemo ?? undefined
 	});
 
