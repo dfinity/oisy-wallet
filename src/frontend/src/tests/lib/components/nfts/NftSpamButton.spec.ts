@@ -131,7 +131,7 @@ describe('NftSpamButton', () => {
 		const savedToken = { ...mockToken, section: CustomTokenSection.SPAM };
 		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(savedToken);
 
-		modalStore.openNftImageConsent({ id: Symbol(), data: { name: 'test', nfts: [] } });
+		modalStore.openNftImageConsent({ id: Symbol(), data: mockNft.collection });
 
 		const openNftImageConsentSpy = vi.spyOn(modalStore, 'openNftImageConsent');
 
