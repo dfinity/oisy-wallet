@@ -1157,14 +1157,14 @@
 			"on_network": " auf $network",
 			"delete_token": "Token löschen",
 			"edit_token": "Token bearbeiten",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Saldo",
+			"sort_by_performance": "Performance",
+			"sort_by_symbol": "Symbol",
+			"hide_asset_types": "Asset-Typen ausblenden",
+			"asset_type": "Asset-Typ in $oisy_name",
+			"asset_type_all": "Alle Asset-Typen",
+			"no_tokens_for_asset_type": "Es hat keine $asset_type in deiner Wallet",
+			"no_tokens_for_asset_type_description": "Wähle aus <strong>$count unterstützten Tokens</strong> um deine Portfolio Ansicht zu konfigurieren."
 		},
 		"details": {
 			"title": "Token-Details",
@@ -1294,14 +1294,14 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Kategorie",
+			"risk": "Risiko"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Crypto",
+			"stablecoin": "Stablecoin",
+			"stock": "Aktien",
+			"commodity": "Rohstoffe"
 		},
 		"risk": {
 			"low": "",
