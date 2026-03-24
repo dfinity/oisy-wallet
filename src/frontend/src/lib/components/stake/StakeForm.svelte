@@ -21,6 +21,7 @@
 
 	interface Props {
 		amount: OptionAmount;
+		amountSetToMax?: boolean;
 		disabled?: boolean;
 		destination?: Address;
 		totalFee?: bigint;
@@ -33,6 +34,7 @@
 
 	let {
 		amount = $bindable(),
+		amountSetToMax = $bindable(false),
 		disabled,
 		destination,
 		totalFee,
@@ -45,8 +47,6 @@
 
 	const { sendToken, sendTokenExchangeRate, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	let amountSetToMax = $state(false);
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 

@@ -4,7 +4,6 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	GetUserTransactionsResponse,
 	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
@@ -26,6 +25,7 @@ import type {
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
+	GetUserTransactionsResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,

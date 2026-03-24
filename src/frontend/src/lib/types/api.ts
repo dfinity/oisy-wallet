@@ -219,6 +219,14 @@ export interface GetUserTransactionsParams {
 	maxResults: bigint;
 }
 
+export interface GetUserTransactionsResponse {
+	transactions: UserTransaction[];
+	newestBlockIndex?: bigint;
+	oldestBlockIndex?: bigint;
+	totalStored: bigint;
+	nextStart?: bigint;
+}
+
 export interface SaveUserTransactionsParams {
 	tokenId: BackendTokenId;
 	transactions: UserTransaction[];
