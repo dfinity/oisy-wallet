@@ -1157,14 +1157,14 @@
 			"on_network": " na $network",
 			"delete_token": "Smazat token",
 			"edit_token": "Upravit token",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Hodnota",
+			"sort_by_performance": "Výkonnost tokenu",
+			"sort_by_symbol": "Symbol",
+			"hide_asset_types": "Skrýt typy aktiv",
+			"asset_type": "Typ aktiva v $oisy_name",
+			"asset_type_all": "Všechny typy aktiv",
+			"no_tokens_for_asset_type": "Ve tvé peněžence nejsou žádné $asset_type",
+			"no_tokens_for_asset_type_description": "Vyber z <strong>$count podporovaných tokenů</strong> a přizpůsob si zobrazení portfolia."
 		},
 		"details": {
 			"title": "Podrobnosti o tokenu",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Kategorie",
+			"risk": "Riziko"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Krypto",
+			"stablecoin": "Stablecoiny",
+			"stock": "Akcie",
+			"commodity": "Komodity"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Nízké riziko",
+			"medium": "Střední riziko",
+			"high": "Vysoké riziko"
 		}
 	},
 	"nfts": {

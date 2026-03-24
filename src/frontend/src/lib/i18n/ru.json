@@ -1157,14 +1157,14 @@
 			"on_network": " в сети $network",
 			"delete_token": "Удалить токен",
 			"edit_token": "Редактировать токен",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Стоимость",
+			"sort_by_performance": "Динамика токена",
+			"sort_by_symbol": "Символ",
+			"hide_asset_types": "Скрыть типы активов",
+			"asset_type": "Тип актива в $oisy_name",
+			"asset_type_all": "Все типы активов",
+			"no_tokens_for_asset_type": "В вашем кошельке нет $asset_type",
+			"no_tokens_for_asset_type_description": "Выберите из <strong>$count поддерживаемых токенов</strong>, чтобы настроить отображение портфеля."
 		},
 		"details": {
 			"title": "Сведения о токене",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Категория",
+			"risk": "Риск"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Криптовалюты",
+			"stablecoin": "Стейблкоины",
+			"stock": "Акции",
+			"commodity": "Сырьевые товары"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Низкий риск",
+			"medium": "Средний риск",
+			"high": "Высокий риск"
 		}
 	},
 	"nfts": {
