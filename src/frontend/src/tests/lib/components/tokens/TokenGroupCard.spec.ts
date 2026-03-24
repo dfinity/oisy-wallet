@@ -6,6 +6,7 @@ import { hideTokenCategoryFilterStore, tokenCategoryFilterStore } from '$lib/sto
 import { tokenListStore } from '$lib/stores/token-list.store';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiGroup } from '$lib/types/token-ui-group';
+import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -39,8 +40,12 @@ describe('TokenGroupCard', () => {
 			usdBalance: usdBalance ?? 0
 		}) as TokenUi;
 
-	const cryptoTag = [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }];
-	const stablecoinTag = [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }];
+	const cryptoTag: TokenUi['tags'] = [
+		{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+	];
+	const stablecoinTag: TokenUi['tags'] = [
+		{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+	];
 
 	const cryptoTokenA = mkTokenUi({
 		tags: cryptoTag,
@@ -61,7 +66,7 @@ describe('TokenGroupCard', () => {
 		network: ICP_NETWORK
 	});
 
-	const groupId = Symbol('test-group');
+	const groupId = parseTokenGroupId('test-group');
 
 	const tokenGroup: TokenUiGroup = {
 		id: groupId,
