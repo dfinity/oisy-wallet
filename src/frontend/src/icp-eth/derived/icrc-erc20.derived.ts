@@ -11,9 +11,10 @@ import { derived, type Readable } from 'svelte/store';
 const enabledErc20TokensAddresses: Readable<Erc20ContractAddressWithNetwork[]> = derived(
 	[enabledErc20Tokens],
 	([$enabledErc20Tokens]) =>
-		$enabledErc20Tokens.map(({ address, network: { exchange } }: Erc20Token) => ({
+		$enabledErc20Tokens.map(({ address, network: { exchange, chainId } }: Erc20Token) => ({
 			address,
-			coingeckoId: exchange?.coingeckoId ?? 'ethereum'
+			coingeckoId: exchange?.coingeckoId ?? 'ethereum',
+			chainId
 		}))
 );
 
@@ -34,14 +35,14 @@ const enabledIcrcTwinTokensAddresses: Readable<Erc20ContractAddressWithNetwork[]
 
 				return isTokenErc20(twinToken) && nonNullish(twinToken.address);
 			})
-			.map((token) => {
-				const {
-					address,
-					network: { exchange }
-				} = (token as IcCkToken).twinToken as Erc20Token;
+		.map((token) => {
+			const {
+				address,
+				network: { exchange, chainId }
+			} = (token as IcCkToken).twinToken as Erc20Token;
 
-				return { address, coingeckoId: exchange?.coingeckoId ?? 'ethereum' };
-			})
+			return { address, coingeckoId: exchange?.coingeckoId ?? 'ethereum', chainId };
+		})
 );
 
 export const enabledMergedErc20TokensAddresses: Readable<Erc20ContractAddressWithNetwork[]> =
