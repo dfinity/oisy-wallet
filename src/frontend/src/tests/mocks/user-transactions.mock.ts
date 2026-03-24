@@ -1,8 +1,9 @@
 import type {
-	GetUserTransactionsResponse,
+	GetUserTransactionsResponse as CandidGetUserTransactionsResponse,
 	TokenId,
 	UserTransaction
 } from '$declarations/backend/backend.did';
+import type { GetUserTransactionsResponse } from '$lib/types/api';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 
 export const mockUserTransactionTokenId: TokenId = { Icrc: mockPrincipal };
@@ -47,10 +48,18 @@ export const mockUserTransaction2: UserTransaction = {
 	timestamp: 1_000_001_000n
 };
 
-export const mockGetUserTransactionsResponse: GetUserTransactionsResponse = {
+export const mockCandidGetUserTransactionsResponse: CandidGetUserTransactionsResponse = {
 	next_start: [15n],
 	total_stored: 50n,
 	oldest_block_index: [1n],
 	newest_block_index: [100n],
+	transactions: [mockUserTransaction]
+};
+
+export const mockGetUserTransactionsResponse: GetUserTransactionsResponse = {
+	nextStart: 15n,
+	totalStored: 50n,
+	oldestBlockIndex: 1n,
+	newestBlockIndex: 100n,
 	transactions: [mockUserTransaction]
 };
