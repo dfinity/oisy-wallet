@@ -63,7 +63,7 @@
 						<TokensFilter>
 							{#snippet overflowableContent()}
 								<Tabs
-									styleClass="mt-2 mb-8"
+									styleClass="mt-2 mb-6"
 									tabVariant="menu"
 									tabs={[
 										{
