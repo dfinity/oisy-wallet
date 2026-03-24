@@ -16,6 +16,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
+	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -33,7 +34,7 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
-		fetchNearIntentsSwap,
+		fetchNearIntentsEvmSwap,
 		fetchVeloraDeltaSwap,
 		fetchVeloraMarketSwap
 	} from '$lib/services/swap.services';
@@ -225,8 +226,7 @@
 			isNullish(maxFeePerGas) ||
 			isNullish(maxPriorityFeePerGas) ||
 			isNullish(gas) ||
-			!isNetworkEthereum($sourceToken.network) ||
-			!isNetworkEthereum($destinationToken.network)
+			!isNetworkEthereum($sourceToken.network)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -260,7 +260,6 @@
 				swapAmount,
 				sourceNetwork: $sourceToken.network,
 				slippageValue,
-				destinationNetwork: $destinationToken.network,
 				userAddress: $ethAddress,
 				gas,
 				maxFeePerGas,
@@ -274,12 +273,22 @@
 					swapDetails: selectedProvider.swapDetails
 				};
 
-				await fetchNearIntentsSwap(params);
-			} else {
+				await fetchNearIntentsEvmSwap(params);
+			} else if (selectedProvider?.provider === SwapProvider.VELORA) {
+				// Velora requires EVM destination chain params, but Near Intents can bridge to/from non-EVM networks.
+				if (!isNetworkEthereum($destinationToken.network)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					return;
+				}
+
 				const params = {
 					...baseParams,
 					receiveAmount: selectedProvider.receiveAmount,
 					isGasless: $isSourceTokenPermitSupported ?? false,
+					destinationNetwork: $destinationToken.network,
 					swapDetails: selectedProvider.swapDetails as VeloraSwapDetails
 				};
 
@@ -288,6 +297,10 @@
 				} else {
 					await fetchVeloraMarketSwap(params);
 				}
+			} else {
+				toastsError({
+					msg: { text: $i18n.swap.error.unexpected }
+				});
 			}
 
 			progress(ProgressStepsSwap.DONE);
