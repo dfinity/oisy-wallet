@@ -10,6 +10,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
@@ -112,14 +113,13 @@ const processPendingTransaction = async ({
 // the real address, but the token address. That gave wrong data in the UI.
 // So, we decided to call the service that reloads all transactions.
 const processMinedTransaction = async ({ token }: { token: Token }) => {
-	const {
-		id: tokenId,
-		network: { id: networkId },
-		standard
-	} = token;
+	const { id: tokenId, standard, network } = token;
 
-	// Reload transactions as a transaction has been mined
-	await reloadEthereumTransactions({ tokenId, networkId, standard });
+	assertIsNetworkEthereum(network);
+
+	const { id: networkId, chainId } = network;
+
+	await reloadEthereumTransactions({ tokenId, networkId, chainId, standard });
 
 	// Reload balance as a transaction has been mined
 	await reloadEthereumBalance(token);

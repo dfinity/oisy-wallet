@@ -11,6 +11,7 @@ import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import type { EthereumChainId } from '$eth/types/network';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
@@ -36,18 +37,20 @@ import { get } from 'svelte/store';
 export const loadEthereumTransactions = ({
 	networkId,
 	tokenId,
+	chainId,
 	standard,
 	updateOnly = false,
 	silent = false
 }: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	chainId: EthereumChainId;
 	standard: TokenStandard;
 	updateOnly?: boolean;
 	silent?: boolean;
 }): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(tokenId) || isSupportedEvmNativeTokenId(tokenId)) {
-		return loadEthTransactions({ networkId, tokenId, updateOnly, silent });
+		return loadEthTransactions({ networkId, tokenId, chainId, updateOnly, silent });
 	}
 
 	return loadErcTransactions({ networkId, tokenId, standard, updateOnly });
@@ -58,6 +61,7 @@ export const loadEthereumTransactions = ({
 export const reloadEthereumTransactions = (params: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	chainId: EthereumChainId;
 	standard: TokenStandard;
 	silent?: boolean;
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
@@ -65,11 +69,14 @@ export const reloadEthereumTransactions = (params: {
 const loadEthTransactions = async ({
 	networkId,
 	tokenId,
+	// TODO: use it when we fetch cached user transactions from the backend
+	chainId: _,
 	updateOnly = false,
 	silent = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
+	chainId: EthereumChainId;
 	updateOnly?: boolean;
 	silent?: boolean;
 }): Promise<ResultSuccess> => {

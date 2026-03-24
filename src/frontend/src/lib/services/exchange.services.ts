@@ -177,18 +177,20 @@ export const exchangeRateSPLToUsd = async (
 
 export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
 	if (nonNullish(data)) {
-		exchangeStore.set([
-			data.currentEthPrice,
-			data.currentBtcPrice,
-			data.currentIcpPrice,
-			data.currentSolPrice,
-			data.currentBnbPrice,
-			data.currentPolPrice,
-			data.currentErc20Prices,
-			data.currentIcrcPrices,
-			data.currentSplPrices,
-			data.currentErc4626Prices
-		]);
+		exchangeStore.set(
+			[
+				data.currentEthPrice,
+				data.currentBtcPrice,
+				data.currentIcpPrice,
+				data.currentSolPrice,
+				data.currentBnbPrice,
+				data.currentPolPrice,
+				data.currentErc20Prices,
+				data.currentIcrcPrices,
+				data.currentSplPrices,
+				data.currentErc4626Prices
+			].filter(nonNullish)
+		);
 
 		if (nonNullish(data.currentExchangeRate)) {
 			// We set the reference currency for the exchange rate to avoid possible race condition where the user changes the current currency while the value is being uploaded, leading to inconsistent data in the UI.
