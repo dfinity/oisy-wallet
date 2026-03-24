@@ -19,7 +19,7 @@ import type { Transaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadEthUserTransactions = ({
@@ -105,9 +105,7 @@ export const loadNextEthUserTransactions = async ({
 			ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
 
 			return {
-				hasMore:
-					nonNullish(fromNullable(result.next_start)) ||
-					nonNullish(fromNullable(result.oldest_block_index))
+				hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
 			};
 		}
 	}

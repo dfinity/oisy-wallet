@@ -467,7 +467,16 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 
 		if ('Ok' in response) {
-			return response.Ok;
+			const { transactions, newest_block_index, oldest_block_index, total_stored, next_start } =
+				response.Ok;
+
+			return {
+				transactions,
+				newestBlockIndex: fromNullable(newest_block_index),
+				oldestBlockIndex: fromNullable(oldest_block_index),
+				totalStored: total_stored,
+				nextStart: fromNullable(next_start)
+			};
 		}
 
 		throw response.Err;
