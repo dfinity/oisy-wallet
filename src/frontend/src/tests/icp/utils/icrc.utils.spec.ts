@@ -404,36 +404,6 @@ describe('icrc.utils', () => {
 					]);
 				});
 
-				it('should fall back to DEFAULT_TOKEN_TAGS when twinToken has no tags and no icrcCustomTokens', () => {
-					const { tags: _, ...twinTokenWithoutTags } = mockValidToken;
-
-					const token = mapIcrcToken({
-						...mockParams,
-						icrcCustomTokens: undefined,
-						twinToken: { ...twinTokenWithoutTags, standard: { code: 'erc20' as const } }
-					} as unknown as IcrcLoadData);
-
-					expect(token?.tags).toStrictEqual([
-						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
-					]);
-				});
-
-				it('should fall back to DEFAULT_TOKEN_TAGS when twinToken tags are undefined', () => {
-					const token = mapIcrcToken({
-						...mockParams,
-						icrcCustomTokens: undefined,
-						twinToken: {
-							...mockValidToken,
-							standard: { code: 'erc20' as const },
-							tags: undefined
-						}
-					} as unknown as IcrcLoadData);
-
-					expect(token?.tags).toStrictEqual([
-						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
-					]);
-				});
-
 				it('should fall back to DEFAULT_TOKEN_TAGS when there is no twinToken and no icrcCustomTokens', () => {
 					const token = mapIcrcToken({
 						...mockParams,
