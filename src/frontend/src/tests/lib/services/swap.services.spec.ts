@@ -20,6 +20,7 @@ import {
 	fetchNearIntentsSwap,
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
+	fetchSwapAmountsSOL,
 	fetchVeloraDeltaSwap,
 	fetchVeloraMarketSwap,
 	loadKongSwapTokens,
@@ -31,6 +32,7 @@ import { fetchVeloraSwapAmount } from '$lib/services/velora-swap.services';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
+import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -40,6 +42,8 @@ import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockVeloraSwapDetails } from '$tests/mocks/velora.mock';
 import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
@@ -1505,6 +1509,188 @@ describe('swap.services', () => {
 					})
 				})
 			);
+		});
+	});
+
+	describe('fetchSwapAmounts with Solana tokens', () => {
+		const solSourceToken = mockValidSplToken;
+		const evmDestToken = {
+			...mockValidErc20Token,
+			network: ETHEREUM_NETWORK
+		} as Erc20Token;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should route to fetchSwapAmountsSOLana when source token is Solana', async () => {
+			mockSolGetQuote.mockResolvedValue({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 500n,
+				receiveOutMinimum: 490n,
+				swapDetails: {} as NearIntentsQuoteResponse
+			});
+
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken: solSourceToken,
+				destinationToken: evmDestToken,
+				amount: 100,
+				tokens: [solSourceToken, evmDestToken],
+				slippage: 1,
+				userEthAddress: mockEthAddress,
+				userSolAddress: mockSolAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.NEAR_INTENTS);
+			expect(mockSolGetQuote).toHaveBeenCalled();
+		});
+
+		it('should route to fetchSwapAmountsSOLana when destination token is Solana', async () => {
+			mockSolGetQuote.mockResolvedValue({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 500n,
+				receiveOutMinimum: 490n,
+				swapDetails: {} as NearIntentsQuoteResponse
+			});
+
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken: evmDestToken,
+				destinationToken: solSourceToken,
+				amount: 100,
+				tokens: [evmDestToken, solSourceToken],
+				slippage: 1,
+				userEthAddress: mockEthAddress,
+				userSolAddress: mockSolAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.NEAR_INTENTS);
+		});
+
+		it('should return [] when source is Solana and userSolAddress is nullish', async () => {
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken: solSourceToken,
+				destinationToken: evmDestToken,
+				amount: 100,
+				tokens: [solSourceToken, evmDestToken],
+				slippage: 1,
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
+			});
+
+			expect(result).toEqual([]);
+			expect(mockSolGetQuote).not.toHaveBeenCalled();
+		});
+
+		it('should use userEthAddress as source when dest is Solana and source is EVM', async () => {
+			mockSolGetQuote.mockResolvedValue(undefined);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken: evmDestToken,
+				destinationToken: solSourceToken,
+				amount: 100,
+				tokens: [evmDestToken, solSourceToken],
+				slippage: 1,
+				userEthAddress: mockEthAddress,
+				userSolAddress: mockSolAddress
+			});
+
+			expect(mockSolGetQuote).toHaveBeenCalledWith(
+				expect.objectContaining({
+					userAddress: mockEthAddress
+				})
+			);
+		});
+	});
+
+	describe('fetchSwapAmountsSOL', () => {
+		const sourceToken = mockValidSplToken;
+		const destinationToken = {
+			...mockValidErc20Token,
+			network: ETHEREUM_NETWORK
+		} as Erc20Token;
+
+		const amount = 1_000_000n;
+		const slippage = 1.5;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should return [] when userAddress is nullish', async () => {
+			const result = await fetchSwapAmountsSOL({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress: undefined,
+				slippage
+			});
+
+			expect(result).toEqual([]);
+			expect(mockSolGetQuote).not.toHaveBeenCalled();
+		});
+
+		it('should return provider results and pass params correctly', async () => {
+			const mockQuote = {
+				provider: SwapProvider.NEAR_INTENTS as const,
+				receiveAmount: 900_000n,
+				receiveOutMinimum: 890_000n,
+				swapDetails: {} as NearIntentsQuoteResponse
+			};
+
+			mockSolGetQuote.mockResolvedValue(mockQuote);
+
+			const result = await fetchSwapAmountsSOL({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress: mockSolAddress,
+				slippage
+			});
+
+			expect(result).toEqual([mockQuote]);
+			expect(mockSolGetQuote).toHaveBeenCalledWith(
+				expect.objectContaining({
+					sourceToken,
+					destinationToken,
+					amount,
+					userAddress: mockSolAddress,
+					slippage
+				})
+			);
+		});
+
+		it('should return [] when all providers return undefined', async () => {
+			mockSolGetQuote.mockResolvedValue(undefined);
+
+			const result = await fetchSwapAmountsSOL({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress: mockSolAddress,
+				slippage
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should skip providers whose quote rejects', async () => {
+			mockSolGetQuote.mockRejectedValue(new Error('Provider error'));
+
+			const result = await fetchSwapAmountsSOL({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress: mockSolAddress,
+				slippage
+			});
+
+			expect(result).toEqual([]);
 		});
 	});
 
