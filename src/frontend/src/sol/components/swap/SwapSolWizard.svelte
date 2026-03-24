@@ -2,6 +2,7 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import type { ProgressStep } from '$eth/types/send';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -25,13 +26,12 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { OptionAmount } from '$lib/types/send';
 	import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { ProgressStep } from '$eth/types/send';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -65,8 +65,13 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate, sourceTokenBalance } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		failedSwapError,
+		sourceTokenExchangeRate,
+		sourceTokenBalance
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -89,17 +94,16 @@
 			return;
 		}
 
-		const parsedSendBalance =
-			nonNullish($sourceTokenBalance)
-				? parseToken({
-						value: formatToken({
-							value: $sourceTokenBalance,
-							unitName: $sourceToken.decimals,
-							displayDecimals: $sourceToken.decimals
-						}),
-						unitName: $sourceToken.decimals
-					})
-				: ZERO;
+		const parsedSendBalance = nonNullish($sourceTokenBalance)
+			? parseToken({
+					value: formatToken({
+						value: $sourceTokenBalance,
+						unitName: $sourceToken.decimals,
+						displayDecimals: $sourceToken.decimals
+					}),
+					unitName: $sourceToken.decimals
+				})
+			: ZERO;
 
 		if (userAmount > parsedSendBalance) {
 			return 'insufficient-funds';
@@ -252,7 +256,7 @@
 				{#snippet swapFees()}{/snippet}
 			</SwapReview>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress swapProgressStep={swapProgressStep} />
+			<SwapProgress {swapProgressStep} />
 		{/if}
 	{/key}
 {/if}
