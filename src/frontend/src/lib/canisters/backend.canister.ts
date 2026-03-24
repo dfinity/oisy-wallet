@@ -6,7 +6,6 @@ import type {
 	CustomToken,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
-	GetUserTransactionsResponse,
 	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
@@ -34,6 +33,7 @@ import type {
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
+	GetUserTransactionsResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,

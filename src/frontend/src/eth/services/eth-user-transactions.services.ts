@@ -10,19 +10,17 @@ import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import {
 	loadUserTransactions,
-	saveFinalizedTransactions,
-	type LoadUserTransactionsResult
+	saveFinalizedTransactions
 } from '$lib/services/user-transactions.services';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
+import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-
-export type { LoadUserTransactionsResult };
 
 export const loadEthUserTransactions = ({
 	identity,
@@ -34,7 +32,7 @@ export const loadEthUserTransactions = ({
 	tokenId: BackendTokenId;
 	start?: bigint;
 	maxResults?: bigint;
-}): Promise<LoadUserTransactionsResult<Transaction> | null> =>
+}): Promise<LoadUserTransactionsResult<Transaction> | undefined> =>
 	loadUserTransactions({
 		identity,
 		tokenId,
@@ -106,7 +104,11 @@ export const loadNextEthUserTransactions = async ({
 
 			ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
 
-			return { hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex) };
+			return {
+				hasMore:
+					nonNullish(fromNullable(result.next_start)) ||
+					nonNullish(fromNullable(result.oldest_block_index))
+			};
 		}
 	}
 

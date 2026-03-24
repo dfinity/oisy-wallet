@@ -122,10 +122,10 @@ describe('eth-user-transactions.services', () => {
 	});
 
 	describe('loadEthUserTransactions', () => {
-		it('returns null when identity is missing', async () => {
+		it('returns undefined when identity is missing', async () => {
 			const result = await loadEthUserTransactions({ identity: null, tokenId: mockBackendTokenId });
 
-			expect(result).toBeNull();
+			expect(result).toBeUndefined();
 			expect(mockGetUserTransactions).not.toHaveBeenCalled();
 		});
 
@@ -151,17 +151,17 @@ describe('eth-user-transactions.services', () => {
 				tokenId: mockBackendTokenId
 			});
 
-			expect(result).not.toBeNull();
+			expect(result).toBeDefined();
 
-			if (result === null) {
+			if (result === undefined) {
 				return;
 			}
 
 			expect(result.transactions).toHaveLength(3);
-			expect(result.newestBlockIndex).toBe(300);
-			expect(result.oldestBlockIndex).toBe(100);
-			expect(result.totalStored).toBe(3n);
-			expect(result.nextStart).toBeUndefined();
+			expect(result.newest_block_index).toEqual([300n]);
+			expect(result.oldest_block_index).toEqual([100n]);
+			expect(result.total_stored).toBe(3n);
+			expect(result.next_start).toEqual([]);
 		});
 
 		it('returns empty result for empty backend', async () => {
@@ -172,19 +172,19 @@ describe('eth-user-transactions.services', () => {
 				tokenId: mockBackendTokenId
 			});
 
-			expect(result).not.toBeNull();
+			expect(result).toBeDefined();
 
-			if (result === null) {
+			if (result === undefined) {
 				return;
 			}
 
 			expect(result.transactions).toHaveLength(0);
-			expect(result.newestBlockIndex).toBeUndefined();
-			expect(result.oldestBlockIndex).toBeUndefined();
-			expect(result.totalStored).toBe(ZERO);
+			expect(result.newest_block_index).toEqual([]);
+			expect(result.oldest_block_index).toEqual([]);
+			expect(result.total_stored).toBe(ZERO);
 		});
 
-		it('returns null on backend error', async () => {
+		it('returns undefined on backend error', async () => {
 			mockGetUserTransactions.mockRejectedValue(new Error('canister error'));
 
 			const result = await loadEthUserTransactions({
@@ -192,7 +192,7 @@ describe('eth-user-transactions.services', () => {
 				tokenId: mockBackendTokenId
 			});
 
-			expect(result).toBeNull();
+			expect(result).toBeUndefined();
 		});
 	});
 

@@ -38,7 +38,7 @@ import type { Transaction } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadEthereumTransactions = ({
@@ -100,7 +100,8 @@ const loadEthTransactions = async ({
 		const stored = await loadEthUserTransactions({ identity, tokenId: transactionTokenId });
 
 		// Fetch from Etherscan starting after the newest stored block (incremental loading)
-		const startBlock = nonNullish(stored?.newestBlockIndex) ? stored.newestBlockIndex + 1 : 0;
+		const newestBlockIndex = fromNullable(stored?.newest_block_index ?? []);
+		const startBlock = nonNullish(newestBlockIndex) ? Number(newestBlockIndex) + 1 : 0;
 
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const newTransactions = await transactionsProviders({ address, startBlock });
