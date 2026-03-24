@@ -255,24 +255,40 @@ export const fetchAllExchangeRatesFromBackend = async ({
 		return acc;
 	}, []);
 
-	const icrcTokenPairs = icrcCanisterIds.reduce<{ id: string; key: string }[]>((acc, id) => {
+	const icrcTokenPairs = icrcCanisterIds.reduce<
+		{ id: LedgerCanisterIdText; key: string }[]
+	>((acc, id) => {
 		const tokenId: TokenId = { Icrc: Principal.fromText(id) };
+
 		const key = tokenIdKey(tokenId);
+
 		if (isNullish(key)) {
 			return acc;
 		}
+
 		tokenIds.push(tokenId);
-		return [...acc, { id, key }];
+
+		acc.push({ id, key });
+
+		return acc;
 	}, []);
 
-	const splTokenPairs = splTokenAddresses.reduce<{ addr: string; key: string }[]>((acc, addr) => {
+	const splTokenPairs = splTokenAddresses.reduce<
+		{ addr: SplTokenAddress; key: string }[]
+	>((acc, addr) => {
 		const tokenId: TokenId = { SplMainnet: addr };
+
 		const key = tokenIdKey(tokenId);
+
 		if (isNullish(key)) {
 			return acc;
 		}
+
 		tokenIds.push(tokenId);
-		return [...acc, { addr, key }];
+
+		acc.push({ addr, key });
+
+		return acc;
 	}, []);
 
 	const ratesByKey = await getExchangeRates({
