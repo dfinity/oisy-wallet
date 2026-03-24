@@ -133,7 +133,7 @@ describe('user-transactions.utils', () => {
 				gasPrice: undefined,
 				gasUsed: undefined,
 				data: '0xabcdef',
-				tokenId: NaN
+				tokenId: undefined
 			});
 		});
 
@@ -169,7 +169,7 @@ describe('user-transactions.utils', () => {
 			expect(result.chainId).toBe(ZERO);
 		});
 
-		it('should return NaN for nonce when empty', () => {
+		it('should default nonce to 0 when empty', () => {
 			const transaction: UserTransaction = {
 				...mockUserTransaction,
 				network_data: {
@@ -179,7 +179,7 @@ describe('user-transactions.utils', () => {
 
 			const result = mapUserTransactionToTransaction(transaction);
 
-			expect(result.nonce).toBeNaN();
+			expect(result.nonce).toBe(0);
 		});
 
 		it('should default gasLimit to ZERO when empty', () => {
