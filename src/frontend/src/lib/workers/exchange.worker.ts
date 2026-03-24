@@ -5,6 +5,7 @@ import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20'
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import {
 	exchangeRateBNBToUsd,
 	exchangeRateBTCToUsd,
@@ -134,9 +135,16 @@ const syncExchangeFromBackend = async ({
 	splTokenAddresses,
 	erc4626TokensExchangeData
 }: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
+	const identity = await AuthClientProvider.getInstance().loadIdentity();
+
+	if (isNullish(identity)) {
+		throw new Error('Cannot fetch backend exchange rates without an authenticated identity.');
+	}
+
 	const [currentExchangeRate, backendPrices] = await Promise.all([
 		exchangeRateUsdToCurrency(currentCurrency),
 		fetchAllExchangeRatesFromBackend({
+			identity,
 			erc20Addresses: erc20ContractAddresses,
 			icrcCanisterIds: icrcLedgerCanisterIds,
 			splTokenAddresses

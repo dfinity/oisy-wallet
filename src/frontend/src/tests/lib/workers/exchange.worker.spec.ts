@@ -5,6 +5,7 @@ import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import type {
@@ -19,6 +20,7 @@ import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/type
 import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
@@ -51,6 +53,19 @@ vi.mock('$lib/api/backend.api', () => ({
 	getExchangeRates: vi.fn()
 }));
 
+vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
+	const authClientProvider = vi.fn().mockReturnValue({
+		loadIdentity: vi.fn()
+	});
+
+	return {
+		...(await importActual()),
+		AuthClientProvider: Object.assign(authClientProvider, {
+			getInstance: authClientProvider
+		})
+	};
+});
+
 describe('exchange.worker', () => {
 	describe('onExchangeMessage', () => {
 		let originalPostMessage: unknown;
@@ -72,6 +87,9 @@ describe('exchange.worker', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 			vi.useFakeTimers();
+
+			const provider = AuthClientProvider.getInstance();
+			vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 
 			vi.mocked(simplePrice).mockImplementation(
 				({ ids }: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse> =>

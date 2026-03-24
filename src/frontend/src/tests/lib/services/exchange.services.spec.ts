@@ -24,6 +24,7 @@ import {
 	MOCK_CANISTER_ID_2,
 	createMockCoingeckoTokenPrice
 } from '$tests/mocks/exchanges.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 
@@ -256,6 +257,7 @@ describe('exchange.services', () => {
 			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
 				splTokenAddresses: ['SoLaddr1']
@@ -275,8 +277,8 @@ describe('exchange.services', () => {
 					{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
 					{ SplMainnet: 'SoLaddr1' }
 				],
-				certified: false,
-				identity: undefined
+				certified: true,
+				identity: mockIdentity
 			});
 		});
 
@@ -296,6 +298,7 @@ describe('exchange.services', () => {
 			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
 				splTokenAddresses: ['SoLaddr1']
@@ -314,6 +317,7 @@ describe('exchange.services', () => {
 			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
 				splTokenAddresses: ['SoLaddr1']
@@ -345,6 +349,7 @@ describe('exchange.services', () => {
 			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: [],
 				splTokenAddresses: []
@@ -357,6 +362,7 @@ describe('exchange.services', () => {
 			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: [],
 				splTokenAddresses: []
@@ -369,6 +375,7 @@ describe('exchange.services', () => {
 			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
 
 			await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
 				// @ts-expect-error Testing with non-standard coingeckoId
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'some-unknown-chain', chainId: 999n }],
 				icrcCanisterIds: [],
@@ -405,6 +412,7 @@ describe('exchange.services', () => {
 			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
 				erc20Addresses: [],
 				icrcCanisterIds: [],
 				splTokenAddresses: []
@@ -435,6 +443,7 @@ describe('exchange.services', () => {
 			);
 
 			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
 				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
 				icrcCanisterIds: [],
 				splTokenAddresses: []
