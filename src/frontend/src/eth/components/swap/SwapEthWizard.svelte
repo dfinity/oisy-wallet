@@ -16,7 +16,6 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -46,7 +45,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { SwapProvider, type VeloraSwapDetails, VeloraSwapTypes } from '$lib/types/swap';
+	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
