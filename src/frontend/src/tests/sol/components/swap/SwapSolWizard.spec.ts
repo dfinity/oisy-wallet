@@ -9,7 +9,6 @@ import {
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
-import en from '$tests/mocks/i18n.mock';
 import * as analytics from '$lib/services/analytics.services';
 import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
@@ -19,11 +18,14 @@ import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
+
+const mockFetchNearIntentsSolSwap = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
 	fetchNearIntentsSolSwap: (...args: unknown[]) => mockFetchNearIntentsSolSwap(...args)
@@ -34,8 +36,6 @@ vi.mock('$lib/utils/parse.utils', () => ({
 }));
 
 describe('SwapSolWizard', () => {
-	const mockFetchNearIntentsSolSwap = vi.fn();
-
 	const mockSourceToken = { ...mockValidSplToken, enabled: true };
 	const mockDestToken = { ...mockValidSplToken, symbol: 'USDC', enabled: true };
 
