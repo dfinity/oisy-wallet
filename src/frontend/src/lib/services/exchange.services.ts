@@ -231,6 +231,53 @@ const NATIVE_TOKEN_IDS: { tokenId: TokenId; coingeckoKey: CoingeckoCoinsId }[] =
 	{ tokenId: { EvmNative: ARBITRUM_MAINNET_NETWORK.chainId }, coingeckoKey: 'ethereum' }
 ];
 
+const collectTokenPairs = <T>({
+	items,
+	toTokenId,
+	toIdentifier
+}: {
+	items: T[];
+	toTokenId: (item: T) => TokenId;
+	toIdentifier: (item: T) => string;
+}): { pairs: { identifier: string; key: string }[]; tokenIds: TokenId[] } =>
+	items.reduce<{ pairs: { identifier: string; key: string }[]; tokenIds: TokenId[] }>(
+		(acc, item) => {
+			const tokenId = toTokenId(item);
+			const key = tokenIdKey(tokenId);
+
+			if (isNullish(key)) {
+				return acc;
+			}
+
+			acc.tokenIds.push(tokenId);
+			acc.pairs.push({ identifier: toIdentifier(item), key });
+
+			return acc;
+		},
+		{ pairs: [], tokenIds: [] }
+	);
+
+const buildPriceMap = ({
+	pairs,
+	rates,
+	normalizeId
+}: {
+	pairs: { identifier: string; key: string }[];
+	rates: Map<string, CoingeckoSimpleTokenPrice>;
+	normalizeId?: (id: string) => string;
+}): CoingeckoSimpleTokenPriceResponse =>
+	pairs.reduce<CoingeckoSimpleTokenPriceResponse>((acc, { identifier, key }) => {
+		const rate = rates.get(key);
+
+		if (nonNullish(rate)) {
+			acc[normalizeId?.(identifier) ?? identifier] = rate;
+		}
+
+		return acc;
+	}, {});
+
+const lower = (id: string) => id.toLowerCase();
+
 export const fetchAllExchangeRatesFromBackend = async ({
 	identity,
 	erc20Addresses,
@@ -252,66 +299,28 @@ export const fetchAllExchangeRatesFromBackend = async ({
 	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
 	currentSplPrices: CoingeckoSimpleTokenPriceResponse;
 }> => {
-	const tokenIds: TokenId[] = NATIVE_TOKEN_IDS.map(({ tokenId }) => tokenId);
+	const nativeTokenIds = NATIVE_TOKEN_IDS.map(({ tokenId }) => tokenId);
 
-	const erc20TokenPairs = erc20Addresses.reduce<
-		{ address: Erc20ContractAddressWithNetwork['address']; key: string }[]
-	>((acc, t) => {
-		const tokenId: TokenId = { Erc20: [t.address, t.chainId] };
+	const erc20 = collectTokenPairs({
+		items: erc20Addresses,
+		toTokenId: (t) => ({ Erc20: [t.address, t.chainId] }),
+		toIdentifier: (t) => t.address
+	});
 
-		const key = tokenIdKey(tokenId);
+	const icrc = collectTokenPairs({
+		items: icrcCanisterIds,
+		toTokenId: (id) => ({ Icrc: Principal.fromText(id) }),
+		toIdentifier: (id) => id
+	});
 
-		if (isNullish(key)) {
-			return acc;
-		}
-
-		tokenIds.push(tokenId);
-
-		acc.push({ address: t.address, key });
-
-		return acc;
-	}, []);
-
-	const icrcTokenPairs = icrcCanisterIds.reduce<{ id: LedgerCanisterIdText; key: string }[]>(
-		(acc, id) => {
-			const tokenId: TokenId = { Icrc: Principal.fromText(id) };
-
-			const key = tokenIdKey(tokenId);
-
-			if (isNullish(key)) {
-				return acc;
-			}
-
-			tokenIds.push(tokenId);
-
-			acc.push({ id, key });
-
-			return acc;
-		},
-		[]
-	);
-
-	const splTokenPairs = splTokenAddresses.reduce<{ addr: SplTokenAddress; key: string }[]>(
-		(acc, addr) => {
-			const tokenId: TokenId = { SplMainnet: addr };
-
-			const key = tokenIdKey(tokenId);
-
-			if (isNullish(key)) {
-				return acc;
-			}
-
-			tokenIds.push(tokenId);
-
-			acc.push({ addr, key });
-
-			return acc;
-		},
-		[]
-	);
+	const spl = collectTokenPairs({
+		items: splTokenAddresses,
+		toTokenId: (addr) => ({ SplMainnet: addr }),
+		toIdentifier: (addr) => addr
+	});
 
 	const ratesByKey = await getExchangeRates({
-		token_ids: tokenIds,
+		token_ids: [...nativeTokenIds, ...erc20.tokenIds, ...icrc.tokenIds, ...spl.tokenIds],
 		certified: true,
 		identity
 	});
@@ -327,45 +336,6 @@ export const fetchAllExchangeRatesFromBackend = async ({
 
 	const [ethEntry, btcEntry, icpEntry, solEntry, bnbEntry, polEntry] = NATIVE_TOKEN_IDS;
 
-	const currentErc20Prices = erc20TokenPairs.reduce<CoingeckoSimpleTokenPriceResponse>(
-		(acc, { address, key }) => {
-			const rate = coingeckoRates.get(key);
-
-			if (nonNullish(rate)) {
-				acc[address.toLowerCase()] = rate;
-			}
-
-			return acc;
-		},
-		{}
-	);
-
-	const currentIcrcPrices = icrcTokenPairs.reduce<CoingeckoSimpleTokenPriceResponse>(
-		(acc, { id, key }) => {
-			const rate = coingeckoRates.get(key);
-
-			if (nonNullish(rate)) {
-				acc[id.toLowerCase()] = rate;
-			}
-
-			return acc;
-		},
-		{}
-	);
-
-	const currentSplPrices = splTokenPairs.reduce<CoingeckoSimpleTokenPriceResponse>(
-		(acc, { addr, key }) => {
-			const rate = coingeckoRates.get(key);
-
-			if (nonNullish(rate)) {
-				acc[addr] = rate;
-			}
-
-			return acc;
-		},
-		{}
-	);
-
 	return {
 		currentEthPrice: nativePrice({ ...ethEntry, coingeckoRates }),
 		currentBtcPrice: nativePrice({ ...btcEntry, coingeckoRates }),
@@ -373,9 +343,17 @@ export const fetchAllExchangeRatesFromBackend = async ({
 		currentSolPrice: nativePrice({ ...solEntry, coingeckoRates }),
 		currentBnbPrice: nativePrice({ ...bnbEntry, coingeckoRates }),
 		currentPolPrice: nativePrice({ ...polEntry, coingeckoRates }),
-		currentErc20Prices,
-		currentIcrcPrices,
-		currentSplPrices
+		currentErc20Prices: buildPriceMap({
+			pairs: erc20.pairs,
+			rates: coingeckoRates,
+			normalizeId: lower
+		}),
+		currentIcrcPrices: buildPriceMap({
+			pairs: icrc.pairs,
+			rates: coingeckoRates,
+			normalizeId: lower
+		}),
+		currentSplPrices: buildPriceMap({ pairs: spl.pairs, rates: coingeckoRates })
 	};
 };
 
