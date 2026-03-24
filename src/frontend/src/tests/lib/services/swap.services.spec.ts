@@ -1705,7 +1705,7 @@ describe('swap.services', () => {
 			vi.clearAllMocks();
 		});
 
-		it('should route to fetchSwapAmountsSOLana when source token is Solana', async () => {
+		it('should route to fetchSwapAmountsSOL when source token is Solana', async () => {
 			mockSolGetQuote.mockResolvedValue({
 				provider: SwapProvider.NEAR_INTENTS,
 				receiveAmount: 500n,
