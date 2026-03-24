@@ -11,7 +11,7 @@ import {
 	submitNearIntentsDeposit
 } from '$lib/rest/near-intents.rest';
 import { NEAR_INTENTS_TERMINAL_STATUSES, type NearIntentsToken } from '$lib/types/near-intents';
-import type { EvmQuoteParams, SwapMappedResult } from '$lib/types/swap';
+import type { NearIntentsQuoteParams, SwapMappedResult } from '$lib/types/swap';
 import {
 	buildNearIntentsQuoteRequest,
 	mapNearIntentsQuoteResult,
@@ -40,8 +40,9 @@ export const fetchNearIntentsSwapQuote = async ({
 	destinationToken,
 	amount,
 	userAddress,
+	recipientAddress,
 	slippage
-}: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
+}: NearIntentsQuoteParams): Promise<SwapMappedResult | undefined> => {
 	if (!NEAR_INTENTS_SWAP_ENABLED || isNullish(userAddress)) {
 		return;
 	}
@@ -60,6 +61,7 @@ export const fetchNearIntentsSwapQuote = async ({
 			...assets,
 			amount,
 			userAddress,
+			recipientAddress,
 			deadlineMs: NEAR_INTENTS_QUOTE_DEADLINE_MS
 		})
 	);
