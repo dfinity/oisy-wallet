@@ -5,7 +5,6 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Transaction as EthTransaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
-import { consoleError } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 
 /**
