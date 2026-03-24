@@ -136,12 +136,8 @@ describe('EarningsList', () => {
 	});
 
 	it('should filter vaults by selected network', () => {
-		vi.spyOn(networkDerived, 'selectedNetwork', 'get').mockReturnValue(
-			readable(BASE_NETWORK)
-		);
-		vi.spyOn(networkDerived, 'pseudoNetworkChainFusion', 'get').mockReturnValue(
-			readable(false)
-		);
+		vi.spyOn(networkDerived, 'selectedNetwork', 'get').mockReturnValue(readable(BASE_NETWORK));
+		vi.spyOn(networkDerived, 'pseudoNetworkChainFusion', 'get').mockReturnValue(readable(false));
 
 		const baseToken: Erc4626CustomToken = {
 			...mockValidErc4626Token,
