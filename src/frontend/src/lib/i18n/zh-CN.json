@@ -1157,14 +1157,14 @@
 			"on_network": " 于 $network",
 			"delete_token": "删除代币",
 			"edit_token": "编辑代币",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "价值",
+			"sort_by_performance": "代币表现",
+			"sort_by_symbol": "符号",
+			"hide_asset_types": "隐藏资产类型",
+			"asset_type": "$oisy_name 中的资产类型",
+			"asset_type_all": "所有资产类型",
+			"no_tokens_for_asset_type": "您的钱包中没有 $asset_type",
+			"no_tokens_for_asset_type_description": "从 <strong>$count 个支持的代币</strong>中选择，自定义您的投资组合视图。"
 		},
 		"details": {
 			"title": "代币详情",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "类别",
+			"risk": "风险"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "加密货币",
+			"stablecoin": "稳定币",
+			"stock": "股票",
+			"commodity": "大宗商品"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "低风险",
+			"medium": "中等风险",
+			"high": "高风险"
 		}
 	},
 	"nfts": {
