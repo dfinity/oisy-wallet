@@ -164,4 +164,43 @@ describe('TokenGroupCard', () => {
 
 		expect(badge).toBeNull();
 	});
+
+	it('should only render matching tokens when expanded with category filter active', async () => {
+		tokenCategoryFilterStore.set({
+			key: 'token-category-filter',
+			value: { value: TokenCategoryTagValue.CRYPTO }
+		});
+
+		const { container } = render(TokenGroupCard, { props: { tokenGroup } });
+
+		const header = container.querySelector('[data-tid^="token-group"]');
+		expect(header).not.toBeNull();
+
+		await fireEvent.click(header!);
+
+		const cryptoCardA = container.querySelector('[data-tid="token-card-CRYA-ICP"]');
+		const cryptoCardB = container.querySelector('[data-tid="token-card-CRYB-ETH"]');
+		const stableCard = container.querySelector('[data-tid="token-card-STBC-ICP"]');
+
+		expect(cryptoCardA).toBeInTheDocument();
+		expect(cryptoCardB).toBeInTheDocument();
+		expect(stableCard).not.toBeInTheDocument();
+	});
+
+	it('should render all tokens when expanded without category filter', async () => {
+		const { container } = render(TokenGroupCard, { props: { tokenGroup } });
+
+		const header = container.querySelector('[data-tid^="token-group"]');
+		expect(header).not.toBeNull();
+
+		await fireEvent.click(header!);
+
+		const cryptoCardA = container.querySelector('[data-tid="token-card-CRYA-ICP"]');
+		const cryptoCardB = container.querySelector('[data-tid="token-card-CRYB-ETH"]');
+		const stableCard = container.querySelector('[data-tid="token-card-STBC-ICP"]');
+
+		expect(cryptoCardA).toBeInTheDocument();
+		expect(cryptoCardB).toBeInTheDocument();
+		expect(stableCard).toBeInTheDocument();
+	});
 });
