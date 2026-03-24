@@ -4,6 +4,7 @@ import {
 	mapExtV2TokenTransferError
 } from '$icp/canisters/ext-v2-token.errors';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { ZERO } from '$lib/constants/app.constants';
 
 describe('ext-v2-token.errors', () => {
 	describe('mapExtV2TokenCommonError', () => {
@@ -33,7 +34,7 @@ describe('ext-v2-token.errors', () => {
 	describe('mapExtV2TokenTransferError', () => {
 		it('should return error when response has no err property', () => {
 			const response: TransferResponse = {
-				ok: 0n
+				ok: ZERO
 			};
 
 			const result = mapExtV2TokenTransferError(response);
