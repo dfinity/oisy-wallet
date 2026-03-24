@@ -243,26 +243,26 @@ export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	isGasless: boolean;
 }
 
-export interface SwapNearIntentsParams extends RequiredTransactionFeeData {
-	identity: Identity;
-	progress: (step: ProgressStep) => void;
-	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
-	swapAmount: Amount;
-	receiveAmount: bigint;
-	slippageValue: Amount;
-	sourceNetwork: EthereumNetwork;
-	userAddress: EthAddress;
-	swapDetails: NearIntentsQuoteResponse;
-}
-
-export interface SwapNearIntentsSolanaParams {
+interface SwapNearIntentsParams {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
 	sourceToken: Token;
 	swapAmount: Amount;
-	userAddress: SolAddress;
 	swapDetails: NearIntentsQuoteResponse;
+}
+
+export interface SwapNearIntentsEvmParams
+	extends SwapNearIntentsParams, RequiredTransactionFeeData {
+	sourceToken: Erc20Token;
+	destinationToken: Erc20Token;
+	receiveAmount: bigint;
+	slippageValue: Amount;
+	sourceNetwork: EthereumNetwork;
+	userAddress: EthAddress;
+}
+
+export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
+	userAddress: SolAddress;
 }
 
 export interface CheckDeltaOrderStatusParams {

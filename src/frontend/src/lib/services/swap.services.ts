@@ -4,6 +4,9 @@ import { createPermit } from '$eth/services/eip2612-permit.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import type { Amount } from '$lib/types/send';
+import type { Token } from '$lib/types/token';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
@@ -68,8 +71,8 @@ import {
 	type IcpSwapWithdrawResponse,
 	type NearIntentsQuoteParams,
 	type SwapMappedResult,
-	type SwapNearIntentsParams,
-	type SwapNearIntentsSolanaParams,
+	type SwapNearIntentsEvmParams,
+	type SwapNearIntentsSolParams,
 	type SwapParams,
 	type SwapVeloraParams
 } from '$lib/types/swap';
@@ -630,18 +633,19 @@ export const fetchIcpSwap = async ({
 	await waitAndTriggerWallet();
 };
 
-export const fetchNearIntentsEvmSwap = async ({
-	identity,
+const executeNearIntentsSwap = async ({
 	progress,
 	sourceToken,
 	swapAmount,
-	sourceNetwork,
-	userAddress,
-	gas,
-	maxFeePerGas,
-	maxPriorityFeePerGas,
-	swapDetails
-}: SwapNearIntentsParams): Promise<void> => {
+	swapDetails,
+	sendTransaction
+}: {
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: Token;
+	swapAmount: Amount;
+	swapDetails: NearIntentsQuoteResponse;
+	sendTransaction: (params: { amount: bigint; depositAddress: string }) => Promise<string>;
+}): Promise<void> => {
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
@@ -651,17 +655,7 @@ export const fetchNearIntentsEvmSwap = async ({
 
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
 
-	const { hash: txHash } = await sendEvm({
-		from: userAddress,
-		to: depositAddress,
-		amount: parsedSwapAmount,
-		token: sourceToken,
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		maxPriorityFeePerGas
-	});
+	const txHash = await sendTransaction({ amount: parsedSwapAmount, depositAddress });
 
 	progress(ProgressStepsSwap.SWAP);
 
@@ -681,6 +675,40 @@ export const fetchNearIntentsEvmSwap = async ({
 	await waitAndTriggerWallet();
 };
 
+export const fetchNearIntentsEvmSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	swapAmount,
+	sourceNetwork,
+	userAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapNearIntentsEvmParams): Promise<void> => {
+	await executeNearIntentsSwap({
+		progress,
+		sourceToken,
+		swapAmount,
+		swapDetails,
+		sendTransaction: async ({ amount, depositAddress }) => {
+			const { hash } = await sendEvm({
+				from: userAddress,
+				to: depositAddress,
+				amount,
+				token: sourceToken,
+				sourceNetwork,
+				identity,
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
+			});
+			return hash;
+		}
+	});
+};
+
 export const fetchNearIntentsSolSwap = async ({
 	identity,
 	progress,
@@ -688,41 +716,22 @@ export const fetchNearIntentsSolSwap = async ({
 	swapAmount,
 	userAddress,
 	swapDetails
-}: SwapNearIntentsSolanaParams): Promise<void> => {
-	const parsedSwapAmount = parseToken({
-		value: `${swapAmount}`,
-		unitName: sourceToken.decimals
+}: SwapNearIntentsSolParams): Promise<void> => {
+	await executeNearIntentsSwap({
+		progress,
+		sourceToken,
+		swapAmount,
+		swapDetails,
+		sendTransaction: async ({ amount, depositAddress }) =>
+			await sendSol({
+				identity,
+				token: sourceToken,
+				amount,
+				destination: depositAddress,
+				source: userAddress,
+				prioritizationFee: ZERO
+			})
 	});
-
-	const { depositAddress, depositMemo } = swapDetails.quote;
-
-	progress(ProgressStepsSwap.SIGN_TRANSFER);
-
-	const signature = await sendSol({
-		identity,
-		token: sourceToken,
-		amount: parsedSwapAmount,
-		destination: depositAddress,
-		source: userAddress,
-		prioritizationFee: ZERO
-	});
-
-	progress(ProgressStepsSwap.SWAP);
-
-	await submitNearIntentsDepositTx({
-		depositAddress,
-		txHash: signature,
-		depositMemo: depositMemo ?? undefined
-	});
-
-	await pollNearIntentsStatus({
-		depositAddress,
-		depositMemo: depositMemo ?? undefined
-	});
-
-	progress(ProgressStepsSwap.UPDATE_UI);
-
-	await waitAndTriggerWallet();
 };
 
 export const swapService = {
