@@ -1,8 +1,15 @@
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
-import { exchangeRateICRCToUsd, exchangeRateUsdToCurrency } from '$lib/services/exchange.services';
+import {
+	exchangeRateICRCToUsd,
+	exchangeRateUsdToCurrency,
+	syncExchange
+} from '$lib/services/exchange.services';
+import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import {
 	findMissingLedgerCanisterIds,
 	formatKongSwapToCoingeckoPrices
@@ -208,6 +215,95 @@ describe('exchange.services', () => {
 			expect(fetchBatchKongSwapPrices).not.toHaveBeenCalled();
 			expect(formatKongSwapToCoingeckoPrices).not.toHaveBeenCalled();
 			expect(result).toEqual(coingeckoResponse);
+		});
+	});
+
+	describe('syncExchange', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			exchangeStore.reset();
+		});
+
+		it('should not update stores when data is undefined', () => {
+			const exchangeSetSpy = vi.spyOn(exchangeStore, 'set');
+			const currencySetSpy = vi.spyOn(currencyExchangeStore, 'setExchangeRateCurrency');
+
+			syncExchange(undefined);
+
+			expect(exchangeSetSpy).not.toHaveBeenCalled();
+			expect(currencySetSpy).not.toHaveBeenCalled();
+		});
+
+		it('should update exchange store with non-nullish price data', () => {
+			const exchangeSetSpy = vi.spyOn(exchangeStore, 'set');
+
+			const data: PostMessageDataResponseExchange = {
+				currentExchangeRate: {
+					exchangeRateToUsd: 1,
+					exchangeRate24hChangeMultiplier: 1,
+					currency: Currency.USD
+				},
+				currentEthPrice: { ethereum: { usd: 3000 } },
+				currentBtcPrice: undefined,
+				currentErc20Prices: { '0xabc': { usd: 1, usd_market_cap: 100 } },
+				currentIcpPrice: undefined,
+				currentIcrcPrices: {},
+				currentSolPrice: undefined,
+				currentSplPrices: {},
+				currentErc4626Prices: {},
+				currentBnbPrice: undefined,
+				currentPolPrice: undefined
+			};
+
+			syncExchange(data);
+
+			expect(exchangeSetSpy).toHaveBeenCalledExactlyOnceWith([
+				{ ethereum: { usd: 3000 } },
+				{ '0xabc': { usd: 1, usd_market_cap: 100 } },
+				{},
+				{},
+				{}
+			]);
+		});
+
+		it('should update currency exchange store when currentExchangeRate is provided', () => {
+			const currencySpy = vi.spyOn(currencyExchangeStore, 'setExchangeRateCurrency');
+			const rateSpy = vi.spyOn(currencyExchangeStore, 'setExchangeRate');
+			const multiplierSpy = vi.spyOn(currencyExchangeStore, 'setExchangeRate24hChangeMultiplier');
+
+			const data: PostMessageDataResponseExchange = {
+				currentExchangeRate: {
+					exchangeRateToUsd: 0.85,
+					exchangeRate24hChangeMultiplier: 1.02,
+					currency: Currency.EUR
+				},
+				currentErc20Prices: {},
+				currentIcrcPrices: {},
+				currentSplPrices: {},
+				currentErc4626Prices: {}
+			};
+
+			syncExchange(data);
+
+			expect(currencySpy).toHaveBeenCalledExactlyOnceWith(Currency.EUR);
+			expect(rateSpy).toHaveBeenCalledExactlyOnceWith(0.85);
+			expect(multiplierSpy).toHaveBeenCalledExactlyOnceWith(1.02);
+		});
+
+		it('should not update currency exchange store when currentExchangeRate is missing', () => {
+			const currencySpy = vi.spyOn(currencyExchangeStore, 'setExchangeRateCurrency');
+
+			const data: PostMessageDataResponseExchange = {
+				currentErc20Prices: {},
+				currentIcrcPrices: {},
+				currentSplPrices: {},
+				currentErc4626Prices: {}
+			};
+
+			syncExchange(data);
+
+			expect(currencySpy).not.toHaveBeenCalled();
 		});
 	});
 });

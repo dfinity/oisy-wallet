@@ -17,6 +17,7 @@ import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 import * as appConstants from '$lib/constants/app.constants';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { syncTransactionsFromCache } from '$lib/services/listener.services';
+import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc1155CustomTokens } from '$tests/mocks/erc1155-tokens.mock';
@@ -240,8 +241,10 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
@@ -331,8 +334,10 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
@@ -347,8 +352,10 @@ describe('LoaderEthTransactions', () => {
 		// same number of calls as before
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
@@ -370,8 +377,10 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		expectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
@@ -399,18 +408,18 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 
-		expectedTokens.forEach(
-			({ id: tokenId, network: { id: networkId }, standard, network }, index) => {
-				const { chainId } = network as unknown as { chainId: bigint };
+		expectedTokens.forEach(({ id: tokenId, standard, network }, index) => {
+			assertIsNetworkEthereum(network);
 
-				expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
-					tokenId,
-					networkId,
-					chainId,
-					standard
-				});
-			}
-		);
+			const { id: networkId, chainId } = network;
+
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+				tokenId,
+				networkId,
+				chainId,
+				standard
+			});
+		});
 
 		expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
 			networkId: ETHEREUM_NETWORK_ID,
@@ -434,8 +443,10 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
@@ -462,8 +473,10 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		expectedNewTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
@@ -484,8 +497,10 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
@@ -515,8 +530,10 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		expectedNewTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
@@ -552,18 +569,18 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokensWithSepolia.length);
 
-		expectedNewTokensWithSepolia.forEach(
-			({ id: tokenId, network: { id: networkId }, standard, network }) => {
-				const { chainId } = network as unknown as { chainId: bigint };
+		expectedNewTokensWithSepolia.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
 
-				expect(loadEthereumTransactions).toHaveBeenCalledWith({
-					tokenId,
-					networkId,
-					chainId,
-					standard
-				});
-			}
-		);
+			const { id: networkId, chainId } = network;
+
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				tokenId,
+				networkId,
+				chainId,
+				standard
+			});
+		});
 	});
 
 	it('should load transactions in the next call if it failed the first time', async () => {
@@ -578,8 +595,10 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
@@ -606,8 +625,10 @@ describe('LoaderEthTransactions', () => {
 			...allExpectedTokens.slice(index + 1)
 		];
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard, network }) => {
-			const { chainId } = network as unknown as { chainId: bigint };
+		expectedNewTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,

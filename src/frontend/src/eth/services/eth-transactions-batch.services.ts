@@ -4,6 +4,7 @@ import type { NetworkChainId } from '$eth/types/network';
 import { batch } from '$lib/services/batch.services';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { isNetworkEthereum } from '$lib/utils/network.utils';
 
 export type ResultByToken = ResultSuccess & { tokenId: TokenId };
 
@@ -15,8 +16,12 @@ export const batchLoadTransactions = ({
 	tokens: Token[];
 }): AsyncGenerator<PromiseSettledResult<ResultByToken>[]> => {
 	const promises = tokens.reduce<(() => Promise<ResultByToken>)[]>(
-		(acc, { network: { id: networkId }, id: tokenId, standard, network }) => {
-			const { chainId } = network as unknown as NetworkChainId;
+		(acc, { network, id: tokenId, standard }) => {
+			if (!isNetworkEthereum(network)) {
+				return acc;
+			}
+
+			const { id: networkId, chainId } = network;
 
 			const promise = async (): PromiseResult => {
 				const result = await loadEthereumTransactions({
@@ -25,10 +30,13 @@ export const batchLoadTransactions = ({
 					chainId,
 					standard
 				});
+
 				return { ...result, tokenId };
 			};
 
-			return [...acc, promise];
+			acc.push(promise);
+
+			return acc;
 		},
 		[]
 	);
