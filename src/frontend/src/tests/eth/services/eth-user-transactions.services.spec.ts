@@ -7,9 +7,9 @@ import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import {
+	loadEthUserTransactions,
 	loadNextEthUserTransactions,
-	loadUserTransactions,
-	saveFinalizedTransactions
+	saveEthFinalizedTransactions
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ZERO } from '$lib/constants/app.constants';
@@ -90,7 +90,7 @@ const makeBackendUserTx = ({
 	network_data: {
 		Evm: {
 			chain_id: [1n],
-			nonce: [1],
+			nonce: [1n],
 			gas_limit: [21000n],
 			gas_price: [20_000_000_000n],
 			gas_used: [21000n],
@@ -122,11 +122,11 @@ describe('eth-user-transactions.services', () => {
 		} as unknown as EtherscanProvider);
 	});
 
-	describe('loadUserTransactions', () => {
+	describe('loadEthUserTransactions', () => {
 		it('returns null when identity is missing', async () => {
 			mockAuthStore(null);
 
-			const result = await loadUserTransactions({ tokenId: mockBackendTokenId });
+			const result = await loadEthUserTransactions({ tokenId: mockBackendTokenId });
 
 			expect(result).toBeNull();
 			expect(mockGetUserTransactions).not.toHaveBeenCalled();
@@ -149,7 +149,7 @@ describe('eth-user-transactions.services', () => {
 				})
 			);
 
-			const result = await loadUserTransactions({ tokenId: mockBackendTokenId });
+			const result = await loadEthUserTransactions({ tokenId: mockBackendTokenId });
 
 			expect(result).not.toBeNull();
 
@@ -167,7 +167,7 @@ describe('eth-user-transactions.services', () => {
 		it('returns empty result for empty backend', async () => {
 			mockGetUserTransactions.mockResolvedValue(makeBackendResponse());
 
-			const result = await loadUserTransactions({ tokenId: mockBackendTokenId });
+			const result = await loadEthUserTransactions({ tokenId: mockBackendTokenId });
 
 			expect(result).not.toBeNull();
 
@@ -184,7 +184,7 @@ describe('eth-user-transactions.services', () => {
 		it('returns null on backend error', async () => {
 			mockGetUserTransactions.mockRejectedValue(new Error('canister error'));
 
-			const result = await loadUserTransactions({ tokenId: mockBackendTokenId });
+			const result = await loadEthUserTransactions({ tokenId: mockBackendTokenId });
 
 			expect(result).toBeNull();
 		});
@@ -452,11 +452,11 @@ describe('eth-user-transactions.services', () => {
 		});
 	});
 
-	describe('saveFinalizedTransactions', () => {
+	describe('saveEthFinalizedTransactions', () => {
 		it('returns success false when identity is missing', async () => {
 			mockAuthStore(null);
 
-			const result = await saveFinalizedTransactions({
+			const result = await saveEthFinalizedTransactions({
 				tokenId: mockBackendTokenId,
 				transactions: [makeTx({ hash: '0xhash1', blockNumber: 100 })],
 				currentBlockNumber: 200
@@ -468,7 +468,7 @@ describe('eth-user-transactions.services', () => {
 
 		it('returns success true without saving when no finalized transactions', async () => {
 			// Block 100 with currentBlockNumber 100 — not enough depth (needs 64+ blocks)
-			const result = await saveFinalizedTransactions({
+			const result = await saveEthFinalizedTransactions({
 				tokenId: mockBackendTokenId,
 				transactions: [makeTx({ hash: '0xhash1', blockNumber: 100 })],
 				currentBlockNumber: 100
@@ -484,7 +484,7 @@ describe('eth-user-transactions.services', () => {
 
 			mockSaveUserTransactions.mockResolvedValue(undefined);
 
-			const result = await saveFinalizedTransactions({
+			const result = await saveEthFinalizedTransactions({
 				tokenId: mockBackendTokenId,
 				transactions: [finalized, pending],
 				currentBlockNumber: 200
@@ -505,7 +505,7 @@ describe('eth-user-transactions.services', () => {
 		it('returns success false on backend error', async () => {
 			mockSaveUserTransactions.mockRejectedValue(new Error('canister error'));
 
-			const result = await saveFinalizedTransactions({
+			const result = await saveEthFinalizedTransactions({
 				tokenId: mockBackendTokenId,
 				transactions: [makeTx({ hash: '0xfinalized', blockNumber: 100 })],
 				currentBlockNumber: 200

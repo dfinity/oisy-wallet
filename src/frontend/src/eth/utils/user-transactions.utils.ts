@@ -1,11 +1,8 @@
 import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
-import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
-import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ZERO } from '$lib/constants/app.constants';
-import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
-import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
 
 /**
  * Number of blocks behind the tip at which an ETH transaction is considered finalized.
@@ -28,12 +25,12 @@ export const mapTransactionToUserTransaction = (tx: Transaction): UserTransactio
 		network_data: {
 			Evm: {
 				chain_id: toNullable(nonNullish(tx.chainId) ? BigInt(tx.chainId) : undefined),
-				nonce: toNullable(nonNullish(tx.nonce) ? tx.nonce : undefined),
+				nonce: toNullable(nonNullish(tx.nonce) ? BigInt(tx.nonce) : undefined),
 				gas_limit: toNullable(tx.gasLimit ?? undefined),
 				gas_price: toNullable(tx.gasPrice ?? undefined),
 				gas_used: toNullable(tx.gasUsed ?? undefined),
 				data: toNullable(tx.data ?? undefined),
-				nft_token_id: toNullable(tx.tokenId ?? undefined)
+				nft_token_id: toNullable(nonNullish(tx.tokenId) ? BigInt(tx.tokenId) : undefined)
 			}
 		}
 	};
@@ -46,20 +43,23 @@ export const mapUserTransactionToTransaction = (stored: UserTransaction): Transa
 
 	const evm = stored.network_data.Evm;
 
+	const nonce = fromNullable(evm.nonce);
+	const nftTokenId = fromNullable(evm.nft_token_id);
+
 	return {
 		hash: stored.id,
 		blockNumber: Number(stored.block_index),
 		timestamp: Number(stored.timestamp),
 		from: stored.from,
-		to: stored.to[0],
+		to: fromNullable(stored.to),
 		value: stored.value,
-		chainId: evm.chain_id[0] ?? ZERO,
-		nonce: evm.nonce[0] ?? 0,
-		gasLimit: evm.gas_limit[0] ?? ZERO,
-		gasPrice: evm.gas_price[0],
-		gasUsed: evm.gas_used[0],
-		data: evm.data[0] ?? '',
-		tokenId: evm.nft_token_id[0]
+		chainId: fromNullable(evm.chain_id) ?? ZERO,
+		nonce: nonNullish(nonce) ? Number(nonce) : 0,
+		gasLimit: fromNullable(evm.gas_limit) ?? ZERO,
+		gasPrice: fromNullable(evm.gas_price),
+		gasUsed: fromNullable(evm.gas_used),
+		data: fromNullable(evm.data) ?? '',
+		tokenId: nonNullish(nftTokenId) ? Number(nftTokenId) : undefined
 	};
 };
 
@@ -80,37 +80,20 @@ export const isTransactionFinalized = ({
 	return currentBlockNumber - blockNumber >= ETH_FINALITY_BLOCKS;
 };
 
-const allEthNetworks = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS];
+export const evmNativeTokenId = (chainId: bigint): BackendTokenId => ({
+	EvmNative: chainId
+});
 
-/**
- * Maps a frontend networkId + optional contract info to a Candid BackendTokenId.
- */
-export const buildEvmNativeBackendTokenId = ({
-	networkId
-}: {
-	networkId: NetworkId;
-}): BackendTokenId | undefined => {
-	const network = allEthNetworks.find(({ id }) => id === networkId);
-	if (isNullish(network)) {
-		return undefined;
-	}
-	return { EvmNative: network.chainId };
-};
-
-export const buildErcBackendTokenId = ({
-	networkId,
+export const ercTokenId = ({
 	contractAddress,
+	chainId,
 	standard
 }: {
-	networkId: NetworkId;
 	contractAddress: string;
+	chainId: bigint;
 	standard: TokenStandard;
 }): BackendTokenId | undefined => {
-	const network = allEthNetworks.find(({ id }) => id === networkId);
-	if (isNullish(network)) {
-		return undefined;
-	}
-	const pair: [string, bigint] = [contractAddress, network.chainId];
+	const pair: [string, bigint] = [contractAddress, chainId];
 	switch (standard.code) {
 		case 'erc20':
 			return { Erc20: pair };

@@ -6,8 +6,8 @@ import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import {
-	loadUserTransactions,
-	saveFinalizedTransactions
+	loadEthUserTransactions,
+	saveEthFinalizedTransactions
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { EthAddress } from '$eth/types/address';
@@ -15,13 +15,14 @@ import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import type { EthereumChainId } from '$eth/types/network';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { filterSpamErc20Transfers } from '$eth/utils/eth-transactions-spam.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { buildEvmNativeBackendTokenId } from '$eth/utils/user-transactions.utils';
+import { evmNativeTokenId } from '$eth/utils/user-transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
@@ -42,18 +43,20 @@ import { get } from 'svelte/store';
 export const loadEthereumTransactions = ({
 	networkId,
 	tokenId,
+	chainId,
 	standard,
 	updateOnly = false,
 	silent = false
 }: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	chainId: EthereumChainId;
 	standard: TokenStandard;
 	updateOnly?: boolean;
 	silent?: boolean;
 }): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(tokenId) || isSupportedEvmNativeTokenId(tokenId)) {
-		return loadEthTransactions({ networkId, tokenId, updateOnly, silent });
+		return loadEthTransactions({ networkId, tokenId, chainId, updateOnly, silent });
 	}
 
 	return loadErcTransactions({ networkId, tokenId, standard, updateOnly });
@@ -64,6 +67,7 @@ export const loadEthereumTransactions = ({
 export const reloadEthereumTransactions = (params: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	chainId: EthereumChainId;
 	standard: TokenStandard;
 	silent?: boolean;
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
@@ -71,11 +75,13 @@ export const reloadEthereumTransactions = (params: {
 const loadEthTransactions = async ({
 	networkId,
 	tokenId,
+	chainId,
 	updateOnly = false,
 	silent = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
+	chainId: EthereumChainId;
 	updateOnly?: boolean;
 	silent?: boolean;
 }): Promise<ResultSuccess> => {
@@ -86,12 +92,9 @@ const loadEthTransactions = async ({
 	}
 
 	try {
-		const transactionTokenId = buildEvmNativeBackendTokenId({ networkId });
+		const transactionTokenId = evmNativeTokenId(chainId);
 
-		// Load stored finalized transactions from backend to get the newest stored block
-		const stored = nonNullish(transactionTokenId)
-			? await loadUserTransactions({ tokenId: transactionTokenId })
-			: null;
+		const stored = await loadEthUserTransactions({ tokenId: transactionTokenId });
 
 		// Fetch from Etherscan starting after the newest stored block (incremental loading)
 		const startBlock = nonNullish(stored?.newestBlockIndex) ? stored.newestBlockIndex + 1 : 0;
@@ -119,12 +122,12 @@ const loadEthTransactions = async ({
 		// We use the highest block number in the batch as the "tip" for finality checks.
 		// This means only transactions at least ETH_FINALITY_BLOCKS behind this tip will
 		// be saved — the most recent transactions in the batch will be saved on a future load.
-		if (newTransactions.length > 0 && nonNullish(transactionTokenId)) {
+		if (newTransactions.length > 0) {
 			const blockNumbers = newTransactions.map((tx) => tx.blockNumber).filter(nonNullish);
 			const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
 
 			if (maxBlockNumber > 0) {
-				saveFinalizedTransactions({
+				saveEthFinalizedTransactions({
 					tokenId: transactionTokenId,
 					transactions: newTransactions,
 					currentBlockNumber: maxBlockNumber

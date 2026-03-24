@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
@@ -90,6 +90,7 @@ describe('eth-transactions.services', () => {
 				const result = await loadEthereumTransactions({
 					networkId: mockNetworkId,
 					tokenId: mockTokenId,
+					chainId: ETHEREUM_NETWORK.chainId,
 					standard: mockStandard
 				});
 
@@ -100,6 +101,7 @@ describe('eth-transactions.services', () => {
 				const result = await loadEthereumTransactions({
 					networkId: ETHEREUM_NETWORK_ID,
 					tokenId: USDT_TOKEN_ID,
+					chainId: ETHEREUM_NETWORK.chainId,
 					standard: USDT_TOKEN.standard
 				});
 
@@ -113,7 +115,7 @@ describe('eth-transactions.services', () => {
 				async (token) => {
 					const {
 						id: mockTokenId,
-						network: { id: mockNetworkId },
+						network: { id: mockNetworkId, chainId },
 						standard: mockStandard
 					} = token;
 
@@ -122,6 +124,7 @@ describe('eth-transactions.services', () => {
 					await loadEthereumTransactions({
 						networkId: mockNetworkId,
 						tokenId: mockTokenId,
+						chainId,
 						standard: mockStandard
 					});
 
@@ -137,7 +140,7 @@ describe('eth-transactions.services', () => {
 				async (token) => {
 					const {
 						id: mockTokenId,
-						network: { id: mockNetworkId },
+						network: { id: mockNetworkId, chainId },
 						standard: mockStandard
 					} = token;
 
@@ -146,6 +149,7 @@ describe('eth-transactions.services', () => {
 					const result = await loadEthereumTransactions({
 						networkId: mockNetworkId,
 						tokenId: mockTokenId,
+						chainId,
 						standard: mockStandard
 					});
 
@@ -168,7 +172,7 @@ describe('eth-transactions.services', () => {
 				async (token) => {
 					const {
 						id: mockTokenId,
-						network: { id: mockNetworkId },
+						network: { id: mockNetworkId, chainId },
 						standard: mockStandard
 					} = token;
 
@@ -186,6 +190,7 @@ describe('eth-transactions.services', () => {
 					const result = await loadEthereumTransactions({
 						networkId: mockNetworkId,
 						tokenId: mockTokenId,
+						chainId,
 						standard: mockStandard,
 						updateOnly: true
 					});
@@ -209,7 +214,7 @@ describe('eth-transactions.services', () => {
 				async (token) => {
 					const {
 						id: mockTokenId,
-						network: { id: mockNetworkId },
+						network: { id: mockNetworkId, chainId },
 						standard: mockStandard,
 						symbol: mockSymbol
 					} = token;
@@ -228,6 +233,7 @@ describe('eth-transactions.services', () => {
 					const result = await loadEthereumTransactions({
 						networkId: mockNetworkId,
 						tokenId: mockTokenId,
+						chainId,
 						standard: mockStandard
 					});
 
@@ -284,6 +290,7 @@ describe('eth-transactions.services', () => {
 				const result = await loadEthereumTransactions({
 					networkId: mockValidErc4626Token.network.id,
 					tokenId: mockValidErc4626Token.id,
+					chainId: mockValidErc4626Token.network.chainId,
 					standard: mockValidErc4626Token.standard
 				});
 
@@ -311,6 +318,7 @@ describe('eth-transactions.services', () => {
 				const result = await loadEthereumTransactions({
 					networkId: mockValidErc4626Token.network.id,
 					tokenId: mockValidErc4626Token.id,
+					chainId: mockValidErc4626Token.network.chainId,
 					standard: mockValidErc4626Token.standard
 				});
 
@@ -338,6 +346,7 @@ describe('eth-transactions.services', () => {
 				const result = await loadEthereumTransactions({
 					networkId: mockValidErc4626Token.network.id,
 					tokenId: mockValidErc4626Token.id,
+					chainId: mockValidErc4626Token.network.chainId,
 					standard: mockValidErc4626Token.standard
 				});
 
@@ -362,7 +371,7 @@ describe('eth-transactions.services', () => {
 
 		const {
 			id: mockTokenId,
-			network: { id: mockNetworkId },
+			network: { id: mockNetworkId, chainId: mockChainId },
 			standard: mockStandard
 		} = USDC_TOKEN;
 
@@ -391,6 +400,7 @@ describe('eth-transactions.services', () => {
 			const result = await reloadEthereumTransactions({
 				networkId: mockNetworkId,
 				tokenId: mockTokenId,
+				chainId: mockChainId,
 				standard: mockStandard
 			});
 

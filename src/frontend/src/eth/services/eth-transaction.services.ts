@@ -2,6 +2,7 @@ import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { reloadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import type { NetworkChainId } from '$eth/types/network';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
@@ -115,11 +116,13 @@ const processMinedTransaction = async ({ token }: { token: Token }) => {
 	const {
 		id: tokenId,
 		network: { id: networkId },
-		standard
+		standard,
+		network
 	} = token;
 
-	// Reload transactions as a transaction has been mined
-	await reloadEthereumTransactions({ tokenId, networkId, standard });
+	const { chainId } = network as unknown as NetworkChainId;
+
+	await reloadEthereumTransactions({ tokenId, networkId, chainId, standard });
 
 	// Reload balance as a transaction has been mined
 	await reloadEthereumBalance(token);

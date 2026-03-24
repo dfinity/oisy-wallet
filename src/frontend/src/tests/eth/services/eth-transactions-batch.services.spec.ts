@@ -49,9 +49,12 @@ describe('eth-transactions-batch.services', () => {
 			);
 
 			mockTokens.slice(0, ETHERSCAN_MAX_CALLS_PER_SECOND).forEach((token) => {
+				const { chainId } = token.network as unknown as { chainId: bigint };
+
 				expect(loadEthereumTransactions).toHaveBeenCalledWith({
 					tokenId: token.id,
 					networkId: token.network.id,
+					chainId,
 					standard: token.standard
 				});
 			});
