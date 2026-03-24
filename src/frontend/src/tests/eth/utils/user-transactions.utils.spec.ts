@@ -1,15 +1,16 @@
 import type { UserTransaction } from '$declarations/backend/backend.did';
-import { ZERO } from '$lib/constants/app.constants';
-import type { Transaction } from '$lib/types/transaction';
 import {
 	ETH_FINALITY_BLOCKS,
 	isTransactionFinalized,
 	mapTransactionToUserTransaction,
 	mapUserTransactionToTransaction
 } from '$eth/utils/user-transactions.utils';
+import { ZERO } from '$lib/constants/app.constants';
+import type { Transaction } from '$lib/types/transaction';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockEthTransaction } from '$tests/mocks/eth-transactions.mock';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
+import { toNullable } from '@dfinity/utils';
 
 describe('user-transactions.utils', () => {
 	const mockUserTransaction: UserTransaction = {
@@ -17,17 +18,17 @@ describe('user-transactions.utils', () => {
 		block_index: 123213n,
 		timestamp: 123456789n,
 		from: mockEthAddress,
-		to: [mockEthAddress2],
+		to: toNullable(mockEthAddress2),
 		value: bn1Bi,
 		network_data: {
 			Evm: {
-				chain_id: [1n],
-				nonce: [123n],
-				gas_limit: [bn3Bi],
-				gas_price: [],
-				gas_used: [],
-				data: ['0xabcdef'],
-				nft_token_id: []
+				chain_id: toNullable(1n),
+				nonce: toNullable(123n),
+				gas_limit: toNullable(bn3Bi),
+				gas_price: toNullable(),
+				gas_used: toNullable(),
+				data: toNullable('0xabcdef'),
+				nft_token_id: toNullable()
 			}
 		}
 	};
@@ -42,9 +43,9 @@ describe('user-transactions.utils', () => {
 		it('should throw when hash is nullish', () => {
 			const { hash: _, ...transactionWithoutHash } = mockEthTransaction;
 
-			expect(() =>
-				mapTransactionToUserTransaction(transactionWithoutHash as Transaction)
-			).toThrow('Cannot store a transaction without a hash');
+			expect(() => mapTransactionToUserTransaction(transactionWithoutHash as Transaction)).toThrow(
+				'Cannot store a transaction without a hash'
+			);
 		});
 
 		it('should default blockNumber and timestamp to 0n when undefined', () => {
@@ -53,8 +54,8 @@ describe('user-transactions.utils', () => {
 
 			const result = mapTransactionToUserTransaction(transaction);
 
-			expect(result.block_index).toBe(0n);
-			expect(result.timestamp).toBe(0n);
+			expect(result.block_index).toBe(ZERO);
+			expect(result.timestamp).toBe(ZERO);
 		});
 
 		it('should map optional "to" as empty when undefined', () => {
@@ -62,22 +63,22 @@ describe('user-transactions.utils', () => {
 
 			const result = mapTransactionToUserTransaction(transaction);
 
-			expect(result.to).toEqual([]);
+			expect(result.to).toEqual(toNullable());
 		});
 
 		it('should map optional chainId, nonce, and tokenId as empty when undefined', () => {
-			const transaction: Transaction = {
+			const transaction = {
 				...mockEthTransaction,
 				chainId: undefined,
 				nonce: undefined,
 				tokenId: undefined
-			};
+			} as unknown as Transaction;
 
 			const result = mapTransactionToUserTransaction(transaction);
 
-			expect(result.network_data.Evm.chain_id).toEqual([]);
-			expect(result.network_data.Evm.nonce).toEqual([]);
-			expect(result.network_data.Evm.nft_token_id).toEqual([]);
+			expect(result.network_data.Evm.chain_id).toEqual(toNullable());
+			expect(result.network_data.Evm.nonce).toEqual(toNullable());
+			expect(result.network_data.Evm.nft_token_id).toEqual(toNullable());
 		});
 
 		it('should map gasPrice and gasUsed as empty when undefined', () => {
@@ -89,8 +90,8 @@ describe('user-transactions.utils', () => {
 
 			const result = mapTransactionToUserTransaction(transaction);
 
-			expect(result.network_data.Evm.gas_price).toEqual([]);
-			expect(result.network_data.Evm.gas_used).toEqual([]);
+			expect(result.network_data.Evm.gas_price).toEqual(toNullable());
+			expect(result.network_data.Evm.gas_used).toEqual(toNullable());
 		});
 
 		it('should map gasPrice and gasUsed when provided', () => {
@@ -102,8 +103,8 @@ describe('user-transactions.utils', () => {
 
 			const result = mapTransactionToUserTransaction(transaction);
 
-			expect(result.network_data.Evm.gas_price).toEqual([100n]);
-			expect(result.network_data.Evm.gas_used).toEqual([21000n]);
+			expect(result.network_data.Evm.gas_price).toEqual(toNullable(100n));
+			expect(result.network_data.Evm.gas_used).toEqual(toNullable(21000n));
 		});
 
 		it('should convert tokenId to bigint', () => {
@@ -111,7 +112,7 @@ describe('user-transactions.utils', () => {
 
 			const result = mapTransactionToUserTransaction(transaction);
 
-			expect(result.network_data.Evm.nft_token_id).toEqual([42n]);
+			expect(result.network_data.Evm.nft_token_id).toEqual(toNullable(42n));
 		});
 	});
 
@@ -148,7 +149,7 @@ describe('user-transactions.utils', () => {
 		});
 
 		it('should map optional "to" as undefined when empty', () => {
-			const transaction: UserTransaction = { ...mockUserTransaction, to: [] };
+			const transaction: UserTransaction = { ...mockUserTransaction, to: toNullable() };
 
 			const result = mapUserTransactionToTransaction(transaction);
 
@@ -159,7 +160,7 @@ describe('user-transactions.utils', () => {
 			const transaction: UserTransaction = {
 				...mockUserTransaction,
 				network_data: {
-					Evm: { ...mockUserTransaction.network_data.Evm, chain_id: [] }
+					Evm: { ...mockUserTransaction.network_data.Evm, chain_id: toNullable() }
 				}
 			};
 
@@ -172,7 +173,7 @@ describe('user-transactions.utils', () => {
 			const transaction: UserTransaction = {
 				...mockUserTransaction,
 				network_data: {
-					Evm: { ...mockUserTransaction.network_data.Evm, nonce: [] }
+					Evm: { ...mockUserTransaction.network_data.Evm, nonce: toNullable() }
 				}
 			};
 
@@ -185,7 +186,7 @@ describe('user-transactions.utils', () => {
 			const transaction: UserTransaction = {
 				...mockUserTransaction,
 				network_data: {
-					Evm: { ...mockUserTransaction.network_data.Evm, gas_limit: [] }
+					Evm: { ...mockUserTransaction.network_data.Evm, gas_limit: toNullable() }
 				}
 			};
 
@@ -198,7 +199,7 @@ describe('user-transactions.utils', () => {
 			const transaction: UserTransaction = {
 				...mockUserTransaction,
 				network_data: {
-					Evm: { ...mockUserTransaction.network_data.Evm, data: [] }
+					Evm: { ...mockUserTransaction.network_data.Evm, data: toNullable() }
 				}
 			};
 
@@ -213,8 +214,8 @@ describe('user-transactions.utils', () => {
 				network_data: {
 					Evm: {
 						...mockUserTransaction.network_data.Evm,
-						gas_price: [100n],
-						gas_used: [21000n]
+						gas_price: toNullable(100n),
+						gas_used: toNullable(21000n)
 					}
 				}
 			};
@@ -231,7 +232,7 @@ describe('user-transactions.utils', () => {
 				network_data: {
 					Evm: {
 						...mockUserTransaction.network_data.Evm,
-						nft_token_id: [42n]
+						nft_token_id: toNullable(42n)
 					}
 				}
 			};
@@ -265,9 +266,9 @@ describe('user-transactions.utils', () => {
 				network_data: {
 					Evm: {
 						...mockUserTransaction.network_data.Evm,
-						gas_price: [100n],
-						gas_used: [21000n],
-						nft_token_id: [42n]
+						gas_price: toNullable(100n),
+						gas_used: toNullable(21000n),
+						nft_token_id: toNullable(42n)
 					}
 				}
 			};
@@ -292,7 +293,7 @@ describe('user-transactions.utils', () => {
 					blockNumber: 100,
 					currentBlockNumber: 100 + ETH_FINALITY_BLOCKS
 				})
-			).toBe(true);
+			).toBeTruthy();
 		});
 
 		it('should return true when block difference exceeds ETH_FINALITY_BLOCKS', () => {
@@ -301,7 +302,7 @@ describe('user-transactions.utils', () => {
 					blockNumber: 100,
 					currentBlockNumber: 100 + ETH_FINALITY_BLOCKS + 1000
 				})
-			).toBe(true);
+			).toBeTruthy();
 		});
 
 		it('should return false when block difference is less than ETH_FINALITY_BLOCKS', () => {
@@ -310,7 +311,7 @@ describe('user-transactions.utils', () => {
 					blockNumber: 100,
 					currentBlockNumber: 100 + ETH_FINALITY_BLOCKS - 1
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 
 		it('should return false when blockNumber is undefined', () => {
@@ -319,7 +320,7 @@ describe('user-transactions.utils', () => {
 					blockNumber: undefined,
 					currentBlockNumber: 1000
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 
 		it('should return true when blockNumber is 0 and currentBlockNumber is at least ETH_FINALITY_BLOCKS', () => {
@@ -328,7 +329,7 @@ describe('user-transactions.utils', () => {
 					blockNumber: 0,
 					currentBlockNumber: ETH_FINALITY_BLOCKS
 				})
-			).toBe(true);
+			).toBeTruthy();
 		});
 
 		it('should return false when blockNumber equals currentBlockNumber', () => {
@@ -337,7 +338,7 @@ describe('user-transactions.utils', () => {
 					blockNumber: 500,
 					currentBlockNumber: 500
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 	});
 });
