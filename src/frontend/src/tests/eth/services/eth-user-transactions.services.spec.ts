@@ -1,7 +1,4 @@
-import type {
-	GetUserTransactionsResponse,
-	UserTransaction
-} from '$declarations/backend/backend.did';
+import type { UserTransaction } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
@@ -14,6 +11,7 @@ import {
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ZERO } from '$lib/constants/app.constants';
 import { ethAddressStore } from '$lib/stores/address.store';
+import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -65,10 +63,7 @@ const makeBackendResponse = ({
 	overrides?: Partial<GetUserTransactionsResponse>;
 } = {}): GetUserTransactionsResponse => ({
 	transactions: [],
-	newest_block_index: [],
-	oldest_block_index: [],
-	total_stored: ZERO,
-	next_start: [],
+	totalStored: ZERO,
 	...overrides
 });
 
@@ -138,10 +133,9 @@ describe('eth-user-transactions.services', () => {
 							makeBackendUserTx({ hash: '0xhash2', blockIndex: 200n, timestamp: 2000n }),
 							makeBackendUserTx({ hash: '0xhash1', blockIndex: 100n, timestamp: 1000n })
 						],
-						newest_block_index: [300n],
-						oldest_block_index: [100n],
-						total_stored: 3n,
-						next_start: []
+						newestBlockIndex: 300n,
+						oldestBlockIndex: 100n,
+						totalStored: 3n
 					}
 				})
 			);
@@ -158,10 +152,10 @@ describe('eth-user-transactions.services', () => {
 			}
 
 			expect(result.transactions).toHaveLength(3);
-			expect(result.newest_block_index).toEqual([300n]);
-			expect(result.oldest_block_index).toEqual([100n]);
-			expect(result.total_stored).toBe(3n);
-			expect(result.next_start).toEqual([]);
+			expect(result.newestBlockIndex).toBe(300n);
+			expect(result.oldestBlockIndex).toBe(100n);
+			expect(result.totalStored).toBe(3n);
+			expect(result.nextStart).toBeUndefined();
 		});
 
 		it('returns empty result for empty backend', async () => {
@@ -179,9 +173,9 @@ describe('eth-user-transactions.services', () => {
 			}
 
 			expect(result.transactions).toHaveLength(0);
-			expect(result.newest_block_index).toEqual([]);
-			expect(result.oldest_block_index).toEqual([]);
-			expect(result.total_stored).toBe(ZERO);
+			expect(result.newestBlockIndex).toBeUndefined();
+			expect(result.oldestBlockIndex).toBeUndefined();
+			expect(result.totalStored).toBe(ZERO);
 		});
 
 		it('returns undefined on backend error', async () => {
@@ -221,10 +215,10 @@ describe('eth-user-transactions.services', () => {
 							makeBackendUserTx({ hash: '0xhash2', blockIndex: 200n, timestamp: 2000n }),
 							makeBackendUserTx({ hash: '0xhash1', blockIndex: 100n, timestamp: 1000n })
 						],
-						newest_block_index: [500n],
-						oldest_block_index: [50n],
-						total_stored: 300n,
-						next_start: [100n]
+						newestBlockIndex: 500n,
+						oldestBlockIndex: 50n,
+						totalStored: 300n,
+						nextStart: 100n
 					}
 				})
 			);
@@ -255,10 +249,9 @@ describe('eth-user-transactions.services', () => {
 						transactions: [
 							makeBackendUserTx({ hash: '0xhash1', blockIndex: 100n, timestamp: 1000n })
 						],
-						newest_block_index: [500n],
-						oldest_block_index: [100n],
-						total_stored: 50n,
-						next_start: []
+						newestBlockIndex: 500n,
+						oldestBlockIndex: 100n,
+						totalStored: 50n
 					}
 				})
 			);

@@ -30,6 +30,7 @@ import {
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockDefinedUserAgreements, mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
 import {
+	mockCandidGetUserTransactionsResponse,
 	mockGetUserTransactionsResponse,
 	mockUserTransaction,
 	mockUserTransactionTokenId
@@ -1524,7 +1525,7 @@ describe('backend.canister', () => {
 
 		it('should return user transactions with success response', async () => {
 			service.get_user_transactions.mockResolvedValue({
-				Ok: mockGetUserTransactionsResponse
+				Ok: mockCandidGetUserTransactionsResponse
 			});
 
 			const { getUserTransactions } = await createBackendCanister({
@@ -1543,7 +1544,7 @@ describe('backend.canister', () => {
 
 		it('should pass empty array for start when undefined', async () => {
 			service.get_user_transactions.mockResolvedValue({
-				Ok: mockGetUserTransactionsResponse
+				Ok: mockCandidGetUserTransactionsResponse
 			});
 
 			const { getUserTransactions } = await createBackendCanister({
