@@ -1157,14 +1157,14 @@
 			"on_network": " na $network",
 			"delete_token": "Usuń token",
 			"edit_token": "Edytuj token",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Wartość",
+			"sort_by_performance": "Wyniki tokenu",
+			"sort_by_symbol": "Symbol",
+			"hide_asset_types": "Ukryj typy aktywów",
+			"asset_type": "Typ aktywa w $oisy_name",
+			"asset_type_all": "Wszystkie typy aktywów",
+			"no_tokens_for_asset_type": "W Twoim portfelu nie ma $asset_type",
+			"no_tokens_for_asset_type_description": "Wybierz spośród <strong>$count obsługiwanych tokenów</strong>, aby dostosować widok portfela."
 		},
 		"details": {
 			"title": "Szczegóły tokena",
@@ -1294,19 +1294,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Kategoria",
+			"risk": "Ryzyko"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Kryptowaluty",
+			"stablecoin": "Stablecoiny",
+			"stock": "Akcje",
+			"commodity": "Surowce"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Niskie ryzyko",
+			"medium": "Średnie ryzyko",
+			"high": "Wysokie ryzyko"
 		}
 	},
 	"nfts": {
