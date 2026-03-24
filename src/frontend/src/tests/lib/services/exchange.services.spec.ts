@@ -8,8 +8,7 @@ import {
 	exchangeRateUsdToCurrency,
 	fetchAllExchangeRatesFromBackend,
 	syncExchange,
-	toTokenId,
-	syncExchange,
+	toTokenId
 } from '$lib/services/exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
