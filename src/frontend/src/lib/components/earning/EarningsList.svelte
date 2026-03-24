@@ -6,13 +6,21 @@
 	import NoStakePlaceholder from '$lib/components/stake/NoStakePlaceholder.svelte';
 	import VaultCard from '$lib/components/vaults/VaultCard.svelte';
 	import { AppPath, VAULT_PARAM } from '$lib/constants/routes.constants';
+	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
+	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
 	import { filterEnabledToken } from '$lib/utils/token.utils';
 
 	let vaultsToDisplay = $derived(
 		$allVaults.filter(
 			({ token }) =>
-				(token.usdBalance ?? 0) > 0 && (isTokenHarvestAutopilot(token) || filterEnabledToken(token))
+				(token.usdBalance ?? 0) > 0 &&
+				(isTokenHarvestAutopilot(token) || filterEnabledToken(token)) &&
+				showTokenFilteredBySelectedNetwork({
+					token,
+					$selectedNetwork,
+					$pseudoNetworkChainFusion
+				})
 		)
 	);
 </script>
