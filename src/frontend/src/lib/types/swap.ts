@@ -6,10 +6,12 @@ import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import type { Address, OptionAddress } from '$lib/types/address';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
+import type { OptionSolAddress } from '$sol/types/address';
 import type { Identity } from '@icp-sdk/core/agent';
 import type {
 	BridgePrice,
@@ -63,6 +65,7 @@ export interface FetchSwapAmountsParams {
 	slippage: string | number;
 	isSourceTokenIcrc2?: boolean;
 	userEthAddress: OptionEthAddress;
+	userSolAddress: OptionSolAddress;
 }
 
 export type Slippage = string | number;
@@ -136,6 +139,12 @@ export interface EvmSwapProviderConfig {
 	isEnabled: boolean;
 }
 
+export interface SolSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+}
+
 export interface SwapParams {
 	identity: Identity;
 	progress: (step: ProgressStepsSwap) => void;
@@ -195,6 +204,15 @@ export interface EvmQuoteParams {
 	destinationToken: Erc20Token;
 	amount: bigint;
 	userAddress: OptionEthAddress;
+	slippage: Slippage;
+}
+
+export interface NearIntentsQuoteParams {
+	sourceToken: Token;
+	destinationToken: Token;
+	amount: bigint;
+	userAddress: OptionAddress<Address>;
+	recipientAddress?: string;
 	slippage: Slippage;
 }
 
