@@ -113,8 +113,7 @@ export const saveFinalizedTransactions = async <T extends EthTransaction>({
 			transactions: finalized.map(mapToBackend)
 		});
 		return { success: true };
-	} catch (err) {
-		consoleError('Failed to save finalized transactions to backend:', err);
+	} catch (_: unknown) {
 		return { success: false };
 	}
 };

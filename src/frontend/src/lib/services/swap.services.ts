@@ -41,6 +41,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
+import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -65,6 +66,7 @@ import {
 	type IcpSwapManualWithdrawParams,
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
+	type NearIntentsQuoteParams,
 	type SwapMappedResult,
 	type SwapNearIntentsParams,
 	type SwapParams,
@@ -73,7 +75,7 @@ import {
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { isNetworkIdICP } from '$lib/utils/network.utils';
+import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
@@ -249,7 +251,8 @@ export const fetchSwapAmounts = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2,
-	userEthAddress
+	userEthAddress,
+	userSolAddress
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -265,6 +268,27 @@ export const fetchSwapAmounts = async ({
 			tokens,
 			slippage,
 			isSourceTokenIcrc2
+		});
+	}
+
+	const isSourceSolana = isNetworkIdSolana(sourceToken.network.id);
+	const isDestSolana = isNetworkIdSolana(destinationToken.network.id);
+
+	if (isSourceSolana || isDestSolana) {
+		const sourceAddress = isSourceSolana ? userSolAddress : userEthAddress;
+		const destAddress = isDestSolana ? userSolAddress : userEthAddress;
+
+		if (isNullish(sourceAddress)) {
+			return [];
+		}
+
+		return await fetchSwapAmountsSOL({
+			sourceToken,
+			destinationToken,
+			amount: sourceAmount,
+			userAddress: sourceAddress,
+			recipientAddress: destAddress ?? undefined,
+			slippage
 		});
 	}
 
@@ -285,7 +309,7 @@ const fetchSwapAmountsICP = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2
-}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & {
+}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'userSolAddress' | 'amount'> & {
 	amount: bigint;
 }): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
@@ -604,7 +628,7 @@ export const fetchIcpSwap = async ({
 	await waitAndTriggerWallet();
 };
 
-export const fetchNearIntentsSwap = async ({
+export const fetchNearIntentsEvmSwap = async ({
 	identity,
 	progress,
 	sourceToken,
@@ -778,6 +802,42 @@ export const fetchSwapAmountsEVM = async ({
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
 			getQuote({ sourceToken, destinationToken, amount, userAddress, slippage })
+		)
+	);
+
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		return acc;
+	}, []);
+
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
+};
+
+// This wrapper keeps the return type uniform (array of SwapMappedResult),
+// so we can plug in more DEX quote providers later without changing callers.
+// Each provider can push its mapped result into the array, easy extendability.
+export const fetchSwapAmountsSOL = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress,
+	recipientAddress,
+	slippage
+}: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
+	if (isNullish(userAddress)) {
+		return [];
+	}
+
+	const enabledProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
 		)
 	);
 

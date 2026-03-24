@@ -65,7 +65,8 @@ describe('EthFeeContext', () => {
 		amount: OptionAmount;
 		data: string | undefined;
 		erc4626ContractAddress: Erc4626ContractAddress | undefined;
-		erc4626Operation: 'deposit' | 'withdraw' | undefined;
+		erc4626Operation: 'deposit' | 'withdraw' | 'redeem' | undefined;
+		erc4626Shares?: bigint | undefined;
 		maxAmount: bigint | undefined;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork: Network | undefined;
@@ -81,6 +82,7 @@ describe('EthFeeContext', () => {
 		data: undefined,
 		erc4626ContractAddress: undefined,
 		erc4626Operation: undefined,
+		erc4626Shares: undefined,
 		maxAmount: undefined,
 		sourceNetwork: network,
 		targetNetwork: network,
@@ -153,6 +155,10 @@ describe('EthFeeContext', () => {
 		vi.spyOn(erc4626Services, 'encodeErc4626Withdraw').mockReturnValue({
 			to: '0x5555555555555555555555555555555555555555',
 			data: '0xwithdrawdata'
+		});
+		vi.spyOn(erc4626Services, 'encodeErc4626Redeem').mockReturnValue({
+			to: '0x5555555555555555555555555555555555555555',
+			data: '0xredeemdata'
 		});
 	});
 
@@ -364,6 +370,63 @@ describe('EthFeeContext', () => {
 			expect(erc4626Services.encodeErc4626Withdraw).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					assets: 50n
+				})
+			);
+		});
+
+		it('should estimate redeem fee using encodeErc4626Redeem with shares', async () => {
+			const provider = infuraMod.infuraProviders(network.id) as unknown as {
+				safeEstimateGas: (p: unknown) => Promise<bigint | undefined>;
+			};
+			vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(250n);
+
+			const mockShares = 1_000_000n;
+
+			renderWith({
+				sendToken: mockValidErc4626Token,
+				sendTokenId: mockValidErc4626Token.id,
+				erc4626ContractAddress,
+				erc4626Operation: 'redeem',
+				erc4626Shares: mockShares
+			});
+
+			await vi.runAllTimersAsync();
+
+			expect(erc4626Services.encodeErc4626Redeem).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					contractAddress: erc4626ContractAddress,
+					shares: mockShares,
+					receiver: fromAddr,
+					owner: fromAddr
+				})
+			);
+
+			expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					gas: 250n
+				})
+			);
+		});
+
+		it('should use fallback fee when redeem gas estimation returns undefined', async () => {
+			const provider = infuraMod.infuraProviders(network.id) as unknown as {
+				safeEstimateGas: (p: unknown) => Promise<bigint | undefined>;
+			};
+			vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(undefined);
+
+			renderWith({
+				sendToken: mockValidErc4626Token,
+				sendTokenId: mockValidErc4626Token.id,
+				erc4626ContractAddress,
+				erc4626Operation: 'redeem',
+				erc4626Shares: 500_000n
+			});
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					gas: ERC20_FALLBACK_FEE
 				})
 			);
 		});
