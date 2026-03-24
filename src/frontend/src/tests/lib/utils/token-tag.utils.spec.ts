@@ -179,20 +179,25 @@ describe('token-tag.utils', () => {
 		});
 
 		describe('group token counts', () => {
-			const mkTokenUiWithOverrides = (tags: Token['tags'], overrides?: Partial<Token>): TokenUi =>
-				({ ...mockValidToken, ...overrides, tags }) as TokenUi;
+			const mkTokenUiWithOverrides = ({
+				tags,
+				overrides
+			}: {
+				tags: Token['tags'];
+				overrides?: Partial<Token>;
+			}): TokenUi => ({ ...mockValidToken, ...overrides, tags }) as TokenUi;
 
-			const cryptoTokenUiGroup = mkTokenUiWithOverrides(cryptoToken.tags, {
-				name: 'CryptoToken',
-				symbol: 'CRY'
+			const cryptoTokenUiGroup = mkTokenUiWithOverrides({
+				tags: cryptoToken.tags,
+				overrides: { name: 'CryptoToken', symbol: 'CRY' }
 			});
-			const stableTokenUiGroup = mkTokenUiWithOverrides(stablecoinToken.tags, {
-				name: 'StableToken',
-				symbol: 'STB'
+			const stableTokenUiGroup = mkTokenUiWithOverrides({
+				tags: stablecoinToken.tags,
+				overrides: { name: 'StableToken', symbol: 'STB' }
 			});
-			const stockTokenUiGroup = mkTokenUiWithOverrides(stockToken.tags, {
-				name: 'StockToken',
-				symbol: 'STK'
+			const stockTokenUiGroup = mkTokenUiWithOverrides({
+				tags: stockToken.tags,
+				overrides: { name: 'StockToken', symbol: 'STK' }
 			});
 
 			it('should filter group tokens to only those matching the selected category', () => {
@@ -219,9 +224,9 @@ describe('token-tag.utils', () => {
 			});
 
 			it('should return correct count when multiple tokens match the category', () => {
-				const anotherCryptoTokenUi = mkTokenUiWithOverrides(cryptoToken.tags, {
-					name: 'AnotherCrypto',
-					symbol: 'AC'
+				const anotherCryptoTokenUi = mkTokenUiWithOverrides({
+					tags: cryptoToken.tags,
+					overrides: { name: 'AnotherCrypto', symbol: 'AC' }
 				});
 				const groupTokens: TokenUi[] = [
 					cryptoTokenUiGroup,
