@@ -255,7 +255,6 @@
 				identity: $authIdentity,
 				progress: (step: ProgressStep) => (swapProgressStep = step),
 				sourceToken: $sourceToken as Erc20Token,
-				destinationToken: $destinationToken as Erc20Token,
 				swapAmount,
 				sourceNetwork: $sourceToken.network,
 				slippageValue,
@@ -268,6 +267,7 @@
 			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED) {
 				const params = {
 					...baseParams,
+					destinationToken: $destinationToken as Erc20Token,
 					receiveAmount: selectedProvider.receiveAmount,
 					swapDetails: selectedProvider.swapDetails
 				};
@@ -280,11 +280,15 @@
 						msg: { text: $i18n.swap.error.unexpected_missing_data }
 					});
 
+					onBack();
+					onStartTriggerAmount();
+
 					return;
 				}
 
 				const params = {
 					...baseParams,
+					destinationToken: $destinationToken as Erc20Token,
 					receiveAmount: selectedProvider.receiveAmount,
 					isGasless: $isSourceTokenPermitSupported ?? false,
 					destinationNetwork: $destinationToken.network,
@@ -300,6 +304,11 @@
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected }
 				});
+
+				onBack();
+				onStartTriggerAmount();
+
+				return;
 			}
 
 			progress(ProgressStepsSwap.DONE);
