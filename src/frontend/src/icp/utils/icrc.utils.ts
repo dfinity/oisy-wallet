@@ -16,7 +16,7 @@ import type {
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
-import type { TokenCategory, TokenMetadata } from '$lib/types/token';
+import type { Token, TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
@@ -87,6 +87,9 @@ export const mapIcrcToken = ({
 
 	const customTokenSymbol = icrcCustomTokens?.[ledgerCanisterId];
 
+	const twinTokenTags =
+		'twinToken' in rest ? (rest as { twinToken?: Token }).twinToken?.tags : undefined;
+
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
@@ -102,7 +105,7 @@ export const mapIcrcToken = ({
 		...(nonNullish(customTokenSymbol?.deprecated) && {
 			deprecated: customTokenSymbol.deprecated
 		}),
-		tags: customTokenSymbol?.tags ?? DEFAULT_TOKEN_TAGS,
+		tags: customTokenSymbol?.tags ?? twinTokenTags ?? DEFAULT_TOKEN_TAGS,
 		ledgerCanisterId,
 		...metadataToken,
 		...rest
