@@ -8,6 +8,7 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiGroup } from '$lib/types/token-ui-group';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
 vi.mock('$app/navigation', () => ({
@@ -174,9 +175,12 @@ describe('TokenGroupCard', () => {
 		const { container } = render(TokenGroupCard, { props: { tokenGroup } });
 
 		const header = container.querySelector('[data-tid^="token-group"]');
+
 		expect(header).not.toBeNull();
 
-		await fireEvent.click(header!);
+		assertNonNullish(header);
+
+		await fireEvent.click(header);
 
 		const cryptoCardA = container.querySelector('[data-tid="token-card-CRYA-ICP"]');
 		const cryptoCardB = container.querySelector('[data-tid="token-card-CRYB-ETH"]');
@@ -191,9 +195,12 @@ describe('TokenGroupCard', () => {
 		const { container } = render(TokenGroupCard, { props: { tokenGroup } });
 
 		const header = container.querySelector('[data-tid^="token-group"]');
+
 		expect(header).not.toBeNull();
 
-		await fireEvent.click(header!);
+		assertNonNullish(header);
+
+		await fireEvent.click(header);
 
 		const cryptoCardA = container.querySelector('[data-tid="token-card-CRYA-ICP"]');
 		const cryptoCardB = container.querySelector('[data-tid="token-card-CRYB-ETH"]');
