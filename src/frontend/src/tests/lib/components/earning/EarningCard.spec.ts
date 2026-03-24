@@ -103,6 +103,6 @@ describe('EarningCard', () => {
 
 		button.click();
 
-		expect(goto).toHaveBeenCalledExactlyOnceWith(AppPath.EarnGold);
+		expect(goto).toHaveBeenCalledExactlyOnceWith(AppPath.EarnAutopilot);
 	});
 });

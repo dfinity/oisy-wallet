@@ -13,6 +13,7 @@ import {
 	depositErc4626,
 	loadCustomErc4626Tokens,
 	loadErc4626Tokens,
+	redeemErc4626,
 	withdrawErc4626
 } from '$eth/services/erc4626.services';
 import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
@@ -722,6 +723,91 @@ describe('erc4626.services', () => {
 					identity: mockIdentity,
 					vault: mockVault,
 					assets: mockAssets,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(infuraProvidersModule.infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
+			});
+		});
+
+		describe('redeemErc4626', () => {
+			const mockShares = 500_000n;
+
+			it('should get nonce, sign and send transaction', async () => {
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(getTransactionCountSpy).toHaveBeenCalledOnce();
+				expect(signTransaction).toHaveBeenCalledOnce();
+				expect(sendTransactionSpy).toHaveBeenCalledOnce();
+			});
+
+			it('should call progress callbacks in order', async () => {
+				const progress = vi.fn();
+
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
+					from: mockFrom,
+					progress,
+					...mockFeeData
+				});
+
+				expect(progress).toHaveBeenCalledTimes(2);
+				expect(progress).toHaveBeenNthCalledWith(1, ProgressStepsUnstake.UNSTAKE);
+				expect(progress).toHaveBeenNthCalledWith(2, ProgressStepsUnstake.UPDATE_UI);
+			});
+
+			it('should send transaction to the vault contract address', async () => {
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(signTransaction).toHaveBeenCalledWith(
+					expect.objectContaining({
+						transaction: expect.objectContaining({
+							to: mockVault.token.address
+						})
+					})
+				);
+			});
+
+			it('should use the nonce from getTransactionCount', async () => {
+				getTransactionCountSpy.mockResolvedValue(42);
+
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(signTransaction).toHaveBeenCalledWith(
+					expect.objectContaining({
+						transaction: expect.objectContaining({
+							nonce: 42n
+						})
+					})
+				);
+			});
+
+			it('should call infuraProviders with the correct network', async () => {
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
 					from: mockFrom,
 					...mockFeeData
 				});

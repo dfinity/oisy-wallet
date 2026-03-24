@@ -291,6 +291,22 @@ export const encodeErc4626Withdraw = ({
 	return { to: contractAddress, data };
 };
 
+export const encodeErc4626Redeem = ({
+	contractAddress,
+	shares,
+	receiver,
+	owner
+}: {
+	contractAddress: Erc4626ContractAddress;
+	shares: bigint;
+	receiver: EthAddress;
+	owner: EthAddress;
+}): { to: string; data: string } => {
+	const data = new Interface(ERC4626_ABI).encodeFunctionData('redeem', [shares, receiver, owner]);
+
+	return { to: contractAddress, data };
+};
+
 export const depositErc4626 = async ({
 	identity,
 	progress,
@@ -365,17 +381,17 @@ export const depositErc4626 = async ({
 	await waitAndTriggerWallet();
 };
 
-export const withdrawErc4626 = async ({
+const sendErc4626Unstake = async ({
 	identity,
 	progress,
 	vault,
-	assets,
+	data,
 	from,
 	...feeData
 }: {
 	identity: OptionIdentity;
 	vault: Vault;
-	assets: bigint;
+	data: string;
 	from: EthAddress;
 	progress?: (step: ProgressStepsUnstake) => void;
 } & RequiredTransactionFeeData): Promise<void> => {
@@ -385,13 +401,6 @@ export const withdrawErc4626 = async ({
 	progress?.(ProgressStepsUnstake.UNSTAKE);
 
 	const nonce = await getNonce({ from, networkId });
-
-	const { data } = encodeErc4626Withdraw({
-		contractAddress: address,
-		assets,
-		receiver: from,
-		owner: from
-	});
 
 	const transaction = prepare({
 		data,
@@ -414,6 +423,50 @@ export const withdrawErc4626 = async ({
 	progress?.(ProgressStepsUnstake.UPDATE_UI);
 
 	await waitAndTriggerWallet();
+};
+
+export const withdrawErc4626 = async ({
+	vault,
+	assets,
+	from,
+	...rest
+}: {
+	identity: OptionIdentity;
+	vault: Vault;
+	assets: bigint;
+	from: EthAddress;
+	progress?: (step: ProgressStepsUnstake) => void;
+} & RequiredTransactionFeeData): Promise<void> => {
+	const { data } = encodeErc4626Withdraw({
+		contractAddress: vault.token.address,
+		assets,
+		receiver: from,
+		owner: from
+	});
+
+	await sendErc4626Unstake({ vault, data, from, ...rest });
+};
+
+export const redeemErc4626 = async ({
+	vault,
+	shares,
+	from,
+	...rest
+}: {
+	identity: OptionIdentity;
+	vault: Vault;
+	shares: bigint;
+	from: EthAddress;
+	progress?: (step: ProgressStepsUnstake) => void;
+} & RequiredTransactionFeeData): Promise<void> => {
+	const { data } = encodeErc4626Redeem({
+		contractAddress: vault.token.address,
+		shares,
+		receiver: from,
+		owner: from
+	});
+
+	await sendErc4626Unstake({ vault, data, from, ...rest });
 };
 
 // ERC4626 metadata is fetched from Infura and doesn't depend on the IC certified flag.

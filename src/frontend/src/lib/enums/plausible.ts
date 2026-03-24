@@ -9,7 +9,8 @@ export enum PLAUSIBLE_EVENTS {
 	LOAD_CUSTOM_TOKENS = 'load_custom_tokens',
 	PAY = 'pay',
 	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help',
-	RATE_LIMITED = 'rate_limited'
+	RATE_LIMITED = 'rate_limited',
+	STAKE = 'stake'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -18,11 +19,16 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	ASSETS_TAB = 'assets_tab',
 	TOKENS = 'tokens',
 	DFX = 'dfx',
-	OPEN_CRYPTOPAY = 'open_cryptopay'
+	OPEN_CRYPTOPAY = 'open_cryptopay',
+	EARN = 'earn'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
 	ICRC = 'icrc'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_EARN {
+	HARVEST_AUTOPILOT = 'harvest-autopilot'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
@@ -48,7 +54,8 @@ export enum PLAUSIBLE_EVENT_SOURCES {
 	NFT_MEDIA_REVIEW = 'media-review',
 	NFT_PAGE = 'nft-page',
 	NFTS_PAGE = 'nfts',
-	NAVIGATION = 'navigation'
+	NAVIGATION = 'navigation',
+	HARVEST_AUTOPILOT = 'harvest-autopilot'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
@@ -58,4 +65,9 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	SORT_ASC = 'sort_asc',
 	SORT_DESC = 'sort_desc',
 	PRICE = 'price'
+}
+
+export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
+	SUCCESS = 'success',
+	ERROR = 'error'
 }

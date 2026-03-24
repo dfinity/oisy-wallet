@@ -20,7 +20,6 @@ import {
 	gotoReplaceRoot,
 	isActivityPath,
 	isDappExplorerPath,
-	isEarnGoldPath,
 	isEarnPath,
 	isEarningPath,
 	isNftsPath,
@@ -28,7 +27,6 @@ import {
 	isRouteActivity,
 	isRouteDappExplorer,
 	isRouteEarn,
-	isRouteEarnGold,
 	isRouteEarning,
 	isRouteNfts,
 	isRouteRewards,
@@ -616,32 +614,6 @@ describe('nav.utils', () => {
 			});
 		});
 
-		describe('isRouteEarnGold', () => {
-			it('should return true when route id matches EarnGold path', () => {
-				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}`;
-
-				expect(isRouteEarnGold(mockPage(mockPath))).toBeTruthy();
-				expect(isRouteEarnGold(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
-			});
-
-			it('should return true when route id is any subroute of the EarnGold path', () => {
-				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}`))).toBeTruthy();
-				expect(
-					isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}/subroute`))
-				).toBeTruthy();
-			});
-
-			it('should return false when route id does not match EarnGold path', () => {
-				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
-
-				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
-
-				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
-
-				expect(isRouteEarn(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
-			});
-		});
-
 		describe('isRouteNfts', () => {
 			it('should return true when route id matches Nfts path', () => {
 				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`))).toBeTruthy();
@@ -750,13 +722,6 @@ describe('nav.utils', () => {
 			expect(isEarnPath(withAppPrefix(AppPath.EarnRewards))).toBeTruthy();
 			expect(isEarnPath('/(app)/earn/whatever')).toBeTruthy();
 			expect(isEarnPath(null)).toBeFalsy();
-		});
-
-		it('isEarnGoldPath', () => {
-			expect(isEarnGoldPath(withAppPrefix(AppPath.EarnGold))).toBeTruthy();
-			expect(isEarnGoldPath('/(app)/earn/gold')).toBeTruthy();
-			expect(isEarnGoldPath('/(app)/earn/ICP')).toBeFalsy();
-			expect(isEarnGoldPath(null)).toBeFalsy();
 		});
 	});
 
