@@ -1,57 +1,76 @@
-import { registerCanisterReset, resetActors } from '$lib/api/actors.reset';
-import * as agentsIc from '$lib/actors/agents.ic';
+import type { registerCanisterReset, resetActors } from '$lib/api/actors.reset';
+
+const mockClearAgents = vi.fn();
+
+vi.mock('$lib/actors/agents.ic', () => ({
+	clearAgents: mockClearAgents
+}));
 
 describe('actors.reset', () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
+	let registerFn: typeof registerCanisterReset;
+	let resetFn: typeof resetActors;
+
+	beforeEach(async () => {
+		vi.resetModules();
+		mockClearAgents.mockClear();
+
+		const mod = await import('$lib/api/actors.reset');
+		registerFn = mod.registerCanisterReset;
+		resetFn = mod.resetActors;
 	});
 
 	describe('resetActors', () => {
 		it('should call clearAgents', () => {
-			const spy = vi.spyOn(agentsIc, 'clearAgents');
+			resetFn();
 
-			resetActors();
+			expect(mockClearAgents).toHaveBeenCalledOnce();
+		});
 
-			expect(spy).toHaveBeenCalledOnce();
+		it('should call clearAgents when no reset functions are registered', () => {
+			resetFn();
+
+			expect(mockClearAgents).toHaveBeenCalledOnce();
 		});
 
 		it('should call all registered reset functions', () => {
 			const resetFn1 = vi.fn();
 			const resetFn2 = vi.fn();
 
-			registerCanisterReset(resetFn1);
-			registerCanisterReset(resetFn2);
+			registerFn(resetFn1);
+			registerFn(resetFn2);
 
-			resetActors();
+			resetFn();
 
 			expect(resetFn1).toHaveBeenCalledOnce();
 			expect(resetFn2).toHaveBeenCalledOnce();
 		});
 
-		it('should call clearAgents even if no reset functions are registered', () => {
-			const spy = vi.spyOn(agentsIc, 'clearAgents');
+		it('should call registered reset functions on every invocation', () => {
+			const resetCallback = vi.fn();
 
-			resetActors();
+			registerFn(resetCallback);
 
-			expect(spy).toHaveBeenCalledOnce();
+			resetFn();
+			resetFn();
+
+			expect(resetCallback).toHaveBeenCalledTimes(2);
+			expect(mockClearAgents).toHaveBeenCalledTimes(2);
 		});
 	});
 
 	describe('registerCanisterReset', () => {
-		it('should accumulate reset functions across multiple calls', () => {
-			const resetFn1 = vi.fn();
-			const resetFn2 = vi.fn();
-			const resetFn3 = vi.fn();
+		it('should accumulate reset functions across multiple registrations', () => {
+			const fns = [vi.fn(), vi.fn(), vi.fn()];
 
-			registerCanisterReset(resetFn1);
-			registerCanisterReset(resetFn2);
-			registerCanisterReset(resetFn3);
+			for (const fn of fns) {
+				registerFn(fn);
+			}
 
-			resetActors();
+			resetFn();
 
-			expect(resetFn1).toHaveBeenCalledOnce();
-			expect(resetFn2).toHaveBeenCalledOnce();
-			expect(resetFn3).toHaveBeenCalledOnce();
+			for (const fn of fns) {
+				expect(fn).toHaveBeenCalledOnce();
+			}
 		});
 	});
 });
