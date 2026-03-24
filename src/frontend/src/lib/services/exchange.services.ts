@@ -184,16 +184,9 @@ export const exchangeRateSPLToUsd = async (
 export const toTokenId = (token: {
 	address: string;
 	coingeckoId?: string;
-	standard?: string;
-	chain_id?: bigint;
 }): TokenId | undefined => {
-	if (token.standard === 'icrc') {
-		return { Icrc: Principal.fromText(token.address) };
-	}
-
 	const chainId =
-		token.chain_id ??
-		(token.coingeckoId === 'ethereum'
+		token.coingeckoId === 'ethereum'
 			? 1n
 			: token.coingeckoId === 'binance-smart-chain'
 				? 56n
@@ -203,7 +196,7 @@ export const toTokenId = (token: {
 						? 8453n
 						: token.coingeckoId === 'arbitrum-one'
 							? 42161n
-							: undefined);
+							: undefined;
 
 	if (nonNullish(chainId)) {
 		return { Erc20: [token.address, chainId] };
