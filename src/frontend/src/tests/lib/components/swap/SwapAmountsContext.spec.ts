@@ -84,6 +84,9 @@ describe('SwapAmountsContext.svelte', () => {
 			readable([sourceToken, destinationToken])
 		);
 		vi.spyOn(addressDerived, 'ethAddress', 'get').mockImplementation(() => readable('0x123'));
+		vi.spyOn(addressDerived, 'solAddressMainnet', 'get').mockImplementation(() =>
+			readable('7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1')
+		);
 	});
 
 	afterEach(() => {

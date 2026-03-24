@@ -11,6 +11,7 @@ import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
+import type { OptionSolAddress } from '$sol/types/address';
 import type { Identity } from '@icp-sdk/core/agent';
 import type {
 	BridgePrice,
@@ -64,6 +65,7 @@ export interface FetchSwapAmountsParams {
 	slippage: string | number;
 	isSourceTokenIcrc2?: boolean;
 	userEthAddress: OptionEthAddress;
+	userSolAddress: OptionSolAddress;
 }
 
 export type Slippage = string | number;
