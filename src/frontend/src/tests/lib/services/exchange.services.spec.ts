@@ -1,24 +1,32 @@
+import type { TokenId } from '$declarations/backend/backend.did';
+import { getExchangeRates } from '$lib/api/backend.api';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import {
 	exchangeRateICRCToUsd,
 	exchangeRateUsdToCurrency,
+	fetchAllExchangeRatesFromBackend,
 	syncExchange
 } from '$lib/services/exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import {
 	findMissingLedgerCanisterIds,
 	formatKongSwapToCoingeckoPrices
 } from '$lib/utils/exchange.utils';
+import { tokenIdKey } from '$lib/utils/token-id.utils';
 import {
 	MOCK_CANISTER_ID_1,
 	MOCK_CANISTER_ID_2,
 	createMockCoingeckoTokenPrice
 } from '$tests/mocks/exchanges.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { Principal } from '@dfinity/principal';
+import { nonNullish } from '@dfinity/utils';
 
 vi.mock('$lib/rest/coingecko.rest', () => ({
 	simplePrice: vi.fn(),
@@ -30,6 +38,9 @@ vi.mock('$lib/rest/kongswap.rest', () => ({
 vi.mock('$lib/utils/exchange.utils', () => ({
 	formatKongSwapToCoingeckoPrices: vi.fn(),
 	findMissingLedgerCanisterIds: vi.fn()
+}));
+vi.mock('$lib/api/backend.api', () => ({
+	getExchangeRates: vi.fn()
 }));
 
 const mockPrice1 = createMockCoingeckoTokenPrice({ usd: 1.11 });
@@ -218,10 +229,235 @@ describe('exchange.services', () => {
 		});
 	});
 
+	describe('fetchAllExchangeRatesFromBackend', () => {
+		const mockExchangeRate: BackendExchangeRate = {
+			usd: {
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
+			}
+		};
+
+		const mockRatesMap = (
+			...entries: [TokenId, BackendExchangeRate][]
+		): Map<string, BackendExchangeRate> =>
+			new Map(
+				entries.reduce<[string, BackendExchangeRate][]>((acc, [id, rate]) => {
+					const key = tokenIdKey(id);
+					return nonNullish(key) ? [...acc, [key, rate]] : acc;
+				}, [])
+			);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should call getExchangeRates with native + mapped token IDs', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+
+			await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
+				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
+				splTokenAddresses: ['SoLaddr1']
+			});
+
+			expect(getExchangeRates).toHaveBeenCalledExactlyOnceWith({
+				token_ids: [
+					{ EvmNative: 1n },
+					{ BtcNativeMainnet: null },
+					{ IcpNative: null },
+					{ SolNativeMainnet: null },
+					{ EvmNative: 56n },
+					{ EvmNative: 137n },
+					{ EvmNative: 8453n },
+					{ EvmNative: 42161n },
+					{ Erc20: ['0xabc', 1n] },
+					{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
+					{ SplMainnet: 'SoLaddr1' }
+				],
+				certified: true,
+				identity: mockIdentity
+			});
+		});
+
+		it('should map backend response to coingecko-shaped prices', async () => {
+			const erc20TokenId: TokenId = { Erc20: ['0xabc', 1n] };
+			const icrcTokenId: TokenId = {
+				Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+			};
+			const splTokenId: TokenId = { SplMainnet: 'SoLaddr1' };
+
+			vi.mocked(getExchangeRates).mockResolvedValue(
+				mockRatesMap(
+					[erc20TokenId, mockExchangeRate],
+					[icrcTokenId, mockExchangeRate],
+					[splTokenId, mockExchangeRate]
+				)
+			);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
+				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
+				splTokenAddresses: ['SoLaddr1']
+			});
+
+			const expectedPrice = { usd: 42000, usd_24h_change: 1.5, usd_market_cap: 800_000_000_000 };
+
+			expect(result.currentErc20Prices).toEqual({ '0xabc': expectedPrice });
+			expect(result.currentIcrcPrices).toEqual({
+				'ryjl3-tyaaa-aaaaa-aaaba-cai': expectedPrice
+			});
+			expect(result.currentSplPrices).toEqual({ SoLaddr1: expectedPrice });
+		});
+
+		it('should return empty objects and undefined native prices when no rates are returned', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
+				icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
+				splTokenAddresses: ['SoLaddr1']
+			});
+
+			expect(result.currentEthPrice).toBeUndefined();
+			expect(result.currentBtcPrice).toBeUndefined();
+			expect(result.currentIcpPrice).toBeUndefined();
+			expect(result.currentSolPrice).toBeUndefined();
+			expect(result.currentBnbPrice).toBeUndefined();
+			expect(result.currentPolPrice).toBeUndefined();
+			expect(result.currentErc20Prices).toEqual({});
+			expect(result.currentIcrcPrices).toEqual({});
+			expect(result.currentSplPrices).toEqual({});
+		});
+
+		it('should skip rates with no price', async () => {
+			const noPriceRate: BackendExchangeRate = {
+				usd: {
+					price: undefined,
+					price24hChangePct: 1.5,
+					marketCap: 100,
+					timestampNs: 1n
+				}
+			};
+
+			vi.mocked(getExchangeRates).mockResolvedValue(
+				mockRatesMap([{ Erc20: ['0xabc', 1n] }, noPriceRate])
+			);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			expect(result.currentErc20Prices).toEqual({});
+		});
+
+		it('should handle empty exchange rate (not found)', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			expect(result.currentErc20Prices).toEqual({});
+		});
+
+		it('should include erc20 addresses via chainId regardless of coingeckoId', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+
+			await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
+				// @ts-expect-error Testing with non-standard coingeckoId
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'some-unknown-chain', chainId: 999n }],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			expect(getExchangeRates).toHaveBeenCalledWith(
+				expect.objectContaining({
+					token_ids: [
+						{ EvmNative: 1n },
+						{ BtcNativeMainnet: null },
+						{ IcpNative: null },
+						{ SolNativeMainnet: null },
+						{ EvmNative: 56n },
+						{ EvmNative: 137n },
+						{ EvmNative: 8453n },
+						{ EvmNative: 42161n },
+						{ Erc20: ['0xabc', 999n] }
+					]
+				})
+			);
+		});
+
+		it('should return native token prices from backend', async () => {
+			vi.mocked(getExchangeRates).mockResolvedValue(
+				mockRatesMap(
+					[{ EvmNative: 1n }, mockExchangeRate],
+					[{ BtcNativeMainnet: null }, mockExchangeRate],
+					[{ IcpNative: null }, mockExchangeRate],
+					[{ SolNativeMainnet: null }, mockExchangeRate],
+					[{ EvmNative: 56n }, mockExchangeRate],
+					[{ EvmNative: 137n }, mockExchangeRate]
+				)
+			);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
+				erc20Addresses: [],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			const expectedPrice = { usd: 42000, usd_24h_change: 1.5, usd_market_cap: 800_000_000_000 };
+
+			expect(result.currentEthPrice).toEqual({ ethereum: expectedPrice });
+			expect(result.currentBtcPrice).toEqual({ bitcoin: expectedPrice });
+			expect(result.currentIcpPrice).toEqual({ 'internet-computer': expectedPrice });
+			expect(result.currentSolPrice).toEqual({ solana: expectedPrice });
+			expect(result.currentBnbPrice).toEqual({ binancecoin: expectedPrice });
+			expect(result.currentPolPrice).toEqual({ 'polygon-ecosystem-token': expectedPrice });
+		});
+
+		it('should handle missing optional fields in BackendExchangeRate', async () => {
+			const partialRate: BackendExchangeRate = {
+				usd: {
+					price: 100,
+					price24hChangePct: undefined,
+					marketCap: undefined,
+					timestampNs: 1n
+				}
+			};
+
+			vi.mocked(getExchangeRates).mockResolvedValue(
+				mockRatesMap([{ Erc20: ['0xabc', 1n] }, partialRate])
+			);
+
+			const result = await fetchAllExchangeRatesFromBackend({
+				identity: mockIdentity,
+				erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
+				icrcCanisterIds: [],
+				splTokenAddresses: []
+			});
+
+			expect(result.currentErc20Prices).toEqual({
+				'0xabc': { usd: 100, usd_24h_change: undefined, usd_market_cap: 0 }
+			});
+		});
+	});
+
 	describe('syncExchange', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
-
 			exchangeStore.reset();
 		});
 
