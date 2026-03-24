@@ -78,12 +78,12 @@ export const mapUserTransactionToTransaction = (transaction: UserTransaction): T
 		to: fromNullable(to),
 		value,
 		chainId: fromNullable(chainId) ?? ZERO,
-		nonce: nonNullish(nonce) ? Number(fromNullable(nonce)) : 0,
+		nonce: Number(fromNullable(nonce) ?? 0),
 		gasLimit: fromNullable(gasLimit) ?? ZERO,
 		gasPrice: fromNullable(gasPrice),
 		gasUsed: fromNullable(gasUsed),
 		data: fromNullable(data) ?? '',
-		tokenId: nonNullish(nftTokenId) ? Number(fromNullable(nftTokenId)) : undefined
+		tokenId: nonNullish(fromNullable(nftTokenId)) ? Number(fromNullable(nftTokenId)) : undefined
 	};
 };
 
