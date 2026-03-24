@@ -276,7 +276,7 @@ describe('icrc.utils', () => {
 						...mockParams,
 						icrcCustomTokens: undefined,
 						twinToken: mockStablecoinTwinToken
-					} as IcrcLoadData);
+					});
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
@@ -288,7 +288,7 @@ describe('icrc.utils', () => {
 						...mockParams,
 						icrcCustomTokens: undefined,
 						twinToken: mockCommodityTwinToken
-					} as IcrcLoadData);
+					});
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.COMMODITY }
@@ -306,7 +306,7 @@ describe('icrc.utils', () => {
 								{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }
 							] as typeof mockValidToken.tags
 						}
-					} as IcrcLoadData);
+					});
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }
@@ -324,7 +324,7 @@ describe('icrc.utils', () => {
 								{ type: TokenTagType.RISK, value: TokenRiskTagValue.HIGH }
 							] as typeof mockValidToken.tags
 						}
-					} as IcrcLoadData);
+					});
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.RISK, value: TokenRiskTagValue.HIGH }
@@ -338,7 +338,7 @@ describe('icrc.utils', () => {
 							['other-canister-id']: mockToken
 						},
 						twinToken: mockStablecoinTwinToken
-					} as IcrcLoadData);
+					});
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
@@ -351,7 +351,7 @@ describe('icrc.utils', () => {
 						icrcCustomTokens: undefined,
 						minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
 						twinToken: mockStablecoinTwinToken
-					} as IcrcLoadData);
+					});
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
@@ -363,7 +363,7 @@ describe('icrc.utils', () => {
 						...mockParams,
 						icrcCustomTokens: undefined,
 						twinToken: mockCryptoTwinToken
-					} as IcrcLoadData);
+					});
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
@@ -380,7 +380,7 @@ describe('icrc.utils', () => {
 							}
 						},
 						twinToken: mockStablecoinTwinToken
-					} as IcrcLoadData);
+					});
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
@@ -397,7 +397,7 @@ describe('icrc.utils', () => {
 							}
 						},
 						twinToken: mockCryptoTwinToken
-					} as IcrcLoadData);
+					});
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
@@ -411,7 +411,7 @@ describe('icrc.utils', () => {
 						...mockParams,
 						icrcCustomTokens: undefined,
 						twinToken: { ...twinTokenWithoutTags, standard: { code: 'erc20' as const } }
-					} as IcrcLoadData);
+					} as unknown as IcrcLoadData);
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
@@ -427,7 +427,7 @@ describe('icrc.utils', () => {
 							standard: { code: 'erc20' as const },
 							tags: undefined
 						}
-					} as IcrcLoadData);
+					} as unknown as IcrcLoadData);
 
 					expect(token?.tags).toStrictEqual([
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }

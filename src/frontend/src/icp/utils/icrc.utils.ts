@@ -8,6 +8,7 @@ import {
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type {
 	IcCkInterface,
+	IcCkMetadata,
 	IcFee,
 	IcInterface,
 	IcToken,
@@ -16,18 +17,19 @@ import type {
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
-import type { Token, TokenCategory, TokenMetadata } from '$lib/types/token';
+import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { mapTokenMetadata, type IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
 
-export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
-	metadata: IcrcTokenMetadataResponse;
-	category: TokenCategory;
-	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
-};
+export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> &
+	Partial<IcCkMetadata> & {
+		metadata: IcrcTokenMetadataResponse;
+		category: TokenCategory;
+		icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
+	};
 
 export const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
 	[BITCAT_LEDGER_CANISTER_ID]: 'BITCAT',
@@ -87,8 +89,7 @@ export const mapIcrcToken = ({
 
 	const customTokenSymbol = icrcCustomTokens?.[ledgerCanisterId];
 
-	const twinTokenTags =
-		'twinToken' in rest ? (rest as { twinToken?: Token }).twinToken?.tags : undefined;
+	const twinTokenTags = rest.twinToken?.tags;
 
 	return {
 		id: parseTokenId(symbol),
