@@ -7,6 +7,7 @@ import type {
 	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
+import { registerCanisterReset } from '$lib/api/actors.reset';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -40,6 +41,8 @@ import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 let canister: BackendCanister | undefined = undefined;
+
+registerCanisterReset(() => (canister = undefined));
 
 export const listCustomTokens = async ({
 	identity

@@ -1,4 +1,5 @@
 import type { chat_request_v1, chat_response_v1 } from '$declarations/llm/llm.did';
+import { registerCanisterReset } from '$lib/api/actors.reset';
 import { LlmCanister } from '$lib/canisters/llm.canister';
 import { LLM_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -6,6 +7,8 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 let canister: LlmCanister | undefined = undefined;
+
+registerCanisterReset(() => (canister = undefined));
 
 export const llmChat = async ({
 	request,

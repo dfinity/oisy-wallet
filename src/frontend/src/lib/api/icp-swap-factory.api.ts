@@ -1,4 +1,5 @@
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
+import { registerCanisterReset } from '$lib/api/actors.reset';
 import { ICPSwapFactoryCanister } from '$lib/canisters/icp-swap-factory.canister';
 import { ICP_SWAP_FACTORY_CANISTER_ID } from '$lib/constants/app.constants';
 import type { ICPSwapGetPoolParams } from '$lib/types/api';
@@ -7,6 +8,8 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 let canister: ICPSwapFactoryCanister | undefined = undefined;
+
+registerCanisterReset(() => (canister = undefined));
 
 export const getPoolCanister = async ({
 	identity,

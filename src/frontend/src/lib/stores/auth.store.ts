@@ -1,3 +1,4 @@
+import { resetActors } from '$lib/api/actors.reset';
 import {
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
@@ -72,6 +73,12 @@ const initAuthStore = (): AuthStore => {
 
 		const isAuthenticated: boolean = await authClient.isAuthenticated();
 
+		// Clear cached agents and canister instances so they are recreated
+		// with the current identity on the next call. Without this, stale
+		// agents keep signing with an old session key, producing
+		// "ECDSA P256 signature could not be verified" errors.
+		resetActors();
+
 		set({ identity: isAuthenticated ? authClient.getIdentity() : null });
 	};
 
@@ -106,6 +113,8 @@ const initAuthStore = (): AuthStore => {
 				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
 					onSuccess: () => {
+						resetActors();
+
 						set({ identity: authClient?.getIdentity() });
 
 						try {
@@ -146,6 +155,8 @@ const initAuthStore = (): AuthStore => {
 
 			// This fixes a "sign in -> sign-out -> sign in again" flow without reloading the window.
 			authClient = null;
+
+			resetActors();
 
 			set({ identity: null });
 		},

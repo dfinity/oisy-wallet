@@ -8,6 +8,7 @@ import type {
 	UserSnapshot,
 	VipReward
 } from '$declarations/rewards/rewards.did';
+import { registerCanisterReset } from '$lib/api/actors.reset';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -16,6 +17,8 @@ import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 let canister: RewardCanister | undefined = undefined;
+
+registerCanisterReset(() => (canister = undefined));
 
 export const isEligible = async ({
 	identity,

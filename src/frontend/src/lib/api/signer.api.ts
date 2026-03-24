@@ -6,6 +6,7 @@ import type {
 	SignBtcResponse
 } from '$declarations/signer/signer.did';
 import type { EthAddress } from '$eth/types/address';
+import { registerCanisterReset } from '$lib/api/actors.reset';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -18,6 +19,8 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 let canister: SignerCanister | undefined = undefined;
+
+registerCanisterReset(() => (canister = undefined));
 
 export const getBtcAddress = async ({
 	identity,
