@@ -1,22 +1,29 @@
-import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
+import {
+	TRACK_COUNT_SWAP_ERROR,
+	TRACK_COUNT_SWAP_SUCCESS
+} from '$lib/constants/analytics.constants';
+import {
+	SWAP_SWITCH_TOKENS_BUTTON,
+	TOKEN_INPUT_CURRENCY_TOKEN
+} from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import en from '$tests/mocks/i18n.mock';
 import * as analytics from '$lib/services/analytics.services';
 import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
-import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
-
-const mockFetchNearIntentsSolSwap = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
 	fetchNearIntentsSolSwap: (...args: unknown[]) => mockFetchNearIntentsSolSwap(...args)
@@ -26,35 +33,43 @@ vi.mock('$lib/utils/parse.utils', () => ({
 	parseToken: vi.fn()
 }));
 
-const mockSourceToken = { ...mockValidSplToken, enabled: true };
-const mockDestToken = { ...mockValidSplToken, symbol: 'USDC', enabled: true };
-
-const BASE_PROPS = {
-	swapAmount: '1',
-	receiveAmount: 2,
-	slippageValue: '0.5',
-	swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-	isSwapAmountsLoading: false,
-	onShowTokensList: vi.fn(),
-	onShowProviderList: vi.fn(),
-	onClose: vi.fn(),
-	onNext: vi.fn(),
-	onBack: vi.fn(),
-	onStartTriggerAmount: vi.fn(),
-	onStopTriggerAmount: vi.fn()
-};
-
-const nearIntentsSwapProviders: SwapMappedResult[] = [
-	{
-		provider: SwapProvider.NEAR_INTENTS,
-		receiveAmount: 890000000n,
-		swapDetails: mockNearIntentsQuoteResponse as NearIntentsQuoteResponse,
-		type: undefined
-	}
-];
-
 describe('SwapSolWizard', () => {
-	const createContext = ({ swaps, selectedProvider }: { swaps: SwapMappedResult[]; selectedProvider: SwapMappedResult }) => {
+	const mockFetchNearIntentsSolSwap = vi.fn();
+
+	const mockSourceToken = { ...mockValidSplToken, enabled: true };
+	const mockDestToken = { ...mockValidSplToken, symbol: 'USDC', enabled: true };
+
+	const baseProps = {
+		swapAmount: '1',
+		receiveAmount: 2,
+		slippageValue: '0.5',
+		swapProgressStep: ProgressStepsSwap.INITIALIZATION,
+		isSwapAmountsLoading: false,
+		onShowTokensList: vi.fn(),
+		onShowProviderList: vi.fn(),
+		onClose: vi.fn(),
+		onNext: vi.fn(),
+		onBack: vi.fn(),
+		onStartTriggerAmount: vi.fn(),
+		onStopTriggerAmount: vi.fn()
+	};
+
+	const nearIntentsSwapProviders: SwapMappedResult[] = [
+		{
+			provider: SwapProvider.NEAR_INTENTS,
+			receiveAmount: 890000000n,
+			swapDetails: mockNearIntentsQuoteResponse as NearIntentsQuoteResponse,
+			type: undefined
+		}
+	];
+
+	const createContext = ({
+		swaps,
+		selectedProvider
+	}: {
+		swaps: SwapMappedResult[];
+		selectedProvider: SwapMappedResult;
+	}) => {
 		const mockContext = new Map();
 
 		mockContext.set(SWAP_CONTEXT_KEY, {
@@ -101,7 +116,7 @@ describe('SwapSolWizard', () => {
 	}) =>
 		render(SwapSolWizard, {
 			props: {
-				...BASE_PROPS,
+				...baseProps,
 				currentStep: { name: step, title: 'Swap' },
 				...propsOverride
 			},
@@ -117,10 +132,10 @@ describe('SwapSolWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('You pay')).toBeInTheDocument();
-			expect(getByText('You receive')).toBeInTheDocument();
-			expect(getByText('Review swap')).toBeInTheDocument();
-			expect(getByText('Cancel')).toBeInTheDocument();
+			expect(getByText(en.tokens.text.source_token_title)).toBeInTheDocument();
+			expect(getByText(en.tokens.text.destination_token_title)).toBeInTheDocument();
+			expect(getByText(en.swap.text.review_button)).toBeInTheDocument();
+			expect(getByText(en.core.text.cancel)).toBeInTheDocument();
 		});
 
 		it('renders slippage section', () => {
@@ -131,7 +146,7 @@ describe('SwapSolWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('Max slippage')).toBeInTheDocument();
+			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
 		});
 
 		it('renders swap provider information', () => {
@@ -142,7 +157,7 @@ describe('SwapSolWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('Swap provider')).toBeInTheDocument();
+			expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
 		});
 
 		it('renders token input fields', () => {
@@ -154,7 +169,7 @@ describe('SwapSolWizard', () => {
 			const { container } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
 			const tokenInputs = container.querySelectorAll(
-				'input[data-tid="token-input-currency-token"]'
+				`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
 			);
 
 			expect(tokenInputs).toHaveLength(2);
@@ -168,7 +183,7 @@ describe('SwapSolWizard', () => {
 
 			const { container } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			const switchButton = container.querySelector('[data-tid="swap-switch-tokens-button"]');
+			const switchButton = container.querySelector(`[data-tid="${SWAP_SWITCH_TOKENS_BUTTON}"]`);
 
 			expect(switchButton).toBeInTheDocument();
 		});
@@ -240,7 +255,7 @@ describe('SwapSolWizard', () => {
 
 			const result = render(SwapSolWizard, {
 				props: {
-					...BASE_PROPS,
+					...baseProps,
 					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
 					onClose,
 					onBack,
@@ -257,7 +272,7 @@ describe('SwapSolWizard', () => {
 		it('calls onClose after successful swap', async () => {
 			const { getByText, onClose, onBack } = renderExecution();
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledOnce();
@@ -266,13 +281,11 @@ describe('SwapSolWizard', () => {
 		});
 
 		it('calls onBack when swap fails', async () => {
-			vi.spyOn(swapServices, 'fetchNearIntentsSolSwap').mockRejectedValue(
-				new Error('Swap failed')
-			);
+			vi.spyOn(swapServices, 'fetchNearIntentsSolSwap').mockRejectedValue(new Error('Swap failed'));
 
 			const { getByText, onClose, onBack } = renderExecution();
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(onBack).toHaveBeenCalledOnce();
@@ -281,13 +294,11 @@ describe('SwapSolWizard', () => {
 		});
 
 		it('calls onStartTriggerAmount when swap fails', async () => {
-			vi.spyOn(swapServices, 'fetchNearIntentsSolSwap').mockRejectedValue(
-				new Error('Swap failed')
-			);
+			vi.spyOn(swapServices, 'fetchNearIntentsSolSwap').mockRejectedValue(new Error('Swap failed'));
 
 			const { getByText, onStartTriggerAmount } = renderExecution();
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
@@ -296,29 +307,27 @@ describe('SwapSolWizard', () => {
 		it('tracks success event after successful swap', async () => {
 			const { getByText } = renderExecution();
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(analytics.trackEvent).toHaveBeenCalledWith(
 				expect.objectContaining({
-					name: 'swap_success'
+					name: TRACK_COUNT_SWAP_SUCCESS
 				})
 			);
 		});
 
 		it('tracks error event when swap fails', async () => {
-			vi.spyOn(swapServices, 'fetchNearIntentsSolSwap').mockRejectedValue(
-				new Error('Swap failed')
-			);
+			vi.spyOn(swapServices, 'fetchNearIntentsSolSwap').mockRejectedValue(new Error('Swap failed'));
 
 			const { getByText } = renderExecution();
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(analytics.trackEvent).toHaveBeenCalledWith(
 				expect.objectContaining({
-					name: 'swap_error'
+					name: TRACK_COUNT_SWAP_ERROR
 				})
 			);
 		});
