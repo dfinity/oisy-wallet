@@ -1,5 +1,10 @@
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { AuthClient, IdbStorage, KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
+import {
+	AuthClient,
+	IdbStorage,
+	KEY_STORAGE_DELEGATION,
+	KEY_STORAGE_KEY
+} from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
 
 export class AuthClientProvider {
