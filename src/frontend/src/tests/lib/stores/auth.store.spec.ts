@@ -86,8 +86,9 @@ describe('auth.store', () => {
 		it('should call resetActors on signIn success', async () => {
 			mockAuthClient.isAuthenticated.mockResolvedValue(true);
 			mockAuthClient.getIdentity.mockReturnValue(identity);
-			mockAuthClient.login.mockImplementation(async ({ onSuccess }: { onSuccess: () => void }) => {
+			mockAuthClient.login.mockImplementation(({ onSuccess }: { onSuccess: () => void }) => {
 				onSuccess();
+				return Promise.resolve();
 			});
 
 			await authStore.sync();
