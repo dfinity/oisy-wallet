@@ -8,7 +8,7 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiGroup } from '$lib/types/token-ui-group';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn()

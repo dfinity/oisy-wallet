@@ -62,6 +62,13 @@
 
 	const totalUsdBalance: number = $derived(sumTokensUiUsdBalance(filteredTokens));
 
+	const filteredBalance: bigint | undefined = $derived(
+		filteredTokens.reduce<bigint | undefined>(
+			(acc, { balance }) => (nonNullish(balance) ? (acc ?? 0n) + balance : acc),
+			undefined
+		)
+	);
+
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
 	const compareTokens = (a: TokenUi, b: TokenUi): number => {
 		// Highest balance first
@@ -106,6 +113,8 @@
 		<TokenCard
 			data={{
 				...headerData,
+				usdBalance: totalUsdBalance,
+				...(nonNullish(filteredBalance) && { balance: filteredBalance }),
 				tokenCount: filteredTokens.length,
 				networks: sortedFilteredTokens.map((t) => t.network)
 			}}
