@@ -210,7 +210,7 @@ export interface NearIntentsQuoteParams {
 	destinationToken: Token;
 	amount: bigint;
 	userAddress: OptionAddress<Address>;
-	recipientAddress?: OptionAddress<Address>;
+	recipientAddress?: string;
 	slippage: Slippage;
 }
 
