@@ -289,7 +289,7 @@
 					receiveAmount: selectedProvider.receiveAmount,
 					isGasless: $isSourceTokenPermitSupported ?? false,
 					destinationNetwork: $destinationToken.network,
-					swapDetails: selectedProvider.swapDetails as VeloraSwapDetails
+					swapDetails: selectedProvider.swapDetails
 				};
 
 				if (selectedProvider.type === VeloraSwapTypes.DELTA) {
