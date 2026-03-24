@@ -6,6 +6,7 @@ import {
 	saveFinalizedTransactions
 } from '$lib/services/user-transactions.services';
 import type { Transaction } from '$lib/types/transaction';
+import { mockEthTransaction } from '$tests/mocks/eth-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockGetUserTransactionsResponse,
@@ -16,12 +17,12 @@ import {
 vi.mock('$lib/api/backend.api');
 
 describe('user-transactions.services', () => {
-	const mapFromBackend = (tx: UserTransaction): Transaction =>
-		({
-			from: tx.from,
-			blockNumber: Number(tx.block_index),
-			hash: tx.id
-		}) as unknown as Transaction;
+	const mapFromBackend = (tx: UserTransaction): Transaction => ({
+		...mockEthTransaction,
+		from: tx.from,
+		blockNumber: Number(tx.block_index),
+		hash: tx.id
+	});
 
 	const mapToBackend = (_tx: Transaction): UserTransaction => mockUserTransaction;
 
@@ -137,17 +138,19 @@ describe('user-transactions.services', () => {
 		const alwaysSaveable = () => true;
 		const neverSaveable = () => false;
 
-		const mockTx = {
+		const mockTx: Transaction = {
+			...mockEthTransaction,
 			from: '0xdef',
 			blockNumber: 100,
 			hash: 'tx-1'
-		} as unknown as Transaction;
+		};
 
-		const mockTx2 = {
+		const mockTx2: Transaction = {
+			...mockEthTransaction,
 			from: '0x123',
 			blockNumber: 101,
 			hash: 'tx-2'
-		} as unknown as Transaction;
+		};
 
 		it('should return { success: false } when identity is nullish', async () => {
 			const result = await saveFinalizedTransactions({
@@ -218,7 +221,7 @@ describe('user-transactions.services', () => {
 		it('should only save transactions that pass canSave filter', async () => {
 			vi.spyOn(backendApi, 'saveUserTransactions').mockResolvedValue();
 
-			const canSaveOnlyFirst = (tx: Transaction) => tx === (mockTx as unknown as Transaction);
+			const canSaveOnlyFirst = (tx: Transaction) => tx === mockTx;
 
 			const result = await saveFinalizedTransactions({
 				identity: mockIdentity,
