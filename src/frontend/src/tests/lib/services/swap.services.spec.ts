@@ -39,6 +39,7 @@ import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.moc
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
+import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockVeloraSwapDetails } from '$tests/mocks/velora.mock';
 import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
@@ -67,6 +68,7 @@ vi.mock('$lib/services/analytics.services', () => ({
 }));
 
 const mockVeloraGetQuote = vi.hoisted(() => vi.fn());
+const mockSolGetQuote = vi.hoisted(() => vi.fn());
 
 vi.mock('$lib/providers/evm-swap.providers', () => ({
 	evmSwapProviders: [
@@ -78,13 +80,28 @@ vi.mock('$lib/providers/evm-swap.providers', () => ({
 	]
 }));
 
+vi.mock('$lib/providers/sol-swap.providers', () => ({
+	solSwapProviders: [
+		{
+			key: 'near_intents',
+			getQuote: mockSolGetQuote,
+			isEnabled: true
+		}
+	]
+}));
+
 vi.mock('$lib/services/near-intents.services', () => ({
+	fetchNearIntentsSwapQuote: vi.fn(),
 	submitNearIntentsDepositTx: vi.fn(),
 	pollNearIntentsStatus: vi.fn()
 }));
 
 vi.mock('$eth/services/send.services', () => ({
 	send: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-send.services', () => ({
+	sendSol: vi.fn()
 }));
 
 vi.mock('@velora-dex/sdk', () => ({
@@ -159,7 +176,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(result).toHaveLength(2);
@@ -196,7 +214,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: false,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -226,7 +245,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledTimes(0);
@@ -260,7 +280,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -285,7 +306,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -310,7 +332,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(result).toHaveLength(2);
@@ -336,7 +359,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: false,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -364,7 +388,8 @@ describe('swap.services', () => {
 				tokens: [evmToken, mockValidErc20Token],
 				slippage: 0.5,
 				isSourceTokenIcrc2: true,
-				userEthAddress: '0xUser'
+				userEthAddress: '0xUser',
+				userSolAddress: undefined
 			});
 
 			expect(mockVeloraGetQuote).toHaveBeenCalled();
@@ -1332,7 +1357,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: false,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1369,7 +1395,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: false,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1399,7 +1426,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith(
@@ -1425,7 +1453,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith(
@@ -1461,7 +1490,8 @@ describe('swap.services', () => {
 				tokens: mockTokens,
 				slippage,
 				isSourceTokenIcrc2: true,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				userSolAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledTimes(2);
@@ -1492,26 +1522,7 @@ describe('swap.services', () => {
 		};
 
 		const mockProgress = vi.fn();
-
-		const mockWetQuote = {
-			correlationId: 'test-id',
-			timestamp: '2026-03-16T00:00:00.000Z',
-			signature: 'sig',
-			quoteRequest: {} as never,
-			quote: {
-				depositAddress: '0xDepositAddr',
-				depositMemo: null,
-				amountIn: '1000000',
-				amountInFormatted: '1.00',
-				amountInUsd: '1.00',
-				amountOut: '900000',
-				amountOutFormatted: '0.90',
-				amountOutUsd: '0.90',
-				deadline: '2026-03-16T00:10:00.000Z',
-				timeEstimate: 120,
-				refundFee: '0'
-			}
-		};
+		const { depositAddress } = mockNearIntentsQuoteResponse.quote;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -1535,21 +1546,21 @@ describe('swap.services', () => {
 				gas: 21000n,
 				maxFeePerGas: 20000000000n,
 				maxPriorityFeePerGas: 2000000000n,
-				swapDetails: mockWetQuote
+				swapDetails: mockNearIntentsQuoteResponse
 			});
 
 			expect(sendEvm).toHaveBeenCalledWith(
 				expect.objectContaining({
 					from: mockEthAddress,
-					to: '0xDepositAddr'
+					to: depositAddress
 				})
 			);
 			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
-				depositAddress: '0xDepositAddr',
+				depositAddress,
 				txHash: '0xTxHash123'
 			});
 			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
-				depositAddress: '0xDepositAddr'
+				depositAddress
 			});
 		});
 
@@ -1567,7 +1578,7 @@ describe('swap.services', () => {
 				gas: 21000n,
 				maxFeePerGas: 20000000000n,
 				maxPriorityFeePerGas: 2000000000n,
-				swapDetails: mockWetQuote
+				swapDetails: mockNearIntentsQuoteResponse
 			});
 
 			expect(mockProgress).toHaveBeenCalledTimes(3);
@@ -1578,8 +1589,8 @@ describe('swap.services', () => {
 
 		it('should pass depositMemo when present in quote', async () => {
 			const quoteWithMemo = {
-				...mockWetQuote,
-				quote: { ...mockWetQuote.quote, depositMemo: 'stellar-memo' }
+				...mockNearIntentsQuoteResponse,
+				quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: 'stellar-memo' }
 			};
 
 			await fetchNearIntentsSwap({
@@ -1599,12 +1610,12 @@ describe('swap.services', () => {
 			});
 
 			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
-				depositAddress: '0xDepositAddr',
+				depositAddress,
 				txHash: '0xTxHash123',
 				depositMemo: 'stellar-memo'
 			});
 			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
-				depositAddress: '0xDepositAddr',
+				depositAddress,
 				depositMemo: 'stellar-memo'
 			});
 		});
