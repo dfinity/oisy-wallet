@@ -1,6 +1,5 @@
 import { ETHERSCAN_MAX_CALLS_PER_SECOND } from '$env/rest/etherscan.env';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
-import type { NetworkChainId } from '$eth/types/network';
 import { batch } from '$lib/services/batch.services';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
