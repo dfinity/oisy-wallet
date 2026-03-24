@@ -1,42 +1,32 @@
 import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
 import { getUserTransactions, saveUserTransactions } from '$lib/api/backend.api';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import { authIdentity } from '$lib/derived/auth.derived';
+import type { OptionIdentity } from '$lib/types/identity';
+import type { Transaction as EthTransaction } from '$lib/types/transaction';
+import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
-
-export interface LoadUserTransactionsResult<T> {
-	transactions: T[];
-	newestBlockIndex: number | undefined;
-	oldestBlockIndex: number | undefined;
-	totalStored: bigint;
-	nextStart: bigint | undefined;
-}
+import { isNullish } from '@dfinity/utils';
 
 /**
  * Loads stored finalized transactions from the backend canister.
  * Returns the transactions and block index boundaries (for incremental loading).
- *
- * Generic over `T` — callers supply a `mapFromBackend` function that converts
- * the backend `UserTransaction` into their network-specific transaction type.
  */
-export const loadUserTransactions = async <T>({
+export const loadUserTransactions = async <T extends EthTransaction>({
+	identity,
 	tokenId,
 	start,
 	maxResults = WALLET_PAGINATION,
 	mapFromBackend
 }: {
+	identity: OptionIdentity;
 	tokenId: BackendTokenId;
 	start?: bigint;
 	maxResults?: bigint;
-	mapFromBackend: (ut: UserTransaction) => T;
-}): Promise<LoadUserTransactionsResult<T> | null> => {
-	const identity = get(authIdentity);
-
+	mapFromBackend: (transaction: UserTransaction) => T;
+}): Promise<LoadUserTransactionsResult<T> | undefined> => {
 	if (isNullish(identity)) {
-		return null;
+		return;
 	}
 
 	try {
@@ -47,19 +37,27 @@ export const loadUserTransactions = async <T>({
 			maxResults
 		});
 
-		const transactions = response.transactions.map(mapFromBackend);
-		const newestIdx = fromNullable(response.newest_block_index);
-		const oldestIdx = fromNullable(response.oldest_block_index);
-		const newestBlockIndex = nonNullish(newestIdx) ? Number(newestIdx) : undefined;
-		const oldestBlockIndex = nonNullish(oldestIdx) ? Number(oldestIdx) : undefined;
-		const totalStored = response.total_stored;
-		const nextStart = fromNullable(response.next_start);
+		const { transactions: rawTransactions, ...rest } = response;
 
-		return { transactions, newestBlockIndex, oldestBlockIndex, totalStored, nextStart };
-	} catch (err) {
-		consoleError('Failed to load stored transactions from backend:', err);
-		return null;
+		return {
+			...rest,
+			transactions: rawTransactions.map(mapFromBackend)
+		};
+	} catch (_: unknown) {
+		// We don't necessarily want to treat a failure to load transactions as an error worth surfacing to the user,
+		// since it's not critical to the functioning of the app (transactions can be re-loaded on demand).
 	}
+};
+
+/**
+ * Attempts to extract a numeric block number from a transaction object.
+ */
+const getBlockNumber = (tx: EthTransaction): number | undefined => {
+	if ('blockNumber' in tx) {
+		return tx.blockNumber;
+	}
+
+	// TODO: support other transaction types (e.g. Solana) by checking other possible block number fields
 };
 
 /**
@@ -71,7 +69,8 @@ export const loadUserTransactions = async <T>({
  * - `isFinalizedFn`: network-specific finality check
  * - `mapToBackend`: converts the network-specific transaction into `UserTransaction`
  */
-export const saveFinalizedTransactions = async <T>({
+export const saveFinalizedTransactions = async <T extends EthTransaction>({
+	identity,
 	tokenId,
 	transactions,
 	currentBlockNumber,
@@ -79,6 +78,7 @@ export const saveFinalizedTransactions = async <T>({
 	mapToBackend,
 	canSave
 }: {
+	identity: OptionIdentity;
 	tokenId: BackendTokenId;
 	transactions: T[];
 	currentBlockNumber: number;
@@ -89,8 +89,6 @@ export const saveFinalizedTransactions = async <T>({
 	mapToBackend: (tx: T) => UserTransaction;
 	canSave: (tx: T) => boolean;
 }): Promise<ResultSuccess> => {
-	const identity = get(authIdentity);
-
 	if (isNullish(identity)) {
 		return { success: false };
 	}
@@ -119,20 +117,4 @@ export const saveFinalizedTransactions = async <T>({
 		consoleError('Failed to save finalized transactions to backend:', err);
 		return { success: false };
 	}
-};
-
-/**
- * Attempts to extract a numeric block number from a transaction object.
- * Works with any object that may have a `blockNumber` property.
- */
-const getBlockNumber = <T>(tx: T): number | undefined => {
-	if (
-		typeof tx === 'object' &&
-		tx !== null &&
-		'blockNumber' in tx &&
-		typeof (tx as Record<string, unknown>).blockNumber === 'number'
-	) {
-		return (tx as Record<string, unknown>).blockNumber as number;
-	}
-	return undefined;
 };

@@ -15,8 +15,8 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ZERO } from '$lib/constants/app.constants';
 import { ethAddressStore } from '$lib/stores/address.store';
 import type { Transaction } from '$lib/types/transaction';
-import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -107,7 +107,6 @@ describe('eth-user-transactions.services', () => {
 	beforeEach(async () => {
 		vi.clearAllMocks();
 
-		mockAuthStore();
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		ethTransactionsStore.reinitialize();
 
@@ -124,9 +123,7 @@ describe('eth-user-transactions.services', () => {
 
 	describe('loadEthUserTransactions', () => {
 		it('returns null when identity is missing', async () => {
-			mockAuthStore(null);
-
-			const result = await loadEthUserTransactions({ tokenId: mockBackendTokenId });
+			const result = await loadEthUserTransactions({ identity: null, tokenId: mockBackendTokenId });
 
 			expect(result).toBeNull();
 			expect(mockGetUserTransactions).not.toHaveBeenCalled();
@@ -149,7 +146,10 @@ describe('eth-user-transactions.services', () => {
 				})
 			);
 
-			const result = await loadEthUserTransactions({ tokenId: mockBackendTokenId });
+			const result = await loadEthUserTransactions({
+				identity: mockIdentity,
+				tokenId: mockBackendTokenId
+			});
 
 			expect(result).not.toBeNull();
 
@@ -167,7 +167,10 @@ describe('eth-user-transactions.services', () => {
 		it('returns empty result for empty backend', async () => {
 			mockGetUserTransactions.mockResolvedValue(makeBackendResponse());
 
-			const result = await loadEthUserTransactions({ tokenId: mockBackendTokenId });
+			const result = await loadEthUserTransactions({
+				identity: mockIdentity,
+				tokenId: mockBackendTokenId
+			});
 
 			expect(result).not.toBeNull();
 
@@ -184,7 +187,10 @@ describe('eth-user-transactions.services', () => {
 		it('returns null on backend error', async () => {
 			mockGetUserTransactions.mockRejectedValue(new Error('canister error'));
 
-			const result = await loadEthUserTransactions({ tokenId: mockBackendTokenId });
+			const result = await loadEthUserTransactions({
+				identity: mockIdentity,
+				tokenId: mockBackendTokenId
+			});
 
 			expect(result).toBeNull();
 		});
@@ -194,6 +200,7 @@ describe('eth-user-transactions.services', () => {
 		// Case 1: Fresh user — backend empty, Etherscan has no older data
 		it('returns hasMore false when backend is empty and Etherscan has nothing older', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -223,6 +230,7 @@ describe('eth-user-transactions.services', () => {
 			);
 
 			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -256,6 +264,7 @@ describe('eth-user-transactions.services', () => {
 			);
 
 			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -277,6 +286,7 @@ describe('eth-user-transactions.services', () => {
 			mockSaveUserTransactions.mockResolvedValue(undefined);
 
 			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -301,6 +311,7 @@ describe('eth-user-transactions.services', () => {
 			mockTransactionsProvider.mockResolvedValue([]);
 
 			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -321,6 +332,7 @@ describe('eth-user-transactions.services', () => {
 			mockTransactionsProvider.mockResolvedValue(olderTxs);
 
 			await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -339,6 +351,7 @@ describe('eth-user-transactions.services', () => {
 			mockSaveUserTransactions.mockResolvedValue(undefined);
 
 			await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -357,6 +370,7 @@ describe('eth-user-transactions.services', () => {
 		// Case 6: oldestLoadedBlockNumber is 0 — no older history possible
 		it('returns hasMore false when oldestLoadedBlockNumber is 0', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -373,6 +387,7 @@ describe('eth-user-transactions.services', () => {
 			ethAddressStore.reset();
 
 			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -389,6 +404,7 @@ describe('eth-user-transactions.services', () => {
 			mockTransactionsProvider.mockRejectedValue(new Error('Etherscan rate limit'));
 
 			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -407,6 +423,7 @@ describe('eth-user-transactions.services', () => {
 			mockTransactionsProvider.mockResolvedValue(olderTxs);
 
 			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -437,6 +454,7 @@ describe('eth-user-transactions.services', () => {
 			mockTransactionsProvider.mockResolvedValue(olderTxs);
 
 			await loadNextEthUserTransactions({
+				identity: mockIdentity,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -454,9 +472,8 @@ describe('eth-user-transactions.services', () => {
 
 	describe('saveEthFinalizedTransactions', () => {
 		it('returns success false when identity is missing', async () => {
-			mockAuthStore(null);
-
 			const result = await saveEthFinalizedTransactions({
+				identity: null,
 				tokenId: mockBackendTokenId,
 				transactions: [makeTx({ hash: '0xhash1', blockNumber: 100 })],
 				currentBlockNumber: 200
@@ -469,6 +486,7 @@ describe('eth-user-transactions.services', () => {
 		it('returns success true without saving when no finalized transactions', async () => {
 			// Block 100 with currentBlockNumber 100 — not enough depth (needs 64+ blocks)
 			const result = await saveEthFinalizedTransactions({
+				identity: mockIdentity,
 				tokenId: mockBackendTokenId,
 				transactions: [makeTx({ hash: '0xhash1', blockNumber: 100 })],
 				currentBlockNumber: 100
@@ -485,6 +503,7 @@ describe('eth-user-transactions.services', () => {
 			mockSaveUserTransactions.mockResolvedValue(undefined);
 
 			const result = await saveEthFinalizedTransactions({
+				identity: mockIdentity,
 				tokenId: mockBackendTokenId,
 				transactions: [finalized, pending],
 				currentBlockNumber: 200
@@ -506,6 +525,7 @@ describe('eth-user-transactions.services', () => {
 			mockSaveUserTransactions.mockRejectedValue(new Error('canister error'));
 
 			const result = await saveEthFinalizedTransactions({
+				identity: mockIdentity,
 				tokenId: mockBackendTokenId,
 				transactions: [makeTx({ hash: '0xfinalized', blockNumber: 100 })],
 				currentBlockNumber: 200

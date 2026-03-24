@@ -13,6 +13,7 @@ import {
 	saveFinalizedTransactions,
 	type LoadUserTransactionsResult
 } from '$lib/services/user-transactions.services';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
@@ -24,15 +25,18 @@ import { get } from 'svelte/store';
 export type { LoadUserTransactionsResult };
 
 export const loadEthUserTransactions = ({
+	identity,
 	tokenId,
 	start,
 	maxResults = WALLET_PAGINATION
 }: {
+	identity: OptionIdentity;
 	tokenId: BackendTokenId;
 	start?: bigint;
 	maxResults?: bigint;
 }): Promise<LoadUserTransactionsResult<Transaction> | null> =>
 	loadUserTransactions({
+		identity,
 		tokenId,
 		start,
 		maxResults,
@@ -40,15 +44,18 @@ export const loadEthUserTransactions = ({
 	});
 
 export const saveEthFinalizedTransactions = ({
+	identity,
 	tokenId,
 	transactions,
 	currentBlockNumber
 }: {
+	identity: OptionIdentity;
 	tokenId: BackendTokenId;
 	transactions: Transaction[];
 	currentBlockNumber: number;
 }): Promise<ResultSuccess> =>
 	saveFinalizedTransactions({
+		identity,
 		tokenId,
 		transactions,
 		currentBlockNumber,
@@ -67,6 +74,7 @@ export const saveEthFinalizedTransactions = ({
  * @returns Whether more pages may exist beyond the returned batch.
  */
 export const loadNextEthUserTransactions = async ({
+	identity,
 	transactionTokenId,
 	tokenId,
 	networkId,
@@ -74,6 +82,7 @@ export const loadNextEthUserTransactions = async ({
 	oldestLoadedBlockNumber,
 	beAtCapacity = false
 }: {
+	identity: OptionIdentity;
 	transactionTokenId: BackendTokenId;
 	tokenId: TokenId;
 	networkId: NetworkId;
@@ -83,6 +92,7 @@ export const loadNextEthUserTransactions = async ({
 }): Promise<{ hasMore: boolean }> => {
 	if (nonNullish(cursor)) {
 		const result = await loadEthUserTransactions({
+			identity,
 			tokenId: transactionTokenId,
 			start: cursor,
 			maxResults: WALLET_PAGINATION
@@ -101,6 +111,7 @@ export const loadNextEthUserTransactions = async ({
 	}
 
 	return loadOlderFromEtherscan({
+		identity,
 		transactionTokenId,
 		tokenId,
 		networkId,
@@ -114,12 +125,14 @@ export const loadNextEthUserTransactions = async ({
  * persists finalized ones in the backend, and appends them to the store.
  */
 const loadOlderFromEtherscan = async ({
+	identity,
 	transactionTokenId,
 	tokenId,
 	networkId,
 	oldestLoadedBlockNumber,
 	skipSave
 }: {
+	identity: OptionIdentity;
 	transactionTokenId: BackendTokenId;
 	tokenId: TokenId;
 	networkId: NetworkId;
@@ -156,6 +169,7 @@ const loadOlderFromEtherscan = async ({
 
 		if (!skipSave) {
 			saveEthFinalizedTransactions({
+				identity,
 				tokenId: transactionTokenId,
 				transactions: olderTransactions,
 				currentBlockNumber: oldestLoadedBlockNumber - 1

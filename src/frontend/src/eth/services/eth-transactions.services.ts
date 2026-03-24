@@ -27,6 +27,7 @@ import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
+import { authIdentity } from '$lib/derived/auth.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -91,10 +92,12 @@ const loadEthTransactions = async ({
 		return { success: false };
 	}
 
+	const identity = get(authIdentity);
+
 	try {
 		const transactionTokenId = evmNativeTokenId(chainId);
 
-		const stored = await loadEthUserTransactions({ tokenId: transactionTokenId });
+		const stored = await loadEthUserTransactions({ identity, tokenId: transactionTokenId });
 
 		// Fetch from Etherscan starting after the newest stored block (incremental loading)
 		const startBlock = nonNullish(stored?.newestBlockIndex) ? stored.newestBlockIndex + 1 : 0;
@@ -128,6 +131,7 @@ const loadEthTransactions = async ({
 
 			if (maxBlockNumber > 0) {
 				saveEthFinalizedTransactions({
+					identity,
 					tokenId: transactionTokenId,
 					transactions: newTransactions,
 					currentBlockNumber: maxBlockNumber
