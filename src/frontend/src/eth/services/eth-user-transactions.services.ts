@@ -1,5 +1,6 @@
 import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import {
@@ -52,7 +53,7 @@ export const loadEthUserTransactions = ({
 /**
  * Persists finalized ETH transactions to the backend.
  * Only transactions with a valid hash, block number, and sufficient depth
- * (>= {@link ETH_FINALITY_BLOCKS} behind the tip) are saved.
+ * (>= the ETH finality threshold in blocks behind the tip) are saved.
  *
  * @param identity - The caller's identity; returns `{ success: false }` when nullish.
  * @param tokenId - The backend-typed token identifier.
@@ -197,7 +198,8 @@ const loadOlderFromEtherscan = async ({
 
 		const olderTransactions = await transactionsProvider({
 			address,
-			endBlock: oldestLoadedBlockNumber - 1
+			endBlock: oldestLoadedBlockNumber - 1,
+			sort: 'desc'
 		});
 
 		if (olderTransactions.length === 0) {
@@ -213,11 +215,15 @@ const loadOlderFromEtherscan = async ({
 
 		if (!skipSave) {
 			try {
+				const { getBlockNumber } = infuraProviders(networkId);
+
+				const latestBlockNumber = await getBlockNumber();
+
 				await saveEthFinalizedTransactions({
 					identity,
 					tokenId: transactionTokenId,
 					transactions: olderTransactions,
-					currentBlockNumber: oldestLoadedBlockNumber - 1
+					currentBlockNumber: latestBlockNumber
 				});
 			} catch (_: unknown) {
 				// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
