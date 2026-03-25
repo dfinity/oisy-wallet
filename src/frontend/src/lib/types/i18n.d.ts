@@ -913,6 +913,7 @@ interface I18nTokens {
 		asset_type: string;
 		asset_type_all: string;
 		no_tokens_for_asset_type: string;
+		no_tokens_for_asset_type_zero_tokens: string;
 		no_tokens_for_asset_type_description: string;
 	};
 	details: {

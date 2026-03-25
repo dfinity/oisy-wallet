@@ -1164,6 +1164,7 @@
 			"asset_type": "Typ aktiva v $oisy_name",
 			"asset_type_all": "Všechny typy aktiv",
 			"no_tokens_for_asset_type": "Ve tvé peněžence nejsou žádné $asset_type",
+			"no_tokens_for_asset_type_zero_tokens": "",
 			"no_tokens_for_asset_type_description": "Vyber z <strong>$count podporovaných tokenů</strong> a přizpůsob si zobrazení portfolia."
 		},
 		"details": {
