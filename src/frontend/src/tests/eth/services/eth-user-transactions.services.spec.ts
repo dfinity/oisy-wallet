@@ -10,7 +10,6 @@ import {
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ZERO } from '$lib/constants/app.constants';
-import { ethAddressStore } from '$lib/stores/address.store';
 import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -102,7 +101,6 @@ describe('eth-user-transactions.services', () => {
 	beforeEach(async () => {
 		vi.clearAllMocks();
 
-		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		ethTransactionsStore.reinitialize();
 
 		const backendApi = await import('$lib/api/backend.api');
@@ -195,6 +193,7 @@ describe('eth-user-transactions.services', () => {
 		it('returns hasMore false when backend is empty and Etherscan has nothing older', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -225,6 +224,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -258,6 +258,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -280,6 +281,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -305,6 +307,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -326,6 +329,7 @@ describe('eth-user-transactions.services', () => {
 
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -345,6 +349,7 @@ describe('eth-user-transactions.services', () => {
 
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -364,6 +369,7 @@ describe('eth-user-transactions.services', () => {
 		it('returns hasMore false when oldestLoadedBlockNumber is 0', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -376,11 +382,10 @@ describe('eth-user-transactions.services', () => {
 		});
 
 		// Case 7: No address — short-circuits
-		it('returns hasMore false when no address is available', async () => {
-			ethAddressStore.reset();
-
+		it('returns hasMore false when address is nullish', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: undefined,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -398,6 +403,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -417,6 +423,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -448,6 +455,7 @@ describe('eth-user-transactions.services', () => {
 
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
