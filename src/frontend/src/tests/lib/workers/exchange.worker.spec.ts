@@ -289,7 +289,7 @@ describe('exchange.worker', () => {
 				const unsupportedErc20Addresses: Erc20ContractAddressWithNetwork[] = [
 					{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n },
 					// @ts-expect-error we test this on purpose
-					{ address: '0xunknown', coingeckoId: 'unsupported-chain', chainId: 999n }
+					{ address: '0xunknown', coingeckoId: 'unsupported-chain', chainId: 1n }
 				];
 
 				const mockEvent = {
@@ -915,7 +915,7 @@ describe('exchange.worker', () => {
 				const unknownPlatformAddress: Erc20ContractAddressWithNetwork = {
 					address: '0xunknown',
 					coingeckoId: 'unknown-platform' as Erc20ContractAddressWithNetwork['coingeckoId'],
-					chainId: 999n
+					chainId: 1n
 				};
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {

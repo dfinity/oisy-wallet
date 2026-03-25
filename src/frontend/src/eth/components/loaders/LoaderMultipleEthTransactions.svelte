@@ -51,7 +51,7 @@
 			return Number(!aIsNull) - Number(!bIsNull);
 		});
 
-		const loader = batchLoadTransactions({ tokens: sortedTokens });
+		const loader = batchLoadTransactions({ identity: $authIdentity, tokens: sortedTokens });
 
 		for await (const _ of loader) {
 			// We don't need to use the results

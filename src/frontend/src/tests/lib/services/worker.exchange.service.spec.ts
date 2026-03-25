@@ -57,7 +57,7 @@ describe('worker.exchange.services', () => {
 
 		const mockData: PostMessageDataRequestExchangeTimer = {
 			currentCurrency: Currency.EUR,
-			erc20Addresses: [{ address: mockEthAddress, coingeckoId: 'ethereum' }],
+			erc20Addresses: [{ address: mockEthAddress, coingeckoId: 'ethereum', chainId: 1n }],
 			icrcCanisterIds: [mockIcrcCustomToken.ledgerCanisterId],
 			splAddresses: [mockSplAddress],
 			erc4626TokensExchangeData: []

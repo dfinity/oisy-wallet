@@ -207,7 +207,7 @@ const nativePrice = ({
 	tokenId,
 	coingeckoKey,
 	coingeckoRates
-}: (typeof NATIVE_TOKEN_IDS)[number] & {
+}: NativeTokenEntry & {
 	coingeckoRates: Map<string, CoingeckoSimpleTokenPrice>;
 }): CoingeckoSimplePriceResponse | undefined => {
 	const key = tokenIdKey(tokenId);
@@ -217,18 +217,42 @@ const nativePrice = ({
 	return nonNullish(rate) ? { [coingeckoKey]: rate } : undefined;
 };
 
-const NATIVE_TOKEN_IDS: { tokenId: TokenId; coingeckoKey: CoingeckoCoinsId }[] = [
-	{ tokenId: { EvmNative: ETHEREUM_NETWORK.chainId }, coingeckoKey: 'ethereum' },
-	{ tokenId: { BtcNativeMainnet: null }, coingeckoKey: 'bitcoin' },
-	{ tokenId: { IcpNative: null }, coingeckoKey: 'internet-computer' },
-	{ tokenId: { SolNativeMainnet: null }, coingeckoKey: 'solana' },
-	{ tokenId: { EvmNative: BSC_MAINNET_NETWORK.chainId }, coingeckoKey: 'binancecoin' },
-	{
-		tokenId: { EvmNative: POLYGON_MAINNET_NETWORK.chainId },
-		coingeckoKey: 'polygon-ecosystem-token'
-	},
-	{ tokenId: { EvmNative: BASE_NETWORK.chainId }, coingeckoKey: 'ethereum' },
-	{ tokenId: { EvmNative: ARBITRUM_MAINNET_NETWORK.chainId }, coingeckoKey: 'ethereum' }
+interface NativeTokenEntry {
+	tokenId: TokenId;
+	coingeckoKey: CoingeckoCoinsId;
+}
+
+const ETH_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { EvmNative: ETHEREUM_NETWORK.chainId },
+	coingeckoKey: 'ethereum'
+};
+const BTC_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { BtcNativeMainnet: null },
+	coingeckoKey: 'bitcoin'
+};
+const ICP_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { IcpNative: null },
+	coingeckoKey: 'internet-computer'
+};
+const SOL_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { SolNativeMainnet: null },
+	coingeckoKey: 'solana'
+};
+const BNB_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { EvmNative: BSC_MAINNET_NETWORK.chainId },
+	coingeckoKey: 'binancecoin'
+};
+const POL_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { EvmNative: POLYGON_MAINNET_NETWORK.chainId },
+	coingeckoKey: 'polygon-ecosystem-token'
+};
+const NATIVE_TOKEN_IDS: NativeTokenEntry[] = [
+	ETH_NATIVE_ENTRY,
+	BTC_NATIVE_ENTRY,
+	ICP_NATIVE_ENTRY,
+	SOL_NATIVE_ENTRY,
+	BNB_NATIVE_ENTRY,
+	POL_NATIVE_ENTRY
 ];
 
 const collectTokenPairs = <T>({
@@ -334,15 +358,13 @@ export const fetchAllExchangeRatesFromBackend = async ({
 		}
 	});
 
-	const [ethEntry, btcEntry, icpEntry, solEntry, bnbEntry, polEntry] = NATIVE_TOKEN_IDS;
-
 	return {
-		currentEthPrice: nativePrice({ ...ethEntry, coingeckoRates }),
-		currentBtcPrice: nativePrice({ ...btcEntry, coingeckoRates }),
-		currentIcpPrice: nativePrice({ ...icpEntry, coingeckoRates }),
-		currentSolPrice: nativePrice({ ...solEntry, coingeckoRates }),
-		currentBnbPrice: nativePrice({ ...bnbEntry, coingeckoRates }),
-		currentPolPrice: nativePrice({ ...polEntry, coingeckoRates }),
+		currentEthPrice: nativePrice({ ...ETH_NATIVE_ENTRY, coingeckoRates }),
+		currentBtcPrice: nativePrice({ ...BTC_NATIVE_ENTRY, coingeckoRates }),
+		currentIcpPrice: nativePrice({ ...ICP_NATIVE_ENTRY, coingeckoRates }),
+		currentSolPrice: nativePrice({ ...SOL_NATIVE_ENTRY, coingeckoRates }),
+		currentBnbPrice: nativePrice({ ...BNB_NATIVE_ENTRY, coingeckoRates }),
+		currentPolPrice: nativePrice({ ...POL_NATIVE_ENTRY, coingeckoRates }),
 		currentErc20Prices: buildPriceMap({
 			pairs: erc20.pairs,
 			rates: coingeckoRates,

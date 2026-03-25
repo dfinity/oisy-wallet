@@ -138,7 +138,7 @@ export const erc4626AssetAddresses: Readable<Erc4626ContractAddressWithNetwork[]
 	([$erc4626Tokens]) =>
 		$erc4626Tokens.map(({ assetAddress, network: { exchange, chainId } }) => ({
 			address: assetAddress,
-			chainId,
-			coingeckoId: exchange?.coingeckoId ?? 'ethereum'
+			coingeckoId: exchange?.coingeckoId ?? 'ethereum',
+			chainId
 		}))
 );

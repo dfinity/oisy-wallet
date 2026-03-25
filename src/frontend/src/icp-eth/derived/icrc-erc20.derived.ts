@@ -13,8 +13,8 @@ const enabledErc20TokensAddresses: Readable<Erc20ContractAddressWithNetwork[]> =
 	([$enabledErc20Tokens]) =>
 		$enabledErc20Tokens.map(({ address, network: { exchange, chainId } }: Erc20Token) => ({
 			address,
-			chainId,
-			coingeckoId: exchange?.coingeckoId ?? 'ethereum'
+			coingeckoId: exchange?.coingeckoId ?? 'ethereum',
+			chainId
 		}))
 );
 
@@ -41,7 +41,7 @@ const enabledIcrcTwinTokensAddresses: Readable<Erc20ContractAddressWithNetwork[]
 					network: { exchange, chainId }
 				} = (token as IcCkToken).twinToken as Erc20Token;
 
-				return { address, chainId, coingeckoId: exchange?.coingeckoId ?? 'ethereum' };
+				return { address, coingeckoId: exchange?.coingeckoId ?? 'ethereum', chainId };
 			})
 );
 
