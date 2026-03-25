@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { QRCodeReader } from '@dfinity/gix-components';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
+	import QRCodeReader from '$lib/components/ui/QRCodeReader.svelte';
 	import {
 		TRACK_COUNT_WALLET_CONNECT,
 		TRACK_COUNT_WALLET_CONNECT_QR_CODE
