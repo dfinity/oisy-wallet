@@ -1,7 +1,9 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 import type { Network, NetworkId } from '$lib/types/network';
+import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 import { derived, type Readable } from 'svelte/store';
 
 interface NetworksEnvs {
@@ -10,11 +12,12 @@ interface NetworksEnvs {
 }
 
 export const crossChainSwapNetworks: Readable<Network[]> = derived(
-	[enabledEthereumNetworks, enabledEvmNetworks],
-	([$enabledEthereumNetworks, $enabledEvmNetworks]) => [
+	[enabledEthereumNetworks, enabledEvmNetworks, enabledSolanaNetworks],
+	([$enabledEthereumNetworks, $enabledEvmNetworks, $enabledSolanaNetworks]) => [
 		ICP_NETWORK,
 		...$enabledEthereumNetworks,
-		...$enabledEvmNetworks
+		...$enabledEvmNetworks,
+		...(NEAR_INTENTS_SWAP_ENABLED ? $enabledSolanaNetworks : [])
 	]
 );
 
