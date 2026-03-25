@@ -247,6 +247,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -272,6 +273,7 @@ describe('LoaderEthTransactions', () => {
 
 		// Disabled autopilot tokens should still be loaded via harvestAutopilotTokens
 		expect(loadEthereumTransactions).toHaveBeenCalledWith({
+			identity: mockIdentity,
 			tokenId: mockHarvestAutopilotErc4626Tokens[0].id,
 			networkId: mockHarvestAutopilotErc4626Tokens[0].network.id,
 			chainId: mockHarvestAutopilotErc4626Tokens[0].network.chainId,
@@ -280,6 +282,7 @@ describe('LoaderEthTransactions', () => {
 
 		// Enabled autopilot tokens should also be loaded
 		expect(loadEthereumTransactions).toHaveBeenCalledWith({
+			identity: mockIdentity,
 			tokenId: mockHarvestAutopilotErc4626Tokens[1].id,
 			networkId: mockHarvestAutopilotErc4626Tokens[1].network.id,
 			chainId: mockHarvestAutopilotErc4626Tokens[1].network.chainId,
@@ -288,6 +291,7 @@ describe('LoaderEthTransactions', () => {
 
 		// Enabled non-autopilot ERC4626 tokens should be loaded
 		expect(loadEthereumTransactions).toHaveBeenCalledWith({
+			identity: mockIdentity,
 			tokenId: mockNonAutopilotErc4626Tokens[0].id,
 			networkId: mockNonAutopilotErc4626Tokens[0].network.id,
 			chainId: mockNonAutopilotErc4626Tokens[0].network.chainId,
@@ -315,6 +319,7 @@ describe('LoaderEthTransactions', () => {
 
 		// Disabled non-autopilot token should NOT be loaded
 		expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
+			identity: mockIdentity,
 			tokenId: mockNonAutopilotErc4626Tokens[0].id,
 			networkId: mockNonAutopilotErc4626Tokens[0].network.id,
 			chainId: mockNonAutopilotErc4626Tokens[0].network.chainId,
@@ -340,6 +345,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -358,6 +364,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -383,6 +390,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -390,10 +398,12 @@ describe('LoaderEthTransactions', () => {
 			});
 		});
 
-		expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
-			networkId: SEPOLIA_NETWORK_ID,
-			tokenId: SEPOLIA_TOKEN_ID
-		});
+		expect(loadEthereumTransactions).not.toHaveBeenCalledWith(
+			expect.objectContaining({
+				networkId: SEPOLIA_NETWORK_ID,
+				tokenId: SEPOLIA_TOKEN_ID
+			})
+		);
 	});
 
 	it('should not load transactions for mainnet tokens when Ethereum mainnet is disabled', async () => {
@@ -414,6 +424,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -421,10 +432,12 @@ describe('LoaderEthTransactions', () => {
 			});
 		});
 
-		expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
-			networkId: ETHEREUM_NETWORK_ID,
-			tokenId: ETHEREUM_TOKEN_ID
-		});
+		expect(loadEthereumTransactions).not.toHaveBeenCalledWith(
+			expect.objectContaining({
+				networkId: ETHEREUM_NETWORK_ID,
+				tokenId: ETHEREUM_TOKEN_ID
+			})
+		);
 	});
 
 	it('should load transactions twice for the same tokens when the stores change', async () => {
@@ -449,6 +462,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -479,6 +493,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -503,6 +518,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -536,6 +552,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -575,6 +592,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -601,6 +619,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,
@@ -631,6 +650,7 @@ describe('LoaderEthTransactions', () => {
 			const { id: networkId, chainId } = network;
 
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
 				chainId,

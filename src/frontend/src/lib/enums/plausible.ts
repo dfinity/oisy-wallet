@@ -10,7 +10,8 @@ export enum PLAUSIBLE_EVENTS {
 	PAY = 'pay',
 	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help',
 	RATE_LIMITED = 'rate_limited',
-	STAKE = 'stake'
+	STAKE = 'stake',
+	UNSTAKE = 'unstake'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -69,5 +70,6 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 
 export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
 	SUCCESS = 'success',
-	ERROR = 'error'
+	ERROR = 'error',
+	CANCEL = 'cancel'
 }
