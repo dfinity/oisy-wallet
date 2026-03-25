@@ -2,6 +2,7 @@ import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUCCESS
 } from '$lib/constants/analytics.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -36,7 +37,7 @@ vi.mock('$lib/utils/parse.utils', () => ({
 }));
 
 vi.mock('$sol/api/solana.api', () => ({
-	estimatePriorityFee: vi.fn().mockResolvedValue(0n)
+	estimatePriorityFee: vi.fn().mockResolvedValue(ZERO)
 }));
 
 describe('SwapSolWizard', () => {
