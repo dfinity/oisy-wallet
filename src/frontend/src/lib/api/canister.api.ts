@@ -1,5 +1,5 @@
 import type { CanisterIdText } from '$lib/types/canister';
-import type { Canister} from '@dfinity/utils';
+import type { Canister } from '@dfinity/utils';
 import { nonNullish } from '@dfinity/utils';
 import type { PrincipalText } from '@dfinity/zod-schemas';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -11,7 +11,7 @@ import { Principal } from '@icp-sdk/core/principal';
  * Each identity gets its own canister instance, so switching identity
  * automatically uses a fresh canister without any explicit reset.
  */
-export class CanisterApi<S extends object, T extends Canister<S>> {
+export class CanisterApi<T extends Canister<S>, S extends object = {}> {
 	readonly #instances = new Map<PrincipalText, Promise<T>>();
 
 	getCanister = ({
