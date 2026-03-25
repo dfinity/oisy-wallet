@@ -186,7 +186,8 @@
 							? $i18n.tokens.text.no_tokens_for_asset_type
 							: $i18n.tokens.text.no_tokens_for_asset_type_zero_tokens,
 						{
-							$asset_type: $i18n.token_tag.category[$tokenCategoryFilter].toLocaleLowerCase($currentLanguage)
+							$asset_type:
+								$i18n.token_tag.category[$tokenCategoryFilter].toLocaleLowerCase($currentLanguage)
 						}
 					)}
 				/>
