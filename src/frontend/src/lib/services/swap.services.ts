@@ -41,6 +41,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
+import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -55,6 +56,8 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import type { Amount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -65,15 +68,18 @@ import {
 	type IcpSwapManualWithdrawParams,
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
+	type NearIntentsQuoteParams,
 	type SwapMappedResult,
-	type SwapNearIntentsParams,
+	type SwapNearIntentsEvmParams,
+	type SwapNearIntentsSolParams,
 	type SwapParams,
 	type SwapVeloraParams
 } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { isNetworkIdICP } from '$lib/utils/network.utils';
+import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
@@ -81,6 +87,7 @@ import {
 	getWithdrawableToken
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+import { sendSol } from '$sol/services/sol-send.services';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -249,7 +256,8 @@ export const fetchSwapAmounts = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2,
-	userEthAddress
+	userEthAddress,
+	userSolAddress
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -265,6 +273,27 @@ export const fetchSwapAmounts = async ({
 			tokens,
 			slippage,
 			isSourceTokenIcrc2
+		});
+	}
+
+	const isSourceSolana = isNetworkIdSolana(sourceToken.network.id);
+	const isDestSolana = isNetworkIdSolana(destinationToken.network.id);
+
+	if (isSourceSolana || isDestSolana) {
+		const sourceAddress = isSourceSolana ? userSolAddress : userEthAddress;
+		const destAddress = isDestSolana ? userSolAddress : userEthAddress;
+
+		if (isNullish(sourceAddress)) {
+			return [];
+		}
+
+		return await fetchSwapAmountsSOL({
+			sourceToken,
+			destinationToken,
+			amount: sourceAmount,
+			userAddress: sourceAddress,
+			recipientAddress: destAddress ?? undefined,
+			slippage
 		});
 	}
 
@@ -285,7 +314,7 @@ const fetchSwapAmountsICP = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2
-}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & {
+}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'userSolAddress' | 'amount'> & {
 	amount: bigint;
 }): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
@@ -604,18 +633,19 @@ export const fetchIcpSwap = async ({
 	await waitAndTriggerWallet();
 };
 
-export const fetchNearIntentsSwap = async ({
-	identity,
+const executeNearIntentsSwap = async ({
 	progress,
 	sourceToken,
 	swapAmount,
-	sourceNetwork,
-	userAddress,
-	gas,
-	maxFeePerGas,
-	maxPriorityFeePerGas,
-	swapDetails
-}: SwapNearIntentsParams): Promise<void> => {
+	swapDetails,
+	sendTransaction
+}: {
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: Token;
+	swapAmount: Amount;
+	swapDetails: NearIntentsQuoteResponse;
+	sendTransaction: (params: { amount: bigint; depositAddress: string }) => Promise<string>;
+}): Promise<void> => {
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
@@ -625,17 +655,7 @@ export const fetchNearIntentsSwap = async ({
 
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
 
-	const { hash: txHash } = await sendEvm({
-		from: userAddress,
-		to: depositAddress,
-		amount: parsedSwapAmount,
-		token: sourceToken,
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		maxPriorityFeePerGas
-	});
+	const txHash = await sendTransaction({ amount: parsedSwapAmount, depositAddress });
 
 	progress(ProgressStepsSwap.SWAP);
 
@@ -653,6 +673,65 @@ export const fetchNearIntentsSwap = async ({
 	progress(ProgressStepsSwap.UPDATE_UI);
 
 	await waitAndTriggerWallet();
+};
+
+export const fetchNearIntentsEvmSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	swapAmount,
+	sourceNetwork,
+	userAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapNearIntentsEvmParams): Promise<void> => {
+	await executeNearIntentsSwap({
+		progress,
+		sourceToken,
+		swapAmount,
+		swapDetails,
+		sendTransaction: async ({ amount, depositAddress }) => {
+			const { hash } = await sendEvm({
+				from: userAddress,
+				to: depositAddress,
+				amount,
+				token: sourceToken,
+				sourceNetwork,
+				identity,
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
+			});
+			return hash;
+		}
+	});
+};
+
+export const fetchNearIntentsSolSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	swapAmount,
+	userAddress,
+	swapDetails
+}: SwapNearIntentsSolParams): Promise<void> => {
+	await executeNearIntentsSwap({
+		progress,
+		sourceToken,
+		swapAmount,
+		swapDetails,
+		sendTransaction: async ({ amount, depositAddress }) =>
+			await sendSol({
+				identity,
+				token: sourceToken,
+				amount,
+				destination: depositAddress,
+				source: userAddress,
+				prioritizationFee: ZERO
+			})
+	});
 };
 
 export const swapService = {
@@ -778,6 +857,42 @@ export const fetchSwapAmountsEVM = async ({
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
 			getQuote({ sourceToken, destinationToken, amount, userAddress, slippage })
+		)
+	);
+
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		return acc;
+	}, []);
+
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
+};
+
+// This wrapper keeps the return type uniform (array of SwapMappedResult),
+// so we can plug in more DEX quote providers later without changing callers.
+// Each provider can push its mapped result into the array, easy extendability.
+export const fetchSwapAmountsSOL = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress,
+	recipientAddress,
+	slippage
+}: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
+	if (isNullish(userAddress)) {
+		return [];
+	}
+
+	const enabledProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
 		)
 	);
 

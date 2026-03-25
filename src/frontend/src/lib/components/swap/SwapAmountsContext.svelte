@@ -6,7 +6,7 @@
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
 		SWAP_DEFAULT_SLIPPAGE_VALUE
 	} from '$lib/constants/swap.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { fetchSwapAmounts } from '$lib/services/swap.services';
@@ -101,7 +101,8 @@
 				tokens: $tokens,
 				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
 				isSourceTokenIcrc2,
-				userEthAddress: $ethAddress
+				userEthAddress: $ethAddress,
+				userSolAddress: $solAddressMainnet
 			});
 
 			if (swapAmounts.length === 0) {

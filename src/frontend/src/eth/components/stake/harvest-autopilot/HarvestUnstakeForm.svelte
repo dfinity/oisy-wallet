@@ -14,11 +14,17 @@
 
 	interface Props {
 		amount: OptionAmount;
+		amountSetToMax?: boolean;
 		onClose: () => void;
 		onNext: () => void;
 	}
 
-	let { amount = $bindable(), onNext, onClose }: Props = $props();
+	let {
+		amount = $bindable(),
+		amountSetToMax = $bindable(false),
+		onNext,
+		onClose
+	}: Props = $props();
 
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 	const { maxGasFee, feeTokenIdStore } = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
@@ -67,6 +73,7 @@
 	{onNext}
 	totalFee={ZERO}
 	bind:amount
+	bind:amountSetToMax
 >
 	{#snippet content()}
 		<HarvestStakeFees />

@@ -33,7 +33,7 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
-		fetchNearIntentsSwap,
+		fetchNearIntentsEvmSwap,
 		fetchVeloraDeltaSwap,
 		fetchVeloraMarketSwap
 	} from '$lib/services/swap.services';
@@ -45,7 +45,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { SwapProvider, type VeloraSwapDetails, VeloraSwapTypes } from '$lib/types/swap';
+	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
@@ -175,17 +175,19 @@
 		})
 	);
 
-	const isNearIntentsProvider = $derived<boolean>(
+	const isNearIntentsProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
 	);
 
-	const isApproveNeeded = $derived<boolean>(
+	const isApproveNeeded = $derived(
 		!isNearIntentsProvider &&
 			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.MARKET &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
-	const isGasless = $derived<boolean>(
+	const isTransferNeeded = $derived(isNearIntentsProvider);
+
+	const isGasless = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
 			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.DELTA &&
 			nonNullish($isSourceTokenPermitSupported) &&
@@ -225,8 +227,7 @@
 			isNullish(maxFeePerGas) ||
 			isNullish(maxPriorityFeePerGas) ||
 			isNullish(gas) ||
-			!isNetworkEthereum($sourceToken.network) ||
-			!isNetworkEthereum($destinationToken.network)
+			!isNetworkEthereum($sourceToken.network)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -256,11 +257,9 @@
 				identity: $authIdentity,
 				progress: (step: ProgressStep) => (swapProgressStep = step),
 				sourceToken: $sourceToken as Erc20Token,
-				destinationToken: $destinationToken as Erc20Token,
 				swapAmount,
 				sourceNetwork: $sourceToken.network,
 				slippageValue,
-				destinationNetwork: $destinationToken.network,
 				userAddress: $ethAddress,
 				gas,
 				maxFeePerGas,
@@ -270,17 +269,32 @@
 			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED) {
 				const params = {
 					...baseParams,
+					destinationToken: $destinationToken as Erc20Token,
 					receiveAmount: selectedProvider.receiveAmount,
 					swapDetails: selectedProvider.swapDetails
 				};
 
-				await fetchNearIntentsSwap(params);
-			} else {
+				await fetchNearIntentsEvmSwap(params);
+			} else if (selectedProvider?.provider === SwapProvider.VELORA) {
+				// Velora requires EVM destination chain params, but Near Intents can bridge to/from non-EVM networks.
+				if (!isNetworkEthereum($destinationToken.network)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
 				const params = {
 					...baseParams,
+					destinationToken: $destinationToken as Erc20Token,
 					receiveAmount: selectedProvider.receiveAmount,
 					isGasless: $isSourceTokenPermitSupported ?? false,
-					swapDetails: selectedProvider.swapDetails as VeloraSwapDetails
+					destinationNetwork: $destinationToken.network,
+					swapDetails: selectedProvider.swapDetails
 				};
 
 				if (selectedProvider.type === VeloraSwapTypes.DELTA) {
@@ -288,6 +302,15 @@
 				} else {
 					await fetchVeloraMarketSwap(params);
 				}
+			} else {
+				toastsError({
+					msg: { text: $i18n.swap.error.unexpected }
+				});
+
+				onBack();
+				onStartTriggerAmount();
+
+				return;
 			}
 
 			progress(ProgressStepsSwap.DONE);
@@ -376,7 +399,11 @@
 					{/snippet}
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-				<SwapProgress sendWithApproval={isApproveNeeded} {swapProgressStep} />
+				<SwapProgress
+					sendWithApproval={isApproveNeeded}
+					sendWithTransfer={isTransferNeeded}
+					{swapProgressStep}
+				/>
 			{/if}
 		{/key}
 	</EthFeeContext>
