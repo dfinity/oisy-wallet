@@ -15,7 +15,7 @@ import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: vi.fn()
+	parseToken: vi.fn().mockReturnValue(ZERO)
 }));
 
 vi.mock('$sol/api/solana.api', () => ({

@@ -100,6 +100,12 @@
 		if (userAmount > parsedSendBalance) {
 			return 'insufficient-funds';
 		}
+
+		if (!isTokenSpl($sourceToken) && nonNullish($feeStore)) {
+			if (userAmount + $feeStore > parsedSendBalance) {
+				return 'insufficient-funds-for-fee';
+			}
+		}
 	};
 
 	$effect(() => {
