@@ -38,7 +38,6 @@ import type {
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
-import { Principal } from '@icp-sdk/core/principal';
 
 const backendApi = new CanisterApi<BackendCanister>();
 

@@ -1,14 +1,14 @@
 import { CanisterApi } from '$lib/api/canister.api';
-import type { Canister } from '@dfinity/utils';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { Principal } from '@icp-sdk/core/principal';
 
 describe('canister.api', () => {
 	const identityA = Ed25519KeyIdentity.generate();
 	const identityB = Ed25519KeyIdentity.generate();
-	const mockCanisterId = Principal.fromText('aaaaa-aa');
+	const mockCanisterId = 'aaaaa-aa';
+	const mockCanisterPrincipal = Principal.fromText(mockCanisterId);
 
-	let api: CanisterApi<Canister<object>>;
+	let api: CanisterApi<{ id: string }>;
 
 	beforeEach(() => {
 		api = new CanisterApi();
@@ -25,7 +25,10 @@ describe('canister.api', () => {
 
 		expect(result).toEqual({ id: 'canister-a' });
 		expect(create).toHaveBeenCalledOnce();
-		expect(create).toHaveBeenCalledWith({ identity: identityA, canisterId: mockCanisterId });
+		expect(create).toHaveBeenCalledWith({
+			identity: identityA,
+			canisterId: mockCanisterPrincipal
+		});
 	});
 
 	it('should return cached instance for the same principal', async () => {

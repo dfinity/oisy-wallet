@@ -16,7 +16,6 @@ import type {
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { assertNonNullish } from '@dfinity/utils';
-import { Principal } from '@icp-sdk/core/principal';
 
 const signerApi = new CanisterApi<SignerCanister>();
 

@@ -4,7 +4,6 @@ import { LlmCanister } from '$lib/canisters/llm.canister';
 import { LLM_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { assertNonNullish } from '@dfinity/utils';
-import { Principal } from '@icp-sdk/core/principal';
 
 const llmApi = new CanisterApi<LlmCanister>();
 
