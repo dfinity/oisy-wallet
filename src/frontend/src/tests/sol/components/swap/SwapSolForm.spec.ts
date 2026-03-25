@@ -87,7 +87,7 @@ describe('SwapSolForm', () => {
 	});
 
 	it('should render all fields', () => {
-		const { container, getByTestId, getByText } = render(SwapSolForm, {
+		const { container, getByTestId } = render(SwapSolForm, {
 			props,
 			context: mockContext
 		});
