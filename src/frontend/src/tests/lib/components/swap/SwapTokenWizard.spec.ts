@@ -7,6 +7,7 @@ import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
@@ -107,6 +108,29 @@ describe('SwapTokenWizard', () => {
 		const { container } = render(SwapTokenWizard, {
 			props: defaultProps,
 			context: mockContext
+		});
+
+		expect(container).toBeTruthy();
+	});
+
+	it('should render Solana wizard when sourceToken is Solana network', () => {
+		const solToken = { ...mockValidSplToken, enabled: true };
+
+		const solContext = initSwapContext({
+			sourceToken: solToken,
+			destinationToken: solToken
+		});
+
+		const solMockContext = new Map(mockContext);
+		solMockContext.set(SWAP_CONTEXT_KEY, {
+			...solContext,
+			sourceTokenExchangeRate: readable(10),
+			destinationTokenExchangeRate: readable(2)
+		});
+
+		const { container } = render(SwapTokenWizard, {
+			props: defaultProps,
+			context: solMockContext
 		});
 
 		expect(container).toBeTruthy();
