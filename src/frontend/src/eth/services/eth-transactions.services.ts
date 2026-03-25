@@ -26,6 +26,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Address } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
@@ -35,6 +36,7 @@ import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadEthereumTransactions = ({
+	identity,
 	networkId,
 	tokenId,
 	chainId,
@@ -42,6 +44,7 @@ export const loadEthereumTransactions = ({
 	updateOnly = false,
 	silent = false
 }: {
+	identity: OptionIdentity;
 	tokenId: TokenId;
 	networkId: NetworkId;
 	chainId: EthereumChainId;
@@ -50,7 +53,7 @@ export const loadEthereumTransactions = ({
 	silent?: boolean;
 }): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(tokenId) || isSupportedEvmNativeTokenId(tokenId)) {
-		return loadEthTransactions({ networkId, tokenId, chainId, updateOnly, silent });
+		return loadEthTransactions({ identity, networkId, tokenId, chainId, updateOnly, silent });
 	}
 
 	return loadErcTransactions({ networkId, tokenId, standard, updateOnly });
@@ -59,6 +62,7 @@ export const loadEthereumTransactions = ({
 // If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
 // Plus, we add new transactions to the existing ones.
 export const reloadEthereumTransactions = (params: {
+	identity: OptionIdentity;
 	tokenId: TokenId;
 	networkId: NetworkId;
 	chainId: EthereumChainId;
@@ -67,6 +71,8 @@ export const reloadEthereumTransactions = (params: {
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
 const loadEthTransactions = async ({
+	// TODO: use it when we fetch cached user transactions from the backend
+	identity: __,
 	networkId,
 	tokenId,
 	// TODO: use it when we fetch cached user transactions from the backend
@@ -74,6 +80,7 @@ const loadEthTransactions = async ({
 	updateOnly = false,
 	silent = false
 }: {
+	identity: OptionIdentity;
 	networkId: NetworkId;
 	tokenId: TokenId;
 	chainId: EthereumChainId;

@@ -88,6 +88,7 @@ describe('eth-transactions.services', () => {
 				} = USDC_TOKEN;
 
 				const result = await loadEthereumTransactions({
+					identity: undefined,
 					networkId: mockNetworkId,
 					tokenId: mockTokenId,
 					chainId: mockChainId,
@@ -99,6 +100,7 @@ describe('eth-transactions.services', () => {
 
 			it('should return false if token is not enabled', async () => {
 				const result = await loadEthereumTransactions({
+					identity: undefined,
 					networkId: ETHEREUM_NETWORK_ID,
 					tokenId: USDT_TOKEN_ID,
 					chainId: ETHEREUM_NETWORK.chainId,
@@ -122,6 +124,7 @@ describe('eth-transactions.services', () => {
 					mockErcTransactions.mockResolvedValueOnce([]);
 
 					await loadEthereumTransactions({
+						identity: undefined,
 						networkId: mockNetworkId,
 						tokenId: mockTokenId,
 						chainId: mockChainId,
@@ -147,6 +150,7 @@ describe('eth-transactions.services', () => {
 					mockErcTransactions.mockResolvedValueOnce(mockTransactions);
 
 					const result = await loadEthereumTransactions({
+						identity: undefined,
 						networkId: mockNetworkId,
 						tokenId: mockTokenId,
 						chainId: mockChainId,
@@ -188,6 +192,7 @@ describe('eth-transactions.services', () => {
 					});
 
 					const result = await loadEthereumTransactions({
+						identity: undefined,
 						networkId: mockNetworkId,
 						tokenId: mockTokenId,
 						chainId: mockChainId,
@@ -231,6 +236,7 @@ describe('eth-transactions.services', () => {
 					mockErcTransactions.mockRejectedValue(mockError);
 
 					const result = await loadEthereumTransactions({
+						identity: undefined,
 						networkId: mockNetworkId,
 						tokenId: mockTokenId,
 						chainId: mockChainId,
@@ -288,6 +294,7 @@ describe('eth-transactions.services', () => {
 				mockErcTransactions.mockResolvedValueOnce([mintTransaction]);
 
 				const result = await loadEthereumTransactions({
+					identity: undefined,
 					networkId: mockValidErc4626Token.network.id,
 					tokenId: mockValidErc4626Token.id,
 					chainId: mockValidErc4626Token.network.chainId,
@@ -316,6 +323,7 @@ describe('eth-transactions.services', () => {
 				mockErcTransactions.mockResolvedValueOnce([burnTransaction]);
 
 				const result = await loadEthereumTransactions({
+					identity: undefined,
 					networkId: mockValidErc4626Token.network.id,
 					tokenId: mockValidErc4626Token.id,
 					chainId: mockValidErc4626Token.network.chainId,
@@ -344,6 +352,7 @@ describe('eth-transactions.services', () => {
 				mockErcTransactions.mockResolvedValueOnce([regularTransaction]);
 
 				const result = await loadEthereumTransactions({
+					identity: undefined,
 					networkId: mockValidErc4626Token.network.id,
 					tokenId: mockValidErc4626Token.id,
 					chainId: mockValidErc4626Token.network.chainId,
@@ -398,6 +407,7 @@ describe('eth-transactions.services', () => {
 			});
 
 			const result = await reloadEthereumTransactions({
+				identity: undefined,
 				networkId: mockNetworkId,
 				tokenId: mockTokenId,
 				chainId: mockChainId,
