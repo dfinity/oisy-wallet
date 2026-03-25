@@ -1,4 +1,6 @@
 import type { TokenId } from '$declarations/backend/backend.did';
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
@@ -244,13 +246,23 @@ const POL_NATIVE_ENTRY: NativeTokenEntry = {
 	tokenId: { EvmNative: POLYGON_MAINNET_NETWORK.chainId },
 	coingeckoKey: 'polygon-ecosystem-token'
 };
+const ARBITRUM_ETH_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { EvmNative: ARBITRUM_MAINNET_NETWORK.chainId },
+	coingeckoKey: 'ethereum'
+};
+const BASE_ETH_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { EvmNative: BASE_NETWORK.chainId },
+	coingeckoKey: 'ethereum'
+};
 const NATIVE_TOKEN_IDS: NativeTokenEntry[] = [
 	ETH_NATIVE_ENTRY,
 	BTC_NATIVE_ENTRY,
 	ICP_NATIVE_ENTRY,
 	SOL_NATIVE_ENTRY,
 	BNB_NATIVE_ENTRY,
-	POL_NATIVE_ENTRY
+	POL_NATIVE_ENTRY,
+	ARBITRUM_ETH_NATIVE_ENTRY,
+	BASE_ETH_NATIVE_ENTRY
 ];
 
 const collectTokenPairs = <T>({
@@ -317,6 +329,8 @@ export const fetchAllExchangeRatesFromBackend = async ({
 	currentSolPrice: CoingeckoSimplePriceResponse | undefined;
 	currentBnbPrice: CoingeckoSimplePriceResponse | undefined;
 	currentPolPrice: CoingeckoSimplePriceResponse | undefined;
+	currentArbitrumEthPrice: CoingeckoSimplePriceResponse | undefined;
+	currentBaseEthPrice: CoingeckoSimplePriceResponse | undefined;
 	currentErc20Prices: CoingeckoSimpleTokenPriceResponse;
 	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
 	currentSplPrices: CoingeckoSimpleTokenPriceResponse;
@@ -363,6 +377,8 @@ export const fetchAllExchangeRatesFromBackend = async ({
 		currentSolPrice: nativePrice({ ...SOL_NATIVE_ENTRY, coingeckoRates }),
 		currentBnbPrice: nativePrice({ ...BNB_NATIVE_ENTRY, coingeckoRates }),
 		currentPolPrice: nativePrice({ ...POL_NATIVE_ENTRY, coingeckoRates }),
+		currentArbitrumEthPrice: nativePrice({ ...ARBITRUM_ETH_NATIVE_ENTRY, coingeckoRates }),
+		currentBaseEthPrice: nativePrice({ ...BASE_ETH_NATIVE_ENTRY, coingeckoRates }),
 		currentErc20Prices: buildPriceMap({
 			pairs: erc20.pairs,
 			rates: coingeckoRates,
@@ -387,6 +403,8 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 				data.currentSolPrice,
 				data.currentBnbPrice,
 				data.currentPolPrice,
+				data.currentArbitrumEthPrice,
+				data.currentBaseEthPrice,
 				data.currentErc20Prices,
 				data.currentIcrcPrices,
 				data.currentSplPrices,

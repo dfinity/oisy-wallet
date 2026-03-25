@@ -105,23 +105,25 @@ describe('worker.exchange.services', () => {
 
 		describe('onmessage', () => {
 			it('should handle syncExchange message', () => {
-				const mockData: PostMessageDataResponseExchange = {
-					currentExchangeRate: {
-						exchangeRateToUsd: 1.5,
-						exchangeRate24hChangeMultiplier: 1,
-						currency: Currency.EUR
-					},
-					currentEthPrice: { ethereum: { usd: 1 } },
-					currentBtcPrice: { bitcoin: { usd: 50000 } },
-					currentErc20Prices: {},
-					currentIcpPrice: { 'internet-computer': { usd: 10 } },
-					currentIcrcPrices: {},
-					currentSolPrice: { solana: { usd: 100 } },
-					currentSplPrices: {},
-					currentErc4626Prices: {},
-					currentBnbPrice: { binancecoin: { usd: 400 } },
-					currentPolPrice: {}
-				};
+			const mockData: PostMessageDataResponseExchange = {
+				currentExchangeRate: {
+					exchangeRateToUsd: 1.5,
+					exchangeRate24hChangeMultiplier: 1,
+					currency: Currency.EUR
+				},
+				currentEthPrice: { ethereum: { usd: 1 } },
+				currentBtcPrice: { bitcoin: { usd: 50000 } },
+				currentErc20Prices: {},
+				currentIcpPrice: { 'internet-computer': { usd: 10 } },
+				currentIcrcPrices: {},
+				currentSolPrice: { solana: { usd: 100 } },
+				currentSplPrices: {},
+				currentErc4626Prices: {},
+				currentBnbPrice: { binancecoin: { usd: 400 } },
+				currentPolPrice: {},
+				currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+				currentBaseEthPrice: { ethereum: { usd: 1 } }
+			};
 				const payload = { msg: 'syncExchange', data: mockData };
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);
 

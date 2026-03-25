@@ -213,16 +213,18 @@ const syncExchange = async ({
 					exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier,
 					currency: currentCurrency
 				},
-				currentEthPrice,
-				currentBtcPrice,
-				currentErc20Prices,
-				currentIcpPrice,
-				currentIcrcPrices,
-				currentSolPrice,
-				currentSplPrices,
-				currentErc4626Prices,
-				currentBnbPrice,
-				currentPolPrice
+			currentEthPrice,
+			currentBtcPrice,
+			currentErc20Prices,
+			currentIcpPrice,
+			currentIcrcPrices,
+			currentSolPrice,
+			currentSplPrices,
+			currentErc4626Prices,
+			currentBnbPrice,
+			currentPolPrice,
+			currentArbitrumEthPrice: currentEthPrice,
+			currentBaseEthPrice: currentEthPrice
 			}
 		} as PostMessage<PostMessageDataResponseExchange>);
 	} catch (err: unknown) {
