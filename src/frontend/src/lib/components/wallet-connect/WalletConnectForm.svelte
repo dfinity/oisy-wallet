@@ -3,7 +3,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
-	import QRCodeReader from '$lib/components/ui/QRCodeReader.svelte';
+	import QrCodeReader from '$lib/components/ui/QrCodeReader.svelte';
 	import {
 		TRACK_COUNT_WALLET_CONNECT,
 		TRACK_COUNT_WALLET_CONNECT_QR_CODE
@@ -71,7 +71,7 @@
 <ContentWithToolbar>
 	<div class="qr-code rounded-lg">
 		{#if renderQRCodeReader}
-			<QRCodeReader on:nnsQRCode={onQRCodeSuccess} on:nnsQRCodeError={error} />
+			<QrCodeReader on:nnsQRCode={onQRCodeSuccess} on:nnsQRCodeError={error} />
 		{/if}
 
 		{#if !renderQRCodeReader}
