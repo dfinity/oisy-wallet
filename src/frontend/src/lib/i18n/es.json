@@ -1164,6 +1164,7 @@
 			"asset_type": "Tipo de activo en $oisy_name",
 			"asset_type_all": "Todos los tipos de activos",
 			"no_tokens_for_asset_type": "No hay $asset_type en tu cartera",
+			"no_tokens_for_asset_type_zero_tokens": "",
 			"no_tokens_for_asset_type_description": "Elige entre <strong>$count tokens compatibles</strong> para personalizar tu vista de cartera."
 		},
 		"details": {
