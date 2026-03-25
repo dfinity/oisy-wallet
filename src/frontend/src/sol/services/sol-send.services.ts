@@ -91,7 +91,7 @@ const createDefaultTransaction = async ({
 }: {
 	rpc: Rpc<SolanaRpcApi>;
 	feePayer: TransactionSigner;
-	version?: TransactionVersion;
+	version?: Exclude<TransactionVersion, 1>;
 }): Promise<SolTransactionMessage> =>
 	await pipe(
 		createTransactionMessage({ version }),
