@@ -12,9 +12,7 @@
 
 	let { title, description }: Props = $props();
 
-	let descriptionText = $derived(
-		description ?? $i18n.tokens.text.filter_nothing_found_description
-	);
+	let descriptionText = $derived(description ?? $i18n.tokens.text.filter_nothing_found_description);
 </script>
 
 <div class="py-12">
