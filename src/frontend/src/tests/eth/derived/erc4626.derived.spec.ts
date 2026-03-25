@@ -258,7 +258,8 @@ describe('erc4626.derived', () => {
 			expect(result).toEqual([
 				{
 					address: mockErc4626CustomEthereumToken.assetAddress,
-					coingeckoId: ETHEREUM_NETWORK.exchange?.coingeckoId ?? 'ethereum'
+					coingeckoId: ETHEREUM_NETWORK.exchange?.coingeckoId ?? 'ethereum',
+					chainId: ETHEREUM_NETWORK.chainId
 				}
 			]);
 		});
