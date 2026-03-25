@@ -52,4 +52,18 @@ describe('canister.api', () => {
 
 		expect(create).toHaveBeenCalledOnce();
 	});
+
+	it('should call create only once for concurrent calls with the same principal', async () => {
+		const create = vi.fn().mockResolvedValue({ id: 'canister-a' });
+
+		const results = await Promise.all([
+			api.getCanister({ identity: identityA, create }),
+			api.getCanister({ identity: identityA, create }),
+			api.getCanister({ identity: identityA, create })
+		]);
+
+		expect(create).toHaveBeenCalledOnce();
+		expect(results[1]).toBe(results[0]);
+		expect(results[2]).toBe(results[0]);
+	});
 });

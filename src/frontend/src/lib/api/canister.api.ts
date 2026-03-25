@@ -8,9 +8,9 @@ import type { Identity } from '@icp-sdk/core/agent';
  * automatically uses a fresh canister without any explicit reset.
  */
 export class CanisterApi<T> {
-	readonly #instances = new Map<string, T>();
+	readonly #instances = new Map<string, Promise<T>>();
 
-	getCanister = async ({
+	getCanister = ({
 		identity,
 		create
 	}: {
@@ -25,10 +25,10 @@ export class CanisterApi<T> {
 			return existing;
 		}
 
-		const instance = await create();
+		const promise = create();
 
-		this.#instances.set(principal, instance);
+		this.#instances.set(principal, promise);
 
-		return instance;
+		return promise;
 	};
 }
