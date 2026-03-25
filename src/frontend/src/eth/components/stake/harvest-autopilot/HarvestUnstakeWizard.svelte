@@ -14,17 +14,16 @@
 		initEthFeeContext,
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
+	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { getHarvestAutopilotBaseTrackingMetadata } from '$eth/utils/harvest-autopilots.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import UnstakeProgress from '$lib/components/stake/UnstakeProgress.svelte';
-	import {
-		TRACK_COUNT_UNSTAKE_ERROR,
-		TRACK_COUNT_UNSTAKE_SUCCESS
-	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { ProgressStepsUnstake } from '$lib/enums/progress-steps';
 	import { WizardStepsUnstake } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -34,6 +33,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { Vault } from '$lib/types/vaults';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -59,7 +59,7 @@
 
 	let amountSetToMax = $state(false);
 
-	const { sendTokenDecimals, sendTokenSymbol, sendToken, sendTokenId, sendBalance } =
+	const { sendTokenDecimals, sendToken, sendTokenId, sendBalance, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let isMaxAmount = $derived.by(() => {
@@ -166,6 +166,22 @@
 
 		onNext();
 
+		const startTime = performance.now();
+
+		const trackEventBaseParams = {
+			...getHarvestAutopilotBaseTrackingMetadata({
+				assetToken: $sendToken as Erc20Token,
+				vaultToken: vault.token
+			}),
+			token_amount: `${amount}`,
+			...(nonNullish($sendTokenExchangeRate)
+				? {
+						token_usd_value: `${Number(amount) * $sendTokenExchangeRate}`,
+						token_usd_price: `${$sendTokenExchangeRate}`
+					}
+				: {})
+		};
+
 		try {
 			const feeParams = {
 				identity: $authIdentity,
@@ -192,27 +208,46 @@
 				});
 			}
 
+			const duration = performance.now() - startTime;
+			const durationInSeconds = duration / 1000;
+
 			trackEvent({
-				name: TRACK_COUNT_UNSTAKE_SUCCESS,
+				name: PLAUSIBLE_EVENTS.UNSTAKE,
 				metadata: {
-					token: $sendTokenSymbol
+					...trackEventBaseParams,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+					result_duration_in_seconds: `${durationInSeconds}`,
+					result_duration_in_seconds_rounded: `${Math.round(durationInSeconds)}`
 				}
 			});
 
 			unstakeProgressStep = ProgressStepsUnstake.DONE;
 
 			setTimeout(() => onClose(), 750);
-		} catch (err: unknown) {
+		} catch (error: unknown) {
+			const duration = performance.now() - startTime;
+			const durationInSeconds = duration / 1000;
+			const errorMessage =
+				errorDetailToString(error) ?? $i18n.stake.error.unexpected_error_on_unstake;
+			const errorName = error instanceof Error ? error.name : undefined;
+			const errorCode = (error as { code?: string }).code;
+
 			trackEvent({
-				name: TRACK_COUNT_UNSTAKE_ERROR,
+				name: PLAUSIBLE_EVENTS.UNSTAKE,
 				metadata: {
-					token: $sendTokenSymbol
+					...trackEventBaseParams,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_duration_in_seconds: `${durationInSeconds}`,
+					result_duration_in_seconds_rounded: `${Math.round(durationInSeconds)}`,
+					result_error_text: errorMessage,
+					...(nonNullish(errorName) ? { result_error: errorName } : {}),
+					...(nonNullish(errorCode) ? { result_error_code: errorCode } : {})
 				}
 			});
 
 			toastsError({
 				msg: { text: $i18n.stake.error.unexpected_error_on_unstake },
-				err
+				err: error
 			});
 
 			onBack();
