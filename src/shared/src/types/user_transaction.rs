@@ -80,7 +80,6 @@ pub enum IcrcTransactionType {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct BtcTransactionData {
     pub fee: Option<Nat>,
-    pub confirmations: Option<u32>,
 }
 
 /// Solana transaction data.
