@@ -7,9 +7,15 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { HARVEST_AUTOPILOT_ADDRESSES } from '$eth/constants/harvest-autopilots.constants';
 import {
+	getHarvestAutopilotBaseTrackingMetadata,
 	getHarvestAutopilotVaultTransactions,
 	isTokenHarvestAutopilot
 } from '$eth/utils/harvest-autopilots.utils';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SOURCES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_EARN
+} from '$lib/enums/plausible';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { Vault } from '$lib/types/vaults';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -221,6 +227,32 @@ describe('harvest-autopilots.utils', () => {
 			});
 
 			expect(result).toHaveLength(0);
+		});
+	});
+
+	describe('getHarvestAutopilotBaseTrackingMetadata', () => {
+		it('should return correct tracking metadata', () => {
+			const result = getHarvestAutopilotBaseTrackingMetadata({
+				assetToken: mockValidErc20Token,
+				vaultToken: mockValidErc4626Token
+			});
+
+			expect(result).toEqual({
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.EARN,
+				event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_EARN.HARVEST_AUTOPILOT,
+				source_location: PLAUSIBLE_EVENT_SOURCES.HARVEST_AUTOPILOT,
+				source_sublocation: mockValidErc4626Token.name,
+				token_network: mockValidErc20Token.network.name,
+				token_address: mockValidErc20Token.address,
+				token_standard: mockValidErc20Token.standard.code,
+				token_symbol: mockValidErc20Token.symbol,
+				token_name: mockValidErc20Token.name,
+				token2_network: mockValidErc4626Token.network.name,
+				token2_address: mockValidErc4626Token.address,
+				token2_standard: mockValidErc4626Token.standard.code,
+				token2_symbol: mockValidErc4626Token.symbol,
+				token2_name: mockValidErc4626Token.name
+			});
 		});
 	});
 });
