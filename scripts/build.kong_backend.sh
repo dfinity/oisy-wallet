@@ -26,9 +26,9 @@ CANDID_URL="${KONG_REPO_URL}/kong_backend.did"
 WASM_URL="${KONG_REPO_URL}/kong_backend.wasm.gz"
 
 # TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
-#CANDID_FILE="$(jq -r .canisters.kong_backend.candid dfx.json)"
+# CANDID_FILE="$(jq -r .canisters.kong_backend.candid dfx.json)"
 # TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
-#WASM_FILE="$(jq -r .canisters.kong_backend.wasm dfx.json)"
+# WASM_FILE="$(jq -r .canisters.kong_backend.wasm dfx.json)"
 
 download() {
   : 'Downloads a URL to a given file.'
