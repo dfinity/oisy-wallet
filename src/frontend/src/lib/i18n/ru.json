@@ -1164,7 +1164,7 @@
 			"asset_type": "Тип актива в $oisy_name",
 			"asset_type_all": "Все типы активов",
 			"no_tokens_for_asset_type": "В вашем кошельке нет $asset_type",
-			"no_tokens_for_asset_type_zero_tokens": "",
+			"no_tokens_for_asset_type_zero_tokens": "В выбранной сети нет $asset_type",
 			"no_tokens_for_asset_type_description": "Выберите из <strong>$count поддерживаемых токенов</strong>, чтобы настроить отображение портфеля."
 		},
 		"details": {
