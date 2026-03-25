@@ -6,6 +6,7 @@ import EarningsList from '$lib/components/earning/EarningsList.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { EARNING_NO_POSITION_PLACEHOLDER } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
+import { tokenListStore } from '$lib/stores/token-list.store';
 import type { Vault } from '$lib/types/vaults';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { render } from '@testing-library/svelte';
@@ -69,6 +70,7 @@ describe('EarningsList', () => {
 
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		tokenListStore.set({ filter: '' });
 	});
 
 	it('should render the placeholder when there are no vaults', () => {
@@ -164,6 +166,53 @@ describe('EarningsList', () => {
 
 		expect(queryByText('Enabled Vault')).not.toBeInTheDocument();
 		expect(getByText('Base Vault')).toBeInTheDocument();
+	});
+
+	it('should filter vaults by search query matching name', () => {
+		mockAllVaultsStore([
+			toVault({ token: mockAutopilotToken }),
+			toVault({ token: mockEnabledToken })
+		]);
+
+		tokenListStore.set({ filter: 'Autopilot' });
+
+		const { getByText, queryByText } = render(EarningsList);
+
+		expect(getByText('Autopilot Vault')).toBeInTheDocument();
+		expect(queryByText('Enabled Vault')).not.toBeInTheDocument();
+	});
+
+	it('should filter vaults by search query matching symbol', () => {
+		const tokenWithUniqueSymbol: Erc4626CustomToken = {
+			...mockEnabledToken,
+			symbol: 'UNIQ'
+		};
+
+		mockAllVaultsStore([
+			toVault({ token: mockAutopilotToken }),
+			toVault({ token: tokenWithUniqueSymbol })
+		]);
+
+		tokenListStore.set({ filter: 'UNIQ' });
+
+		const { getByText, queryByText } = render(EarningsList);
+
+		expect(queryByText('Autopilot Vault')).not.toBeInTheDocument();
+		expect(getByText('Enabled Vault')).toBeInTheDocument();
+	});
+
+	it('should show all vaults when search query is empty', () => {
+		mockAllVaultsStore([
+			toVault({ token: mockAutopilotToken }),
+			toVault({ token: mockEnabledToken })
+		]);
+
+		tokenListStore.set({ filter: '' });
+
+		const { getByText } = render(EarningsList);
+
+		expect(getByText('Autopilot Vault')).toBeInTheDocument();
+		expect(getByText('Enabled Vault')).toBeInTheDocument();
 	});
 
 	it('should show all non-testnet vaults when no network is selected (chain fusion)', () => {

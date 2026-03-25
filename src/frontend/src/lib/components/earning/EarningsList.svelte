@@ -7,11 +7,13 @@
 	import VaultCard from '$lib/components/vaults/VaultCard.svelte';
 	import { AppPath, VAULT_PARAM } from '$lib/constants/routes.constants';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
+	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils';
 	import { filterEnabledToken } from '$lib/utils/token.utils';
 
-	let vaultsToDisplay = $derived(
+	let filteredVaults = $derived(
 		$allVaults.filter(
 			({ token }) =>
 				(token.usdBalance ?? 0) > 0 &&
@@ -23,6 +25,23 @@
 				})
 		)
 	);
+
+	let filter = $derived($tokenListStore.filter);
+
+	let vaultsToDisplay = $derived.by(() => {
+		if (filter === '') {
+			return filteredVaults;
+		}
+
+		const matchingTokens = getFilteredTokenGroup({
+			filter,
+			list: filteredVaults.map(({ token }) => token)
+		});
+
+		const matchingTokenIds = new Set(matchingTokens.map(({ id }) => id));
+
+		return filteredVaults.filter(({ token }) => matchingTokenIds.has(token.id));
+	});
 </script>
 
 <!-- TODO: add a skeleton -->
