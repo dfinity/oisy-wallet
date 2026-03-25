@@ -94,8 +94,8 @@ const loadEthTransactions = async ({
 	}
 
 	try {
-		const { transactions: transactionsProviders } = etherscanProviders(networkId);
-		const transactions = await transactionsProviders({ address });
+		const { transactions: transactionsProvider } = etherscanProviders(networkId);
+		const transactions = await transactionsProvider({ address });
 
 		const certifiedTransactions = transactions.map((transaction) => ({
 			data: transaction,
