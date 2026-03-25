@@ -1,6 +1,5 @@
 import type { CanisterIdText } from '$lib/types/canister';
-import type { Canister } from '@dfinity/utils';
-import { nonNullish } from '@dfinity/utils';
+import { nonNullish, type Canister } from '@dfinity/utils';
 import type { PrincipalText } from '@dfinity/zod-schemas';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
