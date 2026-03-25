@@ -76,7 +76,7 @@ export class AuthClientProvider {
 	 * To ensure each session starts clean and safe, we clear the stored keys
 	 * before creating a new AuthClient.
 	 *
-	 * We also remove the delegation because `AuthClient.create` does **not**
+	 * We also remove the delegation because `AuthClient.create` does not
 	 * overwrite or discard an existing delegation — it reads it from storage
 	 * and pairs it with whatever key is present. Once the key is cleared and
 	 * a fresh one generated, the old delegation would reference a different
