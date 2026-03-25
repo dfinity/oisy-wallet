@@ -48,7 +48,8 @@ function install_did_files() {
 # .. downloads candid for the signer
 DFX_NETWORK=ic ./scripts/build.signer.sh
 # .. downloads candid for the kong_backend
-DFX_NETWORK=ic ./scripts/build.kong_backend.sh
+# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
+# DFX_NETWORK=ic ./scripts/build.kong_backend.sh
 # .. downloads candid for the icp_swap_pool
 DFX_NETWORK=ic ./scripts/build.icp_swap_pool.sh
 # .. downloads candid for the icp_swap_factory

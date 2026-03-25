@@ -40,16 +40,20 @@ download() {
 
 ####
 # Downloads the candid file, if it does not exist already.
-download candid
+# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
+# download candid
 
 ####
 # Downloads the Wasm file, if it does not exist already.
-download wasm
+# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
+# download wasm
 
 ####
 # Success
-cat <<EOF
-SUCCESS: The kong_backend installation files have been created:
-kong_backend candid:       $CANDID_FILE
-kong_backend Wasm:         $WASM_FILE
-EOF
+echo "SKIPPED: kong_backend downloads are temporarily disabled (assets unreachable)."
+# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
+# cat <<EOF
+# SUCCESS: The kong_backend installation files have been created:
+# kong_backend candid:       $CANDID_FILE
+# kong_backend Wasm:         $WASM_FILE
+# EOF
