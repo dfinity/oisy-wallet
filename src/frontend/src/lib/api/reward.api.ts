@@ -98,10 +98,7 @@ const rewardCanister = async ({
 
 	return await rewardApi.getCanister({
 		identity,
-		create: () =>
-			RewardCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: RewardCanister.create
 	});
 };

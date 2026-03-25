@@ -129,10 +129,7 @@ const signerCanister = async ({
 
 	return await signerApi.getCanister({
 		identity,
-		create: () =>
-			SignerCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: SignerCanister.create
 	});
 };

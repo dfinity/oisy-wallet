@@ -295,10 +295,7 @@ const backendCanister = async ({
 
 	return await backendApi.getCanister({
 		identity,
-		create: () =>
-			BackendCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: BackendCanister.create
 	});
 };

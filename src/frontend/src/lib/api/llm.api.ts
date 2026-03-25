@@ -28,10 +28,7 @@ const llmCanister = async ({
 
 	return await llmApi.getCanister({
 		identity,
-		create: () =>
-			LlmCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: LlmCanister.create
 	});
 };

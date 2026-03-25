@@ -33,10 +33,7 @@ const icpSwapFactoryCanister = async ({
 
 	return await icpSwapApi.getCanister({
 		identity,
-		create: () =>
-			ICPSwapFactoryCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: ICPSwapFactoryCanister.create
 	});
 };

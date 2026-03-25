@@ -59,10 +59,7 @@ const kongBackendCanister = async ({
 
 	return await kongApi.getCanister({
 		identity,
-		create: () =>
-			KongBackendCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: KongBackendCanister.create
 	});
 };
