@@ -1,6 +1,7 @@
 import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import {
 	isTransactionFinalized,
 	mapTransactionToUserTransaction,
@@ -11,7 +12,6 @@ import {
 	loadUserTransactions,
 	saveFinalizedTransactions
 } from '$lib/services/user-transactions.services';
-import type { OptionEthAddress } from '$eth/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
