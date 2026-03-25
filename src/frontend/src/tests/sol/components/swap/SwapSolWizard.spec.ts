@@ -35,6 +35,10 @@ vi.mock('$lib/utils/parse.utils', () => ({
 	parseToken: vi.fn()
 }));
 
+vi.mock('$sol/api/solana.api', () => ({
+	estimatePriorityFee: vi.fn().mockResolvedValue(0n)
+}));
+
 describe('SwapSolWizard', () => {
 	const mockSourceToken = { ...mockValidSplToken, enabled: true };
 	const mockDestToken = { ...mockValidSplToken, symbol: 'USDC', enabled: true };
