@@ -1164,7 +1164,7 @@
 			"asset_type": "$oisy_nameのアセットタイプ",
 			"asset_type_all": "すべてのアセットタイプ",
 			"no_tokens_for_asset_type": "ウォレットに$asset_typeはありません",
-			"no_tokens_for_asset_type_zero_tokens": "",
+			"no_tokens_for_asset_type_zero_tokens": "選択したネットワークに $asset_type はありません",
 			"no_tokens_for_asset_type_description": "<strong>$count種類の対応トークン</strong>から選択してポートフォリオ表示をカスタマイズしてください。"
 		},
 		"details": {
