@@ -7,6 +7,7 @@
 	interface Props {
 		swapProgressStep?: string;
 		sendWithApproval?: boolean;
+		sendWithTransfer?: boolean;
 		swapWithWithdrawing?: boolean;
 		failedSteps?: string[];
 	}
@@ -15,6 +16,7 @@
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION,
 		failedSteps = $bindable([]),
 		sendWithApproval = false,
+		sendWithTransfer = false,
 		swapWithWithdrawing = false
 	}: Props = $props();
 
@@ -35,7 +37,11 @@
 						step: ProgressStepsSwap.APPROVE,
 						text: $i18n.send.text.approving,
 						state: 'next'
-					},
+					}
+				] as ProgressSteps)
+			: []),
+		...(sendWithApproval || sendWithTransfer
+			? ([
 					{
 						step: ProgressStepsSwap.SIGN_TRANSFER,
 						text: $i18n.send.text.signing_transaction,
