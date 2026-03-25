@@ -1164,6 +1164,7 @@
 			"asset_type": "Loại tài sản trong $oisy_name",
 			"asset_type_all": "Tất cả loại tài sản",
 			"no_tokens_for_asset_type": "Ví của bạn không có $asset_type nào",
+			"no_tokens_for_asset_type_zero_tokens": "",
 			"no_tokens_for_asset_type_description": "Chọn từ <strong>$count token được hỗ trợ</strong> để tùy chỉnh chế độ xem danh mục đầu tư của bạn."
 		},
 		"details": {
