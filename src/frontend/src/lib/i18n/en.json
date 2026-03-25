@@ -1164,6 +1164,7 @@
 			"asset_type": "Asset type in $oisy_name",
 			"asset_type_all": "All asset types",
 			"no_tokens_for_asset_type": "There are no $asset_type in your wallet",
+			"no_tokens_for_asset_type_zero_tokens": "There are no $asset_type in the selected network",
 			"no_tokens_for_asset_type_description": "Choose from <strong>$count supported tokens</strong> to customize your portfolio view."
 		},
 		"details": {

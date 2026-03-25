@@ -16,6 +16,7 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -180,9 +181,15 @@
 								$count: `${disabledCategoryTokenCount}`
 							})
 						: ''}
-					title={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type, {
-						$asset_type: $i18n.token_tag.category[$tokenCategoryFilter]
-					})}
+					title={replacePlaceholders(
+						disabledCategoryTokenCount > 0
+							? $i18n.tokens.text.no_tokens_for_asset_type
+							: $i18n.tokens.text.no_tokens_for_asset_type_zero_tokens,
+						{
+							$asset_type:
+								$i18n.token_tag.category[$tokenCategoryFilter].toLocaleLowerCase($currentLanguage)
+						}
+					)}
 				/>
 			{:else if $tokenListStore.filter === ''}
 				<NoTokensPlaceholder />

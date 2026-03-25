@@ -166,7 +166,9 @@ describe('exchange.worker', () => {
 						currentIcrcPrices: null,
 						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 						currentSolPrice: { solana: { usd: 1 } },
-						currentSplPrices: null
+						currentSplPrices: null,
+						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+						currentBaseEthPrice: { ethereum: { usd: 1 } }
 					}
 				});
 			});
@@ -641,7 +643,9 @@ describe('exchange.worker', () => {
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
 							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 							currentSolPrice: { solana: { usd: 1 } },
-							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } }
+							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
+							currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+							currentBaseEthPrice: { ethereum: { usd: 1 } }
 						}
 					});
 				});
@@ -702,7 +706,9 @@ describe('exchange.worker', () => {
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
 							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1, usd_24h_change: 3 } },
 							currentSolPrice: { solana: { usd: 1, usd_24h_change: 3 } },
-							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } }
+							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
+							currentArbitrumEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } },
+							currentBaseEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } }
 						}
 					});
 				});

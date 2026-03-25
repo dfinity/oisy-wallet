@@ -21,6 +21,7 @@
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
+	import { ckUsdcConversionDisabled } from '$icp-eth/derived/cketh.derived';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
@@ -119,7 +120,7 @@
 			? defaultDestination
 			: customDestination;
 
-		if (isNullish($authIdentity)) {
+		if (isNullish($authIdentity) || $ckUsdcConversionDisabled) {
 			return;
 		}
 

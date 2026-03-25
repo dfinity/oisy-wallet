@@ -1164,6 +1164,7 @@
 			"asset_type": "$oisy_name में असेट प्रकार",
 			"asset_type_all": "सभी असेट प्रकार",
 			"no_tokens_for_asset_type": "आपके वॉलेट में कोई $asset_type नहीं है",
+			"no_tokens_for_asset_type_zero_tokens": "",
 			"no_tokens_for_asset_type_description": "अपना पोर्टफोलियो दृश्य अनुकूलित करने के लिए <strong>$count समर्थित टोकन</strong> में से चुनें।"
 		},
 		"details": {

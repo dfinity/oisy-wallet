@@ -3,6 +3,8 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
+import type { InfuraProvider } from '$eth/providers/infura.providers';
+import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import {
 	loadEthUserTransactions,
 	loadNextEthUserTransactions,
@@ -10,7 +12,6 @@ import {
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ZERO } from '$lib/constants/app.constants';
-import { ethAddressStore } from '$lib/stores/address.store';
 import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -25,6 +26,10 @@ vi.mock('$lib/api/backend.api', () => ({
 
 vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn()
+}));
+
+vi.mock('$eth/providers/infura.providers', () => ({
+	infuraProviders: vi.fn()
 }));
 
 let mockGetUserTransactions: MockInstance;
@@ -95,14 +100,17 @@ const makeBackendUserTx = ({
 	}
 });
 
+const MOCK_LATEST_BLOCK_NUMBER = 1000;
+
 describe('eth-user-transactions.services', () => {
 	let etherscanProvidersSpy: MockInstance;
+	let infuraProvidersSpy: MockInstance;
 	let mockTransactionsProvider: MockInstance;
+	let mockGetBlockNumber: MockInstance;
 
 	beforeEach(async () => {
 		vi.clearAllMocks();
 
-		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		ethTransactionsStore.reinitialize();
 
 		const backendApi = await import('$lib/api/backend.api');
@@ -114,6 +122,12 @@ describe('eth-user-transactions.services', () => {
 		etherscanProvidersSpy.mockReturnValue({
 			transactions: mockTransactionsProvider
 		} as unknown as EtherscanProvider);
+
+		mockGetBlockNumber = vi.fn().mockResolvedValue(MOCK_LATEST_BLOCK_NUMBER);
+		infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraProviders');
+		infuraProvidersSpy.mockReturnValue({
+			getBlockNumber: mockGetBlockNumber
+		} as unknown as InfuraProvider);
 	});
 
 	describe('loadEthUserTransactions', () => {
@@ -195,6 +209,7 @@ describe('eth-user-transactions.services', () => {
 		it('returns hasMore false when backend is empty and Etherscan has nothing older', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -225,6 +240,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -258,6 +274,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -280,6 +297,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -291,7 +309,8 @@ describe('eth-user-transactions.services', () => {
 			expect(hasMore).toBeTruthy();
 			expect(mockTransactionsProvider).toHaveBeenCalledWith({
 				address: mockEthAddress,
-				endBlock: 99
+				endBlock: 99,
+				sort: 'desc'
 			});
 
 			const store = get(ethTransactionsStore);
@@ -305,6 +324,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -315,7 +335,8 @@ describe('eth-user-transactions.services', () => {
 			expect(hasMore).toBeFalsy();
 			expect(mockTransactionsProvider).toHaveBeenCalledWith({
 				address: mockEthAddress,
-				endBlock: 49
+				endBlock: 49,
+				sort: 'desc'
 			});
 		});
 
@@ -326,6 +347,7 @@ describe('eth-user-transactions.services', () => {
 
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -345,6 +367,7 @@ describe('eth-user-transactions.services', () => {
 
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -353,17 +376,16 @@ describe('eth-user-transactions.services', () => {
 				beAtCapacity: false
 			});
 
-			// saveFinalizedTransactions is fire-and-forget, but the underlying
-			// saveUserTransactions should still be called if the tx is finalized.
-			// Since mockSaveUserTransactions is mocked, we verify indirectly that
-			// the save path was taken (not skipped).
 			expect(mockTransactionsProvider).toHaveBeenCalledOnce();
+			expect(mockGetBlockNumber).toHaveBeenCalledOnce();
+			expect(mockSaveUserTransactions).toHaveBeenCalledOnce();
 		});
 
 		// Case 6: oldestLoadedBlockNumber is 0 — no older history possible
 		it('returns hasMore false when oldestLoadedBlockNumber is 0', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -376,11 +398,10 @@ describe('eth-user-transactions.services', () => {
 		});
 
 		// Case 7: No address — short-circuits
-		it('returns hasMore false when no address is available', async () => {
-			ethAddressStore.reset();
-
+		it('returns hasMore false when address is nullish', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: undefined,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -398,6 +419,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -417,6 +439,7 @@ describe('eth-user-transactions.services', () => {
 
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
@@ -428,7 +451,8 @@ describe('eth-user-transactions.services', () => {
 			expect(mockGetUserTransactions).toHaveBeenCalledOnce();
 			expect(mockTransactionsProvider).toHaveBeenCalledWith({
 				address: mockEthAddress,
-				endBlock: 99
+				endBlock: 99,
+				sort: 'desc'
 			});
 		});
 
@@ -448,6 +472,7 @@ describe('eth-user-transactions.services', () => {
 
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
+				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,

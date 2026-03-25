@@ -107,8 +107,8 @@ const loadEthTransactions = async ({
 			? Number(stored.newestBlockIndex) + 1
 			: 0;
 
-		const { transactions: transactionsProviders } = etherscanProviders(networkId);
-		const newTransactions = await transactionsProviders({ address, startBlock });
+		const { transactions: transactionsProvider } = etherscanProviders(networkId);
+		const newTransactions = await transactionsProvider({ address, startBlock });
 
 		// Combine: stored transactions + newly fetched ones
 		const allTransactions = [...(stored?.transactions ?? []), ...newTransactions];
