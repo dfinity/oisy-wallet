@@ -423,6 +423,10 @@ export const idlFactory = ({ IDL }) => {
 		max_results: IDL.Nat64,
 		start: IDL.Opt(IDL.Nat64)
 	});
+	const BtcTransactionData = IDL.Record({
+		fee: IDL.Opt(IDL.Nat),
+		confirmations: IDL.Opt(IDL.Nat32)
+	});
 	const EvmTransactionData = IDL.Record({
 		nft_token_id: IDL.Opt(IDL.Nat),
 		data: IDL.Opt(IDL.Text),
@@ -432,7 +436,28 @@ export const idlFactory = ({ IDL }) => {
 		gas_used: IDL.Opt(IDL.Nat),
 		gas_price: IDL.Opt(IDL.Nat)
 	});
-	const NetworkTransactionData = IDL.Variant({ Evm: EvmTransactionData });
+	const SolTransactionData = IDL.Record({
+		fee: IDL.Opt(IDL.Nat),
+		to_owner: IDL.Opt(IDL.Text),
+		from_owner: IDL.Opt(IDL.Text)
+	});
+	const IcrcTransactionType = IDL.Variant({
+		Approve: IDL.Record({ spender: IDL.Text }),
+		Burn: IDL.Null,
+		Mint: IDL.Null,
+		Transfer: IDL.Null
+	});
+	const IcrcTransactionData = IDL.Record({
+		fee: IDL.Opt(IDL.Nat),
+		memo: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		tx_type: IcrcTransactionType
+	});
+	const NetworkTransactionData = IDL.Variant({
+		Btc: BtcTransactionData,
+		Evm: EvmTransactionData,
+		Sol: SolTransactionData,
+		Icrc: IcrcTransactionData
+	});
 	const UserTransaction = IDL.Record({
 		id: IDL.Text,
 		to: IDL.Opt(IDL.Text),
