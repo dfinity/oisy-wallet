@@ -222,7 +222,9 @@ const syncExchange = async ({
 				currentSplPrices,
 				currentErc4626Prices,
 				currentBnbPrice,
-				currentPolPrice
+				currentPolPrice,
+				currentArbitrumEthPrice: currentEthPrice,
+				currentBaseEthPrice: currentEthPrice
 			}
 		} as PostMessage<PostMessageDataResponseExchange>);
 	} catch (err: unknown) {

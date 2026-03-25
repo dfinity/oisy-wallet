@@ -271,6 +271,8 @@ describe('exchange.services', () => {
 					{ SolNativeMainnet: null },
 					{ EvmNative: 56n },
 					{ EvmNative: 137n },
+					{ EvmNative: 42161n },
+					{ EvmNative: 8453n },
 					{ Erc20: ['0xabc', 1n] },
 					{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
 					{ SplMainnet: 'SoLaddr1' }
@@ -327,6 +329,8 @@ describe('exchange.services', () => {
 			expect(result.currentSolPrice).toBeUndefined();
 			expect(result.currentBnbPrice).toBeUndefined();
 			expect(result.currentPolPrice).toBeUndefined();
+			expect(result.currentArbitrumEthPrice).toBeUndefined();
+			expect(result.currentBaseEthPrice).toBeUndefined();
 			expect(result.currentErc20Prices).toEqual({});
 			expect(result.currentIcrcPrices).toEqual({});
 			expect(result.currentSplPrices).toEqual({});
@@ -389,6 +393,8 @@ describe('exchange.services', () => {
 						{ SolNativeMainnet: null },
 						{ EvmNative: 56n },
 						{ EvmNative: 137n },
+						{ EvmNative: 42161n },
+						{ EvmNative: 8453n },
 						{ Erc20: ['0xabc', 999n] }
 					]
 				})
@@ -403,7 +409,9 @@ describe('exchange.services', () => {
 					[{ IcpNative: null }, mockExchangeRate],
 					[{ SolNativeMainnet: null }, mockExchangeRate],
 					[{ EvmNative: 56n }, mockExchangeRate],
-					[{ EvmNative: 137n }, mockExchangeRate]
+					[{ EvmNative: 137n }, mockExchangeRate],
+					[{ EvmNative: 42161n }, mockExchangeRate],
+					[{ EvmNative: 8453n }, mockExchangeRate]
 				)
 			);
 
@@ -422,6 +430,8 @@ describe('exchange.services', () => {
 			expect(result.currentSolPrice).toEqual({ solana: expectedPrice });
 			expect(result.currentBnbPrice).toEqual({ binancecoin: expectedPrice });
 			expect(result.currentPolPrice).toEqual({ 'polygon-ecosystem-token': expectedPrice });
+			expect(result.currentArbitrumEthPrice).toEqual({ ethereum: expectedPrice });
+			expect(result.currentBaseEthPrice).toEqual({ ethereum: expectedPrice });
 		});
 
 		it('should handle missing optional fields in BackendExchangeRate', async () => {
