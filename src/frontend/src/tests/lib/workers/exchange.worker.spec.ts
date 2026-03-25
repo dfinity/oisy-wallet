@@ -86,12 +86,12 @@ describe('exchange.worker', () => {
 
 		describe('with message startExchangeTimer', () => {
 			const mockErc20ContractAddresses: Erc20ContractAddressWithNetwork[] = [
-				{ address: '0x123', coingeckoId: 'ethereum' },
-				{ address: '0x456', coingeckoId: 'base' },
-				{ address: '0x789', coingeckoId: 'binance-smart-chain' },
-				{ address: '0xabc', coingeckoId: 'ethereum' },
-				{ address: '0xdef', coingeckoId: 'polygon-pos' },
-				{ address: '0xghi', coingeckoId: 'arbitrum-one' }
+				{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n },
+				{ address: '0x456', coingeckoId: 'base', chainId: 8453n },
+				{ address: '0x789', coingeckoId: 'binance-smart-chain', chainId: 56n },
+				{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n },
+				{ address: '0xdef', coingeckoId: 'polygon-pos', chainId: 137n },
+				{ address: '0xghi', coingeckoId: 'arbitrum-one', chainId: 42161n }
 			];
 			const mockIcrcLedgerCanisterIds: LedgerCanisterIdText[] = ['icrc1', 'icrc2'];
 			const mockSplTokenAddresses: SplTokenAddress[] = ['spl1', 'spl2'];
@@ -243,9 +243,9 @@ describe('exchange.worker', () => {
 
 			it('should filter out unsupported coingecko platform IDs for ERC20 tokens', async () => {
 				const unsupportedErc20Addresses: Erc20ContractAddressWithNetwork[] = [
-					{ address: '0x123', coingeckoId: 'ethereum' },
+					{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n },
 					// @ts-expect-error we test this on purpose
-					{ address: '0xunknown', coingeckoId: 'unsupported-chain' }
+					{ address: '0xunknown', coingeckoId: 'unsupported-chain', chainId: 1n }
 				];
 
 				const mockEvent = {
@@ -362,7 +362,7 @@ describe('exchange.worker', () => {
 						msg,
 						data: {
 							currentCurrency: Currency.USD,
-							erc20Addresses: [{ address: '0x123', coingeckoId: 'ethereum' }],
+							erc20Addresses: [{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n }],
 							icrcCanisterIds: [],
 							splAddresses: [],
 							erc4626TokensExchangeData: []
@@ -786,7 +786,8 @@ describe('exchange.worker', () => {
 			it('should skip ERC20 addresses with unknown coingecko platform', async () => {
 				const unknownPlatformAddress: Erc20ContractAddressWithNetwork = {
 					address: '0xunknown',
-					coingeckoId: 'unknown-platform' as Erc20ContractAddressWithNetwork['coingeckoId']
+					coingeckoId: 'unknown-platform' as Erc20ContractAddressWithNetwork['coingeckoId'],
+					chainId: 1n
 				};
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
