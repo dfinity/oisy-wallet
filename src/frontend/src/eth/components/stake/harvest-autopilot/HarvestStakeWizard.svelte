@@ -16,18 +16,13 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { getHarvestAutopilotBaseTrackingMetadata } from '$eth/utils/harvest-autopilots.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import StakeProgress from '$lib/components/stake/StakeProgress.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import {
-		PLAUSIBLE_EVENT_CONTEXTS,
-		PLAUSIBLE_EVENT_RESULT_STATUSES,
-		PLAUSIBLE_EVENT_SOURCES,
-		PLAUSIBLE_EVENT_SUBCONTEXT_EARN,
-		PLAUSIBLE_EVENTS
-	} from '$lib/enums/plausible';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { ProgressStepsStake } from '$lib/enums/progress-steps';
 	import { WizardStepsStake } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -159,21 +154,11 @@
 		const startTime = performance.now();
 
 		const trackEventBaseParams = {
-			event_context: PLAUSIBLE_EVENT_CONTEXTS.EARN,
-			event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_EARN.HARVEST_AUTOPILOT,
-			source_location: PLAUSIBLE_EVENT_SOURCES.HARVEST_AUTOPILOT,
-			source_sublocation: vault.token.name,
-			token_network: $sendToken.network.name,
-			token_address: ($sendToken as Erc20Token).address,
-			token_standard: $sendToken.standard.code,
-			token_symbol: $sendToken.symbol,
-			token_name: $sendToken.name,
+			...getHarvestAutopilotBaseTrackingMetadata({
+				assetToken: $sendToken as Erc20Token,
+				vaultToken: vault.token
+			}),
 			token_amount: `${amount}`,
-			token2_network: vault.token.network.name,
-			token2_address: vault.token.address,
-			token2_standard: vault.token.standard.code,
-			token2_symbol: vault.token.symbol,
-			token2_name: vault.token.name,
 			...(nonNullish($sendTokenExchangeRate)
 				? {
 						token_usd_value: `${Number(amount) * $sendTokenExchangeRate}`,
