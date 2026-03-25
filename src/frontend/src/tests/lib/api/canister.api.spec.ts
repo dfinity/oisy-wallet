@@ -1,4 +1,5 @@
 import { CanisterApi } from '$lib/api/canister.api';
+import type { Canister } from '@dfinity/utils';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -8,7 +9,11 @@ describe('canister.api', () => {
 	const mockCanisterId = 'aaaaa-aa';
 	const mockCanisterPrincipal = Principal.fromText(mockCanisterId);
 
-	let api: CanisterApi<{ id: string }>;
+	interface CanisterType {
+		id: string;
+	}
+
+	let api: CanisterApi<Canister<CanisterType>, CanisterType>;
 
 	beforeEach(() => {
 		api = new CanisterApi();
