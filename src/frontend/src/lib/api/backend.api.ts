@@ -7,6 +7,7 @@ import type {
 	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
+import { CanisterApi } from '$lib/api/canister.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -36,10 +37,10 @@ import type {
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
-import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
-let canister: BackendCanister | undefined = undefined;
+const backendApi = new CanisterApi<BackendCanister>();
 
 export const listCustomTokens = async ({
 	identity
@@ -292,12 +293,12 @@ const backendCanister = async ({
 }: CanisterApiFunctionParams): Promise<BackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	if (isNullish(canister)) {
-		canister = await BackendCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return canister;
+	return backendApi.getCanister({
+		identity,
+		create: () =>
+			BackendCanister.create({
+				identity,
+				canisterId: Principal.fromText(canisterId)
+			})
+	});
 };
