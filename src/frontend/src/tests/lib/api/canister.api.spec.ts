@@ -24,8 +24,7 @@ describe('canister.api', () => {
 		});
 
 		expect(result).toEqual({ id: 'canister-a' });
-		expect(create).toHaveBeenCalledOnce();
-		expect(create).toHaveBeenCalledWith({
+		expect(create).toHaveBeenCalledExactlyOnceWith({
 			identity: identityA,
 			canisterId: mockCanisterPrincipal
 		});
