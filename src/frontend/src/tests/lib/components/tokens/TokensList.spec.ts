@@ -1,36 +1,36 @@
 import TokensList from '$lib/components/tokens/TokensList.svelte';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
-import {
-	hideTokenCategoryFilterStore,
-	tokenCategoryFilterStore
-} from '$lib/stores/settings.store';
+import { hideTokenCategoryFilterStore, tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import { tokenListStore } from '$lib/stores/token-list.store';
 import type { Token } from '$lib/types/token';
-import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
-import { filterTokenGroups } from '$lib/utils/token-group.utils';
-import { mockValidToken } from '$tests/mocks/tokens.mock';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { filterTokenGroups } from '$lib/utils/token-group.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-const { mockAllFungibleNetworkTokens, mockSortedTokens } = vi.hoisted(() => {
-	const { writable } = require('svelte/store');
-	return {
-		mockAllFungibleNetworkTokens: writable<Token[]>([]),
-		mockSortedTokens: writable<TokenUiOrGroupUi[]>([])
-	};
-});
+const mockStores = vi.hoisted(() => ({
+	setAllFungibleNetworkTokens: (_v: Token[]) => {},
+	setSortedTokens: (_v: unknown[]) => {}
+}));
 
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
 }));
 
-vi.mock('$lib/derived/all-network-tokens.derived', () => ({
-	allFungibleNetworkTokens: mockAllFungibleNetworkTokens
-}));
+vi.mock('$lib/derived/all-network-tokens.derived', async () => {
+	const { writable } = await import('svelte/store');
+	const store = writable<Token[]>([]);
+	mockStores.setAllFungibleNetworkTokens = (v) => store.set(v);
+	return { allFungibleNetworkTokens: store };
+});
 
-vi.mock('$lib/derived/network-tokens-ui.derived', () => ({
-	sortedEnabledNetworkTokenUiOrGroupUi: mockSortedTokens
-}));
+vi.mock('$lib/derived/network-tokens-ui.derived', async () => {
+	const { writable } = await import('svelte/store');
+	const store = writable<unknown[]>([]);
+	mockStores.setSortedTokens = (v) => store.set(v);
+	return { sortedEnabledNetworkTokenUiOrGroupUi: store };
+});
 
 vi.mock(import('$lib/utils/token-group.utils'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -49,7 +49,7 @@ describe('TokensList', () => {
 	}: {
 		category: TokenCategoryTagValue;
 		enabled: boolean;
-	}): Token => ({
+	}): TokenToggleable<Token> => ({
 		...mockValidToken,
 		tags: [{ type: TokenTagType.CATEGORY, value: category }],
 		enabled
@@ -62,8 +62,8 @@ describe('TokensList', () => {
 		tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 		tokenListStore.set({ filter: '' });
 
-		mockSortedTokens.set([]);
-		mockAllFungibleNetworkTokens.set([]);
+		mockStores.setSortedTokens([]);
+		mockStores.setAllFungibleNetworkTokens([]);
 	});
 
 	describe('category filter placeholder', () => {
@@ -85,9 +85,7 @@ describe('TokensList', () => {
 			});
 		});
 
-		it('should use no_tokens_for_asset_type_zero_tokens text when disabledCategoryTokenCount is 0', async () => {
-			mockAllFungibleNetworkTokens.set([]);
-
+		it('should use the proper label text when disabledCategoryTokenCount is 0', async () => {
 			tokenCategoryFilterStore.set({
 				key: 'token-category-filter',
 				value: { value: TokenCategoryTagValue.CRYPTO }
@@ -99,20 +97,18 @@ describe('TokensList', () => {
 				const title = container.querySelector('p.font-bold');
 
 				expect(title).not.toBeNull();
-				expect(title?.textContent).toContain(
-					en.token_tag.category.crypto.toLocaleLowerCase('en')
-				);
+				expect(title?.textContent).toContain(en.token_tag.category.crypto.toLocaleLowerCase('en'));
 				expect(title?.textContent).toContain('in the selected network');
 			});
 		});
 
-		it('should use no_tokens_for_asset_type text when there are disabled tokens to enable', async () => {
+		it('should use the proper label text when there are disabled tokens to enable', async () => {
 			const disabledStablecoin = mkToggleableToken({
 				category: TokenCategoryTagValue.STABLECOIN,
 				enabled: false
 			});
 
-			mockAllFungibleNetworkTokens.set([disabledStablecoin]);
+			mockStores.setAllFungibleNetworkTokens([disabledStablecoin]);
 
 			tokenCategoryFilterStore.set({
 				key: 'token-category-filter',
@@ -138,7 +134,7 @@ describe('TokensList', () => {
 				mkToggleableToken({ category: TokenCategoryTagValue.COMMODITY, enabled: false })
 			];
 
-			mockAllFungibleNetworkTokens.set(disabledTokens);
+			mockStores.setAllFungibleNetworkTokens(disabledTokens);
 
 			tokenCategoryFilterStore.set({
 				key: 'token-category-filter',
@@ -154,8 +150,6 @@ describe('TokensList', () => {
 		});
 
 		it('should not show description when there are no disabled tokens to enable', async () => {
-			mockAllFungibleNetworkTokens.set([]);
-
 			tokenCategoryFilterStore.set({
 				key: 'token-category-filter',
 				value: { value: TokenCategoryTagValue.STOCK }
