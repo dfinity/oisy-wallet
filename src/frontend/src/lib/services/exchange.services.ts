@@ -1,6 +1,4 @@
 import type { TokenId } from '$declarations/backend/backend.did';
-import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
-import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
