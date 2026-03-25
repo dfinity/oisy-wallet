@@ -1,5 +1,5 @@
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
-import { CanisterApi } from '$lib/api/canister-api';
+import { CanisterApi } from '$lib/api/canister.api';
 import { ICPSwapFactoryCanister } from '$lib/canisters/icp-swap-factory.canister';
 import { ICP_SWAP_FACTORY_CANISTER_ID } from '$lib/constants/app.constants';
 import type { ICPSwapGetPoolParams } from '$lib/types/api';
@@ -31,12 +31,9 @@ const icpSwapFactoryCanister = async ({
 }: CanisterApiFunctionParams): Promise<ICPSwapFactoryCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return icpSwapApi.getCanister({
+	return await icpSwapApi.getCanister({
 		identity,
-		create: () =>
-			ICPSwapFactoryCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: ICPSwapFactoryCanister.create
 	});
 };

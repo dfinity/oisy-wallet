@@ -7,7 +7,7 @@ import type {
 	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
-import { CanisterApi } from '$lib/api/canister-api';
+import { CanisterApi } from '$lib/api/canister.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -293,12 +293,9 @@ const backendCanister = async ({
 }: CanisterApiFunctionParams): Promise<BackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return backendApi.getCanister({
+	return await backendApi.getCanister({
 		identity,
-		create: () =>
-			BackendCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: BackendCanister.create
 	});
 };

@@ -6,7 +6,7 @@ import type {
 	SignBtcResponse
 } from '$declarations/signer/signer.did';
 import type { EthAddress } from '$eth/types/address';
-import { CanisterApi } from '$lib/api/canister-api';
+import { CanisterApi } from '$lib/api/canister.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -127,12 +127,9 @@ const signerCanister = async ({
 }: CanisterApiFunctionParams): Promise<SignerCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return signerApi.getCanister({
+	return await signerApi.getCanister({
 		identity,
-		create: () =>
-			SignerCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: SignerCanister.create
 	});
 };

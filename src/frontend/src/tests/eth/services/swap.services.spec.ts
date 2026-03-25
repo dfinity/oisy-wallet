@@ -153,6 +153,7 @@ describe('swap.services', () => {
 
 			expect(processTransactionSent).toHaveBeenCalledOnce();
 			expect(processTransactionSent).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
 				token: ETHEREUM_TOKEN,
 				transaction: mockTransactionResponse
 			});

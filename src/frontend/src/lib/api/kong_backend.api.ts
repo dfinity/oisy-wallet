@@ -1,5 +1,5 @@
 import type { SwapAmountsReply, TokenReply } from '$declarations/kong_backend/kong_backend.did';
-import { CanisterApi } from '$lib/api/canister-api';
+import { CanisterApi } from '$lib/api/canister.api';
 import { KongBackendCanister } from '$lib/canisters/kong_backend.canister';
 import { KONG_BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { KongSwapAmountsParams, KongSwapParams } from '$lib/types/api';
@@ -57,12 +57,9 @@ const kongBackendCanister = async ({
 }: CanisterApiFunctionParams): Promise<KongBackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return kongApi.getCanister({
+	return await kongApi.getCanister({
 		identity,
-		create: () =>
-			KongBackendCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: KongBackendCanister.create
 	});
 };

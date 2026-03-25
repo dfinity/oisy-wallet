@@ -1,5 +1,5 @@
 import type { chat_request_v1, chat_response_v1 } from '$declarations/llm/llm.did';
-import { CanisterApi } from '$lib/api/canister-api';
+import { CanisterApi } from '$lib/api/canister.api';
 import { LlmCanister } from '$lib/canisters/llm.canister';
 import { LLM_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -26,12 +26,9 @@ const llmCanister = async ({
 }: CanisterApiFunctionParams): Promise<LlmCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return llmApi.getCanister({
+	return await llmApi.getCanister({
 		identity,
-		create: () =>
-			LlmCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: LlmCanister.create
 	});
 };

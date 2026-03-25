@@ -8,7 +8,7 @@ import type {
 	UserSnapshot,
 	VipReward
 } from '$declarations/rewards/rewards.did';
-import { CanisterApi } from '$lib/api/canister-api';
+import { CanisterApi } from '$lib/api/canister.api';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -96,12 +96,9 @@ const rewardCanister = async ({
 }: CanisterApiFunctionParams): Promise<RewardCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return rewardApi.getCanister({
+	return await rewardApi.getCanister({
 		identity,
-		create: () =>
-			RewardCanister.create({
-				identity,
-				canisterId: Principal.fromText(canisterId)
-			})
+		canisterId,
+		create: RewardCanister.create
 	});
 };
