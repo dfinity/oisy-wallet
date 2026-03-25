@@ -1,6 +1,7 @@
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { SUPPORTED_SOLANA_MAINNET_NETWORKS } from '$env/networks/networks.sol.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
 import {
@@ -129,7 +130,12 @@ describe('SwapContexts', () => {
 			const networksListContext = getNetworksListContext();
 			const networks = get(networksListContext.filteredNetworks);
 
-			expect(networks).toEqual([ICP_NETWORK, ETHEREUM_NETWORK, ...SUPPORTED_EVM_MAINNET_NETWORKS]);
+			expect(networks).toEqual([
+				ICP_NETWORK,
+				ETHEREUM_NETWORK,
+				...SUPPORTED_EVM_MAINNET_NETWORKS,
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS
+			]);
 		});
 
 		it('should only include ICP when all other networks are disabled before mount', () => {
