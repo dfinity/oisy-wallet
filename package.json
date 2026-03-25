@@ -89,6 +89,7 @@
 		"@solana/kit": "^6.0.1",
 		"@velora-dex/sdk": "^9.3.3",
 		"alchemy-sdk": "^3.6.5",
+		"barcode-detector": "^3.1.1",
 		"bech32": "^1.1.4",
 		"bitcoinjs-lib": "^6.1.7",
 		"browser-image-compression": "^2.0.2",
