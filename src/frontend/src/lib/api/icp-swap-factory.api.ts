@@ -5,7 +5,6 @@ import { ICP_SWAP_FACTORY_CANISTER_ID } from '$lib/constants/app.constants';
 import type { ICPSwapGetPoolParams } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { assertNonNullish } from '@dfinity/utils';
-import { Principal } from '@icp-sdk/core/principal';
 
 const icpSwapApi = new CanisterApi<ICPSwapFactoryCanister>();
 
