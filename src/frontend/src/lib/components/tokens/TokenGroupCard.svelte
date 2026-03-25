@@ -5,8 +5,10 @@
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenGroupStore } from '$lib/stores/token-group.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -17,6 +19,7 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
+	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
@@ -42,15 +45,30 @@
 	const showTokenInGroup = (token: TokenUi) => token.neverCollapseInTokenGroup;
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
 
-	// list of filtered tokens, filtered by string input
+	const categoryFilteredTokens: TokenUi[] = $derived(
+		$showTokenCategoryFilter
+			? filterTokensUiByCategory({
+					tokens: tokenGroup.tokens,
+					category: $tokenCategoryFilter
+				})
+			: tokenGroup.tokens
+	);
+
 	const filteredTokens: TokenUi[] = $derived(
 		getFilteredTokenGroup({
 			filter: $tokenListStore.filter,
-			list: tokenGroup.tokens
+			list: categoryFilteredTokens
 		})
 	);
 
 	const totalUsdBalance: number = $derived(sumTokensUiUsdBalance(filteredTokens));
+
+	const filteredBalance: bigint | undefined = $derived(
+		filteredTokens.reduce<bigint | undefined>(
+			(acc, { balance }) => (nonNullish(balance) ? (acc ?? ZERO) + balance : acc),
+			undefined
+		)
+	);
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
 	const compareTokens = (a: TokenUi, b: TokenUi): number => {
@@ -96,6 +114,8 @@
 		<TokenCard
 			data={{
 				...headerData,
+				usdBalance: totalUsdBalance,
+				...(nonNullish(filteredBalance) && { balance: filteredBalance }),
 				tokenCount: filteredTokens.length,
 				networks: sortedFilteredTokens.map((t) => t.network)
 			}}
