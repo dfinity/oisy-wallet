@@ -8,17 +8,15 @@ import type {
 	UserSnapshot,
 	VipReward
 } from '$declarations/rewards/rewards.did';
-import { registerCanisterReset } from '$lib/api/actors.reset';
+import { CanisterApi } from '$lib/api/canister-api';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { RewardClaimApiResponse } from '$lib/types/reward';
-import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
-let canister: RewardCanister | undefined = undefined;
-
-registerCanisterReset(() => (canister = undefined));
+const rewardApi = new CanisterApi<RewardCanister>();
 
 export const isEligible = async ({
 	identity,
@@ -98,12 +96,12 @@ const rewardCanister = async ({
 }: CanisterApiFunctionParams): Promise<RewardCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	if (isNullish(canister)) {
-		canister = await RewardCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return canister;
+	return rewardApi.getCanister({
+		identity,
+		create: () =>
+			RewardCanister.create({
+				identity,
+				canisterId: Principal.fromText(canisterId)
+			})
+	});
 };

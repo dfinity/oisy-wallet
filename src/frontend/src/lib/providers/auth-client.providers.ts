@@ -74,9 +74,13 @@ export class AuthClientProvider {
 	 * Since icp-js-core persists identity keys in IndexedDB by default,
 	 * they could be tampered with and affect the next login.
 	 * To ensure each session starts clean and safe, we clear the stored keys
-	 * AND delegation before creating a new AuthClient. Both must be removed
-	 * together because a leftover delegation paired with a freshly generated
-	 * key produces an ECDSA P256 signature / delegation mismatch.
+	 * before creating a new AuthClient.
+	 *
+	 * We also remove the delegation because `AuthClient.create` does **not**
+	 * overwrite or discard an existing delegation — it reads it from storage
+	 * and pairs it with whatever key is present. Once the key is cleared and
+	 * a fresh one generated, the old delegation would reference a different
+	 * public key, producing an ECDSA P256 signature / delegation mismatch.
 	 */
 	safeCreateAuthClient = async (
 		args: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }

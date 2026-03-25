@@ -1,15 +1,13 @@
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
-import { registerCanisterReset } from '$lib/api/actors.reset';
+import { CanisterApi } from '$lib/api/canister-api';
 import { ICPSwapFactoryCanister } from '$lib/canisters/icp-swap-factory.canister';
 import { ICP_SWAP_FACTORY_CANISTER_ID } from '$lib/constants/app.constants';
 import type { ICPSwapGetPoolParams } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
-let canister: ICPSwapFactoryCanister | undefined = undefined;
-
-registerCanisterReset(() => (canister = undefined));
+const icpSwapApi = new CanisterApi<ICPSwapFactoryCanister>();
 
 export const getPoolCanister = async ({
 	identity,
@@ -33,12 +31,12 @@ const icpSwapFactoryCanister = async ({
 }: CanisterApiFunctionParams): Promise<ICPSwapFactoryCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	if (isNullish(canister)) {
-		canister = await ICPSwapFactoryCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return canister;
+	return icpSwapApi.getCanister({
+		identity,
+		create: () =>
+			ICPSwapFactoryCanister.create({
+				identity,
+				canisterId: Principal.fromText(canisterId)
+			})
+	});
 };

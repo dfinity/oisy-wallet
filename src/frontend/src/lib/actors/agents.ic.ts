@@ -3,4 +3,4 @@ import { AgentManager } from '@dfinity/utils';
 
 const agents = AgentManager.create({ fetchRootKey: LOCAL, host: REPLICA_HOST });
 
-export const { getAgent, clearAgents } = agents;
+export const { getAgent } = agents;
