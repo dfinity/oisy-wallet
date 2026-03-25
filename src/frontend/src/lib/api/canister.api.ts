@@ -10,13 +10,13 @@ import type { Identity } from '@icp-sdk/core/agent';
 export class CanisterApi<T> {
 	readonly #instances = new Map<string, T>();
 
-	async getCanister({
+	getCanister = async ({
 		identity,
 		create
 	}: {
 		identity: Identity;
 		create: () => Promise<T>;
-	}): Promise<T> {
+	}): Promise<T> => {
 		const principal = identity.getPrincipal().toText();
 
 		const existing = this.#instances.get(principal);
@@ -30,5 +30,5 @@ export class CanisterApi<T> {
 		this.#instances.set(principal, instance);
 
 		return instance;
-	}
+	};
 }
