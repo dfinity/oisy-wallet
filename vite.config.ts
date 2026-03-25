@@ -30,7 +30,7 @@ const config: UserConfig = {
 						return `i18n-${basename(id, '.json')}`;
 					}
 
-					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
+					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'barcode-detector', 'qr-creator'];
 
 					if (
 						['@sveltejs', 'svelte', '@dfinity/gix-components', ...lazy].find((lib) =>

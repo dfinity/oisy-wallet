@@ -40,13 +40,18 @@
 		resolveQrCodePromise?.({ status: 'cancelled' });
 		resolveQrCodePromise = undefined;
 	};
+
+	const onError = () => {
+		resolveQrCodePromise?.({ status: 'cancelled' });
+		resolveQrCodePromise = undefined;
+	};
 </script>
 
 <div
 	class="stretch qr-code-wrapper h-full w-full md:min-h-[300px]"
 	data-tid={ADDRESS_BOOK_QR_CODE_SCAN}
 >
-	<QrCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
+	<QrCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} on:nnsQRCodeError={onError} />
 </div>
 
 <style lang="scss">
