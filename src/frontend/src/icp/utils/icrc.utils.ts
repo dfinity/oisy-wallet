@@ -8,6 +8,7 @@ import {
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type {
 	IcCkInterface,
+	IcCkMetadata,
 	IcFee,
 	IcInterface,
 	IcToken,
@@ -23,11 +24,12 @@ import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { mapTokenMetadata, type IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
 
-export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
-	metadata: IcrcTokenMetadataResponse;
-	category: TokenCategory;
-	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
-};
+export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> &
+	Partial<IcCkMetadata> & {
+		metadata: IcrcTokenMetadataResponse;
+		category: TokenCategory;
+		icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
+	};
 
 export const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
 	[BITCAT_LEDGER_CANISTER_ID]: 'BITCAT',
@@ -87,6 +89,8 @@ export const mapIcrcToken = ({
 
 	const customTokenSymbol = icrcCustomTokens?.[ledgerCanisterId];
 
+	const twinTokenTags = rest.twinToken?.tags;
+
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
@@ -102,7 +106,7 @@ export const mapIcrcToken = ({
 		...(nonNullish(customTokenSymbol?.deprecated) && {
 			deprecated: customTokenSymbol.deprecated
 		}),
-		tags: customTokenSymbol?.tags ?? DEFAULT_TOKEN_TAGS,
+		tags: customTokenSymbol?.tags ?? twinTokenTags ?? DEFAULT_TOKEN_TAGS,
 		ledgerCanisterId,
 		...metadataToken,
 		...rest

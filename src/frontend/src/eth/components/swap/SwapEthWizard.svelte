@@ -175,17 +175,19 @@
 		})
 	);
 
-	const isNearIntentsProvider = $derived<boolean>(
+	const isNearIntentsProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
 	);
 
-	const isApproveNeeded = $derived<boolean>(
+	const isApproveNeeded = $derived(
 		!isNearIntentsProvider &&
 			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.MARKET &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
-	const isGasless = $derived<boolean>(
+	const isTransferNeeded = $derived(isNearIntentsProvider);
+
+	const isGasless = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
 			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.DELTA &&
 			nonNullish($isSourceTokenPermitSupported) &&
@@ -397,7 +399,11 @@
 					{/snippet}
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-				<SwapProgress sendWithApproval={isApproveNeeded} {swapProgressStep} />
+				<SwapProgress
+					sendWithApproval={isApproveNeeded}
+					sendWithTransfer={isTransferNeeded}
+					{swapProgressStep}
+				/>
 			{/if}
 		{/key}
 	</EthFeeContext>
