@@ -11,7 +11,10 @@
 		harvestAutopilots
 	} from '$eth/derived/harvest-autopilots.derived';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-	import { getHarvestAutopilotVaultTransactions } from '$eth/utils/harvest-autopilots.utils';
+	import {
+		getHarvestAutopilotBaseTrackingMetadata,
+		getHarvestAutopilotVaultTransactions
+	} from '$eth/utils/harvest-autopilots.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import EarningPositionCard from '$lib/components/earning/EarningPositionCard.svelte';
@@ -36,6 +39,8 @@
 	} from '$lib/derived/modal.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
+	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -130,6 +135,40 @@
 				})
 			: ZERO
 	);
+
+	const onStakeModalOpen = (id: symbol) => {
+		if (nonNullish(vault) && nonNullish(assetToken)) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.OPEN_MODAL,
+				metadata: {
+					...getHarvestAutopilotBaseTrackingMetadata({
+						assetToken,
+						vaultToken: vault.token
+					}),
+					event_type: PLAUSIBLE_EVENTS.STAKE
+				}
+			});
+		}
+
+		modalStore.openHarvestStake(id);
+	};
+
+	const onUnstakeModalOpen = (id: symbol) => {
+		if (nonNullish(vault) && nonNullish(assetToken)) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.OPEN_MODAL,
+				metadata: {
+					...getHarvestAutopilotBaseTrackingMetadata({
+						assetToken,
+						vaultToken: vault.token
+					}),
+					event_type: PLAUSIBLE_EVENTS.UNSTAKE
+				}
+			});
+		}
+
+		modalStore.openHarvestUnstake(id);
+	};
 </script>
 
 <div class="flex flex-col gap-6 pb-6">
@@ -183,7 +222,7 @@
 							</ButtonWithModal>
 
 							{#if nonNullish(vault) && assetTokenBalance > ZERO}
-								<ButtonWithModal isOpen={$modalHarvestStake} onOpen={modalStore.openHarvestStake}>
+								<ButtonWithModal isOpen={$modalHarvestStake} onOpen={onStakeModalOpen}>
 									{#snippet button(onclick)}
 										<Button colorStyle="success" fullWidth {onclick}>
 											{$i18n.stake.text.stake}
@@ -202,7 +241,7 @@
 				<EarningPositionCard {earningPositionsUsd} {earningYearlyAmountUsd}>
 					{#snippet buttons()}
 						{#if nonNullish(assetToken) && nonNullish(vault) && totalStakedAssetsBalance > ZERO}
-							<ButtonWithModal isOpen={$modalHarvestUnstake} onOpen={modalStore.openHarvestUnstake}>
+							<ButtonWithModal isOpen={$modalHarvestUnstake} onOpen={onUnstakeModalOpen}>
 								{#snippet button(onclick)}
 									<Button fullWidth {onclick}>
 										{$i18n.stake.text.unstake}
