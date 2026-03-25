@@ -118,36 +118,26 @@ export const loadNextEthUserTransactions = async ({
 	oldestLoadedBlockNumber: number | undefined;
 	beAtCapacity?: boolean;
 }): Promise<{ hasMore: boolean }> => {
-	if (isNullish(cursor)) {
-		return loadOlderFromEtherscan({
+	if (nonNullish(cursor)) {
+		const result = await loadEthUserTransactions({
 			identity,
-			address,
-			transactionTokenId,
-			tokenId,
-			networkId,
-			oldestLoadedBlockNumber,
-			skipSave: beAtCapacity
+			tokenId: transactionTokenId,
+			start: cursor,
+			maxResults: WALLET_PAGINATION
 		});
-	}
 
-	const result = await loadEthUserTransactions({
-		identity,
-		tokenId: transactionTokenId,
-		start: cursor,
-		maxResults: WALLET_PAGINATION
-	});
+		if (nonNullish(result) && result.transactions.length > 0) {
+			const certifiedTransactions = result.transactions.map((transaction) => ({
+				data: transaction,
+				certified: false
+			}));
 
-	if (nonNullish(result) && result.transactions.length > 0) {
-		const certifiedTransactions = result.transactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+			ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
 
-		ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
-
-		return {
-			hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
-		};
+			return {
+				hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
+			};
+		}
 	}
 
 	return loadOlderFromEtherscan({
