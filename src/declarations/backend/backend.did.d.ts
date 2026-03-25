@@ -127,7 +127,6 @@ export type BtcSelectUserUtxosFeeResult =
 	| { Err: SelectedUtxosFeeError };
 export interface BtcTransactionData {
 	fee: [] | [bigint];
-	confirmations: [] | [number];
 }
 export interface CanisterStatusResultV2 {
 	controller: Principal;
