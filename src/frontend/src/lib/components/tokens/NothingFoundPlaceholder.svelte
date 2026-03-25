@@ -12,7 +12,7 @@
 
 	let { title, description }: Props = $props();
 
-	let descriptionText: string = $derived(
+	let descriptionText = $derived(
 		description ?? $i18n.tokens.text.filter_nothing_found_description
 	);
 </script>
