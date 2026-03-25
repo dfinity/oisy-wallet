@@ -57,7 +57,7 @@ const kongBackendCanister = async ({
 }: CanisterApiFunctionParams): Promise<KongBackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return kongApi.getCanister({
+	return await kongApi.getCanister({
 		identity,
 		create: () =>
 			KongBackendCanister.create({

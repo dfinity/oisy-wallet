@@ -293,7 +293,7 @@ const backendCanister = async ({
 }: CanisterApiFunctionParams): Promise<BackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return backendApi.getCanister({
+	return await backendApi.getCanister({
 		identity,
 		create: () =>
 			BackendCanister.create({

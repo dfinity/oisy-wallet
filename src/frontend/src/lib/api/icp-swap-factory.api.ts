@@ -31,7 +31,7 @@ const icpSwapFactoryCanister = async ({
 }: CanisterApiFunctionParams): Promise<ICPSwapFactoryCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return icpSwapApi.getCanister({
+	return await icpSwapApi.getCanister({
 		identity,
 		create: () =>
 			ICPSwapFactoryCanister.create({

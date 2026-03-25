@@ -96,7 +96,7 @@ const rewardCanister = async ({
 }: CanisterApiFunctionParams): Promise<RewardCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return rewardApi.getCanister({
+	return await rewardApi.getCanister({
 		identity,
 		create: () =>
 			RewardCanister.create({

@@ -127,7 +127,7 @@ const signerCanister = async ({
 }: CanisterApiFunctionParams): Promise<SignerCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return signerApi.getCanister({
+	return await signerApi.getCanister({
 		identity,
 		create: () =>
 			SignerCanister.create({

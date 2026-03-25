@@ -26,7 +26,7 @@ const llmCanister = async ({
 }: CanisterApiFunctionParams): Promise<LlmCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	return llmApi.getCanister({
+	return await llmApi.getCanister({
 		identity,
 		create: () =>
 			LlmCanister.create({
