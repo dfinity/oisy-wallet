@@ -59,7 +59,6 @@ pub struct EvmTransactionData {
     pub nft_token_id: Option<Nat>,
 }
 
-
 /// ICRC / ICP transaction data.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct IcrcTransactionData {
@@ -93,7 +92,6 @@ pub struct SolTransactionData {
     /// Owner account that controls the destination token account.
     pub to_owner: Option<String>,
 }
-
 
 /// Request to retrieve stored transactions with cursor-based pagination.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
