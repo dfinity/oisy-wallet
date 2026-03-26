@@ -115,7 +115,6 @@ type BtcSelectUserUtxosFeeResult = variant {
 	Ok : SelectedUtxosFeeResponse;
 	Err : SelectedUtxosFeeError
 };
-type BtcTransactionData = record { fee : opt nat64; confirmations : opt nat32 };
 type BtcTransactionData = record { fee : opt nat };
 type CanisterStatusResultV2 = record {
 	controller : principal;
@@ -371,7 +370,6 @@ type Settings = record {
 };
 type SignedDelegation = record { signature : blob; delegation : Delegation };
 type SolTransactionData = record {
-	fee : opt nat64;
 	fee : opt nat;
 	to_owner : opt text;
 	from_owner : opt text

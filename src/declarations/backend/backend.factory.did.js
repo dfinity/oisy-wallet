@@ -423,10 +423,7 @@ export const idlFactory = ({ IDL }) => {
 		max_results: IDL.Nat64,
 		start: IDL.Opt(IDL.Nat64)
 	});
-	const BtcTransactionData = IDL.Record({
-		fee: IDL.Opt(IDL.Nat64),
-		confirmations: IDL.Opt(IDL.Nat32)
-	});
+	const BtcTransactionData = IDL.Record({ fee: IDL.Opt(IDL.Nat) });
 	const EvmTransactionData = IDL.Record({
 		nft_token_id: IDL.Opt(IDL.Nat),
 		data: IDL.Opt(IDL.Text),
