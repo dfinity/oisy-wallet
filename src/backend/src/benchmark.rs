@@ -422,7 +422,13 @@ fn bench_update_user_agreements() -> BenchResult {
     bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::service::update_agreements(sp, version, agreements.clone(), &mut m)
+            user_profile::service::update_agreements(
+                sp,
+                version,
+                agreements.clone(),
+                &mut m,
+                &mut s.agreement_history,
+            )
         }));
     })
 }

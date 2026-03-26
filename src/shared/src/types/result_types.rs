@@ -13,7 +13,7 @@ use super::{
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
-    agreement::UpdateAgreementsError,
+    agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
@@ -364,6 +364,22 @@ impl From<Result<(), UserTransactionError>> for SaveUserTransactionsResult {
         match result {
             Ok(()) => SaveUserTransactionsResult::Ok(()),
             Err(err) => SaveUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetAgreementHistoryResult {
+    Ok(Vec<AgreementHistoryEntry>),
+    Err(GetAgreementHistoryError),
+}
+impl From<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>
+    for GetAgreementHistoryResult
+{
+    fn from(result: Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>) -> Self {
+        match result {
+            Ok(entries) => GetAgreementHistoryResult::Ok(entries),
+            Err(err) => GetAgreementHistoryResult::Err(err),
         }
     }
 }

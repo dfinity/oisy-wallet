@@ -4,14 +4,15 @@ use ic_cdk::{
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use shared::types::{
-    agreement::UpdateUserAgreementsRequest,
+    agreement::{GetAgreementHistoryError, UpdateUserAgreementsRequest},
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
     experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
     network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
     result_types::{
-        AddUserCredentialResult, AddUserHiddenDappIdResult, GetUserProfileResult,
-        SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
-        UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+        AddUserCredentialResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
+        GetUserProfileResult, SetUserShowTestnetsResult,
+        UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
+        UpdateUserNetworkSettingsResult,
     },
     user_profile::{
         AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
@@ -19,7 +20,7 @@ use shared::types::{
 };
 
 use crate::{
-    state::{mutate_state, read_config},
+    state::{mutate_state, read_config, read_state},
     types::StoredPrincipal,
     user_profile::{credential_config::find_credential_config, model::UserProfileModel, service},
     utils::{guards::caller_is_not_anonymous, housekeeping::spawn_allow_signing_if_below_limit},
@@ -163,7 +164,9 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
     inner(request).into()
 }
 
-/// Updates the user's agreements, merging with any existing ones.
+/// Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
+/// for every agreement that was actually changed.
+///
 /// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
 /// set to `now`.
 ///
@@ -187,7 +190,31 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
             request.current_user_version,
             request.agreements,
             &mut user_profile_model,
+            &mut s.agreement_history,
         )
+    })
+    .into()
+}
+
+/// Returns the full agreement consent/rejection history for the caller.
+///
+/// # Returns
+/// - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
+///
+/// # Errors
+/// - `Err(UserNotFound)` if no history exists and the user has no profile.
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_user_agreement_history() -> GetAgreementHistoryResult {
+    let stored_principal = StoredPrincipal(msg_caller());
+
+    read_state(|s| {
+        if !s.user_profile_updated.contains_key(&stored_principal) {
+            return Err(GetAgreementHistoryError::UserNotFound);
+        }
+        Ok(s.agreement_history
+            .get(&stored_principal)
+            .map_or_else(Vec::new, |c| c.0))
     })
     .into()
 }

@@ -2,7 +2,9 @@ use std::result::Result;
 
 use ic_cdk::api::time;
 use shared::types::{
-    agreement::{UpdateAgreementsError, UserAgreements},
+    agreement::{
+        AgreementHistoryEntry, AgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
+    },
     dapp::AddDappSettingsError,
     experimental_feature::{
         ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
@@ -10,12 +12,12 @@ use shared::types::{
     network::{NetworkSettingsMap, SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     verifiable_credential::CredentialType,
-    Version,
+    Timestamp, Version,
 };
 
 use crate::{
     state::{read_state, State},
-    types::StoredPrincipal,
+    types::{AgreementHistoryMap, Candid, StoredPrincipal},
     user_profile::model::UserProfileModel,
 };
 
@@ -152,7 +154,37 @@ pub fn add_hidden_dapp_id(
     Ok(())
 }
 
-/// Updates the user's agreements, merging with any existing agreements.
+/// Builds history entries for agreements that were actually changed.
+fn collect_history_entries(
+    request: &UserAgreements,
+    now: Timestamp,
+) -> Vec<AgreementHistoryEntry> {
+    let mut entries = Vec::new();
+
+    let pairs: [(AgreementType, &UserAgreement); 3] = [
+        (AgreementType::LicenseAgreement, &request.license_agreement),
+        (AgreementType::TermsOfUse, &request.terms_of_use),
+        (AgreementType::PrivacyPolicy, &request.privacy_policy),
+    ];
+
+    for (agreement_type, agreement) in pairs {
+        if let Some(accepted) = agreement.accepted {
+            entries.push(AgreementHistoryEntry {
+                agreement_type,
+                accepted,
+                timestamp_ns: now,
+                text_sha256: agreement.text_sha256.clone(),
+                last_updated_at_ms: agreement.last_updated_at_ms,
+            });
+        }
+    }
+
+    entries
+}
+
+/// Updates the user's agreements, merging with any existing agreements, and appends an audit-trail
+/// entry for every agreement that was actually changed.
+///
 /// Only fields provided in `agreements` (i.e., where `accepted` is `Some(_)`) will be updated.
 /// If an agreement is newly accepted (`Some(true)`), `last_accepted_at_ns` is set to `now`.
 ///
@@ -161,6 +193,7 @@ pub fn add_hidden_dapp_id(
 /// * `profile_version` - The version of the user's profile.
 /// * `agreements` - The (partial) agreements to merge.
 /// * `user_profile_model` - The user profile model.
+/// * `agreement_history` - Stable map storing per-user agreement audit trail.
 ///
 /// # Returns
 /// - Returns `Ok(())` if the agreements were successfully updated or no change was needed.
@@ -172,12 +205,29 @@ pub fn update_agreements(
     profile_version: Option<Version>,
     agreements: UserAgreements,
     user_profile_model: &mut UserProfileModel,
+    agreement_history: &mut AgreementHistoryMap,
 ) -> Result<(), UpdateAgreementsError> {
     let user_profile = find_profile(principal, user_profile_model)
         .map_err(|_| UpdateAgreementsError::UserNotFound)?;
     let now = time();
-    let new_profile = user_profile.with_agreements(profile_version, now, agreements)?;
+    let new_profile =
+        user_profile.with_agreements(profile_version, now, agreements.clone())?;
+
+    let profile_changed = new_profile.version != user_profile.version;
+
     user_profile_model.store_new(principal, now, &new_profile);
+
+    if profile_changed {
+        let new_entries = collect_history_entries(&agreements, now);
+        if !new_entries.is_empty() {
+            let mut history = agreement_history
+                .get(&principal)
+                .map_or_else(Vec::new, |c| c.0);
+            history.extend(new_entries);
+            agreement_history.insert(principal, Candid(history));
+        }
+    }
+
     Ok(())
 }
 
