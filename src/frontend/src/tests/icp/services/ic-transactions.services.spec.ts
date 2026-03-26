@@ -138,8 +138,7 @@ describe('ic-transactions.services', () => {
 					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.UNCERTIFIED_REMOVED,
 					token_id: tokenId.description,
 					removed_count: `${n}`
-				},
-				warning: get(i18n).transactions.error.uncertified_transactions_removed
+				}
 			});
 		});
 	});

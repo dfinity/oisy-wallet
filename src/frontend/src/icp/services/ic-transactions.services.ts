@@ -17,7 +17,6 @@ import {
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
-import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -134,8 +133,7 @@ export const onTransactionsCleanUp = ({
 			event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.UNCERTIFIED_REMOVED,
 			token_id: `${tokenId.description}`,
 			removed_count: `${transactionIds.length}`
-		},
-		warning: get(i18n).transactions.error.uncertified_transactions_removed
+		}
 	});
 };
 
