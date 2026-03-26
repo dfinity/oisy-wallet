@@ -1034,7 +1034,7 @@
 			"unexpected_missing_data": "Что-то пошло не так при инициализации транзакции обмена."
 		},
 		"warning": {
-			"ckusdc_conversion_currently_suspended": ""
+			"ckusdc_conversion_currently_suspended": "Конвертация USDC из/в ckUSDC в настоящее время приостановлена."
 		}
 	},
 	"swap": {
