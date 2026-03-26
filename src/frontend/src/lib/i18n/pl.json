@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Błąd podczas ładowania adresu kontraktu pomocniczego ckETH. Nie zainicjowano identyfikatora kanistra mintera.",
 			"unexpected": "Coś poszło nie tak podczas konwersji tokenów.",
 			"unexpected_missing_data": "Coś poszło nie tak podczas inicjowania transakcji konwersji."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Konwersja USDC z/do ckUSDC jest obecnie zawieszona."
 		}
 	},
 	"swap": {
@@ -1164,6 +1167,7 @@
 			"asset_type": "Typ aktywa w $oisy_name",
 			"asset_type_all": "Wszystkie typy aktywów",
 			"no_tokens_for_asset_type": "W Twoim portfelu nie ma $asset_type",
+			"no_tokens_for_asset_type_zero_tokens": "W wybranej sieci nie ma żadnych $asset_type",
 			"no_tokens_for_asset_type_description": "Wybierz spośród <strong>$count obsługiwanych tokenów</strong>, aby dostosować widok portfela."
 		},
 		"details": {

@@ -1,4 +1,3 @@
-import type { UserTransaction } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import {
@@ -6,10 +5,12 @@ import {
 	saveFinalizedTransactions
 } from '$lib/services/user-transactions.services';
 import type { Transaction } from '$lib/types/transaction';
-import { mockEthTransaction } from '$tests/mocks/eth-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
+	mockEthTransaction,
 	mockGetUserTransactionsResponse,
+	mockMapFromBackendUserTransaction,
+	mockMapToBackendUserTransaction,
 	mockUserTransaction,
 	mockUserTransactionTokenId
 } from '$tests/mocks/user-transactions.mock';
@@ -20,15 +21,6 @@ vi.mock('$lib/api/backend.api', () => ({
 }));
 
 describe('user-transactions.services', () => {
-	const mapFromBackend = (tx: UserTransaction): Transaction => ({
-		...mockEthTransaction,
-		from: tx.from,
-		blockNumber: Number(tx.block_index),
-		hash: tx.id
-	});
-
-	const mapToBackend = (_tx: Transaction): UserTransaction => mockUserTransaction;
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -38,7 +30,7 @@ describe('user-transactions.services', () => {
 			const result = await loadUserTransactions({
 				identity: null,
 				tokenId: mockUserTransactionTokenId,
-				mapFromBackend
+				mapFromBackend: mockMapFromBackendUserTransaction
 			});
 
 			expect(result).toBeUndefined();
@@ -55,7 +47,7 @@ describe('user-transactions.services', () => {
 				tokenId: mockUserTransactionTokenId,
 				start: 5n,
 				maxResults: 20n,
-				mapFromBackend
+				mapFromBackend: mockMapFromBackendUserTransaction
 			});
 
 			expect(backendApi.getUserTransactions).toHaveBeenCalledExactlyOnceWith({
@@ -74,7 +66,7 @@ describe('user-transactions.services', () => {
 			await loadUserTransactions({
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
-				mapFromBackend
+				mapFromBackend: mockMapFromBackendUserTransaction
 			});
 
 			expect(backendApi.getUserTransactions).toHaveBeenCalledWith(
@@ -90,14 +82,14 @@ describe('user-transactions.services', () => {
 			const result = await loadUserTransactions({
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
-				mapFromBackend
+				mapFromBackend: mockMapFromBackendUserTransaction
 			});
 
 			expect(result?.transactions).toHaveLength(
 				mockGetUserTransactionsResponse.transactions.length
 			);
 			expect(result?.transactions[0]).toEqual(
-				mapFromBackend(mockGetUserTransactionsResponse.transactions[0])
+				mockMapFromBackendUserTransaction(mockGetUserTransactionsResponse.transactions[0])
 			);
 		});
 
@@ -109,7 +101,7 @@ describe('user-transactions.services', () => {
 			const result = await loadUserTransactions({
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
-				mapFromBackend
+				mapFromBackend: mockMapFromBackendUserTransaction
 			});
 
 			expect(result).toEqual(
@@ -128,7 +120,7 @@ describe('user-transactions.services', () => {
 			const result = await loadUserTransactions({
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
-				mapFromBackend
+				mapFromBackend: mockMapFromBackendUserTransaction
 			});
 
 			expect(result).toBeUndefined();
@@ -162,7 +154,7 @@ describe('user-transactions.services', () => {
 				transactions: [mockTx],
 				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
-				mapToBackend,
+				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
 			});
 
@@ -177,7 +169,7 @@ describe('user-transactions.services', () => {
 				transactions: [mockTx],
 				currentBlockNumber: 200,
 				isFinalizedFn: neverFinalized,
-				mapToBackend,
+				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
 			});
 
@@ -192,7 +184,7 @@ describe('user-transactions.services', () => {
 				transactions: [mockTx],
 				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
-				mapToBackend,
+				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: neverSaveable
 			});
 
@@ -209,7 +201,7 @@ describe('user-transactions.services', () => {
 				transactions: [mockTx, mockTx2],
 				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
-				mapToBackend,
+				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
 			});
 
@@ -232,7 +224,7 @@ describe('user-transactions.services', () => {
 				transactions: [mockTx, mockTx2],
 				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
-				mapToBackend,
+				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: canSaveOnlyFirst
 			});
 
@@ -255,7 +247,7 @@ describe('user-transactions.services', () => {
 				transactions: [mockTx],
 				currentBlockNumber: 200,
 				isFinalizedFn,
-				mapToBackend,
+				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
 			});
 
@@ -274,7 +266,7 @@ describe('user-transactions.services', () => {
 				transactions: [mockTx],
 				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
-				mapToBackend,
+				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
 			});
 
@@ -288,7 +280,7 @@ describe('user-transactions.services', () => {
 				transactions: [],
 				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
-				mapToBackend,
+				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
 			});
 

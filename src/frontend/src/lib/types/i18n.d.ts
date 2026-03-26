@@ -786,6 +786,7 @@ interface I18nConvert {
 	};
 	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
+	warning: { ckusdc_conversion_currently_suspended: string };
 }
 
 interface I18nSwap {
@@ -913,6 +914,7 @@ interface I18nTokens {
 		asset_type: string;
 		asset_type_all: string;
 		no_tokens_for_asset_type: string;
+		no_tokens_for_asset_type_zero_tokens: string;
 		no_tokens_for_asset_type_description: string;
 	};
 	details: {

@@ -187,7 +187,7 @@ const syncExchangeFromBackend = async ({
 	};
 };
 
-const syncExchangeFromCoingecko = async ({
+const syncExchangeFromProviders = async ({
 	currentCurrency,
 	erc20ContractAddresses,
 	icrcLedgerCanisterIds,
@@ -279,7 +279,9 @@ const syncExchangeFromCoingecko = async ({
 		currentSplPrices: currentSplPrices ?? {},
 		currentErc4626Prices,
 		currentBnbPrice: currentBnbPrice ?? undefined,
-		currentPolPrice: currentPolPrice ?? undefined
+		currentPolPrice: currentPolPrice ?? undefined,
+		currentArbitrumEthPrice: currentEthPrice ?? undefined,
+		currentBaseEthPrice: currentEthPrice ?? undefined
 	};
 };
 
@@ -294,7 +296,7 @@ const syncExchange = async (params: SyncExchangeParams) => {
 	try {
 		const data = BACKEND_EXCHANGE_ENABLED
 			? await syncExchangeFromBackend(params)
-			: await syncExchangeFromCoingecko(params);
+			: await syncExchangeFromProviders(params);
 
 		postMessage({
 			msg: 'syncExchange',

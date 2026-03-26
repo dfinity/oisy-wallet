@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Fehler beim Laden der ckETH-Hilfsvertrag-Adresse. Keine Minter-Canister-ID initialisiert.",
 			"unexpected": "Beim Konvertieren der Token ist etwas schiefgelaufen.",
 			"unexpected_missing_data": "Beim Starten der Umwandlungstransaktion ist etwas schiefgelaufen."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Das Konvertieren von USDC zu/von ckUSDC ist derzeit ausgesetzt."
 		}
 	},
 	"swap": {
@@ -1164,6 +1167,7 @@
 			"asset_type": "Anlageklasse in $oisy_name",
 			"asset_type_all": "Alle Anlageklassen",
 			"no_tokens_for_asset_type": "Es gibt keine $asset_type in deiner Wallet",
+			"no_tokens_for_asset_type_zero_tokens": "Es gibt keine $asset_type im ausgewählten Netzwerk",
 			"no_tokens_for_asset_type_description": "Wähle aus <strong>$count unterstützten Token</strong>, um deine Portfolioansicht anzupassen."
 		},
 		"details": {

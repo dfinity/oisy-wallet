@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Erro ao carregar o endereço do contrato auxiliar ckETH. Nenhum ID de canister minter foi inicializado.",
 			"unexpected": "Algo deu errado ao converter tokens.",
 			"unexpected_missing_data": "Algo deu errado ao iniciar uma transação de conversão."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "A conversão de USDC de/para ckUSDC está atualmente suspensa."
 		}
 	},
 	"swap": {
@@ -1164,6 +1167,7 @@
 			"asset_type": "Tipo de ativo em $oisy_name",
 			"asset_type_all": "Todos os tipos de ativos",
 			"no_tokens_for_asset_type": "Não há $asset_type na sua carteira",
+			"no_tokens_for_asset_type_zero_tokens": "Não há $asset_type na rede selecionada",
 			"no_tokens_for_asset_type_description": "Escolha entre <strong>$count tokens suportados</strong> para personalizar a visualização do seu portfólio."
 		},
 		"details": {

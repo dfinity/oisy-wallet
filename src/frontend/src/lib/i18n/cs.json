@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Chyba při načítání adresy pomocné smlouvy ckETH. Nebyl inicializován žádný ID kanystru minteru.",
 			"unexpected": "Při převodu tokenů se něco pokazilo.",
 			"unexpected_missing_data": "Při zahájení transakce převodu se něco pokazilo."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Převod USDC z/na ckUSDC je momentálně pozastaven."
 		}
 	},
 	"swap": {
@@ -1164,6 +1167,7 @@
 			"asset_type": "Typ aktiva v $oisy_name",
 			"asset_type_all": "Všechny typy aktiv",
 			"no_tokens_for_asset_type": "Ve tvé peněžence nejsou žádné $asset_type",
+			"no_tokens_for_asset_type_zero_tokens": "V vybrané síti nejsou žádné $asset_type",
 			"no_tokens_for_asset_type_description": "Vyber z <strong>$count podporovaných tokenů</strong> a přizpůsob si zobrazení portfolia."
 		},
 		"details": {

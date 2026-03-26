@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "加载 ckETH 辅助合约地址出错。未初始化 minter canister ID。",
 			"unexpected": "转换代币时发生错误。",
 			"unexpected_missing_data": "初始化转换交易时出错。"
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "USDC 与 ckUSDC 之间的转换目前已暂停。"
 		}
 	},
 	"swap": {
@@ -1164,6 +1167,7 @@
 			"asset_type": "$oisy_name 中的资产类型",
 			"asset_type_all": "所有资产类型",
 			"no_tokens_for_asset_type": "您的钱包中没有 $asset_type",
+			"no_tokens_for_asset_type_zero_tokens": "所选网络中没有 $asset_type",
 			"no_tokens_for_asset_type_description": "从 <strong>$count 个支持的代币</strong>中选择，自定义您的投资组合视图。"
 		},
 		"details": {
