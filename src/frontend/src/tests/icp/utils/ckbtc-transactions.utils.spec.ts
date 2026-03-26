@@ -1,4 +1,9 @@
-import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
+import {
+	BTC_MAINNET_EXPLORER_URL,
+	BTC_TESTNET_EXPLORER_URL,
+	CKBTC_EXPLORER_URL,
+	CKBTC_TESTNET_EXPLORER_URL
+} from '$env/explorers.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
@@ -6,23 +11,148 @@ import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
+import { MINT_MEMO_KYT_FAIL } from '$icp/utils/ckbtc-memo.utils';
 import {
 	extendCkBTCTransaction,
 	getCkBtcPendingUtxoTransactions,
-	mapCkBTCPendingUtxo
+	mapCkBTCPendingUtxo,
+	mapCkBTCTransaction
 } from '$icp/utils/ckbtc-transactions.utils';
 import type { Token } from '$lib/types/token';
 import { mockPendingUtxo } from '$tests/mocks/ckbtc.mock';
 import {
 	MOCK_CKBTC_TOKEN,
 	cleanupCkBtcPendingStores,
+	createMockIcrcBurnTransaction,
+	createMockIcrcMintTransaction,
+	createMockIcrcTransferTransaction,
 	setupCkBtcPendingStores
 } from '$tests/mocks/ic-transactions.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
+import { Cbor } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 describe('ckbtc-transactions.utils', () => {
+	describe('mapCkBTCTransaction', () => {
+		const baseMockTransaction = createMockIcrcTransferTransaction();
+
+		it('should map a basic transfer transaction with ckBTC explorer URLs', () => {
+			const result = mapCkBTCTransaction({
+				transaction: baseMockTransaction,
+				identity: undefined,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+				env: 'mainnet'
+			});
+
+			expect(result.id).toBe('100');
+			expect(result.txExplorerUrl).toContain(CKBTC_EXPLORER_URL);
+		});
+
+		it('should use testnet ckBTC explorer URL for testnet env', () => {
+			const result = mapCkBTCTransaction({
+				transaction: baseMockTransaction,
+				identity: undefined,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+				env: 'testnet'
+			});
+
+			expect(result.txExplorerUrl).toContain(CKBTC_TESTNET_EXPLORER_URL);
+		});
+
+		it('should not include ckBTC explorer URLs for unknown ledger', () => {
+			const result = mapCkBTCTransaction({
+				transaction: baseMockTransaction,
+				identity: undefined,
+				ledgerCanisterId: 'unknown-canister-id',
+				env: 'mainnet'
+			});
+
+			expect(result.txExplorerUrl).toBeUndefined();
+		});
+
+		it('should not include ckBTC explorer URLs when env is undefined', () => {
+			const result = mapCkBTCTransaction({
+				transaction: baseMockTransaction,
+				identity: undefined,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+				env: undefined
+			});
+
+			expect(result.txExplorerUrl).toBeUndefined();
+		});
+
+		describe('mint transactions', () => {
+			it('should map a mint transaction as twin_token_converted', () => {
+				const result = mapCkBTCTransaction({
+					transaction: createMockIcrcMintTransaction(),
+					identity: undefined,
+					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+					env: 'mainnet'
+				});
+
+				expect(result.fromLabel).toBe('transaction.label.twin_network');
+				expect(result.typeLabel).toBe('transaction.label.twin_token_converted');
+				expect(result.status).toBe('executed');
+			});
+
+			it('should map a reimbursement mint transaction', () => {
+				const kytFailMemo = new Uint8Array(Cbor.encode([MINT_MEMO_KYT_FAIL, [null, null, null]]));
+
+				const result = mapCkBTCTransaction({
+					transaction: createMockIcrcMintTransaction({ id: 201n, memo: kytFailMemo }),
+					identity: undefined,
+					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+					env: 'mainnet'
+				});
+
+				expect(result.typeLabel).toBe('transaction.label.reimbursement');
+				expect(result.status).toBe('reimbursed');
+			});
+		});
+
+		describe('burn transactions', () => {
+			it('should map a burn transaction with BTC address from memo', () => {
+				const burnMemo = new Uint8Array(Cbor.encode([0, ['bc1qtest123', null, null]]));
+
+				const result = mapCkBTCTransaction({
+					transaction: createMockIcrcBurnTransaction({ memo: burnMemo }),
+					identity: undefined,
+					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+					env: 'mainnet'
+				});
+
+				expect(result.to).toBe('bc1qtest123');
+				expect(result.toExplorerUrl).toContain(BTC_MAINNET_EXPLORER_URL);
+				expect(result.toExplorerUrl).toContain('bc1qtest123');
+			});
+
+			it('should use testnet BTC explorer URL for non-mainnet canister', () => {
+				const burnMemo = new Uint8Array(Cbor.encode([0, ['tb1qtest456', null, null]]));
+
+				const result = mapCkBTCTransaction({
+					transaction: createMockIcrcBurnTransaction({ id: 301n, memo: burnMemo }),
+					identity: undefined,
+					ledgerCanisterId: 'testnet-canister-id',
+					env: 'testnet'
+				});
+
+				expect(result.toExplorerUrl).toContain(BTC_TESTNET_EXPLORER_URL);
+			});
+
+			it('should set toLabel to twin_network when memo has no address', () => {
+				const result = mapCkBTCTransaction({
+					transaction: createMockIcrcBurnTransaction({ id: 302n }),
+					identity: undefined,
+					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+					env: 'mainnet'
+				});
+
+				expect(result.toLabel).toBe('transaction.label.twin_network');
+			});
+		});
+	});
+
 	describe('mapCkBTCPendingUtxo', () => {
 		const mockKytFee = 123456789n;
 
