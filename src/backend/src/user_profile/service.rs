@@ -2,9 +2,7 @@ use std::result::Result;
 
 use ic_cdk::api::time;
 use shared::types::{
-    agreement::{
-        AgreementHistoryEntry, AgreementType, UpdateAgreementsError, UserAgreements,
-    },
+    agreement::{AgreementHistoryEntry, AgreementType, UpdateAgreementsError, UserAgreements},
     dapp::AddDappSettingsError,
     experimental_feature::{
         ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
@@ -202,18 +200,14 @@ pub fn update_agreements(
     let user_profile = find_profile(principal, user_profile_model)
         .map_err(|_| UpdateAgreementsError::UserNotFound)?;
     let now = time();
-    let new_profile =
-        user_profile.with_agreements(profile_version, now, agreements.clone())?;
+    let new_profile = user_profile.with_agreements(profile_version, now, agreements.clone())?;
 
     user_profile_model.store_new(principal, now, &new_profile);
 
     if new_profile.version != user_profile.version {
         let new_entries = collect_history_entries(&agreements, now);
         if !new_entries.is_empty() {
-            let mut history = agreement_history
-                .get(&principal)
-                .unwrap_or_default()
-                .0;
+            let mut history = agreement_history.get(&principal).unwrap_or_default().0;
             history.extend(new_entries);
             agreement_history.insert(principal, Candid(history));
         }
