@@ -12,7 +12,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { MinterNoNewUtxosError } from '@icp-sdk/canisters/ckbtc';
+import { type CkBtcMinterDid, type EstimateWithdrawalFee, MinterNoNewUtxosError } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 vi.mock('$icp/api/ckbtc-minter.api');
@@ -31,10 +31,16 @@ vi.mock('$lib/services/actions.services', () => ({
 
 describe('ckbtc.services', () => {
 	const mockProgress = vi.fn();
-	const mockToken = {
+	const mockToken: IcCkToken = {
 		...mockValidIcCkToken,
 		minterCanisterId: 'mock-minter-canister-id'
-	} as IcCkToken;
+	};
+
+	const mockMinterInfo: CkBtcMinterDid.MinterInfo = {
+		kyt_fee: 100n,
+		retrieve_btc_min_amount: 10_000n,
+		min_confirmations: 6
+	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -125,10 +131,10 @@ describe('ckbtc.services', () => {
 		});
 
 		it('should throw when minterCanisterId is nullish', async () => {
-			const tokenWithoutMinter = {
+			const tokenWithoutMinter: IcCkToken = {
 				...mockToken,
 				minterCanisterId: undefined
-			} as unknown as IcCkToken;
+			};
 
 			await expect(
 				updateBalance({
@@ -148,7 +154,7 @@ describe('ckbtc.services', () => {
 			});
 			ckBtcMinterInfoStore.set({
 				id: mockToken.id,
-				data: { data: { kyt_fee: 100n } as never, certified: true }
+				data: { data: mockMinterInfo, certified: true }
 			});
 
 			const busyStartSpy = vi.spyOn(busy, 'start');
@@ -164,7 +170,7 @@ describe('ckbtc.services', () => {
 		it('should load BTC address when not yet loaded', async () => {
 			ckBtcMinterInfoStore.set({
 				id: mockToken.id,
-				data: { data: { kyt_fee: 100n } as never, certified: true }
+				data: { data: mockMinterInfo, certified: true }
 			});
 
 			vi.mocked(ckbtcMinterApi.getBtcAddress).mockResolvedValue('bc1qnewaddress');
@@ -219,10 +225,10 @@ describe('ckbtc.services', () => {
 		});
 
 		it('should throw when minterCanisterId is nullish', async () => {
-			const tokenWithoutMinter = {
+			const tokenWithoutMinter: IcCkToken = {
 				...mockToken,
 				minterCanisterId: undefined
-			} as unknown as IcCkToken;
+			};
 
 			await expect(
 				loadAllCkBtcInfo({
@@ -235,7 +241,7 @@ describe('ckbtc.services', () => {
 
 	describe('queryEstimateFee', () => {
 		it('should return success with fee on successful estimation', async () => {
-			const mockFee = { minter_fee: 100n, bitcoin_fee: 200n } as never;
+			const mockFee: EstimateWithdrawalFee = { minter_fee: 100n, bitcoin_fee: 200n };
 			vi.mocked(ckbtcMinterApi.estimateFee).mockResolvedValue(mockFee);
 
 			const result = await queryEstimateFee({
