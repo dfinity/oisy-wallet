@@ -1302,6 +1302,55 @@ describe('exchange.worker', () => {
 					})
 				);
 			});
+
+			it('should post a sync success message and log error when identity is nullish', async () => {
+				const provider = AuthClientProvider.getInstance();
+				vi.mocked(provider.loadIdentity).mockResolvedValue(null as unknown as undefined);
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: {
+						currentExchangeRate: {
+							exchangeRateToUsd: null,
+							exchangeRate24hChangeMultiplier: null,
+							currency: Currency.USD
+						},
+						currentEthPrice: undefined,
+						currentBtcPrice: undefined,
+						currentErc20Prices: {},
+						currentIcpPrice: undefined,
+						currentIcrcPrices: {},
+						currentSolPrice: undefined,
+						currentSplPrices: {},
+						currentErc4626Prices: {},
+						currentBnbPrice: undefined,
+						currentPolPrice: undefined
+					}
+				});
+
+				expect(console.error).toHaveBeenCalledExactlyOnceWith(
+					'Error while fetching exchange rate:',
+					'Cannot fetch backend exchange rates without an authenticated identity.'
+				);
+
+				expect(getExchangeRates).not.toHaveBeenCalled();
+			});
 		});
 	});
 });

@@ -138,7 +138,28 @@ const syncExchangeFromBackend = async ({
 	const identity = await AuthClientProvider.getInstance().loadIdentity();
 
 	if (isNullish(identity)) {
-		throw new Error('Cannot fetch backend exchange rates without an authenticated identity.');
+		consoleError(
+			'Error while fetching exchange rate:',
+			'Cannot fetch backend exchange rates without an authenticated identity.'
+		);
+
+		return {
+			currentExchangeRate: {
+				exchangeRateToUsd: null,
+				exchangeRate24hChangeMultiplier: null,
+				currency: currentCurrency
+			},
+			currentEthPrice: undefined,
+			currentBtcPrice: undefined,
+			currentErc20Prices: {},
+			currentIcpPrice: undefined,
+			currentIcrcPrices: {},
+			currentSolPrice: undefined,
+			currentSplPrices: {},
+			currentErc4626Prices: {},
+			currentBnbPrice: undefined,
+			currentPolPrice: undefined
+		};
 	}
 
 	const [currentExchangeRate, backendPrices] = await Promise.all([
