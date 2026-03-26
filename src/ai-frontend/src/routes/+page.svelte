@@ -14,7 +14,6 @@
 	import { InternetIdentityDomain } from '$lib/types/auth';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-
 	onMount(() => {
 		aiAssistantStore.open();
 	});
