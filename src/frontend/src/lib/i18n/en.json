@@ -1033,7 +1033,7 @@
 			"unexpected": "Something went wrong while converting tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": "Converting USDC from/to ckUSDC is currently suspended."
 		}
 	},
