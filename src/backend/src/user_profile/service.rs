@@ -155,10 +155,7 @@ pub fn add_hidden_dapp_id(
 }
 
 /// Builds history entries for agreements that were actually changed.
-fn collect_history_entries(
-    request: &UserAgreements,
-    now: Timestamp,
-) -> Vec<AgreementHistoryEntry> {
+fn collect_history_entries(request: &UserAgreements, now: Timestamp) -> Vec<AgreementHistoryEntry> {
     let mut entries = Vec::new();
 
     let pairs: [(AgreementType, &UserAgreement); 3] = [
@@ -210,8 +207,7 @@ pub fn update_agreements(
     let user_profile = find_profile(principal, user_profile_model)
         .map_err(|_| UpdateAgreementsError::UserNotFound)?;
     let now = time();
-    let new_profile =
-        user_profile.with_agreements(profile_version, now, agreements.clone())?;
+    let new_profile = user_profile.with_agreements(profile_version, now, agreements.clone())?;
 
     let profile_changed = new_profile.version != user_profile.version;
 

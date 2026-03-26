@@ -10,9 +10,8 @@ use shared::types::{
     network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
     result_types::{
         AddUserCredentialResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
-        GetUserProfileResult, SetUserShowTestnetsResult,
-        UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
-        UpdateUserNetworkSettingsResult,
+        GetUserProfileResult, SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
+        UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
     },
     user_profile::{
         AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,

@@ -8,16 +8,15 @@ use shared::types::{
 
 use crate::{
     state::memory::{
-        AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID,
-        BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_MEMORY_ID,
-        EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, TOKEN_ACTIVITY_MEMORY_ID,
-        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
-        USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
+        AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID,
+        CONFIG_MEMORY_ID, CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER,
+        TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
+        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
         maps::{
-            AgreementHistoryMap, ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactMap,
-            CustomTokenMap, ExchangeRateMap, TokenActivityMap, UserProfileMap,
+            AgreementHistoryMap, ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell,
+            ContactMap, CustomTokenMap, ExchangeRateMap, TokenActivityMap, UserProfileMap,
             UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
