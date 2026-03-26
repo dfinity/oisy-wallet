@@ -114,8 +114,8 @@ describe('asserts-amount.utils', () => {
 						...params.minterInfo,
 						data: {
 							...params.minterInfo.data,
-						retrieve_btc_min_amount: 500_000n
-					} as CkBtcMinterDid.MinterInfo
+							retrieve_btc_min_amount: 500_000n
+						} as CkBtcMinterDid.MinterInfo
 					}
 				})
 			).toBe('minimum-amount-not-reached');
