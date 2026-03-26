@@ -5,7 +5,6 @@
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
@@ -63,13 +62,6 @@
 
 	const totalUsdBalance: number = $derived(sumTokensUiUsdBalance(filteredTokens));
 
-	const filteredBalance: bigint | undefined = $derived(
-		filteredTokens.reduce<bigint | undefined>(
-			(acc, { balance }) => (nonNullish(balance) ? (acc ?? ZERO) + balance : acc),
-			undefined
-		)
-	);
-
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
 	const compareTokens = (a: TokenUi, b: TokenUi): number => {
 		// Highest balance first
@@ -114,8 +106,6 @@
 		<TokenCard
 			data={{
 				...headerData,
-				usdBalance: totalUsdBalance,
-				...(nonNullish(filteredBalance) && { balance: filteredBalance }),
 				tokenCount: filteredTokens.length,
 				networks: sortedFilteredTokens.map((t) => t.network)
 			}}
