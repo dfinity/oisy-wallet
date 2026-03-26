@@ -39,7 +39,11 @@
 	} from '$lib/derived/modal.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
-	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -169,6 +173,25 @@
 
 		modalStore.openHarvestUnstake(id);
 	};
+
+	let tracked = $state(false);
+	$effect(() => {
+		if (!tracked && nonNullish(vault) && nonNullish(assetToken)) {
+			tracked = true;
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+				metadata: {
+					...getHarvestAutopilotBaseTrackingMetadata({
+						vaultToken: vault.token,
+						assetToken
+					}),
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.EARN,
+					event_value: PLAUSIBLE_EVENT_VALUES.HARVEST_AUTOPILOT_DETAIL_PAGE
+				}
+			});
+		}
+	});
 </script>
 
 <div class="flex flex-col gap-6 pb-6">
