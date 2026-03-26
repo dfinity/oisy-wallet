@@ -18,7 +18,6 @@ import {
 	mapCkBTCPendingUtxo,
 	mapCkBTCTransaction
 } from '$icp/utils/ckbtc-transactions.utils';
-import type { Token } from '$lib/types/token';
 import { mockPendingUtxo } from '$tests/mocks/ckbtc.mock';
 import {
 	MOCK_CKBTC_TOKEN,
@@ -340,7 +339,7 @@ describe('ckbtc-transactions.utils', () => {
 	describe('getCkBtcPendingUtxoTransactions', () => {
 		it('should return empty array when no pending transactions', () => {
 			const result = getCkBtcPendingUtxoTransactions({
-				token: MOCK_CKBTC_TOKEN as Token,
+				token: MOCK_CKBTC_TOKEN,
 				ckBtcMinterInfoStore: get(ckBtcMinterInfoStore),
 				ckBtcPendingUtxosStore: get(ckBtcPendingUtxosStore)
 			});
@@ -352,7 +351,7 @@ describe('ckbtc-transactions.utils', () => {
 			setupCkBtcPendingStores();
 
 			const result = getCkBtcPendingUtxoTransactions({
-				token: MOCK_CKBTC_TOKEN as Token,
+				token: MOCK_CKBTC_TOKEN,
 				ckBtcMinterInfoStore: get(ckBtcMinterInfoStore),
 				ckBtcPendingUtxosStore: get(ckBtcPendingUtxosStore)
 			});
@@ -379,10 +378,10 @@ describe('ckbtc-transactions.utils', () => {
 		it('should not return the pending transactions when minter info is not available', () => {
 			setupCkBtcPendingStores();
 
-			ckBtcMinterInfoStore.reset((MOCK_CKBTC_TOKEN as Token).id);
+			ckBtcMinterInfoStore.reset((MOCK_CKBTC_TOKEN).id);
 
 			const result = getCkBtcPendingUtxoTransactions({
-				token: MOCK_CKBTC_TOKEN as Token,
+				token: MOCK_CKBTC_TOKEN,
 				ckBtcMinterInfoStore: get(ckBtcMinterInfoStore),
 				ckBtcPendingUtxosStore: get(ckBtcPendingUtxosStore)
 			});
@@ -395,10 +394,10 @@ describe('ckbtc-transactions.utils', () => {
 		it('should not return the pending transactions when utxos store is not available', () => {
 			setupCkBtcPendingStores();
 
-			ckBtcPendingUtxosStore.reset((MOCK_CKBTC_TOKEN as Token).id);
+			ckBtcPendingUtxosStore.reset((MOCK_CKBTC_TOKEN).id);
 
 			const result = getCkBtcPendingUtxoTransactions({
-				token: MOCK_CKBTC_TOKEN as Token,
+				token: MOCK_CKBTC_TOKEN,
 				ckBtcMinterInfoStore: get(ckBtcMinterInfoStore),
 				ckBtcPendingUtxosStore: get(ckBtcPendingUtxosStore)
 			});
