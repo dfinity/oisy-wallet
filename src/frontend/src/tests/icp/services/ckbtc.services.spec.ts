@@ -12,7 +12,11 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { type CkBtcMinterDid, type EstimateWithdrawalFee, MinterNoNewUtxosError } from '@icp-sdk/canisters/ckbtc';
+import {
+	type CkBtcMinterDid,
+	type EstimateWithdrawalFee,
+	MinterNoNewUtxosError
+} from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 vi.mock('$icp/api/ckbtc-minter.api');
