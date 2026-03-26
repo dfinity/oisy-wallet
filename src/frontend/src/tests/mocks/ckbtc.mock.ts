@@ -9,7 +9,11 @@ export const mockPendingUtxo: CkBtcMinterDid.PendingUtxo = {
 	outpoint: { txid: Uint8Array.from([1, 2, 3]), vout: 666 }
 };
 
-export const mockCkBtcMinterInfo = { kyt_fee: 100n } as CkBtcMinterDid.MinterInfo;
+export const mockCkBtcMinterInfo: CkBtcMinterDid.MinterInfo = {
+	kyt_fee: 100n,
+	retrieve_btc_min_amount: 100_000n,
+	min_confirmations: 6
+};
 
 export const mockCkBtcPendingUtxoTransaction: IcTransactionUi = {
 	fromLabel: 'transaction.label.twin_network',
