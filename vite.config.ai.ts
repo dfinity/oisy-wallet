@@ -17,7 +17,6 @@ const config: UserConfig = {
 	},
 	build: {
 		target: 'es2020',
-		outDir: 'build-ai',
 		rollupOptions: {
 			plugins: [
 				inject({
