@@ -456,7 +456,7 @@
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
 			"open_wallet": "Take me to the wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles Episode 5 is now Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 6 is now Live!",
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
 			"youre_eligible": "You're eligible!",
@@ -475,13 +475,13 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
-			"coming_soon": "$oisy_short episode 6 is coming soon",
+			"coming_soon": "$oisy_short episode 7 is coming soon",
 			"reward_banner": "Banner of the campaign $campaignName"
 		},
 		"campaigns": {
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 3 is Live \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episode 3 has ended",
 				"one_liner": "Earn BTC for being active—and now, for <strong>inviting friends</strong>.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer a friend, and earn 10% of the value of their rewards for the entire campaign.",
 				"participate_title": "Earn BTC by staying active - and now by inviting others.",
 				"description": "Meet simple weekly requirements. Log in, make two transactions, and hold at least $20 in tokens to stay eligible for one of 50 BTC drops every day.<br/><strong>Now with referral rewards:</strong> invite a friend to deploy a wallet and earn 10% of their Sprinkles for 30 days. They keep 100% - you earn extra.",
@@ -506,7 +506,7 @@
 			},
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 4 is Live \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episode 4 has ended",
 				"one_liner": "Earn BTC for staying active — and now, earn <strong>guaranteed</strong> Sprinkles for referrals.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer 4 friends and get rewarded directly. Top referrers win even more.",
 				"participate_title": "Earn BTC by staying active - and now by inviting others.",
 				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Now with referral rewards: invite a friend to set up a wallet and you’ll both earn guaranteed Sprinkles. Land in the top 4 referrers and win a jackpot.",
@@ -546,7 +546,7 @@
 			},
 			"sprinkles_s1e5": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 5 is Live 🤑",
+				"card_title": "OISY Sprinkles: Episode 5 has ended",
 				"one_liner": "Earn Sprinkles for being active, referring others, and using OISY across chains. Your actions grow your rewards, and active referrals boost them further.<br/>Plus, now more chains means better chances to win.",
 				"participate_title": "Earn tokens for activity and referrals. More chains mean more chances.",
 				"description": "Stay active over 10 days to qualify: log in often, complete wallet actions, and hold at least $20.<br/>Each active chain boosts your odds with a Multichain Multiplier.<br/>Earn 10% from friends who qualify, and rank top 3 to win a $200 Super Sprinkle.",
