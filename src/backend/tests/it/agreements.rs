@@ -446,6 +446,22 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
 // ---------------------------------------------------------------------------
 
 #[test]
+fn test_get_agreement_history_returns_error_for_missing_profile() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let result = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap();
+
+    assert_eq!(result, Err(GetAgreementHistoryError::UserNotFound));
+}
+
+#[test]
 fn test_get_agreement_history_returns_empty_for_new_user() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
