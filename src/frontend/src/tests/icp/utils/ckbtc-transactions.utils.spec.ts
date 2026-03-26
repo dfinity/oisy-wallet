@@ -378,7 +378,7 @@ describe('ckbtc-transactions.utils', () => {
 		it('should not return the pending transactions when minter info is not available', () => {
 			setupCkBtcPendingStores();
 
-			ckBtcMinterInfoStore.reset((MOCK_CKBTC_TOKEN).id);
+			ckBtcMinterInfoStore.reset(MOCK_CKBTC_TOKEN.id);
 
 			const result = getCkBtcPendingUtxoTransactions({
 				token: MOCK_CKBTC_TOKEN,
@@ -394,7 +394,7 @@ describe('ckbtc-transactions.utils', () => {
 		it('should not return the pending transactions when utxos store is not available', () => {
 			setupCkBtcPendingStores();
 
-			ckBtcPendingUtxosStore.reset((MOCK_CKBTC_TOKEN).id);
+			ckBtcPendingUtxosStore.reset(MOCK_CKBTC_TOKEN.id);
 
 			const result = getCkBtcPendingUtxoTransactions({
 				token: MOCK_CKBTC_TOKEN,
