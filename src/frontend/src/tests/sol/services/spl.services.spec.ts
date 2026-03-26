@@ -1,4 +1,3 @@
-import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import * as customTokensServices from '$lib/services/custom-tokens.services';
@@ -7,8 +6,10 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import * as consoleUtils from '$lib/utils/console.utils';
 import * as customTokenUtils from '$lib/utils/custom-token.utils';
 import * as tokensUtils from '$lib/utils/tokens.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import * as solanaApi from '$sol/api/solana.api';
 import * as quicknodeRest from '$sol/rest/quicknode.rest';
+import { toNullable } from '@dfinity/utils';
 import {
 	getSplMetadata,
 	loadCustomTokens,
@@ -106,21 +107,19 @@ describe('spl.services', () => {
 				{
 					token: {
 						SplMainnet: {
-							symbol: [],
-							decimals: [],
-							token_address: existingToken.address,
-							network: SOLANA_MAINNET_NETWORK
+							symbol: toNullable(existingToken.symbol),
+							decimals: toNullable(existingToken.decimals),
+							token_address: existingToken.address
 						}
 					},
 					enabled: true,
-					version: [],
-					allow_external_content_source: []
+					version: toNullable(1n),
+					allow_external_content_source: toNullable(false),
+					section: toNullable(undefined)
 				}
 			];
 
-			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(
-				mockBackendTokens as never
-			);
+			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(mockBackendTokens);
 
 			await loadCustomTokens({ identity: mockIdentity });
 		});
@@ -131,29 +130,29 @@ describe('spl.services', () => {
 				{
 					token: {
 						SplMainnet: {
-							symbol: [],
-							decimals: [],
-							token_address: mockAddress,
-							network: SOLANA_MAINNET_NETWORK
+							symbol: toNullable('NEW'),
+							decimals: toNullable(6),
+							token_address: mockAddress
 						}
 					},
 					enabled: true,
-					version: [],
-					allow_external_content_source: []
+					version: toNullable(1n),
+					allow_external_content_source: toNullable(false),
+					section: toNullable(undefined)
 				}
 			];
 
-			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(
-				mockBackendTokens as never
-			);
+			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(mockBackendTokens);
 			vi.mocked(solanaApi.getTokenInfo).mockResolvedValue({
 				owner: TOKEN_PROGRAM_ADDRESS,
 				symbol: 'NEW',
 				name: 'New Token',
 				decimals: 6
-			} as never);
+			});
 			vi.mocked(quicknodeRest.splMetadata).mockResolvedValue(undefined);
-			vi.spyOn(customTokenUtils, 'parseCustomTokenId').mockReturnValue('mock-custom-id' as never);
+			vi.spyOn(customTokenUtils, 'parseCustomTokenId').mockReturnValue(
+				parseTokenId('mock-custom-id')
+			);
 			vi.spyOn(tokensUtils, 'getCodebaseTokenIconPath').mockReturnValue(undefined);
 
 			await loadCustomTokens({ identity: mockIdentity });
@@ -167,27 +166,25 @@ describe('spl.services', () => {
 				{
 					token: {
 						SplMainnet: {
-							symbol: [],
-							decimals: [],
-							token_address: mockAddress,
-							network: SOLANA_MAINNET_NETWORK
+							symbol: toNullable('X'),
+							decimals: toNullable(6),
+							token_address: mockAddress
 						}
 					},
 					enabled: true,
-					version: [],
-					allow_external_content_source: []
+					version: toNullable(1n),
+					allow_external_content_source: toNullable(false),
+					section: toNullable(undefined)
 				}
 			];
 
-			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(
-				mockBackendTokens as never
-			);
+			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(mockBackendTokens);
 			vi.mocked(solanaApi.getTokenInfo).mockResolvedValue({
 				owner: undefined,
 				symbol: 'X',
 				name: 'X',
 				decimals: 6
-			} as never);
+			});
 
 			await loadCustomTokens({ identity: mockIdentity });
 
@@ -200,29 +197,27 @@ describe('spl.services', () => {
 				{
 					token: {
 						SplDevnet: {
-							symbol: [],
-							decimals: [],
-							token_address: mockAddress,
-							network: SOLANA_DEVNET_NETWORK
+							symbol: toNullable('DEV'),
+							decimals: toNullable(SOLANA_DEFAULT_DECIMALS),
+							token_address: mockAddress
 						}
 					},
 					enabled: true,
-					version: [],
-					allow_external_content_source: []
+					version: toNullable(1n),
+					allow_external_content_source: toNullable(false),
+					section: toNullable(undefined)
 				}
 			];
 
-			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(
-				mockBackendTokens as never
-			);
+			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(mockBackendTokens);
 			vi.mocked(solanaApi.getTokenInfo).mockResolvedValue({
 				owner: TOKEN_PROGRAM_ADDRESS,
 				symbol: 'DEV',
 				name: 'Dev Token',
 				decimals: SOLANA_DEFAULT_DECIMALS
-			} as never);
+			});
 			vi.mocked(quicknodeRest.splMetadata).mockResolvedValue(undefined);
-			vi.spyOn(customTokenUtils, 'parseCustomTokenId').mockReturnValue('mock-dev-id' as never);
+			vi.spyOn(customTokenUtils, 'parseCustomTokenId').mockReturnValue(parseTokenId('mock-dev-id'));
 			vi.spyOn(tokensUtils, 'getCodebaseTokenIconPath').mockReturnValue(undefined);
 
 			await loadCustomTokens({ identity: mockIdentity });
@@ -235,14 +230,13 @@ describe('spl.services', () => {
 				{
 					token: { SomeOtherType: {} },
 					enabled: true,
-					version: [],
-					allow_external_content_source: []
+					version: toNullable(1n),
+					allow_external_content_source: toNullable(false),
+					section: toNullable(undefined)
 				}
 			];
 
-			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(
-				mockBackendTokens as never
-			);
+			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue(mockBackendTokens);
 
 			await loadCustomTokens({ identity: mockIdentity });
 
@@ -282,7 +276,7 @@ describe('spl.services', () => {
 						links: { image: 'https://example.com/icon.png' }
 					}
 				}
-			} as never);
+			});
 
 			const result = await getSplMetadata(params);
 
@@ -294,7 +288,7 @@ describe('spl.services', () => {
 		});
 
 		it('should return undefined when metadata result is null', async () => {
-			vi.mocked(quicknodeRest.splMetadata).mockResolvedValue(null as never);
+			vi.mocked(quicknodeRest.splMetadata).mockResolvedValue(undefined);
 
 			const result = await getSplMetadata(params);
 
