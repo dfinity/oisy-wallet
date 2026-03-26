@@ -1034,7 +1034,7 @@
 			"unexpected_missing_data": "変換トランザクションの開始中にエラーが発生しました。"
 		},
 		"warning": {
-			"ckusdc_conversion_currently_suspended": ""
+			"ckusdc_conversion_currently_suspended": "USDC と ckUSDC 間の変換は現在停止中です。"
 		}
 	},
 	"swap": {
