@@ -123,7 +123,7 @@ const loadIcrcData = ({
 }) => {
 	const data = mapIcrcToken(token);
 	// In the unlikely event of a token not being mapped, we choose to skip it instead of throwing an error. This prevents the token from being displayed and, consequently, from being noticed as missing by the user.
-	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
+	nonNullish(data) && icrcDefaultTokensStore.batchSet({ data, certified });
 };
 
 const loadIcrcCustomTokens = async ({

@@ -11,12 +11,15 @@ export interface ExchangeStore extends Readable<ExchangeData> {
 }
 
 const initExchangeStore = (): ExchangeStore => {
-	const { subscribe, set, update } = writable<ExchangeData>(undefined);
+	const { subscribe, set } = writable<ExchangeData>(undefined);
+
+	let current: ExchangeData = undefined;
+	let currentJson = '';
 
 	return {
-		set: (tokensPrice: CoingeckoPriceResponse[]) =>
-			update((state) => ({
-				...(nonNullish(state) && state),
+		set: (tokensPrice: CoingeckoPriceResponse[]) => {
+			const next: ExchangeData = {
+				...(nonNullish(current) && current),
 				...tokensPrice.reduce(
 					(acc, price) => ({
 						...acc,
@@ -24,8 +27,23 @@ const initExchangeStore = (): ExchangeStore => {
 					}),
 					{}
 				)
-			})),
-		reset: () => set(null),
+			};
+
+			const nextJson = JSON.stringify(next);
+
+			if (nextJson === currentJson) {
+				return;
+			}
+
+			current = next;
+			currentJson = nextJson;
+			set(current);
+		},
+		reset: () => {
+			current = undefined;
+			currentJson = '';
+			set(null);
+		},
 		subscribe
 	};
 };
