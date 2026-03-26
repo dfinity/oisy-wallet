@@ -1034,7 +1034,7 @@
 			"unexpected_missing_data": "初始化转换交易时出错。"
 		},
 		"warning": {
-			"ckusdc_conversion_currently_suspended": ""
+			"ckusdc_conversion_currently_suspended": "USDC 与 ckUSDC 之间的转换目前已暂停。"
 		}
 	},
 	"swap": {
