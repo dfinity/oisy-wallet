@@ -1164,7 +1164,7 @@
 			"asset_type": "Tipo de ativo em $oisy_name",
 			"asset_type_all": "Todos os tipos de ativos",
 			"no_tokens_for_asset_type": "Não há $asset_type na sua carteira",
-			"no_tokens_for_asset_type_zero_tokens": "",
+			"no_tokens_for_asset_type_zero_tokens": "Não há $asset_type na rede selecionada",
 			"no_tokens_for_asset_type_description": "Escolha entre <strong>$count tokens suportados</strong> para personalizar a visualização do seu portfólio."
 		},
 		"details": {
