@@ -10,7 +10,6 @@ import * as tokensUtils from '$lib/utils/tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import * as solanaApi from '$sol/api/solana.api';
 import * as quicknodeRest from '$sol/rest/quicknode.rest';
-import { toNullable } from '@dfinity/utils';
 import {
 	getSplMetadata,
 	loadCustomTokens,
@@ -21,6 +20,7 @@ import {
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
