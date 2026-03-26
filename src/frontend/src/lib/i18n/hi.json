@@ -1034,7 +1034,7 @@
 			"unexpected_missing_data": "एक कनवर्ट लेनदेन शुरू करते समय कुछ गलत हो गया।"
 		},
 		"warning": {
-			"ckusdc_conversion_currently_suspended": ""
+			"ckusdc_conversion_currently_suspended": "USDC को ckUSDC से/में परिवर्तित करना अभी निलंबित है।"
 		}
 	},
 	"swap": {
