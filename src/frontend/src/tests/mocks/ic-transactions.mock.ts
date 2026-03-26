@@ -8,12 +8,93 @@ import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction';
 import type { Token, TokenId } from '$lib/types/token';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo, mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
+import { mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
+
+const mockTimestamp = 1_700_000_000_000_000_000n;
+
+export const createMockIcrcTransferTransaction = ({
+	id = 100n,
+	amount = 50_000n,
+	memo
+}: { id?: bigint; amount?: bigint; memo?: Uint8Array } = {}): IcrcTransaction => ({
+	id,
+	transaction: {
+		kind: 'transfer',
+		burn: [],
+		mint: [],
+		approve: [],
+		transfer: [
+			{
+				amount,
+				fee: [100n],
+				created_at_time: [mockTimestamp],
+				from: { owner: mockPrincipal, subaccount: [] },
+				to: { owner: mockPrincipal2, subaccount: [] },
+				memo: memo ? [memo] : [],
+				spender: []
+			}
+		],
+		fee_collector: [],
+		timestamp: mockTimestamp
+	}
+});
+
+export const createMockIcrcMintTransaction = ({
+	id = 200n,
+	amount = 100_000n,
+	memo
+}: { id?: bigint; amount?: bigint; memo?: Uint8Array } = {}): IcrcTransaction => ({
+	id,
+	transaction: {
+		kind: 'mint',
+		burn: [],
+		mint: [
+			{
+				amount,
+				fee: [],
+				created_at_time: [mockTimestamp],
+				to: { owner: mockPrincipal, subaccount: [] },
+				memo: memo ? [memo] : []
+			}
+		],
+		approve: [],
+		transfer: [],
+		fee_collector: [],
+		timestamp: mockTimestamp
+	}
+});
+
+export const createMockIcrcBurnTransaction = ({
+	id = 300n,
+	amount = 75_000n,
+	memo
+}: { id?: bigint; amount?: bigint; memo?: Uint8Array } = {}): IcrcTransaction => ({
+	id,
+	transaction: {
+		kind: 'burn',
+		burn: [
+			{
+				amount,
+				fee: [],
+				created_at_time: [mockTimestamp],
+				from: { owner: mockPrincipal, subaccount: [] },
+				memo: memo ? [memo] : [],
+				spender: []
+			}
+		],
+		mint: [],
+		approve: [],
+		transfer: [],
+		fee_collector: [],
+		timestamp: mockTimestamp
+	}
+});
 
 export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 	Array.from({ length: n }, () => ({
