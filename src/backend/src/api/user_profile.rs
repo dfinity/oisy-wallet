@@ -213,7 +213,8 @@ pub fn get_user_agreement_history() -> GetAgreementHistoryResult {
         }
         Ok(s.agreement_history
             .get(&stored_principal)
-            .map_or_else(Vec::new, |c| c.0))
+            .unwrap_or_default()
+            .0)
     })
     .into()
 }

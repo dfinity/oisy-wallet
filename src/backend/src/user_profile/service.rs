@@ -3,7 +3,7 @@ use std::result::Result;
 use ic_cdk::api::time;
 use shared::types::{
     agreement::{
-        AgreementHistoryEntry, AgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
+        AgreementHistoryEntry, AgreementType, UpdateAgreementsError, UserAgreements,
     },
     dapp::AddDappSettingsError,
     experimental_feature::{
@@ -156,27 +156,22 @@ pub fn add_hidden_dapp_id(
 
 /// Builds history entries for agreements that were actually changed.
 fn collect_history_entries(request: &UserAgreements, now: Timestamp) -> Vec<AgreementHistoryEntry> {
-    let mut entries = Vec::new();
-
-    let pairs: [(AgreementType, &UserAgreement); 3] = [
+    [
         (AgreementType::LicenseAgreement, &request.license_agreement),
         (AgreementType::TermsOfUse, &request.terms_of_use),
         (AgreementType::PrivacyPolicy, &request.privacy_policy),
-    ];
-
-    for (agreement_type, agreement) in pairs {
-        if let Some(accepted) = agreement.accepted {
-            entries.push(AgreementHistoryEntry {
-                agreement_type,
-                accepted,
-                timestamp_ns: now,
-                text_sha256: agreement.text_sha256.clone(),
-                last_updated_at_ms: agreement.last_updated_at_ms,
-            });
-        }
-    }
-
-    entries
+    ]
+    .into_iter()
+    .filter_map(|(agreement_type, agreement)| {
+        agreement.accepted.map(|accepted| AgreementHistoryEntry {
+            agreement_type,
+            accepted,
+            timestamp_ns: now,
+            text_sha256: agreement.text_sha256.clone(),
+            last_updated_at_ms: agreement.last_updated_at_ms,
+        })
+    })
+    .collect()
 }
 
 /// Updates the user's agreements, merging with any existing agreements, and appends an audit-trail
@@ -207,21 +202,20 @@ pub fn update_agreements(
     let user_profile = find_profile(principal, user_profile_model)
         .map_err(|_| UpdateAgreementsError::UserNotFound)?;
     let now = time();
-    let new_profile = user_profile.with_agreements(profile_version, now, agreements.clone())?;
 
+    let new_entries = collect_history_entries(&agreements, now);
+    let new_profile = user_profile.with_agreements(profile_version, now, agreements)?;
     let profile_changed = new_profile.version != user_profile.version;
 
     user_profile_model.store_new(principal, now, &new_profile);
 
-    if profile_changed {
-        let new_entries = collect_history_entries(&agreements, now);
-        if !new_entries.is_empty() {
-            let mut history = agreement_history
-                .get(&principal)
-                .map_or_else(Vec::new, |c| c.0);
-            history.extend(new_entries);
-            agreement_history.insert(principal, Candid(history));
-        }
+    if profile_changed && !new_entries.is_empty() {
+        let mut history = agreement_history
+            .get(&principal)
+            .unwrap_or_default()
+            .0;
+        history.extend(new_entries);
+        agreement_history.insert(principal, Candid(history));
     }
 
     Ok(())
