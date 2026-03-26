@@ -10,16 +10,10 @@ export interface CertifiedIcrcTokensStore<T extends IcToken> extends Readable<
 	CertifiedIcrcTokensData<T>
 > {
 	set: (token: CertifiedData<T>) => void;
-	batchSet: (token: CertifiedData<T>) => void;
 	setAll: (tokens: CertifiedData<T>[]) => void;
 	reset: (ledgerCanisterId: CanisterIdText) => void;
 	resetAll: () => void;
 }
-
-const scheduleFlush =
-	typeof requestAnimationFrame === 'function'
-		? (fn: () => void) => requestAnimationFrame(() => fn())
-		: (fn: () => void) => queueMicrotask(fn);
 
 export const initCertifiedIcrcTokensStore = <T extends IcToken>(): CertifiedIcrcTokensStore<T> => {
 	const { subscribe, update, set } = writable<CertifiedIcrcTokensData<T>>(undefined);
@@ -43,29 +37,6 @@ export const initCertifiedIcrcTokensStore = <T extends IcToken>(): CertifiedIcrc
 		}
 	});
 
-	let pending: CertifiedData<T>[] = [];
-	let scheduled = false;
-
-	const flushBatch = () => {
-		const batch = pending;
-		pending = [];
-		scheduled = false;
-
-		if (batch.length === 0) {
-			return;
-		}
-
-		update((state) => {
-			const batchCanisterIds = new Set(
-				batch.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
-			);
-			const filtered = (state ?? []).filter(
-				({ data: { ledgerCanisterId } }) => !batchCanisterIds.has(ledgerCanisterId)
-			);
-			return [...filtered, ...batch.map((token) => updateToken({ state, token }))];
-		});
-	};
-
 	return {
 		set: ({ data, ...rest }: CertifiedData<T>) =>
 			update((state) => [
@@ -74,13 +45,6 @@ export const initCertifiedIcrcTokensStore = <T extends IcToken>(): CertifiedIcrc
 				),
 				updateToken({ state, token: { data, ...rest } })
 			]),
-		batchSet: (token: CertifiedData<T>) => {
-			pending.push(token);
-			if (!scheduled) {
-				scheduled = true;
-				scheduleFlush(flushBatch);
-			}
-		},
 		setAll: (tokens: CertifiedData<T>[]) =>
 			update((state) => [
 				...(state ?? []).filter(
@@ -91,17 +55,11 @@ export const initCertifiedIcrcTokensStore = <T extends IcToken>(): CertifiedIcrc
 				),
 				...tokens.map((token) => updateToken({ state, token }))
 			]),
-		reset: (ledgerCanisterId: CanisterIdText) => {
-			pending = pending.filter(({ data }) => data.ledgerCanisterId !== ledgerCanisterId);
+		reset: (ledgerCanisterId: CanisterIdText) =>
 			update((state) => [
 				...(state ?? []).filter(({ data: { ledgerCanisterId: id } }) => id !== ledgerCanisterId)
-			]);
-		},
-		resetAll: () => {
-			pending = [];
-			scheduled = false;
-			set(null);
-		},
+			]),
+		resetAll: () => set(null),
 		subscribe
 	};
 };
