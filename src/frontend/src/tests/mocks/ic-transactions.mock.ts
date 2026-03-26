@@ -9,12 +9,12 @@ import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction';
-import type { Token, TokenId } from '$lib/types/token';
+import type { TokenId } from '$lib/types/token';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
-import { mockCkBtcMinterInfo, mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
+import { mockCkBtcMinterInfo, mockPendingUtxo } from '$tests/mocks/ckbtc.mock';
 import { mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
-import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
+import { toNullable } from '@dfinity/utils';
 
 const mockTimestamp = 1_700_000_000_000_000_000n;
 
@@ -32,8 +32,8 @@ export const createMockIcrcTransferTransaction = ({
 		transfer: [
 			{
 				amount,
-				fee: [100n],
-				created_at_time: [mockTimestamp],
+				fee: toNullable(100n),
+				created_at_time: toNullable(mockTimestamp),
 				from: { owner: mockPrincipal, subaccount: [] },
 				to: { owner: mockPrincipal2, subaccount: [] },
 				memo: memo ? [memo] : [],
@@ -125,26 +125,22 @@ export const cleanupIcTransactionsStore = ({ tokenId }: { tokenId: TokenId }) =>
 	icTransactionsStore.reset(tokenId);
 };
 
-export const MOCK_CKBTC_TOKEN: Partial<IcCkToken> = {
+export const MOCK_CKBTC_TOKEN: IcCkToken = {
 	...BTC_MAINNET_TOKEN,
+	fee: 10n,
 	ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
 };
 
 export const setupCkBtcPendingStores = () => {
 	ckBtcPendingUtxosStore.set({
-		id: (MOCK_CKBTC_TOKEN as Token).id,
+		id: MOCK_CKBTC_TOKEN.id,
 		data: {
-			data: [
-				{
-					...mockCkBtcPendingUtxoTransaction,
-					outpoint: { txid: [0], vout: '' }
-				} as unknown as CkBtcMinterDid.PendingUtxo
-			],
+			data: [mockPendingUtxo],
 			certified: true
 		}
 	});
 	ckBtcMinterInfoStore.set({
-		id: (MOCK_CKBTC_TOKEN as Token).id,
+		id: MOCK_CKBTC_TOKEN.id,
 		data: {
 			data: mockCkBtcMinterInfo,
 			certified: true
@@ -154,12 +150,13 @@ export const setupCkBtcPendingStores = () => {
 
 export const cleanupCkBtcPendingStores = () => {
 	ckBtcPendingUtxosStore.reset(ICP_TOKEN.id);
-	ckBtcPendingUtxosStore.reset((MOCK_CKBTC_TOKEN as Token).id);
-	ckBtcMinterInfoStore.reset((MOCK_CKBTC_TOKEN as Token).id);
+	ckBtcPendingUtxosStore.reset(MOCK_CKBTC_TOKEN.id);
+	ckBtcMinterInfoStore.reset(MOCK_CKBTC_TOKEN.id);
 };
 
-export const MOCK_CKETH_TOKEN: Partial<IcCkToken> = {
+export const MOCK_CKETH_TOKEN: IcCkToken = {
 	...ETHEREUM_TOKEN,
+	fee: 2_000_000_000_000n,
 	ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID
 };
 
@@ -170,12 +167,12 @@ export const setupCkEthPendingStore = () => {
 	];
 
 	icPendingTransactionsStore.set({
-		tokenId: (MOCK_CKETH_TOKEN as Token).id,
+		tokenId: MOCK_CKETH_TOKEN.id,
 		data: transactions
 	});
 };
 
 export const cleanupCkEthPendingStore = () => {
 	icPendingTransactionsStore.reset(ICP_TOKEN.id);
-	icPendingTransactionsStore.reset((MOCK_CKETH_TOKEN as Token).id);
+	icPendingTransactionsStore.reset(MOCK_CKETH_TOKEN.id);
 };
