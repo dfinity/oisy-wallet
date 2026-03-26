@@ -578,6 +578,36 @@
 						"share_href": ""
 					}
 				}
+			},
+			"sprinkles_s1e6": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"welcome": {
+					"title": "",
+					"subtitle": "",
+					"description": ""
+				},
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},

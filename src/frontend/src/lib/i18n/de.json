@@ -578,6 +578,36 @@
 						"share_href": "https://x.com/intent/post?text=Habe%20einem%20Freund%20die%20%40OISY%20Wallet%20empfohlen%20-%20and%20gratis%20%24BTC%20gewonnen%20%F0%9F%AA%82%0AWenn%20deine%20Freunde%20gewinnen%2C%20gewinnst%20du%20auch.%20Einfach%21%0AVersuche%20es%20auch%2C%20bei%20OISY.com"
 					}
 				}
+			},
+			"sprinkles_s1e6": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"welcome": {
+					"title": "",
+					"subtitle": "",
+					"description": ""
+				},
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},
