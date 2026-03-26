@@ -7,7 +7,10 @@ const file = fileURLToPath(new URL('package.json', import.meta.url));
 const json = readFileSync(file, 'utf8');
 const { version } = JSON.parse(json);
 
-const filesPath = (/** @type {string} */ path) => `src/frontend/${path}`;
+const isAiApp = process.env.OISY_APP === 'ai';
+const appRoot = isAiApp ? 'src/ai-frontend' : 'src/frontend';
+
+const filesPath = (/** @type {string} */ path) => `${appRoot}/${path}`;
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -20,7 +23,7 @@ const config = {
 		}),
 		files: {
 			assets: filesPath('static'),
-			lib: filesPath('src/lib'),
+			lib: 'src/frontend/src/lib',
 			routes: filesPath('src/routes'),
 			appTemplate: filesPath('src/app.html')
 		},
@@ -33,12 +36,14 @@ const config = {
 			$sol: './src/frontend/src/sol',
 			'$icp-eth': './src/frontend/src/icp-eth',
 			$env: './src/frontend/src/env',
-			$routes: './src/frontend/src/routes'
+			$routes: `./${appRoot}/src/routes`
 		},
 
 		serviceWorker: {
 			register: false
 		},
+
+		...(isAiApp ? { outDir: '.svelte-kit-ai' } : {}),
 
 		version: {
 			name: version
