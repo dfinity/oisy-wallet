@@ -1033,7 +1033,7 @@
 			"unexpected": "转换代币时发生错误。",
 			"unexpected_missing_data": "初始化转换交易时出错。"
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": ""
 		}
 	},

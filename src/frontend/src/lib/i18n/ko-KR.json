@@ -1033,7 +1033,7 @@
 			"unexpected": "토큰 전환 중 문제가 발생했습니다.",
 			"unexpected_missing_data": "전환 트랜잭션을 시작하는 중 문제가 발생했습니다."
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": ""
 		}
 	},

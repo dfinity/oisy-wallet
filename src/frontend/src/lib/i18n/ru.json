@@ -1033,7 +1033,7 @@
 			"unexpected": "Что-то пошло не так при обмене токенов.",
 			"unexpected_missing_data": "Что-то пошло не так при инициализации транзакции обмена."
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": ""
 		}
 	},

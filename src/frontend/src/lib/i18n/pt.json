@@ -1033,7 +1033,7 @@
 			"unexpected": "Algo deu errado ao converter tokens.",
 			"unexpected_missing_data": "Algo deu errado ao iniciar uma transação de conversão."
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": ""
 		}
 	},

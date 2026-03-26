@@ -1033,7 +1033,7 @@
 			"unexpected": "Při převodu tokenů se něco pokazilo.",
 			"unexpected_missing_data": "Při zahájení transakce převodu se něco pokazilo."
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": ""
 		}
 	},

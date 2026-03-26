@@ -1033,7 +1033,7 @@
 			"unexpected": "टोकन बदलते समय कुछ गलत हो गया।",
 			"unexpected_missing_data": "एक कनवर्ट लेनदेन शुरू करते समय कुछ गलत हो गया।"
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": ""
 		}
 	},

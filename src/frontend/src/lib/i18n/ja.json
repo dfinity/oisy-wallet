@@ -1033,7 +1033,7 @@
 			"unexpected": "トークンを変換中に問題が発生しました",
 			"unexpected_missing_data": "変換トランザクションの開始中にエラーが発生しました。"
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": ""
 		}
 	},

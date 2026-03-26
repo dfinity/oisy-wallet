@@ -1033,7 +1033,7 @@
 			"unexpected": "حدث خطأ ما أثناء تحويل التوكنات.",
 			"unexpected_missing_data": "حدث خطأ ما أثناء بدء معاملة تحويل."
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": ""
 		}
 	},

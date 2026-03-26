@@ -1033,7 +1033,7 @@
 			"unexpected": "Đã xảy ra lỗi trong khi chuyển đổi token.",
 			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch chuyển đổi."
 		},
-		"warn": {
+		"warning": {
 			"ckusdc_conversion_currently_suspended": ""
 		}
 	},
