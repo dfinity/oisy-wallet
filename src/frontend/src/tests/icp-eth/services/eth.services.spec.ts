@@ -28,7 +28,7 @@ vi.mock('@icp-sdk/canisters/cketh', () => ({
 	encodePrincipalToEthAddress: vi.fn(() => '0xPrincipalEthAddress')
 }));
 
-describe('icp-eth/services/eth.services', () => {
+describe('eth.services', () => {
 	const mockTwinTokenNetworkId = Symbol('Ethereum');
 	const mockTwinToken = {
 		...mockValidToken,
