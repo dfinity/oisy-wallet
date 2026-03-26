@@ -1164,7 +1164,7 @@
 			"asset_type": "Anlageklasse in $oisy_name",
 			"asset_type_all": "Alle Anlageklassen",
 			"no_tokens_for_asset_type": "Es gibt keine $asset_type in deiner Wallet",
-			"no_tokens_for_asset_type_zero_tokens": "Es gibt keine $asset_type im gewählten Netzwerk",
+			"no_tokens_for_asset_type_zero_tokens": "Es gibt keine $asset_type im ausgewählten Netzwerk",
 			"no_tokens_for_asset_type_description": "Wähle aus <strong>$count unterstützten Token</strong>, um deine Portfolioansicht anzupassen."
 		},
 		"details": {
