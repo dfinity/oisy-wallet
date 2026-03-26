@@ -1,9 +1,9 @@
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN, USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import {
@@ -557,9 +557,7 @@ describe('eth-transactions.services', () => {
 				}));
 				mockEthTransactionsProvider.mockResolvedValueOnce(newTransactions);
 
-				vi.mocked(saveEthFinalizedTransactions).mockRejectedValue(
-					new Error('Backend save failed')
-				);
+				vi.mocked(saveEthFinalizedTransactions).mockRejectedValue(new Error('Backend save failed'));
 
 				const result = await loadEthereumTransactions({
 					identity: mockIdentity,
@@ -617,9 +615,7 @@ describe('eth-transactions.services', () => {
 			});
 
 			it('should handle loadEthUserTransactions failure gracefully', async () => {
-				vi.mocked(loadEthUserTransactions).mockRejectedValue(
-					new Error('Backend read failed')
-				);
+				vi.mocked(loadEthUserTransactions).mockRejectedValue(new Error('Backend read failed'));
 
 				const result = await loadEthereumTransactions({
 					identity: mockIdentity,
