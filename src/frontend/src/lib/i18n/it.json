@@ -1034,7 +1034,7 @@
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di conversione."
 		},
 		"warning": {
-			"ckusdc_conversion_currently_suspended": ""
+			"ckusdc_conversion_currently_suspended": "La conversione di USDC da/verso ckUSDC è attualmente sospesa."
 		}
 	},
 	"swap": {
