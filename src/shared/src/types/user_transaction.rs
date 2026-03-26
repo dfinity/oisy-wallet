@@ -40,6 +40,9 @@ pub struct UserTransaction {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum NetworkTransactionData {
     Evm(EvmTransactionData),
+    Icrc(IcrcTransactionData),
+    Btc(BtcTransactionData),
+    Sol(SolTransactionData),
 }
 
 /// EVM / Ethereum-family transaction data.
@@ -54,6 +57,39 @@ pub struct EvmTransactionData {
     pub data: Option<String>,
     /// NFT token ID (ERC-721 / ERC-1155).
     pub nft_token_id: Option<Nat>,
+}
+
+/// ICRC / ICP transaction data.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct IcrcTransactionData {
+    pub fee: Option<Nat>,
+    pub memo: Option<Vec<u8>>,
+    pub tx_type: IcrcTransactionType,
+}
+
+/// The kind of ICRC ledger operation.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum IcrcTransactionType {
+    Transfer,
+    Approve { spender: String },
+    Mint,
+    Burn,
+}
+
+/// Bitcoin transaction data.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct BtcTransactionData {
+    pub fee: Option<Nat>,
+}
+
+/// Solana transaction data.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct SolTransactionData {
+    pub fee: Option<Nat>,
+    /// Owner account that controls the source token account (relevant for SPL).
+    pub from_owner: Option<String>,
+    /// Owner account that controls the destination token account.
+    pub to_owner: Option<String>,
 }
 
 /// Request to retrieve stored transactions with cursor-based pagination.
