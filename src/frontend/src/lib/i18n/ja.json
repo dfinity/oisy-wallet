@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "BTC引き出しステータスの取得中にエラーが発生しました。",
 			"transaction_price": "トランザクション価格の見積もりの読み込み中にエラーが発生しました。",
 			"icrc_canisters": "ICRCキャニスターの読み込み中にエラーが発生しました。",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "トークン$tokenSymbolを読み取ることができませんでした。現在、応答がありません。後ほどもう一度お試しください。",
 			"icrc_canister_loading_custom": "Ledgerキャニスター$ledgerCanisterIdのトークンを読み込めませんでした。現在、応答していません。後ほどもう一度お試しください。",
 			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
@@ -1156,14 +1157,15 @@
 			"on_network": "$network上",
 			"delete_token": "トークンを削除",
 			"edit_token": "トークンを編集",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "価値",
+			"sort_by_performance": "トークンのパフォーマンス",
+			"sort_by_symbol": "シンボル",
+			"hide_asset_types": "アセットタイプを非表示",
+			"asset_type": "$oisy_nameのアセットタイプ",
+			"asset_type_all": "すべてのアセットタイプ",
+			"no_tokens_for_asset_type": "ウォレットに$asset_typeはありません",
+			"no_tokens_for_asset_type_zero_tokens": "選択したネットワークに $asset_type はありません",
+			"no_tokens_for_asset_type_description": "<strong>$count種類の対応トークン</strong>から選択してポートフォリオ表示をカスタマイズしてください。"
 		},
 		"details": {
 			"title": "トークンの詳細",
@@ -1280,6 +1282,7 @@
 			"unrecognised_erc_interface": "認識できないERCインターフェースです。",
 			"no_metadata": "メタデータが取得されませんでした。",
 			"unexpected": "トークンの保存中にエラーが発生しました。",
+			"version_mismatch": "",
 			"unexpected_hiding": "トークンを隠す際に予期せぬ問題が発生しました。",
 			"already_available": "トークンはすでに利用可能です。",
 			"not_toggleable": "トークンは切り替え不可であり、非表示にできません。",
@@ -1292,19 +1295,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "カテゴリー",
+			"risk": "リスク"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "暗号資産",
+			"stablecoin": "ステーブルコイン",
+			"stock": "株式",
+			"commodity": "コモディティ"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "低リスク",
+			"medium": "中リスク",
+			"high": "高リスク"
 		}
 	},
 	"nfts": {
@@ -2003,8 +2006,8 @@
 			"description_empty": "まだトークンをステーキングしていないようです。",
 			"full_history": "履歴を全て表示",
 			"recent_history": "履歴を閉じる",
-			"gldt_stake_carousel_slide_title": "Gold DAOステーキングでAPYを獲得",
-			"gldt_stake_carousel_slide_cta": "詳細を見る"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "出金中に問題が発生しました。",

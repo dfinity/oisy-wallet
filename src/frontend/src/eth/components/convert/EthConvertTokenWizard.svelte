@@ -19,7 +19,8 @@
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
 		ckErc20HelperContractAddress,
-		ckEthHelperContractAddress
+		ckEthHelperContractAddress,
+		ckUsdcConversionDisabled
 	} from '$icp-eth/derived/cketh.derived';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -86,7 +87,7 @@
 			return;
 		}
 
-		if (isNullish($authIdentity)) {
+		if (isNullish($authIdentity) || $ckUsdcConversionDisabled) {
 			return;
 		}
 

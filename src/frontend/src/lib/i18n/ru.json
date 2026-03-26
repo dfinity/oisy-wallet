@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "Ошибка при получении статусов вывода BTC.",
 			"transaction_price": "Ошибка при загрузке оценки стоимости транзакции.",
 			"icrc_canisters": "Ошибка при загрузке контейнеров ICRC.",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "Токен $tokenSymbol не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
 			"icrc_canister_loading_custom": "Токен с канистером леджера $ledgerCanisterId не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
 			"erc20_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-20.",
@@ -1156,14 +1157,15 @@
 			"on_network": " в сети $network",
 			"delete_token": "Удалить токен",
 			"edit_token": "Редактировать токен",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Стоимость",
+			"sort_by_performance": "Динамика токена",
+			"sort_by_symbol": "Символ",
+			"hide_asset_types": "Скрыть типы активов",
+			"asset_type": "Тип актива в $oisy_name",
+			"asset_type_all": "Все типы активов",
+			"no_tokens_for_asset_type": "В вашем кошельке нет $asset_type",
+			"no_tokens_for_asset_type_zero_tokens": "В выбранной сети нет $asset_type",
+			"no_tokens_for_asset_type_description": "Выберите из <strong>$count поддерживаемых токенов</strong>, чтобы настроить отображение портфеля."
 		},
 		"details": {
 			"title": "Сведения о токене",
@@ -1280,6 +1282,7 @@
 			"unrecognised_erc_interface": "Неопознанный интерфейс ERC.",
 			"no_metadata": "Метаданные не были получены.",
 			"unexpected": "Что-то пошло не так при сохранении токена.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Что-то пошло не так при скрытии токена.",
 			"already_available": "Токен уже доступен.",
 			"not_toggleable": "Токен не переключаем, его нельзя скрыть.",
@@ -1292,19 +1295,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Категория",
+			"risk": "Риск"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Криптовалюты",
+			"stablecoin": "Стейблкоины",
+			"stock": "Акции",
+			"commodity": "Сырьевые товары"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Низкий риск",
+			"medium": "Средний риск",
+			"high": "Высокий риск"
 		}
 	},
 	"nfts": {
@@ -2003,8 +2006,8 @@
 			"description_empty": "Похоже, вы ещё не стейкали токены.",
 			"full_history": "Показать полную историю",
 			"recent_history": "Скрыть полную историю",
-			"gldt_stake_carousel_slide_title": "Зарабатывай APY с Gold DAO Staking",
-			"gldt_stake_carousel_slide_cta": "Узнать больше о Gold DAO Staking"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Что-то пошло не так при выводе токенов.",

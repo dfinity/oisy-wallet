@@ -16,6 +16,7 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -28,7 +29,8 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
-	import { filterTokensByCategory } from '$lib/utils/token-tag.utils';
+	import { filterTokensByCategory, getTokenCategoryTag } from '$lib/utils/token-tag.utils';
+	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
@@ -130,6 +132,19 @@
 	let enableMoreTokensWithKey = $derived(
 		enableMoreTokensList.map((tokenOrGroup) => ({ tokenOrGroup, key: getUiKey(tokenOrGroup) }))
 	);
+
+	let disabledCategoryTokenCount: number = $derived.by(() => {
+		if (!$showTokenCategoryFilter || isNullish($tokenCategoryFilter)) {
+			return 0;
+		}
+
+		return $allFungibleNetworkTokens.filter(
+			(token) =>
+				isTokenToggleable(token) &&
+				!token.enabled &&
+				getTokenCategoryTag(token) === $tokenCategoryFilter
+		).length;
+	});
 </script>
 
 <TokensDisplayHandler bind:tokens>
@@ -161,12 +176,20 @@
 		{#if filteredTokens?.length === 0}
 			{#if $showTokenCategoryFilter && nonNullish($tokenCategoryFilter)}
 				<NothingFoundPlaceholder
-					description={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type_description, {
-						$count: `${$allFungibleNetworkTokens.length}`
-					})}
-					title={replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type, {
-						$asset_type: $i18n.token_tag.category[$tokenCategoryFilter]
-					})}
+					description={disabledCategoryTokenCount > 0
+						? replacePlaceholders($i18n.tokens.text.no_tokens_for_asset_type_description, {
+								$count: `${disabledCategoryTokenCount}`
+							})
+						: ''}
+					title={replacePlaceholders(
+						disabledCategoryTokenCount > 0
+							? $i18n.tokens.text.no_tokens_for_asset_type
+							: $i18n.tokens.text.no_tokens_for_asset_type_zero_tokens,
+						{
+							$asset_type:
+								$i18n.token_tag.category[$tokenCategoryFilter].toLocaleLowerCase($currentLanguage)
+						}
+					)}
 				/>
 			{:else if $tokenListStore.filter === ''}
 				<NoTokensPlaceholder />

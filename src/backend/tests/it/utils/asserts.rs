@@ -52,7 +52,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{assert_deviation, assert_greater_than, assert_in_range, assert_less_than};
 
     // Test for assert_greater_than
     #[test]

@@ -44,12 +44,12 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 	})
 }));
 
-const mockFetchNearIntentsSwap = vi.fn();
+const mockFetchNearIntentsEvmSwap = vi.fn();
 const mockFetchVeloraDeltaSwap = vi.fn();
 const mockFetchVeloraMarketSwap = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
-	fetchNearIntentsSwap: (...args: unknown[]) => mockFetchNearIntentsSwap(...args),
+	fetchNearIntentsEvmSwap: (...args: unknown[]) => mockFetchNearIntentsEvmSwap(...args),
 	fetchVeloraDeltaSwap: (...args: unknown[]) => mockFetchVeloraDeltaSwap(...args),
 	fetchVeloraMarketSwap: (...args: unknown[]) => mockFetchVeloraMarketSwap(...args)
 }));

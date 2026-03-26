@@ -7,6 +7,7 @@ import type {
 	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
+import { CanisterApi } from '$lib/api/canister.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -24,8 +25,11 @@ import type {
 	GetContactParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
+	GetUserTransactionsParams,
+	GetUserTransactionsResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
@@ -33,10 +37,9 @@ import type {
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
-import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
-import { Principal } from '@icp-sdk/core/principal';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
-let canister: BackendCanister | undefined = undefined;
+const backendApi = new CanisterApi<BackendCanister>();
 
 export const listCustomTokens = async ({
 	identity
@@ -264,6 +267,24 @@ export const getExchangeRates = async ({
 	return getExchangeRates(params);
 };
 
+export const getUserTransactions = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<GetUserTransactionsParams>): Promise<GetUserTransactionsResponse> => {
+	const { getUserTransactions } = await backendCanister({ identity });
+
+	return getUserTransactions(params);
+};
+
+export const saveUserTransactions = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserTransactionsParams>): Promise<void> => {
+	const { saveUserTransactions } = await backendCanister({ identity });
+
+	return saveUserTransactions(params);
+};
+
 const backendCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
@@ -271,12 +292,9 @@ const backendCanister = async ({
 }: CanisterApiFunctionParams): Promise<BackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	if (isNullish(canister)) {
-		canister = await BackendCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return canister;
+	return await backendApi.getCanister({
+		identity,
+		canisterId,
+		create: BackendCanister.create
+	});
 };

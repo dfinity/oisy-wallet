@@ -10,10 +10,11 @@
 
 	interface Props {
 		amount: OptionAmount;
+		estimatedSharesToReceive?: OptionAmount;
 		vault: Vault;
 	}
 
-	let { vault, amount }: Props = $props();
+	let { vault, amount, estimatedSharesToReceive = $bindable() }: Props = $props();
 
 	let exchange = $derived($exchanges?.[vault.token.id]);
 
@@ -21,12 +22,15 @@
 		nonNullish(exchange) && 'assets_per_share' in exchange ? exchange.assets_per_share : undefined
 	);
 
-	let sharesToReceive = $derived(
-		nonNullish(amount) && nonNullish(assetsPerShare) ? Number(amount) / assetsPerShare : undefined
-	);
+	$effect(() => {
+		estimatedSharesToReceive =
+			nonNullish(amount) && nonNullish(assetsPerShare)
+				? Number(amount) / assetsPerShare
+				: undefined;
+	});
 </script>
 
-{#if nonNullish(sharesToReceive) && nonNullish(vault.apy)}
+{#if nonNullish(estimatedSharesToReceive) && nonNullish(vault.apy)}
 	<ModalValue>
 		{#snippet label()}
 			{$i18n.stake.text.estimated_yearly_yield}
@@ -34,14 +38,14 @@
 
 		{#snippet mainValue()}
 			<ConvertAmountExchange
-				amount={(sharesToReceive * Number(vault.apy)) / 100}
+				amount={(Number(estimatedSharesToReceive ?? 0) * Number(vault.apy)) / 100}
 				exchangeRate={vault.token.usdPrice}
 			/>
 		{/snippet}
 	</ModalValue>
 
 	<ConvertAmountDisplay
-		amount={sharesToReceive}
+		amount={estimatedSharesToReceive}
 		exchangeRate={vault.token.usdPrice}
 		symbol={vault.token.symbol}
 	>

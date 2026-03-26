@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "Chyba při načítání stavů výběru BTC.",
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "Token $tokenSymbol neodpovedá a momentálne ho nie je možné načítať. Skúste to znova neskôr.",
 			"icrc_canister_loading_custom": "Token s Ledger kanystrem $ledgerCanisterId neodpovedá a momentálne ho nie je možné načítať. Skúste to znova neskôr.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
@@ -1156,14 +1157,15 @@
 			"on_network": " na $network",
 			"delete_token": "Smazat token",
 			"edit_token": "Upravit token",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Hodnota",
+			"sort_by_performance": "Výkonnost tokenu",
+			"sort_by_symbol": "Symbol",
+			"hide_asset_types": "Skrýt typy aktiv",
+			"asset_type": "Typ aktiva v $oisy_name",
+			"asset_type_all": "Všechny typy aktiv",
+			"no_tokens_for_asset_type": "Ve tvé peněžence nejsou žádné $asset_type",
+			"no_tokens_for_asset_type_zero_tokens": "V vybrané síti nejsou žádné $asset_type",
+			"no_tokens_for_asset_type_description": "Vyber z <strong>$count podporovaných tokenů</strong> a přizpůsob si zobrazení portfolia."
 		},
 		"details": {
 			"title": "Podrobnosti o tokenu",
@@ -1280,6 +1282,7 @@
 			"unrecognised_erc_interface": "Nerozpoznané rozhraní ERC.",
 			"no_metadata": "Nebyly načteny žádné metadata.",
 			"unexpected": "Při ukládání tokenu se něco pokazilo.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Při skrývání tokenu se něco pokazilo.",
 			"already_available": "Token je již k dispozici.",
 			"not_toggleable": "Token nelze přepnout, nelze jej skrýt.",
@@ -1292,19 +1295,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Kategorie",
+			"risk": "Riziko"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Krypto",
+			"stablecoin": "Stablecoiny",
+			"stock": "Akcie",
+			"commodity": "Komodity"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Nízké riziko",
+			"medium": "Střední riziko",
+			"high": "Vysoké riziko"
 		}
 	},
 	"nfts": {
@@ -2003,8 +2006,8 @@
 			"description_empty": "Zdá se, že jste zatím nestakovali žádné tokeny",
 			"full_history": "Zobrazit celou historii",
 			"recent_history": "Zavřít celou historii",
-			"gldt_stake_carousel_slide_title": "Získejte APY se stakováním Gold DAO",
-			"gldt_stake_carousel_slide_cta": "Zjistit více"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",

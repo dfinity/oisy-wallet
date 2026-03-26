@@ -24,7 +24,7 @@ pub fn coingecko_native_coin(chain_id: u64) -> Option<&'static str> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{coingecko_native_coin, coingecko_platform};
 
     #[test]
     fn test_known_platforms() {

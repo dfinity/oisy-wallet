@@ -9,7 +9,8 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isNetworkIdICP } from '$lib/utils/network.utils';
+	import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -76,6 +77,22 @@
 			{onNext}
 			{onShowProviderList}
 			{onShowTokensList}
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+			bind:swapProgressStep
+		/>
+	{:else if isNetworkIdSolana($sourceToken.network.id)}
+		<SwapSolWizard
+			{currentStep}
+			{isSwapAmountsLoading}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onShowProviderList}
+			{onShowTokensList}
+			{onStartTriggerAmount}
+			{onStopTriggerAmount}
 			bind:swapAmount
 			bind:receiveAmount
 			bind:slippageValue

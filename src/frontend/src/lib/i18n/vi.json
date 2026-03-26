@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "Lỗi khi tìm nạp trạng thái rút BTC.",
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "Token $tokenSymbol không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
 			"icrc_canister_loading_custom": "Token với canister ledger $ledgerCanisterId không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
@@ -1156,14 +1157,15 @@
 			"on_network": " trên mạng $network",
 			"delete_token": "Xóa token",
 			"edit_token": "Chỉnh sửa token",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Giá trị",
+			"sort_by_performance": "Hiệu suất token",
+			"sort_by_symbol": "Ký hiệu",
+			"hide_asset_types": "Ẩn loại tài sản",
+			"asset_type": "Loại tài sản trong $oisy_name",
+			"asset_type_all": "Tất cả loại tài sản",
+			"no_tokens_for_asset_type": "Ví của bạn không có $asset_type nào",
+			"no_tokens_for_asset_type_zero_tokens": "Không có $asset_type nào trong mạng đã chọn",
+			"no_tokens_for_asset_type_description": "Chọn từ <strong>$count token được hỗ trợ</strong> để tùy chỉnh chế độ xem danh mục đầu tư của bạn."
 		},
 		"details": {
 			"title": "Chi tiết token",
@@ -1280,6 +1282,7 @@
 			"unrecognised_erc_interface": "Không nhận diện được giao diện ERC20.",
 			"no_metadata": "Không có metadata nào được tìm thấy.",
 			"unexpected": "Đã xảy ra lỗi trong khi lưu token.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Đã xảy ra lỗi trong khi ẩn token.",
 			"already_available": "Token đã có sẵn.",
 			"not_toggleable": "Token không thể chuyển đổi, không thể ẩn.",
@@ -1292,19 +1295,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Danh mục",
+			"risk": "Rủi ro"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Tiền mã hóa",
+			"stablecoin": "Stablecoin",
+			"stock": "Cổ phiếu",
+			"commodity": "Hàng hóa"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Rủi ro thấp",
+			"medium": "Rủi ro trung bình",
+			"high": "Rủi ro cao"
 		}
 	},
 	"nfts": {
@@ -2003,8 +2006,8 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",

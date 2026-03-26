@@ -12,6 +12,7 @@ import {
 import { SwapProvider } from '$lib/types/swap';
 import { mapNearIntentsQuoteResult } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import type { SplToken } from '$sol/types/spl';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
@@ -21,6 +22,8 @@ import {
 	mockNearIntentsStatusSuccess,
 	mockNearIntentsTokens
 } from '$tests/mocks/near-intents.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 
 vi.mock('$env/rest/near-intents.env', () => ({
 	NEAR_INTENTS_SWAP_ENABLED: true,
@@ -128,7 +131,7 @@ describe('near-intents.services', () => {
 				sourceToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
@@ -149,7 +152,7 @@ describe('near-intents.services', () => {
 				sourceToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
@@ -169,12 +172,12 @@ describe('near-intents.services', () => {
 			);
 		});
 
-		it('should return undefined when userEthAddress is nullish', async () => {
+		it('should return undefined when userAddress is nullish', async () => {
 			const result = await fetchNearIntentsSwapQuote({
 				sourceToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: undefined,
+				userAddress: undefined,
 				slippage
 			});
 
@@ -192,7 +195,7 @@ describe('near-intents.services', () => {
 				sourceToken: unsupportedToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
@@ -209,7 +212,7 @@ describe('near-intents.services', () => {
 				sourceToken: unknownToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
@@ -226,11 +229,102 @@ describe('near-intents.services', () => {
 				sourceToken,
 				destinationToken: unknownDest,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress,
+				userAddress: mockEthAddress,
 				slippage
 			});
 
 			expect(result).toBeUndefined();
+		});
+
+		describe('with Solana tokens', () => {
+			const solSourceToken: SplToken = {
+				...mockValidSplToken,
+				address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+			};
+
+			const evmDestinationToken: Erc20Token = {
+				...mockValidErc20Token,
+				network: ETHEREUM_NETWORK,
+				address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+			};
+
+			beforeEach(() => {
+				vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+			});
+
+			it('should return a SwapMappedResult for SOL-SPL to EVM quote', async () => {
+				vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+					mockNearIntentsQuoteResponse
+				);
+
+				const result = await fetchNearIntentsSwapQuote({
+					sourceToken: solSourceToken,
+					destinationToken: evmDestinationToken,
+					amount: 1_000_000n,
+					userAddress: mockSolAddress,
+					slippage
+				});
+
+				expect(result).toStrictEqual({
+					provider: SwapProvider.NEAR_INTENTS,
+					receiveAmount: BigInt(mockNearIntentsQuoteResponse.quote.amountOut),
+					receiveOutMinimum: BigInt(mockNearIntentsQuoteResponse.quote.minAmountOut ?? '0'),
+					swapDetails: mockNearIntentsQuoteResponse
+				});
+			});
+
+			it('should return undefined when userAddress is nullish', async () => {
+				const result = await fetchNearIntentsSwapQuote({
+					sourceToken: solSourceToken,
+					destinationToken: evmDestinationToken,
+					amount: 1_000_000n,
+					userAddress: undefined,
+					slippage
+				});
+
+				expect(result).toBeUndefined();
+				expect(nearIntentsApi.fetchNearIntentsQuote).not.toHaveBeenCalled();
+			});
+
+			it('should return undefined when SPL token is not found in NEAR Intents tokens', async () => {
+				const unknownSplToken: SplToken = {
+					...solSourceToken,
+					address: 'UnknownMintAddress123456789012345678901234567'
+				};
+
+				const result = await fetchNearIntentsSwapQuote({
+					sourceToken: unknownSplToken,
+					destinationToken: evmDestinationToken,
+					amount: 1_000_000n,
+					userAddress: mockSolAddress,
+					slippage
+				});
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should call the API with correct Solana asset IDs', async () => {
+				vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+					mockNearIntentsQuoteResponse
+				);
+
+				await fetchNearIntentsSwapQuote({
+					sourceToken: solSourceToken,
+					destinationToken: evmDestinationToken,
+					amount: 1_000_000n,
+					userAddress: mockSolAddress,
+					slippage
+				});
+
+				expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledWith(
+					expect.objectContaining({
+						originAsset: 'nep141:sol-EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v.omft.near',
+						destinationAsset: 'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
+						recipient: mockSolAddress,
+						refundTo: mockSolAddress
+					})
+				);
+			});
 		});
 	});
 

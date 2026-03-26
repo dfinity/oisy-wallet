@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "Fehler beim Abrufen der BTC-Auszahlungsstatus.",
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "Das $tokenSymbol Token antwortet nicht und kann momentan nicht geladen werden. Versuche später nochmal.",
 			"icrc_canister_loading_custom": "Das Token mit dem Ledger Kanister $ledgerCanisterId antwortet nicht und kann momentan nicht geladen werden. Versuche später nochmal.",
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
@@ -1135,8 +1136,8 @@
 			"contract_address": "Vertragsadresse",
 			"token_address": "Token-Adresse",
 			"balance": "Guthaben",
-			"hide_zero_balances": "Nullsalden verbergen",
-			"all_tokens_with_zero_hidden": "Alle Assets mit Nullsaldo sind derzeit verborgen",
+			"hide_zero_balances": "Nullsalden ausblenden",
+			"all_tokens_with_zero_hidden": "Alle Assets mit Nullsaldo sind derzeit ausgeblendet",
 			"filter_nothing_found": "Keine aktiven Token gefunden",
 			"filter_nothing_found_description": "Suche unten nach verfügbaren Token oder importiere zusätzliche Token mittels \"Token verwalten\"",
 			"filter_placeholder": "Nach Token oder Symbol filtern",
@@ -1156,14 +1157,15 @@
 			"on_network": " auf $network",
 			"delete_token": "Token löschen",
 			"edit_token": "Token bearbeiten",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Wert",
+			"sort_by_performance": "Token-Performance",
+			"sort_by_symbol": "Symbol",
+			"hide_asset_types": "Anlageklassen ausblenden",
+			"asset_type": "Anlageklasse in $oisy_name",
+			"asset_type_all": "Alle Anlageklassen",
+			"no_tokens_for_asset_type": "Es gibt keine $asset_type in deiner Wallet",
+			"no_tokens_for_asset_type_zero_tokens": "Es gibt keine $asset_type im ausgewählten Netzwerk",
+			"no_tokens_for_asset_type_description": "Wähle aus <strong>$count unterstützten Token</strong>, um deine Portfolioansicht anzupassen."
 		},
 		"details": {
 			"title": "Token-Details",
@@ -1280,6 +1282,7 @@
 			"unrecognised_erc_interface": "Unbekanntes ERC Interface.",
 			"no_metadata": "Es wurden keine Metadaten abgerufen.",
 			"unexpected": "Beim Speichern des Tokens ist etwas schiefgelaufen.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Beim Verbergen des Tokens ist etwas schiefgelaufen.",
 			"already_available": "Token ist bereits verfügbar.",
 			"not_toggleable": "Token kann nicht ausgeblendet werden.",
@@ -1292,19 +1295,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Kategorie",
+			"risk": "Risiko"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Krypto",
+			"stablecoin": "Stablecoins",
+			"stock": "Aktien",
+			"commodity": "Rohstoffe"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Geringes Risiko",
+			"medium": "Mittleres Risiko",
+			"high": "Hohes Risiko"
 		}
 	},
 	"nfts": {
@@ -2003,8 +2006,8 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",

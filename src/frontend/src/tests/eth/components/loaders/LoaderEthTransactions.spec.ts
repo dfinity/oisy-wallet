@@ -17,6 +17,7 @@ import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 import * as appConstants from '$lib/constants/app.constants';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { syncTransactionsFromCache } from '$lib/services/listener.services';
+import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc1155CustomTokens } from '$tests/mocks/erc1155-tokens.mock';
@@ -240,11 +241,16 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
@@ -267,22 +273,28 @@ describe('LoaderEthTransactions', () => {
 
 		// Disabled autopilot tokens should still be loaded via harvestAutopilotTokens
 		expect(loadEthereumTransactions).toHaveBeenCalledWith({
+			identity: mockIdentity,
 			tokenId: mockHarvestAutopilotErc4626Tokens[0].id,
 			networkId: mockHarvestAutopilotErc4626Tokens[0].network.id,
+			chainId: mockHarvestAutopilotErc4626Tokens[0].network.chainId,
 			standard: mockHarvestAutopilotErc4626Tokens[0].standard
 		});
 
 		// Enabled autopilot tokens should also be loaded
 		expect(loadEthereumTransactions).toHaveBeenCalledWith({
+			identity: mockIdentity,
 			tokenId: mockHarvestAutopilotErc4626Tokens[1].id,
 			networkId: mockHarvestAutopilotErc4626Tokens[1].network.id,
+			chainId: mockHarvestAutopilotErc4626Tokens[1].network.chainId,
 			standard: mockHarvestAutopilotErc4626Tokens[1].standard
 		});
 
 		// Enabled non-autopilot ERC4626 tokens should be loaded
 		expect(loadEthereumTransactions).toHaveBeenCalledWith({
+			identity: mockIdentity,
 			tokenId: mockNonAutopilotErc4626Tokens[0].id,
 			networkId: mockNonAutopilotErc4626Tokens[0].network.id,
+			chainId: mockNonAutopilotErc4626Tokens[0].network.chainId,
 			standard: mockNonAutopilotErc4626Tokens[0].standard
 		});
 
@@ -307,8 +319,10 @@ describe('LoaderEthTransactions', () => {
 
 		// Disabled non-autopilot token should NOT be loaded
 		expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
+			identity: mockIdentity,
 			tokenId: mockNonAutopilotErc4626Tokens[0].id,
 			networkId: mockNonAutopilotErc4626Tokens[0].network.id,
+			chainId: mockNonAutopilotErc4626Tokens[0].network.chainId,
 			standard: mockNonAutopilotErc4626Tokens[0].standard
 		});
 
@@ -325,11 +339,16 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
@@ -339,11 +358,16 @@ describe('LoaderEthTransactions', () => {
 		// same number of calls as before
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
@@ -360,19 +384,26 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		expectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
 
-		expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
-			networkId: SEPOLIA_NETWORK_ID,
-			tokenId: SEPOLIA_TOKEN_ID
-		});
+		expect(loadEthereumTransactions).not.toHaveBeenCalledWith(
+			expect.objectContaining({
+				networkId: SEPOLIA_NETWORK_ID,
+				tokenId: SEPOLIA_TOKEN_ID
+			})
+		);
 	});
 
 	it('should not load transactions for mainnet tokens when Ethereum mainnet is disabled', async () => {
@@ -387,18 +418,26 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+		expectedTokens.forEach(({ id: tokenId, standard, network }, index) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
 
-		expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
-			networkId: ETHEREUM_NETWORK_ID,
-			tokenId: ETHEREUM_TOKEN_ID
-		});
+		expect(loadEthereumTransactions).not.toHaveBeenCalledWith(
+			expect.objectContaining({
+				networkId: ETHEREUM_NETWORK_ID,
+				tokenId: ETHEREUM_TOKEN_ID
+			})
+		);
 	});
 
 	it('should load transactions twice for the same tokens when the stores change', async () => {
@@ -417,11 +456,16 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
@@ -443,11 +487,16 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		expectedNewTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
@@ -463,11 +512,16 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
@@ -492,11 +546,16 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		expectedNewTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
@@ -527,16 +586,19 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokensWithSepolia.length);
 
-		expectedNewTokensWithSepolia.forEach(
-			({ id: tokenId, network: { id: networkId }, standard }) => {
-				// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
-				expect(loadEthereumTransactions).toHaveBeenCalledWith({
-					tokenId,
-					networkId,
-					standard
-				});
-			}
-		);
+		expectedNewTokensWithSepolia.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId,
+				networkId,
+				chainId,
+				standard
+			});
+		});
 	});
 
 	it('should load transactions in the next call if it failed the first time', async () => {
@@ -551,11 +613,16 @@ describe('LoaderEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		allExpectedTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});
@@ -577,11 +644,16 @@ describe('LoaderEthTransactions', () => {
 			...allExpectedTokens.slice(index + 1)
 		];
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
-			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+		expectedNewTokens.forEach(({ id: tokenId, standard, network }) => {
+			assertIsNetworkEthereum(network);
+
+			const { id: networkId, chainId } = network;
+
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				tokenId,
 				networkId,
+				chainId,
 				standard
 			});
 		});

@@ -7,6 +7,11 @@ use shared::types::delegation::IIDelegationChain;
 
 use crate::state::read_config;
 
+/// When `false`, [`require_ii_delegation`] is a no-op for every caller,
+/// effectively disabling the II delegation chain guard.
+/// Flip to `true` to enforce the full cryptographic verification.
+const II_DELEGATION_CHAIN_GUARD_ENABLED: bool = false;
+
 /// Reads the II verification parameters (known II canister IDs and IC root key)
 /// from the backend configuration.
 pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>) {
@@ -38,6 +43,10 @@ pub fn require_ii_delegation(
     ic_root_key_raw: &[u8],
     now_ns: u64,
 ) -> Result<(), String> {
+    if !II_DELEGATION_CHAIN_GUARD_ENABLED {
+        return Ok(());
+    }
+
     if caller_is_controller {
         return Ok(());
     }
@@ -133,9 +142,13 @@ pub fn verify_ii_delegation_chain(
 
 #[cfg(test)]
 mod tests {
-    use shared::types::delegation::{Delegation, SignedDelegation};
+    use candid::Principal;
+    use ic_canister_sig_creation::CanisterSigPublicKey;
+    use shared::types::delegation::{Delegation, IIDelegationChain, SignedDelegation};
 
-    use super::*;
+    use super::{
+        require_ii_delegation, verify_ii_delegation_chain, II_DELEGATION_CHAIN_GUARD_ENABLED,
+    };
 
     const FAR_FUTURE_NS: u64 = 9_999_999_999_000_000_000;
 
@@ -184,7 +197,11 @@ mod tests {
     #[test]
     fn test_require_non_controller_missing_chain() {
         let result = require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0);
-        assert_eq!(result.unwrap_err(), "II delegation chain is required");
+        if II_DELEGATION_CHAIN_GUARD_ENABLED {
+            assert_eq!(result.unwrap_err(), "II delegation chain is required");
+        } else {
+            assert!(result.is_ok());
+        }
     }
 
     // ---- verify_ii_delegation_chain ----

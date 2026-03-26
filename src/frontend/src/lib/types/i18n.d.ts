@@ -428,6 +428,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		load_token_list: string;
 		icrc_canister_loading_curated: string;
 		icrc_canister_loading_custom: string;
 		erc20_custom_tokens: string;
@@ -912,6 +913,7 @@ interface I18nTokens {
 		asset_type: string;
 		asset_type_all: string;
 		no_tokens_for_asset_type: string;
+		no_tokens_for_asset_type_zero_tokens: string;
 		no_tokens_for_asset_type_description: string;
 	};
 	details: {
@@ -1008,6 +1010,7 @@ interface I18nTokens {
 		unrecognised_erc_interface: string;
 		no_metadata: string;
 		unexpected: string;
+		version_mismatch: string;
 		unexpected_hiding: string;
 		already_available: string;
 		not_toggleable: string;
@@ -1575,8 +1578,8 @@ interface I18nStake {
 		description_empty: string;
 		full_history: string;
 		recent_history: string;
-		gldt_stake_carousel_slide_title: string;
-		gldt_stake_carousel_slide_cta: string;
+		harvest_autopilot_carousel_slide_title: string;
+		harvest_autopilot_carousel_slide_cta: string;
 	};
 	error: {
 		unexpected_error_on_withdraw: string;

@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "Error al obtener los estados de retiro de BTC.",
 			"transaction_price": "Error al cargar la estimación del precio de una transacción.",
 			"icrc_canisters": "Error al cargar los canisters de ICRC.",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "El token $tokenSymbol no responde y no se puede cargar ahora mismo. Inténtalo de nuevo más tarde.",
 			"icrc_canister_loading_custom": "El token con el canister de Ledger $ledgerCanisterId no responde y no se puede cargar en este momento. Inténtalo de nuevo más tarde.",
 			"erc20_custom_tokens": "Error al cargar los tokens ERC20 personalizados.",
@@ -1156,14 +1157,15 @@
 			"on_network": "en red ",
 			"delete_token": "Eliminar token",
 			"edit_token": "Editar token",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": "",
-			"hide_asset_types": "",
-			"asset_type": "",
-			"asset_type_all": "",
-			"no_tokens_for_asset_type": "",
-			"no_tokens_for_asset_type_description": ""
+			"sort_by_value": "Valor",
+			"sort_by_performance": "Rendimiento del token",
+			"sort_by_symbol": "Símbolo",
+			"hide_asset_types": "Ocultar tipos de activos",
+			"asset_type": "Tipo de activo en $oisy_name",
+			"asset_type_all": "Todos los tipos de activos",
+			"no_tokens_for_asset_type": "No hay $asset_type en tu cartera",
+			"no_tokens_for_asset_type_zero_tokens": "No hay $asset_type en la red seleccionada",
+			"no_tokens_for_asset_type_description": "Elige entre <strong>$count tokens compatibles</strong> para personalizar tu vista de cartera."
 		},
 		"details": {
 			"title": "Detalles del token",
@@ -1280,6 +1282,7 @@
 			"unrecognised_erc_interface": "Interfaz ERC no reconocida.",
 			"no_metadata": "No se obtuvieron metadatos.",
 			"unexpected": "Algo salió mal al guardar el token.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Algo salió mal al ocultar el token.",
 			"already_available": "El token ya está disponible.",
 			"not_toggleable": "El token no se puede alternar, no se puede ocultar.",
@@ -1292,19 +1295,19 @@
 	},
 	"token_tag": {
 		"type": {
-			"category": "",
-			"risk": ""
+			"category": "Categoría",
+			"risk": "Riesgo"
 		},
 		"category": {
-			"crypto": "",
-			"stablecoin": "",
-			"stock": "",
-			"commodity": ""
+			"crypto": "Criptomonedas",
+			"stablecoin": "Stablecoins",
+			"stock": "Acciones",
+			"commodity": "Materias primas"
 		},
 		"risk": {
-			"low": "",
-			"medium": "",
-			"high": ""
+			"low": "Riesgo bajo",
+			"medium": "Riesgo medio",
+			"high": "Riesgo alto"
 		}
 	},
 	"nfts": {
@@ -2003,8 +2006,8 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",

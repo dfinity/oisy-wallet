@@ -653,6 +653,7 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"load_token_list": "Something went wrong loading your token list. Please reload the page to try again.",
 			"icrc_canister_loading_curated": "The $tokenSymbol token is not responding and can't be loaded right now. Try again later.",
 			"icrc_canister_loading_custom": "The token with ledger canister $ledgerCanisterId is not responding and can't be loaded right now. Try again later.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
@@ -1163,6 +1164,7 @@
 			"asset_type": "Asset type in $oisy_name",
 			"asset_type_all": "All asset types",
 			"no_tokens_for_asset_type": "There are no $asset_type in your wallet",
+			"no_tokens_for_asset_type_zero_tokens": "There are no $asset_type in the selected network",
 			"no_tokens_for_asset_type_description": "Choose from <strong>$count supported tokens</strong> to customize your portfolio view."
 		},
 		"details": {
@@ -1280,6 +1282,7 @@
 			"unrecognised_erc_interface": "Unrecognised ERC interface.",
 			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
+			"version_mismatch": "The token has been updated since it was loaded. Please check its status again and repeat the operation if needed.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
@@ -2003,8 +2006,8 @@
 			"description_empty": "It looks like you haven't staked any tokens yet",
 			"full_history": "Show full history",
 			"recent_history": "Close full history",
-			"gldt_stake_carousel_slide_title": "Earn APY with Gold DAO Staking",
-			"gldt_stake_carousel_slide_cta": "Learn more"
+			"harvest_autopilot_carousel_slide_title": "Smart Yield Farming with Harvest Autopilot",
+			"harvest_autopilot_carousel_slide_cta": "Learn more"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens.",

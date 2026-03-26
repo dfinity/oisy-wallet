@@ -187,6 +187,11 @@ export const mapIcErrorMetadata = (err: unknown): Record<string, string> | undef
 	return parseIcErrorMessage(err) ?? { error: replaceIcErrorFields(err) ?? `${err}` };
 };
 
+const IC_VERSION_MISMATCH_MARKER = 'Version mismatch';
+
+export const isVersionMismatchError = (err: unknown): boolean =>
+	err instanceof Error && err.message.includes(IC_VERSION_MISMATCH_MARKER);
+
 const IC_CALL_CONTEXT_MARKER = 'Call context:';
 const IC_CANISTER_ID_KEY = 'Canister ID';
 const IC_METHOD_NAME_KEY = 'Method name';

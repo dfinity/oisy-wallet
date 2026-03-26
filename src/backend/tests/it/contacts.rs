@@ -855,9 +855,9 @@ fn test_update_contact_image_jpeg() {
 mod tests {
     use pretty_assertions::assert_eq;
     use serde_bytes::ByteBuf;
-    use shared::types::contact::{ContactImage, ImageMimeType};
+    use shared::types::contact::{Contact, ContactImage, ImageMimeType, UpdateContactRequest};
 
-    use super::*;
+    use super::create_empty_contacts;
 
     #[test]
     fn test_update_contact_image_png() {

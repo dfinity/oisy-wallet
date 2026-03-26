@@ -163,7 +163,7 @@ const updateCSP = (indexHtml) => {
         img-src 'self' https: ipfs: data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
-        script-src 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
+        script-src 'unsafe-inline' 'strict-dynamic' 'wasm-unsafe-eval' ${indexHashes.join(' ')};
         base-uri 'self';
         form-action 'none';
         style-src 'self' 'unsafe-inline';
