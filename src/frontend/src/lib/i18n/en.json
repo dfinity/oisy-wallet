@@ -578,6 +578,36 @@
 						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
 					}
 				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episode 6 is Live 🤑",
+				"one_liner": "Earn Sprinkles for being active, referring others, and using OISY across chains. Your actions grow your rewards, and active referrals boost them further.<br/>Plus, now more chains means better chances to win.",
+				"participate_title": "Earn tokens for activity and referrals. More chains mean more chances.",
+				"description": "Stay active to qualify: log in often, complete wallet actions, and hold at least $5.<br/>Each active chain boosts your odds with a Multichain Multiplier.<br/>Earn 10% from friends who qualify.",
+				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"welcome": {
+					"title": "Welcome to $oisy_short!",
+					"subtitle": "Ready to Earn?",
+					"description": "You're 2 steps away from your first reward: Log in, hold $5+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer your friends and get a bonus every time one of them earns sprinkles."
+				},
+				"win": {
+					"default": {
+						"title": "You got rewarded",
+						"description": "Your rewards just landed in your wallet<br>Don't forget to refer and stay active to win more",
+						"share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
+					},
+					"jackpot": {
+						"title": "You've won the weekly bonus drop",
+						"description": "You just earned one of our weekly bonus drops.<br>Stay active, and keep referring to win more",
+						"share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
+					},
+					"referral": {
+						"title": "Here a small thank you",
+						"description": "One of your referred users just got some sprinkles.",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
 			}
 		}
 	},
