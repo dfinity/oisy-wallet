@@ -130,7 +130,7 @@
 		}
 	},
 	{
-		"id": "sprinkles_test",
+		"id": "sprinkles_s1e6",
 		"title": "rewards.campaigns.sprinkles_s1e6.title",
 		"cardTitle": "rewards.campaigns.sprinkles_s1e6.card_title",
 		"oneLiner": "rewards.campaigns.sprinkles_s1e6.one_liner",
@@ -159,12 +159,6 @@
 				"banner": "/images/rewards/reward-jackpot-received.svg",
 				"description": "rewards.campaigns.sprinkles_s1e6.win.jackpot.description",
 				"shareHref": "rewards.campaigns.sprinkles_s1e6.win.jackpot.share_href"
-			},
-			"leaderboard": {
-				"title": "rewards.campaigns.sprinkles_s1e6.win.leaderboard.title",
-				"banner": "/images/rewards/reward-jackpot-received.svg",
-				"description": "rewards.campaigns.sprinkles_s1e6.win.leaderboard.description",
-				"shareHref": "rewards.campaigns.sprinkles_s1e6.win.leaderboard.share_href"
 			},
 			"referral": {
 				"title": "rewards.campaigns.sprinkles_s1e6.win.referral.title",
