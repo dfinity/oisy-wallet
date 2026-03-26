@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "ckETH 헬퍼 컨트랙트 주소를 불러오는 중 오류가 발생했습니다. 민터 캐니스터 ID가 초기화되지 않았습니다.",
 			"unexpected": "토큰 전환 중 문제가 발생했습니다.",
 			"unexpected_missing_data": "전환 트랜잭션을 시작하는 중 문제가 발생했습니다."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "USDC와 ckUSDC 간의 전환이 현재 중단되었습니다."
 		}
 	},
 	"swap": {
