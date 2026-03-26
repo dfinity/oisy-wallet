@@ -9,6 +9,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import * as analyticsServices from '$lib/services/analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import * as eventsUtils from '$lib/utils/events.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
@@ -44,11 +45,11 @@ describe('eth.services', () => {
 
 	const mockToken: IcToken = {
 		...mockValidToken,
-		id: Symbol('ckETH') as never,
+		id: parseTokenId('ckETH'),
 		ledgerCanisterId: 'mock-ledger',
 		fee: 10_000n,
 		standard: { code: 'icrc' }
-	} as unknown as IcToken;
+	} as IcToken;
 
 	const mockToAddress = '0xRecipientAddress';
 	const mockLastObservedBlockNumber = 100n;
