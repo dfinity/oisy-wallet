@@ -193,7 +193,7 @@ fn collect_history_entries(request: &UserAgreements, now: Timestamp) -> Vec<Agre
 pub fn update_agreements(
     principal: StoredPrincipal,
     profile_version: Option<Version>,
-    agreements: UserAgreements,
+    agreements: &UserAgreements,
     user_profile_model: &mut UserProfileModel,
     agreement_history: &mut AgreementHistoryMap,
 ) -> Result<(), UpdateAgreementsError> {
@@ -205,7 +205,7 @@ pub fn update_agreements(
     user_profile_model.store_new(principal, now, &new_profile);
 
     if new_profile.version != user_profile.version {
-        let new_entries = collect_history_entries(&agreements, now);
+        let new_entries = collect_history_entries(agreements, now);
         if !new_entries.is_empty() {
             let mut history = agreement_history.get(&principal).unwrap_or_default().0;
             history.extend(new_entries);

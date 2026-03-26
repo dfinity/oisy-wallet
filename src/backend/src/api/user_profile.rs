@@ -178,16 +178,19 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
-    let user_principal = msg_caller();
-    let stored_principal = StoredPrincipal(user_principal);
+    let UpdateUserAgreementsRequest {
+        current_user_version,
+        agreements,
+    } = request;
+    let stored_principal = StoredPrincipal(msg_caller());
 
     mutate_state(|s| {
         let mut user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
         service::update_agreements(
             stored_principal,
-            request.current_user_version,
-            request.agreements,
+            current_user_version,
+            &agreements,
             &mut user_profile_model,
             &mut s.agreement_history,
         )

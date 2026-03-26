@@ -425,7 +425,7 @@ fn bench_update_user_agreements() -> BenchResult {
             user_profile::service::update_agreements(
                 sp,
                 version,
-                agreements.clone(),
+                &agreements,
                 &mut m,
                 &mut s.agreement_history,
             )
