@@ -163,10 +163,12 @@ describe('exchange.worker', () => {
 						currentErc4626Prices: {},
 						currentEthPrice: { ethereum: { usd: 1 } },
 						currentIcpPrice: { 'internet-computer': { usd: 1 } },
-					currentIcrcPrices: {},
-					currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
-					currentSolPrice: { solana: { usd: 1 } },
-					currentSplPrices: {}
+						currentIcrcPrices: {},
+						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+						currentSolPrice: { solana: { usd: 1 } },
+						currentSplPrices: {},
+						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+						currentBaseEthPrice: { ethereum: { usd: 1 } }
 					}
 				});
 			});
@@ -678,12 +680,14 @@ describe('exchange.worker', () => {
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
 							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 							currentSolPrice: { solana: { usd: 1 } },
-						currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } }
-					}
+							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
+							currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+							currentBaseEthPrice: { ethereum: { usd: 1 } }
+						}
+					});
 				});
-			});
 
-			it('should post a message with synced token prices and current currency exchange rate', async () => {
+				it('should post a message with synced token prices and current currency exchange rate', async () => {
 					vi.mocked(simplePrice).mockImplementation(
 						({
 							ids,
@@ -739,7 +743,9 @@ describe('exchange.worker', () => {
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
 							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1, usd_24h_change: 3 } },
 							currentSolPrice: { solana: { usd: 1, usd_24h_change: 3 } },
-						currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } }
+							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
+							currentArbitrumEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } },
+							currentBaseEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } }
 						}
 					});
 				});
