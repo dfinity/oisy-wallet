@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "ckETHヘルパーコントラクトアドレスの読み込み中にエラーが発生しました。ミントキャニスターIDが初期化されていません。",
 			"unexpected": "トークンを変換中に問題が発生しました",
 			"unexpected_missing_data": "変換トランザクションの開始中にエラーが発生しました。"
+		},
+		"warn": {
+			"ckusdc_conversion_currently_suspended": ""
 		}
 	},
 	"swap": {

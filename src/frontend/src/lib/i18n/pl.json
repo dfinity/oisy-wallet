@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Błąd podczas ładowania adresu kontraktu pomocniczego ckETH. Nie zainicjowano identyfikatora kanistra mintera.",
 			"unexpected": "Coś poszło nie tak podczas konwersji tokenów.",
 			"unexpected_missing_data": "Coś poszło nie tak podczas inicjowania transakcji konwersji."
+		},
+		"warn": {
+			"ckusdc_conversion_currently_suspended": ""
 		}
 	},
 	"swap": {

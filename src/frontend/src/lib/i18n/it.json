@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Errore durante il caricamento dell'indirizzo del contratto helper ckETH. Nessun canister minter ID è stato inizializzato.",
 			"unexpected": "Qualcosa è andato storto durante la conversione dei token.",
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di conversione."
+		},
+		"warn": {
+			"ckusdc_conversion_currently_suspended": ""
 		}
 	},
 	"swap": {
