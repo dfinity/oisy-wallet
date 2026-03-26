@@ -25,14 +25,17 @@ type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
+	InvalidDelegationChain : record { msg : text };
 	RateLimited : RateLimitError;
 	RateLimitedByGuard : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
 };
+type AllowSigningRequest = record {
+	ii_delegation_chain : opt IIDelegationChain
+};
 type AllowSigningResponse = record {
 	status : AllowSigningStatus;
-	challenge_completion : opt ChallengeCompletion;
 	allowed_cycles : nat
 };
 type AllowSigningResult = variant {
@@ -53,19 +56,33 @@ type ApproveError = variant {
 };
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
+type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
 	DuplicateUtxos;
-	RateLimited : RateLimitError;
 	InvalidDelegationChain : record { msg : text };
 	InternalError : record { msg : text };
 	UtxosAlreadyReserved
 };
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
-	network : Network;
-	utxos : vec Utxo
+	network : BitcoinNetwork;
+	utxos : vec Utxo;
+	ii_delegation_chain : opt IIDelegationChain
+};
+type Delegation = record {
+	pubkey : blob;
+	expiration : nat64;
+	targets : opt vec principal
+};
+type IIDelegationChain = record {
+	delegations : vec SignedDelegation;
+	public_key : blob
+};
+type SignedDelegation = record {
+	delegation : Delegation;
+	signature : blob
 };
 type BtcAddPendingTransactionResult = variant {
 	Ok;
@@ -78,25 +95,22 @@ type BtcAddress = variant {
 	P2SH : text;
 	P2TR : text
 };
-type BtcGetFeePercentilesRequest = record { network : Network };
+type BtcGetFeePercentilesRequest = record { network : BitcoinNetwork };
 type BtcGetFeePercentilesResponse = record { fee_percentiles : vec nat64 };
 type BtcGetFeePercentilesResult = variant {
 	Ok : BtcGetFeePercentilesResponse;
 	Err : SelectedUtxosFeeError
 };
-type BtcGetPendingTransactionsError = variant {
-	InternalError : record { msg : text }
-};
 type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
 type BtcGetPendingTransactionsRequest = record {
-	network : Network;
+	network : BitcoinNetwork;
 	address : text
 };
 type BtcGetPendingTransactionsResult = variant {
 	Ok : BtcGetPendingTransactionsReponse;
-	Err : BtcGetPendingTransactionsError
+	Err : BtcAddPendingTransactionError
 };
 type BtcSelectUserUtxosFeeResult = variant {
 	Ok : SelectedUtxosFeeResponse;
@@ -114,12 +128,6 @@ type CanisterStatusResultV2 = record {
 	module_hash : opt blob
 };
 type CanisterStatusType = variant { stopped; stopping; running };
-type ChallengeCompletion = record {
-	solved_duration_ms : nat64;
-	next_allowance_ms : nat64;
-	next_difficulty : nat32;
-	current_difficulty : nat32
-};
 type Config = record {
 	derivation_origin : opt text;
 	ecdsa_key_name : text;
@@ -145,7 +153,6 @@ type ContactError = variant {
 	InvalidImageFormat;
 	ContactNotFound;
 	ImageTooLarge;
-	TooManyContacts;
 	RandomnessError;
 	ImageExceedsMaxSize;
 	CanisterStatusError;
@@ -186,7 +193,7 @@ type ExperimentalFeaturesSettings = record {
 		ExperimentalFeatureSettings
 	}
 };
-type ExtV2Token = record { canister_id : principal };
+type ExtV2Token = record { ledger_id : principal };
 type GetAllowedCyclesError = variant {
 	Other : text;
 	FailedToContactCyclesLedger
@@ -198,22 +205,6 @@ type GetAllowedCyclesResult = variant {
 };
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
-type GetUserTransactionsRequest = record {
-	token_id : TokenId;
-	max_results : nat64;
-	start : opt nat64
-};
-type GetUserTransactionsResponse = record {
-	next_start : opt nat64;
-	newest_block_index : opt nat64;
-	oldest_block_index : opt nat64;
-	total_stored : nat64;
-	transactions : vec UserTransaction
-};
-type GetUserTransactionsResult = variant {
-	Ok : GetUserTransactionsResponse;
-	Err : UserTransactionError
-};
 type GetUserProfileError = variant { NotFound };
 type GetUserProfileResult = variant {
 	Ok : UserProfile;
@@ -250,7 +241,6 @@ type InitArg = record {
 	supported_credentials : opt vec SupportedCredential;
 	ic_root_key_der : opt blob
 };
-type Network = variant { mainnet; regtest; testnet };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
 	ArbitrumMainnet;
@@ -277,30 +267,16 @@ type NetworksSettings = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
-type RateLimitError = record {
-	max_calls : nat32;
-	window_ns : nat64;
-	caller : principal
-};
-type SaveUserTransactionsRequest = record {
-	token_id : TokenId;
-	transactions : vec UserTransaction
-};
-type SaveUserTransactionsResult = variant {
-	Ok;
-	Err : UserTransactionError
-};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
 };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
-	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
 type SelectedUtxosFeeRequest = record {
-	network : Network;
+	network : BitcoinNetwork;
 	amount_satoshis : nat64;
 	min_confirmations : opt nat32
 };
@@ -324,60 +300,9 @@ type SplToken = record {
 	token_address : text;
 	symbol : opt text
 };
-type EvmTransactionData = record {
-	chain_id : opt nat64;
-	nonce : opt nat32;
-	gas_limit : opt nat;
-	gas_price : opt nat;
-	gas_used : opt nat;
-	data : opt text;
-	nft_token_id : opt nat32
-};
-type IcrcTransactionType = variant {
-	Transfer;
-	Approve : record { spender : text };
-	Mint;
-	Burn
-};
-type IcrcTransactionData = record {
-	fee : opt nat;
-	memo : opt blob;
-	tx_type : IcrcTransactionType
-};
-type BtcTransactionData = record {
-	fee : opt nat64;
-	confirmations : opt nat32
-};
-type SolTransactionData = record {
-	fee : opt nat64;
-	from_owner : opt text;
-	to_owner : opt text
-};
-type NetworkTransactionData = variant {
-	Evm : EvmTransactionData;
-	Icrc : IcrcTransactionData;
-	Btc : BtcTransactionData;
-	Sol : SolTransactionData
-};
-type UserTransaction = record {
-	id : text;
-	block_index : nat64;
-	timestamp : nat64;
-	from : text;
-	to : opt text;
-	value : nat;
-	network_data : NetworkTransactionData
-};
-type UserTransactionError = variant {
-	DuplicateTransaction : record { id : text };
-	InternalError : record { msg : text };
-	TooManyTransactions;
-	UserNotFound
-};
 type Stats = record {
 	user_profile_count : nat64;
 	custom_token_count : nat64;
-	token_activity_count : nat64;
 	user_timestamps_count : nat64;
 	user_token_count : nat64
 };
@@ -396,10 +321,7 @@ type Token = variant {
 	Erc721 : ErcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken;
-	IcPunks : ExtV2Token;
-	Erc1155 : ErcToken;
-	Erc4626 : ErcToken;
-	Dip721 : ExtV2Token
+	Erc1155 : ErcToken
 };
 type TokenAccountId = variant {
 	Btc : BtcAddress;
@@ -408,20 +330,6 @@ type TokenAccountId = variant {
 	Icrcv2 : Icrcv2AccountId
 };
 type TokenSection = variant { Spam; Hidden };
-type TokenId = variant {
-	Erc20 : record { text; nat64 };
-	SolNativeDevnet;
-	Icrc : principal;
-	EvmNative : nat64;
-	Erc721 : record { text; nat64 };
-	SolNativeMainnet;
-	SplDevnet : text;
-	BtcNative;
-	SplMainnet : text;
-	IcpNative;
-	Erc1155 : record { text; nat64 };
-	Erc4626 : record { text; nat64 }
-};
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;
@@ -480,6 +388,15 @@ type UserProfile = record {
 	created_timestamp : nat64;
 	updated_timestamp : nat64
 };
+type UserToken = record {
+	decimals : opt nat8;
+	version : opt nat64;
+	enabled : opt bool;
+	chain_id : nat64;
+	contract_address : text;
+	symbol : opt text
+};
+type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
 	// Adds a verifiable credential to the user profile.
@@ -500,23 +417,15 @@ service : (Arg) -> {
 	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (
 		AddUserHiddenDappIdResult
 	);
-	// Ensures the caller has enough cycles allowance for chain-fusion signer
-	// operations (providing public keys, creating signatures, etc.).
+	// This function authorizes the caller to spend a specific
 	//
-	// If the caller already has sufficient allowance the call returns
-	// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
-	// call is made.  Otherwise, the endpoint is rate-limited and a new
-	// `icrc_2_approve` is issued on the cycles ledger.
-	//
-	// # Rate limiting
-	// Two rate limiters are applied in order:
-	// 1. **Guard limiter** – a high-frequency limiter (10 calls/min) checked *before* any
-	// inter-canister call to cheaply reject bursts that would drain cycles.
-	// 2. **Business limiter** – the stricter per-caller limit (3 calls/hour) for normal usage.
+	// Note:
+	// - The chain fusion signer performs threshold key operations including providing public keys,
+	// creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
 	//
 	// # Errors
 	// Errors are enumerated by: `AllowSigningError`.
-	allow_signing : () -> (AllowSigningResult);
+	allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
 	// Adds a pending Bitcoin transaction for the caller.
 	//
 	// Requires a valid II delegation chain to verify the caller authenticated
@@ -533,7 +442,8 @@ service : (Arg) -> {
 	// and are periodically updated in the background.
 	//
 	// # Returns
-	// - `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
+	// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
+	// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
 	//
 	// # Errors
 	// - `InternalError`: If fee percentiles are not available in the cache for the requested network
@@ -541,7 +451,7 @@ service : (Arg) -> {
 	// # Note
 	// This function only returns data from the in-memory cache and doesn't make any calls
 	// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
-	// it returns the default percentiles.
+	// an error is returned rather than fetching fresh data.
 	btc_get_current_fee_percentiles : (BtcGetFeePercentilesRequest) -> (
 		BtcGetFeePercentilesResult
 	) query;
@@ -568,6 +478,9 @@ service : (Arg) -> {
 	//
 	// # Returns
 	// The created contact on success.
+	//
+	// # Test
+	// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
 	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
@@ -611,16 +524,6 @@ service : (Arg) -> {
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
-	// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
-	//
-	// # Returns
-	// - `Ok(GetUserTransactionsResponse)` with the requested page of transactions
-	//
-	// # Errors
-	// Errors are enumerated by: `UserTransactionError`.
-	get_user_transactions : (GetUserTransactionsRequest) -> (
-		GetUserTransactionsResult
-	) query;
 	// Returns the caller's user profile.
 	//
 	// # Errors
@@ -639,32 +542,15 @@ service : (Arg) -> {
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
-	// List the custom tokens for the calling user.
-	//
-	// Note: This method was previously exposed as a *query* but is now an *update*
-	// call. The change is intentional and breaking: `list_custom_tokens` now tracks
-	// token activity by calling `mark_tokens_active`, which mutates canister state.
-	// Because queries must not modify state on the IC, this function must be an
-	// update, not a query.
-	//
-	// Implications for callers:
-	// - This call now participates in consensus and may have higher latency than a query.
-	// - It consumes cycles as an update call.
-	// - Integrations that previously relied on query semantics must be updated to invoke this as an
-	// update method.
-	list_custom_tokens : () -> (vec CustomToken);
+	list_custom_tokens : () -> (vec CustomToken) query;
+	list_user_tokens : () -> (vec UserToken) query;
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
-	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
-	//
-	// # Errors
-	// Errors are enumerated by: `UserTransactionError`.
-	save_user_transactions : (SaveUserTransactionsRequest) -> (
-		SaveUserTransactionsResult
-	);
+	remove_user_token : (UserTokenId) -> ();
 	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
+	set_many_user_tokens : (vec UserToken) -> ();
 	// Sets the user's preference to show (or hide) testnets in the interface.
 	//
 	// # Returns
@@ -676,6 +562,7 @@ service : (Arg) -> {
 	set_user_show_testnets : (SetShowTestnetsRequest) -> (
 		SetUserShowTestnetsResult
 	);
+	set_user_token : (UserToken) -> ();
 	// Gets statistics about the canister.
 	//
 	// Note: This is a private method, restricted to authorized users, as some stats may not be
