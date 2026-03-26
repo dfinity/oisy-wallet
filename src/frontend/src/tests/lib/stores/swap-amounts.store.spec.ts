@@ -98,6 +98,7 @@ describe('swap-amounts.store', () => {
 				amountForSwap: '1000000',
 				selectedProvider: evmSwaps[0]
 			});
+
 			expect(get(store)?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
 
 			const round2 = [
@@ -109,6 +110,7 @@ describe('swap-amounts.store', () => {
 				amountForSwap: '1000000',
 				selectedProvider: round2[0]
 			});
+
 			expect(get(store)?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 
 			const round3 = [
@@ -120,6 +122,7 @@ describe('swap-amounts.store', () => {
 				amountForSwap: '1000000',
 				selectedProvider: round3[0]
 			});
+
 			expect(get(store)?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
 		});
 	});
@@ -150,6 +153,7 @@ describe('swap-amounts.store', () => {
 			});
 
 			const state = get(store);
+
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 			expect(state?.selectedProvider?.receiveAmount).toBe(500000000n);
 			expect(state?.swaps[0].provider).toBe(SwapProvider.VELORA);
@@ -178,6 +182,7 @@ describe('swap-amounts.store', () => {
 			});
 
 			const state = get(store);
+
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 			expect(state?.selectedProvider?.receiveAmount).toBe(999000000n);
 		});
@@ -205,6 +210,7 @@ describe('swap-amounts.store', () => {
 			});
 
 			const state = get(store);
+
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 			expect(state?.swaps[0].provider).toBe(SwapProvider.VELORA);
 			expect(state?.swaps[0].receiveAmount).toBe(1500000000n);
@@ -233,6 +239,7 @@ describe('swap-amounts.store', () => {
 			});
 
 			const state = get(store);
+
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 		});
 
@@ -271,6 +278,7 @@ describe('swap-amounts.store', () => {
 			});
 
 			const state = get(store);
+
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 			expect(state?.swaps[0].provider).toBe(SwapProvider.NEAR_INTENTS);
 		});
@@ -294,6 +302,7 @@ describe('swap-amounts.store', () => {
 			});
 
 			const state = get(store);
+
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
 			expect(state?.manuallySelectedProviderKey).toBeUndefined();
 		});
@@ -363,6 +372,7 @@ describe('swap-amounts.store', () => {
 			store.setManualProvider(evmSwaps[1]);
 
 			const state = get(store);
+
 			expect(state?.manuallySelectedProviderKey).toBe(SwapProvider.NEAR_INTENTS);
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 		});
@@ -379,6 +389,7 @@ describe('swap-amounts.store', () => {
 			store.setSelectedProvider(evmSwaps[1]);
 
 			const state = get(store);
+
 			expect(state?.manuallySelectedProviderKey).toBeUndefined();
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 		});
