@@ -199,22 +199,20 @@ const syncExchangeFromProviders = async ({
 
 	return {
 		currentExchangeRate: {
-			exchangeRateToUsd: currentExchangeRate?.rate,
-			exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier,
+			exchangeRateToUsd: currentExchangeRate?.rate ?? null,
+			exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier ?? null,
 			currency: currentCurrency
 		},
-		currentEthPrice,
-		currentBtcPrice,
+		currentEthPrice: currentEthPrice ?? undefined,
+		currentBtcPrice: currentBtcPrice ?? undefined,
 		currentErc20Prices,
-		currentIcpPrice,
-		currentIcrcPrices,
-		currentSolPrice,
-		currentSplPrices,
+		currentIcpPrice: currentIcpPrice ?? undefined,
+		currentIcrcPrices: currentIcrcPrices ?? {},
+		currentSolPrice: currentSolPrice ?? undefined,
+		currentSplPrices: currentSplPrices ?? {},
 		currentErc4626Prices,
-		currentBnbPrice,
-		currentPolPrice,
-		currentArbitrumEthPrice: currentEthPrice,
-		currentBaseEthPrice: currentEthPrice
+		currentBnbPrice: currentBnbPrice ?? undefined,
+		currentPolPrice: currentPolPrice ?? undefined
 	};
 };
 
