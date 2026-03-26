@@ -7,13 +7,13 @@ import {
 } from '$eth/utils/user-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Transaction } from '$lib/types/transaction';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
 	extractMockEvmTransactionData,
 	mockEthMappedEvmTransactionData,
 	mockEthMappedUserTransaction,
 	mockEthTransaction
 } from '$tests/mocks/user-transactions.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { toNullable } from '@dfinity/utils';
 
 describe('user-transactions.utils', () => {

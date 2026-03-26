@@ -9,10 +9,10 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockEthTransaction,
 	mockGetUserTransactionsResponse,
-	mockUserTransaction,
-	mockUserTransactionTokenId,
 	mockMapFromBackendUserTransaction,
-	mockMapToBackendUserTransaction
+	mockMapToBackendUserTransaction,
+	mockUserTransaction,
+	mockUserTransactionTokenId
 } from '$tests/mocks/user-transactions.mock';
 
 vi.mock('$lib/api/backend.api', () => ({

@@ -1,6 +1,6 @@
 import type {
-	EvmTransactionData,
 	GetUserTransactionsResponse as CandidGetUserTransactionsResponse,
+	EvmTransactionData,
 	NetworkTransactionData,
 	TokenId,
 	UserTransaction
@@ -15,7 +15,9 @@ import { toNullable } from '@dfinity/utils';
 
 export { mockEthTransaction };
 
-export const extractMockEvmTransactionData = (networkData: NetworkTransactionData): EvmTransactionData => {
+export const extractMockEvmTransactionData = (
+	networkData: NetworkTransactionData
+): EvmTransactionData => {
 	if (!('Evm' in networkData)) {
 		throw new Error('Expected Evm network data');
 	}
