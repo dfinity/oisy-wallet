@@ -1,6 +1,7 @@
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { basename, dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { defineViteReplacements, readCanisterIds } from './vite.utils';
 
@@ -12,11 +13,18 @@ import { defineViteReplacements, readCanisterIds } from './vite.utils';
 // dfx deploy --network staging = staging
 const network = process.env.DFX_NETWORK ?? 'local';
 
+const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+
 const config: UserConfig = {
 	plugins: [sveltekit()],
 	resolve: {
 		alias: {
-			$declarations: resolve('./src/declarations')
+			$declarations: resolve('./src/declarations'),
+			// Rollup can fail to resolve "exports" subpaths in dynamic import(); pin the entry file.
+			'barcode-detector/ponyfill': resolve(
+				projectRoot,
+				'node_modules/barcode-detector/dist/es/ponyfill.js'
+			)
 		}
 	},
 	build: {
