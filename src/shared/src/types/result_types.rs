@@ -11,7 +11,6 @@ use super::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
     user_profile::{GetUserProfileError, UserProfile},
-    user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
 use crate::types::{
     agreement::UpdateAgreementsError,
@@ -20,6 +19,7 @@ use crate::types::{
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::AddUserCredentialError,
+    user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
