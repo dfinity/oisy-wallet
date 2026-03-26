@@ -160,12 +160,6 @@
 				"description": "rewards.campaigns.sprinkles_s1e5.win.jackpot.description",
 				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.jackpot.share_href"
 			},
-			"leaderboard": {
-				"title": "rewards.campaigns.sprinkles_s1e5.win.leaderboard.title",
-				"banner": "/images/rewards/reward-jackpot-received.svg",
-				"description": "rewards.campaigns.sprinkles_s1e5.win.leaderboard.description",
-				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.leaderboard.share_href"
-			},
 			"referral": {
 				"title": "rewards.campaigns.sprinkles_s1e5.win.referral.title",
 				"banner": "/images/rewards/reward-received.svg",
