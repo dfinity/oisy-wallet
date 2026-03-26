@@ -16,6 +16,7 @@ import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { createMockBackendUserTransaction } from '$tests/mocks/user-transactions.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -72,34 +73,6 @@ const makeBackendResponse = ({
 	...overrides
 });
 
-const makeBackendUserTx = ({
-	hash,
-	blockIndex,
-	timestamp
-}: {
-	hash: string;
-	blockIndex: bigint;
-	timestamp: bigint;
-}): UserTransaction => ({
-	id: hash,
-	block_index: blockIndex,
-	timestamp,
-	from: mockEthAddress,
-	to: ['0xrecipient'],
-	value: 1000n,
-	network_data: {
-		Evm: {
-			chain_id: [1n],
-			nonce: [1n],
-			gas_limit: [21000n],
-			gas_price: [20_000_000_000n],
-			gas_used: [21000n],
-			data: [],
-			nft_token_id: []
-		}
-	}
-});
-
 const MOCK_LATEST_BLOCK_NUMBER = 1000;
 
 describe('eth-user-transactions.services', () => {
@@ -143,9 +116,21 @@ describe('eth-user-transactions.services', () => {
 				makeBackendResponse({
 					overrides: {
 						transactions: [
-							makeBackendUserTx({ hash: '0xhash3', blockIndex: 300n, timestamp: 3000n }),
-							makeBackendUserTx({ hash: '0xhash2', blockIndex: 200n, timestamp: 2000n }),
-							makeBackendUserTx({ hash: '0xhash1', blockIndex: 100n, timestamp: 1000n })
+							createMockBackendUserTransaction({
+								hash: '0xhash3',
+								blockIndex: 300n,
+								timestamp: 3000n
+							}),
+							createMockBackendUserTransaction({
+								hash: '0xhash2',
+								blockIndex: 200n,
+								timestamp: 2000n
+							}),
+							createMockBackendUserTransaction({
+								hash: '0xhash1',
+								blockIndex: 100n,
+								timestamp: 1000n
+							})
 						],
 						newestBlockIndex: 300n,
 						oldestBlockIndex: 100n,
@@ -227,8 +212,16 @@ describe('eth-user-transactions.services', () => {
 				makeBackendResponse({
 					overrides: {
 						transactions: [
-							makeBackendUserTx({ hash: '0xhash2', blockIndex: 200n, timestamp: 2000n }),
-							makeBackendUserTx({ hash: '0xhash1', blockIndex: 100n, timestamp: 1000n })
+							createMockBackendUserTransaction({
+								hash: '0xhash2',
+								blockIndex: 200n,
+								timestamp: 2000n
+							}),
+							createMockBackendUserTransaction({
+								hash: '0xhash1',
+								blockIndex: 100n,
+								timestamp: 1000n
+							})
 						],
 						newestBlockIndex: 500n,
 						oldestBlockIndex: 50n,
@@ -263,7 +256,11 @@ describe('eth-user-transactions.services', () => {
 				makeBackendResponse({
 					overrides: {
 						transactions: [
-							makeBackendUserTx({ hash: '0xhash1', blockIndex: 100n, timestamp: 1000n })
+							createMockBackendUserTransaction({
+								hash: '0xhash1',
+								blockIndex: 100n,
+								timestamp: 1000n
+							})
 						],
 						newestBlockIndex: 500n,
 						oldestBlockIndex: 100n,
