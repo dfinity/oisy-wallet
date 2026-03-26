@@ -58,7 +58,7 @@ export const createMockIcrcMintTransaction = ({
 			{
 				amount,
 				fee: [],
-				created_at_time: [mockTimestamp],
+				created_at_time: toNullable(mockTimestamp),
 				to: { owner: mockPrincipal, subaccount: [] },
 				memo: memo ? [memo] : []
 			}
@@ -82,7 +82,7 @@ export const createMockIcrcBurnTransaction = ({
 			{
 				amount,
 				fee: [],
-				created_at_time: [mockTimestamp],
+				created_at_time: toNullable(mockTimestamp),
 				from: { owner: mockPrincipal, subaccount: [] },
 				memo: memo ? [memo] : [],
 				spender: []
