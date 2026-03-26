@@ -1,3 +1,4 @@
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import * as customTokensServices from '$lib/services/custom-tokens.services';
@@ -103,7 +104,7 @@ describe('spl.services', () => {
 				return;
 			}
 
-			const mockBackendTokens = [
+			const mockBackendTokens: CustomToken[] = [
 				{
 					token: {
 						SplMainnet: {
@@ -115,7 +116,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
-					section: toNullable(undefined)
+					section: []
 				}
 			];
 
@@ -126,7 +127,7 @@ describe('spl.services', () => {
 
 		it('should fetch token info for non-existing tokens', async () => {
 			const mockAddress = 'NewTokenAddress123456789';
-			const mockBackendTokens = [
+			const mockBackendTokens: CustomToken[] = [
 				{
 					token: {
 						SplMainnet: {
@@ -138,7 +139,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
-					section: toNullable(undefined)
+					section: []
 				}
 			];
 
@@ -162,7 +163,7 @@ describe('spl.services', () => {
 
 		it('should skip tokens with no owner', async () => {
 			const mockAddress = 'NoOwnerTokenAddress';
-			const mockBackendTokens = [
+			const mockBackendTokens: CustomToken[] = [
 				{
 					token: {
 						SplMainnet: {
@@ -174,7 +175,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
-					section: toNullable(undefined)
+					section: []
 				}
 			];
 
@@ -193,7 +194,7 @@ describe('spl.services', () => {
 
 		it('should handle SplDevnet tokens', async () => {
 			const mockAddress = 'DevnetTokenAddress';
-			const mockBackendTokens = [
+			const mockBackendTokens: CustomToken[] = [
 				{
 					token: {
 						SplDevnet: {
@@ -205,7 +206,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
-					section: toNullable(undefined)
+					section: []
 				}
 			];
 
@@ -226,13 +227,14 @@ describe('spl.services', () => {
 		});
 
 		it('should skip tokens that are neither SplMainnet nor SplDevnet', async () => {
-			const mockBackendTokens = [
+			const mockBackendTokens: CustomToken[] = [
 				{
+					// @ts-expect-error: intentionally testing an unrecognized token variant
 					token: { SomeOtherType: {} },
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
-					section: toNullable(undefined)
+					section: []
 				}
 			];
 
