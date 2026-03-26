@@ -163,10 +163,10 @@ describe('exchange.worker', () => {
 						currentErc4626Prices: {},
 						currentEthPrice: { ethereum: { usd: 1 } },
 						currentIcpPrice: { 'internet-computer': { usd: 1 } },
-						currentIcrcPrices: null,
+						currentIcrcPrices: {},
 						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 						currentSolPrice: { solana: { usd: 1 } },
-						currentSplPrices: null,
+						currentSplPrices: {},
 						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
 						currentBaseEthPrice: { ethereum: { usd: 1 } }
 					}
@@ -298,12 +298,25 @@ describe('exchange.worker', () => {
 
 				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 					msg: 'syncExchange',
-					data: expect.objectContaining({
-						currentExchangeRate: expect.objectContaining({
-							exchangeRateToUsd: undefined,
+					data: {
+						currentExchangeRate: {
+							exchangeRateToUsd: null,
+							exchangeRate24hChangeMultiplier: null,
 							currency: Currency.JPY
-						})
-					})
+						},
+						currentEthPrice: undefined,
+						currentBtcPrice: undefined,
+						currentErc20Prices: {},
+						currentErc4626Prices: {},
+						currentIcpPrice: undefined,
+						currentIcrcPrices: {},
+						currentSolPrice: undefined,
+						currentSplPrices: {},
+						currentBnbPrice: undefined,
+						currentPolPrice: undefined,
+						currentArbitrumEthPrice: undefined,
+						currentBaseEthPrice: undefined
+					}
 				});
 			});
 
@@ -346,11 +359,25 @@ describe('exchange.worker', () => {
 
 				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 					msg: 'syncExchange',
-					data: expect.objectContaining({
+					data: {
+						currentExchangeRate: {
+							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1,
+							currency: Currency.USD
+						},
 						currentEthPrice: undefined,
-						currentIcrcPrices: undefined,
-						currentSplPrices: undefined
-					})
+						currentBtcPrice: { bitcoin: { usd: 1 } },
+						currentErc20Prices: {},
+						currentErc4626Prices: {},
+						currentIcpPrice: { 'internet-computer': { usd: 1 } },
+						currentIcrcPrices: {},
+						currentSolPrice: { solana: { usd: 1 } },
+						currentSplPrices: {},
+						currentBnbPrice: { binancecoin: { usd: 1 } },
+						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+						currentArbitrumEthPrice: undefined,
+						currentBaseEthPrice: undefined
+					}
 				});
 			});
 
@@ -376,9 +403,25 @@ describe('exchange.worker', () => {
 
 				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 					msg: 'syncExchange',
-					data: expect.objectContaining({
-						currentErc20Prices: {}
-					})
+					data: {
+						currentExchangeRate: {
+							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1,
+							currency: Currency.USD
+						},
+						currentEthPrice: { ethereum: { usd: 1 } },
+						currentBtcPrice: { bitcoin: { usd: 1 } },
+						currentErc20Prices: {},
+						currentErc4626Prices: {},
+						currentIcpPrice: { 'internet-computer': { usd: 1 } },
+						currentIcrcPrices: {},
+						currentSolPrice: { solana: { usd: 1 } },
+						currentSplPrices: {},
+						currentBnbPrice: { binancecoin: { usd: 1 } },
+						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+						currentBaseEthPrice: { ethereum: { usd: 1 } }
+					}
 				});
 			});
 
@@ -739,11 +782,10 @@ describe('exchange.worker', () => {
 
 				await onExchangeMessage(mockEvent);
 
-				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(
-					expect.objectContaining({
-						msg: 'syncExchangeError'
-					})
-				);
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchangeError',
+					data: { err: 'catastrophic' }
+				});
 			});
 		});
 
