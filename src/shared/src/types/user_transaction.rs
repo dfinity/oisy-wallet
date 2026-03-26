@@ -79,14 +79,13 @@ pub enum IcrcTransactionType {
 /// Bitcoin transaction data.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct BtcTransactionData {
-    pub fee: Option<u64>,
-    pub confirmations: Option<u32>,
+    pub fee: Option<Nat>,
 }
 
 /// Solana transaction data.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct SolTransactionData {
-    pub fee: Option<u64>,
+    pub fee: Option<Nat>,
     /// Owner account that controls the source token account (relevant for SPL).
     pub from_owner: Option<String>,
     /// Owner account that controls the destination token account.

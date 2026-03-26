@@ -437,7 +437,7 @@ export const idlFactory = ({ IDL }) => {
 		gas_price: IDL.Opt(IDL.Nat)
 	});
 	const SolTransactionData = IDL.Record({
-		fee: IDL.Opt(IDL.Nat64),
+		fee: IDL.Opt(IDL.Nat),
 		to_owner: IDL.Opt(IDL.Text),
 		from_owner: IDL.Opt(IDL.Text)
 	});
