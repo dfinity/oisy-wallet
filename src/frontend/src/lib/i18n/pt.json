@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Erro ao carregar o endereço do contrato auxiliar ckETH. Nenhum ID de canister minter foi inicializado.",
 			"unexpected": "Algo deu errado ao converter tokens.",
 			"unexpected_missing_data": "Algo deu errado ao iniciar uma transação de conversão."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "A conversão de USDC de/para ckUSDC está atualmente suspensa."
 		}
 	},
 	"swap": {

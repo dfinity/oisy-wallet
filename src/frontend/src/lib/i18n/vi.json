@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Lỗi khi tải địa chỉ hợp đồng hỗ trợ ckETH. Không có ID canister minter nào được khởi tạo.",
 			"unexpected": "Đã xảy ra lỗi trong khi chuyển đổi token.",
 			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch chuyển đổi."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Việc chuyển đổi USDC từ/sang ckUSDC hiện đang bị tạm ngừng."
 		}
 	},
 	"swap": {

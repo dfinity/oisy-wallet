@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Fehler beim Laden der ckETH-Hilfsvertrag-Adresse. Keine Minter-Canister-ID initialisiert.",
 			"unexpected": "Beim Konvertieren der Token ist etwas schiefgelaufen.",
 			"unexpected_missing_data": "Beim Starten der Umwandlungstransaktion ist etwas schiefgelaufen."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Das Konvertieren von USDC zu/von ckUSDC ist derzeit ausgesetzt."
 		}
 	},
 	"swap": {
