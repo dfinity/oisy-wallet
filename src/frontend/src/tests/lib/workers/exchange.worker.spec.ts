@@ -313,7 +313,9 @@ describe('exchange.worker', () => {
 						currentSolPrice: undefined,
 						currentSplPrices: {},
 						currentBnbPrice: undefined,
-						currentPolPrice: undefined
+						currentPolPrice: undefined,
+						currentArbitrumEthPrice: undefined,
+						currentBaseEthPrice: undefined
 					}
 				});
 			});
@@ -372,7 +374,9 @@ describe('exchange.worker', () => {
 						currentSolPrice: { solana: { usd: 1 } },
 						currentSplPrices: {},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
-						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } }
+						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+						currentArbitrumEthPrice: undefined,
+						currentBaseEthPrice: undefined
 					}
 				});
 			});
@@ -414,7 +418,9 @@ describe('exchange.worker', () => {
 						currentSolPrice: { solana: { usd: 1 } },
 						currentSplPrices: {},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
-						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } }
+						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+						currentBaseEthPrice: { ethereum: { usd: 1 } }
 					}
 				});
 			});

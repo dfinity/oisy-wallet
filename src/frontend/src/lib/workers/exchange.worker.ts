@@ -212,7 +212,9 @@ const syncExchangeFromProviders = async ({
 		currentSplPrices: currentSplPrices ?? {},
 		currentErc4626Prices,
 		currentBnbPrice: currentBnbPrice ?? undefined,
-		currentPolPrice: currentPolPrice ?? undefined
+		currentPolPrice: currentPolPrice ?? undefined,
+		currentArbitrumEthPrice: currentEthPrice ?? undefined,
+		currentBaseEthPrice: currentEthPrice ?? undefined
 	};
 };
 
