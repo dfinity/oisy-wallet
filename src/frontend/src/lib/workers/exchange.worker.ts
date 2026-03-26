@@ -94,7 +94,7 @@ interface SyncExchangeParams {
 	erc4626TokensExchangeData: Erc4626TokensExchangeData[];
 }
 
-const syncExchangeFromCoingecko = async ({
+const syncExchangeFromProviders = async ({
 	currentCurrency,
 	erc20ContractAddresses,
 	icrcLedgerCanisterIds,
@@ -227,7 +227,7 @@ const syncExchange = async (params: SyncExchangeParams) => {
 	syncInProgress = true;
 
 	try {
-		const data = await syncExchangeFromCoingecko(params);
+		const data = await syncExchangeFromProviders(params);
 
 		postMessage({
 			msg: 'syncExchange',
