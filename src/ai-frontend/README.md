@@ -95,12 +95,12 @@ After deploying the canister, register the custom domain following the [IC custo
 
 ## Key differences from the main app
 
-| Aspect | Main app (`oisy.com`) | AI app (`oisy.ai`) |
-|--------|----------------------|---------------------|
-| Routes | Multi-page wallet UI | Single page (login + chat) |
-| Auth guard | Full landing page with preview image | Minimal login screen |
-| AI feature flags | Gated by `VITE_AI_ASSISTANT_CONSOLE_ENABLED` + beta opt-in | Always enabled |
-| Navigation | Full nav menu, hero, footer | None |
-| Build output | `build/` | `build-ai/` |
-| SvelteKit output | `.svelte-kit/` | `.svelte-kit-ai/` |
-| Canister | `frontend` | `frontend_ai` |
+| Aspect           | Main app (`oisy.com`)                                      | AI app (`oisy.ai`)         |
+| ---------------- | ---------------------------------------------------------- | -------------------------- |
+| Routes           | Multi-page wallet UI                                       | Single page (login + chat) |
+| Auth guard       | Full landing page with preview image                       | Minimal login screen       |
+| AI feature flags | Gated by `VITE_AI_ASSISTANT_CONSOLE_ENABLED` + beta opt-in | Always enabled             |
+| Navigation       | Full nav menu, hero, footer                                | None                       |
+| Build output     | `build/`                                                   | `build-ai/`                |
+| SvelteKit output | `.svelte-kit/`                                             | `.svelte-kit-ai/`          |
+| Canister         | `frontend`                                                 | `frontend_ai`              |

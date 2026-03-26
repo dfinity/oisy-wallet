@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import IconAstronautArrow from '$lib/components/icons/icon-astronaut/IconAstronautArrow.svelte';
-	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
-	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
+	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
+	import IconAstronautArrow from '$lib/components/icons/icon-astronaut/IconAstronautArrow.svelte';
+	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { signIn } from '$lib/services/auth.services';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
@@ -30,10 +30,7 @@
 </script>
 
 {#if $authNotSignedIn}
-	<div
-		class="flex min-h-dvh flex-col items-center justify-center px-6"
-		in:fade
-	>
+	<div class="flex min-h-dvh flex-col items-center justify-center px-6" in:fade>
 		<div class="flex flex-col items-center gap-8 text-center">
 			<div class="flex items-center gap-3">
 				<IconAiAssistant size="48" />

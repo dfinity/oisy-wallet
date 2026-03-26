@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { type Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Busy from '$lib/components/ui/Busy.svelte';
