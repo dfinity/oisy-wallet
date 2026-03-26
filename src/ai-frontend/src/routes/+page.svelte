@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
+	import AiAssistantChat from '$lib/components/ai-assistant/AiAssistantChat.svelte';
+	import AiAssistantResetButton from '$lib/components/ai-assistant/AiAssistantResetButton.svelte';
 	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
 	import IconAstronautArrow from '$lib/components/icons/icon-astronaut/IconAstronautArrow.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
@@ -11,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { InternetIdentityDomain } from '$lib/types/auth';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+
 
 	onMount(() => {
 		aiAssistantStore.open();
@@ -53,5 +55,11 @@
 		</div>
 	</div>
 {:else if $authSignedIn}
-	<AiAssistantConsole />
+	<div class="fixed inset-0 mx-auto flex max-w-3xl flex-col bg-primary" in:fade>
+		<div class="flex items-center justify-end px-4 py-2">
+			<AiAssistantResetButton />
+		</div>
+
+		<AiAssistantChat />
+	</div>
 {/if}

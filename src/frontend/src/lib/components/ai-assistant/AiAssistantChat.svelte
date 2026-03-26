@@ -1,0 +1,207 @@
+<script lang="ts">
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
+	import AiAssistantActionButton from '$lib/components/ai-assistant/AiAssistantActionButton.svelte';
+	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
+	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
+	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
+	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
+	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
+	import {
+		AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
+		AI_ASSISTANT_MESSAGE_SENT
+	} from '$lib/constants/analytics.constants';
+	import {
+		aiAssistantLlmMessages,
+		aiAssistantChatMessages
+	} from '$lib/derived/ai-assistant.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { askLlm } from '$lib/services/ai-assistant.services';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { ChatMessage } from '$lib/types/ai-assistant';
+	import { generateAiAssistantResponseEventMetadata } from '$lib/utils/ai-assistant.utils';
+	import { consoleError } from '$lib/utils/console.utils';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+
+	let userInput = $state('');
+	let loading = $state(false);
+	let disabled = $derived(loading || isNullishOrEmpty(userInput));
+	let messagesContainer: HTMLDivElement | undefined;
+	let shouldScrollMessagesContainer = $state(true);
+
+	let messagesToDisplay = $derived(
+		$aiAssistantChatMessages.reduce<ChatMessage[]>(
+			(acc, { data, role }) => [...acc, ...(role !== 'system' ? [{ role, data }] : [])],
+			[]
+		)
+	);
+
+	const handleMessagesContainerScroll = () => {
+		if (isNullish(messagesContainer)) {
+			return;
+		}
+
+		shouldScrollMessagesContainer =
+			messagesContainer.scrollTop + messagesContainer.clientHeight >=
+			messagesContainer.scrollHeight - 10;
+	};
+
+	$effect(() => {
+		if (
+			nonNullish(messagesContainer) &&
+			shouldScrollMessagesContainer &&
+			messagesToDisplay.length > 0
+		) {
+			messagesContainer.scrollTo({
+				top: messagesContainer.scrollHeight,
+				behavior: 'smooth'
+			});
+		}
+	});
+
+	export const sendMessage = async ({
+		messageText,
+		context
+	}: {
+		messageText?: string;
+		context?: string;
+	}) => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		if (notEmptyString(messageText)) {
+			aiAssistantStore.appendMessage({
+				role: 'user',
+				data: { text: messageText, context }
+			});
+		}
+
+		const requestStartTimestamp = Date.now();
+
+		try {
+			shouldScrollMessagesContainer = true;
+			loading = true;
+
+			trackEvent({ name: AI_ASSISTANT_MESSAGE_SENT });
+
+			const { text, tool } = await askLlm({
+				messages: $aiAssistantLlmMessages,
+				identity: $authIdentity
+			});
+
+			aiAssistantStore.appendMessage({
+				role: 'assistant',
+				data:
+					(tool?.calls ?? []).length > 0 && (tool?.results ?? []).length > 0
+						? {
+								tool
+							}
+						: {
+								text: isNullishOrEmpty(text) ? $i18n.ai_assistant.errors.no_response : text,
+								...(isNullishOrEmpty(text) && { retryable: true })
+							}
+			});
+		} catch (err: unknown) {
+			consoleError($i18n.ai_assistant.errors.unknown, err);
+
+			aiAssistantStore.appendMessage({
+				role: 'assistant',
+				data: {
+					text: $i18n.ai_assistant.errors.unknown,
+					retryable: true
+				}
+			});
+
+			trackEvent({
+				name: AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
+				metadata: generateAiAssistantResponseEventMetadata({ requestStartTimestamp })
+			});
+		}
+
+		loading = false;
+	};
+
+	const onRetry = async () => {
+		aiAssistantStore.removeLastMessage();
+
+		await onMessageSubmit();
+	};
+
+	const onMessageSubmit = async () => {
+		if (loading) {
+			return;
+		}
+
+		const nextMessage = userInput;
+		userInput = '';
+
+		await sendMessage({ messageText: nextMessage });
+	};
+</script>
+
+<div
+	bind:this={messagesContainer}
+	class="h-full overflow-x-hidden overflow-y-auto px-4 py-6"
+	onscroll={handleMessagesContainerScroll}
+>
+	{#if !loading && messagesToDisplay.length <= 0}
+		<div in:fade>
+			<h4 class="text-brand-primary">
+				{$i18n.ai_assistant.text.welcome_message}
+			</h4>
+			<div class="my-6">
+				<AiAssistantActionButton
+					onClick={() => {
+						sendMessage({ messageText: $i18n.ai_assistant.text.action_button_contacts_prompt });
+					}}
+					subtitle={$i18n.ai_assistant.text.action_button_contacts_subtitle}
+					title={$i18n.ai_assistant.text.action_button_contacts_title}
+				>
+					{#snippet icon()}
+						<IconUserSquare />
+					{/snippet}
+				</AiAssistantActionButton>
+				<AiAssistantActionButton
+					onClick={() => {
+						sendMessage({
+							messageText: $i18n.ai_assistant.text.action_button_send_tokens_prompt
+						});
+					}}
+					subtitle={$i18n.ai_assistant.text.action_button_send_tokens_subtitle}
+					title={$i18n.ai_assistant.text.action_button_send_tokens_title}
+				>
+					{#snippet icon()}
+						<IconSend size="24" />
+					{/snippet}
+				</AiAssistantActionButton>
+				<AiAssistantActionButton
+					onClick={() => {
+						sendMessage({
+							messageText: $i18n.ai_assistant.text.action_button_show_balance_prompt
+						});
+					}}
+					subtitle={$i18n.ai_assistant.text.action_button_show_balance_subtitle}
+					title={$i18n.ai_assistant.text.action_button_show_balance_title}
+				>
+					{#snippet icon()}
+						<IconWallet size="24" />
+					{/snippet}
+				</AiAssistantActionButton>
+			</div>
+		</div>
+	{:else}
+		<div in:fade>
+			<AiAssistantMessages
+				{loading}
+				messages={messagesToDisplay}
+				{onRetry}
+				onSendMessage={sendMessage}
+			/>
+		</div>
+	{/if}
+</div>
+
+<AiAssistantForm {disabled} {onMessageSubmit} bind:value={userInput} />
