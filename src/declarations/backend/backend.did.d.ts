@@ -32,6 +32,17 @@ export interface AddUserCredentialRequest {
 }
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
+export interface AgreementHistoryEntry {
+	timestamp_ns: bigint;
+	agreement_type: AgreementType;
+	text_sha256: [] | [string];
+	accepted: boolean;
+	last_updated_at_ms: [] | [bigint];
+}
+export type AgreementType =
+	| { TermsOfUse: null }
+	| { PrivacyPolicy: null }
+	| { LicenseAgreement: null };
 export interface Agreements {
 	agreements: UserAgreements;
 }
@@ -240,6 +251,12 @@ export interface ExperimentalFeaturesSettings {
 export interface ExtV2Token {
 	canister_id: Principal;
 }
+export type GetAgreementHistoryError = { UserNotFound: null };
+export type GetAgreementHistoryResult =
+	| {
+			Ok: Array<AgreementHistoryEntry>;
+	  }
+	| { Err: GetAgreementHistoryError };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
@@ -397,6 +414,7 @@ export interface Stats {
 	custom_token_count: bigint;
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;
+	agreement_history_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
@@ -702,6 +720,16 @@ export interface _SERVICE {
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
 	get_exchange_rates: ActorMethod<[Array<TokenId>], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
+	 * Returns the full agreement consent/rejection history for the caller.
+	 *
+	 * # Returns
+	 * - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
+	 *
+	 * # Errors
+	 * - `Err(UserNotFound)` if no history exists and the user has no profile.
+	 */
+	get_user_agreement_history: ActorMethod<[], GetAgreementHistoryResult>;
+	/**
 	 * Returns the caller's user profile.
 	 *
 	 * # Errors
@@ -806,7 +834,9 @@ export interface _SERVICE {
 	 */
 	update_contact: ActorMethod<[Contact], GetContactResult>;
 	/**
-	 * Updates the user's agreements, merging with any existing ones.
+	 * Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
+	 * for every agreement that was actually changed.
+	 *
 	 * Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
 	 * set to `now`.
 	 *
