@@ -46,7 +46,8 @@ export enum PLAUSIBLE_EVENT_VALUES {
 	NFT = 'nft',
 	NFT_COLLECTION_PAGE = 'nft-collection-page',
 	NFT_PAGE = 'nft-page',
-	EARN_PAGE = 'earn-page'
+	EARN_PAGE = 'earn-page',
+	HARVEST_AUTOPILOTS_PAGE = 'harvest-autopilots-page'
 }
 
 export enum PLAUSIBLE_EVENT_SOURCES {
