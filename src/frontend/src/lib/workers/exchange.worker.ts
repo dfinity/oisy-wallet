@@ -94,14 +94,10 @@ interface SyncExchangeParams {
 	erc4626TokensExchangeData: Erc4626TokensExchangeData[];
 }
 
-const syncExchangeFromProviders = async ({
-	currentCurrency,
-	erc20ContractAddresses,
-	icrcLedgerCanisterIds,
-	splTokenAddresses,
-	erc4626TokensExchangeData
-}: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
-	const erc20PriceParams: CoingeckoErc20PriceParams[] = Object.values(
+const buildErc20PriceParams = (
+	erc20ContractAddresses: Erc20ContractAddressWithNetwork[]
+): CoingeckoErc20PriceParams[] =>
+	Object.values(
 		erc20ContractAddresses.reduce<Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>>(
 			(acc, { address, coingeckoId }) => {
 				if (
@@ -128,6 +124,15 @@ const syncExchangeFromProviders = async ({
 			{} as Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>
 		)
 	);
+
+const syncExchangeFromProviders = async ({
+	currentCurrency,
+	erc20ContractAddresses,
+	icrcLedgerCanisterIds,
+	splTokenAddresses,
+	erc4626TokensExchangeData
+}: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
+	const erc20PriceParams = buildErc20PriceParams(erc20ContractAddresses);
 
 	const erc20PricesSettled = await Promise.allSettled(
 		erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))
