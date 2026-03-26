@@ -125,6 +125,9 @@ export type BtcGetPendingTransactionsResult =
 export type BtcSelectUserUtxosFeeResult =
 	| { Ok: SelectedUtxosFeeResponse }
 	| { Err: SelectedUtxosFeeError };
+export interface BtcTransactionData {
+	fee: [] | [bigint];
+}
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -288,6 +291,16 @@ export interface IcrcToken {
 	ledger_id: Principal;
 	index_id: [] | [Principal];
 }
+export interface IcrcTransactionData {
+	fee: [] | [bigint];
+	memo: [] | [Uint8Array];
+	tx_type: IcrcTransactionType;
+}
+export type IcrcTransactionType =
+	| { Approve: { spender: string } }
+	| { Burn: null }
+	| { Mint: null }
+	| { Transfer: null };
 export type Icrcv2AccountId =
 	| { Account: Uint8Array }
 	| {
@@ -329,7 +342,11 @@ export type NetworkSettingsFor =
 	| { SolanaMainnet: null }
 	| { BitcoinMainnet: null }
 	| { BscTestnet: null };
-export type NetworkTransactionData = { Evm: EvmTransactionData };
+export type NetworkTransactionData =
+	| { Btc: BtcTransactionData }
+	| { Evm: EvmTransactionData }
+	| { Sol: SolTransactionData }
+	| { Icrc: IcrcTransactionData };
 export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
@@ -385,6 +402,11 @@ export interface Settings {
 export interface SignedDelegation {
 	signature: Uint8Array;
 	delegation: Delegation;
+}
+export interface SolTransactionData {
+	fee: [] | [bigint];
+	to_owner: [] | [string];
+	from_owner: [] | [string];
 }
 export interface SplToken {
 	decimals: [] | [number];
