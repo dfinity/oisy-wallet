@@ -12,7 +12,7 @@ export enum PLAUSIBLE_EVENTS {
 	RATE_LIMITED = 'rate_limited',
 	STAKE = 'stake',
 	UNSTAKE = 'unstake',
-	UNCERTIFIED_TRANSACTIONS_REMOVED = 'uncertified_transactions_removed'
+	LOAD_TRANSACTIONS = 'load_transactions'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -42,6 +42,10 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
 	PER_USER = 'per_user',
 	GLOBAL = 'global'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
+	UNCERTIFIED_REMOVED = 'uncertified_removed'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
