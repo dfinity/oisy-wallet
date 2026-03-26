@@ -1034,7 +1034,7 @@
 			"unexpected_missing_data": "전환 트랜잭션을 시작하는 중 문제가 발생했습니다."
 		},
 		"warning": {
-			"ckusdc_conversion_currently_suspended": ""
+			"ckusdc_conversion_currently_suspended": "USDC와 ckUSDC 간의 전환이 현재 중단되었습니다."
 		}
 	},
 	"swap": {
