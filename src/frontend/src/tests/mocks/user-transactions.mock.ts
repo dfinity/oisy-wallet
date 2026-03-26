@@ -1,13 +1,66 @@
 import type {
+	EvmTransactionData,
 	GetUserTransactionsResponse as CandidGetUserTransactionsResponse,
+	NetworkTransactionData,
 	TokenId,
 	UserTransaction
 } from '$declarations/backend/backend.did';
+import { mapTransactionToUserTransaction } from '$eth/utils/user-transactions.utils';
 import type { GetUserTransactionsResponse } from '$lib/types/api';
+import type { Transaction } from '$lib/types/transaction';
+import { mockEthTransaction } from '$tests/mocks/eth-transactions.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 
+export { mockEthTransaction };
+
+export const extractMockEvmTransactionData = (networkData: NetworkTransactionData): EvmTransactionData => {
+	if (!('Evm' in networkData)) {
+		throw new Error('Expected Evm network data');
+	}
+
+	return networkData.Evm;
+};
+
+export const mockEthMappedUserTransaction: UserTransaction =
+	mapTransactionToUserTransaction(mockEthTransaction);
+
+export const mockEthMappedEvmTransactionData: EvmTransactionData = extractMockEvmTransactionData(
+	mockEthMappedUserTransaction.network_data
+);
+
 export const mockUserTransactionTokenId: TokenId = { Icrc: mockPrincipal };
+
+export const createMockBackendUserTransaction = ({
+	hash,
+	blockIndex,
+	timestamp,
+	from = mockEthAddress
+}: {
+	hash: string;
+	blockIndex: bigint;
+	timestamp: bigint;
+	from?: string;
+}): UserTransaction => ({
+	id: hash,
+	block_index: blockIndex,
+	timestamp,
+	from,
+	to: toNullable('0xrecipient'),
+	value: 1000n,
+	network_data: {
+		Evm: {
+			chain_id: toNullable(1n),
+			nonce: toNullable(1n),
+			gas_limit: toNullable(21000n),
+			gas_price: toNullable(20_000_000_000n),
+			gas_used: toNullable(21000n),
+			data: toNullable(),
+			nft_token_id: toNullable()
+		}
+	}
+});
 
 export const mockUserTransaction: UserTransaction = {
 	id: 'tx-1',
@@ -64,3 +117,13 @@ export const mockGetUserTransactionsResponse: GetUserTransactionsResponse = {
 	newestBlockIndex: 100n,
 	transactions: [mockUserTransaction]
 };
+
+export const mockMapFromBackendUserTransaction = (tx: UserTransaction): Transaction => ({
+	...mockEthTransaction,
+	from: tx.from,
+	blockNumber: Number(tx.block_index),
+	hash: tx.id
+});
+
+export const mockMapToBackendUserTransaction = (_tx: Transaction): UserTransaction =>
+	mockUserTransaction;
