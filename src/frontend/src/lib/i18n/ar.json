@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "خطأ أثناء تحميل عنوان عقد مساعد ckETH. لم يتم تهيئة معرف حاوية منشئ.",
 			"unexpected": "حدث خطأ ما أثناء تحويل التوكنات.",
 			"unexpected_missing_data": "حدث خطأ ما أثناء بدء معاملة تحويل."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": ""
 		}
 	},
 	"swap": {

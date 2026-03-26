@@ -1032,6 +1032,9 @@
 			"loading_cketh_helper": "Chyba při načítání adresy pomocné smlouvy ckETH. Nebyl inicializován žádný ID kanystru minteru.",
 			"unexpected": "Při převodu tokenů se něco pokazilo.",
 			"unexpected_missing_data": "Při zahájení transakce převodu se něco pokazilo."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Převod USDC z/na ckUSDC je momentálně pozastaven."
 		}
 	},
 	"swap": {
