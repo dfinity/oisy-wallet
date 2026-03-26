@@ -6,7 +6,6 @@
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
-	import { ckUsdcConversionDisabled } from '$icp-eth/derived/cketh.derived';
 	import { autoLoadErc20Token } from '$icp-eth/services/erc20-token.services';
 	import { autoLoadIcrcToken } from '$icp-eth/services/icrc-token.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -91,7 +90,7 @@
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
 		{ariaLabel}
-		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled || $ckUsdcConversionDisabled}
+		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
 		{icon}
 		{label}
 		onclick={async () => await openConvert()}
