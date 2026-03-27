@@ -40,7 +40,8 @@ export const OisyDappDescriptionSchema = DAppDescriptionSchema.extend({
 	callToAction: z.string().optional(),
 	telegram: UrlSchema.optional(),
 	openChat: UrlSchema.optional(),
-	carousel: CarouselDappDescriptionSchema.optional()
+	carousel: CarouselDappDescriptionSchema.optional(),
+	disabled: z.boolean().optional()
 });
 
 export type OisyDappDescription = z.infer<typeof OisyDappDescriptionSchema>;
