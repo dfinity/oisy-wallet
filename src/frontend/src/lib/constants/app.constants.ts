@@ -13,6 +13,10 @@ export const STAGING = MODE === 'staging' || TEST_FE || AUDIT || E2E;
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
+// Set via OISY_SIGNER_TARGET env var at build time ('signer' | 'legacy_signer' | '')
+export const SIGNER_TARGET: string | undefined = VITE_OISY_SIGNER_TARGET || undefined;
+export const IS_SIGNER_DOMAIN = nonNullish(SIGNER_TARGET);
+
 export const TEST = parseBoolEnvVar(import.meta.env.TEST);
 
 const MAINNET_DOMAIN = 'icp0.io';
@@ -128,9 +132,12 @@ const DOMAIN_URL_HOSTNAME =
 const IS_ICP_DOMAIN_URL = DOMAIN_URL_HOSTNAME.endsWith('.icp0.io');
 
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
+// Signer domains always need a derivation origin so users get the same identity as on the main wallet.
 export const AUTH_DERIVATION_ORIGIN =
-	BETA || (PROD && IS_ICP_DOMAIN_URL)
-		? 'https://oisy.com'
+	IS_SIGNER_DOMAIN || BETA || (PROD && IS_ICP_DOMAIN_URL)
+		? STAGING
+			? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
+			: 'https://oisy.com'
 		: STAGING
 			? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
 			: undefined;
