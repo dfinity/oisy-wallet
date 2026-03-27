@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+####
+# Note: KongSwap was sunsetted but we keep the infrastructure code in case they make a comeback.
+
 set -euo pipefail
 
 print_help() {
@@ -25,10 +28,8 @@ CANDID_URL="${KONG_REPO_URL}/kong_backend.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 WASM_URL="${KONG_REPO_URL}/kong_backend.wasm.gz"
 
-# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
-# CANDID_FILE="$(jq -r .canisters.kong_backend.candid dfx.json)"
-# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
-# WASM_FILE="$(jq -r .canisters.kong_backend.wasm dfx.json)"
+CANDID_FILE="$(jq -r .canisters.kong_backend.candid dfx.json)"
+WASM_FILE="$(jq -r .canisters.kong_backend.wasm dfx.json)"
 
 download() {
   : 'Downloads a URL to a given file.'
@@ -42,20 +43,16 @@ download() {
 
 ####
 # Downloads the candid file, if it does not exist already.
-# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
-# download candid
+download candid
 
 ####
 # Downloads the Wasm file, if it does not exist already.
-# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
-# download wasm
+download wasm
 
 ####
 # Success
-echo "SKIPPED: kong_backend downloads are temporarily disabled (assets unreachable)."
-# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
-# cat <<EOF
-# SUCCESS: The kong_backend installation files have been created:
-# kong_backend candid:       $CANDID_FILE
-# kong_backend Wasm:         $WASM_FILE
-# EOF
+cat <<EOF
+SUCCESS: The kong_backend installation files have been created:
+kong_backend candid:       $CANDID_FILE
+kong_backend Wasm:         $WASM_FILE
+EOF
