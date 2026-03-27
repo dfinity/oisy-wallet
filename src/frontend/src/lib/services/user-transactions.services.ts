@@ -5,13 +5,14 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Transaction as EthTransaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
 
 /**
  * Loads stored finalized transactions from the backend canister.
  * Returns the transactions and block index boundaries (for incremental loading).
  */
-export const loadUserTransactions = async <T extends EthTransaction>({
+export const loadUserTransactions = async <T extends EthTransaction | SolTransactionUi>({
 	identity,
 	tokenId,
 	start,
@@ -49,30 +50,18 @@ export const loadUserTransactions = async <T extends EthTransaction>({
 };
 
 /**
- * Attempts to extract a numeric block number from a transaction object.
- */
-const getBlockNumber = (tx: EthTransaction): number | undefined => {
-	if ('blockNumber' in tx) {
-		return tx.blockNumber;
-	}
-
-	// TODO: support other transaction types (e.g. Solana) by checking other possible block number fields
-};
-
-/**
  * Saves finalized transactions to the backend canister.
  * Only transactions that pass `canSave` and `isFinalizedFn` will be persisted.
  *
  * Generic over `T` — callers supply:
  * - `canSave`: pre-filter (e.g. must have a hash and block number)
- * - `isFinalizedFn`: network-specific finality check
+ * - `isFinalizedFn`: network-specific finality check (receives the full transaction)
  * - `mapToBackend`: converts the network-specific transaction into `UserTransaction`
  */
-export const saveFinalizedTransactions = async <T extends EthTransaction>({
+export const saveFinalizedTransactions = async <T>({
 	identity,
 	tokenId,
 	transactions,
-	currentBlockNumber,
 	isFinalizedFn,
 	mapToBackend,
 	canSave
@@ -80,11 +69,7 @@ export const saveFinalizedTransactions = async <T extends EthTransaction>({
 	identity: OptionIdentity;
 	tokenId: BackendTokenId;
 	transactions: T[];
-	currentBlockNumber: number;
-	isFinalizedFn: (params: {
-		blockNumber: number | undefined;
-		currentBlockNumber: number;
-	}) => boolean;
+	isFinalizedFn: (tx: T) => boolean;
 	mapToBackend: (tx: T) => UserTransaction;
 	canSave: (tx: T) => boolean;
 }): Promise<ResultSuccess> => {
@@ -92,14 +77,7 @@ export const saveFinalizedTransactions = async <T extends EthTransaction>({
 		return { success: false };
 	}
 
-	const finalized = transactions.filter(
-		(tx) =>
-			canSave(tx) &&
-			isFinalizedFn({
-				blockNumber: getBlockNumber(tx),
-				currentBlockNumber
-			})
-	);
+	const finalized = transactions.filter((tx) => canSave(tx) && isFinalizedFn(tx));
 
 	if (finalized.length === 0) {
 		return { success: true };
