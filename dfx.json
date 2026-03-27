@@ -126,6 +126,7 @@
 			}
 		},
 		"signer_frontend": {
+			"build": "OISY_SIGNER_TARGET=signer npm run build",
 			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.20.0/src/distributed/assetstorage.did",
 			"frontend": {
 				"entrypoint": "build/index.html"
@@ -134,6 +135,7 @@
 			"type": "assets"
 		},
 		"legacy_signer_frontend": {
+			"build": "OISY_SIGNER_TARGET=legacy_signer npm run build",
 			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.20.0/src/distributed/assetstorage.did",
 			"frontend": {
 				"entrypoint": "build/index.html"
