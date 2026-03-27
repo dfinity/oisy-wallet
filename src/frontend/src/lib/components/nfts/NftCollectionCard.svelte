@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -61,10 +62,10 @@
 		});
 
 		if (collection.nfts.length === 1) {
-			goto(nftsUrl({ nft: collection.nfts[0] }));
+			goto(resolve(nftsUrl({ nft: collection.nfts[0] })));
 			return;
 		}
-		goto(nftsUrl({ collection: collection.collection }));
+		goto(resolve(nftsUrl({ collection: collection.collection })));
 	};
 </script>
 

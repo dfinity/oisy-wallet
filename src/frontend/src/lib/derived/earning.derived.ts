@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
 	enabledHarvestAutopilotsUsdBalance,
@@ -56,7 +57,7 @@ export const earningData: Readable<EarningData> = derived(
 						Number($harvestAutopilotsMaxApy)) /
 					100
 				: undefined,
-			action: () => goto(AppPath.EarnAutopilot)
+			action: () => goto(resolve(AppPath.EarnAutopilot))
 		}
 	})
 );

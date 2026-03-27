@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate, goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { EARNING_ENABLED } from '$env/earning';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import AllRewardsList from '$lib/components/rewards/AllRewardsList.svelte';
@@ -29,12 +30,14 @@
 			link={false}
 			onclick={() =>
 				goto(
-					networkUrl({
-						path: AppPath.Earn,
-						networkId: $networkId,
-						usePreviousRoute: true,
-						fromRoute
-					})
+					resolve(
+						networkUrl({
+							path: AppPath.Earn,
+							networkId: $networkId,
+							usePreviousRoute: true,
+							fromRoute
+						})
+					)
 				)}
 			styleClass="mr-3"
 		>

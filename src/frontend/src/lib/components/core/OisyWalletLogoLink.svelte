@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_ITEM_HOMEPAGE } from '$lib/constants/test-ids.constants';
@@ -10,7 +11,7 @@
 	class="flex w-fit items-center gap-0 no-underline"
 	aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
 	data-tid={NAVIGATION_ITEM_HOMEPAGE}
-	href={AppPath.Tokens}
+	href={resolve(AppPath.Tokens)}
 >
 	<OisyWalletLogo />
 </a>

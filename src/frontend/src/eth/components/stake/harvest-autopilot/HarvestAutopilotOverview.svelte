@@ -3,6 +3,7 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { EarningCardFields } from '$env/types/env.earning-cards';
 	import HarvestAutopilotInfoBox from '$eth/components/stake/harvest-autopilot/HarvestAutopilotInfoBox.svelte';
@@ -125,7 +126,8 @@
 					{#each currentPositionsSorted as autopilot (autopilot.token.id)}
 						<VaultCard
 							data={autopilot}
-							onClick={() => goto(`${AppPath.EarnAutopilot}?vault=${autopilot.token.address}`)}
+							onClick={() =>
+								goto(resolve(`${AppPath.EarnAutopilot}?vault=${autopilot.token.address}`))}
 						/>
 					{/each}
 				</div>
@@ -144,7 +146,8 @@
 					{#each otherAutopilotsSorted as autopilot (autopilot.token.id)}
 						<VaultCard
 							data={autopilot}
-							onClick={() => goto(`${AppPath.EarnAutopilot}?vault=${autopilot.token.address}`)}
+							onClick={() =>
+								goto(resolve(`${AppPath.EarnAutopilot}?vault=${autopilot.token.address}`))}
 						/>
 					{/each}
 				</div>

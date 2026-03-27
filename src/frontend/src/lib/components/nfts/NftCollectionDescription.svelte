@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
 	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
@@ -37,7 +38,7 @@
 	);
 
 	const gotoCollection = (): void => {
-		goto(nftsUrl({ collection }));
+		goto(resolve(nftsUrl({ collection })));
 	};
 </script>
 

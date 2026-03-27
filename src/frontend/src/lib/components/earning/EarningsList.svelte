@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { allVaults } from '$eth/derived/vaults.derived';
 	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 	import NoStakePlaceholder from '$lib/components/stake/NoStakePlaceholder.svelte';
@@ -55,9 +56,11 @@
 					data={vault}
 					onClick={() =>
 						goto(
-							isTokenHarvestAutopilot(vault.token)
-								? `${AppPath.EarnAutopilot}?${VAULT_PARAM}=${vault.token.address}`
-								: transactionsUrl({ token: vault.token })
+							resolve(
+								isTokenHarvestAutopilot(vault.token)
+									? `${AppPath.EarnAutopilot}?${VAULT_PARAM}=${vault.token.address}`
+									: transactionsUrl({ token: vault.token })
+							)
 						)}
 				/>
 			</div>

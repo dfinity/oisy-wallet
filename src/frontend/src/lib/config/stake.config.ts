@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 import { HARVEST_AUTOPILOT_URL } from '$eth/constants/harvest-autopilots.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import {
@@ -63,7 +64,7 @@ export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = 
 		url: `${HARVEST_AUTOPILOT_URL}autopilot/`,
 		card: {
 			titles: ['earning.cards.harvest_autopilot.title'],
-			action: () => goto(AppPath.EarnAutopilot)
+			action: () => goto(resolve(AppPath.EarnAutopilot))
 		}
 	}
 };

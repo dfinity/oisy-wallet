@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate, goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -56,12 +57,14 @@
 			modalStore.openRewardDetails({ id: rewardModalId, data: airdrop });
 		} else if (nonNullish(pagePath)) {
 			goto(
-				networkUrl({
-					path: pagePath,
-					networkId: $networkId,
-					usePreviousRoute: true,
-					fromRoute
-				})
+				resolve(
+					networkUrl({
+						path: pagePath,
+						networkId: $networkId,
+						usePreviousRoute: true,
+						fromRoute
+					})
+				)
 			);
 		} else {
 			modalStore.openDappDetails({ id: dappModalId, data: dappsCarouselSlide });

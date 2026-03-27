@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import IconOisyMate from '$lib/components/icons/IconOisyMate.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -19,7 +20,7 @@
 
 	<p>{text}</p>
 
-	<Button colorStyle="secondary-light" onclick={() => goto(AppPath.Tokens)}>
+	<Button colorStyle="secondary-light" onclick={() => goto(resolve(AppPath.Tokens))}>
 		{$i18n.scanner.text.go_to_assets}
 	</Button>
 </div>

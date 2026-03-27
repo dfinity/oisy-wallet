@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
+import { resolve } from '$app/paths';
 import {
 	AppPath,
 	COLLECTION_PARAM,
@@ -20,8 +21,6 @@ import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
-
-export const pathToHref = (path: AppPath) => (path.endsWith('/') ? path.slice(0, -1) : path);
 
 const normalizePath = (s: string | null) =>
 	nonNullish(s) ? (s.endsWith('/') ? s : `${s}/`) : null;
@@ -112,16 +111,18 @@ export const back = async ({ pop }: { pop: boolean }) => {
 		return;
 	}
 
-	await goto('/');
+	await goto(resolve('/'));
 };
 
 export const gotoReplaceRoot = async (deleteIdbCache = false) => {
-	await goto(deleteIdbCache ? `/?${PARAM_DELETE_IDB_CACHE}=true` : '/', { replaceState: true });
+	await goto(resolve(deleteIdbCache ? `/?${PARAM_DELETE_IDB_CACHE}=true` : '/'), {
+		replaceState: true
+	});
 };
 
 export const removeSearchParam = ({ url, searchParam }: { url: URL; searchParam: string }) => {
 	url.searchParams.delete(searchParam);
-	pushState(url, {});
+	pushState(resolve(`${url.pathname}${url.search}`), {});
 };
 
 export interface RouteParams {
@@ -185,7 +186,7 @@ export const switchNetwork = async ({ networkId }: { networkId: Nullish<NetworkI
 		userSelectedNetworkStore.set(networkId);
 	}
 
-	await goto(url, { replaceState: true, noScroll: true });
+	await goto(resolve(`${url.pathname}${url.search}`), { replaceState: true, noScroll: true });
 };
 
 // Todo: remove fromRoute

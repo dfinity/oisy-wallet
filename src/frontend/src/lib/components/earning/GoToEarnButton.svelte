@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate, goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import IconArrowRight from '$lib/components/icons/IconArrowRight.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -27,7 +28,7 @@
 
 <Button
 	colorStyle="success"
-	onclick={() => goto(path)}
+	onclick={() => goto(resolve(path))}
 	styleClass="gap-1 flex-none px-12 font-semibold"
 	testId={EARNING_GOTO_BUTTON}
 	type="button"

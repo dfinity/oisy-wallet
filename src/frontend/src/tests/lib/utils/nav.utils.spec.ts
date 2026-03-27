@@ -39,7 +39,6 @@ import {
 	loadRouteParams,
 	networkParam,
 	networkUrl,
-	pathToHref,
 	nftsUrl,
 	removeSearchParam,
 	resetRouteParams,
@@ -62,20 +61,6 @@ describe('nav.utils', () => {
 		vi.resetAllMocks();
 
 		vi.spyOn(appNavigation, 'goto').mockImplementation(mockGoTo);
-	});
-
-	describe('pathToHref', () => {
-		it('should return the same path if it does not end with a slash', () => {
-			const path = '/example/path';
-
-			expect(pathToHref(path as AppPath)).toBe(path);
-		});
-
-		it('should remove the trailing slash if the path ends with one', () => {
-			const path = '/example/path/';
-
-			expect(pathToHref(path as AppPath)).toBe(path.slice(0, -1));
-		});
 	});
 
 	describe('networkParam', () => {
@@ -212,7 +197,7 @@ describe('nav.utils', () => {
 
 			removeSearchParam({ url, searchParam: 'code' });
 
-			expect(pushStateMock).toHaveBeenCalledWith(url, {});
+			expect(pushStateMock).toHaveBeenCalledWith('/', {});
 			expect(url.toString()).toBe(urlString);
 		});
 	});
@@ -741,8 +726,6 @@ describe('nav.utils', () => {
 	});
 
 	describe('switchNetwork', () => {
-		const baseUrl = new URL(window.location.href);
-
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -756,7 +739,10 @@ describe('nav.utils', () => {
 
 			expect(get(userSelectedNetworkStore)).toBeUndefined();
 
-			expect(goto).toHaveBeenCalledExactlyOnceWith(baseUrl, { replaceState: true, noScroll: true });
+			expect(goto).toHaveBeenCalledExactlyOnceWith('/', {
+				replaceState: true,
+				noScroll: true
+			});
 		});
 
 		it('should handle a network ID with nullish description', async () => {
@@ -772,9 +758,10 @@ describe('nav.utils', () => {
 
 			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID);
 
-			const newUrl = new URL(`${baseUrl}?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
-
-			expect(goto).toHaveBeenCalledExactlyOnceWith(newUrl, { replaceState: true, noScroll: true });
+			expect(goto).toHaveBeenCalledExactlyOnceWith(
+				`/?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`,
+				{ replaceState: true, noScroll: true }
+			);
 		});
 	});
 
