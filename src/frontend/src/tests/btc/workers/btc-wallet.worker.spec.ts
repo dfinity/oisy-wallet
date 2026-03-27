@@ -272,13 +272,13 @@ describe('btc-wallet.worker', () => {
 					// error
 					expect(postMessageMock).toHaveBeenCalledTimes(7);
 
-				expect(postMessageMock).toHaveBeenCalledWith({
-					ref,
-					msg: 'syncBtcWalletError',
-					data: {
-						error: err
-					}
-				});
+					expect(postMessageMock).toHaveBeenCalledWith({
+						ref,
+						msg: 'syncBtcWalletError',
+						data: {
+							error: err
+						}
+					});
 				});
 			}
 		};
