@@ -61,6 +61,7 @@ fn stats_returns_correct_number_of_users() {
         token_activity_count: user_tokens.len() as u64,
         exchange_rates_count: 0,
         user_transactions_count: 0,
+        agreement_history_count: 0,
     };
 
     let caller = controller();
