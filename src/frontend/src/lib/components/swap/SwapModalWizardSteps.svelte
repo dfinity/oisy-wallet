@@ -222,7 +222,8 @@
 	};
 
 	const selectProvider = (detail: SwapMappedResult) => {
-		swapAmountsStore.setSelectedProvider(detail);
+		swapAmountsStore.setManualProvider(detail);
+
 		goToStep(WizardStepsSwap.SWAP);
 	};
 

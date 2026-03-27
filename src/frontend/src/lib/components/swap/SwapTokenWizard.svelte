@@ -55,7 +55,11 @@
 		manualPause = false;
 	};
 
-	let shouldPause = $derived(manualPause || currentStep?.name === WizardStepsSwap.SWAPPING);
+	let shouldPause = $derived(
+		manualPause ||
+			currentStep?.name === WizardStepsSwap.REVIEW ||
+			currentStep?.name === WizardStepsSwap.SWAPPING
+	);
 </script>
 
 <SwapAmountsContext

@@ -123,6 +123,7 @@ type BtcSelectUserUtxosFeeResult = variant {
 	Ok : SelectedUtxosFeeResponse;
 	Err : SelectedUtxosFeeError
 };
+type BtcTransactionData = record { fee : opt nat };
 type CanisterStatusResultV2 = record {
 	controller : principal;
 	status : CanisterStatusType;
@@ -277,6 +278,17 @@ type IIDelegationChain = record {
 	delegations : vec SignedDelegation
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
+type IcrcTransactionData = record {
+	fee : opt nat;
+	memo : opt blob;
+	tx_type : IcrcTransactionType
+};
+type IcrcTransactionType = variant {
+	Approve : record { spender : text };
+	Burn;
+	Mint;
+	Transfer
+};
 type Icrcv2AccountId = variant {
 	Account : blob;
 	WithPrincipal : record { owner : principal; subaccount : opt blob }
@@ -316,7 +328,12 @@ type NetworkSettingsFor = variant {
 	BitcoinMainnet;
 	BscTestnet
 };
-type NetworkTransactionData = variant { Evm : EvmTransactionData };
+type NetworkTransactionData = variant {
+	Btc : BtcTransactionData;
+	Evm : EvmTransactionData;
+	Sol : SolTransactionData;
+	Icrc : IcrcTransactionData
+};
 type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
@@ -365,6 +382,11 @@ type Settings = record {
 	experimental_features : ExperimentalFeaturesSettings
 };
 type SignedDelegation = record { signature : blob; delegation : Delegation };
+type SolTransactionData = record {
+	fee : opt nat;
+	to_owner : opt text;
+	from_owner : opt text
+};
 type SplToken = record {
 	decimals : opt nat8;
 	token_address : text;

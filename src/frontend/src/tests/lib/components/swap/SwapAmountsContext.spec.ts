@@ -8,6 +8,7 @@ import * as swapService from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
+import { SwapProvider } from '$lib/types/swap';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
@@ -235,5 +236,95 @@ describe('SwapAmountsContext.svelte', () => {
 		await waitForDebounce();
 
 		expect(fetchMock).not.toHaveBeenCalled();
+	});
+
+	it('preserves manual provider selection across periodic refresh', async () => {
+		vi.useFakeTimers();
+
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		store.setSwaps({
+			swaps: mockSwapProviders,
+			amountForSwap: 10,
+			selectedProvider: mockSwapProviders[0]
+		});
+
+		store.setManualProvider(mockSwapProviders[1]);
+
+		expect(get(store)?.selectedProvider?.provider).toBe(SwapProvider.KONG_SWAP);
+
+		await act(() =>
+			render(SwapAmountsContext, {
+				props: {
+					amount: '10',
+					sourceToken,
+					destinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true,
+					enableAmountUpdates: true,
+					pauseAmountUpdates: false
+				},
+				context
+			})
+		);
+
+		await vi.advanceTimersByTimeAsync(350);
+		await tick();
+
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(get(store)?.selectedProvider?.provider).toBe(SwapProvider.KONG_SWAP);
+
+		await vi.advanceTimersByTimeAsync(5100);
+		await tick();
+
+		expect(fetchMock).toHaveBeenCalled();
+		expect(get(store)?.selectedProvider?.provider).toBe(SwapProvider.KONG_SWAP);
+
+		vi.useRealTimers();
+	});
+
+	it('does not fetch when pauseAmountUpdates is true', async () => {
+		vi.useFakeTimers();
+
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		store.setSwaps({
+			swaps: mockSwapProviders,
+			amountForSwap: 10,
+			selectedProvider: mockSwapProviders[0]
+		});
+
+		await act(() =>
+			render(SwapAmountsContext, {
+				props: {
+					amount: '10',
+					sourceToken,
+					destinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true,
+					enableAmountUpdates: true,
+					pauseAmountUpdates: true
+				},
+				context
+			})
+		);
+
+		await vi.advanceTimersByTimeAsync(350);
+		await tick();
+
+		await vi.advanceTimersByTimeAsync(10_000);
+		await tick();
+
+		expect(fetchMock).not.toHaveBeenCalled();
+
+		vi.useRealTimers();
 	});
 });
