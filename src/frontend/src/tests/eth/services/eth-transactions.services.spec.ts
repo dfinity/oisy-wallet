@@ -52,6 +52,10 @@ vi.mock('$lib/utils/console.utils', () => ({
 	consoleError: vi.fn()
 }));
 
+vi.mock('$env/user-transactions.env', () => ({
+	USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED: true
+}));
+
 describe('eth-transactions.services', () => {
 	const mockErc20CustomTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
 		data: { ...token, enabled: true },
