@@ -32,10 +32,6 @@
 			: { formattedAbs: undefined, sign: undefined }
 	);
 
-	let exchangeRateChangeSymbol = $derived(
-		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '▾') : undefined
-	);
-
 	let parsedTimeFrame = $derived(
 		nonNullish(timeFrame) ? $i18n.temporal.time_frame[`t_${timeFrame}`] : undefined
 	);
@@ -51,9 +47,12 @@
 		class:text-success-primary={exchangeRateChangeSign === 'positive'}
 		class:text-tertiary={exchangeRateChangeSign === 'zero'}
 	>
-		<span class="inline-block scale-175 transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
-			<span class="-translate-y-px inline-block transform">{exchangeRateChangeSymbol}</span>
-		</span>
+		<span
+			class="mb-px inline-block h-[0.45em] w-[0.45em]"
+			class:rotate-180={exchangeRateChangeSign === 'positive'}
+			class:-rotate-90={exchangeRateChangeSign === 'zero'}
+			style="clip-path: polygon(50% 100%, 0% 0%, 100% 0%); background: currentColor;"
+		></span>
 		{formattedExchangeRateChange}
 		{#if nonNullish(parsedTimeFrame)}
 			<span class="text-[9px] sm:text-[11px]">{`(${parsedTimeFrame})`}</span>

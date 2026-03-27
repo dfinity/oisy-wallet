@@ -26,7 +26,7 @@ describe('ExchangeRateChange', () => {
 	});
 
 	it('should render a positive price change', () => {
-		const { getByText } = render(ExchangeRateChange, {
+		const { getByText, container } = render(ExchangeRateChange, {
 			props: {
 				usdPriceChangePercentage24h: 1.23456
 			}
@@ -34,14 +34,14 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('1.23%')).toBeInTheDocument();
 
-		const symbol = getByText('▾');
+		const triangle = container.querySelector('span.inline-block[style*="clip-path"]');
 
-		expect(symbol).toBeInTheDocument();
-		expect(symbol).toHaveClass('rotate-180');
+		expect(triangle).toBeInTheDocument();
+		expect(triangle).toHaveClass('rotate-180');
 	});
 
 	it('should render a negative price change', () => {
-		const { getByText } = render(ExchangeRateChange, {
+		const { getByText, container } = render(ExchangeRateChange, {
 			props: {
 				usdPriceChangePercentage24h: -123.456
 			}
@@ -49,14 +49,15 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('123%')).toBeInTheDocument();
 
-		const symbol = getByText('▾');
+		const triangle = container.querySelector('span.inline-block[style*="clip-path"]');
 
-		expect(symbol).toBeInTheDocument();
-		expect(symbol).not.toHaveClass('rotate-180');
+		expect(triangle).toBeInTheDocument();
+		expect(triangle).not.toHaveClass('rotate-180');
+		expect(triangle).not.toHaveClass('-rotate-90');
 	});
 
 	it('should render a zero price change', () => {
-		const { getByText } = render(ExchangeRateChange, {
+		const { getByText, container } = render(ExchangeRateChange, {
 			props: {
 				usdPriceChangePercentage24h: 0
 			}
@@ -64,7 +65,10 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('0.00%')).toBeInTheDocument();
 
-		expect(getByText('▸')).toBeInTheDocument();
+		const triangle = container.querySelector('span.inline-block[style*="clip-path"]');
+
+		expect(triangle).toBeInTheDocument();
+		expect(triangle).toHaveClass('-rotate-90');
 	});
 
 	it('should render the proper background', async () => {
