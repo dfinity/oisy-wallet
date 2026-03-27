@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { resolve } from '$app/paths';
 	import { TRACK_OPEN_AGREEMENT } from '$lib/constants/analytics.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { authSignedIn } from '$lib/derived/auth.derived';
@@ -35,7 +34,7 @@
 	class:text-brand-primary-alt={color === 'blue'}
 	aria-label={replaceOisyPlaceholders($i18n.privacy_policy.alt.privacy_policy)}
 	data-tid={testId}
-	href={resolve(AppPath.PrivacyPolicy)}
+	href={AppPath.PrivacyPolicy}
 	onclick={handleClick}
 	target="_blank"
 >

@@ -1,5 +1,4 @@
 import * as navModule from '$app/navigation';
-import { resolve } from '$app/paths';
 import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
@@ -80,7 +79,7 @@ describe('AllEarningOpportunityCardList', () => {
 					[EarningCardFields.NETWORKS]: ['eth-icon'],
 					[EarningCardFields.ASSETS]: ['usdc-icon'],
 					[EarningCardFields.EARNING_POTENTIAL]: 49.5,
-					action: () => navModule.goto(resolve('/earn/autopilot/'))
+					action: () => navModule.goto('/earn/autopilot/')
 				}
 			})
 		);

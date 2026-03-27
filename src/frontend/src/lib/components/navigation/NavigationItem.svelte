@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { resolve } from '$app/paths';
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import type { TagVariant } from '$lib/types/style';
 
@@ -24,7 +23,7 @@
 	class:selected
 	aria-label={ariaLabel}
 	data-tid={testId}
-	href={resolve(href)}
+	{href}
 >
 	{@render icon?.()}
 	<span class="block w-full truncate md:w-auto">

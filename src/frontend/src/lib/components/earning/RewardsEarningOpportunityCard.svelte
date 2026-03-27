@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { earningCards } from '$env/earning-cards.env';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
@@ -63,12 +62,7 @@
 			/>
 		{/snippet}
 		{#snippet button()}
-			<Button
-				colorStyle="primary"
-				fullWidth
-				onclick={() => goto(resolve(AppPath.EarnRewards))}
-				paddingSmall
-			>
+			<Button colorStyle="primary" fullWidth onclick={() => goto(AppPath.EarnRewards)} paddingSmall>
 				{resolveText({ i18n: $i18n, path: cardData.actionText })}
 			</Button>
 		{/snippet}

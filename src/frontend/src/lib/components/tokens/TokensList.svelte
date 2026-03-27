@@ -4,7 +4,6 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -167,7 +166,7 @@
 						{@const { token } = tokenOrGroup}
 
 						<div class="transition-colors duration-300 hover:bg-primary">
-							<TokenCard data={token} onClick={() => goto(resolve(transactionsUrl({ token })))} />
+							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
 				</div>

@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCardSkeleton from '$lib/components/nfts/NftCardSkeleton.svelte';
@@ -36,7 +35,7 @@
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(collection)) {
-				goto(resolve(`${AppPath.Nfts}${page.url.search}`));
+				goto(`${AppPath.Nfts}${page.url.search}`);
 				toastsError({ msg: { text: $i18n.nfts.text.collection_not_loaded } });
 			}
 		}, FALLBACK_TIMEOUT);

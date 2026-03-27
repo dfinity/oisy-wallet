@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -122,11 +121,7 @@
 					class="flex overflow-hidden rounded-lg bg-secondary transition-colors duration-250 hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
-					<TokenCard
-						asNetwork
-						data={token}
-						onClick={() => goto(resolve(transactionsUrl({ token })))}
-					/>
+					<TokenCard asNetwork data={token} onClick={() => goto(transactionsUrl({ token }))} />
 				</div>
 			{/each}
 

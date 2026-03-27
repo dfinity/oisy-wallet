@@ -3,7 +3,6 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -113,14 +112,12 @@
 
 	const gotoActivity = async () => {
 		await goto(
-			resolve(
-				networkUrl({
-					path: AppPath.Activity,
-					networkId: $networkId,
-					usePreviousRoute: false,
-					fromRoute: null
-				})
-			)
+			networkUrl({
+				path: AppPath.Activity,
+				networkId: $networkId,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
 		);
 	};
 

@@ -197,7 +197,7 @@ describe('nav.utils', () => {
 
 			removeSearchParam({ url, searchParam: 'code' });
 
-			expect(pushStateMock).toHaveBeenCalledWith('/', {});
+			expect(pushStateMock).toHaveBeenCalledWith(url, {});
 			expect(url.toString()).toBe(urlString);
 		});
 	});
@@ -726,6 +726,8 @@ describe('nav.utils', () => {
 	});
 
 	describe('switchNetwork', () => {
+		const baseUrl = new URL(window.location.href);
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -739,10 +741,7 @@ describe('nav.utils', () => {
 
 			expect(get(userSelectedNetworkStore)).toBeUndefined();
 
-			expect(goto).toHaveBeenCalledExactlyOnceWith('/', {
-				replaceState: true,
-				noScroll: true
-			});
+			expect(goto).toHaveBeenCalledExactlyOnceWith(baseUrl, { replaceState: true, noScroll: true });
 		});
 
 		it('should handle a network ID with nullish description', async () => {
@@ -758,10 +757,9 @@ describe('nav.utils', () => {
 
 			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID);
 
-			expect(goto).toHaveBeenCalledExactlyOnceWith(
-				`/?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`,
-				{ replaceState: true, noScroll: true }
-			);
+			const newUrl = new URL(`${baseUrl}?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
+
+			expect(goto).toHaveBeenCalledExactlyOnceWith(newUrl, { replaceState: true, noScroll: true });
 		});
 	});
 

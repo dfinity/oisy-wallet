@@ -9,15 +9,6 @@ declare global {
 	}
 }
 
-declare module '$app/paths' {
-	/**
-	 * Loose overload for resolve() that accepts dynamically constructed
-	 * pathnames (e.g. from utility functions or template literals with
-	 * query parameters). At runtime resolve() handles any string.
-	 */
-	export function resolve(url: string & {}): string;
-}
-
 declare const VITE_OISY_DOMAIN: string;
 
 declare const VITE_APP_VERSION: string;

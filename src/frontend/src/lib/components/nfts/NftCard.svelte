@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
@@ -65,7 +64,7 @@
 				}
 			});
 
-			goto(resolve(nftsUrl({ nft })));
+			goto(nftsUrl({ nft }));
 		}
 	};
 </script>

@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { TabVariant } from '$lib/types/style';
@@ -41,7 +40,7 @@
 				});
 			}
 
-			goto(resolve(path));
+			goto(path);
 		}
 	};
 </script>

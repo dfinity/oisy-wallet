@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import Transactions from '$lib/components/transactions/Transactions.svelte';
 	import { NETWORK_PARAM, TOKEN_PARAM } from '$lib/constants/routes.constants';
 	import { networks } from '$lib/derived/networks.derived';
@@ -26,14 +25,14 @@
 					level: 'warn'
 				});
 			}
-			await goto(resolve('/'));
+			await goto('/');
 		}
 
 		const unknownNetwork =
 			$networks.find(({ id }) => id.description === routeNetwork) === undefined;
 
 		if (unknownNetwork) {
-			await goto(resolve('/'));
+			await goto('/');
 		}
 	});
 </script>

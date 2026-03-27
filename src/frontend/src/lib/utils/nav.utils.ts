@@ -1,6 +1,5 @@
 import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
-import { resolve } from '$app/paths';
 import {
 	AppPath,
 	COLLECTION_PARAM,
@@ -111,18 +110,16 @@ export const back = async ({ pop }: { pop: boolean }) => {
 		return;
 	}
 
-	await goto(resolve('/'));
+	await goto('/');
 };
 
 export const gotoReplaceRoot = async (deleteIdbCache = false) => {
-	await goto(resolve(deleteIdbCache ? `/?${PARAM_DELETE_IDB_CACHE}=true` : '/'), {
-		replaceState: true
-	});
+	await goto(deleteIdbCache ? `/?${PARAM_DELETE_IDB_CACHE}=true` : '/', { replaceState: true });
 };
 
 export const removeSearchParam = ({ url, searchParam }: { url: URL; searchParam: string }) => {
 	url.searchParams.delete(searchParam);
-	pushState(resolve(`${url.pathname}${url.search}`), {});
+	pushState(url, {});
 };
 
 export interface RouteParams {
@@ -186,7 +183,7 @@ export const switchNetwork = async ({ networkId }: { networkId: Nullish<NetworkI
 		userSelectedNetworkStore.set(networkId);
 	}
 
-	await goto(resolve(`${url.pathname}${url.search}`), { replaceState: true, noScroll: true });
+	await goto(url, { replaceState: true, noScroll: true });
 };
 
 // Todo: remove fromRoute

@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
@@ -54,7 +53,7 @@
 					}),
 					level: 'warn'
 				});
-				await goto(resolve('/'));
+				await goto('/');
 			}
 		}, FALLBACK_TIMEOUT);
 	});
@@ -63,7 +62,7 @@
 
 	const handleClose = async () => {
 		if (isNullish($pageToken)) {
-			await goto(resolve('/'));
+			await goto('/');
 		}
 	};
 </script>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -11,7 +10,7 @@
 
 <div class="flex gap-2 text-xs font-bold">
 	{#each items as item, index (item.url + index)}
-		<a class="text-brand-primary no-underline" href={resolve(item.url)}>
+		<a class="text-brand-primary no-underline" href={item.url}>
 			{shortenWithMiddleEllipsis({ text: item.label, splitLength: 10 })}
 		</a>
 		<span>/</span>
