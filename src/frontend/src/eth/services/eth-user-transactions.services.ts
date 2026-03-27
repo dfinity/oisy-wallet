@@ -76,8 +76,8 @@ export const saveEthFinalizedTransactions = ({
 		identity,
 		tokenId,
 		transactions,
-		currentBlockNumber,
-		isFinalizedFn: isTransactionFinalized,
+		isFinalizedFn: (tx) =>
+			isTransactionFinalized({ blockNumber: tx.blockNumber, currentBlockNumber }),
 		mapToBackend: mapTransactionToUserTransaction,
 		canSave: (tx) => nonNullish(tx.blockNumber) && nonNullish(tx.hash)
 	});

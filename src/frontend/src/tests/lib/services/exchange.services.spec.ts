@@ -42,6 +42,9 @@ vi.mock('$lib/utils/exchange.utils', () => ({
 vi.mock('$lib/api/backend.api', () => ({
 	getExchangeRates: vi.fn()
 }));
+vi.mock('$env/rest/kongswap.env', () => ({
+	KONGSWAP_PROVIDER_ENABLED: true
+}));
 
 const mockPrice1 = createMockCoingeckoTokenPrice({ usd: 1.11 });
 const mockPrice2 = createMockCoingeckoTokenPrice({ usd: 2.22 });

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import {
 		loadDisabledIcrcTokensBalances,
@@ -51,14 +52,16 @@
 			return;
 		}
 
-		busy.start({ msg: $i18n.init.info.hold_loading });
+		if (KONGSWAP_PROVIDER_ENABLED) {
+			busy.start({ msg: $i18n.init.info.hold_loading });
 
-		// 1. If loadKongSwapTokens succeeds within 10s - show modal.
-		// 2. If loadKongSwapTokens does not succeed within 10s - show toast, do not show modal.
-		// 3. If loadKongSwapTokens throws - show toast, do not show modal.
-		await Promise.any([waitReady({ retries: 10, isDisabled }), loadKongSwapTokens()]);
+			// 1. If loadKongSwapTokens succeeds within 10s - show modal.
+			// 2. If loadKongSwapTokens does not succeed within 10s - show toast, do not show modal.
+			// 3. If loadKongSwapTokens throws - show toast, do not show modal.
+			await Promise.any([waitReady({ retries: 10, isDisabled }), loadKongSwapTokens()]);
 
-		busy.stop();
+			busy.stop();
+		}
 
 		onSwapReady();
 

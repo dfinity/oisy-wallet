@@ -16,8 +16,6 @@ dfx deploy cketh_index
 dfx deploy ckusdc_ledger
 dfx deploy ckusdc_index
 
-# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
-# dfx deploy kong_backend
 dfx deploy icp_swap_factory
 dfx deploy icp_swap_pool
 
