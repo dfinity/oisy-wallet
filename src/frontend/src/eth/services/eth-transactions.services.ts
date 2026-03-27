@@ -1,3 +1,4 @@
+import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
@@ -5,6 +6,10 @@ import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
+import {
+	loadEthUserTransactions,
+	saveEthFinalizedTransactions
+} from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
@@ -31,8 +36,9 @@ import type { NetworkId } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadEthereumTransactions = ({
@@ -71,12 +77,10 @@ export const reloadEthereumTransactions = (params: {
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
 const loadEthTransactions = async ({
-	// TODO: use it when we fetch cached user transactions from the backend
-	identity: __,
+	identity,
 	networkId,
 	tokenId,
-	// TODO: use it when we fetch cached user transactions from the backend
-	chainId: _,
+	chainId,
 	updateOnly = false,
 	silent = false
 }: {
@@ -94,10 +98,22 @@ const loadEthTransactions = async ({
 	}
 
 	try {
-		const { transactions: transactionsProvider } = etherscanProviders(networkId);
-		const transactions = await transactionsProvider({ address });
+		const transactionTokenId: BackendTokenId = { EvmNative: chainId };
 
-		const certifiedTransactions = transactions.map((transaction) => ({
+		const stored = await loadEthUserTransactions({ identity, tokenId: transactionTokenId });
+
+		// Fetch from Etherscan starting after the newest stored block (incremental loading)
+		const startBlock = nonNullish(stored?.newestBlockIndex)
+			? Number(stored.newestBlockIndex) + 1
+			: 0;
+
+		const { transactions: transactionsProvider } = etherscanProviders(networkId);
+		const newTransactions = await transactionsProvider({ address, startBlock, sort: 'desc' });
+
+		// Combine newest-first: new transactions (desc) then stored (desc from backend)
+		const allTransactions = [...newTransactions, ...(stored?.transactions ?? [])];
+
+		const certifiedTransactions = allTransactions.map((transaction) => ({
 			data: transaction,
 			// We set the certified property to false because we don't have a way to certify ETH transactions for now.
 			certified: false
@@ -109,6 +125,24 @@ const loadEthTransactions = async ({
 			);
 		} else {
 			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
+		}
+
+		// Save newly finalized transactions to backend (fire-and-forget).
+		// We use the highest block number in the batch as the "tip" for finality checks.
+		// This means only transactions at least ETH_FINALITY_BLOCKS behind this tip will
+		// be saved — the most recent transactions in the batch will be saved on a future load.
+		if (newTransactions.length > 0) {
+			const blockNumbers = newTransactions.map((tx) => tx.blockNumber).filter(nonNullish);
+			const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
+
+			if (maxBlockNumber > 0) {
+				saveEthFinalizedTransactions({
+					identity,
+					tokenId: transactionTokenId,
+					transactions: newTransactions,
+					currentBlockNumber: maxBlockNumber
+				}).catch((err) => consoleError('Background save of finalized transactions failed:', err));
+			}
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
