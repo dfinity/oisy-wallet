@@ -125,6 +125,22 @@
 				}
 			}
 		},
+		"signer_frontend": {
+			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.20.0/src/distributed/assetstorage.did",
+			"frontend": {
+				"entrypoint": "build/index.html"
+			},
+			"source": ["build/"],
+			"type": "assets"
+		},
+		"legacy_signer_frontend": {
+			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.20.0/src/distributed/assetstorage.did",
+			"frontend": {
+				"entrypoint": "build/index.html"
+			},
+			"source": ["build/"],
+			"type": "assets"
+		},
 		"orbit": {
 			"type": "custom",
 			"candid": "https://raw.githubusercontent.com/dfinity/orbit/%40orbit/station-v0.0.2-alpha.5/apps/wallet/src/generated/station/station.did",
