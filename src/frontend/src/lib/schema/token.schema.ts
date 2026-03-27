@@ -1,6 +1,8 @@
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { OnramperIdSchema } from '$lib/schema/onramper.schema';
+import { TokenDeprecatedSchema } from '$lib/schema/token-deprecated.schema';
 import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
+import { TokenTagsSchema } from '$lib/schema/token-tag.schema';
 import * as z from 'zod';
 
 export const TokenIdSchema = z.symbol().brand<'TokenId'>();
@@ -10,6 +12,7 @@ export const TokenStandardCodeSchema = z.enum([
 	'erc20',
 	'erc721',
 	'erc1155',
+	'erc4626',
 	'icp',
 	'icrc',
 	'dip20',
@@ -68,5 +71,7 @@ export const TokenSchema = z.object({
 	...TokenMetadataSchema.shape,
 	...TokenAppearanceSchema.shape,
 	...TokenBuyableSchema.shape,
-	...TokenGroupPropSchema.shape
+	...TokenTagsSchema.shape,
+	...TokenGroupPropSchema.shape,
+	...TokenDeprecatedSchema.shape
 });

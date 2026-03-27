@@ -11,7 +11,6 @@
 		crossChainSwapNetworksMainnetsIds
 	} from '$lib/derived/cross-chain-networks.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { swappableTokens } from '$lib/derived/swap.derived';
 	import {
 		initModalNetworksListContext,
 		MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -39,33 +38,33 @@
 		store: initSwapAmountsStore()
 	});
 
-	setContext<SwapContext>(
-		SWAP_CONTEXT_KEY,
-		initSwapContext({
-			sourceToken: $swappableTokens.sourceToken,
-			destinationToken: $swappableTokens.destinationToken
-		})
-	);
+	setContext<SwapContext>(SWAP_CONTEXT_KEY, initSwapContext());
 
-	setContext<ModalTokensListContext>(
-		MODAL_TOKENS_LIST_CONTEXT_KEY,
-		initModalTokensListContext({
-			tokens: [],
-			filterNetwork:
-				nonNullish($selectedNetwork) &&
-				$crossChainSwapNetworksMainnetsIds.includes($selectedNetwork.id)
-					? $selectedNetwork
-					: undefined,
-			filterNetworksIds: $crossChainSwapNetworksMainnetsIds
-		})
-	);
+	const tokensListContext = initModalTokensListContext({
+		tokens: [],
+		filterNetwork:
+			nonNullish($selectedNetwork) &&
+			$crossChainSwapNetworksMainnetsIds.includes($selectedNetwork.id)
+				? $selectedNetwork
+				: undefined,
+		filterNetworksIds: $crossChainSwapNetworksMainnetsIds
+	});
 
-	setContext<ModalNetworksListContext>(
-		MODAL_NETWORKS_LIST_CONTEXT_KEY,
-		initModalNetworksListContext({
-			networks: $crossChainSwapNetworksMainnets
-		})
-	);
+	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
+
+	const networksListContext = initModalNetworksListContext({
+		networks: $crossChainSwapNetworksMainnets
+	});
+
+	setContext<ModalNetworksListContext>(MODAL_NETWORKS_LIST_CONTEXT_KEY, networksListContext);
+
+	$effect(() => {
+		networksListContext.setNetworks($crossChainSwapNetworksMainnets);
+	});
+
+	$effect(() => {
+		tokensListContext.setFilterNetworksIds($crossChainSwapNetworksMainnetsIds);
+	});
 
 	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {
 		store: icTokenFeeStore

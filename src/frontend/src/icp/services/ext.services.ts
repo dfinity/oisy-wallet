@@ -7,6 +7,7 @@ import {
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -22,7 +23,7 @@ export const loadExtTokens = async ({ identity }: { identity: OptionIdentity }):
 	await Promise.all([loadDefaultExtTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
-const loadDefaultExtTokens = (): ResultSuccess => {
+export const loadDefaultExtTokens = (): ResultSuccess => {
 	extDefaultTokensStore.set(
 		EXT_BUILTIN_TOKENS.map((token) => ({ ...token, id: parseTokenId(token.symbol) }))
 	);
@@ -86,6 +87,7 @@ const mapExtCustomToken = async ({
 		symbol,
 		standard: { code: 'ext' as const, version: 'v2' },
 		category: 'custom' as const,
+		tags: DEFAULT_TOKEN_TAGS,
 		enabled,
 		version,
 		...(nonNullish(mappedSection) && {
@@ -122,4 +124,16 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.ext_custom_tokens },
 		err
 	});
+};
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadCustomTokensWithMetadata(params);
+
+		loadCustomTokenData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };

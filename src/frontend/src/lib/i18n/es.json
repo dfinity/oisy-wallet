@@ -41,7 +41,11 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "Aprender mas"
+			"learn_more": "Aprender mas",
+			"sorting": "Ordenar",
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -176,7 +180,6 @@
 			"title_part_1": "Desbloquear para continuar",
 			"title_part_2": "Anteriormente bloqueaste tu billetera para mantenerla segura. Continúa donde lo dejaste o cierra sesión.",
 			"unlock": "Desbloquear",
-			"unlock_with_legacy_login": "",
 			"logout": "Cerrar sesión",
 			"logout_clear_cash_message": "Cerrar sesión borrará todos los datos en caché",
 			"learn_more": "Saber más"
@@ -206,15 +209,17 @@
 			"website": "Imagen de $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Redes Sociales",
-			"verifiable_credentials": "Credenciales Verificables",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Juego",
-			"tools": "Herramientas",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "IA",
-			"nft": ""
+			"defi": "DeFi",
+			"game": "Juego",
+			"nft": "",
+			"rwa": "",
+			"social_media": "Redes Sociales",
+			"staking": "Staking",
+			"tools": "Herramientas",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -347,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "La primera plataforma para construir aplicaciones que se escriben solas.",
-				"call_to_action": "Prueba Caffeine",
 				"description": "Caffeine es la primera plataforma para construir aplicaciones que se escriben solas. Simplemente habla con la IA en tu escritorio o móvil, y crea aplicaciones y servicios para ti, incluyendo aquellos que se conectan con OISY Wallet. Experimenta el futuro del desarrollo de aplicaciones con la creación impulsada por IA.",
 				"carousel": {
 					"text": "Hola, internet que se escribe solo",
@@ -401,6 +405,36 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -600,6 +634,7 @@
 			"no_infura_erc721_provider": "No hay proveedor de Infura ERC721 para la red $network",
 			"no_infura_erc1155_provider": "No hay proveedor de Infura ERC1155 para la red $network",
 			"no_infura_erc20_icp_provider": "No hay proveedor de Infura ERC20 ICP para la red $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "No hay red Solana para la red $network",
 			"loading_address": "Error al cargar la dirección de $symbol.",
 			"loading_balance": "Error al cargar el saldo de $symbol para la red $network.",
@@ -618,8 +653,11 @@
 			"btc_withdrawal_statuses": "Error al obtener los estados de retiro de BTC.",
 			"transaction_price": "Error al cargar la estimación del precio de una transacción.",
 			"icrc_canisters": "Error al cargar los canisters de ICRC.",
-			"icrc_canister_loading": "El token con el canister de Ledger $ledgerCanisterId no se pudo cargar porque actualmente no responde.",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "El token $tokenSymbol no responde y no se puede cargar ahora mismo. Inténtalo de nuevo más tarde.",
+			"icrc_canister_loading_custom": "El token con el canister de Ledger $ledgerCanisterId no responde y no se puede cargar en este momento. Inténtalo de nuevo más tarde.",
 			"erc20_custom_tokens": "Error al cargar los tokens ERC20 personalizados.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Error al cargar los tokens ERC721 personalizados.",
 			"erc1155_custom_tokens": "Error al cargar los tokens ERC1155 personalizados.",
 			"spl_custom_tokens": "Error al cargar los tokens SPL personalizados.",
@@ -627,6 +665,7 @@
 			"icrc_custom_token": "Error al cargar el token ICRC personalizado.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "Tu billetera requiere algunos datos iniciales que aún no se han cargado. Por favor, inténtalo de nuevo.",
 			"allow_signing": "Ocurrió un problema al configurar tu billetera para firmar. Has sido desconectado. Si el problema persiste, contacta con el soporte.",
 			"waiting_for_allowed_cycles_aborted": "Preparación del ledger de ciclos abortada. Por favor, intenta iniciar sesión más tarde",
@@ -789,6 +828,7 @@
 	"send": {
 		"text": {
 			"send": "Enviar",
+			"send_token": "",
 			"destination": "Destino",
 			"source": "Origen",
 			"balance": "Saldo",
@@ -992,6 +1032,9 @@
 			"loading_cketh_helper": "Error al cargar la dirección del contrato auxiliar de ckETH. No se ha iniciado ningún ID de canister minter.",
 			"unexpected": "Algo salió mal al convertir los tokens.",
 			"unexpected_missing_data": "Algo salió mal al iniciar una transacción de conversión."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "La conversión de USDC a/desde ckUSDC está actualmente suspendida."
 		}
 	},
 	"swap": {
@@ -1036,7 +1079,8 @@
 			"network_cost": "Costo de red",
 			"gasless": "Sin gas",
 			"swap_fees": "Comisiones de Intercambio",
-			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>"
+			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Actualmente no hay ningún exchange disponible para intercambiar tokens. Por favor, inténtalo de nuevo más tarde.",
@@ -1053,7 +1097,8 @@
 			"manually_withdraw_success": "Los tokens de tu intercambio fallido anterior fueron retirados con éxito. Puedes intentar el intercambio de nuevo o cambiar el proveedor de intercambio.",
 			"manually_withdraw_failed": "El retiro de tus fondos falló. <br> Por favor, inténtalo de nuevo o sigue",
 			"swap_sucess_withdraw_failed": "El intercambio se completó, pero tus tokens no pudieron ser retirados automáticamente. Haz clic en el botón de Retirar a continuación para retirarlos manualmente.<br> O sigue",
-			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal."
+			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal.",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1114,7 +1159,16 @@
 			"hide_more_networks": "Ocultar más redes",
 			"on_network": "en red ",
 			"delete_token": "Eliminar token",
-			"edit_token": "Editar token"
+			"edit_token": "Editar token",
+			"sort_by_value": "Valor",
+			"sort_by_performance": "Rendimiento del token",
+			"sort_by_symbol": "Símbolo",
+			"hide_asset_types": "Ocultar tipos de activos",
+			"asset_type": "Tipo de activo en $oisy_name",
+			"asset_type_all": "Todos los tipos de activos",
+			"no_tokens_for_asset_type": "No hay $asset_type en tu cartera",
+			"no_tokens_for_asset_type_zero_tokens": "No hay $asset_type en la red seleccionada",
+			"no_tokens_for_asset_type_description": "Elige entre <strong>$count tokens compatibles</strong> para personalizar tu vista de cartera."
 		},
 		"details": {
 			"title": "Detalles del token",
@@ -1231,6 +1285,7 @@
 			"unrecognised_erc_interface": "Interfaz ERC no reconocida.",
 			"no_metadata": "No se obtuvieron metadatos.",
 			"unexpected": "Algo salió mal al guardar el token.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Algo salió mal al ocultar el token.",
 			"already_available": "El token ya está disponible.",
 			"not_toggleable": "El token no se puede alternar, no se puede ocultar.",
@@ -1239,6 +1294,23 @@
 			"unexpected_undefined": "El token no está definido. Esto es inesperado.",
 			"unexpected_error_on_token_delete": "Algo salió mal al eliminar el token.",
 			"unexpected_error_on_token_update": "Algo salió mal al actualizar el token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Categoría",
+			"risk": "Riesgo"
+		},
+		"category": {
+			"crypto": "Criptomonedas",
+			"stablecoin": "Stablecoins",
+			"stock": "Acciones",
+			"commodity": "Materias primas"
+		},
+		"risk": {
+			"low": "Riesgo bajo",
+			"medium": "Riesgo medio",
+			"high": "Riesgo alto"
 		}
 	},
 	"nfts": {
@@ -1253,7 +1325,6 @@
 			"by_collection": "Agrupar por colección",
 			"show_spam": "Mostrar spam",
 			"show_hidden": "Mostrar ocultos",
-			"sorting": "Ordenar",
 			"recents_first": "Más recientes primero",
 			"oldest_first": "Más antiguos primero",
 			"collection_atoz": "Nombre de la colección A-Z",
@@ -1469,8 +1540,6 @@
 		},
 		"label": {
 			"reimbursement": "Reembolso",
-			"twin_token_sent": "$twinToken enviado",
-			"ck_token_sent": "$ckToken enviado",
 			"twin_token_converted": "Convertido desde $twinToken",
 			"ck_token_converted": "Convertido desde $ckToken",
 			"sending_twin_token": "Enviando $twinToken",
@@ -1688,15 +1757,6 @@
 			"title": "Escanear código QR"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Preparando Firmante",
-			"description": "Verificando que no eres un robot",
-			"request_challenge": "Esperando nuevo desafío",
-			"solve_challenge": "Resolviendo desafío",
-			"grant_cycles": "Habilitando firma"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1839,9 +1899,8 @@
 			"go_to_earn": ""
 		},
 		"cards": {
-			"gldt": {
-				"title1": "",
-				"title2": "",
+			"harvest_autopilot": {
+				"title": "",
 				"description": "",
 				"action": ""
 			},
@@ -1853,6 +1912,8 @@
 		},
 		"card_fields": {
 			"apy": "",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "",
 			"currentEarning": "",
 			"earningPotential": "",
@@ -1867,13 +1928,34 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "",
 			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "",
 			"unstake_now": "",
 			"unstaking": "",
@@ -1888,10 +1970,12 @@
 			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "",
 			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
+			"max_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1914,7 +1998,7 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": "",
+			"get_asset_tokens": "",
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",
@@ -1925,29 +2009,17 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",
 			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": ""
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
-		},
 		"info": {
-			"gldt": {
+			"harvest_autopilot": {
 				"title": "",
 				"description": "",
 				"fact_1_title": "",
@@ -1955,8 +2027,7 @@
 				"fact_2_title": "",
 				"fact_2_description": "",
 				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
@@ -1994,6 +2065,9 @@
 			"minute_plural": "",
 			"second": "",
 			"second_plural": ""
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

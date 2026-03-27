@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.en
 import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import pepe from '$icp-eth/assets/pepe.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,12 +17,12 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Pepe',
 	symbol: PEPE_SYMBOL,
 	decimals: PEPE_DECIMALS,
 	icon: pepe,
 	address: '0x6982508145454Ce325dDbE47a25d4ec3d2311933',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckPEPE',
 	groupData: PEPE_TOKEN_GROUP,
 	neverCollapseInTokenGroup: true,
@@ -39,11 +40,11 @@ export const SEPOLIA_PEPE_TOKEN: RequiredErc20Token = {
 	network: SEPOLIA_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Pepe',
 	symbol: PEPE_SYMBOL,
 	decimals: PEPE_DECIMALS,
 	icon: pepe,
 	address: '0x560eF9F39E4B08f9693987cad307f6FBfd97B2F6',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckSepoliaPEPE'
 };

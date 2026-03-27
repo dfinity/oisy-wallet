@@ -1,7 +1,3 @@
-import { AuthClientProvider } from '$lib/providers/auth-client.providers';
-import { AuthClientNotInitializedError } from '$lib/types/errors';
-import { isNullish, nonNullish } from '@dfinity/utils';
-
 import {
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
@@ -10,11 +6,15 @@ import {
 	TEST
 } from '$lib/constants/app.constants';
 import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { InternetIdentityDomain } from '$lib/types/auth';
+import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { popupCenter } from '$lib/utils/window.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { AuthClient } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
 import { writable, type Readable } from 'svelte/store';
@@ -23,10 +23,11 @@ export interface AuthStoreData {
 	identity: OptionIdentity;
 }
 
-let authClient: Option<AuthClient>;
+let authClient: Nullish<AuthClient>;
 
 export interface AuthSignInParams {
 	domain?: InternetIdentityDomain;
+	asPopup?: boolean;
 }
 
 export interface AuthStore extends Readable<AuthStoreData> {
@@ -85,7 +86,7 @@ const initAuthStore = (): AuthStore => {
 			await sync({ forceSync: true });
 		},
 
-		signIn: ({ domain }: AuthSignInParams) =>
+		signIn: ({ domain, asPopup }: AuthSignInParams) =>
 			// eslint-disable-next-line no-async-promise-executor
 			new Promise<void>(async (resolve, reject) => {
 				// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
@@ -100,7 +101,7 @@ const initAuthStore = (): AuthStore => {
 					? /apple/i.test(navigator?.vendor)
 						? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
 						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-					: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}${domain === InternetIdentityDomain.VERSION_2_0 ? '/?feature_flag_guided_upgrade=true' : ''}`;
+					: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}${domain === InternetIdentityDomain.VERSION_2_0 ? '/?feature_flag_min_guided_upgrade=true' : ''}`;
 
 				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
@@ -118,14 +119,21 @@ const initAuthStore = (): AuthStore => {
 							// We don't really care if the broadcast channel fails to open or if it fails to post messages.
 							// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
 							// We just print a warning in the console for debugging purposes.
-							console.warn('Auth BroadcastChannel posting failed', err);
+							consoleWarn('Auth BroadcastChannel posting failed', err);
 						}
 
 						resolve();
 					},
 					onError: reject,
 					identityProvider,
-					windowOpenerFeatures: popupCenter({ width: AUTH_POPUP_WIDTH, height: AUTH_POPUP_HEIGHT }),
+					...(asPopup
+						? {
+								windowOpenerFeatures: popupCenter({
+									width: AUTH_POPUP_WIDTH,
+									height: AUTH_POPUP_HEIGHT
+								})
+							}
+						: {}),
 					...getOptionalDerivationOrigin()
 				});
 			}),

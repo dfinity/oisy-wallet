@@ -9,6 +9,7 @@
 	import type { IcCkToken, IcToken, OptionIcCkToken, OptionIcToken } from '$icp/types/ic-token';
 	import { isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';
+	import { ckUsdcConversionDisabled } from '$icp-eth/derived/cketh.derived';
 	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
 	import {
 		networkBitcoinMainnetEnabled,
@@ -45,7 +46,7 @@
 	);
 </script>
 
-{#if (ckBTC || ckETH || ckErc20) && nonNullish(sourceToken) && nonNullish(destinationToken)}
+{#if (ckBTC || ckETH || ckErc20) && nonNullish(sourceToken) && nonNullish(destinationToken) && !$ckUsdcConversionDisabled}
 	<InfoBoxWrapper {key}>
 		{#if ckBTC}
 			<InfoBitcoin />

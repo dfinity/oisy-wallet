@@ -1,9 +1,11 @@
+import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import type {
+	CoingeckoSimpleErc4626TokenPriceResponse,
 	CoingeckoSimplePriceParams,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceParams,
@@ -17,6 +19,10 @@ import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers
 vi.mock('$lib/rest/coingecko.rest', () => ({
 	simplePrice: vi.fn(),
 	simpleTokenPrice: vi.fn()
+}));
+
+vi.mock('$eth/services/erc4626-exchange.services', () => ({
+	calculateErc4626Prices: vi.fn()
 }));
 
 describe('exchange.worker', () => {
@@ -62,6 +68,8 @@ describe('exchange.worker', () => {
 						).reduce((acc, address) => ({ ...acc, [address]: { usd: 1 } }), {})
 					)
 			);
+
+			vi.mocked(calculateErc4626Prices).mockResolvedValue({});
 		});
 
 		afterEach(() => {
@@ -78,12 +86,12 @@ describe('exchange.worker', () => {
 
 		describe('with message startExchangeTimer', () => {
 			const mockErc20ContractAddresses: Erc20ContractAddressWithNetwork[] = [
-				{ address: '0x123', coingeckoId: 'ethereum' },
-				{ address: '0x456', coingeckoId: 'base' },
-				{ address: '0x789', coingeckoId: 'binance-smart-chain' },
-				{ address: '0xabc', coingeckoId: 'ethereum' },
-				{ address: '0xdef', coingeckoId: 'polygon-pos' },
-				{ address: '0xghi', coingeckoId: 'arbitrum-one' }
+				{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n },
+				{ address: '0x456', coingeckoId: 'base', chainId: 8453n },
+				{ address: '0x789', coingeckoId: 'binance-smart-chain', chainId: 56n },
+				{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n },
+				{ address: '0xdef', coingeckoId: 'polygon-pos', chainId: 137n },
+				{ address: '0xghi', coingeckoId: 'arbitrum-one', chainId: 42161n }
 			];
 			const mockIcrcLedgerCanisterIds: LedgerCanisterIdText[] = ['icrc1', 'icrc2'];
 			const mockSplTokenAddresses: SplTokenAddress[] = ['spl1', 'spl2'];
@@ -97,7 +105,8 @@ describe('exchange.worker', () => {
 					currentCurrency: Currency.USD,
 					erc20Addresses: mockErc20ContractAddresses,
 					icrcCanisterIds: mockIcrcLedgerCanisterIds,
-					splAddresses: mockSplTokenAddresses
+					splAddresses: mockSplTokenAddresses,
+					erc4626TokensExchangeData: []
 				}
 			};
 
@@ -107,50 +116,59 @@ describe('exchange.worker', () => {
 				expect(simplePrice).toHaveBeenCalledTimes(6);
 				expect(simplePrice).toHaveBeenNthCalledWith(1, {
 					ids: 'ethereum',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(2, {
 					ids: 'bitcoin',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(3, {
 					ids: 'internet-computer',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(4, {
 					ids: 'solana',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(5, {
 					ids: 'binancecoin',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(6, {
 					ids: 'polygon-ecosystem-token',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 			});
 
 			it('should post a message with synced prices', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
-				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 					msg: 'syncExchange',
 					data: {
 						currentExchangeRate: {
 							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1,
 							currency: Currency.USD
 						},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentBtcPrice: { bitcoin: { usd: 1 } },
 						currentErc20Prices: {},
+						currentErc4626Prices: {},
 						currentEthPrice: { ethereum: { usd: 1 } },
 						currentIcpPrice: { 'internet-computer': { usd: 1 } },
-						currentIcrcPrices: null,
+						currentIcrcPrices: {},
 						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 						currentSolPrice: { solana: { usd: 1 } },
-						currentSplPrices: null
+						currentSplPrices: {},
+						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+						currentBaseEthPrice: { ethereum: { usd: 1 } }
 					}
 				});
 			});
@@ -175,31 +193,31 @@ describe('exchange.worker', () => {
 				expect(postMessageMock).toHaveBeenCalledTimes(11);
 			});
 
-			it('should post an error message if the sync fails', async () => {
+			it('should post a sync success message even if some price fetches fail', async () => {
 				const mockErrorMessage = 'Sync failed';
 				const mockError = new Error(mockErrorMessage);
 				vi.mocked(simplePrice).mockRejectedValueOnce(mockError);
 
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
-				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
-					msg: 'syncExchangeError',
-					data: { err: mockErrorMessage }
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.any(Object)
 				});
 
-				expect(console.error).toHaveBeenCalledOnce();
-				expect(console.error).toHaveBeenNthCalledWith(
-					1,
-					'Unexpected error while fetching symbol average price:',
+				expect(console.error).toHaveBeenCalledExactlyOnceWith(
+					'Error while fetching exchange rate:',
 					mockError
 				);
 			});
 
-			it('should stop the timer if the sync fails', async () => {
+			it('should not stop the timer if the sync fails', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.any(Object)
+				});
 
 				vi.clearAllMocks();
 
@@ -209,9 +227,201 @@ describe('exchange.worker', () => {
 
 				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL * 10);
 
-				expect(postMessageMock).not.toHaveBeenCalledWith({
+				expect(postMessageMock).toHaveBeenCalledTimes(10);
+			});
+
+			it('should post syncExchangeError when all exchange calls throw', async () => {
+				vi.mocked(simplePrice).mockRejectedValue(new Error('All failed'));
+				vi.mocked(simpleTokenPrice).mockRejectedValue(new Error('All failed'));
+				vi.mocked(calculateErc4626Prices).mockRejectedValue(new Error('All failed'));
+
+				await onExchangeMessage(event);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchangeError',
+					data: { err: 'All failed' }
+				});
+			});
+
+			it('should filter out unsupported coingecko platform IDs for ERC20 tokens', async () => {
+				const unsupportedErc20Addresses: Erc20ContractAddressWithNetwork[] = [
+					{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n },
+					// @ts-expect-error we test this on purpose
+					{ address: '0xunknown', coingeckoId: 'unsupported-chain', chainId: 1n }
+				];
+
+				const mockEvent = {
+					...event,
+					data: {
+						...event.data,
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: unsupportedErc20Addresses,
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
+					id: 'ethereum',
+					vs_currencies: Currency.USD,
+					contract_addresses: ['0x123'],
+					include_market_cap: true,
+					include_24hr_change: true
+				});
+			});
+
+			it('should handle exchange rate rejection for non-USD currency', async () => {
+				vi.mocked(simplePrice).mockRejectedValue(new Error('All prices failed'));
+
+				const mockEvent = {
+					...event,
+					data: {
+						...event.data,
+						msg,
+						data: {
+							currentCurrency: Currency.JPY,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 					msg: 'syncExchange',
-					data: expect.any(Object)
+					data: {
+						currentExchangeRate: {
+							exchangeRateToUsd: null,
+							exchangeRate24hChangeMultiplier: null,
+							currency: Currency.JPY
+						},
+						currentEthPrice: undefined,
+						currentBtcPrice: undefined,
+						currentErc20Prices: {},
+						currentErc4626Prices: {},
+						currentIcpPrice: undefined,
+						currentIcrcPrices: {},
+						currentSolPrice: undefined,
+						currentSplPrices: {},
+						currentBnbPrice: undefined,
+						currentPolPrice: undefined,
+						currentArbitrumEthPrice: undefined,
+						currentBaseEthPrice: undefined
+					}
+				});
+			});
+
+			it('should handle ETH, ICRC, and SPL price rejections individually', async () => {
+				vi.mocked(simplePrice).mockImplementation(
+					({ ids }: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse> => {
+						const idList = Array.isArray(ids) ? ids : ids.split(',');
+						if (idList.includes('ethereum')) {
+							return Promise.reject(new Error('ETH failed'));
+						}
+						return Promise.resolve(idList.reduce((acc, id) => ({ ...acc, [id]: { usd: 1 } }), {}));
+					}
+				);
+
+				vi.mocked(simpleTokenPrice).mockImplementation(
+					({ id }: CoingeckoSimpleTokenPriceParams): Promise<CoingeckoSimpleTokenPriceResponse> => {
+						if (id === 'internet-computer' || id === 'solana') {
+							return Promise.reject(new Error(`${id} failed`));
+						}
+						return Promise.resolve({});
+					}
+				);
+
+				const mockEvent = {
+					...event,
+					data: {
+						...event.data,
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: ['icrc1'],
+							splAddresses: ['spl1'],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: {
+						currentExchangeRate: {
+							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1,
+							currency: Currency.USD
+						},
+						currentEthPrice: undefined,
+						currentBtcPrice: { bitcoin: { usd: 1 } },
+						currentErc20Prices: {},
+						currentErc4626Prices: {},
+						currentIcpPrice: { 'internet-computer': { usd: 1 } },
+						currentIcrcPrices: {},
+						currentSolPrice: { solana: { usd: 1 } },
+						currentSplPrices: {},
+						currentBnbPrice: { binancecoin: { usd: 1 } },
+						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+						currentArbitrumEthPrice: undefined,
+						currentBaseEthPrice: undefined
+					}
+				});
+			});
+
+			it('should handle rejected ERC20 price promises gracefully', async () => {
+				vi.mocked(simpleTokenPrice).mockRejectedValueOnce(new Error('ERC20 fetch failed'));
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...event,
+					data: {
+						...event.data,
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n }],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: {
+						currentExchangeRate: {
+							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1,
+							currency: Currency.USD
+						},
+						currentEthPrice: { ethereum: { usd: 1 } },
+						currentBtcPrice: { bitcoin: { usd: 1 } },
+						currentErc20Prices: {},
+						currentErc4626Prices: {},
+						currentIcpPrice: { 'internet-computer': { usd: 1 } },
+						currentIcrcPrices: {},
+						currentSolPrice: { solana: { usd: 1 } },
+						currentSplPrices: {},
+						currentBnbPrice: { binancecoin: { usd: 1 } },
+						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+						currentBaseEthPrice: { ethereum: { usd: 1 } }
+					}
 				});
 			});
 
@@ -234,7 +444,8 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.JPY,
 								erc20Addresses: mockErc20ContractAddresses,
 								icrcCanisterIds: [],
-								splAddresses: []
+								splAddresses: [],
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
@@ -246,31 +457,36 @@ describe('exchange.worker', () => {
 						id: 'ethereum',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x123', '0xabc'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'base',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x456'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x789'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(4, {
 						id: 'polygon-pos',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xdef'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(5, {
 						id: 'arbitrum-one',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xghi'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -284,19 +500,20 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.CHF,
 								erc20Addresses: [],
 								icrcCanisterIds: mockIcrcLedgerCanisterIds,
-								splAddresses: []
+								splAddresses: [],
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
 
 					await onExchangeMessage(mockEvent);
 
-					expect(simpleTokenPrice).toHaveBeenCalledOnce();
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
 						id: 'internet-computer',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockIcrcLedgerCanisterIds,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -312,19 +529,20 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.EUR,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
-								splAddresses: mockSplTokenAddresses
+								splAddresses: mockSplTokenAddresses,
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
 
 					await onExchangeMessage(mockEvent);
 
-					expect(simpleTokenPrice).toHaveBeenCalledOnce();
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
 						id: 'solana',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockSplTokenAddresses,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -338,7 +556,8 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.JPY,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
-								splAddresses: []
+								splAddresses: [],
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
@@ -350,7 +569,8 @@ describe('exchange.worker', () => {
 
 					expect(simplePrice).toHaveBeenNthCalledWith(1, {
 						ids: 'bitcoin',
-						vs_currencies: `${Currency.USD},${Currency.JPY}`
+						vs_currencies: `${Currency.USD},${Currency.JPY}`,
+						include_24hr_change: true
 					});
 				});
 
@@ -364,7 +584,8 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.USD,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
-								splAddresses: []
+								splAddresses: [],
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
@@ -387,45 +608,52 @@ describe('exchange.worker', () => {
 						id: 'ethereum',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x123', '0xabc'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'base',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x456'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x789'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(4, {
 						id: 'polygon-pos',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xdef'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(5, {
 						id: 'arbitrum-one',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xghi'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(6, {
 						id: 'internet-computer',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockIcrcLedgerCanisterIds,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(7, {
 						id: 'solana',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockSplTokenAddresses,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -439,6 +667,7 @@ describe('exchange.worker', () => {
 						data: {
 							currentExchangeRate: {
 								exchangeRateToUsd: 1,
+								exchangeRate24hChangeMultiplier: 1,
 								currency: Currency.USD
 							},
 							currentBnbPrice: { binancecoin: { usd: 1 } },
@@ -451,12 +680,15 @@ describe('exchange.worker', () => {
 								'0xdef': { usd: 1 },
 								'0xghi': { usd: 1 }
 							},
+							currentErc4626Prices: {},
 							currentEthPrice: { ethereum: { usd: 1 } },
 							currentIcpPrice: { 'internet-computer': { usd: 1 } },
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
 							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 							currentSolPrice: { solana: { usd: 1 } },
-							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } }
+							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
+							currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+							currentBaseEthPrice: { ethereum: { usd: 1 } }
 						}
 					});
 				});
@@ -471,7 +703,11 @@ describe('exchange.worker', () => {
 								(Array.isArray(ids) ? ids : ids.split(',')).reduce(
 									(acc, id) => ({
 										...acc,
-										[id]: { usd: 1, ...(vs_currencies.includes(',') ? { jpy: 3 } : {}) }
+										[id]: {
+											usd: 1,
+											usd_24h_change: 3,
+											...(vs_currencies.includes(',') ? { jpy: 3, jpy_24h_change: 5 } : {})
+										}
 									}),
 									{}
 								)
@@ -494,10 +730,11 @@ describe('exchange.worker', () => {
 						data: {
 							currentExchangeRate: {
 								exchangeRateToUsd: 1 / 3,
+								exchangeRate24hChangeMultiplier: 1.03 / 1.05,
 								currency: Currency.JPY
 							},
-							currentBnbPrice: { binancecoin: { usd: 1 } },
-							currentBtcPrice: { bitcoin: { usd: 1 } },
+							currentBnbPrice: { binancecoin: { usd: 1, usd_24h_change: 3 } },
+							currentBtcPrice: { bitcoin: { usd: 1, usd_24h_change: 3 } },
 							currentErc20Prices: {
 								'0x123': { usd: 1 },
 								'0x456': { usd: 1 },
@@ -506,15 +743,118 @@ describe('exchange.worker', () => {
 								'0xdef': { usd: 1 },
 								'0xghi': { usd: 1 }
 							},
-							currentEthPrice: { ethereum: { usd: 1 } },
-							currentIcpPrice: { 'internet-computer': { usd: 1 } },
+							currentErc4626Prices: {},
+							currentEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } },
+							currentIcpPrice: { 'internet-computer': { usd: 1, usd_24h_change: 3 } },
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
-							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
-							currentSolPrice: { solana: { usd: 1 } },
-							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } }
+							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1, usd_24h_change: 3 } },
+							currentSolPrice: { solana: { usd: 1, usd_24h_change: 3 } },
+							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
+							currentArbitrumEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } },
+							currentBaseEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } }
 						}
 					});
 				});
+			});
+		});
+
+		describe('error handling in syncExchange', () => {
+			const msg = 'startExchangeTimer' as const;
+
+			it('should post syncExchangeError when an unexpected error occurs', async () => {
+				vi.mocked(simplePrice).mockRejectedValue(new Error('catastrophic'));
+				vi.mocked(simpleTokenPrice).mockRejectedValue(new Error('catastrophic'));
+				vi.mocked(calculateErc4626Prices).mockRejectedValue(new Error('catastrophic'));
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchangeError',
+					data: { err: 'catastrophic' }
+				});
+			});
+		});
+
+		describe('syncInProgress guard', () => {
+			const msg = 'startExchangeTimer' as const;
+
+			it('should skip sync when one is already in progress', async () => {
+				const resolvers: Array<(value: CoingeckoSimplePriceResponse) => void> = [];
+				vi.mocked(simplePrice).mockImplementation(
+					() =>
+						new Promise<CoingeckoSimplePriceResponse>((resolve) => {
+							resolvers.push(resolve);
+						})
+				);
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				const firstCall = onExchangeMessage(mockEvent);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).not.toHaveBeenCalled();
+
+				resolvers.forEach((r) => r({ ethereum: { usd: 1 } }));
+				await firstCall;
+			});
+		});
+
+		describe('unknown coingecko platform', () => {
+			const msg = 'startExchangeTimer' as const;
+
+			it('should skip ERC20 addresses with unknown coingecko platform', async () => {
+				const unknownPlatformAddress: Erc20ContractAddressWithNetwork = {
+					address: '0xunknown',
+					coingeckoId: 'unknown-platform' as Erc20ContractAddressWithNetwork['coingeckoId'],
+					chainId: 1n
+				};
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [unknownPlatformAddress],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(simpleTokenPrice).not.toHaveBeenCalled();
 			});
 		});
 
@@ -548,6 +888,38 @@ describe('exchange.worker', () => {
 				await onExchangeMessage(startEvent);
 
 				expect(postMessageMock).toHaveBeenCalledTimes(2);
+			});
+
+			it('should not reschedule when timer is stopped during sync', async () => {
+				await onExchangeMessage(startEvent);
+
+				expect(postMessageMock).toHaveBeenCalledOnce();
+
+				postMessageMock.mockClear();
+
+				let resolveErc4626: ((v: CoingeckoSimpleErc4626TokenPriceResponse) => void) | undefined;
+				vi.mocked(calculateErc4626Prices).mockImplementation(
+					() =>
+						new Promise((resolve) => {
+							resolveErc4626 = resolve;
+						})
+				);
+
+				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL);
+
+				expect(resolveErc4626).toBeDefined();
+
+				await onExchangeMessage(stopEvent);
+
+				resolveErc4626?.({});
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(postMessageMock).toHaveBeenCalledOnce();
+
+				postMessageMock.mockClear();
+				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL * 5);
+
+				expect(postMessageMock).not.toHaveBeenCalled();
 			});
 		});
 

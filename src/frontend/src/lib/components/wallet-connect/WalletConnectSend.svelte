@@ -33,5 +33,7 @@
 </script>
 
 {#if $modalWalletConnectSend && nonNullish(request) && nonNullish(firstTransaction) && nonNullish(sourceNetwork)}
-	<EthWalletConnectSendModal {firstTransaction} {listener} {request} {sourceNetwork} />
+	{#key request.id}
+		<EthWalletConnectSendModal {firstTransaction} {listener} {request} {sourceNetwork} />
+	{/key}
 {/if}

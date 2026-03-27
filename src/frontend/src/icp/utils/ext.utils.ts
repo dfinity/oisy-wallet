@@ -4,6 +4,7 @@ import type { EnvExtToken, EnvExtTokenStandardVersion } from '$env/types/env-ext
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { ExtToken, ExtTokenWithoutId } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -68,7 +69,8 @@ const mapStandardVersion = (version: EnvExtTokenStandardVersion): string | undef
 export const mapExtToken = ({
 	canisterId,
 	standardVersion,
-	metadata: { name }
+	metadata: { name },
+	tags
 }: EnvExtToken): ExtTokenWithoutId => ({
 	canisterId,
 	network: ICP_NETWORK,
@@ -81,5 +83,6 @@ export const mapExtToken = ({
 		code: 'ext',
 		version: mapStandardVersion(standardVersion)
 	},
-	category: 'custom'
+	category: 'custom',
+	tags: tags ?? DEFAULT_TOKEN_TAGS
 });

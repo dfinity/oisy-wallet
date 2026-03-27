@@ -1,6 +1,7 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { ARMON_TOKEN_GROUP } from '$env/tokens/groups/groups.armon.env';
 import armon from '$eth/assets/armon.png';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -17,6 +18,7 @@ export const ARMON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Arm Holdings plc (Ondo Tokenized)',
 	symbol: ARMON_SYMBOL,
 	decimals: ARMON_DECIMALS,

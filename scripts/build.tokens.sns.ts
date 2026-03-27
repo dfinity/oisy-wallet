@@ -14,7 +14,7 @@ import {
 } from '@dfinity/utils';
 import type { UrlSchema } from '@dfinity/zod-schemas';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { z } from 'zod';
 import { SNS_JSON_FILE } from './constants.mjs';
@@ -137,7 +137,7 @@ const mapOptionalToken = (
 	const { symbol, name, fee, decimals, ...rest } = nullishToken;
 
 	if (isNullish(symbol) || isNullish(name) || isNullish(fee) || isNullish(decimals)) {
-		return undefined;
+		return;
 	}
 
 	return {
@@ -196,7 +196,37 @@ const mapDeprecatedSnsMetadata = ({
 	...rest
 });
 
+const readExistingTags = (): Record<CanisterIdText, EnvSnsTokenWithIcon['tags']> => {
+	if (!existsSync(SNS_JSON_FILE)) {
+		return {};
+	}
+
+	try {
+		const existing: { ledgerCanisterId: string; tags?: EnvSnsTokenWithIcon['tags'] }[] = JSON.parse(
+			readFileSync(SNS_JSON_FILE, 'utf8')
+		);
+
+		return existing.reduce<Record<CanisterIdText, EnvSnsTokenWithIcon['tags']>>(
+			(acc, { ledgerCanisterId, tags }) => {
+				if (nonNullish(tags)) {
+					acc[ledgerCanisterId] = tags;
+				}
+				return acc;
+			},
+			{}
+		);
+	} catch (err: unknown) {
+		console.error(
+			`Failed to read or parse existing SNS tags from "${SNS_JSON_FILE}". Aborting to avoid overwriting manual tags.`,
+			err
+		);
+		throw err instanceof Error ? err : new Error('Failed to read existing SNS tags');
+	}
+};
+
 const findSnses = async () => {
+	const existingTags = readExistingTags();
+
 	const data = await querySnsAggregator();
 
 	const snses = data.filter(filterCommittedSns);
@@ -216,7 +246,10 @@ const findSnses = async () => {
 						ledgerCanisterId,
 						rootCanisterId,
 						...rest,
-						metadata
+						metadata,
+						...(nonNullish(existingTags[ledgerCanisterId]) && {
+							tags: existingTags[ledgerCanisterId]
+						})
 					}
 				],
 				icons: [

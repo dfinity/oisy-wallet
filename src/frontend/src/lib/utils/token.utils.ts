@@ -46,7 +46,11 @@ export const getMaxTransactionAmount = ({
 }): string => {
 	const value =
 		(balance ?? ZERO) -
-		(tokenStandard.code !== 'erc20' && tokenStandard.code !== 'spl' ? fee : ZERO);
+		(tokenStandard.code !== 'erc20' &&
+		tokenStandard.code !== 'erc4626' &&
+		tokenStandard.code !== 'spl'
+			? fee
+			: ZERO);
 
 	return value <= ZERO
 		? ZERO.toString()
@@ -168,6 +172,8 @@ export const mapTokenUi = <T extends Token>({
 }): TokenUi<T> => {
 	const { staked, claimable } = $stakeBalances[token.id] ?? {};
 
+	const exchange = $exchanges?.[token.id];
+
 	return {
 		...token,
 		// There is a difference between undefined and null for the balance.
@@ -179,6 +185,9 @@ export const mapTokenUi = <T extends Token>({
 			$balances,
 			$exchanges
 		}),
+		usdPrice: exchange?.usd,
+		usdMarketCap: exchange?.usd_market_cap,
+		usdPriceChangePercentage24h: exchange?.usd_24h_change,
 		...(nonNullish(staked)
 			? {
 					stakeBalance: staked,
@@ -262,6 +271,15 @@ export const findTwinToken = ({
  */
 export const getTokenDisplaySymbol = (token: Token | CardData): string =>
 	token.oisySymbol?.oisySymbol ?? token.symbol;
+
+/**
+ * Gets the name to display for the given token.
+ *
+ * @param token - for which the name to display should be found
+ * @returns the name to display for the token
+ */
+export const getTokenDisplayName = (token: Token | CardData): string =>
+	token.oisyName?.oisyName ?? token.name;
 
 /**
  * Checks if a token is specifically defined as enabled/disabled, otherwise it defaults to true.

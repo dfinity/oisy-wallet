@@ -50,7 +50,7 @@ describe('llm.api', () => {
 				request
 			});
 
-			await expect(res).rejects.toThrowError();
+			await expect(res).rejects.toThrow();
 		});
 	});
 });

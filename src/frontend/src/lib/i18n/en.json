@@ -41,7 +41,11 @@
 			"more": "More",
 			"less": "Less",
 			"ellipsis": "…",
-			"learn_more": "Learn more"
+			"learn_more": "Learn more",
+			"sorting": "Sorting",
+			"unlimited": "Unlimited $items",
+			"info": "Info",
+			"asset": "Asset"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -176,7 +180,6 @@
 			"title_part_1": "Unlock to continue",
 			"title_part_2": "You previously locked your wallet to keep it safe. Resume where you left off or log out.",
 			"unlock": "Unlock",
-			"unlock_with_legacy_login": "Unlock with legacy login",
 			"logout": "Log out",
 			"logout_clear_cash_message": "Logging out will clear all cached data",
 			"learn_more": "Learn more"
@@ -206,15 +209,17 @@
 			"website": "Image of $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Social Media",
-			"verifiable_credentials": "Verifiable Credentials",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Game",
-			"tools": "Tools",
+			"aa_new": "Recently added",
+			"ab_icp": "ICP",
 			"ai": "AI",
-			"nft": "NFT"
+			"defi": "DeFi",
+			"game": "Game",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social_media": "Social Media",
+			"staking": "Staking",
+			"tools": "Tools",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -346,11 +351,10 @@
 			},
 			"caffeine": {
 				"name": "Caffeine",
-				"one_liner": "The first platform for building self-writing apps.",
-				"call_to_action": "Try Caffeine",
-				"description": "Caffeine is the first platform for building self-writing apps. Just talk to AI on desktop or mobile, and it creates apps and services for you – including ones that connect to OISY Wallet. Experience the future of app development with AI-powered creation.",
+				"one_liner": "Create the future internet, one app at a time. Chat with AI on Caffeine to create apps and websites.",
+				"description": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing, which grants them incredible security and resilience, and provides a guarantee that a mistake during a software update cannot cause data loss. AI writes your backend software using Motoko, the first programming language for AI, and runs your apps on the revolutionary Internet Computer network (ICP).",
 				"carousel": {
-					"text": "Hello, self-writing internet",
+					"text": "Chat to create!",
 					"call_to_action": "Learn more"
 				}
 			},
@@ -404,6 +408,36 @@
 				"name": "Kamino",
 				"one_liner": "Kamino is the largest borrowing and lending protocol on Solana, powering a significant share of the network’s DeFi activity.",
 				"description": "Kamino is a decentralized finance (DeFi) platform on the Solana blockchain that integrates liquidity provision, lending, and leveraged trading into a single suite of products. It simplifies these DeFi strategies, especially through its automated liquidity vaults and Kamino Lend system, and uses concentrated liquidity management to increase capital efficiency for its users."
+			},
+			"helium": {
+				"name": "Helium",
+				"one_liner": "A community‑built decentralized wireless network using Hotspots to deliver LoRaWAN IoT and mobile offload services—powered by token incentives on Solana.",
+				"description": "Helium is a decentralized wireless network where individuals deploy Hotspots to provide LoRaWAN and mobile network coverage in exchange for token incentives. The network transitioned to Solana for better scalability and now integrates with the mobile and IoT sectors. All data and rewards are settled on-chain, making Helium a key player in decentralized infrastructure."
+			},
+			"sanctum": {
+				"name": "Sanctum",
+				"one_liner": "A Solana-native liquid staking protocol with instant swaps between LSTs and tools for launching your own.",
+				"description": "Sanctum is a liquid staking infrastructure protocol on Solana enabling instant, slippage-free swaps between liquid staking tokens (LSTs). It supports ecosystem growth by allowing new LSTs to tap into shared liquidity, and offers tools for issuing branded tokens with automated minting and redemption. The platform’s Infinity pool, Router, and Reserve systems help deliver deep liquidity, composability, and safety across the staking landscape."
+			},
+			"sphere_finance": {
+				"name": "Sphere Finance",
+				"one_liner": "A meta‑governance DeFi protocol focused on governance acquisition, treasury yield farming, and building linked yield‑generating tools around the $SPHERE token.",
+				"description": "Sphere Finance is a DeFi meta-governance protocol that acquires governance tokens and builds tools to maximize protocol revenue around its native token, $SPHERE. It automates capital allocation across partner protocols and uses its treasury to generate yield. Governance is earned through veTETU-style staking, aligning incentives with long-term protocol health."
+			},
+			"binaryx": {
+				"name": "BinaryX",
+				"one_liner": "Here’s a compact, image‑length–style description for Binaryx, designed to fit the same format and brevity as your image example",
+				"description": "BinaryX is a tokenized real estate investment platform offering fractional ownership and passive income from global properties. Investors can buy into legally structured DAO-LLCs representing rental or off-plan real estate starting from just $50. Yield is distributed from rental income or asset appreciation, and properties can be traded on a secondary marketplace."
+			},
+			"parcl": {
+				"name": "Parcl",
+				"one_liner": "A Solana‑based perpetuals exchange offering synthetic real‑estate markets—trade real‑estate price indexes with cross‑margin and LP‑backed liquidity.",
+				"description": "Parcl is a Solana-based decentralized exchange for real-estate price perpetuals, enabling users to long or short synthetic property indexes. It uses price data from Parcl Labs and LP-backed liquidity for cross-margined trading. The protocol is tailored to traders seeking exposure to real-world asset performance without holding the underlying property."
+			},
+			"liquidium": {
+				"name": "Liquidium",
+				"one_liner": "Borrow & lend native Bitcoin against USDT.",
+				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes."
 			}
 		}
 	},
@@ -600,6 +634,7 @@
 			"no_infura_erc721_provider": "No Infura ERC721 provider for network $network",
 			"no_infura_erc1155_provider": "No Infura ERC1155 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
+			"no_infura_erc4626_provider": "No Infura ERC4626 provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
 			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading $symbol balance for network $network.",
@@ -618,8 +653,11 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
-			"icrc_canister_loading": "The token with Ledger canister $ledgerCanisterId could not be loaded because it’s currently not responding.",
+			"load_token_list": "Something went wrong loading your token list. Please reload the page to try again.",
+			"icrc_canister_loading_curated": "The $tokenSymbol token is not responding and can't be loaded right now. Try again later.",
+			"icrc_canister_loading_custom": "The token with ledger canister $ledgerCanisterId is not responding and can't be loaded right now. Try again later.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
+			"erc4626_custom_tokens": "Error while loading the ERC4626 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
 			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
@@ -627,6 +665,7 @@
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"ext_custom_tokens": "Error while loading the EXT custom tokens.",
 			"icpunks_custom_tokens": "Error while loading the ICPunks custom tokens.",
+			"custom_tokens": "Error while loading the custom tokens.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
 			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
@@ -789,6 +828,7 @@
 	"send": {
 		"text": {
 			"send": "Send",
+			"send_token": "Send $token",
 			"destination": "Destination",
 			"source": "Source",
 			"balance": "Balance",
@@ -992,6 +1032,9 @@
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized.",
 			"unexpected": "Something went wrong while converting tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Converting USDC from/to ckUSDC is currently suspended."
 		}
 	},
 	"swap": {
@@ -1036,7 +1079,8 @@
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
-			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network"
+			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
+			"near_intents_estimated_time": "NEAR Intents (~$minutes min)"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -1053,7 +1097,8 @@
 			"manually_withdraw_success": "The tokens from your previous failed swap were successfully withdrawn. You can try the swap again or change the swap provider.",
 			"manually_withdraw_failed": "Withdrawing your funds failed. <br> Please try again or follow",
 			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
-			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal."
+			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
+			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page."
 		}
 	},
 	"buy": {
@@ -1114,7 +1159,16 @@
 			"hide_more_networks": "Hide more networks",
 			"on_network": " on $network",
 			"delete_token": "Delete token",
-			"edit_token": "Edit token"
+			"edit_token": "Edit token",
+			"sort_by_value": "Value",
+			"sort_by_performance": "Token performance",
+			"sort_by_symbol": "Symbol",
+			"hide_asset_types": "Hide asset types",
+			"asset_type": "Asset type in $oisy_name",
+			"asset_type_all": "All asset types",
+			"no_tokens_for_asset_type": "There are no $asset_type in your wallet",
+			"no_tokens_for_asset_type_zero_tokens": "There are no $asset_type in the selected network",
+			"no_tokens_for_asset_type_description": "Choose from <strong>$count supported tokens</strong> to customize your portfolio view."
 		},
 		"details": {
 			"title": "Token details",
@@ -1231,6 +1285,7 @@
 			"unrecognised_erc_interface": "Unrecognised ERC interface.",
 			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
+			"version_mismatch": "The token has been updated since it was loaded. Please check its status again and repeat the operation if needed.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
@@ -1239,6 +1294,23 @@
 			"unexpected_undefined": "Token is undefined. This is unexpected.",
 			"unexpected_error_on_token_delete": "Something went wrong while removing the token.",
 			"unexpected_error_on_token_update": "Something went wrong while updating the token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Category",
+			"risk": "Risk"
+		},
+		"category": {
+			"crypto": "Crypto",
+			"stablecoin": "Stablecoins",
+			"stock": "Stocks",
+			"commodity": "Commodities"
+		},
+		"risk": {
+			"low": "Low risk",
+			"medium": "Medium risk",
+			"high": "High risk"
 		}
 	},
 	"nfts": {
@@ -1253,7 +1325,6 @@
 			"by_collection": "Group by collection",
 			"show_spam": "Show spam",
 			"show_hidden": "Show hidden",
-			"sorting": "Sorting",
 			"recents_first": "Recents first",
 			"oldest_first": "Oldest first",
 			"collection_atoz": "Collection name A-Z",
@@ -1469,8 +1540,6 @@
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
-			"twin_token_sent": "$twinToken sent",
-			"ck_token_sent": "$ckToken sent",
 			"twin_token_converted": "Converted from $twinToken",
 			"ck_token_converted": "Converted from $ckToken",
 			"sending_twin_token": "Sending $twinToken",
@@ -1688,15 +1757,6 @@
 			"title": "Scan QR code"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Preparing Signer",
-			"description": "Verifying that you are not a robot",
-			"request_challenge": "Waiting for new challenge",
-			"solve_challenge": "Solving challenge",
-			"grant_cycles": "Enabling signing"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1839,11 +1899,10 @@
 			"go_to_earn": "Go to Earn"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "Earn with Gold",
-				"description": "Stake GLDT to earn daily rewards in governance tokens, unlocking passive income from gold holdings.",
-				"action": "Stake GLDT"
+			"harvest_autopilot": {
+				"title": "Harvest - Autopilot",
+				"description": "Maximized yield efficiency with 1-click autopilot vaults.",
+				"action": "Go to Autopilot"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1853,9 +1912,11 @@
 		},
 		"card_fields": {
 			"apy": "APY",
+			"networks": "Networks",
+			"assets": "Assets",
 			"currentStaked": "Staked",
 			"currentEarning": "Currently earning",
-			"earningPotential": "Additional earning potential",
+			"earningPotential": "Earning potential",
 			"terms": "Terms"
 		},
 		"terms": {
@@ -1867,13 +1928,34 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "Autopilot",
+			"live_apy": "Live APY"
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
-			"stake": "Stake $token_symbol",
+			"harvest_autopilot_page_description": "Maximized yield efficiency with 1-click autopilot vaults.",
+			"harvest_autopilot_vault_page_description": "Autopilot is powered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">audited IPOR</a> Fusion Vault technology.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot is a specialized \"set-and-forget\" service that automates your DeFi positions with minimal effort.",
+			"harvest_autopilot_stake_terms": "I confirm that I have read and understand the product, have read the <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Risk Disclosures</a>, and agree to the <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Terms and Conditions</a>.",
+			"my_positions": "My positions",
+			"available_autopilots": "Available autopilots",
+			"vault_info": "Vault info",
+			"vault_address": "Vault address",
+			"protocol": "Protocol",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "Total Value Locked (TVL)",
+			"manager": "Manager",
+			"vault_description": "This pool is designed as a \"set-and-forget\" yield management service for your $asset_symbol holdings. It automatically optimizes your DeFi position with minimal effort on your part by dynamically allocating capital to the best opportunities.",
+			"stake": "Stake",
 			"stake_now": "Stake now",
 			"stake_amount": "Stake $amount $token_symbol",
 			"not_enough_to_stake": "No $token_symbol to stake",
+			"estimated_received": "Est. Received",
+			"estimated_yearly_yield": "Est. Yearly Yield",
 			"unstake": "Unstake",
 			"unstake_now": "Unstake now",
 			"unstaking": "Unstaking...",
@@ -1884,14 +1966,16 @@
 			"executing_transaction": "Executing transaction...",
 			"unsupported_token_staking": "Staking for the selected token is not supported.",
 			"provider": "Staking terms provided by $provider",
-			"earning_potential": "Additional earning potential",
+			"earning_potential": "Earning potential",
 			"earning_potential_hint": "Based on the value of your not invested assets and the highest APY of the available earning opportunities.",
-			"active_earning": "Currently earning",
+			"active_earning": "Active earning",
 			"active_earning_per_year": "$amount/year",
+			"active_earning_per_year_short": "$amount/yr",
 			"unproductive_assets": "Available",
 			"invested_assets": "Allocated",
 			"visit_provider": "Visit website",
 			"current_apy_label": "Current APY",
+			"max_apy_label": "Max. APY",
 			"stake_review_subtitle": "You stake",
 			"unstake_review_subtitle": "You unstake",
 			"delayed_dissolve": "Receive with a delay",
@@ -1914,7 +1998,7 @@
 			"claim_now": "Claim now",
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",
-			"get_tokens": "Get more $token_symbol",
+			"get_asset_tokens": "Get $token_symbol",
 			"reward_claimed": "Reward claimed",
 			"staked": "Staked",
 			"unstaked": "Unstaked",
@@ -1925,38 +2009,25 @@
 			"description_empty": "It looks like you haven't staked any tokens yet",
 			"full_history": "Show full history",
 			"recent_history": "Close full history",
-			"gldt_stake_carousel_slide_title": "Earn APY with Gold DAO Staking",
-			"gldt_stake_carousel_slide_cta": "Learn more"
+			"harvest_autopilot_carousel_slide_title": "Smart Yield Farming with Harvest Autopilot",
+			"harvest_autopilot_carousel_slide_cta": "Learn more"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens.",
 			"unexpected_error_on_unstake": "Something went wrong while unstaking tokens.",
+			"unexpected_error_on_stake": "Something went wrong while staking tokens.",
 			"dissolvement_limit_reached": "You reached the maximum of $limit active unlock requests. Complete some before creating a new one.<br/>Note that you can always unstake using the ‘immediately’ option."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "Current APY $apy%",
-				"item1_description": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
-				"item2_title_1": "Staking rewards are being paid in ",
-				"item2_title_2": " GOLDAO tokens",
-				"item3_title": "Unlock delay of 1 week",
-				"item3_description": "When unlocking GLDT from staking, the tokens are locked for 1 week without receiving any further rewards, before they can be withdrawn. You can pay a 5% fee on your stake to unlock immediately.",
-				"item4_title": "Age bonus",
-				"item4_description": "GLDT stakes start obtaining an age bonus from day 1. The older the stakes, the bigger the age bonus, growing linearly at 100% per year.",
-				"item5_title": "When you start unlocking your GLDT stake, you will no longer receive new rewards"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "What is GLDT",
-				"description": "GLDT stands for “Gold Token”, being a fungible token backed by GLD NFTs. GLD NFTs are NFTs that represent irrefutable ownership of physical gold bars. 1 GLDT represents exactly 0.01g of gold, and GLD NFTs can be swapped at a ratio of 1g for 100 GLDTs.",
-				"fact_1_title": "Backed by real gold",
-				"fact_1_description": "Every GLDT token is backed by actual gold stored in secure vaults",
-				"fact_2_title": "Flexible terms",
-				"fact_2_description": "No lock-up periods, stake and unstake anytime you want",
-				"fact_3_title": "Stable returns",
-				"fact_3_description": "Earn $apy% APY with minimal volatility risk",
-				"fact_3_description_fallback": "Earn consistent rewards with minimal volatility risk"
+			"harvest_autopilot": {
+				"title": "What is Harvest Autopilot",
+				"description": "Harvest Autopilot is a specialized feature (and a specific product line) within the Harvest Finance ecosystem designed to automate and optimize your decentralized finance (DeFi) positions with minimal effort.",
+				"fact_1_title": "Smart Yield Allocation",
+				"fact_1_description": "Automatically switches protocols to capture the highest live APY.",
+				"fact_2_title": "Passive Compounding",
+				"fact_2_description": "Rewards are automatically harvested and reinvested to maximize your growth.",
+				"fact_3_title": "Gas Cost Sharing",
+				"fact_3_description": "Lowers your expenses by pooling transactions with other users to save on gas."
 			}
 		},
 		"alt": {
@@ -1994,6 +2065,9 @@
 			"minute_plural": "minutes",
 			"second": "second",
 			"second_plural": "seconds"
+		},
+		"time_frame": {
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {

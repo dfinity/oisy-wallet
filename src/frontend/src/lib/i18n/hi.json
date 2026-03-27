@@ -41,7 +41,11 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": "छँटाई",
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -176,7 +180,6 @@
 			"title_part_1": "जारी रखने के लिए अनलॉक करें",
 			"title_part_2": "आपने पहले अपने वॉलेट को सुरक्षित रखने के लिए लॉक किया था। जहाँ से छोड़ा था वहीं से शुरू करें या लॉग आउट करें।",
 			"unlock": "अनलॉक करें",
-			"unlock_with_legacy_login": "",
 			"logout": "लॉगआउट करें",
 			"logout_clear_cash_message": "लॉग आउट करने से सभी कैश्ड डेटा साफ़ हो जाएगा",
 			"learn_more": "और जानें"
@@ -206,15 +209,17 @@
 			"website": "$dAppName की छवि"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "सोशल मीडिया",
-			"verifiable_credentials": "सत्यापन योग्य क्रेडेंशियल्स",
-			"staking": "स्टेकिंग",
-			"walletconnect": "वॉलेटकनेक्ट",
-			"game": "गेम",
-			"tools": "टूल्स",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "",
-			"nft": ""
+			"defi": "DeFi",
+			"game": "गेम",
+			"nft": "",
+			"rwa": "",
+			"social_media": "सोशल मीडिया",
+			"staking": "स्टेकिंग",
+			"tools": "टूल्स",
+			"walletconnect": "वॉलेटकनेक्ट"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -347,7 +352,6 @@
 			"caffeine": {
 				"name": "",
 				"one_liner": "",
-				"call_to_action": "",
 				"description": "",
 				"carousel": {
 					"text": "",
@@ -401,6 +405,36 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -600,6 +634,7 @@
 			"no_infura_erc721_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC721 प्रदाता नहीं है",
 			"no_infura_erc1155_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC1155 प्रदाता नहीं है",
 			"no_infura_erc20_icp_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC20 ICP प्रदाता नहीं है",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "नेटवर्क $network के लिए कोई सोलाना नेटवर्क नहीं है",
 			"loading_address": "$symbol पता लोड करते समय त्रुटि।",
 			"loading_balance": "नेटवर्क $network के लिए $symbol बैलेंस लोड करते समय त्रुटि।",
@@ -618,8 +653,11 @@
 			"btc_withdrawal_statuses": "BTC निकासी स्थिति लाते समय त्रुटइ।",
 			"transaction_price": "लेनदेन की कीमत का अनुमान लोड करते समय त्रुटि।",
 			"icrc_canisters": "ICRC कैनिस्टर लोड करते समय त्रुटि।",
-			"icrc_canister_loading": "",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "",
+			"icrc_canister_loading_custom": "",
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc1155_custom_tokens": "ERC1155 कस्टम टोकन लोड करते समय त्रुटि।",
 			"spl_custom_tokens": "SPL कस्टम टोकन लोड करते समय त्रुटि।",
@@ -627,6 +665,7 @@
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "आपके वॉलेट को कुछ प्रारंभिक डेटा की आवश्यकता है जो अभी तक लोड नहीं हुआ है। कृपया पुनः प्रयास करें।",
 			"allow_signing": "आपके वॉलेट को साइन करने के लिए सेट करते समय एक समस्या हुई। आपको साइन आउट कर दिया गया है। यदि समस्या बनी रहती है, तो सहायता से संपर्क करें।",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -789,6 +828,7 @@
 	"send": {
 		"text": {
 			"send": "भेजें",
+			"send_token": "",
 			"destination": "गंतव्य",
 			"source": "स्रोत",
 			"balance": "शेष राशि",
@@ -992,6 +1032,9 @@
 			"loading_cketh_helper": "ckETH सहायक अनुबंध पता लोड करते समय त्रुटि। कोई मिन्टर कैनिस्टर आईडी प्रारंभ नहीं की गई है।",
 			"unexpected": "टोकन बदलते समय कुछ गलत हो गया।",
 			"unexpected_missing_data": "एक कनवर्ट लेनदेन शुरू करते समय कुछ गलत हो गया।"
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "USDC को ckUSDC से/में परिवर्तित करना अभी निलंबित है।"
 		}
 	},
 	"swap": {
@@ -1036,7 +1079,8 @@
 			"network_cost": "नेटवर्क लागत",
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
-			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं"
+			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
@@ -1053,7 +1097,8 @@
 			"manually_withdraw_success": "आपके पिछले असफल स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। आप स्वैप को फिर से आज़मा सकते हैं या स्वैप प्रदाता बदल सकते हैं।",
 			"manually_withdraw_failed": "आपके फंड निकालने में विफल रहा। <br> कृपया पुनः प्रयास करें या अनुसरण करें",
 			"swap_sucess_withdraw_failed": "स्वैप पूरा हो गया, लेकिन आपके टोकन स्वचालित रूप से वापस नहीं लिए जा सके। उन्हें मैन्युअल रूप से वापस लेने के लिए नीचे दिए गए निकालें बटन पर क्लिक करें।<br> या अनुसरण करें",
-			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।"
+			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1114,7 +1159,16 @@
 			"hide_more_networks": "अधिक नेटवर्क छुपाएं",
 			"on_network": " $network पर",
 			"delete_token": "टोकन मिटाएँ",
-			"edit_token": "टोकन संपादित करें"
+			"edit_token": "टोकन संपादित करें",
+			"sort_by_value": "मूल्य",
+			"sort_by_performance": "टोकन प्रदर्शन",
+			"sort_by_symbol": "प्रतीक",
+			"hide_asset_types": "असेट प्रकार छुपाएं",
+			"asset_type": "$oisy_name में असेट प्रकार",
+			"asset_type_all": "सभी असेट प्रकार",
+			"no_tokens_for_asset_type": "आपके वॉलेट में कोई $asset_type नहीं है",
+			"no_tokens_for_asset_type_zero_tokens": "चयनित नेटवर्क में कोई $asset_type नहीं है",
+			"no_tokens_for_asset_type_description": "अपना पोर्टफोलियो दृश्य अनुकूलित करने के लिए <strong>$count समर्थित टोकन</strong> में से चुनें।"
 		},
 		"details": {
 			"title": "टोकन विवरण",
@@ -1231,6 +1285,7 @@
 			"unrecognised_erc_interface": "अपरिचित ERC इंटरफ़ेस।",
 			"no_metadata": "कोई मेटाडेटा प्राप्त नहीं हुआ।",
 			"unexpected": "टोकन सहेजते समय कुछ गलत हो गया।",
+			"version_mismatch": "",
 			"unexpected_hiding": "टोकन छिपाते समय कुछ गलत हो गया।",
 			"already_available": "टोकन पहले से उपलब्ध है।",
 			"not_toggleable": "टोकन टॉगलेबल नहीं है, इसे छिपाया नहीं जा सकता।",
@@ -1239,6 +1294,23 @@
 			"unexpected_undefined": "टोकन अपरिभाषित है। यह अप्रत्याशित है।",
 			"unexpected_error_on_token_delete": "टोकन हटाते समय कुछ गलत हो गया।",
 			"unexpected_error_on_token_update": "टोकन अपडेट करते समय कुछ गलत हो गया।"
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "श्रेणी",
+			"risk": "जोखिम"
+		},
+		"category": {
+			"crypto": "क्रिप्टो",
+			"stablecoin": "स्टेबलकॉइन",
+			"stock": "शेयर",
+			"commodity": "कमोडिटी"
+		},
+		"risk": {
+			"low": "कम जोखिम",
+			"medium": "मध्यम जोखिम",
+			"high": "उच्च जोखिम"
 		}
 	},
 	"nfts": {
@@ -1253,7 +1325,6 @@
 			"by_collection": "संग्रह के अनुसार समूहित करें",
 			"show_spam": "स्पैम दिखाएँ",
 			"show_hidden": "छिपा हुआ दिखाएँ",
-			"sorting": "छँटाई",
 			"recents_first": "नवीनतम पहले",
 			"oldest_first": "सबसे पुराना पहले",
 			"collection_atoz": "संग्रह का नाम A-Z",
@@ -1469,8 +1540,6 @@
 		},
 		"label": {
 			"reimbursement": "प्रतिपूर्ति",
-			"twin_token_sent": "$twinToken भेजा गया",
-			"ck_token_sent": "$ckToken भेजा गया",
 			"twin_token_converted": "$twinToken से परिवर्तित",
 			"ck_token_converted": "$ckToken से परिवर्तित",
 			"sending_twin_token": "$twinToken भेज रहा है",
@@ -1688,15 +1757,6 @@
 			"title": "QR कोड स्कैन करें"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Preparing Signer",
-			"description": "Verifying that you are not a robot",
-			"request_challenge": "Waiting for new challenge",
-			"solve_challenge": "Solving challenge",
-			"grant_cycles": "Enabling signing"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1839,9 +1899,8 @@
 			"go_to_earn": ""
 		},
 		"cards": {
-			"gldt": {
-				"title1": "",
-				"title2": "",
+			"harvest_autopilot": {
+				"title": "",
 				"description": "",
 				"action": ""
 			},
@@ -1853,6 +1912,8 @@
 		},
 		"card_fields": {
 			"apy": "",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "",
 			"currentEarning": "",
 			"earningPotential": "",
@@ -1867,13 +1928,34 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "",
 			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "",
 			"unstake_now": "",
 			"unstaking": "",
@@ -1888,10 +1970,12 @@
 			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "",
 			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
+			"max_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1914,7 +1998,7 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": "",
+			"get_asset_tokens": "",
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",
@@ -1925,29 +2009,17 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",
 			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": ""
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
-		},
 		"info": {
-			"gldt": {
+			"harvest_autopilot": {
 				"title": "",
 				"description": "",
 				"fact_1_title": "",
@@ -1955,8 +2027,7 @@
 				"fact_2_title": "",
 				"fact_2_description": "",
 				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
@@ -1994,6 +2065,9 @@
 			"minute_plural": "मिनट",
 			"second": "सेकंड",
 			"second_plural": "सेकंड"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

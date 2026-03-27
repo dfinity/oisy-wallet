@@ -28,11 +28,15 @@ import {
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isErc20Icp } from '$eth/utils/token.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
+import { exchangesDataEqual } from '$lib/utils/exchange.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -47,9 +51,9 @@ export const exchangeNotInitialized: Readable<boolean> = derived(
 	([$exchangeInitialized]) => !$exchangeInitialized
 );
 
-export const exchanges: Readable<ExchangesData> = derived(
-	[exchangeStore, enabledErc20Tokens, allIcrcTokens, enabledSplTokens],
-	([$exchangeStore, $erc20Tokens, $icrcTokens, $splTokens]) => {
+export const exchanges: Readable<ExchangesData> = derivedMemo(
+	[exchangeStore, enabledErc20Tokens, erc4626Tokens, allIcrcTokens, enabledSplTokens],
+	([$exchangeStore, $erc20Tokens, $erc4626Tokens, $icrcTokens, $splTokens]) => {
 		const ethPrice = $exchangeStore?.ethereum;
 		const btcPrice = $exchangeStore?.bitcoin;
 		const icpPrice = $exchangeStore?.['internet-computer'];
@@ -79,7 +83,9 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const tokens = [
-					...$erc20Tokens.filter(({ address }) => address.toLowerCase() === key.toLowerCase()),
+					...[...$erc20Tokens, ...$erc4626Tokens].filter(
+						({ address }) => address.toLowerCase() === key.toLowerCase()
+					),
 					...$splTokens.filter(({ address }) => address.toLowerCase() === key.toLowerCase())
 				];
 
@@ -88,15 +94,13 @@ export const exchanges: Readable<ExchangesData> = derived(
 					...tokens.reduce((inner, token) => ({ ...inner, [token.id]: currentPrice }), {})
 				};
 			}, {}),
-			...$erc20Tokens
-				.filter(({ exchange }) => exchange === 'icp')
-				.reduce(
-					(acc, { id }) => ({
-						...acc,
-						[id]: icpPrice
-					}),
-					{}
-				),
+			...$erc20Tokens.filter(isErc20Icp).reduce(
+				(acc, { id }) => ({
+					...acc,
+					[id]: icpPrice
+				}),
+				{}
+			),
 			...$icrcTokens.reduce((acc, token) => {
 				const { id, ledgerCanisterId, exchangeCoinId } = token;
 
@@ -130,5 +134,6 @@ export const exchanges: Readable<ExchangesData> = derived(
 				};
 			}, {})
 		};
-	}
+	},
+	exchangesDataEqual
 );

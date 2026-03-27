@@ -6,6 +6,7 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -137,6 +138,7 @@ const mapErc1155CustomToken = async ({
 			decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 			standard: { code: 'erc1155' as const },
 			category: 'custom' as const,
+			tags: DEFAULT_TOKEN_TAGS,
 			enabled,
 			version,
 			...(nonNullish(mappedSection) && {
@@ -175,4 +177,32 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.erc1155_custom_tokens },
 		err
 	});
+};
+
+// ERC1155 metadata is fetched from Alchemy and doesn't depend on the IC certified flag.
+// On the certified round we reuse the query round's response to skip redundant HTTP calls.
+let lastCustomTokensResponse: Erc1155CustomToken[] | undefined;
+
+export const processCustomTokens = async ({
+	certified,
+	...rest
+}: LoadCustomTokenParams): Promise<void> => {
+	try {
+		if (certified && nonNullish(lastCustomTokensResponse)) {
+			loadCustomTokenData({ response: lastCustomTokensResponse, certified });
+
+			return;
+		}
+
+		const response = await loadCustomTokensWithMetadata({ ...rest, certified });
+		lastCustomTokensResponse = response;
+
+		loadCustomTokenData({ response, certified });
+	} catch (err: unknown) {
+		lastCustomTokensResponse = undefined;
+
+		if (certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };

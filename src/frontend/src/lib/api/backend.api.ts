@@ -1,20 +1,20 @@
 import type {
 	AddUserCredentialResult,
-	AllowSigningResponse,
 	BtcGetFeePercentilesResponse,
 	Contact,
-	CreateChallengeResponse,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	PendingTransaction,
-	SelectedUtxosFeeResponse,
+	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
+import { CanisterApi } from '$lib/api/canister.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
+	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
+	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
@@ -23,26 +23,30 @@ import type {
 	CreateContactParams,
 	DeleteContactParams,
 	GetContactParams,
+	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
+	GetUserTransactionsParams,
+	GetUserTransactionsResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SaveUserTransactionsParams,
+	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
-import { Principal } from '@icp-sdk/core/principal';
+import type { BackendExchangeRate } from '$lib/types/exchange';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
-let canister: BackendCanister | undefined = undefined;
+const backendApi = new CanisterApi<BackendCanister>();
 
 export const listCustomTokens = async ({
-	identity,
-	certified
-}: CanisterApiFunctionParams<QueryParams>): Promise<CustomToken[]> => {
+	identity
+}: CanisterApiFunctionParams): Promise<CustomToken[]> => {
 	const { listCustomTokens } = await backendCanister({ identity });
 
-	return listCustomTokens({ certified });
+	return listCustomTokens();
 };
 
 export const setManyCustomTokens = async ({
@@ -105,7 +109,7 @@ export const addUserCredential = async ({
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcAddPendingTransactionParams>): Promise<boolean> => {
+}: CanisterApiFunctionParams<BtcAddPendingTransactionParams>): Promise<AddPendingTransactionOutcome> => {
 	const { btcAddPendingTransaction } = await backendCanister({ identity });
 
 	return btcAddPendingTransaction(params);
@@ -114,16 +118,16 @@ export const addPendingBtcTransaction = async ({
 export const getPendingBtcTransactions = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<PendingTransaction[]> => {
-	const { btcGetPendingTransaction } = await backendCanister({ identity });
+}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<GetPendingTransactionsOutcome> => {
+	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
-	return btcGetPendingTransaction(params);
+	return btcGetPendingTransactions(params);
 };
 
 export const selectUserUtxosFee = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeResponse> => {
+}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeOutcome> => {
 	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
 
 	return btcSelectUserUtxosFee(params);
@@ -138,13 +142,6 @@ export const getCurrentBtcFeePercentiles = async ({
 	return btcGetCurrentFeePercentiles(params);
 };
 
-export const createPowChallenge = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<CreateChallengeResponse> => {
-	const { createPowChallenge } = await backendCanister({ identity });
-	return createPowChallenge();
-};
-
 export const getAllowedCycles = async ({
 	identity
 }: CanisterApiFunctionParams): Promise<GetAllowedCyclesResponse> => {
@@ -156,7 +153,7 @@ export const getAllowedCycles = async ({
 export const allowSigning = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningResponse> => {
+}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningOutcome> => {
 	const { allowSigning } = await backendCanister({ identity });
 
 	return allowSigning(params);
@@ -246,6 +243,48 @@ export const updateUserExperimentalFeatureSettings = async ({
 	return updateUserExperimentalFeatureSettings(params);
 };
 
+export const getExchangeRate = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<{
+	token_id: TokenId;
+	certified: boolean;
+}>): Promise<BackendExchangeRate | undefined> => {
+	const { getExchangeRate } = await backendCanister({ identity });
+
+	return getExchangeRate(params);
+};
+
+export const getExchangeRates = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<{
+	token_ids: TokenId[];
+	certified: boolean;
+}>): Promise<Map<string, BackendExchangeRate>> => {
+	const { getExchangeRates } = await backendCanister({ identity });
+
+	return getExchangeRates(params);
+};
+
+export const getUserTransactions = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<GetUserTransactionsParams>): Promise<GetUserTransactionsResponse> => {
+	const { getUserTransactions } = await backendCanister({ identity });
+
+	return getUserTransactions(params);
+};
+
+export const saveUserTransactions = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserTransactionsParams>): Promise<void> => {
+	const { saveUserTransactions } = await backendCanister({ identity });
+
+	return saveUserTransactions(params);
+};
+
 const backendCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
@@ -253,12 +292,9 @@ const backendCanister = async ({
 }: CanisterApiFunctionParams): Promise<BackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	if (isNullish(canister)) {
-		canister = await BackendCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return canister;
+	return await backendApi.getCanister({
+		identity,
+		canisterId,
+		create: BackendCanister.create
+	});
 };

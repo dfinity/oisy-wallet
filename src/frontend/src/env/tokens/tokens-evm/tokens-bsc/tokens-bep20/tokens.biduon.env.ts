@@ -2,6 +2,7 @@ import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc
 import { BIDUON_TOKEN_GROUP } from '$env/tokens/groups/groups.biduon.env';
 import biduon from '$eth/assets/biduon.webp';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,11 +17,11 @@ export const BIDUON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Baidu (Ondo Tokenized)',
 	symbol: BIDUON_SYMBOL,
 	decimals: BIDUON_DECIMALS,
 	icon: biduon,
 	address: '0x467e59ce5D5fe01686D4A80dd1E1DAE13549AA6c',
-	exchange: 'erc20',
 	groupData: BIDUON_TOKEN_GROUP
 };

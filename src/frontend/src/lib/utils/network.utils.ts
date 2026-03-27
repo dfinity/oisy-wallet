@@ -1,4 +1,4 @@
-import type { BitcoinNetwork as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
+import type { Network as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -129,24 +129,24 @@ export const mapCkBtcBitcoinNetworkToBackendBitcoinNetwork = (
 	}
 };
 
-export const showTokenFilteredBySelectedNetwork = ({
+export const showTokenFilteredBySelectedNetwork = <T extends Token>({
 	token,
 	$selectedNetwork,
 	$pseudoNetworkChainFusion
 }: {
-	token: Token;
+	token: T;
 	$selectedNetwork: Network | undefined;
 	$pseudoNetworkChainFusion: boolean;
 }): boolean =>
 	($pseudoNetworkChainFusion && !isTokenIcTestnet(token) && token.network.env !== 'testnet') ||
 	$selectedNetwork?.id === token.network.id;
 
-export const showTokenFilteredBySelectedNetworks = ({
+export const showTokenFilteredBySelectedNetworks = <T extends Token>({
 	token,
 	$selectedNetworks,
 	$pseudoNetworkChainFusion
 }: {
-	token: Token;
+	token: T;
 	$selectedNetworks: NetworkId[] | undefined;
 	$pseudoNetworkChainFusion: boolean;
 }): boolean =>

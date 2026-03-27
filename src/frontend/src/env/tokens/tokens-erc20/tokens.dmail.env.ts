@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import dmail from '$eth/assets/dmail.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -15,10 +16,10 @@ export const DMAIL_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Dmail Network',
 	symbol: DMAIL_SYMBOL,
 	decimals: DMAIL_DECIMALS,
 	icon: dmail,
-	address: '0xcC6f1e1B87cfCbe9221808d2d85C501aab0B5192',
-	exchange: 'erc20'
+	address: '0xcC6f1e1B87cfCbe9221808d2d85C501aab0B5192'
 };

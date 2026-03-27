@@ -68,7 +68,10 @@ const mockVeloraBridgePrice: BridgePrice = {
 				amountInUSD: '50.0'
 			}
 		],
-		estimatedTimeMs: 300000
+		estimatedTimeMs: 300000,
+		fastest: true,
+		bestReturn: true,
+		recommended: true
 	},
 	availableBridges: []
 };
@@ -172,7 +175,10 @@ export const mockVeloraBridgeSwapResponse: DeltaSwapResponse = {
 			destAmountAfterBridge: '800',
 			destUSDAfterBridge: '795.0',
 			fees: [],
-			estimatedTimeMs: 300000
+			estimatedTimeMs: 300000,
+			fastest: true,
+			bestReturn: true,
+			recommended: true
 		}
 	},
 	deltaAddress: '0xdelta123'

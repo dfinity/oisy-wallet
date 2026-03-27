@@ -2,7 +2,9 @@
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
+	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
+	import { isInterfaceErc4626 } from '$eth/services/erc4626.services';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc721Metadata } from '$eth/types/erc721';
@@ -156,7 +158,20 @@
 			return;
 		}
 
-		if (ethMetadata.decimals >= 0) {
+		const isErc4626 = await isInterfaceErc4626({
+			address: ethContractAddress,
+			networkId: network.id
+		});
+
+		if (isErc4626) {
+			await saveTokens([{ ...newToken, networkKey: 'Erc4626' }]);
+
+			return;
+		}
+
+		const { isErc20 } = infuraErc20Providers(network.id);
+
+		if (await isErc20({ contractAddress: ethContractAddress })) {
 			await saveTokens([{ ...newToken, networkKey: 'Erc20' }]);
 
 			return;

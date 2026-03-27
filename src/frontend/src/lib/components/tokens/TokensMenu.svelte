@@ -1,8 +1,8 @@
 <script lang="ts">
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconHide from '$lib/components/icons/IconHide.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import TokensCategoryFilterToggle from '$lib/components/tokens/TokensCategoryFilterToggle.svelte';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -20,6 +20,10 @@
 
 	const toggleHideZeros = () => {
 		emit({ message: 'oisyToggleZeroBalances' });
+	};
+
+	const toggleTokenCategoryFilter = () => {
+		emit({ message: 'oisyToggleTokenCategoryFilter' });
 	};
 
 	const openManageTokens = () => {
@@ -48,10 +52,18 @@
 		<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 		<List condensed noPadding>
 			<ListItem>
-				<LogoButton fullWidth onClick={toggleHideZeros}>
-					{#snippet logo()}
-						<IconHide />
+				<LogoButton fullWidth onClick={toggleTokenCategoryFilter}>
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.tokens.text.hide_asset_types}</span>
 					{/snippet}
+					{#snippet action()}
+						<TokensCategoryFilterToggle />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+
+			<ListItem>
+				<LogoButton fullWidth onClick={toggleHideZeros}>
 					{#snippet title()}
 						<span class="text-sm font-normal">{$i18n.tokens.text.hide_zero_balances}</span>
 					{/snippet}
@@ -60,6 +72,7 @@
 					{/snippet}
 				</LogoButton>
 			</ListItem>
+
 			<ListItem>
 				<LogoButton fullWidth onClick={openManageTokens}>
 					{#snippet logo()}

@@ -12,6 +12,7 @@ import { collectionMetadata } from '$icp/api/icpunks.api';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icPunksDefaultTokensStore } from '$icp/stores/icpunks-default-tokens.store';
 import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -36,7 +37,7 @@ export const loadIcPunksTokens = async ({
 	await Promise.all([loadDefaultIcPunksTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
-const loadDefaultIcPunksTokens = (): ResultSuccess => {
+export const loadDefaultIcPunksTokens = (): ResultSuccess => {
 	icPunksDefaultTokensStore.set(
 		IC_PUNKS_BUILTIN_TOKENS.map((token) => ({ ...token, id: parseTokenId(token.symbol) }))
 	);
@@ -102,6 +103,7 @@ const mapIcPunksCustomToken = async ({
 		symbol,
 		standard: { code: 'icpunks' as const },
 		category: 'custom' as const,
+		tags: DEFAULT_TOKEN_TAGS,
 		enabled,
 		version,
 		...(nonNullish(mappedSection) && {
@@ -138,4 +140,16 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.icpunks_custom_tokens },
 		err
 	});
+};
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadCustomTokensWithMetadata(params);
+
+		loadCustomTokenData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };

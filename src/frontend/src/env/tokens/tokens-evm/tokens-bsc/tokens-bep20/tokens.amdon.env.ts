@@ -2,6 +2,7 @@ import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc
 import { AMDON_TOKEN_GROUP } from '$env/tokens/groups/groups.amdon.env';
 import amdon from '$eth/assets/amdon.webp';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,11 +17,11 @@ export const AMDON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'AMD (Ondo Tokenized Stock)',
 	symbol: AMDON_SYMBOL,
 	decimals: AMDON_DECIMALS,
 	icon: amdon,
 	address: '0x9f16E46c73b43BDB70861247d537bEE4eA18F639',
-	exchange: 'erc20',
 	groupData: AMDON_TOKEN_GROUP
 };

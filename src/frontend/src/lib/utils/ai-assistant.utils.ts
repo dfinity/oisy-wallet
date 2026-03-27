@@ -37,7 +37,7 @@ export const parseToAiAssistantContacts = (
 									? ['solana', 'spl']
 									: addressType === 'Eth'
 										? // We do not include NFT standards here until the console can handle sending them
-											['ethereum', 'erc20', 'dip20']
+											['ethereum', 'erc20', 'erc4626', 'dip20']
 										: [],
 					addressType,
 					...restAddress

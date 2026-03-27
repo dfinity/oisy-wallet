@@ -4,13 +4,19 @@ import {
 	USDC_TOKEN
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdt.env';
+import { WBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.wbtc.env';
 import { ZCHF_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.zchf.env';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
 const POLYGON_ERC20_TOKENS_AMOY: RequiredEvmErc20Token[] = [AMOY_USDC_TOKEN];
 
-const POLYGON_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [USDC_TOKEN, USDT_TOKEN, ZCHF_TOKEN];
+const POLYGON_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
+	USDC_TOKEN,
+	USDT_TOKEN,
+	WBTC_TOKEN,
+	ZCHF_TOKEN
+];
 
 export const POLYGON_ERC20_TOKENS: RequiredEvmErc20Token[] = defineSupportedTokens({
 	mainnetFlag: POLYGON_MAINNET_ENABLED,

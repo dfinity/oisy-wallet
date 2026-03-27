@@ -14,6 +14,8 @@ describe('auth-client.providers', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		AuthClientProvider.getInstance().reset();
+
 		vi.spyOn(AuthClient, 'create');
 
 		vi.spyOn(authClientStorage, 'get');
@@ -89,7 +91,9 @@ describe('auth-client.providers', () => {
 				expect.any(Object)
 			);
 
-			expect(authClientStorage.remove).toHaveBeenCalledExactlyOnceWith(KEY_STORAGE_KEY);
+			expect(authClientStorage.remove).toHaveBeenCalledTimes(2);
+			expect(authClientStorage.remove).toHaveBeenCalledWith(KEY_STORAGE_KEY);
+			expect(authClientStorage.remove).toHaveBeenCalledWith(KEY_STORAGE_DELEGATION);
 		});
 
 		it('should create a new key when called a second time', async () => {
@@ -112,7 +116,9 @@ describe('auth-client.providers', () => {
 				expect.any(Object)
 			);
 
-			expect(authClientStorage.remove).toHaveBeenCalledExactlyOnceWith(KEY_STORAGE_KEY);
+			expect(authClientStorage.remove).toHaveBeenCalledTimes(2);
+			expect(authClientStorage.remove).toHaveBeenCalledWith(KEY_STORAGE_KEY);
+			expect(authClientStorage.remove).toHaveBeenCalledWith(KEY_STORAGE_DELEGATION);
 		});
 	});
 

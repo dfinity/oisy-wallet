@@ -1,8 +1,10 @@
 import { loadCustomTokens as loadCustomErc1155Tokens } from '$eth/services/erc1155.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
+import { loadCustomErc4626Tokens } from '$eth/services/erc4626.services';
 import { loadCustomTokens as loadCustomErc721Tokens } from '$eth/services/erc721.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { loadCustomTokens as loadCustomExtTokens } from '$icp/services/ext.services';
 import { loadCustomTokens as loadCustomIcPunksTokens } from '$icp/services/icpunks.services';
@@ -20,6 +22,7 @@ import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { assertNever } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 const parseErcIdentifier = (token: SaveCustomErcVariant) => `${token.address}#${token.chainId}`;
@@ -55,6 +58,12 @@ const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 		return;
 	}
 
+	if (token.networkKey === 'Erc4626') {
+		erc4626CustomTokensStore.resetByIdentifier(parseErcIdentifier(token));
+
+		return;
+	}
+
 	if (token.networkKey === 'Erc721') {
 		erc721CustomTokensStore.resetByIdentifier(parseErcIdentifier(token));
 
@@ -76,28 +85,10 @@ const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 	assertNever(token.networkKey, `Unexpected networkKey: ${token.networkKey}`);
 };
 
-export const saveCustomTokens = async ({
-	progress,
-	identity,
-	tokens
-}: SaveTokensParams<SaveCustomTokenWithKey>) => {
-	progress?.(ProgressStepsAddToken.SAVE);
-
-	await setManyCustomTokens({
-		identity,
-		tokens: tokens.map(toCustomToken),
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-	});
-
-	progress?.(ProgressStepsAddToken.UPDATE_UI);
-
-	// Hide tokens that have been disabled
-	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
-	disabledTokens.forEach(hideTokenByKey);
-
-	// Reload all custom tokens for simplicity reason.
-	await Promise.all([
+const reloadAllCustomTokens = ({ identity }: { identity: Identity }) =>
+	Promise.all([
 		loadCustomErc20Tokens({ identity }),
+		loadCustomErc4626Tokens({ identity }),
 		loadCustomErc721Tokens({ identity }),
 		loadCustomErc1155Tokens({ identity }),
 		loadCustomIcrcTokens({ identity }),
@@ -106,4 +97,31 @@ export const saveCustomTokens = async ({
 		loadCustomIcPunksTokens({ identity }),
 		loadCustomSplTokens({ identity })
 	]);
+
+export const saveCustomTokens = async ({
+	progress,
+	identity,
+	tokens
+}: SaveTokensParams<SaveCustomTokenWithKey>) => {
+	progress?.(ProgressStepsAddToken.SAVE);
+
+	const save = async () => {
+		await setManyCustomTokens({
+			identity,
+			tokens: tokens.map(toCustomToken),
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
+
+		progress?.(ProgressStepsAddToken.UPDATE_UI);
+
+		// Hide tokens that have been disabled
+		const disabledTokens = tokens.filter(({ enabled }) => !enabled);
+		disabledTokens.forEach(hideTokenByKey);
+	};
+
+	try {
+		await save();
+	} finally {
+		await reloadAllCustomTokens({ identity });
+	}
 };

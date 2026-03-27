@@ -9,6 +9,7 @@ import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
 import { ARMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.armon.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.biduon.env';
+import { CBBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.cbbtc.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.copxon.env';
 import { DAI_TOKEN } from '$env/tokens/tokens-erc20/tokens.dai.env';
 import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
@@ -52,8 +53,7 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	{
 		// Weenus
-		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
-		exchange: 'erc20'
+		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9'
 	}
 ];
 
@@ -73,6 +73,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ARMON_TOKEN,
 	BABAON_TOKEN,
 	BIDUON_TOKEN,
+	CBBTC_TOKEN,
 	COPXON_TOKEN,
 	DAI_TOKEN,
 	DMAIL_TOKEN,

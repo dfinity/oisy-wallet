@@ -8,11 +8,11 @@
 		"actionText": "earning.cards.sprinkles.action"
 	},
 	{
-		"id": "gldt-staking",
-		"titles": ["earning.cards.gldt.title1", "earning.cards.gldt.title2"],
-		"description": "earning.cards.gldt.description",
-		"logo": "/images/dapps/gold-dao-logo.svg",
-		"fields": ["apy", "currentStaked", "currentEarning", "earningPotential", "terms"],
-		"actionText": "earning.cards.gldt.action"
+		"id": "harvest-autopilot",
+		"titles": ["earning.cards.harvest_autopilot.title"],
+		"description": "earning.cards.harvest_autopilot.description",
+		"logo": "/images/dapps/harvest-autopilot-logo.svg",
+		"fields": ["networks", "assets", "currentEarning", "earningPotential"],
+		"actionText": "earning.cards.harvest_autopilot.action"
 	}
 ]

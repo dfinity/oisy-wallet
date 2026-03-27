@@ -32,24 +32,42 @@ export interface AddUserCredentialRequest {
 }
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
+export interface AgreementHistoryEntry {
+	timestamp_ns: bigint;
+	agreement_type: AgreementType;
+	text_sha256: [] | [string];
+	accepted: boolean;
+	last_updated_at_ms: [] | [bigint];
+}
+export type AgreementType =
+	| { TermsOfUse: null }
+	| { PrivacyPolicy: null }
+	| { LicenseAgreement: null };
 export interface Agreements {
 	agreements: UserAgreements;
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
-	| { PowChallenge: ChallengeCompletionError }
+	| { InvalidDelegationChain: { msg: string } }
+	| { RateLimited: RateLimitError }
+	| { RateLimitedByGuard: RateLimitError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
 export interface AllowSigningRequest {
-	nonce: bigint;
+	ii_delegation_chain: [] | [IIDelegationChain];
 }
 export interface AllowSigningResponse {
 	status: AllowSigningStatus;
-	challenge_completion: [] | [ChallengeCompletion];
 	allowed_cycles: bigint;
 }
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
+export interface ApiKeys {
+	alchemy_api_key: [] | [string];
+	etherscan_api_key: [] | [string];
+	coingecko_api_key: [] | [string];
+	infura_api_key: [] | [string];
+}
 export type ApproveError =
 	| {
 			GenericError: { message: string; error_code: bigint };
@@ -64,14 +82,18 @@ export type ApproveError =
 	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
-export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
-export type BtcAddPendingTransactionError = {
-	InternalError: { msg: string };
-};
+export type BtcAddPendingTransactionError =
+	| { InvalidUtxos: null }
+	| { EmptyUtxos: null }
+	| { DuplicateUtxos: null }
+	| { InvalidDelegationChain: { msg: string } }
+	| { RateLimited: RateLimitError }
+	| { InternalError: { msg: string } }
+	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
-	network: BitcoinNetwork;
-	address: string;
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
 	utxos: Array<Utxo>;
 }
 export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
@@ -82,7 +104,7 @@ export type BtcAddress =
 	| { P2SH: string }
 	| { P2TR: string };
 export interface BtcGetFeePercentilesRequest {
-	network: BitcoinNetwork;
+	network: Network;
 }
 export interface BtcGetFeePercentilesResponse {
 	fee_percentiles: BigUint64Array;
@@ -92,21 +114,31 @@ export type BtcGetFeePercentilesResult =
 			Ok: BtcGetFeePercentilesResponse;
 	  }
 	| { Err: SelectedUtxosFeeError };
+export type BtcGetPendingTransactionsError =
+	| {
+			InvalidDelegationChain: { msg: string };
+	  }
+	| { RateLimited: RateLimitError }
+	| { InternalError: { msg: string } };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
 export interface BtcGetPendingTransactionsRequest {
-	network: BitcoinNetwork;
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
 	address: string;
 }
 export type BtcGetPendingTransactionsResult =
 	| {
 			Ok: BtcGetPendingTransactionsReponse;
 	  }
-	| { Err: BtcAddPendingTransactionError };
+	| { Err: BtcGetPendingTransactionsError };
 export type BtcSelectUserUtxosFeeResult =
 	| { Ok: SelectedUtxosFeeResponse }
 	| { Err: SelectedUtxosFeeError };
+export interface BtcTransactionData {
+	fee: [] | [bigint];
+}
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -119,18 +151,6 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
-export interface ChallengeCompletion {
-	solved_duration_ms: bigint;
-	next_allowance_ms: bigint;
-	next_difficulty: number;
-	current_difficulty: number;
-}
-export type ChallengeCompletionError =
-	| { InvalidNonce: null }
-	| { MissingChallenge: null }
-	| { ExpiredChallenge: null }
-	| { MissingUserProfile: null }
-	| { ChallengeAlreadySolved: null };
 export interface Config {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
@@ -156,6 +176,7 @@ export type ContactError =
 	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
 	| { ImageTooLarge: null }
+	| { TooManyContacts: null }
 	| { RandomnessError: null }
 	| { ImageExceedsMaxSize: null }
 	| { CanisterStatusError: null }
@@ -164,24 +185,11 @@ export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
 }
-export type CreateChallengeError =
-	| { ChallengeInProgress: null }
-	| { MissingUserProfile: null }
-	| { RandomnessError: string }
-	| { Other: string };
-export interface CreateChallengeResponse {
-	difficulty: number;
-	start_timestamp_ms: bigint;
-	expiry_timestamp_ms: bigint;
-}
 export interface CreateContactRequest {
 	name: string;
 	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export type CreatePowChallengeResult =
-	| { Ok: CreateChallengeResponse }
-	| { Err: CreateChallengeError };
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
 	credential_type: string;
@@ -207,12 +215,35 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+export interface Delegation {
+	pubkey: Uint8Array;
+	targets: [] | [Array<Principal>];
+	expiration: bigint;
+}
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export interface EvmTransactionData {
+	nft_token_id: [] | [bigint];
+	data: [] | [string];
+	chain_id: [] | [bigint];
+	nonce: [] | [bigint];
+	gas_limit: [] | [bigint];
+	gas_used: [] | [bigint];
+	gas_price: [] | [bigint];
+}
+export interface ExchangeData {
+	price_24h_change_pct: [] | [number];
+	market_cap: [] | [number];
+	timestamp_ns: bigint;
+	price: [] | [number];
+}
+export interface ExchangeRate {
+	usd: ExchangeData;
+}
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;
 }
@@ -223,6 +254,12 @@ export interface ExperimentalFeaturesSettings {
 export interface ExtV2Token {
 	canister_id: Principal;
 }
+export type GetAgreementHistoryError = { UserNotFound: null };
+export type GetAgreementHistoryResult =
+	| {
+			Ok: Array<AgreementHistoryEntry>;
+	  }
+	| { Err: GetAgreementHistoryError };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
@@ -234,6 +271,21 @@ export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
+export interface GetUserTransactionsRequest {
+	token_id: TokenId;
+	max_results: bigint;
+	start: [] | [bigint];
+}
+export interface GetUserTransactionsResponse {
+	next_start: [] | [bigint];
+	total_stored: bigint;
+	oldest_block_index: [] | [bigint];
+	newest_block_index: [] | [bigint];
+	transactions: Array<UserTransaction>;
+}
+export type GetUserTransactionsResult =
+	| { Ok: GetUserTransactionsResponse }
+	| { Err: UserTransactionError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -248,10 +300,24 @@ export interface HttpResponse {
 	headers: Array<[string, string]>;
 	status_code: number;
 }
+export interface IIDelegationChain {
+	public_key: Uint8Array;
+	delegations: Array<SignedDelegation>;
+}
 export interface IcrcToken {
 	ledger_id: Principal;
 	index_id: [] | [Principal];
 }
+export interface IcrcTransactionData {
+	fee: [] | [bigint];
+	memo: [] | [Uint8Array];
+	tx_type: IcrcTransactionType;
+}
+export type IcrcTransactionType =
+	| { Approve: { spender: string } }
+	| { Burn: null }
+	| { Mint: null }
+	| { Transfer: null };
 export type Icrcv2AccountId =
 	| { Account: Uint8Array }
 	| {
@@ -270,6 +336,7 @@ export interface InitArg {
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array];
 }
+export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface NetworkSettings {
 	enabled: boolean;
 	is_testnet: boolean;
@@ -292,6 +359,11 @@ export type NetworkSettingsFor =
 	| { SolanaMainnet: null }
 	| { BitcoinMainnet: null }
 	| { BscTestnet: null };
+export type NetworkTransactionData =
+	| { Btc: BtcTransactionData }
+	| { Evm: EvmTransactionData }
+	| { Sol: SolTransactionData }
+	| { Icrc: IcrcTransactionData };
 export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
@@ -304,15 +376,28 @@ export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
 }
+export interface RateLimitError {
+	max_calls: number;
+	window_ns: bigint;
+	caller: Principal;
+}
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
+export interface SaveUserTransactionsRequest {
+	token_id: TokenId;
+	transactions: Array<UserTransaction>;
+}
+export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
+	| { InvalidDelegationChain: { msg: string } }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
-	network: BitcoinNetwork;
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
 	amount_satoshis: bigint;
 	min_confirmations: [] | [number];
 }
@@ -331,6 +416,15 @@ export interface Settings {
 	dapp: DappSettings;
 	experimental_features: ExperimentalFeaturesSettings;
 }
+export interface SignedDelegation {
+	signature: Uint8Array;
+	delegation: Delegation;
+}
+export interface SolTransactionData {
+	fee: [] | [bigint];
+	to_owner: [] | [string];
+	from_owner: [] | [string];
+}
 export interface SplToken {
 	decimals: [] | [number];
 	token_address: string;
@@ -338,7 +432,11 @@ export interface SplToken {
 }
 export interface Stats {
 	user_profile_count: bigint;
+	user_transactions_count: bigint;
 	custom_token_count: bigint;
+	exchange_rates_count: bigint;
+	token_activity_count: bigint;
+	agreement_history_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
@@ -368,6 +466,23 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
+export type TokenId =
+	| { Erc20: [string, bigint] }
+	| { ExtV2: Principal }
+	| { SolNativeDevnet: null }
+	| { Icrc: Principal }
+	| { EvmNative: bigint }
+	| { BtcNativeMainnet: null }
+	| { Erc721: [string, bigint] }
+	| { SolNativeMainnet: null }
+	| { SplDevnet: string }
+	| { SplMainnet: string }
+	| { IcpNative: null }
+	| { IcPunks: Principal }
+	| { BtcNativeTestnet: null }
+	| { Erc1155: [string, bigint] }
+	| { Erc4626: [string, bigint] }
+	| { Dip721: Principal };
 export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
@@ -429,6 +544,22 @@ export interface UserProfile {
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }
+export interface UserTransaction {
+	id: string;
+	to: [] | [string];
+	block_index: bigint;
+	value: bigint;
+	from: string;
+	network_data: NetworkTransactionData;
+	timestamp: bigint;
+}
+export type UserTransactionError =
+	| {
+			DuplicateTransaction: { id: string };
+	  }
+	| { InternalError: { msg: string } }
+	| { TooManyTransactions: null }
+	| { UserNotFound: null };
 export interface Utxo {
 	height: number;
 	value: bigint;
@@ -456,11 +587,22 @@ export interface _SERVICE {
 	 */
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
 	/**
-	 * This function authorizes the caller to spend a specific
+	 * Ensures the caller has enough cycles allowance for chain-fusion signer
+	 * operations (providing public keys, creating signatures, etc.).
 	 *
-	 * Note:
-	 * - The chain fusion signer performs threshold key operations including providing public keys,
-	 * creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
+	 * If the caller already has sufficient allowance the call returns
+	 * immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
+	 * call is made.  Otherwise, the endpoint is rate-limited and a new
+	 * `icrc_2_approve` is issued on the cycles ledger.
+	 *
+	 * # Rate limiting
+	 * Two rate limiters are applied in order:
+	 * 1. **Guard limiter** – a high-frequency limiter (10 calls/min) checked *before* any
+	 * inter-canister call to cheaply reject bursts that would drain cycles.
+	 * 2. **Business limiter** – the stricter per-caller limit (3 calls/hour) for normal usage.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `AllowSigningError`.
@@ -468,6 +610,10 @@ export interface _SERVICE {
 	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
 	/**
 	 * Adds a pending Bitcoin transaction for the caller.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. This protects against unauthorised CLI callers.
+	 * Controllers bypass this check.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `BtcAddPendingTransactionError`.
@@ -482,8 +628,7 @@ export interface _SERVICE {
 	 * and are periodically updated in the background.
 	 *
 	 * # Returns
-	 * - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
-	 * - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+	 * - `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
 	 *
 	 * # Errors
 	 * - `InternalError`: If fee percentiles are not available in the cache for the requested network
@@ -491,7 +636,7 @@ export interface _SERVICE {
 	 * # Note
 	 * This function only returns data from the in-memory cache and doesn't make any calls
 	 * to the Bitcoin API itself. If the cache doesn't have data for the requested network,
-	 * an error is returned rather than fetching fresh data.
+	 * it returns the default percentiles.
 	 */
 	btc_get_current_fee_percentiles: ActorMethod<
 		[BtcGetFeePercentilesRequest],
@@ -499,6 +644,9 @@ export interface _SERVICE {
 	>;
 	/**
 	 * Returns the pending Bitcoin transactions for the caller.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `BtcGetPendingTransactionsError`.
@@ -509,6 +657,9 @@ export interface _SERVICE {
 	>;
 	/**
 	 * Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `SelectedUtxosFeeError`.
@@ -526,24 +677,8 @@ export interface _SERVICE {
 	 *
 	 * # Returns
 	 * The created contact on success.
-	 *
-	 * # Test
-	 * This endpoint is currently a placeholder and will be fully implemented in a future PR.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
-	/**
-	 * Creates a new proof-of-work challenge for the caller.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `CreateChallengeError`.
-	 *
-	 * # Returns
-	 *
-	 * * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-	 * * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-	 * internal errors.
-	 */
-	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.
@@ -576,6 +711,12 @@ export interface _SERVICE {
 	 */
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	/**
+	 * Returns the currently stored API keys.
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	get_api_keys: ActorMethod<[], ApiKeys>;
+	/**
 	 * API method to get cycle balance and burn rate.
 	 */
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
@@ -598,6 +739,18 @@ export interface _SERVICE {
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
+	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
+	get_exchange_rates: ActorMethod<[Array<TokenId>], Array<[TokenId, [] | [ExchangeRate]]>>;
+	/**
+	 * Returns the full agreement consent/rejection history for the caller.
+	 *
+	 * # Returns
+	 * - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
+	 *
+	 * # Errors
+	 * - `Err(UserNotFound)` if no history exists and the user has no profile.
+	 */
+	get_user_agreement_history: ActorMethod<[], GetAgreementHistoryResult>;
 	/**
 	 * Returns the caller's user profile.
 	 *
@@ -608,6 +761,16 @@ export interface _SERVICE {
 	 * - If the caller is anonymous.  See: `may_read_user_data`.
 	 */
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
+	/**
+	 * Retrieves stored finalized transactions for the caller, with cursor-based pagination.
+	 *
+	 * # Returns
+	 * - `Ok(GetUserTransactionsResponse)` with the requested page of transactions.
+	 *
+	 * Currently, this function always returns `Ok` for valid (non-anonymous) calls.
+	 * The `Err(UserTransactionError)` variant is reserved for future validation logic.
+	 */
+	get_user_transactions: ActorMethod<[GetUserTransactionsRequest], GetUserTransactionsResult>;
 	/**
 	 * Checks if the caller has an associated user profile.
 	 *
@@ -622,11 +785,39 @@ export interface _SERVICE {
 	 * Processes external HTTP requests.
 	 */
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
+	/**
+	 * List the custom tokens for the calling user.
+	 *
+	 * Note: This method was previously exposed as a *query* but is now an *update*
+	 * call. The change is intentional and breaking: `list_custom_tokens` now tracks
+	 * token activity by calling `mark_tokens_active`, which mutates canister state.
+	 * Because queries must not modify state on the IC, this function must be an
+	 * update, not a query.
+	 *
+	 * Implications for callers:
+	 * - This call now participates in consensus and may have higher latency than a query.
+	 * - It consumes cycles as an update call.
+	 * - Integrations that previously relied on query semantics must be updated to invoke this as an
+	 * update method.
+	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	/**
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Saves finalized transactions for the caller. Transactions are deduplicated by hash.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `UserTransactionError`.
+	 */
+	save_user_transactions: ActorMethod<[SaveUserTransactionsRequest], SaveUserTransactionsResult>;
+	/**
+	 * Overwrites the stored API keys.
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_api_keys: ActorMethod<[ApiKeys], undefined>;
 	/**
 	 * Add or update custom token for the user.
 	 */
@@ -665,7 +856,9 @@ export interface _SERVICE {
 	 */
 	update_contact: ActorMethod<[Contact], GetContactResult>;
 	/**
-	 * Updates the user's agreements, merging with any existing ones.
+	 * Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
+	 * for every agreement that was actually changed.
+	 *
 	 * Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
 	 * set to `now`.
 	 *

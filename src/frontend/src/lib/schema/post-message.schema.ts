@@ -1,4 +1,5 @@
 import type { BtcAddress } from '$btc/types/address';
+import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import {
 	IcCanistersSchema,
@@ -27,9 +28,6 @@ export const POST_MESSAGE_REQUESTS = [
 	'stopIdleTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
-	'startPowProtectionTimer',
-	'triggerPowProtectionTimer',
-	'stopPowProtectionTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -69,7 +67,8 @@ export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
 	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
-	splAddresses: z.array(z.custom<SplTokenAddress>())
+	splAddresses: z.array(z.custom<SplTokenAddress>()),
+	erc4626TokensExchangeData: z.array(z.custom<Erc4626TokensExchangeData>())
 });
 
 export const PostMessageDataRequestIcrcSchema = z.object({
@@ -124,8 +123,7 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus',
-	'syncPowProtectionStatus'
+	'syncCkBTCUpdateBalanceStatus'
 ]);
 
 export const PostMessageErrorResponseSchema = z.enum([
@@ -136,8 +134,7 @@ export const PostMessageErrorResponseSchema = z.enum([
 	'syncBtcWalletError',
 	'syncSolWalletError',
 	'syncBtcStatusesError',
-	'syncCkMinterInfoError',
-	'syncPowProtectionError'
+	'syncCkMinterInfoError'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
@@ -157,8 +154,6 @@ export const PostMessageResponseSchema = z.enum([
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
-	'syncPowProgress',
-	'syncPowNextAllowance',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -169,15 +164,18 @@ export const PostMessageDataResponseAuthSchema = PostMessageDataResponseSchema.e
 // TODO: generate zod schema for Coingecko
 export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSchema.extend({
 	currentExchangeRate: CurrencyExchangeDataSchema.optional(),
-	currentEthPrice: z.custom<CoingeckoSimplePriceResponse>(),
-	currentBtcPrice: z.custom<CoingeckoSimplePriceResponse>(),
+	currentEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentBtcPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentErc20Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>(),
+	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>(),
+	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>(),
-	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>()
+	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
+	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentArbitrumEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentBaseEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional()
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({
@@ -221,16 +219,6 @@ export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSc
 	// TODO: generate zod schema for BtcAddressData
 	address: z.custom<BtcAddressData>()
 }).strict();
-
-export const PostMessageDataResponsePowProtectorProgressSchema =
-	PostMessageDataResponseSchema.extend({
-		progress: z.enum(['REQUEST_CHALLENGE', 'SOLVE_CHALLENGE', 'GRANT_CYCLES'])
-	});
-
-export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
-	PostMessageDataResponseSchema.extend({
-		nextAllowanceMs: z.custom<bigint>().optional()
-	});
 
 export const PostMessageCommonSchema = z.object({
 	ref: z.string().optional()

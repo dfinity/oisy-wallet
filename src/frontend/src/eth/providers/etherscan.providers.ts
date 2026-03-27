@@ -4,6 +4,7 @@ import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import type { Erc721Token } from '$eth/types/erc721';
 import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 import type {
@@ -33,6 +34,7 @@ interface TransactionsParams {
 	address: EthAddress;
 	startBlock?: BlockTag;
 	endBlock?: BlockTag;
+	sort?: 'asc' | 'desc';
 }
 
 export class EtherscanProvider {
@@ -52,14 +54,15 @@ export class EtherscanProvider {
 	private async getHistory({
 		address,
 		startBlock,
-		endBlock
+		endBlock,
+		sort
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
 			action: 'txlist',
 			address,
 			startblock: startBlock ?? 0,
 			...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
-			sort: 'asc'
+			sort: sort ?? 'asc'
 		};
 
 		const result: EtherscanProviderTransaction[] = await this.provider.fetch('account', params);
@@ -74,7 +77,9 @@ export class EtherscanProvider {
 				to,
 				value,
 				gas,
-				gasPrice
+				gasPrice,
+				gasUsed,
+				input: data
 			}: EtherscanProviderTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
@@ -84,8 +89,10 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				value: BigInt(value),
-				chainId: this.chainId
+				chainId: this.chainId,
+				data
 			})
 		);
 	}
@@ -94,14 +101,15 @@ export class EtherscanProvider {
 	private async getInternalHistory({
 		address,
 		startBlock,
-		endBlock
+		endBlock,
+		sort
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
 			action: 'txlistinternal',
 			address,
 			startblock: startBlock ?? 0,
 			...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
-			sort: 'asc'
+			sort: sort ?? 'asc'
 		};
 
 		const result: EtherscanProviderInternalTransaction[] = await this.provider.fetch(
@@ -117,7 +125,8 @@ export class EtherscanProvider {
 				from,
 				to,
 				value,
-				gas
+				gas,
+				input: data
 			}: EtherscanProviderInternalTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
@@ -127,7 +136,8 @@ export class EtherscanProvider {
 				nonce: 0,
 				gasLimit: BigInt(gas),
 				value: BigInt(value),
-				chainId: this.chainId
+				chainId: this.chainId,
+				data
 			})
 		);
 	}
@@ -144,7 +154,7 @@ export class EtherscanProvider {
 		contract: { address: contractAddress }
 	}: {
 		address: EthAddress;
-		contract: Erc20Token;
+		contract: Erc20Token | Erc4626Token;
 	}): Promise<Transaction[]> => {
 		const params = {
 			action: 'tokentx',
@@ -168,12 +178,14 @@ export class EtherscanProvider {
 				nonce,
 				gas,
 				gasPrice,
+				gasUsed,
 				hash,
 				blockNumber,
 				timeStamp,
 				from,
 				to,
-				value
+				value,
+				input: data
 			}: EtherscanProviderTokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
@@ -183,8 +195,10 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				value: BigInt(value),
-				chainId: this.chainId
+				chainId: this.chainId,
+				data
 			})
 		);
 	};
@@ -217,12 +231,14 @@ export class EtherscanProvider {
 				nonce,
 				gas,
 				gasPrice,
+				gasUsed,
 				hash,
 				blockNumber,
 				timeStamp,
 				from,
 				to,
-				tokenID
+				tokenID,
+				input: data
 			}: EtherscanProviderErc721TokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
@@ -234,7 +250,9 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
-				chainId: this.chainId
+				gasUsed: BigInt(gasUsed),
+				chainId: this.chainId,
+				data
 			})
 		);
 	};
@@ -267,13 +285,15 @@ export class EtherscanProvider {
 				nonce,
 				gas,
 				gasPrice,
+				gasUsed,
 				hash,
 				blockNumber,
 				timeStamp,
 				from,
 				to,
 				tokenID,
-				tokenValue
+				tokenValue,
+				input: data
 			}: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
@@ -285,7 +305,9 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
-				chainId: this.chainId
+				gasUsed: BigInt(gasUsed),
+				chainId: this.chainId,
+				data
 			})
 		);
 	};

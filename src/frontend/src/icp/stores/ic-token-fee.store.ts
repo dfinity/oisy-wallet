@@ -1,8 +1,8 @@
-import type { Option } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
 
-export type IcTokenFeeStoreData = Option<Record<string, bigint>>;
+export type IcTokenFeeStoreData = Nullish<Record<string, bigint>>;
 
 interface SetIcTokenFeeParams {
 	tokenSymbol: string;

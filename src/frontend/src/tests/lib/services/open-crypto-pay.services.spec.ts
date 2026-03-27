@@ -1,6 +1,7 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as ethPayServices from '$eth/services/eth-open-crypto-pay.services';
 import { buildTransactionBaseParams } from '$eth/services/eth-open-crypto-pay.services';
 import { getNonce } from '$eth/services/nonce.services';
@@ -25,6 +26,7 @@ import type {
 } from '$lib/types/open-crypto-pay';
 import { extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { readable } from 'svelte/store';
 
@@ -147,21 +149,21 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should throw error for empty code', async () => {
-			await expect(processOpenCryptoPayCode('')).rejects.toThrowError('QR Code cannot be empty');
+			await expect(processOpenCryptoPayCode('')).rejects.toThrow('QR Code cannot be empty');
 		});
 
 		it('should throw error for whitespace-only code', async () => {
-			await expect(processOpenCryptoPayCode('   ')).rejects.toThrowError('QR Code cannot be empty');
+			await expect(processOpenCryptoPayCode('   ')).rejects.toThrow('QR Code cannot be empty');
 		});
 
 		it('should throw error for invalid URL format', async () => {
-			await expect(processOpenCryptoPayCode('not-a-valid-url')).rejects.toThrowError();
+			await expect(processOpenCryptoPayCode('not-a-valid-url')).rejects.toThrow();
 		});
 
 		it('should throw error for missing lightning parameter', async () => {
 			const codeWithoutLightning = 'https://app.dfx.swiss/pl/?other=param';
 
-			await expect(processOpenCryptoPayCode(codeWithoutLightning)).rejects.toThrowError(
+			await expect(processOpenCryptoPayCode(codeWithoutLightning)).rejects.toThrow(
 				'Missing lightning parameter'
 			);
 		});
@@ -169,7 +171,7 @@ describe('open-crypto-pay.service', () => {
 		it('should throw error when LNURL decoding fails', async () => {
 			const codeWithInvalidLnurl = 'https://app.dfx.swiss/pl/?lightning=INVALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(codeWithInvalidLnurl)).rejects.toThrowError(
+			await expect(processOpenCryptoPayCode(codeWithInvalidLnurl)).rejects.toThrow(
 				'Failed to decode lightning parameter'
 			);
 		});
@@ -181,9 +183,7 @@ describe('open-crypto-pay.service', () => {
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrowError(
-				'API request failed: 404'
-			);
+			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow('API request failed: 404');
 
 			expect(fetchOpenCryptoPay).toHaveBeenCalledExactlyOnceWith(
 				'https://api.dfx.swiss/v1/lnurlp/pl_test123'
@@ -197,7 +197,7 @@ describe('open-crypto-pay.service', () => {
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrowError('Network error');
+			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow('Network error');
 			expect(fetchOpenCryptoPay).toHaveBeenCalledOnce();
 		});
 
@@ -237,21 +237,35 @@ describe('open-crypto-pay.service', () => {
 			amount: '1.5',
 			minFee: 0.001,
 			tokenNetwork: 'Ethereum'
-		};
+		} as PayableToken;
 
 		const mockErc20Token: PayableToken = {
 			...USDC_TOKEN,
 			amount: '100',
 			minFee: 0.0001,
 			tokenNetwork: 'Ethereum'
-		};
+		} as PayableToken;
 
 		const mockBtcToken: PayableToken = {
 			...BTC_MAINNET_TOKEN,
 			amount: '0.5',
 			minFee: 0.0001,
 			tokenNetwork: 'Bitcoin'
-		};
+		} as PayableToken;
+
+		const mockIcpToken: PayableToken = {
+			...ICP_TOKEN,
+			amount: '10',
+			minFee: 0.01,
+			tokenNetwork: 'InternetComputer'
+		} as PayableToken;
+
+		const mockIcrcToken: PayableToken = {
+			...mockValidIcrcToken,
+			amount: '20',
+			minFee: 0.02,
+			tokenNetwork: 'InternetComputer'
+		} as PayableToken;
 
 		const mockFeeResult: EthFeeResult = {
 			feeInWei: 300000n,
@@ -293,7 +307,7 @@ describe('open-crypto-pay.service', () => {
 			expect(ethPayServices.calculateEthFee).toHaveBeenCalledWith(mockErc20Token);
 		});
 
-		it('should skip non-Ethereum tokens', async () => {
+		it('should skip Bitcoin tokens', async () => {
 			const result = await calculateTokensWithFees([mockBtcToken]);
 
 			expect(result).toHaveLength(1);
@@ -301,15 +315,25 @@ describe('open-crypto-pay.service', () => {
 			expect(ethPayServices.calculateEthFee).not.toHaveBeenCalled();
 		});
 
-		it('should handle mixed tokens (ETH, ERC20, Bitcoin)', async () => {
-			const tokens = [mockPayableToken, mockErc20Token, mockBtcToken];
+		it('should handle mixed tokens', async () => {
+			const tokens = [mockPayableToken, mockErc20Token, mockBtcToken, mockIcpToken, mockIcrcToken];
 
 			const result = await calculateTokensWithFees(tokens);
 
-			expect(result).toHaveLength(3);
-			expect(result[0].fee).toBeDefined();
-			expect(result[1].fee).toBeDefined();
-			expect(result[2].fee).toBeUndefined();
+			expect(result.map(({ fee }) => fee)).toStrictEqual([
+				mockFeeResult,
+				mockFeeResult,
+				undefined,
+				{
+					feePerTransaction: ICP_TOKEN.fee,
+					totalFee: ICP_TOKEN.fee * 2n
+				},
+				{
+					feePerTransaction: mockValidIcrcToken.fee,
+					totalFee: mockValidIcrcToken.fee * 2n
+				}
+			]);
+
 			expect(ethPayServices.calculateEthFee).toHaveBeenCalledTimes(2);
 		});
 
@@ -560,7 +584,7 @@ describe('open-crypto-pay.service', () => {
 				},
 				estimatedGasLimit: 25000n
 			}
-		};
+		} as PayableTokenWithConvertedAmount;
 
 		const mockData: OpenCryptoPayResponse = {
 			id: 'pl_test123',
@@ -781,7 +805,7 @@ describe('open-crypto-pay.service', () => {
 					progress: mockProgress,
 					amount: 100000n
 				})
-			).rejects.toThrowError('Payment failed');
+			).rejects.toThrow('Payment failed');
 		});
 
 		it('should handle transaction signing errors', async () => {
@@ -812,7 +836,7 @@ describe('open-crypto-pay.service', () => {
 					progress: mockProgress,
 					amount: 100000n
 				})
-			).rejects.toThrowError('Signing failed');
+			).rejects.toThrow('Signing failed');
 
 			expect(mockProgress).toHaveBeenCalledTimes(2);
 		});

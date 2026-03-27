@@ -6,7 +6,7 @@ import type {
 	WorkerListener,
 	WorkerPostMessageData
 } from '$lib/types/worker';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export abstract class AppWorker {
 	readonly #worker: Worker;
@@ -15,8 +15,10 @@ export abstract class AppWorker {
 	readonly #queue: WorkerQueue;
 	// TODO: use generics directly in the class so that we can use type WorkerListener
 	#listener: ((ev: MessageEvent) => void) | undefined;
+	#isTerminated = false;
 
 	static #singletonWorker?: Worker;
+	static #singletonRefCount = 0;
 
 	protected constructor(workerData: WorkerData) {
 		const { worker, isSingleton } = workerData;
@@ -25,6 +27,10 @@ export abstract class AppWorker {
 		this.#workerId = crypto.randomUUID();
 		this.#isSingleton = isSingleton;
 		this.#queue = new WorkerQueue(worker);
+
+		if (this.#isSingleton) {
+			AppWorker.#singletonRefCount++;
+		}
 	}
 
 	static #newInstance = async (): Promise<Worker> => {
@@ -35,6 +41,7 @@ export abstract class AppWorker {
 	static #getInstanceAsSingleton = async (): Promise<Worker> => {
 		if (isNullish(this.#singletonWorker)) {
 			this.#singletonWorker = await this.#newInstance();
+			this.#singletonRefCount = 0;
 		}
 
 		return this.#singletonWorker;
@@ -82,17 +89,32 @@ export abstract class AppWorker {
 	};
 
 	terminate = () => {
-		if (this.#isSingleton) {
-			// If it's a singleton, we could have several listeners on the same instance of the worker and we cannot terminate it.
-			// Ideally, we should have a way to terminate the worker if we find out that there are no more listeners on it.
-			// TODO: Terminate the worker when there are no more listeners even from other instances of `AppWorker`.
-			this.#removeListener();
+		// Guard against double-terminate on the same instance
+		if (this.#isTerminated) {
 			return;
 		}
 
-		this.#worker.terminate();
+		this.#isTerminated = true;
 
-		this.#worker.onmessage = null;
+		if (!this.#isSingleton) {
+			this.#worker.terminate();
+
+			this.#worker.onmessage = null;
+
+			return;
+		}
+
+		// If it's a singleton, multiple `AppWorker` wrappers share the same underlying Worker.
+		// We track wrapper instances (ref count) and terminate the singleton Worker when the last one is destroyed.
+		this.#removeListener();
+
+		AppWorker.#singletonRefCount--;
+
+		if (AppWorker.#singletonRefCount <= 0 && nonNullish(AppWorker.#singletonWorker)) {
+			AppWorker.#singletonWorker.terminate();
+			AppWorker.#singletonWorker = undefined;
+			AppWorker.#singletonRefCount = 0;
+		}
 	};
 
 	protected abstract stopTimer(): void;
@@ -109,4 +131,16 @@ export abstract class AppWorker {
 		this.terminate();
 		this.isDestroying = false;
 	};
+
+	/**
+	 * Reset the internal state of the worker service.
+	 * This is notably useful for testing purposes to ensure that each test starts with a clean state.
+	 */
+	static resetForTesting() {
+		if (nonNullish(this.#singletonWorker)) {
+			this.#singletonWorker.terminate();
+			this.#singletonWorker = undefined;
+		}
+		this.#singletonRefCount = 0;
+	}
 }

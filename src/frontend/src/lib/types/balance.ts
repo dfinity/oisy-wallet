@@ -1,5 +1,5 @@
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 export type Balance = bigint;
 
-export type OptionBalance = Option<Balance>;
+export type OptionBalance = Nullish<Balance>;

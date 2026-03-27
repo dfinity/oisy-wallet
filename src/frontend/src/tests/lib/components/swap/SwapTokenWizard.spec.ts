@@ -2,13 +2,22 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
+import * as addressDerived from '$lib/derived/address.derived';
+import * as authStore from '$lib/derived/auth.derived';
+import * as tokensStore from '$lib/derived/tokens.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import * as swapService from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { readable, writable } from 'svelte/store';
 
 vi.mock('$eth/services/eth-listener.services', () => ({
@@ -110,5 +119,116 @@ describe('SwapTokenWizard', () => {
 		});
 
 		expect(container).toBeTruthy();
+	});
+
+	it('should render Solana wizard when sourceToken is Solana network', () => {
+		const solToken = { ...mockValidSplToken, enabled: true };
+
+		const solContext = initSwapContext({
+			sourceToken: solToken,
+			destinationToken: solToken
+		});
+
+		const solMockContext = new Map(mockContext);
+		solMockContext.set(SWAP_CONTEXT_KEY, {
+			...solContext,
+			sourceTokenExchangeRate: readable(10),
+			destinationTokenExchangeRate: readable(2)
+		});
+
+		const { container } = render(SwapTokenWizard, {
+			props: defaultProps,
+			context: solMockContext
+		});
+
+		expect(container).toBeTruthy();
+	});
+
+	describe('pause during review step', () => {
+		const erc20Token = { ...mockValidErc20Token, enabled: true };
+
+		let fetchMock: ReturnType<typeof vi.spyOn>;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(mockIdentity));
+			vi.spyOn(tokensStore, 'tokens', 'get').mockImplementation(() => readable([erc20Token]));
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockImplementation(() => readable('0x123'));
+			vi.spyOn(addressDerived, 'solAddressMainnet', 'get').mockImplementation(() =>
+				readable(undefined)
+			);
+
+			fetchMock = vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue([]);
+
+			const erc20Context = new Map(mockContext);
+			erc20Context.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable(erc20Token),
+				destinationToken: readable(erc20Token),
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(2),
+				isSourceTokenIcrc2: readable(undefined),
+				failedSwapError: writable(undefined),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				isSourceTokenPermitSupported: readable(undefined),
+				setSourceToken: vi.fn(),
+				setDestinationToken: vi.fn(),
+				setIsTokenPermitSupported: vi.fn(),
+				setIsTokensIcrc2: vi.fn(),
+				switchTokens: vi.fn()
+			});
+			mockContext.set(SWAP_CONTEXT_KEY, erc20Context.get(SWAP_CONTEXT_KEY));
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('should not trigger periodic refresh during REVIEW step', async () => {
+			render(SwapTokenWizard, {
+				props: {
+					...defaultProps,
+					currentStep: {
+						name: WizardStepsSwap.REVIEW,
+						title: 'Review'
+					}
+				},
+				context: mockContext
+			});
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+
+			fetchMock.mockClear();
+
+			await vi.advanceTimersByTimeAsync(10_000);
+			await tick();
+
+			expect(fetchMock).not.toHaveBeenCalled();
+		});
+
+		it('should trigger periodic refresh during SWAP step', async () => {
+			render(SwapTokenWizard, {
+				props: {
+					...defaultProps,
+					currentStep: {
+						name: WizardStepsSwap.SWAP,
+						title: 'Swap'
+					}
+				},
+				context: mockContext
+			});
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+
+			fetchMock.mockClear();
+
+			await vi.advanceTimersByTimeAsync(5_100);
+			await tick();
+
+			expect(fetchMock).toHaveBeenCalled();
+		});
 	});
 });

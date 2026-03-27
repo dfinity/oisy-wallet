@@ -1,6 +1,7 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
-import { ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { ADDITIONAL_ICRC_TOKENS_INDEXED } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import { ICRC_TOKENS, ICRC_TOKENS_METADATA } from '$env/tokens/tokens-icrc/tokens.icrc.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
@@ -22,9 +23,8 @@ import {
 	type IcToken
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { buildIcrcCustomTokenMetadataPseudoResponse } from '$icp/utils/icrc-metadata.utils';
 import {
-	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
 	mapTokenOisyName,
 	mapTokenOisySymbol,
@@ -53,6 +53,7 @@ import {
 	fromNullable,
 	isNullish,
 	nonNullish,
+	nowInBigIntNanoSeconds,
 	queryAndUpdate,
 	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
@@ -64,7 +65,7 @@ export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity })
 	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
-const loadDefaultIcrcTokens = async () => {
+export const loadDefaultIcrcTokens = async () => {
 	await Promise.all(
 		ICRC_TOKENS.map(mapTokenOisyName)
 			.map(mapTokenOisySymbol)
@@ -108,7 +109,9 @@ const requestIcrcMetadata = async ({
 	QueryAndUpdateRequestParams & { category: TokenCategory }): Promise<IcrcLoadData> => ({
 	...rest,
 	ledgerCanisterId,
-	metadata: await metadata({ ledgerCanisterId, identity, certified })
+	metadata:
+		ICRC_TOKENS_METADATA.get(ledgerCanisterId) ??
+		(await metadata({ ledgerCanisterId, identity, certified }))
 });
 
 const loadIcrcData = ({
@@ -156,7 +159,8 @@ const loadCustomIcrcTokensData = async ({
 	const indexedIcrcCustomTokens = {
 		...SUPPORTED_ICP_TOKENS_INDEXED,
 		...SNS_BUILTIN_TOKENS_INDEXED,
-		...DIP20_BUILTIN_TOKENS_INDEXED
+		...DIP20_BUILTIN_TOKENS_INDEXED,
+		...ADDITIONAL_ICRC_TOKENS_INDEXED
 	};
 
 	const requestIcrcCustomTokenMetadata = async (
@@ -239,10 +243,16 @@ const loadCustomIcrcTokensData = async ({
 
 				// To avoid polluting the screen, we show the toast error only after the update call.
 				if (enabled && certified) {
+					const curatedToken = indexedIcrcCustomTokens[ledgerCanisterId];
+
 					toastsShow({
-						text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
-							$ledgerCanisterId: ledgerCanisterId
-						}),
+						text: nonNullish(curatedToken)
+							? replacePlaceholders(get(i18n).init.error.icrc_canister_loading_curated, {
+									$tokenSymbol: curatedToken.symbol
+								})
+							: replacePlaceholders(get(i18n).init.error.icrc_canister_loading_custom, {
+									$ledgerCanisterId: ledgerCanisterId
+								}),
 						level: 'warn'
 					});
 				}
@@ -280,9 +290,20 @@ const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
 	});
 
 	toastsError({
-		msg: { text: get(i18n).init.error.icrc_canisters },
-		err
+		msg: { text: get(i18n).init.error.load_token_list }
 	});
+};
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadIcrcCustomTokens(params);
+
+		loadIcrcCustomData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onCustomTokensUpdateError({ error: err });
+		}
+	}
 };
 
 const onDefaultTokensUpdateError = ({
@@ -327,7 +348,7 @@ export const loadDisabledIcrcTokensBalances = async ({
 	results.forEach((result) => {
 		if (result.status === 'fulfilled') {
 			const { id, icrcTokenBalance } = result.value;
-			balancesStore.set({
+			balancesStore.batchSet({
 				id,
 				data: {
 					data: icrcTokenBalance,

@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { BIDUON_TOKEN_GROUP } from '$env/tokens/groups/groups.biduon.env';
 import biduon from '$eth/assets/biduon.webp';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,11 +17,11 @@ export const BIDUON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Baidu (Ondo Tokenized)',
 	symbol: BIDUON_SYMBOL,
 	decimals: BIDUON_DECIMALS,
 	icon: biduon,
 	address: '0x9d4C6AD12B55E4645b585209F90Cc26614061E91',
-	exchange: 'erc20',
 	groupData: BIDUON_TOKEN_GROUP
 };

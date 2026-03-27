@@ -41,7 +41,8 @@ describe('ExchangeAmountDisplay', () => {
 			currency: Currency.USD,
 			exchangeRate: {
 				currency: Currency.USD,
-				exchangeRateToUsd: 1
+				exchangeRateToUsd: 1,
+				exchangeRate24hChangeMultiplier: 1
 			},
 			language: Languages.ENGLISH
 		};

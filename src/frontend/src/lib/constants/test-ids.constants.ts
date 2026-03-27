@@ -22,7 +22,6 @@ export const LOCK_BUTTON = 'lock-button';
 export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
-export const POW_PROTECTOR_MODAL = 'pow-protector-modal';
 export const BUTTON_MODAL_CLOSE = 'close-modal';
 
 export const MODAL_TITLE = 'modal-title';
@@ -202,6 +201,7 @@ export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
 
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 export const TRANSACTIONS_DATE_GROUP_PREFIX = 'transactions-date-group-';
+export const TRANSACTION_CHILDREN_CONTAINER = 'transaction-children-container';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

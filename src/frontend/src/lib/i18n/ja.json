@@ -41,7 +41,11 @@
 			"more": "さらに",
 			"less": "少なく",
 			"ellipsis": "…",
-			"learn_more": "詳細を見る"
+			"learn_more": "詳細を見る",
+			"sorting": "並べ替え",
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -176,7 +180,6 @@
 			"title_part_1": "ロックを解除して続行",
 			"title_part_2": "ウォレットは安全のためロックされています。中断したところから再開するか、ログアウトしてください。",
 			"unlock": "ロック解除",
-			"unlock_with_legacy_login": "",
 			"logout": "ログアウト",
 			"logout_clear_cash_message": "ログアウトすると、キャッシュされたデータがすべて消去されます。",
 			"learn_more": "詳細を見る"
@@ -206,15 +209,17 @@
 			"website": "$dAppNameの画像"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "ソーシャルメディア",
-			"verifiable_credentials": "検証可能な認証情報",
-			"staking": "ステーキング",
-			"walletconnect": "WalletConnect",
-			"game": "ゲーム",
-			"tools": "ツール",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "AI",
-			"nft": "NFT"
+			"defi": "DeFi",
+			"game": "ゲーム",
+			"nft": "NFT",
+			"rwa": "",
+			"social_media": "ソーシャルメディア",
+			"staking": "ステーキング",
+			"tools": "ツール",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -347,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "自己記述型アプリを構築するための初のプラットフォーム",
-				"call_to_action": "Caffeineを試す",
 				"description": "Caffeine は、自己記述型アプリを構築するための初のプラットフォームです。デスクトップやモバイルで AI と会話するだけで、OISY Wallet と連携するものを含むアプリやサービスを自動で作成します。AI主導の開発によって実現する、アプリ開発の未来を体験してください。",
 				"carousel": {
 					"text": "こんにちは、自己記述型インターネット",
@@ -404,6 +408,36 @@
 				"name": "Kamino",
 				"one_liner": "Solana ネットワークにおける DeFi 活動の大きな割合を支えている、Solana 上で最大規模の借入・貸付プロトコル",
 				"description": "Kamino は、Solana ブロックチェーン上の分散型金融（DeFi）プラットフォームで、流動性提供、レンディング、レバレッジ取引を単一のプロダクト群として統合しています。自動化された 流動性ボールト や Kamino Lend を通じて、これらの DeFi 戦略を簡素化しており、集中流動性管理を活用することで、ユーザーの 資本効率を高めています。"
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -600,6 +634,7 @@
 			"no_infura_erc721_provider": "ネットワーク$networkのInfura ERC721プロバイダーが存在しません。",
 			"no_infura_erc1155_provider": "ネットワーク$networkのInfura ERC1155プロバイダーが存在しません。",
 			"no_infura_erc20_icp_provider": "ネットワーク$networkのInfura ERC20 ICPプロバイダーが存在しません。",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "ネットワーク$networkのSolanaネットワークが存在しません。",
 			"loading_address": "$symbolアドレスの読み込み中にエラーが発生しました。",
 			"loading_balance": "ネットワーク$networkの$symbol残高の読み込み中にエラーが発生しました。",
@@ -618,8 +653,11 @@
 			"btc_withdrawal_statuses": "BTC引き出しステータスの取得中にエラーが発生しました。",
 			"transaction_price": "トランザクション価格の見積もりの読み込み中にエラーが発生しました。",
 			"icrc_canisters": "ICRCキャニスターの読み込み中にエラーが発生しました。",
-			"icrc_canister_loading": "Ledgerキャニスター$ledgerCanisterIdのトークンを読み込めませんでした。現在、応答していません。",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "トークン$tokenSymbolを読み取ることができませんでした。現在、応答がありません。後ほどもう一度お試しください。",
+			"icrc_canister_loading_custom": "Ledgerキャニスター$ledgerCanisterIdのトークンを読み込めませんでした。現在、応答していません。後ほどもう一度お試しください。",
 			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc1155_custom_tokens": "ERC1155カスタムトークンの読み込み中にエラーが発生しました。",
 			"spl_custom_tokens": "SPLカスタムトークンの読み込み中にエラーが発生しました。",
@@ -627,6 +665,7 @@
 			"icrc_custom_token": "ICRCカスタムトークンの読み込み中にエラーが発生しました。",
 			"ext_custom_tokens": "EXTカスタムトークンの読み込み中にエラーが発生しました。",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "ウォレットにはまだロードされていない初期データが必要です。もう一度お試しください。",
 			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
 			"waiting_for_allowed_cycles_aborted": "Cyclesレジャーの準備を中止しました。後でログインしてください。",
@@ -789,6 +828,7 @@
 	"send": {
 		"text": {
 			"send": "送信",
+			"send_token": "",
 			"destination": "宛先",
 			"source": "送信元",
 			"balance": "残高",
@@ -992,6 +1032,9 @@
 			"loading_cketh_helper": "ckETHヘルパーコントラクトアドレスの読み込み中にエラーが発生しました。ミントキャニスターIDが初期化されていません。",
 			"unexpected": "トークンを変換中に問題が発生しました",
 			"unexpected_missing_data": "変換トランザクションの開始中にエラーが発生しました。"
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "USDC と ckUSDC 間の変換は現在停止中です。"
 		}
 	},
 	"swap": {
@@ -1036,7 +1079,8 @@
 			"network_cost": "ネットワークコスト",
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
-			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。"
+			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",
@@ -1053,7 +1097,8 @@
 			"manually_withdraw_success": "前回の失敗したスワップのトークンは正常に出金されました。再度スワップをお試しいただくか、スワッププロバイダーを変更してください。",
 			"manually_withdraw_failed": "資金の出金に失敗しました。<br>再度お試しいただくか、以下に従ってください。",
 			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください。",
-			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。"
+			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1114,7 +1159,16 @@
 			"hide_more_networks": "ネットワークを非表示",
 			"on_network": "$network上",
 			"delete_token": "トークンを削除",
-			"edit_token": "トークンを編集"
+			"edit_token": "トークンを編集",
+			"sort_by_value": "価値",
+			"sort_by_performance": "トークンのパフォーマンス",
+			"sort_by_symbol": "シンボル",
+			"hide_asset_types": "アセットタイプを非表示",
+			"asset_type": "$oisy_nameのアセットタイプ",
+			"asset_type_all": "すべてのアセットタイプ",
+			"no_tokens_for_asset_type": "ウォレットに$asset_typeはありません",
+			"no_tokens_for_asset_type_zero_tokens": "選択したネットワークに $asset_type はありません",
+			"no_tokens_for_asset_type_description": "<strong>$count種類の対応トークン</strong>から選択してポートフォリオ表示をカスタマイズしてください。"
 		},
 		"details": {
 			"title": "トークンの詳細",
@@ -1231,6 +1285,7 @@
 			"unrecognised_erc_interface": "認識できないERCインターフェースです。",
 			"no_metadata": "メタデータが取得されませんでした。",
 			"unexpected": "トークンの保存中にエラーが発生しました。",
+			"version_mismatch": "",
 			"unexpected_hiding": "トークンを隠す際に予期せぬ問題が発生しました。",
 			"already_available": "トークンはすでに利用可能です。",
 			"not_toggleable": "トークンは切り替え不可であり、非表示にできません。",
@@ -1239,6 +1294,23 @@
 			"unexpected_undefined": "トークンが未定義です。これは予期しないエラーです。",
 			"unexpected_error_on_token_delete": "トークンの削除中にエラーが発生しました。",
 			"unexpected_error_on_token_update": "トークンの更新中にエラーが発生しました。"
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "カテゴリー",
+			"risk": "リスク"
+		},
+		"category": {
+			"crypto": "暗号資産",
+			"stablecoin": "ステーブルコイン",
+			"stock": "株式",
+			"commodity": "コモディティ"
+		},
+		"risk": {
+			"low": "低リスク",
+			"medium": "中リスク",
+			"high": "高リスク"
 		}
 	},
 	"nfts": {
@@ -1253,7 +1325,6 @@
 			"by_collection": "コレクションでグループ化",
 			"show_spam": "スパムを表示",
 			"show_hidden": "非表示を表示",
-			"sorting": "並べ替え",
 			"recents_first": "新しい順",
 			"oldest_first": "古い順",
 			"collection_atoz": "コレクション名 A-Z",
@@ -1469,8 +1540,6 @@
 		},
 		"label": {
 			"reimbursement": "払い戻し",
-			"twin_token_sent": "$twinToken送信済み",
-			"ck_token_sent": "$ckToken送信済み",
 			"twin_token_converted": "$twinTokenから変換済み",
 			"ck_token_converted": "$ckTokenから変換済み",
 			"sending_twin_token": "$twinToken送信中",
@@ -1688,15 +1757,6 @@
 			"title": "QRコードをスキャン"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "署名の準備中",
-			"description": "ロボットでないことを確認しています。",
-			"request_challenge": "新しいチャレンジを待機中",
-			"solve_challenge": "チャレンジ解決中",
-			"grant_cycles": "署名を有効化中"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1839,11 +1899,10 @@
 			"go_to_earn": "報酬獲得へ"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "ゴールドで報酬獲得",
-				"description": "GLDTをステーキングして、ガバナンストークンの報酬を毎日獲得。ゴールド保有で不労所得を得られます。",
-				"action": "GLDTをステーキング"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1853,6 +1912,8 @@
 		},
 		"card_fields": {
 			"apy": "APY",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "ステーキング中",
 			"currentEarning": "獲得済み報酬額",
 			"earningPotential": "これから獲得できる報酬額",
@@ -1867,13 +1928,34 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "GLDTトークンをステーキングして、実物のゴールドに裏付けられた報酬を獲得",
-			"stake": "$token_symbolをステーキング",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
+			"stake": "",
 			"stake_now": "今すぐステーキング",
 			"stake_amount": "$amount $token_symbolをステーキング",
 			"not_enough_to_stake": "ステーキング可能な$token_symbolがありません。",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "ステーキング解除",
 			"unstake_now": "今すぐ解除",
 			"unstaking": "解除中...",
@@ -1888,10 +1970,12 @@
 			"earning_potential_hint": "未ステーキング資産の価値と、利用可能な運用機会の最高APYに基づいています。",
 			"active_earning": "獲得済み報酬額",
 			"active_earning_per_year": "$amount/年",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "利用可能",
 			"invested_assets": "運用中",
 			"visit_provider": "ウェブサイトを見る",
 			"current_apy_label": "現在のAPY",
+			"max_apy_label": "",
 			"stake_review_subtitle": "ステーキング額",
 			"unstake_review_subtitle": "ステーキング解除額",
 			"delayed_dissolve": "遅延受取",
@@ -1914,7 +1998,7 @@
 			"claim_now": "今すぐ請求",
 			"claiming": "請求中...",
 			"get_tokens_with_amount": "最大$amount $token_symbolを入手",
-			"get_tokens": "さらに$token_symbolを入手",
+			"get_asset_tokens": "",
 			"reward_claimed": "受領済み報酬",
 			"staked": "ステーキング中",
 			"unstaked": "ステーキング解除済み",
@@ -1925,38 +2009,25 @@
 			"description_empty": "まだトークンをステーキングしていないようです。",
 			"full_history": "履歴を全て表示",
 			"recent_history": "履歴を閉じる",
-			"gldt_stake_carousel_slide_title": "Gold DAOステーキングでAPYを獲得",
-			"gldt_stake_carousel_slide_cta": "詳細を見る"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "出金中に問題が発生しました。",
 			"unexpected_error_on_unstake": "ステーキング解除中に問題が発生しました。",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": "アクティブな解除リクエストの上限$limitに達しました。新しいリクエストを作成する前に、一部を完了してください。<br/>注意: 「即時」オプションを使用すれば、いつでもステーキング解除できます。"
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "現在のAPY $apy%",
-				"item1_description": "最新の報酬に基づいています。実効APYは、毎日ステーキングされる$tokenの総額によって変動します。",
-				"item2_title_1": "ステーキング報酬は",
-				"item2_title_2": "GOLDAOトークンで支払われます。",
-				"item3_title": "ロック解除まで1週間",
-				"item3_description": "GLDTをステーキングから解除する際、トークンは引き出し可能になるまで1週間ロックされ、その間報酬は発生しません。ステーク額の5%の手数料を支払うことで、即座に解除できます。",
-				"item4_title": "保有期間ボーナス",
-				"item4_description": "GLDTステークは1日目から保有期間ボーナスを獲得できます。ステーク期間が長いほどボーナスが大きくなり、年率100%で直線的に増加します。",
-				"item5_title": "GLDTステークの解除を開始すると、新しい報酬は受け取れなくなります。"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "GLDTとは",
-				"description": "GLDTは「ゴールドトークン」の略で、GLD NFTに裏付けられたファンジブルトークンです。GLD NFTは、実物のゴールドバーの紛れもない所有権を表すNFTです。1 GLDTは正確に0.01gのゴールドを表し、GLD NFTは1gあたり100 GLDTの比率で交換できます。",
-				"fact_1_title": "実物のゴールドに裏付け",
-				"fact_1_description": "すべてのGLDTトークンは、安全な金庫に保管された実物のゴールドに裏付けられています。",
-				"fact_2_title": "柔軟な条件",
-				"fact_2_description": "ロック期間なし、いつでもステーキング・解除が可能",
-				"fact_3_title": "安定したリターン",
-				"fact_3_description": "最小限のボラティリティリスクで$apy%のAPYを獲得",
-				"fact_3_description_fallback": "最小限のボラティリティリスクで安定した報酬を獲得"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
@@ -1994,6 +2065,9 @@
 			"minute_plural": "分",
 			"second": "秒",
 			"second_plural": "秒"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

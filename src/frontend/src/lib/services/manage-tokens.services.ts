@@ -1,5 +1,6 @@
 import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { SaveErc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import {
 	MANAGE_TOKENS_MODAL_ROUTE,
@@ -11,13 +12,13 @@ import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { mapIcErrorMetadata } from '$lib/utils/error.utils';
+import { isVersionMismatchError, mapIcErrorMetadata } from '$lib/utils/error.utils';
 import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -44,6 +45,7 @@ export const saveTokens = async <
 		| SaveSplCustomToken
 		| SaveErc721CustomToken
 		| SaveErc1155CustomToken
+		| SaveErc4626CustomToken
 		| TokenToggleable<Token>
 >({
 	tokens,
@@ -110,10 +112,19 @@ export const saveTokens = async <
 			});
 		});
 	} catch (err: unknown) {
-		toastsError({
-			msg: { text: $i18n.tokens.error.unexpected },
-			err
-		});
+		const versionMismatch = isVersionMismatchError(err);
+
+		if (versionMismatch) {
+			toastsShow({
+				text: $i18n.tokens.error.version_mismatch,
+				level: 'warn'
+			});
+		} else {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected },
+				err
+			});
+		}
 
 		onError?.();
 

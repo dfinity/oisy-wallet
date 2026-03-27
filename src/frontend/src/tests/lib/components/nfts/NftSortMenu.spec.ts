@@ -40,7 +40,7 @@ describe('NftSorting', () => {
 		await fireEvent.click(button);
 
 		await waitFor(() => {
-			const sortingTitle = getByText(get(i18n).nfts.text.sorting);
+			const sortingTitle = getByText(get(i18n).core.text.sorting);
 
 			expect(sortingTitle).toBeInTheDocument();
 		});

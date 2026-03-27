@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import dai from '$eth/assets/dai.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -15,10 +16,10 @@ export const DAI_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'Dai Stablecoin',
 	symbol: DAI_SYMBOL,
 	decimals: DAI_DECIMALS,
 	icon: dai,
-	address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-	exchange: 'erc20'
+	address: '0x6b175474e89094c44da98b954eedeac495271d0f'
 };

@@ -4,6 +4,7 @@ import type { BtcTransactionType } from '$btc/types/btc-transaction';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { USDC_TOKEN, USDC_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import {
 	BASE_ETH_TOKEN,
 	BASE_ETH_TOKEN_ID
@@ -54,7 +55,10 @@ import {
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
-import { createMockEthCertifiedTransactions } from '$tests/mocks/eth-transactions.mock';
+import {
+	createMockEthCertifiedTransactions,
+	mockEthTransaction
+} from '$tests/mocks/eth-transactions.mock';
 import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
@@ -446,6 +450,171 @@ describe('transactions.utils', () => {
 				);
 
 				expect(result).toEqual(expectedTransactions);
+			});
+		});
+
+		describe('ETH transaction deduplication', () => {
+			const duplicateHash = '0xduplicate123';
+
+			const rest = {
+				$btcTransactions: undefined,
+				$ckEthMinterInfo: {},
+				$ethAddress: undefined,
+				$icTransactions: {},
+				$solTransactions: {},
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined,
+				$icTransactionsStore: undefined
+			};
+
+			it('should keep the ERC-20 transaction when native and ERC-20 share the same hash on the same network', () => {
+				const nativeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+				const erc20Tx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, PEPE_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeTx],
+						[PEPE_TOKEN_ID]: [erc20Tx]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(1);
+				expect(result[0].token).toBe(PEPE_TOKEN);
+			});
+
+			it('should keep both transactions when they have different hashes', () => {
+				const nativeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: '0xhash1' },
+					certified: false
+				};
+				const erc20Tx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: '0xhash2' },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, PEPE_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeTx],
+						[PEPE_TOKEN_ID]: [erc20Tx]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+			});
+
+			it('should keep both transactions when they share the same hash but are on different networks', () => {
+				const ethTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+				const baseTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, BASE_ETH_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [ethTx],
+						[BASE_ETH_TOKEN_ID]: [baseTx]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+			});
+
+			it('should not deduplicate non-ethereum component transactions', () => {
+				const solTx1: SolTransactionUi = {
+					...createMockSolTransactionsUi(1)[0],
+					id: 'same-id'
+				};
+				const solTx2: SolTransactionUi = {
+					...createMockSolTransactionsUi(1)[0],
+					id: 'same-id'
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: solTx1, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: solTx2, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(2);
+			});
+
+			it('should keep all non-native transactions and only remove the native one when multiple ERC-20 transfers share the same hash', () => {
+				const sharedHash = duplicateHash;
+				const nativeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: sharedHash },
+					certified: false
+				};
+				const pepeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: sharedHash },
+					certified: false
+				};
+				const usdcTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: sharedHash },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, PEPE_TOKEN, USDC_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeTx],
+						[PEPE_TOKEN_ID]: [pepeTx],
+						[USDC_TOKEN_ID]: [usdcTx]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+				expect(result.every(({ token }) => token.standard.code !== 'ethereum')).toBeTruthy();
+				expect(result.map(({ token }) => token)).toEqual([PEPE_TOKEN, USDC_TOKEN]);
+			});
+
+			it('should keep the native transaction if no non-native duplicate exists', () => {
+				const nativeTx1: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+				const nativeTx2: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: '0xunique' },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeTx1, nativeTx2]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
 			});
 		});
 	});

@@ -51,7 +51,7 @@ describe('LoaderCollections', () => {
 	});
 
 	it('should add new ERC collections', async () => {
-		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
+		const networks = [...SUPPORTED_ETHEREUM_MAINNET_NETWORKS, ...SUPPORTED_EVM_MAINNET_NETWORKS];
 
 		mockGetTokensForOwner.mockResolvedValue([
 			{ address: mockEthAddress, isSpam: false, standard: 'erc721' },
@@ -63,25 +63,23 @@ describe('LoaderCollections', () => {
 		await waitFor(() => {
 			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
 
-			for (const network of networks) {
-				expect(saveCustomTokensSpy).toHaveBeenCalledWith({
-					tokens: [
-						{
-							address: mockEthAddress,
-							chainId: network.chainId,
-							networkKey: 'Erc721',
-							enabled: true
-						},
-						{
-							address: mockEthAddress,
-							chainId: network.chainId,
-							networkKey: 'Erc1155',
-							enabled: true
-						}
-					],
-					identity: mockIdentity
-				});
-			}
+			expect(saveCustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
+				tokens: networks.flatMap((network) => [
+					{
+						address: mockEthAddress,
+						chainId: network.chainId,
+						networkKey: 'Erc721',
+						enabled: true
+					},
+					{
+						address: mockEthAddress,
+						chainId: network.chainId,
+						networkKey: 'Erc1155',
+						enabled: true
+					}
+				]),
+				identity: mockIdentity
+			});
 		});
 	});
 

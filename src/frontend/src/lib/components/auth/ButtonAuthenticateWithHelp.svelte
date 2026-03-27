@@ -9,6 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { tokenCategoryFilterStore, tokensSortStore } from '$lib/stores/settings.store';
 	import { InternetIdentityDomain } from '$lib/types/auth';
 	import { componentToHtml } from '$lib/utils/component.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -17,19 +18,30 @@
 		fullWidth?: boolean;
 		helpAlignment?: 'inherit' | 'center';
 		needHelpLink?: boolean;
+		asPopup?: boolean;
 	}
 
-	let { fullWidth = false, helpAlignment = 'inherit', needHelpLink = true }: Props = $props();
+	let {
+		fullWidth = false,
+		helpAlignment = 'inherit',
+		needHelpLink = true,
+		asPopup = false
+	}: Props = $props();
 
 	const modalId = Symbol();
 
 	const onAuthenticate = async (domain: InternetIdentityDomain) => {
 		const { success } = await signIn({
-			domain
+			domain,
+			asPopup
 		});
 
 		if (success === 'ok') {
 			authLocked.unlock({ source: 'login from landing page' });
+
+			tokensSortStore.reset({ key: 'tokens-sort' });
+
+			tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 		} else if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}

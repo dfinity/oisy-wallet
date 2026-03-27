@@ -13,6 +13,12 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 describe('HowToConvertEthereumModal', () => {
 	const props = {
 		sourceToken: ETHEREUM_TOKEN,

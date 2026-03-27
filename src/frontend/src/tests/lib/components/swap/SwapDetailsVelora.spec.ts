@@ -1,8 +1,7 @@
+import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 import { SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
-
-import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 
 describe('SwapDetailsVelora', () => {
 	const baseProvider = {

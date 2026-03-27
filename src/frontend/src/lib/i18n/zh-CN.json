@@ -41,7 +41,11 @@
 			"more": "更多",
 			"less": "更少",
 			"ellipsis": "…",
-			"learn_more": "了解更多"
+			"learn_more": "了解更多",
+			"sorting": "排序方式",
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
@@ -176,7 +180,6 @@
 			"title_part_1": "解锁以继续",
 			"title_part_2": "您之前已锁定钱包以确保其安全。请从上次中断的地方继续操作或退出。",
 			"unlock": "开锁",
-			"unlock_with_legacy_login": "",
 			"logout": "退出登录",
 			"logout_clear_cash_message": "注销将清除所有缓存数据",
 			"learn_more": "了解更多"
@@ -206,15 +209,17 @@
 			"website": "$dAppName 的图像"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "社交媒体",
-			"verifiable_credentials": "可验证凭证",
-			"staking": "质押",
-			"walletconnect": "WalletConnect",
-			"game": "游戏",
-			"tools": "工具包",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "人工智能",
-			"nft": "NFT"
+			"defi": "DeFi",
+			"game": "游戏",
+			"nft": "NFT",
+			"rwa": "",
+			"social_media": "社交媒体",
+			"staking": "质押",
+			"tools": "工具包",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -347,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "首个用于构建自我编写应用的平台。",
-				"call_to_action": "试用 Caffeine",
 				"description": "Caffeine 是首个用于构建自我编写应用的平台。只需在桌面或移动端与 AI 对话，它就会为你创建应用和服务——包括那些能连接到 OISY 钱包的。体验由 AI 驱动的应用开发未来。",
 				"carousel": {
 					"text": "你好，自我编写的互联网",
@@ -404,6 +408,36 @@
 				"name": "Kamino",
 				"one_liner": "Kamino 是 Solana 上最大的借贷协议，支撑着该网络中相当大比例的 DeFi 活动。",
 				"description": "Kamino 是一个运行在 Solana 区块链上的去中心化金融（DeFi）平台，将流动性提供、借贷和杠杆交易整合为一套产品体系。它通过自动化流动性金库和 Kamino Lend 系统简化了这些 DeFi 策略，并利用集中流动性管理来提升用户的资金效率。"
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -600,6 +634,7 @@
 			"no_infura_erc721_provider": "没有 $network 网络的 Infura ERC721 提供商",
 			"no_infura_erc1155_provider": "没有 $network 网络的 Infura ERC1155 提供商",
 			"no_infura_erc20_icp_provider": "没有 $network 网络的 Infura ERC20 ICP 提供商",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "没有 $network 网络的 Solana 网络配置",
 			"loading_address": "加载 $symbol 地址时出错。",
 			"loading_balance": "加载 $network 网络上的 $symbol 余额时出错。",
@@ -618,8 +653,11 @@
 			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
-			"icrc_canister_loading": "无法加载带有 Ledger 容器 $ledgerCanisterId 的令牌，因为它目前没有响应。",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "$tokenSymbol 代币暂无响应，目前无法加载。请稍后再试。",
+			"icrc_canister_loading_custom": "账本容器 $ledgerCanisterId 的代币暂无响应，目前无法加载。请稍后再试。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
 			"spl_custom_tokens": "加载 SPL 用户代币时出错。",
@@ -627,6 +665,7 @@
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"ext_custom_tokens": "加载 EXT 自定义代币时出错。",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
 			"waiting_for_allowed_cycles_aborted": "已中止周期账本准备。请稍后尝试登录。",
@@ -789,6 +828,7 @@
 	"send": {
 		"text": {
 			"send": "发送",
+			"send_token": "",
 			"destination": "目标地址",
 			"source": "来源地址",
 			"balance": "余额",
@@ -992,6 +1032,9 @@
 			"loading_cketh_helper": "加载 ckETH 辅助合约地址出错。未初始化 minter canister ID。",
 			"unexpected": "转换代币时发生错误。",
 			"unexpected_missing_data": "初始化转换交易时出错。"
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "USDC 与 ckUSDC 之间的转换目前已暂停。"
 		}
 	},
 	"swap": {
@@ -1036,7 +1079,8 @@
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
-			"cross_chain_networks_info": "跨链网络信息"
+			"cross_chain_networks_info": "跨链网络信息",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -1053,7 +1097,8 @@
 			"manually_withdraw_success": "手动取款成功",
 			"manually_withdraw_failed": "手动取款失败",
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
-			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功"
+			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1114,7 +1159,16 @@
 			"hide_more_networks": "隐藏更多网络",
 			"on_network": " 于 $network",
 			"delete_token": "删除代币",
-			"edit_token": "编辑代币"
+			"edit_token": "编辑代币",
+			"sort_by_value": "价值",
+			"sort_by_performance": "代币表现",
+			"sort_by_symbol": "符号",
+			"hide_asset_types": "隐藏资产类型",
+			"asset_type": "$oisy_name 中的资产类型",
+			"asset_type_all": "所有资产类型",
+			"no_tokens_for_asset_type": "您的钱包中没有 $asset_type",
+			"no_tokens_for_asset_type_zero_tokens": "所选网络中没有 $asset_type",
+			"no_tokens_for_asset_type_description": "从 <strong>$count 个支持的代币</strong>中选择，自定义您的投资组合视图。"
 		},
 		"details": {
 			"title": "代币详情",
@@ -1231,6 +1285,7 @@
 			"unrecognised_erc_interface": "无法识别的 ERC 接口。",
 			"no_metadata": "未获取到任何元数据。",
 			"unexpected": "保存代币时发生错误。",
+			"version_mismatch": "",
 			"unexpected_hiding": "隐藏代币时发生错误。",
 			"already_available": "代币已存在。",
 			"not_toggleable": "该代币不可切换，无法隐藏。",
@@ -1239,6 +1294,23 @@
 			"unexpected_undefined": "代币未定义。这是异常情况。",
 			"unexpected_error_on_token_delete": "移除代币时发生错误。",
 			"unexpected_error_on_token_update": "更新代币时发生错误。"
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "类别",
+			"risk": "风险"
+		},
+		"category": {
+			"crypto": "加密货币",
+			"stablecoin": "稳定币",
+			"stock": "股票",
+			"commodity": "大宗商品"
+		},
+		"risk": {
+			"low": "低风险",
+			"medium": "中等风险",
+			"high": "高风险"
 		}
 	},
 	"nfts": {
@@ -1253,7 +1325,6 @@
 			"by_collection": "按集合分组",
 			"show_spam": "显示垃圾内容",
 			"show_hidden": "显示已隐藏",
-			"sorting": "排序方式",
 			"recents_first": "最新优先",
 			"oldest_first": "最早优先",
 			"collection_atoz": "集合名称 A-Z",
@@ -1469,8 +1540,6 @@
 		},
 		"label": {
 			"reimbursement": "报销",
-			"twin_token_sent": "已发送 $twinToken",
-			"ck_token_sent": "已发送 $ckToken",
 			"twin_token_converted": "从 $twinToken 转换",
 			"ck_token_converted": "从 $ckToken 转换",
 			"sending_twin_token": "正在发送 $twinToken",
@@ -1688,15 +1757,6 @@
 			"title": "扫描二维码"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Preparing Signer",
-			"description": "Verifying that you are not a robot",
-			"request_challenge": "Waiting for new challenge",
-			"solve_challenge": "Solving challenge",
-			"grant_cycles": "Enabling signing"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1839,11 +1899,10 @@
 			"go_to_earn": "前往 Earn"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "黄金收益",
-				"description": "质押 GLDT 可每日获得治理代币奖励，从黄金持有中解锁被动收益。",
-				"action": "质押 GLDT"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1853,6 +1912,8 @@
 		},
 		"card_fields": {
 			"apy": "年化收益率",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "已质押",
 			"currentEarning": "当前收益",
 			"earningPotential": "额外收益潜力",
@@ -1867,13 +1928,34 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "",
 			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "",
 			"unstake_now": "",
 			"unstaking": "",
@@ -1888,10 +1970,12 @@
 			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "",
 			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
+			"max_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1914,7 +1998,7 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": "",
+			"get_asset_tokens": "",
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",
@@ -1925,29 +2009,17 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",
 			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": ""
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
-		},
 		"info": {
-			"gldt": {
+			"harvest_autopilot": {
 				"title": "",
 				"description": "",
 				"fact_1_title": "",
@@ -1955,8 +2027,7 @@
 				"fact_2_title": "",
 				"fact_2_description": "",
 				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
@@ -1994,6 +2065,9 @@
 			"minute_plural": "分钟（复数）",
 			"second": "秒（单数）",
 			"second_plural": "秒（复数）"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

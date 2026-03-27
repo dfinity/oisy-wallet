@@ -3,21 +3,16 @@
 	import { type Component, type Snippet, untrack } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import type { EthNonFungibleToken } from '$eth/types/nft';
-	import { isTokenErc } from '$eth/utils/erc.utils';
-	import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
-	import { isTokenIc } from '$icp/utils/icrc.utils';
-	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
+	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
-	import TokenAsContact from '$lib/components/tokens/TokenAsContact.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import { allTokens } from '$lib/derived/all-tokens.derived';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import { TRANSACTION_CHILDREN_CONTAINER } from '$lib/constants/test-ids.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -26,16 +21,13 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { areAddressesEqual } from '$lib/utils/address.utils';
-	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
-	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
+	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		displayAmount?: bigint;
@@ -78,40 +70,14 @@
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
 	const address: string | undefined = $derived(
-		type === 'send'
+		type === 'send' || type === 'deposit'
 			? to
-			: type === 'receive'
+			: type === 'receive' || type === 'withdraw'
 				? from
 				: type === 'approve'
 					? approveSpender
 					: undefined
 	);
-
-	const putativeToken = $derived(
-		nonNullish(address)
-			? $allTokens.find((t) =>
-					areAddressesEqual({
-						address1: address,
-						address2: isTokenIc(t)
-							? t.ledgerCanisterId
-							: isTokenErc(t) || isTokenSpl(t)
-								? t.address
-								: isTokenIcNft(t)
-									? t.canisterId
-									: undefined,
-						networkId: t.network.id
-					})
-				)
-			: undefined
-	);
-
-	const contact = $derived(
-		nonNullish(address)
-			? getContactForAddress({ addressString: address, contactList: $contacts })
-			: undefined
-	);
-
-	const contactAddress = $derived(filterAddressFromContact({ contact, address }));
 
 	const network: Network | undefined = $derived(token.network);
 
@@ -166,7 +132,7 @@
 	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin withGap>
 			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
-				<span class="truncate">
+				<span class="truncate" data-tid={TRANSACTION_CHILDREN_CONTAINER}>
 					{@render children()}
 				</span>
 
@@ -235,23 +201,15 @@
 					class="flex min-w-0 flex-col items-center items-start text-xs text-primary sm:flex-row sm:text-sm"
 				>
 					<span class="inline-flex min-w-0 items-center gap-1">
-						{#if type === 'send'}
+						{#if type === 'send' || type === 'deposit'}
 							<span class="shrink-0">{$i18n.transaction.text.to}</span>
-						{:else if type === 'receive'}
+						{:else if type === 'receive' || type === 'withdraw'}
 							<span class="shrink-0">{$i18n.transaction.text.from}</span>
 						{:else if type === 'approve'}
 							<span class="shrink-0">{$i18n.transaction.text.for}</span>
 						{/if}
 
-						{#if nonNullish(putativeToken)}
-							<TokenAsContact token={putativeToken} />
-						{:else if nonNullish(contact)}
-							<ContactWithAvatar {contact} {contactAddress} />
-						{:else if nonNullish(address)}
-							<span class="flex inline-block max-w-38 min-w-0 flex-wrap items-center truncate">
-								{shortenWithMiddleEllipsis({ text: address })}
-							</span>
-						{/if}
+						<ContactOrToken identifier={address} showFallback />
 					</span>
 					<span class="truncate text-tertiary">
 						<TransactionStatusComponent {status} />

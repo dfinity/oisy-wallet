@@ -3,12 +3,14 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
-import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
 import { icPunksTokens } from '$icp/derived/icpunks.derived';
@@ -20,7 +22,8 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
-import { filterEnabledTokens } from '$lib/utils/tokens.utils';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
+import { filterEnabledTokens, tokenListEqual } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
@@ -28,7 +31,7 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const nativeTokens: Readable<Token[]> = derived(
+export const nativeTokens: Readable<Token[]> = derivedMemo(
 	[
 		defaultIcpTokens,
 		enabledBitcoinTokens,
@@ -48,17 +51,19 @@ export const nativeTokens: Readable<Token[]> = derived(
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
 		...$enabledEvmTokens
-	]
+	],
+	tokenListEqual
 );
 
-export const fungibleTokens: Readable<Token[]> = derived(
-	[nativeTokens, erc20Tokens, icrcTokens, splTokens],
-	([$nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) => [
+export const fungibleTokens: Readable<Token[]> = derivedMemo(
+	[nativeTokens, ercFungibleTokens, icrcTokens, splTokens],
+	([$nativeTokens, $ercFungibleTokens, $icrcTokens, $splTokens]) => [
 		...$nativeTokens,
-		...$erc20Tokens,
+		...$ercFungibleTokens,
 		...$icrcTokens,
 		...$splTokens
-	]
+	],
+	tokenListEqual
 );
 
 export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = derived(
@@ -71,9 +76,10 @@ export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = deri
 	]
 );
 
-export const tokens: Readable<Token[]> = derived(
+export const tokens: Readable<Token[]> = derivedMemo(
 	[fungibleTokens, nonFungibleTokens],
-	([$fungibleTokens, $nonFungibleTokens]) => [...$fungibleTokens, ...$nonFungibleTokens]
+	([$fungibleTokens, $nonFungibleTokens]) => [...$fungibleTokens, ...$nonFungibleTokens],
+	tokenListEqual
 );
 
 export const tokensToPin: Readable<TokenToPin[]> = derived(
@@ -92,7 +98,11 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 /**
  * All user-enabled tokens.
  */
-export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);
+export const enabledTokens: Readable<Token[]> = derivedMemo(
+	[tokens],
+	filterEnabledTokens,
+	tokenListEqual
+);
 
 /**
  * All user-enabled unique tokens symbols.
@@ -105,9 +115,10 @@ export const enabledUniqueTokensSymbols: Readable<Token['symbol'][]> = derived(
 /**
  * All user-enabled fungible tokens.
  */
-export const enabledFungibleTokens: Readable<Token[]> = derived(
+export const enabledFungibleTokens: Readable<Token[]> = derivedMemo(
 	[fungibleTokens],
-	filterEnabledTokens
+	filterEnabledTokens,
+	tokenListEqual
 );
 
 /**
@@ -168,18 +179,27 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	([$enabledTokens]) => $enabledTokens.filter(isTokenErc20)
 );
 
-/**
- * The following store is used as a reference for the list of WalletWorkers that are started/stopped in the main token page.
- */
-// TODO: The several dependencies of enabledIcTokens are not strictly only IC tokens, but other tokens too.
-//  We should find a better way to handle this, improving the store.
-export const enabledIcTokens: Readable<IcToken[]> = derived([enabledTokens], ([$enabledTokens]) =>
-	$enabledTokens.filter(isTokenIc)
+export const enabledErc4626Tokens: Readable<Erc4626Token[]> = derived(
+	[enabledTokens],
+	([$enabledTokens]) => $enabledTokens.filter(isTokenErc4626)
 );
 
 /**
  * The following store is used as a reference for the list of WalletWorkers that are started/stopped in the main token page.
  */
-export const enabledSplTokens: Readable<SplToken[]> = derived([enabledTokens], ([$enabledTokens]) =>
-	$enabledTokens.filter(isTokenSpl)
+// TODO: The several dependencies of enabledIcTokens are not strictly only IC tokens, but other tokens too.
+//  We should find a better way to handle this, improving the store.
+export const enabledIcTokens: Readable<IcToken[]> = derivedMemo(
+	[enabledTokens],
+	([$enabledTokens]) => $enabledTokens.filter(isTokenIc),
+	tokenListEqual
+);
+
+/**
+ * The following store is used as a reference for the list of WalletWorkers that are started/stopped in the main token page.
+ */
+export const enabledSplTokens: Readable<SplToken[]> = derivedMemo(
+	[enabledTokens],
+	([$enabledTokens]) => $enabledTokens.filter(isTokenSpl),
+	tokenListEqual
 );

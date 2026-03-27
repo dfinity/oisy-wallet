@@ -41,7 +41,11 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": "",
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!",
@@ -176,7 +180,6 @@
 			"title_part_1": "Sblocca per continuare",
 			"title_part_2": "In precedenza hai bloccato il tuo wallet per tenerlo al sicuro. Riprendi da dove eri rimasto o esci.",
 			"unlock": "Sblocca",
-			"unlock_with_legacy_login": "",
 			"logout": "Esci",
 			"logout_clear_cash_message": "La disconnessione cancellerà tutti i dati memorizzati nella cache",
 			"learn_more": "Saperne di più"
@@ -206,15 +209,17 @@
 			"website": "Immagine di $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Social Media",
-			"verifiable_credentials": "Credenziali Verificabili",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Gioco",
-			"tools": "Strumenti",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "",
-			"nft": ""
+			"defi": "DeFi",
+			"game": "Gioco",
+			"nft": "",
+			"rwa": "",
+			"social_media": "Social Media",
+			"staking": "Staking",
+			"tools": "Strumenti",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -347,7 +352,6 @@
 			"caffeine": {
 				"name": "",
 				"one_liner": "",
-				"call_to_action": "",
 				"description": "",
 				"carousel": {
 					"text": "",
@@ -401,6 +405,36 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -600,6 +634,7 @@
 			"no_infura_erc721_provider": "Nessun provider Infura ERC721 per la rete $network",
 			"no_infura_erc1155_provider": "Nessun provider Infura ERC1155 per la rete $network",
 			"no_infura_erc20_icp_provider": "Nessun provider Infura ERC20 ICP per la rete $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Nessuna rete Solana per la rete $network",
 			"loading_address": "Errore durante il caricamento dell'indirizzo $symbol.",
 			"loading_balance": "Errore durante il caricamento del saldo $symbol per la rete $network.",
@@ -618,8 +653,11 @@
 			"btc_withdrawal_statuses": "Errore durante il recupero degli stati di prelievo BTC.",
 			"transaction_price": "Errore durante il caricamento della stima del prezzo di una transazione.",
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
-			"icrc_canister_loading": "",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "Il token $tokenSymbol non risponde e non può essere caricato al momento. Riprova più tardi.",
+			"icrc_canister_loading_custom": "Il token con canister ledger $ledgerCanisterId non risponde e non può essere caricato al momento. Riprova più tardi.",
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
 			"erc1155_custom_tokens": "Errore durante il caricamento del token personalizzato ERC1155.",
 			"spl_custom_tokens": "Errore durante il caricamento del token personalizzato SPL.",
@@ -627,6 +665,7 @@
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
 			"allow_signing": "Si è verificato un problema durante la configurazione del tuo wallet per la firma. Sei stato disconnesso. Se il problema persiste, contatta il supporto.",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -789,6 +828,7 @@
 	"send": {
 		"text": {
 			"send": "Invia",
+			"send_token": "",
 			"destination": "Destinazione",
 			"source": "Origine",
 			"balance": "Saldo",
@@ -992,6 +1032,9 @@
 			"loading_cketh_helper": "Errore durante il caricamento dell'indirizzo del contratto helper ckETH. Nessun canister minter ID è stato inizializzato.",
 			"unexpected": "Qualcosa è andato storto durante la conversione dei token.",
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di conversione."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "La conversione di USDC da/verso ckUSDC è attualmente sospesa."
 		}
 	},
 	"swap": {
@@ -1036,7 +1079,8 @@
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
-			"cross_chain_networks_info": ""
+			"cross_chain_networks_info": "",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -1053,7 +1097,8 @@
 			"manually_withdraw_success": "",
 			"manually_withdraw_failed": "",
 			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": ""
+			"swap_sucess_manually_withdraw_success": "",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1114,7 +1159,16 @@
 			"hide_more_networks": "Nascondi altre reti",
 			"on_network": " su $network",
 			"delete_token": "Elimina token",
-			"edit_token": "Modifica token"
+			"edit_token": "Modifica token",
+			"sort_by_value": "Valore",
+			"sort_by_performance": "Performance del token",
+			"sort_by_symbol": "Simbolo",
+			"hide_asset_types": "Nascondi tipi di asset",
+			"asset_type": "Tipo di asset in $oisy_name",
+			"asset_type_all": "Tutti i tipi di asset",
+			"no_tokens_for_asset_type": "Non ci sono $asset_type nel tuo portafoglio",
+			"no_tokens_for_asset_type_zero_tokens": "Non ci sono $asset_type nella rete selezionata",
+			"no_tokens_for_asset_type_description": "Scegli tra <strong>$count token supportati</strong> per personalizzare la visualizzazione del tuo portafoglio."
 		},
 		"details": {
 			"title": "Dettagli del token",
@@ -1231,6 +1285,7 @@
 			"unrecognised_erc_interface": "",
 			"no_metadata": "Nessun metadato recuperato.",
 			"unexpected": "Qualcosa è andato storto durante il salvataggio del token.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Qualcosa è andato storto nel nascondere il token.",
 			"already_available": "Token già disponibile.",
 			"not_toggleable": "Il token non è attivabile/disattivabile, non può essere nascosto.",
@@ -1239,6 +1294,23 @@
 			"unexpected_undefined": "Il token non è definito. Questo è inaspettato.",
 			"unexpected_error_on_token_delete": "Si è verificato un errore durante la rimozione del token.",
 			"unexpected_error_on_token_update": "Si è verificato un errore durante l'aggiornamento del token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Categoria",
+			"risk": "Rischio"
+		},
+		"category": {
+			"crypto": "Criptovalute",
+			"stablecoin": "Stablecoin",
+			"stock": "Azioni",
+			"commodity": "Materie prime"
+		},
+		"risk": {
+			"low": "Rischio basso",
+			"medium": "Rischio medio",
+			"high": "Rischio alto"
 		}
 	},
 	"nfts": {
@@ -1253,7 +1325,6 @@
 			"by_collection": "",
 			"show_spam": "",
 			"show_hidden": "",
-			"sorting": "",
 			"recents_first": "",
 			"oldest_first": "",
 			"collection_atoz": "",
@@ -1469,8 +1540,6 @@
 		},
 		"label": {
 			"reimbursement": "Rimborso",
-			"twin_token_sent": "$twinToken inviato",
-			"ck_token_sent": "$ckToken inviato",
 			"twin_token_converted": "Convertito da $twinToken",
 			"ck_token_converted": "Convertito da $ckToken",
 			"sending_twin_token": "Invio di $twinToken",
@@ -1688,15 +1757,6 @@
 			"title": "Scansiona codice QR"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Preparing Signer",
-			"description": "Verifying that you are not a robot",
-			"request_challenge": "Waiting for new challenge",
-			"solve_challenge": "Solving challenge",
-			"grant_cycles": "Enabling signing"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1839,9 +1899,8 @@
 			"go_to_earn": ""
 		},
 		"cards": {
-			"gldt": {
-				"title1": "",
-				"title2": "",
+			"harvest_autopilot": {
+				"title": "",
 				"description": "",
 				"action": ""
 			},
@@ -1853,6 +1912,8 @@
 		},
 		"card_fields": {
 			"apy": "",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "",
 			"currentEarning": "",
 			"earningPotential": "",
@@ -1867,13 +1928,34 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "",
 			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "",
 			"unstake_now": "",
 			"unstaking": "",
@@ -1888,10 +1970,12 @@
 			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "",
 			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
+			"max_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1914,7 +1998,7 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": "",
+			"get_asset_tokens": "",
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",
@@ -1925,29 +2009,17 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",
 			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": ""
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
-		},
 		"info": {
-			"gldt": {
+			"harvest_autopilot": {
 				"title": "",
 				"description": "",
 				"fact_1_title": "",
@@ -1955,8 +2027,7 @@
 				"fact_2_title": "",
 				"fact_2_description": "",
 				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
@@ -1994,6 +2065,9 @@
 			"minute_plural": "minuti",
 			"second": "secondo",
 			"second_plural": "secondi"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

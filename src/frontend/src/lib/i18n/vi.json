@@ -41,7 +41,11 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": "Sắp xếp",
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -176,7 +180,6 @@
 			"title_part_1": "Mở khóa để tiếp tục",
 			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
 			"unlock": "Mở khóa",
-			"unlock_with_legacy_login": "",
 			"logout": "Đăng xuất",
 			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",
 			"learn_more": "Tìm hiểu thêm"
@@ -206,15 +209,17 @@
 			"website": "Hình ảnh của $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Mạng xã hội",
-			"verifiable_credentials": "Thông tin xác thực",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Trò chơi",
-			"tools": "Công cụ",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "AI",
-			"nft": ""
+			"defi": "DeFi",
+			"game": "Trò chơi",
+			"nft": "",
+			"rwa": "",
+			"social_media": "Mạng xã hội",
+			"staking": "Staking",
+			"tools": "Công cụ",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -347,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "Nền tảng đầu tiên để xây dựng các ứng dụng tự viết.",
-				"call_to_action": "Thử Caffeine",
 				"description": "Caffeine là nền tảng đầu tiên để xây dựng các ứng dụng tự viết. Chỉ cần trò chuyện với AI trên máy tính hoặc điện thoại, nó sẽ tạo ra các ứng dụng và dịch vụ cho bạn – bao gồm cả những ứng dụng kết nối với Ví OISY. Trải nghiệm tương lai của việc phát triển ứng dụng với khả năng sáng tạo được hỗ trợ bởi AI.",
 				"carousel": {
 					"text": "Xin chào, internet tự viết",
@@ -401,6 +405,36 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -600,6 +634,7 @@
 			"no_infura_erc721_provider": "Không có nhà cung cấp Infura ERC721 cho mạng $network",
 			"no_infura_erc1155_provider": "Không có nhà cung cấp Infura ERC1155 cho mạng $network",
 			"no_infura_erc20_icp_provider": "Không có nhà cung cấp Infura ERC20 Icp cho mạng $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Không có mạng Solana cho mạng $network",
 			"loading_address": "Lỗi khi tải địa chỉ $symbol.",
 			"loading_balance": "Lỗi khi tải số dư $symbol cho mạng $network.",
@@ -618,8 +653,11 @@
 			"btc_withdrawal_statuses": "Lỗi khi tìm nạp trạng thái rút BTC.",
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
-			"icrc_canister_loading": "Token với canister Ledger $ledgerCanisterId không thể được tải vì hiện tại nó không phản hồi.",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "Token $tokenSymbol không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
+			"icrc_canister_loading_custom": "Token với canister ledger $ledgerCanisterId không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
 			"erc1155_custom_tokens": "Lỗi khi tải các token ERC1155.",
 			"spl_custom_tokens": "Lỗi khi tải các token tùy chỉnh SPL.",
@@ -627,6 +665,7 @@
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
 			"waiting_for_allowed_cycles_aborted": "Đã hủy bỏ quá trình chuẩn bị cycles ledger. Vui lòng thử đăng nhập lại sau.",
@@ -789,6 +828,7 @@
 	"send": {
 		"text": {
 			"send": "Gửi",
+			"send_token": "",
 			"destination": "Tới",
 			"source": "Nguồn",
 			"balance": "Số dư",
@@ -992,6 +1032,9 @@
 			"loading_cketh_helper": "Lỗi khi tải địa chỉ hợp đồng hỗ trợ ckETH. Không có ID canister minter nào được khởi tạo.",
 			"unexpected": "Đã xảy ra lỗi trong khi chuyển đổi token.",
 			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch chuyển đổi."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Việc chuyển đổi USDC từ/sang ckUSDC hiện đang bị tạm ngừng."
 		}
 	},
 	"swap": {
@@ -1036,7 +1079,8 @@
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
-			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>"
+			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
@@ -1053,7 +1097,8 @@
 			"manually_withdraw_success": "Token từ giao dịch hoán đổi không thành công trước đó của bạn đã được rút thành công. Bạn có thể thử lại giao dịch hoán đổi hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
 			"manually_withdraw_failed": "Rút tiền của bạn không thành công.<br> Vui lòng thử lại hoặc làm theo",
 			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
-			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này."
+			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1114,7 +1159,16 @@
 			"hide_more_networks": "Ẩn thêm mạng",
 			"on_network": " trên mạng $network",
 			"delete_token": "Xóa token",
-			"edit_token": "Chỉnh sửa token"
+			"edit_token": "Chỉnh sửa token",
+			"sort_by_value": "Giá trị",
+			"sort_by_performance": "Hiệu suất token",
+			"sort_by_symbol": "Ký hiệu",
+			"hide_asset_types": "Ẩn loại tài sản",
+			"asset_type": "Loại tài sản trong $oisy_name",
+			"asset_type_all": "Tất cả loại tài sản",
+			"no_tokens_for_asset_type": "Ví của bạn không có $asset_type nào",
+			"no_tokens_for_asset_type_zero_tokens": "Không có $asset_type nào trong mạng đã chọn",
+			"no_tokens_for_asset_type_description": "Chọn từ <strong>$count token được hỗ trợ</strong> để tùy chỉnh chế độ xem danh mục đầu tư của bạn."
 		},
 		"details": {
 			"title": "Chi tiết token",
@@ -1231,6 +1285,7 @@
 			"unrecognised_erc_interface": "Không nhận diện được giao diện ERC20.",
 			"no_metadata": "Không có metadata nào được tìm thấy.",
 			"unexpected": "Đã xảy ra lỗi trong khi lưu token.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Đã xảy ra lỗi trong khi ẩn token.",
 			"already_available": "Token đã có sẵn.",
 			"not_toggleable": "Token không thể chuyển đổi, không thể ẩn.",
@@ -1239,6 +1294,23 @@
 			"unexpected_undefined": "Token không xác định. Điều này không mong muốn.",
 			"unexpected_error_on_token_delete": "Đã xảy ra lỗi khi xóa token.",
 			"unexpected_error_on_token_update": "Đã xảy ra lỗi khi cập nhật token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Danh mục",
+			"risk": "Rủi ro"
+		},
+		"category": {
+			"crypto": "Tiền mã hóa",
+			"stablecoin": "Stablecoin",
+			"stock": "Cổ phiếu",
+			"commodity": "Hàng hóa"
+		},
+		"risk": {
+			"low": "Rủi ro thấp",
+			"medium": "Rủi ro trung bình",
+			"high": "Rủi ro cao"
 		}
 	},
 	"nfts": {
@@ -1253,7 +1325,6 @@
 			"by_collection": "Nhóm theo bộ sưu tập",
 			"show_spam": "Hiển thị spam",
 			"show_hidden": "Hiển thị ẩn",
-			"sorting": "Sắp xếp",
 			"recents_first": "Gần đây trước",
 			"oldest_first": "Cũ nhất trước",
 			"collection_atoz": "Tên bộ sưu tập A-Z",
@@ -1469,8 +1540,6 @@
 		},
 		"label": {
 			"reimbursement": "Hoàn tiền",
-			"twin_token_sent": "$twinToken đã gửi",
-			"ck_token_sent": "$ckToken đã gửi",
 			"twin_token_converted": "Đã chuyển đổi từ $twinToken",
 			"ck_token_converted": "Đã chuyển đổi từ $ckToken",
 			"sending_twin_token": "Đang gửi $twinToken",
@@ -1688,15 +1757,6 @@
 			"title": "Quét mã QR"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Preparing Signer",
-			"description": "Verifying that you are not a robot",
-			"request_challenge": "Waiting for new challenge",
-			"solve_challenge": "Solving challenge",
-			"grant_cycles": "Enabling signing"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1839,9 +1899,8 @@
 			"go_to_earn": ""
 		},
 		"cards": {
-			"gldt": {
-				"title1": "",
-				"title2": "",
+			"harvest_autopilot": {
+				"title": "",
 				"description": "",
 				"action": ""
 			},
@@ -1853,6 +1912,8 @@
 		},
 		"card_fields": {
 			"apy": "",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "",
 			"currentEarning": "",
 			"earningPotential": "",
@@ -1867,13 +1928,34 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "",
 			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "",
 			"unstake_now": "",
 			"unstaking": "",
@@ -1888,10 +1970,12 @@
 			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "",
 			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
+			"max_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1914,7 +1998,7 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": "",
+			"get_asset_tokens": "",
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",
@@ -1925,29 +2009,17 @@
 			"description_empty": "",
 			"full_history": "",
 			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",
 			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": ""
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
-		},
 		"info": {
-			"gldt": {
+			"harvest_autopilot": {
 				"title": "",
 				"description": "",
 				"fact_1_title": "",
@@ -1955,8 +2027,7 @@
 				"fact_2_title": "",
 				"fact_2_description": "",
 				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
@@ -1994,6 +2065,9 @@
 			"minute_plural": "phút",
 			"second": "giây",
 			"second_plural": "giây"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

@@ -5,6 +5,7 @@ import { loadCustomTokens, loadExtTokens } from '$icp/services/ext.services';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -95,7 +96,7 @@ describe('ext.services', () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrowError();
+			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrow();
 		});
 	});
 
@@ -119,12 +120,10 @@ describe('ext.services', () => {
 			expect(listCustomTokens).toHaveBeenCalledTimes(2);
 			expect(listCustomTokens).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
-				certified: false,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
 			expect(listCustomTokens).toHaveBeenNthCalledWith(2, {
 				identity: mockIdentity,
-				certified: true,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
 		});
@@ -177,6 +176,7 @@ describe('ext.services', () => {
 						enabled: true,
 						standard: { code: 'ext', version: 'v2' },
 						category: 'custom',
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 						canisterId: mockCanisterId,
 						symbol: mockCanisterId,
 						name: mockCanisterId,

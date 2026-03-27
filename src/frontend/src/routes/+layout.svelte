@@ -15,6 +15,7 @@
 	} from '$lib/constants/analytics.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
+	import { networkId } from '$lib/derived/network.derived';
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
@@ -24,6 +25,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+	import { consoleWarn } from '$lib/utils/console.utils';
 
 	interface Props {
 		children: Snippet;
@@ -145,7 +148,7 @@
 			// We don't really care if the broadcast channel fails to open or if it fails to set the message handler.
 			// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
 			// We just print a warning in the console for debugging purposes.
-			console.warn('Auth BroadcastChannel initialization failed', err);
+			consoleWarn('Auth BroadcastChannel initialization failed', err);
 		}
 	};
 
@@ -175,6 +178,15 @@
 				unlockBodyScroll();
 			}
 		}
+	});
+
+	// When arriving via a deep link with a network param, the NFT breadcrumb
+	// would drop that filter because its route depends on `userSelectedNetworkStore`,
+	// which is only updated through explicit user actions.
+	// We initialise the store from the URL on first load to preserve navigation
+	// context without promoting the route to the source of truth.
+	onMount(() => {
+		userSelectedNetworkStore.set($networkId);
 	});
 </script>
 

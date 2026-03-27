@@ -8,10 +8,9 @@ import type {
 	IcFeeSchema,
 	IcInterfaceSchema,
 	IcTokenSchema,
-	IcTokenWithIcrc2SupportedSchema,
 	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type * as z from 'zod';
 
 export type IcFee = z.infer<typeof IcFeeSchema>;
@@ -28,16 +27,14 @@ export type IcInterface = z.infer<typeof IcInterfaceSchema>;
 
 export type IcToken = z.infer<typeof IcTokenSchema>;
 
-export type IcTokenWithIcrc2Supported = z.infer<typeof IcTokenWithIcrc2SupportedSchema>;
-
 export type IcTokenWithoutId = z.infer<typeof IcTokenWithoutIdSchema>;
 
 export type IcCkToken = z.infer<typeof IcCkTokenSchema>;
 
 export type IcCkInterface = z.infer<typeof IcCkInterfaceSchema>;
 
-export type OptionIcToken = Option<IcToken>;
-export type OptionIcCkToken = Option<IcCkToken>;
+export type OptionIcToken = Nullish<IcToken>;
+export type OptionIcCkToken = Nullish<IcCkToken>;
 
 export enum IcTokenStandards {
 	icrc1 = 'ICRC-1',

@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
-	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { back } from '$lib/utils/nav.utils';
 
@@ -29,11 +28,6 @@
 	aria-label={$i18n.core.alt.back}
 	onclick={() => back({ pop: nonNullish(fromRoute) })}
 >
-	{#if onlyArrow}
-		<IconBackArrow />
-		<span class="visually-hidden">{$i18n.core.text.back}</span>
-	{:else}
-		<IconBack />
-		{$i18n.core.text.back}
-	{/if}
+	<IconBack />
+	<span class:visually-hidden={onlyArrow}>{$i18n.core.text.back}</span>
 </button>

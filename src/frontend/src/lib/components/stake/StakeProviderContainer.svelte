@@ -1,25 +1,24 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { stakeProvidersConfig } from '$lib/config/stake.config';
 	import { STAKE_PROVIDER_LOGO } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { StakeProvider } from '$lib/types/stake';
 	import { formatStakeApyNumber } from '$lib/utils/format.utils';
-	import { resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		provider: StakeProvider;
 		content: Snippet;
-		pageTitle: string;
+		pageTitle?: string;
+		pageDescription: string;
 		backButton?: Snippet;
-		currentApy?: number;
+		maxApy?: number;
+		logo?: string;
 	}
 
-	let { provider, content, backButton, pageTitle, currentApy }: Props = $props();
+	let { logo, pageDescription, content, backButton, pageTitle, maxApy }: Props = $props();
 </script>
 
 <StakeContentSection {content}>
@@ -31,30 +30,31 @@
 		{/if}
 
 		<div class="flex w-full flex-col items-center text-center">
-			<Logo
-				alt={stakeProvidersConfig[provider].name}
-				size="xl"
-				src={stakeProvidersConfig[provider].logo}
-				testId={STAKE_PROVIDER_LOGO}
-			/>
+			<Logo alt={pageTitle} size="xl" src={logo} testId={STAKE_PROVIDER_LOGO} />
 
 			<h2 class="my-2 text-xl font-bold sm:text-2xl">
 				{pageTitle}
 			</h2>
 
 			<div class="text-sm sm:text-base">
-				{resolveText({ i18n: $i18n, path: stakeProvidersConfig[provider].pageDescriptionKey })}
+				<Html text={pageDescription} />
 			</div>
 		</div>
 
-		{#if nonNullish(currentApy)}
+		{#if nonNullish(maxApy)}
 			<div
-				class="absolute top-0 right-0 flex flex-col items-center rounded-lg bg-success-subtle-20 px-1 py-1 text-center sm:px-3"
+				class="absolute top-0 right-0 flex flex-col items-center rounded-lg px-1 py-1 text-center sm:px-3"
+				class:bg-secondary={maxApy <= 0}
+				class:bg-success-subtle-20={maxApy > 0}
 				in:fade
 			>
-				<span class="text-xs">{$i18n.stake.text.current_apy_label}</span>
-				<span class="text-sm font-bold text-success-primary">
-					{formatStakeApyNumber(currentApy)}%
+				<span class="text-xs">{$i18n.stake.text.max_apy_label}</span>
+				<span
+					class="text-sm font-bold"
+					class:text-primary={maxApy <= 0}
+					class:text-success-primary={maxApy > 0}
+				>
+					{formatStakeApyNumber(maxApy)}%
 				</span>
 			</div>
 		{/if}

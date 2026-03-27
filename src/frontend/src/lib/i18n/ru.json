@@ -41,7 +41,11 @@
 			"more": "Больше",
 			"less": "Меньше",
 			"ellipsis": "…",
-			"learn_more": "Узнать больше"
+			"learn_more": "Узнать больше",
+			"sorting": "Сортировка",
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -176,7 +180,6 @@
 			"title_part_1": "Разблокируйте, чтобы продолжить",
 			"title_part_2": "Вы ранее заблокировали свой кошелёк для безопасности. Продолжите работу с того места, где остановились или выйдите из него.",
 			"unlock": "Разблокировать",
-			"unlock_with_legacy_login": "",
 			"logout": "Выйти из системы",
 			"logout_clear_cash_message": "Выйти и очистить сообщение об активах",
 			"learn_more": "Узнать больше"
@@ -206,15 +209,17 @@
 			"website": "Изображение $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Социальные сети",
-			"verifiable_credentials": "Verifiable credentials",
-			"staking": "Стейкинг",
-			"walletconnect": "WalletConnect",
-			"game": "Игра",
-			"tools": "Инструменты",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "ИИ",
-			"nft": "NFT"
+			"defi": "DeFi",
+			"game": "Игра",
+			"nft": "NFT",
+			"rwa": "",
+			"social_media": "Социальные сети",
+			"staking": "Стейкинг",
+			"tools": "Инструменты",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -347,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "Платформа для создания приложений с помощью ИИ",
-				"call_to_action": "Узнать больше",
 				"description": "Caffeine — платформа для создания приложений с помощью ИИ. Просто обратитесь к ИИ на компьютере или телефоне, и он создаст для вас приложения или сервисы, включая интеграцию с кошельком OISY. Почувствуйте будущее разработки с ИИ.",
 				"carousel": {
 					"text": "Меняйте токены на DEX",
@@ -404,6 +408,36 @@
 				"name": "Kamino",
 				"one_liner": "Kamino — крупнейший протокол заимствования и кредитования в сети Solana, обеспечивающий значительную долю активности DeFi в сети.",
 				"description": "Kamino — это децентрализованная финансовая (DeFi) платформа на блокчейне Solana, которая объединяет предоставление ликвидности, кредитование и торговлю с использованием заемных средств в единый набор продуктов. Она упрощает эти стратегии DeFi, особенно благодаря автоматизированным хранилищам ликвидности и системе Kamino Lend и использует концентрированное управление ликвидностью для повышения эффективности использования капитала для своих пользователей."
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -600,6 +634,7 @@
 			"no_infura_erc721_provider": "Нет поставщика Infura ERC721 для сети $network",
 			"no_infura_erc1155_provider": "Нет поставщика Infura ERC1155 для сети $network",
 			"no_infura_erc20_icp_provider": "Нет поставщика Infura ERC20 ICP для сети $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Нет сети Solana для сети $network",
 			"loading_address": "Ошибка при загрузке адреса $symbol.",
 			"loading_balance": "Ошибка при загрузке баланса $symbol для сети $network.",
@@ -618,8 +653,11 @@
 			"btc_withdrawal_statuses": "Ошибка при получении статусов вывода BTC.",
 			"transaction_price": "Ошибка при загрузке оценки стоимости транзакции.",
 			"icrc_canisters": "Ошибка при загрузке контейнеров ICRC.",
-			"icrc_canister_loading": "Токен $ledgerCanisterId не может быть загружен, поскольку он в настоящее время не отвечает.",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "Токен $tokenSymbol не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
+			"icrc_canister_loading_custom": "Токен с канистером леджера $ledgerCanisterId не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
 			"erc20_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-721.",
 			"erc1155_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-1155.",
 			"spl_custom_tokens": "Ошибка при загрузке пользовательских токенов SPL.",
@@ -627,6 +665,7 @@
 			"icrc_custom_token": "Ошибка при загрузке пользовательского токена ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "Вашему кошельку требуются некоторые начальные данные, которые еще не загружены. Пожалуйста, попробуйте еще раз.",
 			"allow_signing": "Проблема с настройкой вашего кошелька для подписи. Вы были выведены из системы. Если проблема не исчезнет, обратитесь в службу поддержки.",
 			"waiting_for_allowed_cycles_aborted": "Пожалуйста, попробуйте войти позже",
@@ -789,6 +828,7 @@
 	"send": {
 		"text": {
 			"send": "Отправить",
+			"send_token": "",
 			"destination": "Получатель",
 			"source": "Источник",
 			"balance": "Баланс",
@@ -992,6 +1032,9 @@
 			"loading_cketh_helper": "Ошибка при загрузке адреса вспомогательного контракта ckETH. Не инициализирован ни один идентификатор контейнера минтера.",
 			"unexpected": "Что-то пошло не так при обмене токенов.",
 			"unexpected_missing_data": "Что-то пошло не так при инициализации транзакции обмена."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Конвертация USDC из/в ckUSDC в настоящее время приостановлена."
 		}
 	},
 	"swap": {
@@ -1036,7 +1079,8 @@
 			"network_cost": "Комиссия за транзакцию",
 			"gasless": "Без комиссии за газ",
 			"swap_fees": "Комиссия за обмен",
-			"cross_chain_networks_info": "Информация о кросс-чейн сетях"
+			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
+			"near_intents_estimated_time": ""
 		},
 		"error": {
 			"kong_not_available": "Сейчас обмен недоступен. Попробуйте позже.",
@@ -1053,7 +1097,8 @@
 			"manually_withdraw_success": "Вывод прошел успешно",
 			"manually_withdraw_failed": "Вывод не удался",
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
-			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно"
+			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
+			"swap_completed_close_failed": ""
 		}
 	},
 	"buy": {
@@ -1114,7 +1159,16 @@
 			"hide_more_networks": "Скрыть больше сетей",
 			"on_network": " в сети $network",
 			"delete_token": "Удалить токен",
-			"edit_token": "Редактировать токен"
+			"edit_token": "Редактировать токен",
+			"sort_by_value": "Стоимость",
+			"sort_by_performance": "Динамика токена",
+			"sort_by_symbol": "Символ",
+			"hide_asset_types": "Скрыть типы активов",
+			"asset_type": "Тип актива в $oisy_name",
+			"asset_type_all": "Все типы активов",
+			"no_tokens_for_asset_type": "В вашем кошельке нет $asset_type",
+			"no_tokens_for_asset_type_zero_tokens": "В выбранной сети нет $asset_type",
+			"no_tokens_for_asset_type_description": "Выберите из <strong>$count поддерживаемых токенов</strong>, чтобы настроить отображение портфеля."
 		},
 		"details": {
 			"title": "Сведения о токене",
@@ -1231,6 +1285,7 @@
 			"unrecognised_erc_interface": "Неопознанный интерфейс ERC.",
 			"no_metadata": "Метаданные не были получены.",
 			"unexpected": "Что-то пошло не так при сохранении токена.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Что-то пошло не так при скрытии токена.",
 			"already_available": "Токен уже доступен.",
 			"not_toggleable": "Токен не переключаем, его нельзя скрыть.",
@@ -1239,6 +1294,23 @@
 			"unexpected_undefined": "Токен не определен. Это неожиданно.",
 			"unexpected_error_on_token_delete": "При удалении токена произошла ошибка.",
 			"unexpected_error_on_token_update": "При обновлении токена произошла ошибка."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Категория",
+			"risk": "Риск"
+		},
+		"category": {
+			"crypto": "Криптовалюты",
+			"stablecoin": "Стейблкоины",
+			"stock": "Акции",
+			"commodity": "Сырьевые товары"
+		},
+		"risk": {
+			"low": "Низкий риск",
+			"medium": "Средний риск",
+			"high": "Высокий риск"
 		}
 	},
 	"nfts": {
@@ -1253,7 +1325,6 @@
 			"by_collection": "По коллекции",
 			"show_spam": "Показывать спам",
 			"show_hidden": "Показать скрытое",
-			"sorting": "Сортировка",
 			"recents_first": "Сначала недавние",
 			"oldest_first": "Сначала последние",
 			"collection_atoz": "Коллекции от A до Z",
@@ -1469,8 +1540,6 @@
 		},
 		"label": {
 			"reimbursement": "Возмещение",
-			"twin_token_sent": "$twinToken отправлен",
-			"ck_token_sent": "$ckToken отправлен",
 			"twin_token_converted": "Обменяно из $twinToken",
 			"ck_token_converted": "Обменяно из $ckToken",
 			"sending_twin_token": "Отправка $twinToken",
@@ -1688,15 +1757,6 @@
 			"title": "Отсканировать QR-код"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Заголовок",
-			"description": "Описание",
-			"request_challenge": "Запросить Сhallenge",
-			"solve_challenge": "Разрешить Сhallenge",
-			"grant_cycles": "Предоставить Cycles"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1839,11 +1899,10 @@
 			"go_to_earn": "Перейти к Заработок"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "Зарабатывай с Gold",
-				"description": "Стейкайте GLDT для получения ежедневных наград в токенах управления, открывая пассивный доход от золотых запасов.",
-				"action": "Стейкать GLDT"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1853,6 +1912,8 @@
 		},
 		"card_fields": {
 			"apy": "APY",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "Застейкано",
 			"currentEarning": "Текущий заработок",
 			"earningPotential": "Потенциал дополнительного заработка",
@@ -1867,13 +1928,34 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Стейкайте токены GLDT для получения наград, обеспеченных физическим золотом",
-			"stake": "Стейкинг $token_symbol",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
+			"stake": "",
 			"stake_now": "Стейкать сейчас",
 			"stake_amount": "Сумма стейкинга $token_symbol",
 			"not_enough_to_stake": "Нет $token_symbol для стейкинга",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "Анстейк",
 			"unstake_now": "Анстейкнуть сейчас",
 			"unstaking": "Анстейкинг...",
@@ -1888,10 +1970,12 @@
 			"earning_potential_hint": "На основе стоимости ваших неинвестированных активов и самой высокой APY среди доступных возможностей заработка.",
 			"active_earning": "$amount/год",
 			"active_earning_per_year": "$amount/год",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "Доступно",
 			"invested_assets": "Выделено",
 			"visit_provider": "Посетить провайдера",
 			"current_apy_label": "Текущая APY",
+			"max_apy_label": "",
 			"stake_review_subtitle": "Вы стейкаете",
 			"unstake_review_subtitle": "Вы анстейкаете",
 			"delayed_dissolve": "Получить с задержкой",
@@ -1914,7 +1998,7 @@
 			"claim_now": "Забрать сейчас",
 			"claiming": "Запрос",
 			"get_tokens_with_amount": "Получить до $amount $token_symbol",
-			"get_tokens": "Получить $token_symbol",
+			"get_asset_tokens": "",
 			"reward_claimed": "Награда получена",
 			"staked": "Застейкано",
 			"unstaked": "Разстейкано",
@@ -1925,38 +2009,25 @@
 			"description_empty": "Похоже, вы ещё не стейкали токены.",
 			"full_history": "Показать полную историю",
 			"recent_history": "Скрыть полную историю",
-			"gldt_stake_carousel_slide_title": "Зарабатывай APY с Gold DAO Staking",
-			"gldt_stake_carousel_slide_cta": "Узнать больше о Gold DAO Staking"
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Что-то пошло не так при выводе токенов.",
 			"unexpected_error_on_unstake": "Что-то пошло не так при анстейкинге токенов.",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": "Достигнут максимум активных запросов на разблокировку ($limit). Завершите некоторые, прежде чем создавать новый.<br/>Обратите внимание: вы можете одновременно иметь до $limit активных запросов на разблокировку."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "Текущая APY $apy%",
-				"item1_description": "На основе последних наград. Эффективная APY зависит от общего количества стейканных $token каждый день.",
-				"item2_title_1": "Награды стейкинга в",
-				"item2_title_2": "GOLDAO Токены ",
-				"item3_title": "Задержка разблокировки 1 неделя",
-				"item3_description": "При разблокировке GLDT из стейкинга токены блокируются на 1 неделю без дальнейших наград, после чего их можно вывести.",
-				"item4_title": "Бонус за возраст",
-				"item4_description": "Стейки GLDT начинают получать бонус за возраст с 1-го дня. Чем дольше стейк, тем выше бонус, линейно растёт до 100% при максимальном возрасте.",
-				"item5_title": "Когда вы начинаете разблокировку GLDT-стейка, вы больше не будете получать новые награды."
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "Что такое GLDT",
-				"description": "GLDT — это «Gold Token», взаимозаменяемый токен, обеспеченный NFT GLD. NFT GLD — это NFT, представляющие неоспоримое владение физическим золотом.",
-				"fact_1_title": "Обеспечено реальным золотом",
-				"fact_1_description": "Каждый токен GLDT обеспечен настоящим золотом, хранящимся в защищённых хранилищах.",
-				"fact_2_title": "Гибкие сроки",
-				"fact_2_description": "Нет периодов блокировки, стейкайте и анстейкайте в любое время.",
-				"fact_3_title": "Стабильные доходы",
-				"fact_3_description": "Зарабатывайте $apy% APY с минимальным риском волатильности",
-				"fact_3_description_fallback": "Получайте стабильные награды с минимальным риском волатильности"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
@@ -1994,6 +2065,9 @@
 			"minute_plural": "минут",
 			"second": "секунда",
 			"second_plural": "секунд"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

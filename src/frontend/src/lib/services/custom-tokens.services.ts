@@ -23,7 +23,6 @@ const loadCustomTokensFromBackend = async ({
 }: LoadCustomTokensFromBackendParams): Promise<CustomToken[]> => {
 	const tokens = await listCustomTokens({
 		identity,
-		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 

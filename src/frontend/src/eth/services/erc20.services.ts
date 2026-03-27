@@ -21,6 +21,7 @@ import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20'
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token } from '$eth/utils/erc20.utils';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
@@ -28,6 +29,7 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
 import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
@@ -48,7 +50,7 @@ const ALL_DEFAULT_ERC20_TOKENS = [
 ];
 
 // TODO(GIX-2740): use environment static metadata
-const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
+export const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	try {
 		type ContractData = Erc20Contract &
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
@@ -90,6 +92,24 @@ export const loadCustomTokens = ({
 		onUpdateError,
 		identity
 	});
+
+export const safeLoadMetadata = async ({
+	networkId,
+	address
+}: {
+	networkId: NetworkId;
+	address: Erc20ContractAddress;
+}) => {
+	try {
+		// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
+		return await infuraErc20Providers(networkId).metadata({ address });
+	} catch (err: unknown) {
+		consoleError(
+			`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
+			err
+		);
+	}
+};
 
 const loadCustomTokensWithMetadata = async ({
 	tokens,
@@ -159,7 +179,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: ETHEREUM_DEFAULT_DECIMALS,
 					standard: { code: 'erc20' as const },
 					category: 'custom' as const,
-					exchange: 'erc20' as const,
+					tags: DEFAULT_TOKEN_TAGS,
 					enabled,
 					version,
 					allowExternalContentSource
@@ -171,24 +191,6 @@ const loadCustomTokensWithMetadata = async ({
 			},
 			[[], []]
 		);
-
-		const safeLoadMetadata = async ({
-			networkId,
-			address
-		}: {
-			networkId: NetworkId;
-			address: Erc20ContractAddress;
-		}) => {
-			try {
-				// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
-				return await infuraErc20Providers(networkId).metadata({ address });
-			} catch (err: unknown) {
-				console.error(
-					`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
-					err
-				);
-			}
-		};
 
 		const customTokens: Erc20CustomToken[] = await nonExistingTokens.reduce<
 			Promise<Erc20CustomToken[]>
@@ -228,4 +230,33 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.erc20_custom_tokens },
 		err
 	});
+};
+
+// ERC20 metadata is fetched from third-party APIs (Infura) that don't depend on
+// the IC certified flag. On the certified round we reuse the query round's response
+// to avoid redundant HTTP calls — only the store's certified tag is updated.
+let lastCustomTokensResponse: Erc20CustomToken[] | undefined;
+
+export const processCustomTokens = async ({
+	certified,
+	...rest
+}: LoadCustomTokenParams): Promise<void> => {
+	try {
+		if (certified && nonNullish(lastCustomTokensResponse)) {
+			loadCustomTokenData({ response: lastCustomTokensResponse, certified });
+
+			return;
+		}
+
+		const response = await loadCustomTokensWithMetadata({ ...rest, certified });
+		lastCustomTokensResponse = response;
+
+		loadCustomTokenData({ response, certified });
+	} catch (err: unknown) {
+		lastCustomTokensResponse = undefined;
+
+		if (certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };

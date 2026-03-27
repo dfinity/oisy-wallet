@@ -19,9 +19,13 @@ import {
 } from '@icp-sdk/canisters/ckbtc';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn()
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('ckbtc-minter.api', () => {
 	const canisterMock = mock<CkBtcMinterCanister>();
@@ -60,7 +64,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(retrieveBtc({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(retrieveBtc({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -87,7 +91,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(updateBalance({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(updateBalance({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -125,7 +129,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(minterInfo({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(minterInfo({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -150,7 +154,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getBtcAddress({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(getBtcAddress({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -206,7 +210,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(estimateFee({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(estimateFee({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -247,7 +251,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(withdrawalStatuses({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(withdrawalStatuses({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -274,7 +278,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getKnownUtxos({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(getKnownUtxos({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 });

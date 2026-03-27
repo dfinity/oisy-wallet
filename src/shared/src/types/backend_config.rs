@@ -30,7 +30,7 @@ pub enum Arg {
 pub struct Config {
     pub ecdsa_key_name: String,
     // A list of allowed callers to restrict access to endpoints that do not particularly check or
-    // use the caller()
+    // use the msg_caller()
     pub allowed_callers: Vec<Principal>,
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.

@@ -8,6 +8,7 @@ import type {
 } from '$eth/types/alchemy-contract';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { Erc721Metadata } from '$eth/types/erc721';
+import type { EthereumChainId } from '$eth/types/network';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import { i18n } from '$lib/stores/i18n.store';
@@ -25,7 +26,6 @@ import {
 	Alchemy,
 	AlchemySubscription,
 	NftOrdering,
-	type AlchemyEventType,
 	type Nft as AlchemyNft,
 	type AlchemySettings,
 	type Network,
@@ -35,18 +35,22 @@ import {
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
+import { createPublicClient, http, isHash, type Chain, type PublicClient } from 'viem';
 
-type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
+type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'> & {
+	wssUrl: string;
+};
 
 const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyConfig>>(
-	(acc, { id, providers: { alchemy: _, alchemyDeprecated } }) => ({
+	(acc, { id, providers: { alchemy: _, alchemyDeprecated, alchemyWsUrl } }) => ({
 		...acc,
 		[id]: {
 			apiKey: ALCHEMY_API_KEY,
-			network: alchemyDeprecated
+			network: alchemyDeprecated,
+			wssUrl: `${alchemyWsUrl}/${ALCHEMY_API_KEY}`
 		}
 	}),
 	{}
@@ -65,6 +69,102 @@ const alchemyConfig = (networkId: NetworkId): AlchemyConfig => {
 	return provider;
 };
 
+interface EthSubscriptionEnvelope<T> {
+	jsonrpc: '2.0';
+	method: 'eth_subscription';
+	params: { subscription: string; result: T };
+}
+
+interface JsonRpcResponse {
+	jsonrpc: '2.0';
+	id: number;
+	result?: unknown;
+	error?: { code: number; message: string };
+}
+
+interface MinedTxEvent {
+	removed?: boolean;
+	transaction: { hash: string };
+}
+
+type PendingTxEvent =
+	| string
+	| { removed?: boolean; transaction: { hash: string } }
+	| { hash: string };
+
+/**
+ * Generic eth_subscribe wrapper for Alchemy (and other WS JSON-RPC providers).
+ * Returns a disconnect() that unsubscribes + closes the socket.
+ */
+const subscribeAlchemyWs = <T>({
+	wssUrl,
+	params,
+	onEvent
+}: {
+	wssUrl: string;
+	params: object;
+	onEvent: (event: T) => void | Promise<void>;
+}): WebSocketListener => {
+	const ws = new WebSocket(wssUrl);
+
+	let subscriptionId: string | null = null;
+	let requestId = 1;
+
+	const send = (payload: object) => {
+		if (ws.readyState === WebSocket.OPEN) {
+			ws.send(JSON.stringify(payload));
+		}
+	};
+
+	const onOpen = () => {
+		send({
+			jsonrpc: '2.0',
+			id: requestId++,
+			method: 'eth_subscribe',
+			params
+		});
+	};
+
+	const onMessage = async (event: MessageEvent<string>) => {
+		const msg = JSON.parse(event.data) as JsonRpcResponse | EthSubscriptionEnvelope<T>;
+
+		// subscribe ack
+		if ('id' in msg) {
+			if (typeof msg.result === 'string') {
+				subscriptionId = msg.result;
+			}
+			return;
+		}
+
+		// events
+		if (msg.method === 'eth_subscription') {
+			await onEvent(msg.params.result);
+		}
+	};
+
+	// use addEventListener so removeEventListener works
+	ws.addEventListener('open', onOpen);
+	ws.addEventListener('message', onMessage);
+
+	return {
+		// eslint-disable-next-line require-await
+		disconnect: async () => {
+			if (subscriptionId && ws.readyState === WebSocket.OPEN) {
+				send({
+					jsonrpc: '2.0',
+					id: requestId++,
+					method: 'eth_unsubscribe',
+					params: [subscriptionId]
+				});
+			}
+			ws.removeEventListener('message', onMessage);
+			ws.removeEventListener('open', onOpen);
+			ws.close();
+			subscriptionId = null;
+		}
+	};
+};
+
 export const initMinedTransactionsListener = ({
 	listener,
 	networkId,
@@ -73,27 +173,18 @@ export const initMinedTransactionsListener = ({
 	listener: Listener;
 	networkId: NetworkId;
 	toAddress?: EthAddress;
-}): WebSocketListener => {
-	let provider: Alchemy | null = new Alchemy(alchemyConfig(networkId));
-
-	const event: AlchemyEventType = {
-		method: AlchemySubscription.MINED_TRANSACTIONS,
-		hashesOnly: true,
-		addresses: nonNullish(toAddress) ? [{ to: toAddress }] : undefined
-	};
-
-	provider.ws.on(event, listener);
-
-	return {
-		// eslint-disable-next-line require-await
-		disconnect: async () => {
-			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have the effect of doubling the triggers. That's why we reset it to null.
-			provider?.ws.off(event);
-			provider?.ws.removeAllListeners();
-			provider = null;
-		}
-	};
-};
+}): WebSocketListener =>
+	subscribeAlchemyWs<MinedTxEvent>({
+		wssUrl: alchemyConfig(networkId).wssUrl,
+		params: [
+			AlchemySubscription.MINED_TRANSACTIONS,
+			{
+				hashesOnly: true,
+				addresses: nonNullish(toAddress) ? [{ to: toAddress }] : undefined
+			}
+		],
+		onEvent: listener
+	});
 
 export const initPendingTransactionsListener = ({
 	toAddress,
@@ -105,27 +196,18 @@ export const initPendingTransactionsListener = ({
 	listener: Listener;
 	networkId: NetworkId;
 	hashesOnly?: boolean;
-}): WebSocketListener => {
-	let provider: Alchemy | null = new Alchemy(alchemyConfig(networkId));
-
-	const event: AlchemyEventType = {
-		method: AlchemySubscription.PENDING_TRANSACTIONS,
-		toAddress,
-		hashesOnly
-	};
-
-	provider.ws.on(event, listener);
-
-	return {
-		// eslint-disable-next-line require-await
-		disconnect: async () => {
-			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have the effect of doubling the triggers. That's why we reset it to null.
-			provider?.ws.off(event);
-			provider?.ws.removeAllListeners();
-			provider = null;
-		}
-	};
-};
+}): WebSocketListener =>
+	subscribeAlchemyWs<PendingTxEvent>({
+		wssUrl: alchemyConfig(networkId).wssUrl,
+		params: [
+			AlchemySubscription.PENDING_TRANSACTIONS,
+			{
+				toAddress,
+				hashesOnly
+			}
+		],
+		onEvent: listener
+	});
 
 const cachedNftMetadata = new SvelteMap<
 	Network,
@@ -181,6 +263,10 @@ const cachedContractMetadata = new SvelteMap<
 	SvelteMap<EthAddress, Erc1155Metadata | Erc721Metadata>
 >();
 
+// Prevents concurrent API calls for the same contract (thundering herd).
+// While a request is in-flight, subsequent callers receive the same promise.
+const inFlightContractMetadata = new Map<string, Promise<Erc1155Metadata | Erc721Metadata>>();
+
 const getCachedContractMetadata = ({
 	network,
 	address
@@ -213,18 +299,41 @@ const updateCachedContractMetadata = ({
 };
 
 export class AlchemyProvider {
+	private readonly provider: PublicClient;
 	/**
 	 * TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
 	 * @deprecated This approach works for now but does not align with the new architectural requirements.
 	 */
 	private readonly deprecatedProvider: Alchemy;
 
-	constructor(private readonly network: Network) {
+	constructor(
+		private readonly network: Network,
+		private readonly viemChain: Chain,
+		private readonly alchemyJsonRpcUrl: string,
+		private readonly chainId: EthereumChainId
+	) {
 		this.deprecatedProvider = new Alchemy({
 			apiKey: ALCHEMY_API_KEY,
 			network: this.network
 		});
+
+		// The `ethers` library is currently not accepting the BSC network, so we cannot use it as a provider for all our networks.
+		// There is an issue open with `ethers` to add support for BSC: https://github.com/ethers-io/ethers.js/issues/5040
+		// We decided to add `viem` instead which can be used for all EVM networks, in the meanwhile.
+		// TODO: Rely on a single library for the provider, and remove the deprecated one.
+		this.provider = createPublicClient({
+			chain: this.viemChain,
+			transport: http(`${this.alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`)
+		});
 	}
+
+	wait = async (hash: string) => {
+		if (!isHash(hash)) {
+			throw new Error(`Invalid transaction hash while waiting for transaction receipt: ${hash}`);
+		}
+
+		await this.provider.waitForTransactionReceipt({ hash });
+	};
 
 	private mapNftFromRpc = async ({
 		nft: {
@@ -278,20 +387,25 @@ export class AlchemyProvider {
 	};
 
 	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
-		const transaction = await this.deprecatedProvider.core.getTransaction(hash);
+		if (!isHash(hash)) {
+			throw new Error(`Invalid transaction hash while fetching transaction details: ${hash}`);
+		}
+
+		const transaction = await this.provider.getTransaction({ hash });
 
 		if (isNullish(transaction)) {
 			return transaction;
 		}
 
-		const { value, gasLimit, gasPrice, chainId, ...rest } = transaction;
+		const { to, blockNumber, gas: gasLimit, input: data, ...rest } = transaction;
 
 		return {
 			...rest,
-			value: value.toBigInt(),
-			gasLimit: gasLimit.toBigInt(),
-			gasPrice: gasPrice?.toBigInt(),
-			chainId: BigInt(chainId)
+			gasLimit,
+			data,
+			to: to ?? undefined,
+			blockNumber: Number(blockNumber),
+			chainId: this.chainId
 		};
 	};
 
@@ -407,6 +521,28 @@ export class AlchemyProvider {
 			return cachedMetadata;
 		}
 
+		const cacheKey = `${this.network}:${address}`;
+
+		const inFlight = inFlightContractMetadata.get(cacheKey);
+
+		if (nonNullish(inFlight)) {
+			return inFlight;
+		}
+
+		const promise = this.fetchContractMetadata(address);
+
+		inFlightContractMetadata.set(cacheKey, promise);
+
+		try {
+			return await promise;
+		} finally {
+			inFlightContractMetadata.delete(cacheKey);
+		}
+	};
+
+	private fetchContractMetadata = async (
+		address: EthAddress
+	): Promise<Erc1155Metadata | Erc721Metadata> => {
 		const result: AlchemyProviderContract =
 			await this.deprecatedProvider.nft.getContractMetadata(address);
 
@@ -452,9 +588,9 @@ const providers: Record<NetworkId, AlchemyProvider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyProvider>>(
-	(acc, { id, providers: { alchemy: _, alchemyDeprecated } }) => ({
+	(acc, { id, chainId, providers: { alchemyDeprecated, viemChain, alchemyJsonRpcUrl } }) => ({
 		...acc,
-		[id]: new AlchemyProvider(alchemyDeprecated)
+		[id]: new AlchemyProvider(alchemyDeprecated, viemChain, alchemyJsonRpcUrl, chainId)
 	}),
 	{}
 );

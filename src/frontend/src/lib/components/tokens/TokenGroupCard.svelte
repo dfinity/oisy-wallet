@@ -7,6 +7,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenGroupStore } from '$lib/stores/token-group.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -17,6 +18,8 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
+	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
+	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		tokenGroup: TokenUiGroup;
@@ -41,46 +44,61 @@
 	const showTokenInGroup = (token: TokenUi) => token.neverCollapseInTokenGroup;
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
 
-	// list of filtered tokens, filtered by string input
+	const categoryFilteredTokens: TokenUi[] = $derived(
+		$showTokenCategoryFilter
+			? filterTokensUiByCategory({
+					tokens: tokenGroup.tokens,
+					category: $tokenCategoryFilter
+				})
+			: tokenGroup.tokens
+	);
+
 	const filteredTokens: TokenUi[] = $derived(
 		getFilteredTokenGroup({
 			filter: $tokenListStore.filter,
-			list: tokenGroup.tokens
+			list: categoryFilteredTokens
 		})
 	);
+
+	const totalUsdBalance: number = $derived(sumTokensUiUsdBalance(filteredTokens));
+
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
+	const compareTokens = (a: TokenUi, b: TokenUi): number => {
+		// Highest balance first
+		const usdBalanceDiff = (b.usdBalance ?? 0) - (a.usdBalance ?? 0);
+		if (usdBalanceDiff !== 0) {
+			return usdBalanceDiff;
+		}
+
+		// If same balance, order by showTokenInGroup (neverCollapseInTokenGroup) > CK > others
+		if (showTokenInGroup(a) !== showTokenInGroup(b)) {
+			return showTokenInGroup(a) ? -1 : 1;
+		}
+		if (isCkToken(a) !== isCkToken(b)) {
+			return isCkToken(a) ? -1 : 1;
+		}
+
+		return 0;
+	};
+
+	const sortedFilteredTokens: TokenUi[] = $derived([...filteredTokens].sort(compareTokens));
 
 	// list of tokens that should display with a "show more" button for not displayed ones
 	const truncatedTokens: TokenUi[] = $derived(
-		filteredTokens.filter((token) => {
-			const totalBalance = filteredTokens.reduce((p, c) => p + (c.usdBalance ?? 0), 0);
-			// Only include tokens with a balance
-			return (
+		sortedFilteredTokens.filter(
+			(token) =>
+				// Only include tokens with a balance
 				(token.usdBalance ?? 0) > 0 ||
 				// If the total balance is 0, show all
-				totalBalance === 0
-			);
-		})
+				totalUsdBalance === 0
+		)
 	);
 
-	// Show all if hideZeros = false and sort
-	const tokensToShow: TokenUi[] = $derived(
-		(hideZeros ? truncatedTokens : filteredTokens).sort((a, b) => {
-			const balanceA = a.usdBalance ?? 0;
-			const balanceB = b.usdBalance ?? 0;
-			// higher balances show first
-			if (balanceA > balanceB) {
-				return -1;
-			}
-			if (balanceA < balanceB) {
-				return 1;
-			}
-			// if same balance order by Native > CK > others
-			return showTokenInGroup(a) ? -1 : isCkToken(a) && !showTokenInGroup(b) ? -1 : 1;
-		})
-	);
+	// Show all if hideZeros = false
+	const tokensToShow: TokenUi[] = $derived(hideZeros ? truncatedTokens : sortedFilteredTokens);
 
 	// Count tokens that are not displayed
-	const notDisplayedCount: number = $derived(filteredTokens.length - tokensToShow.length);
+	const notDisplayedCount: number = $derived(sortedFilteredTokens.length - tokensToShow.length);
 </script>
 
 <div class="flex flex-col" class:bg-primary={isExpanded}>
@@ -89,7 +107,7 @@
 			data={{
 				...headerData,
 				tokenCount: filteredTokens.length,
-				networks: filteredTokens.map((t) => t.network)
+				networks: sortedFilteredTokens.map((t) => t.network)
 			}}
 			onClick={() => toggleIsExpanded(!isExpanded)}
 			testIdPrefix={TOKEN_GROUP}

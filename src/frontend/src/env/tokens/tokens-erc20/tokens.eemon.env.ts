@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { EEMON_TOKEN_GROUP } from '$env/tokens/groups/groups.eemon.env';
 import iSharesPurple from '$eth/assets/ishares_purple.webp';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,11 +17,11 @@ export const EEMON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'iShares MSCI Emerging Markets ETF (Ondo Tokenized)',
 	symbol: EEMON_SYMBOL,
 	decimals: EEMON_DECIMALS,
 	icon: iSharesPurple,
 	address: '0x77A1a02e4a888ADA8620b93C30dE8a41E621126c',
-	exchange: 'erc20',
 	groupData: EEMON_TOKEN_GROUP
 };

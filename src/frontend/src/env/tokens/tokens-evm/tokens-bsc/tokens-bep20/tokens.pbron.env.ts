@@ -2,6 +2,7 @@ import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc
 import { PBRON_TOKEN_GROUP } from '$env/tokens/groups/groups.pbron.env';
 import pbron from '$eth/assets/pbron.webp';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,11 +17,11 @@ export const PBRON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Petrobras (Ondo Tokenized)',
 	symbol: PBRON_SYMBOL,
 	decimals: PBRON_DECIMALS,
 	icon: pbron,
 	address: '0x2b1d5cDeCC356530a746C5754231EfaEAca64022',
-	exchange: 'erc20',
 	groupData: PBRON_TOKEN_GROUP
 };

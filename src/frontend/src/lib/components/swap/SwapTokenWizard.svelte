@@ -9,7 +9,8 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isNetworkIdICP } from '$lib/utils/network.utils';
+	import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -54,7 +55,11 @@
 		manualPause = false;
 	};
 
-	let shouldPause = $derived(manualPause || currentStep?.name === WizardStepsSwap.SWAPPING);
+	let shouldPause = $derived(
+		manualPause ||
+			currentStep?.name === WizardStepsSwap.REVIEW ||
+			currentStep?.name === WizardStepsSwap.SWAPPING
+	);
 </script>
 
 <SwapAmountsContext
@@ -81,6 +86,22 @@
 			bind:slippageValue
 			bind:swapProgressStep
 		/>
+	{:else if isNetworkIdSolana($sourceToken.network.id)}
+		<SwapSolWizard
+			{currentStep}
+			{isSwapAmountsLoading}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onShowProviderList}
+			{onShowTokensList}
+			{onStartTriggerAmount}
+			{onStopTriggerAmount}
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+			bind:swapProgressStep
+		/>
 	{:else}
 		<SwapEthWizard
 			{currentStep}
@@ -88,6 +109,7 @@
 			{onBack}
 			{onClose}
 			{onNext}
+			{onShowProviderList}
 			{onShowTokensList}
 			{onStartTriggerAmount}
 			{onStopTriggerAmount}

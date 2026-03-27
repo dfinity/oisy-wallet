@@ -1,5 +1,4 @@
 import { agreementsData } from '$env/agreements.env';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { updateUserAgreements } from '$lib/api/backend.api';
 import { acceptAgreements } from '$lib/services/user-agreements.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -9,15 +8,20 @@ import type { AgreementsToAccept } from '$lib/types/user-agreements';
 import * as eventsUtils from '$lib/utils/events.utils';
 import { emit } from '$lib/utils/events.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/backend.api', () => ({
 	updateUserAgreements: vi.fn()
 }));
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn().mockReturnValue(123_456_789n)
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn().mockReturnValue(123_456_789n)
+	};
+});
 
 describe('user-agreements.services', () => {
 	describe('acceptAgreements', () => {

@@ -1,4 +1,5 @@
 import * as exchangeEnv from '$env/exchange.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import {
 	ARBITRUM_ETH_TOKEN_ID,
@@ -32,8 +33,11 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
+import { ERC20_ICP_ADDRESS, ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
+import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -50,6 +54,7 @@ import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SplToken } from '$sol/types/spl';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -231,6 +236,9 @@ describe('exchange.derived', () => {
 			erc20DefaultTokensStore.reset();
 			erc20CustomTokensStore.resetAll();
 
+			erc4626DefaultTokensStore.reset();
+			erc4626CustomTokensStore.resetAll();
+
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
 
@@ -382,10 +390,31 @@ describe('exchange.derived', () => {
 			});
 		});
 
+		it('should return values for ERC4626 tokens', () => {
+			const mockErc4626TokenPrice = { usd: 99.99 };
+
+			erc4626DefaultTokensStore.set([mockValidErc4626Token]);
+			erc4626CustomTokensStore.setAll([
+				{ data: { ...mockValidErc4626Token, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ [mockValidErc4626Token.address.toLowerCase()]: mockErc4626TokenPrice }]);
+
+			const result = get(exchanges);
+
+			expect(result?.[mockValidErc4626Token.id]).toEqual(mockErc4626TokenPrice);
+		});
+
 		it('should return values for ERC20 token ICP', () => {
 			erc20CustomTokensStore.setAll([
 				{
-					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true },
+					data: {
+						...mockErc20DefaultToken,
+						symbol: ERC20_ICP_SYMBOL,
+						address: ERC20_ICP_ADDRESS,
+						network: ETHEREUM_NETWORK,
+						enabled: true
+					},
 					certified: false
 				}
 			]);
@@ -448,6 +477,83 @@ describe('exchange.derived', () => {
 				[mockCkEthToken.id]: undefined,
 				...expectedNullishExchangesIcrc
 			});
+		});
+
+		it('should fallback to solana price for ICRC tokens with solana exchangeCoinId', () => {
+			const mockSolToken: IcCkToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('CkSolTokenId'),
+				exchangeCoinId: 'solana' as const,
+				ledgerCanisterId: 'mock-sol-ledger'
+			};
+
+			icrcDefaultTokensStore.set({ data: mockSolToken, certified: false });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockSolToken, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ solana: solPrice }]);
+
+			expect(get(exchanges)?.[mockSolToken.id]).toEqual(solPrice);
+		});
+
+		it('should fallback to icp price for ICRC tokens with internet-computer exchangeCoinId', () => {
+			const mockIcpCkToken: IcCkToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('CkIcpTokenId'),
+				exchangeCoinId: 'internet-computer' as const,
+				ledgerCanisterId: 'mock-icp-ledger'
+			};
+
+			icrcDefaultTokensStore.set({ data: mockIcpCkToken, certified: false });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockIcpCkToken, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ 'internet-computer': icpPrice }]);
+
+			expect(get(exchanges)?.[mockIcpCkToken.id]).toEqual(icpPrice);
+		});
+
+		it('should return undefined for ICRC tokens with unknown exchangeCoinId', () => {
+			const mockUnknownToken: IcCkToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('UnknownCoinId'),
+				// @ts-expect-error we test this on purpose
+				exchangeCoinId: 'unknown-coin',
+				ledgerCanisterId: 'mock-unknown-ledger'
+			};
+
+			icrcDefaultTokensStore.set({ data: mockUnknownToken, certified: false });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockUnknownToken, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ ethereum: ethPrice }]);
+
+			const result = get(exchanges);
+
+			expect(result).toBeDefined();
+			expect(result[mockUnknownToken.id]).toBeUndefined();
+		});
+
+		it('should use ethPrice for ICRC token with ethereum exchangeCoinId and no twin token address', () => {
+			const mockCkEthNoTwin: IcCkToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('CkEthNoTwinTokenId'),
+				exchangeCoinId: 'ethereum' as const,
+				ledgerCanisterId: 'mock-no-twin-ledger',
+				twinToken: undefined
+			};
+
+			icrcDefaultTokensStore.set({ data: mockCkEthNoTwin, certified: false });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockCkEthNoTwin, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ ethereum: ethPrice }]);
+
+			expect(get(exchanges)?.[mockCkEthNoTwin.id]).toEqual(ethPrice);
 		});
 
 		it('should fallback to twin tokens for ICRC tokens when possible', () => {
