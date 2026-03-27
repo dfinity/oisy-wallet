@@ -7,6 +7,33 @@ use crate::{
 
 pub const SHA256_HEX_LENGTH: usize = 64;
 
+/// Identifies which agreement a history entry refers to.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum AgreementType {
+    LicenseAgreement,
+    TermsOfUse,
+    PrivacyPolicy,
+}
+
+/// A single audit-trail entry recording that a user accepted (or rejected) a specific agreement
+/// version at a point in time.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct AgreementHistoryEntry {
+    pub agreement_type: AgreementType,
+    pub accepted: bool,
+    /// Canister timestamp (nanos since epoch) when this action was recorded.
+    pub timestamp_ns: Timestamp,
+    /// SHA256 hash of the agreement text the user was shown, if provided.
+    pub text_sha256: Option<String>,
+    /// Document-version timestamp (millis since epoch) of the agreement the user acted on.
+    pub last_updated_at_ms: Option<Timestamp>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetAgreementHistoryError {
+    UserNotFound,
+}
+
 /// Per-agreement status/metadata.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct UserAgreement {

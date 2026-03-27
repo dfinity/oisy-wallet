@@ -111,10 +111,10 @@ const loadEthTransactions = async ({
 			: 0;
 
 		const { transactions: transactionsProvider } = etherscanProviders(networkId);
-		const newTransactions = await transactionsProvider({ address, startBlock });
+		const newTransactions = await transactionsProvider({ address, startBlock, sort: 'desc' });
 
-		// Combine: stored transactions + newly fetched ones
-		const allTransactions = [...(stored?.transactions ?? []), ...newTransactions];
+		// Combine newest-first: new transactions (desc) then stored (desc from backend)
+		const allTransactions = [...newTransactions, ...(stored?.transactions ?? [])];
 
 		const certifiedTransactions = allTransactions.map((transaction) => ({
 			data: transaction,

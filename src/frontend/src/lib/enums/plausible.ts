@@ -11,7 +11,8 @@ export enum PLAUSIBLE_EVENTS {
 	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help',
 	RATE_LIMITED = 'rate_limited',
 	STAKE = 'stake',
-	UNSTAKE = 'unstake'
+	UNSTAKE = 'unstake',
+	LOAD_TRANSACTIONS = 'load_transactions'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -21,7 +22,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	TOKENS = 'tokens',
 	DFX = 'dfx',
 	OPEN_CRYPTOPAY = 'open_cryptopay',
-	EARN = 'earn'
+	EARN = 'earn',
+	TRANSACTIONS = 'transactions'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -40,6 +42,10 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
 	PER_USER = 'per_user',
 	GLOBAL = 'global'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
+	UNCERTIFIED_REMOVED = 'uncertified_removed'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {

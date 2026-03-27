@@ -10,10 +10,13 @@ import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
 import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
-import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -21,7 +24,6 @@ import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
-import { get } from 'svelte/store';
 
 const getTransactions = async ({
 	token: { standard, indexCanisterId },
@@ -115,12 +117,22 @@ export const onLoadTransactionsError = ({
 	});
 };
 
-export const onTransactionsCleanUp = (data: { tokenId: TokenId; transactionIds: string[] }) => {
-	icTransactionsStore.cleanUp(data);
+export const onTransactionsCleanUp = ({
+	tokenId,
+	transactionIds
+}: {
+	tokenId: TokenId;
+	transactionIds: string[];
+}) => {
+	icTransactionsStore.cleanUp({ tokenId, transactionIds });
 
-	toastsError({
-		msg: {
-			text: get(i18n).transactions.error.uncertified_transactions_removed
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.LOAD_TRANSACTIONS,
+		metadata: {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS,
+			event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.UNCERTIFIED_REMOVED,
+			token_id: `${tokenId.description}`,
+			removed_count: `${transactionIds.length}`
 		}
 	});
 };

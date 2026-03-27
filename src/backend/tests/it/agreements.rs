@@ -4,8 +4,8 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
     agreement::{
-        UpdateAgreementsError, UpdateUserAgreementsRequest, UserAgreement, UserAgreements,
-        SHA256_HEX_LENGTH,
+        AgreementHistoryEntry, AgreementType, GetAgreementHistoryError, UpdateAgreementsError,
+        UpdateUserAgreementsRequest, UserAgreement, UserAgreements, SHA256_HEX_LENGTH,
     },
     user_profile::{GetUserProfileError, UserProfile},
     Timestamp, Version,
@@ -439,4 +439,223 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
     );
 
     assert_invalid_sha256(&pic_setup, caller, profile.version, "");
+}
+
+// ---------------------------------------------------------------------------
+// Agreement history audit trail
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_get_agreement_history_returns_error_for_missing_profile() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let result = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap();
+
+    assert_eq!(result, Err(GetAgreementHistoryError::UserNotFound));
+}
+
+#[test]
+fn test_get_agreement_history_returns_empty_for_new_user() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    assert!(history.is_empty());
+}
+
+#[test]
+fn test_agreement_history_records_single_acceptance() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    let sha = "a".repeat(SHA256_HEX_LENGTH);
+    let arg = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: UserAgreements {
+            license_agreement: UserAgreement {
+                accepted: Some(true),
+                text_sha256: Some(sha.clone()),
+                last_updated_at_ms: Some(1_700_000_000_000),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+    };
+
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg)
+        .unwrap()
+        .unwrap();
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(history.len(), 1);
+    assert_eq!(history[0].agreement_type, AgreementType::LicenseAgreement);
+    assert!(history[0].accepted);
+    assert_eq!(history[0].text_sha256, Some(sha));
+    assert_eq!(history[0].last_updated_at_ms, Some(1_700_000_000_000));
+    assert!(history[0].timestamp_ns > 0);
+}
+
+#[test]
+fn test_agreement_history_records_multiple_agreements_at_once() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    let arg = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: UserAgreements {
+            license_agreement: UserAgreement {
+                accepted: Some(true),
+                ..Default::default()
+            },
+            terms_of_use: UserAgreement {
+                accepted: Some(true),
+                ..Default::default()
+            },
+            privacy_policy: UserAgreement {
+                accepted: Some(false),
+                ..Default::default()
+            },
+        },
+    };
+
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg)
+        .unwrap()
+        .unwrap();
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(history.len(), 3);
+    assert_eq!(history[0].agreement_type, AgreementType::LicenseAgreement);
+    assert!(history[0].accepted);
+    assert_eq!(history[1].agreement_type, AgreementType::TermsOfUse);
+    assert!(history[1].accepted);
+    assert_eq!(history[2].agreement_type, AgreementType::PrivacyPolicy);
+    assert!(!history[2].accepted);
+}
+
+#[test]
+fn test_agreement_history_accumulates_across_updates() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    let arg1 = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: INITIAL_AGREEMENTS.clone(),
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg1)
+        .unwrap()
+        .unwrap();
+
+    let user_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    let arg2 = UpdateUserAgreementsRequest {
+        current_user_version: user_profile.version,
+        agreements: NEW_AGREEMENTS.clone(),
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg2)
+        .unwrap()
+        .unwrap();
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    // First update: license_agreement accepted (1 entry)
+    // Second update: terms_of_use accepted + privacy_policy rejected (2 entries)
+    assert_eq!(history.len(), 3);
+    assert_eq!(history[0].agreement_type, AgreementType::LicenseAgreement);
+    assert!(history[0].accepted);
+    assert_eq!(history[1].agreement_type, AgreementType::TermsOfUse);
+    assert!(history[1].accepted);
+    assert_eq!(history[2].agreement_type, AgreementType::PrivacyPolicy);
+    assert!(!history[2].accepted);
+}
+
+#[test]
+fn test_agreement_history_not_recorded_when_no_change() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    // Send empty agreements (accepted: None for all) — no change expected
+    let arg = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: EMPTY_AGREEMENTS.clone(),
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg)
+        .unwrap()
+        .unwrap();
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    assert!(history.is_empty());
 }

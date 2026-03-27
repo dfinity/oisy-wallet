@@ -353,7 +353,8 @@ describe('eth-transactions.services', () => {
 
 				expect(mockEthTransactionsProvider).toHaveBeenCalledWith({
 					address: mockEthAddress,
-					startBlock: 0
+					startBlock: 0,
+					sort: 'desc'
 				});
 			});
 
@@ -380,7 +381,8 @@ describe('eth-transactions.services', () => {
 
 				expect(mockEthTransactionsProvider).toHaveBeenCalledWith({
 					address: mockEthAddress,
-					startBlock: 101
+					startBlock: 101,
+					sort: 'desc'
 				});
 			});
 
@@ -412,7 +414,7 @@ describe('eth-transactions.services', () => {
 				assertNonNullish(transactionStore);
 
 				expect(transactionStore[mockTokenId]).toEqual(
-					[...storedTransactions, ...newTransactions].map((data) => ({
+					[...newTransactions, ...storedTransactions].map((data) => ({
 						data,
 						certified: false
 					}))
