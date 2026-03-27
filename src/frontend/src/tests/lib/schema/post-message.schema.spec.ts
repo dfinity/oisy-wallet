@@ -801,6 +801,7 @@ describe('post-message.schema', () => {
 
 		it('should validate with a valid response msg and data matching dataSchema', () => {
 			const validPayload = {
+				ref: validRef,
 				msg: validResponseMsg,
 				data: validData
 			};
@@ -821,6 +822,7 @@ describe('post-message.schema', () => {
 			const validData = { error: 'mock-error' };
 
 			const validPayload = {
+				ref: validRef,
 				msg: validResponseMsg,
 				data: validData
 			};
@@ -833,6 +835,7 @@ describe('post-message.schema', () => {
 			const validData = {};
 
 			const validPayload = {
+				ref: validRef,
 				msg: validResponseMsg,
 				data: validData
 			};
@@ -843,8 +846,7 @@ describe('post-message.schema', () => {
 		it('should validate with a valid ref', () => {
 			const validPayload = {
 				msg: validRequestMsg,
-				data: validData,
-				ref: validRef
+				data: validData
 			};
 
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
@@ -865,10 +867,30 @@ describe('post-message.schema', () => {
 			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
 		});
 
+		it('should throw an error if ref does not match string', () => {
+			const invalidPayload = {
+				ref: 987,
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+
 		it('should throw an error if data does not match dataSchema', () => {
 			const invalidPayload = {
 				msg: validRequestMsg,
 				data: { additionalInfo: 123 }
+			};
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+
+		it('should throw an error if ref is present with a request', () => {
+			const invalidPayload = {
+				ref: validRef,
+				msg: validRequestMsg,
+				data: validData
 			};
 
 			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
@@ -888,6 +910,7 @@ describe('post-message.schema', () => {
 
 		it('should validate with a valid response msg and data matching dataSchema', () => {
 			const validPayload = {
+				ref: validRef,
 				msg: validResponseMsg,
 				data: validData
 			};
@@ -900,6 +923,7 @@ describe('post-message.schema', () => {
 			const validData = { error: 'mock-error' };
 
 			const validPayload = {
+				ref: validRef,
 				msg: validResponseMsg,
 				data: validData
 			};
@@ -912,6 +936,7 @@ describe('post-message.schema', () => {
 			const validData = {};
 
 			const validPayload = {
+				ref: validRef,
 				msg: validResponseMsg,
 				data: validData
 			};
@@ -921,9 +946,9 @@ describe('post-message.schema', () => {
 
 		it('should validate with a valid ref', () => {
 			const validPayload = {
+				ref: validRef,
 				msg: validResponseMsg,
-				data: validData,
-				ref: validRef
+				data: validData
 			};
 
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
@@ -931,6 +956,7 @@ describe('post-message.schema', () => {
 
 		it('should throw with a request msg and no data (data is optional)', () => {
 			const validPayload = {
+				ref: validRef,
 				msg: validRequestMsg
 			};
 
@@ -939,6 +965,7 @@ describe('post-message.schema', () => {
 
 		it('should throw with a request msg and data matching dataSchema', () => {
 			const validPayload = {
+				ref: validRef,
 				msg: validRequestMsg,
 				data: validData
 			};
@@ -947,14 +974,31 @@ describe('post-message.schema', () => {
 		});
 
 		it('should throw an error if msg is missing', () => {
-			const invalidPayload = { data: validData };
+			const invalidPayload = { ref: validRef, data: validData };
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+
+		it('should throw an error if ref is missing', () => {
+			const invalidPayload = { msg: validRequestMsg, data: validData };
 
 			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
 		});
 
 		it('should throw an error if msg is not a valid value from PostMessageResponseSchema', () => {
 			const invalidPayload = {
+				ref: validRef,
 				msg: 'invalid_message',
+				data: validData
+			};
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+
+		it('should throw an error if ref does not match string', () => {
+			const invalidPayload = {
+				ref: 987,
+				msg: validResponseMsg,
 				data: validData
 			};
 
@@ -963,7 +1007,8 @@ describe('post-message.schema', () => {
 
 		it('should throw an error if data does not match dataSchema', () => {
 			const invalidPayload = {
-				msg: validRequestMsg,
+				ref: validRef,
+				msg: validResponseMsg,
 				data: { additionalInfo: 123 }
 			};
 

@@ -9,6 +9,7 @@ import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/sche
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type {
+	PostMessageCommon,
 	PostMessageDataRequestIcCkBTCUpdateBalance,
 	PostMessageDataResponseBTCAddress,
 	PostMessageJsonDataResponse
@@ -25,6 +26,8 @@ import {
 export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance> {
 	private timer = new SchedulerTimer('syncCkBTCUpdateBalanceStatus');
 
+	private ref: PostMessageCommon['ref'] | undefined;
+
 	private btcAddress: string | undefined;
 
 	stop() {
@@ -32,6 +35,8 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 	}
 
 	async start(data: PostMessageDataRequestIcCkBTCUpdateBalance | undefined) {
+		this.ref = data?.minterCanisterId;
+
 		await this.timer.start<PostMessageDataRequestIcCkBTCUpdateBalance>({
 			interval: CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS,
 			job: this.updateBalance,
@@ -123,7 +128,12 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 	}
 
 	private postMessageBtcAddress(address: BtcAddressData) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseBTCAddress>({
+			ref: this.ref,
 			msg: 'syncBtcAddress',
 			data: {
 				address
@@ -189,7 +199,12 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 				.map(({ outpoint: { txid } }) => uint8ArrayToHexString(txid))
 		};
 
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageJsonDataResponse>({
+			ref: this.ref,
 			msg: 'syncCkBTCUpdateOk',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)
@@ -198,6 +213,10 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 	}
 
 	private postPendingUtxos(err: MinterNoNewUtxosError) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		const { pendingUtxos } = err;
 
 		const data: CertifiedData<CkBtcMinterDid.PendingUtxo[]> = {
@@ -206,6 +225,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		};
 
 		this.timer.postMsg<PostMessageJsonDataResponse>({
+			ref: this.ref,
 			msg: 'syncBtcPendingUtxos',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)

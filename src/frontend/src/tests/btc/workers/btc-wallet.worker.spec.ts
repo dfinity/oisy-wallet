@@ -69,11 +69,14 @@ describe('btc-wallet.worker', () => {
 
 	const mockPostMessage = ({
 		certified,
-		withTransactions
+		withTransactions,
+		ref
 	}: {
 		certified: boolean;
 		withTransactions: boolean;
+		ref: string;
 	}) => ({
+		ref,
 		msg: 'syncBtcWallet',
 		data: {
 			wallet: {
@@ -154,13 +157,17 @@ describe('btc-wallet.worker', () => {
 	}): TestUtil => {
 		const scheduler: BtcWalletScheduler = new BtcWalletScheduler();
 
+		const ref = startData?.btcAddress.data ?? '';
+
 		const mockPostMessageUncertified = mockPostMessage({
 			certified: false,
-			withTransactions: true
+			withTransactions: true,
+			ref
 		});
 		const mockPostMessageCertified = mockPostMessage({
 			certified: true,
-			withTransactions: false
+			withTransactions: false,
+			ref
 		});
 
 		return {
@@ -265,12 +272,13 @@ describe('btc-wallet.worker', () => {
 					// error
 					expect(postMessageMock).toHaveBeenCalledTimes(7);
 
-					expect(postMessageMock).toHaveBeenCalledWith({
-						msg: 'syncBtcWalletError',
-						data: {
-							error: err
-						}
-					});
+				expect(postMessageMock).toHaveBeenCalledWith({
+					ref,
+					msg: 'syncBtcWalletError',
+					data: {
+						error: err
+					}
+				});
 				});
 			}
 		};
