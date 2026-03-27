@@ -51,8 +51,8 @@
 		class:text-success-primary={exchangeRateChangeSign === 'positive'}
 		class:text-tertiary={exchangeRateChangeSign === 'zero'}
 	>
-		<span class="inline-block scale-[1.75] transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
-			{exchangeRateChangeSymbol}
+		<span class="inline-block scale-175 transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
+			<span class="-translate-y-px inline-block transform">{exchangeRateChangeSymbol}</span>
 		</span>
 		{formattedExchangeRateChange}
 		{#if nonNullish(parsedTimeFrame)}
