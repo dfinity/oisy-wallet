@@ -1,8 +1,10 @@
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 import type { OptionToken, Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
+import { isNetworkEthereum } from '$lib/utils/network.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { hexStringToUint8Array, isNullish, nonNullish } from '@dfinity/utils';
 
@@ -11,13 +13,13 @@ export const decodeQrCode = ({
 	code,
 	expectedToken,
 	ethereumTokens,
-	erc20Tokens
+	ercTokens
 }: {
 	status: QrStatus;
 	code?: string;
 	expectedToken: OptionToken;
 	ethereumTokens: Token[];
-	erc20Tokens: Erc20Token[];
+	ercTokens: (Erc20Token | Erc4626Token)[];
 }): QrResponse => {
 	if (status !== 'success') {
 		return { status };
@@ -27,7 +29,7 @@ export const decodeQrCode = ({
 		return { status: 'cancelled' };
 	}
 
-	const payment = decodeQrCodeUrn(code);
+	const payment = decodeQrCodeUrn({ urn: code });
 
 	if (isNullish(payment)) {
 		return { status: 'success', destination: code };
@@ -79,7 +81,7 @@ export const decodeQrCode = ({
 
 		if (nonNullish(tokenAddress)) {
 			return (
-				erc20Tokens.find(
+				ercTokens.find(
 					(token) =>
 						token.address.toLowerCase() === tokenAddress.toLowerCase() &&
 						token.network.chainId.toString() === parsedEthereumChainId.toString()
@@ -90,7 +92,8 @@ export const decodeQrCode = ({
 		return (
 			ethereumTokens.find(
 				(token) =>
-					(token.network as EthereumNetwork).chainId.toString() === parsedEthereumChainId.toString()
+					isNetworkEthereum(token.network) &&
+					token.network.chainId.toString() === parsedEthereumChainId.toString()
 			) ?? undefined
 		);
 	};

@@ -2,26 +2,31 @@ import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import {
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
 	clearIdbIcTransactions,
 	clearIdbSolTransactions,
-	deleteIdbBtcTransactions,
-	deleteIdbEthTransactions,
-	deleteIdbIcTransactions,
-	deleteIdbSolTransactions,
 	getIdbBtcTransactions,
 	getIdbEthTransactions,
 	getIdbIcTransactions,
 	getIdbSolTransactions,
+	setIdbBtcTransactions,
+	setIdbEthTransactions,
+	setIdbIcTransactions,
+	setIdbSolTransactions,
 	setIdbTransactionsStore
 } from '$lib/api/idb-transactions.api';
-import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
+import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -30,21 +35,15 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
-vi.mock('$lib/utils/idb.utils', () => ({
-	delMultiKeysByPrincipal: vi.fn()
-}));
-
 describe('idb-transactions.api', () => {
 	const mockIdbTransactionsStore = createStore('mock-store', 'mock-store');
 
 	const mockToken1 = ETHEREUM_TOKEN;
 	const mockToken2 = BTC_MAINNET_TOKEN;
 	const mockToken3 = USDC_TOKEN;
-	const mockTokens = [mockToken1, mockToken2, mockToken3];
+	const mockToken4 = ICP_TOKEN;
+	const mockToken5 = SOLANA_TOKEN;
+	const mockTokens = [mockToken1, mockToken2, mockToken3, mockToken4, mockToken5];
 
 	const mockTransactions1 = createMockEthTransactions(3);
 	const mockTransactions2 = createMockBtcTransactionsUi(7);
@@ -87,6 +86,10 @@ describe('idb-transactions.api', () => {
 			tokenId: mockToken2.id,
 			transactions: mockCertifiedTransactions2
 		});
+
+		icTransactionsStore.reset(mockToken4.id);
+
+		solTransactionsStore.reset(mockToken5.id);
 	});
 
 	describe('setIdbTransactionsStore', () => {
@@ -280,50 +283,6 @@ describe('idb-transactions.api', () => {
 		});
 	});
 
-	describe('deleteIdbBtcTransactions', () => {
-		it('should delete BTC tokens', async () => {
-			await deleteIdbBtcTransactions(mockPrincipal);
-
-			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
-				principal: mockPrincipal,
-				store: expect.any(Object)
-			});
-		});
-	});
-
-	describe('deleteIdbEthTransactions', () => {
-		it('should delete ETH transactions', async () => {
-			await deleteIdbEthTransactions(mockPrincipal);
-
-			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
-				principal: mockPrincipal,
-				store: expect.any(Object)
-			});
-		});
-	});
-
-	describe('deleteIdbIcTransactions', () => {
-		it('should delete IC transactions', async () => {
-			await deleteIdbIcTransactions(mockPrincipal);
-
-			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
-				principal: mockPrincipal,
-				store: expect.any(Object)
-			});
-		});
-	});
-
-	describe('deleteIdbSolTransactions', () => {
-		it('should delete SOL transactions', async () => {
-			await deleteIdbSolTransactions(mockPrincipal);
-
-			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
-				principal: mockPrincipal,
-				store: expect.any(Object)
-			});
-		});
-	});
-
 	describe('clearIdbBtcTransactions', () => {
 		it('should clear BTC transactions', async () => {
 			await clearIdbBtcTransactions();
@@ -353,6 +312,100 @@ describe('idb-transactions.api', () => {
 			await clearIdbSolTransactions();
 
 			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('setIdbBtcTransactions', () => {
+		it('should delegate to setIdbTransactionsStore with btc store', async () => {
+			await setIdbBtcTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken2],
+				transactionsStoreData: get(btcTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken2.id.description,
+					mockToken2.network.id.description
+				],
+				mockTransactions2,
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('setIdbEthTransactions', () => {
+		it('should delegate to setIdbTransactionsStore with eth store', async () => {
+			await setIdbEthTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken1],
+				transactionsStoreData: get(ethTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken1.id.description,
+					mockToken1.network.id.description
+				],
+				mockTransactions1,
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('setIdbIcTransactions', () => {
+		const mockIcTransactions = createMockIcTransactionsUi(4);
+
+		it('should delegate to setIdbTransactionsStore with ic store', async () => {
+			icTransactionsStore.set({
+				tokenId: mockToken4.id,
+				transactions: mockIcTransactions.map((data) => ({ data, certified: true }))
+			});
+
+			await setIdbIcTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken4],
+				transactionsStoreData: get(icTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken4.id.description,
+					mockToken4.network.id.description
+				],
+				mockIcTransactions,
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('setIdbSolTransactions', () => {
+		const mockSolTransactions = createMockSolTransactionsUi(3);
+
+		it('should delegate to setIdbTransactionsStore with sol store', async () => {
+			solTransactionsStore.set({
+				tokenId: mockToken5.id,
+				transactions: mockSolTransactions.map((data) => ({ data, certified: false }))
+			});
+
+			await setIdbSolTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken5],
+				transactionsStoreData: get(solTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken5.id.description,
+					mockToken5.network.id.description
+				],
+				mockSolTransactions,
+				expect.any(Object)
+			);
 		});
 	});
 });

@@ -2,16 +2,35 @@ import { withdrawalStatuses } from '$icp/api/ckbtc-minter.api';
 import { BTC_STATUSES_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { createQueryAndUpdateWithWarmup } from '$lib/services/query.services';
 import type {
 	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
-import { assertNonNullish, jsonReplacer, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	isNullish,
+	jsonReplacer,
+	nonNullish,
+	queryAndUpdate,
+	type QueryAndUpdateParams
+} from '@dfinity/utils';
+import type { RetrieveBtcStatusV2WithId } from '@icp-sdk/canisters/ckbtc';
 
 export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcCk> {
+	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+	private _interval: number | 'disabled' = BTC_STATUSES_TIMER_INTERVAL_MILLIS;
+
+	private get queryAndUpdateWithWarmup() {
+		if (isNullish(this._queryAndUpdateWithWarmup)) {
+			this._queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+		}
+
+		return this._queryAndUpdateWithWarmup;
+	}
+
 	private timer = new SchedulerTimer('syncBtcStatusesStatus');
 
 	stop() {
@@ -20,7 +39,7 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcC
 
 	async start(data: PostMessageDataRequestIcCk | undefined) {
 		await this.timer.start<PostMessageDataRequestIcCk>({
-			interval: BTC_STATUSES_TIMER_INTERVAL_MILLIS,
+			interval: this._interval,
 			job: this.syncStatuses,
 			data
 		});
@@ -44,14 +63,20 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcC
 			'No data - minterCanisterId - provided to fetch the BTC withdrawal statuses.'
 		);
 
-		await queryAndUpdate<RetrieveBtcStatusV2WithId[]>({
+		const params: QueryAndUpdateParams<RetrieveBtcStatusV2WithId[]> = {
 			request: ({ identity: _, certified }) =>
 				withdrawalStatuses({ minterCanisterId, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncStatusesResults({ certified, ...rest }),
 			onUpdateError: ({ error }) => this.postMessageWalletError(error),
-			identity,
-			resolution: 'all_settled'
-		});
+			identity
+		};
+
+		// if the interval is "disabled", the sync will only be triggered once; therefore, it makes sense to do "update" only
+		if (this._interval === 'disabled') {
+			await queryAndUpdate<RetrieveBtcStatusV2WithId[]>({ ...params, strategy: 'update' });
+		} else {
+			await this.queryAndUpdateWithWarmup<RetrieveBtcStatusV2WithId[]>(params);
+		}
 	};
 
 	private syncStatusesResults = ({

@@ -1,8 +1,6 @@
-import {
-	LOCAL_CKBTC_LEDGER_CANISTER_ID,
-	LOCAL_CKETH_LEDGER_CANISTER_ID,
-	LOCAL_CKUSDC_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { LOCAL_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { LOCAL_CKUSDC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
+import { LOCAL_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -18,7 +16,7 @@ import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
-import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import { get, readable } from 'svelte/store';
 
 const ethExchangeValue = 1;
@@ -119,7 +117,7 @@ describe('convertStore', () => {
 
 	it('should have minter info fee set if sourceToken is ckETH', () => {
 		const mockCkEthMinterInfo = {
-			data: { minimum_withdrawal_amount: [500n] } as CkEthMinterInfo,
+			data: { minimum_withdrawal_amount: [500n] } as CkEthMinterDid.MinterInfo,
 			certified: true
 		};
 		ckEthMinterInfoStore.set({

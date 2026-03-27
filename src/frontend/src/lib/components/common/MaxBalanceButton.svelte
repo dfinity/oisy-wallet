@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { preventDefault } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -27,7 +28,7 @@
 		fee
 	}: Props = $props();
 
-	let isZeroBalance = $derived(isNullish(balance) || balance === ZERO);
+	let isZeroBalance = $derived(!$isIcMintingAccount && (isNullish(balance) || balance === ZERO));
 
 	let maxAmount = $derived(
 		nonNullish(token)

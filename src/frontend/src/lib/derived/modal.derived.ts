@@ -48,9 +48,17 @@ export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
 );
-export const modalGldtStake: Readable<boolean> = derived(
+export const modalGetToken: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'gldt-stake'
+	($modalStore) => $modalStore?.type === 'get-token'
+);
+export const modalHarvestStake: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'harvest-stake'
+);
+export const modalHarvestUnstake: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'harvest-unstake'
 );
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
@@ -291,4 +299,14 @@ export const modalNftFullscreenDisplayData: Readable<Nft | undefined> = derived(
 	modalStore,
 	($modalStore) =>
 		$modalStore?.type === 'nft-fullscreen-display' ? ($modalStore?.data as Nft) : undefined
+);
+
+export const modalUniversalScannerOpen: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'universal-scanner'
+);
+
+export const modalPayDialogOpen: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'pay-dialog'
 );

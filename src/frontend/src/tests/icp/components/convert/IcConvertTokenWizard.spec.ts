@@ -38,10 +38,6 @@ import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('IcConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const ckBtcToken = {

@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import unhx from '$sol/assets/unhx.svg';
@@ -14,8 +15,9 @@ export const UNHX_TOKEN_ID: TokenId = parseTokenId(UNHX_SYMBOL);
 export const UNHX_TOKEN: RequiredSpl2022Token = {
 	id: UNHX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'UnitedHealth xStock',
 	symbol: UNHX_SYMBOL,
 	decimals: UNHX_DECIMALS,

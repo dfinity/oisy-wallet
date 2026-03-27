@@ -1,20 +1,28 @@
 <script lang="ts">
+	import { isIOS } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { page } from '$app/state';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
-	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
+	import {
+		tokenCategoryFilter,
+		showTokenCategoryFilter,
+		isPrivacyMode
+	} from '$lib/derived/settings.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
-	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
+	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
+	import { sumTokensUiUsdBalance, sumTokensUiUsdStakeBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		hideBalance?: boolean;
@@ -24,11 +32,24 @@
 
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedFungibleNetworkTokensUi));
+	const isTokensRoute = $derived(isRouteTokens(page));
+
+	const heroTokens = $derived(
+		$showTokenCategoryFilter && isTokensRoute
+			? filterTokensUiByCategory({
+					tokens: $enabledFungibleNetworkTokensUi,
+					category: $tokenCategoryFilter
+				})
+			: $enabledFungibleNetworkTokensUi
+	);
+
+	const totalUsd = $derived(sumTokensUiUsdBalance(heroTokens));
+
+	const totalStakeUsd = $derived(sumTokensUiUsdStakeBalance(heroTokens));
 
 	let balance = $derived(
 		formatCurrency({
-			value: $loaded ? totalUsd : 0,
+			value: $loaded ? totalUsd + totalStakeUsd : 0,
 			currency: $currentCurrency,
 			exchangeRate: $currencyExchangeStore,
 			language: $currentLanguage
@@ -37,7 +58,7 @@
 </script>
 
 <span class="flex flex-col items-center gap-1">
-	<output class="mt-7 inline-block break-all text-4xl font-bold md:text-5xl">
+	<output class="mt-7 inline-block text-4xl font-bold break-all md:text-5xl">
 		{#if $loaded && nonNullish(balance)}
 			{#if hideBalance}
 				<IconDots styleClass="my-4.25" times={6} variant="lg" />
@@ -45,14 +66,18 @@
 				{balance}
 			{/if}
 		{:else}
-			<span class="animate-pulse">
+			<span class:animate-pulse={!isIOS()}>
 				{#if hideBalance}
 					<IconDots styleClass="my-4.25" times={6} variant="lg" />
 				{:else}
 					{formatCurrency({
 						value: 0,
 						currency: $currentCurrency,
-						exchangeRate: { currency: $currentCurrency, exchangeRateToUsd: 1 },
+						exchangeRate: {
+							currency: $currentCurrency,
+							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1
+						},
 						language: $currentLanguage
 					})}
 				{/if}

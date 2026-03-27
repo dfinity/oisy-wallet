@@ -5,6 +5,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { TokenId } from '$lib/types/token';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
@@ -25,7 +26,7 @@ export const syncWallet = ({
 	} = data;
 
 	if (nonNullish(balance)) {
-		balancesStore.set({
+		balancesStore.batchSet({
 			id: tokenId,
 			data: {
 				data: balance,
@@ -57,7 +58,7 @@ export const syncWalletError = ({
 	solTransactionsStore.reset(tokenId);
 
 	if (hideToast) {
-		console.warn(`${errorText}:`, err);
+		consoleWarn(`${errorText}:`, err);
 		return;
 	}
 

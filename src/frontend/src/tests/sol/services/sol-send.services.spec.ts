@@ -3,12 +3,12 @@ import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
+import type { SolAddress } from '$sol/types/address';
 import type { SolInstruction } from '$sol/types/sol-instructions';
 import type { SplToken } from '$sol/types/spl';
 import * as networkUtils from '$sol/utils/safe-network.utils';
@@ -50,6 +50,7 @@ vi.mock(import('@solana/kit'), async (importOriginal) => {
 		assertIsFullySignedTransaction: vi.fn(),
 		assertIsTransactionPartialSigner: vi.fn(),
 		assertIsTransactionSigner: vi.fn(),
+		assertIsTransactionWithBlockhashLifetime: vi.fn(),
 		assertIsTransactionWithinSizeLimit: vi.fn(),
 		createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
 		getSignatureFromTransaction: vi.fn(),
@@ -192,17 +193,14 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledOnce();
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(SOLANA_TOKEN.network.id);
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(SOLANA_TOKEN.network.id);
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-sol-instruction'],
 				mockTx
 			);
-			expect(getTransferSolInstruction).toHaveBeenCalledOnce();
-			expect(getTransferSolInstruction).toHaveBeenCalledWith({
+			expect(getTransferSolInstruction).toHaveBeenCalledExactlyOnceWith({
 				source: mockSigner,
 				destination: mockDestination,
 				amount: mockAmount
@@ -320,8 +318,7 @@ describe('sol-send.services', () => {
 			});
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				[{ keys: 'mock-ata-creation-instruction' }, 'mock-transfer-instruction'],
 				mockTx
 			);
@@ -368,13 +365,11 @@ describe('sol-send.services', () => {
 			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-instruction'],
 				mockTx
 			);
-			expect(getTransferInstruction).toHaveBeenCalledOnce();
-			expect(getTransferInstruction).toHaveBeenCalledWith(
+			expect(getTransferInstruction).toHaveBeenCalledExactlyOnceWith(
 				{
 					source: mockAtaAddress,
 					destination: mockAtaAddress3,

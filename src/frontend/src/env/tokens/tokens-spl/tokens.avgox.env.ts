@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import avgox from '$sol/assets/avgox.svg';
@@ -14,8 +15,9 @@ export const AVGOX_TOKEN_ID: TokenId = parseTokenId(AVGOX_SYMBOL);
 export const AVGOX_TOKEN: RequiredSpl2022Token = {
 	id: AVGOX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Broadcom xStock',
 	symbol: AVGOX_SYMBOL,
 	decimals: AVGOX_DECIMALS,

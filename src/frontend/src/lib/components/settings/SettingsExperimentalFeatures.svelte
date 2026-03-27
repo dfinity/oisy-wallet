@@ -9,7 +9,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userExperimentalFeatures } from '$lib/derived/user-experimental-features.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import type {
@@ -25,7 +24,6 @@
 
 	const save = async (features: UserExperimentalFeatures) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -58,15 +56,15 @@
 </script>
 
 <SettingsCard>
-	<svelte:fragment slot="title">{$i18n.settings.text.beta_features}</svelte:fragment>
+	{#snippet title()}{$i18n.settings.text.beta_features}{/snippet}
 
 	{#each features as feature (feature)}
 		<SettingsCardItem>
-			<svelte:fragment slot="key">
+			{#snippet key()}
 				{labelsByFeatureId[feature].title}
-			</svelte:fragment>
+			{/snippet}
 
-			<svelte:fragment slot="value">
+			{#snippet value()}
 				<Toggle
 					ariaLabel={$userExperimentalFeatures?.[feature].enabled
 						? $i18n.settings.text.disable_beta_feature
@@ -82,8 +80,9 @@
 						});
 					}}
 				/>
-			</svelte:fragment>
-			<svelte:fragment slot="info">
+			{/snippet}
+
+			{#snippet info()}
 				<span>
 					{labelsByFeatureId[feature].description}
 
@@ -95,7 +94,7 @@
 						>
 					{/if}
 				</span>
-			</svelte:fragment>
+			{/snippet}
 		</SettingsCardItem>
 	{/each}
 </SettingsCard>

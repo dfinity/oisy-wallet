@@ -6,21 +6,20 @@
 	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import type { OptionBalance } from '$lib/types/balance';
-	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
+	import type { OptionToken } from '$lib/types/token';
 
 	interface Props {
 		destination: string | null;
-		amount: OptionAmount;
-		token: Token;
+		amount?: bigint;
+		token: OptionToken;
 		exchangeRate?: number;
 		balance: OptionBalance;
 		source: string;
 		application: string;
 		showNullishAmountLabel?: boolean;
+		showUnlimitedAmountLabel?: boolean;
 		sourceNetwork: Snippet;
 		destinationNetwork?: Snippet;
-		fee?: Snippet;
 		children?: Snippet;
 	}
 
@@ -33,9 +32,9 @@
 		source,
 		application,
 		showNullishAmountLabel = false,
+		showUnlimitedAmountLabel = false,
 		sourceNetwork,
 		destinationNetwork,
-		fee,
 		children
 	}: Props = $props();
 </script>
@@ -46,14 +45,18 @@
 
 {@render destinationNetwork?.()}
 
-<SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} {token} />
+<SendDataAmount
+	{amount}
+	{exchangeRate}
+	showNullishLabel={showNullishAmountLabel}
+	showUnlimitedLabel={showUnlimitedAmountLabel}
+	{token}
+/>
 
 <SendSource {balance} {exchangeRate} {source} {token} />
 
 {#if nonNullish(destination)}
 	<SendDataDestination {destination} />
 {/if}
-
-{@render fee?.()}
 
 {@render children?.()}

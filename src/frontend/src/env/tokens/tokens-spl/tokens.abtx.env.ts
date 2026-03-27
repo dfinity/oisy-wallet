@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import abtx from '$sol/assets/abtx.svg';
@@ -14,8 +15,9 @@ export const ABTX_TOKEN_ID: TokenId = parseTokenId(ABTX_SYMBOL);
 export const ABTX_TOKEN: RequiredSpl2022Token = {
 	id: ABTX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Abbott xStock',
 	symbol: ABTX_SYMBOL,
 	decimals: ABTX_DECIMALS,

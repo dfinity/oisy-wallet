@@ -4,7 +4,7 @@ import {
 	CKBTC_EXPLORER_URL,
 	CKBTC_TESTNET_EXPLORER_URL
 } from '$env/explorers.env';
-import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
@@ -20,8 +20,9 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
-import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
+import { consoleError } from '$lib/utils/console.utils';
 import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -82,7 +83,7 @@ export const mapCkBTCTransaction = ({
 	}
 
 	if (nonNullish(burn)) {
-		const memo = fromNullable(burn.memo) ?? [];
+		const memo = fromNullable(burn.memo) ?? new Uint8Array();
 
 		const toAddress = burnMemoAddress(memo);
 
@@ -107,7 +108,7 @@ export const mapCkBTCPendingUtxo = ({
 	kytFee,
 	ledgerCanisterId
 }: {
-	utxo: PendingUtxo;
+	utxo: CkBtcMinterDid.PendingUtxo;
 	kytFee: bigint;
 } & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
 	const id = utxoTxIdToString(txid);
@@ -153,7 +154,7 @@ export const extendCkBTCTransaction = ({
 };
 
 const burnStatus = (
-	retrieveBtcStatus: RetrieveBtcStatusV2 | undefined
+	retrieveBtcStatus: CkBtcMinterDid.RetrieveBtcStatusV2 | undefined
 ): Required<Pick<IcTransactionUi, 'typeLabel'>> & Pick<IcTransactionUi, 'status'> => {
 	if (nonNullish(retrieveBtcStatus)) {
 		if ('Reimbursed' in retrieveBtcStatus || 'AmountTooLow' in retrieveBtcStatus) {
@@ -178,31 +179,31 @@ const burnStatus = (
 	}
 
 	// Force compiler error on unhandled cases based on leftover types
-	const _: { Confirmed: { txid: Uint8Array | number[] } } | { Unknown: null } | undefined | never =
+	const _: { Confirmed: { txid: Uint8Array } } | { Unknown: null } | undefined | never =
 		retrieveBtcStatus;
 
 	return {
-		typeLabel: 'transaction.label.twin_token_sent',
+		typeLabel: 'send.text.send',
 		status: 'executed'
 	};
 };
 
-const isMemoReimbursement = (memo: Uint8Array | number[]) => {
+const isMemoReimbursement = (memo: Uint8Array) => {
 	try {
 		const [mintType, _] = decodeMintMemo(memo);
 		return mintType === MINT_MEMO_KYT_FAIL;
 	} catch (err: unknown) {
-		console.error('Failed to decode ckBTC mint memo', memo, err);
+		consoleError('Failed to decode ckBTC mint memo', memo, err);
 		return false;
 	}
 };
 
-const burnMemoAddress = (memo: Uint8Array | number[]): OptionString => {
+const burnMemoAddress = (memo: Uint8Array): OptionString => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
 		return toAddress;
 	} catch (err: unknown) {
-		console.error('Failed to decode ckBTC burn memo', memo, err);
+		consoleError('Failed to decode ckBTC burn memo', memo, err);
 		return undefined;
 	}
 };

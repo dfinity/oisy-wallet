@@ -1,5 +1,4 @@
 import {
-	NetworkAppMetadataSchema,
 	NetworkEnvironmentSchema,
 	NetworkIdSchema,
 	NetworkSchema
@@ -41,41 +40,19 @@ describe('network.schema', () => {
 		});
 	});
 
-	describe('NetworkAppMetadataSchema', () => {
-		it('should validate complete metadata', () => {
-			const validMetadata = {
-				explorerUrl: 'https://example.com/explorer'
-			};
-
-			expect(NetworkAppMetadataSchema.parse(validMetadata)).toEqual(validMetadata);
-		});
-
-		it('should fail validation with an invalid explorer URL', () => {
-			const invalidMetadata = {
-				explorerUrl: 'invalid-url'
-			};
-
-			expect(() => NetworkAppMetadataSchema.parse(invalidMetadata)).toThrow();
-		});
-
-		it('should fail validation with missing explorer URL', () => {
-			const invalidMetadata = {};
-
-			expect(() => NetworkAppMetadataSchema.parse(invalidMetadata)).toThrow();
-		});
-	});
-
 	describe('NetworkSchema', () => {
 		const validNetworkWithRequiredFields = {
 			id: parseNetworkId('NetworkId'),
 			env: 'testnet',
-			name: 'Test Network'
+			name: 'Test Network',
+			explorerUrl: 'https://example.com/explorer'
 		};
 
 		const validNetwork = {
 			...validNetworkWithRequiredFields,
 			icon: 'https://example.com/icon.svg',
-			buy: { onramperId: 'icp' }
+			buy: { onramperId: 'icp' },
+			pay: { openCryptoPay: 'InternetComputer' }
 		};
 
 		it('should validate a complete network', () => {
@@ -122,6 +99,24 @@ describe('network.schema', () => {
 			};
 
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
+		});
+
+		it('should accept supportsNft value as true', () => {
+			const result = NetworkSchema.parse({ ...validNetwork, supportsNft: true });
+
+			expect(result.supportsNft).toBeTruthy();
+		});
+
+		it('should accept supportsNft value as false', () => {
+			const result = NetworkSchema.parse({ ...validNetwork, supportsNft: false });
+
+			expect(result.supportsNft).toBeFalsy();
+		});
+
+		it('supportsNft value should be optional and undefined when not provided', () => {
+			const result = NetworkSchema.parse(validNetwork);
+
+			expect(result.supportsNft).toBeUndefined();
 		});
 	});
 });

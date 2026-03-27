@@ -2,9 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
-	import { initBtcStatusesWorker } from '$icp/services/worker.btc-statuses.services';
-	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
-	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { BtcStatusesWorker } from '$icp/services/worker.btc-statuses.services';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { OptionToken, Token } from '$lib/types/token';
 
@@ -14,18 +12,12 @@
 	}
 
 	let { token, children }: Props = $props();
-	let minterInfoLoaded: boolean = $derived(
-		nonNullish(token?.id) && $ckBtcMinterInfoStore?.[token.id]?.certified === true
-	);
+
 	let twinToken: Token | undefined = $derived((token as OptionIcCkToken)?.twinToken);
 </script>
 
 {#if nonNullish(token)}
-	<IcCkListener initFn={initBtcStatusesWorker} {token} {twinToken} />
-
-	{#if !minterInfoLoaded}
-		<IcCkListener initFn={initCkBTCMinterInfoWorker} {token} {twinToken} />
-	{/if}
+	<IcCkListener initFn={BtcStatusesWorker.init} {token} {twinToken} />
 {/if}
 
 {@render children?.()}

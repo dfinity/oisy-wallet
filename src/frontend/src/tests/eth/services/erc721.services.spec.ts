@@ -8,6 +8,13 @@ import { loadCustomTokens, loadErc721Tokens } from '$eth/services/erc721.service
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721Metadata } from '$eth/types/erc721';
 import { listCustomTokens } from '$lib/api/backend.api';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
+} from '$lib/enums/plausible';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { trackEvent } from '$lib/services/analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -21,6 +28,10 @@ import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('erc721.services', () => {
@@ -41,8 +52,9 @@ describe('erc721.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc721',
+				standard: { code: 'erc721' },
 				category: 'custom',
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				version: 1n,
 				enabled: true,
 				network: ETHEREUM_NETWORK,
@@ -56,8 +68,9 @@ describe('erc721.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc721',
+				standard: { code: 'erc721' },
 				category: 'custom',
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				version: 2n,
 				enabled: true,
 				network: BASE_NETWORK,
@@ -70,8 +83,9 @@ describe('erc721.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc721',
+				standard: { code: 'erc721' },
 				category: 'custom',
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				version: undefined,
 				enabled: false,
 				network: POLYGON_AMOY_NETWORK,
@@ -132,6 +146,45 @@ describe('erc721.services', () => {
 			vi.mocked(mockMetadata).mockRejectedValue(mockError);
 
 			await expect(loadErc721Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+
+			expect(get(erc721CustomTokensStore)).toStrictEqual([]);
+
+			// query + update
+			expect(trackEvent).toHaveBeenCalledTimes(mockCustomTokensErc721.length * 2);
+
+			mockCustomTokensErc721.forEach(({ token }, index) => {
+				assert('Erc721' in token);
+
+				const {
+					Erc721: { token_address: address }
+				} = token;
+
+				const {
+					network: { id: networkId }
+				} = expectedCustomTokens[index].data;
+
+				expect(trackEvent).toHaveBeenNthCalledWith(index + 1, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NFT.ERC721,
+						token_address: address,
+						token_network: `${networkId.description}`
+					},
+					warning: `Error loading metadata for custom ERC721 token ${address} on network ${networkId.description}. ${mockError}`
+				});
+
+				expect(trackEvent).toHaveBeenNthCalledWith(index + 1 + mockCustomTokensErc721.length, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NFT.ERC721,
+						token_address: address,
+						token_network: `${networkId.description}`
+					},
+					warning: `Error loading metadata for custom ERC721 token ${address} on network ${networkId.description}. ${mockError}`
+				});
+			});
 		});
 
 		it('should not throw error if list custom tokens throws', async () => {
@@ -178,12 +231,10 @@ describe('erc721.services', () => {
 			expect(listCustomTokens).toHaveBeenCalledTimes(2);
 			expect(listCustomTokens).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
-				certified: false,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
 			expect(listCustomTokens).toHaveBeenNthCalledWith(2, {
 				identity: mockIdentity,
-				certified: true,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
 		});
@@ -246,7 +297,10 @@ describe('erc721.services', () => {
 
 		it('should reset token store on error', async () => {
 			erc721CustomTokensStore.setAll([
-				{ data: { ...SEPOLIA_PEPE_TOKEN, standard: 'erc721', enabled: true }, certified: false }
+				{
+					data: { ...SEPOLIA_PEPE_TOKEN, standard: { code: 'erc721' }, enabled: true },
+					certified: false
+				}
 			]);
 
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Error loading custom tokens'));

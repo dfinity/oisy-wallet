@@ -15,7 +15,7 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue(undefined)
 }));
 
-vi.mock('$btc/utils/btc-address.utils', () => ({
+vi.mock('$btc/utils/btc-address.services', () => ({
 	getBtcSourceAddress: vi.fn().mockReturnValue('test-btc-address')
 }));
 
@@ -76,9 +76,17 @@ describe('btc-listener', () => {
 		btcTransactionsStore.reset(tokenId);
 	});
 
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
 	describe('syncWallet', () => {
-		it('should set the balance in balancesStore', () => {
+		it('should set the balance in balancesStore', async () => {
+			vi.useFakeTimers();
+
 			syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+
+			await vi.runAllTimersAsync();
 
 			const balance = get(balancesStore);
 

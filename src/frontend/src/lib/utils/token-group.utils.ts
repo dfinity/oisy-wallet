@@ -20,40 +20,8 @@ export const isTokenUiGroup = (
 	'group' in tokenUiOrGroupUi &&
 	'tokens' in tokenUiOrGroupUi.group;
 
-/**
- * Function to create a list of `TokenUiOrGroupUi` by grouping tokens with matching `groupData`.
- * A group is placed in the position where its first token was found.
- * Tokens with no groups remain as individual tokens in their original position.
- *
- * @param tokens - The list of TokenUi objects to group. Each token may or may not have a `groupData` field.
- *                 Tokens with `groupData` are grouped together.
- *
- * @returns A new list where tokens with `groupData` are grouped into a `TokenUiGroup`,
- *          and tokens without twins remain in their original place.
- *          A group replaces its first token in the list.
- */
-export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
-	const tokenOrGroups = groupTokens(tokens);
-
-	return tokenOrGroups
-		.map((tokenOrGroup) =>
-			isTokenUiGroup(tokenOrGroup) && tokenOrGroup.group.tokens.length === 1
-				? { token: tokenOrGroup.group.tokens[0] }
-				: tokenOrGroup
-		)
-		.sort((aa, bb) => {
-			const a = isTokenUiGroup(aa) ? aa.group : aa.token;
-			const b = isTokenUiGroup(bb) ? bb.group : bb.token;
-
-			return (
-				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO))
-			);
-		});
-};
-
-const hasBalance = ({ token, showZeroBalances }: { token: TokenUi; showZeroBalances: boolean }) =>
-	Number(token.balance ?? ZERO) || Number(token.usdBalance ?? ZERO) || showZeroBalances;
+const hasBalance = ({ balance, usdBalance }: TokenUi) =>
+	Number(balance ?? ZERO) || Number(usdBalance ?? ZERO);
 
 /**
  * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least
@@ -71,11 +39,13 @@ export const filterTokenGroups = ({
 	groupedTokens: TokenUiOrGroupUi[];
 	showZeroBalances: boolean;
 }) =>
-	groupedTokens.filter((tokenOrGroup: TokenUiOrGroupUi) =>
-		isTokenUiGroup(tokenOrGroup)
-			? tokenOrGroup.group.tokens.some((token: TokenUi) => hasBalance({ token, showZeroBalances }))
-			: hasBalance({ token: tokenOrGroup.token, showZeroBalances })
-	);
+	showZeroBalances
+		? groupedTokens
+		: groupedTokens.filter((tokenOrGroup: TokenUiOrGroupUi) =>
+				isTokenUiGroup(tokenOrGroup)
+					? tokenOrGroup.group.tokens.some((token: TokenUi) => hasBalance(token))
+					: hasBalance(tokenOrGroup.token)
+			);
 
 const mapNewTokenGroup = (token: TokenUiGroupable): TokenUiGroup => ({
 	id: token.groupData.id,
@@ -83,7 +53,10 @@ const mapNewTokenGroup = (token: TokenUiGroupable): TokenUiGroup => ({
 	groupData: token.groupData,
 	tokens: [token],
 	balance: token.balance,
-	usdBalance: token.usdBalance
+	usdBalance: token.usdBalance,
+	usdPrice: token.usdPrice,
+	usdMarketCap: token.usdMarketCap,
+	usdPriceChangePercentage24h: token.usdPriceChangePercentage24h
 });
 
 interface GroupTokenParams {
@@ -109,7 +82,7 @@ interface UpdateTokenGroupParams extends GroupTokenParams {
 export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams): TokenUiGroup => {
 	const newTokens: TokenUiGroup['tokens'] = [...tokenGroup.tokens, token];
 
-	const newDecimals = Math.max(...newTokens.map(({ decimals }) => decimals));
+	const newDecimals = Math.max(tokenGroup.decimals, token.decimals);
 
 	return {
 		...tokenGroup,
@@ -166,7 +139,9 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 		const { id: tokenId, groupData } = token;
 
 		if (isNullish(groupData)) {
-			return { ...acc, [tokenId]: { token } };
+			acc[tokenId] = { token };
+
+			return acc;
 		}
 
 		const { id: groupId } = groupData;
@@ -183,10 +158,18 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 					: undefined
 		});
 
-		return { ...acc, [groupId]: { group } };
+		acc[groupId] = { group };
+
+		return acc;
 	}, {});
 
-	return Object.getOwnPropertySymbols(tokenGroupsMap).map((id) => tokenGroupsMap[id as TokenId]);
+	return Object.getOwnPropertySymbols(tokenGroupsMap).map((id) => {
+		const tokenOrGroup = tokenGroupsMap[id as TokenId];
+
+		return isTokenUiGroup(tokenOrGroup) && tokenOrGroup.group.tokens.length === 1
+			? { token: tokenOrGroup.group.tokens[0] }
+			: tokenOrGroup;
+	});
 };
 
 export const sortTokenOrGroupUi = (tokenOrGroup: TokenUiOrGroupUi[]) =>
@@ -196,7 +179,7 @@ export const sortTokenOrGroupUi = (tokenOrGroup: TokenUiOrGroupUi[]) =>
 				? (() => {
 						const aName = a.token.name;
 						const bName = b.token.name;
-						// we want non alphanumeric starting items to come last
+						// we want non-alphanumeric starting items to come last
 						const isAlphaNum = (char: string) => /^[a-zA-Z0-9]$/.test(char);
 						const aStartsValid = isAlphaNum(aName.charAt(0));
 						const bStartsValid = isAlphaNum(bName.charAt(0));

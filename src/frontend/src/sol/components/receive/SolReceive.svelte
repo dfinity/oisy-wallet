@@ -3,17 +3,11 @@
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { modalSolReceive } from '$lib/derived/modal.derived';
-	import { networkId } from '$lib/derived/network.derived';
+	import { networkAddressStore } from '$lib/derived/network-address.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import {
-		solAddressDevnetStore,
-		solAddressLocalnetStore,
-		solAddressMainnetStore
-	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
-	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 
 	interface Props {
 		token: Token;
@@ -21,14 +15,7 @@
 
 	let { token }: Props = $props();
 
-	// TODO: consolidate this logic together with btc into $networkAddress like it's done for ICP and ETH
-	let addressData = $derived(
-		isNetworkIdSOLDevnet($networkId)
-			? $solAddressDevnetStore
-			: isNetworkIdSOLLocal($networkId)
-				? $solAddressLocalnetStore
-				: $solAddressMainnetStore
-	);
+	let addressData = $derived($networkAddressStore);
 
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
 

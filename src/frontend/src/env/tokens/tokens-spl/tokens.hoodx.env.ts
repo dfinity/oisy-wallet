@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import hoodx from '$sol/assets/hoodx.svg';
@@ -14,8 +15,9 @@ export const HOODX_TOKEN_ID: TokenId = parseTokenId(HOODX_SYMBOL);
 export const HOODX_TOKEN: RequiredSpl2022Token = {
 	id: HOODX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Robinhood xStock',
 	symbol: HOODX_SYMBOL,
 	decimals: HOODX_DECIMALS,

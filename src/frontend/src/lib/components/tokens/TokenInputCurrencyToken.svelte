@@ -15,6 +15,8 @@
 		loading?: boolean;
 		autofocus?: boolean;
 		onInput: () => void;
+		onBlur: () => void;
+		onFocus: () => void;
 	}
 
 	let {
@@ -27,7 +29,9 @@
 		error = false,
 		loading = false,
 		autofocus = false,
-		onInput
+		onInput,
+		onBlur,
+		onFocus
 	}: Props = $props();
 </script>
 
@@ -39,10 +43,10 @@
 	{error}
 	{innerEnd}
 	{loading}
+	{onBlur}
+	{onFocus}
 	{onInput}
 	{placeholder}
 	testId={TOKEN_INPUT_CURRENCY_TOKEN}
 	bind:value
-	on:focus
-	on:blur
 />

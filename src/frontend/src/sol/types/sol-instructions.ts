@@ -1,4 +1,4 @@
-import type { SolAddress } from '$lib/types/address';
+import type { SolAddress } from '$sol/types/address';
 import type { SolRpcTransactionRaw } from '$sol/types/sol-transaction';
 import type { ParsedComputeBudgetInstruction } from '@solana-program/compute-budget';
 import type { ParsedSystemInstruction } from '@solana-program/system';

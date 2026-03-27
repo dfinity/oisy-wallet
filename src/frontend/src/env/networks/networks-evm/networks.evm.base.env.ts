@@ -7,6 +7,7 @@ import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
+import { base, baseSepolia } from 'viem/chains';
 
 export const BASE_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_BASE_MAINNET_DISABLED
@@ -23,14 +24,18 @@ export const BASE_NETWORK: EthereumNetwork = {
 	chainId: 8453n,
 	icon: baseMainnetIcon,
 	explorerUrl: BASE_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'base',
 		alchemy: 'base',
 		alchemyDeprecated: Network.BASE_MAINNET,
-		alchemyJsonRpcUrl: 'https://base-mainnet.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://base-mainnet.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://base-mainnet.g.alchemy.com/v2',
+		viemChain: base
 	},
 	exchange: { coingeckoId: 'base' },
-	buy: { onramperId: 'base' }
+	buy: { onramperId: 'base' },
+	pay: { openCryptoPay: 'Base' }
 };
 
 export const BASE_SEPOLIA_NETWORK_SYMBOL = 'SepoliaBASE';
@@ -44,11 +49,14 @@ export const BASE_SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 84532n,
 	icon: baseSepoliaIcon,
 	explorerUrl: BASE_SEPOLIA_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'base-sepolia',
 		alchemy: 'base-sepolia',
 		alchemyDeprecated: Network.BASE_SEPOLIA,
-		alchemyJsonRpcUrl: 'https://base-sepolia.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://base-sepolia.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://base-sepolia.g.alchemy.com/v2',
+		viemChain: baseSepolia
 	}
 };
 

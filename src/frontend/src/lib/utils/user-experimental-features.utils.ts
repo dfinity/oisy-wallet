@@ -6,6 +6,7 @@ import type {
 	ExperimentalFeatureId,
 	UserExperimentalFeatures
 } from '$lib/types/user-experimental-features';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 
 const featureIdToKey = (
@@ -16,7 +17,7 @@ const featureIdToKey = (
 			return { AiAssistantBeta: null };
 
 		default:
-			console.warn(`Unknown featureId: ${featureId}`);
+			consoleWarn(`Unknown featureId: ${featureId}`);
 	}
 };
 

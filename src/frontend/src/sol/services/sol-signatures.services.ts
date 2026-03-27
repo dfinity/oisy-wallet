@@ -1,7 +1,7 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import { fetchSignatures } from '$sol/api/solana.api';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';

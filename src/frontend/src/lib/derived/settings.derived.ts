@@ -1,13 +1,18 @@
+import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import {
+	hideTokenCategoryFilterStore,
 	hideZeroBalancesStore,
 	nftGroupByCollectionStore,
 	nftSortStore,
 	privacyModeStore,
 	showHiddenStore,
 	showSpamStore,
+	tokenCategoryFilterStore,
+	tokensSortStore,
 	type NftSortOrder,
 	type NftSortType
 } from '$lib/stores/settings.store';
+import type { TokensSortType } from '$lib/types/tokens-sort';
 import { derived, type Readable } from 'svelte/store';
 
 export const hideZeroBalances: Readable<boolean> = derived(
@@ -35,6 +40,11 @@ export const showSpam: Readable<boolean> = derived(
 	([$showSpamStore]) => $showSpamStore.enabled
 );
 
+export const tokensSortType: Readable<TokensSortType> = derived(
+	[tokensSortStore],
+	([$tokensSortStore]) => $tokensSortStore.type
+);
+
 export const nftSortOrder: Readable<NftSortOrder> = derived(
 	[nftSortStore],
 	([$nftSortStore]) => $nftSortStore.order
@@ -48,4 +58,19 @@ export const nftSortType: Readable<NftSortType> = derived(
 export const nftGroupByCollection: Readable<boolean> = derived(
 	[nftGroupByCollectionStore],
 	([$nftGroupByCollectionStore]) => $nftGroupByCollectionStore
+);
+
+export const hideTokenCategoryFilter: Readable<boolean> = derived(
+	[hideTokenCategoryFilterStore],
+	([$store]) => $store.enabled
+);
+
+export const showTokenCategoryFilter: Readable<boolean> = derived(
+	[hideTokenCategoryFilter],
+	([$hideTokenCategoryFilter]) => !$hideTokenCategoryFilter
+);
+
+export const tokenCategoryFilter: Readable<TokenCategoryTagValue | undefined> = derived(
+	[tokenCategoryFilterStore],
+	([$store]) => $store.value
 );

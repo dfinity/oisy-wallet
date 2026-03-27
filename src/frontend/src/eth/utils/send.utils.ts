@@ -1,5 +1,5 @@
+import type { OptionEthAddress } from '$eth/types/address';
 import { isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
-import type { OptionEthAddress } from '$lib/types/address';
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 

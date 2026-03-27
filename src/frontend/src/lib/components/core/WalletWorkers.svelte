@@ -1,24 +1,22 @@
 <script lang="ts" module>
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 
 	type T = Token;
 </script>
 
 <script generics="T extends Token = Token" lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { onDestroy, type Snippet } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { InitWalletWorkerFn, WalletWorker } from '$lib/types/listener';
-	import type { TokenId } from '$lib/types/token';
 	import { cleanWorkers, loadWorker } from '$lib/utils/wallet.utils';
 
 	interface Props {
 		tokens: T[];
 		initWalletWorker: InitWalletWorkerFn<T>;
-		children?: Snippet;
 	}
 
-	let { tokens, initWalletWorker, children }: Props = $props();
+	let { tokens, initWalletWorker }: Props = $props();
 
 	const workers = new SvelteMap<TokenId, WalletWorker>();
 
@@ -52,5 +50,3 @@
 </script>
 
 <svelte:window onoisyTriggerWallet={debounceTriggerTimer} />
-
-{@render children?.()}

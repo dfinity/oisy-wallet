@@ -1,23 +1,25 @@
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { retryWithDelay } from '$lib/services/rest.services';
-import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type {
+	PostMessageCommon,
 	PostMessageDataRequestSol,
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { Option } from '$lib/types/utils';
 import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 interface LoadSolWalletParams {
 	identity: OptionIdentity;
@@ -28,7 +30,7 @@ interface LoadSolWalletParams {
 }
 
 interface SolWalletStore {
-	balance: CertifiedData<Option<SolBalance>> | undefined;
+	balance: CertifiedData<Nullish<SolBalance>> | undefined;
 	transactions: Record<string, SolCertifiedTransaction>;
 }
 
@@ -38,6 +40,8 @@ interface SolWalletData {
 }
 
 export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> {
+	#ref: PostMessageCommon['ref'] | undefined;
+
 	private timer = new SchedulerTimer('syncSolWalletStatus');
 
 	private store: SolWalletStore = {
@@ -49,7 +53,15 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		this.timer.stop();
 	}
 
+	protected setRef(data: PostMessageDataRequestSol | undefined) {
+		this.#ref = nonNullish(data)
+			? `${data.tokenAddress ?? SOLANA_TOKEN.symbol}-${data.solanaNetwork}`
+			: undefined;
+	}
+
 	async start(data: PostMessageDataRequestSol | undefined) {
+		this.setRef(data);
+
 		await this.timer.start<PostMessageDataRequestSol>({
 			interval: SOL_WALLET_TIMER_INTERVAL_MILLIS,
 			job: this.syncWallet,
@@ -179,14 +191,24 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	};
 
 	private postMessageWallet(data: SolPostMessageDataResponseWallet) {
+		if (isNullish(this.#ref)) {
+			return;
+		}
+
 		this.timer.postMsg<SolPostMessageDataResponseWallet>({
+			ref: this.#ref,
 			msg: 'syncSolWallet',
 			data
 		});
 	}
 
 	protected postMessageWalletError({ error }: { error: unknown }) {
+		if (isNullish(this.#ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseError>({
+			ref: this.#ref,
 			msg: 'syncSolWalletError',
 			data: {
 				error

@@ -10,10 +10,7 @@ describe('BtcTokenModal', () => {
 	});
 
 	it('necessary content is displayed', () => {
-		mockPage.mock({
-			token: BTC_MAINNET_TOKEN.name,
-			network: BTC_MAINNET_TOKEN.network.id.description
-		});
+		mockPage.mockToken(BTC_MAINNET_TOKEN);
 
 		const { container } = render(BtcTokenModal);
 

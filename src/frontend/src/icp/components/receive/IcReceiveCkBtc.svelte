@@ -37,7 +37,6 @@
 		});
 
 		modalStore.openCkBTCReceive(modalId);
-		return;
 	};
 
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
@@ -47,7 +46,7 @@
 
 <ReceiveButtonWithModal isOpen={$modalCkBTCReceive} {modalId} open={openModal}>
 	{#snippet modal()}
-		<ReceiveAddressModal infoCmp={IcReceiveInfoCkBtc} on:nnsClose={close} />
+		<ReceiveAddressModal infoCmp={IcReceiveInfoCkBtc} onClose={close} />
 	{/snippet}
 </ReceiveButtonWithModal>
 

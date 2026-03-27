@@ -30,7 +30,7 @@
 		testId={REWARDS_MODAL_IMAGE_BANNER}
 	/>
 
-	<span class="absolute right-4 top-4">
+	<span class="absolute top-4 right-4">
 		<RewardDateBadge
 			endDate={reward.endDate}
 			startDate={reward.startDate}

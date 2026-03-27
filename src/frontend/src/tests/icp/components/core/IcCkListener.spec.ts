@@ -1,4 +1,4 @@
-import { IC_CKETH_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKETH_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 import { CKETH_MINTER_INFO_TIMER } from '$icp/constants/cketh.constants';
 import { emit } from '$lib/utils/events.utils';

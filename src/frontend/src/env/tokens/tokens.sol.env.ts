@@ -4,6 +4,7 @@ import {
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK
 } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -18,8 +19,9 @@ export const SOLANA_TOKEN_ID: TokenId = parseTokenId(SOLANA_SYMBOL);
 export const SOLANA_TOKEN: RequiredToken = {
 	id: SOLANA_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'solana',
+	standard: { code: 'solana' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Solana',
 	symbol: SOLANA_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
@@ -36,8 +38,9 @@ export const SOLANA_DEVNET_TOKEN_ID: TokenId = parseTokenId(SOLANA_DEVNET_SYMBOL
 export const SOLANA_DEVNET_TOKEN: RequiredToken = {
 	id: SOLANA_DEVNET_TOKEN_ID,
 	network: SOLANA_DEVNET_NETWORK,
-	standard: 'solana',
+	standard: { code: 'solana' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Solana (Devnet)',
 	symbol: SOLANA_DEVNET_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
@@ -51,8 +54,9 @@ export const SOLANA_LOCAL_TOKEN_ID: TokenId = parseTokenId(SOLANA_LOCAL_SYMBOL);
 export const SOLANA_LOCAL_TOKEN: RequiredToken = {
 	id: SOLANA_LOCAL_TOKEN_ID,
 	network: SOLANA_LOCAL_NETWORK,
-	standard: 'solana',
+	standard: { code: 'solana' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Solana (Local)',
 	symbol: SOLANA_LOCAL_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,

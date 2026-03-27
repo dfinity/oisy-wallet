@@ -41,11 +41,11 @@ export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =
 /**
  * Bitcoin txid to text representation requires inverting the array.
  *
- * @param txid Uint8Array | number[]
+ * @param txid Uint8Array
  * @returns string A human-readable transaction id.
  */
-export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
-	uint8ArrayToHexString(Uint8Array.from(txid).toReversed());
+export const utxoTxIdToString = (txid: Uint8Array): string =>
+	uint8ArrayToHexString(txid.toReversed());
 
 /**
  * Convert a Bitcoin transaction ID hex string to Uint8Array with proper byte reversal.

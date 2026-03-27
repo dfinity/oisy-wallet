@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import tslax from '$sol/assets/tslax.svg';
@@ -14,8 +15,9 @@ export const TSLAX_TOKEN_ID: TokenId = parseTokenId(TSLAX_SYMBOL);
 export const TSLAX_TOKEN: RequiredSpl2022Token = {
 	id: TSLAX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Tesla xStock',
 	symbol: TSLAX_SYMBOL,
 	decimals: TSLAX_DECIMALS,

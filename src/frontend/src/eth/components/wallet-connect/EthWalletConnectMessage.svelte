@@ -12,6 +12,7 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
+	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -75,7 +76,7 @@
 				return BigInt(details.amount);
 			} catch (_: unknown) {
 				// It could not be parsed as a BigInt, so we return undefined.
-				console.warn('Could not parse amount as BigInt:', details.amount);
+				consoleWarn('Could not parse amount as BigInt:', details.amount);
 			}
 		}
 	});
@@ -89,34 +90,34 @@
 				const timestamp = Number(details.expiration);
 
 				if (isNaN(timestamp)) {
-					console.warn('Could not parse expiration as a number:', details.expiration);
+					consoleWarn('Could not parse expiration as a number:', details.expiration);
 					return;
 				}
 
 				return formatSecondsToDate({ seconds: timestamp, language: $currentLanguage });
 			} catch (_: unknown) {
 				// It could not be parsed as a BigInt, so we return undefined.
-				console.warn('Could not parse expiration as Date:', details.expiration);
+				consoleWarn('Could not parse expiration as Date:', details.expiration);
 			}
 		}
 	});
 </script>
 
-<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}:</p>
+<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}</p>
 <p class="mb-4 font-normal">{application}</p>
 
-<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}:</p>
+<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}</p>
 <p class="mb-4 font-normal">{method}</p>
 
 {#if nonNullish(token)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}:</p>
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
 	<p class="mb-4 font-normal">{token.symbol}</p>
 
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}:</p>
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}</p>
 	<p class="mb-4 font-normal">{token.network.name}</p>
 
 	{#if nonNullish(amount)}
-		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}:</p>
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}</p>
 		<p class="mb-4 font-normal"
 			>{formatToken({
 				value: amount,
@@ -129,18 +130,18 @@
 {/if}
 
 {#if nonNullish(spender)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}:</p>
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}</p>
 	<p class="mb-4 font-normal">{spender}</p>
 {/if}
 
 {#if nonNullish(expiration)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}:</p>
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}</p>
 	<p class="mb-4 font-normal">{expiration}</p>
 {/if}
 
-<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>
+<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
 {#if nonNullish(json)}
-	<div class="rounded-xs mt-4 bg-disabled p-4">
+	<div class="mt-4 rounded-xs bg-disabled p-4">
 		<Json _collapsed={true} {json} />
 	</div>
 {:else}

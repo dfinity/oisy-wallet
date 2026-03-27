@@ -7,9 +7,30 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isSolanaToken, isTrumpToken } from '$sol/utils/token.utils';
+import { isSolanaToken, isTokenSolanaNative, isTrumpToken } from '$sol/utils/token.utils';
 
 describe('token.utils', () => {
+	describe('isTokenSolanaNative', () => {
+		it.each(SUPPORTED_SOLANA_TOKENS)('should return true for token $name', (token) => {
+			expect(isTokenSolanaNative(token)).toBeTruthy();
+		});
+
+		it.each(SPL_TOKENS)('should return false for token $name', (token) => {
+			expect(isTokenSolanaNative(token)).toBeFalsy();
+		});
+
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...ERC20_TWIN_TOKENS,
+			...EVM_ERC20_TOKENS
+		])('should return false for token $name', (token) => {
+			expect(isTokenSolanaNative(token)).toBeFalsy();
+		});
+	});
+
 	describe('isSolanaToken', () => {
 		it.each([...SUPPORTED_SOLANA_TOKENS, ...SPL_TOKENS])(
 			'should return true for token $name',

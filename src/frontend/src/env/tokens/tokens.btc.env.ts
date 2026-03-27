@@ -7,6 +7,7 @@ import {
 	BTC_TESTNET_NETWORK
 } from '$env/networks/networks.btc.env';
 import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { RequiredToken, RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -20,15 +21,16 @@ export const BTC_MAINNET_TOKEN_ID: TokenId = parseTokenId(BTC_MAINNET_SYMBOL);
 export const BTC_MAINNET_TOKEN: RequiredTokenWithLinkedData = {
 	id: BTC_MAINNET_TOKEN_ID,
 	network: BTC_MAINNET_NETWORK,
-	standard: 'bitcoin',
+	standard: { code: 'bitcoin' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Bitcoin',
 	symbol: BTC_MAINNET_SYMBOL,
 	decimals: BTC_DECIMALS,
 	icon: bitcoin,
 	twinTokenSymbol: 'ckBTC',
 	groupData: BTC_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: { onramperId: 'btc' }
 };
 
@@ -39,8 +41,9 @@ export const BTC_TESTNET_TOKEN_ID: TokenId = parseTokenId(BTC_TESTNET_SYMBOL);
 export const BTC_TESTNET_TOKEN: RequiredToken = {
 	id: BTC_TESTNET_TOKEN_ID,
 	network: BTC_TESTNET_NETWORK,
-	standard: 'bitcoin',
+	standard: { code: 'bitcoin' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Bitcoin (Testnet)',
 	symbol: BTC_TESTNET_SYMBOL,
 	decimals: BTC_DECIMALS,
@@ -54,8 +57,9 @@ export const BTC_REGTEST_TOKEN_ID: TokenId = parseTokenId(BTC_REGTEST_SYMBOL);
 export const BTC_REGTEST_TOKEN: RequiredToken = {
 	id: BTC_REGTEST_TOKEN_ID,
 	network: BTC_REGTEST_NETWORK,
-	standard: 'bitcoin',
+	standard: { code: 'bitcoin' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Bitcoin (Regtest)',
 	symbol: BTC_REGTEST_SYMBOL,
 	decimals: BTC_DECIMALS,

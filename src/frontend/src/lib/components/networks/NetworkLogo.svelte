@@ -13,25 +13,36 @@
 		color?: 'off-white' | 'white';
 		testId?: string;
 		transparent?: boolean;
+		alwaysInverted?: boolean;
 	}
 
-	let { network, size = 'xxs', color = 'off-white', testId, transparent = false }: Props = $props();
+	let {
+		network,
+		size = 'xxs',
+		color = 'off-white',
+		testId,
+		transparent = false,
+		alwaysInverted = false
+	}: Props = $props();
 
 	const isPseudoNetwork = $derived(network.id === ICP_PSEUDO_TESTNET_NETWORK_ID);
 	const isTestnet = $derived(network.env === 'testnet' && !isPseudoNetwork);
+
+	const { icon, name } = $derived(network ?? {});
 </script>
 
 {#if transparent}
 	<div
 		class="block"
+		class:always-inverted={alwaysInverted}
 		class:invert-on-dark-theme={!isTestnet}
 		data-tid={`${testId}-transparent-container`}
 	>
 		<Logo
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
 			{color}
 			{size}
-			src={network.icon}
+			src={icon}
 			testId={`${testId}-transparent`}
 		/>
 	</div>
@@ -41,14 +52,18 @@
 		class="rounded-full bg-primary ring ring-disabled"
 		data-tid={`${testId}-light-container`}
 	>
-		<span class="inline-flex" class:invert-on-dark-theme={!isTestnet}>
+		<span
+			class="inline-flex"
+			class:always-inverted={alwaysInverted}
+			class:invert-on-dark-theme={!isTestnet}
+		>
 			<Logo
 				alt={replacePlaceholders($i18n.core.alt.logo, {
-					$name: network.name
+					$name: name
 				})}
 				{color}
 				{size}
-				src={network.icon}
+				src={icon}
 				testId={`${testId}-default`}
 			/>
 		</span>

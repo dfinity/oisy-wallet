@@ -69,7 +69,8 @@ export const formatUpdatedAgreementsHtml = ({
 		renderAgreementItemHtml({
 			agreementType: camelToSnake(agreementType as keyof EnvAgreements),
 			i18n,
-			Component: mapAgreementToComponent(agreementType as keyof EnvAgreements)
+			Component: mapAgreementToComponent(agreementType as keyof EnvAgreements),
+			props: { color: 'blue' }
 		})
 	);
 

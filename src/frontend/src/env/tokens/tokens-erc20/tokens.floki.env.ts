@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import floki from '$eth/assets/floki.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -13,12 +14,12 @@ export const FLOKI_TOKEN_ID: TokenId = parseTokenId(FLOKI_SYMBOL);
 export const FLOKI_TOKEN: RequiredAdditionalErc20Token = {
 	id: FLOKI_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'FLOKI',
 	symbol: FLOKI_SYMBOL,
 	decimals: FLOKI_DECIMALS,
 	icon: floki,
-	address: '0xcf0c122c6b73ff809c693db761e7baebe62b6a2e',
-	exchange: 'erc20'
+	address: '0xcf0c122c6b73ff809c693db761e7baebe62b6a2e'
 };

@@ -2,44 +2,54 @@ import type {
 	AddUserCredentialResult,
 	CustomToken,
 	PendingTransaction,
-	UserToken,
-	UserTokenId
+	TokenId
 } from '$declarations/backend/backend.did';
 import {
 	addPendingBtcTransaction,
 	addUserCredential,
+	allowSigning,
 	createUserProfile,
+	getExchangeRate,
+	getExchangeRates,
 	getPendingBtcTransactions,
 	getUserProfile,
+	getUserTransactions,
 	listCustomTokens,
-	listUserTokens,
 	removeCustomToken,
-	removeUserToken,
+	saveUserTransactions,
 	setCustomToken,
 	setManyCustomTokens,
-	setManyUserTokens,
-	setUserToken,
 	updateUserExperimentalFeatureSettings
 } from '$lib/api/backend.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import type {
+	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
+	AllowSigningOutcome,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	GetUserProfileResponse,
+	GetUserTransactionsParams,
+	SaveUserTransactionsParams,
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIIDelegationChain } from '$tests/mocks/ii-delegation.mock';
 import { mockUserExperimentalFeatures } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
-import { mockUserTokens } from '$tests/mocks/user-tokens.mock';
-import { Principal } from '@dfinity/principal';
+import {
+	mockGetUserTransactionsResponse,
+	mockUserTransactionTokenId
+} from '$tests/mocks/user-transactions.mock';
 import type { QueryParams } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 describe('backend.api', () => {
@@ -57,37 +67,6 @@ describe('backend.api', () => {
 		vi.spyOn(BackendCanister, 'create').mockResolvedValue(backendCanisterMock);
 	});
 
-	describe('listUserTokens', () => {
-		const mockParams: CanisterApiFunctionParams<QueryParams> = {
-			...baseParams,
-			certified
-		};
-
-		beforeEach(() => {
-			backendCanisterMock.listUserTokens.mockResolvedValue(mockUserTokens);
-		});
-
-		it('should successfully call listUserTokens endpoint', async () => {
-			const result = await listUserTokens(mockParams);
-
-			expect(result).toEqual(mockUserTokens);
-
-			expect(backendCanisterMock.listUserTokens).toHaveBeenCalledExactlyOnceWith({ certified });
-		});
-
-		it('should throw an error if identity is undefined', async () => {
-			await expect(listUserTokens({ ...mockParams, identity: undefined })).rejects.toThrow();
-		});
-
-		it('should throw an error if listUserTokens throws', async () => {
-			backendCanisterMock.listUserTokens.mockImplementation(() => {
-				throw new Error('mock-error');
-			});
-
-			await expect(listUserTokens(mockParams)).rejects.toThrow();
-		});
-	});
-
 	describe('listCustomTokens', () => {
 		const mockParams: CanisterApiFunctionParams<QueryParams> = {
 			...baseParams,
@@ -102,7 +81,7 @@ describe('backend.api', () => {
 			const result = await listCustomTokens(mockParams);
 
 			expect(result).toEqual(mockCustomTokens);
-			expect(backendCanisterMock.listCustomTokens).toHaveBeenCalledExactlyOnceWith({ certified });
+			expect(backendCanisterMock.listCustomTokens).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should throw an error if identity is undefined', async () => {
@@ -186,41 +165,6 @@ describe('backend.api', () => {
 		});
 	});
 
-	describe('removeUserToken', () => {
-		const [mockUserToken] = mockUserTokens;
-
-		const mockParams: CanisterApiFunctionParams<UserTokenId> = {
-			...baseParams,
-			chain_id: mockUserToken.chain_id,
-			contract_address: mockUserToken.contract_address
-		};
-
-		beforeEach(() => {
-			backendCanisterMock.removeUserToken.mockResolvedValue();
-		});
-
-		it('should successfully call removeUserToken endpoint', async () => {
-			await removeUserToken(mockParams);
-
-			expect(backendCanisterMock.removeUserToken).toHaveBeenCalledExactlyOnceWith({
-				chain_id: mockUserToken.chain_id,
-				contract_address: mockUserToken.contract_address
-			});
-		});
-
-		it('should throw an error if identity is undefined', async () => {
-			await expect(removeUserToken({ ...mockParams, identity: undefined })).rejects.toThrow();
-		});
-
-		it('should throw an error if removeUserToken throws', async () => {
-			backendCanisterMock.removeUserToken.mockImplementation(() => {
-				throw new Error('mock-error');
-			});
-
-			await expect(removeUserToken(mockParams)).rejects.toThrow();
-		});
-	});
-
 	describe('removeCustomToken', () => {
 		const [mockCustomToken] = mockCustomTokens;
 
@@ -251,72 +195,6 @@ describe('backend.api', () => {
 			});
 
 			await expect(removeCustomToken(mockParams)).rejects.toThrow();
-		});
-	});
-
-	describe('setManyUserTokens', () => {
-		const mockParams: CanisterApiFunctionParams<{ tokens: UserToken[] }> = {
-			...baseParams,
-			tokens: mockUserTokens
-		};
-
-		beforeEach(() => {
-			backendCanisterMock.setManyUserTokens.mockResolvedValue();
-		});
-
-		it('should successfully call setManyUserTokens endpoint', async () => {
-			await setManyUserTokens(mockParams);
-
-			expect(backendCanisterMock.setManyUserTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: mockUserTokens
-			});
-		});
-
-		it('should throw an error if identity is undefined', async () => {
-			await expect(setManyUserTokens({ ...mockParams, identity: undefined })).rejects.toThrow();
-		});
-
-		it('should throw an error if setManyUserTokens throws', async () => {
-			backendCanisterMock.setManyUserTokens.mockImplementation(() => {
-				throw new Error('mock-error');
-			});
-
-			await expect(setManyUserTokens(mockParams)).rejects.toThrow();
-		});
-	});
-
-	describe('setUserToken', () => {
-		const [mockUserToken] = mockUserTokens;
-
-		const mockParams: CanisterApiFunctionParams<{
-			token: UserToken;
-		}> = {
-			...baseParams,
-			token: mockUserToken
-		};
-
-		beforeEach(() => {
-			backendCanisterMock.setUserToken.mockResolvedValue();
-		});
-
-		it('should successfully call setUserToken endpoint', async () => {
-			await setUserToken(mockParams);
-
-			expect(backendCanisterMock.setUserToken).toHaveBeenCalledExactlyOnceWith({
-				token: mockUserToken
-			});
-		});
-
-		it('should throw an error if identity is undefined', async () => {
-			await expect(setUserToken({ ...mockParams, identity: undefined })).rejects.toThrow();
-		});
-
-		it('should throw an error if setUserToken throws', async () => {
-			backendCanisterMock.setUserToken.mockImplementation(() => {
-				throw new Error('mock-error');
-			});
-
-			await expect(setUserToken(mockParams)).rejects.toThrow();
 		});
 	});
 
@@ -454,10 +332,11 @@ describe('backend.api', () => {
 			txId: new Uint8Array([1, 2, 3]),
 			utxos: [mockUtxo],
 			network: { mainnet: null },
-			address: 'address'
+			address: 'address',
+			iiDelegationChain: mockIIDelegationChain
 		};
 
-		const mockResponse = true;
+		const mockResponse: AddPendingTransactionOutcome = { response: true };
 
 		beforeEach(() => {
 			backendCanisterMock.btcAddPendingTransaction.mockResolvedValue(mockResponse);
@@ -471,7 +350,8 @@ describe('backend.api', () => {
 				txId: new Uint8Array([1, 2, 3]),
 				utxos: [mockUtxo],
 				network: { mainnet: null },
-				address: 'address'
+				address: 'address',
+				iiDelegationChain: mockIIDelegationChain
 			});
 		});
 
@@ -494,7 +374,8 @@ describe('backend.api', () => {
 		const mockParams: CanisterApiFunctionParams<BtcGetPendingTransactionParams> = {
 			...baseParams,
 			network: { mainnet: null },
-			address: 'address'
+			address: 'address',
+			iiDelegationChain: mockIIDelegationChain
 		};
 
 		const mockResponse: PendingTransaction[] = [
@@ -505,16 +386,17 @@ describe('backend.api', () => {
 		];
 
 		beforeEach(() => {
-			backendCanisterMock.btcGetPendingTransaction.mockResolvedValue(mockResponse);
+			backendCanisterMock.btcGetPendingTransactions.mockResolvedValue({ response: mockResponse });
 		});
 
 		it('should successfully call btcGetPendingTransaction endpoint', async () => {
 			const result = await getPendingBtcTransactions(mockParams);
 
-			expect(result).toEqual(mockResponse);
-			expect(backendCanisterMock.btcGetPendingTransaction).toHaveBeenCalledExactlyOnceWith({
+			expect(result).toEqual({ response: mockResponse });
+			expect(backendCanisterMock.btcGetPendingTransactions).toHaveBeenCalledExactlyOnceWith({
 				network: { mainnet: null },
-				address: 'address'
+				address: 'address',
+				iiDelegationChain: mockIIDelegationChain
 			});
 		});
 
@@ -525,11 +407,47 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if getPendingBtcTransactions throws', async () => {
-			backendCanisterMock.btcGetPendingTransaction.mockImplementation(() => {
+			backendCanisterMock.btcGetPendingTransactions.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
 			await expect(getPendingBtcTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('allowSigning', () => {
+		const mockParams: CanisterApiFunctionParams<AllowSigningParams> = {
+			...baseParams,
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		const mockResponse: AllowSigningOutcome = {
+			response: { status: { Executed: null }, allowed_cycles: 100n }
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.allowSigning.mockResolvedValue(mockResponse);
+		});
+
+		it('should successfully call allowSigning endpoint', async () => {
+			const result = await allowSigning(mockParams);
+
+			expect(result).toEqual(mockResponse);
+			expect(backendCanisterMock.allowSigning).toHaveBeenCalledExactlyOnceWith({
+				iiDelegationChain: mockIIDelegationChain
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(allowSigning({ ...mockParams, identity: undefined })).rejects.toThrow();
+		});
+
+		it('should throw an error if allowSigning throws', async () => {
+			backendCanisterMock.allowSigning.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(allowSigning(mockParams)).rejects.toThrow();
 		});
 	});
 
@@ -568,6 +486,177 @@ describe('backend.api', () => {
 			});
 
 			await expect(updateUserExperimentalFeatureSettings(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('getUserTransactions', () => {
+		const mockParams: CanisterApiFunctionParams<GetUserTransactionsParams> = {
+			...baseParams,
+			tokenId: mockUserTransactionTokenId,
+			start: 5n,
+			maxResults: 10n
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.getUserTransactions.mockResolvedValue(mockGetUserTransactionsResponse);
+		});
+
+		it('should successfully call getUserTransactions endpoint', async () => {
+			const result = await getUserTransactions(mockParams);
+
+			expect(result).toEqual(mockGetUserTransactionsResponse);
+			expect(backendCanisterMock.getUserTransactions).toHaveBeenCalledExactlyOnceWith({
+				tokenId: mockUserTransactionTokenId,
+				start: 5n,
+				maxResults: 10n
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(getUserTransactions({ ...mockParams, identity: undefined })).rejects.toThrow();
+		});
+
+		it('should throw an error if getUserTransactions throws', async () => {
+			backendCanisterMock.getUserTransactions.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(getUserTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('saveUserTransactions', () => {
+		const mockParams: CanisterApiFunctionParams<SaveUserTransactionsParams> = {
+			...baseParams,
+			tokenId: mockUserTransactionTokenId,
+			transactions: []
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.saveUserTransactions.mockResolvedValue();
+		});
+
+		it('should successfully call saveUserTransactions endpoint', async () => {
+			const result = await saveUserTransactions(mockParams);
+
+			expect(result).toEqual(undefined);
+			expect(backendCanisterMock.saveUserTransactions).toHaveBeenCalledExactlyOnceWith({
+				tokenId: mockUserTransactionTokenId,
+				transactions: []
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(saveUserTransactions({ ...mockParams, identity: undefined })).rejects.toThrow();
+		});
+
+		it('should throw an error if saveUserTransactions throws', async () => {
+			backendCanisterMock.saveUserTransactions.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(saveUserTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('getExchangeRate', () => {
+		const tokenId: TokenId = { Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
+		const mockRate: BackendExchangeRate = {
+			usd: {
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
+			}
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.getExchangeRate.mockResolvedValue(mockRate);
+		});
+
+		it('should successfully call getExchangeRate endpoint', async () => {
+			const result = await getExchangeRate({
+				...baseParams,
+				token_id: tokenId,
+				certified: false
+			});
+
+			expect(result).toEqual(mockRate);
+			expect(backendCanisterMock.getExchangeRate).toHaveBeenCalledExactlyOnceWith({
+				token_id: tokenId,
+				certified: false
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				getExchangeRate({ identity: undefined, token_id: tokenId, certified: false })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if getExchangeRate throws', async () => {
+			backendCanisterMock.getExchangeRate.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(
+				getExchangeRate({ ...baseParams, token_id: tokenId, certified: false })
+			).rejects.toThrow();
+		});
+	});
+
+	describe('getExchangeRates', () => {
+		const tokenIds: TokenId[] = [
+			{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
+			{ Erc20: ['0xabc', 1n] }
+		];
+		const mockRate: BackendExchangeRate = {
+			usd: {
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
+			}
+		};
+
+		const mockMap = new Map([
+			['Icrc:ryjl3-tyaaa-aaaaa-aaaba-cai', mockRate],
+			['Erc20:0xabc:1', mockRate]
+		]);
+
+		beforeEach(() => {
+			backendCanisterMock.getExchangeRates.mockResolvedValue(mockMap);
+		});
+
+		it('should successfully call getExchangeRates endpoint', async () => {
+			const result = await getExchangeRates({
+				...baseParams,
+				token_ids: tokenIds,
+				certified: false
+			});
+
+			expect(result).toBeInstanceOf(Map);
+			expect(result.size).toBe(2);
+			expect(backendCanisterMock.getExchangeRates).toHaveBeenCalledExactlyOnceWith({
+				token_ids: tokenIds,
+				certified: false
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				getExchangeRates({ identity: undefined, token_ids: tokenIds, certified: false })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if getExchangeRates throws', async () => {
+			backendCanisterMock.getExchangeRates.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(
+				getExchangeRates({ ...baseParams, token_ids: tokenIds, certified: false })
+			).rejects.toThrow();
 		});
 	});
 });

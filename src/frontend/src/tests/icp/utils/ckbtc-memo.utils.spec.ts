@@ -1,6 +1,6 @@
 import { decodeBurnMemo, decodeMintMemo, LegacyMintMemoError } from '$icp/utils/ckbtc-memo.utils';
-import { Cbor } from '@dfinity/agent';
 import { hexStringToUint8Array } from '@dfinity/utils';
+import { Cbor } from '@icp-sdk/core/agent';
 
 describe('ckbtc-memo.utils', () => {
 	describe('decode mint memo', () => {

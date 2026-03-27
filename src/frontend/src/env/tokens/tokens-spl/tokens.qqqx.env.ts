@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import qqqx from '$sol/assets/qqqx.svg';
@@ -14,8 +15,9 @@ export const QQQX_TOKEN_ID: TokenId = parseTokenId(QQQX_SYMBOL);
 export const QQQX_TOKEN: RequiredSpl2022Token = {
 	id: QQQX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Nasdaq xStock',
 	symbol: QQQX_SYMBOL,
 	decimals: QQQX_DECIMALS,

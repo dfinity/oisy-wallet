@@ -1,4 +1,5 @@
 use candid::Principal;
+use pretty_assertions::assert_eq;
 use shared::types::{
     network::{SetShowTestnetsRequest, SetTestnetsSettingsError},
     user_profile::{GetUserProfileError, UserProfile},
@@ -19,10 +20,7 @@ fn test_set_user_show_testnets_saves_the_toggle() {
         pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
-    assert_eq!(
-        profile.settings.unwrap().networks.testnets.show_testnets,
-        false
-    );
+    assert!(!profile.settings.unwrap().networks.testnets.show_testnets);
 
     let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: true,
@@ -49,7 +47,7 @@ fn test_set_user_show_testnets_saves_the_toggle() {
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.networks.testnets.show_testnets, true);
+    assert!(settings.networks.testnets.show_testnets);
 
     let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: false,
@@ -76,7 +74,7 @@ fn test_set_user_show_testnets_saves_the_toggle() {
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.networks.testnets.show_testnets, false);
+    assert!(!settings.networks.testnets.show_testnets);
 }
 
 #[test]
@@ -89,10 +87,7 @@ fn test_set_user_show_testnets_cannot_update_wrong_version() {
         pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
-    assert_eq!(
-        profile.settings.unwrap().networks.testnets.show_testnets,
-        false
-    );
+    assert!(!profile.settings.unwrap().networks.testnets.show_testnets);
 
     let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: true,
@@ -129,7 +124,7 @@ fn test_set_user_show_testnets_cannot_update_wrong_version() {
         (),
     );
 
-    assert_eq!(
+    assert!(
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
@@ -137,8 +132,7 @@ fn test_set_user_show_testnets_cannot_update_wrong_version() {
             .unwrap()
             .networks
             .testnets
-            .show_testnets,
-        true
+            .show_testnets
     );
 }
 
@@ -153,10 +147,7 @@ fn test_set_user_show_testnets_does_not_change_existing_value_if_same() {
 
     let profile = create_profile_response.expect("Create failed");
 
-    assert_eq!(
-        profile.settings.unwrap().networks.testnets.show_testnets,
-        false
-    );
+    assert!(!profile.settings.unwrap().networks.testnets.show_testnets);
 
     let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: false,
@@ -183,7 +174,7 @@ fn test_set_user_show_testnets_does_not_change_existing_value_if_same() {
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.networks.testnets.show_testnets, false);
+    assert!(!settings.networks.testnets.show_testnets);
 
     let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: false,
@@ -210,7 +201,7 @@ fn test_set_user_show_testnets_does_not_change_existing_value_if_same() {
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.networks.testnets.show_testnets, false);
+    assert!(!settings.networks.testnets.show_testnets);
 
     let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: true,
@@ -237,7 +228,7 @@ fn test_set_user_show_testnets_does_not_change_existing_value_if_same() {
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.networks.testnets.show_testnets, true);
+    assert!(settings.networks.testnets.show_testnets);
 
     let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: true,
@@ -264,5 +255,5 @@ fn test_set_user_show_testnets_does_not_change_existing_value_if_same() {
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.networks.testnets.show_testnets, true);
+    assert!(settings.networks.testnets.show_testnets);
 }

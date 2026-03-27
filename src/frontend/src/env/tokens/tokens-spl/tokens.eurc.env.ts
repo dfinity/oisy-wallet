@@ -1,6 +1,7 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
 import eurc from '$eth/assets/eurc.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -15,8 +16,9 @@ export const EURC_TOKEN_ID: TokenId = parseTokenId(EURC_SYMBOL);
 export const EURC_TOKEN: RequiredSplToken = {
 	id: EURC_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'Euro Coin',
 	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
@@ -36,8 +38,9 @@ export const DEVNET_EURC_TOKEN_ID: TokenId = parseTokenId(DEVNET_EURC_SYMBOL);
 export const DEVNET_EURC_TOKEN: RequiredSplToken = {
 	id: DEVNET_EURC_TOKEN_ID,
 	network: SOLANA_DEVNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'EURC (Devnet)',
 	symbol: DEVNET_EURC_SYMBOL,
 	decimals: EURC_DECIMALS,

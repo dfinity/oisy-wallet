@@ -1,6 +1,7 @@
 import { Currency } from '$lib/enums/currency';
+import { AppWorker } from '$lib/services/_worker.services';
 import { syncExchange } from '$lib/services/exchange.services';
-import { initExchangeWorker, type ExchangeWorker } from '$lib/services/worker.exchange.services';
+import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type {
 	PostMessageDataRequestExchangeTimer,
@@ -30,29 +31,46 @@ vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
 
 let workerInstance: Worker;
 
-vi.mock('$lib/workers/workers?worker', () => ({
-	default: vi.fn().mockImplementation(() => {
-		// @ts-expect-error testing this on purpose with a mock class
-		workerInstance = new Worker();
-		return workerInstance;
-	})
-}));
+vi.mock('$lib/workers/workers?worker', () => {
+	class MockWorkers {
+		constructor() {
+			// @ts-expect-error testing this on purpose with a mock class
+			workerInstance = new Worker();
+			return workerInstance;
+		}
+	}
+
+	return {
+		default: MockWorkers
+	};
+});
+
+const mockId = 'abcdefgh';
+
+vi.stubGlobal('crypto', {
+	randomUUID: vi.fn().mockReturnValue(mockId)
+});
 
 describe('worker.exchange.services', () => {
-	describe('initExchangeWorker', () => {
+	describe('ExchangeWorker', () => {
 		let worker: ExchangeWorker;
 
 		const mockData: PostMessageDataRequestExchangeTimer = {
 			currentCurrency: Currency.EUR,
-			erc20Addresses: [{ address: mockEthAddress, coingeckoId: 'ethereum' }],
+			erc20Addresses: [{ address: mockEthAddress, coingeckoId: 'ethereum', chainId: 1n }],
 			icrcCanisterIds: [mockIcrcCustomToken.ledgerCanisterId],
-			splAddresses: [mockSplAddress]
+			splAddresses: [mockSplAddress],
+			erc4626TokensExchangeData: []
 		};
 
 		beforeEach(async () => {
 			vi.clearAllMocks();
 
-			worker = await initExchangeWorker();
+			worker = await ExchangeWorker.init();
+		});
+
+		it('should initialize a worker instance', () => {
+			expect(worker).toBeInstanceOf(AppWorker);
 		});
 
 		it('should start the worker and send the correct start message', () => {
@@ -60,6 +78,7 @@ describe('worker.exchange.services', () => {
 
 			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 				msg: 'startExchangeTimer',
+				workerId: mockId,
 				data: mockData
 			});
 		});
@@ -67,13 +86,19 @@ describe('worker.exchange.services', () => {
 		it('should stop the worker and send the correct stop message', () => {
 			worker.stopExchangeTimer();
 
-			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({ msg: 'stopExchangeTimer' });
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopExchangeTimer',
+				workerId: mockId
+			});
 		});
 
 		it('should destroy the worker', () => {
 			worker.destroy();
 
-			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({ msg: 'stopExchangeTimer' });
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopExchangeTimer',
+				workerId: mockId
+			});
 
 			expect(workerInstance.terminate).toHaveBeenCalledOnce();
 		});
@@ -81,7 +106,11 @@ describe('worker.exchange.services', () => {
 		describe('onmessage', () => {
 			it('should handle syncExchange message', () => {
 				const mockData: PostMessageDataResponseExchange = {
-					currentExchangeRate: { exchangeRateToUsd: 1.5, currency: Currency.EUR },
+					currentExchangeRate: {
+						exchangeRateToUsd: 1.5,
+						exchangeRate24hChangeMultiplier: 1,
+						currency: Currency.EUR
+					},
 					currentEthPrice: { ethereum: { usd: 1 } },
 					currentBtcPrice: { bitcoin: { usd: 50000 } },
 					currentErc20Prices: {},
@@ -89,8 +118,11 @@ describe('worker.exchange.services', () => {
 					currentIcrcPrices: {},
 					currentSolPrice: { solana: { usd: 100 } },
 					currentSplPrices: {},
+					currentErc4626Prices: {},
 					currentBnbPrice: { binancecoin: { usd: 400 } },
-					currentPolPrice: {}
+					currentPolPrice: {},
+					currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+					currentBaseEthPrice: { ethereum: { usd: 1 } }
 				};
 				const payload = { msg: 'syncExchange', data: mockData };
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);

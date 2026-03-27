@@ -1,23 +1,24 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
-	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
+	import { enabledErc20Tokens, enabledErc4626Tokens } from '$lib/derived/tokens.derived';
 	import { syncBalancesFromCache } from '$lib/services/listener.services';
 
-	interface Props {
-		children?: Snippet;
-	}
-
-	let { children }: Props = $props();
-
 	let loading = $state(false);
+	let timer = $state<NodeJS.Timeout | undefined>();
+
+	const resetTimer = () => {
+		if (nonNullish(timer)) {
+			clearTimeout(timer);
+			timer = undefined;
+		}
+	};
 
 	const onLoad = async () => {
 		if (isNullish($ethAddress)) {
@@ -25,6 +26,14 @@
 		}
 
 		if (loading) {
+			resetTimer();
+
+			timer = setTimeout(() => {
+				resetTimer();
+
+				onLoad();
+			}, 500);
+
 			return;
 		}
 
@@ -32,10 +41,10 @@
 
 		await Promise.allSettled([
 			// We might require Ethereum balance on IC network as well given that one can convert ckETH to ETH.
-			loadEthBalances([...$enabledEthereumTokens, ...$enabledEvmTokens]),
+			loadEthBalances($enabledEthEvmNativeTokens),
 			loadErc20Balances({
 				address: $ethAddress,
-				erc20Tokens: $enabledErc20Tokens
+				tokens: [...$enabledErc20Tokens, ...$enabledErc4626Tokens]
 			})
 		]);
 
@@ -46,7 +55,8 @@
 
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
-		[$ethAddress, $enabledEthereumTokens, $enabledEvmTokens, $enabledErc20Tokens];
+		[$ethAddress, $enabledEthEvmNativeTokens, $enabledErc20Tokens, $enabledErc4626Tokens];
+
 		debounceLoad();
 	});
 
@@ -57,8 +67,10 @@
 			return;
 		}
 
+		loading = true;
+
 		await Promise.allSettled(
-			[...$enabledEthereumTokens, ...$enabledEvmTokens, ...$enabledErc20Tokens].map(
+			[...$enabledEthEvmNativeTokens, ...$enabledErc20Tokens, ...$enabledErc4626Tokens].map(
 				async ({ id: tokenId, network: { id: networkId } }) => {
 					await syncBalancesFromCache({
 						principal,
@@ -68,9 +80,9 @@
 				}
 			)
 		);
+
+		loading = false;
 	});
 </script>
 
-<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children?.()}
-</IntervalLoader>
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad} />

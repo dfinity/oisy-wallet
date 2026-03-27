@@ -53,6 +53,7 @@ import {
 	parseInitializeNonTransferableMintInstruction,
 	parseInitializePausableConfigInstruction,
 	parseInitializePermanentDelegateInstruction,
+	parseInitializePermissionedBurnInstruction,
 	parseInitializeScaledUiAmountMintInstruction,
 	parseInitializeTokenGroupInstruction,
 	parseInitializeTokenGroupMemberInstruction,
@@ -62,6 +63,8 @@ import {
 	parseMintToCheckedInstruction,
 	parseMintToInstruction,
 	parsePauseInstruction,
+	parsePermissionedBurnCheckedInstruction,
+	parsePermissionedBurnInstruction,
 	parseReallocateInstruction,
 	parseRemoveTokenMetadataKeyInstruction,
 	parseResumeInstruction,
@@ -74,6 +77,7 @@ import {
 	parseTransferCheckedWithFeeInstruction,
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction,
+	parseUnwrapLamportsInstruction,
 	parseUpdateConfidentialTransferMintInstruction,
 	parseUpdateDefaultAccountStateInstruction,
 	parseUpdateGroupMemberPointerInstruction,
@@ -185,6 +189,10 @@ vi.mock(import('@solana-program/token-2022'), async (importOriginal) => {
 		parseWithdrawWithheldTokensFromAccountsForConfidentialTransferFeeInstruction: vi.fn(),
 		parseWithdrawWithheldTokensFromAccountsInstruction: vi.fn(),
 		parseWithdrawWithheldTokensFromMintForConfidentialTransferFeeInstruction: vi.fn(),
+		parseUnwrapLamportsInstruction: vi.fn(),
+		parseInitializePermissionedBurnInstruction: vi.fn(),
+		parsePermissionedBurnInstruction: vi.fn(),
+		parsePermissionedBurnCheckedInstruction: vi.fn(),
 		parseWithdrawWithheldTokensFromMintInstruction: vi.fn()
 	};
 });
@@ -1305,6 +1313,56 @@ describe('sol-instructions-token-2022.utils', () => {
 			});
 
 			expect(parseInitializeTokenGroupMemberInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
+		it('should parse an UnwrapLamports instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(Token2022Instruction.UnwrapLamports);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.UnwrapLamports
+			});
+
+			expect(parseUnwrapLamportsInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse an InitializePermissionedBurn instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.InitializePermissionedBurn
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.InitializePermissionedBurn
+			});
+
+			expect(parseInitializePermissionedBurnInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
+		it('should parse a PermissionedBurn instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.PermissionedBurn
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.PermissionedBurn
+			});
+
+			expect(parsePermissionedBurnInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse a PermissionedBurnChecked instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.PermissionedBurnChecked
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.PermissionedBurnChecked
+			});
+
+			expect(parsePermissionedBurnCheckedInstruction).toHaveBeenCalledExactlyOnceWith(
 				mockInstruction
 			);
 		});

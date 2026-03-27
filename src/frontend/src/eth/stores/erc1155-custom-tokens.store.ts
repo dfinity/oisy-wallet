@@ -1,4 +1,4 @@
 import type { Erc1155Token } from '$eth/types/erc1155';
-import { initCertifiedUserTokensStore } from '$lib/stores/user-tokens.store';
+import { initCertifiedCustomTokensStore } from '$lib/stores/custom-tokens.store';
 
-export const erc1155CustomTokensStore = initCertifiedUserTokensStore<Erc1155Token>();
+export const erc1155CustomTokensStore = initCertifiedCustomTokensStore<Erc1155Token>();

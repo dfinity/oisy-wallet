@@ -6,15 +6,11 @@
 	import EthWalletConnectSignModal from '$eth/components/wallet-connect/EthWalletConnectSignModal.svelte';
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 	import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 
-	interface Props {
-		listener: OptionWalletConnectListener;
-	}
-
-	let { listener = $bindable() }: Props = $props();
+	let listener = $derived($walletConnectListenerStore);
 
 	let request = $derived(
 		$modalWalletConnectSign
@@ -38,9 +34,11 @@
 </script>
 
 {#if $modalWalletConnectSign && nonNullish(request)}
-	{#if nonNullish(ethChainId)}
-		<EthWalletConnectSignModal {request} bind:listener />
-	{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
-		<SolWalletConnectSignModal network={sourceSolNetwork} {request} bind:listener />
-	{/if}
+	{#key request.id}
+		{#if nonNullish(ethChainId)}
+			<EthWalletConnectSignModal {listener} {request} />
+		{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
+			<SolWalletConnectSignModal {listener} network={sourceSolNetwork} {request} />
+		{/if}
+	{/key}
 {/if}

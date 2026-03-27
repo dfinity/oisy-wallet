@@ -1,24 +1,25 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import usdc from '$eth/assets/usdc.svg';
-import type { Erc1155Token, RequiredErc1155Token } from '$eth/types/erc1155';
+import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 const NYAN_CAT_SYMBOL = 'NYAN';
 
 const NYAN_CAT_TOKEN_ID: TokenId = parseTokenId(NYAN_CAT_SYMBOL);
 
-export const NYAN_CAT_TOKEN: RequiredErc1155Token = {
+export const NYAN_CAT_TOKEN: Erc1155Token = {
 	id: NYAN_CAT_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc1155',
+	standard: { code: 'erc1155' },
 	category: 'custom',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Nyan Cat',
 	symbol: NYAN_CAT_SYMBOL,
 	decimals: 0,
@@ -30,11 +31,12 @@ const BUILD_AN_APE_SYMBOL = 'BAPES';
 
 const BUILD_AN_APE_TOKEN_ID: TokenId = parseTokenId(BUILD_AN_APE_SYMBOL);
 
-export const BUILD_AN_APE_TOKEN: RequiredErc1155Token = {
+export const BUILD_AN_APE_TOKEN: Erc1155Token = {
 	id: BUILD_AN_APE_TOKEN_ID,
 	network: POLYGON_AMOY_NETWORK,
-	standard: 'erc1155',
+	standard: { code: 'erc1155' },
 	category: 'custom',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Build an Ape by Reido',
 	symbol: BUILD_AN_APE_SYMBOL,
 	decimals: 0,
@@ -48,8 +50,8 @@ export const mockValidErc1155Token: Erc1155Token = {
 	...mockValidToken,
 	id: parseTokenId('Erc1155TokenId'),
 	network: ETHEREUM_NETWORK,
-	standard: 'erc1155',
-	address: mockEthAddress
+	standard: { code: 'erc1155' },
+	address: '0x206571b68c66E1d112b74d65695043ad2b5F95D5'
 };
 
 export const createMockErc1155Tokens = ({
@@ -66,8 +68,9 @@ export const createMockErc1155Tokens = ({
 		symbol: `ERC1155-${start + i + 1}-${networkEnv}`,
 		name: `Erc1155Token${start + i + 1} ${networkEnv}`,
 		network: ETHEREUM_NETWORK,
-		standard: 'erc1155',
+		standard: { code: 'erc1155' },
 		category: 'custom',
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		decimals: 0,
 		address: `0x${start + i + 1}-${networkEnv}`
 	}));

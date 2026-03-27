@@ -9,7 +9,7 @@ import { get } from 'svelte/store';
 
 describe('BTC Pending Sent Transactions Services', () => {
 	const mockPendingTransaction: PendingTransaction = {
-		txid: [],
+		txid: Uint8Array.from([]),
 		utxos: []
 	};
 	const address = 'test-address';
@@ -21,7 +21,9 @@ describe('BTC Pending Sent Transactions Services', () => {
 
 	describe('loadBtcPendingSentTransactions', () => {
 		it('should store the pending transactions', async () => {
-			vi.spyOn(backendAPI, 'getPendingBtcTransactions').mockResolvedValue([mockPendingTransaction]);
+			vi.spyOn(backendAPI, 'getPendingBtcTransactions').mockResolvedValue({
+				response: [mockPendingTransaction]
+			});
 
 			const result = await loadBtcPendingSentTransactions({
 				address,

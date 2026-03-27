@@ -1,4 +1,3 @@
-import { ICP_SWAP_ENABLED } from '$env/icp-swap.env';
 import { kongSwapAmounts } from '$lib/api/kong_backend.api';
 import { icpSwapAmounts } from '$lib/services/icp-swap.services';
 import { SwapProvider, type SwapProviderConfig } from '$lib/types/swap';
@@ -14,7 +13,8 @@ export const swapProviders: SwapProviderConfig[] = [
 	{
 		key: SwapProvider.ICP_SWAP,
 		getQuote: icpSwapAmounts,
-		mapQuoteResult: ({ swap, slippage }) => mapIcpSwapResult({ swap, slippage }),
-		isEnabled: ICP_SWAP_ENABLED
+		mapQuoteResult: ({ swap, slippage, destToken }) =>
+			mapIcpSwapResult({ swap, slippage, destToken }),
+		isEnabled: true
 	}
 ];

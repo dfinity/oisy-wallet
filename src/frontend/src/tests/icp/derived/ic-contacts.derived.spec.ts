@@ -8,7 +8,7 @@ import { getNetworkContactKey } from '$lib/utils/contact.utils';
 import { getMockContactsUi, mockContactIcrcAddressUi } from '$tests/mocks/contacts.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 describe('ic-contacts.derived', () => {

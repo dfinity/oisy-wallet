@@ -2,14 +2,14 @@
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import TokenExchangeValueSkeleton from '$lib/components/tokens/TokenExchangeValueSkeleton.svelte';
 	import type { CardData } from '$lib/types/token-card';
-	import type { TokenUi } from '$lib/types/token-ui';
 
-	export let data: CardData;
+	interface Props {
+		data: CardData;
+	}
 
-	let balance: TokenUi['balance'];
-	let usdBalance: TokenUi['usdBalance'];
+	let { data }: Props = $props();
 
-	$: ({ balance, usdBalance } = data);
+	let { balance, usdBalance } = $derived(data);
 </script>
 
 <TokenExchangeValueSkeleton {data}>

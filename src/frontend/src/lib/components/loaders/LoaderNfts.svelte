@@ -1,80 +1,49 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
-	import { NFTS_ENABLED } from '$env/nft.env';
-	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+	import { debounce } from '@dfinity/utils';
+	import { untrack } from 'svelte';
+	import { page } from '$app/state';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+	import { MILLISECONDS_IN_DAY, NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftsByNetwork } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
+	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
-	import { findNftsByToken, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
-
-	interface Props {
-		skipInitialLoad?: boolean;
-		children?: Snippet;
-	}
-
-	let { skipInitialLoad = true, children }: Props = $props();
-
-	const handleRemovedNfts = ({
-		token,
-		inventory
-	}: {
-		token: NonFungibleToken;
-		inventory: NftId[];
-	}) => {
-		const removedNfts = findRemovedNfts({ nfts: $nftStore ?? [], token, inventory });
-
-		if (removedNfts.length > 0) {
-			nftStore.removeSelectedNfts(removedNfts);
-		}
-	};
-
-	const handleUpdatedNfts = ({
-		token,
-		inventory
-	}: {
-		token: NonFungibleToken;
-		inventory: Nft[];
-	}) => {
-		const updatedNfts = getUpdatedNfts({ nfts: $nftStore ?? [], token, inventory });
-
-		if (updatedNfts.length > 0) {
-			nftStore.updateSelectedNfts(updatedNfts);
-		}
-	};
 
 	const onLoad = async () => {
-		if (!NFTS_ENABLED || isNullish($ethAddress)) {
-			return;
-		}
-
 		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
 		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
-
-			tokens.forEach((token) => {
-				const nftsByToken = findNftsByToken({ nfts, token });
-
-				handleRemovedNfts({ token, inventory: nftsByToken.map((nft) => nft.id) });
-
-				if (isTokenErc1155(token)) {
-					handleUpdatedNfts({ token, inventory: nfts });
-				}
-
-				nftStore.addAll(nftsByToken);
+			const nfts = await loadNftsByNetwork({
+				networkId,
+				tokens,
+				identity: $authIdentity,
+				ethAddress: $ethAddress
 			});
+
+			nftStore.setAllByNetwork({ networkId, nfts });
 		});
 
 		await Promise.allSettled(promises);
 	};
+
+	const debounceLoad = debounce(onLoad);
+
+	$effect(() => {
+		[$enabledNonFungibleTokens, $authIdentity, $ethAddress];
+
+		untrack(() => debounceLoad());
+	});
+
+	// If we are not in NFTs page or Activity page, there is no need to reload NFTs frequently.
+	// In fact, we can disable it, giving it a very high interval.
+	let isNftsPage = $derived(isRouteNfts(page));
+	let isActivityPage = $derived(isRouteActivity(page));
+	let interval = $derived(
+		isNftsPage || isActivityPage ? NFT_TIMER_INTERVAL_MILLIS : MILLISECONDS_IN_DAY
+	);
 </script>
 
-<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad} {skipInitialLoad}>
-	{@render children?.()}
-</IntervalLoader>
+<IntervalLoader {interval} {onLoad} skipInitialLoad={true} />

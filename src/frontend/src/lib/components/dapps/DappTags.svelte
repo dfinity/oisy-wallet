@@ -3,8 +3,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 
-	export let tags: string[] = [];
-	export let dAppName: string;
+	interface Props {
+		tags?: string[];
+		dAppName: string;
+	}
+
+	let { tags = [], dAppName }: Props = $props();
 </script>
 
 <ul

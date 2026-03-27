@@ -18,6 +18,7 @@ import {
 } from '$lib/api/reward.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { QrCodeType, asQrCodeType } from '$lib/enums/qr-code-types';
+import { RewardType } from '$lib/enums/reward-type';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import {
@@ -31,13 +32,14 @@ import type {
 	RewardClaimApiResponse,
 	RewardClaimResponse,
 	RewardResponseInfo,
+	RewardResult,
 	RewardsResponse,
 	UserRoleResult
 } from '$lib/types/reward';
 import type { ResultSuccess } from '$lib/types/utils';
-import { mapEligibilityReport } from '$lib/utils/rewards.utils';
-import type { Identity } from '@dfinity/agent';
+import { INITIAL_REWARD_RESULT, mapEligibilityReport } from '$lib/utils/rewards.utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 const queryEligibilityReport = async (params: {
@@ -168,6 +170,60 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 	}
 
 	return { rewards: [], lastTimestamp: ZERO };
+};
+
+const getRewardType = (rewards: RewardResponseInfo[]) => {
+	const priorityOrder = [
+		RewardType.LEADERBOARD,
+		RewardType.JACKPOT,
+		RewardType.REFERRER,
+		RewardType.REFEREE,
+		RewardType.REFERRAL,
+		RewardType.AIRDROP
+	];
+
+	const foundRewardType = priorityOrder.find((rewardType) =>
+		rewards.some(({ name }) => name === rewardType)
+	);
+
+	return foundRewardType ?? RewardType.AIRDROP;
+};
+
+const getFirstReward = ({
+	rewards,
+	rewardType
+}: {
+	rewards: RewardResponseInfo[];
+	rewardType: RewardType;
+}): RewardResponseInfo | undefined =>
+	rewards.find(({ name }) => name === rewardType) ?? rewards.at(0);
+
+export const loadRewardResult = async (identity: Identity): Promise<RewardResult> => {
+	const initialLoading: string | null = sessionStorage.getItem(INITIAL_REWARD_RESULT);
+	if (isNullish(initialLoading)) {
+		const { rewards, lastTimestamp } = await getRewards({ identity });
+		const newRewards: RewardResponseInfo[] = rewards.filter(
+			({ timestamp }) => timestamp >= lastTimestamp
+		);
+
+		sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
+
+		if (newRewards.length > 0) {
+			const rewardType = getRewardType(newRewards);
+
+			return {
+				reward: getFirstReward({ rewards: newRewards, rewardType }),
+				lastTimestamp,
+				rewardType
+			};
+		}
+
+		if (lastTimestamp === ZERO) {
+			return { lastTimestamp };
+		}
+	}
+
+	return {};
 };
 
 const updateReward = async ({

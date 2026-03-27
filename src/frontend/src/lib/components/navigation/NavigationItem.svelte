@@ -31,7 +31,7 @@
 	</span>
 	{#if nonNullish(tag)}
 		<div
-			class="text-xs/4.5 md:mt-0.75 absolute -mt-1.5 ml-10 scale-75 font-bold uppercase md:relative md:ml-1 md:scale-100"
+			class="absolute -mt-1.5 ml-10 scale-75 text-xs/4.5 font-bold uppercase md:relative md:mt-0.75 md:ml-1 md:scale-100"
 		>
 			<Tag size="sm" variant={tagVariant}>{tag}</Tag>
 		</div>

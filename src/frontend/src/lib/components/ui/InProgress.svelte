@@ -19,6 +19,9 @@
 
 	let dynamicSteps = $state<ProgressSteps>([
 		// TODO: have a look if there is a better solution than casting
+		// TODO: check if there is a better way to handle this svelte-ignore
+		// eslint-disable-next-line svelte/no-unused-svelte-ignore
+		// svelte-ignore state_referenced_locally -- we want to get only the initial value
 		...(steps as ProgressSteps)
 	]);
 

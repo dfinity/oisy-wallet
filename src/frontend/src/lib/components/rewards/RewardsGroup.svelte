@@ -29,7 +29,7 @@
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
 	{#if nonNullish(title)}
-		<span class="text-lg font-bold first-letter:capitalize"><Html text={title} /></span>
+		<span class="text-lg font-bold"><Html text={title} /></span>
 	{/if}
 
 	{#each sortedRewards as reward (reward.id)}

@@ -84,7 +84,7 @@
 							testId={`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${currency}`}
 							transparent
 						>
-							<span class="pt-0.75 w-[20px] text-brand-primary">
+							<span class="w-[20px] pt-0.75 text-brand-primary">
 								{#if $currentCurrency === currency}
 									<IconCheck size="20" />
 								{/if}

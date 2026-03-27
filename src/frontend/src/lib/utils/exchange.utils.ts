@@ -5,7 +5,9 @@ import type {
 	CoingeckoSimpleTokenPrice,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
+import type { ExchangesData } from '$lib/types/exchange';
 import type { KongSwapToken, KongSwapTokenMetrics } from '$lib/types/kongswap';
+import type { TokenId } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -63,4 +65,33 @@ export const findMissingLedgerCanisterIds = ({
 }): LedgerCanisterIdText[] => {
 	const found = new Set(Object.keys(coingeckoResponse ?? {}));
 	return allLedgerCanisterIds.filter((id) => !found.has(id.toLowerCase()));
+};
+
+/**
+ * Compares two ExchangesData records by TokenId keys (stored as JS symbol property keys) and usd price.
+ * Uses Object.getOwnPropertySymbols since TokenId keys are JS symbols.
+ */
+// eslint-disable-next-line local-rules/prefer-object-params
+export const exchangesDataEqual = (a: ExchangesData, b: ExchangesData): boolean => {
+	const keysA = Object.getOwnPropertySymbols(a);
+	const keysB = Object.getOwnPropertySymbols(b);
+
+	if (keysA.length !== keysB.length) {
+		return false;
+	}
+
+	return keysA.every((k) => {
+		const va = a[k as TokenId];
+		const vb = b[k as TokenId];
+
+		if (va === vb) {
+			return true;
+		}
+
+		if (va === undefined || vb === undefined) {
+			return false;
+		}
+
+		return va.usd === vb.usd;
+	});
 };

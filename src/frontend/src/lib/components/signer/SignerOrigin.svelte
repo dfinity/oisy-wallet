@@ -1,15 +1,18 @@
 <script lang="ts">
 	import type { Origin, PayloadOrigin } from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Nullish } from '@dfinity/zod-schemas';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionString } from '$lib/types/string';
-	import type { Option } from '$lib/types/utils';
 
-	export let payload: Option<PayloadOrigin>;
+	interface Props {
+		payload: Nullish<PayloadOrigin>;
+	}
 
-	let origin: Origin | undefined;
-	$: origin = payload?.origin;
+	let { payload }: Props = $props();
+
+	let origin = $derived<Origin | undefined>(payload?.origin);
 
 	const mapHost = (origin: Origin | undefined): OptionString => {
 		if (isNullish(origin)) {
@@ -26,13 +29,11 @@
 	};
 
 	// Null being used if mapping the origin does not work - i.e. invalid origin. Probably an edge case.
-
-	let host: OptionString;
-	$: host = mapHost(origin);
+	let host = $derived(mapHost(origin));
 </script>
 
 {#if nonNullish(origin)}
-	<p class="mb-6 break-normal text-center">
+	<p class="mb-6 text-center break-normal">
 		{$i18n.signer.origin.text.request_from}
 		{#if nonNullish(host)}<span class="font-bold text-brand-primary-alt"
 				><ExternalLink

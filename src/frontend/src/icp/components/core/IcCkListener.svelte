@@ -5,34 +5,33 @@
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { Token } from '$lib/types/token';
 
-	export let initFn: IcCkWorker;
-	export let token: Token;
-	export let twinToken: Token | undefined = undefined;
-	export let minterCanisterId: CanisterIdText | undefined = undefined;
+	interface Props {
+		initFn: IcCkWorker;
+		token: Token;
+		twinToken?: Token;
+		minterCanisterId?: CanisterIdText;
+	}
+
+	let { initFn, token, twinToken, minterCanisterId }: Props = $props();
 
 	let worker: IcCkWorkerInitResult | undefined;
 
-	onMount(
-		async () =>
-			(worker = await initFn({
-				minterCanisterId: minterCanisterId ?? (token as OptionIcCkToken)?.minterCanisterId,
-				token,
-				twinToken
-			}))
-	);
+	onMount(async () => {
+		worker = await initFn({
+			minterCanisterId: minterCanisterId ?? (token as OptionIcCkToken)?.minterCanisterId,
+			token,
+			twinToken
+		});
+
+		worker?.stop();
+		worker?.start();
+	});
 
 	onDestroy(() => worker?.destroy());
 
-	const syncTimer = () => {
-		worker?.stop();
-		worker?.start();
+	const triggerTimer = () => {
+		worker?.trigger();
 	};
-
-	$: (worker, syncTimer());
-
-	const triggerTimer = () => worker?.trigger();
 </script>
 
 <svelte:window onoisyTriggerWallet={triggerTimer} />
-
-<slot />

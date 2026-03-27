@@ -14,10 +14,16 @@ describe('AiAssistantUserMessages', () => {
 		{ role: 'system', data: { text: systemMessage } }
 	] as ChatMessage[];
 
+	const props = {
+		messages,
+		onSendMessage: vi.fn(),
+		onRetry: vi.fn()
+	};
+
 	it('renders correctly if loading is false', async () => {
 		const { getByText } = render(AiAssistantMessages, {
 			props: {
-				messages,
+				...props,
 				loading: false
 			}
 		});
@@ -33,7 +39,7 @@ describe('AiAssistantUserMessages', () => {
 	it('renders correctly if loading is true', async () => {
 		const { getByText } = render(AiAssistantMessages, {
 			props: {
-				messages,
+				...props,
 				loading: true
 			}
 		});

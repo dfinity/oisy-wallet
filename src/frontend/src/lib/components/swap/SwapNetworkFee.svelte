@@ -5,7 +5,11 @@
 	import type { ProviderFee } from '$lib/types/swap';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let networkFee: ProviderFee;
+	interface Props {
+		networkFee: ProviderFee;
+	}
+
+	let { networkFee }: Props = $props();
 </script>
 
 <ModalValue>

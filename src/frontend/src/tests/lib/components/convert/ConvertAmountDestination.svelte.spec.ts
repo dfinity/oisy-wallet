@@ -83,10 +83,9 @@ describe('ConvertAmountDestination', () => {
 	});
 
 	it('should calculate receiveAmount correctly if sendAmount is not provided', () => {
-		const { sendAmount: _, ...newProps } = props;
-
 		const testProps = $state({
-			...newProps,
+			...props,
+			sendAmount: undefined,
 			receiveAmount: undefined
 		});
 

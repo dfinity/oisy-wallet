@@ -1,25 +1,23 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
-	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
+	import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 	import CkBtcUpdateBalanceListener from '$icp/components/core/CkBtcUpdateBalanceListener.svelte';
+	import CkMinterInfoLoader from '$icp/components/loaders/CkMinterInfoLoader.svelte';
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
 	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
-	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
-	import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
-	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
-	import ShortcutGuard from '$lib/components/guard/ShortcutGuard.svelte';
-	import UrlGuard from '$lib/components/guard/UrlGuard.svelte';
+	import Guards from '$lib/components/guard/Guards.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
+	import LoaderHarvest from '$lib/components/loaders/LoaderHarvest.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
-	import PowProtector from '$lib/components/pow/PowProtector.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
+	import WalletConnectListener from '$lib/components/wallet-connect/WalletConnectListener.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	interface Props {
@@ -30,44 +28,40 @@
 </script>
 
 <LoaderUserProfile>
-	<PowProtector>
-		<AgreementsGuard>
-			<AddressGuard>
-				<Loader>
-					<LoaderTokens>
-						<UrlGuard>
-							<ShortcutGuard>
-								<RewardGuard>
-									<LoaderEthBalances>
-										<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
-											<LoaderMultipleEthTransactions>
-												<LoaderWallets>
-													<ExchangeWorker>
-														<LoaderMetamask>
-															<UserSnapshotWorker>
-																<LoaderContacts>
-																	<TransactionsIdbSetter>
-																		<BalancesIdbSetter>
-																			{@render children()}
-																		</BalancesIdbSetter>
-																	</TransactionsIdbSetter>
-																</LoaderContacts>
-															</UserSnapshotWorker>
-														</LoaderMetamask>
-													</ExchangeWorker>
-												</LoaderWallets>
-											</LoaderMultipleEthTransactions>
-										</MultipleListeners>
-									</LoaderEthBalances>
-								</RewardGuard>
-							</ShortcutGuard>
-						</UrlGuard>
-					</LoaderTokens>
-				</Loader>
-			</AddressGuard>
-		</AgreementsGuard>
-	</PowProtector>
+	<Loader>
+		<LoaderTokens />
+
+		<LoaderEthBalances />
+
+		<MultipleListeners tokens={$enabledFungibleNetworkTokens} />
+
+		<CkMinterInfoLoader />
+
+		<LoaderEthTransactions />
+
+		<LoaderWallets />
+
+		<ExchangeWorker />
+
+		<LoaderMetamask />
+
+		<UserSnapshotWorker />
+
+		<LoaderContacts />
+
+		<TransactionsIdbSetter />
+
+		<BalancesIdbSetter />
+
+		<LoaderHarvest />
+
+		{@render children()}
+	</Loader>
 </LoaderUserProfile>
+
+<Guards />
+
+<WalletConnectListener />
 
 <!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
 <CkBtcUpdateBalanceListener />

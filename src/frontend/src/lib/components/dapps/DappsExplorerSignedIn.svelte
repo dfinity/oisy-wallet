@@ -94,7 +94,7 @@
 		<li class="flex" in:fade>
 			<DappCard
 				dAppDescription={dApp}
-				on:click={() => {
+				onClick={() => {
 					modalStore.openDappDetails({ id: modalId, data: dApp });
 					trackEvent({
 						name: TRACK_COUNT_DAPP_OPEN_INFO_MODAL,

@@ -1,10 +1,15 @@
+import { CK_USDC_CONVERSION_ENABLED } from '$env/convert.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { IC_CKUSDC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens/tokens.erc20.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import type { OptionEthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import {
 	toCkErc20HelperContractAddress,
@@ -13,12 +18,13 @@ import {
 import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
+import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+import { pageToken } from '$lib/derived/page-token.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
-import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -28,11 +34,6 @@ import { derived, type Readable } from 'svelte/store';
 export const ckEthereumTwinToken: Readable<Token> = derived(
 	[tokenWithFallback],
 	([$tokenWithFallback]) => ($tokenWithFallback as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
-);
-
-export const ckEthereumTwinTokenStandard: Readable<TokenStandard> = derived(
-	[ckEthereumTwinToken],
-	([{ standard }]) => standard
 );
 
 /**
@@ -97,7 +98,8 @@ export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
 export const ethToCkETHEnabled: Readable<boolean> = derived(
 	[tokenWithFallbackAsIcToken, selectedEthereumNetwork, ckEthereumNativeTokenEnabledNetwork],
 	([$tokenWithFallbackAsIcToken, $selectedEthereumNetwork, $ckEthereumNativeTokenEnabledNetwork]) =>
-		($tokenWithFallbackAsIcToken.standard === 'ethereum' && nonNullish($selectedEthereumNetwork)) ||
+		($tokenWithFallbackAsIcToken.standard.code === 'ethereum' &&
+			nonNullish($selectedEthereumNetwork)) ||
 		(isTokenCkEthLedger($tokenWithFallbackAsIcToken) &&
 			nonNullish($ckEthereumNativeTokenEnabledNetwork))
 );
@@ -115,4 +117,20 @@ export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
 			nonNullish($selectedEthereumNetwork)) ||
 		(isTokenCkErc20Ledger($tokenWithFallbackAsIcToken) &&
 			nonNullish($ckEthereumNativeTokenEnabledNetwork))
+);
+
+const isUsdcOrCkUsdcToken: Readable<boolean> = derived(
+	[pageToken],
+	([$pageToken]) =>
+		nonNullish($pageToken) &&
+		((isTokenErc20($pageToken) && $pageToken.address === USDC_TOKEN.address) ||
+			(isIcCkToken($pageToken) && $pageToken.ledgerCanisterId === IC_CKUSDC_LEDGER_CANISTER_ID))
+);
+
+/**
+ * The flag that checks if page token is USDC or ckUSDC and if their conversion feature flag is disabled
+ */
+export const ckUsdcConversionDisabled: Readable<boolean> = derived(
+	[isUsdcOrCkUsdcToken],
+	([$isUsdcOrCkUsdcToken]) => $isUsdcOrCkUsdcToken && !CK_USDC_CONVERSION_ENABLED
 );

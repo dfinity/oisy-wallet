@@ -1,6 +1,7 @@
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
-import * as authClientApi from '$lib/api/auth-client.api';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
@@ -19,6 +20,19 @@ import type { MockInstance } from 'vitest';
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
 }));
+
+vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
+	const authClientProvider = vi.fn().mockReturnValue({
+		loadIdentity: vi.fn()
+	});
+
+	return {
+		...(await importActual()),
+		AuthClientProvider: Object.assign(authClientProvider, {
+			getInstance: authClientProvider
+		})
+	};
+});
 
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
@@ -51,12 +65,15 @@ describe('sol-wallet.scheduler', () => {
 
 	const mockPostMessage = ({
 		withTransactions,
+		ref,
 		isSpl
 	}: {
 		withTransactions: boolean;
+		ref?: string;
 		isSpl: boolean;
 	}) => ({
 		msg: 'syncSolWallet',
+		ref,
 		data: {
 			wallet: {
 				balance: {
@@ -99,7 +116,8 @@ describe('sol-wallet.scheduler', () => {
 			.spyOn(solSignaturesServices, 'getSolTransactions')
 			.mockResolvedValue(mockSolTransactions);
 
-		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
+		const provider = AuthClientProvider.getInstance();
+		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 	});
 
 	afterEach(() => {
@@ -117,6 +135,10 @@ describe('sol-wallet.scheduler', () => {
 		startData?: PostMessageDataRequestSol | undefined;
 	}): TestUtil => {
 		const scheduler: SolWalletScheduler = new SolWalletScheduler();
+
+		const ref = nonNullish(startData)
+			? `${startData.tokenAddress ?? SOLANA_TOKEN.symbol}-${startData.solanaNetwork}`
+			: undefined;
 
 		const isSpl = nonNullish(startData?.tokenAddress) && nonNullish(startData?.tokenOwnerAddress);
 
@@ -145,7 +167,7 @@ describe('sol-wallet.scheduler', () => {
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(
 						2,
-						mockPostMessage({ withTransactions: true, isSpl })
+						mockPostMessage({ withTransactions: true, isSpl, ref })
 					);
 					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
@@ -203,8 +225,13 @@ describe('sol-wallet.scheduler', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(3);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(
+						2,
+						mockPostMessage({ withTransactions: true, isSpl, ref })
+					);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 				});
 
 				it('should trigger postMessage with error after retrying', async () => {
@@ -225,6 +252,7 @@ describe('sol-wallet.scheduler', () => {
 
 					expect(postMessageMock).toHaveBeenCalledWith({
 						msg: 'syncSolWalletError',
+						ref,
 						data: {
 							error: err
 						}
@@ -247,8 +275,8 @@ describe('sol-wallet.scheduler', () => {
 
 					// Only status messages should be sent
 					expect(postMessageMock).toHaveBeenCalledTimes(2);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageStatusIdle);
 				});
 
 				it('should update store with new transactions', async () => {

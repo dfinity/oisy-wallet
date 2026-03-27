@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import IcConvertForm from '$icp/components/convert/IcConvertForm.svelte';
 	import IcConvertProgress from '$icp/components/convert/IcConvertProgress.svelte';
@@ -21,6 +21,7 @@
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
+	import { ckUsdcConversionDisabled } from '$icp-eth/derived/cketh.derived';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
@@ -42,7 +43,6 @@
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert, WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -84,7 +84,8 @@
 		onQRCodeScan
 	}: Props = $props();
 
-	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+	const { sourceToken, destinationToken, minterInfo } =
+		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	let defaultDestination = $derived(
 		isTokenCkBtcLedger($sourceToken) ? ($btcAddressMainnet ?? '') : ($ethAddress ?? '')
@@ -93,6 +94,12 @@
 	let isDestinationCustom = $derived(!isNullishOrEmpty(customDestination));
 
 	let networkId = $derived($destinationToken.network.id);
+
+	let minimumBtcRetrieveAmount = $derived(
+		nonNullish($minterInfo) && 'retrieve_btc_min_amount' in $minterInfo.data
+			? $minterInfo.data.retrieve_btc_min_amount
+			: undefined
+	);
 
 	/**
 	 * Bitcoin fee context store
@@ -113,8 +120,7 @@
 			? defaultDestination
 			: customDestination;
 
-		if (isNullish($authIdentity)) {
-			await nullishSignOut();
+		if (isNullish($authIdentity) || $ckUsdcConversionDisabled) {
 			return;
 		}
 
@@ -203,56 +209,63 @@
 </script>
 
 <EthereumFeeContext {networkId}>
-	<BitcoinFeeContext amount={sendAmount} {networkId} token={$sourceToken}>
-		{#if currentStep?.name === WizardStepsConvert.CONVERT}
-			<IcConvertForm
-				destination={isDestinationCustom ? customDestination : defaultDestination}
-				{isDestinationCustom}
-				on:icNext={onNext}
-				on:icClose={onClose}
-				on:icDestination={onDestination}
-				bind:sendAmount
-				bind:receiveAmount
-			>
-				<svelte:fragment slot="cancel">
-					{#if formCancelAction === 'back'}
+	<BitcoinFeeContext
+		amount={sendAmount}
+		minimumAmount={minimumBtcRetrieveAmount}
+		{networkId}
+		token={$sourceToken}
+	>
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsConvert.CONVERT}
+				<IcConvertForm
+					destination={isDestinationCustom ? customDestination : defaultDestination}
+					{isDestinationCustom}
+					{onDestination}
+					{onNext}
+					bind:sendAmount
+					bind:receiveAmount
+				>
+					{#snippet cancel()}
+						{#if formCancelAction === 'back'}
+							<ButtonBack onclick={back} />
+						{:else}
+							<ButtonCancel onclick={close} />
+						{/if}
+					{/snippet}
+				</IcConvertForm>
+			{:else if currentStep?.name === WizardStepsConvert.REVIEW}
+				<IcConvertReview
+					destination={isDestinationCustom ? customDestination : defaultDestination}
+					{isDestinationCustom}
+					onConvert={convert}
+					{receiveAmount}
+					{sendAmount}
+				>
+					{#snippet cancel()}
 						<ButtonBack onclick={back} />
-					{:else}
-						<ButtonCancel onclick={close} />
-					{/if}
-				</svelte:fragment>
-			</IcConvertForm>
-		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-			<IcConvertReview
-				destination={isDestinationCustom ? customDestination : defaultDestination}
-				{isDestinationCustom}
-				{receiveAmount}
-				{sendAmount}
-				on:icConvert={convert}
-				on:icBack={onBack}
-			>
-				<ButtonBack slot="cancel" onclick={back} />
-			</IcConvertReview>
-		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
-			<IcConvertProgress bind:convertProgressStep />
-		{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
-			<DestinationWizardStep
-				{networkId}
-				{onDestinationBack}
-				{onQRCodeScan}
-				tokenStandard={$destinationToken.standard}
-				bind:customDestination
-			>
-				{#snippet title()}{$i18n.convert.text.send_to}{/snippet}
-			</DestinationWizardStep>
-		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-			<SendQrCodeScan
-				expectedToken={$destinationToken}
-				onDecodeQrCode={decodeQrCode}
-				{onQRCodeBack}
-				bind:destination={customDestination}
-				bind:amount={sendAmount}
-			/>
-		{/if}
+					{/snippet}
+				</IcConvertReview>
+			{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
+				<IcConvertProgress {convertProgressStep} />
+			{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
+				<DestinationWizardStep
+					{networkId}
+					{onDestinationBack}
+					{onQRCodeScan}
+					tokenStandard={$destinationToken.standard}
+					bind:customDestination
+				>
+					{#snippet title()}{$i18n.convert.text.send_to}{/snippet}
+				</DestinationWizardStep>
+			{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+				<SendQrCodeScan
+					expectedToken={$destinationToken}
+					onDecodeQrCode={decodeQrCode}
+					{onQRCodeBack}
+					bind:destination={customDestination}
+					bind:amount={sendAmount}
+				/>
+			{/if}
+		{/key}
 	</BitcoinFeeContext>
 </EthereumFeeContext>

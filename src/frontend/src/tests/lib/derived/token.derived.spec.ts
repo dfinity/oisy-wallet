@@ -1,3 +1,4 @@
+import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
@@ -12,6 +13,7 @@ import { POL_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens.
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { DEFAULT_ARBITRUM_TOKEN } from '$lib/constants/tokens.constants';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -39,7 +41,7 @@ describe('token.derived', () => {
 		it.each(SUPPORTED_BITCOIN_NETWORK_IDS)(
 			`should return default token for Bitcoin network %s`,
 			(networkId) => {
-				mockPage.mock({ network: networkId.description });
+				mockPage.mockNetwork(networkId.description);
 
 				expect(get(defaultFallbackToken)).toEqual(BTC_MAINNET_TOKEN);
 			}
@@ -48,7 +50,7 @@ describe('token.derived', () => {
 		it.each(SUPPORTED_SOLANA_NETWORK_IDS)(
 			`should return default token for Solana network %s`,
 			(networkId) => {
-				mockPage.mock({ network: networkId.description });
+				mockPage.mockNetwork(networkId.description);
 
 				expect(get(defaultFallbackToken)).toEqual(SOLANA_TOKEN);
 			}
@@ -57,7 +59,7 @@ describe('token.derived', () => {
 		it.each(SUPPORTED_ETHEREUM_NETWORK_IDS)(
 			`should return default token for Ethereum network %s`,
 			(networkId) => {
-				mockPage.mock({ network: networkId.description });
+				mockPage.mockNetwork(networkId.description);
 
 				expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
 			}
@@ -66,7 +68,7 @@ describe('token.derived', () => {
 		it.each(SUPPORTED_BASE_NETWORK_IDS)(
 			`should return default token for Base network %s`,
 			(networkId) => {
-				mockPage.mock({ network: networkId.description });
+				mockPage.mockNetwork(networkId.description);
 
 				expect(get(defaultFallbackToken)).toEqual(BASE_ETH_TOKEN);
 			}
@@ -75,7 +77,7 @@ describe('token.derived', () => {
 		it.each(SUPPORTED_BSC_NETWORK_IDS)(
 			`should return default token for BSC network %s`,
 			(networkId) => {
-				mockPage.mock({ network: networkId.description });
+				mockPage.mockNetwork(networkId.description);
 
 				expect(get(defaultFallbackToken)).toEqual(BNB_MAINNET_TOKEN);
 			}
@@ -84,20 +86,29 @@ describe('token.derived', () => {
 		it.each(SUPPORTED_POLYGON_NETWORK_IDS)(
 			`should return default token for Polygon network %s`,
 			(networkId) => {
-				mockPage.mock({ network: networkId.description });
+				mockPage.mockNetwork(networkId.description);
 
 				expect(get(defaultFallbackToken)).toEqual(POL_MAINNET_TOKEN);
 			}
 		);
 
+		it.each(SUPPORTED_ARBITRUM_NETWORK_IDS)(
+			`should return default token for Arbitrum network %s`,
+			(networkId) => {
+				mockPage.mockNetwork(networkId.description);
+
+				expect(get(defaultFallbackToken)).toEqual(DEFAULT_ARBITRUM_TOKEN);
+			}
+		);
+
 		it('should return ETH for ICP network', () => {
-			mockPage.mock({ network: ICP_NETWORK_ID.description });
+			mockPage.mockNetwork(ICP_NETWORK_ID.description);
 
 			expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
 		});
 
 		it('should return ETH for any other network', () => {
-			mockPage.mock({ network: 'mock-network' });
+			mockPage.mockNetwork('mock-network');
 
 			expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
 		});
@@ -110,7 +121,7 @@ describe('token.derived', () => {
 			it.each(SUPPORTED_TESTNET_NETWORK_IDS)(
 				`should return default token for Bitcoin network %s`,
 				(networkId) => {
-					mockPage.mock({ network: networkId.description });
+					mockPage.mockNetwork(networkId.description);
 
 					expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
 				}
@@ -124,7 +135,7 @@ describe('token.derived', () => {
 			});
 
 			it.each(SUPPORTED_NETWORK_IDS)(`should return default token for network %s`, (networkId) => {
-				mockPage.mock({ network: networkId.description });
+				mockPage.mockNetwork(networkId.description);
 
 				expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
 			});

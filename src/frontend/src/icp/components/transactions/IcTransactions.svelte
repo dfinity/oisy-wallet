@@ -28,20 +28,16 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckEthereum = $derived($tokenCkEthLedger || $tokenCkErc20Ledger);
 
-	let selectedTransaction = $state<IcTransactionUi | undefined>();
-	let selectedToken = $state<OptionToken>();
-	$effect(() => {
-		({ transaction: selectedTransaction, token: selectedToken } =
-			mapTransactionModalData<IcTransactionUi>({
-				$modalOpen: $modalIcTransaction,
-				$modalStore
-			}));
-	});
+	let { transaction: selectedTransaction, token: selectedToken } = $derived(
+		mapTransactionModalData<IcTransactionUi>({
+			$modalOpen: $modalIcTransaction,
+			$modalStore
+		})
+	);
 
 	let noTransactions = $derived(
 		nonNullish($pageToken) && $icTransactionsStore?.[$pageToken.id] === null

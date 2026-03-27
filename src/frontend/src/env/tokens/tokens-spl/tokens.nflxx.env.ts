@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import nflxx from '$sol/assets/nflxx.svg';
@@ -14,8 +15,9 @@ export const NFLXX_TOKEN_ID: TokenId = parseTokenId(NFLXX_SYMBOL);
 export const NFLXX_TOKEN: RequiredSpl2022Token = {
 	id: NFLXX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Netflix xStock',
 	symbol: NFLXX_SYMBOL,
 	decimals: NFLXX_DECIMALS,

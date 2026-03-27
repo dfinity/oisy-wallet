@@ -26,7 +26,7 @@
 			/>
 		</div>
 	{/if}
-	<div class="backdrop-blur-xs absolute start-0 w-full flex-1 bg-black/30 px-4 py-4">
+	<div class="absolute start-0 w-full flex-1 bg-black/30 px-4 py-4 backdrop-blur-xs">
 		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 overflow-hidden rounded-full">
 				<Img

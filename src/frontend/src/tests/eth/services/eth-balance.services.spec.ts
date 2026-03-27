@@ -93,6 +93,8 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: true });
 
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
 			mockTokens.forEach(({ id }) => {
 				expect(get(balancesStore)?.[id]).toEqual({ certified: false, data: mockBalance });
 			});
@@ -122,6 +124,8 @@ describe('eth-balance.services', () => {
 			// Required for the type interpreter
 			assertNonNullish(ETHEREUM_TOKEN_ID.description);
 			assertNonNullish(ETHEREUM_NETWORK_ID.description);
+
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 			expect(get(balancesStore)?.[ETHEREUM_TOKEN_ID]).toEqual(null);
 			expect(get(balancesStore)?.[SEPOLIA_TOKEN_ID]).toEqual({
@@ -168,7 +172,7 @@ describe('eth-balance.services', () => {
 
 		const mockParams = {
 			address: mockEthAddress,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		};
 
 		const mockBalance = 123n;
@@ -223,6 +227,8 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: true });
 
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
 			mockErc20DefaultTokens.forEach(({ id }) => {
 				expect(get(balancesStore)?.[id]).toEqual({ certified: false, data: mockBalance });
 			});
@@ -248,6 +254,8 @@ describe('eth-balance.services', () => {
 					$network: mockErc20DefaultTokens[0].network.name
 				})} ${mockError.toString()}`
 			});
+
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 			expect(get(balancesStore)?.[mockErc20DefaultTokens[0].id]).toEqual(null);
 
@@ -317,6 +325,8 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: true });
 
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
 			expect(get(balancesStore)?.[ETHEREUM_TOKEN_ID]).toEqual({
 				certified: false,
 				data: mockBalance
@@ -333,6 +343,8 @@ describe('eth-balance.services', () => {
 			const result = await reloadEthereumBalance(mockValidErc20Token);
 
 			expect(result).toEqual({ success: true });
+
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 			expect(get(balancesStore)?.[mockValidErc20Token.id]).toEqual({
 				certified: false,

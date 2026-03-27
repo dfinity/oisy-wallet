@@ -8,17 +8,14 @@ import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { nullishSignOut } from '$lib/services/auth.services';
 import type {
 	GetIdbTransactionsParams,
 	IdbTransactionsStoreData,
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
 import type { Transaction } from '$lib/types/transaction';
-import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { clear, createStore, get, set as idbSet, type UseStore } from 'idb-keyval';
 
@@ -46,7 +43,6 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 	idbTransactionsStore
 }: SetIdbTransactionsParams<T> & { idbTransactionsStore: UseStore }) => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 
@@ -109,18 +105,6 @@ export const getIdbIcTransactions = (
 export const getIdbSolTransactions = (
 	params: GetIdbTransactionsParams
 ): Promise<SolTransactionUi[] | undefined> => get(toKey(params), idbSolTransactionsStore);
-
-export const deleteIdbBtcTransactions = (principal: Principal): Promise<void> =>
-	delMultiKeysByPrincipal({ principal, store: idbBtcTransactionsStore });
-
-export const deleteIdbEthTransactions = (principal: Principal): Promise<void> =>
-	delMultiKeysByPrincipal({ principal, store: idbEthTransactionsStore });
-
-export const deleteIdbIcTransactions = (principal: Principal): Promise<void> =>
-	delMultiKeysByPrincipal({ principal, store: idbIcTransactionsStore });
-
-export const deleteIdbSolTransactions = (principal: Principal): Promise<void> =>
-	delMultiKeysByPrincipal({ principal, store: idbSolTransactionsStore });
 
 export const clearIdbBtcTransactions = (): Promise<void> => clear(idbBtcTransactionsStore);
 

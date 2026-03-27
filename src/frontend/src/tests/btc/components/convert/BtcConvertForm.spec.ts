@@ -1,8 +1,11 @@
 import BtcConvertForm from '$btc/components/convert/BtcConvertForm.svelte';
 import * as btcPendingSendTransactionsStatusStore from '$btc/derived/btc-pending-sent-transactions-status.derived';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
-	initUtxosFeeStore,
 	UTXOS_FEE_CONTEXT_KEY,
+	initUtxosFeeStore,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -12,6 +15,7 @@ import { TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY } from '$lib/stores/token-ac
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -44,7 +48,9 @@ describe('BtcConvertForm', () => {
 	const props = {
 		source: mockBtcAddress,
 		sendAmount: 0.001,
-		receiveAmount: 0.001
+		receiveAmount: 0.001,
+		onNext: vi.fn(),
+		cancel: mockSnippet
 	};
 	const mockBtcPendingSendTransactionsStatusStore = (
 		status:
@@ -62,6 +68,10 @@ describe('BtcConvertForm', () => {
 		mockPage.reset();
 		store = initUtxosFeeStore();
 		store.reset();
+
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
 	});
 
 	it('should keep the next button clickable if all requirements are met', () => {

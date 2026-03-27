@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import acnx from '$sol/assets/acnx.svg';
@@ -14,8 +15,9 @@ export const ACNX_TOKEN_ID: TokenId = parseTokenId(ACNX_SYMBOL);
 export const ACNX_TOKEN: RequiredSpl2022Token = {
 	id: ACNX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Accenture xStock',
 	symbol: ACNX_SYMBOL,
 	decimals: ACNX_DECIMALS,

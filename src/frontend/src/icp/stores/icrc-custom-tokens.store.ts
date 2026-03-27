@@ -1,4 +1,4 @@
-import { initCertifiedIcrcTokensStore } from '$icp/stores/certified-icrc.store';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type { IcToken } from '$icp/types/ic-token';
+import { initCertifiedCustomTokensStore } from '$lib/stores/custom-tokens.store';
 
-export const icrcCustomTokensStore = initCertifiedIcrcTokensStore<IcrcCustomToken>();
+export const icrcCustomTokensStore = initCertifiedCustomTokensStore<IcToken>();

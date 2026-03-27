@@ -2,8 +2,13 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
+	import { onDestroy } from 'svelte';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
+	import {
+		SESSION_REQUEST_ETH_SIGN_LEGACY,
+		SESSION_REQUEST_ETH_SIGN_V4
+	} from '$eth/constants/wallet-connect.constants';
 	import { signMessage } from '$eth/services/wallet-connect.services';
 	import { getSignParamsMessageTypedDataV4 } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
@@ -20,11 +25,19 @@
 		request: WalletKitTypes.SessionRequest;
 	}
 
-	let { listener = $bindable(), request }: Props = $props();
+	let { listener, request }: Props = $props();
 
-	let {
-		domain: { name: domainName }
-	} = $derived(getSignParamsMessageTypedDataV4(request.params.request.params));
+	let method = $derived(request.params.request.method);
+
+	let domainName = $derived.by(() => {
+		if (method === SESSION_REQUEST_ETH_SIGN_V4 || method === SESSION_REQUEST_ETH_SIGN_LEGACY) {
+			const {
+				domain: { name }
+			} = getSignParamsMessageTypedDataV4(request.params.request.params);
+
+			return name;
+		}
+	});
 
 	/**
 	 * Modal
@@ -45,6 +58,8 @@
 	let modal = $state<WizardModal<WizardStepsSign>>();
 
 	const close = () => modalStore.close();
+
+	let closeTimeout: NodeJS.Timeout | undefined;
 
 	/**
 	 * WalletConnect
@@ -74,20 +89,24 @@
 			progress: (step: ProgressStepsSign) => (signProgressStep = step)
 		});
 
-		setTimeout(() => close(), success ? 750 : 0);
+		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
 	};
+
+	onDestroy(() => clearTimeout(closeTimeout));
 </script>
 
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{#snippet title()}
-		<WalletConnectModalTitle
-			>{domainName ?? $i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
-		>
+		<WalletConnectModalTitle>
+			{domainName ?? $i18n.wallet_connect.text.sign_message}
+		</WalletConnectModalTitle>
 	{/snippet}
 
-	{#if currentStep?.name === WizardStepsSign.SIGNING}
-		<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
-	{:else if currentStep?.name === WizardStepsSign.REVIEW}
-		<WalletConnectSignReview onApprove={approve} onReject={reject} {request} />
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSign.SIGNING}
+			<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
+		{:else if currentStep?.name === WizardStepsSign.REVIEW}
+			<WalletConnectSignReview onApprove={approve} onReject={reject} {request} />
+		{/if}
+	{/key}
 </WizardModal>

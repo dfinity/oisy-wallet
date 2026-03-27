@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { getContext, setContext } from 'svelte';
+	import { getContext, onDestroy, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -28,7 +28,7 @@
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -128,6 +128,8 @@
 
 	const close = () => modalStore.close();
 
+	let closeTimeout: NodeJS.Timeout | undefined;
+
 	/**
 	 * Reject a transaction
 	 */
@@ -166,17 +168,19 @@
 			targetNetwork
 		});
 
-		setTimeout(() => close(), success ? 750 : 0);
+		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
 	};
+
+	onDestroy(() => clearTimeout(closeTimeout));
 </script>
 
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{@const { data } = firstTransaction}
 
 	{#snippet title()}
-		<WalletConnectModalTitle
-			>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
-		>
+		<WalletConnectModalTitle>
+			{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}
+		</WalletConnectModalTitle>
 	{/snippet}
 
 	<EthFeeContext
@@ -190,24 +194,26 @@
 		{sourceNetwork}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
-			{#if currentStep?.name === WizardStepsSend.SENDING}
-				<SendProgress
-					progressStep={sendProgressStep}
-					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
-				/>
-			{:else if currentStep?.name === WizardStepsSend.REVIEW}
-				<EthWalletConnectSendReview
-					{amount}
-					{application}
-					{data}
-					{destination}
-					{erc20Approve}
-					onApprove={send}
-					onReject={reject}
-					{sourceNetwork}
-					{targetNetwork}
-				/>
-			{/if}
+			{#key currentStep?.name}
+				{#if currentStep?.name === WizardStepsSend.SENDING}
+					<InProgressWizard
+						progressStep={sendProgressStep}
+						steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
+					/>
+				{:else if currentStep?.name === WizardStepsSend.REVIEW}
+					<EthWalletConnectSendReview
+						{amount}
+						{application}
+						{data}
+						{destination}
+						{erc20Approve}
+						onApprove={send}
+						onReject={reject}
+						{sourceNetwork}
+						{targetNetwork}
+					/>
+				{/if}
+			{/key}
 		</CkEthLoader>
 	</EthFeeContext>
 </WizardModal>

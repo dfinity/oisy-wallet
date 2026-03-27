@@ -50,7 +50,7 @@
 			return new SolAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
-		if (nonNullish($sendBalance) && $sendTokenStandard === 'solana') {
+		if (nonNullish($sendBalance) && $sendTokenStandard.code === 'solana') {
 			const total = userAmount + ($fee ?? ZERO);
 
 			if (total > $sendBalance) {

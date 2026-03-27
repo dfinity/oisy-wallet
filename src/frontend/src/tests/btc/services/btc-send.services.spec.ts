@@ -11,8 +11,8 @@ import { ZERO } from '$lib/constants/app.constants';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { Utxo } from '@dfinity/ckbtc';
 import { toNullable } from '@dfinity/utils';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 // Mock environment variables (same as btc-utxos.service.spec.ts)
 vi.mock('$env/networks/networks.icrc.env', () => ({
@@ -41,7 +41,7 @@ describe('btc-send.services', () => {
 		it('should call all required functions', async () => {
 			const addPendingBtcTransactionSpy = vi
 				.spyOn(backendAPI, 'addPendingBtcTransaction')
-				.mockResolvedValue(true);
+				.mockResolvedValue({ response: true });
 			const sendBtcApiSpy = vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
 			const txidStringToUint8ArraySpy = vi
 				.spyOn(btcUtils, 'txidStringToUint8Array')
@@ -52,8 +52,7 @@ describe('btc-send.services', () => {
 
 			expect(onProgressSpy).toHaveBeenCalled();
 
-			expect(sendBtcApiSpy).toHaveBeenCalledOnce();
-			expect(sendBtcApiSpy).toHaveBeenCalledWith({
+			expect(sendBtcApiSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
 				feeSatoshis: toNullable(defaultParams.utxosFee.feeSatoshis),
@@ -70,13 +69,13 @@ describe('btc-send.services', () => {
 
 			expect(txidStringToUint8ArraySpy).toHaveBeenCalledWith(txid);
 
-			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
-			expect(addPendingBtcTransactionSpy).toHaveBeenCalledWith({
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
 				address: defaultParams.source,
 				txId: new Uint8Array(),
-				utxos: defaultParams.utxosFee.utxos
+				utxos: defaultParams.utxosFee.utxos,
+				iiDelegationChain: []
 			});
 		});
 
@@ -104,11 +103,11 @@ describe('btc-send.services', () => {
 	});
 
 	describe('validateUtxosForSend', () => {
-		const validUtxo: Utxo = {
+		const validUtxo: CkBtcMinterDid.Utxo = {
 			height: 100,
 			value: 100000n,
 			outpoint: {
-				txid: [1, 2, 3, 4, 5],
+				txid: Uint8Array.from([1, 2, 3, 4, 5]),
 				vout: 0
 			}
 		};
@@ -181,7 +180,7 @@ describe('btc-send.services', () => {
 			it('should throw InvalidUtxoData error when UTXO has no txid', async () => {
 				const invalidUtxo = {
 					...validUtxo,
-					outpoint: { ...validUtxo.outpoint, txid: [] as number[] }
+					outpoint: { ...validUtxo.outpoint, txid: Uint8Array.from([]) }
 				};
 				const params = {
 					...defaultValidateParams,
@@ -377,11 +376,11 @@ describe('btc-send.services', () => {
 		});
 
 		it('should handle multiple UTXOs correctly', async () => {
-			const utxo2: Utxo = {
+			const utxo2: CkBtcMinterDid.Utxo = {
 				height: 200,
 				value: 50000n,
 				outpoint: {
-					txid: [6, 7, 8, 9, 10],
+					txid: Uint8Array.from([6, 7, 8, 9, 10]),
 					vout: 1
 				}
 			};

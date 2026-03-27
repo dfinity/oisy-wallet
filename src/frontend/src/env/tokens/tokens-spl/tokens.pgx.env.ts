@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import pgx from '$sol/assets/pgx.svg';
@@ -14,8 +15,9 @@ export const PGX_TOKEN_ID: TokenId = parseTokenId(PGX_SYMBOL);
 export const PGX_TOKEN: RequiredSpl2022Token = {
 	id: PGX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Procter & Gamble xStock',
 	symbol: PGX_SYMBOL,
 	decimals: PGX_DECIMALS,

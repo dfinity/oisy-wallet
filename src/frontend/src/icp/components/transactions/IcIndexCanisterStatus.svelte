@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { blur } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OisyIndexCanisterBalanceOutOfSyncEvent } from '$lib/types/custom-events';
 
 	interface Props {
 		children: Snippet;
@@ -11,7 +12,9 @@
 
 	let indexCanisterBalanceOutOfSync = $state<boolean>(false);
 
-	const onSyncPendingState = ({ detail: state }: CustomEvent<boolean>) =>
+	const onSyncPendingState = ({
+		detail: state
+	}: CustomEvent<OisyIndexCanisterBalanceOutOfSyncEvent>) =>
 		(indexCanisterBalanceOutOfSync = state);
 </script>
 

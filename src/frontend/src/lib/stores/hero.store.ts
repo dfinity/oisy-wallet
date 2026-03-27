@@ -4,6 +4,7 @@ export interface HeroContext {
 	loading: Writable<boolean>;
 	loaded: Readable<boolean>;
 	outflowActionsDisabled: Writable<boolean>;
+	inflowActionsDisabled: Writable<boolean>;
 }
 
 export const initHeroContext = (): HeroContext => {
@@ -11,11 +12,13 @@ export const initHeroContext = (): HeroContext => {
 	const loaded = derived(loading, ($loading) => !$loading);
 
 	const outflowActionsDisabled = writable<boolean>(true);
+	const inflowActionsDisabled = writable<boolean>(true);
 
 	return {
 		loading,
 		loaded,
-		outflowActionsDisabled
+		outflowActionsDisabled,
+		inflowActionsDisabled
 	};
 };
 

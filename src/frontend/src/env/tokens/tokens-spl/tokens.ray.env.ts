@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import ray from '$sol/assets/ray.svg';
@@ -14,8 +15,9 @@ export const RAY_TOKEN_ID: TokenId = parseTokenId(RAY_SYMBOL);
 export const RAY_TOKEN: RequiredSplToken = {
 	id: RAY_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Raydium',
 	symbol: RAY_SYMBOL,
 	decimals: RAY_DECIMALS,

@@ -1,5 +1,4 @@
 import { icrc1Transfer, transfer } from '$icp/api/icp-ledger.api';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockAccountIdentifierText,
@@ -7,22 +6,30 @@ import {
 	mockPrincipal2,
 	mockPrincipalText2
 } from '$tests/mocks/identity.mock';
-import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@dfinity/ledger-icp';
-import type { IcrcAccount, IcrcBlockIndex } from '@dfinity/ledger-icrc';
-import { toNullable } from '@dfinity/utils';
+import { nowInBigIntNanoSeconds, toNullable } from '@dfinity/utils';
+import {
+	AccountIdentifier,
+	IcpLedgerCanister,
+	type BlockHeight
+} from '@icp-sdk/canisters/ledger/icp';
+import type { IcrcAccount, IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn()
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('icp-ledger.api', () => {
-	const ledgerCanisterMock = mock<LedgerCanister>();
+	const ledgerCanisterMock = mock<IcpLedgerCanister>();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(LedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+		vi.spyOn(IcpLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 	});
 
 	describe('transfer', () => {
@@ -46,8 +53,7 @@ describe('icp-ledger.api', () => {
 
 			expect(result).toEqual(mockBlock);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				to: AccountIdentifier.fromHex(mockAccountIdentifierText)
 			});
@@ -84,7 +90,7 @@ describe('icp-ledger.api', () => {
 			ledgerCanisterId: mockLedgerCanisterId
 		};
 
-		const mockIndex: IcrcBlockIndex = 123n;
+		const mockIndex: IcrcIndexDid.BlockIndex = 123n;
 
 		beforeEach(() => {
 			ledgerCanisterMock.icrc1Transfer.mockResolvedValue(mockIndex);
@@ -95,8 +101,7 @@ describe('icp-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				to: toAccount,
 				createdAt
@@ -110,8 +115,7 @@ describe('icp-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				to: toAccount,
 				createdAt: 987_654_321n

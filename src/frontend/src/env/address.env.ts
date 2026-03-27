@@ -1,6 +1,4 @@
-import { parseBoolEnvVar } from '$lib/utils/env.utils';
+import { LOCAL } from '$lib/constants/app.constants';
 
-// TODO: to be removed when the feature is fully implemented
-export const FRONTEND_DERIVATION_ENABLED = parseBoolEnvVar(
-	import.meta.env.VITE_FRONTEND_DERIVATION_ENABLED
-);
+// TODO: to be removed when the feature is fully implemented for local environment too
+export const FRONTEND_DERIVATION_ENABLED = !LOCAL;

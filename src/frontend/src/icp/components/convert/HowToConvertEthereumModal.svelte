@@ -83,9 +83,9 @@
 		>
 			<HowToConvertEthereumWizardSteps
 				{currentStep}
-				on:icQRCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
-				on:icConvert={() => goToStep(WizardStepsConvert.CONVERT)}
-				on:icBack={modal?.back}
+				onBack={modal?.back}
+				onConvert={() => goToStep(WizardStepsConvert.CONVERT)}
+				onQrCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
 			/>
 		</EthConvertTokenWizard>
 	</WizardModal>

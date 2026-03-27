@@ -11,8 +11,11 @@ export const LANGUAGES = {
 	[Languages.HINDI]: 'हिन्दी',
 	[Languages.ITALIAN]: 'Italiano',
 	[Languages.JAPANESE]: '日本語',
+	[Languages.KOREAN]: '한국어',
 	[Languages.POLISH]: 'Polski',
 	[Languages.PORTUGUESE]: 'Português',
+	[Languages.RUSSIAN]: 'Русский',
+	[Languages.SPANISH]: 'Español',
 	[Languages.VIETNAMESE]: 'Tiếng việt',
 	[Languages.CHINESE_SIMPLIFIED]: '中文 (简体)'
 };

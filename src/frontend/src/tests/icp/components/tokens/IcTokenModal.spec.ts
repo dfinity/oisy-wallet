@@ -20,10 +20,7 @@ describe('IcTokenModal', () => {
 	beforeEach(() => {
 		mockPage.reset();
 
-		mockPage.mock({
-			token: mockIcToken.name,
-			network: mockIcToken.network.id.description
-		});
+		mockPage.mockToken(mockIcToken);
 	});
 
 	it('displays all required values including the delete and edit buttons for IC token', () => {

@@ -199,10 +199,7 @@
 				</TokenInputNetworkWrapper>
 			</div>
 
-			<SwapSwitchTokensButton
-				disabled={isSwitchTokensButtonDisabled()}
-				on:icSwitchTokens={onTokensSwitch}
-			/>
+			<SwapSwitchTokensButton disabled={isSwitchTokensButtonDisabled()} {onTokensSwitch} />
 
 			<TokenInputNetworkWrapper
 				showGradient={isCrossChainNetworks}
@@ -210,7 +207,7 @@
 			>
 				{#snippet tokenInput()}
 					<TokenInput
-						amount={receiveAmount}
+						amount={swapAmountsLoading ? 0 : receiveAmount}
 						disabled={true}
 						displayUnit={inputUnit}
 						exchangeRate={$destinationTokenExchangeRate}
@@ -230,7 +227,7 @@
 								{:else}
 									<div class="flex gap-3 text-tertiary">
 										<TokenInputAmountExchange
-											amount={receiveAmount}
+											amount={swapAmountsLoading ? 0 : receiveAmount}
 											exchangeRate={$destinationTokenExchangeRate}
 											token={$destinationToken}
 											bind:displayUnit={exchangeValueUnit}

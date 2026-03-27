@@ -21,9 +21,14 @@ describe('KnownDestinations', () => {
 			]
 		]);
 
+	const props = {
+		onNext: vi.fn()
+	};
+
 	it('renders content if data is provided', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
+				...props,
 				destination: '',
 				knownDestinations
 			},
@@ -38,6 +43,7 @@ describe('KnownDestinations', () => {
 	it('renders filtered content if data is provided', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
+				...props,
 				destination: mockBtcAddress,
 				knownDestinations
 			},
@@ -52,6 +58,7 @@ describe('KnownDestinations', () => {
 	it('renders empty state component if data is empty', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
+				...props,
 				destination: mockBtcAddress
 			},
 			context: mockContext(BTC_MAINNET_TOKEN)

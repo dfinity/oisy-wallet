@@ -8,24 +8,14 @@
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { modalBtcReceive } from '$lib/derived/modal.derived';
+	import { networkAddressStore } from '$lib/derived/network-address.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import {
-		btcAddressMainnetStore,
-		btcAddressRegtestStore,
-		btcAddressTestnetStore
-	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
-	let addressData = $derived(
-		isNetworkIdBTCTestnet($networkId)
-			? $btcAddressTestnetStore
-			: isNetworkIdBTCRegtest($networkId)
-				? $btcAddressRegtestStore
-				: $btcAddressMainnetStore
-	);
+	let addressData = $derived($networkAddressStore);
 
 	let addressToken = $derived(
 		isNetworkIdBTCTestnet($networkId)

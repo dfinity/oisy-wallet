@@ -1,3 +1,4 @@
+import type { BtcAddress } from '$btc/types/address';
 import type {
 	BitcoinNetwork,
 	EthAddressRequest,
@@ -6,10 +7,12 @@ import type {
 	EthSignTransactionRequest,
 	GetBalanceRequest,
 	SendBtcResponse,
+	SignBtcResponse,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
+import type { EthAddress } from '$eth/types/address';
 import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import {
@@ -17,7 +20,6 @@ import {
 	mapSignerCanisterGetEthAddressError,
 	mapSignerCanisterSendBtcError
 } from '$lib/canisters/signer.errors';
-import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type {
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
@@ -201,10 +203,37 @@ export class SignerCanister extends Canister<SignerService> {
 		throw mapSignerCanisterSendBtcError(response.Err);
 	};
 
+	signBtc = async ({
+		feeSatoshis,
+		utxosToSpend,
+		...rest
+	}: SendBtcParams): Promise<SignBtcResponse> => {
+		const { btc_caller_sign } = this.caller({
+			certified: true
+		});
+
+		const response = await btc_caller_sign(
+			{
+				address_type: P2WPKH,
+				utxos_to_spend: utxosToSpend,
+				fee_satoshis: feeSatoshis,
+				...rest
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		throw mapSignerCanisterSendBtcError(response.Err);
+	};
+
 	getSchnorrPublicKey = async ({
 		derivationPath,
 		keyId
-	}: GetSchnorrPublicKeyParams): Promise<Uint8Array | number[]> => {
+	}: GetSchnorrPublicKeyParams): Promise<Uint8Array> => {
 		const { schnorr_public_key } = this.caller({
 			certified: true
 		});
@@ -231,7 +260,7 @@ export class SignerCanister extends Canister<SignerService> {
 		message,
 		derivationPath,
 		keyId
-	}: SignWithSchnorrParams): Promise<Uint8Array | number[]> => {
+	}: SignWithSchnorrParams): Promise<Uint8Array> => {
 		const { schnorr_sign } = this.caller({
 			certified: true
 		});

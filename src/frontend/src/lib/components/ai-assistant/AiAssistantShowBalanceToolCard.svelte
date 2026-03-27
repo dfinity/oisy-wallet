@@ -2,8 +2,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -84,7 +84,7 @@
 	{/snippet}
 
 	{#snippet titleEnd()}
-		<span class="ml-2 block min-w-12 text-nowrap text-sm">
+		<span class="ml-2 block min-w-12 text-sm text-nowrap">
 			{#if $isPrivacyMode}
 				<IconDots styleClass="h-[1rem] items-center" times={3} />
 			{:else if nonNullish(token) && isNullish(tokenCount)}

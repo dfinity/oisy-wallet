@@ -1,8 +1,7 @@
+import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 import { SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
-
-import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 
 describe('SwapDetailsVelora', () => {
 	const baseProvider = {
@@ -26,7 +25,7 @@ describe('SwapDetailsVelora', () => {
 		expect(getByText(en.swap.text.gasless)).toBeInTheDocument();
 
 		expect(getByText(en.swap.text.swap_fees)).toBeInTheDocument();
-		expect(getByText('$0')).toBeInTheDocument();
+		expect(getByText('$0.00')).toBeInTheDocument();
 
 		expect(queryByText('Market')).not.toBeInTheDocument();
 	});
@@ -45,6 +44,6 @@ describe('SwapDetailsVelora', () => {
 		expect(queryByText(en.swap.text.network_cost)).not.toBeInTheDocument();
 		expect(queryByText(en.swap.text.gasless)).not.toBeInTheDocument();
 		expect(queryByText(en.swap.text.swap_fees)).not.toBeInTheDocument();
-		expect(queryByText('$0')).not.toBeInTheDocument();
+		expect(queryByText('$0.00')).not.toBeInTheDocument();
 	});
 });

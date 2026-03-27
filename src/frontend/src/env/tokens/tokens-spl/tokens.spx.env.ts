@@ -1,6 +1,7 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SPX_TOKEN_GROUP } from '$env/tokens/groups/groups.spx.env';
 import spx from '$eth/assets/spx.png';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -15,8 +16,9 @@ export const SPX_TOKEN_ID: TokenId = parseTokenId(SPX_SYMBOL);
 export const SPX_TOKEN: RequiredSplToken = {
 	id: SPX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'SPX6900 (Wormhole)',
 	symbol: SPX_SYMBOL,
 	decimals: SPX_DECIMALS,

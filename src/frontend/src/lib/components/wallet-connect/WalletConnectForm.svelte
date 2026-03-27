@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { QRCodeReader } from '@dfinity/gix-components';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
+	import QrCodeReader from '$lib/components/ui/QrCodeReader.svelte';
 	import {
 		TRACK_COUNT_WALLET_CONNECT,
 		TRACK_COUNT_WALLET_CONNECT_QR_CODE
@@ -13,7 +13,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 
 	interface Props {
-		onConnect: (uri: string) => void;
+		onConnect: (uri: string) => Promise<void>;
 	}
 
 	let { onConnect }: Props = $props();
@@ -32,7 +32,7 @@
 
 	let invalid = $derived(!uri);
 
-	const connect = (): 'success' | 'error' => {
+	const connect = async (): Promise<'success' | 'error'> => {
 		if (!uri) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.missing_uri }
@@ -40,13 +40,13 @@
 			return 'error';
 		}
 
-		onConnect(uri);
+		await onConnect(uri);
 
 		return 'success';
 	};
 
-	const onClick = () => {
-		const result = connect();
+	const onClick = async () => {
+		const result = await connect();
 
 		if (result === 'error') {
 			return;
@@ -71,7 +71,7 @@
 <ContentWithToolbar>
 	<div class="qr-code rounded-lg">
 		{#if renderQRCodeReader}
-			<QRCodeReader on:nnsQRCode={onQRCodeSuccess} on:nnsQRCodeError={error} />
+			<QrCodeReader on:nnsQRCode={onQRCodeSuccess} on:nnsQRCodeError={error} />
 		{/if}
 
 		{#if !renderQRCodeReader}

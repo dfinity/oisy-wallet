@@ -12,9 +12,10 @@
 		noUnderline?: boolean;
 		testId?: string;
 		icon?: Snippet;
+		color?: 'blue' | 'inherit';
 	}
 
-	let { noUnderline = false, testId, icon }: Props = $props();
+	let { noUnderline = false, testId, icon, color = 'inherit' }: Props = $props();
 
 	const handleClick = () => {
 		trackEvent({
@@ -26,7 +27,12 @@
 
 <a
 	class="inline-flex items-center gap-1"
+	class:active:text-brand-primary-alt={color === 'inherit'}
+	class:active:text-brand-secondary={color === 'blue'}
+	class:hover:text-brand-primary-alt={color === 'inherit'}
+	class:hover:text-brand-secondary={color === 'blue'}
 	class:no-underline={noUnderline}
+	class:text-brand-primary-alt={color === 'blue'}
 	aria-label={replaceOisyPlaceholders($i18n.terms_of_use.alt.terms_of_use)}
 	data-tid={testId}
 	href={pathToHref(AppPath.TermsOfUse)}

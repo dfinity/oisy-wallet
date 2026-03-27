@@ -3,7 +3,6 @@ import { SOL_DEVNET_EXPLORER_URL, SOL_MAINNET_EXPLORER_URL } from '$env/explorer
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { QUICKNODE_API_KEY } from '$env/rest/quicknode.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
-
 import solDevnetIcon from '$lib/assets/networks/solana-devnet.svg';
 import solMainnetIcon from '$lib/assets/networks/solana-mainnet.svg';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -45,7 +44,8 @@ export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	chainId: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
 	icon: solMainnetIcon,
 	explorerUrl: SOL_MAINNET_EXPLORER_URL,
-	buy: { onramperId: 'solana' }
+	buy: { onramperId: 'solana' },
+	pay: { openCryptoPay: 'Solana' }
 };
 
 export const SOLANA_DEVNET_NETWORK_SYMBOL = 'SOL (Devnet)';
@@ -69,7 +69,8 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 	id: SOLANA_LOCAL_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Local',
-	icon: solDevnetIcon
+	icon: solDevnetIcon,
+	explorerUrl: SOL_MAINNET_EXPLORER_URL
 };
 
 export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({

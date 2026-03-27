@@ -12,13 +12,13 @@
 	<SignerAnimatedAstronaut />
 </div>
 
-<h2 class="mb-2 mt-9 text-center">
+<h2 class="mt-9 mb-2 text-center">
 	{replaceOisyPlaceholders($i18n.signer.sign_in.text.access_your_wallet)}
 </h2>
 
 <p class="mb-12 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
 
-<ButtonAuthenticateWithHelp fullWidth needHelpLink={false} />
+<ButtonAuthenticateWithHelp asPopup fullWidth needHelpLink={false} />
 
 {#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
 	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />

@@ -19,6 +19,5 @@ export const onCkEthMinterInfoMessage = async ({
 			return;
 		case 'triggerCkEthMinterInfoTimer':
 			await scheduler.trigger(data);
-			return;
 	}
 };

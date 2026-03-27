@@ -6,7 +6,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
-		data: string | undefined;
+		data?: string;
 		label: string;
 	}
 

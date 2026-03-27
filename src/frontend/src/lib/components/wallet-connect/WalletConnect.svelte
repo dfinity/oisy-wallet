@@ -1,14 +1,46 @@
 <script lang="ts">
-	import WalletConnectSend from '$lib/components/wallet-connect/WalletConnectSend.svelte';
-	import WalletConnectSession from '$lib/components/wallet-connect/WalletConnectSession.svelte';
-	import WalletConnectSign from '$lib/components/wallet-connect/WalletConnectSign.svelte';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { nonNullish } from '@dfinity/utils';
+	import { walletConnectReconnecting } from '$eth/stores/wallet-connect.store';
+	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
+	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { disconnectListener } from '$lib/services/wallet-connect.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsShow } from '$lib/stores/toasts.store';
+	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 
-	let listener = $state<OptionWalletConnectListener | undefined>();
+	let listener = $derived($listenerStore);
+
+	const modalId = Symbol();
+
+	const disconnect = async () => {
+		await disconnectListener();
+
+		toastsShow({
+			text: $i18n.wallet_connect.info.disconnected,
+			level: 'info',
+			duration: 2000
+		});
+	};
+
+	const openWalletConnectAuth = () => {
+		modalStore.openWalletConnectAuth(modalId);
+
+		trackEvent({
+			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
+		});
+	};
 </script>
 
-<WalletConnectSession bind:listener />
-
-<WalletConnectSign bind:listener />
-
-<WalletConnectSend bind:listener />
+{#if nonNullish(listener)}
+	<WalletConnectButton onclick={disconnect}>
+		{$i18n.wallet_connect.text.disconnect}
+	</WalletConnectButton>
+{:else}
+	<WalletConnectButton
+		ariaLabel={$i18n.wallet_connect.text.name}
+		loading={$walletConnectReconnecting}
+		onclick={openWalletConnectAuth}
+	/>
+{/if}

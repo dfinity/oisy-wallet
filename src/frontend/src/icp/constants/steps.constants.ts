@@ -7,11 +7,15 @@ import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 export const sendSteps = ({
 	i18n,
 	networkId,
-	tokenCkErc20Ledger
+	tokenCkErc20Ledger,
+	minting,
+	burning
 }: {
 	i18n: I18n;
 	networkId?: NetworkId;
 	tokenCkErc20Ledger?: boolean;
+	minting?: boolean;
+	burning?: boolean;
 }): ProgressSteps =>
 	[
 		{
@@ -39,7 +43,11 @@ export const sendSteps = ({
 			: []),
 		{
 			step: ProgressStepsSendIc.SEND,
-			text: i18n.send.text.sending,
+			text: minting
+				? i18n.mint.text.minting
+				: burning
+					? i18n.burn.text.burning
+					: i18n.send.text.sending,
 			state: 'next'
 		},
 		{

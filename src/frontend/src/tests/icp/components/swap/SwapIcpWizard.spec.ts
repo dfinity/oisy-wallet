@@ -3,16 +3,30 @@ import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import * as analytics from '$lib/services/analytics.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import * as toasts from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
+vi.mock('$icp/services/icrc.services', () => ({
+	isIcrcTokenSupportIcrc2: vi.fn()
+}));
+
+vi.mock('$icp/api/icrc-ledger.api', () => ({
+	icrc1SupportedStandards: vi.fn()
+}));
+
+const mockSwapFn = vi.fn();
+
+vi.mock('$lib/services/swap.services', () => ({
+	swapService: {
+		icpSwap: (...args: unknown[]) => mockSwapFn(...args)
+	}
 }));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
@@ -23,7 +37,13 @@ const BASE_PROPS = {
 	receiveAmount: 2,
 	slippageValue: '0.5',
 	swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-	swapFailedProgressSteps: []
+	swapFailedProgressSteps: [],
+	isSwapAmountsLoading: false,
+	onShowTokensList: vi.fn(),
+	onShowProviderList: vi.fn(),
+	onClose: vi.fn(),
+	onNext: vi.fn(),
+	onBack: vi.fn()
 };
 
 describe('SwapIcpWizard', () => {
@@ -35,7 +55,8 @@ describe('SwapIcpWizard', () => {
 			destinationToken: readable(mockDestToken),
 			isSourceTokenIcrc2: readable(true),
 			failedSwapError: writable(undefined),
-			sourceTokenExchangeRate: readable(10)
+			sourceTokenExchangeRate: readable(10),
+			setIsTokensIcrc2: vi.fn()
 		};
 
 		const swapAmountsStore = initSwapAmountsStore();
@@ -60,6 +81,7 @@ describe('SwapIcpWizard', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		mockContext = createContext();
 		mockAuthStore();
 	});
@@ -126,5 +148,42 @@ describe('SwapIcpWizard', () => {
 		const { container } = renderWithStep(WizardStepsSwap.SWAPPING);
 
 		expect(container).toBeInTheDocument();
+	});
+
+	describe('swap execution', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			mockSwapFn.mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('calls onClose after successful swap', async () => {
+			const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
+
+			await fireEvent.click(getByText('Swap now'));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockSwapFn).toHaveBeenCalledOnce();
+			expect(BASE_PROPS.onClose).toHaveBeenCalledOnce();
+			expect(BASE_PROPS.onBack).not.toHaveBeenCalled();
+		});
+
+		it('calls onBack when swap fails', async () => {
+			mockSwapFn.mockRejectedValue(new Error('Swap failed'));
+
+			const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
+
+			await fireEvent.click(getByText('Swap now'));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+			expect(BASE_PROPS.onClose).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalled();
+		});
 	});
 });

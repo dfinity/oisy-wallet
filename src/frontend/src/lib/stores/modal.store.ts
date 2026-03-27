@@ -11,8 +11,8 @@ import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
-import type { Option } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { writable, type Readable } from 'svelte/store';
@@ -65,12 +65,16 @@ export interface Modal<T> {
 		| 'auth-help'
 		| 'nft-image-consent'
 		| 'nft-fullscreen-display'
-		| 'gldt-stake';
+		| 'get-token'
+		| 'harvest-stake'
+		| 'harvest-unstake'
+		| 'universal-scanner'
+		| 'pay-dialog';
 	data?: T;
 	id?: symbol;
 }
 
-export type ModalData<T> = Option<Modal<T>>;
+export type ModalData<T> = Nullish<Modal<T>>;
 
 interface SetWithDataParams<D> {
 	id: symbol;
@@ -132,7 +136,11 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	openNftImageConsent: (params: SetWithDataParams<NftCollection>) => void;
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
-	openGldtStake: (id: symbol) => void;
+	openHarvestStake: (id: symbol) => void;
+	openHarvestUnstake: (id: symbol) => void;
+	openUniversalScanner: (id: symbol) => void;
+	openPayDialog: (id: symbol) => void;
+	openGetToken: (id: symbol) => void;
 	close: () => void;
 }
 
@@ -236,7 +244,11 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openNftFullscreenDisplay: <(params: SetWithDataParams<Nft>) => void>(
 			setTypeWithData('nft-fullscreen-display')
 		),
-		openGldtStake: setType('gldt-stake'),
+		openHarvestStake: setType('harvest-stake'),
+		openHarvestUnstake: setType('harvest-unstake'),
+		openUniversalScanner: setType('universal-scanner'),
+		openPayDialog: setType('pay-dialog'),
+		openGetToken: setType('get-token'),
 		close: () => set(null),
 		subscribe
 	};

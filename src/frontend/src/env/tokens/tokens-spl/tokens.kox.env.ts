@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import kox from '$sol/assets/kox.svg';
@@ -14,8 +15,9 @@ export const KOX_TOKEN_ID: TokenId = parseTokenId(KOX_SYMBOL);
 export const KOX_TOKEN: RequiredSpl2022Token = {
 	id: KOX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Coca-Cola xStock',
 	symbol: KOX_SYMBOL,
 	decimals: KOX_DECIMALS,

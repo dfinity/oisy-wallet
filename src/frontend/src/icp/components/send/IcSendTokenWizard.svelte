@@ -1,17 +1,19 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
+	import { sendNft } from '$icp/services/nft-send.services';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
-		TRACK_COUNT_IC_SEND_SUCCESS
+		TRACK_COUNT_IC_SEND_SUCCESS,
+		TRACK_NFT_SEND
 	} from '$lib/constants/analytics.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
@@ -21,6 +23,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -35,6 +38,7 @@
 		amount: OptionAmount;
 		sendProgressStep: string;
 		selectedContact?: ContactUi;
+		nft?: Nft;
 		onBack: () => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -48,6 +52,7 @@
 		amount = $bindable(),
 		sendProgressStep = $bindable(),
 		selectedContact,
+		nft,
 		onBack,
 		onClose,
 		onNext,
@@ -65,6 +70,74 @@
 	/**
 	 * Send
 	 */
+
+	const nftSend = async () => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		if (isNullishOrEmpty(destination)) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.destination_address_invalid }
+			});
+			return;
+		}
+
+		if (isNullish(nft)) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.no_nft_selected }
+			});
+			return;
+		}
+
+		onNext();
+
+		try {
+			await sendNft({
+				token: $sendToken as NonFungibleToken,
+				tokenId: nft.id,
+				to: destination,
+				identity: $authIdentity,
+				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
+			});
+
+			trackEvent({
+				name: TRACK_NFT_SEND,
+				metadata: {
+					resultStatus: 'success',
+					token: $sendToken.symbol,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
+					tokenId: String(nft.id),
+					network: $sendToken.network.name
+				}
+			});
+
+			sendProgressStep = ProgressStepsSendIc.DONE;
+
+			setTimeout(() => close(), 750);
+		} catch (err: unknown) {
+			trackEvent({
+				name: TRACK_NFT_SEND,
+				metadata: {
+					resultStatus: 'error',
+					token: $sendToken.symbol,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
+					tokenId: String(nft.id),
+					network: $sendToken.network.name,
+					error: (err as Error).message
+				}
+			});
+
+			toastsError({
+				msg: { text: $i18n.send.error.unexpected },
+				err
+			});
+
+			onBack();
+		}
+	};
 
 	const send = async () => {
 		if (isNullishOrEmpty(destination)) {
@@ -140,14 +213,23 @@
 	const close = () => onClose();
 </script>
 
-{#if currentStep?.name === WizardStepsSend.REVIEW}
-	<IcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} />
-{:else if currentStep?.name === WizardStepsSend.SENDING}
-	<IcSendProgress bind:sendProgressStep />
-{:else if currentStep?.name === WizardStepsSend.SEND}
-	<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-		{#snippet cancel()}
-			<ButtonBack onclick={back} />
-		{/snippet}
-	</IcSendForm>
-{/if}
+{#key currentStep?.name}
+	{#if currentStep?.name === WizardStepsSend.REVIEW}
+		<IcSendReview
+			{amount}
+			{destination}
+			{nft}
+			{onBack}
+			onSend={nonNullish(nft) ? nftSend : send}
+			{selectedContact}
+		/>
+	{:else if currentStep?.name === WizardStepsSend.SENDING}
+		<IcSendProgress {sendProgressStep} />
+	{:else if currentStep?.name === WizardStepsSend.SEND}
+		<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
+		</IcSendForm>
+	{/if}
+{/key}

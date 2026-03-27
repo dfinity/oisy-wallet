@@ -2,11 +2,15 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import { sendBtc, validateBtcSend } from '$btc/services/btc-send.services';
-	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
+	import {
+		UTXOS_FEE_CONTEXT_KEY,
+		type UtxosFeeContext as UtxosFeeContextType
+	} from '$btc/stores/utxos-fee.store';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
@@ -23,7 +27,6 @@
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -64,9 +67,7 @@
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
-
-	let utxosFee = $state<UtxosFee | undefined>();
+	const { store: utxosFeeStore } = getContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY);
 
 	let networkId = $derived($sendToken.network.id);
 
@@ -77,6 +78,10 @@
 				? $btcAddressRegtest
 				: $btcAddressMainnet) ?? ''
 	);
+
+	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
+
+	let amountError = $state(false);
 
 	const close = () => onClose();
 	const back = () => onSendBack();
@@ -107,7 +112,7 @@
 			return;
 		}
 
-		if (isNullish(utxosFee)) {
+		if (isNullish($utxosFeeStore?.utxosFee)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.utxos_fee_missing }
 			});
@@ -122,34 +127,31 @@
 		}
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
 		onNext();
 
+		const sendTrackingEventMetadata = {
+			token: $sendToken.symbol,
+			network: `${networkId.description}`,
+			feeSatoshis: $utxosFeeStore.utxosFee.feeSatoshis.toString()
+		};
+
 		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
 			// Validate UTXOs before proceeding
 			try {
 				await validateBtcSend({
-					utxosFee,
+					utxosFee: $utxosFeeStore.utxosFee,
 					source,
 					amount,
 					network,
 					identity: $authIdentity
 				});
-			} catch (err: unknown) {
-				// Handle BtcValidationError with specific toastsError for each type
-				if (err instanceof BtcValidationError) {
-					utxosFee.error = err.type;
-				}
-
+			} catch (_: unknown) {
 				trackEvent({
 					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-					metadata: {
-						token: $sendToken.symbol,
-						network: `${networkId?.description ?? 'unknown'}`
-					}
+					metadata: sendTrackingEventMetadata
 				});
 
 				// go back to the previous step so the user can correct/ try again
@@ -158,12 +160,13 @@
 				return;
 			}
 		}
+
 		try {
 			progress(ProgressStepsSendBtc.SEND);
 			await sendBtc({
 				destination,
 				amount,
-				utxosFee,
+				utxosFee: $utxosFeeStore.utxosFee,
 				network,
 				source,
 				identity: $authIdentity
@@ -171,10 +174,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_SUCCESS,
-				metadata: {
-					token: $sendToken.symbol,
-					network: `${networkId.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			progress(ProgressStepsSendBtc.DONE);
@@ -183,10 +183,7 @@
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_ERROR,
-				metadata: {
-					token: $sendToken.symbol,
-					network: `${networkId.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
@@ -199,22 +196,26 @@
 	};
 </script>
 
-{#if currentStep?.name === WizardStepsSend.REVIEW}
-	<BtcSendReview
-		{amount}
-		{destination}
-		{onBack}
-		onSend={send}
-		{selectedContact}
-		{source}
-		bind:utxosFee
-	/>
-{:else if currentStep?.name === WizardStepsSend.SENDING}
-	<BtcSendProgress bind:sendProgressStep />
-{:else if currentStep?.name === WizardStepsSend.SEND}
-	<BtcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-		{#snippet cancel()}
-			<ButtonBack onclick={back} />
-		{/snippet}
-	</BtcSendForm>
-{/if}
+<UtxosFeeLoader {amount} {amountError} {networkId} {source}>
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSend.REVIEW}
+			<BtcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} />
+		{:else if currentStep?.name === WizardStepsSend.SENDING}
+			<BtcSendProgress {sendProgressStep} />
+		{:else if currentStep?.name === WizardStepsSend.SEND}
+			<BtcSendForm
+				{onBack}
+				{onNext}
+				{onTokensList}
+				{selectedContact}
+				{source}
+				bind:destination
+				bind:amount
+			>
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
+			</BtcSendForm>
+		{/if}
+	{/key}
+</UtxosFeeLoader>

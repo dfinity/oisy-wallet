@@ -1,4 +1,4 @@
-import type { BtcAddress } from '$lib/types/address';
+import type { BtcAddress } from '$btc/types/address';
 
 interface SpendingOutpoint {
 	tx_index: number;

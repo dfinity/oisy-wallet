@@ -1,5 +1,6 @@
 import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/eth-fee.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import {
 	getSignParamsMessageHex,
@@ -22,7 +23,6 @@ import {
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';

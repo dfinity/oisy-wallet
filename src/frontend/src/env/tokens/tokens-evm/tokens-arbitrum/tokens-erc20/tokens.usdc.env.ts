@@ -5,6 +5,7 @@ import {
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -17,14 +18,14 @@ export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
 export const USDC_TOKEN: RequiredEvmErc20Token = {
 	id: USDC_TOKEN_ID,
 	network: ARBITRUM_MAINNET_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
-	exchange: 'erc20',
 	groupData: USDC_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdc_arbitrum'
@@ -38,12 +39,12 @@ export const ARB_SEPOLIA_USDC_TOKEN_ID: TokenId = parseTokenId(ARB_SEPOLIA_USDC_
 export const ARB_SEPOLIA_USDC_TOKEN: RequiredEvmErc20Token = {
 	id: ARB_SEPOLIA_USDC_TOKEN_ID,
 	network: ARBITRUM_SEPOLIA_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'USDC (Sepolia Testnet)',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,
 	icon: usdc,
-	address: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d',
-	exchange: 'erc20'
+	address: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d'
 };

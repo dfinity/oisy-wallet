@@ -1,5 +1,6 @@
-import type { Address, SolAddress } from '$lib/types/address';
+import type { Address } from '$lib/types/address';
 import { getAccountOwner } from '$sol/api/solana.api';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { assertIsAddress } from '@solana/kit';

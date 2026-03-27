@@ -1,11 +1,11 @@
 import { SOL_RPC_CANISTER_ID } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { SolRpcCanister } from '$sol/canisters/sol-rpc.canister';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { ParsedAccountInfo } from '$sol/types/sol-rpc';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let canister: SolRpcCanister | undefined = undefined;
 

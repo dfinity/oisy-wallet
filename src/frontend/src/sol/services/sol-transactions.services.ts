@@ -2,10 +2,10 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
-import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
@@ -14,6 +14,7 @@ import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
 import type {
@@ -324,7 +325,7 @@ const loadSolTransactions = async ({
 	} catch (error: unknown) {
 		solTransactionsStore.reset(tokenId);
 
-		console.error(`Failed to load transactions for ${tokenId.description}:`, error);
+		consoleError(`Failed to load transactions for ${tokenId.description}:`, error);
 		return [];
 	}
 };

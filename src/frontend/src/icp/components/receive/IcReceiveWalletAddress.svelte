@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
@@ -8,15 +8,20 @@
 	} from '$icp/stores/receive-token.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ReceiveQRCode } from '$lib/types/receive';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
+	interface Props {
+		onQRCode: (details: ReceiveQRCode) => void;
+	}
+
+	let { onQRCode }: Props = $props();
+
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	const dispatch = createEventDispatcher();
-
 	const displayQRCode = (address: string) =>
-		dispatch('icQRCode', {
+		onQRCode({
 			address,
 			addressLabel: $i18n.wallet.text.wallet_address,
 			addressToken: $token,
@@ -31,9 +36,9 @@
 	network={ICP_NETWORK}
 	qrCodeAction={{
 		enabled: true,
-		ariaLabel: $i18n.wallet.text.display_wallet_address_qr
+		ariaLabel: $i18n.wallet.text.display_wallet_address_qr,
+		onClick: () => displayQRCode($icrcAccountIdentifierText ?? '')
 	}}
-	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
 	{#snippet title()}
 		{$i18n.wallet.text.wallet_address}

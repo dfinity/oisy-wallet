@@ -26,7 +26,7 @@
 	let addressToDisplay = $derived(shortenWithMiddleEllipsis({ text: destination }));
 </script>
 
-<div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
+<div class="mt-6 mb-10" data-tid={SEND_DESTINATION_SECTION}>
 	<div class="font-bold">{$i18n.core.text.to}</div>
 
 	<AddressCard hasError={invalidDestination} items="center">

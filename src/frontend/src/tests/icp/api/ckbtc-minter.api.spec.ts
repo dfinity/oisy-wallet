@@ -1,4 +1,4 @@
-import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import {
 	estimateFee,
 	getBtcAddress,
@@ -11,27 +11,29 @@ import {
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
-	CkBTCMinterCanister,
+	CkBtcMinterCanister,
+	type CkBtcMinterDid,
 	type EstimateWithdrawalFee,
-	type MinterInfo,
-	type RetrieveBtcOk,
 	type RetrieveBtcStatusV2WithId,
-	type Utxo
-} from '@dfinity/ckbtc';
-import type { UpdateBalanceOk } from '@dfinity/ckbtc/dist/types/types/minter.responses';
+	type UpdateBalanceOk
+} from '@icp-sdk/canisters/ckbtc';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn()
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('ckbtc-minter.api', () => {
-	const canisterMock = mock<CkBTCMinterCanister>();
+	const canisterMock = mock<CkBtcMinterCanister>();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(CkBTCMinterCanister, 'create').mockImplementation(() => canisterMock);
+		vi.spyOn(CkBtcMinterCanister, 'create').mockImplementation(() => canisterMock);
 	});
 
 	describe('retrieveBtc', () => {
@@ -44,7 +46,7 @@ describe('ckbtc-minter.api', () => {
 			address: mockBtcAddress
 		};
 
-		const expected: RetrieveBtcOk = { block_index: 123n };
+		const expected: CkBtcMinterDid.RetrieveBtcOk = { block_index: 123n };
 
 		beforeEach(() => {
 			canisterMock.retrieveBtcWithApproval.mockResolvedValue(expected);
@@ -55,8 +57,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.retrieveBtcWithApproval).toHaveBeenCalledOnce();
-			expect(canisterMock.retrieveBtcWithApproval).toHaveBeenCalledWith({
+			expect(canisterMock.retrieveBtcWithApproval).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				address: mockBtcAddress
 			});
@@ -84,8 +85,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.updateBalance).toHaveBeenCalledOnce();
-			expect(canisterMock.updateBalance).toHaveBeenCalledWith({
+			expect(canisterMock.updateBalance).toHaveBeenCalledExactlyOnceWith({
 				owner: mockIdentity.getPrincipal()
 			});
 		});
@@ -102,7 +102,7 @@ describe('ckbtc-minter.api', () => {
 			certified: true
 		};
 
-		const expected: MinterInfo = {
+		const expected: CkBtcMinterDid.MinterInfo = {
 			retrieve_btc_min_amount: 123n,
 			min_confirmations: 111,
 			kyt_fee: 456n
@@ -117,8 +117,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.getMinterInfo).toHaveBeenCalledOnce();
-			expect(canisterMock.getMinterInfo).toHaveBeenCalledWith({ certified: true });
+			expect(canisterMock.getMinterInfo).toHaveBeenCalledExactlyOnceWith({ certified: true });
 		});
 
 		it('successfully calls getMinterInfo endpoint as query', async () => {
@@ -126,8 +125,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.getMinterInfo).toHaveBeenCalledOnce();
-			expect(canisterMock.getMinterInfo).toHaveBeenCalledWith({ certified: false });
+			expect(canisterMock.getMinterInfo).toHaveBeenCalledExactlyOnceWith({ certified: false });
 		});
 
 		it('throws an error if identity is undefined', async () => {
@@ -150,8 +148,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(mockBtcAddress);
 
-			expect(canisterMock.getBtcAddress).toHaveBeenCalledOnce();
-			expect(canisterMock.getBtcAddress).toHaveBeenCalledWith({
+			expect(canisterMock.getBtcAddress).toHaveBeenCalledExactlyOnceWith({
 				owner: mockIdentity.getPrincipal()
 			});
 		});
@@ -185,8 +182,10 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledOnce();
-			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledWith({ amount, certified: true });
+			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				certified: true
+			});
 		});
 
 		it('successfully calls estimateWithdrawalFee endpoint with no amount', async () => {
@@ -194,8 +193,9 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledOnce();
-			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledWith({ certified: true });
+			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
 		});
 
 		it('successfully calls estimateWithdrawalFee endpoint as query', async () => {
@@ -203,8 +203,10 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledOnce();
-			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledWith({ amount, certified: false });
+			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				certified: false
+			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
@@ -233,8 +235,9 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledOnce();
-			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledWith({ certified: true });
+			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
 		});
 
 		it('successfully calls retrieveBtcStatusV2ByAccount endpoint as query', async () => {
@@ -242,8 +245,9 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledOnce();
-			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledWith({ certified: false });
+			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
@@ -257,7 +261,7 @@ describe('ckbtc-minter.api', () => {
 			minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
 		};
 
-		const expected: Utxo[] = [mockUtxo, mockUtxo];
+		const expected: CkBtcMinterDid.Utxo[] = [mockUtxo, mockUtxo];
 
 		beforeEach(() => {
 			canisterMock.getKnownUtxos.mockResolvedValue(expected);
@@ -268,8 +272,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.getKnownUtxos).toHaveBeenCalledOnce();
-			expect(canisterMock.getKnownUtxos).toHaveBeenCalledWith({
+			expect(canisterMock.getKnownUtxos).toHaveBeenCalledExactlyOnceWith({
 				owner: mockIdentity.getPrincipal()
 			});
 		});

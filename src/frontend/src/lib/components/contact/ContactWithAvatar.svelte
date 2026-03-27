@@ -22,13 +22,13 @@
 	</span>
 
 	<span class="flex min-w-0 flex-wrap items-center">
-		<span class="max-w-38 inline-block truncate">
+		<span class="inline-block max-w-38 truncate">
 			{contact.name}
 		</span>
 		{#if notEmptyString(addressAlias)}
 			<span class="inline-flex items-center text-tertiary">
 				<Divider />
-				<span class="sm:max-w-29 lg:max-w-34 inline-block max-w-20 truncate">
+				<span class="inline-block max-w-20 truncate sm:max-w-29 lg:max-w-34">
 					{addressAlias}
 				</span>
 			</span>

@@ -12,13 +12,13 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	IntersectionObserverActive,
+	IntersectionObserverPassive
+} from '$tests/mocks/infinite-scroll.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 describe('AllTransactions', () => {
 	const customIcrcToken: IcrcCustomToken = {
@@ -26,6 +26,16 @@ describe('AllTransactions', () => {
 		version: 1n,
 		enabled: true
 	};
+
+	beforeAll(() => {
+		Object.defineProperty(window, 'IntersectionObserver', {
+			writable: true,
+			configurable: true,
+			value: IntersectionObserverActive
+		});
+	});
+
+	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
 
 	it('renders the title', () => {
 		const { container } = render(AllTransactions);
@@ -46,7 +56,7 @@ describe('AllTransactions', () => {
 			symbol: 'UWT'
 		};
 
-		icrcCustomTokensStore.set({ data: tokenWithoutIndexCanister, certified: true });
+		icrcCustomTokensStore.setAll([{ data: tokenWithoutIndexCanister, certified: true }]);
 
 		const store = get(icrcCustomTokensStore);
 		const tokenId = store?.at(0)?.data.id;
@@ -69,7 +79,7 @@ describe('AllTransactions', () => {
 			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
 		};
 
-		icrcCustomTokensStore.set({ data: tokenWithUnavailableIndexCanister, certified: true });
+		icrcCustomTokensStore.setAll([{ data: tokenWithUnavailableIndexCanister, certified: true }]);
 
 		const store = get(icrcCustomTokensStore);
 		const tokenId = store?.at(0)?.data.id;

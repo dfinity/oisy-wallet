@@ -1,6 +1,7 @@
-import type { Network, NetworkAppMetadata } from '$lib/types/network';
+import type { Network } from '$lib/types/network';
 import type { Network as AlchemyNetwork } from 'alchemy-sdk';
 import type { Networkish } from 'ethers/providers';
+import type { Chain } from 'viem';
 
 export type EthereumChainId = bigint;
 
@@ -14,7 +15,9 @@ interface NetworkProviders {
 		alchemy: Networkish;
 		alchemyDeprecated: AlchemyNetwork;
 		alchemyJsonRpcUrl: string;
+		alchemyWsUrl: string;
+		viemChain: Chain;
 	};
 }
 
-export type EthereumNetwork = Network & NetworkChainId & NetworkAppMetadata & NetworkProviders;
+export type EthereumNetwork = Network & NetworkChainId & NetworkProviders;

@@ -1,26 +1,30 @@
-import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
-import { erc1155Tokens } from '$eth/derived/erc1155.derived';
+import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { erc721Tokens } from '$eth/derived/erc721.derived';
-import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import { enabledEvmTokens } from '$evm/derived/tokens.derived';
-import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
-import { defaultIcpTokens } from '$icp/derived/tokens.derived';
-import type { IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
+import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
+import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
-import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
+import type { CustomToken } from '$lib/types/custom-token';
+import type { RequiredToken, Token } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
+import { isTokenFungible } from '$lib/utils/nft.utils';
+import { tokenListEqual } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 // The entire list of ICRC tokens to display to the user:
 // This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled),
 // and the environment tokens that have never been used.
-export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
+export const allIcrcTokens: Readable<IcTokenToggleable[]> = derivedMemo(
 	[icrcTokens],
 	([$icrcTokens]) => {
 		// The list of ICRC tokens (SNSes) is defined as environment variables.
@@ -36,8 +40,14 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 			...icrcEnvTokens.filter(
 				({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
 			)
-		].sort(sortIcTokens);
-	}
+		];
+	},
+	tokenListEqual
+);
+
+export const allSortedIcrcTokens: Readable<IcTokenToggleable[]> = derived(
+	[allIcrcTokens],
+	([$allIcrcTokens]) => [...$allIcrcTokens].sort(sortIcTokens)
 );
 
 export const allKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = derived(
@@ -46,66 +56,33 @@ export const allKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = de
 		$allIcrcTokens.filter(({ symbol }) => nonNullish($kongSwapTokensStore?.[symbol]))
 );
 
-export const allDisabledKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = derived(
-	[allKongSwapCompatibleIcrcTokens, enabledIcrcTokens],
-	([allKongSwapCompatibleIcrcTokens, $enabledIcrcTokens]) => {
-		const enabledIcrcTokenIds = $enabledIcrcTokens.map(({ id }) => id);
-
-		return allKongSwapCompatibleIcrcTokens.filter(({ id }) => !enabledIcrcTokenIds.includes(id));
-	}
-);
-
-export const allSwappableTokensDerived: Readable<IcTokenWithIcrc2Supported[]> = derived(
-	[swappableIcrcTokensStore],
-	([$swappableTokensStore]) => $swappableTokensStore ?? []
-);
-
-export const allTokens = derived(
-	[
-		// The entire list of Erc20 tokens to display to the user.
-		erc20Tokens,
-		// The entire list of Erc721 tokens to display to the user.
-		erc721Tokens,
-		// The entire list of Erc1155 tokens to display to the user.
-		erc1155Tokens,
-		defaultIcpTokens,
-		enabledBitcoinTokens,
-		enabledEthereumTokens,
-		allIcrcTokens,
-		enabledSolanaTokens,
-		splTokens,
-		enabledEvmTokens
-	],
-	([
-		$erc20Tokens,
-		$erc721Tokens,
-		$erc1155Tokens,
-		$defaultIcpTokens,
-		$enabledBitcoinTokens,
-		$enabledEthereumTokens,
-		$allIcrcTokens,
-		$enabledSolanaTokens,
-		$splTokens,
-		$enabledEvmTokens
-	]) => [
-		...$defaultIcpTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
-		...$erc20Tokens,
-		...$erc721Tokens,
-		...$erc1155Tokens,
+export const allTokens: Readable<CustomToken<Token>[]> = derivedMemo(
+	[nativeTokens, ercFungibleTokens, allIcrcTokens, splTokens, nonFungibleTokens],
+	([$nativeTokens, $ercFungibleTokens, $allIcrcTokens, $splTokens, $nonFungibleTokens]) => [
+		...$nativeTokens.map((token) => ({ ...token, enabled: true })),
+		...$ercFungibleTokens,
 		...$allIcrcTokens,
-		...$splTokens
-	]
+		...$splTokens,
+		...$nonFungibleTokens
+	],
+	tokenListEqual
 );
 
-export const allCrossChainSwapTokens = derived(
-	[erc20Tokens, enabledEthereumTokens, enabledEvmTokens],
-	([$erc20Tokens, $enabledEthereumTokens, $enabledEvmTokens]) => [
-		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
-		...$erc20Tokens.map((token) => ({ ...token, enabled: true }))
+export const allFungibleTokens: Readable<Token[]> = derivedMemo(
+	[allTokens],
+	([$tokens]) => $tokens.filter(isTokenFungible),
+	tokenListEqual
+);
+
+export const allCrossChainSwapTokens: Readable<
+	TokenToggleable<RequiredToken | Erc20CustomToken | SplCustomToken>[]
+> = derived(
+	[erc20Tokens, enabledEthEvmNativeTokens, splTokens, enabledSolanaTokens],
+	([$erc20Tokens, $ethEvmNativeTokens, $splTokens, $enabledSolanaTokens]) => [
+		...$ethEvmNativeTokens.map((token) => ({ ...token, enabled: true })),
+		...$erc20Tokens,
+		...(NEAR_INTENTS_SWAP_ENABLED
+			? [...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })), ...$splTokens]
+			: [])
 	]
 );

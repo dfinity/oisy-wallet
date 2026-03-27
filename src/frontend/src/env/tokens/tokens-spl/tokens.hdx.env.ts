@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import hdx from '$sol/assets/hdx.svg';
@@ -14,8 +15,9 @@ export const HDX_TOKEN_ID: TokenId = parseTokenId(HDX_SYMBOL);
 export const HDX_TOKEN: RequiredSpl2022Token = {
 	id: HDX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Home Depot xStock',
 	symbol: HDX_SYMBOL,
 	decimals: HDX_DECIMALS,

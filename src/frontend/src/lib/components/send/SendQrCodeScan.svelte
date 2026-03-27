@@ -12,7 +12,7 @@
 
 	interface Props {
 		expectedToken: OptionToken;
-		destination: string | undefined;
+		destination?: string;
 		amount: OptionAmount;
 		onDecodeQrCode: ({
 			status,

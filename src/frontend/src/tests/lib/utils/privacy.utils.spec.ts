@@ -63,8 +63,7 @@ describe('setPrivacyMode', () => {
 
 		setPrivacyMode({ enabled: true, source: 'User menu click' });
 
-		expect(spyTrackEvent).toHaveBeenCalledOnce();
-		expect(spyTrackEvent).toHaveBeenCalledWith({
+		expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: TRACK_PRIVACY_MODE_CHANGE,
 			metadata: {
 				enabled: 'true',
@@ -79,8 +78,7 @@ describe('setPrivacyMode', () => {
 
 		setPrivacyMode({ enabled: false, withToast: true, source: 'keypress P' });
 
-		expect(spyTrackEvent).toHaveBeenCalledOnce();
-		expect(spyTrackEvent).toHaveBeenCalledWith({
+		expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: TRACK_PRIVACY_MODE_CHANGE,
 			metadata: {
 				enabled: 'false',

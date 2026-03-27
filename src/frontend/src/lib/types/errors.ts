@@ -1,5 +1,3 @@
-import type { NetworkId } from '$lib/types/network';
-
 export class UserProfileNotFoundError extends Error {}
 
 export class UserNotVipError extends Error {}
@@ -12,25 +10,15 @@ export class AlreadyClaimedError extends Error {}
 
 export class InvalidCampaignError extends Error {}
 
-export class LoadIdbAddressError extends Error {
-	constructor(private readonly _networkId: NetworkId) {
-		super();
-	}
-
-	get networkId(): NetworkId {
-		return this._networkId;
-	}
-}
-
 export class NftError extends Error {
 	constructor(
-		private readonly _tokenUri: number,
+		private readonly _tokenUri: string,
 		private readonly _contractAddress: string
 	) {
 		super();
 	}
 
-	get tokenUri(): number {
+	get tokenUri(): string {
 		return this._tokenUri;
 	}
 

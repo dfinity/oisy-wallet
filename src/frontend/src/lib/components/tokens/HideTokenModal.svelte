@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Identity } from '@dfinity/agent';
 	import {
 		type ProgressStep,
 		WizardModal,
@@ -7,6 +6,7 @@
 		type WizardSteps
 	} from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onDestroy } from 'svelte';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
@@ -15,7 +15,6 @@
 	import { pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
 	import { WizardStepsHideToken } from '$lib/enums/wizard-steps';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -46,7 +45,6 @@
 		}
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -136,13 +134,15 @@
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-	{#if currentStep?.name === WizardStepsHideToken.HIDING}
-		<InProgressWizard
-			progressStep={hideProgressStep}
-			steps={HIDE_TOKEN_STEPS}
-			warningType="manage"
-		/>
-	{:else if currentStep?.name === WizardStepsHideToken.HIDE}
-		<HideTokenReview onCancel={close} onHide={hide} />
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsHideToken.HIDING}
+			<InProgressWizard
+				progressStep={hideProgressStep}
+				steps={HIDE_TOKEN_STEPS}
+				warningType="manage"
+			/>
+		{:else if currentStep?.name === WizardStepsHideToken.HIDE}
+			<HideTokenReview onCancel={close} onHide={hide} />
+		{/if}
+	{/key}
 </WizardModal>

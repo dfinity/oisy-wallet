@@ -15,7 +15,7 @@ export const safeMapNetworkIdToNetwork = (networkId: NetworkId): SolanaNetworkTy
 
 	throw new NullishError(
 		replacePlaceholders(get(i18n).init.error.no_solana_network, {
-			$network: networkId.description ?? ''
+			$network: `${networkId.description}`
 		})
 	);
 };

@@ -1,6 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import { checkIfAccountExists, loadTokenBalance } from '$sol/api/solana.api';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';

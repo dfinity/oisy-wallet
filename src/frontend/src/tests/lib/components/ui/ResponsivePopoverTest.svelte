@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
 
-	let button: HTMLButtonElement | undefined = $state(undefined);
+	let button = $state<HTMLButtonElement | undefined>();
 </script>
 
 <button bind:this={button}>Test</button>

@@ -14,9 +14,9 @@ import { SOLANA_NETWORK_TYPES } from '$sol/schema/network.schema';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockAccountInfo } from '$tests/mocks/sol-rpc.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import type { ActorSubclass } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import type { ActorSubclass } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
@@ -263,10 +263,10 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				// @ts-expect-error we test this in purposes
-				await expect(getAccountInfo({ ...mockParams, network: 'unknown-network' })).rejects.toThrow(
-					expectedUnknownNetworkError
-				);
+				await expect(
+					// @ts-expect-error we test this in purposes
+					getAccountInfo({ ...mockParams, network: 'unknown-network' })
+				).rejects.toThrow(expectedUnknownNetworkError);
 			});
 		});
 	});

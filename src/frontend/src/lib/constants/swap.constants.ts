@@ -5,6 +5,8 @@ import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/ne
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import type { NetworkId } from '$lib/types/network';
 import { SwapProvider, type SwapProvidersConfig } from '$lib/types/swap';
 
@@ -19,10 +21,6 @@ export const SWAP_SLIPPAGE_VELORA_INVALID_VALUE = 15;
 export const SWAP_VALUE_DIFFERENCE_WARNING_VALUE = -1;
 export const SWAP_VALUE_DIFFERENCE_ERROR_VALUE = -5;
 
-export const KONG_SWAP_PROVIDER = 'kongSwap';
-export const ICP_SWAP_PROVIDER = 'icpSwap';
-export const VELORA_SWAP_PROVIDER = 'velora';
-
 export const ICP_SWAP_POOL_FEE = 3000n;
 
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -31,25 +29,60 @@ export const SWAP_DELTA_TIMEOUT_MS = 5 * 60_000;
 export const SWAP_DELTA_INTERVAL_MS = 3_000;
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
+export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
+	[ETHEREUM_NETWORK_ID]: 'eth',
+	[ARBITRUM_MAINNET_NETWORK_ID]: 'arb',
+	[BASE_NETWORK_ID]: 'base',
+	[BSC_MAINNET_NETWORK_ID]: 'bsc',
+	[POLYGON_MAINNET_NETWORK_ID]: 'pol',
+	[SOLANA_MAINNET_NETWORK_ID]: 'sol'
+};
+
+export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
+export const NEAR_INTENTS_POLL_INTERVAL_MS = 2_000;
+export const NEAR_INTENTS_POLL_MAX_ATTEMPTS = 120;
+
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
 
 export const SWAP_MODE = 'all';
 export const SWAP_SIDE = 'SELL';
 
-export const swapProvidersDetails: Record<string, SwapProvidersConfig> = {
+export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersConfig>> = {
 	[SwapProvider.VELORA]: {
 		website: 'https://app.velora.xyz/',
 		name: 'Velora',
 		logo: '/images/dapps/velora-logo.svg'
-	}
+	},
+	...(NEAR_INTENTS_SWAP_ENABLED
+		? {
+				[SwapProvider.NEAR_INTENTS]: {
+					website: 'https://near-intents.org/',
+					name: 'NEAR Intents',
+					logo: '/images/dapps/near-intents-logo.svg'
+				}
+			}
+		: {})
 };
+
+const SUPPORTED_CROSS_SWAP_EVM_NETWORK_IDS = [
+	ETHEREUM_NETWORK_ID,
+	...SUPPORTED_EVM_MAINNET_NETWORK_IDS
+];
+
+const SUPPORTED_CROSS_SWAP_SOL_NETWORK_IDS = [SOLANA_MAINNET_NETWORK_ID];
+
+const SUPPORTED_CROSS_SWAP_NETWORK_IDS = [
+	...SUPPORTED_CROSS_SWAP_EVM_NETWORK_IDS,
+	...SUPPORTED_CROSS_SWAP_SOL_NETWORK_IDS
+];
 
 export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	[ICP_NETWORK_ID]: [ICP_NETWORK_ID],
-	[ETHEREUM_NETWORK_ID]: [ETHEREUM_NETWORK_ID, ...SUPPORTED_EVM_MAINNET_NETWORK_IDS],
-	[ARBITRUM_MAINNET_NETWORK_ID]: [ARBITRUM_MAINNET_NETWORK_ID],
-	[BSC_MAINNET_NETWORK_ID]: [BSC_MAINNET_NETWORK_ID],
-	[POLYGON_MAINNET_NETWORK_ID]: [POLYGON_MAINNET_NETWORK_ID],
-	[BASE_NETWORK_ID]: [ETHEREUM_NETWORK_ID, ...SUPPORTED_EVM_MAINNET_NETWORK_IDS]
+	[ETHEREUM_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+	[ARBITRUM_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+	[BSC_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+	[POLYGON_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+	[BASE_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+	[SOLANA_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS
 };

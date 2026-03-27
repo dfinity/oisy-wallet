@@ -42,7 +42,7 @@ describe('TransactionsDateGroup', () => {
 		...mockEthTransactionsUi
 	] as AllTransactionUiWithCmpNonEmptyList;
 
-	it('should render the date', () => {
+	it('should render the capitalized date', () => {
 		const { getByText } = render(TransactionsDateGroup, {
 			props: {
 				formattedDate: 'today',
@@ -50,7 +50,7 @@ describe('TransactionsDateGroup', () => {
 			}
 		});
 
-		expect(getByText('today')).toBeInTheDocument();
+		expect(getByText('Today')).toBeInTheDocument();
 	});
 
 	it('should render the transactions list', () => {

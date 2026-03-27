@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import aaplx from '$sol/assets/aaplx.svg';
@@ -14,8 +15,9 @@ export const AAPLX_TOKEN_ID: TokenId = parseTokenId(AAPLX_SYMBOL);
 export const AAPLX_TOKEN: RequiredSpl2022Token = {
 	id: AAPLX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Apple xStock',
 	symbol: AAPLX_SYMBOL,
 	decimals: AAPLX_DECIMALS,

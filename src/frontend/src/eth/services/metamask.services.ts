@@ -5,10 +5,10 @@ import {
 	switchMetamaskChain
 } from '$eth/providers/metamask.providers';
 import { metamaskStore } from '$eth/stores/metamask.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import detectEthereumProvider from '@metamask/detect-provider';

@@ -2,7 +2,6 @@
 	import { IconGitHub } from '@dfinity/gix-components';
 	import { page } from '$app/state';
 	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
-	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
@@ -55,7 +54,7 @@
 				</ExternalLinkIcon>
 			</div>
 			{#if $authNotSignedIn}
-				<div class="mb-2 flex gap-2 text-nowrap text-xs text-tertiary">
+				<div class="mb-2 flex gap-2 text-xs text-nowrap text-tertiary">
 					<TermsOfUseLink />
 					<PrivacyPolicyLink />
 					<LicenseAgreementLink />
@@ -82,7 +81,6 @@
 				class:xl:max-w-80={$authSignedIn}
 				class:xl:max-w-none={$authNotSignedIn}
 			>
-				<AiAssistantConsoleButton styleClass="mb-4 hidden md:block" />
 				<div class="flex flex-col items-center pt-2 sm:flex-row sm:items-start sm:gap-2">
 					<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 					<span

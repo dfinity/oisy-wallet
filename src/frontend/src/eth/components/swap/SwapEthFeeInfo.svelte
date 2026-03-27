@@ -18,11 +18,14 @@
 		feeTokenId?: OptionTokenId;
 		feeSymbol?: OptionString;
 	}
+
 	let { decimals, feeSymbol, feeTokenId }: Props = $props();
+
 	const { sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
-	const balanceForFee = nonNullish(feeTokenId)
-		? ($balancesStore?.[feeTokenId]?.data ?? ZERO)
-		: ZERO;
+
+	const balanceForFee = $derived(
+		nonNullish(feeTokenId) ? ($balancesStore?.[feeTokenId]?.data ?? ZERO) : ZERO
+	);
 </script>
 
 {#if nonNullish(feeSymbol) && $sourceToken?.symbol !== feeSymbol}

@@ -12,16 +12,11 @@ import {
 } from '$lib/constants/analytics.constants';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { saveTokens } from '$lib/services/manage-tokens.services';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
@@ -61,12 +56,12 @@ describe('manage-tokens.services', () => {
 			vi.clearAllMocks();
 
 			vi.spyOn(toastsStore, 'toastsError');
+			vi.spyOn(toastsStore, 'toastsShow');
 		});
 
-		it('should call nullishSignOut if identity is nullish', async () => {
+		it('should return early if identity is nullish', async () => {
 			await saveTokens({ ...params, identity: null });
 
-			expect(nullishSignOut).toHaveBeenCalledOnce();
 			expect(mockSave).not.toHaveBeenCalled();
 		});
 
@@ -127,11 +122,34 @@ describe('manage-tokens.services', () => {
 				msg: { text: en.tokens.error.unexpected },
 				err: new Error('Save failed')
 			});
+			expect(toastsShow).not.toHaveBeenCalled();
 			expect(mockOnError).toHaveBeenCalledOnce();
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
-				metadata: { error: 'Save failed' }
+				metadata: {
+					error: 'Save failed'
+				}
+			});
+		});
+
+		it('should show a warning toast on version mismatch error', async () => {
+			mockSave.mockRejectedValueOnce(new Error('Version mismatch, token update not allowed'));
+
+			await saveTokens(params);
+
+			expect(toastsError).not.toHaveBeenCalled();
+			expect(toastsShow).toHaveBeenCalledWith({
+				text: en.tokens.error.version_mismatch,
+				level: 'warn'
+			});
+			expect(mockOnError).toHaveBeenCalledOnce();
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
+				metadata: {
+					error: 'Version mismatch, token update not allowed'
+				}
 			});
 		});
 

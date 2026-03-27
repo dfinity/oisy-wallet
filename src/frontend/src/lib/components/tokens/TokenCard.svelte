@@ -1,19 +1,24 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
+	import ExchangeRateChange from '$lib/components/exchange/ExchangeRateChange.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
+	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -23,6 +28,7 @@
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
 		hover?: boolean;
+		onClick?: () => void;
 		onToggle?: (t: Token) => void;
 	}
 
@@ -31,10 +37,9 @@
 		testIdPrefix = TOKEN_CARD,
 		asNetwork = false,
 		hover = false,
+		onClick,
 		onToggle
 	}: Props = $props();
-
-	const dispatch = createEventDispatcher();
 
 	let testId = $derived(
 		`${testIdPrefix}-${data.symbol}${nonNullish(data.network) ? `-${data.network.id.description}` : ''}`
@@ -43,17 +48,23 @@
 	let token: TokenToggleable<Token> | undefined = $derived(
 		isCardDataTogglableToken(data) ? data : undefined
 	);
+
+	let { usdPrice, usdPriceChangePercentage24h } = $derived(data);
+
+	let formattedExchangeRate = $derived(
+		nonNullish(usdPrice)
+			? formatCurrency({
+					value: usdPrice,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
+	);
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton
-		condensed={asNetwork}
-		dividers={false}
-		{hover}
-		onClick={() => dispatch('click')}
-		rounded={false}
-		{testId}
-	>
+	<LogoButton condensed={asNetwork} dividers={false} {hover} {onClick} rounded={false} {testId}>
 		{#snippet logo()}
 			<span class="flex" class:mr-2={!asNetwork}>
 				<TokenLogo
@@ -79,9 +90,14 @@
 		{/snippet}
 
 		{#snippet subtitle()}
-			<span class:text-sm={asNetwork}>
+			<span
+				class="flex items-baseline gap-1 text-sm sm:gap-2"
+				class:ml-2={!asNetwork}
+				class:sm:ml-2.5={!asNetwork}
+			>
 				{#if !asNetwork}
-					<Divider />{data.name}
+					{formattedExchangeRate}
+					<ExchangeRateChange fontSize="xs" {usdPriceChangePercentage24h} />
 				{/if}
 			</span>
 		{/snippet}
@@ -104,13 +120,17 @@
 		{#snippet description()}
 			<span class:text-sm={asNetwork}>
 				{#if data?.networks}
-					{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
+					{@const networks = [...new Set(data.networks.map((n) => n.name))]}
+
+					<span class="text-primary">{data.name}</span>
+					{replacePlaceholders($i18n.tokens.text.on_network, { $network: '' })}
+					{#each networks as network, index (network)}
 						{#if index !== 0}
 							<Divider />
 						{/if}{network}
 					{/each}
-				{:else if !asNetwork && nonNullish(data.network)}
-					{data.network.name}
+				{:else if !asNetwork}
+					<TokenNameAndNetwork {data} />
 				{/if}
 			</span>
 		{/snippet}

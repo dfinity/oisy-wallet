@@ -17,6 +17,5 @@ export const onBtcStatusesMessage = async ({
 			return;
 		case 'triggerBtcStatusesTimer':
 			await scheduler.trigger(data);
-			return;
 	}
 };

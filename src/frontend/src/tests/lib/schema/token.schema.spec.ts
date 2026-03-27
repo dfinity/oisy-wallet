@@ -1,4 +1,5 @@
 import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	TokenAppearanceSchema,
 	TokenBuyableSchema,
@@ -6,6 +7,7 @@ import {
 	TokenIdSchema,
 	TokenMetadataSchema,
 	TokenSchema,
+	TokenStandardCodeSchema,
 	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -25,47 +27,160 @@ describe('token.schema', () => {
 		});
 	});
 
-	describe('TokenStandardSchema', () => {
+	describe('TokenStandardCodeSchema', () => {
 		it('should validate "ethereum" as a supported token standard', () => {
 			const validStandard = 'ethereum';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "erc20" as a supported token standard', () => {
 			const validStandard = 'erc20';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "icp" as a supported token standard', () => {
 			const validStandard = 'icp';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "icrc" as a supported token standard', () => {
 			const validStandard = 'icrc';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "dip20" as a supported token standard', () => {
+			const validStandard = 'dip20';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "dip721" as a supported token standard', () => {
+			const validStandard = 'dip721';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "ext" as a supported token standard', () => {
+			const validStandard = 'ext';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "icpunks" as a supported token standard', () => {
+			const validStandard = 'icpunks';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "bitcoin" as a supported token standard', () => {
 			const validStandard = 'bitcoin';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "solana" as a supported token standard', () => {
 			const validStandard = 'solana';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should fail validation with an unsupported token standard', () => {
 			const invalidStandard = 'unsupported-standard';
 
-			expect(() => TokenStandardSchema.parse(invalidStandard)).toThrow();
+			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrow();
+		});
+	});
+
+	describe('TokenStandardSchema', () => {
+		it('should validate "ethereum" as a supported token standard', () => {
+			const validStandard = 'ethereum';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "erc20" as a supported token standard', () => {
+			const validStandard = 'erc20';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "icp" as a supported token standard', () => {
+			const validStandard = 'icp';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "icrc" as a supported token standard', () => {
+			const validStandard = 'icrc';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "dip20" as a supported token standard', () => {
+			const validStandard = 'dip20';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "dip721" as a supported token standard', () => {
+			const validStandard = 'dip721';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "ext" as a supported token standard', () => {
+			const validStandard = 'ext';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "icpunks" as a supported token standard', () => {
+			const validStandard = 'icpunks';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({
+				code: validStandard
+			});
+		});
+
+		it('should validate "bitcoin" as a supported token standard', () => {
+			const validStandard = 'bitcoin';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "solana" as a supported token standard', () => {
+			const validStandard = 'solana';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should accept a version for the standard', () => {
+			const validStandard = 'ext';
+			const validVersion = 'legacy';
+
+			expect(TokenStandardSchema.parse({ code: validStandard, version: validVersion })).toEqual({
+				code: validStandard,
+				version: validVersion
+			});
+		});
+
+		it('should fail validation with an unsupported token standard', () => {
+			const invalidStandard = 'unsupported-standard';
+
+			expect(() => TokenStandardSchema.parse({ code: invalidStandard })).toThrow();
+		});
+
+		it('should fail validation with an unsupported standard version', () => {
+			const validStandard = 'ext';
+			const invalidVersion = 123;
+
+			expect(() =>
+				TokenStandardSchema.parse({ code: validStandard, version: invalidVersion })
+			).toThrow();
 		});
 	});
 
@@ -198,13 +313,14 @@ describe('token.schema', () => {
 	});
 
 	describe('TokenSchema', () => {
-		const { chainId: _, explorerUrl: __, providers: ___, ...mockNetwork } = SEPOLIA_NETWORK;
+		const { chainId: _, providers: __, ...mockNetwork } = SEPOLIA_NETWORK;
 
 		const validTokenWithRequiredFields = {
 			id: parseTokenId('TokenId'),
 			network: mockNetwork,
-			standard: 'ethereum',
+			standard: { code: 'ethereum' },
 			category: 'default',
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			name: 'SampleToken',
 			symbol: 'STK',
 			decimals: 8
@@ -215,6 +331,8 @@ describe('token.schema', () => {
 			icon: 'https://example.com/icon.png',
 			oisySymbol: { oisySymbol: 'OSYM' },
 			oisyName: { prefix: 'OS', oisyName: 'OisyToken' },
+			neverCollapseInTokenGroup: false,
+			allowExternalContentSource: true,
 			buy: { onramperId: 'valid-id' }
 		};
 
@@ -246,6 +364,12 @@ describe('token.schema', () => {
 
 		it('should fail validation when category is missing', () => {
 			const { category: _, ...invalidToken } = validToken;
+
+			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+		});
+
+		it('should fail validation when tags is missing', () => {
+			const { tags: _, ...invalidToken } = validToken;
 
 			expect(() => TokenSchema.parse(invalidToken)).toThrow();
 		});

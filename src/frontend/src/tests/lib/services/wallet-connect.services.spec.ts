@@ -16,13 +16,9 @@ describe('wallet-connect.services', () => {
 		pair: vi.fn(),
 		approveSession: vi.fn(),
 		rejectSession: vi.fn(),
-		sessionProposal: vi.fn(),
+		attachHandlers: vi.fn(),
+		detachHandlers: vi.fn(),
 		rejectRequest: vi.fn(),
-		sessionDelete: vi.fn(),
-		sessionRequest: vi.fn(),
-		offSessionProposal: vi.fn(),
-		offSessionDelete: vi.fn(),
-		offSessionRequest: vi.fn(),
 		getActiveSessions: vi.fn(),
 		approveRequest: vi.fn(),
 		disconnect: vi.fn()
@@ -61,7 +57,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForNull).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.no_connection_opened }
 			});
 
@@ -71,7 +67,11 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForUndefined).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledTimes(2);
+			expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: en.wallet_connect.error.no_connection_opened }
+			});
+			expect(spyToastsError).toHaveBeenNthCalledWith(2, {
 				msg: { text: en.wallet_connect.error.no_connection_opened }
 			});
 		});
@@ -84,7 +84,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForNull).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.request_not_defined }
 			});
 
@@ -95,7 +95,11 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForUndefined).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledTimes(2);
+			expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: en.wallet_connect.error.request_not_defined }
+			});
+			expect(spyToastsError).toHaveBeenNthCalledWith(2, {
 				msg: { text: en.wallet_connect.error.request_not_defined }
 			});
 		});

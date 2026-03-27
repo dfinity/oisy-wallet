@@ -1,8 +1,8 @@
 import { OISY_DESCRIPTION, OISY_ICON, OISY_NAME, OISY_URL } from '$lib/constants/oisy.constants';
-import type { AuthClientTypes } from '@walletconnect/auth-client';
+import type { WalletKitTypes } from '@reown/walletkit';
 import type { ErrorResponse } from '@walletconnect/jsonrpc-utils';
 
-export const WALLET_CONNECT_METADATA: AuthClientTypes.Metadata = {
+export const WALLET_CONNECT_METADATA: WalletKitTypes.Metadata = {
 	name: OISY_NAME,
 	description: OISY_DESCRIPTION,
 	url: OISY_URL,

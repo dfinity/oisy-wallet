@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import pengu from '$sol/assets/pengu.png';
@@ -14,8 +15,9 @@ export const PENGU_TOKEN_ID: TokenId = parseTokenId(PENGU_SYMBOL);
 export const PENGU_TOKEN: RequiredSplToken = {
 	id: PENGU_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Pudgy Penguins',
 	symbol: PENGU_SYMBOL,
 	decimals: PENGU_DECIMALS,

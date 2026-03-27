@@ -5,6 +5,7 @@ import {
 } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import eth from '$icp-eth/assets/eth.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -18,8 +19,9 @@ export const ARBITRUM_ETH_TOKEN_ID: TokenId = parseTokenId(ARBITRUM_ETH_SYMBOL);
 export const ARBITRUM_ETH_TOKEN: RequiredToken = {
 	id: ARBITRUM_ETH_TOKEN_ID,
 	network: ARBITRUM_MAINNET_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Ethereum',
 	symbol: ARBITRUM_ETH_SYMBOL,
 	decimals: ARBITRUM_ETH_DECIMALS,
@@ -37,8 +39,9 @@ export const ARBITRUM_SEPOLIA_ETH_TOKEN_ID: TokenId = parseTokenId(ARBITRUM_SEPO
 export const ARBITRUM_SEPOLIA_ETH_TOKEN: RequiredToken = {
 	id: ARBITRUM_SEPOLIA_ETH_TOKEN_ID,
 	network: ARBITRUM_SEPOLIA_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'SepoliaETH',
 	symbol: ARBITRUM_SEPOLIA_ETH_SYMBOL,
 	decimals: ARBITRUM_ETH_DECIMALS,

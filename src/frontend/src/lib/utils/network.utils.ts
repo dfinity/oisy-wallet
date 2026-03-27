@@ -1,4 +1,4 @@
-import type { BitcoinNetwork as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
+import type { Network as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -19,14 +19,26 @@ import {
 	SOLANA_MAINNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
+import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { SolanaNetwork } from '$sol/types/network';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { nonNullish } from '@dfinity/utils';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 
 export type IsNetworkIdUtil = (networkId: NetworkId | undefined) => boolean;
+
+export const isNetworkEthereum = (network: Network | undefined): network is EthereumNetwork =>
+	isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id);
+
+export const assertIsNetworkEthereum: (
+	network: Network | undefined
+) => asserts network is EthereumNetwork = (network: Network | undefined): void => {
+	if (!isNetworkEthereum(network)) {
+		throw new Error(`Network ${network?.name ?? ''} is not an Ethereum or EVM network`);
+	}
+};
 
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
 
@@ -117,24 +129,24 @@ export const mapCkBtcBitcoinNetworkToBackendBitcoinNetwork = (
 	}
 };
 
-export const showTokenFilteredBySelectedNetwork = ({
+export const showTokenFilteredBySelectedNetwork = <T extends Token>({
 	token,
 	$selectedNetwork,
 	$pseudoNetworkChainFusion
 }: {
-	token: Token;
+	token: T;
 	$selectedNetwork: Network | undefined;
 	$pseudoNetworkChainFusion: boolean;
 }): boolean =>
 	($pseudoNetworkChainFusion && !isTokenIcTestnet(token) && token.network.env !== 'testnet') ||
 	$selectedNetwork?.id === token.network.id;
 
-export const showTokenFilteredBySelectedNetworks = ({
+export const showTokenFilteredBySelectedNetworks = <T extends Token>({
 	token,
 	$selectedNetworks,
 	$pseudoNetworkChainFusion
 }: {
-	token: Token;
+	token: T;
 	$selectedNetworks: NetworkId[] | undefined;
 	$pseudoNetworkChainFusion: boolean;
 }): boolean =>

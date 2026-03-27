@@ -1,6 +1,8 @@
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import type { OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.constants';
@@ -8,7 +10,6 @@ import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -47,7 +48,7 @@ const loadEthBalance = async ({
 		const { balance } = infuraProviders(networkId);
 		const data = await balance(address);
 
-		balancesStore.set({ id: tokenId, data: { data, certified: false } });
+		balancesStore.batchSet({ id: tokenId, data: { data, certified: false } });
 	} catch (err: unknown) {
 		balancesStore.reset(tokenId);
 
@@ -74,7 +75,7 @@ const loadErc20Balance = async ({
 	token: contract,
 	address: optionAddress
 }: {
-	token: Erc20Token;
+	token: Erc20Token | Erc4626Token;
 	address?: OptionEthAddress;
 }): Promise<ResultSuccess> => {
 	const address = optionAddress ?? get(addressStore);
@@ -92,7 +93,7 @@ const loadErc20Balance = async ({
 	try {
 		const { balance } = infuraErc20Providers(contract.network.id);
 		const data = await balance({ address, contract });
-		balancesStore.set({ id: contract.id, data: { data, certified: false } });
+		balancesStore.batchSet({ id: contract.id, data: { data, certified: false } });
 	} catch (err: unknown) {
 		balancesStore.reset(contract.id);
 
@@ -127,13 +128,13 @@ export const loadEthBalances = async (tokens: Token[]): Promise<ResultSuccess> =
 
 export const loadErc20Balances = async ({
 	address,
-	erc20Tokens
+	tokens
 }: {
 	address: OptionEthAddress;
-	erc20Tokens: Erc20Token[];
+	tokens: (Erc20Token | Erc4626Token)[];
 }): Promise<ResultSuccess> => {
 	const results = await Promise.all([
-		...erc20Tokens.map((token) => loadErc20Balance({ token, address }))
+		...tokens.map((token) => loadErc20Balance({ token, address }))
 	]);
 
 	return { success: results.every(({ success }) => success === true) };

@@ -11,7 +11,8 @@ describe('SwapProviderListItem', () => {
 		destinationToken: mockValidIcToken as IcTokenToggleable,
 		usdBalance: '$5.00',
 		logoSize: 'md' as const,
-		isBestRate: false
+		isBestRate: false,
+		onClick: vi.fn()
 	};
 
 	const createDapp = (overrides = {}) => ({

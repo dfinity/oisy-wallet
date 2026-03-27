@@ -1,7 +1,5 @@
 import { MILLISECONDS_IN_SECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 
-export const nowInBigIntNanoSeconds = (): bigint => BigInt(Date.now()) * BigInt(1e6);
-
 export const normalizeTimestampToSeconds = (timestamp: number | bigint): number => {
 	const ts = Number(timestamp);
 

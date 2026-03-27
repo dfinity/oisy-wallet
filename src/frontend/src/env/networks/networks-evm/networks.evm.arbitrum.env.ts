@@ -7,6 +7,7 @@ import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 
 export const ARBITRUM_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_ARBITRUM_MAINNET_DISABLED
@@ -25,14 +26,18 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 	chainId: 42161n,
 	icon: arbitrumMainnetIcon,
 	explorerUrl: ARBITRUM_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'arbitrum',
 		alchemy: 'arbitrum',
 		alchemyDeprecated: Network.ARB_MAINNET,
-		alchemyJsonRpcUrl: 'https://arb-mainnet.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://arb-mainnet.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://arb-mainnet.g.alchemy.com/v2',
+		viemChain: arbitrum
 	},
 	exchange: { coingeckoId: 'arbitrum-one' },
-	buy: { onramperId: 'arbitrum' }
+	buy: { onramperId: 'arbitrum' },
+	pay: { openCryptoPay: 'Arbitrum' }
 };
 
 export const ARBITRUM_SEPOLIA_NETWORK_SYMBOL = 'ARB (Sepolia Testnet)';
@@ -48,11 +53,14 @@ export const ARBITRUM_SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 421614n,
 	icon: arbitrumSepoliaIcon,
 	explorerUrl: ARBITRUM_SEPOLIA_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'arbitrum-sepolia',
 		alchemy: 'arbitrum-sepolia',
 		alchemyDeprecated: Network.ARB_SEPOLIA,
-		alchemyJsonRpcUrl: 'https://arb-sepolia.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://arb-sepolia.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://arb-sepolia.g.alchemy.com/v2',
+		viemChain: arbitrumSepolia
 	}
 };
 

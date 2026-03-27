@@ -2,7 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
-	import { isTokenIcrc, isTokenDip20 } from '$icp/utils/icrc.utils';
+	import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
+	import { isTokenIcrc, isTokenDip20, isTokenIc } from '$icp/utils/icrc.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
@@ -24,8 +25,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { getTokenCategoryTag } from '$lib/utils/token-tag.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface BaseTokenModalProps {
@@ -36,6 +39,8 @@
 	}
 
 	let { children, token, onDeleteClick, onEditClick }: BaseTokenModalProps = $props();
+
+	let categoryTag = $derived(nonNullish(token) ? getTokenCategoryTag(token) : undefined);
 </script>
 
 <ContentWithToolbar>
@@ -140,14 +145,14 @@
 				</ModalListItem>
 			{/if}
 
-			{#if isTokenIcrc(token) || isTokenErc20(token) || isTokenDip20(token)}
+			{#if isTokenIcrc(token) || isTokenErc20(token) || isTokenDip20(token) || isTokenErc4626(token)}
 				<ModalListItem>
 					{#snippet label()}
 						{$i18n.tokens.details.standard}
 					{/snippet}
 
 					{#snippet content()}
-						{token.standard}
+						{token.standard.code}
 					{/snippet}
 				</ModalListItem>
 			{/if}
@@ -171,6 +176,39 @@
 					{token.decimals}
 				{/snippet}
 			</ModalListItem>
+
+			{#if isTokenIc(token)}
+				<ModalListItem>
+					{#snippet label()}
+						{$i18n.fee.text.fee}
+					{/snippet}
+
+					{#snippet content()}
+						{formatToken({
+							value: token.fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					{/snippet}
+				</ModalListItem>
+			{/if}
+
+			{#if nonNullish(categoryTag)}
+				<ModalListItem>
+					{#snippet label()}
+						{replaceOisyPlaceholders($i18n.tokens.text.asset_type)}
+					{/snippet}
+
+					{#snippet content()}
+						<span
+							class="inline-block rounded-md border border-secondary bg-secondary px-2 py-0.5 text-xs font-medium"
+						>
+							{$i18n.token_tag.category[categoryTag] ?? categoryTag}
+						</span>
+					{/snippet}
+				</ModalListItem>
+			{/if}
 		</List>
 
 		{#if nonNullish(onDeleteClick)}

@@ -1,11 +1,11 @@
 <script lang="ts">
+	import type { Nullish } from '@dfinity/zod-schemas';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Option } from '$lib/types/utils';
 
 	interface Props {
-		proposal: Option<WalletKitTypes.SessionProposal>;
+		proposal: Nullish<WalletKitTypes.SessionProposal>;
 	}
 
 	let { proposal }: Props = $props();
@@ -28,7 +28,7 @@
 			{$i18n.wallet_connect.domain.unknown}
 		{/if}
 	</label>
-	<div id="verification" class="mb-4 break-all font-normal">
+	<div id="verification" class="mb-4 font-normal break-all">
 		{#if validation === 'VALID'}
 			{$i18n.wallet_connect.domain.valid_description}
 		{:else if validation === 'INVALID'}

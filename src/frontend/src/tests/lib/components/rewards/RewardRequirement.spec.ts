@@ -2,6 +2,11 @@ import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte'
 import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { i18n } from '$lib/stores/i18n.store';
+import type {
+	MinLoginsCriterion,
+	MinTotalAssetsUsdCriterion,
+	MinTransactionsCriterion
+} from '$lib/types/reward';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -9,14 +14,16 @@ import { get } from 'svelte/store';
 describe('RewardRequirement', () => {
 	describe('Requirements', () => {
 		it('should render min logins requirement', () => {
+			const criterion: MinLoginsCriterion = {
+				satisfied: true,
+				type: RewardCriterionType.MIN_LOGINS,
+				days: 6n,
+				count: 2
+			};
+
 			const { getByText } = render(RewardRequirement, {
 				props: {
-					criterion: {
-						satisfied: true,
-						type: RewardCriterionType.MIN_LOGINS,
-						days: 6n,
-						count: 2
-					}
+					criterion
 				}
 			});
 
@@ -31,14 +38,16 @@ describe('RewardRequirement', () => {
 		});
 
 		it('should render min transactions requirement', () => {
+			const criterion: MinTransactionsCriterion = {
+				satisfied: false,
+				type: RewardCriterionType.MIN_TRANSACTIONS,
+				days: 6n,
+				count: 3
+			};
+
 			const { getByText } = render(RewardRequirement, {
 				props: {
-					criterion: {
-						satisfied: false,
-						type: RewardCriterionType.MIN_TRANSACTIONS,
-						days: 6n,
-						count: 3
-					}
+					criterion
 				}
 			});
 
@@ -53,14 +62,16 @@ describe('RewardRequirement', () => {
 		});
 
 		it('should not render min transactions in network requirement', () => {
+			const criterion: MinTransactionsCriterion = {
+				satisfied: false,
+				type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
+				days: 6n,
+				count: 3
+			};
+
 			const { queryByText } = render(RewardRequirement, {
 				props: {
-					criterion: {
-						satisfied: false,
-						type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
-						days: 6n,
-						count: 3
-					}
+					criterion
 				}
 			});
 
@@ -75,13 +86,15 @@ describe('RewardRequirement', () => {
 		});
 
 		it('should render min total assets usd requirement', () => {
+			const criterion: MinTotalAssetsUsdCriterion = {
+				satisfied: false,
+				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+				usd: 21
+			};
+
 			const { getByText } = render(RewardRequirement, {
 				props: {
-					criterion: {
-						satisfied: false,
-						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
-						usd: 21
-					}
+					criterion
 				}
 			});
 
@@ -95,13 +108,15 @@ describe('RewardRequirement', () => {
 		});
 
 		it('should render min total assets usd in network requirement', () => {
+			const criterion: MinTotalAssetsUsdCriterion = {
+				satisfied: false,
+				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
+				usd: 21
+			};
+
 			const { queryByText } = render(RewardRequirement, {
 				props: {
-					criterion: {
-						satisfied: false,
-						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
-						usd: 21
-					}
+					criterion
 				}
 			});
 
@@ -119,14 +134,16 @@ describe('RewardRequirement', () => {
 		const requirementStatusSelector = `span[data-tid="${REWARDS_REQUIREMENTS_STATUS}"]`;
 
 		it('should not render satisfied requirement', () => {
+			const criterion: MinLoginsCriterion = {
+				satisfied: true,
+				type: RewardCriterionType.MIN_LOGINS,
+				days: 6n,
+				count: 2
+			};
+
 			const { container } = render(RewardRequirement, {
 				props: {
-					criterion: {
-						satisfied: true,
-						type: RewardCriterionType.MIN_LOGINS,
-						days: 6n,
-						count: 2
-					},
+					criterion,
 					testId: REWARDS_REQUIREMENTS_STATUS
 				}
 			});
@@ -139,14 +156,16 @@ describe('RewardRequirement', () => {
 		});
 
 		it('should not render not satisfied requirement', () => {
+			const criterion: MinLoginsCriterion = {
+				satisfied: false,
+				type: RewardCriterionType.MIN_LOGINS,
+				days: 6n,
+				count: 2
+			};
+
 			const { container } = render(RewardRequirement, {
 				props: {
-					criterion: {
-						satisfied: false,
-						type: RewardCriterionType.MIN_LOGINS,
-						days: 6n,
-						count: 2
-					},
+					criterion,
 					testId: REWARDS_REQUIREMENTS_STATUS
 				}
 			});

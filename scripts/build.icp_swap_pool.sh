@@ -7,7 +7,7 @@ print_help() {
 
 	- The Wasm and Candid files are downloaded.
 
-	The files are installed at at the locations defined for 'icp_swap_pool' in 'dfx.json'.
+	The files are installed at the locations defined for 'icp_swap_pool' in 'dfx.json'.
 	EOF
 }
 

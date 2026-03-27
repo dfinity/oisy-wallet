@@ -1,10 +1,16 @@
+import type { BtcAddress } from '$btc/types/address';
 import type {
-	AllowSigningRequest,
-	BitcoinNetwork,
+	AllowSigningResponse,
+	TokenId as BackendTokenId,
+	Network as BitcoinNetwork,
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
+	IIDelegationChain,
+	PendingTransaction,
+	SelectedUtxosFeeResponse,
 	UserProfile,
+	UserTransaction,
 	Utxo
 } from '$declarations/backend/backend.did';
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
@@ -15,13 +21,14 @@ import type {
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
 import type { IcToken } from '$icp/types/ic-token';
-import type { Address, BtcAddress } from '$lib/types/address';
+import type { Address } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';
 import type { UserNetworks } from '$lib/types/user-networks';
-import type { Identity } from '@dfinity/agent';
-import type { Principal } from '@dfinity/principal';
+import type { Nullable } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export interface AddUserCredentialParams {
 	credentialJwt: string;
@@ -32,23 +39,50 @@ export interface AddUserCredentialParams {
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 
+export interface RateLimitInfo {
+	endpoint: string;
+	limiter: string;
+}
+
+export interface AddPendingTransactionOutcome {
+	response: true;
+	rateLimitInfo?: RateLimitInfo;
+}
+
+export interface GetPendingTransactionsOutcome {
+	response: PendingTransaction[];
+	rateLimitInfo?: RateLimitInfo;
+}
+
+export interface SelectedUtxosFeeOutcome {
+	response: SelectedUtxosFeeResponse;
+	rateLimitInfo?: RateLimitInfo;
+}
+
 export interface AllowSigningParams {
-	request?: AllowSigningRequest;
+	iiDelegationChain: Nullable<IIDelegationChain>;
+}
+
+export interface AllowSigningOutcome {
+	response: AllowSigningResponse;
+	rateLimitInfo?: RateLimitInfo;
 }
 
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
 	amountSatoshis: bigint;
 	minConfirmations: [number];
+	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
 export interface BtcGetPendingTransactionParams {
 	network: BitcoinNetwork;
 	address: BtcAddress;
+	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
-	txId: Uint8Array | number[];
+	txId: Uint8Array;
 	utxos: Utxo[];
 }
 
@@ -65,7 +99,7 @@ export interface GetSchnorrPublicKeyParams {
 }
 
 export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
-	message: number[];
+	message: Uint8Array;
 }
 
 export interface AddUserHiddenDappIdParams {
@@ -177,4 +211,23 @@ export interface DeleteContactParams {
 export interface UpdateUserExperimentalFeatureSettings {
 	experimentalFeatures: UserExperimentalFeatures;
 	currentUserVersion?: bigint;
+}
+
+export interface GetUserTransactionsParams {
+	tokenId: BackendTokenId;
+	start?: bigint;
+	maxResults: bigint;
+}
+
+export interface GetUserTransactionsResponse {
+	transactions: UserTransaction[];
+	newestBlockIndex?: bigint;
+	oldestBlockIndex?: bigint;
+	totalStored: bigint;
+	nextStart?: bigint;
+}
+
+export interface SaveUserTransactionsParams {
+	tokenId: BackendTokenId;
+	transactions: UserTransaction[];
 }

@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import abbvx from '$sol/assets/abbvx.svg';
@@ -14,8 +15,9 @@ export const ABBVX_TOKEN_ID: TokenId = parseTokenId(ABBVX_SYMBOL);
 export const ABBVX_TOKEN: RequiredSpl2022Token = {
 	id: ABBVX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'AbbVie xStock',
 	symbol: ABBVX_SYMBOL,
 	decimals: ABBVX_DECIMALS,

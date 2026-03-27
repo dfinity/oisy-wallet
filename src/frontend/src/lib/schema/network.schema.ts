@@ -15,8 +15,19 @@ const NetworkBuySchema = z.object({
 	onramperId: OnramperNetworkIdSchema
 });
 
-export const NetworkAppMetadataSchema = z.object({
-	explorerUrl: UrlSchema
+export const NetworkOpenCryptoPaySchema = z.enum([
+	'Bitcoin',
+	'Ethereum',
+	'Arbitrum',
+	'Base',
+	'BinanceSmartChain',
+	'Polygon',
+	'InternetComputer',
+	'Solana'
+]);
+
+const NetworkPaySchema = z.object({
+	openCryptoPay: NetworkOpenCryptoPaySchema
 });
 
 const IconSchema = z
@@ -41,6 +52,9 @@ export const NetworkSchema = z.object({
 	env: NetworkEnvironmentSchema,
 	name: z.string(),
 	icon: IconSchema.optional(),
+	explorerUrl: UrlSchema,
 	exchange: NetworkExchangeSchema.optional(),
-	buy: NetworkBuySchema.optional()
+	buy: NetworkBuySchema.optional(),
+	pay: NetworkPaySchema.optional(),
+	supportsNft: z.boolean().optional()
 });

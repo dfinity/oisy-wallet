@@ -1,4 +1,3 @@
-import type { EthereumNetwork } from '$eth/types/network';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import type { IcCkLinkedAssets, IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -46,9 +45,11 @@ const mapPendingTransaction = ({
 	token: IcToken;
 	value: bigint;
 } & IcCkLinkedAssets): IcTransactionUi => {
-	const { explorerUrl } = twinToken.network as EthereumNetwork;
+	const {
+		network: { explorerUrl },
+		symbol: twinTokenSymbol
+	} = twinToken;
 
-	const { symbol: twinTokenSymbol } = twinToken;
 	const { symbol } = token;
 
 	const {

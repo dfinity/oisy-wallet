@@ -44,7 +44,7 @@ describe('IntervalLoader', () => {
 
 		const n = 5;
 
-		vi.advanceTimersByTime(interval * 5 + interval / 2);
+		await vi.advanceTimersByTimeAsync(interval * 5 + interval / 2);
 
 		expect(onLoad).toHaveBeenCalledTimes(n + 1);
 	});
@@ -68,5 +68,34 @@ describe('IntervalLoader', () => {
 		vi.advanceTimersByTime(interval * 5);
 
 		expect(onLoad).toHaveBeenCalledOnce();
+	});
+
+	it('should restart timer on interval prop change', async () => {
+		const onLoad = vi.fn();
+
+		const { rerender } = render(IntervalLoader, {
+			props: {
+				onLoad,
+				interval
+			}
+		});
+
+		await tick();
+
+		expect(onLoad).toHaveBeenCalledOnce();
+
+		const newInterval = interval / 3;
+
+		await rerender({ interval: newInterval });
+
+		await tick();
+
+		vi.advanceTimersByTime(interval + newInterval / 2);
+
+		expect(onLoad).toHaveBeenCalledTimes(2);
+
+		await vi.advanceTimersByTimeAsync(newInterval);
+
+		expect(onLoad).toHaveBeenCalledTimes(3);
 	});
 });

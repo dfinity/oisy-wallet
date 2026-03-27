@@ -1,24 +1,28 @@
 <script lang="ts">
-	import IconAstronautArrow from '$lib/components/icons/IconAstronautArrow.svelte';
-	import { LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
-	import { i18n } from '$lib/stores/i18n.store';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		onclick: () => void;
 		fullWidth?: boolean;
+		testId?: string;
+		styleClass?: string;
+		children: Snippet;
 	}
 
-	let { onclick, fullWidth = false }: Props = $props();
+	let { onclick, fullWidth = false, styleClass, testId, children }: Props = $props();
 </script>
 
 <button
-	class="login-button flex w-full items-center justify-center gap-4 rounded-2xl bg-brand-primary py-3 text-lg font-bold leading-6 text-primary-inverted sm:px-12"
+	class={`login-button flex w-full items-center justify-center gap-4 rounded-2xl py-3 text-lg leading-6 font-bold whitespace-nowrap sm:max-w-none ${styleClass ?? ''}`}
+	class:lg:px-6={!fullWidth}
+	class:max-w-[24rem]={!fullWidth}
+	class:px-12={fullWidth}
+	class:px-4={!fullWidth}
 	class:sm:w-80={!fullWidth}
-	data-tid={LOGIN_BUTTON}
+	data-tid={testId}
 	{onclick}
 >
-	{$i18n.auth.text.authenticate}
-	<IconAstronautArrow />
+	{@render children()}
 </button>
 
 <style lang="scss">

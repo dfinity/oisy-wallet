@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { IconCheck } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import type { MouseEventHandler } from 'svelte/elements';
 	import { fade } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
 
@@ -14,14 +15,14 @@
 		condensed?: boolean;
 		styleClass?: string;
 		testId?: string;
-		logo: Snippet;
+		logo?: Snippet;
 		title?: Snippet;
 		subtitle?: Snippet;
 		titleEnd?: Snippet;
 		description?: Snippet;
 		descriptionEnd?: Snippet;
 		action?: Snippet;
-		onClick?: () => void;
+		onClick?: MouseEventHandler<HTMLButtonElement>;
 		fullWidth?: boolean;
 	}
 
@@ -52,9 +53,14 @@
 	class:rounded-lg={rounded}
 	class:w-full={dividers || fullWidth}
 >
-	<button class="flex w-full border-0 px-2" data-tid={testId} onclick={onClick}>
+	<button
+		class="flex w-full border-0 px-2"
+		class:cursor-default={isNullish(onClick)}
+		data-tid={testId}
+		onclick={onClick}
+	>
 		<span
-			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
+			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-t-0 border-r-0 border-l-0"
 			class:border-b={dividers}
 			class:border-brand-subtle-20={dividers}
 			class:py-1={condensed}
@@ -68,17 +74,27 @@
 						{/if}
 					</span>
 				{/if}
-				<span class="mr-2 flex">{@render logo()}</span>
+				{#if nonNullish(logo)}
+					<span class="mr-2 flex">{@render logo()}</span>
+				{/if}
 				<span class="flex min-w-0 flex-col text-left">
-					<span class="truncate text-nowrap">
+					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
-							<span class="text-lg font-bold text-primary">{@render title()}</span>
+							<span
+								class="text-lg font-bold text-nowrap text-primary"
+								class:min-w-0={isNullish(subtitle)}
+								class:truncate={isNullish(subtitle)}
+							>
+								{@render title()}
+							</span>
 						{/if}
 						{#if nonNullish(subtitle)}
 							{#if dividers}
 								<span class="text-tertiary"><Divider /></span>
 							{/if}
-							<span class="text-base text-tertiary">{@render subtitle()}</span>
+							<span class="truncate text-base text-nowrap text-tertiary">
+								{@render subtitle()}
+							</span>
 						{/if}
 					</span>
 					{#if nonNullish(description)}
@@ -89,15 +105,15 @@
 				</span>
 			</span>
 
-			<span class="flex items-center">
-				<span class="flex flex-col text-right">
+			<span class="flex items-center text-nowrap">
+				<span class="flex flex-col text-right text-nowrap">
 					{#if nonNullish(titleEnd)}
-						<span class="text-lg font-bold">
+						<span class="text-lg font-bold text-nowrap">
 							{@render titleEnd()}
 						</span>
 					{/if}
 					{#if nonNullish(descriptionEnd)}
-						<span class="text-sm text-tertiary">
+						<span class="text-sm text-nowrap text-tertiary">
 							{@render descriptionEnd()}
 						</span>
 					{/if}

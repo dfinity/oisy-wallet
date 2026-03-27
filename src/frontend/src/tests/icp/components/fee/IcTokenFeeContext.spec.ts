@@ -7,10 +7,9 @@ import {
 	type IcTokenFeeStore
 } from '$icp/stores/ic-token-fee.store';
 import * as authStore from '$lib/derived/auth.derived';
-import * as authServices from '$lib/services/auth.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -28,6 +27,8 @@ describe('IcTokenFeeContext', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		icTokenFeeStore.reset();
 	});
 
@@ -43,13 +44,11 @@ describe('IcTokenFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(transactionFeeSpy).toHaveBeenCalledOnce();
-			expect(transactionFeeSpy).toHaveBeenCalledWith({
+			expect(transactionFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				ledgerCanisterId: ICP_TOKEN.ledgerCanisterId,
 				identity: mockIdentity
 			});
-			expect(setIcTokenFeeSpy).toHaveBeenCalledOnce();
-			expect(setIcTokenFeeSpy).toHaveBeenCalledWith({
+			expect(setIcTokenFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				tokenSymbol: ICP_TOKEN.symbol,
 				fee: mockFee
 			});
@@ -57,7 +56,7 @@ describe('IcTokenFeeContext', () => {
 	});
 
 	it('should not call transactionFee if no authIdentity available', async () => {
-		const nullishSignOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
+		const transactionFeeSpy = mockTransactionFee();
 
 		mockAuthStore(null);
 
@@ -67,7 +66,7 @@ describe('IcTokenFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(nullishSignOutSpy).toHaveBeenCalledOnce();
+			expect(transactionFeeSpy).not.toHaveBeenCalled();
 		});
 	});
 
@@ -119,8 +118,7 @@ describe('IcTokenFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(setIcTokenFeeSpy).toHaveBeenCalledOnce();
-			expect(setIcTokenFeeSpy).toHaveBeenCalledWith({
+			expect(setIcTokenFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				tokenSymbol: ICP_TOKEN.symbol,
 				fee: ICP_TOKEN.fee
 			});

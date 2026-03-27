@@ -11,6 +11,7 @@ import {
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 const mockContactImage: ContactImage | null = {
 	data: new Uint8Array([1, 2, 3]),
@@ -132,7 +133,7 @@ describe('manage-contacts.service', () => {
 
 	describe('updateContact', () => {
 		const mockUpdateContact = vi.spyOn(backendApi, 'updateContact');
-		let updateContactSpy: ReturnType<typeof vi.spyOn>;
+		let updateContactSpy: MockInstance;
 
 		beforeEach(() => {
 			vi.resetAllMocks();

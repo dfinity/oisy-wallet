@@ -12,10 +12,11 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId,
-            Token,
+            CustomToken, CustomTokenId, Dip721Token, ErcToken, ErcTokenId, ExtV2Token,
+            IcPunksToken, IcrcToken, SplToken, SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
+        exchange::{ExchangeData, ExchangeRate},
         experimental_feature::{
             ExperimentalFeatureSettingsMap, ExperimentalFeaturesSettings,
             UpdateExperimentalFeaturesSettingsError,
@@ -81,6 +82,21 @@ fn validate_collection_size<T>(
     Ok(())
 }
 
+fn validate_finite_float(value: f64, field_name: &str) -> Result<(), Error> {
+    if !value.is_finite() {
+        return Err(Error::msg(format!("{field_name} must be a finite number")));
+    }
+    Ok(())
+}
+
+fn validate_non_negative_float(value: f64, field_name: &str) -> Result<(), Error> {
+    validate_finite_float(value, field_name)?;
+    if value < 0.0 {
+        return Err(Error::msg(format!("{field_name} cannot be negative")));
+    }
+    Ok(())
+}
+
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
         match token {
@@ -105,7 +121,15 @@ impl From<&Token> for CustomTokenId {
                 token_address,
                 chain_id,
                 ..
+            })
+            | Token::Erc4626(ErcToken {
+                token_address,
+                chain_id,
+                ..
             }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
+            Token::ExtV2(token) => CustomTokenId::ExtV2(token.canister_id),
+            Token::Dip721(token) => CustomTokenId::Dip721(token.canister_id),
+            Token::IcPunks(token) => CustomTokenId::IcPunks(token.canister_id),
         }
     }
 }
@@ -506,26 +530,22 @@ impl Validate for SplTokenId {
     ///
     /// # References
     /// - <https://solana.com/docs/more/exchange#basic-verification>
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         if self.0.len() < 32 {
-            return Err(candid::Error::msg(
-                "Minimum valid Solana address length is 32",
-            ));
+            return Err(Error::msg("Minimum valid Solana address length is 32"));
         }
         if self.0.len() > 44 {
-            return Err(candid::Error::msg(
-                "Maximum valid Solana address length is 44",
-            ));
+            return Err(Error::msg("Maximum valid Solana address length is 44"));
         }
         let parsed_maybe = bs58::decode(&self.0).into_vec();
         if let Ok(bytes) = parsed_maybe {
             if bytes.len() != 32 {
-                return Err(candid::Error::msg(
+                return Err(Error::msg(
                     "Invalid Solana address: not 32 bytes when decoded",
                 ));
             }
         } else {
-            return Err(candid::Error::msg("Invalid Solana address: not base58"));
+            return Err(Error::msg("Invalid Solana address: not base58"));
         }
         Ok(())
     }
@@ -538,21 +558,24 @@ impl ErcTokenId {
 
 impl Validate for ErcTokenId {
     /// Verifies that an Ethereum/EVM address is valid.
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         if self.0.len() != 42 {
-            return Err(candid::Error::msg(
-                "Invalid Ethereum/EVM contract address length",
-            ));
+            return Err(Error::msg("Invalid Ethereum/EVM contract address length"));
         }
         Ok(())
     }
 }
 
 impl Validate for CustomTokenId {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         match self {
-            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle, we could */
-            // check the exact type of principal.
+            CustomTokenId::Icrc(_)
+            | CustomTokenId::ExtV2(_)
+            | CustomTokenId::Dip721(_)
+            | CustomTokenId::IcPunks(_) => Ok(()), /* This is a principal. */
+            // In principle, we
+            // could check the exact
+            // type of principal.
             CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
                 token_address.validate()
             }
@@ -562,27 +585,33 @@ impl Validate for CustomTokenId {
 }
 
 impl Validate for CustomToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         self.token.validate()
     }
 }
 
 impl Validate for Token {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         match self {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
-            Token::Erc20(token) | Token::Erc721(token) | Token::Erc1155(token) => token.validate(),
+            Token::Erc20(token)
+            | Token::Erc721(token)
+            | Token::Erc1155(token)
+            | Token::Erc4626(token) => token.validate(),
+            Token::ExtV2(token) => token.validate(),
+            Token::Dip721(token) => token.validate(),
+            Token::IcPunks(token) => token.validate(),
         }
     }
 }
 
 impl Validate for SplToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         use crate::types::MAX_SYMBOL_LENGTH;
         if let Some(symbol) = &self.symbol {
             if symbol.chars().count() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg(format!(
+                return Err(Error::msg(format!(
                     "Symbol too long: {} > {}",
                     symbol.len(),
                     MAX_SYMBOL_LENGTH
@@ -594,7 +623,7 @@ impl Validate for SplToken {
 }
 
 impl Validate for ErcToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         self.token_address.validate()
     }
 }
@@ -606,33 +635,78 @@ impl Validate for IcrcToken {
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
     /// - If an index principal is present, checks that it is also the type of principal used for a
     ///   canister.
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         let IcrcToken {
             ledger_id,
             index_id,
         } = self;
         // The ledger_id should be appropriate for a canister.
         if ledger_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Ledger ID is not a canister"));
+            return Err(Error::msg("Ledger ID is not a canister"));
         }
         // Likewise for the index ID, if present:
         if let Some(index_id) = index_id {
             if index_id.as_slice().last() != Some(&1) {
-                return Err(candid::Error::msg("Index ID is not a canister"));
+                return Err(Error::msg("Index ID is not a canister"));
             }
         }
         Ok(())
     }
 }
 
+impl Validate for ExtV2Token {
+    /// Verifies that an EXT v2 token is valid.
+    ///
+    /// - Checks that the canister principal is the type of principal used for a canister.
+    ///   - <https://wiki.internetcomputer.org/wiki/Principal>
+    fn validate(&self) -> Result<(), Error> {
+        let ExtV2Token { canister_id } = self;
+        // The canister_id should be appropriate for a canister.
+        if canister_id.as_slice().last() != Some(&1) {
+            return Err(Error::msg("Canister ID is not a canister"));
+        }
+        Ok(())
+    }
+}
+
+impl Validate for Dip721Token {
+    /// Verifies that a DIP721 token is valid.
+    ///
+    /// - Checks that the canister principal is the type of principal used for a canister.
+    ///   - <https://wiki.internetcomputer.org/wiki/Principal>
+    fn validate(&self) -> Result<(), Error> {
+        let Dip721Token { canister_id } = self;
+        // The canister_id should be appropriate for a canister.
+        if canister_id.as_slice().last() != Some(&1) {
+            return Err(Error::msg("Canister ID is not a canister"));
+        }
+        Ok(())
+    }
+}
+
+impl Validate for IcPunksToken {
+    /// Verifies that an `ICPunks` token is valid.
+    ///
+    /// - Checks that the canister principal is the type of principal used for a canister.
+    ///   - <https://wiki.internetcomputer.org/wiki/Principal>
+    fn validate(&self) -> Result<(), Error> {
+        let IcPunksToken { canister_id } = self;
+        // The canister_id should be appropriate for a canister.
+        if canister_id.as_slice().last() != Some(&1) {
+            return Err(Error::msg("Canister ID is not a canister"));
+        }
+        Ok(())
+    }
+}
+
 impl Validate for UserToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         if self.contract_address.len() != EVM_CONTRACT_ADDRESS_LENGTH {
-            return Err(candid::Error::msg("Invalid EVM contract address length"));
+            return Err(Error::msg("Invalid EVM contract address length"));
         }
         if let Some(symbol) = &self.symbol {
             if symbol.len() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg(format!(
+                return Err(Error::msg(format!(
                     "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
                 )));
             }
@@ -723,6 +797,33 @@ impl Validate for UpdateContactRequest {
     }
 }
 
+impl Validate for ExchangeData {
+    fn validate(&self) -> Result<(), Error> {
+        if self.timestamp_ns == 0 {
+            return Err(Error::msg("timestamp_ns cannot be zero"));
+        }
+        if let Some(price) = self.price {
+            validate_non_negative_float(price, "price")?;
+        }
+        if let Some(change) = self.price_24h_change_pct {
+            validate_finite_float(change, "price_24h_change_pct")?;
+            if change < -100.0 {
+                return Err(Error::msg("price_24h_change_pct cannot be less than -100%"));
+            }
+        }
+        if let Some(market_cap) = self.market_cap {
+            validate_non_negative_float(market_cap, "market_cap")?;
+        }
+        Ok(())
+    }
+}
+
+impl Validate for ExchangeRate {
+    fn validate(&self) -> Result<(), Error> {
+        self.usd.validate()
+    }
+}
+
 // Apply the validation during deserialization for all types
 validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
@@ -732,8 +833,13 @@ validate_on_deserialize!(ContactImage);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
+validate_on_deserialize!(ExtV2Token);
+validate_on_deserialize!(Dip721Token);
+validate_on_deserialize!(IcPunksToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(ErcToken);
 validate_on_deserialize!(ErcTokenId);
 validate_on_deserialize!(UserToken);
+validate_on_deserialize!(ExchangeData);
+validate_on_deserialize!(ExchangeRate);

@@ -187,14 +187,13 @@ export const ${symbol}_TOKEN_ID: TokenId = parseTokenId(${symbol}_SYMBOL);
 export const ${mainnetToken}: RequiredErc20Token = {
 	id: ${symbol}_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: '${mainnetName}',
 	symbol: ${symbol}_SYMBOL,
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
 	address: '${contractAddress}',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ck${symbol}'
 };
 `
@@ -210,14 +209,13 @@ export const SEPOLIA_${symbol}_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_${symbol
 export const ${testnetToken}: RequiredErc20Token = {
 	id: SEPOLIA_${symbol}_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: '${testnetName}',
 	symbol: '${testnetSymbol}',
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
 	address: '${testnetContractAddress}',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckSepolia${symbol}'
 };
 `

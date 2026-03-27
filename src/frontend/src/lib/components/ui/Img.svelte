@@ -3,7 +3,6 @@
 		src: string;
 		alt?: string;
 		role?: string;
-		loading?: 'eager' | 'lazy';
 		width?: string;
 		height?: string;
 		rounded?: boolean;
@@ -19,7 +18,6 @@
 		src,
 		alt = '',
 		role = 'presentation',
-		loading = 'lazy',
 		width,
 		height,
 		rounded = false,
@@ -41,7 +39,7 @@
 	data-tid={testId}
 	decoding="async"
 	{height}
-	{loading}
+	loading="lazy"
 	onerror={onError}
 	onload={onLoad}
 	{role}

@@ -1,7 +1,5 @@
 import { agreementsData } from '$env/agreements.env';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { updateUserAgreements } from '$lib/api/backend.api';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { acceptAgreements } from '$lib/services/user-agreements.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -10,19 +8,20 @@ import type { AgreementsToAccept } from '$lib/types/user-agreements';
 import * as eventsUtils from '$lib/utils/events.utils';
 import { emit } from '$lib/utils/events.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { get } from 'svelte/store';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 vi.mock('$lib/api/backend.api', () => ({
 	updateUserAgreements: vi.fn()
 }));
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn().mockReturnValue(123_456_789n)
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn().mockReturnValue(123_456_789n)
+	};
+});
 
 describe('user-agreements.services', () => {
 	describe('acceptAgreements', () => {
@@ -50,10 +49,8 @@ describe('user-agreements.services', () => {
 			vi.spyOn(eventsUtils, 'emit');
 		});
 
-		it('should sign out if the user is not authenticated', async () => {
+		it('should return early if the user is not authenticated', async () => {
 			await acceptAgreements({ ...params, identity: null });
-
-			expect(nullishSignOut).toHaveBeenCalledExactlyOnceWith();
 
 			expect(nowInBigIntNanoSeconds).not.toHaveBeenCalled();
 
@@ -112,8 +109,6 @@ describe('user-agreements.services', () => {
 
 		it('should handle empty agreements to accept', async () => {
 			await acceptAgreements({ ...params, agreementsToAccept: {} });
-
-			expect(nullishSignOut).not.toHaveBeenCalled();
 
 			expect(nowInBigIntNanoSeconds).not.toHaveBeenCalled();
 

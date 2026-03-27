@@ -20,7 +20,6 @@
 		usdBalance?: number;
 		isTestnet?: boolean;
 		testId?: string;
-		delayOnNetworkSelect?: boolean;
 		labelsSize?: LabelSize;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
@@ -31,17 +30,11 @@
 		usdBalance,
 		isTestnet = false,
 		testId,
-		delayOnNetworkSelect = true,
 		labelsSize = 'md',
 		onSelected
 	}: Props = $props();
 
-	const onClick = () => {
-		// If rendered in the dropdown, we add a small delay to give the user a visual feedback that the network is checked
-		delayOnNetworkSelect
-			? setTimeout(() => onSelected?.(network?.id), 500)
-			: onSelected?.(network?.id);
-	};
+	const onClick = () => onSelected?.(network?.id);
 </script>
 
 <!--

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
@@ -11,7 +12,6 @@
 	import type { Erc1155Metadata } from '$eth/types/erc1155';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc721Metadata } from '$eth/types/erc721';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -24,34 +24,46 @@
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 
-	export let contractAddress: string | undefined;
-	export let metadata: Erc20Metadata | Erc721Metadata | Erc1155Metadata | undefined;
-	export let network: Network;
+	interface Props {
+		contractAddress?: string;
+		metadata?: Erc20Metadata | Erc721Metadata | Erc1155Metadata;
+		network: Network;
+		onBack: () => void;
+		onSave: () => void;
+	}
+
+	let { contractAddress, metadata = $bindable(), network, onBack, onSave }: Props = $props();
 
 	const validateMetadata = () => {
 		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.incomplete_metadata }
 			});
-			dispatch('icBack');
+
+			onBack();
+
 			return;
 		}
 
+		// This does not happen at this point, but it is useful type-wise
+		assertIsNetworkEthereum(network);
+
 		if (
-			[...$erc20Tokens, ...$erc721Tokens]?.find(
-				({ symbol, name, network: tokenNetwork }) =>
-					(symbol.toLowerCase() === (metadata?.symbol?.toLowerCase() ?? '') ||
-						name.toLowerCase() === (metadata?.name?.toLowerCase() ?? '')) &&
-					tokenNetwork.chainId === (network as EthereumNetwork).chainId
-			) !== undefined
+			nonNullish(
+				[...$erc20Tokens, ...$erc721Tokens]?.find(
+					({ symbol, network: tokenNetwork }) =>
+						symbol.toLowerCase() === (metadata?.symbol?.toLowerCase() ?? '') &&
+						tokenNetwork.chainId === network.chainId
+				)
+			)
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.duplicate_metadata }
 			});
 
-			dispatch('icBack');
-			return;
+			onBack();
 		}
 	};
 
@@ -61,7 +73,8 @@
 				msg: { text: $i18n.tokens.import.error.missing_contract_address }
 			});
 
-			dispatch('icBack');
+			onBack();
+
 			return;
 		}
 
@@ -70,56 +83,82 @@
 				msg: { text: $i18n.tokens.import.error.no_network }
 			});
 
-			dispatch('icBack');
+			onBack();
+
 			return;
 		}
 
+		// This does not happen at this point, but it is useful type-wise
+		assertIsNetworkEthereum(network);
+
 		if (
-			[...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens]?.find(
+			[...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens, ...$erc4626Tokens]?.find(
 				({ address, network: tokenNetwork }) =>
 					areAddressesEqual({
 						address1: address,
 						address2: contractAddress,
 						networkId: network.id
-					}) && tokenNetwork.chainId === (network as EthereumNetwork).chainId
+					}) && tokenNetwork.chainId === network.chainId
 			) !== undefined
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.already_available }
 			});
 
-			dispatch('icBack');
+			onBack();
+
 			return;
 		}
 
-		const { metadata: metadataApiErc20, isErc20 } = infuraErc20Providers(network.id);
 		try {
+			const { metadata: metadataApiErc20, isErc20 } = infuraErc20Providers(network.id);
+
 			if (await isErc20({ contractAddress })) {
 				metadata = await metadataApiErc20({ address: contractAddress });
+
 				validateMetadata();
-			} else {
-				const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(
-					network.id
-				);
-				if (await isInterfaceErc721({ address: contractAddress })) {
-					metadata = await metadataApiErc721({ address: contractAddress });
-					validateMetadata();
-				} else {
-					const { metadata: metadataApiErc1155 } = infuraErc1155Providers(network.id);
-					metadata = await metadataApiErc1155({ address: contractAddress });
-				}
+
+				return;
+			}
+
+			const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(network.id);
+
+			if (await isInterfaceErc721({ address: contractAddress })) {
+				metadata = await metadataApiErc721({ address: contractAddress });
+
+				validateMetadata();
+
+				return;
+			}
+
+			const { metadata: metadataApiErc1155, isInterfaceErc1155 } = infuraErc1155Providers(
+				network.id
+			);
+
+			if (await isInterfaceErc1155({ address: contractAddress })) {
+				metadata = await metadataApiErc1155({ address: contractAddress });
+
+				// ERC1155 do not need to implement `symbol` and `name`, so we skip the validation for this standard
+
+				return;
+			}
+
+			// In case we are not able to determine the token standard, we display an error message
+			if (isNullish(metadata)) {
+				toastsError({
+					msg: { text: $i18n.tokens.error.unrecognised_erc_interface }
+				});
+
+				onBack();
 			}
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
-			dispatch('icBack');
+			onBack();
 		}
 	});
 
-	let invalid = true;
-	$: invalid = isNullishOrEmpty(contractAddress) || isNullish(metadata);
-
-	const dispatch = createEventDispatcher();
+	let invalid = $derived(isNullishOrEmpty(contractAddress) || isNullish(metadata));
 </script>
 
 <ContentWithToolbar>
@@ -186,8 +225,8 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={() => dispatch('icBack')} />
-			<Button disabled={invalid} onclick={() => dispatch('icSave')}>
+			<ButtonBack onclick={onBack} />
+			<Button disabled={invalid} onclick={onSave}>
 				{$i18n.tokens.import.text.add_the_token}
 			</Button>
 		</ButtonGroup>

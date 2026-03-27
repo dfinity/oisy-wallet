@@ -3,9 +3,10 @@ import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('Radio', () => {
-	const props: { inputId: string; checked: boolean } = {
+	const props = {
 		inputId: 'id',
-		checked: true
+		checked: true,
+		onChange: vi.fn()
 	};
 
 	it('should render a container', () => {

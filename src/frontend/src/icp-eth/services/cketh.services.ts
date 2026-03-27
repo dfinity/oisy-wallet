@@ -6,10 +6,11 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Network } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
-import { AnonymousIdentity } from '@dfinity/agent';
-import type { MinterInfo } from '@dfinity/cketh';
 import { isNullish, queryAndUpdate } from '@dfinity/utils';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import { AnonymousIdentity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 export const loadCkEthMinterInfo = async ({
@@ -26,7 +27,7 @@ export const loadCkEthMinterInfo = async ({
 		return;
 	}
 
-	await queryAndUpdate<MinterInfo>({
+	await queryAndUpdate<CkEthMinterDid.MinterInfo>({
 		request: ({ identity: _, certified }) =>
 			minterInfo({
 				minterCanisterId,
@@ -37,7 +38,7 @@ export const loadCkEthMinterInfo = async ({
 			ckEthMinterInfoStore.set({ id: tokenId, data: { data, certified } }),
 		onUpdateError: ({ error }) => {
 			// We silence the error here because we display a visual error when we try to effectively use the information
-			console.error(error);
+			consoleError(error);
 
 			ckEthMinterInfoStore.reset(tokenId);
 		},

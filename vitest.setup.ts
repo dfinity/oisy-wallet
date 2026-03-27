@@ -5,7 +5,7 @@ import {
 	disableConsoleLog,
 	failTestsThatLogToConsole
 } from '$tests/utils/console.test-utils';
-import type { HttpAgent } from '@dfinity/agent';
+import type { HttpAgent } from '@icp-sdk/core/agent';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';
@@ -67,8 +67,15 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	};
 });
 
+vi.mock('$lib/services/analytics-wrapper', () => ({
+	loadPlausibleTracker: vi.fn(() => ({
+		init: vi.fn(),
+		track: vi.fn()
+	}))
+}));
+
 vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
+	const MockProvider = vi.fn(class {});
 
 	const plugin = vi.fn();
 
@@ -76,9 +83,9 @@ vi.mock('ethers/providers', () => {
 	network.prototype.attachPlugin = vi.fn();
 
 	return {
-		EtherscanProvider: provider,
-		InfuraProvider: provider,
-		JsonRpcProvider: provider,
+		EtherscanProvider: MockProvider,
+		InfuraProvider: MockProvider,
+		JsonRpcProvider: MockProvider,
 		EtherscanPlugin: plugin,
 		Network: network
 	};

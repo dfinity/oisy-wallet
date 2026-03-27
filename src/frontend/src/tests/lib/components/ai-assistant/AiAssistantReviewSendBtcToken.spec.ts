@@ -1,5 +1,11 @@
 import * as btcSendServices from '$btc/services/btc-send.services';
 import * as btcUtxosApi from '$btc/services/btc-utxos.service';
+import {
+	UTXOS_FEE_CONTEXT_KEY,
+	initUtxosFeeStore,
+	type UtxosFeeContext
+} from '$btc/stores/utxos-fee.store';
+import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -13,6 +19,8 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import type { AddPendingTransactionOutcome } from '$lib/types/api';
+import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
@@ -22,26 +30,36 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { toNullable } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('AiAssistantReviewSendBtcToken', () => {
 	const sendAmount = 0.0001;
 	const transactionId = 'txid';
-	const pendingBtcTransactionResponse = true;
-	const mockContext = (token = BTC_MAINNET_TOKEN) =>
-		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token })]]);
+	const pendingBtcTransactionResponse: AddPendingTransactionOutcome = { response: true };
+	const mockContext = ({
+		token = BTC_MAINNET_TOKEN,
+		utxosFee
+	}: {
+		token?: Token;
+		utxosFee?: UtxosFee;
+	}) => {
+		const utxosFeeStore = initUtxosFeeStore();
+		utxosFeeStore.setUtxosFee({ utxosFee });
+
+		return new Map<symbol, SendContext | UtxosFeeContext>([
+			[SEND_CONTEXT_KEY, initSendContext({ token })],
+			[UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore }]
+		]);
+	};
 	const props = {
 		amount: sendAmount,
 		destination: mockBtcAddress,
 		sendCompleted: false,
-		sendEnabled: true
+		sendEnabled: true,
+		onSendCompleted: vi.fn()
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
 	const mockPrepareBtcSendApi = () =>
-		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue(mockUtxosFee);
+		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockReturnValue(mockUtxosFee);
 	const mockBackendApi = () =>
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
@@ -75,7 +93,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 				...props,
 				sendCompleted: true
 			},
-			context: mockContext()
+			context: mockContext({ utxosFee: mockUtxosFee })
 		});
 
 		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
@@ -93,7 +111,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 		const { getByTestId } = render(AiAssistantReviewSendBtcToken, {
 			props,
-			context: mockContext()
+			context: mockContext({ utxosFee: mockUtxosFee })
 		});
 
 		await waitFor(async () => {
@@ -101,7 +119,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 			await fireEvent.click(button);
 
-			expect(btcSendApiSpy).toHaveBeenCalledWith({
+			expect(btcSendApiSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: mapToSignerBitcoinNetwork({ network: BTC_MAINNET_TOKEN.network.env }),
 				utxosToSpend: mockUtxosFee.utxos,
@@ -113,14 +131,12 @@ describe('AiAssistantReviewSendBtcToken', () => {
 					}
 				]
 			});
-			expect(btcSendApiSpy).toHaveBeenCalledOnce();
 		});
 	});
 
 	it('should not call sendBtc if authIdentity is not defined', async () => {
 		const btcSendApiSpy = mockSignerApi();
 		mockBackendApi();
-		mockAuthStore();
 		mockBtcAddressStore();
 		mockBalance();
 		mockPrepareBtcSendApi();
@@ -128,7 +144,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 		const { getByTestId } = render(AiAssistantReviewSendBtcToken, {
 			props,
-			context: mockContext()
+			context: mockContext({ utxosFee: mockUtxosFee })
 		});
 
 		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
@@ -149,7 +165,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 		const { getByTestId } = render(AiAssistantReviewSendBtcToken, {
 			props,
-			context: mockContext(ETHEREUM_TOKEN)
+			context: mockContext({ token: ETHEREUM_TOKEN, utxosFee: mockUtxosFee })
 		});
 
 		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
@@ -159,8 +175,28 @@ describe('AiAssistantReviewSendBtcToken', () => {
 		expect(btcSendApiSpy).not.toHaveBeenCalled();
 	});
 
-	it('should not call sendBtc if destination address is not BTC', async () => {
+	it('should not call sendBtc if utxos are not available', async () => {
 		const btcSendApiSpy = mockSignerApi();
+		mockBackendApi();
+		mockAuthStore();
+		mockBtcAddressStore();
+		mockBalance();
+		mockPrepareBtcSendApi();
+		mockValidateBtcSend();
+
+		const { getByTestId } = render(AiAssistantReviewSendBtcToken, {
+			props,
+			context: mockContext({})
+		});
+
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		await fireEvent.click(button);
+
+		expect(btcSendApiSpy).not.toHaveBeenCalled();
+	});
+
+	it('should not call sendBtc if destination address is not BTC', () => {
 		mockBackendApi();
 		mockAuthStore();
 		mockBtcAddressStore();
@@ -173,18 +209,15 @@ describe('AiAssistantReviewSendBtcToken', () => {
 				...props,
 				destination: mockEthAddress
 			},
-			context: mockContext()
+			context: mockContext({ utxosFee: mockUtxosFee })
 		});
 
 		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
 
-		await fireEvent.click(button);
-
-		expect(btcSendApiSpy).not.toHaveBeenCalled();
+		expect(button).toHaveAttribute('disabled');
 	});
 
-	it('should not call sendBtc if sendEnabled is false', async () => {
-		const btcSendApiSpy = mockSignerApi();
+	it('should not allow calling sendBtc if sendEnabled is false', () => {
 		mockBackendApi();
 		mockAuthStore();
 		mockBtcAddressStore();
@@ -197,13 +230,11 @@ describe('AiAssistantReviewSendBtcToken', () => {
 				...props,
 				sendEnabled: false
 			},
-			context: mockContext()
+			context: mockContext({ utxosFee: mockUtxosFee })
 		});
 
 		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
 
-		await fireEvent.click(button);
-
-		expect(btcSendApiSpy).not.toHaveBeenCalled();
+		expect(button).toHaveAttribute('disabled');
 	});
 });

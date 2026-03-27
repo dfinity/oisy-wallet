@@ -2,8 +2,11 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { erc20DefaultTokens } from '$eth/derived/erc20.derived';
+	import { erc4626DefaultTokens } from '$eth/derived/erc4626.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
+	import type { Erc4626Token } from '$eth/types/erc4626';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils.js';
+	import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
@@ -21,11 +24,15 @@
 
 	let isErc20 = $derived(nonNullish($pageToken) && isTokenErc20($pageToken));
 
-	let contractAddress = $derived(isErc20 ? ($pageToken as Erc20Token).address : undefined);
+	let isErc4626 = $derived(nonNullish($pageToken) && isTokenErc4626($pageToken));
+
+	let contractAddress = $derived(
+		isErc20 || isErc4626 ? ($pageToken as Erc20Token | Erc4626Token).address : undefined
+	);
 
 	let undeletableToken = $derived(
-		nonNullish($pageToken) && isErc20
-			? $erc20DefaultTokens.some(
+		nonNullish($pageToken) && (isErc20 || isErc4626)
+			? [...$erc20DefaultTokens, ...$erc4626DefaultTokens].some(
 					({ id, network: { id: networkId } }) =>
 						$pageToken.id === id && $pageToken.network.id === networkId
 				)

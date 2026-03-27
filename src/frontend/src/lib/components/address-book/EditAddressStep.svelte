@@ -39,6 +39,9 @@
 		disabled = false
 	}: Props = $props();
 
+	// TODO: check if there is a better way to handle this svelte-ignore
+	// eslint-disable-next-line svelte/no-unused-svelte-ignore
+	// svelte-ignore state_referenced_locally -- we want to get only the initial value
 	let editingAddress = $state(address ? { ...address } : {});
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
@@ -79,7 +82,7 @@
 
 	let isFormValid = $state(false);
 
-	const focusField = isNewAddress ? 'address' : 'label';
+	let focusField = $derived(isNewAddress ? ('address' as const) : ('label' as const));
 
 	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
 	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);

@@ -1,9 +1,12 @@
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { Utxo } from '@dfinity/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export interface UtxoSelectionResult {
-	selectedUtxos: Utxo[];
+	selectedUtxos: CkBtcMinterDid.Utxo[];
 	totalInputValue: bigint;
 	changeAmount: bigint;
 	sufficientFunds: boolean;
@@ -13,7 +16,7 @@ export interface UtxoSelectionResult {
 /**
  * Extracts transaction IDs from an array of UTXOs
  */
-export const extractUtxoTxIds = (utxos: Utxo[]): string[] =>
+export const extractUtxoTxIds = (utxos: CkBtcMinterDid.Utxo[]): string[] =>
 	utxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
 
 /**
@@ -27,8 +30,8 @@ export const estimateTransactionSize = ({
 	numInputs: number;
 	numOutputs: number;
 }): number => {
-	// version (4) and locktime (4) and input count (1) and output count (1)
-	const baseSize = 10;
+	// version (4) and locktime (4) and input count (1), output count (1) and SegWit marker + flag (0.5 -> rounding to 1)
+	const baseSize = 11;
 
 	// P2WPKH input size: outpoint (36) and scriptSig length (1) and scriptSig (0) and sequence (4) = 41 bytes
 	// Plus witness data: witness stack items (1) and signature (72) and pubkey (33) = 106 bytes
@@ -50,7 +53,7 @@ export const calculateUtxoSelection = ({
 	amountSatoshis,
 	feeRateMiliSatoshisPerVByte
 }: {
-	availableUtxos: Utxo[];
+	availableUtxos: CkBtcMinterDid.Utxo[];
 	amountSatoshis: bigint;
 	feeRateMiliSatoshisPerVByte: bigint;
 }): UtxoSelectionResult => {
@@ -71,7 +74,7 @@ export const calculateUtxoSelection = ({
 		return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
 	});
 
-	const selectedUtxos: Utxo[] = [];
+	const selectedUtxos: CkBtcMinterDid.Utxo[] = [];
 	let totalInputValue = ZERO;
 	let estimatedFee = ZERO;
 
@@ -86,7 +89,8 @@ export const calculateUtxoSelection = ({
 			numInputs: selectedUtxos.length,
 			numOutputs: 2
 		});
-		estimatedFee = (BigInt(txSize) * feeRateMiliSatoshisPerVByte) / 1000n;
+		// Round up to ensure fee meets minimum rate requirements
+		estimatedFee = (BigInt(txSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
 		const totalRequired = amountSatoshis + estimatedFee;
 
 		// Check if we have enough to cover amount and fee
@@ -120,9 +124,9 @@ export const filterLockedUtxos = ({
 	utxos,
 	pendingUtxoTxIds
 }: {
-	utxos: Utxo[];
+	utxos: CkBtcMinterDid.Utxo[];
 	pendingUtxoTxIds: string[];
-}): Utxo[] =>
+}): CkBtcMinterDid.Utxo[] =>
 	utxos.filter((utxo) => {
 		const txIdHex = utxoTxIdToString(utxo.outpoint.txid);
 		return !pendingUtxoTxIds.includes(txIdHex);
@@ -135,12 +139,12 @@ export const filterAvailableUtxos = ({
 	utxos,
 	options
 }: {
-	utxos: Utxo[];
+	utxos: CkBtcMinterDid.Utxo[];
 	options: {
 		minConfirmations: number;
 		pendingUtxoTxIds: string[];
 	};
-}): Utxo[] => {
+}): CkBtcMinterDid.Utxo[] => {
 	const { minConfirmations, pendingUtxoTxIds } = options;
 
 	// First filter by confirmations to ensure transaction security
@@ -160,4 +164,10 @@ export const filterAvailableUtxos = ({
 		utxos: confirmedUtxos,
 		pendingUtxoTxIds
 	});
+};
+
+export const resetUtxosDataStores = (): void => {
+	btcPendingSentTransactionsStore.reset();
+	allUtxosStore.reset();
+	feeRatePercentilesStore.reset();
 };

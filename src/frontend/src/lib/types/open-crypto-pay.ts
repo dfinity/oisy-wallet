@@ -1,0 +1,150 @@
+import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
+import type { UtxosFee } from '$btc/types/btc-send';
+import type { EthFeeResult } from '$eth/types/pay';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { IcFeeResult } from '$icp/types/pay';
+import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
+import type { Network, NetworkOpenCryptoPay } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
+import type { Identity } from '@icp-sdk/core/agent';
+import type { Principal } from '@icp-sdk/core/principal';
+
+export interface Address {
+	street?: string;
+	houseNumber?: string;
+	city?: string;
+	zip?: string;
+	country?: string;
+}
+
+export interface Recipient {
+	name?: string;
+	address?: Address;
+	phone?: string;
+	mail?: string;
+	website?: string;
+	registrationNumber?: string;
+	storeType?: string;
+	merchantCategory?: string;
+	goodsType?: string;
+	goodsCategory?: string;
+}
+
+export interface Quote {
+	id: string;
+	expiration?: string;
+	payment?: string;
+}
+
+export interface RequestedAmount {
+	asset: string;
+	amount: string;
+}
+
+export interface Asset {
+	asset: string;
+	amount: string;
+}
+
+export interface TransferAmount {
+	method: string;
+	minFee?: number;
+	assets: Asset[];
+	available: boolean;
+}
+
+export interface OpenCryptoPayResponse {
+	id: string;
+	tag: string;
+	callback: string;
+	minSendable: number;
+	maxSendable: number;
+	metadata: string;
+	requestedAmount: RequestedAmount;
+	transferAmounts: TransferAmount[];
+	externalId?: string;
+	mode?: string;
+	displayName?: string;
+	standard?: string;
+	possibleStandards?: string[];
+	displayQr?: boolean;
+	recipient?: Recipient;
+	route?: string;
+	quote?: Quote;
+}
+
+export interface PaymentMethodData {
+	assets: Map<string, { amount: string }>;
+	minFee?: number;
+}
+
+type PayableNetwork = Omit<Network, 'pay'> & Required<Pick<Network, 'pay'>>;
+
+export type PayableToken = Omit<Token, 'network'> & {
+	network: PayableNetwork;
+	amount: string;
+	tokenNetwork: NetworkOpenCryptoPay;
+	minFee?: number;
+};
+
+export interface PayableTokenWithFees extends PayableToken {
+	fee?: EthFeeResult | UtxosFee | IcFeeResult;
+}
+
+export interface PrepareTokensParams {
+	transferAmounts: TransferAmount[];
+	networks: Network[];
+	availableTokens: Token[];
+	btcAddressMainnet: OptionBtcAddress;
+}
+
+export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
+	amountInUSD: number;
+	feeInUSD: number;
+	sumInUSD: number;
+}
+
+export interface ValidatedBtcPaymentData {
+	destination: BtcAddress;
+	satoshisAmount: bigint;
+	utxosFee: UtxosFee;
+}
+
+export interface PayParams {
+	token: PayableTokenWithConvertedAmount;
+	data: OpenCryptoPayResponse;
+	identity: Identity;
+	quoteId: string;
+	callback: string;
+	amount: bigint;
+	progress: (step: ProgressStepsPayment) => void;
+}
+
+export interface TransactionBaseParams {
+	from: string;
+	to: string;
+	amount: bigint;
+	maxPriorityFeePerGas: bigint;
+	maxFeePerGas: bigint;
+	nonce: number;
+	gas: bigint;
+	chainId: bigint;
+}
+
+export interface ValidatedEthPaymentData {
+	destination: string;
+	ethereumChainId: bigint;
+	value: bigint;
+	feeData: {
+		maxFeePerGas: bigint;
+		maxPriorityFeePerGas: bigint;
+	};
+	estimatedGasLimit: bigint;
+}
+
+export interface ValidatedIcPaymentData {
+	spender: Principal;
+	amount: bigint;
+	ledgerCanisterId: LedgerCanisterIdText;
+	fee: IcFeeResult;
+}

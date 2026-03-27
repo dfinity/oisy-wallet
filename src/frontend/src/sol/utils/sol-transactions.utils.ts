@@ -1,5 +1,4 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
@@ -52,8 +51,3 @@ export const mapSolTransactionMessage = ({
 		},
 		{ amount: undefined }
 	);
-
-export const transactionMessageHasBlockhashLifetime = (
-	message: CompilableTransactionMessage
-): message is SolTransactionMessage =>
-	'blockhash' in message.lifetimeConstraint && 'lastValidBlockHeight' in message.lifetimeConstraint;

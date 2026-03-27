@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import type { TabVariant } from '$lib/types/style';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
@@ -11,6 +13,7 @@
 		children?: Snippet;
 		styleClass?: string;
 		tabVariant?: TabVariant;
+		trackEventName?: string;
 	}
 
 	let {
@@ -18,13 +21,25 @@
 		activeTab = $bindable(),
 		tabs,
 		styleClass,
-		tabVariant = 'default'
+		tabVariant = 'default',
+		trackEventName
 	}: Props = $props();
 
 	const handleClick = ({ id, path }: { id: string; path?: string }): void => {
 		if (isNullish(path)) {
 			activeTab = id;
 		} else {
+			if (nonNullish(trackEventName)) {
+				trackEvent({
+					name: trackEventName,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.ASSETS_TAB,
+						event_value: id,
+						location_source: PLAUSIBLE_EVENT_SOURCES.ASSETS_PAGE
+					}
+				});
+			}
+
 			goto(path);
 		}
 	};
@@ -33,7 +48,7 @@
 <div class={`flex items-center ${styleClass ?? ''}`}>
 	{#each tabs as { label, id, path }, index (id)}
 		<button
-			class="justify-center rounded-none border-0 text-sm font-semibold transition hover:border-brand-primary sm:text-base"
+			class="justify-center rounded-none border-0 text-sm font-semibold transition-colors hover:border-brand-primary sm:text-base"
 			class:border-b-2={activeTab === id || tabVariant === 'default'}
 			class:border-brand-primary={activeTab === id}
 			class:border-primary={activeTab !== id}

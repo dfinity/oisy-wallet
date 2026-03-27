@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
+	import { decodeErc20AbiData } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
+	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
@@ -16,7 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
-	import { formatToken } from '$lib/utils/format.utils';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 
 	interface Props {
 		amount: bigint;
@@ -42,23 +42,36 @@
 		onReject
 	}: Props = $props();
 
-	let amountDisplay = $derived(
-		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount
+	let { to: spender, value: amountDisplay } = $derived(
+		erc20Approve && nonNullish(data)
+			? decodeErc20AbiData({ data })
+			: { to: destination, value: amount }
 	);
 
-	const { sendToken, sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let balance = $derived($balancesStore?.[$sendTokenId]?.data);
+	let token = $derived(
+		erc20Approve
+			? $ercFungibleTokens.find(
+					({ address, network: { id: networkId } }) =>
+						areAddressesEqual({ address1: address, address2: destination, networkId }) &&
+						networkId === sourceNetworkProp.id
+				)
+			: $sendToken
+	);
+
+	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
 </script>
 
 <ContentWithToolbar>
 	<SendData
-		amount={formatToken({ value: amountDisplay })}
+		amount={amountDisplay}
 		{application}
 		{balance}
 		{destination}
+		showUnlimitedAmountLabel={erc20Approve}
 		source={$ethAddress ?? ''}
-		token={$sendToken}
+		{token}
 	>
 		{#snippet sourceNetwork()}
 			<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
@@ -77,13 +90,9 @@
 			{/if}
 		{/snippet}
 
-		{#snippet fee()}
-			<EthFeeDisplay>
-				{#snippet label()}
-					<Html text={$i18n.fee.text.max_fee_eth} />
-				{/snippet}
-			</EthFeeDisplay>
-		{/snippet}
+		{#if erc20Approve && nonNullish(spender)}
+			<SendDataSpender {spender} />
+		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 	</SendData>

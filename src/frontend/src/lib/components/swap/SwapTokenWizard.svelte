@@ -9,7 +9,8 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isNetworkIdICP } from '$lib/utils/network.utils';
+	import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -19,6 +20,7 @@
 		swapFailedProgressSteps?: ProgressStepsSwap[];
 		currentStep?: WizardStep;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -31,6 +33,7 @@
 		swapFailedProgressSteps = $bindable(),
 		currentStep,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext,
 		onBack
@@ -52,7 +55,11 @@
 		manualPause = false;
 	};
 
-	let shouldPause = $derived(manualPause || currentStep?.name === WizardStepsSwap.SWAPPING);
+	let shouldPause = $derived(
+		manualPause ||
+			currentStep?.name === WizardStepsSwap.REVIEW ||
+			currentStep?.name === WizardStepsSwap.SWAPPING
+	);
 </script>
 
 <SwapAmountsContext
@@ -72,15 +79,28 @@
 			{onBack}
 			{onClose}
 			{onNext}
+			{onShowProviderList}
 			{onShowTokensList}
 			bind:swapAmount
 			bind:receiveAmount
 			bind:slippageValue
 			bind:swapProgressStep
-			on:icClose
-			on:icShowTokensList
-			on:icShowProviderList
-			on:icNext
+		/>
+	{:else if isNetworkIdSolana($sourceToken.network.id)}
+		<SwapSolWizard
+			{currentStep}
+			{isSwapAmountsLoading}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onShowProviderList}
+			{onShowTokensList}
+			{onStartTriggerAmount}
+			{onStopTriggerAmount}
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+			bind:swapProgressStep
 		/>
 	{:else}
 		<SwapEthWizard
@@ -89,6 +109,7 @@
 			{onBack}
 			{onClose}
 			{onNext}
+			{onShowProviderList}
 			{onShowTokensList}
 			{onStartTriggerAmount}
 			{onStopTriggerAmount}

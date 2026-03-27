@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, type Snippet } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
@@ -14,21 +14,18 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';
+	import {
+		anyBalanceNonZero,
+		noPositiveBalanceAndNotAllBalancesZero
+	} from '$lib/derived/balances.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { exchangeNotInitialized } from '$lib/derived/exchange.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
-	import { balancesStore } from '$lib/stores/balances.store';
+	import { derivedMemo } from '$lib/utils/derived-memo.utils';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
@@ -45,12 +42,21 @@
 		} catch (error: unknown) {
 			trackEvent({
 				name: TRACK_SNAPSHOT_SEND_ERROR,
-				metadata: mapIcErrorMetadata(error),
-				warning: `Unexpected error while taking user snapshot: ${error}`
+				metadata: mapIcErrorMetadata(error)
 			});
 		}
 
 		syncInProgress = false;
+	};
+
+	const scheduleNext = (): void => {
+		timer = setTimeout(async () => {
+			await sync();
+
+			if (nonNullish(timer)) {
+				scheduleNext();
+			}
+		}, USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
 	};
 
 	const startTimer = async () => {
@@ -60,7 +66,7 @@
 
 		await sync();
 
-		timer = setInterval(sync, USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+		scheduleNext();
 	};
 
 	const stopTimer = () => {
@@ -68,7 +74,7 @@
 			return;
 		}
 
-		clearInterval(timer);
+		clearTimeout(timer);
 		timer = undefined;
 	};
 
@@ -82,9 +88,6 @@
 		if (
 			$authNotSignedIn ||
 			$isBusy ||
-			isNullish($btcAddressMainnet) ||
-			isNullish($ethAddress) ||
-			isNullish($solAddressMainnet) ||
 			isNullish($tokens) ||
 			$exchangeNotInitialized ||
 			$noPositiveBalanceAndNotAllBalancesZero
@@ -105,13 +108,27 @@
 		debounceTrigger();
 	};
 
+	const countNonNullishSymbolEntries = (store: Record<symbol, unknown> | undefined): number =>
+		store ? Object.getOwnPropertySymbols(store).filter((key) => nonNullish(store[key])).length : 0;
+
+	const transactionTokenEntryCount = derivedMemo(
+		[btcTransactionsStore, ethTransactionsStore, icTransactionsStore, solTransactionsStore],
+		([$btc, $eth, $ic, $sol]) =>
+			countNonNullishSymbolEntries($btc) +
+			countNonNullishSymbolEntries($eth) +
+			countNonNullishSymbolEntries($ic) +
+			countNonNullishSymbolEntries($sol),
+		// eslint-disable-next-line local-rules/prefer-object-params
+		(a, b) => a === b
+	);
+
 	// The snapshot should be triggered for any change in the following variables (for now).
 	// Auth: We should trigger the snapshot when the user is signed in. If the user is not signed in, we should not trigger the snapshot. We should also not trigger the snapshot if the user is busy.
 	// Addresses: the addresses of each network.
 	// Tokens: any new token added to the list of tokens or any change in the token list.
-	// Balances: All balances (since we need to check if the user has any balance).
+	// Balances: Coarse boolean signal (memoized) — flips only when balance status changes, not per-token.
 	// Exchanges: All exchanges initialized (since we have no disclaimer specific for the tokens we are interested in).
-	// Transactions: all transactions related to each network.
+	// Transactions: Coarse entry-count signal — emits only when a new token's transactions appear, not on data updates. The periodic timer captures ongoing transaction changes.
 	$effect(() => {
 		[
 			$authSignedIn,
@@ -121,15 +138,11 @@
 			$solAddressMainnet,
 			$solAddressDevnet,
 			$tokens,
-			$balancesStore,
+			$anyBalanceNonZero,
 			$exchangeNotInitialized,
-			$btcTransactionsStore,
-			$ethTransactionsStore,
-			$icTransactionsStore,
-			$solTransactionsStore
+			$transactionTokenEntryCount
 		];
-		triggerTimer();
+
+		untrack(triggerTimer);
 	});
 </script>
-
-{@render children()}

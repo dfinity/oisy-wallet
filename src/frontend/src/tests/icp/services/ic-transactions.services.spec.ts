@@ -15,17 +15,19 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import * as analytics from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
-import { i18n } from '$lib/stores/i18n.store';
-import * as toastsStore from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
-import type { TransactionWithId } from '@dfinity/ledger-icp/dist/candid';
 import { toNullable } from '@dfinity/utils';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -77,15 +79,6 @@ describe('ic-transactions.services', () => {
 			});
 		});
 
-		it('should log error to console', () => {
-			onLoadTransactionsError({ tokenId, error: mockError });
-
-			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-				`${get(i18n).transactions.error.loading_transactions}:`,
-				mockError
-			);
-		});
-
 		it('should handle a nullish error', () => {
 			onLoadTransactionsError({ tokenId, error: null });
 
@@ -104,18 +97,6 @@ describe('ic-transactions.services', () => {
 					tokenId: tokenId.description
 				}
 			});
-
-			expect(console.warn).toHaveBeenCalledTimes(2);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				1,
-				`${get(i18n).transactions.error.loading_transactions}:`,
-				null
-			);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				2,
-				`${get(i18n).transactions.error.loading_transactions}:`,
-				undefined
-			);
 		});
 	});
 
@@ -131,12 +112,12 @@ describe('ic-transactions.services', () => {
 			.map((transaction) => transaction.data.id);
 		const mockData = { tokenId, transactionIds: mockTransactionsIds };
 
-		let spyToastsError: MockInstance;
+		let spyTrackEvent: MockInstance;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+			spyTrackEvent = vi.spyOn(analytics, 'trackEvent');
 
 			icTransactionsStore.append({ tokenId, transactions: mockTransactions });
 		});
@@ -147,11 +128,17 @@ describe('ic-transactions.services', () => {
 			expect(get(icTransactionsStore)?.[tokenId]).toStrictEqual(mockTransactions.slice(n));
 		});
 
-		it('should call toastsError by default', () => {
+		it('should track a plausible event', () => {
 			onTransactionsCleanUp(mockData);
 
-			expect(spyToastsError).toHaveBeenCalledWith({
-				msg: { text: get(i18n).transactions.error.uncertified_transactions_removed }
+			expect(spyTrackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.LOAD_TRANSACTIONS,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS,
+					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.UNCERTIFIED_REMOVED,
+					token_id: tokenId.description,
+					removed_count: `${n}`
+				}
 			});
 		});
 	});
@@ -215,13 +202,23 @@ describe('ic-transactions.services', () => {
 								created_at_time: []
 							},
 							id: BigInt(transaction.id)
-						}) as TransactionWithId
+						}) as IcpIndexDid.TransactionWithId
 				)
-			} as GetAccountIdentifierTransactionsResponse);
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
 		});
 
 		it('should not load transactions if the last ID is not parseable', async () => {
 			await loadNextIcTransactions({ ...mockParams, lastId: 'mock-last-id' });
+
+			expect(getTransactionsIcp).not.toHaveBeenCalled();
+			expect(getTransactionsIcrc).not.toHaveBeenCalled();
+		});
+
+		it('should not load transactions if the token is nullish', async () => {
+			await loadNextIcTransactions({
+				...mockParams,
+				token: undefined as unknown as typeof mockToken
+			});
 
 			expect(getTransactionsIcp).not.toHaveBeenCalled();
 			expect(getTransactionsIcrc).not.toHaveBeenCalled();
@@ -267,7 +264,10 @@ describe('ic-transactions.services', () => {
 		});
 
 		it('should load transactions with the correct parameters for ICRC tokens', async () => {
-			await loadNextIcTransactions({ ...mockParams, token: { ...mockToken, standard: 'icrc' } });
+			await loadNextIcTransactions({
+				...mockParams,
+				token: { ...mockToken, standard: { code: 'icrc' } }
+			});
 
 			expect(getTransactionsIcrc).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcrc).toHaveBeenNthCalledWith(1, {
@@ -346,8 +346,8 @@ describe('ic-transactions.services', () => {
 			icTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
 
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
-				transactions: [] as TransactionWithId[]
-			} as GetAccountIdentifierTransactionsResponse);
+				transactions: [] as IcpIndexDid.TransactionWithId[]
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
 
 			await loadNextIcTransactions(mockParams);
 
@@ -356,8 +356,8 @@ describe('ic-transactions.services', () => {
 
 		it('should call signalEnd if no transactions are returned', async () => {
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
-				transactions: [] as TransactionWithId[]
-			} as GetAccountIdentifierTransactionsResponse);
+				transactions: [] as IcpIndexDid.TransactionWithId[]
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
 
 			await loadNextIcTransactions(mockParams);
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import ConvertReviewNetworks from '$lib/components/convert/ConvertReviewNetworks.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -9,10 +9,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 
-	export let sendAmount: OptionAmount = undefined;
-	export let receiveAmount: number | undefined = undefined;
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		onConvert: () => void;
+		destination?: Snippet;
+		fee: Snippet;
+		infoMessage?: Snippet;
+		cancel: Snippet;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { sendAmount, receiveAmount, onConvert, destination, fee, infoMessage, cancel }: Props =
+		$props();
 
 	const { sourceToken, destinationToken, sourceTokenExchangeRate, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
@@ -30,17 +38,17 @@
 
 	<ConvertReviewNetworks />
 
-	<slot name="destination" />
+	{@render destination?.()}
 
-	<slot name="fee" />
+	{@render fee()}
 
-	<slot name="info-message" />
+	{@render infoMessage?.()}
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<slot name="cancel" />
+			{@render cancel()}
 
-			<Button onclick={() => dispatch('icConvert')} testId="convert-review-button-next">
+			<Button onclick={onConvert} testId="convert-review-button-next">
 				{$i18n.convert.text.convert_button}
 			</Button>
 		</ButtonGroup>
