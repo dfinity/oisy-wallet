@@ -8,16 +8,16 @@ use shared::types::{
 
 use crate::{
     state::memory::{
-        API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID,
-        CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, TOKEN_ACTIVITY_MEMORY_ID,
-        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
-        USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
+        AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID,
+        CONFIG_MEMORY_ID, CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER,
+        TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
+        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
         maps::{
-            ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap,
-            ExchangeRateMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-            UserTransactionsMap,
+            AgreementHistoryMap, ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell,
+            ContactMap, CustomTokenMap, ExchangeRateMap, TokenActivityMap, UserProfileMap,
+            UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
     },
@@ -44,6 +44,8 @@ pub(crate) struct State {
     pub(crate) token_activity: TokenActivityMap,
     pub(crate) exchange_rates: ExchangeRateMap,
     pub(crate) user_transactions: UserTransactionsMap,
+    /// Per-user audit trail of agreement consent/rejection events.
+    pub(crate) agreement_history: AgreementHistoryMap,
 }
 
 impl From<&State> for Stats {
@@ -56,6 +58,7 @@ impl From<&State> for Stats {
             token_activity_count: state.token_activity.len(),
             exchange_rates_count: state.exchange_rates.len(),
             user_transactions_count: state.user_transactions.len(),
+            agreement_history_count: state.agreement_history.len(),
         }
     }
 }
@@ -77,6 +80,7 @@ thread_local! {
             token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
             exchange_rates: ExchangeRateMap::init(mm.borrow().get(EXCHANGE_RATE_MEMORY_ID)),
             user_transactions: UserTransactionsMap::init(mm.borrow().get(USER_TRANSACTIONS_MEMORY_ID)),
+            agreement_history: AgreementHistoryMap::init(mm.borrow().get(AGREEMENT_HISTORY_MEMORY_ID)),
         })
     );
 }
