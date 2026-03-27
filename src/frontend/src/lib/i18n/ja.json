@@ -222,15 +222,6 @@
 			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
-			"kongswap": {
-				"name": "KongSwap",
-				"one_liner": "ワンストップのトークンショップ - KongSwapを使えば、すべてのチェーンで簡単にトークンを取引できます。",
-				"description": "KongSwapは、ICP、Bitcoin、Ethereum、Solanaにまたがるブリッジレスのクロスチェーン取引を提供する完全分散型取引所（DEX）です。<br/><br/>Chain Fusion技術とInternet Computer Protocolを使用し、手数料を削減し、ユーザーエクスペリエンスを簡素化し、流動性の断片化を回避します。フロントエンドとバックエンドの両方がスマートコントラクトを介してオンチェーンで動作し、シームレスなDeFi体験を提供します。",
-				"carousel": {
-					"text": "DEXでトークンをスワップ",
-					"call_to_action": "KongSwapを試す"
-				}
-			},
 			"openchat": {
 				"name": "OpenChat",
 				"one_liner": "WhatsAppの分散型代替アプリ",

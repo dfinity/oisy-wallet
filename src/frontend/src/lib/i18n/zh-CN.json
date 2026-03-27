@@ -222,15 +222,6 @@
 			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
-			"kongswap": {
-				"name": "KongSwap",
-				"one_liner": "一站式代币商店 - 使用 KongSwap 轻松跨链交易代币。",
-				"description": "KongSwap 是一个完全去中心化的交易所（DEX），提供跨 ICP、比特币、以太坊和 Solana 的无桥跨链交易。<br/><br/>利用链融合技术和互联网计算机协议，它降低了费用，简化了用户体验，并避免了流动性碎片化。前端和后端都通过智能合约在链上运行，提供无缝的 DeFi 体验。",
-				"carousel": {
-					"text": "在 DEX 上兑换代币",
-					"call_to_action": "试试 KongSwap"
-				}
-			},
 			"openchat": {
 				"name": "OpenChat",
 				"one_liner": "WhatsApp 的去中心化替代品。",

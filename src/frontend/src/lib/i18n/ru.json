@@ -222,15 +222,6 @@
 			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
-			"kongswap": {
-				"name": "KongSwap",
-				"one_liner": "Обменивайте токены между разными сетями",
-				"description": "KongSwap — это децентрализованная биржа, которая позволяет торговать между блокчейнами без мостов. Работает с ICP, Bitcoin, Ethereum и Solana. <br/><br/>Использует технологию Chain Fusion и протокол Internet Computer для снижения комиссий и упрощения торговли. Весь интерфейс работает прямо в блокчейне через смарт-контракты.",
-				"carousel": {
-					"text": "Обменивайте токены на DEX",
-					"call_to_action": "Попробовать KongSwap"
-				}
-			},
 			"openchat": {
 				"name": "OpenChat",
 				"one_liner": "Децентрализованная альтернатива WhatsApp",

@@ -222,15 +222,6 @@
 			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
-			"kongswap": {
-				"name": "KongSwap",
-				"one_liner": "متجر التوكنات الشامل - تداول التوكنات عبر جميع السلاسل بسهولة باستخدام KongSwap.",
-				"description": "KongSwap هو بورصة لامركزية بالكامل (DEX) تقدم تداولًا عبر السلاسل بدون جسور عبر ICP، بيتكوين، إيثريوم، وسولانا. <br/><br/>باستخدام تقنية Chain Fusion وبروتوكول Internet Computer، فإنه يقلل من الرسوم، ويبسط تجربة المستخدم، ويتجنب تجزئة السيولة. يعمل كل من الواجهة الأمامية والخلفية على السلسلة عبر العقود الذكية، مما يوفر تجربة DeFi سلسة.",
-				"carousel": {
-					"text": "تبديل التوكنات على DEX",
-					"call_to_action": "جرب KongSwap"
-				}
-			},
 			"openchat": {
 				"name": "OpenChat",
 				"one_liner": "بديل لامركزي لتطبيق WhatsApp.",

@@ -222,15 +222,6 @@
 			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
-			"kongswap": {
-				"name": "KongSwap",
-				"one_liner": "Jediné místo pro všechny tokeny - snadno obchodujte s tokeny na všech chainech pomocí KongSwap.",
-				"description": "KongSwap je plně decentralizovaná burza (DEX) nabízející mezichainové obchodování bez mostů napříč ICP, Bitcoinem, Ethereem a Solanou. <br/><br/>Díky technologii Chain Fusion a protokolu Internet Computer snižuje poplatky, zjednodušuje uživatelské prostředí a zabraňuje fragmentaci likvidity. Frontend i backend fungují on-chain prostřednictvím chytrých smluv a poskytují bezproblémový zážitek DeFi.",
-				"carousel": {
-					"text": "Vyměňujte tokeny na DEX",
-					"call_to_action": "Vyzkoušejte KongSwap"
-				}
-			},
 			"openchat": {
 				"name": "OpenChat",
 				"one_liner": "Decentralizovaná alternativa k WhatsApp.",

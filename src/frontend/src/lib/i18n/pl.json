@@ -222,15 +222,6 @@
 			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
-			"kongswap": {
-				"name": "KongSwap",
-				"one_liner": "Jedyny w swoim rodzaju sklep z tokenami - Handluj tokenami na wszystkich łańcuchach z łatwością, używając KongSwap.",
-				"description": "KongSwap to w pełni zdecentralizowana giełda (DEX) oferująca handel międzyłańcuchowy bez mostów na ICP, Bitcoin, Ethereum i Solana. <br/><br/>Korzystając z technologii Chain Fusion i protokołu Internet Computer, zmniejsza opłaty, upraszcza obsługę i zapobiega fragmentacji płynności. Zarówno interfejs użytkownika, jak i back-end działają na łańcuchu za pośrednictwem inteligentnych kontraktów, zapewniając płynne doświadczenie DeFi.",
-				"carousel": {
-					"text": "Wymieniaj tokeny na DEX",
-					"call_to_action": "Wypróbuj KongSwap"
-				}
-			},
 			"openchat": {
 				"name": "OpenChat",
 				"one_liner": "Zdecentralizowana alternatywa dla WhatsApp.",

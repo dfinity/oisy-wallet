@@ -222,15 +222,6 @@
 			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
-			"kongswap": {
-				"name": "KongSwap",
-				"one_liner": "Sàn đa chuỗi - Giao dịch token trên tất cả các chuỗi một cách dễ dàng bằng KongSwap.",
-				"description": "KongSwap là một sàn giao dịch phi tập trung (DEX) hoàn toàn cung cấp giao dịch chuỗi chéo không cần cầu nối trên ICP, Bitcoin, Ethereum và Solana. <br/><br/>Sử dụng công nghệ Chain Fusion và Giao thức Máy tính Internet, nó giảm phí, đơn giản hóa trải nghiệm người dùng và tránh phân mảnh thanh khoản. Cả giao diện người dùng và phụ trợ đều hoạt động trên chuỗi thông qua các hợp đồng thông minh, mang lại trải nghiệm DeFi liền mạch.",
-				"carousel": {
-					"text": "Hoán đổi token trên DEX",
-					"call_to_action": "Thử KongSwap"
-				}
-			},
 			"openchat": {
 				"name": "OpenChat",
 				"one_liner": "Giải pháp thay thế phi tập trung cho WhatsApp.",

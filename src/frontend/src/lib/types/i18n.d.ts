@@ -210,12 +210,6 @@ interface I18nDapps {
 		walletconnect: string;
 	};
 	descriptions: {
-		kongswap: {
-			name: string;
-			one_liner: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
 		openchat: {
 			name: string;
 			one_liner: string;
