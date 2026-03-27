@@ -123,6 +123,9 @@ figcaption {
 
 * {
 	scrollbar-width: thin;
+}
+
+:root {
 	scrollbar-color: #{$a-dark-20} transparent;
 }
 
