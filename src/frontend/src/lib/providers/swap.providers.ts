@@ -1,3 +1,4 @@
+import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import { kongSwapAmounts } from '$lib/api/kong_backend.api';
 import { icpSwapAmounts } from '$lib/services/icp-swap.services';
 import { SwapProvider, type SwapProviderConfig } from '$lib/types/swap';
@@ -8,7 +9,7 @@ export const swapProviders: SwapProviderConfig[] = [
 		key: SwapProvider.KONG_SWAP,
 		getQuote: kongSwapAmounts,
 		mapQuoteResult: ({ swap, tokens }) => mapKongSwapResult({ swap, tokens }),
-		isEnabled: true
+		isEnabled: KONGSWAP_PROVIDER_ENABLED
 	},
 	{
 		key: SwapProvider.ICP_SWAP,

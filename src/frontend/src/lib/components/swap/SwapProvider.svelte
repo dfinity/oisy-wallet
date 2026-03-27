@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
@@ -104,7 +105,7 @@
 					{/snippet}
 				</ModalValue>
 			{/if}
-			{#if selectedProvider.provider === SwapProvider.KONG_SWAP}
+			{#if selectedProvider.provider === SwapProvider.KONG_SWAP && KONGSWAP_PROVIDER_ENABLED}
 				<SwapDetailsKong provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.ICP_SWAP}
 				<SwapDetailsIcp provider={selectedProvider} {slippageValue} />
