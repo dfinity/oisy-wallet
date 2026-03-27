@@ -1,5 +1,6 @@
 import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
+import { USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED } from '$env/user-transactions.env';
 import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
@@ -100,7 +101,9 @@ const loadEthTransactions = async ({
 	try {
 		const transactionTokenId: BackendTokenId = { EvmNative: chainId };
 
-		const stored = await loadEthUserTransactions({ identity, tokenId: transactionTokenId });
+		const stored = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED
+			? await loadEthUserTransactions({ identity, tokenId: transactionTokenId })
+			: undefined;
 
 		// Fetch from Etherscan starting after the newest stored block (incremental loading)
 		const startBlock = nonNullish(stored?.newestBlockIndex)
@@ -131,7 +134,7 @@ const loadEthTransactions = async ({
 		// We use the highest block number in the batch as the "tip" for finality checks.
 		// This means only transactions at least ETH_FINALITY_BLOCKS behind this tip will
 		// be saved — the most recent transactions in the batch will be saved on a future load.
-		if (newTransactions.length > 0) {
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newTransactions.length > 0) {
 			const blockNumbers = newTransactions.map((tx) => tx.blockNumber).filter(nonNullish);
 			const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
 

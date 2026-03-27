@@ -4,6 +4,7 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
@@ -158,6 +159,11 @@ export const exchangeRateICRCToUsd = async (
 	}
 
 	const coingeckoPrices = await fetchIcrcPricesFromCoingecko(ledgerCanisterIds);
+
+	if (!KONGSWAP_PROVIDER_ENABLED) {
+		return coingeckoPrices;
+	}
+
 	const missingIds = findMissingLedgerCanisterIds({
 		allLedgerCanisterIds: ledgerCanisterIds,
 		coingeckoResponse: coingeckoPrices
