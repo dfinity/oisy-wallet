@@ -51,7 +51,7 @@
 		class:text-success-primary={exchangeRateChangeSign === 'positive'}
 		class:text-tertiary={exchangeRateChangeSign === 'zero'}
 	>
-		<span class="inline-block scale-125 transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
+		<span class="inline-block scale-150 transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
 			{exchangeRateChangeSymbol}
 		</span>
 		{formattedExchangeRateChange}
