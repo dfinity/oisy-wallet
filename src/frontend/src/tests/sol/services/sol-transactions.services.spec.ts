@@ -130,6 +130,7 @@ describe('sol-transactions.services', () => {
 		const expected: SolTransactionUi = {
 			id: mockSignature.signature,
 			signature: mockSignature.signature,
+			blockNumber: Number(mockTransactionDetail.slot),
 			timestamp: mockTransactionDetail.blockTime ?? ZERO,
 			value: mockMappedTransaction.value,
 			from: mockSolAddress,
