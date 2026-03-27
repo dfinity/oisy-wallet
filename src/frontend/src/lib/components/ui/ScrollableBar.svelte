@@ -81,8 +81,4 @@
 	.scrollable-bar {
 		scrollbar-width: none;
 	}
-
-	.scrollable-bar::-webkit-scrollbar {
-		display: none;
-	}
 </style>
