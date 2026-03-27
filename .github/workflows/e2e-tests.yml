@@ -143,15 +143,6 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      # At the first loading the website refreshes itself because it is optimizing dependencies.
-      # But that causes the Internet Identity pop-up to disconnect from OISY, and fails the first try of the first tests, causing automatic delay.
-      # So we first open an instance of the website to warm it up.
-      - name: Warm up the website
-        run: |
-          npm run build
-          npm run preview -- --open &
-          sleep 10
-
       - name: Test
         run: npm run e2e:ci -- --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
