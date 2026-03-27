@@ -48,10 +48,10 @@
 		class:text-tertiary={exchangeRateChangeSign === 'zero'}
 	>
 		<span
-			class="mb-px inline-block h-[0.45em] w-[0.45em]"
-			class:rotate-180={exchangeRateChangeSign === 'positive'}
-			class:-rotate-90={exchangeRateChangeSign === 'zero'}
 			style="clip-path: polygon(50% 100%, 0% 0%, 100% 0%); background: currentColor;"
+			class="mb-px inline-block h-[0.45em] w-[0.45em]"
+			class:-rotate-90={exchangeRateChangeSign === 'zero'}
+			class:rotate-180={exchangeRateChangeSign === 'positive'}
 		></span>
 		{formattedExchangeRateChange}
 		{#if nonNullish(parsedTimeFrame)}
