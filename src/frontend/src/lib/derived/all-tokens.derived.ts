@@ -1,3 +1,4 @@
+import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
@@ -50,10 +51,12 @@ export const allSortedIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 	([$allIcrcTokens]) => [...$allIcrcTokens].sort(sortIcTokens)
 );
 
-export const allKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = derived(
+export const allSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 	[allIcrcTokens, kongSwapTokensStore],
 	([$allIcrcTokens, $kongSwapTokensStore]) =>
-		$allIcrcTokens.filter(({ symbol }) => nonNullish($kongSwapTokensStore?.[symbol]))
+		$allIcrcTokens.filter(
+			({ symbol }) => !KONGSWAP_PROVIDER_ENABLED || nonNullish($kongSwapTokensStore?.[symbol])
+		)
 );
 
 export const allTokens: Readable<CustomToken<Token>[]> = derivedMemo(
