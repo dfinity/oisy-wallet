@@ -134,7 +134,7 @@ const loadEthTransactions = async ({
 		// We use the highest block number in the batch as the "tip" for finality checks.
 		// This means only transactions at least ETH_FINALITY_BLOCKS behind this tip will
 		// be saved — the most recent transactions in the batch will be saved on a future load.
-		if (newTransactions.length > 0) {
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newTransactions.length > 0) {
 			const blockNumbers = newTransactions.map((tx) => tx.blockNumber).filter(nonNullish);
 			const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
 
