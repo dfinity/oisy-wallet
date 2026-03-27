@@ -1,8 +1,10 @@
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcTransactionType } from '$btc/types/btc-transaction';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { USDC_TOKEN, USDC_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import {
 	BASE_ETH_TOKEN,
 	BASE_ETH_TOKEN_ID
@@ -27,18 +29,16 @@ import {
 } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
+import type {
+	EthCertifiedTransaction,
+	EthCertifiedTransactionsData
+} from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { Token } from '$lib/types/token';
-import type {
-	AllTransactionUiWithCmp,
-	AnyTransactionUi,
-	Transaction
-} from '$lib/types/transaction';
+import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction-ui';
 import {
 	areTransactionsStoresLoaded,
 	areTransactionsStoresLoading,
@@ -52,9 +52,13 @@ import {
 	mapAllTransactionsUi,
 	sortTransactions
 } from '$lib/utils/transactions.utils';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
-import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
+import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
+import {
+	createMockEthCertifiedTransactions,
+	mockEthTransaction
+} from '$tests/mocks/eth-transactions.mock';
 import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
@@ -74,22 +78,26 @@ describe('transactions.utils', () => {
 
 		const mockBtcTestnetTransactions: BtcTransactionUi[] = createMockBtcTransactionsUi(3);
 
-		const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+		const mockBtcTransactions: BtcCertifiedTransactionsData = {
 			[BTC_MAINNET_TOKEN_ID]: mockBtcMainnetTransactions.map((data) => ({ data, certified })),
 			[BTC_TESTNET_TOKEN_ID]: mockBtcTestnetTransactions.map((data) => ({ data, certified }))
 		};
 
-		const mockEthMainnetTransactions: Transaction[] = createMockEthTransactions(9);
+		const mockEthMainnetTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(9);
 
-		const mockSepoliaTransactions: Transaction[] = createMockEthTransactions(7);
+		const mockSepoliaTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(7);
 
-		const mockErc20Transactions: Transaction[] = createMockEthTransactions(4);
+		const mockErc20Transactions: EthCertifiedTransaction[] = createMockEthCertifiedTransactions(4);
 
-		const mockBaseMainnetTransactions: Transaction[] = createMockEthTransactions(3);
+		const mockBaseMainnetTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(3);
 
-		const mockBnbMainnetTransactions: Transaction[] = createMockEthTransactions(2);
+		const mockBnbMainnetTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(2);
 
-		const mockEthTransactions: EthTransactionsData = {
+		const mockEthTransactions: EthCertifiedTransactionsData = {
 			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions,
 			[SEPOLIA_TOKEN_ID]: mockSepoliaTransactions,
 			[PEPE_TOKEN_ID]: mockErc20Transactions,
@@ -98,12 +106,12 @@ describe('transactions.utils', () => {
 		};
 
 		const mockIcTransactionsUi: IcTransactionUi[] = createMockIcTransactionsUi(7);
-		const mockIcTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+		const mockIcTransactions: IcCertifiedTransactionsData = {
 			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified }))
 		};
 
 		const mockSolTransactionsUi: SolTransactionUi[] = createMockSolTransactionsUi(4);
-		const mockSolTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>> = {
+		const mockSolTransactions: SolCertifiedTransactionsData = {
 			[SOLANA_TOKEN_ID]: mockSolTransactionsUi.map((data) => ({ data, certified }))
 		};
 
@@ -118,7 +126,7 @@ describe('transactions.utils', () => {
 		const type = 'receive' as EthTransactionType;
 
 		const expectedEthMainnetTransactions: AllTransactionUiWithCmp[] = [
-			...mockEthMainnetTransactions.map((transaction) => ({
+			...mockEthMainnetTransactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -130,7 +138,7 @@ describe('transactions.utils', () => {
 		];
 
 		const expectedSepoliaTransactions: AllTransactionUiWithCmp[] = [
-			...mockSepoliaTransactions.map((transaction) => ({
+			...mockSepoliaTransactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -142,7 +150,7 @@ describe('transactions.utils', () => {
 		];
 
 		const expectedBaseMainnetTransactions: AllTransactionUiWithCmp[] = [
-			...mockBaseMainnetTransactions.map((transaction) => ({
+			...mockBaseMainnetTransactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -154,7 +162,7 @@ describe('transactions.utils', () => {
 		];
 
 		const expectedBnbMainnetTransactions: AllTransactionUiWithCmp[] = [
-			...mockBnbMainnetTransactions.map((transaction) => ({
+			...mockBnbMainnetTransactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -166,7 +174,7 @@ describe('transactions.utils', () => {
 		];
 
 		const expectedErc20Transactions: AllTransactionUiWithCmp[] = [
-			...mockErc20Transactions.map((transaction) => ({
+			...mockErc20Transactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -251,7 +259,7 @@ describe('transactions.utils', () => {
 			});
 
 			it('should return an empty array if there are no transactions for BTC mainnet', () => {
-				const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+				const mockBtcTransactions: BtcCertifiedTransactionsData = {
 					[BTC_TESTNET_TOKEN_ID]: mockBtcTestnetTransactions.map((data) => ({ data, certified }))
 				};
 
@@ -311,7 +319,7 @@ describe('transactions.utils', () => {
 			it('should return an empty array if there are no transactions any of the tokens', () => {
 				const tokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN];
 
-				const mockEthTransactions: EthTransactionsData = {
+				const mockEthTransactions: EthCertifiedTransactionsData = {
 					[PEPE_TOKEN_ID]: mockErc20Transactions
 				};
 
@@ -325,7 +333,7 @@ describe('transactions.utils', () => {
 			});
 
 			it('should map correctly if there are no transactions for some of the tokens', () => {
-				const mockEthTransactions: EthTransactionsData = {
+				const mockEthTransactions: EthCertifiedTransactionsData = {
 					[PEPE_TOKEN_ID]: mockErc20Transactions
 				};
 
@@ -444,6 +452,171 @@ describe('transactions.utils', () => {
 				expect(result).toEqual(expectedTransactions);
 			});
 		});
+
+		describe('ETH transaction deduplication', () => {
+			const duplicateHash = '0xduplicate123';
+
+			const rest = {
+				$btcTransactions: undefined,
+				$ckEthMinterInfo: {},
+				$ethAddress: undefined,
+				$icTransactions: {},
+				$solTransactions: {},
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined,
+				$icTransactionsStore: undefined
+			};
+
+			it('should keep the ERC-20 transaction when native and ERC-20 share the same hash on the same network', () => {
+				const nativeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+				const erc20Tx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, PEPE_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeTx],
+						[PEPE_TOKEN_ID]: [erc20Tx]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(1);
+				expect(result[0].token).toBe(PEPE_TOKEN);
+			});
+
+			it('should keep both transactions when they have different hashes', () => {
+				const nativeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: '0xhash1' },
+					certified: false
+				};
+				const erc20Tx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: '0xhash2' },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, PEPE_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeTx],
+						[PEPE_TOKEN_ID]: [erc20Tx]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+			});
+
+			it('should keep both transactions when they share the same hash but are on different networks', () => {
+				const ethTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+				const baseTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, BASE_ETH_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [ethTx],
+						[BASE_ETH_TOKEN_ID]: [baseTx]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+			});
+
+			it('should not deduplicate non-ethereum component transactions', () => {
+				const solTx1: SolTransactionUi = {
+					...createMockSolTransactionsUi(1)[0],
+					id: 'same-id'
+				};
+				const solTx2: SolTransactionUi = {
+					...createMockSolTransactionsUi(1)[0],
+					id: 'same-id'
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: solTx1, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: solTx2, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(2);
+			});
+
+			it('should keep all non-native transactions and only remove the native one when multiple ERC-20 transfers share the same hash', () => {
+				const sharedHash = duplicateHash;
+				const nativeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: sharedHash },
+					certified: false
+				};
+				const pepeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: sharedHash },
+					certified: false
+				};
+				const usdcTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: sharedHash },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, PEPE_TOKEN, USDC_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeTx],
+						[PEPE_TOKEN_ID]: [pepeTx],
+						[USDC_TOKEN_ID]: [usdcTx]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+				expect(result.every(({ token }) => token.standard.code !== 'ethereum')).toBeTruthy();
+				expect(result.map(({ token }) => token)).toEqual([PEPE_TOKEN, USDC_TOKEN]);
+			});
+
+			it('should keep the native transaction if no non-native duplicate exists', () => {
+				const nativeTx1: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+				const nativeTx2: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: '0xunique' },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeTx1, nativeTx2]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+			});
+		});
 	});
 
 	describe('MicroTransactions', () => {
@@ -454,17 +627,18 @@ describe('transactions.utils', () => {
 		const tokens = [...btcTokens, ...ethTokens, ...icTokens, ...solTokens];
 
 		const mockBtcMainnetTransactions: BtcTransactionUi[] = createMockBtcTransactionsUi(3);
-		const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+		const mockBtcTransactions: BtcCertifiedTransactionsData = {
 			[BTC_MAINNET_TOKEN_ID]: mockBtcMainnetTransactions.map((data) => ({ data, certified: false }))
 		};
 
-		const mockEthMainnetTransactions: Transaction[] = createMockEthTransactions(5);
-		const mockEthTransactions: EthTransactionsData = {
+		const mockEthMainnetTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(5);
+		const mockEthTransactions: EthCertifiedTransactionsData = {
 			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions
 		};
 
 		const mockIcTransactionsUi: IcTransactionUi[] = createMockIcTransactionsUi(7);
-		const mockIcTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+		const mockIcTransactions: IcCertifiedTransactionsData = {
 			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({
 				data: { ...data, type: 'receive' },
 				certified: false
@@ -516,7 +690,7 @@ describe('transactions.utils', () => {
 			});
 
 			it('should filter only received micro transactions', () => {
-				const mockIcSendTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+				const mockIcSendTransactions: IcCertifiedTransactionsData = {
 					[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified: false }))
 				};
 
@@ -755,7 +929,7 @@ describe('transactions.utils', () => {
 		});
 
 		const mockBtcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+			transactionsStoreData: BtcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -771,18 +945,18 @@ describe('transactions.utils', () => {
 			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
 		};
 		const mockEthTransactionStoreData: {
-			transactionsStoreData: EthTransactionsData;
+			transactionsStoreData: EthCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
-				[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
-				[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7),
-				[PEPE_TOKEN_ID]: createMockEthTransactions(4)
+				[ETHEREUM_TOKEN_ID]: createMockEthCertifiedTransactions(9),
+				[SEPOLIA_TOKEN_ID]: createMockEthCertifiedTransactions(7),
+				[PEPE_TOKEN_ID]: createMockEthCertifiedTransactions(4)
 			},
 			tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 		};
 		const mockIcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+			transactionsStoreData: IcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -794,7 +968,7 @@ describe('transactions.utils', () => {
 			tokens: [ICP_TOKEN]
 		};
 		const mockSolTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+			transactionsStoreData: SolCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -923,8 +1097,8 @@ describe('transactions.utils', () => {
 			const result = areTransactionsStoresLoading([
 				{
 					transactionsStoreData: {
-						[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
-						[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7)
+						[ETHEREUM_TOKEN_ID]: createMockEthCertifiedTransactions(9),
+						[SEPOLIA_TOKEN_ID]: createMockEthCertifiedTransactions(7)
 					},
 					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 				},
@@ -1093,7 +1267,7 @@ describe('transactions.utils', () => {
 		});
 
 		const mockBtcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+			transactionsStoreData: BtcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1109,18 +1283,18 @@ describe('transactions.utils', () => {
 			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
 		};
 		const mockEthTransactionStoreData: {
-			transactionsStoreData: EthTransactionsData;
+			transactionsStoreData: EthCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
-				[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
-				[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7),
-				[PEPE_TOKEN_ID]: createMockEthTransactions(4)
+				[ETHEREUM_TOKEN_ID]: createMockEthCertifiedTransactions(9),
+				[SEPOLIA_TOKEN_ID]: createMockEthCertifiedTransactions(7),
+				[PEPE_TOKEN_ID]: createMockEthCertifiedTransactions(4)
 			},
 			tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 		};
 		const mockIcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+			transactionsStoreData: IcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1132,7 +1306,7 @@ describe('transactions.utils', () => {
 			tokens: [ICP_TOKEN]
 		};
 		const mockSolTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+			transactionsStoreData: SolCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1261,8 +1435,8 @@ describe('transactions.utils', () => {
 			const result = areTransactionsStoresLoaded([
 				{
 					transactionsStoreData: {
-						[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
-						[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7)
+						[ETHEREUM_TOKEN_ID]: createMockEthCertifiedTransactions(9),
+						[SEPOLIA_TOKEN_ID]: createMockEthCertifiedTransactions(7)
 					},
 					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 				},

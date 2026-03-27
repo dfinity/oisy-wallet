@@ -1,14 +1,13 @@
 import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
-import ethereumIconDark from '$lib/assets/networks/dark/ethereum-mainnet.svg';
-import sepoliaIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
-import ethereumIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
-import sepoliaIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
+import ethereumIcon from '$lib/assets/networks/ethereum-mainnet.svg';
+import sepoliaIcon from '$lib/assets/networks/ethereum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
+import { mainnet, sepolia } from 'viem/chains';
 
 export const ETH_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED
@@ -26,16 +25,20 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Ethereum',
 	chainId: 1n,
-	iconLight: ethereumIconLight,
-	iconDark: ethereumIconDark,
+	icon: ethereumIcon,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
-		infura: 'homestead',
-		alchemy: Network.ETH_MAINNET,
-		alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2'
+		infura: 'mainnet',
+		alchemy: 'mainnet',
+		alchemyDeprecated: Network.ETH_MAINNET,
+		alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://eth-mainnet.g.alchemy.com/v2',
+		viemChain: mainnet
 	},
 	exchange: { coingeckoId: 'ethereum' },
-	buy: { onramperId: 'ethereum' }
+	buy: { onramperId: 'ethereum' },
+	pay: { openCryptoPay: 'Ethereum' }
 };
 
 export const SEPOLIA_NETWORK_SYMBOL = 'SepoliaETH';
@@ -47,13 +50,16 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Sepolia',
 	chainId: 11155111n,
-	iconLight: sepoliaIconLight,
-	iconDark: sepoliaIconDark,
+	icon: sepoliaIcon,
 	explorerUrl: SEPOLIA_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'sepolia',
-		alchemy: Network.ETH_SEPOLIA,
-		alchemyJsonRpcUrl: 'https://eth-sepolia.g.alchemy.com/v2'
+		alchemy: 'sepolia',
+		alchemyDeprecated: Network.ETH_SEPOLIA,
+		alchemyJsonRpcUrl: 'https://eth-sepolia.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://eth-sepolia.g.alchemy.com/v2',
+		viemChain: sepolia
 	}
 };
 

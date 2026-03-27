@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { preventDefault } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import {
@@ -7,40 +8,56 @@
 		TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE,
 		TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE
 	} from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
-	import { formatUSD } from '$lib/utils/format.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
 
-	export let amount: OptionAmount;
-	export let exchangeRate: number | undefined;
-	export let token: Token | undefined = undefined;
-	export let displayUnit: DisplayUnit = 'usd';
-	export let disabled = false;
+	interface Props {
+		amount: OptionAmount;
+		exchangeRate?: number;
+		token?: Token;
+		displayUnit?: DisplayUnit;
+		disabled?: boolean;
+	}
+
+	let {
+		amount,
+		exchangeRate,
+		token,
+		displayUnit = $bindable('usd'),
+		disabled = false
+	}: Props = $props();
 
 	const handleUnitSwitch = () => {
 		displayUnit = displayUnit === 'usd' ? 'token' : 'usd';
 	};
 
-	let formattedUSDAmount: string | undefined;
-	$: formattedUSDAmount = formatUSD({
-		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0
-	});
+	let formattedUSDAmount = $derived(
+		formatCurrency({
+			value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		})
+	);
 
-	let formattedTokenAmount: string | undefined;
-	$: formattedTokenAmount = nonNullish(token)
-		? `${nonNullish(amount) ? amount : 0} ${token.symbol}`
-		: '0';
+	let formattedTokenAmount = $derived(
+		nonNullish(token) ? `${nonNullish(amount) ? amount : 0} ${token.symbol}` : '0'
+	);
 </script>
 
 <div class="flex items-center gap-1" data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE}>
 	{#if nonNullish(exchangeRate)}
 		<button
 			class:hover:cursor-default={disabled}
-			{disabled}
-			on:click|preventDefault={handleUnitSwitch}
 			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
+			{disabled}
+			onclick={preventDefault(handleUnitSwitch)}
 		>
 			<IconArrowUpDown size="14" />
 		</button>

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
+	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
 		destination: string;
@@ -10,12 +10,9 @@
 	let { destination }: Props = $props();
 </script>
 
-<ModalValue>
-	{#snippet label()}
-		{$i18n.send.text.destination}
-	{/snippet}
-
-	{#snippet mainValue()}
-		{shortenWithMiddleEllipsis({ text: destination })}
-	{/snippet}
-</ModalValue>
+<WalletConnectModalValue label={$i18n.send.text.destination} ref="destination">
+	<div class="flex flex-col gap-1">
+		{destination}
+		<ContactOrToken identifier={destination} />
+	</div>
+</WalletConnectModalValue>

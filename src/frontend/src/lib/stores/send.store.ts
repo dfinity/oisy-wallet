@@ -1,11 +1,14 @@
+import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { Address } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-import { nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable } from 'svelte/store';
+import { nonNullish, notEmptyString } from '@dfinity/utils';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export type SendData = Token;
 
@@ -25,7 +28,13 @@ const initSendStore = (token: Token): SendStore => {
 	};
 };
 
-export const initSendContext = ({ token }: { token: Token }): SendContext => {
+export const initSendContext = ({
+	token,
+	customSendBalance
+}: {
+	token: Token;
+	customSendBalance?: OptionBalance;
+}): SendContext => {
 	const sendToken = initSendStore(token);
 
 	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
@@ -34,14 +43,31 @@ export const initSendContext = ({ token }: { token: Token }): SendContext => {
 	const sendTokenSymbol = derived(sendToken, (token) => getTokenDisplaySymbol(token));
 	const sendTokenNetworkId = derived(sendToken, ({ network: { id: networkId } }) => networkId);
 
-	const sendBalance = derived(
-		[balancesStore, sendTokenId],
-		([$balanceStore, $sendTokenId]) => $balanceStore?.[$sendTokenId]?.data
-	);
-
 	const sendTokenExchangeRate = derived([exchanges, sendToken], ([$exchanges, $sendToken]) =>
 		nonNullish($sendToken) ? $exchanges?.[$sendToken.id]?.usd : undefined
 	);
+
+	const sendBalance = derived(
+		[balancesStore, sendTokenId],
+		([$balanceStore, $sendTokenId]) => customSendBalance ?? $balanceStore?.[$sendTokenId]?.data
+	);
+
+	const sendDestination = writable<Address>('');
+
+	const isIcBurning = derived(
+		[sendToken, sendDestination],
+		([$sendToken, $sendDestination]) =>
+			notEmptyString($sendDestination) &&
+			nonNullish($sendToken) &&
+			isTokenIc($sendToken) &&
+			nonNullish($sendToken.mintingAccount) &&
+			$sendDestination === encodeIcrcAccount($sendToken.mintingAccount)
+	);
+
+	// WizardModal re-renders content on step change (e.g. when switching between SendForm to SendReview steps)
+	// So, the `customNonce` property cannot be passed between components because it is reset even if is `$bindable`
+	// To persist the value between components, we need to put it in a context outside the WizardModal
+	const sendEthCustomNonce = writable<number | undefined>();
 
 	return {
 		sendToken,
@@ -49,9 +75,12 @@ export const initSendContext = ({ token }: { token: Token }): SendContext => {
 		sendTokenId,
 		sendTokenStandard,
 		sendTokenSymbol,
-		sendBalance,
 		sendTokenExchangeRate,
-		sendTokenNetworkId
+		sendTokenNetworkId,
+		sendBalance,
+		sendDestination,
+		isIcBurning,
+		sendEthCustomNonce
 	};
 };
 
@@ -61,9 +90,12 @@ export interface SendContext {
 	sendTokenId: Readable<TokenId>;
 	sendTokenStandard: Readable<TokenStandard>;
 	sendTokenSymbol: Readable<string>;
-	sendBalance: Readable<OptionBalance>;
 	sendTokenExchangeRate: Readable<number | undefined>;
 	sendTokenNetworkId: Readable<NetworkId>;
+	sendBalance: Readable<OptionBalance>;
+	sendDestination: Writable<Address>;
+	isIcBurning: Readable<boolean>;
+	sendEthCustomNonce: Writable<number | undefined>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

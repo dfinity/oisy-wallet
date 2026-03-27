@@ -1,22 +1,24 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import type { OptionIcToken } from '$icp/types/ic-token';
+	import { getTokenFee } from '$icp/utils/token.utils';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
-	const { sendToken, sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
+	const { sendToken, sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate, isIcBurning } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fee: bigint | undefined;
-	$: fee = ($sendToken as OptionIcToken)?.fee;
+	let fee = $derived($isIcBurning ? ZERO : getTokenFee($sendToken));
 </script>
 
 <FeeDisplay
-	feeAmount={fee}
 	decimals={$sendTokenDecimals}
-	symbol={$sendTokenSymbol}
 	exchangeRate={$sendTokenExchangeRate}
+	feeAmount={fee}
+	symbol={$sendTokenSymbol}
 >
-	<span slot="label">{$i18n.fee.text.fee}</span>
+	{#snippet label()}
+		<span>{$i18n.fee.text.fee}</span>
+	{/snippet}
 </FeeDisplay>

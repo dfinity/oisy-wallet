@@ -1,6 +1,7 @@
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
+import { isEthAddress } from '$eth/utils/account.utils';
 import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
-import { isEthAddress } from '$lib/utils/account.utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
 import { TypedDataEncoder } from 'ethers/hash';
@@ -33,7 +34,7 @@ export const convertHexToUtf8 = (value: string): string => {
 			return toUtf8String(value);
 		} catch (err: unknown) {
 			// We ignore the issue and display the encoded value for now.
-			console.error(err);
+			consoleError(err);
 		}
 	}
 

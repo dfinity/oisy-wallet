@@ -1,7 +1,7 @@
 import UrlGuard from '$lib/components/guard/UrlGuard.svelte';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import * as rewardService from '$lib/services/reward.services';
-import { loading } from '$lib/stores/loader.store';
+import { initialLoading } from '$lib/stores/loader.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as navUtils from '$lib/utils/nav.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -16,7 +16,7 @@ describe('UrlGuard', () => {
 		mockPage.reset();
 		modalStore.close();
 
-		loading.set(false);
+		initialLoading.set(false);
 		mockAuthStore();
 	});
 

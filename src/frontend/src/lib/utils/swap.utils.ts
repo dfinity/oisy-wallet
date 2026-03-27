@@ -2,23 +2,51 @@ import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
 } from '$declarations/kong_backend/kong_backend.did';
+import { dAppDescriptions } from '$env/dapp-descriptions.env';
+import type { Erc20Token } from '$eth/types/erc20';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
-import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
+import {
+	NEAR_INTENTS_BLOCKCHAIN_MAP,
+	SWAP_DEFAULT_SLIPPAGE_VALUE,
+	SWAP_ETH_TOKEN_PLACEHOLDER,
+	swapProvidersDetails
+} from '$lib/constants/swap.constants';
+import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
+import type { OisyDappDescription } from '$lib/types/dapp-description';
+import type {
+	NearIntentsQuoteRequest,
+	NearIntentsQuoteResponse,
+	NearIntentsToken
+} from '$lib/types/near-intents';
+import type { NetworkId } from '$lib/types/network';
+import type { OptionAmount } from '$lib/types/send';
 import {
 	SwapProvider,
+	VeloraSwapTypes,
+	type DeltaSwapResponse,
 	type FormatSlippageParams,
+	type GetWithdrawableTokenParams,
 	type ICPSwapResult,
 	type ProviderFee,
 	type Slippage,
-	type SwapMappedResult
+	type SwapMappedResult,
+	type SwapProvidersConfig,
+	type VeloraSwapDetails
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { areAddressesEqual } from '$lib/utils/address.utils';
+import { formatToken } from '$lib/utils/format.utils';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { findToken } from '$lib/utils/tokens.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { formatToken } from './format.utils';
-import { isNullishOrEmpty } from './input.utils';
+import type { OptimalRate } from '@velora-dex/sdk';
 
 export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] =>
 	transactions.length === 0
@@ -68,16 +96,20 @@ export const getKongIcTokenIdentifier = (token: Token): string =>
 
 export const mapIcpSwapResult = ({
 	swap,
-	slippage
+	slippage,
+	destToken
 }: {
 	swap: ICPSwapResult;
 	slippage: Slippage;
+	destToken: IcToken;
 }): SwapMappedResult => {
 	const parsedSlippage = Number(slippage);
 	const slippagePercentage = parsedSlippage > 0 ? parsedSlippage : SWAP_DEFAULT_SLIPPAGE_VALUE;
+	const receiveAmountNet = swap.receiveAmount - destToken.fee;
+
 	return {
 		provider: SwapProvider.ICP_SWAP,
-		receiveAmount: swap.receiveAmount,
+		receiveAmount: receiveAmountNet > 0 ? receiveAmountNet : ZERO,
 		receiveOutMinimum: calculateSlippage({
 			quoteAmount: swap.receiveAmount,
 			slippagePercentage
@@ -153,4 +185,210 @@ export const formatReceiveOutMinimum = ({
 		unitName: decimals,
 		displayDecimals: decimals
 	});
+};
+
+export const mapVeloraSwapResult = (swap: DeltaSwapResponse): SwapMappedResult => ({
+	provider: SwapProvider.VELORA,
+	receiveAmount:
+		// Velora does not always return the destination amount in the precision of the destination token (as we would expect).
+		// For example, if we request a swap from USDC-BSC (18 digits) to USDC-BASE (6 digits), the destination amount is returned as if it has 18 digits instead of 6.
+		// This causes issues in the normal formatting of our code, since we expect each amount to be strictly related to its reference token.
+		// To avoid this issue, we could use the `bridgeInfo` data that Velora adds for this specific cases: it specify the correct amount to look at when the bridge is treating tokens with scaling factor.
+		// This is not documented anywhere in Velora documentation, it was the result of a direct conversations with them.
+		// TODO: remove this disclaimer where Velora fixes this issue on their side.
+		'bridgeInfo' in swap.delta
+			? BigInt(swap.delta.bridgeInfo.destAmountAfterBridge)
+			: BigInt(swap.delta.destAmount),
+	swapDetails: swap.delta as VeloraSwapDetails,
+	type: VeloraSwapTypes.DELTA
+});
+
+export const mapVeloraMarketSwapResult = (swap: OptimalRate): SwapMappedResult => ({
+	provider: SwapProvider.VELORA,
+	receiveAmount: BigInt(swap.destAmount),
+	swapDetails: swap as VeloraSwapDetails,
+	type: VeloraSwapTypes.MARKET
+});
+
+export const mapNearIntentsQuoteResult = (quote: NearIntentsQuoteResponse): SwapMappedResult => ({
+	provider: SwapProvider.NEAR_INTENTS,
+	receiveAmount: BigInt(Math.floor(Number(quote.quote.amountOut))),
+	receiveOutMinimum: nonNullish(quote.quote.minAmountOut)
+		? BigInt(Math.floor(Number(quote.quote.minAmountOut)))
+		: undefined,
+	swapDetails: quote
+});
+
+export const resolveNearIntentsBlockchain = (networkId: NetworkId): string | undefined =>
+	NEAR_INTENTS_BLOCKCHAIN_MAP[networkId];
+
+export const findNearIntentsAsset = ({
+	tokens,
+	token,
+	blockchain
+}: {
+	tokens: NearIntentsToken[];
+	token: Token;
+	blockchain: string;
+}): NearIntentsToken | undefined =>
+	tokens.find(
+		(t) =>
+			t.blockchain === blockchain &&
+			(isNullish(t.contractAddress)
+				? // Native tokens
+					t.symbol.toLowerCase() === token.symbol.toLowerCase()
+				: isTokenErc20(token) || isTokenSpl(token)
+					? areAddressesEqual({
+							address1: t.contractAddress,
+							address2: token.address,
+							networkId: token.network.id
+						})
+					: false)
+	);
+
+export const resolveNearIntentsSwapAssets = ({
+	nearTokens,
+	sourceToken,
+	destinationToken
+}: {
+	nearTokens: NearIntentsToken[];
+	sourceToken: Token;
+	destinationToken: Token;
+}): { srcAsset: NearIntentsToken; destAsset: NearIntentsToken } | undefined => {
+	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.id);
+	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.id);
+
+	if (isNullish(srcBlockchain) || isNullish(destBlockchain)) {
+		return;
+	}
+
+	const srcAsset = findNearIntentsAsset({
+		tokens: nearTokens,
+		token: sourceToken,
+		blockchain: srcBlockchain
+	});
+
+	const destAsset = findNearIntentsAsset({
+		tokens: nearTokens,
+		token: destinationToken,
+		blockchain: destBlockchain
+	});
+
+	if (isNullish(srcAsset) || isNullish(destAsset)) {
+		return;
+	}
+
+	return { srcAsset, destAsset };
+};
+
+export const buildNearIntentsQuoteRequest = ({
+	slippageTolerance,
+	srcAsset,
+	destAsset,
+	amount,
+	userAddress,
+	recipientAddress,
+	deadlineMs
+}: {
+	slippageTolerance: number;
+	srcAsset: NearIntentsToken;
+	destAsset: NearIntentsToken;
+	amount: bigint;
+	userAddress: string;
+	recipientAddress?: string;
+	deadlineMs: number;
+}): NearIntentsQuoteRequest => ({
+	dry: false,
+	swapType: 'EXACT_INPUT',
+	slippageTolerance,
+	originAsset: srcAsset.assetId,
+	depositType: 'ORIGIN_CHAIN',
+	destinationAsset: destAsset.assetId,
+	amount: amount.toString(),
+	recipient: recipientAddress ?? userAddress,
+	recipientType: 'DESTINATION_CHAIN',
+	refundTo: userAddress,
+	refundType: 'ORIGIN_CHAIN',
+	deadline: new Date(Date.now() + deadlineMs).toISOString()
+});
+
+export const geSwapEthTokenAddress = (token: Erc20Token) => {
+	if (isDefaultEthereumToken(token)) {
+		return SWAP_ETH_TOKEN_PLACEHOLDER;
+	}
+
+	return token.address;
+};
+
+export const isSwapError = (err: unknown): err is SwapError => err instanceof SwapError;
+
+export const getWithdrawableToken = ({
+	tokenAddress,
+	sourceToken,
+	destinationToken
+}: GetWithdrawableTokenParams): IcTokenToggleable => {
+	if (tokenAddress === sourceToken.ledgerCanisterId) {
+		return sourceToken;
+	}
+
+	if (tokenAddress === destinationToken.ledgerCanisterId) {
+		return destinationToken;
+	}
+
+	throw new Error(`Unknown token address`);
+};
+
+export const findSwapProvider = (
+	providerId: string
+): OisyDappDescription | SwapProvidersConfig | undefined => {
+	const normalizedId = providerId.toLowerCase();
+	const icDAppProvider = dAppDescriptions.find(({ id }) => id === normalizedId);
+
+	if (icDAppProvider) {
+		return icDAppProvider;
+	}
+
+	const exactMatch = swapProvidersDetails[providerId as SwapProvider];
+
+	if (nonNullish(exactMatch)) {
+		return { id: providerId, ...exactMatch };
+	}
+
+	const normalizedMatch = swapProvidersDetails[normalizedId as SwapProvider];
+
+	if (nonNullish(normalizedMatch)) {
+		return { id: normalizedId, ...normalizedMatch };
+	}
+};
+
+export const calculateValueDifference = ({
+	swapAmount,
+	receiveAmount,
+	sourceTokenExchangeRate,
+	destinationTokenExchangeRate
+}: {
+	swapAmount: OptionAmount;
+	receiveAmount?: number;
+	sourceTokenExchangeRate?: number;
+	destinationTokenExchangeRate?: number;
+}): number | undefined => {
+	const paidValue =
+		nonNullish(swapAmount) && nonNullish(sourceTokenExchangeRate)
+			? Number(swapAmount) * sourceTokenExchangeRate
+			: undefined;
+
+	if (isNullish(paidValue) || paidValue === 0) {
+		return;
+	}
+
+	const receivedValue =
+		nonNullish(receiveAmount) && nonNullish(destinationTokenExchangeRate)
+			? receiveAmount * destinationTokenExchangeRate
+			: undefined;
+
+	if (isNullish(receivedValue)) {
+		return;
+	}
+
+	return ((receivedValue - paidValue) / paidValue) * 100;
 };

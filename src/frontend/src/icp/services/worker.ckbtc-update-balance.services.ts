@@ -4,84 +4,104 @@ import {
 	syncCkBTCUpdateOk
 } from '$icp/services/ckbtc-listener.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
-import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
+import type { IcCkWorkerParams } from '$icp/types/ck-listener';
+import { AppWorker } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcCkBTCUpdateBalance,
 	PostMessageDataResponseBTCAddress,
 	PostMessageJsonDataResponse,
 	PostMessageSyncState
 } from '$lib/types/post-message';
+import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 import { emit } from '$lib/utils/events.utils';
 import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 import { get } from 'svelte/store';
 
-export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
-	minterCanisterId,
-	token: { id: tokenId },
-	twinToken
-}: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
-	const CkBTCUpdateBalanceWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new CkBTCUpdateBalanceWorker.default();
+export class CkBTCUpdateBalanceWorker extends AppWorker {
+	private constructor(
+		worker: WorkerData,
+		private readonly tokenId: TokenId,
+		private readonly minterCanisterId: IcCkWorkerParams['minterCanisterId'],
+		private readonly twinToken: IcCkWorkerParams['twinToken']
+	) {
+		super(worker);
 
-	worker.onmessage = async ({
-		data
-	}: MessageEvent<
-		PostMessage<
-			PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseBTCAddress
-		>
-	>) => {
-		const { msg } = data;
+		this.setOnMessage(
+			async ({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseBTCAddress
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-		switch (msg) {
-			case 'syncBtcPendingUtxos':
-				syncBtcPendingUtxos({
-					tokenId,
-					data: data.data as PostMessageJsonDataResponse
-				});
-				return;
-			case 'syncCkBTCUpdateBalanceStatus':
-				emit({
-					message: 'oisyCkBtcUpdateBalance',
-					detail: (data.data as PostMessageSyncState).state
-				});
-				return;
-			case 'syncBtcAddress':
-				syncBtcAddress({
-					tokenId,
-					data: data.data as PostMessageDataResponseBTCAddress
-				});
-				return;
-			case 'syncCkBTCUpdateOk':
-				await syncCkBTCUpdateOk({
-					tokenId,
-					data: data.data as PostMessageJsonDataResponse
-				});
-				return;
-		}
-	};
-
-	return {
-		start: () => {
-			// We can imperatively get the address because the worker fetches it, and we only provide it to reduce the number of calls. By doing so, we can adhere to our standard component abstraction for interacting with workers.
-			const btcAddress = get(btcAddressStore)?.[tokenId]?.data;
-
-			worker.postMessage({
-				msg: 'startCkBTCUpdateBalanceTimer',
-				data: {
-					minterCanisterId,
-					btcAddress,
-					bitcoinNetwork: isNetworkIdBTCMainnet(twinToken?.network.id) ? 'mainnet' : 'testnet'
+				switch (msg) {
+					case 'syncBtcPendingUtxos':
+						syncBtcPendingUtxos({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+					case 'syncCkBTCUpdateBalanceStatus':
+						emit({
+							message: 'oisyCkBtcUpdateBalance',
+							detail: (data as PostMessageSyncState).state
+						});
+						return;
+					case 'syncBtcAddress':
+						syncBtcAddress({
+							tokenId,
+							data: data as PostMessageDataResponseBTCAddress
+						});
+						return;
+					case 'syncCkBTCUpdateOk':
+						await syncCkBTCUpdateOk({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
 				}
-			});
-		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopCkBTCUpdateBalanceTimer'
-			});
-		},
-		trigger: () => {
-			// Do nothing, we do not restart the ckBtc update balance worker for any particular events.
-			// When user execute it manually on the UI side, we display a progression in a modal therefore we do not have to execute it in the background.
-		}
+			}
+		);
+	}
+
+	static async init({
+		minterCanisterId,
+		token: { id: tokenId },
+		twinToken
+	}: IcCkWorkerParams): Promise<CkBTCUpdateBalanceWorker> {
+		const worker = await AppWorker.getInstance();
+		return new CkBTCUpdateBalanceWorker(worker, tokenId, minterCanisterId, twinToken);
+	}
+
+	protected override stopTimer = () => {
+		this.postMessage({
+			msg: 'stopCkBTCUpdateBalanceTimer'
+		});
 	};
-};
+
+	start = () => {
+		// We can imperatively get the address because the worker fetches it, and we only provide it to reduce the number of calls. By doing so, we can adhere to our standard component abstraction for interacting with workers.
+		const btcAddress = get(btcAddressStore)?.[this.tokenId]?.data;
+
+		this.postMessage<PostMessage<PostMessageDataRequestIcCkBTCUpdateBalance>>({
+			msg: 'startCkBTCUpdateBalanceTimer',
+			data: {
+				minterCanisterId: this.minterCanisterId,
+				btcAddress,
+				bitcoinNetwork: isNetworkIdBTCMainnet(this.twinToken?.network.id) ? 'mainnet' : 'testnet'
+			}
+		});
+	};
+
+	stop = () => {
+		this.stopTimer();
+	};
+
+	trigger = () => {
+		// Do nothing, we do not restart the ckBtc update balance worker for any particular events.
+		// When a user executes it manually on the UI side, we display a progression in a modal therefore we do not have to execute it in the background.
+	};
+}

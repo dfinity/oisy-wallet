@@ -1,4 +1,4 @@
-import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
+import { BITCOIN_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
@@ -14,17 +14,15 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
+import { consoleError } from '$lib/utils/console.utils';
+import { isEmptyString, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 import {
 	MinterNoNewUtxosError,
 	type BitcoinNetwork,
-	type PendingUtxo,
-	type UtxoStatus
-} from '@dfinity/ckbtc';
-import { assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
+	type CkBtcMinterDid
+} from '@icp-sdk/canisters/ckbtc';
 
-export class CkBTCUpdateBalanceScheduler
-	implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance>
-{
+export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance> {
 	private timer = new SchedulerTimer('syncCkBTCUpdateBalanceStatus');
 
 	private btcAddress: string | undefined;
@@ -52,23 +50,28 @@ export class CkBTCUpdateBalanceScheduler
 		identity,
 		data
 	}: SchedulerJobData<PostMessageDataRequestIcCkBTCUpdateBalance>) => {
-		const minterCanisterId = data?.minterCanisterId;
+		const { minterCanisterId, bitcoinNetwork, btcAddress } = data ?? {};
 
-		assertNonNullish(
-			minterCanisterId,
-			'No data - minterCanisterId - provided to update the BTC balance.'
-		);
+		if (isNullish(minterCanisterId)) {
+			consoleError('No data - minterCanisterId - provided to update the BTC balance. Skipping.');
 
-		const bitcoinNetwork = data?.bitcoinNetwork;
+			return;
+		}
 
-		assertNonNullish(bitcoinNetwork, 'No BTC network provided to check for update balance.');
+		if (isNullish(bitcoinNetwork)) {
+			consoleError('No data - bitcoinNetwork - provided to update the BTC balance. Skipping.');
+
+			return;
+		}
 
 		const address =
-			data?.btcAddress ??
-			this.btcAddress ??
-			(await this.loadBtcAddress({ minterCanisterId, identity }));
+			btcAddress ?? this.btcAddress ?? (await this.loadBtcAddress({ minterCanisterId, identity }));
 
-		assertNonNullish(address, 'No BTC address could be derived from the ckBTC minter.');
+		if (isEmptyString(address)) {
+			consoleError('No BTC address could be derived from the ckBTC minter. Skipping.');
+
+			return;
+		}
 
 		const pendingUtxos = await this.hasPendingUtxos({
 			minterCanisterId,
@@ -97,7 +100,7 @@ export class CkBTCUpdateBalanceScheduler
 			}
 
 			// We only log and continue to poll on purpose. UpdateBalance can fail for various non UX blocker reasons and user can trigger it again manually.
-			console.error(err);
+			consoleError(err);
 		}
 	};
 
@@ -164,7 +167,7 @@ export class CkBTCUpdateBalanceScheduler
 		return allUtxosTxids.some((txid) => !knownUtxosTxids.includes(txid));
 	}
 
-	private postUpdateOk(utxosStatuses: UtxoStatus[]) {
+	private postUpdateOk(utxosStatuses: CkBtcMinterDid.UtxoStatus[]) {
 		const data: CertifiedData<UtxoTxidText[]> = {
 			certified: true,
 			data: utxosStatuses
@@ -197,7 +200,7 @@ export class CkBTCUpdateBalanceScheduler
 	private postPendingUtxos(err: MinterNoNewUtxosError) {
 		const { pendingUtxos } = err;
 
-		const data: CertifiedData<PendingUtxo[]> = {
+		const data: CertifiedData<CkBtcMinterDid.PendingUtxo[]> = {
 			certified: true,
 			data: pendingUtxos
 		};

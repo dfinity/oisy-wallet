@@ -1,11 +1,25 @@
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { SchedulerTimer } from '$lib/schedulers/scheduler';
-import * as authUtils from '$lib/utils/auth.utils';
-import { loadIdentity } from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { expect, vi, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
+
+vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
+	const authClientProvider = vi.fn().mockReturnValue({
+		loadIdentity: vi.fn()
+	});
+
+	return {
+		...(await importActual()),
+		AuthClientProvider: Object.assign(authClientProvider, {
+			getInstance: authClientProvider
+		})
+	};
+});
 
 describe('scheduler', () => {
 	describe('SchedulerTimer', () => {
+		const provider = AuthClientProvider.getInstance();
+
 		let originalPostmessage: unknown;
 
 		let scheduler: SchedulerTimer;
@@ -35,7 +49,7 @@ describe('scheduler', () => {
 
 			scheduler = new SchedulerTimer(statusMsg);
 
-			vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
+			vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 		});
 
 		afterEach(() => {
@@ -51,7 +65,7 @@ describe('scheduler', () => {
 
 		describe('start', () => {
 			it('should not start if identity is nullish', async () => {
-				vi.spyOn(authUtils, 'loadIdentity').mockResolvedValueOnce(undefined);
+				const loadIdentity = vi.spyOn(provider, 'loadIdentity').mockResolvedValueOnce(undefined);
 
 				await scheduler.start(mockParams);
 
@@ -170,7 +184,7 @@ describe('scheduler', () => {
 			const { interval: _, ...mockTriggerParams } = mockParams;
 
 			it('should not trigger if identity is nullish', async () => {
-				vi.spyOn(authUtils, 'loadIdentity').mockResolvedValueOnce(undefined);
+				const loadIdentity = vi.spyOn(provider, 'loadIdentity').mockResolvedValueOnce(undefined);
 
 				await scheduler.trigger(mockTriggerParams);
 
@@ -255,12 +269,12 @@ describe('scheduler', () => {
 		});
 
 		describe('stop', () => {
-			let spyClearInterval: MockInstance;
+			let spyClearTimeout: MockInstance;
 
 			beforeEach(async () => {
 				await scheduler.start(mockParams);
 
-				spyClearInterval = vi.spyOn(global, 'clearInterval');
+				spyClearTimeout = vi.spyOn(global, 'clearTimeout');
 			});
 
 			it('should stop the timer', () => {
@@ -268,9 +282,9 @@ describe('scheduler', () => {
 
 				scheduler.stop();
 
-				expect(spyClearInterval).toHaveBeenCalledOnce();
+				expect(spyClearTimeout).toHaveBeenCalledOnce();
 
-				expect(postMessageMock).toHaveBeenCalledTimes(1);
+				expect(postMessageMock).toHaveBeenCalledOnce();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: statusMsg,
 					data: { state: 'idle' }
@@ -284,9 +298,9 @@ describe('scheduler', () => {
 
 				scheduler.stop();
 
-				expect(spyClearInterval).not.toHaveBeenCalled();
+				expect(spyClearTimeout).not.toHaveBeenCalled();
 
-				expect(postMessageMock).toHaveBeenCalledTimes(1);
+				expect(postMessageMock).toHaveBeenCalledOnce();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: statusMsg,
 					data: { state: 'idle' }

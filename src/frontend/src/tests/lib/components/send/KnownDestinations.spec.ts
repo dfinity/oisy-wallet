@@ -4,7 +4,7 @@ import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores
 import type { Token } from '$lib/types/token';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { knownDestinations } from '$tests/mocks/transactions.mock';
@@ -21,9 +21,14 @@ describe('KnownDestinations', () => {
 			]
 		]);
 
+	const props = {
+		onNext: vi.fn()
+	};
+
 	it('renders content if data is provided', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
+				...props,
 				destination: '',
 				knownDestinations
 			},
@@ -38,6 +43,7 @@ describe('KnownDestinations', () => {
 	it('renders filtered content if data is provided', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
+				...props,
 				destination: mockBtcAddress,
 				knownDestinations
 			},
@@ -52,6 +58,7 @@ describe('KnownDestinations', () => {
 	it('renders empty state component if data is empty', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
+				...props,
 				destination: mockBtcAddress
 			},
 			context: mockContext(BTC_MAINNET_TOKEN)

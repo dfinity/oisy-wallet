@@ -3,7 +3,7 @@ import {
 	IC_CKBTC_INDEX_CANISTER_ID,
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKBTC_MINTER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import {
 	IcAppMetadataSchema,
 	IcCanistersSchema,
@@ -17,16 +17,18 @@ import {
 	IcTokenSchema,
 	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 describe('ic-token.schema', () => {
-	const { chainId: _, explorerUrl: __, providers: ___, ...mockNetwork } = SEPOLIA_NETWORK;
+	const { chainId: _, providers: __, ...mockNetwork } = SEPOLIA_NETWORK;
 
 	const mockToken = {
 		id: parseTokenId('Test'),
 		network: mockNetwork,
-		standard: 'icp',
+		standard: { code: 'icp' },
 		category: 'default',
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8,
@@ -43,7 +45,6 @@ describe('ic-token.schema', () => {
 	};
 
 	const mockApp = {
-		position: 1,
 		exchangeCoinId: 'bitcoin',
 		explorerUrl: 'https://explorer.example.com'
 	};
@@ -67,15 +68,6 @@ describe('ic-token.schema', () => {
 
 		it('should validate with correct data', () => {
 			expect(IcAppMetadataSchema.parse(validData)).toEqual(validData);
-		});
-
-		it('should fail with invalid position', () => {
-			const invalidData = {
-				...validData,
-				position: 'first'
-			};
-
-			expect(() => IcAppMetadataSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid explorerUrl', () => {
@@ -246,15 +238,6 @@ describe('ic-token.schema', () => {
 
 			expect(() => IcInterfaceSchema.parse(invalidData)).toThrow();
 		});
-
-		it('should fail with incorrect IcAppMetadataSchema data', () => {
-			const invalidData = {
-				...validData,
-				position: 'first'
-			};
-
-			expect(() => IcInterfaceSchema.parse(invalidData)).toThrow();
-		});
 	});
 
 	describe('IcTokenSchema', () => {
@@ -291,15 +274,6 @@ describe('ic-token.schema', () => {
 			const invalidData = {
 				...validData,
 				ledgerCanisterId: 123
-			};
-
-			expect(() => IcTokenSchema.parse(invalidData)).toThrow();
-		});
-
-		it('should fail with invalid app data', () => {
-			const invalidData = {
-				...validData,
-				position: 'first'
 			};
 
 			expect(() => IcTokenSchema.parse(invalidData)).toThrow();

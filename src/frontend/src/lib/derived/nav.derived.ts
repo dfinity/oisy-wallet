@@ -19,3 +19,30 @@ export const routeNetwork: Readable<OptionString> = derived(
 		}
 	]) => network
 );
+
+export const routeCollection: Readable<OptionString> = derived(
+	[page],
+	([
+		{
+			data: { collection }
+		}
+	]) => collection
+);
+
+export const routeNft: Readable<OptionString> = derived(
+	[page],
+	([
+		{
+			data: { nft }
+		}
+	]) => nft
+);
+
+export const routeAutopilotVault: Readable<OptionString> = derived(
+	[page],
+	([
+		{
+			data: { vault }
+		}
+	]) => vault
+);

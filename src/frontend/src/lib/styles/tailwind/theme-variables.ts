@@ -3,6 +3,7 @@ export const themeVariables = {
 		// we need to use rem instead of px because the default tailwind values changed to rem,
 		// and mixing units breaks custom screen definitions
 		xs: '28rem', // 448px
+		'1.5xs': '32rem', // 512px
 		'1.5md': '56rem', // 896px
 		'1.5lg': '72rem', // 1152px
 		'1.5xl': '88rem', // 1408px
@@ -13,6 +14,7 @@ export const themeVariables = {
 		page: 'var(--color-background-page)',
 		surface: 'var(--color-background-surface)',
 		primary: 'var(--color-background-primary)',
+		'primary-light': 'var(--color-background-primary-light)',
 		'primary-alt': 'var(--color-background-primary-alt)',
 		'primary-inverted': 'var(--color-background-primary-inverted)',
 		'primary-inverted-alt': 'var(--color-background-primary-inverted-alt)',
@@ -34,7 +36,8 @@ export const themeVariables = {
 			secondary: 'var(--color-background-brand-secondary)',
 			tertiary: 'var(--color-background-brand-tertiary)',
 			disabled: 'var(--color-background-brand-disabled)',
-			light: 'var(--color-background-brand-light)'
+			light: 'var(--color-background-brand-light)',
+			'light-alt': 'var(--color-background-brand-light-alt)'
 		},
 		success: {
 			'subtle-10': 'var(--color-background-success-subtle-10)',
@@ -73,6 +76,9 @@ export const themeVariables = {
 			'7': 'var(--color-background-contact-7)',
 			'8': 'var(--color-background-contact-8)',
 			'9': 'var(--color-background-contact-9)'
+		},
+		overlay: {
+			'page-30': 'color-mix(in srgb, var(--color-background-page) 30%, transparent)'
 		}
 	},
 	border: {
@@ -176,6 +182,8 @@ export const themeVariables = {
 		'trump-0': '#232BCC',
 		'trump-100': '#000797',
 		'gold-0': '#CCA055',
-		'gold-100': '#EBD27F'
+		'gold-100': '#EBD27F',
+		'arbitrum-0': '#11AAFF',
+		'arbitrum-100': '#203147'
 	}
 };

@@ -1,5 +1,6 @@
 import { send as executeSend } from '$eth/services/send.services';
-import type { FeeStoreData } from '$eth/stores/fee.store';
+import type { FeeStoreData } from '$eth/stores/eth-fee.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import {
 	getSignParamsMessageHex,
@@ -10,7 +11,7 @@ import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api'
 import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
 	TRACK_COUNT_WC_ETH_SEND_SUCCESS
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -22,9 +23,9 @@ import {
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -162,7 +163,7 @@ export const send = ({
 
 				await listener.approveRequest({ id, topic, message: hash });
 
-				progress(lastProgressStep);
+				progress?.(lastProgressStep);
 
 				trackEvent({
 					name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
@@ -185,7 +186,9 @@ export const send = ({
 				throw err;
 			}
 		},
-		toastMsg: get(i18n).wallet_connect.info.eth_transaction_executed
+		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {
+			$method: params.request.params.request.method
+		})
 	});
 
 export const signMessage = ({

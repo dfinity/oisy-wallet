@@ -1,0 +1,164 @@
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
+import {
+	NFT_COLLECTION_ACTION_HIDE,
+	NFT_COLLECTION_ACTION_SPAM,
+	NFT_HIDDEN_BADGE
+} from '$lib/constants/test-ids.constants';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { extractMediaUrls } from '$lib/services/url.services';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+import type { NonFungibleToken } from '$lib/types/nft';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { mockNftCollectionUi } from '$tests/mocks/nfts.mock';
+import { assertNonNullish } from '@dfinity/utils';
+import { render, waitFor } from '@testing-library/svelte';
+
+vi.mock('$lib/services/url.services', () => ({
+	extractMediaUrls: vi.fn()
+}));
+
+describe('NftCollectionHero', () => {
+	const spamButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_SPAM}"]`;
+	const hideButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_HIDE}"]`;
+	const hiddenBadgeSelector = `span[data-tid="${NFT_HIDDEN_BADGE}"]`;
+
+	const mockToken: NonFungibleToken = {
+		...AZUKI_ELEMENTAL_BEANS_TOKEN,
+		standard: {
+			...AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
+			version: 'standard-version'
+		},
+		network: POLYGON_MAINNET_NETWORK,
+		description: 'Some descriptive text'
+	};
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		vi.mocked(extractMediaUrls).mockResolvedValue([]);
+
+		userSelectedNetworkStore.set(undefined);
+	});
+
+	it('should render the collection data', async () => {
+		const { container, getByText, getAllByText } = render(NftCollectionHero, {
+			props: {
+				nfts: mockNftCollectionUi.nfts,
+				token: mockToken
+			}
+		});
+
+		assertNonNullish(mockNftCollectionUi.collection.name);
+
+		const names: HTMLElement[] | null = getAllByText(mockToken.name);
+
+		names.forEach((n) => {
+			expect(n).toBeInTheDocument();
+		});
+
+		const description: HTMLElement | null = getByText(mockToken.description as string);
+
+		expect(description).toBeInTheDocument();
+
+		const standard: HTMLElement | null = getByText(mockToken.standard.code);
+
+		expect(standard).toBeInTheDocument();
+
+		assertNonNullish(mockToken.standard.version);
+
+		const standardVersion: HTMLElement | null = getByText(mockToken.standard.version);
+
+		expect(standardVersion).toBeInTheDocument();
+
+		const address: HTMLElement | null = getByText(
+			shortenWithMiddleEllipsis({ text: mockToken.address })
+		);
+
+		expect(address).toBeInTheDocument();
+
+		const network: HTMLElement | null = getByText(mockToken.network.name);
+
+		expect(network).toBeInTheDocument();
+
+		await waitFor(() => {
+			const spamButton: HTMLButtonElement | null = container.querySelector(spamButtonSelector);
+
+			expect(spamButton).toBeInTheDocument();
+
+			const hideButton: HTMLButtonElement | null = container.querySelector(hideButtonSelector);
+
+			expect(hideButton).toBeInTheDocument();
+		});
+	});
+
+	it('should render the collections first nft image as a banner', () => {
+		const { container } = render(NftCollectionHero, {
+			props: {
+				nfts: mockNftCollectionUi.nfts,
+				token: mockToken
+			}
+		});
+
+		const parent = container.querySelector('.h-64');
+
+		assertNonNullish(parent);
+
+		const imageElement: HTMLDivElement | null = parent.querySelector('div');
+
+		assertNonNullish(imageElement);
+
+		expect(imageElement.getAttribute('style')).toContain(
+			`background-image: url("${mockNftCollectionUi.nfts[0].imageUrl}")`
+		);
+	});
+
+	it('should render the hidden badge in the banner', () => {
+		const { container } = render(NftCollectionHero, {
+			props: {
+				nfts: mockNftCollectionUi.nfts,
+				token: { ...mockToken, section: CustomTokenSection.HIDDEN }
+			}
+		});
+
+		const hiddenBadge: HTMLSpanElement | null = container.querySelector(hiddenBadgeSelector);
+
+		expect(hiddenBadge).toBeInTheDocument();
+	});
+
+	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', () => {
+		userSelectedNetworkStore.set(ETHEREUM_NETWORK_ID);
+
+		const { container } = render(NftCollectionHero, {
+			props: {
+				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
+				nfts: mockNftCollectionUi.nfts
+			}
+		});
+
+		const firstBreadcrumElmt = container.querySelector(
+			'div.text-xs.font-bold a.no-underline:first-of-type'
+		);
+
+		expect(firstBreadcrumElmt?.getAttribute('href')).toContain(
+			`network=${ETHEREUM_NETWORK_ID.description}`
+		);
+	});
+
+	it('should render the root breadcrumb without network query param if userSelectedNetwork is not defined', () => {
+		const { container } = render(NftCollectionHero, {
+			props: {
+				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
+				nfts: mockNftCollectionUi.nfts
+			}
+		});
+
+		const firstBreadcrumElmt = container.querySelector(
+			'div.text-xs.font-bold a.no-underline:first-of-type'
+		);
+
+		expect(firstBreadcrumElmt?.getAttribute('href')).not.toContain('network=');
+	});
+});

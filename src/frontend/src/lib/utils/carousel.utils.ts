@@ -28,17 +28,17 @@ export const buildCarouselSliderFrameItem = ({
 };
 
 /**
- * A util for extending provided sliderFrame element with carousel items and width style..
+ * A util for extending provided sliderFrame element with carousel items and width style.
  */
 export const extendCarouselSliderFrame = ({
 	sliderFrame,
 	slides,
 	slideWidth
 }: {
-	slides: Node[];
+	slides: Node[] | undefined;
 	slideWidth: number;
 } & CommonParams) => {
-	if (isNullish(sliderFrame) || slides.length === 0) {
+	if (isNullish(sliderFrame) || isNullish(slides) || slides.length === 0) {
 		return;
 	}
 

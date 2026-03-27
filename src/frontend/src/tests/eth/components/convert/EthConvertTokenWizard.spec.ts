@@ -5,12 +5,13 @@ import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard
 import * as tokensDerived from '$eth/derived/token.derived';
 import * as sendServices from '$eth/services/send.services';
 import {
-	FEE_CONTEXT_KEY,
-	initFeeContext,
-	initFeeStore,
-	type FeeContext,
+	ETH_FEE_CONTEXT_KEY,
+	initEthFeeContext,
+	initEthFeeStore,
+	type EthFeeContext,
 	type FeeStoreData
-} from '$eth/stores/fee.store';
+} from '$eth/stores/eth-fee.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import * as ckEthStores from '$icp-eth/stores/cketh.store';
@@ -29,48 +30,49 @@ import {
 	initTokenActionValidationErrorsContext,
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import { fireEvent, render } from '@testing-library/svelte';
 import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
+}));
+
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
 }));
 
 describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
 	const mockContext = (fees?: FeeStoreData) => {
-		const feeStore = initFeeStore();
+		const feeStore = initEthFeeStore();
 
 		if (nonNullish(fees)) {
 			feeStore.setFee(fees);
 		}
 
-		return new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | FeeContext>([
+		return new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | EthFeeContext>([
 			[
 				CONVERT_CONTEXT_KEY,
 				initConvertContext({ sourceToken: ETHEREUM_TOKEN, destinationToken: SEPOLIA_TOKEN })
 			],
 			[
-				FEE_CONTEXT_KEY,
-				initFeeContext({
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
 					feeStore,
 					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 					feeExchangeRateStore: writable(100),
@@ -87,6 +89,9 @@ describe('EthConvertTokenWizard', () => {
 		maxFeePerGas: 100n,
 		maxPriorityFeePerGas: 100n
 	};
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
 	const props = {
 		currentStep: {
 			name: WizardStepsConvert.REVIEW,
@@ -94,12 +99,15 @@ describe('EthConvertTokenWizard', () => {
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
 		sendAmount,
-		receiveAmount: sendAmount
+		receiveAmount: sendAmount,
+		onBack,
+		onClose,
+		onNext
 	};
 
 	let sendSpy: MockInstance;
 
-	const mockCkEthMinterInfoStore = (minterInfo?: MinterInfo) => {
+	const mockCkEthMinterInfoStore = (minterInfo?: CkEthMinterDid.MinterInfo) => {
 		const store = initCertifiedSetterStore<CkEthMinterInfoData>();
 
 		if (nonNullish(minterInfo)) {
@@ -134,7 +142,9 @@ describe('EthConvertTokenWizard', () => {
 			.mockImplementation(() => readable(address));
 
 	const mockEthereumToken = (token = ETHEREUM_TOKEN) =>
-		vi.spyOn(tokensDerived, 'ethereumToken', 'get').mockImplementation(() => readable(token));
+		vi
+			.spyOn(tokensDerived, 'nativeEthereumTokenWithFallback', 'get')
+			.mockImplementation(() => readable(token));
 
 	const clickConvertButton = async (container: HTMLElement) => {
 		const convertButtonSelector = '[data-tid="convert-review-button-next"]';
@@ -154,7 +164,7 @@ describe('EthConvertTokenWizard', () => {
 		});
 
 		mockPage.reset();
-		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+		mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 
 		ethAddressStore.reset();
 

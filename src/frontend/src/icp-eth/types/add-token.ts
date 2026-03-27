@@ -1,8 +1,8 @@
-import type { SolAddress } from '$lib/types/address';
 import type { OneOf } from '$lib/utils/ts.utils';
+import type { SolAddress } from '$sol/types/address';
 
-interface Erc20AddTokenData {
-	erc20ContractAddress: string;
+interface EthAddTokenData {
+	ethContractAddress: string;
 }
 
 interface IcAddTokenData {
@@ -10,8 +10,29 @@ interface IcAddTokenData {
 	indexCanisterId: string | undefined;
 }
 
+interface ExtAddTokenData {
+	extCanisterId: string;
+}
+
+interface Dip721AddTokenData {
+	dip721CanisterId: string;
+}
+
+interface IcPunksAddTokenData {
+	icPunksCanisterId: string;
+}
+
 interface SplAddTokenData {
 	splTokenAddress: SolAddress;
 }
 
-export type AddTokenData = OneOf<[Erc20AddTokenData, IcAddTokenData, SplAddTokenData]>;
+export type AddTokenData = OneOf<
+	[
+		EthAddTokenData,
+		IcAddTokenData,
+		ExtAddTokenData,
+		Dip721AddTokenData,
+		IcPunksAddTokenData,
+		SplAddTokenData
+	]
+>;

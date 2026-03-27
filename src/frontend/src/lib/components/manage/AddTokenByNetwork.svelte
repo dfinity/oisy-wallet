@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
+	import { preventDefault } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
-	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
+	import IcAddNftForm from '$icp/components/tokens/IcAddNftForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks, networksMainnets } from '$lib/derived/networks.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -23,120 +23,132 @@
 	} from '$lib/utils/network.utils';
 	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
 
-	export let network: Network | undefined;
-	export let tokenData: Partial<AddTokenData>;
-
-	let networkName: string | undefined = network?.name;
-	$: networkName,
-		(network = nonNullish(networkName)
-			? $networks.find(({ name }) => name === networkName)
-			: undefined);
-
-	let isIcpNetwork = false;
-	$: isIcpNetwork = isNetworkIdICP(network?.id);
-
-	let isEthereumNetwork = false;
-	$: isEthereumNetwork = isNetworkIdEthereum(network?.id);
-
-	let isEvmNetwork = false;
-	$: isEvmNetwork = isNetworkIdEvm(network?.id);
-
-	let isSolanaNetwork = false;
-	$: isSolanaNetwork = isNetworkIdSolana(network?.id);
-
-	let { ledgerCanisterId, indexCanisterId, erc20ContractAddress, splTokenAddress } = tokenData;
-
-	// Since we persist the values of relevant variables when switching networks, this ensures that
-	// only the data related to the selected network is passed.
-	$: if (isIcpNetwork) {
-		tokenData = {
-			ledgerCanisterId,
-			indexCanisterId:
-				nonNullish(indexCanisterId) && notEmptyString(indexCanisterId) ? indexCanisterId : undefined
-		};
-	} else if (isEthereumNetwork || isEvmNetwork) {
-		tokenData = { erc20ContractAddress };
-	} else if (isSolanaNetwork) {
-		tokenData = { splTokenAddress };
-	} else {
-		tokenData = {};
+	interface Props {
+		network?: Network;
+		tokenData: Partial<AddTokenData>;
+		onBack: () => void;
+		onNext: () => void;
+		isNftsPage?: boolean;
 	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		network = $bindable(),
+		tokenData = $bindable(),
+		onBack,
+		onNext,
+		isNftsPage = false
+	}: Props = $props();
 
-	let invalidErc20 = true;
-	$: invalidErc20 = isNullishOrEmpty(erc20ContractAddress);
+	let networkName = $state<string | undefined>(network?.name);
 
-	let invalidIc = true;
-	$: invalidIc = isNullishOrEmpty(ledgerCanisterId);
+	$effect(() => {
+		network = nonNullish(networkName)
+			? $networks.find(({ name }) => name === networkName)
+			: undefined;
+	});
 
-	let invalidSpl = true;
-	$: invalidSpl = isNullishOrEmpty(splTokenAddress);
+	let isIcpNetwork = $derived(isNetworkIdICP(network?.id));
 
-	let invalid = true;
-	$: invalid = isIcpNetwork
-		? invalidIc
-		: isEthereumNetwork || isEvmNetwork
-			? invalidErc20
-			: isSolanaNetwork
-				? invalidSpl
-				: true;
+	let isEthereumNetwork = $derived(isNetworkIdEthereum(network?.id));
 
-	let enabledNetworkSelector = true;
-	$: enabledNetworkSelector = isNullish($selectedNetwork);
+	let isEvmNetwork = $derived(isNetworkIdEvm(network?.id));
 
-	let availableNetworks: Network[] = [];
+	let isSolanaNetwork = $derived(isNetworkIdSolana(network?.id));
+
+	let {
+		ledgerCanisterId,
+		indexCanisterId,
+		extCanisterId,
+		dip721CanisterId,
+		icPunksCanisterId,
+		ethContractAddress,
+		splTokenAddress
+	} = $derived(tokenData);
+
+	$effect(() => {
+		// Since we persist the values of relevant variables when switching networks, this ensures that
+		// only the data related to the selected network is passed.
+		if (isIcpNetwork) {
+			tokenData = isNftsPage
+				? nonNullish(extCanisterId)
+					? { extCanisterId }
+					: nonNullish(dip721CanisterId)
+						? { dip721CanisterId }
+						: { icPunksCanisterId }
+				: {
+						ledgerCanisterId,
+						indexCanisterId:
+							nonNullish(indexCanisterId) && notEmptyString(indexCanisterId)
+								? indexCanisterId
+								: undefined
+					};
+		} else if (isEthereumNetwork || isEvmNetwork) {
+			tokenData = { ethContractAddress };
+		} else if (isSolanaNetwork) {
+			tokenData = { splTokenAddress };
+		} else {
+			tokenData = {};
+		}
+	});
+
+	let invalidEth = $derived(isNullishOrEmpty(ethContractAddress));
+
+	let invalidIc = $derived(isNullishOrEmpty(ledgerCanisterId));
+
+	let invalidExt = $derived(isNullishOrEmpty(extCanisterId));
+
+	let invalidDip721 = $derived(isNullishOrEmpty(dip721CanisterId));
+
+	let invalidIcPunks = $derived(isNullishOrEmpty(icPunksCanisterId));
+
+	let invalidIcNft = $derived(invalidExt && invalidDip721 && invalidIcPunks);
+
+	let invalidSpl = $derived(isNullishOrEmpty(splTokenAddress));
+
+	let invalid = $derived(
+		isIcpNetwork
+			? isNftsPage
+				? invalidIcNft
+				: invalidIc
+			: isEthereumNetwork || isEvmNetwork
+				? invalidEth
+				: isSolanaNetwork
+					? invalidSpl
+					: true
+	);
+
+	let enabledNetworkSelector = $derived(isNullish($selectedNetwork));
+
 	// filter out BTC networks - they do not have custom tokens
-	$: availableNetworks = (
-		$selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets
-	).filter(({ id }) => !isNetworkIdBitcoin(id));
+	let availableNetworks = $derived(
+		($selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets).filter(
+			({ id, supportsNft }) => !isNetworkIdBitcoin(id) && (!isNftsPage || supportsNft)
+		)
+	);
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
+<form class="min-h-auto" method="POST" onsubmit={preventDefault(onNext)} in:fade>
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
-			<Value ref="network" element="div">
-				{#snippet label()}
-					{$i18n.tokens.manage.text.network}
-				{/snippet}
-
-				{#snippet content()}
-					<div id="network" class="network mt-1 pt-0.5">
-						<Dropdown name="network" bind:selectedValue={networkName}>
-							<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
-								>{$i18n.tokens.manage.placeholder.select_network}</option
-							>
-							{#each availableNetworks as network (network.id)}
-								<DropdownItem value={network.name}>{network.name}</DropdownItem>
-							{/each}
-						</Dropdown>
-					</div>
-				{/snippet}
-			</Value>
+			<AddTokenByNetworkDropdown {availableNetworks} bind:networkName />
 		{/if}
 
 		{#if isIcpNetwork}
-			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
+			{#if isNftsPage}
+				<IcAddNftForm bind:extCanisterId bind:dip721CanisterId bind:icPunksCanisterId />
+			{:else}
+				<IcAddIcrcTokenForm bind:ledgerCanisterId bind:indexCanisterId />
+			{/if}
 		{:else if isEthereumNetwork || isEvmNetwork}
-			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
+			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
-			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />
+			<SolAddTokenForm bind:tokenAddress={splTokenAddress} />
 		{:else if nonNullish($selectedNetwork)}
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}
 
 		{#snippet toolbar()}
-			<AddTokenByNetworkToolbar {invalid} on:icBack />
+			<AddTokenByNetworkToolbar {invalid} {onBack} />
 		{/snippet}
 	</ContentWithToolbar>
 </form>
-
-<style lang="scss">
-	.hidden {
-		display: none;
-	}
-
-	.network {
-		--disable-contrast: rgba(0, 0, 0, 0.5);
-	}
-</style>

@@ -6,6 +6,10 @@ import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
 
 describe('user-networks.utils', () => {
 	describe('mapUserNetworks', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
 		it('should convert UserNetworks to array of [NetworkSettingsFor, NetworkSettings]', () => {
 			expect(mapUserNetworks(mockUserNetworks)).toEqual(mockUserNetworksMap);
 		});
@@ -19,7 +23,7 @@ describe('user-networks.utils', () => {
 
 			expect(mapUserNetworks(userNetworks)).toEqual(mockUserNetworksMap);
 
-			expect(console.warn).toHaveBeenCalledTimes(1);
+			expect(console.warn).toHaveBeenCalledOnce();
 			expect(console.warn).toHaveBeenNthCalledWith(
 				1,
 				`Unknown networkId: ${unknownNetworkId.description}`

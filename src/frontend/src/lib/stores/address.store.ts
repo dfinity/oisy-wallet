@@ -1,19 +1,22 @@
-import type { StorageStoreData } from '$lib/stores/storage.store';
-import type { Address, BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
+import type { BtcAddress } from '$btc/types/address';
+import type { EthAddress } from '$eth/types/address';
+import type { Address } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
+import type { SolAddress } from '$sol/types/address';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
 
 type CertifiedAddressData<T extends Address> = CertifiedData<T>;
 
-export type StorageAddressData<T extends Address> = StorageStoreData<CertifiedAddressData<T>>;
+export type AddressStoreData<T extends Address> = Nullish<CertifiedAddressData<T>>;
 
-export interface AddressStore<T extends Address> extends Readable<StorageAddressData<T>> {
+export interface AddressStore<T extends Address> extends Readable<AddressStoreData<T>> {
 	set: (data: CertifiedAddressData<T>) => void;
 	reset: () => void;
 }
 
 const initAddressStore = <T extends Address>(): AddressStore<T> => {
-	const { subscribe, set } = writable<StorageAddressData<T>>(undefined);
+	const { subscribe, set } = writable<AddressStoreData<T>>(undefined);
 
 	return {
 		set: (data: CertifiedAddressData<T>) => set(data),

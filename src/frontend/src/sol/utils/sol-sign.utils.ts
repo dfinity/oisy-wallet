@@ -1,8 +1,8 @@
 import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
-import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import {
 	assertIsTransactionPartialSigner,
@@ -10,16 +10,18 @@ import {
 	address as solAddress,
 	type SignatureDictionary,
 	type Transaction,
-	type TransactionPartialSigner
+	type TransactionPartialSigner,
+	type TransactionWithLifetime,
+	type TransactionWithinSizeLimit
 } from '@solana/kit';
 
-interface CreateSignerParams {
+export interface CreateSignerParams {
 	identity: OptionIdentity;
 	address: SolAddress;
 	network: SolanaNetworkType;
 }
 
-const signTransaction = async ({
+export const signTransaction = async ({
 	identity,
 	transaction,
 	address,
@@ -31,7 +33,7 @@ const signTransaction = async ({
 		identity,
 		derivationPath,
 		keyId: SOLANA_KEY_ID,
-		message: Array.from(transaction.messageBytes)
+		message: Uint8Array.from(transaction.messageBytes)
 	});
 
 	return { [address]: Uint8Array.from(signedBytes) } as SignatureDictionary;
@@ -43,7 +45,7 @@ const signTransactions = async ({
 	address,
 	network
 }: CreateSignerParams & {
-	transactions: Transaction[];
+	transactions: (Transaction & TransactionWithLifetime)[];
 }): Promise<SignatureDictionary[]> =>
 	await Promise.all(
 		transactions.map(
@@ -58,7 +60,9 @@ export const createSigner = ({
 }: CreateSignerParams): TransactionPartialSigner => {
 	const signer: TransactionPartialSigner = {
 		address: solAddress(address),
-		signTransactions: async (transactions: Transaction[]): Promise<SignatureDictionary[]> =>
+		signTransactions: async (
+			transactions: (Transaction & TransactionWithinSizeLimit & TransactionWithLifetime)[]
+		): Promise<SignatureDictionary[]> =>
 			await signTransactions({ identity, transactions, address, network })
 	};
 

@@ -1,16 +1,9 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
-	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
-	import { isBitcoinToken } from '$btc/utils/token.utils';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-	import { isTokenErc20UserToken, isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { getContext, onMount, setContext, type Snippet, untrack } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
-	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
+	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -19,65 +12,134 @@
 	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { pseudoNetworkICPTestnet, selectedNetwork } from '$lib/derived/network.derived';
+	import { networks } from '$lib/derived/networks.derived';
+	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
+	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import type { CustomToken } from '$lib/types/custom-token';
 	import type { ExchangesData } from '$lib/types/exchange';
-	import type { Token } from '$lib/types/token';
+	import type { Network } from '$lib/types/network';
+	import type { Token, TokenId } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token-ui';
+	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
-	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
-	import { isSolanaToken } from '$sol/utils/token.utils';
 
-	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
+	interface Props {
+		network?: Network;
+		initialSearch?: string;
+		infoElement?: Snippet;
+		isNftsPage?: boolean;
+		onSave: (tokens: Token[]) => void;
+		onAddToken: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		network = $bindable(),
+		initialSearch,
+		infoElement,
+		isNftsPage,
+		onSave,
+		onAddToken
+	}: Props = $props();
 
-	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
+	// To avoid strange behaviour when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
 	// the life of the component.
 	let exchangesStaticData: ExchangesData | undefined = $state();
 
 	onMount(() => {
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
+
+		return () => {
+			modifiedTokens.clear();
+			userHasEdited = false;
+			tokensInContext = [];
+		};
 	});
 
-	let allTokensSorted: Token[] = $derived(
-		nonNullish(exchangesStaticData)
-			? pinEnabledTokensAtTop(
-					sortTokens({
-						$tokens: $allTokens,
-						$exchanges: exchangesStaticData,
-						$tokensToPin
-					})
-				)
-			: []
+	let allTokensUi: TokenUi<CustomToken<Token>>[] = $derived(
+		$allTokens.reduce<TokenUi<CustomToken<Token>>[]>((acc, token) => {
+			if (isNullish(exchangesStaticData)) {
+				return acc;
+			}
+
+			acc.push(
+				mapTokenUi({
+					token,
+					$balances: $balancesStore,
+					$stakeBalances,
+					$exchanges: exchangesStaticData
+				})
+			);
+
+			return acc;
+		}, [])
 	);
+
+	let allTokensSorted: TokenUi<CustomToken<Token>>[] = $derived(
+		pinEnabledTokensAtTop(
+			sortTokens({
+				$tokens: allTokensUi,
+				$tokensToPin,
+				$networksToPin: $networks
+			})
+		)
+	);
+
+	let tokensInContext: Token[] = $state([]);
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
 			tokens: [],
 			filterZeroBalance: false,
-			filterNetwork: $selectedNetwork,
+			filterNetwork: network ?? $selectedNetwork,
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
 			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
-			sortByBalance: false
+			sortByBalance: false,
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
+			filterNfts: isNftsPage,
+			filterCategoryTag: $tokenCategoryFilter
 		})
 	);
 
-	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+	const { setTokens, filterNetwork } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
+
+	const updateContextTokens = () => {
+		// Keep the context list in sync only until the user starts editing.
+		// This prevents overwriting the locally toggled enabled state.
+		if (!userHasEdited) {
+			tokensInContext = allTokensSorted;
+			setTokens(allTokensSorted);
+		}
+	};
 
 	$effect(() => {
-		setTokens(allTokensSorted);
+		[userHasEdited, allTokensSorted];
+
+		untrack(() => updateContextTokens());
 	});
 
-	let loading = $derived($erc20UserTokensNotInitialized);
+	$effect(() => {
+		if (nonNullish($filterNetwork)) {
+			network = $filterNetwork;
+		}
+	});
 
 	let showNetworks = $state(false);
 
@@ -85,55 +147,37 @@
 		showNetworks = !showNetworks;
 	};
 
-	let modifiedTokens: Record<string, Token> = $state({});
+	const modifiedTokens = new SvelteMap<TokenId, Token>();
 
-	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
-		const { id: networkId } = network;
-		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
+	let userHasEdited = $state(false);
+
+	const onToggle = ({ id, ...rest }: Token) => {
+		const current = modifiedTokens.get(id);
 
 		// we need to set the tokenlist for the ModalTokenListContext manually when we change the enabled prop,
 		// because the exposed prop from the context is a derived and on update of the data the "enabled" gets reset
-		const tokensList = [...allTokensSorted];
-		const token = tokensList.find((t) => t.id === id);
-		if (nonNullish(token) && 'enabled' in token) {
-			token.enabled = !token.enabled;
-			setTokens(tokensList);
-		}
+		userHasEdited = true;
+		const tokensList = tokensInContext.map((t) =>
+			t.id === id && isTokenToggleable(t) ? { ...t, enabled: !t.enabled } : t
+		);
+		tokensInContext = tokensList;
+		setTokens(tokensList);
 
 		if (nonNullish(current)) {
-			modifiedTokens = { ...tokens };
+			modifiedTokens.delete(id);
 			return;
 		}
 
-		modifiedTokens = {
-			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
-			...tokens
-		};
+		modifiedTokens.set(id, { id, ...rest });
 	};
 
-	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
+	let tokensToBeSaved = $derived([...modifiedTokens.values()]);
 
-	let groupModifiedTokens = $derived(
-		Object.values(modifiedTokens).reduce<{
-			icrc: IcrcCustomToken[];
-			erc20: Erc20UserToken[];
-			spl: SplTokenToggleable[];
-		}>(
-			({ icrc, erc20, spl }, token) => ({
-				icrc: [
-					...icrc,
-					...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
-				],
-				erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
-				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
-			}),
-			{ icrc: [], erc20: [], spl: [] }
-		)
-	);
+	let saveDisabled = $derived(tokensToBeSaved.length === 0);
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
 	// We might want to improve this in the future.
-	const save = () => dispatch('icSave', groupModifiedTokens);
+	const save = () => onSave(tokensToBeSaved);
 </script>
 
 {#if nonNullish(infoElement)}
@@ -141,12 +185,11 @@
 {/if}
 
 {#if showNetworks}
-	<ModalNetworksFilter on:icNetworkFilter={() => (showNetworks = false)} />
+	<ModalNetworksFilter onNetworkFilter={() => (showNetworks = false)} />
 {:else}
 	<ModalTokensList
-		{loading}
-		on:icSelectNetworkFilter={onSelectNetwork}
 		networkSelectorViewOnly={nonNullish($selectedNetwork)}
+		onSelectNetworkFilter={onSelectNetwork}
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
@@ -160,7 +203,7 @@
 
 				{#snippet logo()}
 					<span class="mr-2">
-						<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+						<TokenLogo badge={{ type: 'network' }} color="white" data={token} />
 					</span>
 				{/snippet}
 
@@ -171,23 +214,27 @@
 				{/snippet}
 
 				{#snippet action()}
-					{#if icTokenIcrcCustomToken(token)}
-						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
-						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
-					{:else if isBitcoinToken(token)}
-						<BtcManageTokenToggle />
-					{:else if isSolanaToken(token)}
-						<SolManageTokenToggle />
-					{/if}
+					<EnableTokenToggle {onToggle} {token} />
 				{/snippet}
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
-			<Button colorStyle="secondary-light" onclick={() => dispatch('icAddToken')}
-				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
+			<Button
+				colorStyle="secondary-light"
+				disabled={$pseudoNetworkICPTestnet ||
+					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
+				onclick={onAddToken}
+				styleClass="whitespace-nowrap"
 			>
-			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} onclick={save}>
+				<IconPlus />
+				{isNftsPage ? $i18n.tokens.manage.text.import_nft : $i18n.tokens.manage.text.import_token}
+			</Button>
+			<Button
+				disabled={saveDisabled}
+				onclick={save}
+				styleClass="whitespace-nowrap"
+				testId={MANAGE_TOKENS_MODAL_SAVE}
+			>
 				{$i18n.core.text.save}
 			</Button>
 		{/snippet}

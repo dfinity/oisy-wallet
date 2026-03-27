@@ -65,6 +65,24 @@ describe('InputAddressAlias', () => {
 
 		expect(addressInput).not.toBeDisabled();
 	});
+
+	it('should not trim label input while the user is typing', async () => {
+		const { getByTestId } = render(InputAddressAlias, {
+			props: {
+				address: {},
+				isValid: false,
+				onQRCodeScan: () => {}
+			}
+		});
+
+		const labelInput = getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT) as HTMLInputElement;
+		const testLabel = '  Test Label  ';
+		await fireEvent.input(labelInput, { target: { value: testLabel } });
+
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		expect(labelInput.value).toBe(testLabel);
+	});
 });
 
 describe('AddressFormTestHost', () => {

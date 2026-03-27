@@ -3,10 +3,10 @@ import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
-import { IcrcIndexNgCanister, type IcrcIndexNgGetTransactions } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
+import { IcrcIndexCanister, type IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const getTransactions = async ({
 	owner,
@@ -21,7 +21,7 @@ export const getTransactions = async ({
 	start?: bigint;
 	maxResults?: bigint;
 	indexCanisterId: IndexCanisterIdText;
-} & QueryParams): Promise<IcrcIndexNgGetTransactions> => {
+} & QueryParams): Promise<IcrcIndexDid.GetTransactions> => {
 	assertNonNullish(identity);
 
 	const { getTransactions } = await indexNgCanister({ identity, indexCanisterId });
@@ -49,16 +49,30 @@ export const getLedgerId = async ({
 	return ledgerId({ certified });
 };
 
+export const getStatus = async ({
+	identity,
+	indexCanisterId,
+	certified = true
+}: {
+	identity: OptionIdentity;
+	indexCanisterId: IndexCanisterIdText;
+} & QueryParams): Promise<IcrcIndexDid.Status> => {
+	assertNonNullish(identity);
+
+	const { status } = await indexNgCanister({ identity, indexCanisterId });
+
+	return status({ certified });
+};
 const indexNgCanister = async ({
 	identity,
 	indexCanisterId
 }: {
 	identity: Identity;
 	indexCanisterId: IndexCanisterIdText;
-}): Promise<IcrcIndexNgCanister> => {
+}): Promise<IcrcIndexCanister> => {
 	const agent = await getAgent({ identity });
 
-	return IcrcIndexNgCanister.create({
+	return IcrcIndexCanister.create({
 		agent,
 		canisterId: Principal.fromText(indexCanisterId)
 	});

@@ -1,4 +1,4 @@
-import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
+import ConvertToCkBtc from '$btc/components/convert/ConvertToCkBtc.svelte';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import * as ckMinterInfoWorkerServices from '$icp/services/worker.ck-minter-info.services';
 import type { IcCkToken } from '$icp/types/ic-token';
@@ -9,7 +9,7 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-describe('ConvertToCkBTC', () => {
+describe('ConvertToCkBtc', () => {
 	const buttonId = 'convert-to-ckbtc-button';
 	const mockCkBtcToken = {
 		...mockValidIcCkToken,
@@ -37,16 +37,21 @@ describe('ConvertToCkBTC', () => {
 		vi.spyOn(ckMinterInfoWorkerServices, 'initCkBTCMinterInfoWorker').mockResolvedValue({
 			start: () => {},
 			stop: () => {},
-			trigger: () => {}
+			trigger: () => {},
+			destroy: () => {}
 		});
 	const mockIsBusyStore = (isBusy = false) =>
 		vi.spyOn(isBusyStore, 'isBusy', 'get').mockImplementation(() => readable(isBusy));
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
 
 	it('should keep the button disabled and not call the service if ckBtcToken is not available', () => {
 		const spy = mockCkMinterInfoWorkerServices();
 		mockIsBusyStore();
 
-		const { getByTestId } = render(ConvertToCkBTC, {
+		const { getByTestId } = render(ConvertToCkBtc, {
 			context: mockContext()
 		});
 
@@ -59,13 +64,12 @@ describe('ConvertToCkBTC', () => {
 		mockTokensStore();
 		mockIsBusyStore();
 
-		const { getByTestId } = render(ConvertToCkBTC, {
+		const { getByTestId } = render(ConvertToCkBtc, {
 			context: mockContext(true)
 		});
 
 		expect(getByTestId(buttonId)).toHaveAttribute('disabled');
-		expect(spy).toHaveBeenCalledOnce();
-		expect(spy).toHaveBeenCalledWith(serviceCallParams);
+		expect(spy).toHaveBeenCalledExactlyOnceWith(serviceCallParams);
 	});
 
 	it('should keep the button disabled but call the service if isBusy is true', () => {
@@ -73,13 +77,12 @@ describe('ConvertToCkBTC', () => {
 		mockTokensStore();
 		mockIsBusyStore(true);
 
-		const { getByTestId } = render(ConvertToCkBTC, {
+		const { getByTestId } = render(ConvertToCkBtc, {
 			context: mockContext()
 		});
 
 		expect(getByTestId(buttonId)).toHaveAttribute('disabled');
-		expect(spy).toHaveBeenCalledOnce();
-		expect(spy).toHaveBeenCalledWith(serviceCallParams);
+		expect(spy).toHaveBeenCalledExactlyOnceWith(serviceCallParams);
 	});
 
 	it('should keep the button enabled and call the service if ckBtcToken is available', () => {
@@ -87,12 +90,11 @@ describe('ConvertToCkBTC', () => {
 		mockTokensStore();
 		mockIsBusyStore();
 
-		const { getByTestId } = render(ConvertToCkBTC, {
+		const { getByTestId } = render(ConvertToCkBtc, {
 			context: mockContext()
 		});
 
 		expect(getByTestId(buttonId)).not.toHaveAttribute('disabled');
-		expect(spy).toHaveBeenCalledOnce();
-		expect(spy).toHaveBeenCalledWith(serviceCallParams);
+		expect(spy).toHaveBeenCalledExactlyOnceWith(serviceCallParams);
 	});
 });

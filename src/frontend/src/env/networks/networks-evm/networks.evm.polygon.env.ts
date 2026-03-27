@@ -1,14 +1,13 @@
 import { POLYGON_AMOY_EXPLORER_URL, POLYGON_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import polygonAmoyIconDark from '$lib/assets/networks/dark/polygon-amoy.svg';
-import polygonMainnetIconDark from '$lib/assets/networks/dark/polygon-mainnet.svg';
-import polygonAmoyIconLight from '$lib/assets/networks/light/polygon-amoy.svg';
-import polygonMainnetIconLight from '$lib/assets/networks/light/polygon-mainnet.svg';
+import polygonAmoyIcon from '$lib/assets/networks/polygon-amoy.svg';
+import polygonMainnetIcon from '$lib/assets/networks/polygon-mainnet.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
+import { polygon, polygonAmoy } from 'viem/chains';
 
 export const POLYGON_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_POLYGON_MAINNET_DISABLED
@@ -23,16 +22,20 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Polygon',
 	chainId: 137n,
-	iconLight: polygonMainnetIconLight,
-	iconDark: polygonMainnetIconDark,
+	icon: polygonMainnetIcon,
 	explorerUrl: POLYGON_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'matic',
-		alchemy: Network.MATIC_MAINNET,
-		alchemyJsonRpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2'
+		alchemy: 'matic',
+		alchemyDeprecated: Network.MATIC_MAINNET,
+		alchemyJsonRpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://polygon-mainnet.g.alchemy.com/v2',
+		viemChain: polygon
 	},
 	exchange: { coingeckoId: 'polygon-pos' },
-	buy: { onramperId: 'polygon' }
+	buy: { onramperId: 'polygon' },
+	pay: { openCryptoPay: 'Polygon' }
 };
 
 export const POLYGON_AMOY_NETWORK_SYMBOL = 'POL (Amoy Testnet)';
@@ -44,13 +47,16 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Polygon (Amoy Testnet)',
 	chainId: 80002n,
-	iconLight: polygonAmoyIconLight,
-	iconDark: polygonAmoyIconDark,
+	icon: polygonAmoyIcon,
 	explorerUrl: POLYGON_AMOY_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'matic-amoy',
-		alchemy: Network.MATIC_AMOY,
-		alchemyJsonRpcUrl: 'https://polygon-amoy.g.alchemy.com/v2'
+		alchemy: 'matic-amoy',
+		alchemyDeprecated: Network.MATIC_AMOY,
+		alchemyJsonRpcUrl: 'https://polygon-amoy.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://polygon-amoy.g.alchemy.com/v2',
+		viemChain: polygonAmoy
 	}
 };
 

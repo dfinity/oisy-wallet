@@ -1,32 +1,27 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { getIdbSolTokens, setIdbSolTokens } from '$lib/api/idb-tokens.api';
-import { nullishSignOut } from '$lib/services/auth.services';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { SolAddress } from '$lib/types/address';
+import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { parseTokenId } from '$lib/validation/token.validation';
-import { getTokenDecimals, getTokenOwner } from '$sol/api/solana.api';
+import { consoleWarn } from '$lib/utils/console.utils';
+import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
+import { hardenMetadata } from '$lib/utils/metadata.utils';
+import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
+import { getTokenInfo } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import {
-	assertNonNullish,
-	fromNullable,
-	isNullish,
-	nonNullish,
-	queryAndUpdate
-} from '@dfinity/utils';
+import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
+import { fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
@@ -34,7 +29,7 @@ export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }):
 	await Promise.all([loadDefaultSplTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
-const loadDefaultSplTokens = (): ResultSuccess => {
+export const loadDefaultSplTokens = (): ResultSuccess => {
 	try {
 		splDefaultTokensStore.set(SPL_TOKENS);
 	} catch (err: unknown) {
@@ -54,67 +49,39 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 export const loadCustomTokens = ({
 	identity,
 	useCache = false
-}: {
-	identity: OptionIdentity;
-	useCache?: boolean;
-}): Promise<void> =>
+}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<SplCustomToken[]>({
-		request: () => loadCustomTokensWithMetadata({ identity, useCache }),
+		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			splCustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.spl_user_tokens },
-				err
-			});
-		},
-		identity,
-		strategy: 'query'
-	});
-
-const loadSplCustomTokens = async ({
-	identity,
-	certified,
-	useCache = false
-}: {
-	identity: OptionIdentity;
-	certified: boolean;
-	useCache?: boolean;
-}): Promise<CustomToken[]> =>
-	await loadNetworkCustomTokens({
-		identity,
-		certified,
-		filterTokens: ({ token }) => 'SplMainnet' in token || 'SplDevnet' in token,
-		setIdbTokens: setIdbSolTokens,
-		getIdbTokens: getIdbSolTokens,
-		useCache
+		onUpdateError,
+		identity
 	});
 
 const loadCustomTokensWithMetadata = async ({
-	identity,
-	useCache = false
-}: {
-	identity: OptionIdentity;
-	useCache?: boolean;
-}): Promise<SplCustomToken[]> => {
+	tokens,
+	...params
+}: LoadCustomTokenParams): Promise<SplCustomToken[]> => {
 	const loadCustomContracts = async (): Promise<SplCustomToken[]> => {
-		if (isNullish(identity)) {
-			await nullishSignOut();
-			return [];
-		}
-
-		const splCustomTokens = await loadSplCustomTokens({ identity, certified: true, useCache });
+		const splCustomTokens = tokens ?? (await loadNetworkCustomTokens(params));
 
 		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
 			[SplCustomToken[], SplCustomToken[]]
 		>(
-			([accExisting, accNonExisting], { token, enabled, version: versionNullable }) => {
+			(
+				[accExisting, accNonExisting],
+				{
+					token,
+					enabled,
+					version: versionNullable,
+					allow_external_content_source: allowExternalContentSourceNullable
+				}
+			) => {
 				if (!('SplMainnet' in token || 'SplDevnet' in token)) {
 					return [accExisting, accNonExisting];
 				}
 
 				const version = fromNullable(versionNullable);
+				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
 				const {
 					network: tokenNetwork,
@@ -134,62 +101,77 @@ const loadCustomTokensWithMetadata = async ({
 					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
 				}
 
-				return [
-					accExisting,
-					[
-						...accNonExisting,
-						{
-							id: parseTokenId(`custom-token#${fromNullable(symbol)}#${tokenNetwork.chainId}`),
-							name: tokenAddress,
-							address: tokenAddress,
-							// TODO: save this value to the backend too
-							owner: TOKEN_PROGRAM_ADDRESS,
-							network: tokenNetwork,
-							symbol: fromNullable(symbol) ?? '',
-							decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
-							standard: 'spl' as const,
-							category: 'custom' as const,
-							enabled,
-							version
-						}
-					]
-				];
+				const newToken: SplCustomToken = {
+					id: parseCustomTokenId({
+						identifier: fromNullable(symbol) ?? tokenAddress,
+						chainId: tokenNetwork.chainId
+					}),
+					name: tokenAddress,
+					address: tokenAddress,
+					// TODO: save this value to the backend too
+					owner: TOKEN_PROGRAM_ADDRESS,
+					network: tokenNetwork,
+					symbol: fromNullable(symbol) ?? '',
+					decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
+					standard: { code: 'spl' as const },
+					category: 'custom' as const,
+					tags: DEFAULT_TOKEN_TAGS,
+					enabled,
+					version,
+					allowExternalContentSource
+				};
+
+				return [accExisting, [...accNonExisting, newToken]];
 			},
 			[[], []]
 		);
 
 		const customTokens: SplCustomToken[] = await nonExistingTokens.reduce<
 			Promise<SplCustomToken[]>
-		>(async (acc, token) => {
-			const { network, address } = token;
+		>(async (acc, { symbol: oldSymbol, name: oldName, ...token }) => {
+			const { network, address, icon } = token;
 
-			const solNetwork = mapNetworkIdToNetwork(network.id);
+			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
-			assertNonNullish(
-				solNetwork,
-				replacePlaceholders(get(i18n).init.error.no_solana_network, {
-					$network: network.id.description ?? ''
-				})
-			);
-
-			const owner = await getTokenOwner({ address, network: solNetwork });
+			const {
+				owner,
+				symbol: infoSymbol,
+				name: infoName,
+				...rest
+			} = await getTokenInfo({ address, network: solNetwork });
 
 			if (isNullish(owner)) {
 				return acc;
 			}
 
-			const metadata = await getSplMetadata({ address, network: solNetwork });
+			const {
+				symbol: metadataSymbol,
+				name: metadataName,
+				...metadata
+			} = (await getSplMetadata({ address, network: solNetwork })) ?? {};
 
-			return nonNullish(metadata)
-				? [
-						...(await acc),
-						{
-							...token,
-							owner,
-							...metadata
-						}
-					]
-				: acc;
+			const symbol = infoSymbol ?? metadataSymbol ?? oldSymbol;
+			const name = infoName ?? metadataName ?? oldName;
+
+			if (isNullish(symbol) || isNullish(name)) {
+				return acc;
+			}
+
+			const baseToken: SplCustomToken = {
+				...token,
+				owner,
+				symbol,
+				name,
+				...rest
+			};
+
+			const newToken: SplCustomToken = {
+				...baseToken,
+				icon: icon ?? getCodebaseTokenIconPath({ token: baseToken }),
+				...(nonNullish(metadata) ? hardenMetadata(metadata) : {})
+			};
+
+			return [...(await acc), newToken];
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];
@@ -208,15 +190,49 @@ const loadCustomTokenData = ({
 	splCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	splCustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.spl_custom_tokens },
+		err
+	});
+};
+
+// SPL metadata is fetched from Solana RPCs / QuickNode and doesn't depend on the IC certified flag.
+// On the certified round we reuse the query round's response to skip redundant HTTP calls.
+let lastCustomTokensResponse: SplCustomToken[] | undefined;
+
+export const processCustomTokens = async ({
+	certified,
+	...rest
+}: LoadCustomTokenParams): Promise<void> => {
+	try {
+		if (certified && nonNullish(lastCustomTokensResponse)) {
+			loadCustomTokenData({ response: lastCustomTokensResponse, certified });
+			return;
+		}
+
+		const response = await loadCustomTokensWithMetadata({ ...rest, certified });
+		lastCustomTokensResponse = response;
+
+		loadCustomTokenData({ response, certified });
+	} catch (err: unknown) {
+		lastCustomTokensResponse = undefined;
+
+		if (certified) {
+			onUpdateError({ error: err });
+		}
+	}
+};
+
 export const getSplMetadata = async ({
 	address,
 	network
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<TokenMetadata | undefined> => {
-	const decimals = await getTokenDecimals({ address, network });
-
+}): Promise<Partial<Omit<TokenMetadata, 'decimals'>> | undefined> => {
 	try {
 		const metadataResult = await splMetadata({ tokenAddress: address, network });
 
@@ -234,13 +250,12 @@ export const getSplMetadata = async ({
 		} = metadataResult;
 
 		return {
-			decimals,
 			name,
 			symbol,
 			icon
 		};
 	} catch (err: unknown) {
 		// We care only for development purposes.
-		console.warn(`Failed to fetch SPL metadata for token ${address} on ${network} network`, err);
+		consoleWarn(`Failed to fetch SPL metadata for token ${address} on ${network} network`, err);
 	}
 };

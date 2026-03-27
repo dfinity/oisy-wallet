@@ -7,7 +7,7 @@ print_help() {
 
 	- The Wasm and Candid files are downloaded.
 
-	The files are installed at at the locations defined for 'icp_swap_pool' in 'dfx.json'.
+	The files are installed at the locations defined for 'icp_swap_pool' in 'dfx.json'.
 	EOF
 }
 
@@ -19,7 +19,7 @@ print_help() {
 ICP_SWAP_POOL_BUILDENV="$DFX_NETWORK"
 export ICP_SWAP_POOL_BUILDENV
 
-ICP_SWAP_REPO_URL="https://raw.githubusercontent.com/ICPSwap-Labs/docs/refs/heads/main/_canister/SwapPool"
+ICP_SWAP_REPO_URL="https://raw.githubusercontent.com/ICPSwap-Labs/docs/ac989c62fb65ed39769dbebfa94eb57f90c86d8f/_canister/SwapPool"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${ICP_SWAP_REPO_URL}/SwapPool.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
@@ -65,7 +65,8 @@ cat <<EOF >"$ARG_FILE"
   $TOKEN1,
   principal "$OWNER_PRINCIPAL",
   principal "$OWNER_PRINCIPAL",
-  principal "$OWNER_PRINCIPAL"
+  principal "$OWNER_PRINCIPAL",
+  principal "$OWNER_PRINCIPAL",
 )
 EOF
 

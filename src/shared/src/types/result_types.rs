@@ -7,16 +7,19 @@ use super::{
         BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
     dapp::AddDappSettingsError,
-    pow::{CreateChallengeError, CreateChallengeResponse},
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
+    agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
+    bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
-    network::SaveTestnetsSettingsError,
+    experimental_feature::UpdateExperimentalFeaturesSettingsError,
+    network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::AddUserCredentialError,
+    user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -138,15 +141,30 @@ impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateUserNetworkSettingsResult {
+    /// The user's network settings were updated successfully.
+    Ok(()),
+    /// The user's network settings were not updated due to an error.
+    Err(UpdateNetworksSettingsError),
+}
+impl From<Result<(), UpdateNetworksSettingsError>> for UpdateUserNetworkSettingsResult {
+    fn from(result: Result<(), UpdateNetworksSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateUserNetworkSettingsResult::Ok(()),
+            Err(err) => UpdateUserNetworkSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SetUserShowTestnetsResult {
     /// The user's show testnets was set successfully.
     Ok(()),
     /// The user's show testnets was not set due to an error.
-    Err(SaveTestnetsSettingsError),
+    Err(SetTestnetsSettingsError),
 }
-
-impl From<Result<(), SaveTestnetsSettingsError>> for SetUserShowTestnetsResult {
-    fn from(result: Result<(), SaveTestnetsSettingsError>) -> Self {
+impl From<Result<(), SetTestnetsSettingsError>> for SetUserShowTestnetsResult {
+    fn from(result: Result<(), SetTestnetsSettingsError>) -> Self {
         match result {
             Ok(()) => SetUserShowTestnetsResult::Ok(()),
             Err(err) => SetUserShowTestnetsResult::Err(err),
@@ -157,14 +175,14 @@ impl From<Result<(), SaveTestnetsSettingsError>> for SetUserShowTestnetsResult {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum GetUserProfileResult {
     /// The user's profile was retrieved successfully.
-    Ok(UserProfile),
+    Ok(Box<UserProfile>),
     /// The user's profile was not retrieved due to an error.
     Err(GetUserProfileError),
 }
 impl From<Result<UserProfile, GetUserProfileError>> for GetUserProfileResult {
     fn from(result: Result<UserProfile, GetUserProfileError>) -> Self {
         match result {
-            Ok(profile) => GetUserProfileResult::Ok(profile),
+            Ok(profile) => GetUserProfileResult::Ok(Box::new(profile)),
             Err(err) => GetUserProfileResult::Err(err),
         }
     }
@@ -187,22 +205,6 @@ impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowe
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum CreatePowChallengeResult {
-    /// The pow challenge was created successfully.
-    Ok(CreateChallengeResponse),
-    /// The pow challenge was not created due to an error.
-    Err(CreateChallengeError),
-}
-impl From<Result<CreateChallengeResponse, CreateChallengeError>> for CreatePowChallengeResult {
-    fn from(result: Result<CreateChallengeResponse, CreateChallengeError>) -> Self {
-        match result {
-            Ok(response) => CreatePowChallengeResult::Ok(response),
-            Err(err) => CreatePowChallengeResult::Err(err),
-        }
-    }
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcSelectUserUtxosFeeResult {
     /// The fee was selected successfully.
     Ok(SelectedUtxosFeeResponse),
@@ -214,6 +216,24 @@ impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelect
         match result {
             Ok(response) => BtcSelectUserUtxosFeeResult::Ok(response),
             Err(err) => BtcSelectUserUtxosFeeResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetFeePercentilesResult {
+    /// The fee was selected successfully.
+    Ok(BtcGetFeePercentilesResponse),
+    /// The fee was not selected due to an error.
+    Err(SelectedUtxosFeeError),
+}
+impl From<Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>>
+    for BtcGetFeePercentilesResult
+{
+    fn from(result: Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>) -> Self {
+        match result {
+            Ok(response) => BtcGetFeePercentilesResult::Ok(response),
+            Err(err) => BtcGetFeePercentilesResult::Err(err),
         }
     }
 }
@@ -282,6 +302,84 @@ impl From<Result<(), AddDappSettingsError>> for AddUserHiddenDappIdResult {
         match result {
             Ok(()) => AddUserHiddenDappIdResult::Ok(()),
             Err(err) => AddUserHiddenDappIdResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateUserAgreementsResult {
+    /// The user's agreements were updated successfully.
+    Ok(()),
+    /// The user's agreements were not updated due to an error.
+    Err(UpdateAgreementsError),
+}
+impl From<Result<(), UpdateAgreementsError>> for UpdateUserAgreementsResult {
+    fn from(result: Result<(), UpdateAgreementsError>) -> Self {
+        match result {
+            Ok(()) => UpdateUserAgreementsResult::Ok(()),
+            Err(err) => UpdateUserAgreementsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateExperimentalFeaturesSettingsResult {
+    /// The user's experimental features settings were updated successfully.
+    Ok(()),
+    /// The user's experimental features settings were not updated due to an error.
+    Err(UpdateExperimentalFeaturesSettingsError),
+}
+impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
+    for UpdateExperimentalFeaturesSettingsResult
+{
+    fn from(result: Result<(), UpdateExperimentalFeaturesSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateExperimentalFeaturesSettingsResult::Ok(()),
+            Err(err) => UpdateExperimentalFeaturesSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetUserTransactionsResult {
+    Ok(GetUserTransactionsResponse),
+    Err(UserTransactionError),
+}
+impl From<Result<GetUserTransactionsResponse, UserTransactionError>> for GetUserTransactionsResult {
+    fn from(result: Result<GetUserTransactionsResponse, UserTransactionError>) -> Self {
+        match result {
+            Ok(response) => GetUserTransactionsResult::Ok(response),
+            Err(err) => GetUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SaveUserTransactionsResult {
+    Ok(()),
+    Err(UserTransactionError),
+}
+impl From<Result<(), UserTransactionError>> for SaveUserTransactionsResult {
+    fn from(result: Result<(), UserTransactionError>) -> Self {
+        match result {
+            Ok(()) => SaveUserTransactionsResult::Ok(()),
+            Err(err) => SaveUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetAgreementHistoryResult {
+    Ok(Vec<AgreementHistoryEntry>),
+    Err(GetAgreementHistoryError),
+}
+impl From<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>
+    for GetAgreementHistoryResult
+{
+    fn from(result: Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>) -> Self {
+        match result {
+            Ok(entries) => GetAgreementHistoryResult::Ok(entries),
+            Err(err) => GetAgreementHistoryResult::Err(err),
         }
     }
 }

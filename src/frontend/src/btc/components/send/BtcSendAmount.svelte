@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
+	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
+	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
+	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
+	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -10,19 +14,28 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let amountError: BtcAmountAssertionError | undefined;
+	interface Props {
+		amount: OptionAmount;
+		amountError?: BtcAmountAssertionError;
+		onTokensList: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
+
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	const { store: storeUtxosFeeData } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
+
+	let utxosFee = $derived($storeUtxosFeeData?.utxosFee);
+	let satoshisFee = $derived(utxosFee?.feeSatoshis);
 
 	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
 
@@ -32,28 +45,36 @@
 			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
-		if (userAmount > ($sendBalance ?? ZERO)) {
-			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
+		if (invalidSendAmount(Number(userAmount))) {
+			return new BtcAmountAssertionError(
+				replacePlaceholders($i18n.send.assertion.minimum_btc_amount, {
+					$amount: convertSatoshisToBtc(BTC_MINIMUM_AMOUNT)
+				})
+			);
 		}
 	};
+
+	/**
+	 * Reevaluate max amount if the user has used the "Max" button and the fees are changing.
+	 */
+	let amountSetToMax = $state(false);
 </script>
 
 <div class="mb-4">
 	<TokenInput
-		token={$sendToken}
-		bind:amount
+		autofocus={nonNullish($sendToken)}
 		displayUnit={inputUnit}
 		exchangeRate={$sendTokenExchangeRate}
+		onClick={onTokensList}
+		onCustomErrorValidate={customValidate}
+		token={$sendToken}
+		bind:amount
+		bind:amountSetToMax
 		bind:error={amountError}
-		customErrorValidate={customValidate}
-		autofocus={nonNullish($sendToken)}
-		on:click={() => {
-			dispatch('icTokensList');
-		}}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}{$i18n.core.text.amount}{/snippet}
 
-		<svelte:fragment slot="amount-info">
+		{#snippet amountInfo()}
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
 					<TokenInputAmountExchange
@@ -64,17 +85,19 @@
 					/>
 				</div>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
-					bind:amount
 					balance={$sendBalance}
-					token={$sendToken}
 					error={nonNullish(amountError)}
+					fee={satoshisFee ?? ZERO}
+					token={$sendToken}
+					bind:amount
+					bind:amountSetToMax
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

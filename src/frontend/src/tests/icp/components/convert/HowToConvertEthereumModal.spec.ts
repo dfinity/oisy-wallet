@@ -2,16 +2,22 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
-	FEE_CONTEXT_KEY,
-	initFeeContext,
-	initFeeStore,
-	type FeeContext
-} from '$eth/stores/fee.store';
+	ETH_FEE_CONTEXT_KEY,
+	initEthFeeContext,
+	initEthFeeStore,
+	type EthFeeContext
+} from '$eth/stores/eth-fee.store';
 import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 import { HOW_TO_CONVERT_ETHEREUM_INFO } from '$lib/constants/test-ids.constants';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
+
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
 
 describe('HowToConvertEthereumModal', () => {
 	const props = {
@@ -20,11 +26,11 @@ describe('HowToConvertEthereumModal', () => {
 	};
 
 	const mockContext = () =>
-		new Map<symbol, FeeContext>([
+		new Map<symbol, EthFeeContext>([
 			[
-				FEE_CONTEXT_KEY,
-				initFeeContext({
-					feeStore: initFeeStore(),
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore: initEthFeeStore(),
 					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 					feeExchangeRateStore: writable(100),
 					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
@@ -37,7 +43,7 @@ describe('HowToConvertEthereumModal', () => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
-		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+		mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 	});
 
 	it('should render convert info on initial render', () => {

@@ -9,9 +9,12 @@ import {
 } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('ContactCard', () => {
+	beforeEach(() => {
+		addressBookStore.reset();
+	});
+
 	// Create mock contacts using getMockContacts
 	const [singleAddressContact] = getMockContactsUi({
 		n: 1,
@@ -175,6 +178,48 @@ describe('ContactCard', () => {
 
 		// The collapsible should be collapsed again
 		expect(queryByTestId('collapsible-content')).not.toBeInTheDocument();
+	});
+
+	it('should render select button when onSelect is provided', async () => {
+		const onClick = vi.fn();
+		const onSelect = vi.fn();
+
+		const { getByText } = render(ContactCard, {
+			props: {
+				contact: singleAddressContact,
+				onClick,
+				onSelect
+			}
+		});
+
+		const selectButton = getByText(en.core.text.select);
+
+		expect(selectButton).toBeInTheDocument();
+
+		await fireEvent.click(selectButton);
+
+		expect(onSelect).toHaveBeenCalled();
+	});
+
+	it('should render expanded addresses without info actions when onInfo is not provided', async () => {
+		const onClick = vi.fn();
+
+		addressBookStore.toggleContact(multipleAddressesContact.id);
+
+		const { queryByTestId, container } = render(ContactCard, {
+			props: {
+				contact: multipleAddressesContact,
+				onClick
+			}
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, 500));
+
+		expect(queryByTestId('collapsible-content')).toBeInTheDocument();
+
+		const infoButtons = container.querySelectorAll('[aria-label="View"]');
+
+		expect(infoButtons).toHaveLength(0);
 	});
 
 	it('should call onInfo when info button is clicked on an expanded address', async () => {

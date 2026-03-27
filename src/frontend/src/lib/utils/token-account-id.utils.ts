@@ -7,7 +7,7 @@ import {
 } from '$lib/constants/token-account-id.constants';
 import type { Network } from '$lib/types/network';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
-import { assertNever } from '$lib/types/utils';
+import { assertNever } from '@dfinity/utils';
 
 export const getTokenAccountIdAddressString = (tokenAccountId: TokenAccountId): string => {
 	if ('Btc' in tokenAccountId) {
@@ -23,7 +23,7 @@ export const getTokenAccountIdAddressString = (tokenAccountId: TokenAccountId): 
 		return tokenAccountId.Sol;
 	}
 
-	return assertNever({ variable: tokenAccountId, typeName: 'TokenAccountId' });
+	assertNever(tokenAccountId, `Unexpected TokenAccountId: ${tokenAccountId}`);
 };
 
 export const getDiscriminatorForTokenAccountId = (
@@ -42,7 +42,7 @@ export const getDiscriminatorForTokenAccountId = (
 		return 'Sol';
 	}
 
-	return assertNever({ variable: tokenAccountId, typeName: 'TokenAccountId' });
+	assertNever(tokenAccountId, `Unexpected TokenAccountId: ${tokenAccountId}`);
 };
 
 export const getNetworksForTokenAccountIdType = (addressType: TokenAccountIdTypes): Network[] =>

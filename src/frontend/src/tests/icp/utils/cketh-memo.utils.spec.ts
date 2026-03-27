@@ -8,12 +8,8 @@ import {
 	MINT_MEMO_REIMBURSE_TRANSACTION,
 	MINT_MEMO_REIMBURSE_WITHDRAWAL
 } from '$icp/utils/cketh-memo.utils';
-import { Cbor } from '@dfinity/agent';
-import {
-	arrayBufferToUint8Array,
-	hexStringToUint8Array,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { hexStringToUint8Array, uint8ArrayToHexString } from '@dfinity/utils';
+import { Cbor } from '@icp-sdk/core/agent';
 
 describe('cketh-memo.utils', () => {
 	describe('decode mint memo', () => {
@@ -58,7 +54,7 @@ describe('cketh-memo.utils', () => {
 		});
 
 		it('should decode memo to reimbursement withdrawal', () => {
-			const memo = arrayBufferToUint8Array(Cbor.encode([2, [1234]]));
+			const memo = Cbor.encode([2, [1234]]);
 
 			const [type, values] = decodeMintMemo(memo);
 
@@ -109,17 +105,13 @@ describe('cketh-memo.utils', () => {
 		});
 
 		it('should decode ckErc20 memo to convert', () => {
-			const memo = arrayBufferToUint8Array(
-				Cbor.encode([
-					2,
-					[
-						1234,
-						hexStringToUint8Array(
-							'705f826861c802b407843e99af986cfde8749b669e5e0a5a150f4350bcaa9bc3'
-						)
-					]
-				])
-			);
+			const memo = Cbor.encode([
+				2,
+				[
+					1234,
+					hexStringToUint8Array('705f826861c802b407843e99af986cfde8749b669e5e0a5a150f4350bcaa9bc3')
+				]
+			]);
 
 			const [type, values] = decodeBurnMemo(memo);
 

@@ -1,0 +1,39 @@
+import type { ContractAddress } from '$eth/types/address';
+import type { EthereumNetwork } from '$eth/types/network';
+import type { NonFungibleTokenAppearance } from '$lib/types/nft-ui';
+import type { Token, TokenMetadata, TokenStandardCode } from '$lib/types/token';
+
+type Erc1155Standard = Extract<TokenStandardCode, 'erc1155'>;
+
+export type Erc1155Token = Erc1155Contract &
+	NonFungibleTokenAppearance &
+	Omit<Token, 'network' | 'standard'> & {
+		network: EthereumNetwork;
+		standard: { code: Erc1155Standard; version?: string };
+	};
+
+export type Erc1155ContractAddress = ContractAddress;
+export type Erc1155Contract = Erc1155ContractAddress;
+
+export type Erc1155Metadata = Omit<TokenMetadata, 'name' | 'symbol'> & {
+	name?: string;
+	symbol?: string;
+};
+
+// https://eips.ethereum.org/EIPS/eip-1155#erc-1155-metadata-uri-json-schema
+export interface Erc1155UriJson {
+	name?: string;
+	decimals?: number;
+	description?: string;
+	image?: string;
+	attributes?: { trait_type: string; value: UriJsonPrimitive }[];
+	properties?: Record<string, NestedUriJsonValue>;
+}
+
+type UriJsonPrimitive = string | number | boolean;
+
+type NestedUriJsonValue = UriJsonPrimitive | UriJsonPrimitive[] | NestedUriJsonPropertyMap;
+
+interface NestedUriJsonPropertyMap {
+	[key: string]: NestedUriJsonValue;
+}

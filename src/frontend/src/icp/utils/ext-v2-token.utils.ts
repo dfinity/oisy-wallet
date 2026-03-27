@@ -1,0 +1,11 @@
+import type { Listing, TokenIndex, User } from '$declarations/ext_v2_token/ext_v2_token.did';
+import type { Principal } from '@icp-sdk/core/principal';
+
+/**
+ * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#user
+ */
+export const toUser = (principal: Principal): User => ({ principal });
+
+export const mapExtTokensListing = (
+	tokens: [TokenIndex, [] | [Listing], [] | [Uint8Array]][]
+): TokenIndex[] => tokens.map(([index, _listing, _metadata]) => index);

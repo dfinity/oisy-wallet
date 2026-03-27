@@ -1,34 +1,34 @@
-import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import { autoLoadCustomToken, setCustomToken } from '$icp-eth/services/custom-token.services';
+import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { autoLoadIcrcToken, setCustomToken } from '$icp-eth/services/icrc-token.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS
+} from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken, mockIcrcCustomTokens } from '$tests/mocks/icrc-custom-tokens.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
 import { isNullish, toNullable } from '@dfinity/utils';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
-
 vi.mock('$app/environment', () => ({
 	browser: true
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('custom-token.services', () => {
@@ -52,11 +52,11 @@ describe('custom-token.services', () => {
 		const mockValidSendToken = {
 			...mockValidIcToken,
 			twinTokenSymbol: mockIcrcCustomTokens[0].symbol,
-			standard: 'erc20' as const
+			standard: { code: 'erc20' as const }
 		};
 
 		it('should return "skipped" when the token standard does not match', async () => {
-			const result = await autoLoadCustomToken({
+			const result = await autoLoadIcrcToken({
 				icrcCustomTokens: mockIcrcCustomTokens,
 				sendToken: mockValidToken,
 				identity: mockIdentity
@@ -81,13 +81,13 @@ describe('custom-token.services', () => {
 				const mockSendToken = {
 					...mockValidIcToken,
 					twinTokenSymbol: customTokens[0].symbol,
-					standard: 'erc20' as const
+					standard: { code: 'erc20' as const }
 				};
 
 				const [first, ...rest] = customTokens;
 				const icrcCustomTokens = [{ ...first, indexCanisterId }, ...rest];
 
-				const { result } = await autoLoadCustomToken({
+				const { result } = await autoLoadIcrcToken({
 					icrcCustomTokens,
 					sendToken: mockSendToken,
 					identity: mockIdentity
@@ -104,11 +104,13 @@ describe('custom-token.services', () => {
 								index_id: isNullish(indexCanisterId) ? [] : [Principal.fromText(indexCanisterId)],
 								ledger_id: Principal.fromText(mockSendToken.ledgerCanisterId)
 							}
-						}
+						},
+						section: toNullable(),
+						allow_external_content_source: toNullable()
 					}
 				});
 
-				expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
+				expect(spyListCustomTokens).toHaveBeenCalledWith();
 			};
 
 			it.each([undefined, IC_CKBTC_INDEX_CANISTER_ID])(
@@ -154,7 +156,9 @@ describe('custom-token.services', () => {
 								}
 							},
 							version: [1n],
-							enabled: true
+							enabled: true,
+							section: toNullable(),
+							allow_external_content_source: toNullable()
 						}
 					]);
 
@@ -165,7 +169,11 @@ describe('custom-token.services', () => {
 						['icrc1:fee', { Nat: mockValidSendToken.fee }]
 					]);
 
-					const { result } = await autoLoadCustomToken({
+					const spyMintingAccount = ledgerCanisterMock.getMintingAccount.mockResolvedValue(
+						toNullable({ owner: mockPrincipal, subaccount: toNullable() })
+					);
+
+					const { result } = await autoLoadIcrcToken({
 						icrcCustomTokens: mockIcrcCustomTokens,
 						sendToken: mockValidSendToken,
 						identity: mockIdentity
@@ -173,9 +181,11 @@ describe('custom-token.services', () => {
 
 					expect(result).toBe('loaded');
 
-					expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
+					expect(spyListCustomTokens).toHaveBeenCalledWith();
 
 					expect(spyMetadata).toHaveBeenCalledWith({ certified: true });
+
+					expect(spyMintingAccount).toHaveBeenCalledWith({ certified: true });
 
 					const store = get(icrcCustomTokensStore);
 
@@ -187,9 +197,8 @@ describe('custom-token.services', () => {
 								...mockValidIcToken,
 								id: expect.any(Symbol),
 								category: 'custom',
-								position: 4,
 								enabled: true,
-								standard: 'icrc',
+								standard: { code: 'icrc' },
 								version: 1n
 							})
 						}
@@ -205,7 +214,7 @@ describe('custom-token.services', () => {
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([]);
 
-				const { result } = await autoLoadCustomToken({
+				const { result } = await autoLoadIcrcToken({
 					icrcCustomTokens: mockIcrcCustomTokens,
 					sendToken: mockValidSendToken,
 					identity: mockIdentity
@@ -225,7 +234,7 @@ describe('custom-token.services', () => {
 				const err = new Error('test');
 				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
 
-				const { result } = await autoLoadCustomToken({
+				const { result } = await autoLoadIcrcToken({
 					icrcCustomTokens: mockIcrcCustomTokens,
 					sendToken: mockValidSendToken,
 					identity: mockIdentity
@@ -233,9 +242,8 @@ describe('custom-token.services', () => {
 
 				expect(result).toBe('loaded');
 
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).init.error.icrc_canisters },
-					err
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: get(i18n).init.error.load_token_list }
 				});
 			});
 
@@ -253,14 +261,16 @@ describe('custom-token.services', () => {
 								}
 							},
 							version: [1n],
-							enabled: true
+							enabled: true,
+							section: toNullable(),
+							allow_external_content_source: toNullable()
 						}
 					]);
 
 					const err = new Error('test');
 					ledgerCanisterMock.metadata.mockRejectedValue(err);
 
-					const { result } = await autoLoadCustomToken({
+					const { result } = await autoLoadIcrcToken({
 						icrcCustomTokens: mockIcrcCustomTokens,
 						sendToken: mockValidSendToken,
 						identity: mockIdentity
@@ -270,9 +280,23 @@ describe('custom-token.services', () => {
 
 					expect(spyToastsError).not.toHaveBeenCalled();
 
-					expect(console.error).toHaveBeenCalledTimes(2);
-					expect(console.error).toHaveBeenNthCalledWith(1, err);
-					expect(console.error).toHaveBeenNthCalledWith(2, err);
+					expect(trackEvent).toHaveBeenCalledTimes(2);
+					expect(trackEvent).toHaveBeenNthCalledWith(1, {
+						name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+						metadata: {
+							event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+							event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+							error: err.message
+						}
+					});
+					expect(trackEvent).toHaveBeenNthCalledWith(2, {
+						name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+						metadata: {
+							event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+							event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+							error: err.message
+						}
+					});
 				}
 			);
 		});
@@ -307,7 +331,9 @@ describe('custom-token.services', () => {
 										isNullish(indexCanisterId) ? undefined : Principal.fromText(indexCanisterId)
 									)
 								}
-							}
+							},
+							section: toNullable(),
+							allow_external_content_source: toNullable()
 						}
 					});
 				});

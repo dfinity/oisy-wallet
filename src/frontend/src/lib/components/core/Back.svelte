@@ -3,14 +3,17 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
-	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { back } from '$lib/utils/nav.utils';
 
-	export let color: 'primary' | 'current' = 'primary';
-	export let onlyArrow = false;
+	interface Props {
+		color?: 'primary' | 'current';
+		onlyArrow?: boolean;
+	}
 
-	let fromRoute: NavigationTarget | null;
+	let { color = 'primary', onlyArrow = false }: Props = $props();
+
+	let fromRoute = $state<NavigationTarget | null | undefined>();
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
@@ -19,17 +22,12 @@
 
 <button
 	class="pointer-events-auto flex gap-0.5 font-bold"
-	class:text-current={color === 'current'}
-	class:text-brand-primary={color === 'primary'}
 	class:icon={onlyArrow}
-	on:click={() => back({ pop: nonNullish(fromRoute) })}
+	class:text-brand-primary={color === 'primary'}
+	class:text-current={color === 'current'}
 	aria-label={$i18n.core.alt.back}
+	onclick={() => back({ pop: nonNullish(fromRoute) })}
 >
-	{#if onlyArrow}
-		<IconBackArrow />
-		<span class="visually-hidden">{$i18n.core.text.back}</span>
-	{:else}
-		<IconBack />
-		{$i18n.core.text.back}
-	{/if}
+	<IconBack />
+	<span class:visually-hidden={onlyArrow}>{$i18n.core.text.back}</span>
 </button>

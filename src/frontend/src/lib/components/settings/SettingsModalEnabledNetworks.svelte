@@ -6,7 +6,6 @@
 		SUPPORTED_NETWORKS,
 		SUPPORTED_TESTNET_NETWORKS
 	} from '$env/networks/networks.env';
-	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { setUserShowTestnets, updateUserNetworkSettings } from '$lib/api/backend.api';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -27,19 +26,19 @@
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { userNetworks } from '$lib/derived/user-networks.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
+	import { isNetworkIdICP } from '$lib/utils/network.utils.js';
 
-	const enabledNetworks = { ...$userNetworks };
-	const enabledNetworksInitial = { ...enabledNetworks };
+	let enabledNetworks = $state({ ...$userNetworks });
+	const enabledNetworksInitial = { ...$userNetworks };
 
-	let enabledTestnet = $testnetsEnabled;
-	const enabledTestnetInitial = enabledTestnet;
+	let enabledTestnet = $state($testnetsEnabled);
+	const enabledTestnetInitial = $testnetsEnabled;
 
 	const checkModified = ({
 		enabledTestnet,
@@ -59,8 +58,8 @@
 
 		return testnetModified || networkModified;
 	};
-	let isModified: boolean;
-	$: isModified = checkModified({ enabledTestnet, enabledNetworks });
+
+	let isModified = $derived(checkModified({ enabledTestnet, enabledNetworks }));
 
 	const toggleTestnets = () => {
 		enabledTestnet = !enabledTestnet;
@@ -73,11 +72,10 @@
 		};
 	};
 
-	let saveLoading = false;
+	let saveLoading = $state(false);
 
 	const save = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -112,9 +110,9 @@
 		<h5 class="mb-4 flex">{$i18n.settings.text.networks}</h5>
 		<div class="flex font-bold">
 			<Checkbox
+				inputId="toggle-testnets-switcher"
 				testId={SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX}
 				text="inline"
-				inputId="toggle-testnets-switcher"
 				bind:checked={enabledTestnet}
 				on:nnsChange={toggleTestnets}
 			>
@@ -123,7 +121,7 @@
 		</div>
 	</div>
 
-	<List variant="styled" condensed={false} styleClass="mb-8">
+	<List condensed={false} styleClass="mb-8" variant="styled">
 		{#each SUPPORTED_MAINNET_NETWORKS as network (network.id)}
 			<ListItem>
 				<span class="flex">
@@ -133,8 +131,8 @@
 				<!-- We disable the ICP toggle, for simplicity in other components and implications we dont allow disabling ICP -->
 				<ManageNetworkToggle
 					checked={enabledNetworks[network.id]?.enabled ?? false}
-					on:nnsToggle={() => toggleNetwork(network)}
-					disabled={network.id === ICP_NETWORK_ID}
+					disabled={isNetworkIdICP(network.id)}
+					onToggle={() => toggleNetwork(network)}
 				/>
 			</ListItem>
 		{/each}
@@ -145,7 +143,7 @@
 			<h5 class="mb-4">{$i18n.networks.test_networks}</h5>
 		</div>
 
-		<List variant="styled" condensed={false}>
+		<List condensed={false} variant="styled">
 			{#each SUPPORTED_TESTNET_NETWORKS as network (network.id)}
 				<ListItem>
 					<span class="flex">
@@ -154,7 +152,8 @@
 					</span>
 					<ManageNetworkToggle
 						checked={enabledNetworks[network.id]?.enabled ?? false}
-						on:nnsToggle={() => toggleNetwork(network)}
+						disabled={isNetworkIdICP(network.id)}
+						onToggle={() => toggleNetwork(network)}
 						testId={`${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-${network.id.description}`}
 					/>
 				</ListItem>
@@ -166,11 +165,10 @@
 		<ButtonGroup>
 			<ButtonCloseModal />
 			<Button
-				loading={saveLoading}
-				loadingAsSkeleton={false}
 				colorStyle="primary"
-				onclick={save}
 				disabled={!isModified || saveLoading || $isBusy}
+				loading={saveLoading}
+				onclick={save}
 				testId={SETTINGS_NETWORKS_MODAL_SAVE_BUTTON}>{$i18n.core.text.save}</Button
 			>
 		</ButtonGroup>

@@ -1,13 +1,12 @@
+import type { ScreensKeyType } from '$lib/types/screens';
 import {
 	AVAILABLE_SCREENS,
 	MAX_SCREEN,
 	MIN_SCREEN,
 	filterScreens,
 	getActiveScreen,
-	shouldDisplayForScreen,
-	type ScreensKeyType
+	shouldDisplayForScreen
 } from '$lib/utils/screens.utils';
-import { describe, expect, it } from 'vitest';
 
 // Helper to convert rem to px for test comparison
 const remToPx = (rem: string) => Number(rem.replaceAll('rem', '')) * 16;

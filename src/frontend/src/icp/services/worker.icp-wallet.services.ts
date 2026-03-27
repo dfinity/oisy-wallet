@@ -1,69 +1,113 @@
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { syncWallet } from '$icp/services/ic-listener.services';
+import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
+import type { IndexCanisterIdText } from '$icp/types/canister';
+import type { IcToken } from '$icp/types/ic-token';
+import { AppWorker } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcp,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
+import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
+import { isIOS } from '@dfinity/gix-components';
+import { assertNonNullish } from '@dfinity/utils';
 
-export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
-	const WalletWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new WalletWorker.default();
+export class IcpWalletWorker extends AppWorker implements WalletWorker {
+	private constructor(
+		worker: WorkerData,
+		tokenId: TokenId,
+		private readonly indexCanisterId: IndexCanisterIdText
+	) {
+		super(worker);
 
-	worker.onmessage = ({
-		data
-	}: MessageEvent<
-		PostMessage<
-			| PostMessageDataResponseWallet
-			| PostMessageDataResponseError
-			| PostMessageDataResponseWalletCleanUp
-		>
-	>) => {
-		const { msg } = data;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					| PostMessageDataResponseWallet
+					| PostMessageDataResponseError
+					| PostMessageDataResponseWalletCleanUp
+				>
+			>) => {
+				const { ref, msg, data } = dataMsg;
 
-		switch (msg) {
-			case 'syncIcpWallet':
-				syncWallet({
-					tokenId: ICP_TOKEN_ID,
-					data: data.data as PostMessageDataResponseWallet
-				});
-				return;
-			case 'syncIcpWalletError':
-				onLoadTransactionsError({
-					tokenId: ICP_TOKEN_ID,
-					error: (data.data as PostMessageDataResponseError).error
-				});
-				return;
-			case 'syncIcpWalletCleanUp':
-				onTransactionsCleanUp({
-					tokenId: ICP_TOKEN_ID,
-					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
-				});
-				return;
-		}
+				// This is an additional guard because it may happen that the worker is initialised as a singleton.
+				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
+				if (ref !== this.indexCanisterId) {
+					return;
+				}
+
+				switch (msg) {
+					case 'syncIcpWallet':
+						syncWallet({
+							tokenId,
+							data: data as PostMessageDataResponseWallet
+						});
+						return;
+					case 'syncIcpWalletError':
+						onLoadTransactionsError({
+							tokenId,
+							error: data.error
+						});
+						return;
+					case 'syncIcpWalletCleanUp':
+						onTransactionsCleanUp({
+							tokenId,
+							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
+						});
+				}
+			}
+		);
+	}
+
+	static async init({
+		indexCanisterId,
+		id: tokenId,
+		network: { id: networkId }
+	}: IcToken): Promise<IcpWalletWorker> {
+		// We typically have ICP-standard tokens only with index canister ID.
+		// In the case of ICP-token without index canister ID, we cannot sync the wallet properly.
+		assertNonNullish(indexCanisterId, 'Index Canister ID is required for ICP Wallet Worker');
+
+		await syncWalletFromCache({ tokenId, networkId });
+
+		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
+		return new IcpWalletWorker(worker, tokenId, indexCanisterId);
+	}
+
+	protected override stopTimer = () => {
+		this.postMessage({
+			msg: 'stopIcpWalletTimer'
+		});
 	};
 
-	return {
-		start: () => {
-			worker.postMessage({
-				msg: 'startIcpWalletTimer'
-			});
-		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopIcpWalletTimer'
-			});
-		},
-		trigger: () => {
-			worker.postMessage({
-				msg: 'triggerIcpWalletTimer'
-			});
-		}
+	start = () => {
+		this.postMessage<PostMessage<PostMessageDataRequestIcp>>({
+			msg: 'startIcpWalletTimer',
+			data: {
+				indexCanisterId: this.indexCanisterId
+			}
+		});
 	};
-};
+
+	stop = () => {
+		this.stopTimer();
+	};
+
+	trigger = () => {
+		this.postMessage<PostMessage<PostMessageDataRequestIcp>>({
+			msg: 'triggerIcpWalletTimer',
+			data: {
+				indexCanisterId: this.indexCanisterId
+			}
+		});
+	};
+}

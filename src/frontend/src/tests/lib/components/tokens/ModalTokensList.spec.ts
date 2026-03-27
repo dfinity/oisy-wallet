@@ -3,6 +3,8 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
 import ModalTokensListHost from '$tests/lib/components/tokens/ModalTokensListTestHost.svelte';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 // Test IDs
@@ -13,9 +15,15 @@ export const MODAL_TOKEN_LIST_TOOLBAR = 'modal-token-list-toolbar';
 const mockTokens: Token[] = [BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 
 describe('ModalTokensList', () => {
+	const baseProps = {
+		onSelectNetworkFilter: vi.fn(),
+		onTokenButtonClick: vi.fn()
+	};
+
 	it('renders tokens passed as props', () => {
 		const { findByTestId } = render(ModalTokensListHost, {
 			props: {
+				...baseProps,
 				tokens: mockTokens,
 				renderNoResults: false
 			}
@@ -31,6 +39,7 @@ describe('ModalTokensList', () => {
 	it('renders toolbar snippet', async () => {
 		const { findByTestId } = render(ModalTokensListHost, {
 			props: {
+				...baseProps,
 				tokens: mockTokens,
 				renderNoResults: false
 			}
@@ -42,6 +51,7 @@ describe('ModalTokensList', () => {
 	it('shows default no-results message when snippet is not provided', () => {
 		const { findByTestId } = render(ModalTokensListHost, {
 			props: {
+				...baseProps,
 				tokens: [],
 				renderNoResults: false
 			}
@@ -57,6 +67,7 @@ describe('ModalTokensList', () => {
 	it('shows custom no results message when no tokens match', () => {
 		const { findByTestId } = render(ModalTokensListHost, {
 			props: {
+				...baseProps,
 				tokens: [], // no tokens
 				renderNoResults: true
 			}
@@ -72,6 +83,7 @@ describe('ModalTokensList', () => {
 	it('filters tokens via search input', async () => {
 		const { findByTestId, queryByTestId, findByPlaceholderText } = render(ModalTokensListHost, {
 			props: {
+				...baseProps,
 				tokens: mockTokens,
 				renderNoResults: true
 			}
@@ -87,10 +99,7 @@ describe('ModalTokensList', () => {
 
 	it('shows no-results message when search returns no matches', async () => {
 		const { findByPlaceholderText, findByTestId } = render(ModalTokensListHost, {
-			props: {
-				tokens: mockTokens,
-				renderNoResults: true
-			}
+			props: { ...baseProps, tokens: mockTokens, renderNoResults: true }
 		});
 
 		const searchInput = await findByPlaceholderText('Search for the token');
@@ -109,20 +118,17 @@ describe('ModalTokensList', () => {
 
 		const { findByTestId } = render(ModalTokensListHost, {
 			props: {
+				...baseProps,
 				tokens: mockTokens,
-				renderNoResults: false
-			},
-			events: {
-				icTokenButtonClick: handler
+				renderNoResults: false,
+				onTokenButtonClick: handler
 			}
 		});
 
 		const btcButton = await findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`);
 		await fireEvent.click(btcButton);
 
-		expect(handler).toHaveBeenCalledExactlyOnceWith(
-			new CustomEvent('icTokenButtonClick', { detail: BTC_MAINNET_TOKEN })
-		);
+		expect(handler).toHaveBeenCalledExactlyOnceWith(BTC_MAINNET_TOKEN);
 	});
 
 	it('dispatches icSelectNetworkFilter when network button is clicked', async () => {
@@ -130,11 +136,10 @@ describe('ModalTokensList', () => {
 
 		render(ModalTokensListHost, {
 			props: {
+				...baseProps,
 				tokens: mockTokens,
-				renderNoResults: false
-			},
-			events: {
-				icSelectNetworkFilter: handler
+				renderNoResults: false,
+				onSelectNetworkFilter: handler
 			}
 		});
 
@@ -147,5 +152,27 @@ describe('ModalTokensList', () => {
 
 			expect(handler).toHaveBeenCalledOnce();
 		}
+	});
+
+	it('should only render Nfts if filterNfts is true', () => {
+		const { container, getByTestId } = render(ModalTokensListHost, {
+			props: {
+				...baseProps,
+				tokens: [
+					...mockTokens,
+					{ ...mockValidErc1155Token, symbol: 'ERC1155' },
+					{ ...mockValidErc721Token, symbol: 'ERC721' }
+				],
+				renderNoResults: false,
+				filterNfts: true
+			}
+		});
+
+		const items = container.querySelectorAll('ul>li');
+
+		expect(items).toHaveLength(2);
+
+		expect(getByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}ERC1155`)).toBeInTheDocument();
+		expect(getByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}ERC721`)).toBeInTheDocument();
 	});
 });

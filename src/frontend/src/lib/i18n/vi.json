@@ -1,0 +1,2105 @@
+{
+	"core": {
+		"text": {
+			"cancel": "Hủy",
+			"next": "Tiếp",
+			"save": "Lưu",
+			"back": "Quay lại",
+			"done": "Hoàn thành",
+			"close": "Đóng",
+			"change": "Thay đổi",
+			"continue": "",
+			"apply": "Áp dụng",
+			"retry": "Thử lại",
+			"refresh": "Làm mới",
+			"name": "Tên",
+			"symbol": "Ký hiệu",
+			"decimals": "Số thập phân",
+			"amount": "Số lượng",
+			"tokenId": "Token id",
+			"max": "Tối đa",
+			"destination": "Đích",
+			"reject": "Từ chối",
+			"approve": "Chấp thuận",
+			"view": "Xem",
+			"copy": "Sao chép",
+			"delete": "Xóa",
+			"create": "Tạo",
+			"clear_filter": "Xóa bộ lọc",
+			"not_available": "Không có",
+			"new": "Mới",
+			"edit": "Chỉnh sửa",
+			"no_results": "Không có kết quả",
+			"paste": "Dán",
+			"to": "Đến",
+			"add": "Thêm",
+			"more_items": "+$items mục khác",
+			"select": "Chọn",
+			"language": "Ngôn ngữ",
+			"currency": "Tiền tệ",
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": "",
+			"learn_more": "",
+			"sorting": "Sắp xếp",
+			"unlimited": "",
+			"info": "",
+			"asset": ""
+		},
+		"info": {
+			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
+			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng."
+		},
+		"alt": {
+			"logo": "Logo $name",
+			"go_to_home": "Đi đến trang chủ $oisy_name",
+			"back": "Quay lại trang trước",
+			"open_details": "Mở chi tiết",
+			"close_details": "Đóng chi tiết",
+			"switch_language": "Chuyển đổi ngôn ngữ",
+			"switch_currency": "Chuyển đổi tiền tệ",
+			"more": "",
+			"less": "",
+			"learn_more": ""
+		},
+		"warning": {
+			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
+			"standalone_mode": "",
+			"video_not_supported": ""
+		}
+	},
+	"navigation": {
+		"text": {
+			"tokens": "Tài sản",
+			"settings": "Cài đặt",
+			"dapp_explorer": "Khám phá",
+			"activity": "Hoạt động",
+			"airdrops": "Phần thưởng",
+			"earning": "Kiếm tiền",
+			"source_code_on_github": "Mã nguồn trên GitHub",
+			"view_on_explorer": "Xem trên trình khám phá",
+			"source_code": "Mã nguồn",
+			"changelog": "Nhật ký thay đổi",
+			"documentation": "Tài liệu",
+			"support": "Hỗ trợ",
+			"confirm_navigate": "Bạn có chắc chắn muốn rời khỏi trang không?",
+			"vip_qr_code": "Mã QR VIP",
+			"binance_qr_code": "QR Binance Clubhouse",
+			"refer_a_friend": "Giới thiệu bạn bè của bạn",
+			"address_book": "Sổ địa chỉ",
+			"hide_balances": "Ẩn số dư",
+			"show_balances": "Hiện số dư",
+			"privacy_mode_enabled": "Chế độ riêng tư đã được bật. Nhấn [P] để hiển thị lại số dư của bạn.",
+			"privacy_mode_disabled": "Chế độ riêng tư đã được tắt. Nhấn [P] để ẩn số dư của bạn."
+		},
+		"alt": {
+			"tokens": "Đi đến chế độ xem tài sản",
+			"settings": "Mở cài đặt của bạn",
+			"dapp_explorer": "Mở trình khám phá ứng dụng",
+			"activity": "Mở chế độ xem hoạt động",
+			"airdrops": "Mở chế độ xem Phần thưởng",
+			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
+			"changelog": "Mở nhật ký thay đổi của $oisy_name trên GitHub để xem các bản cập nhật mới nhất",
+			"documentation": "Mở tài liệu $oisy_name",
+			"support": "Mở phần Hỗ trợ trong tài liệu $oisy_name",
+			"open_twitter": "Mở X/Twitter của DFINITY",
+			"vip_qr_code": "Tạo liên kết mời",
+			"binance_qr_code": "Tạo liên kết Binance Clubhouse",
+			"refer_a_friend": "Tạo liên kết giới thiệu cho bạn bè",
+			"address_book": "Mở sổ địa chỉ",
+			"hide_balances": "Ẩn số dư hiển thị",
+			"show_balances": "Hiện số dư bị ẩn"
+		},
+		"short": {
+			"documentation": "Tài liệu"
+		}
+	},
+	"auth": {
+		"text": {
+			"title_part_1": "Tài sản số của bạn",
+			"title_part_2": "Riêng tư và An toàn",
+			"logout": "Đăng xuất",
+			"lock": "Khóa",
+			"authenticate": "Mở hoặc Tạo",
+			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
+			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
+			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
+			"social_login": "Truy cập tức thì và riêng tư + đăng nhập bằng tài khoản mạng xã hội"
+		},
+		"alt": {
+			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
+		},
+		"message": {
+			"session_locked": ""
+		},
+		"warning": {
+			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
+			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn.",
+			"reload_and_retry": "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng tải lại trang và thử lại. Nếu lỗi này vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ."
+		},
+		"error": {
+			"no_internet_identity": "Không có Internet Identity.",
+			"invalid_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng. Vui lòng liên hệ với nhà phát hành và yêu cầu lại thông tin xác thực.",
+			"error_validating_pouh_credential_oisy": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng trong $oisy_short: $error",
+			"error_validating_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng.",
+			"error_requesting_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi yêu xác thực người dùng.",
+			"missing_pouh_issuer_origin": "Xin lỗi, đã xảy ra lỗi trong khi yêu cầu thông tin xác thực người dùng. Thiếu nguồn gốc nhà phát hành.",
+			"no_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi yêu cầu xác thực người dùng. Bạn có thông tin xác thực hợp lệ trong Decide AI không?",
+			"error_while_signing_in": "Đã xảy ra lỗi trong khi đăng nhập.",
+			"unexpected_issue_with_syncing": "Sự cố không mong muốn trong khi đồng bộ hóa trạng thái xác thực của bạn."
+		},
+		"help": {
+			"text": {
+				"title": "",
+				"description": "",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"feedback_text": "",
+				"thanks_text": "Cảm ơn bạn!",
+				"useful_links": "",
+				"identity_new_identity": "Ví $oisy_short chuyển đổi tên miền Internet Identity thành: <span class=\"font-bold\">identity.internetcomputer.org</span>",
+				"switch_to_new_internet_identity": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"oisy_introduction": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
+				"need_help": "Cần giúp đỡ",
+				"sign_in": "đăng nhập?"
+			},
+			"alt": {
+				"internet_identity": "Hình ảnh mới của Internet Identity"
+			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Mở khóa để tiếp tục",
+			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
+			"unlock": "Mở khóa",
+			"logout": "Đăng xuất",
+			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",
+			"learn_more": "Tìm hiểu thêm"
+		}
+	},
+	"dapps": {
+		"text": {
+			"all_dapps": "Tất cả ứng dụng",
+			"featured": "Nổi bật",
+			"sign_in": "Đăng nhập để khám phá hệ sinh thái.",
+			"title": "Khám phá ứng dụng",
+			"open_dapp": "Mở $dAppName",
+			"submit_your_dapp": "Thêm ứng dụng của bạn"
+		},
+		"alt": {
+			"learn_more": "Tìm hiểu thêm về $dAppName",
+			"logo": "Logo của $dAppName",
+			"show_all": "Hiển thị tất cả ứng dụng",
+			"show_tag": "Hiển thị ứng dụng với thẻ $tag",
+			"open_dapp": "Mở ứng dụng $dAppName",
+			"open_telegram": "Mở $dAppName trên Telegram",
+			"open_open_chat": "Mở $dAppName trên OpenChat",
+			"open_twitter": "Mở nguồn cấp dữ liệu X/Twitter của $dAppName",
+			"source_code_on_github": "Xem mã nguồn của $dAppName trên github",
+			"submit_your_dapp": "Gửi ứng dụng của bạn để hiển thị trong trình khám phá ứng dụng",
+			"tags": "Thẻ liên quan đến $dAppName",
+			"website": "Hình ảnh của $dAppName"
+		},
+		"categories": {
+			"aa_new": "",
+			"ab_icp": "",
+			"ai": "AI",
+			"defi": "DeFi",
+			"game": "Trò chơi",
+			"nft": "",
+			"rwa": "",
+			"social_media": "Mạng xã hội",
+			"staking": "Staking",
+			"tools": "Công cụ",
+			"walletconnect": "WalletConnect"
+		},
+		"descriptions": {
+			"kongswap": {
+				"name": "KongSwap",
+				"one_liner": "Sàn đa chuỗi - Giao dịch token trên tất cả các chuỗi một cách dễ dàng bằng KongSwap.",
+				"description": "KongSwap là một sàn giao dịch phi tập trung (DEX) hoàn toàn cung cấp giao dịch chuỗi chéo không cần cầu nối trên ICP, Bitcoin, Ethereum và Solana. <br/><br/>Sử dụng công nghệ Chain Fusion và Giao thức Máy tính Internet, nó giảm phí, đơn giản hóa trải nghiệm người dùng và tránh phân mảnh thanh khoản. Cả giao diện người dùng và phụ trợ đều hoạt động trên chuỗi thông qua các hợp đồng thông minh, mang lại trải nghiệm DeFi liền mạch.",
+				"carousel": {
+					"text": "Hoán đổi token trên DEX",
+					"call_to_action": "Thử KongSwap"
+				}
+			},
+			"openchat": {
+				"name": "OpenChat",
+				"one_liner": "Giải pháp thay thế phi tập trung cho WhatsApp.",
+				"call_to_action": "Đến OpenChat",
+				"description": "OpenChat là một ứng dụng trò chuyện đầy đủ tính năng từ đầu tới cuối trên blockchain Internet Computer.<br/><br/>OpenChat được quản lý bởi cộng đồng của nó như một DAO và có token CHAT riêng. Token CHAT được trao làm phần thưởng cho người dùng để thúc đẩy tăng trưởng và tạo ra một đội ngũ hàng triệu người ủng hộ cho phép OpenChat trở thành một đối thủ cạnh tranh khả thi với các đối thủ công nghệ lớn tập trung!",
+				"stats": "Hơn 80.000 người dùng",
+				"carousel": {
+					"text": "OpenChat - tin nhắn bảo mật",
+					"call_to_action": "Hiển thị thêm"
+				}
+			},
+			"decideid": {
+				"name": "DecideID",
+				"one_liner": "Xác minh danh tính duy nhất cho các tương tác kỹ thuật số đáng tin cậy.",
+				"call_to_action": "Mở DecideID",
+				"stats": "Hơn 50.000 yêu cầu",
+				"description": "Decide ID là trung tâm của hệ thống Decide AI, đảm bảo sự tin cậy và bảo mật thông qua phương pháp Xác minh danh tính - Proof of Personhood (PoP) độc đáo của nó. Khi bạn tham gia, bạn sẽ trải qua một quá trình xác minh trong đó bạn cung cấp nhiều bằng chứng và hoàn thành một thử thách đặc biệt để xác nhận danh tính của mình. Điều này đảm bảo rằng mọi người dùng đều là thật, duy nhất và không phải là bot. ID chính của bạn, một định danh duy nhất trên chuỗi, được tạo trong quá trình này. Nó có thể được sử dụng trên các ứng dụng khác nhau yêu cầu xác minh nhân thân, đảm bảo tích hợp an toàn và liền mạch vào quy trình đăng ký hoặc đăng nhập của bất kỳ ứng dụng nào. Ngoài ra, việc sử dụng các bằng chứng không kiến thức có nghĩa là dữ liệu cá nhân của bạn, như thông tin sinh trắc học, vẫn được bảo mật và an toàn.<br/><br/>Với Decide ID, hãy tận hưởng một cách linh hoạt, an toàn và ưu tiên quyền riêng tư để xác minh và tương tác trực tuyến.",
+				"carousel": {
+					"text": "Tận hưởng xác thực và tương tác online một cách bảo mật",
+					"call_to_action": "Bạn có hứng thú không?"
+				}
+			},
+			"icpswap": {
+				"name": "ICPSwap",
+				"one_liner": "ICPSwap là một AMM DEX được xây dựng hoàn toàn trên blockchain, là trung tâm hàng đầu cho các dịch vụ tài chính và DAO đầy đủ trên ICP.",
+				"call_to_action": "Gặp gỡ tương lai",
+				"description": "Trung tâm của tài chính Phi tập trung tương lai!<br/>Tái định nghĩa sàn giao dịch thành một trung tâm, ICPSwap cung cấp các dịch vụ tài chính, thị trường và DAO đầy đủ trên Internet Computer. Dựa trên công nghệ nền tảng của Internet Computer của DFINITY, ICPSwap thiết lập một hệ sinh thái tài chính phi tập trung thực sự bằng cách tái cấu trúc cách người dùng và nhà phát triển cùng nhau xây dựng các dự án."
+			},
+			"nnsdapp": {
+				"name": "NNS Dapp",
+				"one_liner": "Ứng dụng dapp giao diện người dùng NNS cho phép bất kỳ ai tương tác với Network Nervous System của Internet Computer bằng giao diện người dùng thân thiện.",
+				"call_to_action": "Tham gia",
+				"description": "Ứng dụng dapp giao diện người dùng NNS cho phép bất kỳ ai tương tác với Network Nervous System của Internet Computer bằng giao diện người dùng thân thiện. Được phục vụ hoàn toàn từ đầu đến cuối thông qua chuỗi khối, ứng dụng dapp phi tập trung này cho phép bạn dễ dàng thực hiện các hành động sau:<br/><ul><li>Gửi và nhận token (ICP, ckBTC, CHAT, v.v.)</li><li>Đặt cược và quản lý các nơ-ron</li><li>Bỏ phiếu về quản trị của Internet Computer và các SNS</li><li>Tham gia vào các giao dịch hoán đổi phi tập trung</li><li>Tạo và nạp tiền vào các canister</li><li>Kiếm phần thưởng quản trị</li></ul>"
+			},
+			"uniswap": {
+				"name": "Uniswap",
+				"one_liner": "Thị trường trên chuỗi lớn nhất. Mua và bán tiền điện tử trên Ethereum và hơn 11 chuỗi khác.",
+				"call_to_action": "Hãy bắt đầu hoán đổi",
+				"description": "Uniswap là một sàn giao dịch tiền điện tử phi tập trung sử dụng một bộ hợp đồng thông minh để tạo ra các nhóm thanh khoản để thực hiện các giao dịch. Đây là một dự án mã nguồn mở và thuộc danh mục sản phẩm DeFi vì nó sử dụng các hợp đồng thông minh để tạo điều kiện cho các giao dịch thay vì một sàn giao dịch tập trung."
+			},
+			"oneinch": {
+				"name": "1inch",
+				"one_liner": "Tối ưu hóa các giao dịch của bạn trên hàng trăm DEX trên nhiều mạng.",
+				"call_to_action": "Hãy xem qua",
+				"description": "Mạng 1inch cung cấp một hệ sinh thái DeFi với các sản phẩm như ứng dụng dApp 1inch, Ví, Cổng thông tin dành cho nhà phát triển, Danh mục đầu tư và Fusion cho các hoạt động Web3 an toàn. 1inch cung cấp quyền truy cập vào hàng trăm nguồn thanh khoản trên nhiều chuỗi khối.<br/><br/>Được cung cấp bởi 1inch Swap Engine, chế độ Fusion cho phép người dùng hoán đổi token mà không phải trả bất kỳ khoản phí mạng nào và với mức giá ưu đãi nhất. Ngoài ra, chế độ Fusion còn cung cấp cho người dùng thêm khả năng bảo vệ MEV. Tất cả các giao dịch hoán đổi ở chế độ Fusion đều được thực hiện bởi các trình giải quyết - các nhà giao dịch chuyên nghiệp, những người sử dụng các cách phức tạp và hiệu quả nhất để bảo vệ các giao dịch hoán đổi của người dùng khỏi MEV."
+			},
+			"compound_finance": {
+				"name": "Compound Finance",
+				"one_liner": "Một thị trường tiền tệ phi tập trung và giao thức cho vay được xây dựng trên Ethereum.",
+				"call_to_action": "Tham gia",
+				"description": "Compound Finance là <b>một thị trường tiền tệ phi tập trung và giao thức cho vay được xây dựng trên Ethereum</b>. Giao thức Compound III (Comet) của nó cho phép người dùng vay hoặc cho vay từ các nhóm tài sản cơ sở có một tài sản thế chấp. Compound III hỗ trợ các tài sản cơ sở (ví dụ: USDC, WETH, v.v.) trên Ethereum, Polygon, Base và Arbitrum."
+			},
+			"aave": {
+				"name": "Aave",
+				"one_liner": "Aave là một giao thức thanh khoản phi tập trung không giám sát, nơi người dùng có thể tham gia với tư cách là nhà cung cấp hoặc người đi vay.",
+				"call_to_action": "Truy cập toàn bộ sức mạnh của DeFi",
+				"description": "Aave là một giao thức thanh khoản phi tập trung không giám sát, nơi người dùng có thể tham gia với tư cách là nhà cung cấp hoặc người đi vay. Các nhà cung cấp cung cấp thanh khoản cho thị trường trong khi kiếm lãi, và người đi vay có thể tiếp cận thanh khoản bằng cách cung cấp tài sản thế chấp vượt quá số tiền vay.\nNó hoàn toàn không cần cấp phép, có nghĩa là bất kỳ ai cũng có thể truy cập và tương tác với Aave thông qua giao diện thân thiện với người dùng hoặc trực tiếp với các hợp đồng thông minh của nó trên các mạng blockchain được hỗ trợ."
+			},
+			"eigenlayer": {
+				"name": "EigenLayer",
+				"one_liner": "Giao thức dựa trên Ethereum giới thiệu tính năng restaking, cho phép stake bất kỳ token ERC20 nào.",
+				"call_to_action": "Restake ngay bây giờ",
+				"description": "EigenLayer là một giao thức được xây dựng trên Ethereum giới thiệu tính năng restaking, một nguyên tắc mới trong bảo mật kinh tế tiền điện tử. Nó cho phép người dùng stake các tài sản như Native ETH, Liquid Staking Tokens (LSTs), token EIGEN hoặc bất kỳ token ERC20 nào vào các hợp đồng thông minh EigenLayer, do đó mở rộng bảo mật kinh tế tiền điện tử của Ethereum cho các ứng dụng bổ sung trên mạng."
+			},
+			"curve_finance": {
+				"name": "Curve Finance",
+				"one_liner": "DEX hàng đầu, nhà cung cấp stablecoin và nền tảng cho vay trên Ethereum và các chuỗi tương thích với EVM.",
+				"call_to_action": "Bị cuốn hút",
+				"description": "Curve Finance là một sàn giao dịch phi tập trung, nhà cung cấp stablecoin và nền tảng cho vay hàng đầu trên Ethereum và các chuỗi tương thích với EVM. Nó nổi tiếng với các nhà tạo lập thị trường tự động tiên tiến cho stablecoin và các tài sản biến động, và hệ thống thanh lý mềm độc đáo cho các khoản vay."
+			},
+			"sonic": {
+				"name": "Sonic",
+				"one_liner": "Mở khóa toàn bộ tiềm năng của DeFi và giao dịch hợp lý. Hoán đổi token, kiếm tiền với tư cách là nhà cung cấp thanh khoản và khai thác AMM hàng đầu của Bitfinity EVM.",
+				"call_to_action": "Mở Sonic",
+				"description": "Sonic, một sàn giao dịch phi tập trung đa chuỗi được xây dựng trên Giao thức Máy tính Internet (ICP), cung cấp một loạt các dịch vụ DeFi. Người dùng có thể dễ dàng giao dịch token và các hợp đồng vĩnh viễn, cung cấp thanh khoản và tham gia bán token LBP. Người dùng có thể tham gia quản trị DAO, đặt cược để nhận phần thưởng và bỏ phiếu cho các quyết định của nền tảng.<br/><br/>Hoàn toàn trên chuỗi và mã nguồn mở! Hoán đổi token như một chuyên gia, tích lũy các khoản phí đó với tư cách là nhà cung cấp thanh khoản, tham gia vào không khí AMM và trở thành một phần không thể thiếu của Sonic DAO.",
+				"carousel": {
+					"text": "Mở khóa toàn bộ tiềm năng của Defi",
+					"call_to_action": "Mở Sonic"
+				}
+			},
+			"raydium": {
+				"name": "Raydium",
+				"one_liner": "DEX và nhà tạo lập thị trường tự động được xây dựng trên chuỗi khối Solana, cung cấp một sổ lệnh giới hạn trung tâm cho phép giao dịch nhanh chóng.",
+				"call_to_action": "Thúc đẩy sự phát triển của DeFi",
+				"description": "Raydium là một nhà tạo lập thị trường tự động (AMM) được xây dựng trên chuỗi khối Solana, cung cấp sự pha trộn độc đáo giữa công nghệ AMM và quyền truy cập vào thanh khoản của sàn giao dịch phi tập trung Serum. Với tư cách là một AMM, Raydium cho phép giao dịch tài sản kỹ thuật số theo cách không cần cấp phép, sử dụng các nhóm thanh khoản."
+			},
+			"jupiter": {
+				"name": "Jupiter",
+				"one_liner": "Công cụ tổng hợp DEX dựa trên Solana giúp tối ưu hóa các giao dịch hoán đổi tốt nhất hiện có giữa bất kỳ cặp token được hỗ trợ nào.",
+				"call_to_action": "Vươn tới vô cực và hơn thế nữa",
+				"description": "Jupiter là một nền tảng tài chính phi tập trung trên chuỗi khối Solana, hoạt động như một công cụ tổng hợp thanh khoản, hợp lý hóa và tối ưu hóa các hoạt động giao dịch trong không gian DeFi. Giao thức của nó được thiết kế để tạo điều kiện thuận lợi cho việc cung cấp thanh khoản và hoán đổi token và đảm bảo các giao dịch hiệu quả, có độ trễ thấp và tiết kiệm chi phí. Nền tảng này cho phép người dùng hoán đổi token, cung cấp thanh khoản và tham gia canh tác lợi nhuận thông qua mô hình nhà tạo lập thị trường tự động (AMM)."
+			},
+			"waterneuron": {
+				"name": "WaterNeuron",
+				"one_liner": "Stake ICP - Tối đa hóa hiệu quả vốn của bạn bằng cách stake ICP của bạn.",
+				"description": "WaterNeuron cung cấp một phương pháp đặt cược hiệu quả hơn về vốn bằng cách cho phép bạn duy trì khả năng tiếp xúc với phần thưởng stake ICP trong khi vẫn giữ cho token của bạn có tính thanh khoản. Cách tiếp cận này đơn giản hóa quy trình stake, loại bỏ nhu cầu chọn các trình xác thực cụ thể để tối đa hóa phần thưởng."
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "Mạng xã hội phi tập trung - đăng bài, kiếm tiền, sở hữu.",
+				"call_to_action": "Đến Taggr",
+				"description": "Taggr là một nền tảng truyền thông xã hội phi tập trung hoàn toàn hoạt động trên một mạng máy tính phân tán công cộng được cung cấp bởi Internet Computer. Không giống như các nền tảng truyền thông xã hội truyền thống do các tập đoàn kiểm soát, Taggr hoàn toàn do người dùng sở hữu và quản lý."
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "Một sự đổi mới trong quản trị DAO",
+				"description": "Toolkit là bộ công cụ đa năng để quản lý các Service Nervous Systems (SNS) và dự án trên Internet Computer. Từ các đề xuất quản trị đến việc triển khai canister, nó trao quyền cho người dùng để đổi mới, hợp tác và phân quyền một cách liền mạch"
+			},
+			"altitudefi": {
+				"name": "Altitude",
+				"one_liner": "Altitude chủ động quản lý nợ và tài sản thế chấp của người dùng theo thời gian thực, tối ưu hóa hiệu quả sử dụng vốn.",
+				"description": "Các khoản vay trong DeFi (Tài chính phi tập trung) thường yêu cầu thế chấp quá mức và kém hiệu quả về vốn. Altitude là một giao thức phi lưu ký (non-custodial protocol) giúp tối ưu hóa các khoản vay DeFi. Altitude chủ động quản lý nợ và tài sản thế chấp của người dùng theo thời gian thực, tối ưu hóa hiệu quả sử dụng vốn."
+			},
+			"usdai": {
+				"name": "USD.AI",
+				"one_liner": "Một giao thức đồng đô la tổng hợp, hỗ trợ USDai bằng cơ sở hạ tầng tính toán AI tạo ra thu nhập và mang lại lợi nhuận thông qua sUSDai.",
+				"description": "USD.AI là một giao thức đồng đô la tổng hợp, được hỗ trợ bởi cơ sở hạ tầng tính toán AI tạo ra thu nhập, tạo ra một stablecoin phi tập trung có tên là USDai. Người dùng có thể giữ hoặc stake USDai để kiếm sUSDai, một phiên bản sinh lời phản ánh thu nhập của giao thức. Hệ thống này được thiết kế để tạo ra một giải pháp thay thế phi tập trung, hiệu quả và có thể kết hợp cho các stablecoin được hỗ trợ bằng tiền pháp định."
+			},
+			"caffeine": {
+				"name": "Caffeine",
+				"one_liner": "Nền tảng đầu tiên để xây dựng các ứng dụng tự viết.",
+				"description": "Caffeine là nền tảng đầu tiên để xây dựng các ứng dụng tự viết. Chỉ cần trò chuyện với AI trên máy tính hoặc điện thoại, nó sẽ tạo ra các ứng dụng và dịch vụ cho bạn – bao gồm cả những ứng dụng kết nối với Ví OISY. Trải nghiệm tương lai của việc phát triển ứng dụng với khả năng sáng tạo được hỗ trợ bởi AI.",
+				"carousel": {
+					"text": "Xin chào, internet tự viết",
+					"call_to_action": "Tìm hiểu thêm"
+				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			}
+		}
+	},
+	"rewards": {
+		"text": {
+			"title": "Phần thưởng",
+			"upcoming_campaigns": "Chiến dịch sắp tới",
+			"active_date": "Kết thúc vào",
+			"ended_date": "Kết thúc vào",
+			"upcoming_date": "Bắt đầu vào",
+			"share": "Chia sẻ trên X",
+			"learn_more": "Tìm hiểu thêm",
+			"check_status": "Kiểm tra trạng thái & tư cách đủ điều kiện",
+			"view_details": "Xem chi tiết",
+			"modal_button_text": "Đã hiểu",
+			"activity_button_text": "Kiểm tra hoạt động gần đây",
+			"activity_button_text_short": "Kiểm tra hoạt động",
+			"open_wallet": "Đưa tôi đến ví",
+			"carousel_slide_title": "$oisy_short Sprinkles Tập 5 hiện đã có!",
+			"carousel_slide_cta": "Tìm hiểu thêm",
+			"sprinkles_earned": "Bạn đã kiếm được $noOfSprinkles sprinkles, tổng cộng $amount! 🎉",
+			"youre_eligible": "Bạn đủ điều kiện!",
+			"not_eligible": "Không đủ điều kiện",
+			"ongoing": "Đang diễn ra",
+			"ended": "Đã kết thúc ($amount)",
+			"banner_text": "Kiếm phần thưởng hàng ngày với OISY Sprinkles"
+		},
+		"requirements": {
+			"requirements_title": "Tiêu chí đủ điều kiện",
+			"network_bonus_info": "Mỗi mạng lưới mà bạn nắm giữ tài sản sẽ mang lại cho bạn một hệ số thưởng. Bạn càng sử dụng nhiều mạng lưới, bạn càng nhận được nhiều phần thưởng!",
+			"min_logins": "Đăng nhập $loginsx lần trong $days ngày qua",
+			"min_transactions": "Hoàn thành $transactions giao dịch trong $days ngày qua",
+			"min_total_assets_usd": "Giữ $$usd giá trị token tại thời điểm phát hành",
+			"hangover": "Không có chiến thắng gần đây (trong $days ngày qua)"
+		},
+		"alt": {
+			"upcoming_campaigns": "Hãy theo dõi các đợt phát token sắp tới! <a href=\"https://x.com/oisy\" target=\"_blank\">Theo dõi chúng tôi trên X</a>, tham gia <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> của chúng tôi hoặc tham gia <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> để cập nhật thông tin.",
+			"coming_soon": "Phần 6 của $oisy_short sắp ra mắt",
+			"reward_banner": "Biểu ngữ của chiến dịch $campaignName"
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Tập 3 đã có mặt 🎊",
+				"one_liner": "Kiếm BTC bằng cách hoạt động—và bây giờ, bằng cách <strong>mời bạn bè</strong>.<br/>Đăng nhập, thực hiện giao dịch và giữ token để đủ điều kiện nhận các đợt phát hàng ngày. Giới thiệu một người bạn và kiếm 10% giá trị phần thưởng của họ trong toàn bộ chiến dịch.",
+				"participate_title": "Kiếm BTC bằng cách duy trì hoạt động - và bây giờ bằng cách mời người khác.",
+				"description": "Đáp ứng các yêu cầu hàng tuần đơn giản. Đăng nhập, thực hiện hai giao dịch và giữ ít nhất 20$ token để đủ điều kiện nhận một trong 50 đợt phát BTC mỗi ngày.<br/><strong>Giờ đây với phần thưởng giới thiệu:</strong> mời một người bạn triển khai ví và kiếm 10% Sprinkles của họ trong 30 ngày. Họ giữ 100% - bạn kiếm thêm.",
+				"campaign_href": "https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A",
+				"win": {
+					"default": {
+						"title": "Chúc mừng bạn đã kiếm được OISY Sprinkles hôm nay!",
+						"description": "Chia sẻ chiến thắng của bạn trên Twitter để đủ điều kiện nhận thêm cơ hội kiếm tiền.",
+						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+					},
+					"jackpot": {
+						"title": "Chúc mừng bạn đã kiếm được OISY Sprinkles lớn nhất hôm nay!",
+						"description": "Chia sẻ chiến thắng của bạn trên Twitter để đủ điều kiện nhận thêm cơ hội kiếm tiền.",
+						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+					},
+					"referral": {
+						"title": "Đây là một lời cảm ơn nhỏ",
+						"description": "Một trong những người dùng được bạn giới thiệu vừa nhận được một số sprinkles.",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Tập 4 đã có mặt 🎊",
+				"one_liner": "Kiếm BTC bằng cách duy trì hoạt động—và bây giờ, kiếm được Sprinkles <strong>được đảm bảo</strong> cho các lượt giới thiệu.<br/>Đăng nhập, thực hiện giao dịch và giữ token để đủ điều kiện nhận các đợt phát hàng ngày. Giới thiệu 4 người bạn và nhận phần thưởng trực tiếp. Những người giới thiệu hàng đầu sẽ thắng nhiều hơn nữa.",
+				"participate_title": "Kiếm BTC bằng cách duy trì hoạt động - và bây giờ bằng cách mời người khác.",
+				"description": "Đáp ứng các yêu cầu hàng tuần đơn giản: đăng nhập, thực hiện hai giao dịch và giữ ít nhất 20$ token để đủ điều kiện nhận các đợt phát BTC lên đến 50$ mỗi ngày.<br>Giờ đây với phần thưởng giới thiệu: mời một người bạn thiết lập ví và cả hai bạn sẽ kiếm được Sprinkles được đảm bảo. Lọt vào top 4 người giới thiệu hàng đầu và giành được giải độc đắc.",
+				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Chào mừng đến với $oisy_short!",
+					"subtitle": "Sẵn sàng kiếm tiền?",
+					"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu 4 người bạn và nhận một khoản tiền thưởng."
+				},
+				"win": {
+					"default": {
+						"title": "Bạn đã được thưởng",
+						"description": "Phần thưởng của bạn vừa được gửi vào ví của bạn<br>Đừng quên giới thiệu và duy trì hoạt động để giành được nhiều hơn",
+						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
+					},
+					"jackpot": {
+						"title": "Bạn đã trúng giải độc đắc",
+						"description": "Bạn vừa kiếm được Phần thưởng Sprinkles cao nhất của chúng tôi<br>Hãy duy trì hoạt động và tiếp tục giới thiệu để giành được nhiều hơn",
+						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+					},
+					"leaderboard": {
+						"title": "Bạn đã đứng đầu Bảng xếp hạng",
+						"description": "Bạn đã được xếp hạng trong top 4 người giới thiệu hàng đầu mùa này<br>200$ đã được thêm vào ví của bạn",
+						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+					},
+					"referrer": {
+						"title": "Bạn mới chỉ bắt đầu",
+						"description": "Bạn đã kiếm được 1 đô la.<br>Giới thiệu thêm - top 4 người giới thiệu hàng đầu nhận được 200$.<br>Bạn sắp thành công rồi. Cố gắng lên.",
+						"share_href": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
+					},
+					"referee": {
+						"title": "Nhận thêm cho việc giới thiệu",
+						"description": "Bạn vừa kiếm được Sprinkles - người giới thiệu bạn cũng vậy.<br>Gửi 4 người bạn và kiếm được 1$.<br>Top 4 người giới thiệu hàng đầu mỗi người giành được 200$.",
+						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Tập 5 đã có mặt 🎊",
+				"one_liner": "Nhận Sprinkles khi hoạt động tích cực, giới thiệu người khác và sử dụng OISY trên nhiều chuỗi. Hành động của bạn sẽ giúp tăng phần thưởng, và lượt giới thiệu tích cực sẽ giúp tăng thêm phần thưởng.<br/>Thêm vào đó, giờ đây, càng nhiều chuỗi thì cơ hội chiến thắng càng cao.",
+				"participate_title": "Nhận token cho hoạt động và lượt giới thiệu. Nhiều chuỗi hơn đồng nghĩa với nhiều cơ hội hơn.",
+				"description": "Duy trì hoạt động trong hơn 10 ngày để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các hành động trong ví và giữ ít nhất 20 đô la.<br/>Mỗi chuỗi hoạt động sẽ tăng cơ hội của bạn với Hệ số nhân đa chuỗi.<br/>Kiếm 10% từ những người bạn đủ điều kiện và xếp hạng trong top 3 để giành được giải thưởng Super Sprinkle trị giá 200 đô la.",
+				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"welcome": {
+					"title": "Chào mừng đến với $oisy_short!",
+					"subtitle": "Sẵn sàng kiếm tiền?",
+					"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận tiền thưởng mỗi khi một trong số họ kiếm được điểm."
+				},
+				"win": {
+					"default": {
+						"title": "Bạn đã được thưởng",
+						"description": "Phần thưởng của bạn vừa được gửi vào ví của bạn.<br>Đừng quên giới thiệu và duy trì hoạt động để giành được nhiều hơn.",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Bạn đã giành được phần thưởng hàng tuần",
+						"description": "Bạn vừa nhận được một trong những phần thưởng hàng tuần của chúng tôi.<br>Hãy tích cực và tiếp tục giới thiệu để giành được nhiều phần thưởng hơn.",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "Bạn đã đứng đầu Bảng xếp hạng",
+						"description": "Bạn đã được xếp hạng trong top 4 người giới thiệu hàng đầu mùa này<br>200$ đã được thêm vào ví của bạn",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Đây là một lời cảm ơn nhỏ",
+						"description": "Một trong những người dùng được bạn giới thiệu vừa nhận được một số sprinkles.",
+						"share_href": ""
+					}
+				}
+			}
+		}
+	},
+	"footer": {
+		"text": {
+			"incubated_with": "Được hỗ trợ với",
+			"by": "bởi",
+			"dfinity_foundation": "DFINITY Foundation",
+			"copyright": "© 2026",
+			"ai_assistant_console_button": "Trợ lý $oisy_short"
+		},
+		"alt": {
+			"dfinity": "Truy cập trang web DFINITY Foundation"
+		}
+	},
+	"wallet": {
+		"text": {
+			"address": "Địa chỉ",
+			"wallet_address": "Địa chỉ ví",
+			"your_addresses": "Địa chỉ của bạn",
+			"address_copied": "Địa chỉ đã được sao chép vào khay nhớ tạm.",
+			"wallet_address_copied": "Địa chỉ ví đã được sao chép vào khay nhớ tạm.",
+			"display_wallet_address_qr": "Hiển thị địa chỉ ví dưới dạng mã QR",
+			"icp_deposits": "Lưu ý: Đối với các khoản tiền gửi ICP, hãy sử dụng nút 'Nhận' trong tài khoản ICP của bạn để nhận đúng địa chỉ.",
+			"use_address_from_to": "Sử dụng địa chỉ này để chuyển $token đến và từ ví của bạn."
+		},
+		"alt": {
+			"open_etherscan": "Mở địa chỉ của bạn trên Etherscan",
+			"open_solscan": "Mở địa chỉ của bạn trên Solscan",
+			"qrcode_address": "Quét mã QR này để sao chép địa chỉ để nhận token $token"
+		}
+	},
+	"init": {
+		"text": {
+			"initializing_wallet": "Đang chuẩn bị ví của bạn...",
+			"securing_session": "Đang bảo mật phiên với Internet Identity",
+			"retrieving_public_keys": "Đang truy xuất public key của bạn cho Bitcoin, Ethereum, Solana, Base, Polygon, BNB và Arbitrum",
+			"done": "Tận hưởng $oisy_short"
+		},
+		"alt": {
+			"loader_banner": "Đang tải dữ liệu ban đầu cho $oisy_name (chủ đề $theme)"
+		},
+		"info": {
+			"hold_loading": "Bình tĩnh, chúng tôi đang tải một số thông tin...",
+			"hold_loading_wallet": "Bình tĩnh, chúng tôi đang tải một số dữ liệu ban đầu cho ví của bạn..."
+		},
+		"error": {
+			"no_alchemy_config": "Không có cấu hình Alchemy cho mạng $network",
+			"no_alchemy_provider": "Không có nhà cung cấp Alchemy cho mạng $network",
+			"no_etherscan_provider": "Không có nhà cung cấp Etherscan cho mạng $network",
+			"no_infura_provider": "Không có nhà cung cấp Infura cho mạng $network",
+			"no_infura_cketh_provider": "Không có nhà cung cấp Infura CkETH cho mạng $network",
+			"no_infura_erc20_provider": "Không có nhà cung cấp Infura ERC20 cho mạng $network",
+			"no_infura_erc721_provider": "Không có nhà cung cấp Infura ERC721 cho mạng $network",
+			"no_infura_erc1155_provider": "Không có nhà cung cấp Infura ERC1155 cho mạng $network",
+			"no_infura_erc20_icp_provider": "Không có nhà cung cấp Infura ERC20 Icp cho mạng $network",
+			"no_infura_erc4626_provider": "",
+			"no_solana_network": "Không có mạng Solana cho mạng $network",
+			"loading_address": "Lỗi khi tải địa chỉ $symbol.",
+			"loading_balance": "Lỗi khi tải số dư $symbol cho mạng $network.",
+			"erc20_contracts": "Lỗi khi tải các hợp đồng ERC20.",
+			"spl_tokens": "Lỗi khi tải các token SPL.",
+			"minter_ckbtc_btc": "Cần có một minter được cấu hình để chuyển đổi ckBTC sang BTC.",
+			"minter_cketh_eth": "Cần có một minter được cấu hình để chuyển đổi ckETH sang ETH.",
+			"minter_ckerc20_erc20": "Cần có một minter được cấu hình để chuyển đổi ckERC20 sang Erc20.",
+			"ledger_cketh_eth": "Cần có một sổ cái ckETH được cấu hình để chuyển đổi ckErc20 sang Erc20.",
+			"minter_btc": "Cần có một minter được cấu hình để truy xuất BTC.",
+			"minter_ckbtc_info": "Cần có một minter được cấu hình để tìm nạp thông tin ckBTC",
+			"minter_cketh_info": "Cần có một minter được cấu hình để tìm nạp thông tin ckETH",
+			"minter_ckbtc_loading_info": "Lỗi khi tải thông tin minter ckBTC.",
+			"minter_cketh_loading_info": "Lỗi khi tải thông tin minter ckETH.",
+			"btc_fees_estimation": "Lỗi khi truy vấn ước tính phí BTC.",
+			"btc_withdrawal_statuses": "Lỗi khi tìm nạp trạng thái rút BTC.",
+			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
+			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "Token $tokenSymbol không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
+			"icrc_canister_loading_custom": "Token với canister ledger $ledgerCanisterId không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
+			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
+			"erc4626_custom_tokens": "",
+			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
+			"erc1155_custom_tokens": "Lỗi khi tải các token ERC1155.",
+			"spl_custom_tokens": "Lỗi khi tải các token tùy chỉnh SPL.",
+			"erc20_custom_token": "Lỗi khi bật token đôi ERC20.",
+			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
+			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
+			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
+			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
+			"waiting_for_allowed_cycles_aborted": "Đã hủy bỏ quá trình chuẩn bị cycles ledger. Vui lòng thử đăng nhập lại sau.",
+			"btc_wallet_error": "Lỗi khi tải thông tin ví BTC.",
+			"sol_wallet_error": "Lỗi khi tải thông tin ví SOL."
+		}
+	},
+	"hero": {
+		"text": {
+			"available_balance": "Số dư của bạn",
+			"unavailable_balance": "Giá trị $currencySymbol không khả dụng",
+			"hidden_balance": "Số dư của bạn bị ẩn",
+			"top_up": "Nạp tiền vào ví của bạn để bắt đầu sử dụng!",
+			"learn_more_about_erc20_icp": "Tìm hiểu thêm về ERC20 ICP trên Ethereum.",
+			"tooltip_toggle_balance": "Nhấp đúp để ẩn/hiện số dư"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Bật chế độ riêng tư để ẩn số dư của bạn"
+		}
+	},
+	"settings": {
+		"text": {
+			"title": "Cài đặt",
+			"general": "Chung",
+			"principal": "Principal của bạn",
+			"principal_copied": "Principal đã được sao chép vào khay nhớ tạm",
+			"principal_description": "ID của bạn cho $oisy_name. Được tạo bởi Internet Identity của bạn.",
+			"session_duration": "Thời lượng phiên",
+			"session_expires_in": "Hết hạn sau",
+			"networks": "Mạng lưới",
+			"enable_testnets": "Bật mạng thử nghiệm",
+			"active_networks": "Mạng đang hoạt động",
+			"active_networks_description": "Chọn mạng bạn muốn làm việc trong $oisy_name. Token và giao dịch từ các mạng không hoạt động sẽ không hiển thị hoặc không được bao gồm trong số dư khả dụng của bạn.",
+			"enable_network": "Bật mạng",
+			"disable_network": "Tắt mạng",
+			"credentials_title": "Thông tin xác thực",
+			"pouh_credential": "Thông tin xác thực người dùng",
+			"pouh_credential_description": "Thông tin xác thực người dùng thật. Nó được phát hành bởi Decide AI.",
+			"present_pouh_credential": "Xuất trình",
+			"pouh_credential_verified": "Đã xác minh ✅",
+			"appearance": "Giao diện",
+			"appearance_light": "Sáng",
+			"appearance_dark": "Tối",
+			"appearance_system": "Hệ thống",
+			"git_disclaimer": "Vì mục đích phát triển, chúng tôi chỉ hiển thị branch và commit trong các canister thử nghiệm.",
+			"git_branch_name": "Branch:",
+			"git_commit_hash": "Commit:",
+			"beta_features": "Tính năng Beta",
+			"enable_beta_feature": "Bật tính tăng beta",
+			"disable_beta_feature": "Tắt tính năng beta",
+			"save_beta_feature_success": "Tính năng beta của bạn đã được cập nhật"
+		},
+		"alt": {
+			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
+			"github_release": "Các bản cập nhật $oisy_short trên GitHub",
+			"appearance_light": "Bật chế độ sáng",
+			"appearance_dark": "Bật chế độ tối",
+			"appearance_system": "Bật chế độ màu theo hệ điều hành của bạn"
+		},
+		"error": {
+			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ."
+		}
+	},
+	"shortcuts": {
+		"privacy_mode": "P"
+	},
+	"networks": {
+		"title": "Mạng hiện tại. Truy cập để lựa chọn.",
+		"test_networks": "Mạng thử nghiệm",
+		"chain_fusion": "Tất cả các mạng",
+		"network": "Mạng",
+		"testnet": "Testnet",
+		"number_of_enabled": "$numNetworksEnabled trong số $numNetworksTotal được bật",
+		"filter": "Lọc mạng",
+		"manage": "Quản lý mạng"
+	},
+	"receive": {
+		"text": {
+			"receive": "Nhận",
+			"address": "Địa chỉ nhận",
+			"receive_token": "Nhận $token"
+		},
+		"icp": {
+			"text": {
+				"account_id": "Địa chỉ ICP (Account Id)",
+				"checking_index_canister_status": "Đang kiểm tra trạng thái giao dịch...",
+				"use_for_all_tokens": "Sử dụng cho tất cả các token khi nhận từ ví, người dùng hoặc các ứng dụng khác hỗ trợ định dạng địa chỉ này.",
+				"use_for_icrc_deposit": "Sử dụng để nhận token ICRC-1 trong mạng ICP, chẳng hạn như token SMS, ck, v.v.",
+				"use_for_icp_deposit": "Sử dụng để gửi tiền ICP từ các sàn giao dịch hoặc các ví khác chỉ hỗ trợ Account Id.",
+				"your_private_eth_address": "Địa chỉ riêng tư của bạn cho tất cả các token ERC20.",
+				"display_account_id_qr": "Hiển thị địa chỉ ICP dưới dạng mã QR",
+				"account_id_copied": "Địa chỉ ICP đã được sao chép vào khay nhớ tạm.",
+				"principal": "Địa chỉ principal ICP",
+				"principal_title": "",
+				"internet_computer_principal_copied": "Địa chỉ principal Internet Computer đã được sao chép vào khay nhớ tạm.",
+				"display_internet_computer_principal_qr": "Hiển thị Địa chỉ principal Internet Computer dưới dạng mã QR",
+				"icp_account": "Địa chỉ ICP (dành cho sàn giao dịch)",
+				"icp_account_title": "",
+				"icp_account_copied": "Địa chỉ ICP đã được sao chép vào khay nhớ tạm.",
+				"display_icp_account_qr": "Hiển thị Tài khoản ICP dưới dạng mã QR"
+			}
+		},
+		"ethereum": {
+			"text": {
+				"checking_status": "Đang kiểm tra trạng thái $token...",
+				"from_network": "Nhận từ Mạng $network",
+				"eth_to_cketh_description": "Chuyển đổi $token sang $ckToken cần gọi một hợp đồng thông minh trên $network và truyền địa chỉ principal IC của bạn làm tham số – $oisy_name đơn giản hóa quy trình này bằng cách cho phép bạn thực hiện chuyển đổi trực tiếp trong ví.",
+				"learn_how_to_convert": "Tìm hiểu cách chuyển đổi $token sang $ckToken",
+				"metamask": "Nhận từ Metamask",
+				"ethereum": "Ethereum",
+				"ethereum_title": "",
+				"ethereum_address": "Địa chỉ",
+				"ethereum_address_copied": "Địa chỉ Ethereum đã được sao chép vào khay nhớ tạm.",
+				"display_ethereum_address_qr": "Hiển thị địa chỉ Ethereum dưới dạng mã QR"
+			},
+			"error": {
+				"no_metamask": "Metamask không khả dụng."
+			}
+		},
+		"bitcoin": {
+			"text": {
+				"bitcoin": "Bitcoin",
+				"checking_status": "Đang kiểm tra trạng thái BTC...",
+				"refresh_status": "Làm mới trạng thái BTC",
+				"initializing": "Đang khởi tạo...",
+				"checking_incoming": "Đang kiểm tra BTC đến...",
+				"refreshing_wallet": "Đang làm mới ví...",
+				"bitcoin_address": "Địa chỉ Bitcoin",
+				"bitcoin_address_title": "",
+				"bitcoin_testnet_address": "Địa chỉ Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "",
+				"bitcoin_regtest_address": "Địa chỉ Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "",
+				"display_bitcoin_address_qr": "Hiển thị Địa chỉ Bitcoin dưới dạng mã QR",
+				"bitcoin_address_copied": "Địa chỉ Bitcoin đã được sao chép vào khay nhớ tạm.",
+				"from_network": "Chuyển Bitcoin trên mạng BTC đến địa chỉ này để nhận ckBTC.",
+				"fee_applied": "Xin lưu ý rằng một khoản phí liên mạng ước tính là $fee BTC sẽ được áp dụng."
+			},
+			"info": {
+				"no_new_btc": "Không có BTC mới được xác nhận.",
+				"check_btc_progress": "Kiểm tra BTC đang được xử lý"
+			},
+			"error": {
+				"unexpected_btc": "Đã xảy ra lỗi trong khi kiểm tra BTC đang được xử lý"
+			}
+		},
+		"solana": {
+			"text": {
+				"solana_address": "Địa chỉ Solana",
+				"solana_address_title": "",
+				"solana_devnet_address": "Địa chỉ Solana Devnet",
+				"solana_devnet_address_title": "",
+				"solana_local_address": "Địa chỉ Solana Local",
+				"solana_local_address_title": "",
+				"solana_address_copied": "Địa chỉ Solana đã được sao chép vào khay nhớ tạm",
+				"display_solana_address_qr": "Hiển thị địa chỉ Solana dưới dạng mã QR"
+			}
+		}
+	},
+	"send": {
+		"text": {
+			"send": "Gửi",
+			"send_token": "",
+			"destination": "Tới",
+			"source": "Nguồn",
+			"balance": "Số dư",
+			"review": "Xem lại",
+			"signing_approval": "Đang ký chấp thuận...",
+			"approving": "Đang chấp thuận...",
+			"approving_fees": "Đang chấp thuận phí...",
+			"approving_transfer": "Đang chấp thuận chuyển...",
+			"approving_wallet_connect": "Đang chấp thuận yêu cầu WalletConnect...",
+			"refreshing_ui": "Đang làm mới giao diện người dùng",
+			"initializing": "Đang khởi tạo giao dịch...",
+			"signing_transaction": "Đang ký giao dịch...",
+			"sending": "Đang gửi...",
+			"signing": "Đang ký...",
+			"signing_message": "Đang ký tin nhắn...",
+			"confirming": "Xác nhận...",
+			"network": "Mạng",
+			"source_network": "Mạng nguồn",
+			"destination_network": "Mạng đích",
+			"initializing_transaction": "Đang khởi tạo giao dịch",
+			"convert_to_native_icp": "Chuyển đổi sang ICP",
+			"open_qr_modal": "Bắt đầu quét mã QR để xem chi tiết giao dịch",
+			"scan_qr": "Quét mã QR",
+			"select_token": "Chọn token để gửi",
+			"select_network_filter": "Chọn bộ lọc mạng",
+			"send_again": "Gửi lại",
+			"recently_used_tab": "Đã dùng gần đây",
+			"contacts_tab": "Liên hệ",
+			"recently_used_empty_state_title": "Các địa chỉ đã dùng gần đây sẽ xuất hiện ở đây",
+			"recently_used_empty_state_description": "Hãy gửi lần đầu tiên ngay bây giờ!",
+			"contacts_empty_state_title": "Danh bạ của bạn sẽ xuất hiện ở đây",
+			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
+			"send_review_subtitle": "Bạn gửi",
+			"no_nfts_found": "Không NFT nào được tìm thấy",
+			"no_nfts_found_desc": "Điều chỉnh tìm kiếm hoặc mạng của bạn để tìm NFT",
+			"select_nft": "Chọn NFT"
+		},
+		"placeholder": {
+			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
+			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
+			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
+			"select_network": "Chọn mạng",
+			"search_nfts": "Tìm kiếm NFT"
+		},
+		"info": {
+			"ckbtc_certified": "Vui lòng đợi cho đến khi các tham số ckBTC được chứng nhận.",
+			"cketh_certified": "Vui lòng đợi cho đến khi các tham số ckETH được chứng nhận.",
+			"pending_bitcoin_transaction": "Bạn có thể gửi một giao dịch Bitcoin khác sau khi giao dịch đang chờ xử lý hoàn tất.",
+			"no_available_utxos": "Bạn sẽ không có UTXO khả dụng để thực hiện giao dịch này.",
+			"unknown_destination": "Bạn chưa tương tác với địa chỉ này trước đây. Vui lòng đảm bảo bạn biết người nhận.",
+			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>"
+		},
+		"assertion": {
+			"invalid_destination_address": "Địa chỉ ví không hợp lệ",
+			"insufficient_funds": "Không đủ tiền.",
+			"unknown_minimum_ckbtc_amount": "Số lượng ckBTC tối thiểu cần thiết để chuyển đổi sang BTC không xác định.",
+			"unknown_minimum_cketh_amount": "Số lượng ckETH tối thiểu cần thiết để chuyển đổi sang ETH không xác định.",
+			"minimum_ckbtc_amount": "Số lượng dưới mức tối thiểu $amount ckBTC cần thiết để chuyển đổi sang BTC.",
+			"minimum_cketh_amount": "Số lượng dưới mức rút tối thiểu là $amount $symbol.",
+			"minimum_amount": "Số lượng dưới mức rút tối thiểu là $amount $symbol.",
+			"minimum_ledger_fees": "Số tiền dưới mức phí sổ cái $symbol.",
+			"minimum_cketh_balance": "Số dư $symbol dưới mức phí ước tính là $amount.",
+			"unknown_cketh": "Không thể truy xuất token ckETH.",
+			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
+			"amount_invalid": "Số lượng không hợp lệ.",
+			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_gas": "Không đủ tiền cho gas",
+			"insufficient_funds_for_amount": "Không đủ tiền cho số lượng",
+			"insufficient_ethereum_funds_to_cover_the_fees": "Không đủ tiền Ethereum để trả phí",
+			"insufficient_solana_funds_to_cover_the_fees": "Không đủ tiền Solana để trả phí",
+			"not_enough_tokens_for_gas": "Không đủ $symbol cho gas. Số dư: $balance $symbol",
+			"gas_fees_not_defined": "Phí gas không được xác định.",
+			"max_gas_fee_per_gas_undefined": "Phí tối đa cho mỗi gas hoặc phí ưu tiên tối đa cho mỗi gas không được xác định.",
+			"address_unknown": "Địa chỉ không xác định.",
+			"minter_info_not_loaded": "Thử lại sau vài giây, tham số cấu hình ckETH chưa được tải.",
+			"minter_info_not_certified": "Thử lại sau vài giây, tham số cấu hình ckETH chưa được chứng nhận.",
+			"cketh_max_transaction_fee_missing": "Phí giao dịch tối đa cho ckETH bị thiếu.",
+			"utxos_fee_missing": "Phí UTXO bị thiếu.",
+			"minimum_btc_amount": "Số tiền quá nhỏ. Vui lòng nhập ít nhất $amount BTC.",
+			"btc_insufficient_balance": "Không có Bitcoin UTXOs khả dụng cho giao dịch",
+			"btc_insufficient_balance_for_fee": "Số dư Bitcoin không đủ để chi trả phí giao dịch",
+			"btc_invalid_utxo_data": "Dữ liệu giao dịch Bitcoin không hợp lệ",
+			"btc_utxo_locked": "Tiền Bitcoin bị khóa bởi các giao dịch đang chờ xử lý",
+			"btc_invalid_fee_calculation": "Xác thực phí giao dịch Bitcoin thất bại",
+			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau.",
+			"no_nft_selected": "Không NFT đã được chọn để gửi"
+		},
+		"error": {
+			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
+			"destination_address_unknown": "Địa chỉ ví ETH không xác định",
+			"metamask_connected": "Không thể lấy tài khoản của bạn. Metamask của bạn có đang mở và đã kết nối chưa?",
+			"metamask_no_accounts": "Không tìm thấy tài khoản Metamask nào.",
+			"metamask_switch_network": "Không thể yêu cầu Metamask chuyển sang ID chuỗi $chain_id. Metamask của bạn có đang sử dụng $network_name không?",
+			"erc20_data_undefined": "Dữ liệu giao dịch Erc20 không được không xác định hoặc null.",
+			"data_undefined": "Dữ liệu giao dịch không được không xác định hoặc null.",
+			"no_identity_calculate_fee": "Không có danh tính nào được cung cấp để tính phí cho principal.",
+			"invalid_destination": "Ví không hợp lệ. Vui lòng thử lại với một địa chỉ ví hợp lệ.",
+			"incompatible_token": "Token không tương thích. Vui lòng thử lại với một token tương thích.",
+			"no_btc_network_id": "Mạng hiện tại ($networkId) không phải là mạng Bitcoin.",
+			"no_solana_network_id": "Mạng hiện tại ($networkId) không phải là mạng Solana.",
+			"no_pending_bitcoin_transaction": "Đã xảy ra lỗi khi tải các giao dịch Bitcoin đang chờ xử lý. Vui lòng thử lại sau.",
+			"unexpected_utxos_fee": "Đã xảy ra lỗi trong khi tính phí giao dịch.",
+			"unable_to_retrieve_amount": "không có (không thể truy xuất)",
+			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
+			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
+			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
+		}
+	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"recipient": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": "",
+			"pay_amount": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": "",
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
+		},
+		"error": {
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
+		}
+	},
+	"convert": {
+		"text": {
+			"converting": "Đang chuyển đổi...",
+			"conversion_destination": "Đích chuyển đổi",
+			"default_destination": "Ví OISY của bạn",
+			"convert_to_btc": "Chuyển đổi sang BTC",
+			"convert_to_ckbtc": "Chuyển đổi sang ckBTC",
+			"convert_to_token": "Chuyển đổi sang $token",
+			"convert_to_cketh": "Chuyển đổi sang ckETH",
+			"convert_to_ckerc20": "Chuyển đổi sang $ckErc20",
+			"convert_eth_to_cketh": "Chuyển đổi $token sang $ckToken",
+			"cketh_conversions_may_take": "Các chuyển đổi ckETH có thể mất tới 20 phút",
+			"ckerc20_conversions_may_take": "Các chuyển đổi $ckErc20 có thể mất tới 20 phút",
+			"how_to_convert_eth_to_cketh": "Đây là cách bạn có thể chuyển đổi $token sang $ckToken trên $oisy_name",
+			"send_eth": "Gửi $token đến địa chỉ $oisy_name của bạn",
+			"wait_eth_current_balance": "Đợi $token đến. Số dư hiện tại",
+			"set_amount": "Đặt số lượng để chuyển đổi",
+			"check_balance_for_fees": "Kiểm tra số dư $token để biết phí chuyển đổi",
+			"fees_explanation": "Bạn cần đủ $token để trả phí thực hiện hợp đồng thông minh.",
+			"current_balance": "👉 Số dư hiện tại:",
+			"review_button": "Xem lại",
+			"convert_button": "Chuyển đổi",
+			"input_reset_button": "Đặt lại giá trị đầu vào",
+			"swap_to_token": "Chuyển đổi $sourceToken → $destinationToken",
+			"review": "Xem lại giao dịch",
+			"max_balance": "Tối đa",
+			"source_network": "Mạng nguồn",
+			"destination_network": "Mạng đích",
+			"conversion_may_take": "Việc chuyển đổi có thể mất tới 1 giờ",
+			"executing_transaction": "Đang thực hiện giao dịch...",
+			"initializing": "Đang khởi tạo giao dịch...",
+			"refreshing_ui": "Đang làm mới giao diện người dùng",
+			"unsupported_token_conversion": "Chuyển đổi cho token đã chọn không được hỗ trợ.",
+			"calculating_max_amount": "Đang tính toán...",
+			"send_to": "Gửi tài sản đã chuyển đổi đến",
+			"custom_destination": "Địa chỉ khác"
+		},
+		"assertion": {
+			"insufficient_funds": "Số dư không đủ"
+		},
+		"error": {
+			"loading_cketh_helper": "Lỗi khi tải địa chỉ hợp đồng hỗ trợ ckETH. Không có ID canister minter nào được khởi tạo.",
+			"unexpected": "Đã xảy ra lỗi trong khi chuyển đổi token.",
+			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch chuyển đổi."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Việc chuyển đổi USDC từ/sang ckUSDC hiện đang bị tạm ngừng."
+		}
+	},
+	"swap": {
+		"text": {
+			"swap": "Hoán đổi",
+			"select_destination_token": "Chọn token để nhận",
+			"select_source_token": "Chọn token để thanh toán",
+			"switch_tokens_button": "Chuyển đổi token",
+			"review": "Xem lại giao dịch",
+			"review_button": "Xem lại hoán đổi",
+			"max_slippage": "Trượt giá tối đa",
+			"value_difference": "Chênh lệch giá trị",
+			"total_fee": "Tổng phí ước tính",
+			"network_fee": "Phí mạng",
+			"approval_fee": "Phí chấp thuận",
+			"gas_fee": "Phí gas",
+			"lp_fee": "Phí LP",
+			"max_slippage_info": "Nhập giá trị từ 0% đến $maxSlippage%",
+			"max_slippage_warning": "Cảnh báo rủi ro: độ trượt cao có thể dẫn đến thua lỗ do biến động thị trường",
+			"max_slippage_error": "Dung sai trượt giá không được bằng 0% hoặc vượt quá $maxSlippage%",
+			"swap_button": "Hoán đổi ngay",
+			"swap_is_not_offered": "Hoán đổi này hiện không được cung cấp.",
+			"executing_transaction": "Đang thực hiện giao dịch...",
+			"initializing": "Đang khởi tạo giao dịch...",
+			"swapping": "Đang hoán đổi...",
+			"refreshing_ui": "Đang làm mới giao diện người dùng",
+			"swap_provider": "Nhà cung cấp hoán đổi",
+			"swap_provider_website": "Trang web",
+			"swap_route": "Lộ trình hoán đổi",
+			"included_network_fees": "Phí mạng đã bao gồm",
+			"included_liquidity_fees": "Phí bể thanh khoản đã bao gồm",
+			"best_rate": "Tỷ giá tốt nhất",
+			"expected_minimum": "Tối thiểu dự kiến",
+			"you_receive": "Bạn nhận được",
+			"select": "Chọn >",
+			"select_swap_provider": "Chọn nhà cung cấp hoán đổi",
+			"open_icp_swap": "Mở trang web ICP Swap",
+			"open_instructions_link": "Mở liên kết hướng dẫn",
+			"select_token": "Chọn token",
+			"select_network_filter": "Chọn mạng",
+			"withdrawing": "Đang rút...",
+			"network_cost": "Phí mặng lưới",
+			"gasless": "Không phí gas",
+			"swap_fees": "Phí giao dịch",
+			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
+			"near_intents_estimated_time": ""
+		},
+		"error": {
+			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
+			"unexpected": "Đã xảy ra lỗi trong khi hoán đổi token.",
+			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch hoán đổi.",
+			"slippage_exceeded": "$oisy_short bảo vệ bạn: Giao dịch nằm ngoài giới hạn trượt giá $maxSlippage% của bạn. Vui lòng điều chỉnh độ trượt tối đa và thử lại.",
+			"pool_not_found": "Hoán đổi thất bại. Không tìm thấy bể thanh khoản.",
+			"deposit_error": "Nạp tiền cho giao dịch hoán đổi (swap) của bạn không thành công. Vui lòng thử lại hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
+			"withdraw_failed": "Hoán đổi thất bại và rút tiền cũng thất bại. Vui lòng kiểm tra số dư chưa sử dụng của bạn và thử rút tiền thủ công: ",
+			"swap_failed_withdraw_success": "Giao dịch hoán đổi không thành công và token của bạn đã được hoàn lại thành công. Vui lòng thử lại hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
+			"withdraw_failed_first_part": "Giao dịch hoán đổi không thành công và token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
+			"withdraw_failed_second_part": "để rút tiền bất cứ lúc nào sau đó trực tiếp từ trang web của họ: ",
+			"swap_failed_instruction_link": "các hướng dẫn này ",
+			"manually_withdraw_success": "Token từ giao dịch hoán đổi không thành công trước đó của bạn đã được rút thành công. Bạn có thể thử lại giao dịch hoán đổi hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
+			"manually_withdraw_failed": "Rút tiền của bạn không thành công.<br> Vui lòng thử lại hoặc làm theo",
+			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
+			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
+			"swap_completed_close_failed": ""
+		}
+	},
+	"buy": {
+		"text": {
+			"buy": "Mua",
+			"buy_dev": "Mua (Dev Environment)"
+		},
+		"onramper": {
+			"title": "Mua qua Onramper"
+		}
+	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": "",
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
+		},
+		"alt": {
+			"pay": "",
+			"where_you_can_pay": ""
+		}
+	},
+	"tokens": {
+		"text": {
+			"title": "Token",
+			"contract_address": "Địa chỉ hợp đồng",
+			"token_address": "Địa chỉ token",
+			"balance": "Số dư",
+			"hide_zero_balances": "Ẩn số dư bằng không",
+			"all_tokens_with_zero_hidden": "Tất cả tài sản có số dư bằng 0 hiện đang bị ẩn",
+			"filter_nothing_found": "Rất tiếc, không tìm thấy gì",
+			"filter_nothing_found_description": "Nhập mã hoặc tên token để lọc",
+			"filter_placeholder": "Lọc theo token hoặc ký hiệu",
+			"buy_or_receive": "Mua hoặc nhận token đầu tiên của bạn ngay bây giờ để xem chúng trong danh sách",
+			"initializing": "Đang khởi tạo...",
+			"updating_ui": "Đang cập nhật giao diện người dùng",
+			"show_token": "Hiển thị token",
+			"hide_token": "Ẩn token",
+			"select_token": "Chọn token",
+			"exchange_is_not_available": "Giá trị USD hiện không khả dụng.",
+			"exchange_is_not_available_short": "Giá trị USD không khả dụng",
+			"source_token_title": "Bạn trả",
+			"destination_token_title": "Bạn nhận",
+			"chain_key": "Chain Key",
+			"show_more_networks": "Hiển thị thêm $number mạng",
+			"hide_more_networks": "Ẩn thêm mạng",
+			"on_network": " trên mạng $network",
+			"delete_token": "Xóa token",
+			"edit_token": "Chỉnh sửa token",
+			"sort_by_value": "Giá trị",
+			"sort_by_performance": "Hiệu suất token",
+			"sort_by_symbol": "Ký hiệu",
+			"hide_asset_types": "Ẩn loại tài sản",
+			"asset_type": "Loại tài sản trong $oisy_name",
+			"asset_type_all": "Tất cả loại tài sản",
+			"no_tokens_for_asset_type": "Ví của bạn không có $asset_type nào",
+			"no_tokens_for_asset_type_zero_tokens": "Không có $asset_type nào trong mạng đã chọn",
+			"no_tokens_for_asset_type_description": "Chọn từ <strong>$count token được hỗ trợ</strong> để tùy chỉnh chế độ xem danh mục đầu tư của bạn."
+		},
+		"details": {
+			"title": "Chi tiết token",
+			"token": "Token",
+			"network": "Mạng",
+			"contract_address_copied": "Địa chỉ hợp đồng đã được sao chép vào khay nhớ tạm.",
+			"token_address_copied": "Địa chỉ token đã được sao chép vào khay nhớ tạm.",
+			"twin_token": "Token đôi",
+			"standard": "Tiêu chuẩn",
+			"confirm_deletion_description": "Thao tác này sẽ xóa <span class=\"font-bold\">$token</span> khỏi danh sách token $oisy_short của bạn. Tiền của bạn sẽ không bị ảnh hưởng — bạn có thể thêm lại token bất cứ lúc nào.",
+			"deletion_confirmation": "$token đã được xóa thành công khỏi danh sách token $oisy_short của bạn.",
+			"update_confirmation": "$token đã được cập nhật thành công.",
+			"missing_index_canister_id_label": "Chưa được gán",
+			"missing_index_canister_id_warning": "Thiếu index canister, vì vậy $oisy_short không thể hiện danh sách giao dịch",
+			"missing_index_canister_id_button": "Đặt index canister"
+		},
+		"balance": {
+			"error": {
+				"not_applicable": "không có"
+			}
+		},
+		"import": {
+			"text": {
+				"title": "Nhập token",
+				"title_nft": "",
+				"review": "Xem lại",
+				"saving": "Đang lưu...",
+				"updating": "Đang cập nhật danh sách token",
+				"canister_id": "",
+				"ledger_canister_id": "ID Canister ledger",
+				"index_canister_id": "ID Canister index",
+				"minter_canister_id": "ID Canister minter",
+				"ledger_canister_id_copied": "ID Canister ledger đã được sao chép vào khay nhớ tạm.",
+				"index_canister_id_copied": "ID Canister index đã được sao chép vào khay nhớ tạm.",
+				"minter_canister_id_copied": "ID Canister minter đã được sao chép vào khay nhớ tạm.",
+				"verifying": "Đang xác minh chi tiết token...",
+				"add_the_token": "Thêm token",
+				"info": "ID canister ledger và index thường có sẵn trên trang web của dự án.",
+				"info_ext": "",
+				"info_index": "ID canister index là tùy chọn, nhưng nếu không có nó, $oisy_short không thể hiển thị lịch sử giao dịch.",
+				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh."
+			},
+			"error": {
+				"loading_metadata": "Địa chỉ được chỉ định không phải là một token hợp lệ trong mạng đã chọn.",
+				"no_metadata": "Không có metadata nào được cung cấp cho token. Điều này không mong muốn.",
+				"unexpected_ledger": "Đã xảy ra lỗi trong khi xác thực ledger canister.",
+				"unexpected_index": "Đã xảy ra lỗi trong khi xác thực index canister.",
+				"unexpected_index_ledger": "Đã xảy ra lỗi trong khi tải ID ledger liên quan đến canister index.",
+				"unrecognized_nft_canister_id_standard": "",
+				"invalid_ledger_id": "ID ledger không liên quan đến canister index.",
+				"missing_ledger_id": "Thiếu ID ledger. Bạn đã cung cấp giá trị chưa?",
+				"missing_canister_id": "",
+				"missing_contract_address": "Thiếu địa chỉ hợp đồng. Bạn đã cung cấp giá trị chưa?",
+				"missing_token_address": "Thiếu địa chỉ token. Bạn đã cung cấp giá trị chưa?",
+				"no_network": "Chưa chọn mạng. Điều này không mong muốn."
+			},
+			"warning": {
+				"do_not_close_manage": "$oisy_name đang chuẩn bị và bảo mật các token mới. Vui lòng không đóng tab này cho đến khi hoàn tất."
+			}
+		},
+		"manage": {
+			"text": {
+				"title": "Quản lý token",
+				"title_nft": "",
+				"manage_list": "Quản lý token",
+				"manage_list_nft": "",
+				"list_settings": "Cài đặt danh sách",
+				"import_token": "Nhập token",
+				"import_nft": "",
+				"network": "Mạng",
+				"all_tokens_zero_balance": "Tất cả các token có số dư bằng 0.",
+				"enable_more_assets": "Kích hoạt thêm token"
+			},
+			"placeholder": {
+				"select_network": "Chọn mạng"
+			},
+			"info": {
+				"no_changes": "Không cần lưu thay đổi."
+			},
+			"error": {
+				"unexpected_build": "Đã xảy ra lỗi không mong muốn khi xây dựng danh sách các token đã biết.",
+				"empty": "Không có token nào được chọn để bật hoặc tắt."
+			}
+		},
+		"hide": {
+			"title": "Ẩn token?",
+			"token": "Ẩn $token",
+			"info": "Bạn có thể thêm lại token này trong tương lai bằng cách vào <strong>“Quản lý token”</strong> trong chế độ xem ví của mình.",
+			"confirm": "Ẩn",
+			"hiding": "Đang ẩn..."
+		},
+		"alt": {
+			"context_menu": "Menu cho token đã chọn",
+			"open_etherscan": "Mở chi tiết của token trên Etherscan",
+			"open_blockstream": "Mở chi tiết của token trên Blockstream",
+			"open_dashboard": "Mở chi tiết của token trên ICP Dashboard",
+			"open_contract_address_block_explorer": "Mở địa chỉ hợp đồng trên trình khám phá khối",
+			"open_token_address_block_explorer": "Mở địa chỉ token trên trình khám phá khối",
+			"token_group_number": "Tổng số token trong nhóm cho token gốc $token",
+			"filter_button": "Mở/đóng bộ lọc"
+		},
+		"placeholder": {
+			"enter_contract_address": "Nhập địa chỉ hợp đồng ERC20",
+			"enter_token_address": "Nhập địa chỉ token SPL",
+			"search_token": "Tìm kiếm token"
+		},
+		"warning": {
+			"trust_token": "Đảm bảo bạn tin tưởng token bạn đang thêm. Nếu token bạn đang thêm bị kiểm soát bởi một bên độc hại, họ có thể cố gắng lừa đảo bạn, ví dụ, bằng cách khiến bạn tin rằng bạn đã nhận được một lượng lớn token để lừa bạn gửi lại cho họ hoặc thực hiện các hành động không mong muốn khác. Tìm hiểu thêm về các chiêu lừa đảo và rủi ro bảo mật, ví dụ <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">tại đây</a>."
+		},
+		"error": {
+			"invalid_contract_address": "Địa chỉ hợp đồng không hợp lệ.",
+			"invalid_token_address": "Địa chỉ token không hợp lệ.",
+			"invalid_ledger": "Token đã chọn không được liên kết với canister ledger của Icrc.",
+			"unrecognised_erc_interface": "Không nhận diện được giao diện ERC20.",
+			"no_metadata": "Không có metadata nào được tìm thấy.",
+			"unexpected": "Đã xảy ra lỗi trong khi lưu token.",
+			"version_mismatch": "",
+			"unexpected_hiding": "Đã xảy ra lỗi trong khi ẩn token.",
+			"already_available": "Token đã có sẵn.",
+			"not_toggleable": "Token không thể chuyển đổi, không thể ẩn.",
+			"incomplete_metadata": "Không có tên hoặc ký hiệu được cung cấp trong metadata.",
+			"duplicate_metadata": "Đã tồn tại một token có tên hoặc ký hiệu tương tự.",
+			"unexpected_undefined": "Token không xác định. Điều này không mong muốn.",
+			"unexpected_error_on_token_delete": "Đã xảy ra lỗi khi xóa token.",
+			"unexpected_error_on_token_update": "Đã xảy ra lỗi khi cập nhật token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Danh mục",
+			"risk": "Rủi ro"
+		},
+		"category": {
+			"crypto": "Tiền mã hóa",
+			"stablecoin": "Stablecoin",
+			"stock": "Cổ phiếu",
+			"commodity": "Hàng hóa"
+		},
+		"risk": {
+			"low": "Rủi ro thấp",
+			"medium": "Rủi ro trung bình",
+			"high": "Rủi ro cao"
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": "NFTs",
+			"title_empty": "NFT của bạn sẽ xuất hiện ở đây",
+			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào",
+			"title_not_supported": "",
+			"description_not_supported": "",
+			"grouping": "Nhóm",
+			"as_plain_list": "Hiển thị dưới dạng danh sách đơn giản",
+			"by_collection": "Nhóm theo bộ sưu tập",
+			"show_spam": "Hiển thị spam",
+			"show_hidden": "Hiển thị ẩn",
+			"recents_first": "Gần đây trước",
+			"oldest_first": "Cũ nhất trước",
+			"collection_atoz": "Tên bộ sưu tập A-Z",
+			"collection_ztoa": "Tên bộ sưu tập Z-A",
+			"collection_items_count": "$count vật phẩm",
+			"collection_address": "Địa chỉ hợp đồng của bộ sưu tập",
+			"token_standard": "Tiêu chuẩn token",
+			"quantity": "Số lượng",
+			"item_traits": "Đặc điểm vật phẩm",
+			"collection_not_loaded": "Không thể hiển thị bộ sưu tập do chưa được tải",
+			"nft_not_loaded": "Không thể hiển thị NFT do chưa được tải",
+			"collections": "Các bộ sưu tập",
+			"all_assets": "Tất cả tài sản",
+			"address_copied": "Đã sao chép địa chỉ $address",
+			"collection_name_copied": "",
+			"id_copied": "",
+			"spam": "Spam",
+			"not_spam": "Không phải spam",
+			"spam_warning": "",
+			"spam_warning_text": "",
+			"hide": "Ẩn",
+			"unhide": "Bỏ ẩn",
+			"hidden": "Đã ẩn",
+			"hide_warning": "",
+			"hide_warning_text": "",
+			"open_explorer": "Mở hợp đồng này trong trình khám phá blockchain",
+			"img_consent_disabled": "Bạn đã tắt hình ảnh từ bộ sưu tập này",
+			"img_consent_none": "Hình ảnh bị tắt vì lý do bảo mật",
+			"review_button": "Xem lại",
+			"collection_name": "Tên bộ sưu tập",
+			"media_urls": "URL media",
+			"media_url": "",
+			"received_at": "",
+			"display_preference": "Tùy chọn hiển thị",
+			"review_preference": "Tùy chọn xem lại",
+			"media_enabled": "Media đã bật",
+			"media_disabled": "Media đã tắt",
+			"enable_media": "Bật media",
+			"disable_media": "Tắt media",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
+			"open_in_new_tab": "Mở trong tab mới",
+			"review_title": "Xem lại nguồn phương tiện cho \"$collectionName\"",
+			"review_description": "Lưu ý! Những hình ảnh này đến từ một nguồn không được xác minh. Việc bật chúng có thể chia sẻ địa chỉ IP của bạn với bên thứ ba và tiềm ẩn rủi ro bảo mật.",
+			"learn_more": "Tìm hiểu thêm",
+			"token_id": "ID token",
+			"go_to_collection": "",
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
+		},
+		"alt": {
+			"placeholder_image": "Chưa có NFT nào",
+			"card": {
+				"image": "Hình ảnh NFT với ID token: $tokenId"
+			},
+			"copy_address": "Sao chép địa chỉ này vào clipboard",
+			"review_preference": "Thay đổi tùy chọn hiển thị",
+			"go_to_collection": ""
+		}
+	},
+	"fee": {
+		"text": {
+			"fee": "Phí",
+			"estimated_btc": "Phí Mạng BTC ước tính",
+			"estimated_inter_network": "Phí network nội ước tính",
+			"estimated_eth": "Phí Ethereum ước tính",
+			"max_fee_eth": "Phí tối đa <small>(có thể trong < 30 giây)</small>",
+			"convert_fee": "Phí chuyển đổi",
+			"convert_inter_network_fee": "Phí chuyển đổi liên mạng",
+			"convert_btc_network_fee": "Phí mạng Bitcoin",
+			"zero_fee": "Miễn phí",
+			"total_fee": "Tổng phí",
+			"ata_fee": "Phí ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": "Số dư không đủ để trả phí."
+		},
+		"error": {
+			"cannot_fetch_gas_fee": "Không thể lấy phí gas."
+		}
+	},
+	"info": {
+		"bitcoin": {
+			"title": "Nhận BTC & chuyển đổi sang ckBTC",
+			"description": "Chuyển đổi Bitcoin sang ckBTC và tận hưởng giao dịch Bitcoin nhanh nhất và rẻ nhất hiện có. Quá trình chuyển đổi có thể mất tới một giờ.",
+			"note": "Bạn có thể chuyển đổi ckBTC trở lại BTC bất cứ lúc nào.",
+			"how_to": "Cách chuyển đổi sang ckBTC"
+		},
+		"ethereum": {
+			"title": "Chuyển đổi sang $ckToken",
+			"description": "Với một vài bước, hãy chuyển đổi $token gốc của mạng $network của bạn sang $ckToken ICP tương ứng trực tiếp trong $oisy_name. Quá trình chuyển đổi có thể mất tới 20 phút.",
+			"note": "Bạn có thể chuyển đổi $ckToken trở lại $token bất cứ lúc nào.",
+			"how_to": "Cách chuyển đổi sang $ckToken",
+			"how_to_short": "Cách chuyển đổi $token"
+		}
+	},
+	"wallet_connect": {
+		"text": {
+			"name": "WalletConnect",
+			"session_proposal": "Đề xuất phiên",
+			"connect": "Kết nối",
+			"connecting": "Đang kết nối...",
+			"disconnect": "Ngắt kết nối",
+			"scan_qr": "Quét mã QR",
+			"or_use_link": "hoặc sử dụng liên kết WalletConnect",
+			"proposer": "Người đề xuất",
+			"spender": "",
+			"application": "",
+			"review": "Xem lại quyền cần thiết của $chain_name ($key)",
+			"method": "Hàm",
+			"methods": "Hàm",
+			"events": "Sự kiện",
+			"message": "Tin nhắn",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
+			"hex_data": "Dữ liệu HEX",
+			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
+			"sign_message": "Ký Tin Nhắn"
+		},
+		"alt": {
+			"connect_input": "ví dụ: wc:a281567bb3e4..."
+		},
+		"domain": {
+			"title": "Xác minh tên miền",
+			"valid": "Hợp lệ ✅",
+			"valid_description": "Xác thực tên miền của người đề xuất đã vượt qua.",
+			"invalid": "Không hợp lệ ❌",
+			"invalid_description": "Tên miền trang web của người đề xuất không khớp với người gửi yêu cầu.",
+			"security_risk": "Rủi ro bảo mật ⚠️",
+			"security_risk_description": "Trang web của người đề xuất bị gắn cờ là không an toàn.",
+			"unknown": "Không xác định ❓",
+			"unknown_description": "Không thể xác minh tên miền của người đề xuất."
+		},
+		"info": {
+			"disconnected": "WalletConnect đã ngắt kết nối.",
+			"session_ended": "Phiên WalletConnect đã kết thúc.",
+			"connected": "WalletConnect đã kết nối.",
+			"transaction_executed": "WalletConnect \"$method\" yêu cầu được thực hiện.",
+			"sign_executed": "Yêu cầu ký của WalletConnect đã được thực hiện."
+		},
+		"error": {
+			"qr_code_read": "Không thể đọc mã QR.",
+			"missing_uri": "Cần cung cấp một URI để kết nối.",
+			"disconnect": "Đã xảy ra lỗi không mong muốn khi ngắt kết nối ví. Đang đặt lại kết nối dù sao đi nữa.",
+			"connect": "Đã xảy ra lỗi không mong muốn khi cố gắng kết nối ví.",
+			"manual_workflow": "Vui lòng hoàn tất quy trình thủ công đã được bắt đầu bằng cách mở cửa sổ WalletConnect.",
+			"skipping_request": "Bỏ qua yêu cầu WalletConnect vì một hành động khác hiện đang được thực hiện qua một lớp phủ.",
+			"method_not_support": "Phương thức được yêu cầu \"$method\" không được hỗ trợ.",
+			"unexpected_pair": "Đã xảy ra lỗi không mong muốn khi cố gắng ghép nối ví.",
+			"no_connection_opened": "Lỗi không mong muốn: Không có kết nối nào được mở.",
+			"no_session_approval": "Lỗi không mong muốn: Không có đề xuất phiên nào khả dụng.",
+			"unexpected": "Lỗi không mong muốn khi giao tiếp với WalletConnect.",
+			"request_rejected": "Yêu cầu WalletConnect bị từ chối",
+			"unknown_parameter": "Tham số không xác định.",
+			"wallet_not_initialized": "Lỗi không mong muốn. Địa chỉ ví của bạn chưa được khởi tạo.",
+			"from_address_not_wallet": "Địa chỉ gửi được yêu cầu cho giao dịch không phải là địa chỉ của ví này.",
+			"unknown_destination": "Địa chỉ đích không xác định.",
+			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
+			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."
+		}
+	},
+	"transaction": {
+		"text": {
+			"details": "Chi tiết giao dịch",
+			"hash": "Hash giao dịch",
+			"hash_copied": "Hash giao dịch $hash đã được sao chép vào khay nhớ tạm.",
+			"id": "ID giao dịch",
+			"id_copied": "ID giao dịch đã được sao chép vào khay nhớ tạm.",
+			"timestamp": "Thời gian",
+			"type": "Loại",
+			"from": "Từ",
+			"from_copied": "Địa chỉ gửi đã được sao chép vào khay nhớ tạm.",
+			"received_from": "Đã nhận từ $name",
+			"from_ata": "Tài khoản token người gửi (ATA)",
+			"from_ata_copied": "Tài khoản token người gửi (ATA) đã được sao chép vào khay nhớ tạm.",
+			"to": "Đến",
+			"to_copied": "Địa chỉ người nhận đã được sao chép vào khay nhớ tạm.",
+			"sent_to": "Đã gửi đến $name",
+			"to_ata": "Tài khoản token người nhận (ATA)",
+			"to_ata_copied": "Tài khoản token người nhận (ATA) đã được sao chép vào khay nhớ tạm.",
+			"block": "Khối",
+			"interacted_with": "Đã tương tác với (Đến)",
+			"status": "Trạng thái",
+			"confirmations": "Xác nhận",
+			"for": "",
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
+		},
+		"status": {
+			"confirmed": "Đã xác nhận",
+			"included": "Đã bao gồm",
+			"finalised": "Đã hoàn tất",
+			"finalized": "Đã hoàn tất",
+			"processed": "Đã xử lý",
+			"pending": "Đang chờ xử lý...",
+			"safe": "An toàn",
+			"unconfirmed": "Chưa xác nhận"
+		},
+		"type": {
+			"send": "Gửi",
+			"receive": "Nhận",
+			"withdraw": "Rút",
+			"deposit": "Tiền gửi",
+			"approve": "Chấp thuận",
+			"burn": "Đốt",
+			"mint": "Tạo"
+		},
+		"label": {
+			"reimbursement": "Hoàn tiền",
+			"twin_token_converted": "Đã chuyển đổi từ $twinToken",
+			"ck_token_converted": "Đã chuyển đổi từ $ckToken",
+			"sending_twin_token": "Đang gửi $twinToken",
+			"sending_twin_token_failed": "Gửi $twinToken thất bại",
+			"converting_twin_token": "Đang chuyển đổi $twinToken sang $ckToken",
+			"converting_ck_token": "Đang chuyển đổi $ckToken sang $twinToken",
+			"twin_network": "mạng $twinNetwork",
+			"no_date_available": "Không có ngày khả dụng",
+			"pending": "Đang chờ xử lý"
+		},
+		"alt": {
+			"open_block_explorer": "Mở giao dịch này trên trình khám phá khối",
+			"open_from_block_explorer": "Mở địa chỉ 'Từ' trên trình khám phá khối",
+			"open_to_block_explorer": "Mở địa chỉ 'Đến' trên trình khám phá khối",
+			"open_for_block_explorer": ""
+		},
+		"error": {
+			"get_block_number": "Không thể lấy số khối.",
+			"failed_get_transaction": "Không thể lấy giao dịch từ (hash: $hash) được cung cấp. Vui lòng tải lại ví."
+		}
+	},
+	"transactions": {
+		"text": {
+			"title": "Giao dịch",
+			"buy_or_receive": "Hãy thực hiện giao dịch đầu tiên và mua hoặc nhận token ngay bây giờ!",
+			"transaction_history": "Lịch sử giao dịch của bạn sẽ xuất hiện tại đây",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
+			"mainnet_btc_transactions_info": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
+			"transaction_history_unavailable": "Lịch sử giao dịch không khả dụng",
+			"missing_index_canister_explanation": "Hiện tại, $oisy_short không thể hiển thị lịch sử giao dịch token của bạn vì nhà phát hành chưa cung cấp tính năng theo dõi. Nó sẽ sớm được bổ sung. Trong thời gian chờ đợi, đừng lo lắng — bạn vẫn có thể gửi và nhận token của mình như bình thường.",
+			"index_canister_not_working_explanation": "Hiện tại, $oisy_short không thể hiển thị lịch sử giao dịch token của bạn vì tính năng theo dõi của nhà phát hành hiện không phản hồi. Nó sẽ sớm được giải quyết. Trong thời gian chờ đợi, đừng lo lắng — bạn vẫn có thể gửi và nhận token của mình như bình thường.",
+			"token_needs_enabling": "Token cần được bật để xem lịch sử giao dịch."
+		},
+		"error": {
+			"loading_transactions_symbol": "Lỗi khi tải các giao dịch $symbol.",
+			"uncertified_transactions_removed": "Một số giao dịch chưa được chứng nhận đã được xác định và sau đó bị xóa khỏi danh sách hiển thị.",
+			"loading_pending_ck_ethereum_transactions": "Đã xảy ra lỗi trong khi tìm nạp các giao dịch $network đang chờ xử lý.",
+			"get_transaction_for_hash": "Không thể lấy giao dịch từ (hash: $hash) được cung cấp.",
+			"unexpected_transaction_for_hash": "Đã xảy ra lỗi không mong muốn trong khi tải chờ xử lý cho hash: $hash.",
+			"loading_token_with_network": "Token $token trên mạng $network không thể được tải vì nó không có trong danh sách token của bạn.",
+			"loading_token": "Liên kết được cung cấp đến một token không hợp lệ."
+		}
+	},
+	"about": {
+		"why_oisy": {
+			"text": {
+				"label": "Tại sao $oisy_short",
+				"title": "Tại sao $oisy_short",
+				"hold_crypto": {
+					"title": "Quản lý hợp nhất tất cả tài sản kỹ thuật số của bạn",
+					"description": "$oisy_short cho phép bạn quản lý tất cả tài sản kỹ thuật số của mình — bao gồm Bitcoin, Solana, Ethereum, ICP, và nhiều hơn nữa — trong một ví hợp nhất duy nhất. Không còn phải xoay xở với nhiều ví cho các loại tiền điện tử khác nhau — hãy tận hưởng trải nghiệm liền mạch và hiệu quả trên nhiều nền tảng."
+				},
+				"network_custody": {
+					"title": "Không còn lo lắng về private key với tính năng mạng lưới lưu ký",
+					"description": "$oisy_name triển khai tính mạng lưới lưu ký, một phương pháp tiếp cận sáng tạo tận dụng mật mã tiên tiến của Internet Computer để loại bỏ nhu cầu bạn phải xử lý trực tiếp private key. Điều này cung cấp một giải pháp thay thế an toàn và thân thiện với người dùng so với các phương pháp truyền thống, phù hợp với phong trào “Onchain is the New Online” — một sự thay đổi hướng tới các giải pháp tăng cường bảo mật và khả năng phục hồi trước các cuộc tấn công mạng bằng cách chạy trên một mạng lưới phân tán."
+				},
+				"fully_on_chain": {
+					"title": "Bảo mật chống giả mạo với ví hoàn toàn trên chuỗi",
+					"description": "Không chỉ các khóa của bạn được bảo mật, mà toàn bộ ứng dụng ví được lưu trữ <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">hoàn toàn trên chuỗi</a> và được phục vụ trực tiếp cho trình duyệt của bạn từ Internet Computer. Điều này có nghĩa là toàn bộ ví được hưởng lợi từ mô hình tin cậy phi tập trung, giúp nó chống giả mạo và có độ bảo mật cao."
+				},
+				"cross_device": {
+					"title": "Truy cập ví của bạn mọi lúc, mọi nơi",
+					"description": "Sử dụng <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">Internet Identity</a>, $oisy_short có thể dễ dàng được sử dụng trên tất cả các thiết bị bạn đã liên kết với danh tính phi tập trung riêng tư của mình. Điều này đảm bảo quyền truy cập liền mạch và an toàn vào ví của bạn cho dù bạn đang sử dụng điện thoại thông minh, máy tính bảng hay máy tính để bàn."
+				},
+				"verifiable_credentials": {
+					"title": "Mở khóa các tính năng bổ sung bằng thông tin xác thực có thể xác minh",
+					"description": "$oisy_short tích hợp với nền tảng <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">thông tin xác thực có thể xác minh</a> của Internet Computer. Truy cập các tính năng bổ sung như airdrop và các chức năng độc quyền bằng cách nhận được các loại thông tin xác thực nhất định, nâng cao trải nghiệm tổng thể của bạn."
+				},
+				"open_source": {
+					"title": "Tin tưởng vào tính minh bạch với mã nguồn mở",
+					"description": "$oisy_short là một dự án <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">mã nguồn mở</a> do một nhóm tận tâm trong <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">quỹ DFINITY</a> dẫn dắt, được hỗ trợ bởi hơn 200 nhà mật mã học và kỹ sư hàng đầu thế giới. Mã nguồn mở đảm bảo tính minh bạch, cho phép cộng đồng kiểm tra, đóng góp và tin tưởng vào tính toàn vẹn của ví."
+				}
+			}
+		}
+	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "Đưa tôi đến ví",
+				"title_successful": "Chúc mừng!",
+				"title_failed": "Mã mời không hợp lệ",
+				"reward_received": "Chào mừng đến với $oisy_short!",
+				"reward_failed": "Mã đã hết hạn",
+				"reward_received_description": "Bạn sẽ nhận được món quà chào mừng của mình bất cứ lúc nào.",
+				"brand_reward_received_description": "Bạn muốn kiếm thêm thu nhập? Hãy giới thiệu bạn bè và nhận thưởng cho mỗi người tham gia.",
+				"reward_failed_description": "Yêu cầu một cái mới và thử lại"
+			},
+			"error": {
+				"loading_reward": "Lỗi khi tải mã phần thưởng mới.",
+				"loading_user_data": "Không tải được dữ liệu người dùng từ canister phần thưởng.",
+				"loading_eligibility": "Lỗi khi tải tính đủ điều kiện của chiến dịch."
+			}
+		},
+		"invitation": {
+			"text": {
+				"title": "Tạo liên kết mời",
+				"binance_title": "QR Binance Clubhouse",
+				"invitation_link_copied": "Liên kết mời đã được sao chép vào khay nhớ tạm.",
+				"generate_new_link": "Tạo liên kết mới",
+				"generating_new_code": "Đang tạo mã mới",
+				"regenerate_countdown_text": "Liên kết mới sẽ được tạo sau $counter giây"
+			}
+		}
+	},
+	"referral": {
+		"invitation": {
+			"text": {
+				"title": "Giới thiệu bạn bè",
+				"referral_link_copied": "Liên kết giới thiệu đã được sao chép vào khay nhớ tạm.",
+				"information": "Nhận sprinkles thưởng, mỗi khi bạn bè của bạn nhận được một cái!",
+				"not_referred_yet": "Bạn chưa giới thiệu bất kỳ ai",
+				"referred_amount": "Bạn đã giới thiệu $amount người",
+				"learn_more": "Tìm hiểu thêm"
+			},
+			"error": {
+				"loading_referrer_info": "Lỗi khi tải thông tin người giới thiệu",
+				"setting_referrer": "Lỗi khi đặt người giới thiệu"
+			}
+		}
+	},
+	"address_book": {
+		"text": {
+			"title": "Sổ địa chỉ",
+			"empty_title": "Danh bạ của bạn trống",
+			"empty_text": "Tất cả các liên hệ của bạn sẽ được hiển thị ở đây",
+			"add_new_contact": "Thêm liên hệ mới",
+			"add_contact": "Thêm liên hệ",
+			"search_contact": "Tìm kiếm liên hệ",
+			"no_address_found": "Không có địa chỉ nào khả dụng.",
+			"no_contact_found": "Không tìm thấy liên hệ nào"
+		},
+		"alt": {
+			"show_addresses_of_contact": "Hiển thị tất cả các địa chỉ liên hệ",
+			"hide_addresses": "Ẩn địa chỉ liên hệ"
+		},
+		"edit_contact": {
+			"title": "Chỉnh sửa liên hệ",
+			"add_address": "Thêm địa chỉ",
+			"delete_contact": "Xóa liên hệ"
+		},
+		"avatar": {
+			"default": "Ảnh đại diện mặc định",
+			"avatar_for": "Ảnh đại diện cho",
+			"avatar_loading": "Ảnh đại diện đang tải..."
+		},
+		"edit_avatar": {
+			"menu_title": "Chỉnh sửa hình đại diện",
+			"upload_image": "Tải hình đại diện lên",
+			"replace_image": "Thay thế hình đại diện",
+			"remove_image": "Xóa hình đại diện"
+		},
+		"show_contact": {
+			"title": "Liên hệ",
+			"add_address": "Thêm địa chỉ",
+			"show_address_text": "Các địa chỉ liên quan sẽ xuất hiện ở đây",
+			"add_first_address": "Thêm địa chỉ đầu tiên vào $contactName!"
+		},
+		"create_contact": {
+			"title": "Tạo liên hệ"
+		}
+	},
+	"contact": {
+		"form": {
+			"edit_contact": "Chỉnh sửa liên hệ",
+			"add_new_contact": "Thêm liên hệ mới"
+		},
+		"fields": {
+			"name": "Tên"
+		},
+		"delete": {
+			"title": "Xóa liên hệ $contact?",
+			"delete_contact": "Xóa liên hệ",
+			"content_text": "Thao tác này sẽ xóa $contact và tất cả các địa chỉ liên quan khỏi Sổ địa chỉ của bạn. Thao tác này không thể hoàn tác."
+		},
+		"error": {
+			"create": "Không thể tạo liên hệ",
+			"update": "Không thể cập nhật liên hệ",
+			"delete": "Không thể xóa liên hệ",
+			"name_too_long": "Vui lòng giữ tên không quá $maxCharacters ký tự."
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
+		},
+		"form": {
+			"new_address": "Địa chỉ mới",
+			"address_placeholder": "Nhập hoặc dán địa chỉ",
+			"label_placeholder": "Ví dụ: “Ví của mẹ”",
+			"invalid_address": "Địa chỉ không hợp lệ",
+			"valid_for_networks": "Hợp lệ cho các mạng:",
+			"error": {
+				"label_too_long": "Nhãn không được vượt quá $maxCharacters ký tự"
+			}
+		},
+		"fields": {
+			"label": "Biệt danh",
+			"address": "Địa chỉ"
+		},
+		"delete": {
+			"title": "Xóa địa chỉ?",
+			"delete_address": "Xóa địa chỉ",
+			"content_text": "Thao tác này sẽ xóa địa chỉ <strong>$address</strong> khỏi liên hệ của $contact.<br>Thao tác này không thể hoàn tác."
+		},
+		"save": {
+			"title": "Lưu địa chỉ",
+			"add_to_existing_contact": "Thêm vào liên hệ hiện có",
+			"create_contact": "Tạo liên hệ"
+		},
+		"qr": {
+			"title": "Quét mã QR"
+		}
+	},
+	"signer": {
+		"sign_in": {
+			"text": {
+				"access_your_wallet": "Truy cập ví $oisy_name của bạn",
+				"open_or_create": "Mở hoặc tạo ví của bạn để kết nối an toàn với dApp và bắt đầu quản lý tài sản của bạn."
+			}
+		},
+		"idle": {
+			"text": {
+				"waiting": "Đang chờ dApp tương tác..."
+			},
+			"alt": {
+				"img_placeholder": "Biểu tượng phi hành gia di chuyển mắt từ trái sang phải trong khi chờ tin nhắn từ dapp của bên phụ thuộc"
+			}
+		},
+		"permissions": {
+			"text": {
+				"title": "Xem lại quyền",
+				"requested_permissions": "Quyền được yêu cầu",
+				"your_wallet_address": "Địa chỉ ví của bạn",
+				"icrc27_accounts": "Xem địa chỉ $oisy_name của bạn",
+				"icrc49_call_canister": "Yêu cầu phê duyệt giao dịch"
+			},
+			"error": {
+				"no_confirm_callback": "Không có hàm gọi lại để xác nhận quyền, điều này không mong muốn. Đóng ví và thử lại."
+			}
+		},
+		"origin": {
+			"text": {
+				"request_from": "Yêu cầu từ:",
+				"invalid_origin": "Nguồn gốc không hợp lệ!!"
+			},
+			"alt": {
+				"link_to_dapp": "Liên kết đến dApp yêu cầu quyền"
+			}
+		},
+		"consent_message": {
+			"text": {
+				"loading": "Đang tải thông báo đồng ý..."
+			},
+			"warning": {
+				"token_without_consent_message": "Token này không cung cấp thông báo xác nhận, vì vậy thông tin dưới đây đã được $oisy_short trích xuất."
+			},
+			"error": {
+				"no_approve_callback": "Không có hàm gọi lại để chấp thuận thông báo đồng ý, điều này không mong muốn. Đóng ví và thử lại.",
+				"no_reject_callback": "Không có hàm gọi lại để từ chối thông báo đồng ý, điều này không mong muốn. Đóng ví và thử lại.",
+				"retrieve": "Đã xảy ra lỗi trong khi truy xuất thông báo đồng ý"
+			}
+		},
+		"call_canister": {
+			"text": {
+				"processing": "Đang xử lý yêu cầu...",
+				"executed": "Yêu cầu đã được thực hiện",
+				"close_window": "Bạn có thể đóng cửa sổ này",
+				"error": "Yêu cầu thất bại do lỗi",
+				"try_again": "Vui lòng thử lại. Nếu sự cố vẫn tiếp diễn, hãy liên hệ với nhà phát triển dapp nơi bạn đã khởi tạo yêu cầu."
+			},
+			"error": {
+				"cannot_call": "Không thể xử lý cuộc gọi"
+			}
+		}
+	},
+	"carousel": {
+		"text": {
+			"next_slide": "Trang chiếu tiếp theo",
+			"prev_slide": "Trang chiếu trước",
+			"indicator": "Chuyển đến trang chiếu $index"
+		}
+	},
+	"agreements": {
+		"text": {
+			"updated_agreements_warning": "Chúng tôi đã cập nhật $agreements. Bằng cách sử dụng $oisy_short, bạn xác nhận rằng bạn đã đọc và đồng ý với các cập nhật."
+		},
+		"error": {
+			"cannot_update_user_agreements": "Đã xảy ra lỗi khi cập nhật các thỏa thuận của bạn."
+		}
+	},
+	"license_agreement": {
+		"text": {
+			"license_agreement": "Thỏa thuận cấp phép",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"license_agreement": "Thỏa thuận cấp phép $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "Điều khoản sử dụng",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
+			"title": "",
+			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": "Liên kết đến Điều khoản sử dụng"
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "Chính sách quyền riêng tư",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": "Liên kết đến Chính sách bảo mật"
+		}
+	},
+	"activity": {
+		"text": {
+			"title": "Hoạt động gần đây"
+		},
+		"info": {
+			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập."
+		},
+		"warning": {
+			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",
+			"unavailable_index_canister": "Không thể hiển thị giao dịch cho $token_list. Canister index hiện không khả dụng."
+		}
+	},
+	"earning": {
+		"text": {
+			"title": "Kiếm tiền",
+			"tab_title": "",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": "",
+			"go_to_earn": ""
+		},
+		"cards": {
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"networks": "",
+			"assets": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
+		}
+	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
+	"stake": {
+		"text": {
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
+			"stake": "",
+			"stake_now": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
+			"unstake": "",
+			"unstake_now": "",
+			"unstaking": "",
+			"unstake_token": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"earning_potential": "",
+			"earning_potential_hint": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
+			"visit_provider": "",
+			"current_apy_label": "",
+			"max_apy_label": "",
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_reward_short": "",
+			"claim_now": "",
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_asset_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
+			"dissolvement_limit_reached": ""
+		},
+		"info": {
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
+		}
+	},
+	"temporal": {
+		"seconds_to_duration": {
+			"year": "năm",
+			"year_plural": "năm",
+			"month": "tháng",
+			"month_plural": "tháng",
+			"day": "ngày",
+			"day_plural": "ngày",
+			"hour": "giờ",
+			"hour_plural": "giờ",
+			"minute": "phút",
+			"minute_plural": "phút",
+			"second": "giây",
+			"second_plural": "giây"
+		},
+		"time_frame": {
+			"t_24h": ""
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "Trợ lý AI $oisy_short",
+			"welcome_message": "Xin chào! 👋 Tôi là chuyên gia AI cá nhân của bạn. Tôi có thể giúp gì cho bạn?",
+			"action_button_contacts_title": "Hiển thị danh bạ",
+			"action_button_contacts_subtitle": "Hiển thị danh bạ đã lưu của bạn",
+			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
+			"action_button_send_tokens_title": "Gửi token",
+			"action_button_send_tokens_subtitle": "Chuẩn bị để gửi trong tích tắc",
+			"action_button_send_tokens_prompt": "Tôi muốn gửi một số token",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
+			"select_contact_message": "Chọn một liên hệ để bắt đầu quá trình gửi:",
+			"send_to_message": "Gửi đến $contact_name ($address_info).",
+			"send_message": "Gửi tin nhắn",
+			"send_message_input_placeholder": "Bạn muốn làm gì?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
+			"send_token_succeeded": "Giao dịch đã hoàn tất!",
+			"show_total_balance_tool_card_title": "",
+			"no_contacts_found_message": "Rất tiếc, tôi không thể tìm thấy bất kỳ liên hệ phù hợp nào trong sổ địa chỉ của bạn.",
+			"loading": "Đang suy nghĩ...",
+			"reset_chat_history": "Đặt lại lịch sử trò chuyện",
+			"feature_description": "Trợ lý AI cho phép bạn hỏi về các chủ đề tiền điện tử chung, nhận trợ giúp về các tính năng OISY cụ thể và gửi token. Lưu ý rằng không có dữ liệu nhạy cảm nào như địa chỉ của bạn hoặc của các liên hệ của bạn được gửi đến trợ lý và tất cả các giao dịch phải được người dùng xác nhận. Tính năng này vẫn đang trong giai đoạn beta và chúng tôi đang tung ra các tính năng mới một cách thường xuyên."
+		},
+		"errors": {
+			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",
+			"no_response": "Xin lỗi, tôi không nhận được phản hồi từ LLM."
+		}
+	}
+}

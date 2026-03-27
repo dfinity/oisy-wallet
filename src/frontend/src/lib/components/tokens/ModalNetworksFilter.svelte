@@ -1,25 +1,38 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import NetworkSwitcherList from '$lib/components/networks/NetworkSwitcherList.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { MODAL_FILTER_NETWORKS } from '$lib/constants/test-ids.constants';
 	import { networks } from '$lib/derived/networks.derived';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import type { NetworkId } from '$lib/types/network';
+	import type { Network, OptionNetworkId } from '$lib/types/network';
+
+	interface Props {
+		allNetworksEnabled?: boolean;
+		filteredNetworks?: Network[];
+		showStakeBalance?: boolean;
+		onNetworkFilter: () => void;
+	}
+
+	let {
+		allNetworksEnabled,
+		filteredNetworks,
+		showStakeBalance = true,
+		onNetworkFilter
+	}: Props = $props();
 
 	const { setFilterNetwork, filterNetwork } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
 	);
 
-	const dispatch = createEventDispatcher();
+	const back = () => onNetworkFilter();
 
-	const back = () => dispatch('icNetworkFilter');
-
-	const onNetworkSelect = ({ detail: networkId }: CustomEvent<NetworkId>) => {
+	const onNetworkSelect = (networkId: OptionNetworkId) => {
 		const network = $networks.find(({ id }) => id === networkId);
 
 		setFilterNetwork(network);
@@ -28,12 +41,15 @@
 	};
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar testId={MODAL_FILTER_NETWORKS}>
 	<NetworkSwitcherList
-		on:icSelected={onNetworkSelect}
-		selectedNetworkId={$filterNetwork?.id}
-		delayOnNetworkSelect={false}
+		{allNetworksEnabled}
 		labelsSize="lg"
+		onSelected={onNetworkSelect}
+		selectedNetworkId={$filterNetwork?.id}
+		{showStakeBalance}
+		showTestnets={false}
+		supportedNetworks={filteredNetworks}
 	/>
 
 	{#snippet toolbar()}

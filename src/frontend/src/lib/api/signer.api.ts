@@ -1,21 +1,23 @@
+import type { BtcAddress } from '$btc/types/address';
 import type {
 	BitcoinNetwork,
 	EthSignTransactionRequest,
-	SendBtcResponse
+	SendBtcResponse,
+	SignBtcResponse
 } from '$declarations/signer/signer.did';
+import type { EthAddress } from '$eth/types/address';
+import { CanisterApi } from '$lib/api/canister.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
-import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type {
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish } from '@dfinity/utils';
 
-let canister: SignerCanister | undefined = undefined;
+const signerApi = new CanisterApi<SignerCanister>();
 
 export const getBtcAddress = async ({
 	identity,
@@ -61,6 +63,15 @@ export const signTransaction = async ({
 	return signTransaction({ transaction });
 };
 
+export const signBtc = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SendBtcParams>): Promise<SignBtcResponse> => {
+	const { signBtc } = await signerCanister({ identity });
+
+	return signBtc(params);
+};
+
 export const signMessage = async ({
 	message,
 	identity
@@ -93,7 +104,7 @@ export const sendBtc = async ({
 export const getSchnorrPublicKey = async ({
 	identity,
 	...rest
-}: CanisterApiFunctionParams<GetSchnorrPublicKeyParams>): Promise<Uint8Array | number[]> => {
+}: CanisterApiFunctionParams<GetSchnorrPublicKeyParams>): Promise<Uint8Array> => {
 	const { getSchnorrPublicKey } = await signerCanister({ identity });
 
 	return await getSchnorrPublicKey(rest);
@@ -102,7 +113,7 @@ export const getSchnorrPublicKey = async ({
 export const signWithSchnorr = async ({
 	identity,
 	...rest
-}: CanisterApiFunctionParams<SignWithSchnorrParams>): Promise<Uint8Array | number[]> => {
+}: CanisterApiFunctionParams<SignWithSchnorrParams>): Promise<Uint8Array> => {
 	const { signWithSchnorr } = await signerCanister({ identity });
 
 	return await signWithSchnorr(rest);
@@ -115,12 +126,9 @@ const signerCanister = async ({
 }: CanisterApiFunctionParams): Promise<SignerCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	if (isNullish(canister)) {
-		canister = await SignerCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return canister;
+	return await signerApi.getCanister({
+		identity,
+		canisterId,
+		create: SignerCanister.create
+	});
 };

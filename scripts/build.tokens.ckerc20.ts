@@ -8,16 +8,12 @@ import type {
 } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import {
-	CkETHOrchestratorCanister,
-	type ManagedCanisters,
-	type OrchestratorInfo
-} from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
-import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
-import { existsSync, writeFileSync } from 'node:fs';
+import { fromNullable, isNullish, jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
+import { CkEthOrchestratorCanister, type CkEthOrchestratorDid } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { agent, loadMetadata, saveLogo } from './build.tokens.utils';
+import { agent, loadMetadata, saveIcon } from './build.tokens.utils';
 import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
@@ -47,8 +43,8 @@ const orchestratorInfo = async ({
 	orchestratorId: canisterId
 }: {
 	orchestratorId: Principal;
-}): Promise<OrchestratorInfo> => {
-	const { getOrchestratorInfo } = CkETHOrchestratorCanister.create({
+}): Promise<CkEthOrchestratorDid.OrchestratorInfo> => {
+	const { getOrchestratorInfo } = CkEthOrchestratorCanister.create({
 		agent,
 		canisterId
 	});
@@ -67,7 +63,7 @@ const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<TokensA
 			index,
 			ckerc20_token_symbol,
 			erc20_contract: { address: erc20ContractAddress }
-		}: ManagedCanisters
+		}: CkEthOrchestratorDid.ManagedCanisters
 	): EnvCkErc20TokensRaw => {
 		const ledgerCanister = fromNullable(ledger);
 		const indexCanister = fromNullable(index);
@@ -155,17 +151,78 @@ const ORCHESTRATOR_PRODUCTION_ID: Principal = Principal.fromText('vxkom-oyaaa-aa
 const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
 
 const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: string }) => {
-	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
-	const file = join(LOGO_FOLDER, `${logoName}.svg`);
+	if (!logoData.startsWith('data:image/svg+xml;')) {
+		const mimeMatch = logoData.match(/^data:([^;]+);/);
 
-	if (existsSync(file)) {
+		console.warn(`Non-SVG logo for ${name}, skipping (MIME: ${mimeMatch?.[1] ?? 'unknown'})`);
+
 		return;
 	}
 
-	saveLogo({ logoData, file, name });
+	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
+
+	saveIcon({ logoData, destDir: LOGO_FOLDER, fileName: logoName, name });
 };
 
+type EnvTokenTags = EnvCkErc20TokensWithMetadata[string]['tags'];
+type EnvTagsRecord = Record<string, Record<string, EnvTokenTags>>;
+
+const readExistingCkErc20Tags = (): EnvTagsRecord => {
+	if (!existsSync(CK_ERC20_JSON_FILE)) {
+		return {};
+	}
+
+	try {
+		const existing = JSON.parse(readFileSync(CK_ERC20_JSON_FILE, 'utf8'), jsonReviver) as Record<
+			string,
+			Record<string, { tags?: EnvTokenTags }>
+		>;
+
+		return Object.entries(existing).reduce<EnvTagsRecord>((envAcc, [env, tokens]) => {
+			const envTags = Object.entries(tokens).reduce<Record<string, EnvTokenTags>>(
+				(acc, [symbol, data]) => {
+					if (nonNullish(data?.tags)) {
+						acc[symbol] = data.tags;
+					}
+					return acc;
+				},
+				{}
+			);
+
+			if (Object.keys(envTags).length > 0) {
+				envAcc[env] = envTags;
+			}
+
+			return envAcc;
+		}, {});
+	} catch (err: unknown) {
+		console.error(
+			`Failed to parse existing CK ERC20 tags from ${CK_ERC20_JSON_FILE}. Aborting to avoid losing curated tags.`,
+			err
+		);
+		throw err;
+	}
+};
+
+const mergeTags = ({
+	tokens,
+	envTags
+}: {
+	tokens: EnvCkErc20TokensWithMetadata;
+	envTags: Record<string, EnvTokenTags> | undefined;
+}): EnvCkErc20TokensWithMetadata =>
+	isNullish(envTags)
+		? tokens
+		: Object.fromEntries(
+				Object.entries(tokens).map(([symbol, data]) => [
+					symbol,
+					nonNullish(envTags[symbol]) ? { ...data, tags: envTags[symbol] } : data
+				])
+			);
+
 const findCkErc20 = async () => {
+	const existingTags = readExistingCkErc20Tags();
+
 	const [
 		{ tokens: staging, icons: stagingIcons },
 		{ tokens: production, icons: productionIcons }
@@ -174,8 +231,8 @@ const findCkErc20 = async () => {
 	);
 
 	const tokens: EnvTokensCkErc20 = {
-		production,
-		staging
+		production: mergeTags({ tokens: production, envTags: existingTags['production'] }),
+		staging: mergeTags({ tokens: staging, envTags: existingTags['staging'] })
 	};
 
 	writeFileSync(CK_ERC20_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));

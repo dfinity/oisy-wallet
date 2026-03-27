@@ -1,12 +1,10 @@
 import type { Contact, ContactAddressData } from '$declarations/backend/backend.did';
-import type { ContactAddressUi } from '$lib/types/contact';
-import { mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
+import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
-import { mockBtcAddress } from './btc.mock';
-import { mockEthAddress } from './eth.mocks';
-import { mockAccountIdentifierText } from './identity.mock';
 
 export const mockBackendContactAddressSol: ContactAddressData = {
 	token_account_id: { Sol: mockSolAddress },
@@ -40,7 +38,8 @@ export const getMockContacts = ({
 					id: BigInt(i),
 					name: names?.[i] ?? 'Testname',
 					update_timestamp_ns: 12,
-					addresses: nonNullish(addresses?.[i]) ? addresses[i] : []
+					addresses: nonNullish(addresses?.[i]) ? addresses[i] : [],
+					image: []
 				}) as unknown as Contact
 		);
 
@@ -73,15 +72,11 @@ export const getMockContactsUi = ({
 	n: number;
 	name?: string;
 	addresses: ContactAddressUi[];
-}): Contact[] =>
-	Array(n)
-		.fill(null)
-		.map(
-			(_, i) =>
-				({
-					id: BigInt(i),
-					name: name ?? 'Testname',
-					updateTimestampNs: 12,
-					addresses
-				}) as unknown as Contact
-		);
+}): ContactUi[] =>
+	Array.from({ length: n }, (_, i) => ({
+		id: BigInt(i),
+		name: name ?? 'Testname',
+		updateTimestampNs: BigInt(12),
+		addresses,
+		image: undefined
+	}));

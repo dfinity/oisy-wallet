@@ -3,13 +3,12 @@ import { withdrawErc20, withdrawEth } from '$icp/api/cketh-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import type { IcCanisters, IcCkMetadata, IcCkToken } from '$icp/types/ic-token';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
-import type { IcrcBlockIndex } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
+import type { IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 export const convertCkBTCToBtc = async ({
@@ -31,7 +30,7 @@ export const convertCkBTCToBtc = async ({
 		to
 	});
 
-	progress(ProgressStepsSendIc.SEND);
+	progress?.(ProgressStepsSendIc.SEND);
 
 	await retrieveBtc({
 		identity,
@@ -93,7 +92,7 @@ export const convertCkErc20ToErc20 = async ({
 
 	// 3. Withdraw Erc20
 
-	progress(ProgressStepsSendIc.SEND);
+	progress?.(ProgressStepsSendIc.SEND);
 
 	await withdrawErc20({
 		identity,
@@ -123,7 +122,7 @@ export const convertCkETHToEth = async ({
 		to
 	});
 
-	progress(ProgressStepsSendIc.SEND);
+	progress?.(ProgressStepsSendIc.SEND);
 
 	await withdrawEth({
 		identity,
@@ -144,8 +143,8 @@ const approveTransfer = ({
 	progressStep?: ProgressStepsSendIc;
 } & {
 	canisters: Pick<IcCanisters, 'ledgerCanisterId'> & IcCkMetadata;
-}): Promise<IcrcBlockIndex> => {
-	progress(progressStep);
+}): Promise<IcrcLedgerDid.BlockIndex> => {
+	progress?.(progressStep);
 
 	return approve({
 		identity,

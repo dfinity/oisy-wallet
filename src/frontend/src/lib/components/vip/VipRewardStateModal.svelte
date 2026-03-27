@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { GLDT_IC_DATA } from '$env/networks/networks.icrc.env';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
-	import { setCustomToken } from '$icp-eth/services/custom-token.services';
+	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
+	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
+	import successfulClickBeeReward from '$lib/assets/successful-clickbee-reward.svg';
 	import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -16,7 +17,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -29,19 +29,14 @@
 
 	let { isSuccessful, codeType = QrCodeType.VIP }: Props = $props();
 
-	const goldToken = $derived(
-		$enabledIcTokens.find((token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId)
-	);
+	const goldToken = $derived($enabledIcTokens.find((token) => isGLDTToken(token)));
 
 	const enableGldtToken = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
-		const token = $icrcTokens.find(
-			({ ledgerCanisterId }) => ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId
-		);
+		const token = $icrcTokens.find((token) => isGLDTToken(token));
 
 		await autoLoadSingleToken({
 			token,
@@ -65,21 +60,23 @@
 	<Sprinkles />
 {/if}
 
-<Modal on:nnsClose={close}>
-	<svelte:fragment slot="title">
+<Modal onClose={close}>
+	{#snippet title()}
 		<span class="text-xl"
 			>{isSuccessful
 				? $i18n.vip.reward.text.title_successful
 				: $i18n.vip.reward.text.title_failed}</span
 		>
-	</svelte:fragment>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<ImgBanner
 			src={isSuccessful
 				? codeType === QrCodeType.VIP
 					? successfulVipReward
-					: successfulBinanceReward
+					: codeType === QrCodeType.GOLD
+						? successfulBinanceReward
+						: successfulClickBeeReward
 				: failedVipReward}
 			styleClass="aspect-auto"
 			testId={VIP_STATE_IMAGE_BANNER}
@@ -92,18 +89,20 @@
 		>
 		<span class="block w-full text-center"
 			>{isSuccessful
-				? $i18n.vip.reward.text.reward_received_description
+				? codeType === QrCodeType.VIP
+					? $i18n.vip.reward.text.reward_received_description
+					: $i18n.vip.reward.text.brand_reward_received_description
 				: $i18n.vip.reward.text.reward_failed_description}</span
 		>
 
 		{#snippet toolbar()}
 			<Button
-				paddingSmall
 				colorStyle="secondary-light"
-				type="button"
 				fullWidth
 				onclick={close}
+				paddingSmall
 				testId={VIP_STATE_BUTTON}
+				type="button"
 			>
 				{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
 			</Button>

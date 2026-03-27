@@ -8,7 +8,7 @@ import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkMetadata, IcCkToken, IcToken } from '$icp/types/ic-token';
-import { TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR } from '$lib/constants/analytics.constants';
 import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 import { waitWalletReady } from '$lib/services/actions.services';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -21,17 +21,17 @@ import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import {
-	MinterNoNewUtxosError,
-	type EstimateWithdrawalFee,
-	type PendingUtxo
-} from '@dfinity/ckbtc';
-import {
 	assertNonNullish,
 	isNullish,
 	nonNullish,
 	queryAndUpdate,
 	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
+import {
+	MinterNoNewUtxosError,
+	type CkBtcMinterDid,
+	type EstimateWithdrawalFee
+} from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 export const updateBalance = async ({
@@ -80,10 +80,10 @@ const populatePendingUtxos = ({
 	pendingUtxos,
 	tokenId
 }: {
-	pendingUtxos: PendingUtxo[];
+	pendingUtxos: CkBtcMinterDid.PendingUtxo[];
 	tokenId: TokenId;
 }) => {
-	const data: CertifiedData<PendingUtxo[]> = {
+	const data: CertifiedData<CkBtcMinterDid.PendingUtxo[]> = {
 		certified: true,
 		data: pendingUtxos
 	};

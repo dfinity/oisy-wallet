@@ -1,6 +1,7 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
@@ -8,7 +9,7 @@ import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
-import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
@@ -20,15 +21,14 @@ import {
 } from '$icp/utils/ic-transactions.utils';
 import { MICRO_TRANSACTION_USD_THRESHOLD, ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
 import type {
 	AllTransactionUiWithCmp,
 	AnyTransactionUi,
-	AnyTransactionUiWithToken
-} from '$lib/types/transaction';
+	AnyTransactionUiWithToken,
+	EthAllTransactionUiWithCmp
+} from '$lib/types/transaction-ui';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
@@ -39,8 +39,73 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+/**
+ * Finds EVM/ETH native-token transactions that are duplicates of non-native transactions
+ * sharing the same hash on the same network.
+ *
+ * For deposit/transfer operations, two transactions are received: the ERC token transfer
+ * and the native fee payment. This identifies the native fee entries to exclude.
+ */
+const findDuplicateEthNativeTransactions = (
+	ethTransactions: EthAllTransactionUiWithCmp[]
+): Set<EthAllTransactionUiWithCmp> => {
+	// Group ETH transactions by (networkId, hash) to detect duplicates.
+	const groupsByNetworkAndHash = new Map<symbol, Map<string, EthAllTransactionUiWithCmp[]>>();
+
+	for (const tx of ethTransactions) {
+		const { hash } = tx.transaction;
+
+		if (nonNullish(hash)) {
+			const networkId = tx.token.network.id;
+
+			if (!groupsByNetworkAndHash.has(networkId)) {
+				groupsByNetworkAndHash.set(networkId, new Map());
+			}
+
+			const networkMap = groupsByNetworkAndHash.get(networkId);
+
+			if (isNullish(networkMap)) {
+				const newNetworkMap = new Map<string, EthAllTransactionUiWithCmp[]>();
+
+				newNetworkMap.set(hash, [tx]);
+
+				groupsByNetworkAndHash.set(networkId, newNetworkMap);
+			} else {
+				if (!networkMap.has(hash)) {
+					networkMap.set(hash, []);
+				}
+
+				networkMap.get(hash)?.push(tx);
+			}
+		}
+	}
+
+	// For each group with duplicates, mark native fee entries for removal
+	// only when the group also contains at least one non-native (e.g. ERC-20) transfer.
+	const duplicates = new Set<EthAllTransactionUiWithCmp>();
+
+	for (const networkMap of groupsByNetworkAndHash.values()) {
+		for (const group of networkMap.values()) {
+			if (group.length > 1) {
+				const hasNonNative = group.some(({ token }) => token.standard.code !== 'ethereum');
+
+				if (hasNonNative) {
+					for (const tx of group) {
+						if (tx.token.standard.code === 'ethereum') {
+							duplicates.add(tx);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return duplicates;
+};
 
 /**
  * Maps the transactions stores to a unified list of transactions with their respective token and components.
@@ -69,14 +134,14 @@ export const mapAllTransactionsUi = ({
 	$icPendingTransactionsStore
 }: {
 	tokens: Token[];
-	$btcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
-	$ethTransactions: EthTransactionsData;
+	$btcTransactions: BtcCertifiedTransactionsData;
+	$ethTransactions: EthCertifiedTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
-	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+	$solTransactions: SolCertifiedTransactionsData;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
-	$icTransactionsStore: CertifiedStoreData<IcTransactionsData>;
+	$icTransactionsStore: IcCertifiedTransactionsData;
 	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
 	$icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
 }): AllTransactionUiWithCmp[] => {
@@ -88,7 +153,10 @@ export const mapAllTransactionsUi = ({
 		$ckEthMinterInfo?.[SEPOLIA_TOKEN_ID]
 	);
 
-	return tokens.reduce<AllTransactionUiWithCmp[]>((acc, token) => {
+	// Collected separately to scope deduplication only to ETH/EVM transactions.
+	const ethTransactions: EthAllTransactionUiWithCmp[] = [];
+
+	const allTransactions = tokens.reduce<AllTransactionUiWithCmp[]>((acc, token) => {
 		const {
 			id: tokenId,
 			network: { id: networkId }
@@ -112,20 +180,21 @@ export const mapAllTransactionsUi = ({
 		if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
 			const isSepoliaNetwork = isNetworkIdSepolia(networkId);
 
-			return [
-				...acc,
-				...($ethTransactions[tokenId] ?? []).map((transaction) => ({
-					transaction: mapEthTransactionUi({
-						transaction,
-						ckMinterInfoAddresses: isSepoliaNetwork
-							? ckEthMinterInfoAddressesSepolia
-							: ckEthMinterInfoAddressesMainnet,
-						$ethAddress
-					}),
-					token,
-					component: 'ethereum' as const
-				}))
-			];
+			const mapped = ($ethTransactions?.[tokenId] ?? []).map(({ data: transaction }) => ({
+				transaction: mapEthTransactionUi({
+					transaction,
+					ckMinterInfoAddresses: isSepoliaNetwork
+						? ckEthMinterInfoAddressesSepolia
+						: ckEthMinterInfoAddressesMainnet,
+					ethAddress: $ethAddress
+				}),
+				token,
+				component: 'ethereum' as const
+			}));
+
+			ethTransactions.push(...mapped);
+
+			return [...acc, ...mapped];
 		}
 
 		if (isNetworkIdICP(networkId)) {
@@ -187,9 +256,16 @@ export const mapAllTransactionsUi = ({
 
 		return acc;
 	}, []);
+
+	// Remove native ETH/EVM transactions that duplicate an ERC token transfer on the same network and hash.
+	const duplicates = findDuplicateEthNativeTransactions(ethTransactions);
+
+	return duplicates.size > 0
+		? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
+		: allTransactions;
 };
 
-//When using this filter function in combination with an infinite loader we need to make sure that the transactions are filtered while loading and not right before displaying them.
+// When using this filter function in combination with an infinite loader we need to make sure that the transactions are filtered while loading and not right before displaying them.
 export const filterReceivedMicroTransactions = ({
 	transactions,
 	exchanges

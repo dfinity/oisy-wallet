@@ -1,4 +1,5 @@
 import type { ToastMsg } from '$lib/types/toast';
+import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import { toastsStore } from '@dfinity/gix-components';
 import { nonNullish } from '@dfinity/utils';
@@ -11,7 +12,7 @@ interface ToastsErrorParams {
 }
 export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams): symbol => {
 	if (nonNullish(err)) {
-		console.error(err);
+		consoleError(err);
 	}
 
 	return toastsStore.show({
@@ -22,7 +23,7 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 };
 
 export const toastsErrorNoTrace = ({ msg, err }: ToastsErrorParams) => {
-	console.error(`${msg.text}:`, err);
+	consoleError(`${msg.text}:`, err);
 
 	return toastsError({
 		msg

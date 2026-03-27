@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
+	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
@@ -8,8 +9,9 @@
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
 		loading?: boolean;
-		loadingAsSkeleton?: boolean;
+		initialising?: boolean;
 		fullWidth?: boolean;
+		contentFullWidth?: boolean;
 		alignLeft?: boolean;
 		link?: boolean;
 		inlineLink?: boolean;
@@ -17,8 +19,10 @@
 		testId?: string;
 		ariaLabel?: string;
 		styleClass?: string;
+		innerStyleClass?: string;
 		transparent?: boolean;
 		onclick?: MouseEventHandler<HTMLButtonElement>;
+		ondblclick?: MouseEventHandler<HTMLButtonElement>;
 		children: Snippet;
 	}
 
@@ -26,9 +30,10 @@
 		colorStyle = 'primary',
 		type = 'submit',
 		disabled,
-		loading = false,
-		loadingAsSkeleton = true,
+		loading = false, // renders with spinner
+		initialising = false, // renders as skeleton
 		fullWidth = false,
+		contentFullWidth = false,
 		alignLeft = false,
 		link = false,
 		inlineLink = false,
@@ -36,43 +41,58 @@
 		testId,
 		ariaLabel,
 		styleClass = '',
+		innerStyleClass = '',
 		transparent,
 		onclick,
+		ondblclick,
 		children
 	}: Props = $props();
 </script>
 
 <button
 	class={`${colorStyle} flex text-center ${styleClass}`}
+	class:animate-pulse={loading || initialising}
+	class:cursor-not-allowed={loading || initialising || disabled}
+	class:duration-500={loading || initialising}
+	class:ease-in-out={loading || initialising}
 	class:flex-1={!inlineLink}
 	class:font-normal={inlineLink}
-	class:text-tertiary={inlineLink}
-	class:underline={inlineLink}
 	class:hover:text-brand-primary={inlineLink}
-	class:padding-sm={paddingSmall}
-	class:w-full={fullWidth}
-	class:link
-	{type}
 	class:justify-start={alignLeft}
-	disabled={disabled ?? loading}
-	class:loading
-	class:transition={loading}
-	class:duration-500={loading}
-	class:ease-in-out={loading}
-	class:animate-pulse={loading}
+	class:link
+	class:loading={loading || initialising}
+	class:padding-sm={paddingSmall}
+	class:text-tertiary={inlineLink}
+	class:transition={loading || initialising}
 	class:transparent
-	{onclick}
-	data-tid={testId}
+	class:underline={inlineLink}
+	class:w-full={fullWidth}
 	aria-label={ariaLabel}
+	data-tid={testId}
+	disabled={disabled ?? (loading || initialising)}
+	{onclick}
+	{ondblclick}
+	{type}
 >
 	<span
-		class="flex gap-2"
-		class:transition={loading}
-		class:duration-500={loading}
-		class:ease-in-out={loading}
-		class:invisible={loading && loadingAsSkeleton}
-		aria-hidden={loading && loadingAsSkeleton}
+		class={`relative flex min-w-0 gap-2 ${innerStyleClass}`}
+		class:duration-500={loading || initialising}
+		class:ease-in-out={loading || initialising}
+		class:invisible={initialising}
+		class:transition={loading || initialising}
+		class:w-full={contentFullWidth}
+		aria-hidden={initialising}
 	>
-		{@render children()}
+		{#if loading}
+			<span class="absolute flex h-full w-full items-center justify-center">
+				<Spinner />
+			</span>
+
+			<span class="invisible">
+				{@render children()}
+			</span>
+		{:else}
+			{@render children()}
+		{/if}
 	</span>
 </button>

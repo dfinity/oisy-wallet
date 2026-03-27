@@ -1,229 +1,23 @@
-import type { EligibilityReport, RewardInfo, UserData } from '$declarations/rewards/rewards.did';
-import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
-import * as rewardApi from '$lib/api/reward.api';
-import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
-import { RewardType } from '$lib/enums/reward-type';
-import type { RewardResponseInfo } from '$lib/types/reward';
+import type { EligibilityReport } from '$declarations/rewards/rewards.did';
 import {
-	INITIAL_REWARD_RESULT,
+	SPRINKLES_SEASON_1_EPISODE_3_ID,
+	SPRINKLES_SEASON_1_EPISODE_4_ID,
+	SPRINKLES_SEASON_1_EPISODE_5_ID
+} from '$env/reward-campaigns.env';
+import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+import {
 	getCampaignState,
 	isEndedCampaign,
 	isOngoingCampaign,
 	isUpcomingCampaign,
-	loadRewardResult,
-	mapEligibilityReport
+	mapEligibilityReport,
+	normalizeNetworkMultiplier,
+	sortRewards
 } from '$lib/utils/rewards.utils';
-import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
-import { assertNonNullish, fromNullable, toNullable } from '@dfinity/utils';
+import { assertNonNullish, toNullable } from '@dfinity/utils';
 
 describe('rewards.utils', () => {
-	describe('loadRewardResult', () => {
-		beforeEach(() => {
-			sessionStorage.clear();
-		});
-
-		const lastTimestamp = BigInt(Date.now());
-		const mockedReward: RewardInfo = {
-			timestamp: lastTimestamp,
-			amount: 1000000n,
-			ledger: mockIdentity.getPrincipal(),
-			name: ['airdrop'],
-			campaign_name: ['deuteronomy'], // Note: This is no longer optional and will be superceded by campaign_id.
-			campaign_id: 'deuteronomy'
-		};
-
-		const mappedMockedReward: RewardResponseInfo = {
-			timestamp: mockedReward.timestamp,
-			amount: mockedReward.amount,
-			ledger: mockedReward.ledger,
-			name: fromNullable(mockedReward.name),
-			campaignName: fromNullable(mockedReward.campaign_name),
-			campaignId: mockedReward.campaign_id
-		};
-
-		it('should return falsy reward result if result was already loaded', async () => {
-			sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
-
-			const { reward, lastTimestamp, rewardType } = await loadRewardResult(mockIdentity);
-
-			expect(rewardType).toBeUndefined();
-			expect(reward).toBeUndefined();
-			expect(lastTimestamp).toBeUndefined();
-		});
-
-		it('should return falsy reward result and set entry in the session storage', async () => {
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [],
-				last_snapshot_timestamp: [lastTimestamp],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
-
-			const { rewardType } = await loadRewardResult(mockIdentity);
-
-			expect(rewardType).toBeUndefined();
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
-		});
-
-		it('should return reward with type airdrop and set entry in the session storage', async () => {
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [[mockedReward]],
-				last_snapshot_timestamp: [lastTimestamp],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
-
-			const { reward, rewardType } = await loadRewardResult(mockIdentity);
-
-			expect(reward).toEqual(mappedMockedReward);
-			expect(rewardType).toBe(RewardType.AIRDROP);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
-		});
-
-		it('should return reward with type jackpot and set entry in the session storage', async () => {
-			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [[customMockedReward]],
-				last_snapshot_timestamp: [lastTimestamp],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
-
-			const { reward, rewardType } = await loadRewardResult(mockIdentity);
-
-			expect(reward).toEqual({ ...mappedMockedReward, name: 'jackpot' });
-			expect(rewardType).toBe(RewardType.JACKPOT);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
-		});
-
-		it('should return reward with type jackpot if one of several received rewards is a jackpot and set entry in the session storage', async () => {
-			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [[mockedReward, customMockedReward]],
-				last_snapshot_timestamp: [lastTimestamp],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
-
-			const { reward, rewardType } = await loadRewardResult(mockIdentity);
-
-			expect(reward).toEqual({ ...mappedMockedReward, name: 'jackpot' });
-			expect(rewardType).toBe(RewardType.JACKPOT);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
-		});
-
-		it('should return reward with type referral and set entry in the session storage', async () => {
-			const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [[customMockedReward]],
-				last_snapshot_timestamp: [lastTimestamp],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
-
-			const { reward, rewardType } = await loadRewardResult(mockIdentity);
-
-			expect(reward).toEqual({ ...mappedMockedReward, name: 'referral' });
-			expect(rewardType).toBe(RewardType.REFERRAL);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
-		});
-
-		it('should return reward with type referral if one of several received rewards is a referral and set entry in the session storage', async () => {
-			const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [[mockedReward, customMockedReward]],
-				last_snapshot_timestamp: [lastTimestamp],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
-
-			const { reward, rewardType } = await loadRewardResult(mockIdentity);
-
-			expect(reward).toEqual({ ...mappedMockedReward, name: 'referral' });
-			expect(rewardType).toBe(RewardType.REFERRAL);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
-		});
-
-		it('should return timestamp on initial loading with new reward of type airdrop', async () => {
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [[mockedReward]],
-				last_snapshot_timestamp: [lastTimestamp],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
-
-			const { reward, lastTimestamp: timestamp, rewardType } = await loadRewardResult(mockIdentity);
-
-			expect(reward).toEqual(mappedMockedReward);
-			expect(timestamp).toBe(lastTimestamp);
-			expect(rewardType).toBe(RewardType.AIRDROP);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
-		});
-
-		it('should return timestamp on first login', async () => {
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [],
-				last_snapshot_timestamp: [0n],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
-
-			const { lastTimestamp } = await loadRewardResult(mockIdentity);
-
-			expect(lastTimestamp).toBe(0n);
-		});
-	});
-
 	describe('isOngoingCampaign', () => {
 		it('should return true if the current date is between the start and end dates of the campaign', () => {
 			const startDate = new Date(Date.now() - 86400000);
@@ -356,7 +150,9 @@ describe('rewards.utils', () => {
 											}
 										}
 									}
-								]
+								],
+								probability_multiplier_enabled: [false],
+								probability_multiplier: toNullable(1)
 							}
 						]
 					]
@@ -376,7 +172,9 @@ describe('rewards.utils', () => {
 								days: 7n,
 								count: 5
 							}
-						]
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
 					}
 				]);
 			});
@@ -401,7 +199,9 @@ describe('rewards.utils', () => {
 											}
 										}
 									}
-								]
+								],
+								probability_multiplier_enabled: [false],
+								probability_multiplier: toNullable(1)
 							}
 						]
 					]
@@ -421,7 +221,58 @@ describe('rewards.utils', () => {
 								days: 30n,
 								count: 10
 							}
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
+					}
+				]);
+			});
+		});
+
+		describe('MinTransactionsInNetwork', () => {
+			it('should map MinTransactionsInNetwork criterion', () => {
+				const report: EligibilityReport = {
+					campaigns: [
+						[
+							'campaign1',
+							{
+								available: true,
+								eligible: true,
+								criteria: [
+									{
+										satisfied: true,
+										criterion: {
+											MinTransactionsInNetwork: {
+												duration: { Days: 30n },
+												count: 10
+											}
+										}
+									}
+								],
+								probability_multiplier_enabled: [false],
+								probability_multiplier: toNullable(1)
+							}
 						]
+					]
+				};
+
+				const result = mapEligibilityReport(report);
+
+				expect(result).toEqual([
+					{
+						campaignId: 'campaign1',
+						available: true,
+						eligible: true,
+						criteria: [
+							{
+								satisfied: true,
+								type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
+								days: 30n,
+								count: 10
+							}
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
 					}
 				]);
 			});
@@ -445,7 +296,9 @@ describe('rewards.utils', () => {
 											}
 										}
 									}
-								]
+								],
+								probability_multiplier_enabled: [false],
+								probability_multiplier: toNullable(1)
 							}
 						]
 					]
@@ -464,7 +317,56 @@ describe('rewards.utils', () => {
 								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 								usd: 1000
 							}
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
+					}
+				]);
+			});
+		});
+
+		describe('MinTotalAssetsUsdInNetwork', () => {
+			it('should map MinTotalAssetsUsdInNetwork criterion', () => {
+				const report: EligibilityReport = {
+					campaigns: [
+						[
+							'campaign1',
+							{
+								available: true,
+								eligible: true,
+								criteria: [
+									{
+										satisfied: true,
+										criterion: {
+											MinTotalAssetsUsdInNetwork: {
+												usd: 1000
+											}
+										}
+									}
+								],
+								probability_multiplier_enabled: [false],
+								probability_multiplier: toNullable(1)
+							}
 						]
+					]
+				};
+
+				const result = mapEligibilityReport(report);
+
+				expect(result).toEqual([
+					{
+						campaignId: 'campaign1',
+						available: true,
+						eligible: true,
+						criteria: [
+							{
+								satisfied: true,
+								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
+								usd: 1000
+							}
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
 					}
 				]);
 			});
@@ -485,7 +387,9 @@ describe('rewards.utils', () => {
 										MinReferrals: { count: 5 }
 									}
 								}
-							]
+							],
+							probability_multiplier_enabled: [false],
+							probability_multiplier: toNullable(1)
 						}
 					]
 				]
@@ -503,7 +407,9 @@ describe('rewards.utils', () => {
 							satisfied: false,
 							type: RewardCriterionType.UNKNOWN
 						}
-					]
+					],
+					probabilityMultiplierEnabled: false,
+					probabilityMultiplier: 1
 				}
 			]);
 		});
@@ -535,7 +441,9 @@ describe('rewards.utils', () => {
 										}
 									}
 								}
-							]
+							],
+							probability_multiplier_enabled: toNullable(),
+							probability_multiplier: toNullable()
 						}
 					]
 				]
@@ -562,6 +470,45 @@ describe('rewards.utils', () => {
 						}
 					]
 				}
+			]);
+		});
+	});
+
+	describe('normalizeNetworkMultiplier', () => {
+		it.each([1, 2, 3, 4, 5, 6, 7, 8])(
+			'should return correct network multiplier for input %i',
+			(input) => {
+				const result = normalizeNetworkMultiplier(input);
+
+				expect(result).toEqual(input);
+			}
+		);
+
+		it('should return default value for not supported values', () => {
+			const result = normalizeNetworkMultiplier(22);
+
+			expect(result).toEqual(1);
+		});
+	});
+
+	describe('sortRewards', () => {
+		it('should sort rewards by end date (asc)', () => {
+			const result = sortRewards({ rewards: mockRewardCampaigns, sortByEndDate: 'asc' });
+
+			expect(result.map((reward) => reward.id)).toEqual([
+				SPRINKLES_SEASON_1_EPISODE_5_ID,
+				SPRINKLES_SEASON_1_EPISODE_4_ID,
+				SPRINKLES_SEASON_1_EPISODE_3_ID
+			]);
+		});
+
+		it('should sort rewards by end date (desc)', () => {
+			const result = sortRewards({ rewards: mockRewardCampaigns, sortByEndDate: 'desc' });
+
+			expect(result.map((reward) => reward.id)).toEqual([
+				SPRINKLES_SEASON_1_EPISODE_3_ID,
+				SPRINKLES_SEASON_1_EPISODE_4_ID,
+				SPRINKLES_SEASON_1_EPISODE_5_ID
 			]);
 		});
 	});

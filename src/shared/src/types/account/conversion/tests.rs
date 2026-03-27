@@ -1,10 +1,14 @@
 //! Tests for parsing account identifiers.
 
-use std::fmt::Debug;
+use std::{fmt::Debug, str::FromStr};
 
 use candid::Principal;
+use pretty_assertions::assert_eq;
 
-use super::*;
+use super::ParseError;
+use crate::types::account::{
+    BtcAddress, EthAddress, IcrcSubaccountId, Icrcv2AccountId, SolPrincipal, TokenAccountId,
+};
 
 struct TestVector<T: Eq + Debug> {
     name: &'static str,

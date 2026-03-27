@@ -2,6 +2,7 @@
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
@@ -25,6 +26,7 @@
 		}
 
 		await loadNextSolTransactions({
+			identity: $authIdentity,
 			token,
 			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
@@ -32,6 +34,6 @@
 	};
 </script>
 
-<InfiniteScroll {onIntersect} disabled={disableInfiniteScroll}>
+<InfiniteScroll disabled={disableInfiniteScroll} {onIntersect}>
 	{@render children()}
 </InfiniteScroll>

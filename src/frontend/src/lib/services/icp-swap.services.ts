@@ -12,8 +12,11 @@ export const icpSwapAmounts = async ({
 }: ICPSwapQuoteParams): Promise<ICPSwapAmountReply> => {
 	const pool = await getPoolCanister({
 		identity,
-		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
-		token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard },
+		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard.code },
+		token1: {
+			address: destinationToken.ledgerCanisterId,
+			standard: destinationToken.standard.code
+		},
 		fee
 	});
 

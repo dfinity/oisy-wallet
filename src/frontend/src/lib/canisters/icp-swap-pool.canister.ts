@@ -1,5 +1,6 @@
 import type {
 	DepositArgs,
+	PoolMetadata,
 	Result,
 	SwapArgs,
 	_SERVICE as SwapPoolService,
@@ -10,8 +11,8 @@ import { idlFactory as poolIdlFactory } from '$declarations/icp_swap_pool/icp_sw
 import { getAgent } from '$lib/actors/agents.ic';
 import { mapIcpSwapFactoryError } from '$lib/canisters/icp-swap.errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import type { Principal } from '@dfinity/principal';
 import { Canister, createServices } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	static async create({ identity, ...options }: CreateCanisterOptions<SwapPoolService>) {
@@ -128,6 +129,23 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	): Promise<{ balance0: bigint; balance1: bigint }> => {
 		const { getUserUnusedBalance } = this.caller({ certified: false });
 		const response = await getUserUnusedBalance(principal);
+
+		if ('ok' in response) {
+			return response.ok;
+		}
+
+		throw mapIcpSwapFactoryError(response.err);
+	};
+
+	/**
+	 * Retrieves metadata for the pool.
+	 *
+	 * @returns Object containing PoolMetadata object.
+	 * @throws CanisterInternalError if fetching metadata fails.
+	 */
+	getPoolMetadata = async (): Promise<PoolMetadata> => {
+		const { metadata } = this.caller({ certified: false });
+		const response = await metadata();
 
 		if ('ok' in response) {
 			return response.ok;

@@ -1,40 +1,52 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
+import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { SaveErc4626CustomToken } from '$eth/types/erc4626-custom-token';
+import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import {
+	MANAGE_TOKENS_MODAL_ROUTE,
 	TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
-import { nullishSignOut } from '$lib/services/auth.services';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { NonEmptyArray } from '$lib/types/utils';
+import { isVersionMismatchError, mapIcErrorMetadata } from '$lib/utils/error.utils';
 import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
-export interface ManageTokensSaveParams {
-	progress: (step: ProgressStepsAddToken) => void;
-	modalNext: () => void;
-	onSuccess: () => void;
-	onError: () => void;
+interface ManageTokensSaveParams {
+	progress?: (step: ProgressStepsAddToken) => void;
+	modalNext?: () => void;
+	onSuccess?: () => void;
+	onError?: () => void;
 	identity: OptionIdentity;
 }
 
 export interface SaveTokensParams<T> {
-	progress: (step: ProgressStepsAddToken) => void;
+	progress?: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
 	tokens: NonEmptyArray<T>;
 }
 
 export const saveTokens = async <
-	T extends SaveUserToken | SaveCustomTokenWithKey | SaveSplCustomToken | TokenToggleable<Token>
+	T extends
+		| SaveCustomTokenWithKey
+		| SaveErc20CustomToken
+		| SaveSplCustomToken
+		| SaveErc721CustomToken
+		| SaveErc1155CustomToken
+		| SaveErc4626CustomToken
+		| TokenToggleable<Token>
 >({
 	tokens,
 	save,
@@ -50,7 +62,6 @@ export const saveTokens = async <
 	const $i18n = get(i18n);
 
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 
@@ -61,7 +72,7 @@ export const saveTokens = async <
 		return;
 	}
 
-	modalNext();
+	modalNext?.();
 
 	try {
 		await save({
@@ -70,9 +81,11 @@ export const saveTokens = async <
 			tokens: tokens as NonEmptyArray<T>
 		});
 
-		progress(ProgressStepsAddToken.DONE);
+		progress?.(ProgressStepsAddToken.DONE);
 
-		setTimeout(() => onSuccess(), 750);
+		if (nonNullish(onSuccess)) {
+			setTimeout(() => onSuccess(), 750);
+		}
 
 		tokens.forEach((token) => {
 			const { enabled } = token;
@@ -93,23 +106,44 @@ export const saveTokens = async <
 					...(nonNullish(indexCanisterId) && { indexCanisterId }),
 					...(nonNullish(tokenId) && { tokenId: `${tokenId.description}` }),
 					...(nonNullish(tokenSymbol) && { tokenSymbol }),
-					...(nonNullish(network) && { networkId: `${network.id.description}` })
+					...(nonNullish(network) && { networkId: `${network.id.description}` }),
+					...{ source: MANAGE_TOKENS_MODAL_ROUTE }
 				}
 			});
 		});
 	} catch (err: unknown) {
-		toastsError({
-			msg: { text: $i18n.tokens.error.unexpected },
-			err
-		});
+		const versionMismatch = isVersionMismatchError(err);
 
-		onError();
+		if (versionMismatch) {
+			toastsShow({
+				text: $i18n.tokens.error.version_mismatch,
+				level: 'warn'
+			});
+		} else {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected },
+				err
+			});
+		}
+
+		onError?.();
 
 		trackEvent({
 			name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
-			metadata: {
-				error: `${err}`
-			}
+			metadata: mapIcErrorMetadata(err)
 		});
 	}
+};
+
+export const saveCustomTokensWithKey = async ({
+	tokens,
+	...rest
+}: {
+	tokens: SaveCustomTokenWithKey[];
+} & ManageTokensSaveParams) => {
+	await saveTokens({
+		...rest,
+		tokens,
+		save: saveCustomTokens
+	});
 };

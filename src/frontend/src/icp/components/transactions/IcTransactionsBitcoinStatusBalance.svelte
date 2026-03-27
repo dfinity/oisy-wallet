@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
 	import { IconReimbursed, Modal } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@icp-sdk/canisters/ckbtc';
 	import { blur } from 'svelte/transition';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
@@ -13,9 +13,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
+	import type { OisySyncStatusEvent } from '$lib/types/custom-events';
 	import type { SyncState } from '$lib/types/sync';
 
-	let receiveProgressStep: string | undefined = undefined;
+	let receiveProgressStep = $state<string | undefined>();
 
 	const modalId = Symbol();
 
@@ -73,34 +74,34 @@
 		}
 	};
 
-	let ckBtcUpdateBalanceSyncState: SyncState | undefined = undefined;
+	let ckBtcUpdateBalanceSyncState = $state<SyncState | undefined>();
 	const debounceUpdateSyncState = debounce(
 		(state: SyncState) => (ckBtcUpdateBalanceSyncState = state)
 	);
-	const onSyncState = ({ detail: state }: CustomEvent<SyncState>) => debounceUpdateSyncState(state);
+	const onSyncState = ({ detail: state }: CustomEvent<OisySyncStatusEvent>) =>
+		debounceUpdateSyncState(state);
 </script>
 
-<svelte:window on:oisyCkBtcUpdateBalance={onSyncState} />
+<svelte:window onoisyCkBtcUpdateBalance={onSyncState} />
 
 {#if nonNullish(ckBtcUpdateBalanceSyncState)}
 	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="animate-pulse text-tertiary">
 			<span in:blur>{$i18n.receive.bitcoin.text.checking_status}</span>
 		</div>{:else}
 		<button
-			in:blur
 			class="text flex gap-2 border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
-			on:click={async () => await receive()}
-			><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
+			onclick={async () => await receive()}
+			in:blur><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>
 	{/if}
 {/if}
 
 {#if $modalReceiveBitcoin}
-	<Modal on:nnsClose={modalStore.close} disablePointerEvents={true}>
-		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.refresh_status}</svelte:fragment>
+	<Modal disablePointerEvents={true} onClose={modalStore.close}>
+		{#snippet title()}{$i18n.receive.bitcoin.text.refresh_status}{/snippet}
 
 		<div class="stretch">
-			<IcTransactionsBitcoinStatus bind:receiveProgressStep />
+			<IcTransactionsBitcoinStatus {receiveProgressStep} />
 		</div>
 	</Modal>
 {/if}

@@ -1,18 +1,30 @@
+import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import {
-	buildIcrcCustomTokenMetadataPseudoResponse,
-	icTokenIcrcCustomToken,
+	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
 	isTokenDip20,
 	isTokenIc,
 	isTokenIcp,
 	isTokenIcrc,
+	isTokenIcrcCustomToken,
 	mapIcrcToken,
+	mapTokenOisyName,
+	mapTokenOisySymbol,
 	sortIcTokens,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import type { TokenStandard } from '$lib/types/token';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { TokenCategoryTagValue, TokenRiskTagValue, TokenTagType } from '$lib/enums/token-tag';
+import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
+import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
-import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
+import { mockIcrcAccount } from '$tests/mocks/identity.mock';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
+import {
+	IcrcMetadataResponseEntries,
+	type IcrcTokenMetadataResponse
+} from '@icp-sdk/canisters/ledger/icrc';
 
 describe('icrc.utils', () => {
 	describe('mapIcrcToken', () => {
@@ -28,16 +40,13 @@ describe('icrc.utils', () => {
 			metadata: mockMetadata,
 			category: 'default',
 			ledgerCanisterId: mockValidIcToken.ledgerCanisterId,
-			position: 1,
+			mintingAccount: mockIcrcAccount,
 			icrcCustomTokens: {
 				[mockToken.ledgerCanisterId]: mockToken
 			}
 		};
 		const mockParamsWithUrlIcon: IcrcLoadData = {
-			metadata: mockMetadata,
-			category: 'default',
-			ledgerCanisterId: mockValidIcToken.ledgerCanisterId,
-			position: 1,
+			...mockParams,
 			icrcCustomTokens: {
 				[mockToken.ledgerCanisterId]: { ...mockToken, icon: 'https://icon.png' }
 			}
@@ -167,14 +176,14 @@ describe('icrc.utils', () => {
 			const token = mapIcrcToken({
 				...mockParams,
 				icrcCustomTokens: {
-					[mockToken.ledgerCanisterId]: { ...mockToken, standard: 'bitcoin' }
+					[mockToken.ledgerCanisterId]: { ...mockToken, standard: { code: 'bitcoin' } }
 				}
 			});
 
 			expect(token).toStrictEqual({
 				...mockToken,
 				id: token?.id,
-				standard: 'bitcoin'
+				standard: { code: 'bitcoin' }
 			});
 		});
 
@@ -192,7 +201,219 @@ describe('icrc.utils', () => {
 			expect(token).toStrictEqual({
 				...mockToken,
 				id: token?.id,
-				standard: 'icrc'
+				standard: { code: 'icrc' }
+			});
+		});
+
+		describe('tags', () => {
+			it('should default tags to crypto when icrcCustomTokens is not provided', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: undefined
+				});
+
+				expect(token?.tags).toStrictEqual([
+					{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+				]);
+			});
+
+			it('should use tags from icrcCustomTokens when provided', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: {
+							...mockToken,
+							tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }]
+						}
+					}
+				});
+
+				expect(token?.tags).toStrictEqual([
+					{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+				]);
+			});
+
+			it('should default tags to crypto when token is not in icrcCustomTokens', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						['other-canister-id']: mockToken
+					}
+				});
+
+				expect(token?.tags).toStrictEqual([
+					{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+				]);
+			});
+
+			describe('twin token tag inheritance', () => {
+				const mockStablecoinTwinToken = {
+					...mockValidToken,
+					standard: { code: 'erc20' as const },
+					tags: [
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+					] as typeof mockValidToken.tags
+				};
+
+				const mockCommodityTwinToken = {
+					...mockValidToken,
+					standard: { code: 'erc20' as const },
+					tags: [
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.COMMODITY }
+					] as typeof mockValidToken.tags
+				};
+
+				const mockCryptoTwinToken = {
+					...mockValidToken,
+					standard: { code: 'erc20' as const },
+					tags: [
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+					] as typeof mockValidToken.tags
+				};
+
+				it('should inherit STABLECOIN tag from twinToken when no icrcCustomTokens are provided', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: undefined,
+						twinToken: mockStablecoinTwinToken
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+					]);
+				});
+
+				it('should inherit COMMODITY tag from twinToken', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: undefined,
+						twinToken: mockCommodityTwinToken
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.COMMODITY }
+					]);
+				});
+
+				it('should inherit STOCK tag from twinToken', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: undefined,
+						twinToken: {
+							...mockValidToken,
+							standard: { code: 'erc20' as const },
+							tags: [
+								{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }
+							] as typeof mockValidToken.tags
+						}
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }
+					]);
+				});
+
+				it('should inherit RISK tag from twinToken', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: undefined,
+						twinToken: {
+							...mockValidToken,
+							standard: { code: 'erc20' as const },
+							tags: [
+								{ type: TokenTagType.RISK, value: TokenRiskTagValue.HIGH }
+							] as typeof mockValidToken.tags
+						}
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.RISK, value: TokenRiskTagValue.HIGH }
+					]);
+				});
+
+				it('should inherit twinToken tags when icrcCustomTokens exists but token is not in the map', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: {
+							['other-canister-id']: mockToken
+						},
+						twinToken: mockStablecoinTwinToken
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+					]);
+				});
+
+				it('should inherit twinToken tags with ck token metadata (minterCanisterId)', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: undefined,
+						minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
+						twinToken: mockStablecoinTwinToken
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+					]);
+				});
+
+				it('should still get CRYPTO tags when twinToken is CRYPTO (no-op inheritance)', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: undefined,
+						twinToken: mockCryptoTwinToken
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+					]);
+				});
+
+				it('should prioritize icrcCustomTokens tags over twinToken tags', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: {
+							[mockToken.ledgerCanisterId]: {
+								...mockToken,
+								tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
+							}
+						},
+						twinToken: mockStablecoinTwinToken
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+					]);
+				});
+
+				it('should prioritize icrcCustomTokens STABLECOIN tags over twinToken CRYPTO tags', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: {
+							[mockToken.ledgerCanisterId]: {
+								...mockToken,
+								tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }]
+							}
+						},
+						twinToken: mockCryptoTwinToken
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }
+					]);
+				});
+
+				it('should fall back to DEFAULT_TOKEN_TAGS when there is no twinToken and no icrcCustomTokens', () => {
+					const token = mapIcrcToken({
+						...mockParams,
+						icrcCustomTokens: undefined
+					});
+
+					expect(token?.tags).toStrictEqual([
+						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+					]);
+				});
 			});
 		});
 	});
@@ -238,58 +459,10 @@ describe('icrc.utils', () => {
 		});
 	});
 
-	describe('buildIcrcCustomTokenMetadataPseudoResponse', () => {
-		it('should return undefined if token is not found', () => {
-			const result = buildIcrcCustomTokenMetadataPseudoResponse({
-				ledgerCanisterId: mockValidIcToken.ledgerCanisterId,
-				icrcCustomTokens: {}
-			});
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should return pseudo metadata response if token exists', () => {
-			const token = { ...mockValidIcToken, icon: 'https://icon.png' };
-
-			const result = buildIcrcCustomTokenMetadataPseudoResponse({
-				ledgerCanisterId: token.ledgerCanisterId,
-				icrcCustomTokens: {
-					[token.ledgerCanisterId]: token
-				}
-			});
-
-			expect(result).toEqual([
-				[IcrcMetadataResponseEntries.SYMBOL, { Text: token.symbol }],
-				[IcrcMetadataResponseEntries.NAME, { Text: token.name }],
-				[IcrcMetadataResponseEntries.FEE, { Nat: token.fee }],
-				[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(token.decimals) }],
-				[IcrcMetadataResponseEntries.LOGO, { Text: token.icon }]
-			]);
-		});
-
-		it('should handle nullish token icon', () => {
-			const { icon: _, ...token } = mockValidIcToken;
-
-			const result = buildIcrcCustomTokenMetadataPseudoResponse({
-				ledgerCanisterId: token.ledgerCanisterId,
-				icrcCustomTokens: {
-					[token.ledgerCanisterId]: token
-				}
-			});
-
-			expect(result).toEqual([
-				[IcrcMetadataResponseEntries.SYMBOL, { Text: token.symbol }],
-				[IcrcMetadataResponseEntries.NAME, { Text: token.name }],
-				[IcrcMetadataResponseEntries.FEE, { Nat: token.fee }],
-				[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(token.decimals) }]
-			]);
-		});
-	});
-
 	describe('isTokenIcp', () => {
 		it.each(['icp'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenIcp({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				isTokenIcp({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 			).toBeTruthy();
 		});
 
@@ -297,7 +470,7 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenIcp({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+					isTokenIcp({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeFalsy();
 			}
 		);
@@ -306,7 +479,7 @@ describe('icrc.utils', () => {
 	describe('isTokenIcrc', () => {
 		it.each(['icrc'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenIcrc({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				isTokenIcrc({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 			).toBeTruthy();
 		});
 
@@ -314,7 +487,7 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenIcrc({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+					isTokenIcrc({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeFalsy();
 			}
 		);
@@ -323,7 +496,7 @@ describe('icrc.utils', () => {
 	describe('isTokenDip20', () => {
 		it.each(['dip20'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenDip20({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				isTokenDip20({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 			).toBeTruthy();
 		});
 
@@ -331,7 +504,10 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenDip20({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+					isTokenDip20({
+						...mockIcrcCustomToken,
+						standard: { code: standard as TokenStandardCode }
+					})
 				).toBeFalsy();
 			}
 		);
@@ -342,7 +518,7 @@ describe('icrc.utils', () => {
 			'should return true for valid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenIc({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+					isTokenIc({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeTruthy();
 			}
 		);
@@ -351,16 +527,19 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenIc({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+					isTokenIc({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeFalsy();
 			}
 		);
 	});
 
-	describe('icTokenIcrcCustomToken', () => {
+	describe('isTokenIcrcCustomToken', () => {
 		it.each(['icp', 'icrc'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				icTokenIcrcCustomToken({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				isTokenIcrcCustomToken({
+					...mockIcrcCustomToken,
+					standard: { code: standard as TokenStandardCode }
+				})
 			).toBeTruthy();
 		});
 
@@ -368,21 +547,87 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					icTokenIcrcCustomToken({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+					isTokenIcrcCustomToken({
+						...mockIcrcCustomToken,
+						standard: { code: standard as TokenStandardCode }
+					})
 				).toBeFalsy();
 			}
 		);
 
 		it('should return true is the token has the prop `enabled`', () => {
-			expect(icTokenIcrcCustomToken({ ...mockIcrcCustomToken, enabled: true })).toBeTruthy();
+			expect(isTokenIcrcCustomToken({ ...mockIcrcCustomToken, enabled: true })).toBeTruthy();
 
-			expect(icTokenIcrcCustomToken({ ...mockIcrcCustomToken, enabled: false })).toBeTruthy();
+			expect(isTokenIcrcCustomToken({ ...mockIcrcCustomToken, enabled: false })).toBeTruthy();
 		});
 
 		it('should return false is the token has no prop `enabled`', () => {
 			const { enabled: _, ...mockIcrcCustomTokenWithoutEnabled } = mockIcrcCustomToken;
 
-			expect(icTokenIcrcCustomToken(mockIcrcCustomTokenWithoutEnabled)).toBeFalsy();
+			expect(isTokenIcrcCustomToken(mockIcrcCustomTokenWithoutEnabled)).toBeFalsy();
+		});
+	});
+
+	describe('mapTokenOisyName', () => {
+		const mockToken: IcInterface = {
+			ledgerCanisterId: mockLedgerCanisterId
+		};
+
+		it('should return the token as it is if it is not an IcCkInterface', () => {
+			const token = mockToken;
+
+			expect(token).not.toHaveProperty('minterCanisterId');
+			expect(token).not.toHaveProperty('twinToken');
+
+			expect(mapTokenOisyName(token)).toStrictEqual(token);
+		});
+
+		it('should return the token as it is if there is no twin token', () => {
+			const token: IcCkInterface = {
+				...mockToken,
+				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
+			};
+
+			expect(token).not.toHaveProperty('twinToken');
+
+			expect(mapTokenOisyName(token)).toStrictEqual(token);
+		});
+
+		it('should return the token with OISY name if there is a twin token', () => {
+			const token: IcCkInterface = {
+				...mockToken,
+				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
+				twinToken: ETHEREUM_TOKEN
+			};
+
+			expect(mapTokenOisyName(token)).toStrictEqual({
+				...token,
+				oisyName: {
+					prefix: 'ck',
+					oisyName: ETHEREUM_TOKEN.name
+				}
+			});
+		});
+	});
+
+	describe('mapTokenOisySymbol', () => {
+		const mockToken: IcInterface = {
+			ledgerCanisterId: mockLedgerCanisterId
+		};
+
+		it('should return the token as it is if there is no custom symbol', () => {
+			expect(mapTokenOisySymbol(mockToken)).toStrictEqual(mockToken);
+		});
+
+		it('should return the token with OISY symbol if there is a custom symbol', () => {
+			const token = { ...mockToken, ledgerCanisterId: GHOSTNODE_LEDGER_CANISTER_ID };
+
+			expect(mapTokenOisySymbol(token)).toStrictEqual({
+				...token,
+				oisySymbol: {
+					oisySymbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[GHOSTNODE_LEDGER_CANISTER_ID]
+				}
+			});
 		});
 	});
 });

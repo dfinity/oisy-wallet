@@ -1,0 +1,2105 @@
+{
+	"core": {
+		"text": {
+			"cancel": "إلغاء",
+			"next": "التالي",
+			"save": "حفظ",
+			"back": "رجوع",
+			"done": "تم",
+			"close": "إغلاق",
+			"change": "تغيير",
+			"continue": "",
+			"apply": "تنفيذ",
+			"retry": "",
+			"refresh": "تحديث",
+			"name": "الاسم",
+			"symbol": "الرمز",
+			"decimals": "الخانات العشرية",
+			"amount": "المبلغ",
+			"tokenId": "",
+			"max": "الحد الأقصى",
+			"destination": "الوجهة",
+			"reject": "رفض",
+			"approve": "موافقة",
+			"view": "عرض",
+			"copy": "نسخ",
+			"delete": "حذف",
+			"create": "إنشاء",
+			"clear_filter": "إعادة تعيين الفلتر",
+			"not_available": "غير متاح",
+			"new": "جديد",
+			"edit": "تعديل",
+			"no_results": "لا توجد نتائج",
+			"paste": "لصق",
+			"to": "إلى",
+			"add": "إضافة",
+			"more_items": "+$items المزيد",
+			"select": "تحديد",
+			"language": "اللغة",
+			"currency": "العملة",
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": "",
+			"learn_more": "",
+			"sorting": "",
+			"unlimited": "",
+			"info": "",
+			"asset": ""
+		},
+		"info": {
+			"test_banner": "لأغراض الاختبار فقط!",
+			"test_banner_beta": ""
+		},
+		"alt": {
+			"logo": "شعار $name",
+			"go_to_home": "انتقل إلى الصفحة الرئيسية لـ $oisy_name",
+			"back": "العودة إلى الصفحة السابقة",
+			"open_details": "فتح التفاصيل",
+			"close_details": "إغلاق التفاصيل",
+			"switch_language": "تبديل اللغة",
+			"switch_currency": "تبديل العملة",
+			"more": "",
+			"less": "",
+			"learn_more": ""
+		},
+		"warning": {
+			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
+			"standalone_mode": "",
+			"video_not_supported": ""
+		}
+	},
+	"navigation": {
+		"text": {
+			"tokens": "الأصول",
+			"settings": "الإعدادات",
+			"dapp_explorer": "استكشاف",
+			"activity": "النشاط",
+			"airdrops": "المكافآت",
+			"earning": "الكسب والمكافآت",
+			"source_code_on_github": "الرمز المصدري على GitHub",
+			"view_on_explorer": "عرض على المستكشف",
+			"source_code": "الرمز المصدري",
+			"changelog": "سجل التغييرات",
+			"documentation": "الوثائق",
+			"support": "الدعم",
+			"confirm_navigate": "هل أنت متأكد أنك تريد الانتقال بعيدًا؟",
+			"vip_qr_code": "الرمز الخاص",
+			"binance_qr_code": "رمز باينانس التعريفي",
+			"refer_a_friend": "ادعُ أصدقاءك",
+			"address_book": "جهات الاتصال",
+			"hide_balances": "إخفاء الأرصدة",
+			"show_balances": "إظهار الأرصدة",
+			"privacy_mode_enabled": "تم تمكين وضع الخصوصية. اضغط على [P] لإظهار أرصدتك مرة أخرى.",
+			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك."
+		},
+		"alt": {
+			"tokens": "انتقل إلى عرض الأصول",
+			"settings": "افتح إعداداتك",
+			"dapp_explorer": "افتح مستكشف التطبيقات",
+			"activity": "افتح عرض النشاط",
+			"airdrops": "افتح عرض المكافآت",
+			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
+			"changelog": "افتح سجل تغييرات $oisy_name على GitHub لمراجعة آخر التحديثات",
+			"documentation": "افتح وثائق $oisy_name",
+			"support": "افتح قسم الدعم في وثائق $oisy_name",
+			"open_twitter": "افتح حساب DFINITY X/Twitter",
+			"vip_qr_code": "إنشاء رابط دعوة",
+			"binance_qr_code": "إنشاء رابط Binance Clubhouse",
+			"refer_a_friend": "إنشاء رابط إحالة لصديق",
+			"address_book": "افتح جهات الاتصال",
+			"hide_balances": "إخفاء الأرصدة المعروضة",
+			"show_balances": "إظهار الأرصدة المخفية"
+		},
+		"short": {
+			"documentation": "وثائق"
+		}
+	},
+	"auth": {
+		"text": {
+			"title_part_1": "",
+			"title_part_2": "",
+			"logout": "تسجيل الخروج",
+			"lock": "",
+			"authenticate": "فتح أو إنشاء",
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": "",
+			"social_login": ""
+		},
+		"alt": {
+			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
+		},
+		"message": {
+			"session_locked": ""
+		},
+		"warning": {
+			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
+			"session_expired": "تم تسجيل خروجك لانتهاء صلاحية جلستك.",
+			"reload_and_retry": ""
+		},
+		"error": {
+			"no_internet_identity": "لا توجد هوية إنترنت.",
+			"invalid_pouh_credential": "عذرًا، حدث خطأ أثناء التحقق من صحة اعتماد الإنسانية. يرجى الاتصال بالجهة المصدرة وطلب الاعتماد مرة أخرى.",
+			"error_validating_pouh_credential_oisy": "عذرًا، حدث خطأ أثناء التحقق من صحة اعتماد الإنسانية في $oisy_short: $error",
+			"error_validating_pouh_credential": "عذرًا، حدث خطأ أثناء التحقق من صحة اعتماد الإنسانية.",
+			"error_requesting_pouh_credential": "عذرًا، حدث خطأ أثناء طلب اعتماد الإنسانية.",
+			"missing_pouh_issuer_origin": "عذرًا، حدث خطأ أثناء طلب اعتماد الإنسانية. أصل الجهة المصدرة مفقود.",
+			"no_pouh_credential": "عذرًا، حدث خطأ أثناء طلب اعتماد الإنسانية. هل لديك اعتماد صالح في Decide AI؟",
+			"error_while_signing_in": "حدث خطأ ما أثناء تسجيل الدخول.",
+			"unexpected_issue_with_syncing": "مشكلة غير متوقعة أثناء مزامنة حالة المصادقة الخاصة بك."
+		},
+		"help": {
+			"text": {
+				"title": "",
+				"description": "",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"feedback_text": "",
+				"thanks_text": "شكرًا لك!",
+				"useful_links": "",
+				"identity_new_identity": "محفظة $oisy_short تحوّل نطاق هوية الإنترنت إلى: <span class=\"font-bold\">identity.internetcomputer.org</span>",
+				"switch_to_new_internet_identity": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"oisy_introduction": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
+				"need_help": "هل تحتاج مساعدة في",
+				"sign_in": "تسجيل الدخول؟"
+			},
+			"alt": {
+				"internet_identity": "صورة لهوية الإنترنت الجديدة"
+			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "",
+			"title_part_2": "",
+			"unlock": "",
+			"logout": "",
+			"logout_clear_cash_message": "",
+			"learn_more": ""
+		}
+	},
+	"dapps": {
+		"text": {
+			"all_dapps": "جميع التطبيقات",
+			"featured": "مميز",
+			"sign_in": "سجّل الدخول لاستكشاف النظام البيئي.",
+			"title": "استكشاف التطبيقات",
+			"open_dapp": "افتح $dAppName",
+			"submit_your_dapp": "أرسل تطبيقك"
+		},
+		"alt": {
+			"learn_more": "تعرّف على المزيد حول $dAppName",
+			"logo": "شعار $dAppName",
+			"show_all": "عرض جميع التطبيقات",
+			"show_tag": "عرض التطبيقات ذات العلامة $tag",
+			"open_dapp": "افتح التطبيق $dAppName",
+			"open_telegram": "افتح $dAppName على Telegram",
+			"open_open_chat": "افتح $dAppName على OpenChat",
+			"open_twitter": "افتح خلاصة $dAppName X/Twitter",
+			"source_code_on_github": "عرض الرمز المصدري لـ $dAppName على github",
+			"submit_your_dapp": "أرسل تطبيقك ليتم عرضه في مستكشف التطبيقات",
+			"tags": "علامات ذات صلة بـ $dAppName",
+			"website": "صورة $dAppName"
+		},
+		"categories": {
+			"aa_new": "",
+			"ab_icp": "",
+			"ai": "",
+			"defi": "التمويل اللامركزي",
+			"game": "لعبة",
+			"nft": "",
+			"rwa": "",
+			"social_media": "وسائل التواصل الاجتماعي",
+			"staking": "التخزين",
+			"tools": "أدوات",
+			"walletconnect": "WalletConnect"
+		},
+		"descriptions": {
+			"kongswap": {
+				"name": "KongSwap",
+				"one_liner": "متجر التوكنات الشامل - تداول التوكنات عبر جميع السلاسل بسهولة باستخدام KongSwap.",
+				"description": "KongSwap هو بورصة لامركزية بالكامل (DEX) تقدم تداولًا عبر السلاسل بدون جسور عبر ICP، بيتكوين، إيثريوم، وسولانا. <br/><br/>باستخدام تقنية Chain Fusion وبروتوكول Internet Computer، فإنه يقلل من الرسوم، ويبسط تجربة المستخدم، ويتجنب تجزئة السيولة. يعمل كل من الواجهة الأمامية والخلفية على السلسلة عبر العقود الذكية، مما يوفر تجربة DeFi سلسة.",
+				"carousel": {
+					"text": "تبديل التوكنات على DEX",
+					"call_to_action": "جرب KongSwap"
+				}
+			},
+			"openchat": {
+				"name": "OpenChat",
+				"one_liner": "بديل لامركزي لتطبيق WhatsApp.",
+				"call_to_action": "اذهب إلى OpenChat",
+				"description": "OpenChat هو تطبيق دردشة كامل الميزات يعمل بالكامل من طرف إلى طرف على بلوكتشين Internet Computer.<br/><br/>يتم إدارة OpenChat من قبل مجتمعه كمنظمة مستقلة لامركزية (DAO) وله توكن خاص به يسمى CHAT. تُمنح توكنات CHAT كمكافآت للمستخدمين لتسريع النمو وإنشاء فريق من ملايين المؤيدين مما يسمح لـ OpenChat بأن يصبح منافسًا قويًا للمنافسين الكبار في مجال التكنولوجيا المركزية!",
+				"stats": "أكثر من 80,000 مستخدم",
+				"carousel": {
+					"text": "",
+					"call_to_action": "عرض المزيد"
+				}
+			},
+			"decideid": {
+				"name": "DecideID",
+				"one_liner": "تحقق فريد من الهوية للمشاركات الرقمية الجديرة بالثقة.",
+				"call_to_action": "افتح DecideID",
+				"stats": "أكثر من 50,000 طلب استدلال",
+				"description": "Decide ID هو في قلب نظام Decide AI، مما يضمن الثقة والأمان من خلال منهجية إثبات الشخصية (PoP) الفريدة. عند الانضمام، ستمر بعملية تحقق حيث تقدم أدلة متعددة وتكمل تحديًا خاصًا لتأكيد هويتك. هذا يضمن أن كل مستخدم حقيقي وفريد وليس روبوتًا. يتم إنشاء معرفك الأساسي، وهو معرف فريد على السلسلة، خلال هذه العملية. يمكن استخدامه عبر مختلف التطبيقات التي تتطلب شخصية تم التحقق منها، مما يضمن تكاملًا آمنًا وسلسًا في عملية تسجيل الدخول أو الاشتراك في أي تطبيق. بالإضافة إلى ذلك، يعني استخدام براهين المعرفة الصفرية أن بياناتك الخاصة، مثل المعلومات البيومترية، تظل سرية وآمنة.<br/><br/>مع Decide ID، استمتع بطريقة مرنة وآمنة وخصوصية أولاً للتحقق والمشاركة عبر الإنترنت.",
+				"carousel": {
+					"text": "استمتع بطريقة خصوصية أولاً للتحقق والمشاركة عبر الإنترنت",
+					"call_to_action": "مهتم؟"
+				}
+			},
+			"icpswap": {
+				"name": "ICPSwap",
+				"one_liner": "ICPSwap هو بورصة لامركزية (AMM DEX) مبنية بالكامل على السلسلة وهي المحور الرئيسي للخدمات المالية ومنظمات DAO المتكاملة على ICP.",
+				"call_to_action": "لقاء المستقبل",
+				"description": "محور التمويل اللامركزي المستقبلي!<br/>إعادة ابتكار البورصة كمركز، يوفر ICPSwap خدمات مالية وسوقية وDAO متكاملة على Internet Computer. استنادًا إلى التكنولوجيا الأساسية لـ DFINITY's Internet Computer، ينشئ ICPSwap نظامًا بيئيًا للتمويل اللامركزي الحقيقي من خلال إعادة هيكلة طريقة بناء المستخدمين والمطورين للمشاريع بشكل مشترك."
+			},
+			"nnsdapp": {
+				"name": "NNS Dapp",
+				"one_liner": "تطبيق الواجهة الأمامية لـ NNS يسمح لأي شخص بالتفاعل مع نظام الشبكة العصبية لـ Internet Computer بواجهة مستخدم سهلة الاستخدام.",
+				"call_to_action": "شارك",
+				"description": "تطبيق الواجهة الأمامية لـ NNS يسمح لأي شخص بالتفاعل مع نظام الشبكة العصبية لـ Internet Computer بواجهة مستخدم سهلة الاستخدام. يتم تقديمه بالكامل من طرف إلى طرف من خلال البلوكتشين، يتيح لك هذا التطبيق اللامركزي القيام بالإجراءات التالية بسهولة:<br/><ul><li>إرسال واستلام التوكنات (ICP, ckBTC, CHAT, إلخ)</li><li>تخزين وإدارة الخلايا العصبية</li><li>التصويت على حوكمة Internet Computer و SNSes</li><li>المشاركة في تبادلات اللامركزية</li><li>إنشاء وتعبئة الحاويات</li><li>كسب مكافآت الحوكمة</li></ul>"
+			},
+			"uniswap": {
+				"name": "Uniswap",
+				"one_liner": "أكبر سوق على السلسلة. قم بشراء وبيع العملات المشفرة على إيثريوم و 11 سلسلة أخرى.",
+				"call_to_action": "لنبدأ التبديل",
+				"description": "Uniswap هي بورصة عملات مشفرة لامركزية تستخدم مجموعة من العقود الذكية لإنشاء مجمعات سيولة لتنفيذ الصفقات. وهو مشروع مفتوح المصدر ويندرج ضمن فئة منتجات التمويل اللامركزي لأنه يستخدم العقود الذكية لتسهيل الصفقات بدلاً من البورصة المركزية."
+			},
+			"oneinch": {
+				"name": "1inch",
+				"one_liner": "قم بتحسين تداولاتك عبر مئات من البورصات اللامركزية على شبكات متعددة.",
+				"call_to_action": "ألق نظرة",
+				"description": "تقدم شبكة 1inch نظامًا بيئيًا للتمويل اللامركزي مع منتجات مثل تطبيق 1inch، المحفظة، بوابة المطورين، المحفظة، و Fusion لعمليات Web3 الآمنة. يوفر 1inch الوصول إلى مئات من مصادر السيولة عبر العديد من سلاسل الكتل.<br/><br/>بدعم من محرك 1inch Swap، يتيح وضع Fusion للمستخدمين تبديل التوكنات دون دفع أي رسوم شبكة وبأفضل الأسعار. بالإضافة إلى ذلك، يوفر وضع Fusion للمستخدمين حماية إضافية من MEV. يتم تنفيذ جميع عمليات التبديل في وضع Fusion بواسطة المحللين - المتداولين المحترفين، الذين يستخدمون أكثر الطرق تطوراً وكفاءة لحماية تبديلات المستخدمين من MEV."
+			},
+			"compound_finance": {
+				"name": "Compound Finance",
+				"one_liner": "سوق نقدي لامركزي وبروتوكول إقراض مبني على إيثريوم.",
+				"call_to_action": "ادخل",
+				"description": "Compound Finance هو <b>سوق نقدي لامركزي وبروتوكول إقراض مبني على إيثريوم</b>. يتيح بروتوكول Compound III (Comet) للمستخدمين الاقتراض أو الإقراض من مجمعات ذات ضمان واحد من \"الأصول الأساسية\". يدعم Compound III الأصول الأساسية (مثل USDC، WETH، إلخ) على إيثريوم، بوليغون، بيس، وأربيتروم."
+			},
+			"aave": {
+				"name": "Aave",
+				"one_liner": "Aave هو بروتوكول سيولة لامركزي غير وصائي حيث يمكن للمستخدمين المشاركة كموردين أو مقترضين.",
+				"call_to_action": "الوصول إلى القوة الكاملة للتمويل اللامركزي",
+				"description": "Aave هو بروتوكول سيولة لامركزي غير وصائي حيث يمكن للمستخدمين المشاركة كموردين أو مقترضين. يقدم الموردون السيولة للسوق مع كسب الفائدة، ويمكن للمقترضين الوصول إلى السيولة من خلال توفير ضمانات تتجاوز المبلغ المقترض.\nإنه غير مرخص تمامًا، مما يعني أنه يمكن لأي شخص الوصول إلى Aave والتفاعل معه من خلال واجهة سهلة الاستخدام أو مباشرة مع عقوده الذكية على شبكات البلوكتشين المدعومة."
+			},
+			"eigenlayer": {
+				"name": "EigenLayer",
+				"one_liner": "بروتوكول قائم على إيثريوم يقدم إعادة التخزين، مما يسمح بتخزين أي توكن ERC20.",
+				"call_to_action": "أعد التخزين الآن",
+				"description": "EigenLayer هو بروتوكول مبني على إيثريوم يقدم إعادة التخزين، وهو بدائي جديد في أمان الاقتصاد المشفر. يسمح للمستخدمين بتخزين الأصول مثل ETH الأصلي، وتوكنات التخزين السائلة (LSTs)، وتوكن EIGEN أو أي توكن ERC20 في عقود EigenLayer الذكية، وبالتالي توسيع أمان الاقتصاد المشفر لإيثريوم ليشمل تطبيقات إضافية على الشبكة."
+			},
+			"curve_finance": {
+				"name": "Curve Finance",
+				"one_liner": "بورصة لامركزية رائدة وموفر عملات مستقرة ومنصة إقراض على إيثريوم والسلاسل المتوافقة مع EVM.",
+				"call_to_action": "انطلق",
+				"description": "Curve Finance هي بورصة لامركزية رائدة وموفر عملات مستقرة ومنصة إقراض على إيثريوم والسلاسل المتوافقة مع EVM. تشتهر بصانعي السوق الآليين المتقدمين للعملات المستقرة والأصول المتقلبة، ونظامها الفريد للتصفية الناعمة للقروض."
+			},
+			"sonic": {
+				"name": "Sonic",
+				"one_liner": "أطلق العنان للإمكانات الكاملة للتمويل اللامركزي والتداول المبسط. قم بتبديل التوكنات، واكسب كمزود للسيولة واستفد من صانع السوق الآلي الرائد في Bitfinity EVM.",
+				"call_to_action": "افتح Sonic",
+				"description": "Sonic، بورصة لامركزية متعددة السلاسل مبنية على بروتوكول Internet Computer (ICP)، تقدم مجموعة واسعة من خدمات التمويل اللامركزي. يمكن للمستخدمين بسهولة تداول التوكنات والعقود الدائمة، وتوفير السيولة، والمشاركة في بيع توكنات LBP. يمكن للمستخدمين المشاركة في حوكمة DAO، وتخزين المكافآت، والتصويت على قرارات المنصة.<br/><br/>على السلسلة بالكامل ومفتوحة المصدر! قم بتبديل التوكنات كالمحترفين، واجمع تلك الرسوم كمزود للسيولة، وانضم إلى أجواء AMM، وكن جزءًا لا يتجزأ من Sonic DAO.",
+				"carousel": {
+					"text": "أطلق العنان للإمكانات الكاملة للتمويل اللامركزي",
+					"call_to_action": "افتح Sonic"
+				}
+			},
+			"raydium": {
+				"name": "Raydium",
+				"one_liner": "بورصة لامركزية وصانع سوق آلي مبني على بلوكتشين سولانا، يقدم دفتر أوامر مركزي محدود يتيح إجراء تداولات سريعة.",
+				"call_to_action": "ادعم تطور التمويل اللامركزي",
+				"description": "Raydium هو صانع سوق آلي (AMM) مبني على بلوكتشين سولانا، ويقدم مزيجًا فريدًا من تقنية AMM والوصول إلى سيولة بورصة Serum اللامركزية. بصفته AMM، يسمح Raydium بتداول الأصول الرقمية بطريقة غير مرخصة، باستخدام مجمعات السيولة."
+			},
+			"jupiter": {
+				"name": "Jupiter",
+				"one_liner": "مجمع بورصات لامركزية قائم على سولانا يعمل على تحسين أفضل عمليات التبديل المتاحة بين أي زوج من التوكنات المدعومة.",
+				"call_to_action": "إلى ما لا نهاية وما بعدها",
+				"description": "Jupiter هي منصة تمويل لامركزي على بلوكتشين سولانا، تعمل كمجمع سيولة، وتبسط وتحسن أنشطة التداول داخل فضاء التمويل اللامركزي. تم تصميم بروتوكولها لتسهيل توفير السيولة وتبديل التوكنات ويضمن معاملات فعالة ومنخفضة الكمون وفعالة من حيث التكلفة. تتيح المنصة للمستخدمين تبديل التوكنات وتوفير السيولة والمشاركة في زراعة العائد من خلال نموذج صانع السوق الآلي (AMM)."
+			},
+			"waterneuron": {
+				"name": "WaterNeuron",
+				"one_liner": "تخزين سائل لـ ICP - قم بزيادة كفاءة رأس المال الخاص بك عن طريق تخزين ICP السائل.",
+				"description": "يقدم WaterNeuron طريقة أكثر كفاءة من حيث رأس المال للتخزين من خلال السماح لك بالحفاظ على التعرض لمكافآت تخزين ICP مع الحفاظ على سيولة التوكنات الخاصة بك. يبسط هذا النهج عملية التخزين، ويزيل الحاجة إلى اختيار مدققين محددين لزيادة المكافآت."
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "وسائل تواصل اجتماعي لامركزية - انشر، اكسب، امتلك.",
+				"call_to_action": "اذهب إلى Taggr",
+				"description": "Taggr هي منصة وسائط اجتماعية لامركزية بالكامل تعيش على شبكة حوسبة موزعة عامة مدعومة من Internet Computer. على عكس منصات الوسائط الاجتماعية التقليدية التي تسيطر عليها الشركات، فإن Taggr مملوكة ومحكومة بالكامل من قبل مستخدميها."
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "حيث تلتقي الحوكمة بالتعاون لإشعال الابتكار.",
+				"description": "Toolkit هي مجموعة أدوات متعددة الاستخدامات لإدارة أنظمة الخدمة العصبية (SNS) والمشاريع على Internet Computer. من مقترحات الحوكمة إلى نشر الحاويات، فإنه يمكّن المستخدمين من الابتكار والتعاون واللامركزية بسلاسة."
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			}
+		}
+	},
+	"rewards": {
+		"text": {
+			"title": "المكافآت",
+			"upcoming_campaigns": "الحملات القادمة",
+			"active_date": "ينتهي في",
+			"ended_date": "انتهى في",
+			"upcoming_date": "",
+			"share": "شارك على X",
+			"learn_more": "تعلم المزيد",
+			"check_status": "تحقق من الحالة والأهلية",
+			"view_details": "عرض التفاصيل",
+			"modal_button_text": "فهمت",
+			"activity_button_text": "تحقق من النشاط الأخير",
+			"activity_button_text_short": "تحقق من النشاط",
+			"open_wallet": "خذني إلى المحفظة",
+			"carousel_slide_title": "رشات $oisy_short الحلقة 4 مباشرة الآن!",
+			"carousel_slide_cta": "تعرّف على المزيد",
+			"sprinkles_earned": "لقد ربحت $noOfSprinkles رشات، بإجمالي $amount! 🎉",
+			"youre_eligible": "أنت مؤهل!",
+			"not_eligible": "",
+			"ongoing": "مستمر",
+			"ended": "انتهى ($amount)",
+			"banner_text": "اكسب مكافآت يومية مع OISY Sprinkles"
+		},
+		"requirements": {
+			"requirements_title": "معايير الأهلية",
+			"network_bonus_info": "",
+			"min_logins": "تسجيل الدخول $loginsx مرة في آخر $days أيام",
+			"min_transactions": "أكمل $transactions معاملة في آخر $days أيام",
+			"min_total_assets_usd": "احتفظ بقيمة $usd دولار من التوكنات وقت الإصدار",
+			"hangover": "لا يوجد فوز حديث (آخر $days يومًا)"
+		},
+		"alt": {
+			"upcoming_campaigns": "راقب عن كثب عمليات إسقاط التوكنات القادمة! <a href=\"https://x.com/oisy\" target=\"_blank\">تابعنا على X</a>، انضم إلى <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> الخاص بنا، أو انضم إلى <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> لتبقى على اطلاع.",
+			"coming_soon": "حلقة $oisy_short 4 قادمة قريبًا",
+			"reward_banner": "لافتة حملة $campaignName"
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: الحلقة 3 مباشرة الآن 🎊",
+				"one_liner": "اكسب BTC من خلال نشاطك—والآن، من خلال <strong>دعوة الأصدقاء</strong>.<br/>سجل الدخول، وقم بإجراء معاملات، واحتفظ بالتوكنات للتأهل للحصول على إسقاطات يومية. قم بإحالة صديق، واكسب 10% من قيمة مكافآتهم طوال الحملة.",
+				"participate_title": "اكسب BTC من خلال البقاء نشطًا - والآن من خلال دعوة الآخرين.",
+				"description": "استوفِ متطلبات أسبوعية بسيطة. سجل الدخول، وقم بإجراء معاملتين، واحتفظ بما لا يقل عن 20 دولارًا من التوكنات لتظل مؤهلاً لواحدة من 50 عملية إسقاط جوي لـ BTC كل يوم.<br/><strong>الآن مع مكافآت الإحالة:</strong> قم بدعوة صديق لنشر محفظة واكسب 10% من رشاتهم لمدة 30 يومًا. يحتفظون بنسبة 100% - وأنت تكسب المزيد.",
+				"campaign_href": "https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A",
+				"win": {
+					"default": {
+						"title": "تهانينا على كسب OISY Sprinkles اليوم!",
+						"description": "شارك انتصارك على X/تويتر للتأهل لفرصة أخرى للكسب.",
+						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+					},
+					"jackpot": {
+						"title": "تهانينا على كسب أكبر OISY Sprinkles اليوم!",
+						"description": "شارك انتصارك على X/تويتر للتأهل لفرصة أخرى للكسب.",
+						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+					},
+					"referral": {
+						"title": "إليك شكرًا صغيرًا",
+						"description": "أحد المستخدمين الذين أحللتهم حصل للتو على بعض الرشات.",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: الحلقة 4 مباشرة الآن 🎊",
+				"one_liner": "اكسب BTC من خلال البقاء نشطًا—والآن، اكسب رشات <strong>مضمونة</strong> للإحالات.<br/>سجل الدخول، وقم بإجراء معاملات، واحتفظ بالتوكنات للتأهل للحصول على إسقاطات يومية. قم بإحالة 4 أصدقاء واحصل على مكافأة مباشرة. أفضل المُحيلين يربحون المزيد.",
+				"participate_title": "اكسب BTC من خلال البقاء نشطًا - والآن من خلال دعوة الآخرين.",
+				"description": "استوفِ متطلبات أسبوعية بسيطة: سجل الدخول، وقم بإجراء معاملتين، واحتفظ بما لا يقل عن 20 دولارًا من التوكنات لتظل مؤهلاً للحصول على ما يصل إلى 50 دولارًا من إسقاطات BTC كل يوم.<br>الآن مع مكافآت الإحالة: قم بدعوة صديق لإنشاء محفظة وستكسبان كلاكما رشات مضمونة. كن من بين أفضل 4 مُحيلين واربح جائزة كبرى.",
+				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "!مرحبًا بك في $oisy_short",
+					"subtitle": "هل أنت مستعد للكسب؟",
+					"description": "أنت على بعد خطوتين من مكافأتك الأولى: سجّل الدخول، احتفظ بـ +$20، وأكمل إجراءين. هذا كل ما يتطلبه الأمر لبدء كسب الرشات.<br><br>هل تريد المزيد؟ أحِل 4 أصدقاء واحصل على مكافأة مضمونة."
+				},
+				"win": {
+					"default": {
+						"title": "لقد حصلت على مكافأة",
+						"description": "لقد وصلت مكافآتك للتو إلى محفظتك<br>لا تنس الإحالة والبقاء نشطًا لكسب المزيد",
+						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
+					},
+					"jackpot": {
+						"title": "لقد فزت بالجائزة الكبرى",
+						"description": "لقد ربحت للتو أعلى مكافأة رشات لدينا<br>ابق نشطًا، واستمر في الإحالة لكسب المزيد",
+						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+					},
+					"leaderboard": {
+						"title": "لقد تصدرت لوحة المتصدرين",
+						"description": "لقد صنفت من بين أفضل 4 مُحيلين هذا الموسم<br>تمت إضافة 200 دولار إلى محفظتك",
+						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+					},
+					"referrer": {
+						"title": "أنت في البداية فقط",
+						"description": "لقد ربحت 1 دولار.<br>أحِل المزيد - أفضل 4 مُحيلين يحصلون على 200 دولار.<br>أنت قريب. استمر.",
+						"share_href": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
+					},
+					"referee": {
+						"title": "احصل على المزيد مقابل الإحالة",
+						"description": "لقد ربحت للتو رشات - وكذلك فعل الشخص الذي أحالك.<br>أرسل 4 أصدقاء واكسب 1 دولار.<br>أفضل 4 مُحيلين يربحون 200 دولار لكل منهم.",
+						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"welcome": {
+					"title": "!مرحبًا بك في $oisy_short",
+					"subtitle": "هل أنت مستعد للكسب؟",
+					"description": ""
+				},
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			}
+		}
+	},
+	"footer": {
+		"text": {
+			"incubated_with": "احتضان مع",
+			"by": "بواسطة",
+			"dfinity_foundation": "مؤسسة DFINITY",
+			"copyright": "© 2026",
+			"ai_assistant_console_button": "مساعد $oisy_short"
+		},
+		"alt": {
+			"dfinity": "انتقل إلى موقع DFINITY Foundation"
+		}
+	},
+	"wallet": {
+		"text": {
+			"address": "العنوان",
+			"wallet_address": "عنوان المحفظة",
+			"your_addresses": "عناوينك",
+			"address_copied": "تم نسخ عنوان المحفظة.",
+			"wallet_address_copied": "تم نسخ عنوان المحفظة إلى الحافظة.",
+			"display_wallet_address_qr": "عرض عنوان المحفظة كرمز QR",
+			"icp_deposits": "ملاحظة: لإيداعات ICP، استخدم زر 'استلام' في حساب ICP الخاص بك للحصول على العنوان الصحيح.",
+			"use_address_from_to": "استخدم هذا العنوان لتحويل $token إلى ومن محفظتك."
+		},
+		"alt": {
+			"open_etherscan": "افتح عنوانك على Etherscan",
+			"open_solscan": "افتح عنوانك على Solscan",
+			"qrcode_address": "امسح رمز QR هذا لنسخ العنوان لاستلام توكنات $token"
+		}
+	},
+	"init": {
+		"text": {
+			"initializing_wallet": "جارٍ إعداد محفظتك...",
+			"securing_session": "تأمين الجلسة باستخدام Internet Identity",
+			"retrieving_public_keys": "جاري استرداد مفاتيحك العامة لبيتكوين، إيثريوم، سولانا، بيس، بوليغون، بي إن بي وأربيتروم",
+			"done": "استمتع بـ $oisy_short"
+		},
+		"alt": {
+			"loader_banner": "جاري تحميل البيانات الأولية لـ $oisy_name (السمة $theme)"
+		},
+		"info": {
+			"hold_loading": "انتظر لحظة، نحن نحمّل بعض المعلومات...",
+			"hold_loading_wallet": "انتظر لحظة، نحن نحمّل بعض البيانات الأولية لمحفظتك..."
+		},
+		"error": {
+			"no_alchemy_config": "لا يوجد إعدادات Alchemy لشبكة $network",
+			"no_alchemy_provider": "لا يوجد مزود Alchemy لشبكة $network",
+			"no_etherscan_provider": "لا يوجد مزود Etherscan لشبكة $network",
+			"no_infura_provider": "لا يوجد مزود Infura لشبكة $network",
+			"no_infura_cketh_provider": "لا يوجد مزود Infura CkETH لشبكة $network",
+			"no_infura_erc20_provider": "لا يوجد مزود Infura ERC20 لشبكة $network",
+			"no_infura_erc721_provider": "لا يوجد مزود Infura ERC721 لشبكة $network",
+			"no_infura_erc1155_provider": "لا يوجد مزود Infura ERC1155 لشبكة $network",
+			"no_infura_erc20_icp_provider": "لا يوجد مزود Infura ERC20 ICP لشبكة $network",
+			"no_infura_erc4626_provider": "",
+			"no_solana_network": "لا يوجد شبكة Solana لشبكة $network",
+			"loading_address": "خطأ أثناء تحميل عنوان $symbol.",
+			"loading_balance": "خطأ أثناء تحميل رصيد $symbol لشبكة $network.",
+			"erc20_contracts": "خطأ أثناء تحميل عقود ERC20.",
+			"spl_tokens": "خطأ أثناء تحميل توكنات SPL.",
+			"minter_ckbtc_btc": "يتطلب محوّل (minter) مُهيّأ لتحويل ckBTC إلى BTC.",
+			"minter_cketh_eth": "يتطلب محوّل (minter) مُهيّأ لتحويل ckETH إلى ETH.",
+			"minter_ckerc20_erc20": "يتطلب محوّل (minter) مُهيّأ لتحويل ckERC20 إلى Erc20.",
+			"ledger_cketh_eth": "يتطلب دفتر أستاذ ckETH مُهيّأ لتحويل ckErc20 إلى Erc20.",
+			"minter_btc": "يتطلب محوّل (minter) مُهيّأ لاسترداد BTC.",
+			"minter_ckbtc_info": "يتطلب محوّل (minter) مُهيّأ لجلب معلومات ckBTC",
+			"minter_cketh_info": "يتطلب محوّل (minter) مُهيّأ لجلب معلومات ckETH",
+			"minter_ckbtc_loading_info": "خطأ أثناء تحميل معلومات محوّل ckBTC.",
+			"minter_cketh_loading_info": "خطأ أثناء تحميل معلومات محوّل ckETH.",
+			"btc_fees_estimation": "خطأ أثناء الاستعلام عن تقدير رسوم BTC.",
+			"btc_withdrawal_statuses": "خطأ أثناء جلب حالات سحب BTC.",
+			"transaction_price": "خطأ أثناء تحميل تقدير سعر المعاملة.",
+			"icrc_canisters": "خطأ أثناء تحميل حاويات ICRC.",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "",
+			"icrc_canister_loading_custom": "",
+			"erc20_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20 المخصصة.",
+			"erc4626_custom_tokens": "",
+			"erc721_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC721 المخصصة.",
+			"erc1155_custom_tokens": "",
+			"spl_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم SPL المخصصة.",
+			"erc20_custom_token": "خطأ أثناء تفعيل التوكن التوأم ERC20.",
+			"icrc_custom_token": "خطأ أثناء تحميل التوكن المخصص ICRC.",
+			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
+			"loading_wallet_timeout": "تتطلب محفظتك بعض البيانات الأولية التي لم يتم تحميلها بعد. يرجى المحاولة مرة أخرى.",
+			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
+			"waiting_for_allowed_cycles_aborted": "",
+			"btc_wallet_error": "خطأ أثناء تحميل معلومات محفظة BTC.",
+			"sol_wallet_error": "خطأ أثناء تحميل معلومات محفظة SOL."
+		}
+	},
+	"hero": {
+		"text": {
+			"available_balance": "رصيدك",
+			"unavailable_balance": "قيمة $currencySymbol غير متاحة",
+			"hidden_balance": "رصيدك مخفي",
+			"top_up": "قم بتعبئة محفظتك لتبدأ في استخدامها!",
+			"learn_more_about_erc20_icp": "تعرف على المزيد حول ERC20 ICP على Ethereum.",
+			"tooltip_toggle_balance": "انقر نقرًا مزدوجًا لإخفاء/إظهار الرصيد"
+		},
+		"alt": {
+			"toggle_privacy_mode": "تشغيل وإيقاف وضع الخصوصية"
+		}
+	},
+	"settings": {
+		"text": {
+			"title": "الإعدادات",
+			"general": "",
+			"principal": "العنوان الاساسي الخاص بك",
+			"principal_copied": "تم نسخ العنوان الأساسي",
+			"principal_description": "معرفك لـ $oisy_name. تم إنشاؤه بواسطة هويتك على الإنترنت.",
+			"session_duration": "مدة الجلسة",
+			"session_expires_in": "تنتهي في",
+			"networks": "الشبكات",
+			"enable_testnets": "تمكين شبكات الاختبار",
+			"active_networks": "الشبكات النشطة",
+			"active_networks_description": "حدد الشبكات التي تريد العمل بها في $oisy_name. لن تظهر التوكنات والمعاملات من الشبكات غير النشطة أو تُدرج في رصيدك المتاح.",
+			"enable_network": "تمكين الشبكة",
+			"disable_network": "تعطيل الشبكة",
+			"credentials_title": "بيانات الاعتماد",
+			"pouh_credential": "اعتماد الإنسانية",
+			"pouh_credential_description": "اعتماد الإنسانية هو إثبات للإنسانية. يتم إصداره بواسطة Decide AI.",
+			"present_pouh_credential": "تقديم",
+			"pouh_credential_verified": "تم التحقق ✅",
+			"appearance": "المظهر",
+			"appearance_light": "فاتح",
+			"appearance_dark": "داكن",
+			"appearance_system": "النظام",
+			"git_disclaimer": "لأغراض التطوير، نعرض الفرع و commit فقط في حاويات الاختبار.",
+			"git_branch_name": "الفرع:",
+			"git_commit_hash": "التزام:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
+		},
+		"alt": {
+			"testnets_toggle": "تبديل لإظهار أو إخفاء شبكات الاختبار",
+			"github_release": "ملاحظات إصدار $oisy_short على GitHub",
+			"appearance_light": "يمكّن الوضع الفاتح",
+			"appearance_dark": "يمكّن الوضع الداكن",
+			"appearance_system": "يمكّن وضع الألوان لنظام التشغيل الخاص بك"
+		},
+		"error": {
+			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة."
+		}
+	},
+	"shortcuts": {
+		"privacy_mode": "P"
+	},
+	"networks": {
+		"title": "الشبكة الحالية. الوصول إلى التحديد.",
+		"test_networks": "شبكات الاختبار",
+		"chain_fusion": "جميع الشبكات",
+		"network": "الشبكة",
+		"testnet": "شبكة اختبار",
+		"number_of_enabled": "$numNetworksEnabled من $numNetworksTotal مفعلة",
+		"filter": "تصفية الشبكات",
+		"manage": "إدارة الشبكات"
+	},
+	"receive": {
+		"text": {
+			"receive": "استلام",
+			"address": "عنوان الاستلام",
+			"receive_token": "استلام $token"
+		},
+		"icp": {
+			"text": {
+				"account_id": "معرف حساب ICP",
+				"checking_index_canister_status": "",
+				"use_for_all_tokens": "استخدم لجميع التوكنات عند الاستلام من المحافظ، المستخدمين، أو التطبيقات الأخرى التي تدعم تنسيق العنوان هذا.",
+				"use_for_icrc_deposit": "استخدم لاستلام توكنات ICRC-1 في شبكة ICP، مثل SNS، توكنات ck، إلخ.",
+				"use_for_icp_deposit": "استخدم لإيداعات ICP من البورصات أو المحافظ الأخرى التي تدعم فقط معرفات الحساب.",
+				"your_private_eth_address": "عنوانك الخاص لجميع توكنات ERC20.",
+				"display_account_id_qr": "عرض معرف حساب ICP كرمز QR",
+				"account_id_copied": "تم نسخ معرف حساب ICP إلى الحافظة.",
+				"principal": "الرئيسي لـ ICP",
+				"principal_title": "",
+				"internet_computer_principal_copied": "تم نسخ الرئيسي لـ Internet Computer إلى الحافظة.",
+				"display_internet_computer_principal_qr": "عرض الرئيسي لـ Internet Computer كرمز QR",
+				"icp_account": "حساب ICP (للبورصات)",
+				"icp_account_title": "",
+				"icp_account_copied": "تم نسخ حساب ICP إلى الحافظة.",
+				"display_icp_account_qr": "عرض حساب ICP كرمز QR"
+			}
+		},
+		"ethereum": {
+			"text": {
+				"checking_status": "جاري التحقق من حالة $token...",
+				"from_network": "استلام من شبكة $network",
+				"eth_to_cketh_description": "يتطلب تحويل $token إلى $ckToken استدعاء عقد ذكي على $network وتمرير معرفك الرئيسي لـ IC كوسيط - $oisy_name يبسّط هذا الإجراء من خلال تمكينك من إجراء التحويل مباشرة داخل المحفظة.",
+				"learn_how_to_convert": "تعرف على كيفية تحويل $token إلى $ckToken",
+				"metamask": "استلام من Metamask",
+				"ethereum": "إيثريوم",
+				"ethereum_title": "",
+				"ethereum_address": "العنوان",
+				"ethereum_address_copied": "تم نسخ عنوان إيثريوم إلى الحافظة.",
+				"display_ethereum_address_qr": "عرض عنوان إيثريوم كرمز QR"
+			},
+			"error": {
+				"no_metamask": "Metamask غير متاح."
+			}
+		},
+		"bitcoin": {
+			"text": {
+				"bitcoin": "بيتكوين",
+				"checking_status": "جاري التحقق من حالة BTC...",
+				"refresh_status": "تحديث حالة BTC",
+				"initializing": "جاري التهيئة...",
+				"checking_incoming": "جاري التحقق من وجود BTC واردة...",
+				"refreshing_wallet": "جاري تحديث المحفظة...",
+				"bitcoin_address": "بيتكوين",
+				"bitcoin_address_title": "",
+				"bitcoin_testnet_address": "بيتكوين (شبكة اختبار)",
+				"bitcoin_testnet_address_title": "",
+				"bitcoin_regtest_address": "بيتكوين (Regtest)",
+				"bitcoin_regtest_address_title": "",
+				"display_bitcoin_address_qr": "عرض عنوان بيتكوين كرمز QR",
+				"bitcoin_address_copied": "تم نسخ عنوان بيتكوين إلى الحافظة.",
+				"from_network": "قم بتحويل البيتكوين على شبكة BTC إلى هذا العنوان لاستلام ckBTC.",
+				"fee_applied": "يرجى ملاحظة أنه سيتم تطبيق رسوم تقديرية بين الشبكات بقيمة $fee BTC."
+			},
+			"info": {
+				"no_new_btc": "لا توجد عملات BTC جديدة مؤكدة.",
+				"check_btc_progress": "جاري التحقق من وجود BTC واردة بالفعل."
+			},
+			"error": {
+				"unexpected_btc": "حدث خطأ ما أثناء التحقق من وجود BTC واردة."
+			}
+		},
+		"solana": {
+			"text": {
+				"solana_address": "عنوان سولانا",
+				"solana_address_title": "",
+				"solana_devnet_address": "عنوان شبكة سولانا للمطورين",
+				"solana_devnet_address_title": "",
+				"solana_local_address": "عنوان سولانا المحلي",
+				"solana_local_address_title": "",
+				"solana_address_copied": "تم نسخ عنوان سولانا إلى الحافظة",
+				"display_solana_address_qr": "عرض عنوان سولانا كرمز QR"
+			}
+		}
+	},
+	"send": {
+		"text": {
+			"send": "إرسال",
+			"send_token": "",
+			"destination": "الوجهة",
+			"source": "المصدر",
+			"balance": "الرصيد",
+			"review": "مراجعة",
+			"signing_approval": "جاري توقيع المعاملة...",
+			"approving": "جاري الموافقة...",
+			"approving_fees": "جاري الموافقة على الرسوم...",
+			"approving_transfer": "جاري الموافقة على التحويل...",
+			"approving_wallet_connect": "جاري الموافقة على طلب الربط...",
+			"refreshing_ui": "جاري تحديث واجهة المستخدم",
+			"initializing": "جاري تهيئة المعاملة...",
+			"signing_transaction": "جاري توقيع المعاملة...",
+			"sending": "جاري الإرسال...",
+			"signing": "جاري التوقيع...",
+			"signing_message": "جاري توقيع الرسالة...",
+			"confirming": "جاري التأكيد...",
+			"network": "الشبكة",
+			"source_network": "شبكة المصدر",
+			"destination_network": "شبكة الوجهة",
+			"initializing_transaction": "جاري تهيئة المعاملة",
+			"convert_to_native_icp": "تحويل إلى ICP الأصلي",
+			"open_qr_modal": "بدء مسح رمز الاستجابة السريعة لتفاصيل المعاملة",
+			"scan_qr": "مسح رمز الاستجابة السريعة",
+			"select_token": "حدد التوكن للإرسال",
+			"select_network_filter": "حدد فلتر الشبكة",
+			"send_again": "إرسال مرة أخرى",
+			"recently_used_tab": "المستخدمة مؤخرًا",
+			"contacts_tab": "جهات الاتصال",
+			"recently_used_empty_state_title": "ستظهر العناوين المستخدمة مؤخرًا هنا",
+			"recently_used_empty_state_description": "قم بأول إرسال الآن!",
+			"contacts_empty_state_title": "ستظهر جهات اتصالك هنا",
+			"contacts_empty_state_description": "يبدو أنك لم تقم بإضافة جهات اتصال بعد",
+			"send_review_subtitle": "أنت ترسل",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
+		},
+		"placeholder": {
+			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
+			"enter_recipient_address": "أدخل عنوان المستلم، الاسم أو الاسم المستعار",
+			"enter_wallet_address": "أدخل عنوان المحفظة، الاسم أو الاسم المستعار",
+			"select_network": "حدد الشبكة",
+			"search_nfts": ""
+		},
+		"info": {
+			"ckbtc_certified": "يرجى الانتظار حتى يتم التصديق على معاملة ckBTC.",
+			"cketh_certified": "يرجى الانتظار حتى يتم التصديق على معاملة ckETH.",
+			"pending_bitcoin_transaction": "يمكنك إرسال معاملة بيتكوين أخرى بمجرد اكتمال المعاملة المعلقة.",
+			"no_available_utxos": "لن يكون لديك UTXOs متاحة لإجراء هذه المعاملة.",
+			"unknown_destination": "لم تتفاعل مع هذا العنوان من قبل. يرجى التأكد من معرفة المستلم.",
+			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>"
+		},
+		"assertion": {
+			"invalid_destination_address": "عنوان الوجهة غير صالح",
+			"insufficient_funds": "أموال غير كافية.",
+			"unknown_minimum_ckbtc_amount": "المبلغ الأدنى من ckBTC المطلوب للتحويل إلى BTC غير معروف.",
+			"unknown_minimum_cketh_amount": "المبلغ الأدنى من ckETH المطلوب للتحويل إلى ETH غير معروف.",
+			"minimum_ckbtc_amount": "المبلغ أقل من الحد الأدنى $amount ckBTC المطلوب للتحويل إلى BTC.",
+			"minimum_cketh_amount": "المبلغ أقل من الحد الأدنى للسحب $amount $symbol.",
+			"minimum_amount": "المبلغ أقل من الحد الأدنى للسحب $amount $symbol.",
+			"minimum_ledger_fees": "المبلغ أقل من رسوم دفتر الأستاذ $symbol.",
+			"minimum_cketh_balance": "رصيد $symbol أقل من الرسوم المقدرة $amount.",
+			"unknown_cketh": "لا يمكن استرداد توكن ckETH.",
+			"destination_address_invalid": "عنوان الوجهة غير صالح.",
+			"amount_invalid": "المبلغ غير صالح.",
+			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_gas": "أموال غير كافية للغاز",
+			"insufficient_funds_for_amount": "أموال غير كافية للمبلغ",
+			"insufficient_ethereum_funds_to_cover_the_fees": "أموال إيثريوم غير كافية لتغطية الرسوم",
+			"insufficient_solana_funds_to_cover_the_fees": "أموال سولانا غير كافية لتغطية الرسوم",
+			"not_enough_tokens_for_gas": "لا توجد توكنات $symbol كافية للغاز. الرصيد: $balance $symbol",
+			"gas_fees_not_defined": "رسوم الغاز غير محددة.",
+			"max_gas_fee_per_gas_undefined": "الحد الأقصى للرسوم لكل غاز أو الحد الأقصى لرسوم الأولوية لكل غاز غير محدد.",
+			"address_unknown": "العنوان غير معروف.",
+			"minter_info_not_loaded": "حاول مرة أخرى في بضع ثوانٍ، لم يتم تحميل معلمة تكوين ckETH بعد.",
+			"minter_info_not_certified": "حاول مرة أخرى في بضع ثوانٍ، لم يتم اعتماد معلمة تكوين ckETH.",
+			"cketh_max_transaction_fee_missing": "الحد الأقصى لرسوم المعاملة لـ ckETH مفقود.",
+			"utxos_fee_missing": "رسوم UTXOs مفقودة.",
+			"minimum_btc_amount": "المبلغ صغير جداً. يرجى إدخال ما لا يقل عن $amount BTC.",
+			"btc_insufficient_balance": "لا توجد UTXOs بيتكوين متاحة للمعاملة",
+			"btc_insufficient_balance_for_fee": "رصيد البيتكوين غير كافٍ لتغطية رسوم المعاملة",
+			"btc_invalid_utxo_data": "بيانات معاملة البيتكوين غير صالحة",
+			"btc_utxo_locked": "أموال البيتكوين مقفلة بواسطة المعاملات المعلقة",
+			"btc_invalid_fee_calculation": "فشل التحقق من رسوم معاملة البيتكوين",
+			"pending_transactions_not_available": "خدمة المعاملات المعلقة غير متاحة حالياً. يرجى المحاولة مرة أخرى لاحقاً.",
+			"no_nft_selected": ""
+		},
+		"error": {
+			"unexpected": "حدث خطأ ما أثناء إرسال المعاملة.",
+			"destination_address_unknown": "عنوان وجهة ETH غير معروف",
+			"metamask_connected": "لا يمكن الحصول على حساباتك. هل Metamask مفتوح ومتصل بالفعل؟",
+			"metamask_no_accounts": "لم يتم العثور على حسابات Metamask.",
+			"metamask_switch_network": "لا يمكن طلب تبديل Metamask إلى معرف السلسلة $chain_id. هل يستخدم Metamask شبكة $network_name؟",
+			"erc20_data_undefined": "بيانات معاملة Erc20 لا يمكن أن تكون غير معرفة أو فارغة.",
+			"data_undefined": "بيانات المعاملة لا يمكن أن تكون غير معرفة أو فارغة.",
+			"no_identity_calculate_fee": "لم يتم تقديم هوية لحساب الرسوم لعميلها الرئيسي.",
+			"invalid_destination": "الوجهة غير صالحة. يرجى المحاولة مرة أخرى باستخدام عنوان محفظة أو وجهة صالحة.",
+			"incompatible_token": "التوكن غير متوافق. يرجى المحاولة مرة أخرى باستخدام توكن متوافق.",
+			"no_btc_network_id": "الشبكة الحالية ($networkId) ليست شبكة بيتكوين.",
+			"no_solana_network_id": "الشبكة الحالية ($networkId) ليست شبكة سولانا.",
+			"no_pending_bitcoin_transaction": "حدث خطأ أثناء تحميل معاملات البيتكوين المعلقة. يرجى المحاولة مرة أخرى لاحقًا.",
+			"unexpected_utxos_fee": "حدث خطأ ما أثناء حساب رسوم المعاملة.",
+			"unable_to_retrieve_amount": "غير متاح (لا يمكن استرداده)",
+			"solana_transaction_expired": "لم تتم معالجة معاملة الإرسال الخاصة بك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى محاولة إرسالها مرة أخرى.",
+			"solana_confirmation_failed": "لم نتلق تأكيدًا للمعاملة التي أنشأتها للتو. يرجى الانتظار بضع ثوانٍ ثم التحقق من قائمة معاملات التوكن الخاصة بك إذا تم إنشاء معاملتك بشكل صحيح.",
+			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"recipient": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": "",
+			"pay_amount": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": "",
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
+		},
+		"error": {
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
+		}
+	},
+	"convert": {
+		"text": {
+			"converting": "جاري التحويل...",
+			"conversion_destination": "وجهة التحويل",
+			"default_destination": "محفظة OISY الخاصة بك",
+			"convert_to_btc": "تحويل إلى BTC",
+			"convert_to_ckbtc": "تحويل إلى ckBTC",
+			"convert_to_token": "تحويل إلى $token",
+			"convert_to_cketh": "تحويل إلى ckETH",
+			"convert_to_ckerc20": "تحويل إلى $ckErc20",
+			"convert_eth_to_cketh": "تحويل $token إلى $ckToken",
+			"cketh_conversions_may_take": "قد تستغرق تحويلات ckETH ما يصل إلى 20 دقيقة",
+			"ckerc20_conversions_may_take": "قد تستغرق تحويلات $ckErc20 ما يصل إلى 20 دقيقة",
+			"how_to_convert_eth_to_cketh": "إليك كيفية تحويل $token إلى $ckToken على $oisy_name",
+			"send_eth": "أرسل $token إلى عنوان $oisy_name الخاص بك",
+			"wait_eth_current_balance": "انتظر وصول $token. الرصيد الحالي",
+			"set_amount": "تحديد مبلغ التحويل",
+			"check_balance_for_fees": "تحقق من رصيد $token لرسوم التحويل",
+			"fees_explanation": "أنت بحاجة إلى ما يكفي من $token لتغطية رسوم تنفيذ العقد الذكي.",
+			"current_balance": "👈 الرصيد الحالي:",
+			"review_button": "مراجعة",
+			"convert_button": "تحويل",
+			"input_reset_button": "إعادة تعيين قيمة الإدخال",
+			"swap_to_token": "تحويل $sourceToken ← $destinationToken",
+			"review": "مراجعة المعاملة",
+			"max_balance": "الحد الأقصى",
+			"source_network": "شبكة المصدر",
+			"destination_network": "شبكة الوجهة",
+			"conversion_may_take": "قد يستغرق التحويل ما يصل إلى ساعة واحدة",
+			"executing_transaction": "جاري تنفيذ المعاملة...",
+			"initializing": "جاري تهيئة المعاملة...",
+			"refreshing_ui": "جاري تحديث واجهة المستخدم",
+			"unsupported_token_conversion": "تحويل التوكن المحدد غير مدعوم.",
+			"calculating_max_amount": "جاري الحساب...",
+			"send_to": "إرسال الأصول المحولة إلى",
+			"custom_destination": "عنوان آخر"
+		},
+		"assertion": {
+			"insufficient_funds": "رصيد غير كافٍ"
+		},
+		"error": {
+			"loading_cketh_helper": "خطأ أثناء تحميل عنوان عقد مساعد ckETH. لم يتم تهيئة معرف حاوية منشئ.",
+			"unexpected": "حدث خطأ ما أثناء تحويل التوكنات.",
+			"unexpected_missing_data": "حدث خطأ ما أثناء بدء معاملة تحويل."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": ""
+		}
+	},
+	"swap": {
+		"text": {
+			"swap": "تبديل",
+			"select_destination_token": "حدد التوكن المراد استلامه",
+			"select_source_token": "حدد التوكن المراد دفعه",
+			"switch_tokens_button": "تبديل التوكنات",
+			"review": "مراجعة المعاملة",
+			"review_button": "مراجعة التبديل",
+			"max_slippage": "الحد الأقصى للانزلاق",
+			"value_difference": "فرق القيمة",
+			"total_fee": "إجمالي الرسوم المقدرة",
+			"network_fee": "رسوم الشبكة",
+			"approval_fee": "رسوم الموافقة",
+			"gas_fee": "رسوم الغاز",
+			"lp_fee": "رسوم السيولة",
+			"max_slippage_info": "",
+			"max_slippage_warning": "تحذير من المخاطر: قد يؤدي الانزلاق المرتفع إلى خسائر بسبب تقلبات السوق",
+			"max_slippage_error": "",
+			"swap_button": "تبديل الآن",
+			"swap_is_not_offered": "هذا التبديل غير متاح حاليًا.",
+			"executing_transaction": "جاري تنفيذ المعاملة...",
+			"initializing": "جاري تهيئة المعاملة...",
+			"swapping": "جاري التبديل...",
+			"refreshing_ui": "جاري تحديث واجهة المستخدم",
+			"swap_provider": "مزود التبديل",
+			"swap_provider_website": "الموقع الإلكتروني",
+			"swap_route": "مسار التبديل",
+			"included_network_fees": "رسوم الشبكة المضمنة",
+			"included_liquidity_fees": "رسوم مجمع السيولة المضمنة",
+			"best_rate": "أفضل سعر",
+			"expected_minimum": "الحد الأدنى المتوقع",
+			"you_receive": "أنت تستلم",
+			"select": "تحديد >",
+			"select_swap_provider": "حدد مزود التبديل",
+			"open_icp_swap": "افتح موقع ICP Swap",
+			"open_instructions_link": "افتح رابط التعليمات",
+			"select_token": "حدد التوكن",
+			"select_network_filter": "حدد الشبكة",
+			"withdrawing": "",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": "",
+			"cross_chain_networks_info": "",
+			"near_intents_estimated_time": ""
+		},
+		"error": {
+			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",
+			"unexpected": "حدث خطأ ما أثناء تبديل التوكنات.",
+			"unexpected_missing_data": "حدث خطأ ما أثناء بدء معاملة تبديل.",
+			"slippage_exceeded": "$oisy_short يحميك: التداول خارج نطاق تحمل الانزلاق الخاص بك بنسبة $maxSlippage%. يرجى ضبط الحد الأقصى للانزلاق والمحاولة مرة أخرى.",
+			"pool_not_found": "فشل التبديل. لم يتم العثور على المجمع.",
+			"deposit_error": "فشل إيداع الأموال لتبديلك. يرجى المحاولة مرة أخرى أو تغيير مزود التبديل.",
+			"withdraw_failed": "فشل التبديل وفشل السحب أيضًا. يرجى التحقق من رصيدك غير المستخدم ومحاولة السحب اليدوي: ",
+			"swap_failed_withdraw_success": "فشل التبديل وتم استرداد توكناتك بنجاح. يرجى المحاولة مرة أخرى أو تغيير مزود التبديل.",
+			"withdraw_failed_first_part": "فشل التبديل ولم يتم سحب التوكنات المرسلة تلقائيًا. يرجى اتباع ",
+			"withdraw_failed_second_part": " لسحبها يدويًا على ",
+			"swap_failed_instruction_link": "هذه التعليمات ",
+			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
+			"swap_sucess_manually_withdraw_success": "",
+			"swap_completed_close_failed": ""
+		}
+	},
+	"buy": {
+		"text": {
+			"buy": "شراء",
+			"buy_dev": "شراء (بيئة تطوير)"
+		},
+		"onramper": {
+			"title": "شراء عبر Onramper"
+		}
+	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": "",
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
+		},
+		"alt": {
+			"pay": "",
+			"where_you_can_pay": ""
+		}
+	},
+	"tokens": {
+		"text": {
+			"title": "التوكنات",
+			"contract_address": "عنوان العقد",
+			"token_address": "عنوان التوكن",
+			"balance": "الرصيد",
+			"hide_zero_balances": "إخفاء الأرصدة الصفرية",
+			"all_tokens_with_zero_hidden": "جميع الأصول ذات الرصيد الصفري مخفية حاليًا",
+			"filter_nothing_found": "لا توجد توكنات ممكّنة متطابقة",
+			"filter_nothing_found_description": "ابحث عن الأصول المتاحة أدناه أو استخدم \"إدارة التوكنات\" لاستيراد توكنات إضافية",
+			"filter_placeholder": "تصفية حسب التوكن أو الرمز",
+			"buy_or_receive": "اشترِ أو استلم أول توكناتك الآن لترىها في القائمة",
+			"initializing": "جاري التهيئة...",
+			"updating_ui": "جاري تحديث واجهة المستخدم...",
+			"show_token": "عرض التوكن",
+			"hide_token": "إخفاء التوكن",
+			"select_token": "حدد التوكن",
+			"exchange_is_not_available": "قيمة الدولار الأمريكي غير متاحة حاليًا.",
+			"exchange_is_not_available_short": "قيمة الدولار الأمريكي غير متاحة",
+			"source_token_title": "أنت تدفع",
+			"destination_token_title": "أنت تستلم",
+			"chain_key": "مفتاح السلسلة",
+			"show_more_networks": "عرض $number شبكة إضافية",
+			"hide_more_networks": "إخفاء المزيد من الشبكات",
+			"on_network": " على $network",
+			"delete_token": "حذف التوكن",
+			"edit_token": "تعديل التوكن",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": "",
+			"hide_asset_types": "",
+			"asset_type": "",
+			"asset_type_all": "",
+			"no_tokens_for_asset_type": "",
+			"no_tokens_for_asset_type_zero_tokens": "",
+			"no_tokens_for_asset_type_description": ""
+		},
+		"details": {
+			"title": "تفاصيل التوكن",
+			"token": "التوكن",
+			"network": "الشبكة",
+			"contract_address_copied": "تم نسخ عنوان العقد إلى الحافظة.",
+			"token_address_copied": "تم نسخ عنوان التوكن إلى الحافظة.",
+			"twin_token": "التوكن التوأم",
+			"standard": "المعيار",
+			"confirm_deletion_description": "سيؤدي هذا إلى إزالة <span class=\"font-bold\">$token</span> من قائمة توكنات $oisy_short الخاصة بك. ستبقى أموالك كما هي - يمكنك إعادة إضافة التوكن في أي وقت.",
+			"deletion_confirmation": "تمت إزالة $token بنجاح من قائمة توكنات $oisy_short الخاصة بك.",
+			"update_confirmation": "تم تحديث $token بنجاح.",
+			"missing_index_canister_id_label": "غير معين",
+			"missing_index_canister_id_warning": "حاوية الفهرس مفقودة، لذلك لا يمكن لـ $oisy_short جلب قائمة بالمعاملات",
+			"missing_index_canister_id_button": "تعيين حاوية الفهرس"
+		},
+		"balance": {
+			"error": {
+				"not_applicable": "غير منطبق"
+			}
+		},
+		"import": {
+			"text": {
+				"title": "استيراد التوكن",
+				"title_nft": "",
+				"review": "مراجعة",
+				"saving": "جاري الحفظ...",
+				"updating": "جاري تحديث قائمة التوكنات",
+				"canister_id": "",
+				"ledger_canister_id": "معرف حاوية السجل",
+				"index_canister_id": "معرف حاوية الفهرس",
+				"minter_canister_id": "معرف حاوية المينتر",
+				"ledger_canister_id_copied": "تم نسخ معرف حاوية السجل إلى المحفظة.",
+				"index_canister_id_copied": "تم نسخ معرف حاوية الفهرس إلى المحفظة.",
+				"minter_canister_id_copied": "تم نسخ معرف حاوية المينتر إلى المحفظة.",
+				"verifying": "جاري التحقق من تفاصيل التوكن...",
+				"add_the_token": "أضف التوكن",
+				"info": "تتوفر معرفات حاوية السجل والفهرس عادةً على موقع المشروع.",
+				"info_ext": "",
+				"info_index": "معرف حاوية الفهرس اختياري، ولكن بدونه، لا يمكن لـ $oisy_short عرض سجل المعاملات.",
+				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة."
+			},
+			"error": {
+				"loading_metadata": "العنوان المحدد ليس توكنًا صالحًا في الشبكة المحددة.",
+				"no_metadata": "لم يتم توفير أي بيانات وصفية للتوكن. هذا غير متوقع.",
+				"unexpected_ledger": "حدث خطأ ما أثناء التحقق من صحة حاوية السجل.",
+				"unexpected_index": "حدث خطأ ما أثناء التحقق من صحة حاوية الفهرس.",
+				"unexpected_index_ledger": "حدث خطأ ما أثناء تحميل معرف السجل المرتبط بحاوية الفهرس.",
+				"unrecognized_nft_canister_id_standard": "",
+				"invalid_ledger_id": "معرف السجل غير مرتبط بحاوية الفهرس.",
+				"missing_ledger_id": "معرف السجل مفقود. هل قدمت قيمة؟",
+				"missing_canister_id": "",
+				"missing_contract_address": "عنوان العقد مفقود. هل قدمت قيمة؟",
+				"missing_token_address": "عنوان التوكن مفقود. هل قدمت قيمة؟",
+				"no_network": "لم يتم تحديد أي شبكة. هذا غير متوقع."
+			},
+			"warning": {
+				"do_not_close_manage": "$oisy_name يقوم بإعداد وتأمين التوكنات الجديدة. يرجى عدم إغلاق هذه النافذة حتى يكتمل الأمر."
+			}
+		},
+		"manage": {
+			"text": {
+				"title": "إدارة التوكنات",
+				"title_nft": "",
+				"manage_list": "إدارة التوكنات",
+				"manage_list_nft": "",
+				"list_settings": "إعدادات القائمة",
+				"import_token": "استيراد توكن",
+				"import_nft": "",
+				"network": "الشبكة",
+				"all_tokens_zero_balance": "جميع التوكنات ذات رصيد صفري.",
+				"enable_more_assets": "تمكين المزيد من التوكنات"
+			},
+			"placeholder": {
+				"select_network": "حدد الشبكة"
+			},
+			"info": {
+				"no_changes": "لا توجد تغييرات تحتاج إلى حفظ."
+			},
+			"error": {
+				"unexpected_build": "حدث خطأ غير متوقع أثناء بناء قائمة التوكنات المعروفة.",
+				"empty": "لم يتم تحديد أي توكنات لتمكينها أو تعطيلها."
+			}
+		},
+		"hide": {
+			"title": "إخفاء التوكن؟",
+			"token": "إخفاء $token",
+			"info": "يمكنك إضافة هذا التوكن مرة أخرى في المستقبل بالانتقال إلى <strong>\"إدارة التوكنات\"</strong> في عرض محفظتك.",
+			"confirm": "إخفاء",
+			"hiding": "جاري الإخفاء..."
+		},
+		"alt": {
+			"context_menu": "قائمة السياق للتوكن المحدد",
+			"open_etherscan": "افتح تفاصيل التوكن على Etherscan",
+			"open_blockstream": "افتح تفاصيل التوكن على Blockstream",
+			"open_dashboard": "افتح تفاصيل التوكن على لوحة تحكم ICP",
+			"open_contract_address_block_explorer": "افتح عنوان العقد على مستكشف الكتل",
+			"open_token_address_block_explorer": "افتح عنوان التوكن على مستكشف الكتل",
+			"token_group_number": "العدد الإجمالي للتوكنات في المجموعة للتوكن الأصلي $token",
+			"filter_button": "فتح/إغلاق الفلتر"
+		},
+		"placeholder": {
+			"enter_contract_address": "أدخل عنوان عقد ERC20",
+			"enter_token_address": "أدخل عنوان توكن SPL",
+			"search_token": "البحث عن التوكن"
+		},
+		"warning": {
+			"trust_token": "تأكد من أنك تثق في التوكن الذي تضيفه. إذا كان التوكن الذي تضيفه تحت سيطرة طرف خبيث، فقد يحاولون الاحتيال عليك، على سبيل المثال، بجعلك تعتقد أنك تلقيت كمية كبيرة من التوكنات من أجل خداعك لإرسال توكنات إليهم في المقابل أو تنفيذ إجراءات أخرى غير مرغوب فيها. تعرف على المزيد حول عمليات الاحتيال والمخاطر الأمنية، على سبيل المثال <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">هنا</a>."
+		},
+		"error": {
+			"invalid_contract_address": "عنوان العقد غير صالح.",
+			"invalid_token_address": "عنوان التوكن غير صالح.",
+			"invalid_ledger": "التوكن المحدد غير مرتبط بحاوية Icrc Ledger.",
+			"unrecognised_erc_interface": "",
+			"no_metadata": "لم يتم جلب أي بيانات وصفية.",
+			"unexpected": "حدث خطأ ما أثناء حفظ التوكن.",
+			"version_mismatch": "",
+			"unexpected_hiding": "حدث خطأ ما أثناء إخفاء التوكن.",
+			"already_available": "التوكن متاح بالفعل.",
+			"not_toggleable": "لا يمكن تبديل التوكن، لا يمكن إخفاؤه.",
+			"incomplete_metadata": "لا يوجد اسم أو رمز في البيانات الوصفية.",
+			"duplicate_metadata": "توكن بنفس الاسم أو الرمز موجود بالفعل.",
+			"unexpected_undefined": "التوكن غير معرف. هذا غير متوقع.",
+			"unexpected_error_on_token_delete": "حدث خطأ ما أثناء إزالة التوكن.",
+			"unexpected_error_on_token_update": "حدث خطأ ما أثناء تحديث التوكن."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "",
+			"risk": ""
+		},
+		"category": {
+			"crypto": "",
+			"stablecoin": "",
+			"stock": "",
+			"commodity": ""
+		},
+		"risk": {
+			"low": "",
+			"medium": "",
+			"high": ""
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": "NFTs",
+			"title_empty": "ستظهر NFTs الخاصة بك هنا",
+			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
+			"title_not_supported": "",
+			"description_not_supported": "",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": "",
+			"collection_not_loaded": "",
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": "",
+			"address_copied": "",
+			"collection_name_copied": "",
+			"id_copied": "",
+			"spam": "",
+			"not_spam": "",
+			"spam_warning": "",
+			"spam_warning_text": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"hide_warning": "",
+			"hide_warning_text": "",
+			"open_explorer": "",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
+			"collection_name": "",
+			"media_urls": "",
+			"media_url": "",
+			"received_at": "",
+			"display_preference": "",
+			"review_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": "",
+			"token_id": "",
+			"go_to_collection": "",
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
+		},
+		"alt": {
+			"placeholder_image": "لا توجد NFTs بعد",
+			"card": {
+				"image": "صورة NFT مع معرف التوكن: $tokenId"
+			},
+			"copy_address": "",
+			"review_preference": "",
+			"go_to_collection": ""
+		}
+	},
+	"fee": {
+		"text": {
+			"fee": "الرسوم",
+			"estimated_btc": "رسوم شبكة البيتكوين المقدرة",
+			"estimated_inter_network": "رسوم الشبكة البينية المقدرة",
+			"estimated_eth": "رسوم الإيثيريوم المقدرة",
+			"max_fee_eth": "الحد الأقصى للرسوم <small>(على الأرجح في < 30 ثانية)</small>",
+			"convert_fee": "رسوم التحويل",
+			"convert_inter_network_fee": "رسوم بين الشبكات",
+			"convert_btc_network_fee": "رسوم شبكة البيتكوين",
+			"zero_fee": "مجاني",
+			"total_fee": "إجمالي الرسوم",
+			"ata_fee": "رسوم ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": "رصيد غير كافٍ لتغطية الرسوم."
+		},
+		"error": {
+			"cannot_fetch_gas_fee": "لا يمكن جلب رسوم الغاز."
+		}
+	},
+	"info": {
+		"bitcoin": {
+			"title": "استلام BTC وتحويله إلى ckBTC",
+			"description": "حوّل البيتكوين إلى ckBTC واستفد من أسرع وأرخص معاملة بيتكوين متاحة. قد تستغرق عملية التحويل ما يصل إلى ساعة.",
+			"note": "يمكنك تحويل ckBTC في أي وقت إلى BTC.",
+			"how_to": "كيفية التحويل إلى ckBTC"
+		},
+		"ethereum": {
+			"title": "تحويل إلى $ckToken",
+			"description": "بضع خطوات بسيطة، حوّل $token الأصلي الخاص بك من شبكة $network إلى $ckToken ICP المطابق مباشرة داخل $oisy_name. قد تستغرق عملية التحويل ما يصل إلى 20 دقيقة.",
+			"note": "يمكنك تحويل $ckToken في أي وقت إلى $token.",
+			"how_to": "كيفية التحويل إلى $ckToken",
+			"how_to_short": "كيفية تحويل $token"
+		}
+	},
+	"wallet_connect": {
+		"text": {
+			"name": "WalletConnect",
+			"session_proposal": "اقتراح جلسة",
+			"connect": "اتصال",
+			"connecting": "جاري الاتصال...",
+			"disconnect": "قطع الاتصال",
+			"scan_qr": "مسح رمز QR",
+			"or_use_link": "أو استخدم رابط WalletConnect",
+			"proposer": "المقترح",
+			"spender": "",
+			"application": "",
+			"review": "مراجعة الأذونات المطلوبة لـ $chain_name ($key)",
+			"method": "الطريقة",
+			"methods": "الطرق",
+			"events": "الأحداث",
+			"message": "الرسالة",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
+			"hex_data": "بيانات HEX",
+			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
+			"sign_message": "توقيع الرسالة"
+		},
+		"alt": {
+			"connect_input": "على سبيل المثال: wc:a281567bb3e4..."
+		},
+		"domain": {
+			"title": "التحقق من النطاق",
+			"valid": "صالح ✅",
+			"valid_description": "نجح التحقق من نطاق المقترح.",
+			"invalid": "غير صالح ❌",
+			"invalid_description": "نطاق موقع الويب الخاص بالمقترح لا يتطابق مع مُرسِل الطلب.",
+			"security_risk": "خطر أمني ⚠️",
+			"security_risk_description": "تم وضع علامة على موقع الويب الخاص بالمقترح على أنه غير آمن.",
+			"unknown": "غير معروف ❓",
+			"unknown_description": "لا يمكن التحقق من نطاق المقترح."
+		},
+		"info": {
+			"disconnected": "تم قطع اتصال WalletConnect.",
+			"session_ended": "انتهت جلسة WalletConnect.",
+			"connected": "تم اتصال WalletConnect.",
+			"transaction_executed": "تم تنفيذ طلب WalletConnect \"$method\".",
+			"sign_executed": "تم تنفيذ طلب توقيع WalletConnect."
+		},
+		"error": {
+			"qr_code_read": "لا يمكن قراءة رمز QR.",
+			"missing_uri": "يجب توفير URI للاتصال.",
+			"disconnect": "حدث خطأ غير متوقع أثناء قطع اتصال المحفظة. جاري إعادة تعيين الاتصال على أي حال.",
+			"connect": "حدث خطأ غير متوقع أثناء محاولة توصيل المحفظة.",
+			"manual_workflow": "يرجى إنهاء سير العمل اليدوي الذي تم البدء فيه بالفعل عن طريق فتح نافذة WalletConnect.",
+			"skipping_request": "جاري تخطي طلب WalletConnect نظرًا لوجود إجراء آخر قيد التقدم حاليًا من خلال تراكب.",
+			"method_not_support": "الطريقة المطلوبة \"$method\" غير مدعومة.",
+			"unexpected_pair": "حدث خطأ غير متوقع أثناء محاولة إقران المحفظة.",
+			"no_connection_opened": "خطأ غير متوقع: لم يتم فتح أي اتصال.",
+			"no_session_approval": "خطأ غير متوقع: لا يوجد اقتراح جلسة متاح.",
+			"unexpected": "خطأ غير متوقع أثناء التواصل مع WalletConnect.",
+			"request_rejected": "تم رفض طلب WalletConnect",
+			"unknown_parameter": "معلمة غير معروفة.",
+			"wallet_not_initialized": "خطأ غير متوقع. عنوان محفظتك غير مهيأ.",
+			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
+			"unknown_destination": "عنوان الوجهة غير معروف.",
+			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
+			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
+		}
+	},
+	"transaction": {
+		"text": {
+			"details": "تفاصيل المعاملة",
+			"hash": "رمز تجزئة المعاملة",
+			"hash_copied": "تم نسخ رمز تجزئة المعاملة $hash إلى الحافظة.",
+			"id": "معرف المعاملة",
+			"id_copied": "تم نسخ معرف المعاملة إلى الحافظة.",
+			"timestamp": "الطابع الزمني",
+			"type": "النوع",
+			"from": "من",
+			"from_copied": "تم نسخ العنوان المرسل إلى الحافظة.",
+			"received_from": "تم الاستلام من $name",
+			"from_ata": "حساب توكن المرسل (ATA)",
+			"from_ata_copied": "تم نسخ حساب توكن المرسل (ATA) إلى الحافظة.",
+			"to": "إلى",
+			"to_copied": "تم نسخ العنوان المستلم إلى الحافظة.",
+			"sent_to": "تم الإرسال إلى $name",
+			"to_ata": "حساب توكن المستلم (ATA)",
+			"to_ata_copied": "تم نسخ حساب توكن المستلم (ATA) إلى الحافظة.",
+			"block": "الكتلة",
+			"interacted_with": "تم التفاعل مع (إلى)",
+			"status": "الحالة",
+			"confirmations": "التأكيدات",
+			"for": "",
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
+		},
+		"status": {
+			"confirmed": "تم التأكيد",
+			"included": "مشمول",
+			"finalised": "تم الانتهاء",
+			"finalized": "تم الانتهاء",
+			"processed": "تمت المعالجة",
+			"pending": "معلق...",
+			"safe": "آمن",
+			"unconfirmed": "غير مؤكد"
+		},
+		"type": {
+			"send": "إرسال",
+			"receive": "استلام",
+			"withdraw": "سحب",
+			"deposit": "إيداع",
+			"approve": "موافقة",
+			"burn": "حرق",
+			"mint": "إنشاء"
+		},
+		"label": {
+			"reimbursement": "تعويض",
+			"twin_token_converted": "تم التحويل من $twinToken",
+			"ck_token_converted": "تم التحويل من $ckToken",
+			"sending_twin_token": "جاري إرسال $twinToken",
+			"sending_twin_token_failed": "فشل إرسال $twinToken",
+			"converting_twin_token": "جاري تحويل $twinToken إلى $ckToken",
+			"converting_ck_token": "جاري تحويل $ckToken إلى $twinToken",
+			"twin_network": "شبكة $twinNetwork",
+			"no_date_available": "لا يوجد تاريخ متاح",
+			"pending": "معلق"
+		},
+		"alt": {
+			"open_block_explorer": "افتح هذه المعاملة في مستكشف الكتل",
+			"open_from_block_explorer": "افتح عنوان 'من' في مستكشف الكتل",
+			"open_to_block_explorer": "افتح عنوان 'إلى' في مستكشف الكتل",
+			"open_for_block_explorer": ""
+		},
+		"error": {
+			"get_block_number": "لا يمكن الحصول على رقم الكتلة.",
+			"failed_get_transaction": "فشل في الحصول على المعاملة من الرمز (hash: $hash) المقدم. يرجى إعادة تحميل تطبيق المحفظة."
+		}
+	},
+	"transactions": {
+		"text": {
+			"title": "المعاملات",
+			"buy_or_receive": "قم بأول معاملة لك، واشترِ أو استلم التوكنات الآن!",
+			"transaction_history": "سيظهر سجل معاملاتك هنا",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
+			"mainnet_btc_transactions_info": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
+			"transaction_history_unavailable": "سجل المعاملات غير متاح",
+			"missing_index_canister_explanation": "في الوقت الحالي، لا يستطيع $oisy_short عرض سجل معاملات التوكن الخاص بك لأن الجهة المصدرة لم توفر ميزة التتبع بعد. من المفترض أن تتم إضافتها قريبًا. في هذه الأثناء، لا تقلق - لا يزال بإمكانك إرسال واستلام التوكنات الخاصة بك كالمعتاد.",
+			"index_canister_not_working_explanation": "في الوقت الحالي، لا يستطيع $oisy_short عرض سجل معاملات التوكن الخاص بك لأن ميزة التتبع الخاصة بالجهة المصدرة لا تستجيب حاليًا. من المفترض أن يتم حل هذه المشكلة قريبًا. في هذه الأثناء، لا تقلق - لا يزال بإمكانك إرسال واستلام التوكنات الخاصة بك كالمعتاد.",
+			"token_needs_enabling": "يجب تمكين التوكن لعرض سجل المعاملات."
+		},
+		"error": {
+			"loading_transactions_symbol": "خطأ أثناء تحميل معاملات $symbol.",
+			"uncertified_transactions_removed": "تم تحديد العديد من المعاملات غير المصدقة وإزالتها لاحقًا من القوائم المعروضة.",
+			"loading_pending_ck_ethereum_transactions": "حدث خطأ ما أثناء جلب معاملات $network المعلقة.",
+			"get_transaction_for_hash": "فشل في الحصول على المعاملة من الرمز (hash: $hash) المقدم.",
+			"unexpected_transaction_for_hash": "حدث خطأ غير متوقع أثناء تحميل المعلق للرمز: $hash.",
+			"loading_token_with_network": "تعذر تحميل التوكن $token على شبكة $network لأنه ليس في قائمة التوكنات الخاصة بك.",
+			"loading_token": "الرابط المقدم لتوكن غير صالح."
+		}
+	},
+	"about": {
+		"why_oisy": {
+			"text": {
+				"label": "لماذا $oisy_short",
+				"title": "لماذا $oisy_short",
+				"hold_crypto": {
+					"title": "إدارة موحدة لجميع أصولك الرقمية",
+					"description": "يتيح لك $oisy_short إدارة جميع أصولك الرقمية - بما في ذلك بيتكوين، سولانا، إيثريوم، ICP، والمزيد - في محفظة واحدة وموحدة. لا مزيد من التلاعب بالمحافظ المتعددة للعملات المشفرة المختلفة - استمتع بتجربة سلسة وفعالة عبر مختلف المنصات."
+				},
+				"network_custody": {
+					"title": "لا مزيد من القلق بشأن المفتاح الخاص مع حراسة الشبكة",
+					"description": "ينفذ $oisy_name حراسة الشبكة، وهو نهج مبتكر يستفيد من التشفير المتقدم لـ Internet Computer للتخلص من الحاجة إلى التعامل مع المفاتيح الخاصة مباشرة. يوفر هذا بديلاً آمنًا وسهل الاستخدام للطرق التقليدية، ويتماشى مع حركة \"Onchain is the New Online\" - تحول نحو حلول تعزز الأمان والمرونة ضد الهجمات الإلكترونية من خلال العمل على شبكة موزعة."
+				},
+				"fully_on_chain": {
+					"title": "أمان مقاوم للعبث مع محفظة على السلسلة بالكامل",
+					"description": "ليست مفاتيحك آمنة فحسب، بل يتم تخزين تطبيق المحفظة بالكامل <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">على السلسلة بالكامل</a> ويتم تقديمه مباشرة إلى متصفحك من Internet Computer. وهذا يعني أن المحفظة بأكملها تستفيد من نموذج الثقة اللامركزي، مما يجعلها مقاومة للعبث وآمنة للغاية."
+				},
+				"cross_device": {
+					"title": "الوصول إلى محفظتك في أي وقت ومن أي مكان",
+					"description": "باستخدام <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">هوية الإنترنت</a>، يمكن استخدام $oisy_short بسهولة عبر جميع الأجهزة التي ربطتها بهويتك اللامركزية الخاصة. وهذا يضمن وصولًا سلسًا وآمنًا إلى محفظتك سواء كنت تستخدم هاتفًا ذكيًا أو جهازًا لوحيًا أو كمبيوتر مكتبيًا."
+				},
+				"verifiable_credentials": {
+					"title": "افتح ميزات إضافية باستخدام بيانات الاعتماد القابلة للتحقق",
+					"description": "يتكامل $oisy_short مع منصة <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">بيانات الاعتماد القابلة للتحقق</a> الخاصة بـ Internet Computer. يمكنك الوصول إلى ميزات إضافية مثل الإسقاطات الجوية والوظائف الحصرية من خلال الحصول على أنواع معينة من بيانات الاعتماد، مما يعزز تجربتك العامة."
+				},
+				"open_source": {
+					"title": "ثق في الشفافية مع المصدر المفتوح",
+					"description": "$oisy_short هو مشروع <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">مفتوح المصدر</a> يقوده فريق متخصص داخل <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">مؤسسة DFINITY</a>، بدعم من أكثر من 200 من كبار خبراء التشفير والمهندسين في العالم. يضمن المصدر المفتوح الشفافية، مما يسمح للمجتمع بالتدقيق والمساهمة والثقة في سلامة المحفظة."
+				}
+			}
+		}
+	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "خذني إلى المحفظة",
+				"title_successful": "تهانينا!",
+				"title_failed": "رمز الدعوة غير صالح",
+				"reward_received": "مرحبًا بك في $oisy_short!",
+				"reward_failed": "انتهت صلاحية الرمز",
+				"reward_received_description": "ستتلقى هديتك الترحيبية في أي لحظة.",
+				"brand_reward_received_description": "",
+				"reward_failed_description": "اطلب رمزًا جديدًا وحاول مرة أخرى"
+			},
+			"error": {
+				"loading_reward": "خطأ أثناء تحميل رمز مكافأة جديد.",
+				"loading_user_data": "فشل تحميل بيانات المستخدم من حاوية المكافآت.",
+				"loading_eligibility": "خطأ أثناء تحميل أهلية الحملة."
+			}
+		},
+		"invitation": {
+			"text": {
+				"title": "",
+				"binance_title": "",
+				"invitation_link_copied": "",
+				"generate_new_link": "",
+				"generating_new_code": "",
+				"regenerate_countdown_text": ""
+			}
+		}
+	},
+	"referral": {
+		"invitation": {
+			"text": {
+				"title": "أحِل صديقًا",
+				"referral_link_copied": "تم نسخ رابط الإحالة إلى المحفظة.",
+				"information": "أحِل الأصدقاء واحصل على رشات إضافية!",
+				"not_referred_yet": "لم تقم بإحالة أي شخص بعد",
+				"referred_amount": "لقد قمت بالفعل بإحالة $amount أشخاص",
+				"learn_more": "تعرف على المزيد"
+			},
+			"error": {
+				"loading_referrer_info": "خطأ أثناء تحميل معلومات المُحيل",
+				"setting_referrer": "خطأ أثناء تعيين المُحيل"
+			}
+		}
+	},
+	"address_book": {
+		"text": {
+			"title": "جهات الاتصال",
+			"empty_title": "جهات اتصالك فارغة",
+			"empty_text": "ستظهر جميع جهات اتصالك هنا",
+			"add_new_contact": "إضافة جهة اتصال جديدة",
+			"add_contact": "إضافة جهة اتصال",
+			"search_contact": "البحث عن جهة اتصال",
+			"no_address_found": "لا يوجد عنوان متاح.",
+			"no_contact_found": "لم يتم العثور على جهات اتصال"
+		},
+		"alt": {
+			"show_addresses_of_contact": "إظهار جميع العناوين لجهة الاتصال",
+			"hide_addresses": "إخفاء عناوين جهة الاتصال"
+		},
+		"edit_contact": {
+			"title": "تعديل جهة الاتصال",
+			"add_address": "إضافة عنوان",
+			"delete_contact": "حذف جهة الاتصال"
+		},
+		"avatar": {
+			"default": "صورة رمزية افتراضية",
+			"avatar_for": "صورة رمزية لـ",
+			"avatar_loading": ""
+		},
+		"edit_avatar": {
+			"menu_title": "صورة جهة الاتصال",
+			"upload_image": "تحميل",
+			"replace_image": "استبدال",
+			"remove_image": "إزالة"
+		},
+		"show_contact": {
+			"title": "جهة الاتصال",
+			"add_address": "إضافة عنوان",
+			"show_address_text": "ستظهر العناوين المرتبطة هنا",
+			"add_first_address": "أضف أول عنوان إلى $contactName!"
+		},
+		"create_contact": {
+			"title": "إنشاء جهة اتصال"
+		}
+	},
+	"contact": {
+		"form": {
+			"edit_contact": "تعديل جهة الاتصال",
+			"add_new_contact": "إضافة جهة اتصال جديدة"
+		},
+		"fields": {
+			"name": "الاسم"
+		},
+		"delete": {
+			"title": "حذف جهة الاتصال $contact؟",
+			"delete_contact": "حذف جهة الاتصال",
+			"content_text": "سيؤدي هذا إلى حذف $contact وجميع العناوين المرتبطة به من دفتر العناوين الخاص بك. لا يمكن التراجع عن هذا الإجراء."
+		},
+		"error": {
+			"create": "فشل إنشاء جهة الاتصال",
+			"update": "فشل تحديث جهة الاتصال",
+			"delete": "فشل حذف جهة الاتصال",
+			"name_too_long": "يرجى أن يكون الاسم مكونًا من $maxCharacters حرفًا أو أقل."
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "كمبيوتر الإنترنت",
+			"Btc": "بيتكوين",
+			"Eth": "إيثريوم",
+			"Sol": "سولانا"
+		},
+		"form": {
+			"new_address": "عنوان جديد",
+			"address_placeholder": "أدخل أو الصق العنوان",
+			"label_placeholder": "على سبيل المثال: \"محفظة الأم\"",
+			"invalid_address": "عنوان غير صالح",
+			"valid_for_networks": "صالح للشبكات:",
+			"error": {
+				"label_too_long": "لا يمكن أن يتجاوز التسمية $maxCharacters حرفًا"
+			}
+		},
+		"fields": {
+			"label": "الاسم المستعار",
+			"address": "العنوان"
+		},
+		"delete": {
+			"title": "حذف العنوان؟",
+			"delete_address": "حذف العنوان",
+			"content_text": "سيؤدي هذا إلى حذف العنوان <strong>$address</strong> من جهة الاتصال $contact.<br>لا يمكن التراجع عن هذا الإجراء."
+		},
+		"save": {
+			"title": "حفظ العنوان",
+			"add_to_existing_contact": "إضافة إلى جهة اتصال موجودة",
+			"create_contact": "إنشاء جهة اتصال"
+		},
+		"qr": {
+			"title": "مسح رمز QR"
+		}
+	},
+	"signer": {
+		"sign_in": {
+			"text": {
+				"access_your_wallet": "الوصول إلى محفظة $oisy_name الخاصة بك",
+				"open_or_create": "افتح أو أنشئ محفظتك للاتصال بأمان بالتطبيق اللامركزي وبدء إدارة أصولك."
+			}
+		},
+		"idle": {
+			"text": {
+				"waiting": "في انتظار تفاعل التطبيق اللامركزي..."
+			},
+			"alt": {
+				"img_placeholder": "شعار رائد الفضاء يحرك عينيه من اليسار إلى اليمين أثناء انتظار الرسائل من تطبيق الطرف المعتمد"
+			}
+		},
+		"permissions": {
+			"text": {
+				"title": "مراجعة الأذونات",
+				"requested_permissions": "الأذونات المطلوبة",
+				"your_wallet_address": "عنوان محفظتك",
+				"icrc27_accounts": "عرض عنوان $oisy_name الخاص بك",
+				"icrc49_call_canister": "طلب الموافقة على المعاملات"
+			},
+			"error": {
+				"no_confirm_callback": "لا توجد وظيفة رد اتصال لتأكيد الأذونات، وهو أمر غير متوقع. أغلق المحفظة وحاول مرة أخرى."
+			}
+		},
+		"origin": {
+			"text": {
+				"request_from": "طلب من:",
+				"invalid_origin": "أصل غير صالح!!"
+			},
+			"alt": {
+				"link_to_dapp": "رابط إلى التطبيق اللامركزي الذي يطلب الأذونات"
+			}
+		},
+		"consent_message": {
+			"text": {
+				"loading": "جاري تحميل رسالة الموافقة..."
+			},
+			"warning": {
+				"token_without_consent_message": "هذا التوكن لا يوفر رسائل تأكيد، لذلك تم استخراج المعلومات أدناه بواسطة $oisy_short."
+			},
+			"error": {
+				"no_approve_callback": "لا توجد وظيفة رد اتصال للموافقة على رسالة الموافقة، وهو أمر غير متوقع. أغلق المحفظة وحاول مرة أخرى.",
+				"no_reject_callback": "لا توجد وظيفة رد اتصال لرفض رسالة الموافقة، وهو أمر غير متوقع. أغلق المحفظة وحاول مرة أخرى.",
+				"retrieve": "حدث خطأ أثناء استرداد رسالة الموافقة"
+			}
+		},
+		"call_canister": {
+			"text": {
+				"processing": "جاري معالجة الطلب...",
+				"executed": "تم تنفيذ الطلب",
+				"close_window": "يمكنك إغلاق هذه النافذة",
+				"error": "فشل الطلب بسبب خطأ",
+				"try_again": "يرجى المحاولة مرة أخرى. إذا استمرت المشكلة، يرجى الاتصال بمطور التطبيق اللامركزي الذي بدأت الطلب منه."
+			},
+			"error": {
+				"cannot_call": "لا يمكن معالجة الاستدعاء"
+			}
+		}
+	},
+	"carousel": {
+		"text": {
+			"next_slide": "الشريحة التالية",
+			"prev_slide": "الشريحة السابقة",
+			"indicator": "انتقل إلى الشريحة $index"
+		}
+	},
+	"agreements": {
+		"text": {
+			"updated_agreements_warning": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
+		}
+	},
+	"license_agreement": {
+		"text": {
+			"license_agreement": "",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
+			"title": "اتفاقية ترخيص $oisy_name (\"اتفاقية الترخيص\")",
+			"body": ""
+		},
+		"alt": {
+			"license_agreement": "اتفاقية ترخيص $oisy_short"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
+			"title": "",
+			"instruction": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
+		}
+	},
+	"activity": {
+		"text": {
+			"title": "النشاط الأخير"
+		},
+		"info": {
+			"btc_transactions": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل."
+		},
+		"warning": {
+			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",
+			"unavailable_index_canister": "لا يمكن عرض معاملات $token_list. حاوية الفهرس غير متاحة حاليًا."
+		}
+	},
+	"earning": {
+		"text": {
+			"title": "اكسب",
+			"tab_title": "",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": "",
+			"go_to_earn": ""
+		},
+		"cards": {
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"networks": "",
+			"assets": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
+		}
+	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
+	"stake": {
+		"text": {
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
+			"stake": "",
+			"stake_now": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
+			"unstake": "",
+			"unstake_now": "",
+			"unstaking": "",
+			"unstake_token": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"earning_potential": "",
+			"earning_potential_hint": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
+			"visit_provider": "",
+			"current_apy_label": "",
+			"max_apy_label": "",
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_reward_short": "",
+			"claim_now": "",
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_asset_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"harvest_autopilot_carousel_slide_title": "",
+			"harvest_autopilot_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
+			"dissolvement_limit_reached": ""
+		},
+		"info": {
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
+		}
+	},
+	"temporal": {
+		"seconds_to_duration": {
+			"year": "سنة",
+			"year_plural": "سنوات",
+			"month": "شهر",
+			"month_plural": "أشهر",
+			"day": "يوم",
+			"day_plural": "أيام",
+			"hour": "ساعة",
+			"hour_plural": "ساعات",
+			"minute": "دقيقة",
+			"minute_plural": "دقائق",
+			"second": "ثانية",
+			"second_plural": "ثواني"
+		},
+		"time_frame": {
+			"t_24h": ""
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "مساعد الذكاء الاصطناعي $oisy_short",
+			"welcome_message": "أهلاً بك! 👋 أنا OISY، مساعدك الشخصي بالذكاء الاصطناعي. إليك كيف يمكنني مساعدتك:",
+			"action_button_contacts_title": "عرض جهات الاتصال",
+			"action_button_contacts_subtitle": "عرض جهات الاتصال المحفوظة لديك",
+			"action_button_contacts_prompt": "أرني جهات اتصالي.",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
+			"send_message": "إرسال رسالة",
+			"send_message_input_placeholder": "ماذا تريد أن تفعل؟",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
+			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
+			"no_contacts_found_message": "",
+			"loading": "جارٍ التفكير...",
+			"reset_chat_history": "",
+			"feature_description": ""
+		},
+		"errors": {
+			"unknown": "عذرًا، حدث خطأ ما في الحصول على رد من LLM.",
+			"no_response": "عذرًا، لم أتلق ردًا من LLM."
+		}
+	}
+}

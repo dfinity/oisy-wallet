@@ -8,17 +8,21 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let {
-		content,
-		contentHeader,
-		contentFooter,
-		showContentHeader = false
-	}: {
+	interface Props {
 		content: Snippet;
 		contentHeader: Snippet<[{ isInBottomSheet: boolean }]>;
 		contentFooter?: Snippet<[closeFn: () => void]>;
 		showContentHeader?: boolean;
-	} = $props();
+		buttonTestId?: string;
+	}
+
+	let {
+		content,
+		contentHeader,
+		contentFooter,
+		showContentHeader = false,
+		buttonTestId
+	}: Props = $props();
 
 	let expanded = $state(false);
 </script>
@@ -27,10 +31,11 @@
 	<div class="flex w-full items-center justify-between">
 		{@render contentHeader({ isInBottomSheet: false })}
 		<ButtonIcon
-			onclick={() => (expanded = true)}
 			ariaLabel={$i18n.core.alt.open_details}
 			colorStyle="muted"
+			onclick={() => (expanded = true)}
 			styleClass="text-disabled mb-2 items-end"
+			testId={buttonTestId}
 			width="w-8"
 		>
 			{#snippet icon()}
@@ -40,19 +45,21 @@
 	</div>
 
 	{#if expanded}
-		<div class="z-14 fixed inset-0">
-			<BottomSheet on:nnsClose={() => (expanded = false)} transition>
-				<div slot="header" class="w-full p-4">
-					<ButtonIcon
-						onclick={() => (expanded = false)}
-						styleClass="text-disabled float-right"
-						ariaLabel={$i18n.core.alt.close_details}
-					>
-						{#snippet icon()}
-							<IconClose size="24" />
-						{/snippet}
-					</ButtonIcon>
-				</div>
+		<div class="fixed inset-0 z-14">
+			<BottomSheet transition>
+				{#snippet header()}
+					<div class="w-full p-4">
+						<ButtonIcon
+							ariaLabel={$i18n.core.alt.close_details}
+							onclick={() => (expanded = false)}
+							styleClass="text-disabled float-right"
+						>
+							{#snippet icon()}
+								<IconClose size="24" />
+							{/snippet}
+						</ButtonIcon>
+					</div>
+				{/snippet}
 
 				<div class="min-h-[35vh] w-full px-4 pb-4">
 					{#if showContentHeader}
@@ -60,13 +67,16 @@
 					{/if}
 					{@render content()}
 				</div>
-				<div slot="footer" class="w-full p-4">
-					{#if nonNullish(contentFooter)}
-						{@render contentFooter(() => {
-							expanded = false;
-						})}
-					{/if}
-				</div>
+
+				{#snippet footer()}
+					<div class="w-full p-4">
+						{#if nonNullish(contentFooter)}
+							{@render contentFooter(() => {
+								expanded = false;
+							})}
+						{/if}
+					</div>
+				{/snippet}
 			</BottomSheet>
 			<Backdrop on:nnsClose={() => (expanded = false)} />
 		</div>
@@ -75,10 +85,12 @@
 
 <Responsive up="md">
 	<div class="modal-expandable-values">
-		<Collapsible bind:expanded initiallyExpanded={expanded}>
-			<div class="flex w-[calc(100%-1.5rem)] items-center" slot="header">
-				{@render contentHeader({ isInBottomSheet: false })}
-			</div>
+		<Collapsible initiallyExpanded={expanded} bind:expanded>
+			{#snippet header()}
+				<div class="flex w-[calc(100%-1.5rem)] items-center">
+					{@render contentHeader({ isInBottomSheet: false })}
+				</div>
+			{/snippet}
 
 			{@render content()}
 		</Collapsible>

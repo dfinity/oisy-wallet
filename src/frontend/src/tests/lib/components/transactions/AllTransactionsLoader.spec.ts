@@ -16,7 +16,8 @@ import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
-import type { AllTransactionUiWithCmp, Transaction } from '$lib/types/transaction';
+import type { Transaction } from '$lib/types/transaction';
+import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import * as transactionsUtils from '$lib/utils/transactions.utils';
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -24,7 +25,7 @@ import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
+import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthTransactionsUi } from '$tests/mocks/eth-transactions.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -200,7 +201,7 @@ describe('AllTransactionsLoader', () => {
 		ethTransactions.forEach(({ transaction, token: { id: tokenId } }) => {
 			ethTransactionsStore.add({
 				tokenId,
-				transactions: [transaction as Transaction]
+				transactions: [{ data: transaction as Transaction, certified: false }]
 			});
 		});
 
@@ -412,6 +413,7 @@ describe('AllTransactionsLoader', () => {
 				);
 
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					token,
@@ -433,6 +435,7 @@ describe('AllTransactionsLoader', () => {
 				);
 
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					token,
@@ -541,6 +544,7 @@ describe('AllTransactionsLoader', () => {
 			);
 
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				minTimestamp: mockMinTimestamp,
 				transactions,
 				token,

@@ -8,5 +8,3 @@ export const ContactAddressUiSchema = z.object({
 	label: z.string().max(CONTACT_MAX_LABEL_LENGTH).optional(),
 	addressType: TokenAccountIdTypesSchema
 });
-
-export type ContactAddressUiSchemaType = z.infer<typeof ContactAddressUiSchema>;

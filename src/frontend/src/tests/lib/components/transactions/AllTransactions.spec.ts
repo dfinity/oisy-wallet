@@ -12,6 +12,10 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	IntersectionObserverActive,
+	IntersectionObserverPassive
+} from '$tests/mocks/infinite-scroll.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -22,6 +26,16 @@ describe('AllTransactions', () => {
 		version: 1n,
 		enabled: true
 	};
+
+	beforeAll(() => {
+		Object.defineProperty(window, 'IntersectionObserver', {
+			writable: true,
+			configurable: true,
+			value: IntersectionObserverActive
+		});
+	});
+
+	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
 
 	it('renders the title', () => {
 		const { container } = render(AllTransactions);
@@ -42,7 +56,7 @@ describe('AllTransactions', () => {
 			symbol: 'UWT'
 		};
 
-		icrcCustomTokensStore.set({ data: tokenWithoutIndexCanister, certified: true });
+		icrcCustomTokensStore.setAll([{ data: tokenWithoutIndexCanister, certified: true }]);
 
 		const store = get(icrcCustomTokensStore);
 		const tokenId = store?.at(0)?.data.id;
@@ -65,7 +79,7 @@ describe('AllTransactions', () => {
 			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
 		};
 
-		icrcCustomTokensStore.set({ data: tokenWithUnavailableIndexCanister, certified: true });
+		icrcCustomTokensStore.setAll([{ data: tokenWithUnavailableIndexCanister, certified: true }]);
 
 		const store = get(icrcCustomTokensStore);
 		const tokenId = store?.at(0)?.data.id;
@@ -96,5 +110,49 @@ describe('AllTransactions', () => {
 		const { getByText } = render(AllTransactions);
 
 		expect(getByText(en.transactions.text.transaction_history)).toBeInTheDocument();
+	});
+
+	describe('Privacy Mode', () => {
+		it('renders title with eye-off icon when privacy mode is enabled', async () => {
+			const settingsModule = await import('$lib/stores/settings.store');
+			settingsModule.privacyModeStore.subscribe = (fn) => {
+				fn({ enabled: true });
+				return () => {};
+			};
+
+			const { container } = render(AllTransactions);
+
+			const titleContainer = container.querySelector('span.flex.items-center.gap-2');
+
+			expect(titleContainer).toBeInTheDocument();
+
+			const title = titleContainer?.querySelector('h1');
+
+			expect(title).toBeInTheDocument();
+			expect(title?.textContent).toBe(en.activity.text.title);
+
+			const eyeOffIcon = titleContainer?.querySelector('span.text-tertiary');
+
+			expect(eyeOffIcon).toBeInTheDocument();
+		});
+
+		it('renders simple title when privacy mode is disabled', async () => {
+			const settingsModule = await import('$lib/stores/settings.store');
+			settingsModule.privacyModeStore.subscribe = (fn) => {
+				fn({ enabled: false });
+				return () => {};
+			};
+
+			const { container } = render(AllTransactions);
+
+			const titleContainer = container.querySelector('span.flex.items-center.gap-2');
+
+			expect(titleContainer).not.toBeInTheDocument();
+
+			const title = container.querySelector('h1');
+
+			expect(title).toBeInTheDocument();
+			expect(title?.textContent).toBe(en.activity.text.title);
+		});
 	});
 });

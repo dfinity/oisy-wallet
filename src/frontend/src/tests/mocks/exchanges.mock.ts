@@ -1,12 +1,12 @@
 import type { CoingeckoSimpleTokenPrice } from '$lib/types/coingecko';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
-import { mockTokens } from './tokens.mock';
+import { mockTokens } from '$tests/mocks/tokens.mock';
 
 export const mockOneUsd = 1;
 
 export const mockExchanges: ExchangesData = mockTokens.reduce<ExchangesData>((acc, token) => {
-	acc[token.id] = { usd: mockOneUsd };
+	acc[token.id] = { usd: mockOneUsd, usd_market_cap: 123_000_000_000, usd_24h_change: 3.5 };
 	return acc;
 }, {});
 

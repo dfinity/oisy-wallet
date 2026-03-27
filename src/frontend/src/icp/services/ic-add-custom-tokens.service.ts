@@ -1,13 +1,15 @@
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { getLedgerId, getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
-import { balance, metadata } from '$icp/api/icrc-ledger.api';
+import { balance, getMintingAccount, metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
 import { mapIcrcToken } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
+import { assertExistingTokens } from '$lib/utils/tokens.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 export interface ValidateTokenData {
@@ -25,10 +27,7 @@ export const loadAndAssertAddCustomToken = async ({
 	icrcTokens: IcToken[];
 }): Promise<{
 	result: 'success' | 'error';
-	data?: {
-		token: IcTokenWithoutId;
-		balance: bigint;
-	};
+	data?: ValidateTokenData;
 }> => {
 	assertNonNullish(identity);
 
@@ -42,7 +41,7 @@ export const loadAndAssertAddCustomToken = async ({
 	const canisterIds = { ledgerCanisterId, indexCanisterId };
 
 	const { alreadyAvailable } = assertAlreadyAvailable({
-		icrcTokens,
+		icrcTokens: [ICP_TOKEN, TESTICP_TOKEN, ...icrcTokens],
 		...canisterIds
 	});
 
@@ -80,7 +79,11 @@ export const loadAndAssertAddCustomToken = async ({
 			return { result: 'error' };
 		}
 
-		const { valid } = assertExistingTokens({ token, icrcTokens });
+		const { valid } = assertExistingTokens({
+			existingTokens: icrcTokens,
+			token,
+			errorMsg: get(i18n).tokens.error.duplicate_metadata
+		});
 
 		if (!valid) {
 			return { result: 'error' };
@@ -90,30 +93,6 @@ export const loadAndAssertAddCustomToken = async ({
 	} catch (_err: unknown) {
 		return { result: 'error' };
 	}
-};
-
-const assertExistingTokens = ({
-	icrcTokens,
-	token
-}: {
-	icrcTokens: IcToken[];
-	token: IcTokenWithoutId;
-}): { valid: boolean } => {
-	if (
-		icrcTokens.find(
-			({ symbol, name }) =>
-				symbol.toLowerCase() === token.symbol.toLowerCase() ||
-				name.toLowerCase() === token.name.toLowerCase()
-		) !== undefined
-	) {
-		toastsError({
-			msg: { text: get(i18n).tokens.error.duplicate_metadata }
-		});
-
-		return { valid: false };
-	}
-
-	return { valid: true };
 };
 
 const assertAlreadyAvailable = ({
@@ -139,20 +118,18 @@ const loadMetadata = async ({
 	...rest
 }: IcCanisters & { identity: Identity }): Promise<IcTokenWithoutId | undefined> => {
 	try {
+		const serviceParams = { ledgerCanisterId, identity, certified: true };
+
 		return mapIcrcToken({
 			ledgerCanisterId,
-			metadata: await metadata({ ledgerCanisterId, identity, certified: true }),
+			metadata: await metadata(serviceParams),
+			mintingAccount: await getMintingAccount(serviceParams),
 			exchangeCoinId: 'internet-computer',
-			// Position does not matter here
-			position: Number.MAX_VALUE,
 			category: 'custom',
 			...rest
 		});
 	} catch (err: unknown) {
-		toastsError({
-			msg: { text: get(i18n).tokens.import.error.loading_metadata },
-			err
-		});
+		toastsError({ msg: { text: get(i18n).tokens.import.error.loading_metadata } });
 
 		throw err;
 	}
@@ -205,7 +182,7 @@ const loadIndexBalance = async ({
 	}
 };
 
-const assertIndexLedgerId = async ({
+export const assertIndexLedgerId = async ({
 	identity,
 	indexCanisterId,
 	ledgerCanisterId

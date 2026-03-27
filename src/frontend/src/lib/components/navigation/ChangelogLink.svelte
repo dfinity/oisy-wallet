@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconChangelog from '$lib/components/icons/lucide/IconChangelog.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { TRACK_COUNT_OPEN_CHANGELOG } from '$lib/constants/analytics.contants';
+	import { TRACK_COUNT_OPEN_CHANGELOG } from '$lib/constants/analytics.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -15,10 +15,10 @@
 </script>
 
 <ExternalLink
+	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 	{asMenuItem}
 	{asMenuItemCondensed}
 	href="https://github.com/dfinity/oisy-wallet/releases"
-	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 	iconVisible={false}
 	trackEvent={{
 		name: TRACK_COUNT_OPEN_CHANGELOG,

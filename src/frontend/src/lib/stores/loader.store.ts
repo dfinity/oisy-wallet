@@ -1,3 +1,3 @@
 import { writable } from 'svelte/store';
 
-export const loading = writable<boolean>(true);
+export const initialLoading = writable<boolean>(true);

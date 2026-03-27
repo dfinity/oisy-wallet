@@ -1,13 +1,16 @@
+import type { BtcAddress } from '$btc/types/address';
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import {
 	IC_CKBTC_INDEX_CANISTER_ID,
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKBTC_MINTER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import { Currency } from '$lib/enums/currency';
 import {
 	JsonTransactionsTextSchema,
 	POST_MESSAGE_REQUESTS,
+	PostMessageDataErrorSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -23,19 +26,20 @@ import {
 	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
+	PostMessageErrorResponseSchema,
 	PostMessageJsonDataResponseSchema,
 	PostMessageRequestSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema,
 	PostMessageWalletDataSchema,
+	inferPostMessageSchedulerSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
-import type { BtcAddress } from '$lib/types/address';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import * as z from 'zod';
 
 describe('post-message.schema', () => {
@@ -87,9 +91,11 @@ describe('post-message.schema', () => {
 
 		it('should validate with correct structure for erc20Addresses and icrcCanisterIds', () => {
 			const validData = {
+				currentCurrency: Currency.USD,
 				erc20Addresses: [mockValidErc20Address],
 				icrcCanisterIds: [mockValidIndexCanisterId],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			expect(PostMessageDataRequestExchangeTimerSchema.parse(validData)).toEqual(validData);
@@ -97,9 +103,11 @@ describe('post-message.schema', () => {
 
 		it('should an invalid erc20Addresses given the lack of zod parser for erc20', () => {
 			const validData = {
+				currentCurrency: Currency.USD,
 				erc20Addresses: ['invalid_address', mockValidErc20Address],
 				icrcCanisterIds: [mockValidIndexCanisterId],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			expect(PostMessageDataRequestExchangeTimerSchema.parse(validData)).toEqual(validData);
@@ -109,7 +117,8 @@ describe('post-message.schema', () => {
 			const invalidData = {
 				erc20Addresses: [mockValidErc20Address],
 				icrcCanisterIds: ['invalid_canister_id'],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			expect(() => PostMessageDataRequestExchangeTimerSchema.parse(invalidData)).toThrow();
@@ -118,17 +127,26 @@ describe('post-message.schema', () => {
 		it('should throw an error if either field is missing', () => {
 			const missingErc20Addresses = {
 				icrcCanisterIds: [mockValidIndexCanisterId],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			const missingIcrcCanisterIds = {
 				erc20Addresses: [mockValidErc20Address],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			const missingSplAddresses = {
 				erc20Addresses: [mockValidErc20Address],
-				icrcCanisterIds: [mockValidIndexCanisterId]
+				icrcCanisterIds: [mockValidIndexCanisterId],
+				erc4626TokensExchangeData: []
+			};
+
+			const missingErc4626TokensExchangeData = {
+				erc20Addresses: [mockValidErc20Address],
+				icrcCanisterIds: [mockValidIndexCanisterId],
+				splAddresses: [mockValidSplAddress]
 			};
 
 			expect(() =>
@@ -138,6 +156,9 @@ describe('post-message.schema', () => {
 				PostMessageDataRequestExchangeTimerSchema.parse(missingIcrcCanisterIds)
 			).toThrow();
 			expect(() => PostMessageDataRequestExchangeTimerSchema.parse(missingSplAddresses)).toThrow();
+			expect(() =>
+				PostMessageDataRequestExchangeTimerSchema.parse(missingErc4626TokensExchangeData)
+			).toThrow();
 		});
 	});
 
@@ -348,22 +369,15 @@ describe('post-message.schema', () => {
 			'signOutIdleTimer',
 			'delegationRemainingTime',
 			'syncExchange',
-			'syncExchangeError',
 			'syncIcpWallet',
 			'syncIcrcWallet',
 			'syncDip20Wallet',
 			'syncBtcWallet',
-			'syncIcpWalletError',
-			'syncIcrcWalletError',
-			'syncDip20WalletError',
-			'syncBtcWalletError',
 			'syncIcpWalletCleanUp',
 			'syncIcrcWalletCleanUp',
 			'syncDip20WalletCleanUp',
 			'syncBtcStatuses',
-			'syncBtcStatusesError',
 			'syncCkMinterInfo',
-			'syncCkMinterInfoError',
 			'syncBtcPendingUtxos',
 			'syncCkBTCUpdateOk',
 			'syncBtcAddress',
@@ -410,6 +424,11 @@ describe('post-message.schema', () => {
 
 		it('should validate with all valid price fields', () => {
 			const validData = {
+				currentExchangeRate: {
+					exchangeRateToUsd: 1.5,
+					exchangeRate24hChangeMultiplier: 3.5,
+					currency: Currency.EUR
+				},
 				currentEthPrice: mockValidPrice,
 				currentBtcPrice: mockValidPrice,
 				currentErc20Prices: mockValidPrice,
@@ -599,6 +618,52 @@ describe('post-message.schema', () => {
 		});
 	});
 
+	describe('PostMessageDataErrorSchema', () => {
+		const [validErrorResponseMsg] = PostMessageErrorResponseSchema.options;
+
+		it('should validate when error is provided with any type of value', () => {
+			const validData = {
+				error: 'An error occurred'
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validData })
+			).toEqual({ msg: validErrorResponseMsg, data: validData });
+
+			const validDataNumber = {
+				error: 12345
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataNumber })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataNumber });
+
+			const validDataObject = {
+				error: { message: 'An error occurred' }
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataObject })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataObject });
+
+			const validDataArray = {
+				error: ['Error 1', 'Error 2']
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataArray })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataArray });
+		});
+
+		it('should validate when error is missing, as it’s optional in the base schema', () => {
+			const validData = {};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validData })
+			).toEqual({ msg: validErrorResponseMsg, data: validData });
+		});
+	});
+
 	describe('PostMessageDataResponseWalletCleanUpSchema', () => {
 		it('should validate when transactionIds is provided as an array of strings', () => {
 			const validData = {
@@ -723,6 +788,7 @@ describe('post-message.schema', () => {
 		const [validRequestMsg] = PostMessageRequestSchema.options;
 		const [validResponseMsg] = PostMessageResponseSchema.options;
 		const validData = { additionalInfo: 'sample info' };
+		const validRef = 'unique-ref-123';
 
 		it('should validate with a valid request msg and data matching dataSchema', () => {
 			const validPayload = {
@@ -750,6 +816,40 @@ describe('post-message.schema', () => {
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
 		});
 
+		it('should validate with a valid error response msg and data matching an error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = { error: 'mock-error' };
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an optional error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = {};
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid ref', () => {
+			const validPayload = {
+				msg: validRequestMsg,
+				data: validData,
+				ref: validRef
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
 		it('should throw an error if msg is missing', () => {
 			const invalidPayload = { data: validData };
 
@@ -757,6 +857,102 @@ describe('post-message.schema', () => {
 		});
 
 		it('should throw an error if msg is not a valid value from PostMessageRequestSchema or PostMessageResponseSchema', () => {
+			const invalidPayload = {
+				msg: 'invalid_message',
+				data: validData
+			};
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+
+		it('should throw an error if data does not match dataSchema', () => {
+			const invalidPayload = {
+				msg: validRequestMsg,
+				data: { additionalInfo: 123 }
+			};
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+	});
+
+	describe('inferPostMessageSchedulerSchema', () => {
+		const CustomDataSchema = z.object({
+			additionalInfo: z.string()
+		});
+		const SchemaWithCustomData = inferPostMessageSchedulerSchema(CustomDataSchema);
+
+		const [validRequestMsg] = PostMessageRequestSchema.options;
+		const [validResponseMsg] = PostMessageResponseSchema.options;
+		const validData = { additionalInfo: 'sample info' };
+		const validRef = 'unique-ref-123';
+
+		it('should validate with a valid response msg and data matching dataSchema', () => {
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = { error: 'mock-error' };
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an optional error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = {};
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid ref', () => {
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData,
+				ref: validRef
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should throw with a request msg and no data (data is optional)', () => {
+			const validPayload = {
+				msg: validRequestMsg
+			};
+
+			expect(() => SchemaWithCustomData.parse(validPayload)).toThrow();
+		});
+
+		it('should throw with a request msg and data matching dataSchema', () => {
+			const validPayload = {
+				msg: validRequestMsg,
+				data: validData
+			};
+
+			expect(() => SchemaWithCustomData.parse(validPayload)).toThrow();
+		});
+
+		it('should throw an error if msg is missing', () => {
+			const invalidPayload = { data: validData };
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+
+		it('should throw an error if msg is not a valid value from PostMessageResponseSchema', () => {
 			const invalidPayload = {
 				msg: 'invalid_message',
 				data: validData

@@ -16,10 +16,27 @@ const extractKeys = ({ obj, prefix = '' }) =>
 		return [...res, `${prefix}${el}`];
 	}, []);
 
-// It checks if the key is used in the content or if the key is used in a dynamic way
-const checkKeyUsage = ({ key, content }) =>
-	content.includes(key) ??
-	(content.includes(`get(i18n)`) && key.split('.').every((k) => content.includes(k)));
+// It checks if the key is used in the content or if the key is used dynamically
+const checkKeyUsage = ({ key, content }) => {
+	if (content.includes(`"${key}"`) || content.includes(`'${key}'`) || content.includes(key)) {
+		return true;
+	}
+
+	const parts = key.split('.');
+	const lastKey = parts[parts.length - 1];
+
+	const destructureRegex = new RegExp(`[{,]\\s*${lastKey}\\s*[:}]`);
+	if (destructureRegex.test(content)) {
+		return true;
+	}
+
+	const dynamicPattern = `${parts.slice(0, -1).join('.')}[`;
+	if (content.includes(dynamicPattern)) {
+		return true;
+	}
+
+	return content.includes('get(i18n)') && parts.every((p) => content.includes(p));
+};
 
 const main = () => {
 	const en = JSON.parse(readFileSync(PATH_TO_EN_JSON, 'utf8'));
@@ -39,10 +56,11 @@ const main = () => {
 	});
 
 	if (potentialUnusedKeys.length === 0) {
-		console.log('All keys are used.');
+		console.log('✅ All keys are used.');
 		process.exit(0);
 	} else {
-		console.error('Unused keys:', potentialUnusedKeys);
+		console.error(`❌ ${potentialUnusedKeys.length} unused keys:`);
+		potentialUnusedKeys.forEach((key) => console.error(' -', key));
 		process.exit(1);
 	}
 };

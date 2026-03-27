@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 import { loadLocalIdentity, localAgent, SNSES } from './utils.mjs';
 
 const PEM_FILE = '/Users/daviddalbusco/.config/dfx/identity/default/identity.pem';

@@ -7,10 +7,11 @@ import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import { icTransactionsStore, type IcTransactionsData } from '$icp/stores/ic-transactions.store';
 import { getAllIcTransactions, getIcExtendedTransactions } from '$icp/utils/ic-transactions.utils';
+import { isTokenIcp } from '$icp/utils/icrc.utils';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
-import type { AnyTransactionUiWithToken } from '$lib/types/transaction';
+import type { AnyTransactionUiWithToken } from '$lib/types/transaction-ui';
 import type { KnownDestinations } from '$lib/types/transactions';
 import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -65,7 +66,7 @@ export const icTransactions: Readable<NonNullable<IcTransactionsData>> = derived
 export const icKnownDestinations: Readable<KnownDestinations> = derived(
 	[icTransactionsStore, tokens, tokenWithFallback],
 	([$icTransactionsStore, $tokens, $tokenWithFallback]) => {
-		const isIcpToken = $tokenWithFallback.id === ICP_TOKEN_ID;
+		const isIcpToken = isTokenIcp($tokenWithFallback);
 		const { [ICP_TOKEN_ID]: icpTransactions, ...icCkTransactionsStore } =
 			$icTransactionsStore ?? {};
 		const icpTransactionsStore = { [ICP_TOKEN_ID]: icpTransactions ?? [] };

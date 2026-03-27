@@ -1,8 +1,4 @@
-<script lang="ts">
-	import { IconCheckCircleFill } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
-	import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
-	import { i18n } from '$lib/stores/i18n.store';
+<script lang="ts" module>
 	import type {
 		CampaignCriterion,
 		HangoverCriterion,
@@ -10,14 +6,24 @@
 		MinTotalAssetsUsdCriterion,
 		MinTransactionsCriterion
 	} from '$lib/types/reward';
+
+	type T = CampaignCriterion;
+</script>
+
+<script generics="T extends CampaignCriterion = CampaignCriterion" lang="ts">
+	import { IconCheckCircleFill } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		criterion: CampaignCriterion;
+		criterion: T;
 		testId?: string;
+		truncate?: boolean;
 	}
 
-	let { criterion, testId }: Props = $props();
+	let { criterion, testId, truncate = false }: Props = $props();
 
 	const getCriterionText = (criterion: CampaignCriterion): string | undefined => {
 		if (RewardCriterionType.MIN_LOGINS === criterion.type) {
@@ -57,20 +63,20 @@
 
 {#if nonNullish(criterionText)}
 	<span
-		class="flex w-full flex-row"
-		class:transition={!criterion.satisfied}
+		class="flex w-full flex-row items-center gap-2"
 		class:duration-500={!criterion.satisfied}
 		class:ease-in-out={!criterion.satisfied}
+		class:transition={!criterion.satisfied}
 	>
 		<span
-			data-tid={testId}
-			class="-mt-0.5 mr-2"
-			class:text-success-primary={criterion.satisfied}
+			class="-mt-0.5"
 			class:text-disabled={!criterion.satisfied}
+			class:text-success-primary={criterion.satisfied}
+			data-tid={testId}
 		>
-			<IconCheckCircleFill size={32} />
+			<IconCheckCircleFill size={24} />
 		</span>
-		<span>
+		<span class:truncate>
 			{criterionText}
 		</span>
 	</span>

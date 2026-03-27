@@ -22,17 +22,17 @@
 
 <div
 	class={`flex rounded-lg border border-disabled bg-secondary px-2 py-3 items-${items}`}
-	class:border-error-solid={hasError}
-	class:bg-secondary={variant === 'default'}
-	class:border-disabled={variant === 'default'}
 	class:bg-brand-subtle-10={variant === 'info'}
+	class:bg-secondary={variant === 'default'}
 	class:border-brand-subtle-10={variant === 'info'}
+	class:border-disabled={variant === 'default'}
+	class:border-error-solid={hasError}
 >
 	<div class="flex flex-shrink-0">
 		{@render logo?.()}
 	</div>
 
-	<div class="flex w-full flex-col truncate pl-2 pr-4 text-sm sm:text-base">
+	<div class="flex w-full flex-col truncate pr-4 pl-2 text-sm sm:text-base">
 		{@render content()}
 	</div>
 

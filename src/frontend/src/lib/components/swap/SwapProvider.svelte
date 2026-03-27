@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
-	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import { getContext } from 'svelte';
+	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
+	import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.svelte';
+	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
+	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -18,25 +20,26 @@
 	import type { OptionString } from '$lib/types/string';
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { findSwapProvider } from '$lib/utils/swap.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 
 	interface Props {
 		slippageValue: OptionAmount;
 		showSelectButton?: boolean;
+		onShowProviderList?: () => void;
 	}
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let { showSelectButton = false, slippageValue }: Props = $props();
+	let { showSelectButton = false, slippageValue, onShowProviderList }: Props = $props();
 
 	let displayURL = $state<OptionString>(null);
 
 	let selectedProvider = $derived($swapAmountsStore?.selectedProvider);
 	let isBestRate = $derived(selectedProvider?.provider === $swapAmountsStore?.swaps[0]?.provider);
 	let swapDApp = $derived(
-		dAppDescriptions.find(
-			({ id }) => id === $swapAmountsStore?.selectedProvider?.provider.toLowerCase()
-		)
+		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);
 
 	$effect(() => {
@@ -50,8 +53,6 @@
 			displayURL = null;
 		}
 	});
-
-	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(swapDApp) && nonNullish(selectedProvider) && nonNullish($swapAmountsStore)}
@@ -62,9 +63,7 @@
 					<div class="flex justify-center gap-2">
 						{$i18n.swap.text.swap_provider}
 						{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet && showSelectButton}
-							<Button link onclick={() => dispatch('icShowProviderList')}
-								>{$i18n.swap.text.select}</Button
-							>
+							<Button link onclick={onShowProviderList}>{$i18n.swap.text.select}</Button>
 						{/if}
 					</div>
 				{/snippet}
@@ -72,17 +71,21 @@
 				{#snippet mainValue()}
 					<div class="flex items-start gap-3">
 						{#if isBestRate && $swapAmountsStore.swaps.length > 1}
-							<SwapBestRateBadge />
+							<BestRateBadge />
 						{/if}
 						<div class="flex gap-2">
 							<div class="mt-1">
 								<Logo
+									alt={replacePlaceholders($i18n.dapps.alt.logo, {
+										$dAppName: resolveText({ i18n: $i18n, path: swapDApp.name })
+									})}
 									src={swapDApp.logo}
-									alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
 								/>
 							</div>
 							<div class="mr-auto">
-								<div class="text-lg font-bold">{swapDApp.name}</div>
+								<div class="text-lg font-bold"
+									>{resolveText({ i18n: $i18n, path: swapDApp.name })}</div
+								>
 							</div>
 						</div>
 					</div>
@@ -105,6 +108,10 @@
 				<SwapDetailsKong provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.ICP_SWAP}
 				<SwapDetailsIcp provider={selectedProvider} {slippageValue} />
+			{:else if selectedProvider.provider === SwapProvider.VELORA}
+				<SwapDetailsVelora provider={selectedProvider} />
+			{:else if selectedProvider.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED}
+				<SwapDetailsNearIntents provider={selectedProvider} {slippageValue} />
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}

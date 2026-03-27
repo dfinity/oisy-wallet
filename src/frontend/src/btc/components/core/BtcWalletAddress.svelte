@@ -10,11 +10,13 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
-	const address = isNetworkIdBTCTestnet($networkId)
-		? $btcAddressTestnet
-		: isNetworkIdBTCRegtest($networkId)
-			? $btcAddressRegtest
-			: $btcAddressMainnet;
+	let address = $derived(
+		isNetworkIdBTCTestnet($networkId)
+			? $btcAddressTestnet
+			: isNetworkIdBTCRegtest($networkId)
+				? $btcAddressRegtest
+				: $btcAddressMainnet
+	);
 </script>
 
 <div class="p-3">
@@ -24,5 +26,5 @@
 
 	<output id="btc-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis({ text: address ?? '' })}</output
-	><Copy inline value={address ?? ''} text={$i18n.wallet.text.address_copied} />
+	><Copy inline text={$i18n.wallet.text.address_copied} value={address ?? ''} />
 </div>

@@ -1,4 +1,4 @@
-import type { UserToken } from '$declarations/backend/backend.did';
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
@@ -8,15 +8,17 @@ import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
 import { ADDITIONAL_ERC20_TOKENS, ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
 import * as infuraProvidersModule from '$eth/providers/infura-erc20.providers';
-import { loadErc20Tokens, loadErc20UserTokens } from '$eth/services/erc20.services';
+import { loadCustomTokens, loadErc20Tokens } from '$eth/services/erc20.services';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20Metadata } from '$eth/types/erc20';
-import { listUserTokens } from '$lib/api/backend.api';
+import { listCustomTokens } from '$lib/api/backend.api';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { toastsErrorNoTrace } from '$lib/stores/toasts.store';
+import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockCustomTokensErc20 } from '$tests/mocks/custom-tokens.mock';
+import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
@@ -24,52 +26,16 @@ import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
-
 vi.mock('$lib/api/backend.api', () => ({
-	listUserTokens: vi.fn()
+	listCustomTokens: vi.fn()
 }));
 
 vi.mock('$eth/providers/infura-erc20.providers', () => ({
+	InfuraErc20Provider: vi.fn(class {}),
 	infuraErc20Providers: vi.fn()
 }));
 
 describe('erc20.services', () => {
-	const mockUserTokens: UserToken[] = [
-		{
-			decimals: toNullable(18),
-			version: toNullable(1n),
-			enabled: toNullable(true),
-			chain_id: ETHEREUM_NETWORK.chainId,
-			contract_address: mockEthAddress,
-			symbol: toNullable('TTK')
-		},
-		{
-			decimals: toNullable(18),
-			version: toNullable(2n),
-			enabled: toNullable(),
-			chain_id: BASE_NETWORK.chainId,
-			contract_address: mockEthAddress2.toUpperCase(),
-			symbol: toNullable('TTK2')
-		},
-		{
-			decimals: toNullable(18),
-			version: toNullable(),
-			enabled: toNullable(false),
-			chain_id: POLYGON_AMOY_NETWORK.chainId,
-			contract_address: mockEthAddress3,
-			symbol: toNullable('TTK3')
-		}
-	];
-
 	const mockMetadata1: Erc20Metadata = {
 		name: 'Test Token',
 		symbol: 'MetadataTTK',
@@ -83,14 +49,15 @@ describe('erc20.services', () => {
 		decimals: 4
 	};
 
-	const expectedUserTokens = [
+	const expectedCustomTokens = [
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				version: 1n,
+				allowExternalContentSource: undefined,
 				enabled: true,
 				network: ETHEREUM_NETWORK,
 				address: mockEthAddress,
@@ -103,31 +70,35 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				version: 2n,
+				allowExternalContentSource: true,
 				enabled: true,
 				network: BASE_NETWORK,
 				address: mockEthAddress2.toUpperCase(),
 				decimals: mockMetadata2.decimals,
 				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol
+				symbol: mockMetadata2.symbol,
+				icon: `/icons/${BASE_NETWORK.id.description?.toLowerCase()}/${mockEthAddress2.toLowerCase()}.webp`
 			}
 		},
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				version: undefined,
+				allowExternalContentSource: false,
 				enabled: false,
 				network: POLYGON_AMOY_NETWORK,
 				address: mockEthAddress3,
 				decimals: mockMetadata2.decimals,
 				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol
+				symbol: mockMetadata2.symbol,
+				icon: `/icons/pol-amoy-testnet/${mockEthAddress3.toLowerCase()}.webp`
 			}
 		}
 	];
@@ -150,14 +121,18 @@ describe('erc20.services', () => {
 			mockAuthStore();
 
 			vi.spyOn(toastsStore, 'toastsErrorNoTrace');
+			vi.spyOn(toastsStore, 'toastsError');
 
 			erc20DefaultTokensStore.reset();
-			erc20UserTokensStore.resetAll();
+			erc20CustomTokensStore.resetAll();
 
-			vi.mocked(listUserTokens).mockResolvedValue(mockUserTokens);
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc20);
 
 			mockMetadata.mockImplementation(({ address }) =>
-				address === mockUserTokens[0].contract_address ? mockMetadata1 : mockMetadata2
+				'Erc20' in mockCustomTokensErc20[0].token &&
+				address === mockCustomTokensErc20[0].token.Erc20.token_address
+					? mockMetadata1
+					: mockMetadata2
 			);
 
 			infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraErc20Providers');
@@ -177,12 +152,12 @@ describe('erc20.services', () => {
 			});
 		});
 
-		it('should save the user tokens in the store', async () => {
+		it('should save the custom tokens in the store', async () => {
 			await loadErc20Tokens({ identity: mockIdentity });
 
-			const tokens = get(erc20UserTokensStore);
+			const tokens = get(erc20CustomTokensStore);
 
-			const expected = expectedUserTokens.map((token, index) => ({
+			const expected = expectedCustomTokens.map((token, index) => ({
 				...token,
 				data: {
 					...token.data,
@@ -190,7 +165,7 @@ describe('erc20.services', () => {
 				}
 			}));
 
-			expect(tokens).toEqual(expected);
+			expect(tokens).toStrictEqual(expected);
 		});
 
 		it('should not throw error if metadata throws', async () => {
@@ -200,23 +175,25 @@ describe('erc20.services', () => {
 			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 		});
 
-		it('should not throw error if list user tokens throws', async () => {
-			const mockError = new Error('Error loading user tokens');
-			vi.mocked(listUserTokens).mockRejectedValue(mockError);
+		it('should not throw error if list custom tokens throws', async () => {
+			const mockError = new Error('Error loading custom tokens');
+			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
 			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 		});
 
 		it('should reset both tokens stores on error', async () => {
 			erc20DefaultTokensStore.add(SEPOLIA_PEPE_TOKEN);
-			erc20UserTokensStore.setAll([{ data: { ...EURC_TOKEN, enabled: true }, certified: false }]);
+			erc20CustomTokensStore.setAll([{ data: { ...EURC_TOKEN, enabled: true }, certified: false }]);
 
 			vi.mocked(mockMetadata).mockRejectedValue(new Error('Error loading metadata'));
 
 			await loadErc20Tokens({ identity: mockIdentity });
 
 			expect(get(erc20DefaultTokensStore)).toBeUndefined();
-			expect(get(erc20UserTokensStore)).toBeNull();
+			expect(get(erc20CustomTokensStore)).toStrictEqual([
+				{ data: { ...EURC_TOKEN, enabled: true }, certified: false }
+			]);
 		});
 
 		it('should display the toast on error', async () => {
@@ -225,19 +202,14 @@ describe('erc20.services', () => {
 
 			await loadErc20Tokens({ identity: mockIdentity });
 
-			expect(toastsErrorNoTrace).toHaveBeenCalledTimes(2);
-			expect(toastsErrorNoTrace).toHaveBeenNthCalledWith(1, {
+			expect(toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.init.error.erc20_contracts },
-				err: mockError
-			});
-			expect(toastsErrorNoTrace).toHaveBeenNthCalledWith(2, {
-				msg: { text: en.init.error.erc20_user_tokens },
 				err: mockError
 			});
 		});
 	});
 
-	describe('loadErc20UserTokens', () => {
+	describe('loadCustomTokens', () => {
 		let infuraProvidersSpy: MockInstance;
 
 		const mockMetadata = vi.fn();
@@ -249,13 +221,17 @@ describe('erc20.services', () => {
 
 			vi.spyOn(toastsStore, 'toastsErrorNoTrace');
 
-			erc20UserTokensStore.resetAll();
+			erc20CustomTokensStore.resetAll();
 
-			vi.mocked(listUserTokens).mockResolvedValue(mockUserTokens);
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc20);
 
-			mockMetadata.mockImplementation(({ address }) =>
-				address === mockUserTokens[0].contract_address ? mockMetadata1 : mockMetadata2
-			);
+			mockMetadata.mockImplementation(({ address }) => {
+				assert('Erc20' in mockCustomTokensErc20[0].token);
+
+				return address === mockCustomTokensErc20[0].token.Erc20.token_address
+					? mockMetadata1
+					: mockMetadata2;
+			});
 
 			infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraErc20Providers');
 
@@ -264,103 +240,133 @@ describe('erc20.services', () => {
 			} as unknown as InfuraErc20Provider);
 		});
 
-		it('should load user ERC20 tokens', async () => {
-			await loadErc20UserTokens({ identity: mockIdentity });
+		it('should load custom ERC20 tokens', async () => {
+			await loadCustomTokens({ identity: mockIdentity });
 
 			// query + update
-			expect(listUserTokens).toHaveBeenCalledTimes(2);
-			expect(listUserTokens).toHaveBeenNthCalledWith(1, {
+			expect(listCustomTokens).toHaveBeenCalledTimes(2);
+			expect(listCustomTokens).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
-				certified: false,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
-			expect(listUserTokens).toHaveBeenNthCalledWith(2, {
+			expect(listCustomTokens).toHaveBeenNthCalledWith(2, {
 				identity: mockIdentity,
-				certified: true,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
 		});
 
 		it('should query metadata for the tokens that are not in the default list', async () => {
-			await loadErc20UserTokens({ identity: mockIdentity });
+			await loadCustomTokens({ identity: mockIdentity });
 
 			// query + update
-			expect(mockMetadata).toHaveBeenCalledTimes(mockUserTokens.length * 2);
+			expect(mockMetadata).toHaveBeenCalledTimes(mockCustomTokensErc20.length * 2);
 
 			// query
-			mockUserTokens.forEach(({ contract_address }, index) => {
+			mockCustomTokensErc20.forEach(({ token }, index) => {
+				assert('Erc20' in token);
+
+				const {
+					Erc20: { token_address }
+				} = token;
+
 				expect(infuraProvidersSpy).toHaveBeenNthCalledWith(
 					index + 1,
-					expectedUserTokens[index].data.network.id
+					expectedCustomTokens[index].data.network.id
 				);
 				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1, {
-					address: contract_address
+					address: token_address
 				});
 			});
 
 			// update
-			mockUserTokens.forEach(({ contract_address }, index) => {
+			mockCustomTokensErc20.forEach(({ token }, index) => {
+				assert('Erc20' in token);
+
+				const {
+					Erc20: { token_address }
+				} = token;
+
 				expect(infuraProvidersSpy).toHaveBeenNthCalledWith(
-					index + 1 + mockUserTokens.length,
-					expectedUserTokens[index].data.network.id
+					index + 1 + mockCustomTokensErc20.length,
+					expectedCustomTokens[index].data.network.id
 				);
-				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockUserTokens.length, {
-					address: contract_address
+				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockCustomTokensErc20.length, {
+					address: token_address
 				});
 			});
 		});
 
 		it('should not query metadata for the tokens that are in the default list', async () => {
-			const additionalUserToken: UserToken = {
-				decimals: toNullable(3),
+			const additionalCustomToken: CustomToken = {
 				version: toNullable(),
-				enabled: toNullable(),
-				chain_id: ETHEREUM_NETWORK.chainId,
-				contract_address: EURC_TOKEN.address,
-				symbol: toNullable(EURC_TOKEN.symbol)
+				enabled: true,
+				token: {
+					Erc20: {
+						chain_id: ETHEREUM_NETWORK.chainId,
+						token_address: EURC_TOKEN.address
+					}
+				},
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			};
+			assert('Erc20' in additionalCustomToken.token);
 
-			vi.mocked(listUserTokens).mockResolvedValue([...mockUserTokens, additionalUserToken]);
+			vi.mocked(listCustomTokens).mockResolvedValue([
+				...mockCustomTokensErc20,
+				additionalCustomToken
+			]);
 
-			await loadErc20UserTokens({ identity: mockIdentity });
+			await loadCustomTokens({ identity: mockIdentity });
 
 			expect(mockMetadata).not.toHaveBeenCalledWith({
-				address: additionalUserToken.contract_address
+				address: additionalCustomToken.token.Erc20.token_address
 			});
 
 			// query + update
-			expect(mockMetadata).toHaveBeenCalledTimes(mockUserTokens.length * 2);
+			expect(mockMetadata).toHaveBeenCalledTimes(mockCustomTokensErc20.length * 2);
 
 			// query
-			mockUserTokens.forEach(({ contract_address }, index) => {
+			mockCustomTokensErc20.forEach(({ token }, index) => {
+				assert('Erc20' in token);
+
+				const {
+					Erc20: { token_address }
+				} = token;
+
 				expect(infuraProvidersSpy).toHaveBeenNthCalledWith(
 					index + 1,
-					expectedUserTokens[index].data.network.id
+					expectedCustomTokens[index].data.network.id
 				);
 				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1, {
-					address: contract_address
+					address: token_address
 				});
 			});
 
 			// update
-			mockUserTokens.forEach(({ contract_address }, index) => {
+			mockCustomTokensErc20.forEach(({ token }, index) => {
+				assert('Erc20' in token);
+
+				const {
+					Erc20: { token_address }
+				} = token;
+
 				expect(infuraProvidersSpy).toHaveBeenNthCalledWith(
-					index + 1 + mockUserTokens.length,
-					expectedUserTokens[index].data.network.id
+					index + 1 + mockCustomTokensErc20.length,
+					expectedCustomTokens[index].data.network.id
 				);
-				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockUserTokens.length, {
-					address: contract_address
+				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockCustomTokensErc20.length, {
+					address: token_address
 				});
 			});
 		});
 
-		it('should save user ERC20 tokens to store', async () => {
-			await loadErc20UserTokens({ identity: mockIdentity });
+		it('should save custom ERC20 tokens to store', async () => {
+			await loadCustomTokens({ identity: mockIdentity });
 
-			const tokens = get(erc20UserTokensStore);
+			const tokens = get(erc20CustomTokensStore);
 
 			expect(tokens).toEqual(
-				expectedUserTokens.map((token, index) => ({
+				expectedCustomTokens.map((token, index) => ({
 					...token,
 					data: {
 						...token.data,
@@ -370,83 +376,89 @@ describe('erc20.services', () => {
 			);
 		});
 
-		it('should use the static metadata for the user tokens that are already among the default tokens', async () => {
-			const additionalUserToken: UserToken = {
-				decimals: toNullable(3),
+		it('should use the static metadata for the custom tokens that are already among the default tokens', async () => {
+			const additionalCustomToken: CustomToken = {
 				version: toNullable(17n),
-				enabled: toNullable(),
-				chain_id: ETHEREUM_NETWORK.chainId,
-				contract_address: EURC_TOKEN.address,
-				symbol: toNullable('Not-EURC')
+				enabled: true,
+				token: {
+					Erc20: {
+						chain_id: ETHEREUM_NETWORK.chainId,
+						token_address: EURC_TOKEN.address
+					}
+				},
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			};
 
-			vi.mocked(listUserTokens).mockResolvedValue([...mockUserTokens, additionalUserToken]);
+			vi.mocked(listCustomTokens).mockResolvedValue([
+				...mockCustomTokensErc20,
+				additionalCustomToken
+			]);
 
-			await loadErc20UserTokens({ identity: mockIdentity });
+			await loadCustomTokens({ identity: mockIdentity });
 
-			const tokens = get(erc20UserTokensStore);
+			const tokens = get(erc20CustomTokensStore);
 
 			const expected = [
-				...expectedUserTokens.map((token, index) => ({
-					...token,
-					data: {
-						...token.data,
-						id: (tokens ?? [])[index].data.id
-					}
-				})),
 				{
 					certified: true,
 					data: {
 						...EURC_TOKEN,
-						category: 'custom',
 						version: 17n,
 						enabled: true
 					}
-				}
+				},
+				...expectedCustomTokens.map((token, index) => ({
+					...token,
+					data: {
+						...token.data,
+						id: (tokens ?? [])[index + 1].data.id
+					}
+				}))
 			];
 
 			expect(tokens).toEqual(expected);
 		});
 
 		it('should reset token store on error', async () => {
-			erc20UserTokensStore.setAll([
+			erc20CustomTokensStore.setAll([
 				{ data: { ...SEPOLIA_PEPE_TOKEN, enabled: true }, certified: false }
 			]);
 
-			vi.mocked(listUserTokens).mockRejectedValue(new Error('Error loading user tokens'));
+			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Error loading custom tokens'));
 
-			await loadErc20UserTokens({ identity: mockIdentity });
+			await loadCustomTokens({ identity: mockIdentity });
 
-			expect(get(erc20UserTokensStore)).toBeNull();
+			expect(get(erc20CustomTokensStore)).toBeNull();
 		});
 
 		it('should display the toast on error', async () => {
-			const mockError = new Error('Error loading user tokens');
-			vi.mocked(listUserTokens).mockRejectedValue(mockError);
+			const mockError = new Error('Error loading custom tokens');
+			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await loadErc20UserTokens({ identity: mockIdentity });
+			await loadCustomTokens({ identity: mockIdentity });
 
-			expect(toastsErrorNoTrace).toHaveBeenCalledOnce();
-			expect(toastsErrorNoTrace).toHaveBeenNthCalledWith(1, {
-				msg: { text: en.init.error.erc20_user_tokens },
+			expect(toastsError).toHaveBeenCalledOnce();
+			expect(toastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: en.init.error.erc20_custom_tokens },
 				err: mockError
 			});
 		});
 
 		it('should cache the custom tokens in IDB on update call', async () => {
-			await loadErc20UserTokens({ identity: mockIdentity });
+			await loadCustomTokens({ identity: mockIdentity });
 
 			expect(idbKeyval.set).toHaveBeenCalledOnce();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
-				mockUserTokens,
+				mockCustomTokensErc20,
 				expect.any(Object)
 			);
 		});
 
 		it('should fetch the cached custom tokens in IDB on query call', async () => {
-			await loadErc20UserTokens({ identity: mockIdentity, useCache: true });
+			await loadCustomTokens({ identity: mockIdentity, useCache: true });
 
 			expect(idbKeyval.get).toHaveBeenCalledOnce();
 			expect(idbKeyval.get).toHaveBeenNthCalledWith(

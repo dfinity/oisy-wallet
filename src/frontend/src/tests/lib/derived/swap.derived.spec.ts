@@ -1,3 +1,4 @@
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { swappableTokens } from '$lib/derived/swap.derived';
@@ -16,7 +17,7 @@ describe('swap.derived', () => {
 		});
 
 		it('should return selected token as sourceToken and undefined for destinationToken', () => {
-			mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
+			mockPage.mockToken(ICP_TOKEN);
 
 			balancesStore.set({
 				id: ICP_TOKEN_ID,
@@ -30,7 +31,7 @@ describe('swap.derived', () => {
 		});
 
 		it('should return selected token as destinationToken and undefined for sourceToken', () => {
-			mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
+			mockPage.mockToken(ICP_TOKEN);
 
 			balancesStore.set({
 				id: ICP_TOKEN_ID,
@@ -41,6 +42,34 @@ describe('swap.derived', () => {
 
 			expect(tokens.sourceToken).toBeUndefined();
 			expect(tokens.destinationToken).toEqual({ ...ICP_TOKEN, enabled: true });
+		});
+
+		it('should return selected ETH token as sourceToken and undefined for destinationToken', () => {
+			mockPage.mockToken(ETHEREUM_TOKEN);
+
+			balancesStore.set({
+				id: ETHEREUM_TOKEN_ID,
+				data: { data: bn2Bi, certified: true }
+			});
+
+			const tokens = get(swappableTokens);
+
+			expect(tokens.sourceToken).toEqual({ ...ETHEREUM_TOKEN, enabled: true });
+			expect(tokens.destinationToken).toBeUndefined();
+		});
+
+		it('should return selected ETH token as destinationToken and undefined for sourceToken', () => {
+			mockPage.mockToken(ETHEREUM_TOKEN);
+
+			balancesStore.set({
+				id: ETHEREUM_TOKEN_ID,
+				data: { data: ZERO, certified: true }
+			});
+
+			const tokens = get(swappableTokens);
+
+			expect(tokens.sourceToken).toBeUndefined();
+			expect(tokens.destinationToken).toEqual({ ...ETHEREUM_TOKEN, enabled: true });
 		});
 	});
 });

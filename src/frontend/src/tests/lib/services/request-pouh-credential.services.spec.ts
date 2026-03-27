@@ -1,5 +1,4 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import * as api from '$lib/api/backend.api';
 import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
@@ -8,8 +7,9 @@ import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockUserProfile, mockUserProfileVersion } from '$tests/mocks/user-profile.mock';
 import { toastsStore } from '@dfinity/gix-components';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
-import { Principal } from '@dfinity/principal';
+import { nowInBigIntNanoSeconds } from '@dfinity/utils';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -65,8 +65,7 @@ describe('request-pouh-credential.services', () => {
 			const result = await requestPouhCredential({ identity });
 
 			expect(result.success).toBeTruthy();
-			expect(addUserCredentialMock).toHaveBeenCalledTimes(1);
-			expect(addUserCredentialMock).toHaveBeenCalledWith({
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {
@@ -77,7 +76,7 @@ describe('request-pouh-credential.services', () => {
 				currentUserVersion: mockUserProfileVersion,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
-			expect(getUserProfileMock).toHaveBeenCalledTimes(1);
+			expect(getUserProfileMock).toHaveBeenCalledOnce();
 			expect(get(userProfileStore)).toEqual({
 				certified: true,
 				profile: userProfileWithCredential
@@ -90,8 +89,7 @@ describe('request-pouh-credential.services', () => {
 			const result = await requestPouhCredential({ identity });
 
 			expect(result.success).toBeTruthy();
-			expect(addUserCredentialMock).toHaveBeenCalledTimes(1);
-			expect(addUserCredentialMock).toHaveBeenCalledWith({
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {

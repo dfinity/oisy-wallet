@@ -1,8 +1,21 @@
-import { LOCAL, STAGING } from '$lib/constants/app.constants';
-import { parseBoolEnvVar } from '$lib/utils/env.utils';
+import { Languages } from '$lib/enums/languages';
 
-// Enabled on Staging and Local if not set
-// Todo: remove once the feature has been completed
-export const I18N_ENABLED = parseBoolEnvVar(
-	import.meta.env.VITE_I18N_ENABLED ?? (STAGING || LOCAL)
-);
+export const SUPPORTED_LANGUAGES = Object.entries(Languages);
+
+// This is the label that is shown. We don't need to translate it as we always show it in its own language
+export const LANGUAGES = {
+	[Languages.ENGLISH]: 'English',
+	[Languages.CZECH]: 'Čeština',
+	[Languages.FRENCH]: 'Français',
+	[Languages.GERMAN]: 'Deutsch',
+	[Languages.HINDI]: 'हिन्दी',
+	[Languages.ITALIAN]: 'Italiano',
+	[Languages.JAPANESE]: '日本語',
+	[Languages.KOREAN]: '한국어',
+	[Languages.POLISH]: 'Polski',
+	[Languages.PORTUGUESE]: 'Português',
+	[Languages.RUSSIAN]: 'Русский',
+	[Languages.SPANISH]: 'Español',
+	[Languages.VIETNAMESE]: 'Tiếng việt',
+	[Languages.CHINESE_SIMPLIFIED]: '中文 (简体)'
+};

@@ -3,7 +3,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
 	import HowToConvertEthereumWizardSteps from '$icp/components/convert/HowToConvertEthereumWizardSteps.svelte';
-	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
+	import {
+		howToConvertWizardSteps,
+		type WizardStepsHowToConvertComplete
+	} from '$icp-eth/config/how-to-convert.config';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsHowToConvert, WizardStepsConvert } from '$lib/enums/wizard-steps';
@@ -23,10 +26,10 @@
 	let sendAmount: OptionAmount = $state();
 	let receiveAmount: number | undefined = $state();
 	let convertProgressStep: string = $state(ProgressStepsConvert.INITIALIZATION);
-	let currentStep: WizardStep | undefined = $state();
-	let modal: WizardModal | undefined = $state();
+	let currentStep: WizardStep<WizardStepsHowToConvertComplete> | undefined = $state();
+	let modal: WizardModal<WizardStepsHowToConvertComplete> | undefined = $state();
 
-	const steps: WizardSteps = $derived(
+	const steps: WizardSteps<WizardStepsHowToConvertComplete> = $derived(
 		howToConvertWizardSteps({
 			i18n: $i18n,
 			sourceToken: sourceToken.symbol,
@@ -55,34 +58,34 @@
 	};
 </script>
 
-<ConvertContexts {sourceToken} {destinationToken}>
+<ConvertContexts {destinationToken} {sourceToken}>
 	<WizardModal
+		bind:this={modal}
+		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
+		onClose={close}
 		{steps}
 		bind:currentStep
-		bind:this={modal}
-		on:nnsClose={close}
-		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
-		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		<EthConvertTokenWizard
 			{currentStep}
 			formCancelAction="back"
-			bind:sendAmount
-			bind:receiveAmount
-			bind:convertProgressStep
-			on:icBack={() =>
+			onBack={() =>
 				currentStep?.name === WizardStepsConvert.CONVERT
 					? goToStep(WizardStepsHowToConvert.INFO)
 					: modal?.back()}
-			on:icNext={modal?.next}
-			on:icClose={close}
+			onClose={close}
+			onNext={modal?.next}
+			bind:sendAmount
+			bind:receiveAmount
+			bind:convertProgressStep
 		>
 			<HowToConvertEthereumWizardSteps
 				{currentStep}
-				on:icQRCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
-				on:icConvert={() => goToStep(WizardStepsConvert.CONVERT)}
-				on:icBack={modal?.back}
+				onBack={modal?.back}
+				onConvert={() => goToStep(WizardStepsConvert.CONVERT)}
+				onQrCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
 			/>
 		</EthConvertTokenWizard>
 	</WizardModal>

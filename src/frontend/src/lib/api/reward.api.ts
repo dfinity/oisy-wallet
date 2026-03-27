@@ -8,14 +8,14 @@ import type {
 	UserSnapshot,
 	VipReward
 } from '$declarations/rewards/rewards.did';
+import { CanisterApi } from '$lib/api/canister.api';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { RewardClaimApiResponse } from '$lib/types/reward';
-import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
-let canister: RewardCanister | undefined = undefined;
+const rewardApi = new CanisterApi<RewardCanister>();
 
 export const isEligible = async ({
 	identity,
@@ -95,12 +95,9 @@ const rewardCanister = async ({
 }: CanisterApiFunctionParams): Promise<RewardCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	if (isNullish(canister)) {
-		canister = await RewardCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return canister;
+	return await rewardApi.getCanister({
+		identity,
+		canisterId,
+		create: RewardCanister.create
+	});
 };

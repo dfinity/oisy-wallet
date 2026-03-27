@@ -2,44 +2,52 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
-	import { formatToken, formatUSD } from '$lib/utils/format.utils';
+	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 
-	export let amount: bigint;
-	export let decimals: number;
-	export let symbol: string;
-	export let exchangeRate: number | undefined;
+	interface Props {
+		amount: bigint;
+		decimals: number;
+		symbol: string;
+		exchangeRate?: number;
+	}
 
-	let usdAmount: number | undefined;
-	$: usdAmount = nonNullish(exchangeRate)
-		? usdValue({
-				decimals,
-				balance: amount,
-				exchangeRate
-			})
-		: undefined;
+	let { amount, decimals, symbol, exchangeRate }: Props = $props();
 
-	let displayAmount: string;
-	$: displayAmount = `${formatToken({
-		value: amount,
-		unitName: decimals,
-		displayDecimals: EIGHT_DECIMALS
-	})} ${symbol}`;
+	let usdAmount = $derived(
+		nonNullish(exchangeRate)
+			? usdValue({
+					decimals,
+					balance: amount,
+					exchangeRate
+				})
+			: undefined
+	);
+
+	let displayAmount = $derived(
+		`${formatToken({
+			value: amount,
+			unitName: decimals,
+			displayDecimals: EIGHT_DECIMALS
+		})} ${symbol}`
+	);
 </script>
 
-<div transition:fade class="flex gap-4">
+<div class="flex gap-4" transition:fade>
 	{displayAmount}
 
 	{#if nonNullish(usdAmount)}
 		<div class="text-tertiary">
-			{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
-				{`( < ${formatUSD({
-					value: EXCHANGE_USD_AMOUNT_THRESHOLD
-				})} )`}
-			{:else}
-				{`( ${formatUSD({ value: usdAmount })} )`}
-			{/if}
+			{`( ${formatCurrency({
+				value: usdAmount,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage,
+				notBelowThreshold: true
+			})} )`}
 		</div>
 	{/if}
 </div>

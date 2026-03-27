@@ -2,8 +2,8 @@ import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
-describe('AutoLoader', () => {
-	const interval = 1000;
+describe('IntervalLoader', () => {
+	const interval = 30_000;
 
 	beforeAll(() => {
 		vi.useFakeTimers();
@@ -30,7 +30,6 @@ describe('AutoLoader', () => {
 
 	it('should call load function repeatedly on interval', async () => {
 		const onLoad = vi.fn();
-		const interval = 1000;
 
 		render(IntervalLoader, {
 			props: {
@@ -45,7 +44,7 @@ describe('AutoLoader', () => {
 
 		const n = 5;
 
-		vi.advanceTimersByTime(interval * 5 + interval / 2);
+		await vi.advanceTimersByTimeAsync(interval * 5 + interval / 2);
 
 		expect(onLoad).toHaveBeenCalledTimes(n + 1);
 	});
@@ -69,5 +68,34 @@ describe('AutoLoader', () => {
 		vi.advanceTimersByTime(interval * 5);
 
 		expect(onLoad).toHaveBeenCalledOnce();
+	});
+
+	it('should restart timer on interval prop change', async () => {
+		const onLoad = vi.fn();
+
+		const { rerender } = render(IntervalLoader, {
+			props: {
+				onLoad,
+				interval
+			}
+		});
+
+		await tick();
+
+		expect(onLoad).toHaveBeenCalledOnce();
+
+		const newInterval = interval / 3;
+
+		await rerender({ interval: newInterval });
+
+		await tick();
+
+		vi.advanceTimersByTime(interval + newInterval / 2);
+
+		expect(onLoad).toHaveBeenCalledTimes(2);
+
+		await vi.advanceTimersByTimeAsync(newInterval);
+
+		expect(onLoad).toHaveBeenCalledTimes(3);
 	});
 });

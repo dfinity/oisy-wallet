@@ -1,19 +1,24 @@
 <script lang="ts">
-	import { QRCodeReader } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
+	import QrCodeReader from '$lib/components/ui/QrCodeReader.svelte';
 	import {
 		TRACK_COUNT_WALLET_CONNECT,
 		TRACK_COUNT_WALLET_CONNECT_QR_CODE
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 
-	let renderQRCodeReader = false;
+	interface Props {
+		onConnect: (uri: string) => Promise<void>;
+	}
+
+	let { onConnect }: Props = $props();
+
+	let renderQRCodeReader = $state(false);
 
 	const error = () => {
 		renderQRCodeReader = false;
@@ -23,14 +28,11 @@
 		});
 	};
 
-	let uri = '';
+	let uri = $state('');
 
-	let invalid = true;
-	$: invalid = !uri;
+	let invalid = $derived(!uri);
 
-	const dispatch = createEventDispatcher();
-
-	const connect = (): 'success' | 'error' => {
+	const connect = async (): Promise<'success' | 'error'> => {
 		if (!uri) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.missing_uri }
@@ -38,13 +40,13 @@
 			return 'error';
 		}
 
-		dispatch('icConnect', uri);
+		await onConnect(uri);
 
 		return 'success';
 	};
 
-	const onClick = () => {
-		const result = connect();
+	const onClick = async () => {
+		const result = await connect();
 
 		if (result === 'error') {
 			return;
@@ -69,16 +71,16 @@
 <ContentWithToolbar>
 	<div class="qr-code rounded-lg">
 		{#if renderQRCodeReader}
-			<QRCodeReader on:nnsQRCode={onQRCodeSuccess} on:nnsQRCodeError={error} />
+			<QrCodeReader on:nnsQRCode={onQRCodeSuccess} on:nnsQRCodeError={error} />
 		{/if}
 
 		{#if !renderQRCodeReader}
 			<Button
-				type="button"
-				styleClass="inset-center"
 				colorStyle="primary"
+				onclick={() => (renderQRCodeReader = true)}
 				paddingSmall
-				onclick={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</Button
+				styleClass="inset-center"
+				type="button">{$i18n.wallet_connect.text.scan_qr}</Button
 			>
 		{/if}
 	</div>
@@ -103,8 +105,8 @@
 		position: relative;
 
 		outline-offset: var(--padding-0_25x);
-		outline: var(--color-base-black) dashed var(--padding-0_5x);
-		--primary-rgb: 59, 0, 185;
+		outline: var(--color-foreground-tertiary) dashed var(--padding-0_25x);
+		color: transparent;
 		overflow: hidden;
 
 		margin: 0 auto;

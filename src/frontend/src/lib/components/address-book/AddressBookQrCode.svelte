@@ -5,7 +5,11 @@
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
-	const { address }: { address: ContactAddressUi } = $props();
+	interface Props {
+		address: ContactAddressUi;
+	}
+
+	const { address }: Props = $props();
 
 	let render = $state(true);
 
@@ -15,22 +19,22 @@
 	});
 </script>
 
-<svelte:window on:resize={rerender} />
+<svelte:window onresize={rerender} />
 
 <div
-	in:fade
 	class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-[100%] rounded-xl bg-white p-4"
 	class:opacity-0={!render}
+	in:fade
 >
 	{#if render && nonNullish(address?.address)}
 		<QRCode value={address.address}>
-			<svelte:fragment slot="logo">
+			{#snippet logo()}
 				{#if nonNullish(address.addressType)}
 					<div class="flex items-center justify-center rounded-lg bg-primary p-2">
 						<IconAddressType addressType={address.addressType} size="48" />
 					</div>
 				{/if}
-			</svelte:fragment>
+			{/snippet}
 		</QRCode>
 	{/if}
 </div>

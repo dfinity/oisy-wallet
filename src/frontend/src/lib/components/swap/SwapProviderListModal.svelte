@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import SwapProviderListItem from './SwapProviderListItem.svelte';
-	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import { getContext } from 'svelte';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { SWAP_MODAL_SELECT_PROVIDER_STEP } from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -13,12 +16,15 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { SwapMappedResult } from '$lib/types/swap';
-	import { formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
+	import { formatTokenBigintToNumber, formatCurrency } from '$lib/utils/format.utils';
+	import { findSwapProvider } from '$lib/utils/swap.utils';
 
-	const dispatch = createEventDispatcher<{
-		icSelectProvider: SwapMappedResult;
-		icCloseProviderList: void;
-	}>();
+	interface Props {
+		onSelectProvider: (swap: SwapMappedResult) => void;
+		onCloseProviderList: () => void;
+	}
+
+	let { onSelectProvider, onCloseProviderList }: Props = $props();
 
 	const { destinationToken, destinationTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -44,11 +50,16 @@
 				displayDecimals: token.decimals
 			}) * exchangeRate;
 
-		return formatUSD({ value: usdValue });
+		return formatCurrency({
+			value: usdValue,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		});
 	};
 </script>
 
-<div class=" mb-4 overflow-y-auto overscroll-contain">
+<div class=" mb-4 overflow-y-auto overscroll-contain" data-tid={SWAP_MODAL_SELECT_PROVIDER_STEP}>
 	<div class="flex w-full flex-row justify-between border-b border-solid border-primary pb-2">
 		<span class="text-sm text-tertiary">{$i18n.swap.text.swap_provider}</span>
 		<span class="text-sm text-tertiary">{$i18n.swap.text.you_receive}</span>
@@ -58,16 +69,16 @@
 			{#if nonNullish($destinationToken) && nonNullish($swapAmountsStore)}
 				<li class="logo-button-list-item" data-testid="provider-item">
 					<SwapProviderListItem
-						on:click={() => dispatch('icSelectProvider', swap)}
-						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						amount={swap.receiveAmount}
-						destinationToken={$destinationToken}
+						dapp={findSwapProvider(swap.provider)}
+						destinationToken={$destinationToken as IcTokenToggleable}
+						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
+						onClick={() => onSelectProvider(swap)}
 						usdBalance={getUsdBalance({
 							amount: swap.receiveAmount,
-							token: $destinationToken,
+							token: $destinationToken as IcTokenToggleable,
 							exchangeRate: $destinationTokenExchangeRate
 						})}
-						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
 					/>
 				</li>
 			{/if}
@@ -76,5 +87,5 @@
 </div>
 
 <ButtonGroup>
-	<ButtonCancel fullWidth={true} onclick={() => dispatch('icCloseProviderList')} />
+	<ButtonCancel fullWidth={true} onclick={onCloseProviderList} />
 </ButtonGroup>

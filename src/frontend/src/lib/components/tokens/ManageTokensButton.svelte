@@ -1,23 +1,27 @@
 <script lang="ts">
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import type { Snippet } from 'svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import { MANAGE_TOKENS_MODAL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	let disabled = true;
-	$: disabled = $erc20UserTokensNotInitialized || $authNotSignedIn;
+	interface Props {
+		label: Snippet;
+	}
 
-	const manageTokensId = Symbol();
+	let { label }: Props = $props();
+
+	let disabled = $derived($authNotSignedIn);
+
+	const manageTokensId = $state(Symbol());
 </script>
 
 <button
 	class="tertiary"
 	data-tid={MANAGE_TOKENS_MODAL_BUTTON}
-	on:click={() => modalStore.openManageTokens({ id: manageTokensId })}
 	{disabled}
+	onclick={() => modalStore.openManageTokens({ id: manageTokensId })}
 >
 	<IconManage />
-	{$i18n.tokens.manage.text.manage_list}
+	{@render label()}
 </button>

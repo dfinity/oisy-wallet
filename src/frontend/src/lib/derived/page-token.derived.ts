@@ -1,14 +1,20 @@
-import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
-import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+import { enabledErcFungibleTokens } from '$eth/derived/erc-fungible.derived';
+import { isTokenEthereumCustomToken } from '$eth/utils/erc20.utils';
+import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
+import { isTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import { isIcrcTokenToggleEnabled } from '$icp/utils/token-toggle.utils';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-import type { OptionToken } from '$lib/types/token';
+import { pageNft } from '$lib/derived/page-nft.derived';
+import { defaultFallbackToken } from '$lib/derived/token.derived';
+import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
+import type { NonFungibleToken } from '$lib/types/nft';
+import type { OptionToken, OptionTokenStandardCode, Token } from '$lib/types/token';
+import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
-import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
-import { isNullish } from '@dfinity/utils';
+import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -18,44 +24,56 @@ export const pageToken: Readable<OptionToken> = derived(
 	[
 		routeToken,
 		routeNetwork,
-		enabledBitcoinTokens,
-		enabledEthereumTokens,
-		enabledSolanaTokens,
-		enabledEvmTokens,
-		enabledErc20Tokens,
+		nativeTokens,
+		enabledErcFungibleTokens,
 		enabledIcrcTokens,
 		enabledSplTokens
 	],
-	([
-		$routeToken,
-		$routeNetwork,
-		$enabledBitcoinTokens,
-		$enabledEthereumTokens,
-		$enabledSolanaTokens,
-		$enabledEvmTokens,
-		$erc20Tokens,
-		$icrcTokens,
-		$splTokens
-	]) => {
-		if (isNullish($routeToken)) {
-			return undefined;
-		}
+	([$routeToken, $routeNetwork, $nativeTokens, $ercFungibleTokens, $icrcTokens, $splTokens]) =>
+		nonNullish($routeToken)
+			? [...$nativeTokens, ...$ercFungibleTokens, ...$icrcTokens, ...$splTokens].find(
+					(token) =>
+						getPageTokenIdentifier(token) === $routeToken &&
+						token.network.id.description === $routeNetwork
+				)
+			: undefined
+);
 
-		if ($routeToken === ICP_TOKEN.name) {
-			return ICP_TOKEN;
-		}
+/**
+ * A derived store which can be used for code convenience reasons.
+ */
+export const pageTokenWithFallback: Readable<Token> = derived(
+	[pageToken, defaultFallbackToken],
+	([$pageToken, $defaultFallbackToken]) => $pageToken ?? $defaultFallbackToken
+);
 
-		return [
-			...$enabledBitcoinTokens,
-			...$enabledEthereumTokens,
-			...$enabledSolanaTokens,
-			...$enabledEvmTokens,
-			...$erc20Tokens,
-			...$icrcTokens,
-			...$splTokens
-		].find(
-			({ name, network: { id: networkId } }) =>
-				name === $routeToken && networkId.description === $routeNetwork
-		);
+export const pageTokenStandard: Readable<OptionTokenStandardCode> = derived(
+	[pageToken],
+	([$pageToken]) => $pageToken?.standard.code
+);
+
+export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pageToken]) => {
+	if (nonNullish($pageToken)) {
+		return isTokenIcrcCustomToken($pageToken)
+			? isIcrcTokenToggleEnabled($pageToken)
+			: isTokenEthereumCustomToken($pageToken)
+				? isNotDefaultEthereumToken($pageToken)
+				: isTokenSpl($pageToken)
+					? isTokenSplCustomToken($pageToken)
+					: false;
 	}
+
+	return false;
+});
+
+export const pageNonFungibleToken: Readable<NonFungibleToken | undefined> = derived(
+	[pageNft, nonFungibleTokens],
+	([$pageNft, $nonFungibleTokens]) =>
+		nonNullish($pageNft) && nonNullish($pageNft.collection)
+			? findNonFungibleToken({
+					tokens: $nonFungibleTokens,
+					address: $pageNft.collection.address,
+					networkId: $pageNft.collection.network.id
+				})
+			: undefined
 );

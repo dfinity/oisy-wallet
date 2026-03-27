@@ -1,11 +1,13 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ZERO } from '$lib/constants/app.constants';
+import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import SolSendReview from '$sol/components/send/SolSendReview.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress } from '$tests/mocks/sol.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('SolSendReview', () => {
@@ -13,7 +15,9 @@ describe('SolSendReview', () => {
 	const props = {
 		destination: mockAtaAddress,
 		amount: 22_000,
-		network: SOLANA_MAINNET_NETWORK
+		network: SOLANA_MAINNET_NETWORK,
+		onBack: vi.fn(),
+		onSend: vi.fn()
 	};
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 	const mockFeeStore = initFeeStore();
@@ -42,7 +46,8 @@ describe('SolSendReview', () => {
 				ataFeeStore: mockAtaFeeStore,
 				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
 				feeDecimalsStore: writable(SOLANA_TOKEN.decimals),
-				feeTokenIdStore: writable(SOLANA_TOKEN.id)
+				feeTokenIdStore: writable(SOLANA_TOKEN.id),
+				feeExchangeRateStore: writable(9.87)
 			})
 		);
 	});
@@ -62,5 +67,45 @@ describe('SolSendReview', () => {
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
 		expect(toolbar).not.toBeNull();
+	});
+
+	it('should disable the next button and render insufficient funds for fee message', () => {
+		const insufficientFundsForFeeTestId = 'sol-send-form-insufficient-funds-for-fee';
+		const buttonTestId = REVIEW_FORM_SEND_BUTTON;
+
+		mockFeeStore.setFee(1000n);
+
+		const { getByTestId } = render(SolSendReview, {
+			props: {
+				...props
+			},
+			context: mockContext
+		});
+
+		waitFor(() => {
+			expect(getByTestId(insufficientFundsForFeeTestId)).toHaveTextContent(
+				en.fee.assertion.insufficient_funds_for_fee
+			);
+			expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
+		});
+	});
+
+	it('should not disable the next button and dont render insufficient funds if sufficient funds', () => {
+		const insufficientFundsForFeeTestId = 'sol-send-form-insufficient-funds-for-fee';
+		const buttonTestId = REVIEW_FORM_SEND_BUTTON;
+
+		mockFeeStore.setFee(ZERO);
+
+		const { getByTestId } = render(SolSendReview, {
+			props: {
+				...props
+			},
+			context: mockContext
+		});
+
+		waitFor(() => {
+			expect(getByTestId(insufficientFundsForFeeTestId)).not.toBeInTheDocument();
+			expect(getByTestId(buttonTestId)).not.toHaveAttribute('disabled');
+		});
 	});
 });

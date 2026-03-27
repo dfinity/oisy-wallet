@@ -1,34 +1,23 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
-import { toUserToken } from '$icp-eth/services/user-token.services';
 import {
+	clearIdbAllCustomTokens,
 	deleteIdbEthToken,
-	deleteIdbEthTokens,
-	deleteIdbIcTokens,
-	deleteIdbSolTokens,
-	getIdbEthTokens,
-	getIdbIcTokens,
-	getIdbSolTokens,
+	deleteIdbIcToken,
+	deleteIdbSolToken,
+	getIdbAllCustomTokens,
+	setIdbAllCustomTokens,
 	setIdbTokensStore
 } from '$lib/api/idb-tokens.api';
-import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { createMockErc20CustomTokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
-
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
 
 vi.mock('$app/environment', () => ({
 	browser: true
@@ -37,7 +26,7 @@ vi.mock('$app/environment', () => ({
 describe('idb-tokens.api', () => {
 	const mockIdbTokensStore = createStore('mock-store', 'mock-store');
 
-	const mockTokens: CustomToken[] = [
+	const icMockTokens = [
 		{
 			token: {
 				Icrc: {
@@ -50,11 +39,16 @@ describe('idb-tokens.api', () => {
 		},
 		{
 			token: {
-				Icrc: { ledger_id: Principal.fromText(IC_CKETH_LEDGER_CANISTER_ID), index_id: toNullable() }
+				Icrc: {
+					ledger_id: Principal.fromText(IC_CKETH_LEDGER_CANISTER_ID),
+					index_id: toNullable()
+				}
 			},
 			version: toNullable(1n),
 			enabled: false
-		},
+		}
+	] as CustomToken[];
+	const splDevnetMockTokens = [
 		{
 			token: {
 				SplDevnet: {
@@ -66,7 +60,21 @@ describe('idb-tokens.api', () => {
 			version: toNullable(),
 			enabled: true
 		}
-	];
+	] as CustomToken[];
+	const splMainnetMockTokens = [
+		{
+			token: {
+				SplMainnet: {
+					decimals: toNullable(18),
+					symbol: toNullable(),
+					token_address: 'JacMjZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
+				}
+			},
+			version: toNullable(),
+			enabled: true
+		}
+	] as CustomToken[];
+	const mockTokens: CustomToken[] = [...icMockTokens, ...splDevnetMockTokens];
 
 	const mockParams = {
 		identity: mockIdentity,
@@ -125,71 +133,92 @@ describe('idb-tokens.api', () => {
 		});
 	});
 
-	describe('getIdbIcTokens', () => {
-		it('should get IC tokens', async () => {
+	describe('getIdbAllCustomTokens', () => {
+		it('should get all custom tokens', async () => {
 			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
 
-			const result = await getIdbIcTokens(mockPrincipal);
+			const result = await getIdbAllCustomTokens(mockPrincipal);
 
 			expect(result).toEqual(mockTokens);
 			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
 		});
 	});
 
-	describe('getIdbEthTokens', () => {
-		it('should get ETH tokens', async () => {
-			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+	describe('setIdbAllCustomTokens', () => {
+		it('should set all custom tokens using the all-tokens idb store', async () => {
+			await setIdbAllCustomTokens({
+				identity: mockIdentity,
+				tokens: mockTokens
+			});
 
-			const result = await getIdbEthTokens(mockPrincipal);
-
-			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-	});
-
-	describe('getIdbSolTokens', () => {
-		it('should get SOL tokens', async () => {
-			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
-
-			const result = await getIdbSolTokens(mockPrincipal);
-
-			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-	});
-
-	describe('deleteIdbIcTokens', () => {
-		it('should delete IC tokens', async () => {
-			await deleteIdbIcTokens(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledOnce();
-			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
-		});
-	});
-
-	describe('deleteIdbEthTokens', () => {
-		it('should delete ETH tokens', async () => {
-			await deleteIdbEthTokens(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledOnce();
-			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
-		});
-	});
-
-	describe('deleteIdbSolTokens', () => {
-		it('should delete SOL tokens', async () => {
-			await deleteIdbSolTokens(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledOnce();
-			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				mockTokens,
+				mockIdbTokensStore
+			);
 		});
 	});
 
 	describe('deleteIdbEthToken', () => {
+		it('should return early with nullish identity', async () => {
+			await deleteIdbEthToken({
+				identity: null,
+				token: icMockTokens[0]
+			});
+
+			expect(idbKeyval.get).not.toHaveBeenCalled();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+
+			await deleteIdbEthToken({
+				identity: undefined,
+				token: icMockTokens[0]
+			});
+
+			expect(idbKeyval.get).not.toHaveBeenCalled();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
+		it('should return early with non-Erc20 token', async () => {
+			await deleteIdbEthToken({
+				identity: mockIdentity,
+				token: icMockTokens[0]
+			});
+
+			expect(idbKeyval.get).not.toHaveBeenCalled();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
+		it('should not call set when currentTokens is nullish', async () => {
+			const [tokenToDelete] = createMockErc20CustomTokens({ n: 1, networkEnv: 'mainnet' });
+			const userTokenToDelete = toCustomToken({
+				...tokenToDelete.data,
+				networkKey: 'Erc20',
+				chainId: tokenToDelete.data.network.chainId
+			});
+
+			vi.mocked(idbKeyval.get).mockResolvedValue(undefined);
+
+			await deleteIdbEthToken({
+				identity: mockIdentity,
+				token: userTokenToDelete
+			});
+
+			expect(idbKeyval.get).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
 		it('should delete provided ETH token', async () => {
-			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
-			const restUserTokens = rest.map(({ data }) => toUserToken(data));
-			const userTokenToDelete = toUserToken(tokenToDelete.data);
+			const [tokenToDelete, ...rest] = createMockErc20CustomTokens({ n: 3, networkEnv: 'mainnet' });
+			const restUserTokens = rest.map(({ data }) =>
+				toCustomToken({ ...data, networkKey: 'Erc20', chainId: data.network.chainId })
+			);
+			const userTokenToDelete = toCustomToken({
+				...tokenToDelete.data,
+				networkKey: 'Erc20',
+				chainId: tokenToDelete.data.network.chainId
+			});
 
 			vi.mocked(idbKeyval.get).mockResolvedValue([userTokenToDelete, ...restUserTokens]);
 
@@ -208,9 +237,15 @@ describe('idb-tokens.api', () => {
 		});
 
 		it('should not delete anything if provided ETH token is not in the IDB', async () => {
-			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
-			const restUserTokens = rest.map(({ data }) => toUserToken(data));
-			const userTokenToDelete = toUserToken(tokenToDelete.data);
+			const [tokenToDelete, ...rest] = createMockErc20CustomTokens({ n: 3, networkEnv: 'mainnet' });
+			const restUserTokens = rest.map(({ data }) =>
+				toCustomToken({ ...data, networkKey: 'Erc20', chainId: data.network.chainId })
+			);
+			const userTokenToDelete = toCustomToken({
+				...tokenToDelete.data,
+				networkKey: 'Erc20',
+				chainId: tokenToDelete.data.network.chainId
+			});
 
 			vi.mocked(idbKeyval.get).mockResolvedValue(restUserTokens);
 
@@ -226,6 +261,184 @@ describe('idb-tokens.api', () => {
 				restUserTokens,
 				mockIdbTokensStore
 			);
+		});
+	});
+
+	describe('deleteIdbIcToken', () => {
+		it('should return early with nullish identity', async () => {
+			await deleteIdbIcToken({
+				identity: null,
+				token: icMockTokens[0]
+			});
+
+			expect(idbKeyval.get).not.toHaveBeenCalled();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+
+			await deleteIdbIcToken({
+				identity: undefined,
+				token: icMockTokens[0]
+			});
+
+			expect(idbKeyval.get).not.toHaveBeenCalled();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
+		it('should return early with non-Icrc token', async () => {
+			await deleteIdbIcToken({
+				identity: mockIdentity,
+				token: splDevnetMockTokens[0]
+			});
+
+			expect(idbKeyval.get).not.toHaveBeenCalled();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
+		it('should not call set when currentTokens is nullish', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(undefined);
+
+			await deleteIdbIcToken({
+				identity: mockIdentity,
+				token: icMockTokens[0]
+			});
+
+			expect(idbKeyval.get).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
+		it('should delete provided IC token', async () => {
+			const [tokenToDelete, ...rest] = icMockTokens;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([tokenToDelete, ...rest]);
+
+			await deleteIdbIcToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				rest,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should not delete anything if provided IC token is not in the IDB', async () => {
+			const [tokenToDelete, ...rest] = icMockTokens;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue(rest);
+
+			await deleteIdbIcToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				rest,
+				mockIdbTokensStore
+			);
+		});
+	});
+
+	describe('deleteIdbSolToken', () => {
+		it('should return early with nullish identity', async () => {
+			await deleteIdbSolToken({
+				identity: null,
+				token: splDevnetMockTokens[0]
+			});
+
+			expect(idbKeyval.get).not.toHaveBeenCalled();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+
+			await deleteIdbSolToken({
+				identity: undefined,
+				token: splDevnetMockTokens[0]
+			});
+
+			expect(idbKeyval.get).not.toHaveBeenCalled();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
+		it('should return early with non-Spl token', async () => {
+			await deleteIdbSolToken({
+				identity: mockIdentity,
+				token: icMockTokens[0]
+			});
+
+			expect(idbKeyval.get).not.toHaveBeenCalled();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
+		it('should not call set when currentTokens is nullish', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(undefined);
+
+			await deleteIdbSolToken({
+				identity: mockIdentity,
+				token: splDevnetMockTokens[0]
+			});
+
+			expect(idbKeyval.get).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
+		it('should delete provided SPL token', async () => {
+			const [tokenToDelete] = splMainnetMockTokens;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([...splMainnetMockTokens, ...splDevnetMockTokens]);
+
+			await deleteIdbSolToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				splDevnetMockTokens,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should not delete anything if provided SPL token is not in the IDB', async () => {
+			const tokenToDelete = {
+				token: {
+					SplDevnet: {
+						decimals: toNullable(18),
+						symbol: toNullable(),
+						token_address: 'token_addresss'
+					}
+				},
+				version: toNullable(),
+				enabled: true
+			} as CustomToken;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([...splMainnetMockTokens, ...splDevnetMockTokens]);
+
+			await deleteIdbSolToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				[...splMainnetMockTokens, ...splDevnetMockTokens],
+				mockIdbTokensStore
+			);
+		});
+	});
+
+	describe('clearIdbAllCustomTokens', () => {
+		it('should clear all custom tokens', async () => {
+			await clearIdbAllCustomTokens();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
 		});
 	});
 });

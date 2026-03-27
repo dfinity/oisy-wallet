@@ -1,34 +1,47 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
+	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
-	import { mapAddressToName } from '$eth/utils/transactions.utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
+	import {
+		decodeErc20AbiData,
+		isErc20TransactionDeposit,
+		isMaxUint256,
+		mapAddressToName
+	} from '$eth/utils/transactions.utils';
+	import { ckMinterBuiltInContacts } from '$icp-eth/derived/ck-minter-contacts.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import {
 		formatSecondsToDate,
 		formatToken,
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
+	import { isTokenNonFungible } from '$lib/utils/nft.utils';
+	import { findNft } from '$lib/utils/nfts.utils';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -37,7 +50,61 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { from, value, timestamp, hash, blockNumber, to, type } = $derived(transaction);
+	let {
+		from,
+		value,
+		timestamp,
+		hash,
+		blockNumber,
+		to,
+		type,
+		approveSpender,
+		data,
+		gasUsed,
+		gasPrice
+	} = $derived(transaction);
+
+	let isSend = $derived(type === 'send');
+	let isDeposit = $derived(type === 'deposit');
+	let isApprove = $derived(type === 'approve');
+
+	let isOutFlow = $derived(isSend || isDeposit || isApprove);
+
+	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
+
+	let { to: dataTo, value: dataValue } = $derived(
+		(isApprove || isErc20Deposit) && nonNullish(data)
+			? decodeErc20AbiData({ data })
+			: { to: undefined, value: undefined }
+	);
+
+	let depositToken = $derived(
+		isErc20Deposit && nonNullish(dataTo) && nonNullish(token)
+			? $ercFungibleTokens.find(
+					({ address, network: { id: networkId } }) =>
+						areAddressesEqual({ address1: address, address2: dataTo, networkId }) &&
+						networkId === token.network.id
+				)
+			: undefined
+	);
+
+	let depositValue = $derived(isErc20Deposit ? dataValue : undefined);
+
+	let approveToken = $derived(
+		isApprove && nonNullish(to) && nonNullish(token)
+			? $ercFungibleTokens.find(
+					({ address, network: { id: networkId } }) =>
+						areAddressesEqual({ address1: address, address2: to, networkId }) &&
+						networkId === token.network.id
+				)
+			: undefined
+	);
+
+	let approveValue = $derived(isApprove ? dataValue : undefined);
+
+	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
+
+	let displayToken = $derived(depositToken ?? approveToken ?? token);
 
 	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
 
@@ -51,10 +118,8 @@
 		notEmptyString(to) ? `${explorerBaseUrl}/address/${to}` : undefined
 	);
 
-	let ckMinterInfo: OptionCertifiedMinterInfo = $derived(
-		$ckEthMinterInfoStore?.[
-			isNetworkIdSepolia(token?.network.id) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
-		]
+	let approveSpenderExplorerUrl = $derived(
+		nonNullish(approveSpender) ? `${explorerBaseUrl}/address/${approveSpender}` : undefined
 	);
 
 	let fromDisplay: OptionString = $derived(
@@ -63,7 +128,7 @@
 					address: from,
 					networkId: token.network.id,
 					erc20Tokens: $erc20Tokens,
-					ckMinterInfo
+					builtInContacts: $ckMinterBuiltInContacts
 				}) ?? from)
 			: from
 	);
@@ -74,9 +139,32 @@
 					address: to,
 					networkId: token.network.id,
 					erc20Tokens: $erc20Tokens,
-					ckMinterInfo
+					builtInContacts: $ckMinterBuiltInContacts
 				}) ?? to)
 			: to
+	);
+
+	let spenderDisplay = $derived(
+		isApprove && nonNullish(approveSpender) && nonNullish(token)
+			? (mapAddressToName({
+					address: approveSpender,
+					networkId: token.network.id,
+					erc20Tokens: $erc20Tokens,
+					builtInContacts: $ckMinterBuiltInContacts
+				}) ?? undefined)
+			: undefined
+	);
+
+	let gasFee = $derived(
+		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
+	);
+
+	let fee = $derived(isOutFlow ? gasFee : undefined);
+
+	let nativeToken = $derived(
+		$enabledEthEvmNativeTokens.find(
+			({ network: { id: networkId } }) => networkId === token?.network.id
+		)
 	);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
@@ -85,63 +173,121 @@
 			data: data as OpenTransactionParams<EthTransactionUi>
 		});
 	};
+
+	const nft = $derived(
+		nonNullish($nftStore) &&
+			nonNullish(token) &&
+			isTokenNonFungible(token) &&
+			nonNullish(transaction.tokenId)
+			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(String(transaction.tokenId)) })
+			: undefined
+	);
+
+	let displayValue = $derived(isErc20Deposit && nonNullish(gasFee) ? gasFee : value);
+
+	let displayType = $derived(isErc20Deposit ? 'deposit' : type);
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
+<Modal onClose={modalStore.close}>
+	{#snippet title()}{$i18n.transaction.text.details}{/snippet}
 
 	<ContentWithToolbar>
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
-				{#if nonNullish(token)}
-					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+				{#if nonNullish(displayToken)}
+					{#if nonNullish(token) && isTokenNonFungible(token) && nonNullish(nft)}
+						<NftCard {nft} />
+					{:else}
+						<TokenLogo badge={{ type: 'network' }} data={displayToken} logoSize="lg" />
+					{/if}
 				{/if}
 			{/snippet}
+
 			{#snippet subtitle()}
-				<span class="capitalize">{type}</span>
+				<span class="capitalize">{$i18n.transaction.type[displayType]}</span>
 			{/snippet}
+
 			{#snippet title()}
-				{#if nonNullish(token) && nonNullish(value)}
+				{#if (isApprove || isErc20Deposit) && nonNullish(displayToken)}
+					<output>
+						{#if isUnlimitedApprove}
+							{replacePlaceholders($i18n.core.text.unlimited, {
+								$items: displayToken.symbol
+							})}
+						{:else if nonNullish(approveValue)}
+							{formatToken({
+								value: approveValue,
+								unitName: displayToken.decimals,
+								displayDecimals: displayToken.decimals
+							})}
+							{displayToken.symbol}
+						{:else if nonNullish(depositValue)}
+							{formatToken({
+								value: depositValue,
+								unitName: displayToken.decimals,
+								displayDecimals: displayToken.decimals
+							})}
+							{displayToken.symbol}
+						{/if}
+					</output>
+				{:else if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
 					<output class:text-success-primary={type === 'receive'}>
 						{formatToken({
-							value,
+							value: displayValue,
 							unitName: token.decimals,
 							displayDecimals: token.decimals,
 							showPlusSign: type === 'receive'
 						})}
 						{token.symbol}
 					</output>
-				{:else}
-					&ZeroWidthSpace;
 				{/if}
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(to) && nonNullish(from)}
+		{#if isApprove && nonNullish(approveSpender)}
 			<TransactionContactCard
-				type={type === 'receive' ? 'receive' : 'send'}
-				{to}
+				{approveSpender}
+				{approveSpenderExplorerUrl}
 				{from}
-				{toExplorerUrl}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
+				type="approve"
+			/>
+		{:else if nonNullish(to) && nonNullish(from)}
+			<TransactionContactCard
+				{from}
+				{fromExplorerUrl}
+				{onSaveAddressComplete}
+				{to}
+				{toExplorerUrl}
+				type={type === 'receive' ? 'receive' : 'send'}
 			/>
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if nonNullish(token?.network)}
+				<ListItem>
+					<span>
+						{$i18n.networks.network}
+					</span>
+
+					<NetworkWithLogo network={token.network} />
+				</ListItem>
+			{/if}
+
 			{#if nonNullish(hash)}
 				<ListItem>
 					<span>{$i18n.transaction.text.hash}</span>
 					<span>
 						<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
 
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={hash}
 							copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
 								$hash: hash
 							})}
-							{explorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
+							externalLink={explorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
 						/>
 					</span>
 				</ListItem>
@@ -163,7 +309,12 @@
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
-					<output>{formatSecondsToDate(timestamp)}</output>
+					<output
+						>{formatSecondsToDate({
+							seconds: Number(timestamp),
+							language: $currentLanguage
+						})}</output
+					>
 				</ListItem>
 			{/if}
 
@@ -173,11 +324,11 @@
 					<span class="flex max-w-[50%] flex-row break-all">
 						<output>{fromDisplay}</output>
 
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={fromDisplay}
 							copyAddressText={$i18n.transaction.text.from_copied}
-							explorerUrl={fromExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+							externalLink={fromExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
 						/>
 					</span>
 				</ListItem>
@@ -190,26 +341,53 @@
 					<span class="flex max-w-[50%] flex-row break-all">
 						<output>{toDisplay}</output>
 
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={toDisplay}
 							copyAddressText={$i18n.transaction.text.to_copied}
-							explorerUrl={toExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+							externalLink={toExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						/>
 					</span>
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(token)}
+			{#if nonNullish(fee) && nonNullish(nativeToken)}
 				<ListItem>
-					<span>{$i18n.core.text.amount}</span>
+					<span>{$i18n.fee.text.fee}</span>
+
 					<output>
 						{formatToken({
-							value,
-							unitName: token.decimals,
-							displayDecimals: token.decimals
+							value: fee,
+							unitName: nativeToken.decimals,
+							displayDecimals: nativeToken.decimals
 						})}
-						{token.symbol}
+						{nativeToken.symbol}
+					</output>
+				</ListItem>
+			{/if}
+
+			{#if isApprove && nonNullish(approveSpender)}
+				<ListItem>
+					<span>{$i18n.wallet_connect.text.spender}</span>
+
+					<span class="flex max-w-[50%] flex-row break-all">
+						<output>{spenderDisplay ?? shortenWithMiddleEllipsis({ text: approveSpender })}</output>
+
+						<AddressActions
+							copyAddress={approveSpender}
+							copyAddressText={$i18n.transaction.text.for_copied}
+							externalLink={approveSpenderExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_for_block_explorer}
+						/>
+					</span>
+				</ListItem>
+			{/if}
+
+			{#if nonNullish(token) && isTokenNonFungible(token) && nonNullish(transaction.tokenId)}
+				<ListItem>
+					<span>{$i18n.core.text.tokenId}</span>
+					<output>
+						{transaction.tokenId}
 					</output>
 				</ListItem>
 			{/if}

@@ -1,6 +1,13 @@
+import { goto } from '$app/navigation';
 import Tabs from '$lib/components/ui/Tabs.svelte';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import * as analyticsServices from '$lib/services/analytics.services';
+import type { NonEmptyArray } from '$lib/types/utils';
+import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
+import { fireEvent, render } from '@testing-library/svelte';
+
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn().mockResolvedValue(undefined)
+}));
 
 describe('Tabs', () => {
 	const props = {
@@ -8,8 +15,12 @@ describe('Tabs', () => {
 		tabs: [
 			{ label: 'Test 1', id: 'test1' },
 			{ label: 'Test 2', id: 'test2' }
-		],
-		children: createMockSnippet('snippet')
+		] as NonEmptyArray<{
+			label: string;
+			id: string;
+			path?: string | undefined;
+		}>,
+		children: mockSnippet
 	};
 
 	it('renders component correctly', () => {
@@ -17,6 +28,67 @@ describe('Tabs', () => {
 
 		expect(getByText(props.tabs[0].label)).toBeInTheDocument();
 		expect(getByText(props.tabs[1].label)).toBeInTheDocument();
-		expect(getByTestId('snippet')).toBeInTheDocument();
+		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
+	});
+
+	it('correctly navigates to provided paths', async () => {
+		const { getByText, getByTestId } = render(Tabs, {
+			props: {
+				...props,
+				tabs: props.tabs.map((t) => ({ ...t, path: t.id })) as NonEmptyArray<{
+					label: string;
+					id: string;
+					path?: string | undefined;
+				}>
+			}
+		});
+
+		const tab0 = getByText(props.tabs[0].label);
+		const tab1 = getByText(props.tabs[1].label);
+
+		expect(tab0).toBeInTheDocument();
+		expect(tab1).toBeInTheDocument();
+		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
+
+		await fireEvent.click(tab0);
+
+		expect(goto).toHaveBeenCalledExactlyOnceWith('test1');
+
+		await fireEvent.click(tab1);
+
+		expect(goto).toHaveBeenCalledTimes(2);
+		expect(goto).toHaveBeenNthCalledWith(1, 'test1');
+		expect(goto).toHaveBeenNthCalledWith(2, 'test2');
+	});
+
+	it('should track event when navigating to a path with trackEventName set', async () => {
+		const trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
+
+		const trackEventName = 'test_event';
+
+		const { getByText } = render(Tabs, {
+			props: {
+				...props,
+				trackEventName,
+				tabs: props.tabs.map((t) => ({ ...t, path: t.id })) as NonEmptyArray<{
+					label: string;
+					id: string;
+					path?: string | undefined;
+				}>
+			}
+		});
+
+		await fireEvent.click(getByText(props.tabs[0].label));
+
+		expect(trackEventSpy).toHaveBeenCalledWith({
+			name: trackEventName,
+			metadata: {
+				event_context: 'assets_tab',
+				event_value: 'test1',
+				location_source: 'assets_page'
+			}
+		});
+
+		expect(goto).toHaveBeenCalledWith('test1');
 	});
 });

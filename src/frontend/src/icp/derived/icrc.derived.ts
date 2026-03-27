@@ -1,34 +1,39 @@
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CK_TOKENS_LEDGER_CANISTER_IDS
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
+import { SUPPORTED_ICP_LEDGER_CANISTER_IDS } from '$env/tokens/tokens.icp.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
-import { sortIcTokens } from '$icp/utils/icrc.utils';
+import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import type { CanisterIdText } from '$lib/types/canister';
+import { primitiveArrayEqual } from '$lib/utils/array.utils';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
+import { tokenListEqual } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * The list of Icrc default tokens - i.e. the statically configured Icrc tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
+ * The list of ICRC default tokens - i.e. the statically configured ICRC tokens of OISY + their metadata, unique IDs, etc. fetched at runtime.
  */
-const icrcDefaultTokens: Readable<IcToken[]> = derived(
+const icrcDefaultTokens: Readable<IcToken[]> = derivedMemo(
 	[icrcDefaultTokensStore, testnetsEnabled],
 	([$icrcTokensStore, $testnetsEnabled]) =>
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
-			(token) => $testnetsEnabled || !isTokenIcrcTestnet(token)
-		)
+			(token) => $testnetsEnabled || !isTokenIcTestnet(token)
+		),
+	tokenListEqual
 );
 
 /**
- * The list of Icrc tokens that are default for Chain Fusion, in the order provided by the static list.
+ * The list of ICRC tokens that are default for Chain Fusion, in the order provided by the static list.
  */
 export const icrcChainFusionDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcDefaultTokens],
@@ -41,7 +46,7 @@ export const icrcChainFusionDefaultTokens: Readable<IcToken[]> = derived(
 );
 
 /**
- * A flatten list of the default ICRC Ledger canister Id.
+ * A flatten list of the default ICRC Ledger canister ID.
  */
 const icrcDefaultTokensCanisterIds: Readable<CanisterIdText[]> = derived(
 	[icrcDefaultTokens],
@@ -49,34 +54,36 @@ const icrcDefaultTokensCanisterIds: Readable<CanisterIdText[]> = derived(
 );
 
 /**
- * The list of Icrc tokens the user has added, enabled or disabled. Can contains default tokens for example if user has disabled a default tokens.
- * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "custom token" in the backend.
+ * The list of ICRC tokens the user has added, enabled or disabled. Can contains default tokens for example if user has disabled a default tokens.
+ * i.e. default tokens are configured on the client side. If the user disables or enables a default token, this token is added as a "custom token" in the backend.
  */
-const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
+const icrcCustomTokens: Readable<IcrcCustomToken[]> = derivedMemo(
 	[icrcCustomTokensStore, testnetsEnabled],
 	([$icrcCustomTokensStore, $testnetsEnabled]) =>
 		($icrcCustomTokensStore?.map(({ data: token }) => token) ?? []).filter(
-			(token) => $testnetsEnabled || !isTokenIcrcTestnet(token)
-		)
+			(token) => $testnetsEnabled || !isTokenIcTestnet(token)
+		),
+	tokenListEqual
 );
 
 const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 	[icrcDefaultTokens, icrcCustomTokens],
-	([$icrcDefaultTokens, $icrcUserTokens]) =>
+	([$icrcDefaultTokens, $icrcCustomTokens]) =>
 		$icrcDefaultTokens.map(({ ledgerCanisterId, ...rest }) => {
-			const userToken = $icrcUserTokens.find(
-				({ ledgerCanisterId: userLedgerCanisterId }) => userLedgerCanisterId === ledgerCanisterId
+			const customToken = $icrcCustomTokens.find(
+				({ ledgerCanisterId: customLedgerCanisterId }) =>
+					customLedgerCanisterId === ledgerCanisterId
 			);
 
 			return mapDefaultTokenToToggleable<IcToken>({
 				defaultToken: { ledgerCanisterId, ...rest },
-				userToken
+				customToken
 			});
 		})
 );
 
 /**
- * The list of default tokens that are enabled - i.e. the list of default Icrc tokens minus those disabled by the user.
+ * The list of default tokens that are enabled - i.e. the list of default ICRC tokens minus those disabled by the user.
  */
 const enabledIcrcDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcDefaultTokensToggleable],
@@ -84,14 +91,17 @@ const enabledIcrcDefaultTokens: Readable<IcToken[]> = derived(
 );
 
 /**
- * The list of Icrc tokens enabled by the user - i.e. saved in the backend canister as enabled - minus those that duplicate default tokens.
- * We do so because the default statically configured are those to be used for various feature. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each others ("Twin Token" links).
+ * The list of ICRC tokens enabled by the user - i.e. saved in the backend canister as enabled - minus those that duplicate default tokens.
+ * We do so because the default statically configured are those to be used for various features. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each other ("Twin Token" links).
  */
 const icrcCustomTokensToggleable: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokens, icrcDefaultTokensCanisterIds],
 	([$icrcCustomTokens, $icrcDefaultTokensCanisterIds]) =>
 		$icrcCustomTokens.filter(
-			({ ledgerCanisterId }) => !$icrcDefaultTokensCanisterIds.includes(ledgerCanisterId)
+			({ ledgerCanisterId }) =>
+				![...SUPPORTED_ICP_LEDGER_CANISTER_IDS, ...$icrcDefaultTokensCanisterIds].includes(
+					ledgerCanisterId
+				)
 		)
 );
 
@@ -101,30 +111,27 @@ const enabledIcrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
 );
 
 /**
- * The list of all Icrc tokens.
+ * The list of all ICRC tokens.
  */
-export const icrcTokens: Readable<IcrcCustomToken[]> = derived(
+export const icrcTokens: Readable<IcrcCustomToken[]> = derivedMemo(
 	[icrcDefaultTokensToggleable, icrcCustomTokensToggleable],
 	([$icrcDefaultTokensToggleable, $icrcCustomTokensToggleable]) => [
 		...$icrcDefaultTokensToggleable,
 		...$icrcCustomTokensToggleable
-	]
-);
-
-export const sortedIcrcTokens: Readable<IcrcCustomToken[]> = derived(
-	[icrcTokens],
-	([$icrcTokens]) => $icrcTokens.sort(sortIcTokens)
+	],
+	tokenListEqual
 );
 
 /**
- * The list of Icrc tokens that are either enabled by default (static config) or enabled by the users regardless if they are custom or default.
+ * The list of ICRC tokens that are either enabled by default (static config) or enabled by the users regardless if they are custom or default.
  */
-export const enabledIcrcTokens: Readable<IcToken[]> = derived(
+export const enabledIcrcTokens: Readable<IcToken[]> = derivedMemo(
 	[enabledIcrcDefaultTokens, enabledIcrcCustomTokens],
 	([$enabledIcrcDefaultTokens, $enabledIcrcCustomTokens]) => [
 		...$enabledIcrcDefaultTokens,
 		...$enabledIcrcCustomTokens
-	]
+	],
+	tokenListEqual
 );
 
 const enabledIcrcTokensNoCk: Readable<IcToken[]> = derived(
@@ -135,7 +142,7 @@ const enabledIcrcTokensNoCk: Readable<IcToken[]> = derived(
 		)
 );
 
-export const enabledIcrcLedgerCanisterIdsNoCk: Readable<LedgerCanisterIdText[]> = derived(
+export const enabledIcrcLedgerCanisterIdsNoCk: Readable<LedgerCanisterIdText[]> = derivedMemo(
 	[enabledIcrcTokensNoCk],
 	([$enabledIcrcTokensNoCk]) => [
 		...new Map(
@@ -144,5 +151,33 @@ export const enabledIcrcLedgerCanisterIdsNoCk: Readable<LedgerCanisterIdText[]> 
 				ledgerCanisterId
 			])
 		).values()
-	]
+	],
+	primitiveArrayEqual
+);
+
+/**
+ * The list of all known to OISY ICRC token ledger ids.
+ * It is used to determine whether a token can be deleted or not.
+ */
+export const allKnownIcrcTokensLedgerCanisterIds: Readable<LedgerCanisterIdText[]> = derived(
+	[icrcDefaultTokens],
+	([$icrcDefaultTokens]) => {
+		const icrcEnvTokens: IcTokenToggleable[] =
+			IC_BUILTIN_TOKENS.map((token) => ({ ...token, enabled: false })) ?? [];
+
+		return [
+			...$icrcDefaultTokens.map(({ ledgerCanisterId }) => ledgerCanisterId),
+			...icrcEnvTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
+		];
+	}
+);
+
+export const icrcCustomTokensInitialized: Readable<boolean> = derived(
+	[icrcCustomTokensStore],
+	([$icrcCustomTokensStore]) => $icrcCustomTokensStore !== undefined
+);
+
+export const icrcCustomTokensNotInitialized: Readable<boolean> = derived(
+	[icrcCustomTokensInitialized],
+	([$icrcCustomTokensInitialized]) => !$icrcCustomTokensInitialized
 );

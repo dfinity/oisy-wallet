@@ -1,9 +1,13 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
-	export let size = '20';
+	interface Props {
+		size?: string;
+	}
+
+	let { size = '20' }: Props = $props();
 </script>
 
-<svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg fill="none" height={size} viewBox="0 0 24 24" width={size} xmlns="http://www.w3.org/2000/svg">
 	<g id="mdi:shield-outline">
 		<path
 			id="Vector"

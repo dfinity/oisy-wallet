@@ -5,7 +5,11 @@
 	import type { ProviderFee } from '$lib/types/swap';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let networkFee: ProviderFee;
+	interface Props {
+		networkFee: ProviderFee;
+	}
+
+	let { networkFee }: Props = $props();
 </script>
 
 <ModalValue>
@@ -16,10 +20,10 @@
 	{#snippet mainValue()}
 		<div class="flex flex-col">
 			<FeeDisplay
-				feeAmount={networkFee.fee}
-				symbol={getTokenDisplaySymbol(networkFee.token)}
 				decimals={networkFee.token.decimals}
 				displayExchangeRate={false}
+				feeAmount={networkFee.fee}
+				symbol={getTokenDisplaySymbol(networkFee.token)}
 			/>
 		</div>
 	{/snippet}

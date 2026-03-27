@@ -1,23 +1,17 @@
-import type { BtcAddress, EthAddress } from '$lib/types/address';
+import type { BtcAddress } from '$btc/types/address';
+import type { EthAddress } from '$eth/types/address';
+import type { Currency } from '$lib/enums/currency';
+import type { OnramperIdSchema, OnramperNetworkIdSchema } from '$lib/schema/onramper.schema';
+import type * as z from 'zod';
 
-// The list of networks that are supported by Onramper can be found here:
-// https://docs.onramper.com/docs/network-support
-export type OnramperNetworkId =
-	| 'icp'
-	| 'bitcoin'
-	| 'ethereum'
-	| 'solana'
-	| 'base'
-	| 'bsc'
-	| 'polygon';
+export type OnramperNetworkId = z.infer<typeof OnramperNetworkIdSchema>;
 
-// The list of cryptocurrencies that are supported by Onramper can be found here:
-// https://docs.onramper.com/docs/crypto-asset-support
-export type OnramperId = string;
+export type OnramperId = z.infer<typeof OnramperIdSchema>;
 
 // The list of fiat currencies that are supported by Onramper can be found here:
 // https://docs.onramper.com/docs/fiat-currency-support
-export type OnramperFiatId = 'usd' | 'eur' | 'gbp' | 'chf';
+// Please, cross-reference the OISY supported currencies with the Coingecko API for supported currencies.
+export type OnramperFiatId = Currency;
 
 export type OnramperMode = 'buy';
 

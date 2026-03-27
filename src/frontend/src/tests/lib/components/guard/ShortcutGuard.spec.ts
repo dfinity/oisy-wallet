@@ -1,6 +1,6 @@
 import ShortcutGuard from '$lib/components/guard/ShortcutGuard.svelte';
 import { isPrivacyMode } from '$lib/derived/settings.derived';
-import { privacyModeStore } from '$lib/stores/settings.store';
+import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -9,7 +9,7 @@ describe('ShortcutGuard', () => {
 		const keyDownEvent = new KeyboardEvent('keydown', { key: 'p' });
 
 		beforeEach(() => {
-			privacyModeStore.set({ key: 'privacy-mode', value: { enabled: false } });
+			setPrivacyMode({ enabled: false });
 		});
 
 		it('should turn on and off privacy mode on keyboard click', () => {

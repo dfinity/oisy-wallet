@@ -1,14 +1,12 @@
+mod agreements;
 mod bitcoin;
 mod config;
 mod contacts;
 mod custom_token;
-mod pow;
 mod settings;
 mod signer;
 mod stats;
-mod token;
-mod upgrade;
+mod transactions;
 mod user_credentials;
 mod user_profile;
-mod user_token;
 mod utils;

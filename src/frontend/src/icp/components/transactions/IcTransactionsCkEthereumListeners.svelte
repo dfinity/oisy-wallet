@@ -2,11 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
-	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
-	import { initCkETHMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
-	import type { IcCkToken, OptionIcCkToken } from '$icp/types/ic-token';
+	import type { IcCkToken } from '$icp/types/ic-token';
 	import CkEthereumPendingTransactionsListener from '$icp-eth/components/core/CkEthereumPendingTransactionsListener.svelte';
-	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OptionToken, Token as TokenType } from '$lib/types/token';
 
 	interface Props {
@@ -14,7 +11,9 @@
 		ckEthereumNativeToken?: TokenType;
 		children?: Snippet;
 	}
+
 	let { token, ckEthereumNativeToken: ckEthereumNativeTokenProp, children }: Props = $props();
+
 	let ckEthereumNativeToken: TokenType = $derived(
 		nonNullish(ckEthereumNativeTokenProp)
 			? ckEthereumNativeTokenProp
@@ -22,15 +21,8 @@
 					(t) => (token as IcCkToken)?.twinToken?.network.id === t.network.id
 				) as TokenType)
 	);
-	let minterCanisterId: CanisterIdText | undefined = $derived(
-		(token as OptionIcCkToken)?.minterCanisterId
-	);
 </script>
 
-<IcCkListener initFn={initCkETHMinterInfoWorker} token={ckEthereumNativeToken} {minterCanisterId} />
+<CkEthereumPendingTransactionsListener {ckEthereumNativeToken} {token} />
 
-<CkEthereumPendingTransactionsListener {token} {ckEthereumNativeToken} />
-
-{#if children}
-	{@render children()}
-{/if}
+{@render children?.()}

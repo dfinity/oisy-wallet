@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { Modal, Html } from '@dfinity/gix-components';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import episodeFour from '$lib/assets/oisy-episode-four.svg';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -15,13 +17,35 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, resolveText } from '$lib/utils/i18n.utils';
+
+	interface Props {
+		reward: RewardCampaignDescription;
+	}
+
+	let { reward }: Props = $props();
+
+	let { title, subtitle, description } = $derived(reward.welcome ?? {});
+
+	let titleStr = $derived(
+		nonNullish(title) ? resolveText({ i18n: $i18n, path: title }) : undefined
+	);
+
+	let subtitleStr = $derived(
+		nonNullish(subtitle) ? resolveText({ i18n: $i18n, path: subtitle }) : undefined
+	);
+
+	let descriptionStr = $derived(
+		nonNullish(description) ? resolveText({ i18n: $i18n, path: description }) : undefined
+	);
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">
-		<span class="text-xl">{replaceOisyPlaceholders($i18n.welcome.title)}</span>
-	</svelte:fragment>
+<Modal onClose={modalStore.close}>
+	{#snippet title()}
+		{#if notEmptyString(titleStr)}
+			<span class="text-xl">{replaceOisyPlaceholders(titleStr)}</span>
+		{/if}
+	{/snippet}
 
 	<ContentWithToolbar>
 		<div class="overflow-hidden rounded-2xl">
@@ -33,33 +57,38 @@
 		</div>
 
 		<div class="text-center">
-			<h3 class="my-3">{$i18n.welcome.subtitle}</h3>
-			<Html text={$i18n.welcome.description} />
+			{#if notEmptyString(subtitleStr)}
+				<h3 class="my-3">{subtitleStr}</h3>
+			{/if}
+
+			{#if notEmptyString(descriptionStr)}
+				<Html text={descriptionStr} />
+			{/if}
 		</div>
 
 		<div class="flex justify-center pt-4">
 			<div>
 				<ExternalLink
-					href={OISY_REWARDS_URL}
 					ariaLabel={$i18n.rewards.text.learn_more}
-					iconVisible={false}
 					asButton
+					href={OISY_REWARDS_URL}
+					iconVisible={false}
 					styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
 					testId={WELCOME_MODAL_LEARN_MORE_ANCHOR}
 				>
 					{$i18n.rewards.text.learn_more}
 				</ExternalLink>
 				<Share
+					href={OISY_WELCOME_TWITTER_URL}
 					testId={WELCOME_MODAL_SHARE_ANCHOR}
 					text={$i18n.rewards.text.share}
-					href={OISY_WELCOME_TWITTER_URL}
 				/>
 			</div>
 		</div>
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<Button onclick={modalStore.close} colorStyle="primary">
+				<Button colorStyle="primary" onclick={modalStore.close}>
 					{$i18n.rewards.text.open_wallet}
 				</Button>
 			</ButtonGroup>

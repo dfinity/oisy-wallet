@@ -1,0 +1,189 @@
+import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.services';
+import type { OptionEthAddress } from '$eth/types/address';
+import type { EthNonFungibleToken } from '$eth/types/nft';
+import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
+import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
+import { loadNfts as loadIcNfts } from '$icp/services/nft.services';
+import type { IcNonFungibleToken } from '$icp/types/nft';
+import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
+import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
+import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
+import { nftStore } from '$lib/stores/nft.store';
+import type { CustomToken } from '$lib/types/custom-token';
+import type { OptionIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
+import type { Nft, NonFungibleToken } from '$lib/types/nft';
+import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdICP } from '$lib/utils/network.utils';
+import { getTokensByNetwork } from '$lib/utils/nft.utils';
+import { isNullish, type QueryParams } from '@dfinity/utils';
+
+export const loadNftsByNetwork = async ({
+	networkId,
+	tokens,
+	identity,
+	ethAddress,
+	certified
+}: {
+	networkId: NetworkId;
+	tokens: NonFungibleToken[];
+	identity: OptionIdentity;
+	ethAddress: OptionEthAddress;
+} & QueryParams): Promise<Nft[]> => {
+	if (tokens.length === 0) {
+		return [];
+	}
+
+	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
+		return await loadErcNftsByNetwork({
+			networkId,
+			// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+			tokens: tokens as EthNonFungibleToken[],
+			walletAddress: ethAddress
+		});
+	}
+
+	if (isNetworkIdICP(networkId)) {
+		return await loadIcNfts({
+			// For now, it is acceptable to cast it since we checked before if the network is ICP.
+			tokens: tokens as IcNonFungibleToken[],
+			identity,
+			certified
+		});
+	}
+
+	return [];
+};
+
+export const loadNfts = async ({
+	tokens,
+	identity,
+	certified,
+	ethAddress
+}: {
+	tokens: NonFungibleToken[];
+	identity: OptionIdentity;
+	ethAddress: OptionEthAddress;
+} & QueryParams) => {
+	const tokensByNetwork = getTokensByNetwork(tokens);
+
+	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
+		if (tokens.length === 0) {
+			return;
+		}
+
+		const nfts: Nft[] = await loadNftsByNetwork({
+			networkId,
+			tokens,
+			identity,
+			certified,
+			ethAddress
+		});
+
+		nftStore.addAll(nfts);
+	});
+
+	await Promise.allSettled(promises);
+};
+
+export const saveNftCustomToken = async ({
+	identity,
+	token,
+	$ethAddress
+}: {
+	identity: OptionIdentity;
+	token: CustomToken<NonFungibleToken>;
+	$ethAddress: OptionEthAddress;
+}) => {
+	if (isNullish(identity)) {
+		return;
+	}
+
+	if (isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token)) {
+		await saveCustomTokens({
+			identity,
+			tokens: [
+				{
+					...token,
+					chainId: token.network.chainId,
+					networkKey: isTokenErc721CustomToken(token) ? 'Erc721' : 'Erc1155'
+				}
+			]
+		});
+	} else if (
+		isTokenExtCustomToken(token) ||
+		isTokenDip721CustomToken(token) ||
+		isTokenIcPunksCustomToken(token)
+	) {
+		await saveCustomTokens({
+			identity,
+			tokens: [
+				{
+					...token,
+					networkKey: isTokenExtCustomToken(token)
+						? 'ExtV2'
+						: isTokenDip721CustomToken(token)
+							? 'Dip721'
+							: 'IcPunks'
+				}
+			]
+		});
+	}
+
+	await loadNfts({
+		tokens: [token],
+		identity,
+		ethAddress: $ethAddress
+	});
+};
+
+export const updateNftSection = async ({
+	section,
+	$authIdentity,
+	token,
+	$ethAddress
+}: {
+	section: CustomTokenSection | undefined;
+	$authIdentity: OptionIdentity;
+	token: NonFungibleToken;
+	$ethAddress: OptionEthAddress;
+}): Promise<NonFungibleToken | undefined> => {
+	const currentAllowMedia = token.allowExternalContentSource;
+
+	const saveToken = {
+		...token,
+		enabled: true,
+		section,
+		...((section === CustomTokenSection.SPAM ||
+			(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
+			allowExternalContentSource: false
+		})
+	};
+
+	await saveNftCustomToken({ identity: $authIdentity, token: saveToken, $ethAddress });
+
+	return saveToken;
+};
+
+export const updateNftMediaConsent = async ({
+	allowMedia,
+	$authIdentity,
+	token,
+	$ethAddress
+}: {
+	allowMedia: boolean;
+	$authIdentity: OptionIdentity;
+	token: NonFungibleToken;
+	$ethAddress: OptionEthAddress;
+}): Promise<NonFungibleToken | undefined> => {
+	const saveToken = {
+		...token,
+		enabled: true, // must be true otherwise we couldn't see it at this point
+		allowExternalContentSource: allowMedia
+	};
+
+	await saveNftCustomToken({ identity: $authIdentity, token: saveToken, $ethAddress });
+
+	return saveToken;
+};

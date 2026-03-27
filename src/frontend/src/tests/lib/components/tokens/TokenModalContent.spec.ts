@@ -1,8 +1,13 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import type { Token } from '$lib/types/token';
+import { formatToken } from '$lib/utils/format.utils';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIndexCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 describe('TokenModalContent', () => {
@@ -25,12 +30,23 @@ describe('TokenModalContent', () => {
 
 		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
 		expect(getByText(ICP_TOKEN.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: ICP_TOKEN.fee,
+					unitName: ICP_TOKEN.decimals,
+					displayDecimals: ICP_TOKEN.decimals
+				})} ${ICP_TOKEN.symbol}`
+			)
+		).toBeInTheDocument();
 	});
 
-	it('renders all values correctly for ICRC token', () => {
+	it('renders all values correctly for ICRC token with index canister', () => {
 		const { getByText, container } = render(TokenModalContent, {
 			props: {
-				token: mockValidIcrcToken
+				token: { ...mockValidIcrcToken, indexCanisterId: mockIndexCanisterId } as Token
 			}
 		});
 
@@ -43,11 +59,134 @@ describe('TokenModalContent', () => {
 		expect(getByText(mockValidIcrcToken.name)).toBeInTheDocument();
 
 		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
-		expect(getByText(mockValidIcrcToken.standard)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.standard.code)).toBeInTheDocument();
+
+		expect(getByText(en.tokens.import.text.index_canister_id)).toBeInTheDocument();
+		expect(getByText(mockIndexCanisterId)).toBeInTheDocument();
 
 		expect(getByText(en.core.text.symbol)).toBeInTheDocument();
 
 		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
 		expect(getByText(mockValidIcrcToken.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: mockValidIcrcToken.fee,
+					unitName: mockValidIcrcToken.decimals,
+					displayDecimals: mockValidIcrcToken.decimals
+				})} ${mockValidIcrcToken.symbol}`
+			)
+		).toBeInTheDocument();
+	});
+
+	it('renders standard for ERC4626 token', () => {
+		const { getByText } = render(TokenModalContent, {
+			props: {
+				token: mockValidErc4626Token as Token
+			}
+		});
+
+		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
+		expect(getByText(mockValidErc4626Token.standard.code)).toBeInTheDocument();
+	});
+
+	it('renders all values correctly for ICRC token without index canister', () => {
+		const { getByText, container } = render(TokenModalContent, {
+			props: {
+				token: mockValidIcrcToken,
+				onEditClick: () => {}
+			}
+		});
+
+		expect(container).toHaveTextContent(getTokenDisplaySymbol(mockValidIcrcToken));
+
+		expect(getByText(en.tokens.details.network)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.network.name)).toBeInTheDocument();
+
+		expect(getByText(en.tokens.details.token)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.name)).toBeInTheDocument();
+
+		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.standard.code)).toBeInTheDocument();
+
+		expect(getByText(en.tokens.import.text.index_canister_id)).toBeInTheDocument();
+		expect(getByText(en.tokens.details.missing_index_canister_id_label)).toBeInTheDocument();
+		expect(getByText(en.tokens.details.missing_index_canister_id_button)).toBeInTheDocument();
+
+		expect(getByText(en.core.text.symbol)).toBeInTheDocument();
+
+		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: mockValidIcrcToken.fee,
+					unitName: mockValidIcrcToken.decimals,
+					displayDecimals: mockValidIcrcToken.decimals
+				})} ${mockValidIcrcToken.symbol}`
+			)
+		).toBeInTheDocument();
+	});
+
+	it('does not render asset type when token has no category tag', () => {
+		const tokenWithoutCategoryTag: Token = {
+			...mockValidIcrcToken,
+			indexCanisterId: mockIndexCanisterId,
+			// @ts-expect-error Testing invalid input types
+			tags: []
+		};
+
+		const { queryByText } = render(TokenModalContent, {
+			props: {
+				token: tokenWithoutCategoryTag
+			}
+		});
+
+		expect(queryByText(replaceOisyPlaceholders(en.tokens.text.asset_type))).not.toBeInTheDocument();
+	});
+
+	it('renders asset type label and badge for a token with a category tag', () => {
+		const cryptoIcrcToken = {
+			...mockValidIcrcToken,
+			indexCanisterId: mockIndexCanisterId,
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
+		} as Token;
+
+		const { getByText } = render(TokenModalContent, {
+			props: {
+				token: cryptoIcrcToken
+			}
+		});
+
+		expect(getByText(replaceOisyPlaceholders(en.tokens.text.asset_type))).toBeInTheDocument();
+
+		const badge = getByText(en.token_tag.category.crypto);
+
+		expect(badge).toBeInTheDocument();
+		expect(badge.tagName.toLowerCase()).toBe('span');
+		expect(badge.classList.contains('rounded-md')).toBeTruthy();
+	});
+
+	it('renders the correct asset type badge for a stablecoin token', () => {
+		const stablecoinIcrcToken = {
+			...mockValidIcrcToken,
+			indexCanisterId: mockIndexCanisterId,
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }]
+		} as Token;
+
+		const { getByText } = render(TokenModalContent, {
+			props: {
+				token: stablecoinIcrcToken
+			}
+		});
+
+		const badge = getByText(en.token_tag.category.stablecoin);
+
+		expect(badge).toBeInTheDocument();
+		expect(badge.classList.contains('rounded-md')).toBeTruthy();
 	});
 });

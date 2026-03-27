@@ -1,22 +1,44 @@
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type {
+	PostMessageCommon,
+	PostMessageDataRequestDip20,
+	PostMessageDataRequestIcp,
+	PostMessageDataRequestIcrc,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
+import { isNullish } from '@dfinity/utils';
 
 export type IcWalletMsg = 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 
-export abstract class IcWalletScheduler<PostMessageDataRequest>
-	implements Scheduler<PostMessageDataRequest>
-{
+export abstract class IcWalletScheduler<
+	PostMessageDataRequest extends
+		| PostMessageDataRequestIcrc
+		| PostMessageDataRequestIcp
+		| PostMessageDataRequestDip20
+> implements Scheduler<PostMessageDataRequest> {
+	protected ref: PostMessageCommon['ref'];
+
 	protected timer = new SchedulerTimer('syncIcWalletStatus');
 
 	stop() {
 		this.timer.stop();
 	}
 
+	protected setRef(data: PostMessageDataRequest | undefined) {
+		this.ref = isNullish(data)
+			? undefined
+			: 'ledgerCanisterId' in data
+				? data.ledgerCanisterId
+				: 'indexCanisterId' in data
+					? data.indexCanisterId
+					: data.canisterId;
+	}
+
 	async start(data: PostMessageDataRequest | undefined) {
+		this.setRef(data);
+
 		await this.timer.start<PostMessageDataRequest>({
 			interval: WALLET_TIMER_INTERVAL_MILLIS,
 			job: this.syncWallet,
@@ -43,14 +65,24 @@ export abstract class IcWalletScheduler<PostMessageDataRequest>
 		data: PostMessageDataResponseWallet;
 		msg: IcWalletMsg;
 	}) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseWallet>({
+			ref: this.ref,
 			msg,
 			data
 		});
 	}
 
 	protected postMessageWalletError({ error, msg }: { error: unknown; msg: IcWalletMsg }) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseError>({
+			ref: this.ref,
 			msg: `${msg}Error`,
 			data: {
 				error

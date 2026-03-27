@@ -1,0 +1,84 @@
+export enum PLAUSIBLE_EVENTS {
+	VIEW_OPEN = 'view_open',
+	NFT_CATEGORIZE = 'nft_categorize',
+	PAGE_OPEN = 'page_open',
+	LIST_SETTINGS_CHANGE = 'list_settings_change',
+	SWAP_OFFER = 'swap_offer',
+	MEDIA_CONSENT = 'media_consent',
+	OPEN_MODAL = 'open_modal',
+	LOAD_CUSTOM_TOKENS = 'load_custom_tokens',
+	PAY = 'pay',
+	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help',
+	RATE_LIMITED = 'rate_limited',
+	STAKE = 'stake',
+	UNSTAKE = 'unstake',
+	LOAD_TRANSACTIONS = 'load_transactions'
+}
+
+export enum PLAUSIBLE_EVENT_CONTEXTS {
+	BACKEND = 'backend',
+	NFT = 'nft',
+	ASSETS_TAB = 'assets_tab',
+	TOKENS = 'tokens',
+	DFX = 'dfx',
+	OPEN_CRYPTOPAY = 'open_cryptopay',
+	EARN = 'earn',
+	TRANSACTIONS = 'transactions'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
+	ICRC = 'icrc'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_EARN {
+	HARVEST_AUTOPILOT = 'harvest-autopilot'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
+	ERC721 = 'erc721',
+	ERC1155 = 'erc1155'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
+	PER_USER = 'per_user',
+	GLOBAL = 'global'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
+	UNCERTIFIED_REMOVED = 'uncertified_removed'
+}
+
+export enum PLAUSIBLE_EVENT_VALUES {
+	NFT = 'nft',
+	NFT_COLLECTION_PAGE = 'nft-collection-page',
+	NFT_PAGE = 'nft-page',
+	EARN_PAGE = 'earn-page',
+	HARVEST_AUTOPILOTS_PAGE = 'harvest-autopilots-page',
+	HARVEST_AUTOPILOT_DETAIL_PAGE = 'harvest-autopilot-detail-page'
+}
+
+export enum PLAUSIBLE_EVENT_SOURCES {
+	BACKEND = 'backend',
+	ASSETS_PAGE = 'assets_page',
+	NFT_COLLECTION = 'nft-collection-page',
+	NFT_MEDIA_REVIEW = 'media-review',
+	NFT_PAGE = 'nft-page',
+	NFTS_PAGE = 'nfts',
+	NAVIGATION = 'navigation',
+	HARVEST_AUTOPILOT = 'harvest-autopilot'
+}
+
+export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
+	GROUP = 'group',
+	VISIBILITY = 'visibility',
+	SORT = 'sort',
+	SORT_ASC = 'sort_asc',
+	SORT_DESC = 'sort_desc',
+	PRICE = 'price'
+}
+
+export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
+	SUCCESS = 'success',
+	ERROR = 'error',
+	CANCEL = 'cancel'
+}

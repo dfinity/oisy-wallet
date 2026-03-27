@@ -1,36 +1,33 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
-	import { erc20UserTokens } from '$eth/derived/erc20.derived';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
+	import { erc20CustomTokens } from '$eth/derived/erc20.derived';
+	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-	import type { IcCkToken, OptionIcCkToken } from '$icp/types/ic-token';
-	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
+	import type { IcCkToken } from '$icp/types/ic-token';
+	import { autoLoadErc20Token } from '$icp-eth/services/erc20-token.services';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalCkETHReceive } from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Token } from '$lib/types/token';
 
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	const destinationToken: OptionIcCkToken = $derived(
-		nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined
-	);
+	const destinationToken = $derived(nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined);
 
-	const sourceToken: Token = $derived($ckEthereumTwinToken);
+	const sourceToken = $derived($ckEthereumTwinToken);
 
 	const openReceive = async (modalId: symbol) => {
-		const { result } = await autoLoadUserToken({
-			erc20UserTokens: $erc20UserTokens,
+		const { result } = await autoLoadErc20Token({
+			erc20CustomTokens: $erc20CustomTokens,
 			sendToken: $tokenWithFallback,
 			identity: $authIdentity
 		});
@@ -45,12 +42,12 @@
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>
-	<svelte:fragment slot="modal">
+<ReceiveButtonWithModal isOpen={$modalCkETHReceive} open={openModal}>
+	{#snippet modal()}
 		{#if nonNullish(sourceToken) && nonNullish(destinationToken)}
-			<FeeStoreContext token={$ethereumToken}>
-				<IcReceiveCkEthereumModal on:nnsClose={close} {sourceToken} {destinationToken} />
-			</FeeStoreContext>
+			<EthFeeStoreContext token={$nativeEthereumTokenWithFallback}>
+				<IcReceiveCkEthereumModal {destinationToken} onClose={close} {sourceToken} />
+			</EthFeeStoreContext>
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </ReceiveButtonWithModal>

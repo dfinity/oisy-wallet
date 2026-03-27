@@ -1,17 +1,19 @@
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
+import { ZERO } from '$lib/constants/app.constants';
+import { loadAddresses } from '$lib/services/addresses.services';
+import { trackRateLimited } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
 import { nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
-import { loading } from '$lib/stores/loader.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { LoadIdbAddressError } from '$lib/types/errors';
+import type { AllowSigningOutcome } from '$lib/types/api';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -21,7 +23,6 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
-import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/load-user-profile.services', () => ({
@@ -29,11 +30,24 @@ vi.mock('$lib/services/load-user-profile.services', () => ({
 }));
 
 vi.mock('$lib/services/addresses.services', () => ({
-	loadIdbAddresses: vi.fn(() => Promise.resolve({ success: true })),
 	loadAddresses: vi.fn(() => Promise.resolve({ success: true }))
 }));
 
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn(),
+	trackRateLimited: vi.fn()
+}));
+
 describe('loader.services', () => {
+	const mockExecutedOutcome: AllowSigningOutcome = {
+		response: { status: { Executed: null }, allowed_cycles: 100n }
+	};
+
+	const mockRateLimitedOutcome: AllowSigningOutcome = {
+		response: { status: { Skipped: null }, allowed_cycles: ZERO },
+		rateLimitInfo: { endpoint: 'allow_signing', limiter: 'ALLOW_SIGNING_RATE_LIMITER' }
+	};
+
 	describe('initSignerAllowance', () => {
 		let apiMock: MockInstance;
 
@@ -56,15 +70,33 @@ describe('loader.services', () => {
 			vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
 		});
 
-		it('should return success', async () => {
-			apiMock.mockResolvedValueOnce(undefined);
+		it('should work correctly', async () => {
+			apiMock.mockResolvedValueOnce(mockExecutedOutcome);
 
 			const result = await initSignerAllowance();
 
 			expect(result.success).toBeTruthy();
 		});
 
-		it('should return success equals to false', async () => {
+		it('should not track event when not rate limited', async () => {
+			apiMock.mockResolvedValueOnce(mockExecutedOutcome);
+
+			await initSignerAllowance();
+
+			expect(trackRateLimited).not.toHaveBeenCalled();
+		});
+
+		it('should track rate limited event when rateLimitInfo is present', async () => {
+			apiMock.mockResolvedValueOnce(mockRateLimitedOutcome);
+
+			await initSignerAllowance();
+
+			expect(trackRateLimited).toHaveBeenCalledExactlyOnceWith(
+				mockRateLimitedOutcome.rateLimitInfo
+			);
+		});
+
+		it('should handle errors', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
@@ -93,13 +125,11 @@ describe('loader.services', () => {
 	describe('initLoader', () => {
 		const mockValidateAddresses = vi.fn();
 		const mockProgressAndLoad = vi.fn();
-		const mockSetProgressModal = vi.fn();
 
 		const mockParams = {
 			identity: mockIdentity,
 			validateAddresses: mockValidateAddresses,
-			progressAndLoad: mockProgressAndLoad,
-			setProgressModal: mockSetProgressModal
+			progressAndLoad: mockProgressAndLoad
 		};
 
 		beforeEach(() => {
@@ -108,9 +138,12 @@ describe('loader.services', () => {
 
 			vi.spyOn(authServices, 'signOut').mockImplementation(vi.fn());
 			vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
-			vi.spyOn(api, 'allowSigning').mockImplementation(vi.fn());
+			vi.spyOn(api, 'allowSigning').mockResolvedValue(mockExecutedOutcome);
 
 			setupUserNetworksStore('allEnabled');
+
+			mockAuthStore(mockIdentity);
+			authStore.setForTesting(mockIdentity);
 		});
 
 		it('should sign out if the identity is nullish', async () => {
@@ -134,125 +167,106 @@ describe('loader.services', () => {
 			expect(signOut).toHaveBeenCalledOnce();
 		});
 
-		it('should load addresses from IDB', async () => {
+		it('should load addresses from the backend', async () => {
 			await initLoader(mockParams);
 
-			expect(loadIdbAddresses).toHaveBeenCalledOnce();
+			expect(allowSigning).toHaveBeenCalledOnce();
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
-			expect(mockProgressAndLoad).toHaveBeenCalledOnce();
-			expect(mockValidateAddresses).toHaveBeenCalledOnce();
-
-			expect(get(loading)).toBeFalsy();
+			expect(loadAddresses).toHaveBeenCalledOnce();
+			expect(loadAddresses).toHaveBeenNthCalledWith(1, [
+				BTC_MAINNET_NETWORK_ID,
+				ETHEREUM_NETWORK_ID,
+				SOLANA_MAINNET_NETWORK_ID
+			]);
 		});
 
-		it('should not load addresses from the backend if the IDB addresses are loaded', async () => {
+		it('should load addresses from the backend only for enabled networks', async () => {
+			userProfileStore.set({
+				certified: false,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						networks: {
+							...mockNetworksSettings,
+							testnets: { show_testnets: true },
+							networks: [
+								[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ ArbitrumMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+							]
+						}
+					})
+				}
+			});
+
 			await initLoader(mockParams);
 
-			expect(allowSigning).not.toHaveBeenCalled();
-			expect(loadAddresses).not.toHaveBeenCalledOnce();
+			expect(allowSigning).toHaveBeenCalledOnce();
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
+
+			expect(loadAddresses).toHaveBeenCalledOnce();
+			expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_MAINNET_NETWORK_ID]);
 		});
 
-		describe('when the IDB addresses are not loaded', () => {
-			beforeEach(() => {
-				setupUserNetworksStore('allEnabled');
-
-				mockAuthStore(mockIdentity);
-				authStore.setForTesting(mockIdentity);
-
-				vi.mocked(loadIdbAddresses).mockResolvedValue({
-					success: false,
-					err: [
-						new LoadIdbAddressError(ETHEREUM_NETWORK_ID),
-						new LoadIdbAddressError(SOLANA_MAINNET_NETWORK_ID)
-					]
-				});
+		it('should load Ethereum address from the backend if even only one EVM network is enabled', async () => {
+			userProfileStore.set({
+				certified: false,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						networks: {
+							...mockNetworksSettings,
+							testnets: { show_testnets: true },
+							networks: [
+								[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ BaseMainnet: null }, { enabled: true, is_testnet: false }],
+								[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ SolanaMainnet: null }, { enabled: false, is_testnet: false }]
+							]
+						}
+					})
+				}
 			});
 
-			it('should load addresses from the backend', async () => {
-				await initLoader(mockParams);
+			await initLoader(mockParams);
 
-				expect(allowSigning).toHaveBeenCalledOnce();
-				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
-
-				expect(loadAddresses).toHaveBeenCalledOnce();
-				expect(loadAddresses).toHaveBeenNthCalledWith(1, [
-					ETHEREUM_NETWORK_ID,
-					SOLANA_MAINNET_NETWORK_ID
-				]);
+			expect(allowSigning).toHaveBeenCalledOnce();
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
 			});
 
-			it('should load addresses from the backend only for enabled networks', async () => {
-				userProfileStore.set({
-					certified: false,
-					profile: {
-						...mockUserProfile,
-						settings: toNullable({
-							...mockUserSettings,
-							networks: {
-								...mockNetworksSettings,
-								testnets: { show_testnets: true },
-								networks: [
-									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
-									[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
-									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
-									[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
-									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
-								]
-							}
-						})
-					}
-				});
+			expect(loadAddresses).toHaveBeenCalledOnce();
+			expect(loadAddresses).toHaveBeenNthCalledWith(1, [ETHEREUM_NETWORK_ID]);
+		});
 
-				await initLoader(mockParams);
+		it('should not load addresses from the backend if all networks are disabled', async () => {
+			setupUserNetworksStore('allDisabled');
 
-				expect(allowSigning).toHaveBeenCalledOnce();
-				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			await initLoader(mockParams);
 
-				expect(loadAddresses).toHaveBeenCalledOnce();
-				expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_MAINNET_NETWORK_ID]);
+			expect(allowSigning).toHaveBeenCalledOnce();
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
 			});
 
-			it('should load Ethereum address from the backend if even only one EVM network is enabled', async () => {
-				userProfileStore.set({
-					certified: false,
-					profile: {
-						...mockUserProfile,
-						settings: toNullable({
-							...mockUserSettings,
-							networks: {
-								...mockNetworksSettings,
-								testnets: { show_testnets: true },
-								networks: [
-									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
-									[{ BaseMainnet: null }, { enabled: true, is_testnet: false }],
-									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
-									[{ SolanaMainnet: null }, { enabled: false, is_testnet: false }]
-								]
-							}
-						})
-					}
-				});
-
-				await initLoader(mockParams);
-
-				expect(allowSigning).toHaveBeenCalledOnce();
-				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
-
-				expect(loadAddresses).toHaveBeenCalledOnce();
-				expect(loadAddresses).toHaveBeenNthCalledWith(1, [ETHEREUM_NETWORK_ID]);
-			});
-
-			it('should not load addresses from the backend if all networks are disabled', async () => {
-				setupUserNetworksStore('allDisabled');
-
-				await initLoader(mockParams);
-
-				expect(allowSigning).toHaveBeenCalledOnce();
-				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
-
-				expect(loadAddresses).toHaveBeenCalledOnce();
-				expect(loadAddresses).toHaveBeenNthCalledWith(1, []);
-			});
+			expect(loadAddresses).toHaveBeenCalledOnce();
+			expect(loadAddresses).toHaveBeenNthCalledWith(1, []);
 		});
 	});
 });

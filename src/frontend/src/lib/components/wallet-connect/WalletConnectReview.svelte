@@ -2,8 +2,7 @@
 	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import type { ProposalTypes } from '@walletconnect/types';
-	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
@@ -12,26 +11,29 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
-	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
+	import { resetListener } from '$lib/services/wallet-connect.services';
+	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Option } from '$lib/types/utils';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import {
+		walletConnectListenerStore,
+		walletConnectProposalStore
+	} from '$lib/stores/wallet-connect.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let proposal: Option<WalletKitTypes.SessionProposal>;
+	let listener = $derived($walletConnectListenerStore);
 
-	let params: ProposalTypes.Struct | undefined;
-	$: params = proposal?.params;
+	let proposal = $derived($walletConnectProposalStore);
 
-	let approve = true;
-	$: approve = acceptedContext(proposal?.verifyContext);
+	let params = $derived(proposal?.params);
 
-	const dispatch = createEventDispatcher();
+	let approve = $derived(acceptedContext(proposal?.verifyContext));
 
 	// Display a cancel button after a while if the WalletConnect initialization never resolves
-
-	let timer: NodeJS.Timeout | undefined;
-	let displayCancel = false;
+	let timer = $state<NodeJS.Timeout | undefined>();
+	let displayCancel = $state(false);
 
 	onMount(() => (timer = setTimeout(() => (displayCancel = true), 2000)));
 
@@ -43,6 +45,84 @@
 		clearTimeout(timer);
 		timer = undefined;
 	});
+
+	const close = () => modalStore.close();
+
+	const resetAndClose = () => {
+		resetListener();
+		close();
+	};
+
+	const answer = async ({
+		callback,
+		toast
+	}: {
+		callback: ((proposal: WalletKitTypes.SessionProposal) => Promise<void>) | undefined;
+		toast?: () => void;
+	}) => {
+		if (isNullish(listener) || isNullish(callback)) {
+			toastsError({
+				msg: { text: $i18n.wallet_connect.error.no_connection_opened }
+			});
+
+			close();
+			return;
+		}
+
+		if (isNullish(proposal)) {
+			toastsError({
+				msg: { text: $i18n.wallet_connect.error.no_session_approval }
+			});
+
+			close();
+			return;
+		}
+
+		busy.start();
+
+		try {
+			await callback(proposal);
+
+			toast?.();
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.wallet_connect.error.unexpected },
+				err
+			});
+
+			resetListener();
+		}
+
+		busy.stop();
+
+		close();
+	};
+
+	const onApprove = async () =>
+		await answer({
+			callback: listener?.approveSession,
+			toast: () =>
+				toastsShow({
+					text: $i18n.wallet_connect.info.connected,
+					level: 'success',
+					duration: 2000
+				})
+		});
+
+	const onReject = async () =>
+		await answer({
+			callback: async () => {
+				if (nonNullish(proposal)) {
+					await listener?.rejectSession(proposal);
+				}
+
+				resetAndClose();
+			}
+		});
+
+	const onCancel = async () => {
+		await onReject();
+	};
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
@@ -71,7 +151,7 @@
 					})}:
 				</p>
 
-				<article class="rounded-xs mt-4 bg-disabled p-4">
+				<article class="mt-4 rounded-xs bg-disabled p-4">
 					<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
@@ -85,7 +165,7 @@
 
 		{#snippet toolbar()}
 			<div in:fade>
-				<WalletConnectActions {approve} on:icApprove on:icReject />
+				<WalletConnectActions {approve} {onApprove} {onReject} />
 			</div>
 		{/snippet}
 	</ContentWithToolbar>
@@ -104,10 +184,7 @@
 			{#if displayCancel}
 				<div in:fade>
 					<ButtonGroup>
-						<ButtonCancel
-							onclick={() => dispatch('icCancel')}
-							disabled={$isBusy || $ethAddressNotCertified}
-						/>
+						<ButtonCancel disabled={$isBusy} onclick={onCancel} />
 					</ButtonGroup>
 				</div>
 			{/if}

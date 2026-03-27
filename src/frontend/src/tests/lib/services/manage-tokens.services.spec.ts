@@ -5,22 +5,18 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import {
+	MANAGE_TOKENS_MODAL_ROUTE,
 	TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { saveTokens } from '$lib/services/manage-tokens.services';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
@@ -60,12 +56,12 @@ describe('manage-tokens.services', () => {
 			vi.clearAllMocks();
 
 			vi.spyOn(toastsStore, 'toastsError');
+			vi.spyOn(toastsStore, 'toastsShow');
 		});
 
-		it('should call nullishSignOut if identity is nullish', async () => {
+		it('should return early if identity is nullish', async () => {
 			await saveTokens({ ...params, identity: null });
 
-			expect(nullishSignOut).toHaveBeenCalledOnce();
 			expect(mockSave).not.toHaveBeenCalled();
 		});
 
@@ -108,7 +104,8 @@ describe('manage-tokens.services', () => {
 						indexCanisterId: 'indexCanisterId' in token ? token.indexCanisterId : undefined,
 						tokenId: token.id?.description,
 						tokenSymbol: token.symbol,
-						networkId: token.network?.id.description
+						networkId: token.network?.id.description,
+						source: MANAGE_TOKENS_MODAL_ROUTE
 					}
 				});
 			});
@@ -125,12 +122,63 @@ describe('manage-tokens.services', () => {
 				msg: { text: en.tokens.error.unexpected },
 				err: new Error('Save failed')
 			});
+			expect(toastsShow).not.toHaveBeenCalled();
 			expect(mockOnError).toHaveBeenCalledOnce();
 
-			expect(trackEvent).toHaveBeenCalledOnce();
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
-				metadata: { error: 'Error: Save failed' }
+				metadata: {
+					error: 'Save failed'
+				}
+			});
+		});
+
+		it('should show a warning toast on version mismatch error', async () => {
+			mockSave.mockRejectedValueOnce(new Error('Version mismatch, token update not allowed'));
+
+			await saveTokens(params);
+
+			expect(toastsError).not.toHaveBeenCalled();
+			expect(toastsShow).toHaveBeenCalledWith({
+				text: en.tokens.error.version_mismatch,
+				level: 'warn'
+			});
+			expect(mockOnError).toHaveBeenCalledOnce();
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
+				metadata: {
+					error: 'Version mismatch, token update not allowed'
+				}
+			});
+		});
+
+		it('should map IC errors for the event tracking', async () => {
+			mockSave.mockRejectedValueOnce(
+				new Error(
+					'AgentError: Call failed:\n' +
+						'  Canister: doked-biaaa-aaaar-qag2a-cai\n' +
+						'  Method: set_many_custom_tokens (update)\n' +
+						'  "Request ID": "25cb1e3181d25a6e05ad2feefc2fb0c10a2e3dae56477edc23ea31eb2f367838"\n' +
+						'  "Error code": "IC0503"\n' +
+						'  "Reject code": "5"\n' +
+						'  "Reject message": "Error from Canister doked-biaaa-aaaar-qag2a-cai: Canister called `ic0.trap` with message: \'Version mismatch, token update not allowed\'.\n' +
+						'Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation: https://internetcomputer.org/docs/current/references/execution-errors#trapped-explicitly"\n'
+				)
+			);
+
+			await saveTokens(params);
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
+				metadata: {
+					Canister: 'doked-biaaa-aaaar-qag2a-cai',
+					'Error code': 'IC0503',
+					Method: 'set_many_custom_tokens (update)',
+					'Reject code': '5',
+					'Reject message':
+						"Error from Canister doked-biaaa-aaaar-qag2a-cai: Canister called `ic0.trap` with message: 'Version mismatch, token update not allowed'."
+				}
 			});
 		});
 	});

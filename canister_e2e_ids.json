@@ -1,6 +1,6 @@
 {
 	"backend": {
-		"local": "tdxud-2yaaa-aaaad-aadiq-cai"
+		"local": "d3nvo-aaaaa-aaaar-qagzq-cai"
 	},
 	"signer": {
 		"local": "tdxud-2yaaa-aaaad-aadiq-cai"
@@ -43,5 +43,11 @@
 	},
 	"rewards": {
 		"local": "vi6cu-aiaaa-aaaad-aad7q-cai"
+	},
+	"xtc-ledger": {
+		"local": "aanaa-xaaaa-aaaah-aaeiq-cai"
+	},
+	"sol_rpc": {
+		"local": "tghme-zyaaa-aaaar-qarca-cai"
 	}
 }

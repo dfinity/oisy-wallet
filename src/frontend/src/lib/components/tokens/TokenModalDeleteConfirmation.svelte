@@ -38,12 +38,12 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonCancel onclick={onCancel} disabled={loading} />
+			<ButtonCancel disabled={loading} onclick={onCancel} />
 
 			<Button
 				colorStyle="error"
-				onclick={onConfirm}
 				disabled={loading}
+				onclick={onConfirm}
 				testId={TOKEN_MODAL_DELETE_BUTTON}
 			>
 				{$i18n.core.text.delete}

@@ -39,6 +39,9 @@
 		disabled = false
 	}: Props = $props();
 
+	// TODO: check if there is a better way to handle this svelte-ignore
+	// eslint-disable-next-line svelte/no-unused-svelte-ignore
+	// svelte-ignore state_referenced_locally -- we want to get only the initial value
 	let editingAddress = $state(address ? { ...address } : {});
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
@@ -79,15 +82,15 @@
 
 	let isFormValid = $state(false);
 
-	const focusField = isNewAddress ? 'address' : 'label';
+	let focusField = $derived(isNewAddress ? ('address' as const) : ('label' as const));
 
 	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
 	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);
 </script>
 
-<form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
+<form class="flex w-full flex-col items-center" method="POST" onsubmit={handleSubmit}>
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-		<Avatar variant="xl" name={contact.name} />
+		<Avatar name={contact.name} image={contact.image} variant="xl" />
 
 		<div class="text-2xl font-bold text-primary md:text-3xl">
 			{contact.name}
@@ -97,12 +100,12 @@
 			<div class="pb-4 text-xl font-bold">{title}</div>
 
 			<InputAddressAlias
-				{onQRCodeScan}
-				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 				address={addressModel}
-				bind:isValid={isFormValid}
+				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 				{disabled}
 				{focusField}
+				{onQRCodeScan}
+				bind:isValid={isFormValid}
 			/>
 		</div>
 
@@ -113,9 +116,9 @@
 				<Button
 					colorStyle="primary"
 					disabled={!isFormValid || (!isNewAddress && !labelChanged)}
+					loading={disabled}
 					onclick={handleSave}
 					testId={ADDRESS_BOOK_SAVE_BUTTON}
-					loading={disabled}
 				>
 					{$i18n.core.text.save}
 				</Button>

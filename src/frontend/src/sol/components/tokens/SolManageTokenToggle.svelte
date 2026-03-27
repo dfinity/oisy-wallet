@@ -4,4 +4,4 @@
 </script>
 
 <!-- For now, we just handle native SOL tokens, they are not manageable. -->
-<Toggle disabled ariaLabel={$i18n.tokens.text.hide_token} checked />
+<Toggle ariaLabel={$i18n.tokens.text.hide_token} checked disabled />

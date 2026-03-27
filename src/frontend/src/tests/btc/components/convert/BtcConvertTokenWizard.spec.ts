@@ -1,6 +1,9 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
-import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
-import * as btcSendApi from '$btc/services/btc-send.services';
+import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
+import * as btcUtxosService from '$btc/services/btc-utxos.service';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
@@ -12,6 +15,7 @@ import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import * as bitcoinApi from '$icp/api/bitcoin.api';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import * as backendApi from '$lib/api/backend.api';
 import * as signerApi from '$lib/api/signer.api';
@@ -28,6 +32,7 @@ import {
 	initTokenActionValidationErrorsContext,
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
+import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -39,14 +44,10 @@ import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('BtcConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
-	const pendingBtcTransactionResponse = true;
+	const pendingBtcTransactionResponse: AddPendingTransactionOutcome = { response: true };
 	const mockContext = ({
 		sourceToken = BTC_MAINNET_TOKEN,
 		mockUtxosFeeStore
@@ -59,6 +60,9 @@ describe('BtcConvertTokenWizard', () => {
 			[CONVERT_CONTEXT_KEY, initConvertContext({ sourceToken, destinationToken: ICP_TOKEN })],
 			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
 	const props = {
 		currentStep: {
 			name: WizardStepsConvert.REVIEW,
@@ -66,12 +70,13 @@ describe('BtcConvertTokenWizard', () => {
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
 		sendAmount,
-		receiveAmount: sendAmount
+		receiveAmount: sendAmount,
+		onBack,
+		onClose,
+		onNext
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
-	const mockSelectUtxosFeeApi = () =>
-		vi.spyOn(btcSendApi, 'selectUtxosFee').mockResolvedValue(mockUtxosFee);
 	const mockBackendApi = () =>
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
@@ -89,9 +94,9 @@ describe('BtcConvertTokenWizard', () => {
 		vi
 			.spyOn(addressesStore, 'btcAddressMainnet', 'get')
 			.mockImplementation(() => readable(mockBtcAddress));
-	const mockBtcPendingSentTransactionsStore = () =>
+	const mockLoadBtcPendingSentTransactions = () =>
 		vi
-			.spyOn(btcPendingSentTransactionsStore, 'loadBtcPendingSentTransactions')
+			.spyOn(btcPendingSentTransactionsServices, 'loadBtcPendingSentTransactions')
 			.mockResolvedValue({ success: true });
 	const mockUtxosFeeStore = (utxosFee?: UtxosFee) => {
 		const store = utxosFeeStore.initUtxosFeeStore();
@@ -106,9 +111,26 @@ describe('BtcConvertTokenWizard', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		mockPage.reset();
-		mockBtcPendingSentTransactionsStore();
-		mockSelectUtxosFeeApi();
+		mockLoadBtcPendingSentTransactions();
+
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
+
+		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockResolvedValue({
+			feeSatoshis: mockUtxosFee.feeSatoshis,
+			utxos: mockUtxosFee.utxos
+		});
+		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
+			utxos: [],
+			tip_block_hash: new Uint8Array(),
+			tip_height: 100,
+			next_page: []
+		});
+		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {
@@ -125,7 +147,7 @@ describe('BtcConvertTokenWizard', () => {
 
 		await clickConvertButton(container);
 
-		expect(btcSendApiSpy).toHaveBeenCalledWith({
+		expect(btcSendApiSpy).toHaveBeenCalledExactlyOnceWith({
 			identity: mockIdentity,
 			network: mapToSignerBitcoinNetwork({ network: BTC_MAINNET_TOKEN.network.env }),
 			utxosToSpend: mockUtxosFee.utxos,
@@ -137,7 +159,6 @@ describe('BtcConvertTokenWizard', () => {
 				}
 			]
 		});
-		expect(btcSendApiSpy).toHaveBeenCalledOnce();
 		expect(addPendingTransactionApiSpy).toHaveResolvedWith(pendingBtcTransactionResponse);
 	});
 

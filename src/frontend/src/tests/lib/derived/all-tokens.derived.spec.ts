@@ -1,6 +1,10 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import {
+	ARBITRUM_ETH_TOKEN,
+	ARBITRUM_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
+import {
 	BASE_ETH_TOKEN,
 	BASE_SEPOLIA_ETH_TOKEN
 } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -18,25 +22,33 @@ import {
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import * as tokensIcEnv from '$env/tokens/tokens.ic.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
-import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
-import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
-import * as dip20TokensServices from '$icp/services/dip20-tokens.services';
-import * as icrcCustomTokensServices from '$icp/services/icrc-custom-tokens.services';
+import { erc4626Tokens } from '$eth/derived/erc4626.derived';
+import { erc721Tokens } from '$eth/derived/erc721.derived';
+import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import {
-	allDisabledKongSwapCompatibleIcrcTokens,
-	allKongSwapCompatibleIcrcTokens,
+	allCrossChainSwapTokens,
+	allFungibleTokens,
 	allTokens
 } from '$lib/derived/all-tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
@@ -59,7 +71,7 @@ describe('all-tokens.derived', () => {
 
 	const mockDip20Token: IcrcCustomToken = {
 		...mockValidIcCkToken,
-		standard: 'dip20',
+		standard: { code: 'dip20' },
 		id: parseTokenId('XTC'),
 		symbol: 'XTC',
 		ledgerCanisterId: 'mock-ledger-canister-id',
@@ -67,15 +79,28 @@ describe('all-tokens.derived', () => {
 		enabled: true
 	};
 
-	const mockErc20Token: Erc20TokenToggleable = {
+	const mockErc20Token: Erc20CustomToken = {
 		...mockValidErc20Token,
 		id: parseTokenId('DUM'),
 		address: mockEthAddress,
-		exchange: 'erc20',
 		enabled: false
 	};
 
-	const mockSplToken: SplTokenToggleable = {
+	const mockErc4626Token: Erc4626CustomToken = {
+		...mockValidErc4626Token,
+		id: parseTokenId('vTEST'),
+		address: mockEthAddress,
+		enabled: true
+	};
+
+	const mockErc721Token: Erc721CustomToken = {
+		...mockValidErc721Token,
+		id: parseTokenId('KUM'),
+		address: mockEthAddress,
+		enabled: false
+	};
+
+	const mockSplToken: SplCustomToken = {
 		...mockValidSplToken,
 		enabled: true
 	};
@@ -83,9 +108,11 @@ describe('all-tokens.derived', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 
+		setupTestnetsStore('disabled');
+
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
+		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 
 		// Mock the store subscriptions with empty arrays by default
 		vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
@@ -93,8 +120,18 @@ describe('all-tokens.derived', () => {
 			return () => {};
 		});
 
-		vi.spyOn(icrcCustomTokensServices, 'buildIcrcCustomTokens').mockReturnValue([]);
-		vi.spyOn(dip20TokensServices, 'buildDip20Tokens').mockReturnValue([]);
+		vi.spyOn(erc4626Tokens, 'subscribe').mockImplementation((fn) => {
+			fn([]);
+			return () => {};
+		});
+
+		// Mock the store subscriptions with empty arrays by default
+		vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
+			fn([]);
+			return () => {};
+		});
+
+		vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => []);
 
 		vi.spyOn(icrcTokens, 'subscribe').mockImplementation((fn) => {
 			fn([]);
@@ -114,6 +151,16 @@ describe('all-tokens.derived', () => {
 				return () => {};
 			});
 
+			vi.spyOn(erc4626Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc4626Token]);
+				return () => {};
+			});
+
+			vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc721Token]);
+				return () => {};
+			});
+
 			vi.spyOn(icrcTokens, 'subscribe').mockImplementation((fn) => {
 				fn([mockIcrcToken]);
 				return () => {};
@@ -124,8 +171,10 @@ describe('all-tokens.derived', () => {
 				return () => {};
 			});
 
-			vi.spyOn(icrcCustomTokensServices, 'buildIcrcCustomTokens').mockReturnValue([mockIcrcToken2]);
-			vi.spyOn(dip20TokensServices, 'buildDip20Tokens').mockReturnValue([mockDip20Token]);
+			vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [
+				mockIcrcToken2,
+				mockDip20Token
+			]);
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
@@ -138,11 +187,14 @@ describe('all-tokens.derived', () => {
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
+				ARBITRUM_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
-				mockDip20Token.id.description,
-				mockIcrcToken2.id.description,
+				mockErc4626Token.id.description,
 				mockIcrcToken.id.description,
-				mockSplToken.id.description
+				mockIcrcToken2.id.description,
+				mockDip20Token.id.description,
+				mockSplToken.id.description,
+				mockErc721Token.id.description
 			]);
 		});
 
@@ -150,6 +202,12 @@ describe('all-tokens.derived', () => {
 			const disabledErc20Token = { ...mockErc20Token, enabled: false };
 			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
 				fn([disabledErc20Token]);
+				return () => {};
+			});
+
+			const disabledErc721Token = { ...mockErc721Token, enabled: false };
+			vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledErc721Token]);
 				return () => {};
 			});
 
@@ -163,6 +221,7 @@ describe('all-tokens.derived', () => {
 			const tokenSymbols = tokens.map((token) => token.id.description);
 
 			expect(tokenSymbols).toContain(disabledErc20Token.id.description);
+			expect(tokenSymbols).toContain(disabledErc721Token.id.description);
 			expect(tokenSymbols).toContain(disabledSplToken.id.description);
 		});
 
@@ -172,7 +231,7 @@ describe('all-tokens.derived', () => {
 				fn([mockIcrcToken]);
 				return () => {};
 			});
-			vi.spyOn(icrcCustomTokensServices, 'buildIcrcCustomTokens').mockReturnValue([duplicateToken]);
+			vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [duplicateToken]);
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
@@ -205,6 +264,7 @@ describe('all-tokens.derived', () => {
 
 			expect(tokenSymbols).toEqual([
 				ICP_TOKEN.id.description,
+				TESTICP_TOKEN.id.description,
 				BTC_MAINNET_TOKEN.id.description,
 				BTC_TESTNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
@@ -216,7 +276,9 @@ describe('all-tokens.derived', () => {
 				BNB_MAINNET_TOKEN.id.description,
 				BNB_TESTNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
-				POL_AMOY_TOKEN.id.description
+				POL_AMOY_TOKEN.id.description,
+				ARBITRUM_ETH_TOKEN.id.description,
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
 			]);
 		});
 
@@ -224,13 +286,14 @@ describe('all-tokens.derived', () => {
 			setupTestnetsStore('enabled');
 			setupUserNetworksStore('allEnabled');
 
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
 
 			expect(tokenSymbols).toEqual([
 				ICP_TOKEN.id.description,
+				TESTICP_TOKEN.id.description,
 				BTC_MAINNET_TOKEN.id.description,
 				BTC_TESTNET_TOKEN.id.description,
 				BTC_REGTEST_TOKEN.id.description,
@@ -244,56 +307,264 @@ describe('all-tokens.derived', () => {
 				BNB_MAINNET_TOKEN.id.description,
 				BNB_TESTNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
-				POL_AMOY_TOKEN.id.description
+				POL_AMOY_TOKEN.id.description,
+				ARBITRUM_ETH_TOKEN.id.description,
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
 			]);
 		});
 	});
 
-	describe('allDisabledKongSwapCompatibleIcrcTokens', () => {
+	describe('allFungibleTokens', () => {
+		it('should merge all tokens into a single array', () => {
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc20Token]);
+				return () => {};
+			});
+
+			vi.spyOn(erc4626Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc4626Token]);
+				return () => {};
+			});
+
+			vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc721Token]);
+				return () => {};
+			});
+
+			vi.spyOn(icrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken]);
+				return () => {};
+			});
+
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockSplToken]);
+				return () => {};
+			});
+
+			vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [
+				mockIcrcToken2,
+				mockDip20Token
+			]);
+
+			const tokens = get(allFungibleTokens);
+			const tokenSymbols = tokens.map((token) => token.id.description);
+
+			expect(tokenSymbols).toEqual([
+				ICP_TOKEN.id.description,
+				BTC_MAINNET_TOKEN.id.description,
+				ETHEREUM_TOKEN.id.description,
+				SOLANA_TOKEN.id.description,
+				BASE_ETH_TOKEN.id.description,
+				BNB_MAINNET_TOKEN.id.description,
+				POL_MAINNET_TOKEN.id.description,
+				ARBITRUM_ETH_TOKEN.id.description,
+				mockErc20Token.id.description,
+				mockErc4626Token.id.description,
+				mockIcrcToken.id.description,
+				mockIcrcToken2.id.description,
+				mockDip20Token.id.description,
+				mockSplToken.id.description
+			]);
+		});
+
+		it('should not include non-fungible tokens', () => {
+			const disabledErc20Token = { ...mockErc20Token, enabled: false };
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledErc20Token]);
+				return () => {};
+			});
+
+			const disabledErc721Token = { ...mockErc721Token, enabled: false };
+			vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledErc721Token]);
+				return () => {};
+			});
+
+			const disabledSplToken = { ...mockSplToken, enabled: false };
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledSplToken]);
+				return () => {};
+			});
+
+			const tokens = get(allFungibleTokens);
+			const tokenSymbols = tokens.map((token) => token.id.description);
+
+			expect(tokenSymbols).not.toContain(disabledErc721Token.id.description);
+
+			expect(tokenSymbols).toContain(disabledErc20Token.id.description);
+			expect(tokenSymbols).toContain(disabledSplToken.id.description);
+		});
+	});
+
+	describe('allCrossChainSwapTokens', () => {
+		const mockErc20Token: Erc20CustomToken = {
+			...mockValidErc20Token,
+			id: parseTokenId('MOCK'),
+			address: mockEthAddress,
+			enabled: false
+		};
+
 		beforeEach(() => {
-			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
+			vi.resetAllMocks();
+
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
 				fn([]);
 				return () => {};
 			});
-			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
+
+			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+
+			vi.spyOn(enabledEvmTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+
+			vi.spyOn(enabledSolanaTokens, 'subscribe').mockImplementation((fn) => {
 				fn([]);
 				return () => {};
 			});
 		});
 
-		it('correctly sets store if there are some disabled kong-compatible icrc tokens', () => {
-			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
-				fn([mockIcrcToken, mockIcrcToken2]);
-				return () => {};
-			});
-			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
-				fn([mockIcrcToken2]);
-				return () => {};
-			});
+		it('should return empty array when all stores are empty', () => {
+			const result = get(allCrossChainSwapTokens);
 
-			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([mockIcrcToken]);
+			expect(result).toEqual([]);
 		});
 
-		it('correctly sets store if all icrc tokens are enabled', () => {
-			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
-				fn([mockIcrcToken, mockIcrcToken2]);
-				return () => {};
-			});
-			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
-				fn([mockIcrcToken, mockIcrcToken2]);
+		it('should include enabled Ethereum tokens with enabled: true', () => {
+			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
+				fn([ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
 				return () => {};
 			});
 
-			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([]);
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([
+				{ ...ETHEREUM_TOKEN, enabled: true },
+				{ ...SEPOLIA_TOKEN, enabled: true }
+			]);
 		});
 
-		it('correctly sets store if there are no kong-compatible tokens', () => {
-			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
-				fn([mockIcrcToken, mockIcrcToken2]);
+		it('should include enabled EVM tokens with enabled: true', () => {
+			const mockEvmToken = { ...ETHEREUM_TOKEN, id: parseTokenId('BASE_ETH') };
+
+			vi.spyOn(enabledEvmTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockEvmToken]);
 				return () => {};
 			});
 
-			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([]);
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([{ ...mockEvmToken, enabled: true }]);
+		});
+
+		it('should include ERC20 tokens with their enabled property', () => {
+			const tokens = [
+				{ ...mockErc20Token, id: parseTokenId('MOCK1'), enabled: true },
+				{ ...mockErc20Token, id: parseTokenId('MOCK2'), enabled: false }
+			];
+
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn(tokens);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual(tokens);
+		});
+
+		it('should handle multiple tokens of the same type', () => {
+			const mockErc20Token2 = {
+				...mockErc20Token,
+				id: parseTokenId('MOCK2'),
+				symbol: 'MOsCK2',
+				enabled: false
+			};
+
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc20Token, mockErc20Token2]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([mockErc20Token, mockErc20Token2]);
+		});
+
+		it('should include enabled Solana native tokens with enabled: true', () => {
+			vi.spyOn(enabledSolanaTokens, 'subscribe').mockImplementation((fn) => {
+				fn([SOLANA_TOKEN]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([{ ...SOLANA_TOKEN, enabled: true }]);
+		});
+
+		it('should include mainnet SPL tokens', () => {
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockSplToken]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([mockSplToken]);
+		});
+
+		it('should combine EVM and Solana tokens', () => {
+			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
+				fn([ETHEREUM_TOKEN]);
+				return () => {};
+			});
+
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc20Token]);
+				return () => {};
+			});
+
+			vi.spyOn(enabledSolanaTokens, 'subscribe').mockImplementation((fn) => {
+				fn([SOLANA_TOKEN]);
+				return () => {};
+			});
+
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockSplToken]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([
+				{ ...ETHEREUM_TOKEN, enabled: true },
+				mockErc20Token,
+				{ ...SOLANA_TOKEN, enabled: true },
+				mockSplToken
+			]);
+		});
+
+		it('should not filter Solana tokens by network since upstream stores handle it', () => {
+			vi.spyOn(enabledSolanaTokens, 'subscribe').mockImplementation((fn) => {
+				fn([SOLANA_TOKEN, SOLANA_DEVNET_TOKEN]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([
+				{ ...SOLANA_TOKEN, enabled: true },
+				{ ...SOLANA_DEVNET_TOKEN, enabled: true }
+			]);
 		});
 	});
 });

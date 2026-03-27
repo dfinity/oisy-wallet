@@ -4,9 +4,13 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let testId: string | undefined = undefined;
+	interface Props {
+		testId?: string;
+	}
+
+	let { testId }: Props = $props();
 </script>
 
-<div transition:slide={SLIDE_DURATION} data-tid={testId}>
+<div data-tid={testId} transition:slide={SLIDE_DURATION}>
 	<MessageBox level="error">{$i18n.fee.assertion.insufficient_funds_for_fee}</MessageBox>
 </div>

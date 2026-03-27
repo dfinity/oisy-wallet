@@ -9,7 +9,7 @@ print_help() {
 		- The installation args are computed based on the target network,
 		      determined by the DFX_NETWORK environment variable.
 
-		The files are installed at at the locations defined for 'cycles_depositor' in 'dfx.json'.
+		The files are installed at the locations defined for 'cycles_depositor' in 'dfx.json'.
 	EOF
 }
 

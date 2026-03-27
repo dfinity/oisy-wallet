@@ -3,53 +3,63 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
-	import AuthHelpIdentityForm from '$lib/components/auth/AuthHelpIdentityForm.svelte';
-	import AuthHelpOtherForm from '$lib/components/auth/AuthHelpOtherForm.svelte';
+	import AuthHelpNewIdentityForm from '$lib/components/auth/AuthHelpNewIdentityForm.svelte';
 	import { authHelpWizardSteps } from '$lib/config/auth-help.config';
+	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { WizardStepsAuthHelp } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let usesIdentityHelp = false;
+	interface Props {
+		usesIdentityHelp?: boolean;
+	}
 
-	let modal: WizardModal;
+	let { usesIdentityHelp = false }: Props = $props();
 
-	let steps: WizardSteps;
-	$: steps = authHelpWizardSteps({ i18n: $i18n });
+	let modal = $state<WizardModal<WizardStepsAuthHelp>>();
 
-	let currentStep: WizardStep | undefined;
+	let steps: WizardSteps<WizardStepsAuthHelp> = $derived(authHelpWizardSteps({ i18n: $i18n }));
 
-	let title: string;
-	$: title = currentStep?.title ?? $i18n.auth.help.text.title;
+	let currentStep = $state<WizardStep<WizardStepsAuthHelp> | undefined>();
+
+	let titleString = $derived(currentStep?.title ?? $i18n.auth.help.text.title);
 
 	onMount(() => {
 		if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {
-			goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
+			goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_NEW_IDENTITY });
 		}
 	});
 
-	const close = () =>
+	const close = () => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+			metadata: { event_value: 'close' }
+		});
+
 		closeModal(() => {
 			currentStep = undefined;
 		});
+	};
 
-	const onBack = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.OVERVIEW });
-	const onLostIdentity = () =>
-		goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
-	const onOther = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHER });
+	const onWizardStepChange = (stepName: WizardStepsAuthHelp) =>
+		nonNullish(modal) ? goToWizardStep({ modal, steps, stepName }) : undefined;
+
+	const onBack = () => onWizardStepChange(WizardStepsAuthHelp.OVERVIEW);
+	const onOpenNewIdentityHelp = () => onWizardStepChange(WizardStepsAuthHelp.HELP_NEW_IDENTITY);
 </script>
 
-<WizardModal {steps} bind:this={modal} bind:currentStep on:nnsClose={close}>
-	<svelte:fragment slot="title">
-		<span class="text-xl">{title}</span>
-	</svelte:fragment>
+<WizardModal bind:this={modal} onClose={close} {steps} bind:currentStep>
+	{#snippet title()}
+		<span class="text-xl">{titleString}</span>
+	{/snippet}
 
-	{#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}
-		<AuthHelpForm {onLostIdentity} {onOther} />
-	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_IDENTITY}
-		<AuthHelpIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
-	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHER}
-		<AuthHelpOtherForm {onBack} onDone={close} />
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}
+			<AuthHelpForm {onOpenNewIdentityHelp} />
+		{:else if currentStep?.name === WizardStepsAuthHelp.HELP_NEW_IDENTITY}
+			<AuthHelpNewIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
+		{/if}
+	{/key}
 </WizardModal>

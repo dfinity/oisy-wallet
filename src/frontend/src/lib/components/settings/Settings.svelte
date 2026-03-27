@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
+	import SettingsExperimentalFeatures from '$lib/components/settings/SettingsExperimentalFeatures.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
-	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
@@ -15,7 +15,7 @@
 		SETTINGS_ADDRESS_LABEL
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential.derived';
 	import {
 		type SettingsModalType,
 		SettingsModalType as SettingsModalEnum
@@ -26,19 +26,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
-	import type { OptionIdentity } from '$lib/types/identity';
-	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	let remainingTimeMilliseconds: number | undefined;
-	$: remainingTimeMilliseconds = $authRemainingTimeStore;
+	let remainingTimeMilliseconds = $derived($authRemainingTimeStore);
 
-	let identity: OptionIdentity;
-	$: identity = $authIdentity;
+	let identity = $derived($authIdentity);
 
-	let principal: Option<Principal>;
-	$: principal = identity?.getPrincipal();
+	let principal = $derived($authIdentity?.getPrincipal());
 
 	const getPouhCredential = async () => {
 		if (nonNullish(identity)) {
@@ -58,70 +53,86 @@
 </script>
 
 <SettingsCard>
-	<svelte:fragment slot="title">General</svelte:fragment>
+	{#snippet title()}{$i18n.settings.text.general}{/snippet}
 
 	<SettingsCardItem>
-		<svelte:fragment slot="key">
+		{#snippet key()}
 			{$i18n.settings.text.principal}
-		</svelte:fragment>
-		<svelte:fragment slot="value">
+		{/snippet}
+
+		{#snippet value()}
 			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
 				{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
 			</output>
-			<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
-		</svelte:fragment>
-		<svelte:fragment slot="info">
+			<Copy inline text={$i18n.settings.text.principal_copied} value={principal?.toText() ?? ''} />
+		{/snippet}
+
+		{#snippet info()}
 			{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
-		</svelte:fragment>
+		{/snippet}
 	</SettingsCardItem>
 
 	<SettingsCardItem permanentInfo>
-		<svelte:fragment slot="key">
+		{#snippet key()}
 			{$i18n.settings.text.session_duration}
-		</svelte:fragment>
+		{/snippet}
 
-		<svelte:fragment slot="info">
+		{#snippet info()}
 			{#if nonNullish(remainingTimeMilliseconds)}
 				{$i18n.settings.text.session_expires_in}
 				{remainingTimeMilliseconds <= 0
 					? '0'
-					: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
+					: secondsToDuration({
+							seconds: BigInt(remainingTimeMilliseconds) / 1000n,
+							i18n: $i18n.temporal.seconds_to_duration
+						})}
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
 
 <SettingsCard>
-	<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
+	{#snippet title()}{$i18n.settings.text.networks}{/snippet}
 
 	<SettingsCardItem>
-		<svelte:fragment slot="key">{$i18n.settings.text.active_networks}</svelte:fragment>
-		<svelte:fragment slot="value">
+		{#snippet key()}
+			{$i18n.settings.text.active_networks}
+		{/snippet}
+
+		{#snippet value()}
 			<EnabledNetworksPreviewIcons />
 
 			<Button
-				testId={SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON}
 				link
 				onclick={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
+				testId={SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON}
 			>
 				{$i18n.core.text.edit} >
 			</Button>
-		</svelte:fragment>
-		<svelte:fragment slot="info">
+		{/snippet}
+
+		{#snippet info()}
 			{replaceOisyPlaceholders($i18n.settings.text.active_networks_description)}
-		</svelte:fragment>
+		{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
 
+{#if AI_ASSISTANT_CONSOLE_ENABLED}
+	<SettingsExperimentalFeatures />
+{/if}
+
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
 	<SettingsCard>
-		<svelte:fragment slot="title">{$i18n.settings.text.credentials_title}</svelte:fragment>
+		{#snippet title()}{$i18n.settings.text.credentials_title}{/snippet}
 
 		<SettingsCardItem>
-			<svelte:fragment slot="key">{$i18n.settings.text.pouh_credential}</svelte:fragment>
-			<svelte:fragment slot="value">
+			{#snippet key()}
+				{$i18n.settings.text.pouh_credential}
+			{/snippet}
+
+			{#snippet value()}
 				{#if $userHasPouhCredential}
-					<output in:fade class="mr-1.5">
+					<output class="mr-1.5" in:fade>
 						{$i18n.settings.text.pouh_credential_verified}
 					</output>
 				{:else}
@@ -129,18 +140,13 @@
 						{$i18n.settings.text.present_pouh_credential}&hellip;
 					</Button>
 				{/if}
-			</svelte:fragment>
-			<svelte:fragment slot="info">
+			{/snippet}
+
+			{#snippet info()}
 				{$i18n.settings.text.pouh_credential_description}
-			</svelte:fragment>
+			{/snippet}
 		</SettingsCardItem>
 	</SettingsCard>
 {/if}
-
-<SettingsCard>
-	<svelte:fragment slot="title">{$i18n.settings.text.appearance}</svelte:fragment>
-
-	<ThemeSelector />
-</SettingsCard>
 
 <SettingsVersion />

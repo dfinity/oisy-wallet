@@ -1,10 +1,36 @@
-import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import { allowance, balance, transactionFee } from '$icp/api/icrc-ledger.api';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import {
+	allowance,
+	approve,
+	balance,
+	getBlocks,
+	getMintingAccount,
+	icrc10SupportedStandards,
+	icrc1SupportedStandards,
+	metadata,
+	transactionFee,
+	transfer
+} from '$icp/api/icrc-ledger.api';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
-import type { Allowance } from '@dfinity/ledger-icp/dist/candid/ledger';
-import { IcrcLedgerCanister, type IcrcAccount } from '@dfinity/ledger-icrc';
+import { nowInBigIntNanoSeconds, toNullable } from '@dfinity/utils';
+import {
+	IcrcLedgerCanister,
+	IcrcMetadataResponseEntries,
+	type IcrcAccount,
+	type IcrcLedgerDid,
+	type IcrcTokenMetadataResponse
+} from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
+
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('icrc-ledger.api', () => {
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
@@ -13,6 +39,87 @@ describe('icrc-ledger.api', () => {
 		vi.clearAllMocks();
 
 		vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+	});
+
+	describe('metadata', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const mockToken = { ...mockValidIcToken, icon: 'mock-icon' };
+		const mockMetadata: IcrcTokenMetadataResponse = [
+			[IcrcMetadataResponseEntries.SYMBOL, { Text: mockToken.symbol }],
+			[IcrcMetadataResponseEntries.NAME, { Text: mockToken.name }],
+			[IcrcMetadataResponseEntries.FEE, { Nat: mockToken.fee }],
+			[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(mockToken.decimals) }],
+			[IcrcMetadataResponseEntries.LOGO, { Text: mockToken.icon }]
+		];
+
+		beforeEach(() => {
+			ledgerCanisterMock.metadata.mockResolvedValue(mockMetadata);
+		});
+
+		it('successfully calls metadata endpoint', async () => {
+			const result = await metadata(params);
+
+			expect(result).toEqual(mockMetadata);
+
+			expect(ledgerCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls metadata endpoint as query', async () => {
+			const result = await metadata({ ...params, certified: false });
+
+			expect(result).toEqual(mockMetadata);
+
+			expect(ledgerCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith({ certified: false });
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(metadata({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('transactionFee', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const fee = 1_000n;
+
+		beforeEach(() => {
+			ledgerCanisterMock.transactionFee.mockResolvedValue(fee);
+		});
+
+		it('successfully calls transactionFee endpoint', async () => {
+			const result = await transactionFee(params);
+
+			expect(result).toEqual(fee);
+
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls transactionFee endpoint as query', async () => {
+			const result = await transactionFee({ ...params, certified: false });
+
+			expect(result).toEqual(fee);
+
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(transactionFee({ ...params, identity: undefined })).rejects.toThrow();
+		});
 	});
 
 	describe('balance', () => {
@@ -37,87 +144,148 @@ describe('icrc-ledger.api', () => {
 			const tokens = await balance(params);
 
 			expect(tokens).toEqual(balanceE8s);
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				...account
 			});
 		});
 
 		it('successfully calls balance endpoint as query', async () => {
-			const tokens = await balance({
-				...params,
-				certified: false
-			});
+			const tokens = await balance({ ...params, certified: false });
 
 			expect(tokens).toEqual(balanceE8s);
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledExactlyOnceWith({
 				certified: false,
 				...account
 			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(
-				balance({
-					certified: true,
-					owner: mockPrincipal,
-					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
-					identity: undefined
-				})
-			).rejects.toThrow();
+			await expect(balance({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
-	describe('transactionFee', () => {
-		const params = {
-			certified: true,
-			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
-			identity: mockIdentity
+	describe('transfer', () => {
+		const to: IcrcAccount = {
+			owner: mockPrincipal2
 		};
 
-		const fee = 1_000n;
+		const toAccount = {
+			owner: mockPrincipal2,
+			subaccount: toNullable()
+		};
+
+		const amount = 1_000_000n;
+
+		const createdAt = 123_456_789n;
+
+		const params = {
+			to,
+			amount,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity,
+			createdAt
+		};
+
+		const mockIndex: IcrcLedgerDid.BlockIndex = 123n;
 
 		beforeEach(() => {
-			ledgerCanisterMock.transactionFee.mockResolvedValue(fee);
+			ledgerCanisterMock.transfer.mockResolvedValue(mockIndex);
 		});
 
-		it('successfully calls transactionFee endpoint', async () => {
-			const result = await transactionFee(params);
+		it('successfully calls transfer endpoint', async () => {
+			const result = await transfer(params);
 
-			expect(result).toEqual(fee);
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledTimes(1);
+			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledWith({
-				certified: true
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: toAccount,
+				created_at_time: createdAt
 			});
 		});
 
-		it('successfully calls transactionFee endpoint as query', async () => {
-			const result = await transactionFee({
-				...params,
-				certified: false
-			});
+		it('successfully calls transfer endpoint without createdAt', async () => {
+			vi.mocked(nowInBigIntNanoSeconds).mockReturnValue(987_654_321n);
 
-			expect(result).toEqual(fee);
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledTimes(1);
+			const result = await transfer({ ...params, createdAt: undefined });
 
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledWith({
-				certified: false
+			expect(result).toEqual(mockIndex);
+
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: toAccount,
+				created_at_time: 987_654_321n
 			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(
-				transactionFee({
-					certified: true,
-					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
-					identity: undefined
-				})
-			).rejects.toThrow();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('approve', () => {
+		const spender: IcrcAccount = {
+			owner: mockPrincipal2
+		};
+
+		const spenderAccount = {
+			owner: mockPrincipal2,
+			subaccount: toNullable()
+		};
+
+		const amount = 1_000_000n;
+
+		const expiresAt = 456_789n;
+		const createdAt = 123_456_789n;
+
+		const params = {
+			spender,
+			amount,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity,
+			expiresAt,
+			createdAt
+		};
+
+		const mockIndex: IcrcLedgerDid.BlockIndex = 123n;
+
+		beforeEach(() => {
+			ledgerCanisterMock.approve.mockResolvedValue(mockIndex);
+		});
+
+		it('successfully calls approve endpoint', async () => {
+			const result = await approve(params);
+
+			expect(result).toEqual(mockIndex);
+
+			expect(ledgerCanisterMock.approve).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				spender: spenderAccount,
+				expires_at: expiresAt,
+				created_at_time: createdAt
+			});
+		});
+
+		it('successfully calls approve endpoint without createdAt', async () => {
+			vi.mocked(nowInBigIntNanoSeconds).mockReturnValue(987_654_321n);
+
+			const result = await approve({ ...params, createdAt: undefined });
+
+			expect(result).toEqual(mockIndex);
+
+			expect(ledgerCanisterMock.approve).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				spender: spenderAccount,
+				expires_at: expiresAt,
+				created_at_time: 987_654_321n
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(approve({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -140,7 +308,7 @@ describe('icrc-ledger.api', () => {
 			identity: mockIdentity
 		};
 
-		const allowanceResponse: Allowance = {
+		const allowanceResponse: IcrcLedgerDid.Allowance = {
 			allowance: 1_000_000n,
 			expires_at: []
 		};
@@ -159,9 +327,8 @@ describe('icrc-ledger.api', () => {
 			const result = await allowance(params);
 
 			expect(result).toEqual(allowanceResponse);
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -185,9 +352,8 @@ describe('icrc-ledger.api', () => {
 			const result = await allowance(params);
 
 			expect(result).toEqual(allowanceResponse);
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: false,
 				account: {
 					owner: ownerPrincipal,
@@ -210,9 +376,8 @@ describe('icrc-ledger.api', () => {
 			const result = await allowance(params);
 
 			expect(result).toEqual(allowanceResponse);
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -235,9 +400,8 @@ describe('icrc-ledger.api', () => {
 			const result = await allowance(params);
 
 			expect(result).toEqual(allowanceResponse);
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -260,9 +424,8 @@ describe('icrc-ledger.api', () => {
 			const result = await allowance(params);
 
 			expect(result).toEqual(allowanceResponse);
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -288,9 +451,8 @@ describe('icrc-ledger.api', () => {
 			const result = await allowance(params);
 
 			expect(result).toEqual(allowanceResponse);
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -313,6 +475,190 @@ describe('icrc-ledger.api', () => {
 					identity: undefined
 				})
 			).rejects.toThrow();
+		});
+	});
+
+	describe('getBlocks', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity,
+			args: []
+		};
+
+		const mockTotalBlocks = 123n;
+		const mockGetBlocksResponse: IcrcLedgerDid.GetBlocksResult = {
+			log_length: mockTotalBlocks,
+			blocks: [],
+			archived_blocks: []
+		};
+
+		beforeEach(() => {
+			ledgerCanisterMock.getBlocks.mockResolvedValue(mockGetBlocksResponse);
+		});
+
+		it('successfully calls getBlocks endpoint', async () => {
+			const result = await getBlocks(params);
+
+			expect(result).toEqual(mockGetBlocksResponse);
+
+			expect(ledgerCanisterMock.getBlocks).toHaveBeenCalledExactlyOnceWith({
+				certified: true,
+				args: params.args
+			});
+		});
+
+		it('successfully calls getBlocks endpoint as query', async () => {
+			const result = await getBlocks({ ...params, certified: false });
+
+			expect(result).toEqual(mockGetBlocksResponse);
+
+			expect(ledgerCanisterMock.getBlocks).toHaveBeenCalledExactlyOnceWith({
+				certified: false,
+				args: params.args
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(getBlocks({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('icrc1SupportedStandards', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const supportedStandards = [
+			{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+			{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+		];
+
+		beforeEach(() => {
+			ledgerCanisterMock.icrc1SupportedStandards.mockResolvedValue(supportedStandards);
+		});
+
+		it('successfully calls icrc1SupportedStandards endpoint', async () => {
+			const result = await icrc1SupportedStandards(params);
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls icrc1SupportedStandards endpoint as query', async () => {
+			const result = await icrc1SupportedStandards({ ...params, certified: false });
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(icrc1SupportedStandards({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('icrc10SupportedStandards', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const supportedStandards = [
+			{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+			{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+		];
+
+		beforeEach(() => {
+			ledgerCanisterMock.icrc10SupportedStandards.mockResolvedValue(supportedStandards);
+		});
+
+		it('successfully calls icrc10SupportedStandards endpoint', async () => {
+			const result = await icrc10SupportedStandards(params);
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc10SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls icrc10SupportedStandards endpoint as query', async () => {
+			const result = await icrc10SupportedStandards({ ...params, certified: false });
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc10SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(icrc10SupportedStandards({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('getMintingAccount', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const candidAccount = {
+			owner: mockPrincipal,
+			subaccount: toNullable(Uint8Array.from([1, 2, 3]))
+		};
+		const expectedAccount = { owner: mockPrincipal, subaccount: Uint8Array.from([1, 2, 3]) };
+
+		beforeEach(() => {
+			ledgerCanisterMock.getMintingAccount.mockResolvedValue(toNullable(candidAccount));
+		});
+
+		it('successfully calls getMintingAccount endpoint', async () => {
+			const result = await getMintingAccount(params);
+
+			expect(result).toEqual(expectedAccount);
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls getMintingAccount endpoint as query', async () => {
+			const result = await getMintingAccount({ ...params, certified: false });
+
+			expect(result).toEqual(expectedAccount);
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(getMintingAccount({ ...params, identity: undefined })).rejects.toThrow();
+		});
+
+		it('returns undefined if getMintingAccount throws', async () => {
+			ledgerCanisterMock.getMintingAccount.mockRejectedValue(
+				new Error('Minting account not found')
+			);
+
+			const result = await getMintingAccount(params);
+
+			expect(result).toBeUndefined();
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
 		});
 	});
 });

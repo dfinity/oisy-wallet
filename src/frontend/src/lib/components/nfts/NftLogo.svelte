@@ -1,0 +1,77 @@
+<script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import type { Component } from 'svelte';
+	import noNftImage from '$lib/assets/nfts/no-nft-image.svg';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { logoSizes } from '$lib/constants/components.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { LogoSize } from '$lib/types/components';
+	import type { Nft } from '$lib/types/nft';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
+
+	interface Props {
+		nft: Nft;
+		logoSize?: LogoSize;
+		color?: 'off-white' | 'white';
+		ring?: boolean;
+		badge?: { type: 'network' } | { type: 'icon'; icon: Component; ariaLabel: string };
+		testId?: string;
+		badgeTestId?: string;
+	}
+
+	let {
+		nft,
+		logoSize = 'lg',
+		color = 'off-white',
+		ring = false,
+		badge,
+		testId,
+		badgeTestId
+	}: Props = $props();
+
+	const {
+		name,
+		collection: { network }
+	} = $derived(nft);
+</script>
+
+<div class="relative rounded-xl bg-primary/80">
+	<div style={`width: ${logoSizes[logoSize]}; height: ${logoSizes[logoSize]};`}>
+		<NftDisplayGuard {nft} type="nft-logo">
+			<Logo
+				alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
+				circle={false}
+				{color}
+				{ring}
+				size={logoSize}
+				src={getNftDisplayImageUrl(nft) ?? noNftImage}
+				{testId}
+			/>
+		</NftDisplayGuard>
+	</div>
+
+	{#if nonNullish(badge) && badge?.type === 'network'}
+		<div
+			class="absolute -bottom-1"
+			class:-right-1={logoSize !== 'xs'}
+			class:-right-1.75={logoSize === 'xs'}
+			class:scale-60={logoSize === 'xs'}
+		>
+			<NetworkLogo {color} {network} testId={`network-${badgeTestId}`} />
+		</div>
+	{:else if nonNullish(badge) && badge?.type === 'icon'}
+		<RoundedIcon
+			ariaLabel={badge.ariaLabel}
+			icon={badge.icon}
+			paddingClass="p-1"
+			positionClass="absolute"
+			size="12"
+			styleClass="-bottom-1 -right-1"
+			testId={`icon-${badgeTestId}`}
+		/>
+	{/if}
+</div>

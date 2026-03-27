@@ -1,0 +1,123 @@
+import { isNullish, nonNullish } from '@dfinity/utils';
+import {
+	AuthClient,
+	IdbStorage,
+	KEY_STORAGE_DELEGATION,
+	KEY_STORAGE_KEY
+} from '@icp-sdk/auth/client';
+import type { Identity } from '@icp-sdk/core/agent';
+
+export class AuthClientProvider {
+	static #instance: AuthClientProvider;
+
+	// We use a dedicated storage for the auth client to better manage it, e.g. clear it for a new login
+	readonly #storage: IdbStorage;
+
+	#authClient: AuthClient | undefined;
+
+	private constructor() {
+		this.#storage = new IdbStorage();
+	}
+
+	static getInstance(): AuthClientProvider {
+		if (isNullish(this.#instance)) {
+			this.#instance = new AuthClientProvider();
+		}
+
+		return this.#instance;
+	}
+
+	createAuthClient = async (
+		{ hideConsoleWarn, forceRecreate }: { hideConsoleWarn: boolean; forceRecreate?: boolean } = {
+			hideConsoleWarn: true
+		}
+	): Promise<AuthClient> => {
+		const authClient = this.#authClient;
+
+		if (!forceRecreate && nonNullish(authClient)) {
+			return authClient;
+		}
+
+		this.#authClient = undefined;
+
+		const hideWarn = (): (() => void) => {
+			// TODO: Workaround for agent-js. Disable the console.warn "You are using a custom storage provider..."
+			// printed in the browser console as pseudo-documentation. There is no opt-out, and we know our custom storage
+			// supports CryptoKey as it's literally the default provided implementation.
+			const hideAgentJsConsoleWarn = globalThis.console.warn;
+			globalThis.console.warn = (): null => null;
+
+			return () => {
+				// Redo console.warn
+				globalThis.console.warn = hideAgentJsConsoleWarn;
+			};
+		};
+
+		const redoConsoleWarn = hideConsoleWarn ? hideWarn() : undefined;
+
+		try {
+			this.#authClient = await AuthClient.create({
+				storage: this.#storage,
+				idleOptions: {
+					disableIdle: true,
+					disableDefaultIdleCallback: true
+				}
+			});
+
+			return this.#authClient;
+		} finally {
+			redoConsoleWarn?.();
+		}
+	};
+
+	/**
+	 * Since icp-js-core persists identity keys in IndexedDB by default,
+	 * they could be tampered with and affect the next login.
+	 * To ensure each session starts clean and safe, we clear the stored keys
+	 * before creating a new AuthClient.
+	 *
+	 * We also remove the delegation because `AuthClient.create` does not
+	 * overwrite or discard an existing delegation — it reads it from storage
+	 * and pairs it with whatever key is present. Once the key is cleared and
+	 * a fresh one generated, the old delegation would reference a different
+	 * public key, producing an ECDSA P256 signature / delegation mismatch.
+	 */
+	safeCreateAuthClient = async (
+		args: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
+	): Promise<AuthClient> => {
+		await Promise.all([
+			this.#storage.remove(KEY_STORAGE_KEY),
+			this.#storage.remove(KEY_STORAGE_DELEGATION)
+		]);
+
+		return await this.createAuthClient({ ...args, forceRecreate: true });
+	};
+
+	/**
+	 * In certain features, we want to execute jobs with the authenticated identity without getting it from the auth.store.
+	 * This is notably useful for Web Workers who do not have access to the window.
+	 */
+	loadIdentity = async (): Promise<Identity | undefined> => {
+		const authClient = await this.createAuthClient();
+		const authenticated = await authClient.isAuthenticated();
+
+		// Not authenticated, therefore, we provide no identity as a result
+		if (!authenticated) {
+			return undefined;
+		}
+
+		return authClient.getIdentity();
+	};
+
+	get storage(): IdbStorage {
+		return this.#storage;
+	}
+
+	/**
+	 * Reset the internal state of the provider.
+	 * This is notably useful for testing purposes to ensure that each test starts with a clean state.
+	 */
+	reset() {
+		this.#authClient = undefined;
+	}
+}

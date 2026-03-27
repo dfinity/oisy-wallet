@@ -15,7 +15,8 @@ export interface IcPendingTransactionsStore extends CertifiedStore<IcPendingTran
 }
 
 const initIcPendingTransactionsStore = (): IcPendingTransactionsStore => {
-	const { subscribe, update, reset } = initCertifiedStore<IcPendingTransactionsData>();
+	const { subscribe, update, reset, reinitialize } =
+		initCertifiedStore<IcPendingTransactionsData>();
 
 	return {
 		prepend: ({
@@ -38,6 +39,7 @@ const initIcPendingTransactionsStore = (): IcPendingTransactionsStore => {
 				[tokenId]: data
 			})),
 		reset,
+		reinitialize,
 		subscribe
 	};
 };

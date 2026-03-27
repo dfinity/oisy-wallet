@@ -13,25 +13,41 @@
 		MODAL_TOKEN_LIST_TOOLBAR
 	} from '$tests/lib/components/tokens/ModalTokensList.spec';
 
-	let { tokens, renderNoResults }: { tokens: Token[]; renderNoResults: boolean } = $props();
+	interface Props {
+		tokens: Token[];
+		renderNoResults: boolean;
+		filterNfts?: boolean;
+		onSelectNetworkFilter: () => void;
+		onTokenButtonClick: (token: Token) => void;
+	}
+
+	let {
+		tokens,
+		renderNoResults,
+		filterNfts = false,
+		onSelectNetworkFilter,
+		onTokenButtonClick
+	}: Props = $props();
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
 			tokens,
 			filterZeroBalance: false,
 			filterNetwork: undefined,
-			filterQuery: ''
+			filterQuery: '',
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
+			filterNfts
 		})
 	);
 </script>
 
-<ModalTokensList
-	loading={false}
-	networkSelectorViewOnly={false}
-	on:icTokenButtonClick
-	on:icSelectNetworkFilter
->
+<ModalTokensList networkSelectorViewOnly={false} {onSelectNetworkFilter} {onTokenButtonClick}>
 	{#snippet noResults()}
 		{#if renderNoResults}
 			<div data-tid={MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS}>No results custom message</div>

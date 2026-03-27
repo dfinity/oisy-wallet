@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
-	import { receiveWizardSteps } from '$eth/config/receive.config';
+	import { receiveWizardSteps, type WizardStepsReceiveComplete } from '$eth/config/receive.config';
 	import HowToConvertEthereumWizardSteps from '$icp/components/convert/HowToConvertEthereumWizardSteps.svelte';
 	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -15,7 +14,8 @@
 	import {
 		WizardStepsConvert,
 		WizardStepsHowToConvert,
-		WizardStepsReceive
+		WizardStepsReceive,
+		WizardStepsSend
 	} from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -26,25 +26,24 @@
 	interface Props {
 		sourceToken: Token;
 		destinationToken: Token;
+		onClose: () => void;
 	}
 
-	let { sourceToken, destinationToken }: Props = $props();
+	let { sourceToken, destinationToken, onClose }: Props = $props();
 
 	let sendAmount: OptionAmount = $state();
 	let receiveAmount: number | undefined = $state();
 	let convertProgressStep: string = $state(ProgressStepsConvert.INITIALIZATION);
-	let currentStep: WizardStep | undefined = $state();
-	let modal: WizardModal | undefined = $state();
+	let currentStep: WizardStep<WizardStepsReceiveComplete> | undefined = $state();
+	let modal: WizardModal<WizardStepsReceiveComplete> | undefined = $state();
 
-	let steps: WizardSteps = $derived(
+	let steps: WizardSteps<WizardStepsReceiveComplete> = $derived(
 		receiveWizardSteps({
 			i18n: $i18n,
 			sourceToken: sourceToken.symbol,
 			destinationToken: destinationToken.symbol
 		})
 	);
-
-	const dispatch = createEventDispatcher();
 
 	const close = () =>
 		closeModal(() => {
@@ -55,12 +54,10 @@
 
 			currentStep = undefined;
 
-			dispatch('nnsClose');
+			onClose();
 		});
 
-	const goToStep = (
-		stepName: WizardStepsHowToConvert | WizardStepsConvert | WizardStepsReceive
-	) => {
+	const goToStep = (stepName: WizardStepsReceiveComplete) => {
 		if (nonNullish(modal)) {
 			goToWizardStep({
 				modal,
@@ -71,57 +68,58 @@
 	};
 </script>
 
-<ConvertContexts {sourceToken} {destinationToken}>
+<ConvertContexts {destinationToken} {sourceToken}>
 	<WizardModal
+		bind:this={modal}
+		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
+		onClose={close}
 		{steps}
 		bind:currentStep
-		bind:this={modal}
-		on:nnsClose={close}
-		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
-		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		<EthConvertTokenWizard
 			{currentStep}
 			formCancelAction="back"
-			bind:sendAmount
-			bind:receiveAmount
-			bind:convertProgressStep
-			on:icBack={() =>
+			onBack={() =>
 				currentStep?.name === WizardStepsConvert.CONVERT
 					? goToStep(WizardStepsHowToConvert.INFO)
 					: modal?.back()}
-			on:icNext={modal?.next}
-			on:icClose={close}
+			onClose={close}
+			onNext={modal?.next}
+			bind:sendAmount
+			bind:receiveAmount
+			bind:convertProgressStep
 		>
-			{#if currentStep?.name === WizardStepsHowToConvert.INFO || currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
-				<HowToConvertEthereumWizardSteps
-					{currentStep}
-					formCancelAction="back"
-					on:icBack={() =>
-						goToStep(
-							currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE
-								? WizardStepsHowToConvert.INFO
-								: WizardStepsReceive.RECEIVE
-						)}
-					on:icQRCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
-					on:icConvert={() => goToStep(WizardStepsConvert.CONVERT)}
-				/>
-			{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
-				<ReceiveAddressQrCode
-					on:icBack={modal?.back}
-					address={$icrcAccountIdentifierText ?? ''}
-					addressToken={ICP_TOKEN}
-					network={ICP_NETWORK}
-					qrCodeAction={{ enabled: false }}
-					copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
-				/>
-			{:else}
-				<IcReceiveInfoCkEthereum
-					on:icQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
-					on:icHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
-				/>
-			{/if}
+			{#key currentStep?.name}
+				{#if currentStep?.name === WizardStepsHowToConvert.INFO || currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
+					<HowToConvertEthereumWizardSteps
+						{currentStep}
+						formCancelAction="back"
+						onBack={() =>
+							goToStep(
+								currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE
+									? WizardStepsHowToConvert.INFO
+									: WizardStepsReceive.RECEIVE
+							)}
+						onConvert={() => goToStep(WizardStepsConvert.CONVERT)}
+						onQrCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
+					/>
+				{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
+					<ReceiveAddressQrCode
+						address={$icrcAccountIdentifierText ?? ''}
+						addressToken={ICP_TOKEN}
+						copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+						network={ICP_NETWORK}
+						onBack={modal?.back}
+					/>
+				{:else if currentStep?.name === WizardStepsReceive.RECEIVE || currentStep?.name === WizardStepsConvert.CONVERT || currentStep?.name === WizardStepsConvert.REVIEW || currentStep?.name === WizardStepsConvert.CONVERTING || currentStep?.name === WizardStepsConvert.DESTINATION || currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+					<IcReceiveInfoCkEthereum
+						onHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
+						onQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
+					/>
+				{/if}
+			{/key}
 		</EthConvertTokenWizard>
 	</WizardModal>
 </ConvertContexts>

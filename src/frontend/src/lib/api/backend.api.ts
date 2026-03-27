@@ -1,55 +1,52 @@
 import type {
 	AddUserCredentialResult,
-	AllowSigningResponse,
+	BtcGetFeePercentilesResponse,
 	Contact,
-	CreateChallengeResponse,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	PendingTransaction,
-	SelectedUtxosFeeResponse,
-	UserProfile,
-	UserToken,
-	UserTokenId
+	TokenId,
+	UserProfile
 } from '$declarations/backend/backend.did';
+import { CanisterApi } from '$lib/api/canister.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
+	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
+	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	CreateContactParams,
 	DeleteContactParams,
 	GetContactParams,
+	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
+	GetUserTransactionsParams,
+	GetUserTransactionsResponse,
+	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SaveUserTransactionsParams,
+	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
-	UpdateContactParams
+	UpdateContactParams,
+	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
+import type { BackendExchangeRate } from '$lib/types/exchange';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
-let canister: BackendCanister | undefined = undefined;
-
-export const listUserTokens = async ({
-	identity,
-	certified
-}: CanisterApiFunctionParams<QueryParams>): Promise<UserToken[]> => {
-	const { listUserTokens } = await backendCanister({ identity });
-
-	return listUserTokens({ certified });
-};
+const backendApi = new CanisterApi<BackendCanister>();
 
 export const listCustomTokens = async ({
-	identity,
-	certified
-}: CanisterApiFunctionParams<QueryParams>): Promise<CustomToken[]> => {
+	identity
+}: CanisterApiFunctionParams): Promise<CustomToken[]> => {
 	const { listCustomTokens } = await backendCanister({ identity });
 
-	return listCustomTokens({ certified });
+	return listCustomTokens();
 };
 
 export const setManyCustomTokens = async ({
@@ -74,15 +71,6 @@ export const setCustomToken = async ({
 	return setCustomToken({ token });
 };
 
-export const removeUserToken = async ({
-	identity,
-	...restParams
-}: CanisterApiFunctionParams<UserTokenId>): Promise<void> => {
-	const { removeUserToken } = await backendCanister({ identity });
-
-	return removeUserToken(restParams);
-};
-
 export const removeCustomToken = async ({
 	identity,
 	...restParams
@@ -90,26 +78,6 @@ export const removeCustomToken = async ({
 	const { removeCustomToken } = await backendCanister({ identity });
 
 	return removeCustomToken(restParams);
-};
-
-export const setManyUserTokens = async ({
-	identity,
-	tokens
-}: CanisterApiFunctionParams<{ tokens: UserToken[] }>): Promise<void> => {
-	const { setManyUserTokens } = await backendCanister({ identity });
-
-	return setManyUserTokens({ tokens });
-};
-
-export const setUserToken = async ({
-	token,
-	identity
-}: CanisterApiFunctionParams<{
-	token: UserToken;
-}>): Promise<void> => {
-	const { setUserToken } = await backendCanister({ identity });
-
-	return setUserToken({ token });
 };
 
 export const createUserProfile = async ({
@@ -141,7 +109,7 @@ export const addUserCredential = async ({
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcAddPendingTransactionParams>): Promise<boolean> => {
+}: CanisterApiFunctionParams<BtcAddPendingTransactionParams>): Promise<AddPendingTransactionOutcome> => {
 	const { btcAddPendingTransaction } = await backendCanister({ identity });
 
 	return btcAddPendingTransaction(params);
@@ -150,26 +118,28 @@ export const addPendingBtcTransaction = async ({
 export const getPendingBtcTransactions = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<PendingTransaction[]> => {
-	const { btcGetPendingTransaction } = await backendCanister({ identity });
+}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<GetPendingTransactionsOutcome> => {
+	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
-	return btcGetPendingTransaction(params);
+	return btcGetPendingTransactions(params);
 };
 
 export const selectUserUtxosFee = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeResponse> => {
+}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeOutcome> => {
 	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
 
 	return btcSelectUserUtxosFee(params);
 };
 
-export const createPowChallenge = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<CreateChallengeResponse> => {
-	const { createPowChallenge } = await backendCanister({ identity });
-	return createPowChallenge();
+export const getCurrentBtcFeePercentiles = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetFeePercentilesParams>): Promise<BtcGetFeePercentilesResponse> => {
+	const { btcGetCurrentFeePercentiles } = await backendCanister({ identity });
+
+	return btcGetCurrentFeePercentiles(params);
 };
 
 export const getAllowedCycles = async ({
@@ -183,7 +153,7 @@ export const getAllowedCycles = async ({
 export const allowSigning = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningResponse> => {
+}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningOutcome> => {
 	const { allowSigning } = await backendCanister({ identity });
 
 	return allowSigning(params);
@@ -214,6 +184,15 @@ export const updateUserNetworkSettings = async ({
 	const { updateUserNetworkSettings } = await backendCanister({ identity });
 
 	return updateUserNetworkSettings(params);
+};
+
+export const updateUserAgreements = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserAgreements>): Promise<void> => {
+	const { updateUserAgreements } = await backendCanister({ identity });
+
+	return updateUserAgreements(params);
 };
 
 export const getContact = async ({
@@ -255,6 +234,57 @@ export const deleteContact = async ({
 	return deleteContact(contactId);
 };
 
+export const updateUserExperimentalFeatureSettings = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<UpdateUserExperimentalFeatureSettings>): Promise<void> => {
+	const { updateUserExperimentalFeatureSettings } = await backendCanister({ identity });
+
+	return updateUserExperimentalFeatureSettings(params);
+};
+
+export const getExchangeRate = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<{
+	token_id: TokenId;
+	certified: boolean;
+}>): Promise<BackendExchangeRate | undefined> => {
+	const { getExchangeRate } = await backendCanister({ identity });
+
+	return getExchangeRate(params);
+};
+
+export const getExchangeRates = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<{
+	token_ids: TokenId[];
+	certified: boolean;
+}>): Promise<Map<string, BackendExchangeRate>> => {
+	const { getExchangeRates } = await backendCanister({ identity });
+
+	return getExchangeRates(params);
+};
+
+export const getUserTransactions = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<GetUserTransactionsParams>): Promise<GetUserTransactionsResponse> => {
+	const { getUserTransactions } = await backendCanister({ identity });
+
+	return getUserTransactions(params);
+};
+
+export const saveUserTransactions = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserTransactionsParams>): Promise<void> => {
+	const { saveUserTransactions } = await backendCanister({ identity });
+
+	return saveUserTransactions(params);
+};
+
 const backendCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
@@ -262,12 +292,9 @@ const backendCanister = async ({
 }: CanisterApiFunctionParams): Promise<BackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	if (isNullish(canister)) {
-		canister = await BackendCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return canister;
+	return await backendApi.getCanister({
+		identity,
+		canisterId,
+		create: BackendCanister.create
+	});
 };

@@ -7,19 +7,26 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Token } from '$lib/types/token';
+	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+	import { getTokenDisplayName } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: Token;
 		logoSize?: LogoSize;
 		onClick: () => void;
+		showDividers?: boolean;
 	}
 
-	let { token, logoSize = 'lg', onClick }: Props = $props();
+	let { token, logoSize = 'lg', onClick, showDividers = true }: Props = $props();
 
-	const { oisyName, oisySymbol, symbol, name, network } = token;
+	const { oisyName, oisySymbol, symbol, network } = $derived(token);
+
+	// For disabled tokens, we don't have the balance workers running, so we can't show the balance.
+	// TODO: Instead of hiding balances we should show a toggle or button to enable the token saying "Enable to see balance"
+	let showBalance = $derived(!isTokenToggleable(token) || token.enabled);
 </script>
 
-<LogoButton {onClick} dividers={true}>
+<LogoButton dividers={showDividers} fullWidth {onClick}>
 	{#snippet title()}
 		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
 	{/snippet}
@@ -29,7 +36,7 @@
 			{$i18n.tokens.text.chain_key}
 		{/if}
 
-		{oisyName?.oisyName ?? name}
+		{getTokenDisplayName(token)}
 	{/snippet}
 
 	{#snippet description()}
@@ -38,15 +45,21 @@
 
 	{#snippet logo()}
 		<div class="mr-2">
-			<TokenLogo data={token} color="white" badge={{ type: 'network' }} {logoSize} />
+			<TokenLogo badge={{ type: 'network' }} color="white" data={token} {logoSize} />
 		</div>
 	{/snippet}
 
 	{#snippet titleEnd()}
-		<TokenBalance data={token} />
+		{#if showBalance}
+			<div class="ml-1 min-w-12 text-nowrap">
+				<TokenBalance data={token} />
+			</div>
+		{/if}
 	{/snippet}
 
 	{#snippet descriptionEnd()}
-		<ExchangeTokenValue data={token} />
+		{#if showBalance}
+			<ExchangeTokenValue data={token} />
+		{/if}
 	{/snippet}
 </LogoButton>

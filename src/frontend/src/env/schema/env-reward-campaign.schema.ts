@@ -13,6 +13,13 @@ export const RewardCampaignSchema = z.object({
 	learnMoreHref: z.string(),
 	startDate: z.string().transform((val) => new Date(val)),
 	endDate: z.string().transform((val) => new Date(val)),
+	welcome: z
+		.object({
+			title: z.string().optional(),
+			subtitle: z.string().optional(),
+			description: z.string().optional()
+		})
+		.optional(),
 	win: z.object({
 		default: z.object({
 			title: z.string(),
@@ -25,6 +32,38 @@ export const RewardCampaignSchema = z.object({
 			banner: z.string(),
 			description: z.string(),
 			shareHref: z.string()
-		})
+		}),
+		referral: z
+			.object({
+				title: z.string(),
+				banner: z.string(),
+				description: z.string(),
+				shareHref: z.string()
+			})
+			.optional(),
+		leaderboard: z
+			.object({
+				title: z.string(),
+				banner: z.string(),
+				description: z.string(),
+				shareHref: z.string()
+			})
+			.optional(),
+		referrer: z
+			.object({
+				title: z.string(),
+				banner: z.string(),
+				description: z.string(),
+				shareHref: z.string()
+			})
+			.optional(),
+		referee: z
+			.object({
+				title: z.string(),
+				banner: z.string(),
+				description: z.string(),
+				shareHref: z.string()
+			})
+			.optional()
 	})
 });

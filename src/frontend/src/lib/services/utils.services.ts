@@ -1,10 +1,9 @@
 import { trackEvent } from '$lib/services/analytics.services';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { errorDetailToString } from '$lib/utils/error.utils';
-import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 
 /**
  * Higher-order function to handle common authentication, tracking, and error handling patterns
@@ -23,8 +22,7 @@ export const wrapCallWith =
 	}) =>
 	async (params: Omit<T, 'identity'>): Promise<R | undefined> => {
 		if (isNullish(identity)) {
-			await nullishSignOut();
-			return undefined;
+			return;
 		}
 
 		try {

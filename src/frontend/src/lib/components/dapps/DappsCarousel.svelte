@@ -1,57 +1,79 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import { EARNING_ENABLED } from '$env/earning';
 	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
+	import { stakeProvidersConfig } from '$lib/config/stake.config';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		userProfileLoaded,
 		userProfileVersion,
 		userSettings
 	} from '$lib/derived/user-profile.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import type {
 		CarouselSlideOisyDappDescription,
 		OisyDappDescription
 	} from '$lib/types/dapp-description';
+	import { StakeProvider } from '$lib/types/stake';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let styleClass: string | undefined = undefined;
+	interface Props {
+		styleClass?: string;
+		wrapperStyleClass?: string;
+	}
+
+	let { styleClass, wrapperStyleClass }: Props = $props();
 
 	// It may happen that the user's settings are refreshed before having been updated.
 	// But for that small instant of time, we could still show the dApp.
-	// To avoid this glitch we store the dApp id in a temporary array, and we add it to the hidden dApps ids.
-	let temporaryHiddenDappsIds: OisyDappDescription['id'][] = [];
+	// To avoid this glitch, we store the dApp id in a temporary array, and we add it to the hidden dApps ids.
+	let temporaryHiddenDappsIds = $state<OisyDappDescription['id'][]>([]);
 
-	let hiddenDappsIds: OisyDappDescription['id'][];
-	$: hiddenDappsIds = [
+	let hiddenDappsIds = $derived([
 		...($userSettings?.dapp.dapp_carousel.hidden_dapp_ids ?? []),
 		...temporaryHiddenDappsIds
-	];
+	]);
 
 	const featuredAirdrop: RewardCampaignDescription | undefined = rewardCampaigns.find(
 		({ id }) => id === FEATURED_REWARD_CAROUSEL_SLIDE_ID
 	);
 
-	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
-	$: featureAirdropSlide = nonNullish(featuredAirdrop)
-		? ({
-				id: featuredAirdrop.id,
-				carousel: {
-					text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
-					callToAction: $i18n.rewards.text.carousel_slide_cta
-				},
-				logo: featuredAirdrop.logo,
-				name: featuredAirdrop.title
-			} as CarouselSlideOisyDappDescription)
-		: undefined;
+	let featureAirdropSlide = $derived(
+		nonNullish(featuredAirdrop)
+			? ({
+					id: featuredAirdrop.id,
+					carousel: {
+						text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
+						callToAction: $i18n.rewards.text.carousel_slide_cta
+					},
+					logo: featuredAirdrop.logo,
+					name: featuredAirdrop.title
+				} as CarouselSlideOisyDappDescription)
+			: undefined
+	);
+
+	let harvestAutopilotSlide = $derived(
+		EARNING_ENABLED
+			? ({
+					id: stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].name,
+					carousel: {
+						text: $i18n.stake.text.harvest_autopilot_carousel_slide_title,
+						callToAction: $i18n.stake.text.harvest_autopilot_carousel_slide_cta
+					},
+					logo: stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].logo,
+					name: stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].name
+				} as CarouselSlideOisyDappDescription)
+			: undefined
+	);
 
 	/*
 	 TODO: rename and adjust DappsCarousel for different data sources (not only dApps descriptions).
@@ -60,20 +82,24 @@
 	 3. Create a single slide data type that can be used for airdrop, dApps, and all further cases.
 	 4. Adjust DappsCarouselSlide accordingly.
 	 */
-	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
-	$: dappsCarouselSlides = filterCarouselDapps({
-		dAppDescriptions: [
-			...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
-			...dAppDescriptions
-		],
-		hiddenDappsIds
-	});
+	let dappsCarouselSlides = $derived(
+		filterCarouselDapps({
+			dAppDescriptions: [
+				...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
+				...(nonNullish(harvestAutopilotSlide) ? [harvestAutopilotSlide] : []),
+				...dAppDescriptions
+			],
+			hiddenDappsIds
+		})
+	);
 
-	let carousel: Carousel;
+	let carousel = $state<Carousel>();
 
-	const closeSlide = async ({
-		detail: dappId
-	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
+	const closeSlide = async (dappId: CarouselSlideOisyDappDescription['id']) => {
+		if (isNullish(carousel)) {
+			return;
+		}
+
 		const idx = dappsCarouselSlides.findIndex(({ id }) => id === dappId);
 
 		temporaryHiddenDappsIds = [...temporaryHiddenDappsIds, dappId];
@@ -86,7 +112,6 @@
 		}
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -105,20 +130,26 @@
 </script>
 
 {#if $userProfileLoaded && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
-	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
-	<Carousel
-		bind:this={carousel}
-		controlsWidthStyleClass="w-[calc(100%-5rem)]"
-		styleClass={`w-full ${styleClass ?? ''}`}
-	>
-		{#each dappsCarouselSlides as dappsCarouselSlide (dappsCarouselSlide.id)}
-			<DappsCarouselSlide
-				{dappsCarouselSlide}
-				airdrop={nonNullish(featuredAirdrop) && featuredAirdrop.id === dappsCarouselSlide.id
-					? featuredAirdrop
-					: undefined}
-				on:icCloseCarouselSlide={closeSlide}
-			/>
-		{/each}
-	</Carousel>
+	<div class={wrapperStyleClass ?? ''}>
+		<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
+		<Carousel
+			bind:this={carousel}
+			controlsWidthStyleClass="w-[calc(100%-5rem)]"
+			styleClass={`w-full ${styleClass ?? ''}`}
+		>
+			{#each dappsCarouselSlides as dappsCarouselSlide (dappsCarouselSlide.id)}
+				<DappsCarouselSlide
+					airdrop={nonNullish(featuredAirdrop) && featuredAirdrop.id === dappsCarouselSlide.id
+						? featuredAirdrop
+						: undefined}
+					{dappsCarouselSlide}
+					onCloseCarouselSlide={closeSlide}
+					pagePath={nonNullish(harvestAutopilotSlide) &&
+					harvestAutopilotSlide.id === dappsCarouselSlide.id
+						? AppPath.EarnAutopilot
+						: undefined}
+				/>
+			{/each}
+		</Carousel>
+	</div>
 {/if}

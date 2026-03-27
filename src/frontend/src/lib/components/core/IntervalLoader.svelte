@@ -1,39 +1,86 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, onMount, type Snippet } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 
 	interface Props {
 		onLoad: () => Promise<void>;
 		interval: number;
-		children?: Snippet;
+		skipInitialLoad?: boolean;
 	}
 
-	let { onLoad, interval, children }: Props = $props();
+	let { onLoad, interval, skipInitialLoad = false }: Props = $props();
 
-	let timer: NodeJS.Timeout | undefined = undefined;
+	// A reference to the `onLoad` function that will be scheduled repeatedly.
+	// We set this only after the initial load has finished, to avoid race conditions.
+	let scheduledLoad = $state<typeof onLoad | undefined>();
 
-	const startTimer = async () => {
-		if (nonNullish(timer)) {
-			return;
-		}
+	let timer: NodeJS.Timeout | undefined;
 
-		await onLoad();
+	const startTimer = (): NodeJS.Timeout | undefined =>
+		setTimeout(async () => {
+			const isTimer = nonNullish(timer);
 
-		timer = setInterval(onLoad, interval);
-	};
+			await scheduledLoad?.();
+
+			if (isTimer) {
+				timer = startTimer();
+			}
+		}, interval);
 
 	const stopTimer = () => {
 		if (isNullish(timer)) {
 			return;
 		}
 
-		clearInterval(timer);
+		clearTimeout(timer);
 		timer = undefined;
 	};
 
-	onMount(startTimer);
+	const resetTimer = () => {
+		stopTimer();
 
-	onDestroy(stopTimer);
+		timer = startTimer();
+	};
+
+	// Lifecycle: on component mount
+	// 1. If `skipInitialLoad` is false, call `onLoad` once immediately.
+	// 2. After the initial call completes, set `scheduledLoad` so it can run repeatedly.
+	onMount(async () => {
+		if (!skipInitialLoad) {
+			await onLoad();
+		}
+
+		// Important: we only set `scheduledLoad` *after* the first `onLoad` call finishes.
+		// If we set it earlier, the repeating timer could trigger another `onLoad`
+		// before the first run has completed, causing overlapping executions.
+		scheduledLoad = onLoad;
+	});
+
+	// We need a separate onMount here because the first onMount above is async.
+	// An async `onMount` cannot return a clean-up function.
+	// Using `onDestroy` directly would create a race condition:
+	// - `onDestroy` does not wait for the async `onMount` above to finish.
+	// - If the component unmounts quickly, the timer could be created after destroy ran,
+	//   leaving an interval running with no clean-up.
+	// By returning a clean-up function here, Svelte guarantees that the timer
+	// will always be stopped after this mount finishes and only when the component unmounts.
+	onMount(() => {
+		timer = startTimer();
+
+		return () => stopTimer();
+	});
+
+	let intervalEffectInitialRun = true;
+
+	$effect(() => {
+		[interval];
+
+		if (intervalEffectInitialRun) {
+			intervalEffectInitialRun = false;
+
+			return;
+		}
+
+		untrack(() => resetTimer());
+	});
 </script>
-
-{@render children?.()}

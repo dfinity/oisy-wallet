@@ -1,28 +1,37 @@
 import type { WalletConnectEthApproveRequestMessage } from '$eth/types/wallet-connect';
 import type { WebSocketListener } from '$lib/types/listener';
-import type { Option } from '$lib/types/utils';
 import type { WalletConnectSolApproveRequestMessage } from '$sol/types/wallet-connect';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { ErrorResponse } from '@walletconnect/jsonrpc-utils';
-import type { PairingTypes } from '@walletconnect/types';
+import type { PairingTypes, SessionTypes } from '@walletconnect/types';
 
 export type WalletConnectApproveRequestMessage =
 	| WalletConnectEthApproveRequestMessage
 	| WalletConnectSolApproveRequestMessage;
 
-export interface WalletConnectListener extends WebSocketListener {
-	pair: () => Promise<PairingTypes.Struct>;
-	approveSession: (proposal: WalletKitTypes.SessionProposal) => Promise<void>;
-	rejectSession: (proposal: WalletKitTypes.SessionProposal) => Promise<void>;
-	sessionProposal: (callback: (proposal: WalletKitTypes.SessionProposal) => void) => void;
-	sessionDelete: (callback: () => void) => void;
-	sessionRequest: (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => void;
-	rejectRequest: (params: { id: number; topic: string; error: ErrorResponse }) => Promise<void>;
-	approveRequest: (params: {
+export abstract class WalletConnectListener implements WebSocketListener {
+	abstract pair(uri: string): Promise<PairingTypes.Struct>;
+	abstract approveSession(proposal: WalletKitTypes.SessionProposal): Promise<void>;
+	abstract rejectSession(proposal: WalletKitTypes.SessionProposal): Promise<void>;
+	abstract attachHandlers(handlers: {
+		onSessionProposal: (proposal: WalletKitTypes.SessionProposal) => void;
+		onSessionDelete: () => void;
+		onSessionRequest: (request: WalletKitTypes.SessionRequest) => Promise<void>;
+	}): void;
+	abstract detachHandlers(): void;
+	abstract rejectRequest(params: {
+		id: number;
+		topic: string;
+		error: ErrorResponse;
+	}): Promise<void>;
+	abstract getActiveSessions(): Record<string, SessionTypes.Struct>;
+	abstract approveRequest(params: {
 		id: number;
 		topic: string;
 		message: WalletConnectApproveRequestMessage;
-	}) => Promise<void>;
+	}): Promise<void>;
+	abstract disconnect(): Promise<void>;
 }
 
-export type OptionWalletConnectListener = Option<WalletConnectListener>;
+export type OptionWalletConnectListener = Nullish<WalletConnectListener>;

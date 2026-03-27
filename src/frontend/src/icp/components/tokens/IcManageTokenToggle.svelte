@@ -1,21 +1,21 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+	import { isIcrcTokenToggleDisabled } from '$icp/utils/token-toggle.utils';
 	import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isIcrcTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
 
-	export let token: IcrcCustomToken;
-	export let testIdPrefix = MANAGE_TOKENS_MODAL_TOKEN_TOGGLE;
+	interface Props {
+		token: IcrcCustomToken;
+		testIdPrefix?: string;
+		onIcToken: (token: IcrcCustomToken) => void;
+	}
 
-	let disabled = false;
-	$: disabled = isIcrcTokenToggleDisabled(token);
+	let { token, testIdPrefix = MANAGE_TOKENS_MODAL_TOKEN_TOGGLE, onIcToken }: Props = $props();
 
-	let checked: boolean;
-	$: checked = token.enabled;
+	let disabled = $derived(isIcrcTokenToggleDisabled(token));
 
-	const dispatch = createEventDispatcher();
+	let checked = $derived(token.enabled);
 
 	const toggle = () => {
 		if (disabled) {
@@ -24,7 +24,7 @@
 
 		checked = !checked;
 
-		dispatch('icToken', {
+		onIcToken({
 			...token,
 			enabled: checked
 		});
@@ -33,8 +33,8 @@
 
 <Toggle
 	ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
-	testId={`${testIdPrefix}-${token.symbol}-${token.network.id.description}`}
 	{disabled}
+	testId={`${testIdPrefix}-${token.symbol}-${token.network.id.description}`}
 	bind:checked
 	on:nnsToggle={toggle}
 />

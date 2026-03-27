@@ -1,28 +1,38 @@
 import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
+import { initUtxosFeeStore, UTXOS_FEE_CONTEXT_KEY } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import {
 	SEND_DESTINATION_SECTION,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
-import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('BtcSendForm', () => {
-	const mockContext = new Map([]);
-	mockContext.set(
-		SEND_CONTEXT_KEY,
-		initSendContext({
-			token: BTC_MAINNET_TOKEN
-		})
-	);
+	const createMockContext = () => {
+		const mockContext = new Map([]);
+		mockContext.set(
+			SEND_CONTEXT_KEY,
+			initSendContext({
+				token: BTC_MAINNET_TOKEN
+			})
+		);
+		mockContext.set(UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() });
+		return mockContext;
+	};
 
 	const props = {
 		destination: mockBtcAddress,
 		amount: 22_000_000,
 		networkId: BTC_MAINNET_NETWORK_ID,
-		source: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9'
+		source: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
+		onBack: vi.fn(),
+		onNext: vi.fn(),
+		onTokensList: vi.fn(),
+		cancel: mockSnippet
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
@@ -31,7 +41,7 @@ describe('BtcSendForm', () => {
 	it('should render all fields', () => {
 		const { container, getByTestId } = render(BtcSendForm, {
 			props,
-			context: mockContext
+			context: createMockContext()
 		});
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);

@@ -10,6 +10,16 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
 
+	interface Props {
+		inputValue: string;
+		inputPlaceholder: string;
+		ariaLabel: string;
+		testIdPrefix?: string;
+		disabled?: boolean;
+		icon: Snippet;
+		overflowableContent?: Snippet;
+	}
+
 	let {
 		inputValue = $bindable(''),
 		inputPlaceholder,
@@ -18,15 +28,7 @@
 		disabled = false,
 		icon: slidingIcon,
 		overflowableContent
-	}: {
-		inputValue: string;
-		inputPlaceholder: string;
-		ariaLabel: string;
-		testIdPrefix?: string;
-		disabled?: boolean;
-		icon: Snippet;
-		overflowableContent?: Snippet;
-	} = $props();
+	}: Props = $props();
 
 	let visible = $state(false);
 
@@ -75,7 +77,7 @@
 
 <div class="relative flex w-full">
 	{#if visible && inputValue === ''}
-		<div class="z-2 fixed bottom-0 left-0 right-0 top-0">
+		<div class="fixed top-0 right-0 bottom-0 left-0 z-2">
 			<Backdrop invisible on:nnsClose={handleClose} />
 		</div>
 	{/if}
@@ -85,34 +87,34 @@
 			{@render overflowableContent()}
 		</div>
 	{/if}
-	<div class="z-2 absolute right-0 w-full">
+	<div class="absolute right-0 z-2 w-full">
 		{#if visible}
 			<div
-				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
-				out:fade
 				class="input-field condensed absolute right-0 -mt-[11px] mr-px flex overflow-hidden"
-				class:w-full={nonNullish(overflowableContent)}
 				class:md:w-[270px]={nonNullish(overflowableContent)}
 				class:w-[270px]={isNullish(overflowableContent)}
+				class:w-full={nonNullish(overflowableContent)}
+				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
+				out:fade
 			>
 				<!-- We add "search" in the inputs name to prevent browsers form displaying autofill, see: -->
 				<!-- https://stackoverflow.com/a/68260636/2244209 -->
 				<!-- Additionally, we have to avoid placeholders with word "name" as that can bring autofill as well -->
 				<InputTextWithAction
-					bind:inputElement
 					name="search_slidingInput"
-					placeholder={inputPlaceholder ?? ''}
-					bind:value={inputValue}
-					testId={`${testIdPrefix}-input`}
 					autofocus
+					placeholder={inputPlaceholder ?? ''}
+					testId={`${testIdPrefix}-input`}
+					bind:inputElement
+					bind:value={inputValue}
 				/>
 				{#if inputValue !== ''}
-					<div class="absolute right-12 top-[11px] bg-primary" transition:fade>
+					<div class="absolute top-[11px] right-12 bg-primary" transition:fade>
 						<ButtonIcon
 							ariaLabel={$i18n.core.text.clear_filter}
 							colorStyle="muted"
-							onclick={handleClear}
 							link={false}
+							onclick={handleClear}
 							testId={`${testIdPrefix}-clear-btn`}
 						>
 							{#snippet icon()}
@@ -124,14 +126,14 @@
 			</div>
 		{/if}
 		<ButtonIcon
-			bind:button
-			onclick={handleToggle}
+			{ariaLabel}
+			colorStyle="muted"
 			{disabled}
 			link={false}
-			colorStyle="muted"
+			onclick={handleToggle}
 			styleClass={`absolute right-[5px] ${visible ? 'active' : ''}`}
-			{ariaLabel}
 			testId={`${testIdPrefix}-open-btn`}
+			bind:button
 		>
 			{#snippet icon()}
 				<span>

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { assertNonNullish, isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
@@ -14,16 +14,23 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { hardenMetadata } from '$lib/utils/metadata.utils';
+	import { getTokenInfo } from '$sol/api/solana.api';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
-	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 
-	export let tokenAddress: SplTokenAddress | undefined;
-	export let metadata: TokenMetadata | undefined;
-	export let network: Network;
+	interface Props {
+		tokenAddress?: SplTokenAddress;
+		metadata?: TokenMetadata;
+		network: Network;
+		onBack: () => void;
+		onSave: () => void;
+	}
+
+	let { tokenAddress, metadata = $bindable(), network, onBack, onSave }: Props = $props();
 
 	onMount(async () => {
 		if (isNullish(tokenAddress)) {
@@ -31,7 +38,7 @@
 				msg: { text: $i18n.tokens.import.error.missing_token_address }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -40,7 +47,7 @@
 				msg: { text: $i18n.tokens.import.error.no_network }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -53,63 +60,65 @@
 				msg: { text: $i18n.tokens.error.already_available }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
 		try {
-			const solNetwork = mapNetworkIdToNetwork(network.id);
+			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
-			assertNonNullish(
-				solNetwork,
-				replacePlaceholders($i18n.init.error.no_solana_network, {
-					$network: network.id.description ?? ''
-				})
-			);
+			const {
+				decimals,
+				symbol: infoSymbol,
+				name: infoName
+			} = await getTokenInfo({ address: tokenAddress, network: solNetwork });
 
-			metadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
+			const splMetadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
 
-			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
+			const symbol = infoSymbol ?? splMetadata?.symbol;
+			const name = infoName ?? splMetadata?.name;
+
+			if (isNullish(symbol) || isNullish(name)) {
 				toastsError({
 					msg: { text: $i18n.tokens.error.incomplete_metadata }
 				});
 
-				dispatch('icBack');
+				onBack();
 				return;
 			}
 
+			metadata = {
+				...(nonNullish(splMetadata) ? hardenMetadata(splMetadata) : {}),
+				decimals,
+				symbol,
+				name
+			};
+
 			if (
-				$splTokens?.find(
-					({ symbol, name }) =>
-						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
-						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
-				) !== undefined
+				nonNullish(
+					$splTokens?.find(
+						({ symbol }) => symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '')
+					)
+				)
 			) {
 				toastsError({
 					msg: { text: $i18n.tokens.error.duplicate_metadata }
 				});
 
-				dispatch('icBack');
-				return;
+				onBack();
 			}
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.loading_metadata },
-				err
-			});
+		} catch (_: unknown) {
+			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
-			dispatch('icBack');
+			onBack();
 		}
 	});
 
-	let invalid = true;
-	$: invalid = isNullishOrEmpty(tokenAddress) || isNullish(metadata);
-
-	const dispatch = createEventDispatcher();
+	let invalid = $derived(isNullishOrEmpty(tokenAddress) || isNullish(metadata));
 </script>
 
 <ContentWithToolbar>
-	<Value ref="contractAddress" element="div">
+	<Value element="div" ref="contractAddress">
 		{#snippet label()}
 			{$i18n.tokens.text.token_address}{/snippet}
 		{#snippet content()}
@@ -117,7 +126,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractName" element="div">
+	<Value element="div" ref="contractName">
 		{#snippet label()}
 			{$i18n.core.text.name}
 		{/snippet}
@@ -131,7 +140,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="network" element="div">
+	<Value element="div" ref="network">
 		{#snippet label()}
 			{$i18n.tokens.manage.text.network}
 		{/snippet}
@@ -141,7 +150,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractSymbol" element="div">
+	<Value element="div" ref="contractSymbol">
 		{#snippet label()}
 			{$i18n.core.text.symbol}
 		{/snippet}
@@ -155,7 +164,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractDecimals" element="div">
+	<Value element="div" ref="contractDecimals">
 		{#snippet label()}
 			{$i18n.core.text.decimals}
 		{/snippet}
@@ -173,8 +182,8 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={() => dispatch('icBack')} />
-			<Button disabled={invalid} onclick={() => dispatch('icSave')}>
+			<ButtonBack onclick={() => onBack()} />
+			<Button disabled={invalid} onclick={onSave}>
 				{$i18n.tokens.import.text.add_the_token}
 			</Button>
 		</ButtonGroup>

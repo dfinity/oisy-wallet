@@ -6,23 +6,16 @@ import {
 } from '$env/explorers.env';
 import * as btcEnv from '$env/networks/networks.btc.env';
 import {
-	BTC_MAINNET_NETWORK,
-	BTC_REGTEST_NETWORK,
-	BTC_TESTNET_NETWORK
-} from '$env/networks/networks.btc.env';
-import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { TOKEN_MENU_BTC_BUTTON } from '$lib/constants/test-ids.constants';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore
 } from '$lib/stores/address.store';
-import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -50,10 +43,8 @@ describe('BtcTokenMenu', () => {
 	});
 
 	it('external link forwards to correct mainnet explorer', async () => {
-		token.set(BTC_MAINNET_TOKEN);
-		erc20UserTokensStore.reset(BTC_MAINNET_TOKEN.id);
+		mockPage.mockToken(BTC_MAINNET_TOKEN);
 		btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
-		mockPage.mock({ network: BTC_MAINNET_NETWORK.id.description });
 
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementationOnce(() => true);
 
@@ -72,10 +63,8 @@ describe('BtcTokenMenu', () => {
 	});
 
 	it('external link forwards to correct testnet explorer', async () => {
-		token.set(BTC_TESTNET_TOKEN);
-		erc20UserTokensStore.reset(BTC_TESTNET_TOKEN.id);
+		mockPage.mockToken(BTC_TESTNET_TOKEN);
 		btcAddressTestnetStore.set({ certified: true, data: mockAddressTestnet });
-		mockPage.mock({ network: BTC_TESTNET_NETWORK.id.description });
 
 		const { container } = render(BtcTokenMenu);
 		const button: HTMLButtonElement | null = container.querySelector(tokenMenuButtonSelector);
@@ -92,10 +81,8 @@ describe('BtcTokenMenu', () => {
 	});
 
 	it('external link forwards to correct regtest explorer', async () => {
-		token.set(BTC_REGTEST_TOKEN);
-		erc20UserTokensStore.reset(BTC_REGTEST_TOKEN.id);
+		mockPage.mockToken(BTC_REGTEST_TOKEN);
 		btcAddressRegtestStore.set({ certified: true, data: mockAddressRegtest });
-		mockPage.mock({ network: BTC_REGTEST_NETWORK.id.description });
 
 		const { container } = render(BtcTokenMenu);
 		const button: HTMLButtonElement | null = container.querySelector(tokenMenuButtonSelector);

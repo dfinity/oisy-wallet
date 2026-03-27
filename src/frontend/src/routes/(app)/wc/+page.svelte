@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Tokens from '$lib/components/tokens/Tokens.svelte';
+	import Assets from '$lib/components/tokens/Assets.svelte';
+	import { TokenTypes } from '$lib/enums/token-types';
 </script>
 
-<Tokens />
+<Assets tab={TokenTypes.TOKENS} />

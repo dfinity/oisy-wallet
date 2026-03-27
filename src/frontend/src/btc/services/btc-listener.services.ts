@@ -1,9 +1,15 @@
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
+import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
+import { syncWalletFromIdbCache } from '$lib/services/listener.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
+import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -16,27 +22,35 @@ export const syncWallet = ({
 }) => {
 	const {
 		wallet: {
-			balance: { certified, data: balance },
+			balance: { certified, data: btcWalletBalance },
 			newTransactions
 		}
 	} = data;
 
-	if (nonNullish(balance)) {
-		balancesStore.set({
+	// Only parse new transactions when certified is false (when we actually receive transaction data)
+	// When certified is true, newTransactions are not provided
+	const providerTransactions: CertifiedData<BtcTransactionUi>[] | null = certified
+		? null
+		: JSON.parse(newTransactions, jsonReviver);
+
+	// Only store transactions when we have actual transaction data (certified === false)
+	if (nonNullish(providerTransactions)) {
+		btcTransactionsStore.prepend({
+			tokenId,
+			transactions: providerTransactions
+		});
+	}
+	if (nonNullish(btcWalletBalance)) {
+		balancesStore.batchSet({
 			id: tokenId,
 			data: {
-				data: balance,
+				data: btcWalletBalance.confirmed,
 				certified
 			}
 		});
 	} else {
 		balancesStore.reset(tokenId);
 	}
-
-	btcTransactionsStore.prepend({
-		tokenId,
-		transactions: JSON.parse(newTransactions, jsonReviver)
-	});
 };
 
 export const syncWalletError = ({
@@ -56,7 +70,7 @@ export const syncWalletError = ({
 	btcTransactionsStore.reset(tokenId);
 
 	if (hideToast) {
-		console.warn(`${errorText}:`, err);
+		consoleWarn(`${errorText}:`, err);
 		return;
 	}
 
@@ -65,3 +79,10 @@ export const syncWalletError = ({
 		err
 	});
 };
+
+export const syncWalletFromCache = (params: Omit<GetIdbTransactionsParams, 'principal'>) =>
+	syncWalletFromIdbCache({
+		...params,
+		getIdbTransactions: getIdbBtcTransactions,
+		transactionsStore: btcTransactionsStore
+	});

@@ -11,10 +11,9 @@ import * as clipboardUtils from '$lib/utils/clipboard.utils';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('ShowContactStep', () => {
 	const mockContact: ContactUi = {
@@ -110,7 +109,7 @@ describe('ShowContactStep', () => {
 		const closeButton = getByTestId(CONTACT_SHOW_CLOSE_BUTTON);
 		await fireEvent.click(closeButton);
 
-		expect(mockClose).toHaveBeenCalledTimes(1);
+		expect(mockClose).toHaveBeenCalledOnce();
 	});
 
 	it('should call addAddress function when add address button is clicked', async () => {
@@ -126,7 +125,7 @@ describe('ShowContactStep', () => {
 		const addAddressButton = getByTestId(CONTACT_SHOW_ADD_ADDRESS_BUTTON);
 		await fireEvent.click(addAddressButton);
 
-		expect(mockAddAddress).toHaveBeenCalledTimes(1);
+		expect(mockAddAddress).toHaveBeenCalledOnce();
 	});
 
 	it('should render addresses when contact has addresses', () => {
@@ -178,8 +177,7 @@ describe('ShowContactStep', () => {
 		await fireEvent.click(infoButtons[0]);
 
 		// Check that showAddress was called with the correct index
-		expect(mockShowAddress).toHaveBeenCalledTimes(1);
-		expect(mockShowAddress).toHaveBeenCalledWith(0);
+		expect(mockShowAddress).toHaveBeenCalledExactlyOnceWith(0);
 	});
 
 	it('should call edit function when edit button is clicked', async () => {
@@ -197,8 +195,7 @@ describe('ShowContactStep', () => {
 		const editButton = getByTestId(CONTACT_HEADER_EDIT_BUTTON);
 		await fireEvent.click(editButton);
 
-		expect(mockEdit).toHaveBeenCalledTimes(1);
-		expect(mockEdit).toHaveBeenCalledWith(mockContact);
+		expect(mockEdit).toHaveBeenCalledExactlyOnceWith(mockContact);
 	});
 
 	it('should call copyToClipboard function when address button is clicked', async () => {

@@ -1,4 +1,4 @@
-import { isDesktop, isMobile } from '$lib/utils/device.utils';
+import { isDesktop, isMobile, isPWAStandalone } from '$lib/utils/device.utils';
 
 describe('device.utils', () => {
 	describe('isMobile', () => {
@@ -122,6 +122,64 @@ describe('device.utils', () => {
 			});
 
 			expect(isDesktop()).toBeTruthy();
+		});
+	});
+
+	describe('isPWAStandalone', () => {
+		it('should return true for PWA standalone mode checking the navigator', () => {
+			Object.defineProperty(window, 'navigator', {
+				writable: true,
+				value: {
+					standalone: true
+				}
+			});
+
+			expect(isPWAStandalone()).toBeTruthy();
+		});
+
+		it('should return false for browser mode checking the navigator', () => {
+			Object.defineProperty(window, 'navigator', {
+				writable: true,
+				value: {
+					standalone: false
+				}
+			});
+
+			expect(isPWAStandalone()).toBeFalsy();
+		});
+
+		it('should return true for PWA standalone mode checking the match media', () => {
+			Object.defineProperties(window, {
+				navigator: {
+					writable: true,
+					value: {}
+				},
+				matchMedia: {
+					writable: true,
+					value: vi.fn().mockImplementation((query) => ({
+						matches: query === '(display-mode: standalone)'
+					}))
+				}
+			});
+
+			expect(isPWAStandalone()).toBeTruthy();
+		});
+
+		it('should return false for browser mode checking the match media', () => {
+			Object.defineProperties(window, {
+				navigator: {
+					writable: true,
+					value: {}
+				},
+				matchMedia: {
+					writable: true,
+					value: vi.fn().mockImplementation((query) => ({
+						matches: query === '(display-mode: browser)'
+					}))
+				}
+			});
+
+			expect(isPWAStandalone()).toBeFalsy();
 		});
 	});
 });

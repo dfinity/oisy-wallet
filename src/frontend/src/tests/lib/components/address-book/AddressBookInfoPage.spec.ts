@@ -3,7 +3,6 @@ import { ADDRESS_EDIT_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 import type { ContactAddressUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('AddressBookInfoPage', () => {
 	const mockAddress: ContactAddressUi = {

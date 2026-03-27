@@ -11,6 +11,7 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
@@ -28,7 +29,8 @@ describe('AllTransactionsSkeletons', () => {
 	it('should render the skeleton when stores are empty', () => {
 		const { getByTestId } = render(AllTransactionsSkeletons, {
 			props: {
-				testIdPrefix
+				testIdPrefix,
+				children: mockSnippet
 			}
 		});
 
@@ -53,7 +55,8 @@ describe('AllTransactionsSkeletons', () => {
 		it('should render the skeleton when at least one store is empty', () => {
 			const { getByTestId } = render(AllTransactionsSkeletons, {
 				props: {
-					testIdPrefix
+					testIdPrefix,
+					children: mockSnippet
 				}
 			});
 
@@ -67,7 +70,8 @@ describe('AllTransactionsSkeletons', () => {
 		it('should not render the skeleton when all stores have data', async () => {
 			const { container } = render(AllTransactionsSkeletons, {
 				props: {
-					testIdPrefix
+					testIdPrefix,
+					children: mockSnippet
 				}
 			});
 
@@ -100,7 +104,8 @@ describe('AllTransactionsSkeletons', () => {
 
 			const { container } = render(AllTransactionsSkeletons, {
 				props: {
-					testIdPrefix
+					testIdPrefix,
+					children: mockSnippet
 				}
 			});
 

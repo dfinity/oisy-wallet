@@ -20,7 +20,11 @@ export enum ProgressStepsConvert {
 
 export enum ProgressStepsSwap {
 	INITIALIZATION = 'initialization',
+	SIGN_APPROVE = 'sign_approve',
+	APPROVE = 'approve',
+	SIGN_TRANSFER = 'sign_transfer',
 	SWAP = 'swap',
+	WITHDRAW = 'withdraw',
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }
@@ -73,6 +77,7 @@ export enum ProgressStepsSendSol {
 	INITIALIZATION = 'initialization',
 	SIGN = 'sign',
 	SEND = 'send',
+	CONFIRM = 'confirm',
 	RELOAD = 'reload',
 	DONE = 'done'
 }
@@ -97,4 +102,33 @@ export enum AddressBookSteps {
 	SHOW_ADDRESS = 'show_address',
 	SAVE_ADDRESS = 'save_address',
 	CREATE_CONTACT = 'create_contact'
+}
+
+export enum ProgressStepsStake {
+	INITIALIZATION = 'initialization',
+	APPROVE = 'approve',
+	STAKE = 'stake',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+export enum ProgressStepsUnstake {
+	INITIALIZATION = 'initialization',
+	UNSTAKE = 'unstake',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+export enum ProgressStepsClaimStakingReward {
+	INITIALIZATION = 'initialization',
+	CLAIM = 'claim',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+export enum ProgressStepsPayment {
+	REQUEST_DETAILS = 'request_details',
+	CREATE_TRANSACTION = 'create_transaction',
+	SIGN_TRANSACTION = 'sign_transaction',
+	PAY = 'pay'
 }

@@ -16,7 +16,8 @@ dfx deploy cketh_index
 dfx deploy ckusdc_ledger
 dfx deploy ckusdc_index
 
-dfx deploy kong_backend
+# TODO: Re-enable once KongSwap DID and WASM assets are reachable again.
+# dfx deploy kong_backend
 dfx deploy icp_swap_factory
 dfx deploy icp_swap_pool
 
@@ -25,5 +26,8 @@ dfx deploy pouh_issuer
 dfx deploy cycles_ledger
 dfx deploy cycles_depositor
 dfx deploy rewards
+dfx deploy llm
+
+dfx deploy sol_rpc
 
 scripts/top-up-cycles-ledger-account.sh --cycles 50T

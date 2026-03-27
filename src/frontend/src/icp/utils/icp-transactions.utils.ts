@@ -5,14 +5,16 @@ import type {
 	IcpTransaction
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
-import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
 export const mapTransactionIcpToSelf = (
-	tx: TransactionWithId
-): ({ transaction: Transaction & IcTransactionAddOnsInfo } & Pick<TransactionWithId, 'id'>)[] => {
+	tx: IcpIndexDid.TransactionWithId
+): ({ transaction: IcpIndexDid.Transaction & IcTransactionAddOnsInfo } & Pick<
+	IcpIndexDid.TransactionWithId,
+	'id'
+>)[] => {
 	const { transaction, id } = tx;
 	const { operation } = transaction;
 
@@ -85,21 +87,21 @@ export const mapIcpTransaction = ({
 		toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}`
 	});
 
-	const mapAmount = ({
-		amount,
-		fee,
-		incoming
-	}: {
-		incoming: boolean | undefined;
-		fee: Tokens;
-		amount: Tokens;
-	}): bigint => amount.e8s + (incoming === false ? fee.e8s : ZERO);
-
 	if ('Approve' in operation) {
+		const approve = operation.Approve;
+		const approveValue = approve.allowance.e8s;
+		const approveFee = approve.fee?.e8s;
+		const approveExpiresAt = fromNullable(approve.expires_at)?.timestamp_nanos;
+
 		return {
 			...tx,
 			type: 'approve',
-			...mapFrom(operation.Approve.from)
+			...mapFrom(operation.Approve.from),
+			value: approveValue,
+			...(nonNullish(approveFee) && { fee: approveFee }),
+			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
+			approveSpender: approve.spender,
+			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approve.spender}`
 		};
 	}
 
@@ -124,17 +126,15 @@ export const mapIcpTransaction = ({
 
 	if ('Transfer' in operation) {
 		const source = mapFrom(operation.Transfer.from);
+		const transferFee = operation.Transfer.fee?.e8s;
 
 		return {
 			...tx,
 			type: source.incoming === false ? 'send' : 'receive',
 			...source,
 			...mapTo(operation.Transfer.to),
-			value: mapAmount({
-				amount: operation.Transfer.amount,
-				fee: operation.Transfer.fee,
-				incoming: source.incoming
-			})
+			value: operation.Transfer.amount.e8s,
+			...(nonNullish(transferFee) && { fee: transferFee })
 		};
 	}
 

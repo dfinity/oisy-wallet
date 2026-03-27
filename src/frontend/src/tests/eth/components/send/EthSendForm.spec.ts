@@ -1,12 +1,13 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
-import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
+import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import {
 	SEND_DESTINATION_SECTION,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -19,9 +20,9 @@ describe('EthSendForm', () => {
 		})
 	);
 	mockContext.set(
-		FEE_CONTEXT_KEY,
-		initFeeContext({
-			feeStore: initFeeStore(),
+		ETH_FEE_CONTEXT_KEY,
+		initEthFeeContext({
+			feeStore: initEthFeeStore(),
 			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
@@ -32,7 +33,11 @@ describe('EthSendForm', () => {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
 		amount: '22000000',
 		network: ETHEREUM_NETWORK,
-		nativeEthereumToken: ETHEREUM_TOKEN
+		nativeEthereumToken: ETHEREUM_TOKEN,
+		onBack: vi.fn(),
+		onNext: vi.fn(),
+		onTokensList: vi.fn(),
+		cancel: mockSnippet
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;

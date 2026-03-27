@@ -1,11 +1,33 @@
-import type { CustomToken, IcrcToken, SplToken } from '$declarations/backend/backend.did';
 import type {
+	CustomToken,
+	// The backend declarations are not exporting Dip721Token because it is structurally identical to ExtV2Token
+	ExtV2Token as Dip721Token,
+	ErcToken,
+	ExtV2Token,
+	// The backend declarations are not exporting IcPunksToken because it is structurally identical to ExtV2Token
+	ExtV2Token as IcPunksToken,
+	IcrcToken,
+	SplToken,
+	Token
+} from '$declarations/backend/backend.did';
+import type { ContractAddress } from '$eth/types/address';
+import type { EthereumChainId } from '$eth/types/network';
+import type {
+	Dip721SaveCustomToken,
+	ErcSaveCustomToken,
+	ExtSaveCustomToken,
+	IcPunksSaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
-import { Principal } from '@dfinity/principal';
-import { nonNullish, toNullable } from '@dfinity/utils';
+import type { TokenId, TokenMetadata } from '$lib/types/token';
+import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
+import type { SolanaChainId } from '$sol/types/network';
+import type { SplTokenAddress } from '$sol/types/spl';
+import { assertNever, nonNullish, toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,
@@ -15,6 +37,26 @@ const toIcrcCustomToken = ({
 	index_id: toNullable(
 		nonNullish(indexCanisterId) ? Principal.fromText(indexCanisterId) : undefined
 	)
+});
+
+const toExtV2CustomToken = ({ canisterId }: ExtSaveCustomToken): ExtV2Token => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
+const toDip721CustomToken = ({ canisterId }: Dip721SaveCustomToken): Dip721Token => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
+const toIcPunksCustomToken = ({ canisterId }: IcPunksSaveCustomToken): IcPunksToken => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
+const toErcCustomToken = ({
+	address: token_address,
+	chainId: chain_id
+}: ErcSaveCustomToken): ErcToken => ({
+	token_address,
+	chain_id
 });
 
 const toSplCustomToken = ({
@@ -30,15 +72,74 @@ const toSplCustomToken = ({
 export const toCustomToken = ({
 	enabled,
 	version,
-	networkKey,
+	section,
+	allowExternalContentSource,
 	...rest
-}: SaveCustomTokenWithKey): CustomToken => ({
-	enabled,
-	version: toNullable(version),
-	token:
-		networkKey === 'Icrc'
-			? { Icrc: toIcrcCustomToken(rest as IcrcSaveCustomToken) }
-			: networkKey === 'SplMainnet'
-				? { SplMainnet: toSplCustomToken(rest as SplSaveCustomToken) }
-				: { SplDevnet: toSplCustomToken(rest as SplSaveCustomToken) }
-});
+}: SaveCustomTokenWithKey): CustomToken => {
+	const toCustomTokenMap = (): Token => {
+		const { networkKey } = rest;
+
+		if (networkKey === 'Icrc') {
+			return { Icrc: toIcrcCustomToken(rest) };
+		}
+
+		if (networkKey === 'ExtV2') {
+			return { ExtV2: toExtV2CustomToken(rest) };
+		}
+
+		if (networkKey === 'Dip721') {
+			return { Dip721: toDip721CustomToken(rest) };
+		}
+
+		if (networkKey === 'IcPunks') {
+			return { IcPunks: toIcPunksCustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc20') {
+			return { Erc20: toErcCustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc4626') {
+			return { Erc4626: toErcCustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc721') {
+			return { Erc721: toErcCustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc1155') {
+			return { Erc1155: toErcCustomToken(rest) };
+		}
+
+		if (networkKey === 'SplMainnet') {
+			return { SplMainnet: toSplCustomToken(rest) };
+		}
+
+		if (networkKey === 'SplDevnet') {
+			return { SplDevnet: toSplCustomToken(rest) };
+		}
+
+		assertNever(networkKey, `Unsupported network key: ${networkKey}`);
+	};
+
+	return {
+		enabled,
+		version: toNullable(version),
+		token: toCustomTokenMap(),
+		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined),
+		allow_external_content_source: toNullable(allowExternalContentSource)
+	};
+};
+
+export const parseCustomTokenId = ({
+	identifier,
+	chainId
+}:
+	| {
+			identifier: ContractAddress['address'] | TokenMetadata['symbol'];
+			chainId: EthereumChainId;
+	  }
+	| {
+			identifier: SplTokenAddress | TokenMetadata['symbol'];
+			chainId: SolanaChainId['chainId'];
+	  }): TokenId => parseTokenId(`custom-token#${identifier}#${chainId}`);

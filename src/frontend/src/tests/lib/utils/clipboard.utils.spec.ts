@@ -1,7 +1,7 @@
 import * as toastsStore from '$lib/stores/toasts.store';
 import { copyToClipboard } from '$lib/utils/clipboard.utils';
 import { copyText } from '$lib/utils/share.utils';
-import type { MockedFunction, MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/utils/share.utils', () => ({
 	copyText: vi.fn()
@@ -11,7 +11,7 @@ describe('clipboard.utils', () => {
 	describe('copyToClipboard', () => {
 		let spyToastsShow: MockInstance;
 
-		const mockCopyText = copyText as MockedFunction<typeof copyText>;
+		const mockCopyText = vi.mocked(copyText);
 
 		const text = 'Copied!';
 		const value = 'text to copy';
@@ -27,8 +27,7 @@ describe('clipboard.utils', () => {
 		it('should copy text to clipboard', async () => {
 			await copyToClipboard({ value, text });
 
-			expect(mockCopyText).toHaveBeenCalledOnce();
-			expect(mockCopyText).toHaveBeenCalledWith(value);
+			expect(mockCopyText).toHaveBeenCalledExactlyOnceWith(value);
 		});
 
 		it('should show a success toast if copy is successful', async () => {

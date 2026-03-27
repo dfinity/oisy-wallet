@@ -5,7 +5,10 @@ use ic_verifiable_credentials::issuer_api::ArgumentValue;
 use serde::{de, Deserializer};
 
 use super::{AddUserCredentialRequest, UserCredential, UserProfile, MAX_ISSUER_LENGTH};
-use crate::validate::{validate_on_deserialize, Validate};
+use crate::{
+    types::agreement::UpdateUserAgreementsRequest,
+    validate::{validate_on_deserialize, Validate},
+};
 
 fn validate_issuer(issuer: &str) -> Result<(), candid::Error> {
     if issuer.len() > MAX_ISSUER_LENGTH {
@@ -34,6 +37,9 @@ impl Validate for UserProfile {
                 UserProfile::MAX_CREDENTIALS
             )));
         }
+        if let Some(agreements) = &self.agreements {
+            agreements.validate()?;
+        }
         Ok(())
     }
 }
@@ -41,6 +47,13 @@ impl Validate for UserProfile {
 validate_on_deserialize!(AddUserCredentialRequest);
 impl Validate for AddUserCredentialRequest {
     fn validate(&self) -> Result<(), candid::Error> {
+        if self.credential_jwt.len() > AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH {
+            return Err(candid::Error::msg(format!(
+                "Credential JWT is too long: {} > {}",
+                self.credential_jwt.len(),
+                AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH
+            )));
+        }
         if self.credential_spec.credential_type.len()
             > AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH
         {
@@ -78,6 +91,16 @@ impl Validate for AddUserCredentialRequest {
                     }
                 }
             }
+        }
+        Ok(())
+    }
+}
+
+validate_on_deserialize!(UpdateUserAgreementsRequest);
+impl Validate for UpdateUserAgreementsRequest {
+    fn validate(&self) -> Result<(), candid::Error> {
+        if let Some(agreements) = self.agreements.clone().into() {
+            agreements.validate()?;
         }
         Ok(())
     }

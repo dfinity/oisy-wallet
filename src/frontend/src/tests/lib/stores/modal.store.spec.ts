@@ -36,9 +36,23 @@ describe('modal.store', () => {
 		expect(get(modalStore)).toEqual({ id, type: 'convert-ckbtc-btc' });
 	});
 
+	it('should open harvest-stake modal with modalId', () => {
+		const id = Symbol('modalId');
+		modalStore.openHarvestStake(id);
+
+		expect(get(modalStore)).toEqual({ type: 'harvest-stake', id });
+	});
+
+	it('should open harvest-unstake modal with modalId', () => {
+		const id = Symbol('modalId');
+		modalStore.openHarvestUnstake(id);
+
+		expect(get(modalStore)).toEqual({ type: 'harvest-unstake', id });
+	});
+
 	it('should close the modal and reset the store', () => {
 		const id = Symbol('modalId');
-		modalStore.openEthToken(id);
+		modalStore.openEthToken({ id, data: undefined });
 		modalStore.close();
 
 		expect(get(modalStore)).toBeNull();

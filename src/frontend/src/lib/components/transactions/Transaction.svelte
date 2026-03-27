@@ -1,27 +1,36 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import type { Component, Snippet } from 'svelte';
-	import Divider from '$lib/components/common/Divider.svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { type Component, type Snippet, untrack } from 'svelte';
+	import { alchemyProviders } from '$eth/providers/alchemy.providers';
+	import type { EthNonFungibleToken } from '$eth/types/nft';
+	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import { TRANSACTION_CHILDREN_CONTAINER } from '$lib/constants/test-ids.constants';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ContactUi } from '$lib/types/contact';
+	import { nftStore } from '$lib/stores/nft.store';
+	import type { Network } from '$lib/types/network';
+	import type { Nft } from '$lib/types/nft';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+	import { isTokenNonFungible } from '$lib/utils/nft.utils';
+	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
-		amount?: bigint;
+		displayAmount?: bigint;
 		type: TransactionType;
 		status: TransactionStatus;
 		timestamp?: number;
@@ -30,12 +39,16 @@
 		iconType: 'token' | 'transaction';
 		to?: string;
 		from?: string;
-		children?: Snippet;
+		tokenId?: number;
+		children: Snippet;
 		onClick?: () => void;
+		approveSpender?: string;
+		timeOnly?: boolean;
+		testId?: string;
 	}
 
 	const {
-		amount: cardAmount,
+		displayAmount,
 		type,
 		status,
 		timestamp,
@@ -44,77 +57,164 @@
 		iconType = 'transaction',
 		to,
 		from,
+		tokenId,
 		children,
-		onClick
+		onClick,
+		approveSpender,
+		timeOnly = true,
+		testId
 	}: Props = $props();
 
-	let cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
+	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
-	let iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
+	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
-	let contactAddress: string | undefined = $derived(
-		type === 'send' ? to : type === 'receive' ? from : undefined
+	const address: string | undefined = $derived(
+		type === 'send' || type === 'deposit'
+			? to
+			: type === 'receive' || type === 'withdraw'
+				? from
+				: type === 'approve'
+					? approveSpender
+					: undefined
 	);
 
-	let contact: ContactUi | undefined = $derived(
-		nonNullish(contactAddress)
-			? getContactForAddress({ addressString: contactAddress, contactList: $contacts })
+	const network: Network | undefined = $derived(token.network);
+
+	const existingNft = $derived(
+		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
+			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(String(tokenId)) })
 			: undefined
 	);
 
-	let addressAlias: string | undefined = $derived(
-		filterAddressFromContact({ contact, address: contactAddress })?.label
-	);
+	let fetchedNft = $state<Nft | undefined>();
+
+	// It may happen that an NFT was sent out by the user or burnt.
+	// In that case, it will not be in the nftStore anymore.
+	// So we cannot find it and render the image in the transaction list.
+	// However, we prefer to always show it, so we try and fetch the metadata anyway.
+	const updateFetchedNft = async () => {
+		if (nonNullish(existingNft)) {
+			return;
+		}
+
+		if (isNullish($nftStore) || !isTokenNonFungible(token) || isNullish(tokenId)) {
+			return;
+		}
+
+		if (!isNetworkIdEthereum(network.id) && !isNetworkIdEvm(network.id)) {
+			return;
+		}
+
+		try {
+			const { getNftMetadata } = alchemyProviders(network.id);
+
+			fetchedNft = await getNftMetadata({
+				// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+				token: token as EthNonFungibleToken,
+				tokenId: parseNftId(String(tokenId))
+			});
+		} catch (_: unknown) {
+			fetchedNft = undefined;
+		}
+	};
+
+	$effect(() => {
+		[token, tokenId, existingNft];
+
+		untrack(() => updateFetchedNft());
+	});
+
+	const nft = $derived(existingNft ?? fetchedNft);
 </script>
 
-<button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
-	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
-		<Card noMargin>
-			<span class="inline-block first-letter:capitalize">
-				{#if nonNullish(contact)}
-					{type === 'send'
-						? replacePlaceholders($i18n.transaction.text.sent_to, { $name: contact.name })
-						: replacePlaceholders($i18n.transaction.text.received_from, { $name: contact.name })}
-					{#if nonNullish(addressAlias) && addressAlias !== ''}
-						<span class="text-tertiary"><Divider />{addressAlias}</span>
-					{/if}
-				{:else}
-					{@render children?.()}
+<button class={`contents ${styleClass ?? ''}`} data-tid={testId} onclick={onClick}>
+	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
+		<Card noMargin withGap>
+			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
+				<span class="truncate" data-tid={TRANSACTION_CHILDREN_CONTAINER}>
+					{@render children()}
+				</span>
+
+				{#if nonNullish(network)}
+					<div class="shrink-0">
+						<NetworkLogo {network} testId="transaction-network" transparent />
+					</div>
 				{/if}
 			</span>
 
 			{#snippet icon()}
 				<div>
 					{#if iconType === 'token'}
-						<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+						{#if nonNullish(nft)}
+							<NftLogo
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								logoSize="md"
+								{nft}
+							/>
+						{:else}
+							<TokenLogo
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								data={token}
+								logoSize="md"
+							/>
+						{/if}
 					{:else}
-						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
+						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} size="16" />
 					{/if}
 				</div>
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(cardAmount)}
+				{#if nonNullish(displayAmount)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
 						<Amount
-							amount={cardAmount}
+							amount={displayAmount}
 							decimals={token.decimals}
-							symbol={getTokenDisplaySymbol(token)}
 							formatPositiveAmount
+							symbol={getTokenDisplaySymbol(token)}
 						/>
 					{/if}
 				{/if}
 			{/snippet}
+			{#snippet amountDescription()}
+				{#if nonNullish(timestamp)}
+					<span class="text-xs sm:text-sm" data-tid="receive-tokens-modal-transaction-timestamp">
+						{formatSecondsToDate({
+							seconds: Number(timestamp),
+							language: $currentLanguage,
+							formatOptions: {
+								hour: '2-digit',
+								minute: '2-digit',
+								hour12: false
+							},
+							timeOnly
+						})}
+					</span>
+				{/if}
+			{/snippet}
 
 			{#snippet description()}
-				<span data-tid="receive-tokens-modal-transaction-timestamp">
-					{#if nonNullish(timestamp)}
-						{formatSecondsToDate(timestamp)}
-					{/if}
+				<span
+					class="flex min-w-0 flex-col items-center items-start text-xs text-primary sm:flex-row sm:text-sm"
+				>
+					<span class="inline-flex min-w-0 items-center gap-1">
+						{#if type === 'send' || type === 'deposit'}
+							<span class="shrink-0">{$i18n.transaction.text.to}</span>
+						{:else if type === 'receive' || type === 'withdraw'}
+							<span class="shrink-0">{$i18n.transaction.text.from}</span>
+						{:else if type === 'approve'}
+							<span class="shrink-0">{$i18n.transaction.text.for}</span>
+						{/if}
+
+						<ContactOrToken identifier={address} showFallback />
+					</span>
+					<span class="truncate text-tertiary">
+						<TransactionStatusComponent {status} />
+					</span>
 				</span>
-				<TransactionStatusComponent {status} />
 			{/snippet}
 		</Card>
 	</span>

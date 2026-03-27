@@ -85,12 +85,12 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 		throw mapKongBackendCanisterError(response.Err);
 	};
 
-	tokens = async (): Promise<TokenReply[]> => {
+	tokens = async (tokenLedgerCanisterId?: string): Promise<TokenReply[]> => {
 		const { tokens } = this.caller({
 			certified: false
 		});
 
-		const response = await tokens(toNullable());
+		const response = await tokens(toNullable(tokenLedgerCanisterId));
 
 		if ('Ok' in response) {
 			return response.Ok;

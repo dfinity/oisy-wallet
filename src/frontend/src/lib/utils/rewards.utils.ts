@@ -1,76 +1,19 @@
 import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
-import { RewardType } from '$lib/enums/reward-type';
-import { getRewards } from '$lib/services/reward.services';
 import type {
 	CampaignCriterion,
 	CampaignEligibility,
 	HangoverCriterion,
 	MinLoginsCriterion,
 	MinTotalAssetsUsdCriterion,
+	MinTotalAssetsUsdInNetworkCriterion,
 	MinTransactionsCriterion,
-	RewardResponseInfo,
-	RewardResult
+	MinTransactionsInNetworkCriterion
 } from '$lib/types/reward';
-import type { Identity } from '@dfinity/agent';
-import { isNullish } from '@dfinity/utils';
+import { fromNullable } from '@dfinity/utils';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
-
-export const loadRewardResult = async (identity: Identity): Promise<RewardResult> => {
-	const initialLoading: string | null = sessionStorage.getItem(INITIAL_REWARD_RESULT);
-	if (isNullish(initialLoading)) {
-		const { rewards, lastTimestamp } = await getRewards({ identity });
-		const newRewards: RewardResponseInfo[] = rewards.filter(
-			({ timestamp }) => timestamp >= lastTimestamp
-		);
-
-		sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
-
-		if (newRewards.length > 0) {
-			const containsJackpot: boolean = newRewards.some(({ name }) => name === RewardType.JACKPOT);
-			const containsReferral: boolean = newRewards.some(({ name }) => name === RewardType.REFERRAL);
-
-			const rewardType = containsJackpot
-				? RewardType.JACKPOT
-				: containsReferral
-					? RewardType.REFERRAL
-					: RewardType.AIRDROP;
-
-			return {
-				reward: getFirstReward({ rewards, containsJackpot, containsReferral }),
-				lastTimestamp,
-				rewardType
-			};
-		}
-
-		if (lastTimestamp === 0n) {
-			return { lastTimestamp };
-		}
-	}
-
-	return {};
-};
-
-const getFirstReward = ({
-	rewards,
-	containsJackpot,
-	containsReferral
-}: {
-	rewards: RewardResponseInfo[];
-	containsJackpot: boolean;
-	containsReferral: boolean;
-}): RewardResponseInfo | undefined => {
-	if (containsJackpot) {
-		return rewards.find(({ name }) => name === RewardType.JACKPOT);
-	}
-	if (containsReferral) {
-		return rewards.find(({ name }) => name === RewardType.REFERRAL);
-	}
-
-	return rewards.at(0);
-};
 
 export const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
 	const currentDate = new Date(Date.now());
@@ -109,7 +52,9 @@ export const mapEligibilityReport = (eligibilityReport: EligibilityReport): Camp
 			campaignId,
 			available: eligibility.available,
 			eligible: eligibility.eligible,
-			criteria
+			criteria,
+			probabilityMultiplierEnabled: fromNullable(eligibility.probability_multiplier_enabled),
+			probabilityMultiplier: fromNullable(eligibility.probability_multiplier)
 		};
 	});
 
@@ -140,6 +85,19 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
+	if ('MinTransactionsInNetwork' in criterion.criterion) {
+		const { duration, count } = criterion.criterion.MinTransactionsInNetwork;
+		if ('Days' in duration) {
+			const days = duration.Days;
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
+				days,
+				count
+			} as MinTransactionsInNetworkCriterion;
+		}
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+	}
 	if ('MinTotalAssetsUsd' in criterion.criterion) {
 		const { usd } = criterion.criterion.MinTotalAssetsUsd;
 
@@ -149,8 +107,17 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 			usd
 		} as MinTotalAssetsUsdCriterion;
 	}
+	if ('MinTotalAssetsUsdInNetwork' in criterion.criterion) {
+		const { usd } = criterion.criterion.MinTotalAssetsUsdInNetwork;
+
+		return {
+			satisfied: criterion.satisfied,
+			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
+			usd
+		} as MinTotalAssetsUsdInNetworkCriterion;
+	}
 	if ('Hangover' in criterion.criterion) {
-		const duration = criterion.criterion.Hangover;
+		const { duration } = criterion.criterion.Hangover;
 		if ('Days' in duration) {
 			const days = duration.Days;
 			return {
@@ -164,3 +131,25 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 
 	return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 };
+
+export const normalizeNetworkMultiplier = (value: number): 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 => {
+	if (![1, 2, 3, 4, 5, 6, 7, 8].includes(value)) {
+		return 1;
+	}
+
+	return value as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+};
+
+export const sortRewards = ({
+	rewards,
+	sortByEndDate
+}: {
+	rewards: RewardCampaignDescription[];
+	sortByEndDate: 'asc' | 'desc';
+}): RewardCampaignDescription[] =>
+	[...rewards].sort((a, b) => {
+		const dateA = new Date(a.endDate).getTime();
+		const dateB = new Date(b.endDate).getTime();
+
+		return sortByEndDate === 'asc' ? dateA - dateB : dateB - dateA;
+	});

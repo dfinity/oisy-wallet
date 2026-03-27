@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
@@ -14,26 +13,29 @@
 		destination: string;
 		invalidDestination?: boolean;
 		selectedContact?: ContactUi;
+		onSendDestinationStep: () => void;
 	}
-	let { destination, invalidDestination = false, selectedContact }: Props = $props();
 
-	const dispatch = createEventDispatcher();
-
-	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
+	let {
+		destination,
+		invalidDestination = false,
+		selectedContact,
+		onSendDestinationStep
+	}: Props = $props();
 
 	let addressToDisplay = $derived(shortenWithMiddleEllipsis({ text: destination }));
 </script>
 
-<div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
+<div class="mt-6 mb-10" data-tid={SEND_DESTINATION_SECTION}>
 	<div class="font-bold">{$i18n.core.text.to}</div>
 
 	<AddressCard hasError={invalidDestination} items="center">
 		{#snippet logo()}
 			<div class="mr-2">
 				<AvatarWithBadge
-					contact={selectedContact}
 					address={destination}
 					badge={{ type: 'addressType', address: destination }}
+					contact={selectedContact}
 				/>
 			</div>
 		{/snippet}
@@ -42,7 +44,7 @@
 			{#if isNullish(selectedContact)}
 				{addressToDisplay}
 			{:else}
-				<SendContactName contact={selectedContact} address={destination} />
+				<SendContactName address={destination} contact={selectedContact} />
 
 				<span class="text-sm text-tertiary">{addressToDisplay}</span>
 			{/if}
@@ -51,8 +53,8 @@
 		{#snippet actions()}
 			<button
 				class="text-brand-primary"
-				onclick={onIcSendDestinationStep}
 				aria-label={$i18n.core.text.back}
+				onclick={onSendDestinationStep}
 			>
 				<IconPenLine />
 			</button>

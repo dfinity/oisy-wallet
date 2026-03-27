@@ -1,5 +1,5 @@
 import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
-import { TRACK_COUNT_OPEN_WHY_OISY } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_OPEN_WHY_OISY } from '$lib/constants/analytics.constants';
 import { ABOUT_WHY_OISY_BUTTON } from '$lib/constants/test-ids.constants';
 import * as analytics from '$lib/services/analytics.services';
 import * as modal from '$lib/stores/modal.store';

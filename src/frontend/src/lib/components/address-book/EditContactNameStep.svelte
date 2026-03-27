@@ -33,6 +33,9 @@
 		title = $bindable<string | undefined>()
 	}: Props = $props();
 
+	// TODO: check if there is a better way to handle this svelte-ignore
+	// eslint-disable-next-line svelte/no-unused-svelte-ignore
+	// svelte-ignore state_referenced_locally -- we want to get only the initial value
 	let editingContact = $state(contact ? { ...contact } : {});
 
 	const handleSave = (event: Event) => {
@@ -64,10 +67,10 @@
 	});
 </script>
 
-<form onsubmit={handleSave} method="POST" class="flex w-full flex-col items-center">
+<form class="flex w-full flex-col items-center" method="POST" onsubmit={handleSave}>
 	<ContentWithToolbar styleClass="flex flex-col gap-6 items-center w-full">
-		<Avatar name={editingContact?.name} variant="xl"></Avatar>
-		<InputContactName bind:contact={editingContact} bind:isValid={isFormValid} {disabled} />
+		<Avatar name={editingContact?.name} image={editingContact?.image} variant="xl"></Avatar>
+		<InputContactName {disabled} bind:contact={editingContact} bind:isValid={isFormValid} />
 
 		<!-- TODO Add address list here -->
 
@@ -76,11 +79,11 @@
 				<ButtonCancel {disabled} onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}
 				></ButtonCancel>
 				<Button
-					type="submit"
 					colorStyle="primary"
 					disabled={!isFormValid}
 					loading={disabled}
 					testId={ADDRESS_BOOK_SAVE_BUTTON}
+					type="submit"
 				>
 					{$i18n.core.text.save}
 				</Button>

@@ -1,33 +1,89 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
+	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
+	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
+	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CampaignCriterion } from '$lib/types/reward';
 
 	interface Props {
 		isEligible: boolean;
+		hasNetworkBonus: boolean;
+		networkBonusMultiplier: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 		criteria: CampaignCriterion[];
+		reward: RewardCampaignDescription;
+		type?: 'default' | 'earnings-card';
 	}
 
-	let { isEligible, criteria }: Props = $props();
+	let {
+		isEligible,
+		hasNetworkBonus,
+		networkBonusMultiplier,
+		criteria,
+		reward,
+		type = 'default'
+	}: Props = $props();
+
+	let infoExpanded = $state(false);
 </script>
 
 {#if criteria.length > 0}
-	<span class="text-base font-semibold">
-		{$i18n.rewards.requirements.requirements_title}
-	</span>
-	{#if isEligible}
-		<span class="inline-flex pl-3">
-			<Badge variant="success">
-				{$i18n.rewards.text.youre_eligible}
-			</Badge>
-		</span>
-	{/if}
+	<div
+		class="flex flex-col gap-2 pb-4"
+		class:flex-row={!hasNetworkBonus}
+		class:items-center={!hasNetworkBonus}
+	>
+		{#if type !== 'earnings-card'}
+			<span class="text-base font-semibold">
+				{$i18n.rewards.requirements.requirements_title}
+			</span>
+		{/if}
+
+		<div class="flex flex-wrap gap-2.5" class:pl-3={!hasNetworkBonus}>
+			<span class:text-sm={type === 'default'} class:text-xs={type === 'earnings-card'}>
+				<EligibilityBadge {isEligible} />
+			</span>
+
+			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
+				<NetworkBonusImage
+					disabled={!isEligible}
+					multiplier={networkBonusMultiplier}
+					size={type === 'earnings-card' ? 210 : undefined}
+				/>
+
+				{#if type !== 'earnings-card'}
+					<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
+						<IconHelp size="18" />
+					</button>
+				{/if}
+			{/if}
+		</div>
+
+		{#if infoExpanded}
+			<span class="mt-1 w-full text-sm text-tertiary" transition:slide>
+				{$i18n.rewards.requirements.network_bonus_info}
+				<ExternalLink
+					ariaLabel={$i18n.rewards.text.learn_more}
+					href={reward.learnMoreHref}
+					iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
+				>
+			</span>
+		{/if}
+	</div>
+
 	<ul class="list-none">
 		{#each criteria as criterion, i (criterion)}
 			<li class="flex gap-2 pt-1">
-				<RewardRequirement {criterion} testId={`${REWARDS_REQUIREMENTS_STATUS}-${i}`} />
+				<RewardRequirement
+					{criterion}
+					testId={`${REWARDS_REQUIREMENTS_STATUS}-${i}`}
+					truncate={type === 'earnings-card'}
+				/>
 			</li>
 		{/each}
 	</ul>

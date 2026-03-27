@@ -1,5 +1,6 @@
 export enum WizardStepsSend {
 	TOKENS_LIST = 'Tokens List',
+	NFTS_LIST = 'NFTs List',
 	DESTINATION = 'Destination',
 	FILTER_NETWORKS = 'Filter Networks',
 	SEND = 'Send',
@@ -24,13 +25,15 @@ export enum WizardStepsConvert {
 export enum WizardStepsSwap {
 	SWAP = 'Swap',
 	REVIEW = 'Review',
-	SWAPPING = 'Swapping'
+	SWAPPING = 'Swapping',
+	TOKENS_LIST = 'Tokens List',
+	FILTER_NETWORKS = 'Filter Networks',
+	SELECT_PROVIDER = 'Select swap provider'
 }
 
 export enum WizardStepsAuthHelp {
 	OVERVIEW = 'Overview',
-	HELP_IDENTITY = 'Help Identity',
-	HELP_OTHER = 'Help Other'
+	HELP_NEW_IDENTITY = 'Help New Identity'
 }
 
 export enum WizardStepsHowToConvert {
@@ -45,5 +48,65 @@ export enum WizardStepsReceive {
 
 export enum TokenModalSteps {
 	CONTENT = 'content',
-	DELETE_CONFIRMATION = 'delete_confirnation'
+	DELETE_CONFIRMATION = 'delete_confirmation',
+	EDIT = 'edit',
+	EDIT_PROGRESS = 'edit_progress'
+}
+
+export enum WizardStepsWalletConnect {
+	CONNECT = 'Connect',
+	REVIEW = 'Review'
+}
+
+export enum WizardStepsHideToken {
+	HIDE = 'Hide',
+	HIDING = 'Hiding'
+}
+
+export enum WizardStepsReceiveAddress {
+	RECEIVE = 'Receive',
+	QR_CODE = 'QR code'
+}
+
+export enum WizardStepsManageTokens {
+	MANAGE = 'Manage',
+	IMPORT = 'Import',
+	REVIEW = 'Review',
+	SAVING = 'Saving'
+}
+
+export enum WizardStepsStake {
+	STAKE = 'Stake',
+	REVIEW = 'Review',
+	STAKING = 'Staking'
+}
+
+export enum WizardStepsUnstake {
+	UNSTAKE = 'Unstake',
+	REVIEW = 'Review',
+	UNSTAKING = 'Unstaking'
+}
+
+export enum WizardStepsClaimStakingReward {
+	REVIEW = 'Review',
+	CLAIMING = 'Claiming'
+}
+
+export const WizardStepsGetToken = {
+	GET_TOKEN: 'Get Token',
+	RECEIVE: 'Receive',
+	BUY_TOKEN: 'Buy Token',
+	...WizardStepsSwap,
+	...WizardStepsHowToConvert
+} as const;
+
+export enum WizardStepsScanner {
+	SCAN = 'Scan',
+	PAY = 'Pay',
+	TOKENS_LIST = 'Tokens List',
+	PAYING = 'Paying',
+	PAYMENT_CONFIRMED = 'Payment Confirmed',
+	PAYMENT_FAILED = 'Payment Failed',
+	WALLET_CONNECT_CONNECT = WizardStepsWalletConnect.CONNECT,
+	WALLET_CONNECT_REVIEW = WizardStepsWalletConnect.REVIEW
 }

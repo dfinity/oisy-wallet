@@ -1,13 +1,18 @@
+import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
+import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
+import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
+import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import {
 	checkIfAccountExists,
 	estimatePriorityFee,
 	fetchSignatures,
+	getAccountInfo,
 	getAccountOwner,
 	getSolCreateAccountFee,
-	getTokenDecimals,
-	getTokenOwner,
+	getTokenInfo,
 	loadSolLamportsBalance,
 	loadTokenAccount,
 	loadTokenBalance
@@ -24,6 +29,8 @@ import {
 	mockAtaAddress,
 	mockSolAddress,
 	mockSolAddress2,
+	mockSolAddress3,
+	mockSolAddress4,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { address, lamports } from '@solana/kit';
@@ -38,6 +45,8 @@ describe('solana.api', () => {
 	let mockGetMinimumBalanceForRentExemption: MockInstance;
 	let mockGetRecentPrioritizationFees: MockInstance;
 	let mockGetAccountInfo: MockInstance;
+
+	let originalMapGet = Map.prototype.get;
 
 	const mockAddresses = [mockSolAddress, mockSolAddress2];
 	const mockBalance = 500000n;
@@ -61,10 +70,98 @@ describe('solana.api', () => {
 			data: {
 				parsed: {
 					info: {
-						decimals: 6
+						decimals: 6,
+						mintAuthority: mockSolAddress3,
+						freezeAuthority: mockSolAddress4
 					}
 				}
 			}
+		}
+	};
+	const mockTokenAccountInfoWithExtensions = {
+		value: {
+			data: {
+				parsed: {
+					info: {
+						decimals: 8,
+						extensions: [
+							{
+								extension: 'metadataPointer',
+								state: {
+									authority: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq',
+									metadataAddress: 'XsyZcb97BzETAqi9BoP2C9D196MiMNBisGMVNje2Thz'
+								}
+							},
+							{
+								extension: 'permanentDelegate',
+								state: {
+									delegate: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq'
+								}
+							},
+							{
+								extension: 'defaultAccountState',
+								state: {
+									accountState: 'initialized'
+								}
+							},
+							{
+								extension: 'scaledUiAmountConfig',
+								state: {
+									authority: 'S7vYFFWH6BjJyEsdrPQpqpYTqLTrPRK6KW3VwsJuRaS',
+									multiplier: '1',
+									newMultiplier: '1',
+									newMultiplierEffectiveTimestamp: 0
+								}
+							},
+							{
+								extension: 'pausableConfig',
+								state: {
+									authority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+									paused: false
+								}
+							},
+							{
+								extension: 'confidentialTransferMint',
+								state: {
+									auditorElgamalPubkey: null,
+									authority: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq',
+									autoApproveNewAccounts: false
+								}
+							},
+							{
+								extension: 'transferHook',
+								state: {
+									authority: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq',
+									programId: null
+								}
+							},
+							{
+								extension: 'tokenMetadata',
+								state: {
+									additionalMetadata: [],
+									mint: 'XsyZcb97BzETAqi9BoP2C9D196MiMNBisGMVNje2Thz',
+									name: 'S&P Small Cap xStock',
+									symbol: 'IJRx',
+									updateAuthority: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq',
+									uri: 'https://xstocks-metadata.backed.fi/tokens/Solana/IJRx/metadata.json'
+								}
+							}
+						],
+						freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+						isInitialized: true,
+						mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+						supply: '0'
+					},
+					type: 'mint'
+				},
+				program: 'spl-token-2022',
+				space: 684
+			},
+			executable: false,
+			lamports: 5651520,
+			owner: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',
+			rentEpoch: 18446744073709552000,
+			space: 684
 		}
 	};
 	const mockAtaInfo = {
@@ -121,6 +218,12 @@ describe('solana.api', () => {
 			getAccountInfo: mockGetAccountInfo
 		});
 		vi.mocked(solRpcProviders.solanaHttpRpc).mockImplementation(mockSolanaHttpRpc);
+
+		originalMapGet = Map.prototype.get;
+	});
+
+	afterEach(() => {
+		Map.prototype.get = originalMapGet;
 	});
 
 	describe('loadSolLamportsBalance', () => {
@@ -135,14 +238,16 @@ describe('solana.api', () => {
 		});
 
 		it('should handle zero balance', async () => {
-			mockGetBalance.mockReturnValueOnce({ send: () => Promise.resolve({ value: lamports(0n) }) });
+			mockGetBalance.mockReturnValueOnce({
+				send: () => Promise.resolve({ value: lamports(ZERO) })
+			});
 
 			const balance = await loadSolLamportsBalance({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -187,7 +292,7 @@ describe('solana.api', () => {
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 		});
 
 		it('should handle undefined balance', async () => {
@@ -264,7 +369,7 @@ describe('solana.api', () => {
 
 			expect(transactions).toHaveLength(5);
 			expect(mockGetSignaturesForAddress).toHaveBeenCalledTimes(2);
-			// Verify the second call uses the last signature from first batch for pagination
+			// Verify the second call uses the last signature from the first batch for pagination
 			expect(mockGetSignaturesForAddress).toHaveBeenLastCalledWith(
 				expect.anything(),
 				expect.objectContaining({
@@ -290,7 +395,7 @@ describe('solana.api', () => {
 			});
 
 			expect(transactions).toHaveLength(2);
-			expect(mockGetSignaturesForAddress).toHaveBeenCalledTimes(1);
+			expect(mockGetSignaturesForAddress).toHaveBeenCalledOnce();
 		});
 
 		it('should handle empty signatures response', async () => {
@@ -366,7 +471,7 @@ describe('solana.api', () => {
 			});
 
 			expect(account).toEqual(mockSplAddress);
-			expect(mockGetTokenAccountsByOwner).toHaveBeenCalledTimes(1);
+			expect(mockGetTokenAccountsByOwner).toHaveBeenCalledOnce();
 		});
 
 		it('should return undefined if no token account exists', async () => {
@@ -470,7 +575,7 @@ describe('solana.api', () => {
 
 			const fee = await estimatePriorityFee({ network: SolanaNetworks.mainnet });
 
-			expect(fee).toEqual(0n);
+			expect(fee).toEqual(ZERO);
 			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledOnce();
 		});
 
@@ -485,82 +590,155 @@ describe('solana.api', () => {
 		});
 	});
 
-	describe('getTokenDecimals', () => {
+	describe('getAccountInfo', () => {
+		// We need to use mock addresses different from the ones used in other tests
+		// That is because the cache is based on address and network for all of them
+		const mockAddress1 = BONK_TOKEN.address;
+		const mockAddress2 = TRUMP_TOKEN.address;
+		const mockAddress3 = PENGU_TOKEN.address;
+		const mockAddress4 = GMEX_TOKEN.address;
+		const mockAddress5 = GOOGLX_TOKEN.address;
+
 		beforeEach(() => {
 			mockAccountInfo = mockTokenAccountInfo;
 		});
 
-		it('should get token decimals successfully', async () => {
-			const decimals = await getTokenDecimals({
-				address: mockSplAddress,
+		it('should get account info successfully', async () => {
+			const info = await getAccountInfo({
+				address: mockAddress1,
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(decimals).toEqual(6);
-			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+			expect(info).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAddress1, { encoding: 'jsonParsed' });
+		});
+
+		it('should cache account info by address and network', async () => {
+			vi.clearAllMocks();
+
+			const firstCall = await getAccountInfo({
+				address: mockAddress2,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(firstCall).toEqual(mockAccountInfo);
+
+			const secondCall = await getAccountInfo({
+				address: mockAddress2,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(secondCall).toEqual(firstCall);
+			expect(mockGetAccountInfo).toHaveBeenCalledOnce();
+
+			const thirdCall = await getAccountInfo({
+				address: mockAddress2,
+				network: SolanaNetworks.devnet
+			});
+
+			expect(thirdCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, mockAddress2, {
+				encoding: 'jsonParsed'
+			});
 		});
 
 		it('should throw error when RPC call fails', async () => {
 			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
 
 			await expect(
-				getTokenDecimals({
-					address: mockSplAddress,
+				getAccountInfo({
+					address: mockAddress3,
 					network: SolanaNetworks.mainnet
 				})
 			).rejects.toThrow(mockError);
 		});
 
-		it('should return 0 when decimals are not found', async () => {
-			mockGetAccountInfo.mockReturnValueOnce({
-				send: () => Promise.resolve({ value: { data: { parsed: { info: {} } } } })
-			});
-
-			const decimals = await getTokenDecimals({
-				address: mockSplAddress,
+		it('should not throw error when RPC call fails but the info was already cached', async () => {
+			const firstCall = await getAccountInfo({
+				address: mockAddress4,
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(decimals).toEqual(0);
+			expect(firstCall).toEqual(mockAccountInfo);
+
+			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
+
+			const secondCall = await getAccountInfo({
+				address: mockAddress4,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(secondCall).toEqual(firstCall);
+			expect(mockGetAccountInfo).toHaveBeenCalledOnce();
 		});
 
-		it('should return 0 when value is nullish', async () => {
-			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.resolve({}) });
+		it('should re-cache account if the cache is nullish', async () => {
+			vi.clearAllMocks();
 
-			const decimals = await getTokenDecimals({
-				address: mockSplAddress,
+			mockAccountInfo = { value: null };
+
+			const firstCall = await getAccountInfo({
+				address: mockAddress5,
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(decimals).toEqual(0);
-		});
-
-		it('should return 0 when the value was not parsed', async () => {
-			mockGetAccountInfo.mockReturnValueOnce({
-				send: () => Promise.resolve({ value: { data: [1, 2, 3] } })
+			expect(firstCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAddress5, {
+				encoding: 'jsonParsed'
 			});
 
-			const decimals = await getTokenDecimals({
-				address: mockSplAddress,
+			mockAccountInfo = mockTokenAccountInfo;
+
+			const secondCall = await getAccountInfo({
+				address: mockAddress5,
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(decimals).toEqual(0);
+			expect(secondCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+
+			const thirdCall = await getAccountInfo({
+				address: mockAddress5,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(thirdCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
 		});
 	});
 
-	describe('getTokenOwner', () => {
+	describe('getTokenInfo', () => {
 		beforeEach(() => {
 			mockAccountInfo = mockTokenAccountInfo;
+
+			vi.spyOn(Map.prototype, 'get').mockReturnValue(undefined);
 		});
 
-		it('should get token owner successfully', async () => {
-			const owner = await getTokenOwner({
+		it('should get token info successfully', async () => {
+			const info = await getTokenInfo({
 				address: mockSplAddress,
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(owner).toEqual(TOKEN_PROGRAM_ADDRESS);
+			expect(info).toEqual({
+				owner: TOKEN_PROGRAM_ADDRESS,
+				decimals: 6,
+				mintAuthority: mockSolAddress3,
+				freezeAuthority: mockSolAddress4
+			});
 			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
 		});
 
@@ -568,30 +746,137 @@ describe('solana.api', () => {
 			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
 
 			await expect(
-				getTokenOwner({
+				getTokenInfo({
 					address: mockSplAddress,
 					network: SolanaNetworks.mainnet
 				})
 			).rejects.toThrow(mockError);
 		});
 
-		it('should return undefined when owner is not found', async () => {
+		it('should handle correctly when info are not complete', async () => {
 			mockGetAccountInfo.mockReturnValueOnce({
 				send: () => Promise.resolve({})
 			});
 
-			const owner = await getTokenOwner({
+			await expect(
+				getTokenInfo({ address: mockSplAddress, network: SolanaNetworks.mainnet })
+			).resolves.toEqual({ owner: undefined, decimals: 0 });
+
+			mockGetAccountInfo.mockReturnValueOnce({
+				send: () => Promise.resolve({ value: {} })
+			});
+
+			await expect(
+				getTokenInfo({ address: mockSplAddress, network: SolanaNetworks.mainnet })
+			).resolves.toEqual({ owner: undefined, decimals: 0 });
+
+			mockGetAccountInfo.mockReturnValueOnce({
+				send: () => Promise.resolve({ value: { data: {} } })
+			});
+
+			await expect(
+				getTokenInfo({ address: mockSplAddress, network: SolanaNetworks.mainnet })
+			).resolves.toEqual({ owner: undefined, decimals: 0 });
+
+			mockGetAccountInfo.mockReturnValueOnce({
+				send: () => Promise.resolve({ value: { data: { parsed: {} } } })
+			});
+
+			await expect(
+				getTokenInfo({ address: mockSplAddress, network: SolanaNetworks.mainnet })
+			).resolves.toEqual({ owner: undefined, decimals: 0 });
+		});
+
+		it('should handle correctly missing info fields', async () => {
+			mockAccountInfo = {
+				value: {
+					owner: TOKEN_PROGRAM_ADDRESS,
+					data: {
+						parsed: {
+							info: {
+								decimals: 8
+							}
+						}
+					}
+				}
+			};
+
+			const info = await getTokenInfo({
 				address: mockSplAddress,
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(owner).toBeUndefined();
+			expect(info).toEqual({
+				owner: TOKEN_PROGRAM_ADDRESS,
+				decimals: 8
+			});
+		});
+
+		describe('with extensions', () => {
+			const {
+				value: {
+					owner,
+					data: {
+						parsed: {
+							info: { decimals, mintAuthority, freezeAuthority, extensions }
+						}
+					}
+				}
+			} = mockTokenAccountInfoWithExtensions;
+
+			beforeEach(() => {
+				mockAccountInfo = mockTokenAccountInfoWithExtensions;
+
+				vi.spyOn(Map.prototype, 'get').mockReturnValue(undefined);
+			});
+
+			it('should parse the metadata extensions if present', async () => {
+				const info = await getTokenInfo({
+					address: mockSplAddress,
+					network: SolanaNetworks.mainnet
+				});
+
+				expect(info).toEqual({
+					owner,
+					decimals,
+					mintAuthority,
+					freezeAuthority,
+					symbol: extensions.find((ext) => ext.extension === 'tokenMetadata')?.state.symbol,
+					name: extensions.find((ext) => ext.extension === 'tokenMetadata')?.state.name
+				});
+				expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+			});
+
+			it('should not raise if the token metadata extension is missing', async () => {
+				const mockAccountInfoModified = { ...mockTokenAccountInfoWithExtensions };
+
+				mockAccountInfoModified.value.data.parsed.info.extensions = [
+					...mockAccountInfoModified.value.data.parsed.info.extensions.filter(
+						(ext) => ext.extension !== 'tokenMetadata'
+					)
+				];
+
+				const info = await getTokenInfo({
+					address: mockSplAddress,
+					network: SolanaNetworks.mainnet
+				});
+
+				expect(info).toEqual({
+					owner,
+					decimals,
+					mintAuthority,
+					freezeAuthority
+				});
+				expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+			});
 		});
 	});
 
 	describe('getAccountOwner', () => {
 		beforeEach(() => {
 			mockAccountInfo = mockAtaInfo;
+
+			vi.spyOn(Map.prototype, 'get').mockReturnValue(undefined);
 		});
 
 		it('should get token owner successfully', async () => {
@@ -630,6 +915,10 @@ describe('solana.api', () => {
 	});
 
 	describe('checkIfAccountExists', () => {
+		beforeEach(() => {
+			vi.spyOn(Map.prototype, 'get').mockReturnValue(undefined);
+		});
+
 		it('should return true if the ATA address has info data', async () => {
 			mockAccountInfo = mockAtaInfo;
 

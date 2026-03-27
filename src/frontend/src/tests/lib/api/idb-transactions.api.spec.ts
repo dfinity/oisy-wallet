@@ -1,24 +1,35 @@
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import { setIdbTransactionsStore } from '$lib/api/idb-transactions.api';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import {
+	clearIdbBtcTransactions,
+	clearIdbEthTransactions,
+	clearIdbIcTransactions,
+	clearIdbSolTransactions,
+	getIdbBtcTransactions,
+	getIdbEthTransactions,
+	getIdbIcTransactions,
+	getIdbSolTransactions,
+	setIdbBtcTransactions,
+	setIdbEthTransactions,
+	setIdbIcTransactions,
+	setIdbSolTransactions,
+	setIdbTransactionsStore
+} from '$lib/api/idb-transactions.api';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
-
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
 
 vi.mock('$app/environment', () => ({
 	browser: true
@@ -29,6 +40,10 @@ describe('idb-transactions.api', () => {
 
 	const mockToken1 = ETHEREUM_TOKEN;
 	const mockToken2 = BTC_MAINNET_TOKEN;
+	const mockToken3 = USDC_TOKEN;
+	const mockToken4 = ICP_TOKEN;
+	const mockToken5 = SOLANA_TOKEN;
+	const mockTokens = [mockToken1, mockToken2, mockToken3, mockToken4, mockToken5];
 
 	const mockTransactions1 = createMockEthTransactions(3);
 	const mockTransactions2 = createMockBtcTransactionsUi(7);
@@ -36,20 +51,33 @@ describe('idb-transactions.api', () => {
 		data: transaction,
 		certified: false
 	}));
+	const mockTransactions3 = createMockEthTransactions(5);
 
 	const mockParams = {
 		identity: mockIdentity,
-		idbTransactionsStore: mockIdbTransactionsStore
+		idbTransactionsStore: mockIdbTransactionsStore,
+		tokens: mockTokens
 	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		ethTransactionsStore.reset();
+		ethTransactionsStore.reset(mockToken1.id);
+		ethTransactionsStore.reset(mockToken3.id);
 
 		ethTransactionsStore.set({
 			tokenId: mockToken1.id,
-			transactions: mockTransactions1
+			transactions: mockTransactions1.map((data) => ({
+				data,
+				certified: false
+			}))
+		});
+		ethTransactionsStore.set({
+			tokenId: mockToken3.id,
+			transactions: mockTransactions3.map((data) => ({
+				data,
+				certified: false
+			}))
 		});
 
 		btcTransactionsStore.reset(mockToken2.id);
@@ -58,6 +86,10 @@ describe('idb-transactions.api', () => {
 			tokenId: mockToken2.id,
 			transactions: mockCertifiedTransactions2
 		});
+
+		icTransactionsStore.reset(mockToken4.id);
+
+		solTransactionsStore.reset(mockToken5.id);
 	});
 
 	describe('setIdbTransactionsStore', () => {
@@ -65,8 +97,6 @@ describe('idb-transactions.api', () => {
 			await setIdbTransactionsStore({
 				...mockParams,
 				identity: null,
-				tokenId: mockToken1.id,
-				networkId: mockToken1.network.id,
 				transactionsStoreData: get(ethTransactionsStore)
 			});
 
@@ -75,8 +105,6 @@ describe('idb-transactions.api', () => {
 			await setIdbTransactionsStore({
 				...mockParams,
 				identity: undefined,
-				tokenId: mockToken1.id,
-				networkId: mockToken1.network.id,
 				transactionsStoreData: get(ethTransactionsStore)
 			});
 
@@ -86,8 +114,6 @@ describe('idb-transactions.api', () => {
 		it('should not set the transactions in the IDB if the transactions store data is nullish', async () => {
 			await setIdbTransactionsStore({
 				...mockParams,
-				tokenId: mockToken1.id,
-				networkId: mockToken1.network.id,
 				transactionsStoreData: undefined
 			});
 
@@ -97,12 +123,10 @@ describe('idb-transactions.api', () => {
 		it('should set the transactions in the IDB', async () => {
 			await setIdbTransactionsStore({
 				...mockParams,
-				tokenId: mockToken1.id,
-				networkId: mockToken1.network.id,
 				transactionsStoreData: get(ethTransactionsStore)
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledTimes(2);
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				[
@@ -113,19 +137,25 @@ describe('idb-transactions.api', () => {
 				mockTransactions1,
 				mockIdbTransactionsStore
 			);
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				2,
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken3.id.description,
+					mockToken3.network.id.description
+				],
+				mockTransactions3,
+				mockIdbTransactionsStore
+			);
 		});
 
 		it('should set the certified transactions in the IDB', async () => {
 			await setIdbTransactionsStore({
 				...mockParams,
-				tokenId: mockToken2.id,
-				networkId: mockToken2.network.id,
 				transactionsStoreData: get(btcTransactionsStore)
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
-			expect(idbKeyval.set).toHaveBeenNthCalledWith(
-				1,
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
 				[
 					mockIdentity.getPrincipal().toText(),
 					mockToken2.id.description,
@@ -136,17 +166,246 @@ describe('idb-transactions.api', () => {
 			);
 		});
 
-		it('should not set the transactions in the IDB if the transactions are nullish for the token', async () => {
+		it('should not set the transactions in the IDB if the transactions are nullish for one token', async () => {
 			ethTransactionsStore.nullify(mockToken1.id);
 
 			await setIdbTransactionsStore({
 				...mockParams,
-				tokenId: mockToken1.id,
-				networkId: mockToken1.network.id,
+				transactionsStoreData: get(ethTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken3.id.description,
+					mockToken3.network.id.description
+				],
+				mockTransactions3,
+				mockIdbTransactionsStore
+			);
+		});
+
+		it('should not set the transactions in the IDB if the transactions are nullish for all tokens', async () => {
+			ethTransactionsStore.nullify(mockToken1.id);
+			ethTransactionsStore.nullify(mockToken3.id);
+
+			await setIdbTransactionsStore({
+				...mockParams,
 				transactionsStoreData: get(ethTransactionsStore)
 			});
 
 			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+
+		it('should ignore errors if a single token throws', async () => {
+			vi.mocked(idbKeyval.set).mockRejectedValueOnce(new Error('Mocked error'));
+
+			await expect(
+				setIdbTransactionsStore({
+					...mockParams,
+					transactionsStoreData: get(ethTransactionsStore)
+				})
+			).resolves.not.toThrow();
+
+			expect(idbKeyval.set).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe('getIdbBtcTransactions', () => {
+		it('should get BTC transactions', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbBtcTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('getIdbEthTransactions', () => {
+		it('should get ETH transactions', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbEthTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('getIdbIcTransactions', () => {
+		it('should get IC transactions', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbIcTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('getIdbSolTransactions', () => {
+		it('should get SOL transactions', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbSolTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('clearIdbBtcTransactions', () => {
+		it('should clear BTC transactions', async () => {
+			await clearIdbBtcTransactions();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbEthTransactions', () => {
+		it('should clear ETH transactions', async () => {
+			await clearIdbEthTransactions();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbIcTransactions', () => {
+		it('should clear IC transactions', async () => {
+			await clearIdbIcTransactions();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbSolTransactions', () => {
+		it('should clear SOL transactions', async () => {
+			await clearIdbSolTransactions();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('setIdbBtcTransactions', () => {
+		it('should delegate to setIdbTransactionsStore with btc store', async () => {
+			await setIdbBtcTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken2],
+				transactionsStoreData: get(btcTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken2.id.description,
+					mockToken2.network.id.description
+				],
+				mockTransactions2,
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('setIdbEthTransactions', () => {
+		it('should delegate to setIdbTransactionsStore with eth store', async () => {
+			await setIdbEthTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken1],
+				transactionsStoreData: get(ethTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken1.id.description,
+					mockToken1.network.id.description
+				],
+				mockTransactions1,
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('setIdbIcTransactions', () => {
+		const mockIcTransactions = createMockIcTransactionsUi(4);
+
+		it('should delegate to setIdbTransactionsStore with ic store', async () => {
+			icTransactionsStore.set({
+				tokenId: mockToken4.id,
+				transactions: mockIcTransactions.map((data) => ({ data, certified: true }))
+			});
+
+			await setIdbIcTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken4],
+				transactionsStoreData: get(icTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken4.id.description,
+					mockToken4.network.id.description
+				],
+				mockIcTransactions,
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('setIdbSolTransactions', () => {
+		const mockSolTransactions = createMockSolTransactionsUi(3);
+
+		it('should delegate to setIdbTransactionsStore with sol store', async () => {
+			solTransactionsStore.set({
+				tokenId: mockToken5.id,
+				transactions: mockSolTransactions.map((data) => ({ data, certified: false }))
+			});
+
+			await setIdbSolTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken5],
+				transactionsStoreData: get(solTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken5.id.description,
+					mockToken5.network.id.description
+				],
+				mockSolTransactions,
+				expect.any(Object)
+			);
 		});
 	});
 });

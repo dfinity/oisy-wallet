@@ -3,7 +3,7 @@ import type { RewardCampaignDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import type { RewardType } from '$lib/enums/reward-type';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export interface RewardsResponse {
 	rewards: RewardResponseInfo[];
@@ -41,6 +41,10 @@ export interface RewardStateData {
 	rewardType?: RewardType;
 }
 
+export interface WelcomeData {
+	reward: RewardCampaignDescription;
+}
+
 export interface UserRoleResult {
 	isVip: boolean;
 	isGold: boolean;
@@ -56,6 +60,8 @@ export interface CampaignEligibility {
 	available: boolean;
 	eligible: boolean;
 	criteria: CampaignCriterion[];
+	probabilityMultiplierEnabled?: boolean;
+	probabilityMultiplier?: number;
 }
 
 export interface CampaignCriterion {
@@ -73,7 +79,16 @@ export interface MinTransactionsCriterion extends CampaignCriterion {
 	count: number;
 }
 
+export interface MinTransactionsInNetworkCriterion extends CampaignCriterion {
+	days: bigint;
+	count: number;
+}
+
 export interface MinTotalAssetsUsdCriterion extends CampaignCriterion {
+	usd: number;
+}
+
+export interface MinTotalAssetsUsdInNetworkCriterion extends CampaignCriterion {
 	usd: number;
 }
 

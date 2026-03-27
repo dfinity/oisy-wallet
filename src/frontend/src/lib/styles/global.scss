@@ -1,13 +1,20 @@
 @use 'sass:meta';
 
-// We explicitly need to import Tailwind with a plain CSS @import as described in their documentation.
-// Trying to import it with Sass — such as using @use — leads to reproducibility issues.
-// Additionally, we need to explicitly set the base path in order to avoid issues with building the app via Docker.
+/*
+We explicitly need to import Tailwind with a plain CSS @import as described in their documentation.
+Trying to import it with Sass — such as using @use — leads to reproducibility issues.
+Additionally, we need to explicitly set the base path in order to avoid issues with building the app via Docker.
+*/
 /* prettier-ignore */
 @import 'tailwindcss' source("../../../../../src");
 @config '../../../../../tailwind.config.ts';
 
 @layer base {
+	::view-transition-old(header),
+	::view-transition-new(header) {
+		animation: none;
+	}
+
 	/*
 	The default border color has changed to `currentColor` in Tailwind CSS v4,
 	so we've added these compatibility styles to make sure everything still
@@ -30,22 +37,8 @@
 		}
 	}
 
-	:root[theme='light'] {
-		.dark-hidden {
-			display: block !important;
-		}
-
-		.dark-block {
-			display: none !important;
-		}
-	}
-	:root[theme='dark'] {
-		.dark-hidden {
-			display: none !important;
-		}
-		.dark-block {
-			display: block !important;
-		}
+	.always-inverted {
+		filter: invert(1);
 	}
 
 	@include meta.load-css('global/font-faces');
@@ -55,6 +48,7 @@
 	@include meta.load-css('global/layout');
 	@include meta.load-css('global/body');
 	@include meta.load-css('global/button');
+	@include meta.load-css('global/input');
 	@include meta.load-css('global/text');
 	@include meta.load-css('global/gix');
 	@include meta.load-css('global/position');
@@ -62,7 +56,7 @@
 	@include meta.load-css('global/lists');
 	@include meta.load-css('global/scrollbar');
 
-	// Themes
+	/* Themes */
 	@include meta.load-css('theme/default-theme');
 	@include meta.load-css('theme/dark-theme');
 

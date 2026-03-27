@@ -1,14 +1,14 @@
+import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import {
 	allowLoggingForDebugging,
 	disableConsoleLog,
 	failTestsThatLogToConsole
 } from '$tests/utils/console.test-utils';
-import type { HttpAgent } from '@dfinity/agent';
+import type { HttpAgent } from '@icp-sdk/core/agent';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';
-import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 // We mock ResizeObserver and element.animate because neither JSDOM nor Happy DOM supports them, while Svelte v5 requires them.
@@ -48,8 +48,14 @@ Element.prototype.animate = (
 	return animation;
 };
 
+Element.prototype.scrollTo = vi.fn();
+
 vi.mock('$app/stores', () => ({
 	page: mockPage
+}));
+
+vi.mock('$app/state', () => ({
+	page: {}
 }));
 
 vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
@@ -61,8 +67,15 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	};
 });
 
+vi.mock('$lib/services/analytics-wrapper', () => ({
+	loadPlausibleTracker: vi.fn(() => ({
+		init: vi.fn(),
+		track: vi.fn()
+	}))
+}));
+
 vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
+	const MockProvider = vi.fn(class {});
 
 	const plugin = vi.fn();
 
@@ -70,17 +83,32 @@ vi.mock('ethers/providers', () => {
 	network.prototype.attachPlugin = vi.fn();
 
 	return {
-		EtherscanProvider: provider,
-		InfuraProvider: provider,
-		JsonRpcProvider: provider,
+		EtherscanProvider: MockProvider,
+		InfuraProvider: MockProvider,
+		JsonRpcProvider: MockProvider,
 		EtherscanPlugin: plugin,
 		Network: network
 	};
 });
 
+vi.mock('idb-keyval', () => ({
+	createStore: vi.fn(() => ({})),
+	set: vi.fn(),
+	get: vi.fn(),
+	del: vi.fn(),
+	clear: vi.fn(),
+	delMany: vi.fn(),
+	keys: vi.fn(() => []),
+	update: vi.fn()
+}));
+
 failTestsThatLogToConsole();
 
-if (process.env.ALLOW_LOGGING_FOR_DEBUGGING) {
+const ALLOW_LOGGING_FOR_DEBUGGING = parseBoolEnvVar(
+	process.env.ALLOW_LOGGING_FOR_DEBUGGING ?? import.meta.env.VITE_ALLOW_LOGGING_FOR_DEBUGGING
+);
+
+if (ALLOW_LOGGING_FOR_DEBUGGING) {
 	allowLoggingForDebugging();
 }
 

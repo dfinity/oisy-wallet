@@ -1,5 +1,8 @@
 export enum RewardType {
 	AIRDROP = 'airdrop',
 	REFERRAL = 'referral',
-	JACKPOT = 'jackpot'
+	REFERRER = 'referrer',
+	REFEREE = 'referee',
+	JACKPOT = 'jackpot',
+	LEADERBOARD = 'leaderboard'
 }

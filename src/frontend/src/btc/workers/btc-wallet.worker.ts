@@ -17,6 +17,5 @@ export const onBtcWalletMessage = async ({
 			return;
 		case 'triggerBtcWalletTimer':
 			await scheduler.trigger(data);
-			return;
 	}
 };

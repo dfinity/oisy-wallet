@@ -1,63 +1,84 @@
 import { onLoadBtcStatusesError, syncBtcStatuses } from '$icp/services/ckbtc-listener.services';
-import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
+import type { IcCkWorkerParams } from '$icp/types/ck-listener';
+import { AppWorker } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse,
 	PostMessageSyncState
 } from '$lib/types/post-message';
+import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 
-export const initBtcStatusesWorker: IcCkWorker = async ({
-	minterCanisterId,
-	token: { id: tokenId }
-}: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
-	const BtcStatusesWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new BtcStatusesWorker.default();
+export class BtcStatusesWorker extends AppWorker {
+	private constructor(
+		worker: WorkerData,
+		tokenId: TokenId,
+		private readonly minterCanisterId: IcCkWorkerParams['minterCanisterId']
+	) {
+		super(worker);
 
-	worker.onmessage = ({
-		data
-	}: MessageEvent<
-		PostMessage<PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseError>
-	>) => {
-		const { msg } = data;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseError
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-		switch (msg) {
-			case 'syncBtcStatuses':
-				syncBtcStatuses({
-					tokenId,
-					data: data.data as PostMessageJsonDataResponse
-				});
-				return;
-			case 'syncBtcStatusesError':
-				onLoadBtcStatusesError({
-					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
-				});
-				return;
-		}
+				switch (msg) {
+					case 'syncBtcStatuses':
+						syncBtcStatuses({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+					case 'syncBtcStatusesError':
+						onLoadBtcStatusesError({
+							tokenId,
+							error: data.error
+						});
+				}
+			}
+		);
+	}
+
+	static async init({
+		minterCanisterId,
+		token: { id: tokenId }
+	}: IcCkWorkerParams): Promise<BtcStatusesWorker> {
+		const worker = await AppWorker.getInstance();
+		return new BtcStatusesWorker(worker, tokenId, minterCanisterId);
+	}
+
+	protected override stopTimer = () => {
+		this.postMessage({
+			msg: 'stopBtcStatusesTimer'
+		});
 	};
 
-	return {
-		start: () => {
-			worker.postMessage({
-				msg: 'startBtcStatusesTimer',
-				data: {
-					minterCanisterId
-				}
-			});
-		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopBtcStatusesTimer'
-			});
-		},
-		trigger: () => {
-			worker.postMessage({
-				msg: 'triggerBtcStatusesTimer',
-				data: {
-					minterCanisterId
-				}
-			});
-		}
+	start = () => {
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
+			msg: 'startBtcStatusesTimer',
+			data: {
+				minterCanisterId: this.minterCanisterId
+			}
+		});
 	};
-};
+
+	stop = () => {
+		this.stopTimer();
+	};
+
+	trigger = () => {
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
+			msg: 'triggerBtcStatusesTimer',
+			data: {
+				minterCanisterId: this.minterCanisterId
+			}
+		});
+	};
+}

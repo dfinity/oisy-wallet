@@ -21,15 +21,16 @@
 </script>
 
 <button
-	class:text={asMenuItem}
+	class:font-bold={!asMenuItem}
+	class:hover:text-brand-secondary={!asMenuItem}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
-	class:whitespace-nowrap={!asMenuItem}
-	class:text-center={!asMenuItem}
-	class:font-bold={!asMenuItem}
+	class:text={asMenuItem}
 	class:text-brand-primary-alt={!asMenuItem}
-	onclick={onClick}
+	class:text-center={!asMenuItem}
+	class:whitespace-nowrap={!asMenuItem}
 	data-tid={testId}
+	onclick={onClick}
 >
 	<div class="flex items-center gap-2">
 		{#if asMenuItem}

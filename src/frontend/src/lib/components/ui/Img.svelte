@@ -3,7 +3,6 @@
 		src: string;
 		alt?: string;
 		role?: string;
-		loading?: 'eager' | 'lazy';
 		width?: string;
 		height?: string;
 		rounded?: boolean;
@@ -19,7 +18,6 @@
 		src,
 		alt = '',
 		role = 'presentation',
-		loading = 'lazy',
 		width,
 		height,
 		rounded = false,
@@ -33,18 +31,18 @@
 </script>
 
 <img
-	{src}
-	{role}
+	style={fitHeight ? `max-width: inherit; height: ${height};` : undefined}
+	class={styleClass}
+	class:grayscale
+	class:rounded-full={rounded}
 	{alt}
-	{loading}
-	{width}
-	{height}
 	data-tid={testId}
 	decoding="async"
-	onload={onLoad}
+	{height}
+	loading="lazy"
 	onerror={onError}
-	class:rounded-full={rounded}
-	class:grayscale
-	class={styleClass}
-	style={fitHeight ? `max-width: inherit; height: ${height};` : undefined}
+	onload={onLoad}
+	{role}
+	{src}
+	{width}
 />

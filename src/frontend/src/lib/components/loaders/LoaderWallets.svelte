@@ -4,10 +4,8 @@
 	import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 </script>
 
-<IcLoaderWallets>
-	<BtcLoaderWallets>
-		<SolLoaderWallets>
-			<slot />
-		</SolLoaderWallets>
-	</BtcLoaderWallets>
-</IcLoaderWallets>
+<IcLoaderWallets />
+
+<BtcLoaderWallets />
+
+<SolLoaderWallets />

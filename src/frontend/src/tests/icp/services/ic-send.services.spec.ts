@@ -1,9 +1,7 @@
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
-import {
-	CKERC20_LEDGER_CANISTER_IDS,
-	IC_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import {
 	icrc1Transfer as icrc1TransferIcp,
 	transfer as transferIcp
@@ -17,20 +15,21 @@ import {
 } from '$icp/services/ck.services';
 import { sendDip20, sendIc, sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import type { IcTransferParams } from '$icp/types/ic-send';
+import * as accountUtils from '$icp/utils/account.utils';
 import * as icrcAccountUtils from '$icp/utils/icrc-account.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
-import * as accountUtils from '$lib/utils/account.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
 import {
+	mockLedgerCanisterId,
 	mockValidDip20Token,
 	mockValidIcCkToken,
 	mockValidIcToken,
 	mockValidIcrcToken
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText2 } from '$tests/mocks/identity.mock';
-import { decodeIcrcAccount } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$lib/utils/wallet.utils', () => ({
 	waitAndTriggerWallet: vi.fn()
@@ -177,7 +176,8 @@ describe('ic-send.services', () => {
 					expect(icrc1TransferIcp).toHaveBeenNthCalledWith(1, {
 						identity: mockIdentity,
 						to: decodeIcrcAccount(mockPrincipalText2),
-						amount: mockAmount
+						amount: mockAmount,
+						ledgerCanisterId: mockLedgerCanisterId
 					});
 
 					expect(transferIcp).not.toHaveBeenCalled();
@@ -193,7 +193,8 @@ describe('ic-send.services', () => {
 					expect(transferIcp).toHaveBeenNthCalledWith(1, {
 						identity: mockIdentity,
 						to: mockPrincipalText2,
-						amount: mockAmount
+						amount: mockAmount,
+						ledgerCanisterId: mockLedgerCanisterId
 					});
 
 					expect(icrc1TransferIcp).not.toHaveBeenCalled();
@@ -602,6 +603,7 @@ describe('ic-send.services', () => {
 			to: mockPrincipalText2,
 			amount: mockAmount,
 			identity: mockIdentity,
+			ledgerCanisterId: mockLedgerCanisterId,
 			progress: mockProgress
 		};
 
@@ -619,7 +621,8 @@ describe('ic-send.services', () => {
 			expect(icrc1TransferIcp).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				to: decodeIcrcAccount(mockPrincipalText2),
-				amount: mockAmount
+				amount: mockAmount,
+				ledgerCanisterId: mockLedgerCanisterId
 			});
 
 			expect(transferIcp).not.toHaveBeenCalled();
@@ -635,7 +638,8 @@ describe('ic-send.services', () => {
 			expect(transferIcp).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				to: mockPrincipalText2,
-				amount: mockAmount
+				amount: mockAmount,
+				ledgerCanisterId: mockLedgerCanisterId
 			});
 
 			expect(icrc1TransferIcp).not.toHaveBeenCalled();

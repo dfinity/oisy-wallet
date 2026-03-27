@@ -4,7 +4,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 
 	interface Props {
-		innerEnd: Snippet;
+		innerEnd?: Snippet;
 		prefix?: Snippet;
 		value: OptionAmount;
 		decimals: number;
@@ -16,6 +16,9 @@
 		testId?: string;
 		styleClass?: string;
 		autofocus?: boolean;
+		onInput: () => void;
+		onBlur: () => void;
+		onFocus: () => void;
 	}
 
 	let {
@@ -30,28 +33,31 @@
 		loading = false,
 		testId,
 		styleClass = '',
-		autofocus = false
+		autofocus = false,
+		onInput,
+		onBlur,
+		onFocus
 	}: Props = $props();
 </script>
 
 <div
 	class={`token-input-currency flex h-full w-full items-center font-bold ${styleClass}`}
-	class:text-error-primary={error}
 	class:animate-pulse={loading}
+	class:text-error-primary={error}
 >
 	{@render prefix?.()}
 	<InputCurrency
+		{name}
+		{autofocus}
+		{decimals}
+		{disabled}
+		{innerEnd}
+		{onBlur}
+		{onFocus}
+		{onInput}
+		{placeholder}
 		{testId}
 		bind:value
-		{name}
-		{placeholder}
-		{disabled}
-		{decimals}
-		{autofocus}
-		on:focus
-		on:blur
-		on:nnsInput
-		{innerEnd}
 	/>
 </div>
 

@@ -1,39 +1,130 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
-import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
+import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
+import { createPermit } from '$eth/services/eip2612-permit.services';
+import { send as sendEvm } from '$eth/services/send.services';
+import { swap } from '$eth/services/swap.services';
+import type { Erc20Token } from '$eth/types/erc20';
+import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
-import { loadCustomTokens } from '$icp/services/icrc.services';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
-import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-swap-pool.api';
+import {
+	deposit,
+	depositFrom,
+	getPoolMetadata,
+	getUserUnusedBalance,
+	swap as swapIcp,
+	withdraw
+} from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
-import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
-import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
+import { signPrehash } from '$lib/api/signer.api';
+import {
+	KONG_BACKEND_CANISTER_ID,
+	NANO_SECONDS_IN_HALF_MINUTE,
+	NANO_SECONDS_IN_MINUTE,
+	ZERO
+} from '$lib/constants/app.constants';
+import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
+import {
+	ICP_SWAP_POOL_FEE,
+	SWAP_DELTA_INTERVAL_MS,
+	SWAP_DELTA_TIMEOUT_MS
+} from '$lib/constants/swap.constants';
+import { exchanges } from '$lib/derived/exchange.derived';
+import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
+import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
+import { trackEvent } from '$lib/services/analytics.services';
+import {
+	pollNearIntentsStatus,
+	submitNearIntentsDepositTx
+} from '$lib/services/near-intents.services';
+import { retryWithDelay } from '$lib/services/rest.services';
+import { throwSwapError } from '$lib/services/swap-errors.services';
+import { autoLoadSingleToken } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import type { Amount } from '$lib/types/send';
 import {
+	SwapErrorCodes,
 	SwapProvider,
+	type CheckDeltaOrderStatusParams,
+	type EvmQuoteParams,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
+	type IcpSwapManualWithdrawParams,
+	type IcpSwapWithdrawParams,
+	type IcpSwapWithdrawResponse,
+	type NearIntentsQuoteParams,
 	type SwapMappedResult,
-	type SwapParams
+	type SwapNearIntentsEvmParams,
+	type SwapNearIntentsSolParams,
+	type SwapParams,
+	type SwapVeloraParams
 } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
+import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { formatToken } from '$lib/utils/format.utils';
+import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
-import { calculateSlippage } from '$lib/utils/swap.utils';
+import {
+	calculateSlippage,
+	geSwapEthTokenAddress,
+	getWithdrawableToken
+} from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { sendSol } from '$sol/services/sol-send.services';
+import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
+import {
+	constructSimpleSDK,
+	type DeltaAuction,
+	type DeltaPrice,
+	type OptimalRate
+} from '@velora-dex/sdk';
 import { get } from 'svelte/store';
-import { autoLoadSingleToken } from './token.services';
+
+const checkNeedsApproval = async ({
+	identity,
+	ledgerCanisterId,
+	amount,
+	spender
+}: {
+	identity: Identity;
+	ledgerCanisterId: LedgerCanisterIdText;
+	amount: bigint;
+	spender: Principal;
+}): Promise<boolean> => {
+	try {
+		const isAllowanceSufficient = await hasSufficientIcrcAllowance({
+			identity,
+			ledgerCanisterId,
+			owner: identity.getPrincipal(),
+			spender,
+			amount,
+			allowanceBuffer: NANO_SECONDS_IN_HALF_MINUTE
+		});
+
+		return !isAllowanceSufficient;
+	} catch (_: unknown) {
+		return true;
+	}
+};
 
 export const fetchKongSwap = async ({
 	identity,
@@ -59,6 +150,7 @@ export const fetchKongSwap = async ({
 		amount: parsedSwapAmount,
 		to: Principal.fromText(KONG_BACKEND_CANISTER_ID).toString()
 	};
+	const parsedSlippageValue = Number(slippageValue);
 
 	const txBlockIndex = !isSourceTokenIcrc2
 		? isTokenIcrc(sourceToken)
@@ -66,28 +158,47 @@ export const fetchKongSwap = async ({
 					...transferParams,
 					ledgerCanisterId
 				})
-			: await sendIcp(transferParams)
+			: await sendIcp({
+					...transferParams,
+					ledgerCanisterId
+				})
 		: undefined;
 
-	isSourceTokenIcrc2 &&
-		(await approve({
+	if (isSourceTokenIcrc2) {
+		// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+		const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+
+		const isApprovalNeeded = await checkNeedsApproval({
 			identity,
 			ledgerCanisterId,
-			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-			amount: parsedSwapAmount + sourceTokenFee * 2n,
-			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-			spender: {
-				owner: Principal.from(KONG_BACKEND_CANISTER_ID)
-			}
-		}));
+			amount: amountWithFees,
+			spender: Principal.from(KONG_BACKEND_CANISTER_ID)
+		});
+
+		if (isApprovalNeeded) {
+			await approve({
+				identity,
+				ledgerCanisterId,
+				amount: amountWithFees,
+				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+				spender: {
+					owner: Principal.from(KONG_BACKEND_CANISTER_ID)
+				}
+			});
+		}
+	}
 
 	await kongSwap({
 		identity,
 		sourceToken,
 		destinationToken,
 		sendAmount: parsedSwapAmount,
-		receiveAmount,
-		maxSlippage: Number(slippageValue),
+		maxSlippage: parsedSlippageValue,
+		receiveAmount: calculateSlippage({
+			quoteAmount: receiveAmount,
+			slippagePercentage: parsedSlippageValue
+		}),
 		...(nonNullish(txBlockIndex) ? { payTransactionId: { BlockIndex: txBlockIndex } } : {})
 	});
 
@@ -105,20 +216,36 @@ export const fetchKongSwap = async ({
 	await waitAndTriggerWallet();
 };
 
-export const loadKongSwapTokens = async ({ identity }: { identity: Identity }): Promise<void> => {
-	const kongSwapTokens = await kongTokens({
-		identity
-	});
-
-	kongSwapTokensStore.setKongSwapTokens(
-		kongSwapTokens.reduce<KongSwapTokensStoreData>(
-			(acc, kongToken) =>
-				'IC' in kongToken && !kongToken.IC.is_removed && kongToken.IC.chain === 'IC'
-					? { ...acc, [kongToken.IC.symbol]: kongToken.IC }
-					: acc,
-			{}
+export const loadKongSwapTokens = async ({
+	identity,
+	allIcrcTokens
+}: {
+	identity: Identity;
+	allIcrcTokens: IcToken[];
+}): Promise<void> => {
+	const kongSwapTokens = await Promise.allSettled(
+		allIcrcTokens.map(({ ledgerCanisterId: tokenLedgerCanisterId }: IcToken) =>
+			kongTokens({
+				identity,
+				tokenLedgerCanisterId
+			})
 		)
 	);
+
+	const supportedTokens = kongSwapTokens.reduce<KongSwapTokensStoreData>((acc, result) => {
+		if (result.status === 'fulfilled') {
+			return result.value.reduce<KongSwapTokensStoreData>(
+				(innerAcc, kongToken) =>
+					'IC' in kongToken && !kongToken.IC.is_removed && kongToken.IC.chain === 'IC'
+						? { ...innerAcc, [kongToken.IC.symbol]: kongToken.IC }
+						: innerAcc,
+				acc
+			);
+		}
+		return acc;
+	}, {});
+
+	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
 };
 
 export const fetchSwapAmounts = async ({
@@ -127,24 +254,122 @@ export const fetchSwapAmounts = async ({
 	destinationToken,
 	amount,
 	tokens,
-	slippage
+	slippage,
+	isSourceTokenIcrc2,
+	userEthAddress,
+	userSolAddress
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
 		unitName: sourceToken.decimals
 	});
+
+	if (isNetworkIdICP(sourceToken.network.id)) {
+		return await fetchSwapAmountsICP({
+			identity,
+			sourceToken,
+			destinationToken,
+			amount: sourceAmount,
+			tokens,
+			slippage,
+			isSourceTokenIcrc2
+		});
+	}
+
+	const isSourceSolana = isNetworkIdSolana(sourceToken.network.id);
+	const isDestSolana = isNetworkIdSolana(destinationToken.network.id);
+
+	if (isSourceSolana || isDestSolana) {
+		const sourceAddress = isSourceSolana ? userSolAddress : userEthAddress;
+		const destAddress = isDestSolana ? userSolAddress : userEthAddress;
+
+		if (isNullish(sourceAddress)) {
+			return [];
+		}
+
+		return await fetchSwapAmountsSOL({
+			sourceToken,
+			destinationToken,
+			amount: sourceAmount,
+			userAddress: sourceAddress,
+			recipientAddress: destAddress ?? undefined,
+			slippage
+		});
+	}
+
+	return await fetchSwapAmountsEVM({
+		sourceToken: sourceToken as Erc20Token,
+		destinationToken: destinationToken as Erc20Token,
+		amount: sourceAmount,
+		userAddress: userEthAddress,
+		slippage
+	});
+};
+
+const fetchSwapAmountsICP = async ({
+	identity,
+	sourceToken,
+	destinationToken,
+	amount,
+	tokens,
+	slippage,
+	isSourceTokenIcrc2
+}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'userSolAddress' | 'amount'> & {
+	amount: bigint;
+}): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
-			getQuote({ identity, sourceToken, destinationToken, sourceAmount })
+			getQuote({
+				identity,
+				sourceToken: sourceToken as IcToken,
+				destinationToken: destinationToken as IcToken,
+				sourceAmount: amount
+			})
 		)
 	);
+
+	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
+	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
+	const sourceTokenToDecimals = formatToken({
+		value: amount,
+		unitName: sourceToken.decimals
+	});
+
+	const trackEventBaseParams = {
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+		token_symbol: sourceToken.symbol,
+		token_network: sourceToken.network.name,
+		token_address: (sourceToken as IcToken).ledgerCanisterId,
+		token_name: sourceToken.name,
+		token_standard: sourceToken.standard.code,
+		token_id: String(sourceToken.id),
+		token2_symbol: destinationToken.symbol,
+		token2_network: destinationToken.network.name,
+		token2_address: (destinationToken as IcToken).ledgerCanisterId,
+		token2_name: destinationToken.name,
+		token2_standard: destinationToken.standard.code,
+		token2_id: String(destinationToken.id),
+		...(nonNullish(sourceTokenUsdValue) && {
+			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+		})
+	};
 
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
 			const result = settledResults[index];
 			if (result.status !== 'fulfilled') {
+				trackEvent({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: {
+						...trackEventBaseParams,
+						event_subcontext: provider.key,
+						result_status: 'error',
+						result_error: result.reason.message
+					}
+				});
+
 				return acc;
 			}
 
@@ -153,9 +378,32 @@ export const fetchSwapAmounts = async ({
 			if (provider.key === SwapProvider.KONG_SWAP) {
 				const swap = result.value as SwapAmountsReply;
 				mapped = provider.mapQuoteResult({ swap, tokens });
-			} else if (provider.key === SwapProvider.ICP_SWAP) {
+			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
-				mapped = provider.mapQuoteResult({ swap, slippage });
+				mapped = provider.mapQuoteResult({
+					swap,
+					slippage,
+					destToken: destinationToken as IcToken
+				});
+			}
+
+			if (nonNullish(mapped)) {
+				const destinationTokenToDecimals = formatToken({
+					value: mapped.receiveAmount,
+					unitName: destinationToken.decimals
+				});
+
+				trackEvent({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: {
+						...trackEventBaseParams,
+						event_subcontext: provider.key,
+						result_status: 'success',
+						...(nonNullish(destinationUsdValue) && {
+							token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+						})
+					}
+				});
 			}
 
 			if (mapped && Number(mapped.receiveAmount) > 0) {
@@ -167,19 +415,24 @@ export const fetchSwapAmounts = async ({
 		[]
 	);
 
-	return mappedProvidersResults.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
+	return mappedProvidersResults.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
 };
 
 export const fetchIcpSwap = async ({
 	identity,
 	progress,
+	setFailedProgressStep,
 	sourceToken,
 	destinationToken,
 	swapAmount,
 	receiveAmount,
 	slippageValue,
 	sourceTokenFee,
-	isSourceTokenIcrc2
+	isSourceTokenIcrc2,
+	tryToWithdraw = false,
+	withdrawDestinationTokens = false
 }: SwapParams): Promise<void> => {
 	progress(ProgressStepsSwap.SWAP);
 
@@ -197,8 +450,8 @@ export const fetchIcpSwap = async ({
 
 	const pool = await getPoolCanister({
 		identity,
-		token0: { address: sourceLedgerCanisterId, standard: sourceStandard },
-		token1: { address: destinationLedgerCanisterId, standard: destinationStandard },
+		token0: { address: sourceLedgerCanisterId, standard: sourceStandard.code },
+		token1: { address: destinationLedgerCanisterId, standard: destinationStandard.code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
 		fee: ICP_SWAP_POOL_FEE
 	});
@@ -210,7 +463,7 @@ export const fetchIcpSwap = async ({
 	const poolCanisterId = pool.canisterId.toString();
 
 	const slippageMinimum = calculateSlippage({
-		quoteAmount: receiveAmount,
+		quoteAmount: receiveAmount + destinationTokenFee,
 		slippagePercentage: Number(slippageValue)
 	});
 
@@ -221,6 +474,32 @@ export const fetchIcpSwap = async ({
 		to: poolCanisterId,
 		ledgerCanisterId: sourceLedgerCanisterId
 	};
+
+	// TODO: Revisit this logic once `tryToWithdraw` and `withdrawDestinationTokens` are provided.
+	// Let's keep it like this for now and adjust it later.
+	if (tryToWithdraw) {
+		if (!withdrawDestinationTokens) {
+			setFailedProgressStep?.(ProgressStepsSwap.SWAP);
+		}
+
+		progress(ProgressStepsSwap.WITHDRAW);
+
+		const { code, message, variant, swapSucceded } = await performManualWithdraw({
+			withdrawDestinationTokens,
+			setFailedProgressStep,
+			identity,
+			canisterId: poolCanisterId,
+			sourceToken,
+			destinationToken
+		});
+
+		throwSwapError({
+			code,
+			message,
+			variant,
+			swapSucceded
+		});
+	}
 
 	try {
 		if (!isSourceTokenIcrc2) {
@@ -233,15 +512,27 @@ export const fetchIcpSwap = async ({
 				fee: sourceTokenFee
 			});
 		} else {
-			await approve({
+			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer"
+			const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+
+			const isApprovalNeeded = await checkNeedsApproval({
 				identity,
 				ledgerCanisterId: sourceLedgerCanisterId,
-				// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-				amount: parsedSwapAmount + sourceTokenFee * 2n,
-				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
-				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-				spender: { owner: pool.canisterId }
+				amount: amountWithFees,
+				spender: pool.canisterId
 			});
+
+			if (isApprovalNeeded) {
+				await approve({
+					identity,
+					ledgerCanisterId: sourceLedgerCanisterId,
+					// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+					amount: parsedSwapAmount + sourceTokenFee * 2n,
+					// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+					expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+					spender: { owner: pool.canisterId }
+				});
+			}
 
 			await depositFrom({
 				identity,
@@ -252,8 +543,14 @@ export const fetchIcpSwap = async ({
 			});
 		}
 	} catch (err: unknown) {
-		console.error(err);
-		throw new Error(get(i18n).swap.error.deposit_error);
+		consoleError(err);
+
+		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
+
+		throwSwapError({
+			code: SwapErrorCodes.DEPOSIT_FAILED,
+			message: get(i18n).swap.error.deposit_error
+		});
 	}
 
 	try {
@@ -265,40 +562,60 @@ export const fetchIcpSwap = async ({
 			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
-	} catch (err: unknown) {
-		console.error(err);
+	} catch (_: unknown) {
+		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
+		progress(ProgressStepsSwap.WITHDRAW);
 
-		try {
-			// If the swap fails, attempt to refund the user's original tokens
-			await withdraw({
-				identity,
-				canisterId: poolCanisterId,
-				token: sourceLedgerCanisterId,
-				amount: parsedSwapAmount,
-				fee: sourceTokenFee
-			});
-		} catch (err: unknown) {
-			console.error(err);
-			// If even the refund fails, show a critical error requiring manual user action
-			throw new Error(get(i18n).swap.error.withdraw_failed);
-		}
-		// Inform the user that the swap failed, but refund was successful
-		throw new Error(get(i18n).swap.error.swap_failed_withdraw_success);
+		// Swap failed, try to withdraw the source tokens
+		const { code, message, variant } = await withdrawICPSwapAfterFailedSwap({
+			identity,
+			canisterId: poolCanisterId,
+			tokenId: sourceLedgerCanisterId,
+			amount: parsedSwapAmount,
+			fee: sourceTokenFee,
+			setFailedProgressStep,
+			sourceToken,
+			destinationToken
+		});
+
+		progress(ProgressStepsSwap.UPDATE_UI);
+
+		throwSwapError({
+			code,
+			message,
+			variant
+		});
 	}
 
 	try {
-		// Withdraw the swapped destination tokens from the pool
+		progress(ProgressStepsSwap.WITHDRAW);
+		// Swap succeeded, now withdraw the destination tokens
 		await withdraw({
 			identity,
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
-			amount: receiveAmount,
+			amount: receiveAmount + destinationTokenFee,
 			fee: destinationTokenFee
 		});
-	} catch (err: unknown) {
-		console.error(err);
+	} catch (_: unknown) {
+		try {
+			await withdrawUserUnusedBalance({
+				identity,
+				canisterId: poolCanisterId,
+				sourceToken,
+				destinationToken
+			});
 
-		throw new Error(get(i18n).swap.error.withdraw_failed);
+			progress(ProgressStepsSwap.UPDATE_UI);
+		} catch (_: unknown) {
+			setFailedProgressStep?.(ProgressStepsSwap.WITHDRAW);
+
+			throwSwapError({
+				code: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED,
+				variant: 'error',
+				swapSucceded: true
+			});
+		}
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
@@ -316,7 +633,571 @@ export const fetchIcpSwap = async ({
 	await waitAndTriggerWallet();
 };
 
+const executeNearIntentsSwap = async ({
+	progress,
+	sourceToken,
+	swapAmount,
+	swapDetails,
+	sendTransaction
+}: {
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: Token;
+	swapAmount: Amount;
+	swapDetails: NearIntentsQuoteResponse;
+	sendTransaction: (params: { amount: bigint; depositAddress: string }) => Promise<string>;
+}): Promise<void> => {
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
+
+	const { depositAddress, depositMemo } = swapDetails.quote;
+
+	progress(ProgressStepsSwap.SIGN_TRANSFER);
+
+	const txHash = await sendTransaction({ amount: parsedSwapAmount, depositAddress });
+
+	progress(ProgressStepsSwap.SWAP);
+
+	await submitNearIntentsDepositTx({
+		depositAddress,
+		txHash,
+		depositMemo: depositMemo ?? undefined
+	});
+
+	await pollNearIntentsStatus({
+		depositAddress,
+		depositMemo: depositMemo ?? undefined
+	});
+
+	progress(ProgressStepsSwap.UPDATE_UI);
+
+	await waitAndTriggerWallet();
+};
+
+export const fetchNearIntentsEvmSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	swapAmount,
+	sourceNetwork,
+	userAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapNearIntentsEvmParams): Promise<void> => {
+	await executeNearIntentsSwap({
+		progress,
+		sourceToken,
+		swapAmount,
+		swapDetails,
+		sendTransaction: async ({ amount, depositAddress }) => {
+			const { hash } = await sendEvm({
+				from: userAddress,
+				to: depositAddress,
+				amount,
+				token: sourceToken,
+				sourceNetwork,
+				identity,
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
+			});
+			return hash;
+		}
+	});
+};
+
+export const fetchNearIntentsSolSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	swapAmount,
+	userAddress,
+	swapDetails
+}: SwapNearIntentsSolParams): Promise<void> => {
+	await executeNearIntentsSwap({
+		progress,
+		sourceToken,
+		swapAmount,
+		swapDetails,
+		sendTransaction: async ({ amount, depositAddress }) =>
+			await sendSol({
+				identity,
+				token: sourceToken,
+				amount,
+				destination: depositAddress,
+				source: userAddress,
+				prioritizationFee: ZERO
+			})
+	});
+};
+
 export const swapService = {
 	[SwapProvider.ICP_SWAP]: fetchIcpSwap,
-	[SwapProvider.KONG_SWAP]: fetchKongSwap
+	[SwapProvider.KONG_SWAP]: fetchKongSwap,
+	//TODO: Will be fixed and updated in the next PRs
+	[SwapProvider.VELORA]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	[SwapProvider.NEAR_INTENTS]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
+	}
+};
+
+export const withdrawICPSwapAfterFailedSwap = async ({
+	identity,
+	canisterId,
+	tokenId,
+	amount,
+	fee,
+	setFailedProgressStep,
+	sourceToken,
+	destinationToken
+}: IcpSwapWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
+	const baseParams = {
+		identity,
+		canisterId,
+		token: tokenId,
+		amount,
+		fee
+	};
+	try {
+		await withdraw(baseParams);
+
+		return {
+			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
+			message: get(i18n).swap.error.swap_failed_withdraw_success
+		};
+	} catch (_: unknown) {
+		try {
+			// Second withdrawal attempt
+			await withdrawUserUnusedBalance({
+				identity,
+				canisterId,
+				sourceToken,
+				destinationToken
+			});
+
+			return {
+				code: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS,
+				message: get(i18n).swap.error.swap_failed_withdraw_success
+			};
+		} catch (_: unknown) {
+			setFailedProgressStep?.(ProgressStepsSwap.WITHDRAW);
+
+			return { code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED, variant: 'error' };
+		}
+	}
+};
+
+export const performManualWithdraw = async ({
+	withdrawDestinationTokens,
+	identity,
+	canisterId,
+	setFailedProgressStep,
+	sourceToken,
+	destinationToken
+}: IcpSwapManualWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
+	try {
+		await withdrawUserUnusedBalance({ identity, canisterId, sourceToken, destinationToken });
+
+		trackEvent({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+			metadata: {
+				dApp: SwapProvider.ICP_SWAP,
+				token: withdrawDestinationTokens ? destinationToken.symbol : sourceToken.symbol,
+				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
+			}
+		});
+
+		return {
+			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+			message: withdrawDestinationTokens
+				? get(i18n).swap.error.swap_sucess_manually_withdraw_success
+				: get(i18n).swap.error.manually_withdraw_success
+		};
+	} catch (_: unknown) {
+		trackEvent({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
+			metadata: {
+				dApp: SwapProvider.ICP_SWAP,
+				token: withdrawDestinationTokens ? destinationToken.symbol : sourceToken.symbol,
+				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
+			}
+		});
+
+		setFailedProgressStep?.(ProgressStepsSwap.WITHDRAW);
+
+		return {
+			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
+			variant: 'error',
+			swapSucceded: withdrawDestinationTokens
+		};
+	}
+};
+
+// This wrapper keeps the return type uniform (array of SwapMappedResult),
+// so we can plug in more DEX quote providers later without changing callers.
+// Each provider can push its mapped result into the array, easy extendability.
+export const fetchSwapAmountsEVM = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress,
+	slippage
+}: EvmQuoteParams): Promise<SwapMappedResult[]> => {
+	if (isNullish(userAddress)) {
+		return [];
+	}
+
+	const enabledProviders = evmSwapProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ sourceToken, destinationToken, amount, userAddress, slippage })
+		)
+	);
+
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		return acc;
+	}, []);
+
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
+};
+
+// This wrapper keeps the return type uniform (array of SwapMappedResult),
+// so we can plug in more DEX quote providers later without changing callers.
+// Each provider can push its mapped result into the array, easy extendability.
+export const fetchSwapAmountsSOL = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress,
+	recipientAddress,
+	slippage
+}: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
+	if (isNullish(userAddress)) {
+		return [];
+	}
+
+	const enabledProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
+		)
+	);
+
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		return acc;
+	}, []);
+
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
+};
+
+export const withdrawUserUnusedBalance = async ({
+	identity,
+	canisterId,
+	sourceToken,
+	destinationToken
+}: Omit<
+	IcpSwapManualWithdrawParams,
+	'setFailedProgressStep' | 'withdrawDestinationTokens'
+>): Promise<void> => {
+	const { token0, token1 } = await getPoolMetadata({ identity, canisterId });
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId,
+		principal: identity.getPrincipal()
+	});
+
+	if (balance0 === ZERO && balance1 === ZERO) {
+		throw new Error('No unused balance to withdraw');
+	}
+
+	if (balance0 !== ZERO) {
+		const token = getWithdrawableToken({
+			tokenAddress: token0.address,
+			sourceToken,
+			destinationToken
+		});
+		await withdraw({
+			identity,
+			canisterId,
+			token: token.ledgerCanisterId,
+			amount: balance0,
+			fee: token.fee
+		});
+	}
+
+	if (balance1 !== ZERO) {
+		const token = getWithdrawableToken({
+			tokenAddress: token1.address,
+			sourceToken,
+			destinationToken
+		});
+		await withdraw({
+			identity,
+			canisterId,
+			token: token.ledgerCanisterId,
+			amount: balance1,
+			fee: token.fee
+		});
+	}
+};
+
+export const fetchVeloraDeltaSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	sourceNetwork,
+	slippageValue,
+	destinationNetwork,
+	userAddress,
+	gas,
+	isGasless,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapVeloraParams): Promise<void> => {
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
+
+	const sdk = constructSimpleSDK({
+		chainId: Number(sourceNetwork.chainId),
+		fetch: window.fetch
+	});
+
+	const deltaContract = await sdk.delta.getDeltaContract();
+
+	const slippageMinimum = calculateSlippage({
+		// According to Velora's documentation, we must provide `destAmount` as the value after slippage.
+		// Additionally, as confirmed with Velora, we cannot use a formatted token value with decimals when creating a Delta order.
+		// Instead, we should use the raw `destAmount` value returned in the quote response (`swapDetails.destAmount`).
+		// Therefore, when creating a Delta order, always use the `destAmount` from `swapDetails`.
+		quoteAmount: BigInt(swapDetails.destAmount),
+		slippagePercentage: Number(slippageValue)
+	});
+
+	if (isNullish(deltaContract)) {
+		return;
+	}
+
+	let signableOrderData;
+
+	const deltaOrderBaseParams = {
+		deltaPrice: swapDetails as DeltaPrice,
+		owner: userAddress,
+		srcToken: sourceToken.address,
+		destToken: destinationToken.address,
+		srcAmount: parsedSwapAmount.toString(),
+		destAmount: `${slippageMinimum}`,
+		destChainId: Number(destinationNetwork.chainId),
+		partner: OISY_URL_HOSTNAME
+	};
+
+	if (isGasless) {
+		progress(ProgressStepsSwap.APPROVE);
+
+		const { nonce, deadline, encodedPermit } = await createPermit({
+			token: sourceToken,
+			userAddress,
+			spender: deltaContract,
+			value: parsedSwapAmount.toString(),
+			identity
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder({
+			...deltaOrderBaseParams,
+			deadline,
+			nonce,
+			permit: encodedPermit
+		});
+	} else {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: deltaContract,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			shouldSwapWithApproval: true,
+			maxPriorityFeePerGas,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
+	}
+
+	const hash = getSignParamsEIP712(signableOrderData);
+
+	const signature = await signPrehash({
+		hash,
+		identity
+	});
+
+	const compactSignature = getCompactSignature(signature);
+
+	const deltaAuction = await sdk.delta.postDeltaOrder({
+		order: signableOrderData.data,
+		signature: compactSignature
+	});
+
+	await checkDeltaOrderStatus({
+		sdk,
+		auctionId: deltaAuction.id
+	});
+
+	progress(ProgressStepsSwap.UPDATE_UI);
+
+	await waitAndTriggerWallet();
+};
+
+const checkDeltaOrderStatus = async ({
+	sdk,
+	auctionId,
+	timeoutMs = SWAP_DELTA_TIMEOUT_MS,
+	intervalMs = SWAP_DELTA_INTERVAL_MS
+}: CheckDeltaOrderStatusParams): Promise<void> => {
+	const deadline = Date.now() + timeoutMs;
+
+	while (Date.now() < deadline) {
+		const auction = await sdk.delta.getDeltaOrderById(auctionId);
+
+		if (isExecutedDeltaAuction({ auction })) {
+			return;
+		}
+
+		await new Promise((r) => setTimeout(r, intervalMs));
+	}
+};
+
+const isExecutedDeltaAuction = ({
+	auction,
+	waitForCrosschain = true
+}: {
+	auction: Omit<DeltaAuction, 'signature'>;
+	waitForCrosschain?: boolean;
+}): boolean => {
+	if (auction.status !== 'EXECUTED') {
+		return false;
+	}
+
+	if (waitForCrosschain && auction.order.bridge.destinationChainId !== 0) {
+		return auction.bridgeStatus === 'filled';
+	}
+
+	return true;
+};
+
+export const fetchVeloraMarketSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	sourceNetwork,
+	slippageValue,
+	userAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapVeloraParams): Promise<void> => {
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
+
+	const sdk = constructSimpleSDK({
+		chainId: Number(sourceNetwork.chainId),
+		fetch: window.fetch
+	});
+
+	const TokenTransferProxy = await sdk.swap.getSpender();
+
+	if (!isDefaultEthereumToken(sourceToken)) {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: TokenTransferProxy,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			maxPriorityFeePerGas,
+			shouldSwapWithApproval: true,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
+
+		await retryWithDelay({
+			maxRetries: 10,
+			request: async () => {
+				const currentAllowance = await erc20ContractAllowance({
+					token: sourceToken,
+					owner: userAddress,
+					spender: TokenTransferProxy,
+					networkId: sourceNetwork.id
+				});
+				if (currentAllowance < parsedSwapAmount) {
+					throw new Error(get(i18n).swap.error.unexpected);
+				}
+			}
+		});
+	}
+
+	progress(ProgressStepsSwap.SWAP);
+
+	const txParams = await sdk.swap.buildTx({
+		srcToken: geSwapEthTokenAddress(sourceToken),
+		destToken: geSwapEthTokenAddress(destinationToken),
+		srcAmount: swapDetails.srcAmount,
+		slippage: Number(slippageValue) * 100,
+		priceRoute: swapDetails as OptimalRate,
+		userAddress,
+		partner: OISY_URL_HOSTNAME
+	});
+
+	await swap({
+		from: userAddress,
+		to: txParams.to,
+		transaction: txParams,
+		identity,
+		token: sourceToken,
+		sourceNetwork,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
+		progress
+	});
+
+	progress(ProgressStepsSwap.UPDATE_UI);
+
+	await waitAndTriggerWallet();
 };

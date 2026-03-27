@@ -11,11 +11,11 @@
 </script>
 
 <Button
-	paddingSmall
 	colorStyle={isPrimary ? 'primary' : 'secondary-light'}
-	type="button"
 	fullWidth
 	onclick={modalStore.close}
+	paddingSmall
+	type="button"
 >
 	{$i18n.core.text.close}
 </Button>

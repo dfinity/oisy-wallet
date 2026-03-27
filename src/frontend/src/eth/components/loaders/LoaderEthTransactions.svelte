@@ -1,83 +1,42 @@
 <script lang="ts">
-	import { tokenNotInitialized } from '$eth/derived/nav.derived';
+	import { page } from '$app/state';
+	import { EARNING_ENABLED } from '$env/earning';
+	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
+	import { harvestAutopilotTokens } from '$eth/derived/harvest-autopilots.derived';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
+	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 	import {
-		loadEthereumTransactions,
-		reloadEthereumTransactions
-	} from '$eth/services/eth-transactions.services';
-	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import type { TokenId } from '$lib/types/token';
-	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+		COLLECTION_TIMER_INTERVAL_MILLIS,
+		MILLISECONDS_IN_DAY,
+		WALLET_TIMER_INTERVAL_MILLIS
+	} from '$lib/constants/app.constants';
+	import {
+		enabledErc20Tokens,
+		enabledErc4626Tokens,
+		enabledNonFungibleTokensWithoutSpam
+	} from '$lib/derived/tokens.derived';
+	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
 
-	let tokenIdLoaded: TokenId | undefined = undefined;
+	let fungibleTokens = $derived([
+		...$enabledEthEvmNativeTokens,
+		...$enabledErc20Tokens,
+		...(EARNING_ENABLED ? $harvestAutopilotTokens : []),
+		...$enabledErc4626Tokens.filter((token) =>
+			EARNING_ENABLED ? !isTokenHarvestAutopilot(token) : true
+		)
+	]);
 
-	let loading = false;
+	let nonFungibleTokens = $derived([...$enabledNonFungibleTokensWithoutSpam]);
 
-	let failedReloadCounter = 0;
-
-	const load = async ({ reload = false }: { reload?: boolean } = {}) => {
-		if (loading) {
-			return;
-		}
-
-		loading = true;
-
-		if ($tokenNotInitialized) {
-			tokenIdLoaded = undefined;
-			loading = false;
-			return;
-		}
-
-		const {
-			network: { id: networkId },
-			id: tokenId
-		} = $tokenWithFallback;
-
-		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
-		// This prevents the glitch load of ETH transaction with a token ID for ICP.
-		if (!isNetworkIdEthereum(networkId) && !isNetworkIdEvm(networkId)) {
-			tokenIdLoaded = undefined;
-			loading = false;
-			return;
-		}
-
-		// We don't reload the same token in a row.
-		if (tokenIdLoaded === tokenId && !reload) {
-			loading = false;
-			return;
-		}
-
-		tokenIdLoaded = tokenId;
-
-		const { success } = reload
-			? await reloadEthereumTransactions({
-					tokenId,
-					networkId,
-					silent: failedReloadCounter + 1 <= FAILURE_THRESHOLD
-				})
-			: await loadEthereumTransactions({ tokenId, networkId });
-
-		if (!success) {
-			tokenIdLoaded = undefined;
-
-			if (reload) {
-				++failedReloadCounter;
-			}
-		} else {
-			failedReloadCounter = 0;
-		}
-
-		loading = false;
-	};
-
-	$: $tokenWithFallback, $tokenNotInitialized, (async () => await load())();
-
-	const reload = async () => {
-		await load({ reload: true });
-	};
+	// If we are not in NFTs page or Activity page, there is no need to reload NFT transactions frequently.
+	// In fact, we can disable it, giving it a very high interval.
+	let isNftsPage = $derived(isRouteNfts(page));
+	let isActivityPage = $derived(isRouteActivity(page));
+	let nftInterval = $derived(
+		isNftsPage || isActivityPage ? COLLECTION_TIMER_INTERVAL_MILLIS : MILLISECONDS_IN_DAY
+	);
 </script>
 
-<IntervalLoader onLoad={reload} interval={WALLET_TIMER_INTERVAL_MILLIS}>
-	<slot />
-</IntervalLoader>
+<LoaderMultipleEthTransactions interval={WALLET_TIMER_INTERVAL_MILLIS} tokens={fungibleTokens} />
+
+<LoaderMultipleEthTransactions interval={nftInterval} tokens={nonFungibleTokens} />

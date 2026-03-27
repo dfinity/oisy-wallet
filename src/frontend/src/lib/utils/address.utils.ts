@@ -1,45 +1,28 @@
 import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_NETWORK_IDS } from '$env/networks/networks.sol.env';
 import { TOKEN_ACCOUNT_ID_TYPES_CASE_SENSITIVE } from '$lib/constants/token-account-id.constants';
-import type { StorageAddressData } from '$lib/stores/address.store';
+import type { AddressStoreData } from '$lib/stores/address.store';
 import type { Address, OptionAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
-import { parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
+import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const mapAddress = <T extends Address>(
-	$addressStore: StorageAddressData<T>
+	$addressStore: AddressStoreData<T>
 ): OptionAddress<T> => mapCertifiedData($addressStore);
 
-export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
-	if (isNullish(address)) {
-		return false;
-	}
-
-	try {
-		parseBtcAddress(address);
-		return true;
-	} catch (_: unknown) {
-		return false;
-	}
-};
-
-export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
-	!isBtcAddress(address);
-
-const mapNetworkIdToAddressType = (
+export const mapNetworkIdToAddressType = (
 	networkId: NetworkId | undefined
 ): TokenAccountIdTypes | undefined => {
 	if (isNullish(networkId)) {
 		return;
 	}
 
-	if (networkId === ICP_NETWORK_ID) {
+	if (isNetworkIdICP(networkId)) {
 		return 'Icrcv2';
 	}
 	if (SUPPORTED_BITCOIN_NETWORK_IDS.includes(networkId)) {

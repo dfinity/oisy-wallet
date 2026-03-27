@@ -1,19 +1,35 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { onDestroy, setContext, type Snippet } from 'svelte';
+	import { resetUtxosDataStores } from '$btc/utils/btc-utxos.utils';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionBalance } from '$lib/types/balance';
+	import type { OptionToken } from '$lib/types/token';
 
-	export let token: OptionToken;
+	interface Props {
+		token: OptionToken;
+		children: Snippet;
+		customSendBalance?: OptionBalance;
+	}
 
-	let selectedToken: Token;
-	$: selectedToken = token ?? DEFAULT_ETHEREUM_TOKEN;
+	let { token, children, customSendBalance }: Props = $props();
+
+	let selectedToken = $derived(token ?? DEFAULT_ETHEREUM_TOKEN);
 
 	/**
 	 * Send modal context store
 	 */
 	const { sendToken, ...rest } = initSendContext({
-		token: selectedToken
+		// TODO: This statement is not reactive. Check if it is intentional or not.
+		// eslint-disable-next-line svelte/no-unused-svelte-ignore
+		// svelte-ignore state_referenced_locally
+		token: token ?? DEFAULT_ETHEREUM_TOKEN,
+		// TODO: This statement is not reactive. Check if it is intentional or not.
+		// eslint-disable-next-line svelte/no-unused-svelte-ignore
+		// svelte-ignore state_referenced_locally
+		customSendBalance
 	});
 
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
@@ -21,7 +37,15 @@
 		...rest
 	});
 
-	$: sendToken.set(selectedToken);
+	$effect(() => {
+		sendToken.set(selectedToken);
+	});
+
+	onDestroy(() => {
+		if (nonNullish(token) && isBitcoinToken(token)) {
+			resetUtxosDataStores();
+		}
+	});
 </script>
 
-<slot />
+{@render children()}

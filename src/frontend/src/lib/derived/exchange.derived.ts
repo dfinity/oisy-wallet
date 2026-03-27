@@ -1,5 +1,9 @@
 import { EXCHANGE_DISABLED } from '$env/exchange.env';
 import {
+	ARBITRUM_ETH_TOKEN_ID,
+	ARBITRUM_SEPOLIA_ETH_TOKEN_ID
+} from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
+import {
 	BASE_ETH_TOKEN_ID,
 	BASE_SEPOLIA_ETH_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -17,18 +21,22 @@ import {
 	BTC_TESTNET_TOKEN_ID
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN_ID, TESTICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import {
 	SOLANA_DEVNET_TOKEN_ID,
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isErc20Icp } from '$eth/utils/token.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
+import { exchangesDataEqual } from '$lib/utils/exchange.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -43,10 +51,9 @@ export const exchangeNotInitialized: Readable<boolean> = derived(
 	([$exchangeInitialized]) => !$exchangeInitialized
 );
 
-// TODO: create tests for store
-export const exchanges: Readable<ExchangesData> = derived(
-	[exchangeStore, enabledErc20Tokens, allIcrcTokens, enabledSplTokens],
-	([$exchangeStore, $erc20Tokens, $icrcTokens, $splTokens]) => {
+export const exchanges: Readable<ExchangesData> = derivedMemo(
+	[exchangeStore, enabledErc20Tokens, erc4626Tokens, allIcrcTokens, enabledSplTokens],
+	([$exchangeStore, $erc20Tokens, $erc4626Tokens, $icrcTokens, $splTokens]) => {
 		const ethPrice = $exchangeStore?.ethereum;
 		const btcPrice = $exchangeStore?.bitcoin;
 		const icpPrice = $exchangeStore?.['internet-computer'];
@@ -62,6 +69,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[ETHEREUM_TOKEN_ID]: ethPrice,
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
+			[TESTICP_TOKEN_ID]: icpPrice,
 			[SOLANA_TOKEN_ID]: solPrice,
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
 			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
@@ -71,25 +79,28 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[BNB_TESTNET_TOKEN_ID]: bnbPrice,
 			[POL_MAINNET_TOKEN_ID]: polPrice,
 			[POL_AMOY_TOKEN_ID]: polPrice,
+			[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
+			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
-				const token =
-					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
-					$splTokens.find(({ address }) => address.toLowerCase() === key.toLowerCase());
+				const tokens = [
+					...[...$erc20Tokens, ...$erc4626Tokens].filter(
+						({ address }) => address.toLowerCase() === key.toLowerCase()
+					),
+					...$splTokens.filter(({ address }) => address.toLowerCase() === key.toLowerCase())
+				];
 
 				return {
 					...acc,
-					...(nonNullish(token) && { [token.id]: currentPrice })
+					...tokens.reduce((inner, token) => ({ ...inner, [token.id]: currentPrice }), {})
 				};
 			}, {}),
-			...$erc20Tokens
-				.filter(({ exchange }) => exchange === 'icp')
-				.reduce(
-					(acc, { id }) => ({
-						...acc,
-						[id]: icpPrice
-					}),
-					{}
-				),
+			...$erc20Tokens.filter(isErc20Icp).reduce(
+				(acc, { id }) => ({
+					...acc,
+					[id]: icpPrice
+				}),
+				{}
+			),
 			...$icrcTokens.reduce((acc, token) => {
 				const { id, ledgerCanisterId, exchangeCoinId } = token;
 
@@ -123,5 +134,6 @@ export const exchanges: Readable<ExchangesData> = derived(
 				};
 			}, {})
 		};
-	}
+	},
+	exchangesDataEqual
 );

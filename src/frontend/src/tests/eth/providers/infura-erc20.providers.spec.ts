@@ -2,16 +2,16 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { ERC20_ABI } from '$eth/constants/erc20.constants';
+import { ERC20_ABI, ERC20_PERMIT_ABI } from '$eth/constants/erc20.constants';
 import { InfuraErc20Provider, infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+import type { EthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ZERO } from '$lib/constants/app.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Contract, type ContractTransaction } from 'ethers/contract';
-import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import type { MockedClass } from 'vitest';
+import { InfuraProvider, InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
@@ -40,10 +40,10 @@ describe('infura-erc20.providers', () => {
 		} = ETHEREUM_NETWORK;
 		const { address: contractAddress } = PEPE_TOKEN;
 
-		const mockProvider = InfuraProviderLib as MockedClass<typeof InfuraProviderLib>;
+		const mockProvider = vi.mocked(InfuraProviderLib);
 		const expectedContractParams = [contractAddress, ERC20_ABI];
 
-		const mockContract = Contract as MockedClass<typeof Contract>;
+		const mockContract = vi.mocked(Contract);
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -57,9 +57,9 @@ describe('infura-erc20.providers', () => {
 		});
 
 		describe('metadata method', () => {
-			const mockName = vi.fn() as unknown as typeof mockContract.prototype.name;
-			const mockSymbol = vi.fn() as unknown as typeof mockContract.prototype.symbol;
-			const mockDecimals = vi.fn() as unknown as typeof mockContract.prototype.decimals;
+			const mockName = vi.fn();
+			const mockSymbol = vi.fn();
+			const mockDecimals = vi.fn();
 
 			const mockParams = {
 				address: contractAddress
@@ -72,9 +72,11 @@ describe('infura-erc20.providers', () => {
 				mockSymbol.mockResolvedValue('mock-symbol');
 				mockDecimals.mockResolvedValue('18');
 
-				mockContract.prototype.name = mockName;
-				mockContract.prototype.symbol = mockSymbol;
-				mockContract.prototype.decimals = mockDecimals;
+				mockContract.prototype.name = mockName as unknown as typeof mockContract.prototype.name;
+				mockContract.prototype.symbol =
+					mockSymbol as unknown as typeof mockContract.prototype.symbol;
+				mockContract.prototype.decimals =
+					mockDecimals as unknown as typeof mockContract.prototype.decimals;
 			});
 
 			it('should return the fetched metadata', async () => {
@@ -119,7 +121,7 @@ describe('infura-erc20.providers', () => {
 		});
 
 		describe('balance method', () => {
-			const mockBalanceOf = vi.fn() as unknown as typeof mockContract.prototype.balanceOf;
+			const mockBalanceOf = vi.fn();
 
 			const mockParams = {
 				contract: { address: contractAddress },
@@ -131,7 +133,8 @@ describe('infura-erc20.providers', () => {
 
 				mockBalanceOf.mockResolvedValue(123456n);
 
-				mockContract.prototype.balanceOf = mockBalanceOf;
+				mockContract.prototype.balanceOf =
+					mockBalanceOf as unknown as typeof mockContract.prototype.balanceOf;
 			});
 
 			it('should return the fetched balance', async () => {
@@ -420,7 +423,7 @@ describe('infura-erc20.providers', () => {
 		});
 
 		describe('allowance method', () => {
-			const mockAllowance = vi.fn() as unknown as typeof mockContract.prototype.allowance;
+			const mockAllowance = vi.fn();
 
 			const mockParams = {
 				contract: { address: contractAddress },
@@ -433,7 +436,8 @@ describe('infura-erc20.providers', () => {
 
 				mockAllowance.mockResolvedValue(123456n);
 
-				mockContract.prototype.allowance = mockAllowance;
+				mockContract.prototype.allowance =
+					mockAllowance as unknown as typeof mockContract.prototype.allowance;
 			});
 
 			it('should return the fetched allowance', async () => {
@@ -469,6 +473,180 @@ describe('infura-erc20.providers', () => {
 				const provider = new InfuraErc20Provider(infura);
 
 				await expect(provider.allowance(mockParams)).rejects.toThrow(errorMessage);
+			});
+		});
+
+		describe('isErc20', () => {
+			const mockDecimals = vi.fn();
+
+			const mockParams = {
+				contractAddress
+			};
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				mockDecimals.mockResolvedValue('18');
+
+				mockContract.prototype.decimals =
+					mockDecimals as unknown as typeof mockContract.prototype.decimals;
+			});
+
+			it('should return true if contract is erc20', async () => {
+				const provider = new InfuraErc20Provider(infura);
+
+				const result = await provider.isErc20(mockParams);
+
+				expect(result).toBeTruthy();
+			});
+
+			it('should return false on error', async () => {
+				const errorMessage = 'Error fetching decimals';
+				mockDecimals.mockRejectedValue(new Error(errorMessage));
+
+				const provider = new InfuraErc20Provider(infura);
+
+				const result = await provider.isErc20(mockParams);
+
+				expect(result).toBeFalsy();
+			});
+
+			it('should call the decimals method of the contract', async () => {
+				const provider = new InfuraErc20Provider(infura);
+
+				await provider.isErc20(mockParams);
+
+				expect(provider).toBeDefined();
+
+				expect(mockContract).toHaveBeenCalledOnce();
+
+				expect(mockContract).toHaveBeenNthCalledWith(
+					1,
+					...expectedContractParams,
+					new mockProvider()
+				);
+
+				expect(mockDecimals).toHaveBeenCalledOnce();
+			});
+		});
+
+		describe('isErc20SupportsPermit', () => {
+			const mockUserAddress = '0x1234567890123456789012345678901234567890' as EthAddress;
+			const mockContractAddress = '0x0987654321098765432109876543210987654321';
+
+			it('should return true when contract supports permit (both nonces and DOMAIN_SEPARATOR succeed)', async () => {
+				const mockNonces = vi.fn().mockResolvedValue(BigInt(0));
+				const mockDomainSeparator = vi.fn().mockResolvedValue('0xabcd...');
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				const result = await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(result).toBeTruthy();
+				expect(mockNonces).toHaveBeenCalledWith(mockUserAddress);
+				expect(mockDomainSeparator).toHaveBeenCalled();
+			});
+
+			it('should return false when nonces method throws error', async () => {
+				const mockNonces = vi.fn().mockRejectedValue(new Error('Method not found'));
+				const mockDomainSeparator = vi.fn().mockResolvedValue('0xabcd...');
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				const result = await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(result).toBeFalsy();
+				expect(mockNonces).toHaveBeenCalledWith(mockUserAddress);
+			});
+
+			it('should return false when DOMAIN_SEPARATOR method throws error', async () => {
+				const mockNonces = vi.fn().mockResolvedValue(BigInt(0));
+				const mockDomainSeparator = vi.fn().mockRejectedValue(new Error('Method not found'));
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				const result = await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(result).toBeFalsy();
+				expect(mockDomainSeparator).toHaveBeenCalled();
+			});
+
+			it('should return false when both methods throw errors', async () => {
+				const mockNonces = vi.fn().mockRejectedValue(new Error('nonces not found'));
+				const mockDomainSeparator = vi
+					.fn()
+					.mockRejectedValue(new Error('DOMAIN_SEPARATOR not found'));
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				const result = await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(result).toBeFalsy();
+			});
+
+			it('should use ERC20_PERMIT_ABI for contract instantiation', async () => {
+				const mockNonces = vi.fn().mockResolvedValue(BigInt(0));
+				const mockDomainSeparator = vi.fn().mockResolvedValue('0xabcd...');
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(Contract).toHaveBeenCalledWith(
+					mockContractAddress,
+					ERC20_PERMIT_ABI,
+					expect.any(InfuraProvider)
+				);
 			});
 		});
 	});

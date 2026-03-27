@@ -11,4 +11,4 @@
 	let { src, alt = '', styleClass, testId }: Props = $props();
 </script>
 
-<Img {src} {alt} {testId} styleClass="w-full h-auto aspect-video {styleClass ?? ''}" />
+<Img {alt} {src} styleClass="w-full h-auto aspect-video {styleClass ?? ''}" {testId} />

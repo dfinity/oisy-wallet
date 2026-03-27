@@ -1,15 +1,12 @@
 import * as analyticsServices from '$lib/services/analytics.services';
-import * as authServices from '$lib/services/auth.services';
 import { wrapCallWith } from '$lib/services/utils.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { vi } from 'vitest';
 
 describe('utils.services', () => {
 	describe('wrapCallWith', () => {
 		const mockMethodToCall = vi.fn();
 		const mockTrackEvent = vi.fn();
-		const mockNullishSignOut = vi.fn();
 		const mockToastsError = vi.fn();
 
 		const successEventName = 'test_success';
@@ -20,11 +17,10 @@ describe('utils.services', () => {
 			vi.clearAllMocks();
 
 			vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(mockTrackEvent);
-			vi.spyOn(authServices, 'nullishSignOut').mockImplementation(mockNullishSignOut);
 			vi.spyOn(toastsStore, 'toastsError').mockImplementation(mockToastsError);
 		});
 
-		it('should call nullishSignOut and return undefined when identity is nullish', async () => {
+		it('should not call the wrapped method and return undefined when identity is nullish', async () => {
 			const wrappedFunction = wrapCallWith({
 				methodToCall: mockMethodToCall,
 				toastErrorMessage,
@@ -37,7 +33,6 @@ describe('utils.services', () => {
 
 			const result = await wrappedFunction({ param1: 'value1' });
 
-			expect(mockNullishSignOut).toHaveBeenCalled();
 			expect(result).toBeUndefined();
 			expect(mockMethodToCall).not.toHaveBeenCalled();
 			expect(mockTrackEvent).not.toHaveBeenCalled();
@@ -61,7 +56,6 @@ describe('utils.services', () => {
 			});
 
 			expect(result).toBe('success result');
-			expect(mockNullishSignOut).not.toHaveBeenCalled();
 			expect(mockToastsError).not.toHaveBeenCalled();
 		});
 

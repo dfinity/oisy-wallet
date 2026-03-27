@@ -1,16 +1,20 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
-	export let size = '24';
-	export let testId: string | undefined = undefined;
+	interface Props {
+		size?: string;
+		testId?: string;
+	}
+
+	let { size = '24', testId }: Props = $props();
 </script>
 
 <svg
-	width={size}
+	data-tid={testId}
+	fill="none"
 	height={size}
 	viewBox="0 0 22 22"
-	fill="none"
+	width={size}
 	xmlns="http://www.w3.org/2000/svg"
-	data-tid={testId}
 >
 	<g clip-path="url(#clip0_10767_21883)">
 		<path

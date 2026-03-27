@@ -1,6 +1,6 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendReview from '$eth/components/send/EthSendReview.svelte';
-import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
+import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
@@ -15,9 +15,9 @@ describe('EthSendReview', () => {
 		})
 	);
 	mockContext.set(
-		FEE_CONTEXT_KEY,
-		initFeeContext({
-			feeStore: initFeeStore(),
+		ETH_FEE_CONTEXT_KEY,
+		initEthFeeContext({
+			feeStore: initEthFeeStore(),
 			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
@@ -26,7 +26,9 @@ describe('EthSendReview', () => {
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
-		amount: '22000000'
+		amount: '22000000',
+		onBack: vi.fn(),
+		onSend: vi.fn()
 	};
 
 	const toolbarSelector = 'div[data-tid="toolbar"]';

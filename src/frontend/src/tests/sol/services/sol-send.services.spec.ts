@@ -1,13 +1,17 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
-import type { SolAddress } from '$lib/types/address';
+import { ZERO } from '$lib/constants/app.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
+import type { SolAddress } from '$sol/types/address';
 import type { SolInstruction } from '$sol/types/sol-instructions';
-import * as networkUtils from '$sol/utils/network.utils';
+import type { SplToken } from '$sol/types/spl';
+import * as networkUtils from '$sol/utils/safe-network.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -15,21 +19,27 @@ import {
 	mockAtaAddress2,
 	mockAtaAddress3,
 	mockSolAddress,
-	mockSolAddress2
+	mockSolAddress2,
+	mockSolAddress3
 } from '$tests/mocks/sol.mock';
+import { estimateComputeUnitLimitFactory } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
-import { getTransferInstruction } from '@solana-program/token';
+import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
 import * as solanaWeb3 from '@solana/kit';
 import {
 	appendTransactionMessageInstructions,
-	getComputeUnitEstimateForTransactionMessageFactory,
 	pipe,
-	sendAndConfirmTransactionFactory,
+	sendTransactionWithoutConfirmingFactory,
 	type Rpc,
 	type RpcSubscriptions,
 	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi
 } from '@solana/kit';
+import {
+	createBlockHeightExceedencePromiseFactory,
+	createRecentSignatureConfirmationPromiseFactory,
+	waitForRecentTransactionConfirmation
+} from '@solana/transaction-confirmation';
 import type { MockInstance } from 'vitest';
 
 vi.mock(import('@solana/kit'), async (importOriginal) => {
@@ -37,14 +47,15 @@ vi.mock(import('@solana/kit'), async (importOriginal) => {
 	return {
 		...actual,
 		appendTransactionMessageInstructions: vi.fn(),
+		assertIsFullySignedTransaction: vi.fn(),
 		assertIsTransactionPartialSigner: vi.fn(),
 		assertIsTransactionSigner: vi.fn(),
-		assertTransactionIsFullySigned: vi.fn(),
+		assertIsTransactionWithBlockhashLifetime: vi.fn(),
+		assertIsTransactionWithinSizeLimit: vi.fn(),
 		createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
-		getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
 		getSignatureFromTransaction: vi.fn(),
 		prependTransactionMessageInstruction: vi.fn(),
-		sendAndConfirmTransactionFactory: vi.fn(),
+		sendTransactionWithoutConfirmingFactory: vi.fn(),
 		setTransactionMessageFeePayer: vi.fn((message) => message),
 		setTransactionMessageFeePayerSigner: vi.fn((message) => message),
 		setTransactionMessageLifetimeUsingBlockhash: vi.fn((message) => message),
@@ -52,12 +63,28 @@ vi.mock(import('@solana/kit'), async (importOriginal) => {
 	};
 });
 
+vi.mock(import('@solana/transaction-confirmation'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		createBlockHeightExceedencePromiseFactory: vi.fn(),
+		createRecentSignatureConfirmationPromiseFactory: vi.fn(),
+		waitForRecentTransactionConfirmation: vi.fn()
+	};
+});
+
+vi.mock('@solana-program/compute-budget', () => ({
+	estimateComputeUnitLimitFactory: vi.fn(),
+	getSetComputeUnitPriceInstruction: vi.fn().mockReturnValue('mock-compute-unit-price-instruction')
+}));
+
 vi.mock('@solana-program/system', () => ({
 	getTransferSolInstruction: vi.fn().mockReturnValue('mock-transfer-sol-instruction')
 }));
 
 vi.mock('@solana-program/token', () => ({
-	getTransferInstruction: vi.fn().mockReturnValue('mock-transfer-instruction')
+	getTransferInstruction: vi.fn().mockReturnValue('mock-transfer-instruction'),
+	getTransferCheckedInstruction: vi.fn().mockReturnValue('mock-transfer-checked-instruction')
 }));
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
@@ -79,7 +106,7 @@ describe('sol-send.services', () => {
 			signTransactions: expect.any(Function)
 		});
 		const mockDestination = mockSolAddress2;
-		const mockPrioritizationFee = 0n;
+		const mockPrioritizationFee = ZERO;
 		const mockParams = {
 			identity: mockIdentity,
 			amount: mockAmount,
@@ -131,12 +158,16 @@ describe('sol-send.services', () => {
 			vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			vi.mocked(solanaWebSocketRpc).mockReturnValue(mockRpcSubscriptions);
 			vi.mocked(signWithSchnorr).mockResolvedValue(new Uint8Array([0, 1, 2, 3]));
-			vi.mocked(sendAndConfirmTransactionFactory).mockReturnValue(() => Promise.resolve());
-			vi.mocked(getComputeUnitEstimateForTransactionMessageFactory).mockReturnValue(() =>
-				Promise.resolve(123)
+			vi.mocked(sendTransactionWithoutConfirmingFactory).mockReturnValue(() => Promise.resolve());
+			vi.mocked(createBlockHeightExceedencePromiseFactory).mockReturnValue(() => Promise.resolve());
+			vi.mocked(createRecentSignatureConfirmationPromiseFactory).mockReturnValue(() =>
+				Promise.resolve()
 			);
+			vi.mocked(waitForRecentTransactionConfirmation).mockResolvedValue();
 
-			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'mapNetworkIdToNetwork');
+			vi.mocked(estimateComputeUnitLimitFactory).mockReturnValue(() => Promise.resolve(123));
+
+			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'safeMapNetworkIdToNetwork');
 
 			spyCalculateAssociatedTokenAddress = vi
 				.spyOn(accountServices, 'calculateAssociatedTokenAddress')
@@ -162,17 +193,14 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledOnce();
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(SOLANA_TOKEN.network.id);
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(SOLANA_TOKEN.network.id);
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-sol-instruction'],
 				mockTx
 			);
-			expect(getTransferSolInstruction).toHaveBeenCalledOnce();
-			expect(getTransferSolInstruction).toHaveBeenCalledWith({
+			expect(getTransferSolInstruction).toHaveBeenCalledExactlyOnceWith({
 				source: mockSigner,
 				destination: mockDestination,
 				amount: mockAmount
@@ -190,8 +218,7 @@ describe('sol-send.services', () => {
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-instruction'],
 				mockTx
 			);
@@ -203,6 +230,62 @@ describe('sol-send.services', () => {
 					amount: mockAmount
 				},
 				{ programAddress: DEVNET_USDC_TOKEN.owner }
+			);
+		});
+
+		it('should send SPL tokens with mint authority successfully', async () => {
+			await expect(
+				sendSol({
+					...mockParams,
+					token: { ...DEVNET_USDC_TOKEN, mintAuthority: mockSolAddress3 } as SplToken
+				})
+			).resolves.not.toThrow();
+
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
+
+			expect(pipe).toHaveBeenCalledTimes(4);
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
+				['mock-transfer-checked-instruction'],
+				mockTx
+			);
+			expect(getTransferCheckedInstruction).toHaveBeenCalledWith(
+				{
+					source: mockAtaAddress,
+					destination: mockAtaAddress2,
+					mint: DEVNET_USDC_TOKEN.address,
+					decimals: DEVNET_USDC_TOKEN.decimals,
+					authority: mockSigner,
+					amount: mockAmount
+				},
+				{ programAddress: DEVNET_USDC_TOKEN.owner }
+			);
+		});
+
+		it('should send Token-2022 SPL tokens successfully', async () => {
+			await expect(
+				sendSol({
+					...mockParams,
+					token: { ...DEVNET_USDC_TOKEN, owner: TOKEN_2022_PROGRAM_ADDRESS } as SplToken
+				})
+			).resolves.not.toThrow();
+
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
+
+			expect(pipe).toHaveBeenCalledTimes(4);
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
+				['mock-transfer-checked-instruction'],
+				mockTx
+			);
+			expect(getTransferCheckedInstruction).toHaveBeenCalledWith(
+				{
+					source: mockAtaAddress,
+					destination: mockAtaAddress2,
+					mint: DEVNET_USDC_TOKEN.address,
+					decimals: DEVNET_USDC_TOKEN.decimals,
+					authority: mockSigner,
+					amount: mockAmount
+				},
+				{ programAddress: TOKEN_2022_PROGRAM_ADDRESS }
 			);
 		});
 
@@ -227,11 +310,15 @@ describe('sol-send.services', () => {
 			).resolves.not.toThrow();
 
 			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledTimes(2);
-			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
+			expect(spyCreateAtaInstruction).toHaveBeenCalledExactlyOnceWith({
+				signer: mockSigner,
+				destination: mockSolAddress2,
+				tokenAddress: DEVNET_USDC_TOKEN.address,
+				tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
+			});
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				[{ keys: 'mock-ata-creation-instruction' }, 'mock-transfer-instruction'],
 				mockTx
 			);
@@ -247,7 +334,7 @@ describe('sol-send.services', () => {
 		});
 
 		it('should use the destination address if it is an ATA address already', async () => {
-			// Providing an owner for the destination address, so that it is considered an ATA address
+			// Providing an owner for the destination address so that it is considered an ATA address
 			vi.mocked(solanaHttpRpc).mockReturnValue({
 				...mockRpc,
 				getAccountInfo: vi.fn((address: SolAddress) => ({
@@ -278,13 +365,11 @@ describe('sol-send.services', () => {
 			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-instruction'],
 				mockTx
 			);
-			expect(getTransferInstruction).toHaveBeenCalledOnce();
-			expect(getTransferInstruction).toHaveBeenCalledWith(
+			expect(getTransferInstruction).toHaveBeenCalledExactlyOnceWith(
 				{
 					source: mockAtaAddress,
 					destination: mockAtaAddress3,
@@ -299,16 +384,14 @@ describe('sol-send.services', () => {
 		});
 
 		it('should throw an error if network is invalid', async () => {
-			spyMapNetworkIdToNetwork.mockReturnValueOnce(undefined);
-
 			await expect(
 				sendSol({
 					...mockParams,
-					token: SOLANA_TOKEN
+					token: { ...SOLANA_TOKEN, network: ETHEREUM_NETWORK }
 				})
 			).rejects.toThrow(
 				replacePlaceholders(en.init.error.no_solana_network, {
-					$network: SOLANA_TOKEN.network.id.description ?? ''
+					$network: ETHEREUM_NETWORK.id.description ?? ''
 				})
 			);
 		});

@@ -2,15 +2,17 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import * as solanaApi from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { getSolSignatures, getSolTransactions } from '$sol/services/sol-signatures.services';
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { RequiredSplToken, SplTokenAddress } from '$sol/types/spl';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockSolSignature,
 	mockSolSignatureResponse,
@@ -236,10 +238,13 @@ describe('sol-signatures.services', () => {
 			spyFetchTransactionsForSignature.mockResolvedValue(mockSolTransactions);
 
 			spyFindAssociatedTokenPda = vi.spyOn(solProgramToken, 'findAssociatedTokenPda');
+
+			mockAuthStore();
 		});
 
 		it('should fetch transactions successfully', async () => {
 			const transactions = await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -253,14 +258,14 @@ describe('sol-signatures.services', () => {
 			spyFindAssociatedTokenPda.mockResolvedValueOnce([mockSplAddress]);
 
 			await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				tokenAddress: mockSplAddress,
 				tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
 			});
 
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledWith({
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledExactlyOnceWith({
 				owner: mockSolAddress,
 				tokenProgram: address(TOKEN_PROGRAM_ADDRESS),
 				mint: mockSplAddress
@@ -270,6 +275,7 @@ describe('sol-signatures.services', () => {
 		it('should handle before parameter', async () => {
 			const signature = mockSolSignature();
 			await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				before: signature
@@ -284,6 +290,7 @@ describe('sol-signatures.services', () => {
 
 		it('should handle limit parameter', async () => {
 			await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				limit: 5
@@ -300,6 +307,7 @@ describe('sol-signatures.services', () => {
 			spyFetchSignatures.mockReturnValue([]);
 
 			const transactions = await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -313,6 +321,7 @@ describe('sol-signatures.services', () => {
 			spyFetchTransactionsForSignature.mockReturnValue([]);
 
 			const transactions = await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -325,6 +334,7 @@ describe('sol-signatures.services', () => {
 
 			await expect(
 				getSolTransactions({
+					identity: mockIdentity,
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet
 				})

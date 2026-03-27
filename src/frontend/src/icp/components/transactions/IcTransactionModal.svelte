@@ -7,14 +7,15 @@
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -24,8 +25,21 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl } =
-		$derived(transaction);
+	let {
+		id,
+		from,
+		to,
+		value,
+		timestamp,
+		type,
+		txExplorerUrl,
+		fromExplorerUrl,
+		toExplorerUrl,
+		fee,
+		incoming,
+		approveSpender,
+		approveExpiresAt
+	} = $derived(transaction);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
@@ -35,14 +49,14 @@
 	};
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
+<Modal onClose={modalStore.close}>
+	{#snippet title()}{$i18n.transaction.text.details}{/snippet}
 
 	<ContentWithToolbar>
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
@@ -65,29 +79,38 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(to) && nonNullish(from)}
+		{#if (nonNullish(to) && nonNullish(from)) || (type === 'approve' && nonNullish(from))}
 			<TransactionContactCard
-				type={type === 'receive' ? 'receive' : 'send'}
-				{to}
+				{approveSpender}
 				{from}
-				{toExplorerUrl}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
+				{to}
+				{toExplorerUrl}
+				type={type === 'receive' ? 'receive' : type === 'approve' ? 'approve' : 'send'}
 			/>
 		{/if}
 
 		<List styleClass="mt-5">
-			{#if nonNullish(timestamp)}
+			{#if nonNullish(token?.network)}
 				<ListItem>
-					<span>{$i18n.transaction.text.timestamp}</span>
-					<output>{formatNanosecondsToDate(timestamp)}</output>
+					<span>
+						{$i18n.networks.network}
+					</span>
+
+					<NetworkWithLogo network={token.network} />
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(token)}
+			{#if nonNullish(timestamp)}
 				<ListItem>
-					<span>{$i18n.networks.network}</span>
-					<span><NetworkWithLogo network={token.network} logo="start" /></span>
+					<span>{$i18n.transaction.text.timestamp}</span>
+					<output
+						>{formatNanosecondsToDate({
+							nanoseconds: timestamp,
+							language: $currentLanguage
+						})}</output
+					>
 				</ListItem>
 			{/if}
 
@@ -96,14 +119,41 @@
 				<span>
 					<output>{id}</output>
 
-					<TransactionAddressActions
+					<AddressActions
 						copyAddress={`${id}`}
 						copyAddressText={$i18n.transaction.text.id_copied}
-						explorerUrl={txExplorerUrl}
-						explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
+						externalLink={txExplorerUrl}
+						externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
 					/>
 				</span>
 			</ListItem>
+
+			{#if nonNullish(fee) && nonNullish(token) && !incoming}
+				<ListItem>
+					<span>{$i18n.fee.text.fee}</span>
+
+					<output>
+						{formatToken({
+							value: fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
+
+			{#if nonNullish(approveExpiresAt)}
+				<ListItem>
+					<span>{$i18n.transaction?.text?.expiration}</span>
+					<output>
+						{formatNanosecondsToDate({
+							nanoseconds: approveExpiresAt,
+							language: $currentLanguage
+						})}
+					</output>
+				</ListItem>
+			{/if}
 		</List>
 
 		{#snippet toolbar()}

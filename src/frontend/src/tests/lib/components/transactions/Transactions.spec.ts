@@ -1,18 +1,25 @@
 import * as appNavigation from '$app/navigation';
-import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import Transactions from '$lib/components/transactions/Transactions.svelte';
 import { BUTTON_MODAL_CLOSE } from '$lib/constants/test-ids.constants';
 import { modalStore } from '$lib/stores/modal.store';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('Transactions', () => {
 	const timeout = 12000;
 	const mockGoTo = vi.fn();
 
+	const mockToken = {
+		...mockValidIcrcToken,
+		name: 'WaterNeuron',
+		ledgerCanisterId: 'jcmow-hyaaa-aaaaq-aadlq-cai'
+	};
+
 	beforeEach(() => {
+		vi.useFakeTimers();
 		vi.clearAllMocks();
 		modalStore.close();
 		mockPage.reset();
@@ -29,107 +36,96 @@ describe('Transactions', () => {
 		});
 	});
 
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
 	it('should open the manage token modal if a disabled token is used', async () => {
-		mockPage.mock({ token: 'WaterNeuron', network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(mockToken);
 
 		render(Transactions);
 
-		await waitFor(
-			() => {
-				expect(get(modalStore)).toBeDefined();
-				expect(get(modalStore)?.type).toBe('manage-tokens');
-			},
-			{ timeout }
-		);
+		await vi.advanceTimersByTimeAsync(timeout);
+		await vi.runOnlyPendingTimersAsync();
+
+		expect(get(modalStore)).toBeDefined();
+		expect(get(modalStore)?.type).toBe('manage-tokens');
 	});
 
 	it('should not open the manage token modal if a not supported token is used', async () => {
-		mockPage.mock({ token: 'WaterGlas', network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken({ ...mockToken, ledgerCanisterId: 'WaterGlas' });
 
 		render(Transactions);
 
-		await new Promise<void>((resolve) =>
-			setTimeout(() => {
-				expect(get(modalStore)).toBeNull();
+		await vi.advanceTimersByTimeAsync(timeout);
+		await vi.runOnlyPendingTimersAsync();
 
-				resolve();
-			}, timeout)
-		);
+		expect(get(modalStore)).toBeNull();
 	});
 
 	it('should not open the manage token modal if an enabled token is used', async () => {
-		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(ICP_TOKEN);
 
 		render(Transactions);
 
-		await new Promise<void>((resolve) =>
-			setTimeout(() => {
-				expect(get(modalStore)).toBeNull();
+		await vi.advanceTimersByTimeAsync(timeout);
+		await vi.runOnlyPendingTimersAsync();
 
-				resolve();
-			}, timeout)
-		);
+		expect(get(modalStore)).toBeNull();
 	});
 
 	it('should redirect the user to the activity page if the modal gets closed', async () => {
-		mockPage.mock({ token: 'WaterNeuron', network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(mockToken);
 
 		const { container } = render(Transactions);
 
-		await waitFor(
-			() => {
-				expect(get(modalStore)).toBeDefined();
-				expect(get(modalStore)?.type).toBe('manage-tokens');
+		await vi.advanceTimersByTimeAsync(timeout);
+		await vi.runOnlyPendingTimersAsync();
 
-				const button: HTMLButtonElement | null = container.querySelector(
-					`button[data-tid='${BUTTON_MODAL_CLOSE}']`
-				);
+		expect(get(modalStore)).toBeDefined();
+		expect(get(modalStore)?.type).toBe('manage-tokens');
 
-				button?.click();
-
-				expect(mockGoTo).toHaveBeenCalledWith('/');
-			},
-			{ timeout }
+		const button: HTMLButtonElement | null = container.querySelector(
+			`button[data-tid='${BUTTON_MODAL_CLOSE}']`
 		);
-	});
 
-	it('should not redirect the user if the modal gets closed and pageToken is nonNullish', async () => {
-		mockPage.mock({ token: 'WaterNeuron', network: ICP_NETWORK_SYMBOL });
-
-		const { container } = render(Transactions);
-
-		await waitFor(
-			() => {
-				expect(get(modalStore)).toBeDefined();
-				expect(get(modalStore)?.type).toBe('manage-tokens');
-
-				const button: HTMLButtonElement | null = container.querySelector(
-					`button[data-tid='${BUTTON_MODAL_CLOSE}']`
-				);
-
-				mockPage.mock({ token: ICP_TOKEN.name, network: ICP_NETWORK_SYMBOL });
-
-				button?.click();
-
-				expect(mockGoTo).not.toHaveBeenCalled();
-			},
-			{ timeout }
-		);
-	});
-
-	it('should redirect the user to the activity page if token does not exist', async () => {
-		mockPage.mock({ token: 'UNKNOWN', network: ICP_NETWORK_SYMBOL });
-
-		render(Transactions);
-
-		await new Promise<void>((resolve) =>
-			setTimeout(() => {
-				expect(get(modalStore)).toBeNull();
-
-				resolve();
-			}, timeout)
-		);
+		button?.click();
 
 		expect(mockGoTo).toHaveBeenCalledWith('/');
 	});
-}, 60000);
+
+	it('should not redirect the user if the modal gets closed and pageToken is nonNullish', async () => {
+		mockPage.mockToken(mockToken);
+
+		const { container } = render(Transactions);
+
+		await vi.advanceTimersByTimeAsync(timeout);
+		await vi.runOnlyPendingTimersAsync();
+
+		expect(get(modalStore)).toBeDefined();
+		expect(get(modalStore)?.type).toBe('manage-tokens');
+
+		const button: HTMLButtonElement | null = container.querySelector(
+			`button[data-tid='${BUTTON_MODAL_CLOSE}']`
+		);
+
+		mockPage.mockToken(ICP_TOKEN);
+
+		button?.click();
+
+		expect(mockGoTo).not.toHaveBeenCalled();
+	});
+
+	it('should redirect the user to the activity page if token does not exist', async () => {
+		mockPage.mockToken({ ...mockToken, ledgerCanisterId: 'UNKNOWN' });
+
+		render(Transactions);
+
+		await vi.advanceTimersByTimeAsync(timeout);
+		await vi.runOnlyPendingTimersAsync();
+
+		expect(get(modalStore)).toBeNull();
+
+		expect(mockGoTo).toHaveBeenCalledWith('/');
+	});
+});

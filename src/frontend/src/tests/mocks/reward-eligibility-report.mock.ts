@@ -30,7 +30,9 @@ export const mockCampaignEligibilities: CampaignEligibility[] = [
 				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 				usd: 21
 			} as MinTotalAssetsUsdCriterion
-		]
+		],
+		probabilityMultiplierEnabled: false,
+		probabilityMultiplier: 1
 	},
 	{
 		campaignId: 'sprinkles_s1e5',
@@ -54,6 +56,8 @@ export const mockCampaignEligibilities: CampaignEligibility[] = [
 				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 				usd: 18
 			} as MinTotalAssetsUsdCriterion
-		]
+		],
+		probabilityMultiplierEnabled: false,
+		probabilityMultiplier: 1
 	}
 ];

@@ -14,27 +14,25 @@
 	} from '$lib/derived/address.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionSolAddress } from '$lib/types/address';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
-	import type { SolanaNetwork } from '$sol/types/network';
 
-	let address: OptionSolAddress;
-	let network: SolanaNetwork;
-	$: [address, network] = isNetworkIdSOLDevnet($networkId)
-		? [$solAddressDevnet, SOLANA_DEVNET_NETWORK]
-		: isNetworkIdSOLLocal($networkId)
-			? [$solAddressLocal, SOLANA_LOCAL_NETWORK]
-			: [$solAddressMainnet, SOLANA_MAINNET_NETWORK];
+	let [address, network] = $derived(
+		isNetworkIdSOLDevnet($networkId)
+			? [$solAddressDevnet, SOLANA_DEVNET_NETWORK]
+			: isNetworkIdSOLLocal($networkId)
+				? [$solAddressLocal, SOLANA_LOCAL_NETWORK]
+				: [$solAddressMainnet, SOLANA_MAINNET_NETWORK]
+	);
 
-	let explorerUrl: string | undefined;
-	$: ({ explorerUrl } = network);
+	let { explorerUrl } = $derived(network);
 
-	let explorerAddressUrl: string | undefined;
-	$: explorerAddressUrl = nonNullish(explorerUrl)
-		? replacePlaceholders(explorerUrl, { $args: `account/${address}/` })
-		: undefined;
+	let explorerAddressUrl = $derived(
+		nonNullish(explorerUrl)
+			? replacePlaceholders(explorerUrl, { $args: `account/${address}/` })
+			: undefined
+	);
 </script>
 
 <div class="p-3">
@@ -42,13 +40,13 @@
 		>{$i18n.wallet.text.wallet_address}:</label
 	>
 
-	<output class="break-all" id="eth-wallet-address"
+	<output id="eth-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis({ text: address ?? '' })}</output
-	><Copy inline value={address ?? ''} text={$i18n.wallet.text.address_copied} />
+	><Copy inline text={$i18n.wallet.text.address_copied} value={address ?? ''} />
 </div>
 
 {#if nonNullish(explorerAddressUrl)}
-	<ExternalLink asMenuItem href={explorerAddressUrl} ariaLabel={$i18n.wallet.alt.open_solscan}>
+	<ExternalLink ariaLabel={$i18n.wallet.alt.open_solscan} asMenuItem href={explorerAddressUrl}>
 		{$i18n.navigation.text.view_on_explorer}
 	</ExternalLink>
 {/if}

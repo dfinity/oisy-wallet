@@ -1,14 +1,19 @@
 <script lang="ts">
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { ethTransactionsNotInitialized } from '$eth/derived/eth-transactions.derived';
-	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
+	import { pageToken } from '$lib/derived/page-token.derived';
 
-	let loading: boolean;
-	$: loading =
-		($erc20UserTokensNotInitialized && $tokenNotInitialized) || $ethTransactionsNotInitialized;
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
+
+	let loading = $derived(isNullish($pageToken) || $ethTransactionsNotInitialized);
 </script>
 
 <TransactionsSkeletons {loading}>
-	<slot />
+	{@render children()}
 </TransactionsSkeletons>

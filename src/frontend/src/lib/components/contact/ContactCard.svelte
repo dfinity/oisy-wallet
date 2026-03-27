@@ -40,10 +40,10 @@
 </script>
 
 {#snippet header()}
-	<LogoButton {onClick} hover={false} condensed testId={CONTACT_CARD_BUTTON} styleClass="group">
+	<LogoButton condensed hover={false} {onClick} styleClass="group" testId={CONTACT_CARD_BUTTON}>
 		{#snippet logo()}
 			<span class="pr-2">
-				<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
+				<AvatarWithBadge badge={{ type: 'addressTypeOrCount' }} {contact} variant="sm" />
 			</span>
 		{/snippet}
 
@@ -70,36 +70,36 @@
 		{#snippet action()}
 			{#if nonNullish(onSelect)}
 				<Button
+					ariaLabel={$i18n.core.text.select}
 					link
 					onclick={onSelect}
-					ariaLabel={$i18n.core.text.select}
 					styleClass="hidden group-hover:block">{$i18n.core.text.select}</Button
 				>
 			{/if}
 			{#if singleAddress && nonNullish(onInfo)}
 				<AddressItemActions
-					styleClass="ml-auto"
 					address={contact.addresses[0]}
 					onInfo={() => onInfo(0)}
+					styleClass="ml-auto"
 				/>
 			{:else if multipleAddresses}
 				<ButtonIcon
-					styleClass="text-primary"
+					ariaLabel={expanded
+						? $i18n.address_book.alt.hide_addresses
+						: $i18n.address_book.alt.show_addresses_of_contact}
 					colorStyle="tertiary-alt"
-					link={false}
-					transparent
-					width="w-8"
 					height="h-8"
+					link={false}
 					onclick={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
 						toggleContent?.();
 						addressBookStore.toggleContact(contact.id);
 					}}
-					ariaLabel={expanded
-						? $i18n.address_book.alt.hide_addresses
-						: $i18n.address_book.alt.show_addresses_of_contact}
+					styleClass="text-primary"
 					testId={CONTACT_CARD_EXPAND_BUTTON}
+					transparent
+					width="w-8"
 				>
 					{#snippet icon()}
 						<IconExpand {expanded} />
@@ -120,8 +120,8 @@
 		{#if expanded}
 			<div
 				class="mt-1 flex flex-col gap-1.5 md:pl-16"
-				transition:slide={SLIDE_DURATION}
 				data-tid="collapsible-content"
+				transition:slide={SLIDE_DURATION}
 			>
 				{#each contact.addresses as address, index (index)}
 					<AddressListItem

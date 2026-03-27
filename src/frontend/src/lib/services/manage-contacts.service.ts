@@ -1,3 +1,4 @@
+import type { ContactImage } from '$declarations/backend/backend.did';
 import {
 	createContact as createContactApi,
 	deleteContact as deleteContactApi,
@@ -8,7 +9,7 @@ import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { compareContactAddresses } from '$lib/utils/contact-address.utils';
 import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export const loadContacts = async (identity: Identity): Promise<void> => {
 	contactsStore.reset();
@@ -38,19 +39,24 @@ export const createContact = async ({
 
 export const updateContact = async ({
 	contact,
-	identity
+	identity,
+	image
 }: {
 	contact: ContactUi;
 	identity: Identity;
+	image?: ContactImage | null;
 }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
 		...contact,
+		image: image !== undefined ? image : contact.image,
 		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
 	};
+
 	const result = await updateContactApi({
 		contact: mapToBackendContact(contactWithSortedAddresses),
 		identity
 	});
+
 	const contactUi = mapToFrontendContact(result);
 	contactsStore.updateContact(contactUi);
 	return contactUi;

@@ -1,6 +1,5 @@
-import * as icrcNetworks from '$env/networks/networks.icrc.env';
-import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
-import { setCustomToken } from '$icp-eth/services/custom-token.services';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import { setCustomToken } from '$icp-eth/services/icrc-token.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -18,10 +17,8 @@ import { modalStore } from '$lib/stores/modal.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mapLocalIcrcData } from '$tests/utils/map-icrc-data.test-utils';
-import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -81,7 +78,9 @@ describe('VipRewardStateModal', () => {
 			expect(
 				getByText(replaceOisyPlaceholders(get(i18n).vip.reward.text.reward_received))
 			).toBeInTheDocument();
-			expect(getByText(get(i18n).vip.reward.text.reward_received_description)).toBeInTheDocument();
+			expect(
+				getByText(get(i18n).vip.reward.text.brand_reward_received_description)
+			).toBeInTheDocument();
 			expect(getByText(get(i18n).vip.reward.text.open_wallet)).toBeInTheDocument();
 		});
 
@@ -104,22 +103,16 @@ describe('VipRewardStateModal', () => {
 	});
 
 	describe('Handle token state', () => {
-		const additionalIcrcData = mapLocalIcrcData(additionalIcrcTokens);
-		const goldToken = nonNullish(additionalIcrcData?.GLDT)
-			? {
-					...additionalIcrcData.GLDT,
-					position: 16
-				}
-			: undefined;
-
 		const mockIcrcDefaultToken: IcToken = {
-			...mockValidIcToken,
-			ledgerCanisterId: goldToken?.ledgerCanisterId ?? 'mxzaz-hqaaa-aaaar-qaada-cai'
+			...mockValidIcrcToken,
+			symbol: 'GLDT',
+			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
 		};
 
 		const mockIcrcCustomToken: IcrcCustomToken = {
-			...mockValidIcToken,
-			ledgerCanisterId: goldToken?.ledgerCanisterId ?? 'mxzaz-hqaaa-aaaar-qaada-cai',
+			...mockValidIcrcToken,
+			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
+			symbol: 'GLDT',
 			enabled: false
 		};
 
@@ -132,8 +125,6 @@ describe('VipRewardStateModal', () => {
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 
 			icrcCustomTokensStore.resetAll();
-
-			vi.spyOn(icrcNetworks, 'GLDT_IC_DATA', 'get').mockImplementation(() => goldToken);
 		});
 
 		it('should auto-enable GLDT token for Gold campaign and undefined token', () => {
@@ -162,7 +153,7 @@ describe('VipRewardStateModal', () => {
 		});
 
 		it('should auto-enable GLDT token for Gold campaign and disabled token', () => {
-			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			icrcCustomTokensStore.setAll([{ data: mockIcrcCustomToken, certified: false }]);
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,
@@ -189,10 +180,12 @@ describe('VipRewardStateModal', () => {
 		});
 
 		it('should not open manage tokens modal for Gold campaign and enabled token', async () => {
-			icrcCustomTokensStore.set({
-				data: { ...mockIcrcCustomToken, enabled: true },
-				certified: false
-			});
+			icrcCustomTokensStore.setAll([
+				{
+					data: { ...mockIcrcCustomToken, enabled: true },
+					certified: false
+				}
+			]);
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,
@@ -228,7 +221,7 @@ describe('VipRewardStateModal', () => {
 		});
 
 		it('should not open manage tokens modal for VIP campaign and disabled token', async () => {
-			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			icrcCustomTokensStore.setAll([{ data: mockIcrcCustomToken, certified: false }]);
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,
@@ -247,10 +240,12 @@ describe('VipRewardStateModal', () => {
 		});
 
 		it('should not open manage tokens modal for VIP campaign and enabled token', async () => {
-			icrcCustomTokensStore.set({
-				data: { ...mockIcrcCustomToken, enabled: true },
-				certified: false
-			});
+			icrcCustomTokensStore.setAll([
+				{
+					data: { ...mockIcrcCustomToken, enabled: true },
+					certified: false
+				}
+			]);
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,

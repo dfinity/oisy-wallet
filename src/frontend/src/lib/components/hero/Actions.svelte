@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { page } from '$app/stores';
-	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
+	import { page } from '$app/state';
+	import ConvertToCkBtc from '$btc/components/convert/ConvertToCkBtc.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
-	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
-	import ConvertToCkETH from '$eth/components/convert/ConvertToCkETH.svelte';
+	import ConvertToCkEth from '$eth/components/convert/ConvertToCkEth.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
-	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
-	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
+	import ConvertToCkErc20 from '$eth/components/send/ConvertToCkErc20.svelte';
+	import { erc20CustomTokensInitialized } from '$eth/derived/erc20.derived';
+	import ConvertToBtc from '$icp/components/convert/ConvertToBtc.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
@@ -29,55 +28,59 @@
 		networkEvm
 	} from '$lib/derived/network.derived';
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
-	import { pageToken } from '$lib/derived/page-token.derived';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { pageToken, pageTokenWithFallback } from '$lib/derived/page-token.derived';
+	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
-	let convertEth = false;
-	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
+	let convertEth = $derived($ethToCkETHEnabled && $erc20CustomTokensInitialized);
 
-	let convertErc20 = false;
-	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
+	let convertErc20 = $derived($erc20ToCkErc20Enabled && $erc20CustomTokensInitialized);
 
-	let convertCkBtc = false;
-	$: convertCkBtc =
-		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	let convertCkBtc = $derived(
+		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20CustomTokensInitialized
+	);
 
-	let convertBtc = false;
-	$: convertBtc = $networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId);
+	let convertBtc = $derived($networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId));
 
-	let isTransactionsPage = false;
-	$: isTransactionsPage = isRouteTransactions($page);
+	let isTransactionsPage = $derived(isRouteTransactions(page));
+	let isNftsPage = $derived(isRouteNfts(page));
 
-	let swapAction = false;
-	$: swapAction =
-		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP));
+	let swapAction = $derived(
+		(!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)) &&
+			!isNftsPage
+	);
 
-	let sendAction = true;
-	$: sendAction = !$allBalancesZero || isTransactionsPage;
+	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
-	let buyAction = true;
-	$: buyAction = !$networkICP || nonNullish($pageToken?.buy);
+	let buyAction = $derived((!$networkICP || nonNullish($pageToken?.buy)) && !isNftsPage);
+
+	// Temporary workaround: disable the Buy button for tokens that support both Swap and Convert.
+	// TODO: Remove once Swap/Convert are refactored and merged.
+	let tooManyButtons = $derived(
+		sendAction &&
+			swapAction &&
+			isTransactionsPage &&
+			(convertErc20 || convertEth || convertCkBtc || convertBtc)
+	);
 </script>
 
-<div role="toolbar" class="flex w-full justify-center pt-10">
+<div class="flex w-full justify-center pt-8" role="toolbar">
 	<HeroButtonGroup>
 		{#if $networkICP}
-			<IcReceive token={$tokenWithFallback} />
+			<IcReceive token={$pageTokenWithFallback} />
 		{:else if $networkEthereum || $networkEvm}
-			<EthReceive token={$tokenWithFallback} />
+			<EthReceive token={$pageTokenWithFallback} />
 		{:else if $networkBitcoin}
 			<BtcReceive />
 		{:else if $networkSolana}
-			<SolReceive token={$tokenWithFallback} />
+			<SolReceive token={$pageTokenWithFallback} />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}
 
 		{#if sendAction}
-			<Send {isTransactionsPage} />
+			<Send {isNftsPage} {isTransactionsPage} />
 		{/if}
 
 		{#if swapAction}
@@ -89,7 +92,7 @@
 				{#if $networkICP}
 					<ConvertToEthereum />
 				{:else}
-					<ConvertToCkETH />
+					<ConvertToCkEth />
 				{/if}
 			{/if}
 
@@ -97,20 +100,20 @@
 				{#if $networkICP}
 					<ConvertToEthereum />
 				{:else}
-					<ConvertToCkERC20 />
+					<ConvertToCkErc20 />
 				{/if}
 			{/if}
 
 			{#if convertCkBtc}
-				<ConvertToBTC />
+				<ConvertToBtc />
 			{/if}
 
 			{#if convertBtc}
-				<ConvertToCkBTC />
+				<ConvertToCkBtc />
 			{/if}
 		{/if}
 
-		{#if buyAction}
+		{#if buyAction && !tooManyButtons}
 			<Buy />
 		{/if}
 	</HeroButtonGroup>

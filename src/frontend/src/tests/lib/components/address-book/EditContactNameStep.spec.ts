@@ -7,7 +7,6 @@ import {
 import type { ContactUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('EditContactNameStep', () => {
 	it('should render the add contact step with form and buttons', () => {
@@ -78,8 +77,9 @@ describe('EditContactNameStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that addContact was called with the correct contact
-		expect(onAddContact).toHaveBeenCalledTimes(1);
-		expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Contact' }));
+		expect(onAddContact).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ name: 'Test Contact' })
+		);
 	});
 
 	it('should call addContact with full contact when save button is clicked with isNewContact=false', async () => {
@@ -97,8 +97,7 @@ describe('EditContactNameStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that addContact was called with the full contact
-		expect(onSaveContact).toHaveBeenCalledTimes(1);
-		expect(onSaveContact).toHaveBeenCalledWith(contact);
+		expect(onSaveContact).toHaveBeenCalledExactlyOnceWith(contact);
 	});
 
 	it('should call close when cancel button is clicked', async () => {
@@ -115,7 +114,7 @@ describe('EditContactNameStep', () => {
 		await fireEvent.click(cancelButton);
 
 		// Check that close was called
-		expect(onClose).toHaveBeenCalledTimes(1);
+		expect(onClose).toHaveBeenCalledOnce();
 	});
 
 	it('should update title when contact name changes', async () => {
@@ -165,7 +164,6 @@ describe('EditContactNameStep', () => {
 		const saveButton = getByTestId(ADDRESS_BOOK_SAVE_BUTTON);
 		await fireEvent.click(saveButton);
 
-		expect(onAddContact).toHaveBeenCalledTimes(1);
-		expect(onAddContact).toHaveBeenCalledWith({ name: 'Test Name' }); // No leading space
+		expect(onAddContact).toHaveBeenCalledExactlyOnceWith({ name: 'Test Name' });
 	});
 });

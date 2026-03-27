@@ -1,87 +1,132 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { listCustomTokens } from '$lib/api/backend.api';
-import { nullishSignOut } from '$lib/services/auth.services';
+import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { SetIdbTokensParams } from '$lib/types/idb-tokens';
 import type { OptionIdentity } from '$lib/types/identity';
-import { Principal } from '@dfinity/principal';
-import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { assertNever, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 interface LoadCustomTokensFromBackendParams {
 	identity: OptionIdentity;
 	certified: boolean;
-	filterTokens: (token: CustomToken) => boolean;
-	setIdbTokens: (params: SetIdbTokensParams<CustomToken>) => Promise<void>;
 }
 
 type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
-	getIdbTokens: (principal: Principal) => Promise<CustomToken[] | undefined>;
 	useCache?: boolean;
 };
 
 const loadCustomTokensFromBackend = async ({
 	identity,
-	certified,
-	filterTokens,
-	setIdbTokens
+	certified
 }: LoadCustomTokensFromBackendParams): Promise<CustomToken[]> => {
 	const tokens = await listCustomTokens({
 		identity,
-		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	// We filter the custom tokens, since the backend "Custom Token" potentially supports other types
-	const filteredTokens = tokens.filter(filterTokens);
+	backendCustomTokens.set(tokens);
 
 	// Caching the custom tokens in the IDB if update call
-	if (certified && filteredTokens.length > 0) {
-		await setIdbTokens({ identity, tokens: filteredTokens });
+	if (certified && tokens.length > 0) {
+		await setIdbAllCustomTokens({ identity, tokens });
 	}
 
-	return filteredTokens;
+	return tokens;
 };
 
 export const loadNetworkCustomTokens = async ({
 	identity,
 	certified,
-	filterTokens,
-	setIdbTokens,
-	getIdbTokens,
 	useCache = false
 }: LoadCustomTokensParams): Promise<CustomToken[]> => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return [];
 	}
 
 	if (useCache && !certified) {
-		const cachedTokens = await getIdbTokens(identity.getPrincipal());
+		const cachedTokens = await getIdbAllCustomTokens(identity.getPrincipal());
 
 		if (nonNullish(cachedTokens)) {
 			// Principals are saved as Uint8Array in the IDB, so we need to parse them back to Principal
 			const parsePrincipal = (token: CustomToken): CustomToken => {
-				if (!('Icrc' in token.token)) {
+				if ('Icrc' in token.token) {
+					const { ledger_id: rawLedgerId, index_id: rawIndexId } = token.token.Icrc;
+
+					const ledgerId = Principal.from(rawLedgerId);
+					const indexId = nonNullish(fromNullable(rawIndexId))
+						? Principal.from(fromNullable(rawIndexId))
+						: undefined;
+
+					return {
+						...token,
+						token: {
+							Icrc: {
+								ledger_id: ledgerId,
+								index_id: toNullable(indexId)
+							}
+						}
+					};
+				}
+
+				if ('ExtV2' in token.token) {
+					const { canister_id: rawCanisterId } = token.token.ExtV2;
+
+					const canisterId = Principal.from(rawCanisterId);
+
+					return {
+						...token,
+						token: {
+							ExtV2: {
+								canister_id: canisterId
+							}
+						}
+					};
+				}
+
+				if ('Dip721' in token.token) {
+					const { canister_id: rawCanisterId } = token.token.Dip721;
+
+					const canisterId = Principal.from(rawCanisterId);
+
+					return {
+						...token,
+						token: {
+							Dip721: {
+								canister_id: canisterId
+							}
+						}
+					};
+				}
+
+				if ('IcPunks' in token.token) {
+					const { canister_id: rawCanisterId } = token.token.IcPunks;
+
+					const canisterId = Principal.from(rawCanisterId);
+
+					return {
+						...token,
+						token: {
+							IcPunks: {
+								canister_id: canisterId
+							}
+						}
+					};
+				}
+
+				if (
+					'Erc20' in token.token ||
+					'Erc721' in token.token ||
+					'Erc1155' in token.token ||
+					'Erc4626' in token.token ||
+					'SplMainnet' in token.token ||
+					'SplDevnet' in token.token
+				) {
 					return token;
 				}
 
-				const { ledger_id: rawLedgerId, index_id: rawIndexId } = token.token.Icrc;
-
-				const ledgerId = Principal.from(rawLedgerId);
-				const indexId = nonNullish(fromNullable(rawIndexId))
-					? Principal.from(fromNullable(rawIndexId))
-					: undefined;
-
-				return {
-					...token,
-					token: {
-						Icrc: {
-							ledger_id: ledgerId,
-							index_id: toNullable(indexId)
-						}
-					}
-				};
+				assertNever(token.token, `Unexpected token type: ${token.token}`);
 			};
 
 			return cachedTokens.map(parsePrincipal);
@@ -90,8 +135,6 @@ export const loadNetworkCustomTokens = async ({
 
 	return await loadCustomTokensFromBackend({
 		identity,
-		certified,
-		filterTokens,
-		setIdbTokens
+		certified
 	});
 };

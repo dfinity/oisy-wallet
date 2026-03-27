@@ -16,12 +16,14 @@
 		progressStep?: string;
 		steps: ProgressSteps;
 		warningType?: 'transaction' | 'manage';
+		failedSteps?: string[];
 	}
 
 	let {
 		progressStep = ProgressStepsSend.INITIALIZATION,
 		steps,
-		warningType = 'transaction'
+		warningType = 'transaction',
+		failedSteps = []
 	}: Props = $props();
 
 	const startConfirmToClose = () => {
@@ -60,5 +62,5 @@
 		</span>
 	</MessageBox>
 
-	<InProgress {progressStep} {steps} />
+	<InProgress {failedSteps} {progressStep} {steps} />
 </div>

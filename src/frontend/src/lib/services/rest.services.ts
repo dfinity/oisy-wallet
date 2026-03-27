@@ -1,3 +1,4 @@
+import { consoleError } from '$lib/utils/console.utils';
 import { randomWait } from '$lib/utils/time.utils';
 
 export interface RetryParams<Response, Error = unknown> {
@@ -25,12 +26,12 @@ export const retry = async <Response, Error>({
 			return await request();
 		} catch (error: unknown) {
 			if (retryCount >= maxRetries) {
-				console.error(`Max retries reached. Error:`, error);
+				consoleError(`Max retries reached. Error:`, error);
 				throw error;
 			}
 
 			await onRetry?.({ error: error as Error, retryCount });
-			console.warn(`Request attempt ${retryCount + 1} failed. Retrying...`);
+
 			return await executeRequest(retryCount + 1);
 		}
 	};

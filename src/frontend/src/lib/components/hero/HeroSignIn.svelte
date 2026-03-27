@@ -1,8 +1,12 @@
 <script lang="ts">
-	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
+	import IconSocialLogin from '$lib/components/icons/IconSocialLogin.svelte';
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import IconSparkles from '$lib/components/icons/lucide/IconSparkles.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
+	import InviteRewardsBanner from '$lib/components/ui/InviteRewardsBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -13,17 +17,27 @@
 		},
 		{
 			label: $i18n.auth.text.instant_and_private,
-			icon: IconScanFace
+			icon: IconSparkles
 		},
 		{
 			label: $i18n.auth.text.advanced_cryptography,
 			icon: IconShieldCheck
+		},
+		{
+			label: $i18n.auth.text.social_login,
+			icon: IconScanFace,
+			endIcon: IconSocialLogin
 		}
 	]);
 </script>
 
-<div class="flex flex-col items-center text-center md:items-start md:text-left lg:mb-20">
-	<div class="mb-7 mt-5 pt-2">
+<div class="flex flex-col items-center text-center md:items-start md:text-left">
+	<!-- Invite Rewards Banner -->
+	<div class="flex justify-center md:justify-start">
+		<InviteRewardsBanner />
+	</div>
+
+	<div class="mt-5 mb-7 pt-2">
 		<h1 class="text-4xl md:leading-tight lg:text-5xl">
 			{replaceOisyPlaceholders($i18n.auth.text.title_part_1)}<br /><span
 				class="text-brand-primary-alt">{$i18n.auth.text.title_part_2}</span
@@ -32,15 +46,23 @@
 	</div>
 
 	<div class="mb-7 flex flex-col items-center gap-2 md:items-start md:gap-3 md:text-lg">
-		{#each infoList as { label, icon: IconCmp } (label)}
+		{#each infoList as { label, icon: IconCmp, endIcon: EndIconCmp } (label)}
 			<div class="flex items-center gap-4">
 				<div class="hidden md:block">
 					<IconCmp />
 				</div>
-				{label}
+
+				<div>
+					{label}
+					{#if nonNullish(EndIconCmp)}
+						<span class="inline-block align-text-top">
+							<EndIconCmp />
+						</span>
+					{/if}
+				</div>
 			</div>
 		{/each}
 	</div>
 
-	<ButtonAuthenticateWithLicense />
+	<ButtonAuthenticateWithHelp needHelpLink={false} />
 </div>

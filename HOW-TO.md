@@ -67,7 +67,7 @@ It's important to note that although both functions are queries, for security re
 and update.
 
 > OISY uses the JavaScript
-> library [@dfinity/ledger-icrc](https://github.com/dfinity/ic-js/tree/main/packages/ledger-icrc) to interact with the
+> library [@icp-sdk/canisters](https://github.com/dfinity/icp-js-canisters/tree/main/packages/canisters) to interact with the
 > canister.
 
 #### Ledger ID

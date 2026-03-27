@@ -1,13 +1,14 @@
 import type { IcToken } from '$icp/types/ic-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { CertifiedData } from '$lib/types/store';
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
 
-export type CertifiedIcrcTokensData<T extends IcToken> = Option<CertifiedData<T>[]>;
+export type CertifiedIcrcTokensData<T extends IcToken> = Nullish<CertifiedData<T>[]>;
 
-export interface CertifiedIcrcTokensStore<T extends IcToken>
-	extends Readable<CertifiedIcrcTokensData<T>> {
+export interface CertifiedIcrcTokensStore<T extends IcToken> extends Readable<
+	CertifiedIcrcTokensData<T>
+> {
 	set: (token: CertifiedData<T>) => void;
 	setAll: (tokens: CertifiedData<T>[]) => void;
 	reset: (ledgerCanisterId: CanisterIdText) => void;

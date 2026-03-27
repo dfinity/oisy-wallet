@@ -4,10 +4,8 @@ import {
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import {
-	ICRC_LEDGER_CANISTER_TESTNET_IDS,
-	STAGING_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { STAGING_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.testnet.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
@@ -25,6 +23,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import { consoleError } from '$lib/utils/console.utils';
 import {
 	fromNullable,
 	isNullish,
@@ -103,7 +102,7 @@ export const mapCkEthereumTransaction = ({
 	}
 
 	if (nonNullish(burn)) {
-		const memo = fromNullable(burn.memo) ?? [];
+		const memo = fromNullable(burn.memo) ?? new Uint8Array();
 
 		const burnMemo = burnMemoInfo(memo);
 
@@ -112,7 +111,7 @@ export const mapCkEthereumTransaction = ({
 
 		return {
 			...tx,
-			typeLabel: 'transaction.label.twin_token_sent',
+			typeLabel: 'send.text.send',
 			...(notEmptyString(to) && {
 				to,
 				toExplorerUrl: `${ethExplorerUrl}/address/${to}`
@@ -125,7 +124,7 @@ export const mapCkEthereumTransaction = ({
 };
 
 const mintMemoInfo = (
-	memo: Uint8Array | number[]
+	memo: Uint8Array
 ): { fromAddress: string | undefined; reimbursement: boolean } | undefined => {
 	try {
 		const [mintType, [fromAddress]] = decodeMintMemo(memo);
@@ -137,21 +136,19 @@ const mintMemoInfo = (
 			)
 		};
 	} catch (err: unknown) {
-		console.error('Failed to decode ckETH mint memo', memo, err);
+		consoleError('Failed to decode ckETH mint memo', memo, err);
 		return undefined;
 	}
 };
 
-const burnMemoInfo = (
-	memo: Uint8Array | number[]
-): { toAddress: string | undefined } | undefined => {
+const burnMemoInfo = (memo: Uint8Array): { toAddress: string | undefined } | undefined => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
 		return {
 			toAddress: toAddress instanceof Uint8Array ? uint8ArrayToHexString(toAddress) : undefined
 		};
 	} catch (err: unknown) {
-		console.error('Failed to decode ckETH burn memo', memo, err);
+		consoleError('Failed to decode ckETH burn memo', memo, err);
 		return undefined;
 	}
 };

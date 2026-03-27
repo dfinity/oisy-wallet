@@ -1,64 +1,79 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
+	import {
+		enabledMainnetTokensUsdBalancesPerNetwork,
+		enabledMainnetTokensUsdStakeBalancesPerNetwork
+	} from '$lib/derived/network-balances.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
-	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
-	import type { NetworkId } from '$lib/types/network';
+	import type { NetworkId, Network as NetworkType, OptionNetworkId } from '$lib/types/network';
 
-	export let selectedNetworkId: NetworkId | undefined = undefined;
-	export let delayOnNetworkSelect = true;
-	export let labelsSize: LabelSize = 'md';
+	interface Props {
+		selectedNetworkId?: NetworkId;
+		labelsSize?: LabelSize;
+		supportedNetworks?: NetworkType[];
+		allNetworksEnabled?: boolean;
+		showTestnets?: boolean;
+		showStakeBalance?: boolean;
+		onSelected?: (networkId: OptionNetworkId) => void;
+	}
 
-	let mainnetTokensUsdBalance: number;
-	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
-		(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
-		0
+	let {
+		selectedNetworkId,
+		labelsSize = 'md',
+		supportedNetworks,
+		allNetworksEnabled = true,
+		showTestnets = true,
+		showStakeBalance = true,
+		onSelected
+	}: Props = $props();
+
+	let enabledNetworks = $derived(supportedNetworks ?? $networksMainnets);
+
+	let mainnetTokensUsdBalance = $derived<number>(
+		enabledNetworks.reduce(
+			(acc, { id }) =>
+				acc +
+				($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0) +
+				($enabledMainnetTokensUsdStakeBalancesPerNetwork[id] ?? 0),
+			0
+		)
 	);
 </script>
 
-<NetworkButton
-	usdBalance={mainnetTokensUsdBalance}
-	{selectedNetworkId}
-	{delayOnNetworkSelect}
-	{labelsSize}
-	on:icSelected
-/>
+{#if allNetworksEnabled}
+	<NetworkButton
+		{labelsSize}
+		{onSelected}
+		{selectedNetworkId}
+		usdBalance={mainnetTokensUsdBalance}
+	/>
+{/if}
 
 <ul class="flex list-none flex-col">
-	{#each $networksMainnets as network (network.id)}
-		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
-			><MainnetNetwork
-				{network}
-				{selectedNetworkId}
-				{delayOnNetworkSelect}
-				{labelsSize}
-				on:icSelected
-			/></li
-		>
+	{#each enabledNetworks as network (network.id)}
+		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}>
+			<MainnetNetwork {labelsSize} {network} {onSelected} {selectedNetworkId} {showStakeBalance} />
+		</li>
 	{/each}
 </ul>
 
-{#if $testnetsEnabled && $networksTestnets.length}
-	<span class="mb-3 mt-6 flex px-3 font-bold" transition:slide={SLIDE_EASING}
+{#if showTestnets && $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
+	<span class="mt-6 mb-3 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>
 
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 		{#each $networksTestnets as network (network.id)}
 			<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
-				><Network
-					{network}
-					{selectedNetworkId}
-					{delayOnNetworkSelect}
-					{labelsSize}
-					on:icSelected
-				/></li
+				><Network {labelsSize} {network} {onSelected} {selectedNetworkId} /></li
 			>
 		{/each}
 	</ul>

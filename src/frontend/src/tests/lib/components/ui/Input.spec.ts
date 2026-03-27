@@ -1,7 +1,6 @@
 import Input from '$lib/components/ui/Input.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('Input', () => {
 	const defaultProps = {
@@ -95,6 +94,21 @@ describe('Input', () => {
 		expect(input).toHaveAttribute('name', 'test-input');
 		expect(input).toHaveAttribute('required');
 		expect(input).toHaveAttribute('disabled');
+	});
+
+	it('shows divider between reset button and paste button when both are enabled', () => {
+		const props = {
+			...defaultProps,
+			showResetButton: true,
+			showPasteButton: true,
+			value: 'some value'
+		};
+
+		const { container } = render(Input, props);
+
+		const divider = container.querySelector('.border-r-1');
+
+		expect(divider).toBeInTheDocument();
 	});
 
 	describe('clipboard paste functionality', () => {

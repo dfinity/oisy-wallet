@@ -1,0 +1,43 @@
+import type { Erc1155Token } from '$eth/types/erc1155';
+import type { Erc721Token } from '$eth/types/erc721';
+import type { EthNonFungibleToken } from '$eth/types/nft';
+import type { ExtToken } from '$icp/types/ext-token';
+import type { IcNonFungibleToken } from '$icp/types/nft';
+import type {
+	NftAttributeSchema,
+	NftCollectionSchema,
+	NftIdSchema,
+	NftMetadataSchema,
+	NftSchema,
+	OwnedContractSchema
+} from '$lib/schema/nft.schema';
+import type { NetworkId } from '$lib/types/network';
+import type * as z from 'zod';
+
+export type NftId = z.infer<typeof NftIdSchema>;
+
+export type NftAttribute = z.infer<typeof NftAttributeSchema>;
+
+export type NftMetadata = z.infer<typeof NftMetadataSchema>;
+
+export type NftMetadataWithoutId = Omit<NftMetadata, 'id'>;
+
+export type NftCollection = z.infer<typeof NftCollectionSchema>;
+
+export interface NftCollectionUi {
+	collection: NftCollection;
+	nfts: Nft[];
+}
+
+export type Nft = z.infer<typeof NftSchema>;
+
+export type OwnedContract = z.infer<typeof OwnedContractSchema>;
+
+export type NonFungibleTokensByNetwork = Map<NetworkId, NonFungibleToken[]>;
+
+export type NonFungibleToken = EthNonFungibleToken | IcNonFungibleToken;
+
+export type NonFungibleTokenIdentifier =
+	| Erc721Token['address']
+	| Erc1155Token['address']
+	| ExtToken['canisterId'];

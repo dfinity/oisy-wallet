@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import trump from '$sol/assets/trump.svg';
@@ -14,8 +15,9 @@ export const TRUMP_TOKEN_ID: TokenId = parseTokenId(TRUMP_SYMBOL);
 export const TRUMP_TOKEN: RequiredSplToken = {
 	id: TRUMP_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'OFFICIAL TRUMP',
 	symbol: TRUMP_SYMBOL,
 	decimals: TRUMP_DECIMALS,

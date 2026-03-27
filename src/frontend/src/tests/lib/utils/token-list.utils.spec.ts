@@ -1,11 +1,23 @@
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { ETH_TOKEN_GROUP, ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import type { TokenUi } from '$lib/types/token';
-import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
-import { getFilteredTokenGroup, getFilteredTokenList } from '$lib/utils/token-list.utils';
-import { describe, expect, it } from 'vitest';
+import type { Network } from '$lib/types/network';
+import type { Token, TokenId } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
+import { isTokenUiGroup } from '$lib/utils/token-group.utils';
+import {
+	getDisabledOrModifiedTokens,
+	getFilteredTokenGroup,
+	getFilteredTokenList
+} from '$lib/utils/token-list.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { SvelteMap } from 'svelte/reactivity';
 
 // Mock data for tokens
 const token1: TokenUi = BTC_MAINNET_TOKEN;
@@ -83,6 +95,104 @@ describe('token-list.utils', () => {
 			const result = getFilteredTokenGroup({ filter: 'Bitcoin', list: [] });
 
 			expect(result).toHaveLength(0);
+		});
+	});
+
+	describe('getDisabledOrModifiedTokens', () => {
+		vi.mock('$lib/utils/network.utils.ts', () => ({
+			showTokenFilteredBySelectedNetwork: vi.fn()
+		}));
+
+		const dummyNetwork: Network = ICP_NETWORK;
+
+		const emptyTokensMap = new SvelteMap<TokenId, Token>();
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+		});
+
+		it('returns an empty array when no tokens are provided', () => {
+			const result = getDisabledOrModifiedTokens({
+				tokens: [],
+				modifiedTokens: emptyTokensMap
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('returns enabled but modified tokens', () => {
+			const token = {
+				...ICP_TOKEN,
+				id: parseTokenId('2'),
+				network: dummyNetwork,
+				enabled: true
+			} as TokenToggleable<Token>;
+
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
+
+			const modifiedTokens = new SvelteMap<TokenId, Token>();
+			modifiedTokens.set(token.id, token);
+
+			const result = getDisabledOrModifiedTokens({
+				tokens: [token],
+				modifiedTokens
+			});
+
+			expect(result).toEqual([{ token }]);
+		});
+
+		it('excludes enabled and unmodified tokens', () => {
+			const token = {
+				...ICP_TOKEN,
+				enabled: true
+			} as TokenToggleable<Token>;
+
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
+
+			const result = getDisabledOrModifiedTokens({
+				tokens: [token],
+				modifiedTokens: emptyTokensMap
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('returns multiple matching tokens', () => {
+			const tokens = [
+				{
+					...ICP_TOKEN,
+					id: parseTokenId('a'),
+					network: dummyNetwork,
+					enabled: false
+				} as TokenToggleable<Token>,
+				{
+					...ICP_TOKEN,
+					id: parseTokenId('b'),
+					network: dummyNetwork,
+					enabled: true
+				} as TokenToggleable<Token>,
+				{
+					...ICP_TOKEN,
+					id: parseTokenId('c'),
+					network: dummyNetwork,
+					enabled: true
+				} as TokenToggleable<Token>
+			];
+
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
+
+			const modifiedTokens = new SvelteMap<TokenId, Token>();
+			modifiedTokens.set(tokens[1].id, tokens[1]);
+
+			const result = getDisabledOrModifiedTokens({
+				tokens,
+				modifiedTokens
+			});
+
+			expect(result.map((r) => (!isTokenUiGroup(r) ? r.token.id : undefined))).toEqual([
+				tokens[0].id,
+				tokens[1].id
+			]);
 		});
 	});
 });

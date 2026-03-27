@@ -1,12 +1,12 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
-import { ERC20_ABI } from '$eth/constants/erc20.constants';
+import { ERC20_ABI, ERC20_PERMIT_ABI } from '$eth/constants/erc20.constants';
+import type { EthAddress } from '$eth/types/address';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Metadata } from '$eth/types/erc20';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -15,7 +15,7 @@ import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraErc20Provider implements Erc20Provider {
-	private readonly provider: InfuraProvider;
+	protected readonly provider: InfuraProvider;
 
 	constructor(private readonly network: Networkish) {
 		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
@@ -113,6 +113,41 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}): Promise<bigint> => {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.allowance(owner, spender);
+	};
+
+	// We use this function to differentiate between Erc20 and Erc721 contracts, because currently we do
+	// not have another way to find out the token standard only by contract address.
+	isErc20 = async ({ contractAddress }: { contractAddress: string }): Promise<boolean> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+
+		try {
+			await erc20Contract.decimals();
+			return true;
+		} catch (_: unknown) {
+			return false;
+		}
+	};
+
+	isErc20SupportsPermit = async ({
+		contractAddress,
+		userAddress
+	}: {
+		contractAddress: string;
+		userAddress: EthAddress;
+	}): Promise<boolean> => {
+		const { nonces, DOMAIN_SEPARATOR, version } = new Contract(
+			contractAddress,
+			ERC20_PERMIT_ABI,
+			this.provider
+		);
+
+		try {
+			await Promise.all([nonces(userAddress), DOMAIN_SEPARATOR(), version()]);
+
+			return true;
+		} catch (_: unknown) {
+			return false;
+		}
 	};
 }
 

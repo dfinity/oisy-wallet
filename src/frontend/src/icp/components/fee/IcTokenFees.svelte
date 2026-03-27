@@ -23,89 +23,101 @@
 	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 
-	export let networkId: NetworkId | undefined = undefined;
-	export let sourceToken: Token;
-	export let sourceTokenExchangeRate: number | undefined = undefined;
-	export let totalSourceTokenFee: bigint | undefined = undefined;
-	export let totalDestinationTokenFee: bigint | undefined = undefined;
-	export let ethereumEstimateFee: bigint | undefined = undefined;
+	interface Props {
+		networkId?: NetworkId;
+		sourceToken: Token;
+		sourceTokenExchangeRate?: number;
+		totalSourceTokenFee?: bigint;
+		totalDestinationTokenFee?: bigint;
+		ethereumEstimateFee?: bigint;
+	}
+
+	let {
+		networkId,
+		sourceToken,
+		sourceTokenExchangeRate,
+		totalSourceTokenFee = $bindable(),
+		totalDestinationTokenFee = $bindable(),
+		ethereumEstimateFee = $bindable()
+	}: Props = $props();
 
 	const { store: bitcoinStoreFeeData } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 	const { store: ethereumStoreFeeData } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	let icTokenFee: bigint | undefined;
-	$: icTokenFee = (sourceToken as IcToken).fee;
+	let icTokenFee = $derived((sourceToken as IcToken).fee);
 
-	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger(sourceToken);
+	let ckBTC = $derived(isTokenCkBtcLedger(sourceToken));
 
-	let btcNetwork = false;
-	$: btcNetwork = isNetworkIdBitcoin(networkId);
+	let btcNetwork = $derived(isNetworkIdBitcoin(networkId));
 
-	let bitcoinEstimatedFee: bigint | undefined = undefined;
-	$: bitcoinEstimatedFee =
+	let bitcoinEstimatedFee = $derived(
 		nonNullish($bitcoinStoreFeeData) && nonNullish($bitcoinStoreFeeData.bitcoinFee)
 			? $bitcoinStoreFeeData.bitcoinFee.bitcoin_fee + $bitcoinStoreFeeData.bitcoinFee.minter_fee
-			: undefined;
+			: undefined
+	);
 
-	let kytFee: bigint | undefined = undefined;
-	$: kytFee =
-		ckBTC && btcNetwork ? $ckBtcMinterInfoStore?.[sourceToken.id]?.data.kyt_fee : undefined;
+	let kytFee = $derived(
+		ckBTC && btcNetwork ? $ckBtcMinterInfoStore?.[sourceToken.id]?.data.kyt_fee : undefined
+	);
 
-	let ethereumFeeToken: Token;
-	$: ethereumFeeToken = $ethereumFeeTokenCkEth ?? $ckEthereumNativeToken;
+	let ethereumFeeToken = $derived($ethereumFeeTokenCkEth ?? $ckEthereumNativeToken);
 
-	$: ethereumEstimateFee = $ethereumStoreFeeData?.maxTransactionFee;
+	$effect(() => {
+		ethereumEstimateFee = $ethereumStoreFeeData?.maxTransactionFee;
+	});
 
-	let ethereumFeeExchangeRate: number | undefined;
-	$: ethereumFeeExchangeRate = $exchanges?.[ethereumFeeToken.id]?.usd;
+	let ethereumFeeExchangeRate = $derived($exchanges?.[ethereumFeeToken.id]?.usd);
 
-	let bitcoinFeeExchangeRate: number | undefined;
-	$: bitcoinFeeExchangeRate = $exchanges?.[BTC_MAINNET_TOKEN_ID]?.usd;
+	let bitcoinFeeExchangeRate = $derived($exchanges?.[BTC_MAINNET_TOKEN_ID]?.usd);
 
-	$: totalSourceTokenFee = icTokenFee;
-	$: totalDestinationTokenFee = bitcoinEstimatedFee;
+	$effect(() => {
+		totalSourceTokenFee = icTokenFee;
+	});
+
+	$effect(() => {
+		totalDestinationTokenFee = bitcoinEstimatedFee;
+	});
 </script>
 
 <FeeDisplay
-	feeAmount={icTokenFee}
 	decimals={sourceToken.decimals}
 	exchangeRate={sourceTokenExchangeRate}
+	feeAmount={icTokenFee}
 	symbol={sourceToken.symbol}
 	zeroAmountLabel={$i18n.fee.text.zero_fee}
 >
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+	{#snippet label()}{$i18n.fee.text.fee}{/snippet}
 </FeeDisplay>
 
 {#if nonNullish(bitcoinEstimatedFee)}
 	<FeeDisplay
-		feeAmount={bitcoinEstimatedFee}
 		decimals={BTC_DECIMALS}
 		exchangeRate={bitcoinFeeExchangeRate}
+		feeAmount={bitcoinEstimatedFee}
 		symbol={BTC_MAINNET_SYMBOL}
 	>
-		<svelte:fragment slot="label">{$i18n.fee.text.estimated_btc}</svelte:fragment>
+		{#snippet label()}{$i18n.fee.text.estimated_btc}{/snippet}
 	</FeeDisplay>
 {/if}
 
 {#if nonNullish(kytFee)}
 	<FeeDisplay
-		feeAmount={kytFee}
 		decimals={sourceToken.decimals}
 		exchangeRate={sourceTokenExchangeRate}
+		feeAmount={kytFee}
 		symbol={sourceToken.symbol}
 	>
-		<svelte:fragment slot="label">{$i18n.fee.text.estimated_inter_network}</svelte:fragment>
+		{#snippet label()}{$i18n.fee.text.estimated_inter_network}{/snippet}
 	</FeeDisplay>
 {/if}
 
 {#if nonNullish(ethereumEstimateFee)}
 	<FeeDisplay
-		feeAmount={ethereumEstimateFee}
 		decimals={ethereumFeeToken.decimals}
 		exchangeRate={ethereumFeeExchangeRate}
+		feeAmount={ethereumEstimateFee}
 		symbol={ethereumFeeToken.symbol}
 	>
-		<svelte:fragment slot="label">{$i18n.fee.text.estimated_eth}</svelte:fragment>
+		{#snippet label()}{$i18n.fee.text.estimated_eth}{/snippet}
 	</FeeDisplay>
 {/if}
