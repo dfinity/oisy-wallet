@@ -543,5 +543,26 @@
 		"stats": "",
 		"logo": "/images/dapps/parcl-logo.webp",
 		"screenshots": ["/images/dapps/parcl-screenshot.webp"]
+	},
+	{
+		"id": "kongswap",
+		"name": "dapps.descriptions.kongswap.name",
+		"oneLiner": "dapps.descriptions.kongswap.one_liner",
+		"website": "https://www.kongswap.io/",
+		"twitter": "https://x.com/kongswap",
+		"github": "https://github.com/KongSwap",
+		"openChat": "https://oc.app/community/maceh-niaaa-aaaaf-bm37q-cai/channel/143833652212619352659918759629305427896",
+		"telegram": "https://t.me/kong_swap",
+		"tags": ["dapps.categories.defi", "dapps.categories.ab_icp"],
+		"description": "dapps.descriptions.kongswap.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/kong-swap-logo.svg",
+		"screenshots": ["/images/dapps/kong-swap.webp"],
+		"carousel": {
+			"text": "dapps.descriptions.kongswap.carousel.text",
+			"callToAction": "dapps.descriptions.kongswap.carousel.call_to_action"
+		}
 	}
 ]
