@@ -152,7 +152,6 @@ describe('user-transactions.services', () => {
 				identity: null,
 				tokenId: mockUserTransactionTokenId,
 				transactions: [mockTx],
-				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
 				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
@@ -167,7 +166,6 @@ describe('user-transactions.services', () => {
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
 				transactions: [mockTx],
-				currentBlockNumber: 200,
 				isFinalizedFn: neverFinalized,
 				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
@@ -182,7 +180,6 @@ describe('user-transactions.services', () => {
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
 				transactions: [mockTx],
-				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
 				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: neverSaveable
@@ -199,7 +196,6 @@ describe('user-transactions.services', () => {
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
 				transactions: [mockTx, mockTx2],
-				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
 				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
@@ -222,7 +218,6 @@ describe('user-transactions.services', () => {
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
 				transactions: [mockTx, mockTx2],
-				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
 				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: canSaveOnlyFirst
@@ -236,7 +231,7 @@ describe('user-transactions.services', () => {
 			});
 		});
 
-		it('should pass blockNumber and currentBlockNumber to isFinalizedFn', async () => {
+		it('should pass the full transaction to isFinalizedFn', async () => {
 			vi.spyOn(backendApi, 'saveUserTransactions').mockResolvedValue();
 
 			const isFinalizedFn = vi.fn().mockReturnValue(true);
@@ -245,16 +240,12 @@ describe('user-transactions.services', () => {
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
 				transactions: [mockTx],
-				currentBlockNumber: 200,
 				isFinalizedFn,
 				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
 			});
 
-			expect(isFinalizedFn).toHaveBeenCalledWith({
-				blockNumber: 100,
-				currentBlockNumber: 200
-			});
+			expect(isFinalizedFn).toHaveBeenCalledWith(mockTx);
 		});
 
 		it('should return { success: false } when saveUserTransactions throws', async () => {
@@ -264,7 +255,6 @@ describe('user-transactions.services', () => {
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
 				transactions: [mockTx],
-				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
 				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
@@ -278,7 +268,6 @@ describe('user-transactions.services', () => {
 				identity: mockIdentity,
 				tokenId: mockUserTransactionTokenId,
 				transactions: [],
-				currentBlockNumber: 200,
 				isFinalizedFn: alwaysFinalized,
 				mapToBackend: mockMapToBackendUserTransaction,
 				canSave: alwaysSaveable
