@@ -61,7 +61,11 @@ import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
-export const loadIcrcTokens = async ({ identity }: { identity: NullishIdentity }): Promise<void> => {
+export const loadIcrcTokens = async ({
+	identity
+}: {
+	identity: NullishIdentity;
+}): Promise<void> => {
 	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
