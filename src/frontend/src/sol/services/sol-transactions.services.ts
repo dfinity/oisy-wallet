@@ -91,6 +91,7 @@ export const fetchSolTransactionsForSignature = async ({
 	}
 
 	const {
+		slot,
 		blockTime,
 		confirmationStatus: status,
 		transaction: {
@@ -213,6 +214,7 @@ export const fetchSolTransactionsForSignature = async ({
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
+				blockNumber: Number(slot),
 				timestamp: blockTime ?? ZERO,
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
