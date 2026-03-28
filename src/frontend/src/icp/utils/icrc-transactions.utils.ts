@@ -5,7 +5,7 @@ import type {
 	IcrcTransaction
 } from '$icp/types/ic-transaction';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import {
 	fromNullable,
 	fromNullishNullable,
@@ -67,7 +67,7 @@ export const mapIcrcTransaction = ({
 	identity
 }: {
 	transaction: IcrcTransaction;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): IcTransactionUi => {
 	const { timestamp, approve, burn, mint, transfer, transferToSelf } = transaction;
 

@@ -7,7 +7,7 @@ import type {
 import { mapIcPunksToken } from '$icp/utils/icpunks.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertExistingTokens } from '$lib/utils/tokens.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -22,7 +22,7 @@ export const loadAndAssertAddCustomToken = async ({
 	icPunksTokens,
 	canisterId
 }: Partial<IcPunksCanisters> & {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	icPunksTokens: IcPunksToken[];
 }): Promise<{
 	result: 'success' | 'error';

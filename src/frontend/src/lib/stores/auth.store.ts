@@ -9,7 +9,7 @@ import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { popupCenter } from '$lib/utils/window.utils';
@@ -20,7 +20,7 @@ import type { Identity } from '@icp-sdk/core/agent';
 import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }
 
 let authClient: Nullish<AuthClient>;

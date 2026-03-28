@@ -12,7 +12,7 @@ import {
 } from '$lib/services/wallet-connect.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -60,7 +60,7 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	modalNext: () => void;
 	progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => void;
 	token: Token;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 };
 
 export const decode = async ({
@@ -104,7 +104,7 @@ const getSignatureWithSending = async ({
 	network,
 	progress
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	base64EncodedTransactionMessage: string;
 	address: SolAddress;
 	network: SolanaNetworkType;

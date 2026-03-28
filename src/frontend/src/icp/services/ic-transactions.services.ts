@@ -17,7 +17,7 @@ import {
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
@@ -30,7 +30,7 @@ const getTransactions = async ({
 	...rest
 }: {
 	owner: Principal;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	start?: bigint;
 	maxResults?: bigint;
 	token: IcToken & IcCanistersStrict;
@@ -57,7 +57,7 @@ const loadNextIcTransactionsRequest = ({
 	...rest
 }: {
 	owner: Principal;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	start?: bigint;
 	maxResults?: bigint;
 	token: IcToken & IcCanistersStrict;
@@ -144,7 +144,7 @@ export const loadNextIcTransactions = async ({
 }: {
 	lastId: IcTransactionUi['id'] | undefined;
 	owner: Principal;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	maxResults?: bigint;
 	token: Token;
 	signalEnd: () => void;
@@ -187,7 +187,7 @@ export const loadNextIcTransactionsByOldest = async ({
 	minTimestamp: number;
 	transactions: IcTransactionUi[];
 	owner: Principal;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	maxResults?: bigint;
 	token: Token;
 	signalEnd: () => void;
