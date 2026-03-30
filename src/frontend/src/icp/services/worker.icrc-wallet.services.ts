@@ -11,7 +11,8 @@ import type {
 	PostMessageDataRequestIcrc,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
-	PostMessageDataResponseWalletCleanUp
+	PostMessageDataResponseWalletCleanUp,
+	PostMessageScheduler
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
@@ -32,7 +33,7 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 			({
 				data: dataMsg
 			}: MessageEvent<
-				PostMessage<
+				PostMessageScheduler<
 					| PostMessageDataResponseWallet
 					| PostMessageDataResponseError
 					| PostMessageDataResponseWalletCleanUp
