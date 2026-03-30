@@ -17,7 +17,7 @@ import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -32,7 +32,7 @@ import { get } from 'svelte/store';
 export const loadIcPunksTokens = async ({
 	identity
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): Promise<void> => {
 	await Promise.all([loadDefaultIcPunksTokens(), loadCustomTokens({ identity, useCache: true })]);
 };

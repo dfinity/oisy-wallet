@@ -1,7 +1,7 @@
 import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
 import { getUserTransactions, saveUserTransactions } from '$lib/api/backend.api';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Transaction as EthTransaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -19,7 +19,7 @@ export const loadUserTransactions = async <T extends EthTransaction | SolTransac
 	maxResults = WALLET_PAGINATION,
 	mapFromBackend
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokenId: BackendTokenId;
 	start?: bigint;
 	maxResults?: bigint;
@@ -66,7 +66,7 @@ export const saveFinalizedTransactions = async <T>({
 	mapToBackend,
 	canSave
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokenId: BackendTokenId;
 	transactions: T[];
 	isFinalizedFn: (tx: T) => boolean;

@@ -12,7 +12,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { CustomToken } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdICP } from '$lib/utils/network.utils';
@@ -28,7 +28,7 @@ export const loadNftsByNetwork = async ({
 }: {
 	networkId: NetworkId;
 	tokens: NonFungibleToken[];
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	ethAddress: OptionEthAddress;
 } & QueryParams): Promise<Nft[]> => {
 	if (tokens.length === 0) {
@@ -63,7 +63,7 @@ export const loadNfts = async ({
 	ethAddress
 }: {
 	tokens: NonFungibleToken[];
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	ethAddress: OptionEthAddress;
 } & QueryParams) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
@@ -92,7 +92,7 @@ export const saveNftCustomToken = async ({
 	token,
 	$ethAddress
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	token: CustomToken<NonFungibleToken>;
 	$ethAddress: OptionEthAddress;
 }) => {
@@ -145,7 +145,7 @@ export const updateNftSection = async ({
 	$ethAddress
 }: {
 	section: CustomTokenSection | undefined;
-	$authIdentity: OptionIdentity;
+	$authIdentity: NullishIdentity;
 	token: NonFungibleToken;
 	$ethAddress: OptionEthAddress;
 }): Promise<NonFungibleToken | undefined> => {
@@ -173,7 +173,7 @@ export const updateNftMediaConsent = async ({
 	$ethAddress
 }: {
 	allowMedia: boolean;
-	$authIdentity: OptionIdentity;
+	$authIdentity: NullishIdentity;
 	token: NonFungibleToken;
 	$ethAddress: OptionEthAddress;
 }): Promise<NonFungibleToken | undefined> => {

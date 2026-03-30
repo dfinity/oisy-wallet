@@ -4,7 +4,7 @@ import { busy } from '$lib/stores/busy.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { token as tokenStore } from '$lib/stores/token.store';
 import type { SaveCustomToken } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token, TokenStandard } from '$lib/types/token';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -22,9 +22,9 @@ export const loadTokenAndRun = async ({
 
 export interface AutoLoadSingleTokenParams<T extends SaveCustomToken> {
 	token: T | undefined;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	setToken: (params: { identity: Identity; token: T; enabled: boolean }) => Promise<void>;
-	loadTokens: (params: { identity: OptionIdentity }) => Promise<void>;
+	loadTokens: (params: { identity: NullishIdentity }) => Promise<void>;
 	errorMessage: string;
 }
 
@@ -48,7 +48,7 @@ export interface AutoLoadTokenResult {
  *
  * @param {Object} params - The parameters for the function.
  * @param {Token} params.token - The token to be loaded.
- * @param {OptionIdentity} params.identity - The user's identity.
+ * @param {NullishIdentity} params.identity - The user's identity.
  * @param {function} params.setToken - A function to enable the counterpart token.
  * @param {function} params.loadTokens - A function to reload tokens.
  * @param {string} params.errorMessage - A message to display in case of an error.
@@ -104,7 +104,7 @@ export const autoLoadSingleToken = async <T extends SaveCustomToken>({
  * @param {Object} params - The parameters for the function.
  * @param {Token[]} params.tokens - The list of user's tokens (could be ERC20 or ICRC).
  * @param {Token} params.sendToken - The token to be sent.
- * @param {OptionIdentity} params.identity - The user's identity.
+ * @param {NullishIdentity} params.identity - The user's identity.
  * @param {string} params.expectedSendTokenStandard - The expected standard of the `sendToken` (e.g., 'erc20', 'icrc').
  * @param {function} params.assertSendTokenData - A function to assert the data of the `sendToken`.
  * @param {function} params.findToken - A function that finds the counterpart token from the user tokens list.

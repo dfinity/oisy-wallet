@@ -32,7 +32,7 @@ import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { isTokenIcp } from '$icp/utils/icrc.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CertifiedTransaction } from '$lib/stores/transactions.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 
 export const mapIcTransaction = ({
@@ -42,7 +42,7 @@ export const mapIcTransaction = ({
 }: {
 	transaction: IcTransaction;
 	token: IcToken;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): IcTransactionUi => {
 	const {
 		network: { env }
