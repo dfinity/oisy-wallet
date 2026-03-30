@@ -12,6 +12,7 @@
 	const { loading, children }: Props = $props();
 
 	const SKELETON_ROWS = 3;
+
 	let cards = $derived(Array.from({ length: SKELETON_ROWS }, (_, i) => i));
 </script>
 
