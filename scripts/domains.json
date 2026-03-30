@@ -11,5 +11,15 @@
 		"beta": "https://beta.oisy.com",
 		"audit": "https://audit.oisy.com",
 		"e2e": "https://e2e.oisy.com"
+	},
+	"signer_frontend": {
+		"ic": "https://signer.oisy.com",
+		"staging": "https://staging.signer.oisy.com",
+		"beta": "https://beta.signer.oisy.com"
+	},
+	"legacy_signer_frontend": {
+		"ic": "https://legacy-signer.oisy.com",
+		"staging": "https://staging.legacy-signer.oisy.com",
+		"beta": "https://beta.legacy-signer.oisy.com"
 	}
 }
