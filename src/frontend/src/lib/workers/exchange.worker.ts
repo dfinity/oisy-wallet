@@ -291,18 +291,18 @@ const syncExchangeFromProviders = async ({
 			exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier ?? null,
 			currency: currentCurrency
 		},
-		currentEthPrice: currentEthPrice ?? undefined,
-		currentBtcPrice: currentBtcPrice ?? undefined,
+		currentEthPrice,
+		currentBtcPrice,
 		currentErc20Prices,
-		currentIcpPrice: currentIcpPrice ?? undefined,
+		currentIcpPrice,
 		currentIcrcPrices: currentIcrcPrices ?? {},
-		currentSolPrice: currentSolPrice ?? undefined,
+		currentSolPrice,
 		currentSplPrices: currentSplPrices ?? {},
 		currentErc4626Prices,
-		currentBnbPrice: currentBnbPrice ?? undefined,
-		currentPolPrice: currentPolPrice ?? undefined,
-		currentArbitrumEthPrice: currentEthPrice ?? undefined,
-		currentBaseEthPrice: currentEthPrice ?? undefined
+		currentBnbPrice,
+		currentPolPrice,
+		currentArbitrumEthPrice: currentEthPrice,
+		currentBaseEthPrice: currentEthPrice
 	};
 };
 
@@ -322,7 +322,7 @@ const syncExchange = async (params: SyncExchangeParams) => {
 		postMessage({
 			msg: 'syncExchange',
 			data
-		} as PostMessage<PostMessageDataResponseExchange>);
+		});
 	} catch (err: unknown) {
 		consoleError('Unexpected error while fetching symbol average price:', err);
 

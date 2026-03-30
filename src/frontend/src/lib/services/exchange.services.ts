@@ -4,6 +4,7 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
@@ -33,7 +34,7 @@ import type { Identity } from '@icp-sdk/core/agent';
 
 const fetchIcrcPricesFromCoingecko = (
 	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
+): Promise<CoingeckoSimpleTokenPriceResponse> =>
 	simpleTokenPrice({
 		id: 'internet-computer',
 		vs_currencies: Currency.USD,
@@ -91,42 +92,42 @@ export const exchangeRateUsdToCurrency = async (
 	return { rate, fx24hChangeMultiplier };
 };
 
-export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	simplePrice({
 		ids: 'ethereum',
 		vs_currencies: Currency.USD,
 		include_24hr_change: true
 	});
 
-export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	simplePrice({
 		ids: 'bitcoin',
 		vs_currencies: Currency.USD,
 		include_24hr_change: true
 	});
 
-export const exchangeRateICPToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRateICPToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	simplePrice({
 		ids: 'internet-computer',
 		vs_currencies: Currency.USD,
 		include_24hr_change: true
 	});
 
-export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	simplePrice({
 		ids: 'solana',
 		vs_currencies: Currency.USD,
 		include_24hr_change: true
 	});
 
-export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	simplePrice({
 		ids: 'binancecoin',
 		vs_currencies: Currency.USD,
 		include_24hr_change: true
 	});
 
-export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	simplePrice({
 		ids: 'polygon-ecosystem-token',
 		vs_currencies: Currency.USD,
@@ -136,9 +137,9 @@ export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 export const exchangeRateERC20ToUsd = async ({
 	coingeckoPlatformId: id,
 	contractAddresses
-}: CoingeckoErc20PriceParams): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+}: CoingeckoErc20PriceParams): Promise<CoingeckoSimpleTokenPriceResponse> => {
 	if (contractAddresses.length === 0) {
-		return null;
+		return {};
 	}
 
 	return await simpleTokenPrice({
@@ -152,12 +153,17 @@ export const exchangeRateERC20ToUsd = async ({
 
 export const exchangeRateICRCToUsd = async (
 	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+): Promise<CoingeckoSimpleTokenPriceResponse> => {
 	if (ledgerCanisterIds.length === 0) {
-		return null;
+		return {};
 	}
 
 	const coingeckoPrices = await fetchIcrcPricesFromCoingecko(ledgerCanisterIds);
+
+	if (!KONGSWAP_PROVIDER_ENABLED) {
+		return coingeckoPrices;
+	}
+
 	const missingIds = findMissingLedgerCanisterIds({
 		allLedgerCanisterIds: ledgerCanisterIds,
 		coingeckoResponse: coingeckoPrices
@@ -168,16 +174,16 @@ export const exchangeRateICRCToUsd = async (
 
 	const kongSwapPrices = await fetchIcrcPricesFromKongSwap(missingIds);
 	return {
-		...(coingeckoPrices ?? {}),
-		...(kongSwapPrices ?? {})
+		...coingeckoPrices,
+		...kongSwapPrices
 	};
 };
 
 export const exchangeRateSPLToUsd = async (
 	tokenAddresses: SplTokenAddress[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+): Promise<CoingeckoSimpleTokenPriceResponse> => {
 	if (tokenAddresses.length === 0) {
-		return null;
+		return {};
 	}
 
 	return await simpleTokenPrice({

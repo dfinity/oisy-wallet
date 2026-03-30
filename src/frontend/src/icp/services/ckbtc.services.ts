@@ -16,7 +16,7 @@ import { busy } from '$lib/stores/busy.store';
 import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -98,7 +98,7 @@ export const loadAllCkBtcInfo = async ({
 	id: tokenId,
 	minterCanisterId,
 	...rest
-}: IcCkToken & { identity: OptionIdentity }) => {
+}: IcCkToken & { identity: NullishIdentity }) => {
 	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_ckbtc_info);
 
 	const addressStore = get(btcAddressStore);
@@ -139,7 +139,7 @@ export const loadAllCkBtcInfo = async ({
 	busy.stop();
 };
 
-const loadBtcAddress = (params: IcCkToken & { identity: OptionIdentity }): Promise<void> =>
+const loadBtcAddress = (params: IcCkToken & { identity: NullishIdentity }): Promise<void> =>
 	loadData({
 		...params,
 		store: btcAddressStore,
@@ -154,7 +154,7 @@ type LoadDataParams<T> = IcToken &
 		request: (
 			options: QueryAndUpdateRequestParams & Pick<IcCkMetadata, 'minterCanisterId'>
 		) => Promise<T>;
-		identity: OptionIdentity;
+		identity: NullishIdentity;
 	};
 
 const loadData: LoadData = async <T>({
@@ -194,7 +194,7 @@ export const queryEstimateFee = async ({
 	minterCanisterId,
 	amount
 }: Partial<IcCkMetadata> & {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	amount: bigint;
 }): Promise<{
 	result: 'success' | 'error';

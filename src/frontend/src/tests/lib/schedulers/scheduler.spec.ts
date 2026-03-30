@@ -310,9 +310,10 @@ describe('scheduler', () => {
 
 		describe('postMsg', () => {
 			const msg = 'syncExchange';
+			const ref = 'test-ref';
 
 			it('should not post message if it is idle', () => {
-				scheduler.postMsg({ msg, data: mockData });
+				scheduler.postMsg({ ref, msg, data: mockData });
 
 				expect(postMessageMock).not.toHaveBeenCalled();
 			});

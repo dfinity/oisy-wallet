@@ -18,7 +18,7 @@ import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -609,7 +609,7 @@ export const saveAllCustomTokens = async ({
 	modalNext?: () => void;
 	onSuccess?: () => void;
 	onError?: () => void;
-	$authIdentity: OptionIdentity;
+	$authIdentity: NullishIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
 	const tokensWithKey = normalizeTokensForSave(tokens);

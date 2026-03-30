@@ -5,7 +5,7 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -40,7 +40,7 @@ const findCustomToken = ({
  * @param {Object} params - The parameters for the function.
  * @param {Erc20CustomToken[]} params.erc20CustomTokens - The list of user's ERC20 tokens.
  * @param {Token} params.sendToken - The token to be sent.
- * @param {OptionIdentity} params.identity - The user's identity.
+ * @param {NullishIdentity} params.identity - The user's identity.
  * @returns {Promise<{ result: 'loaded' | 'skipped' | 'error' }>} The result of the operation.
  */
 export const autoLoadErc20Token = async ({
@@ -50,7 +50,7 @@ export const autoLoadErc20Token = async ({
 }: {
 	erc20CustomTokens: Erc20CustomToken[];
 	sendToken: Token;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): Promise<AutoLoadTokenResult> =>
 	await autoLoadToken({
 		tokens: erc20CustomTokens,

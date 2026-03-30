@@ -13,7 +13,7 @@ import {
 	loadUserTransactions,
 	saveFinalizedTransactions
 } from '$lib/services/user-transactions.services';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
@@ -37,7 +37,7 @@ export const loadEthUserTransactions = ({
 	start,
 	maxResults = WALLET_PAGINATION
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokenId: BackendTokenId;
 	start?: bigint;
 	maxResults?: bigint;
@@ -67,7 +67,7 @@ export const saveEthFinalizedTransactions = ({
 	transactions,
 	currentBlockNumber
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokenId: BackendTokenId;
 	transactions: Transaction[];
 	currentBlockNumber: number;
@@ -76,8 +76,8 @@ export const saveEthFinalizedTransactions = ({
 		identity,
 		tokenId,
 		transactions,
-		currentBlockNumber,
-		isFinalizedFn: isTransactionFinalized,
+		isFinalizedFn: (tx) =>
+			isTransactionFinalized({ blockNumber: tx.blockNumber, currentBlockNumber }),
 		mapToBackend: mapTransactionToUserTransaction,
 		canSave: (tx) => nonNullish(tx.blockNumber) && nonNullish(tx.hash)
 	});
@@ -110,7 +110,7 @@ export const loadNextEthUserTransactions = async ({
 	oldestLoadedBlockNumber,
 	beAtCapacity = false
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	address: OptionEthAddress;
 	transactionTokenId: BackendTokenId;
 	tokenId: TokenId;
@@ -177,7 +177,7 @@ const loadOlderFromEtherscan = async ({
 	oldestLoadedBlockNumber,
 	skipSave
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	address: OptionEthAddress;
 	transactionTokenId: BackendTokenId;
 	tokenId: TokenId;

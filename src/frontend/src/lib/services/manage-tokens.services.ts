@@ -14,7 +14,7 @@ import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { NonEmptyArray } from '$lib/types/utils';
@@ -29,7 +29,7 @@ interface ManageTokensSaveParams {
 	modalNext?: () => void;
 	onSuccess?: () => void;
 	onError?: () => void;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }
 
 export interface SaveTokensParams<T> {

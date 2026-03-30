@@ -42,6 +42,9 @@ vi.mock('$lib/utils/exchange.utils', () => ({
 vi.mock('$lib/api/backend.api', () => ({
 	getExchangeRates: vi.fn()
 }));
+vi.mock('$env/rest/kongswap.env', () => ({
+	KONGSWAP_PROVIDER_ENABLED: true
+}));
 
 const mockPrice1 = createMockCoingeckoTokenPrice({ usd: 1.11 });
 const mockPrice2 = createMockCoingeckoTokenPrice({ usd: 2.22 });
@@ -91,14 +94,6 @@ describe('exchange.services', () => {
 			expect(rate).toStrictEqual({ rate: 2, fx24hChangeMultiplier: 1.03 / 1.18 }); // 10000 / 5000
 		});
 
-		it('should return undefined for a nullish response', async () => {
-			vi.mocked(simplePrice).mockResolvedValue(null);
-
-			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
-
-			expect(rate).toBeUndefined();
-		});
-
 		it('should return undefined for a nullish price for BTC', async () => {
 			vi.mocked(simplePrice).mockResolvedValue({});
 
@@ -139,10 +134,10 @@ describe('exchange.services', () => {
 			vi.clearAllMocks();
 		});
 
-		it('returns null if no canister IDs are provided', async () => {
+		it('returns empty object if no canister IDs are provided', async () => {
 			const result = await exchangeRateICRCToUsd([]);
 
-			expect(result).toBeNull();
+			expect(result).toEqual({});
 			expect(simpleTokenPrice).not.toHaveBeenCalled();
 			expect(findMissingLedgerCanisterIds).not.toHaveBeenCalled();
 			expect(fetchBatchKongSwapPrices).not.toHaveBeenCalled();
@@ -196,8 +191,8 @@ describe('exchange.services', () => {
 			});
 		});
 
-		it('returns only KongSwap prices if Coingecko returns null', async () => {
-			vi.mocked(simpleTokenPrice).mockResolvedValue(null);
+		it('returns only KongSwap prices if Coingecko returns empty object', async () => {
+			vi.mocked(simpleTokenPrice).mockResolvedValue({});
 			vi.mocked(findMissingLedgerCanisterIds).mockReturnValue([MOCK_CANISTER_ID_1]);
 			vi.mocked(fetchBatchKongSwapPrices).mockResolvedValue(['mockRawToken' as never]);
 			vi.mocked(formatKongSwapToCoingeckoPrices).mockReturnValue({
