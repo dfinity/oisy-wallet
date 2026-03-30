@@ -88,7 +88,7 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	SORT_ASC = 'sort_asc',
 	SORT_DESC = 'sort_desc',
 	PRICE = 'price',
-	NETWORK = 'Network'
+	NETWORK = 'network'
 }
 
 export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
