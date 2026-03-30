@@ -843,7 +843,7 @@ describe('post-message.schema', () => {
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
 		});
 
-		it('should validate with a valid ref', () => {
+		it('should validate a request without ref', () => {
 			const validPayload = {
 				msg: validRequestMsg,
 				data: validData
@@ -944,7 +944,7 @@ describe('post-message.schema', () => {
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
 		});
 
-		it('should validate with a valid ref', () => {
+		it('should validate a response with ref', () => {
 			const validPayload = {
 				ref: validRef,
 				msg: validResponseMsg,
