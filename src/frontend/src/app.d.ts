@@ -16,3 +16,5 @@ declare const VITE_DFX_NETWORK: string;
 
 declare const VITE_GIT_COMMIT_HASH: string;
 declare const VITE_GIT_BRANCH_NAME: string;
+
+declare const VITE_OISY_SIGNER_TARGET: string;

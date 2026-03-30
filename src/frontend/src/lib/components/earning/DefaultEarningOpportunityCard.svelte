@@ -18,9 +18,9 @@
 		};
 	}
 
-	const { cardData, cardFields }: Props = $props();
+	let { cardData, cardFields }: Props = $props();
 
-	const formattedApy = $derived(cardFields.apy ? `${cardFields.apy}%` : '-');
+	let formattedApy = $derived(nonNullish(cardFields.apy) ? `${cardFields.apy}%` : '-');
 </script>
 
 <EarningOpportunityCard titles={cardData.titles}>

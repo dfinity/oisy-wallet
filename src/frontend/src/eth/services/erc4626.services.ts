@@ -29,7 +29,7 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { Vault } from '$lib/types/vaults';
@@ -56,7 +56,7 @@ export const isInterfaceErc4626 = async ({
 export const loadErc4626Tokens = async ({
 	identity
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): Promise<void> => {
 	loadDefaultErc4626Tokens();
 	await loadCustomErc4626Tokens({ identity, useCache: true });
@@ -316,7 +316,7 @@ export const depositErc4626 = async ({
 	from,
 	...feeData
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	vault: Vault;
 	assetToken: Erc20Token;
 	amount: bigint;
@@ -389,7 +389,7 @@ const sendErc4626Unstake = async ({
 	from,
 	...feeData
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	vault: Vault;
 	data: string;
 	from: EthAddress;
@@ -431,7 +431,7 @@ export const withdrawErc4626 = async ({
 	from,
 	...rest
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	vault: Vault;
 	assets: bigint;
 	from: EthAddress;
@@ -453,7 +453,7 @@ export const redeemErc4626 = async ({
 	from,
 	...rest
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	vault: Vault;
 	shares: bigint;
 	from: EthAddress;

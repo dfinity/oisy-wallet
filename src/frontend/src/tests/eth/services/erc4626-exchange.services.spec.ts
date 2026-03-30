@@ -73,9 +73,9 @@ describe('erc4626-exchange.services', () => {
 			expect(result).toEqual({});
 		});
 
-		it('should return empty results when erc20Prices is null', async () => {
+		it('should return empty results when erc20Prices is empty', async () => {
 			const result = await calculateErc4626Prices({
-				erc20Prices: null,
+				erc20Prices: {},
 				erc4626TokensExchangeData: [mockExchangeData]
 			});
 

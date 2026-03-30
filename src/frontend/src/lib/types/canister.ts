@@ -1,4 +1,4 @@
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { CanisterOptions } from '@dfinity/utils';
 import { PrincipalTextSchema, type Nullish } from '@dfinity/zod-schemas';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -13,7 +13,7 @@ export type OptionCanisterIdText = Nullish<CanisterIdText>;
 
 export type CanisterApiFunctionParams<T = unknown> = T & {
 	nullishIdentityErrorMessage?: string;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	canisterId?: CanisterIdText;
 };
 
