@@ -138,6 +138,7 @@
 			emit({ message: 'oisyRefreshUserProfile' });
 			setTimeout(() => modalStore.close(), 750);
 		} catch (_: unknown) {
+			saveLoading = false;
 			trackNetworkManageEvents({ status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR });
 		}
 	};
