@@ -11,7 +11,7 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton hover={false} testId={testId}>
+	<LogoButton hover={false} {testId}>
 		{#snippet logo()}
 			<span class="mr-2 flex">
 				<SkeletonLogo />
