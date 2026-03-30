@@ -4,6 +4,7 @@ import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { createQueryAndUpdateWithWarmup } from '$lib/services/query.services';
 import type {
+	PostMessageCommon,
 	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse
@@ -22,6 +23,7 @@ import type { RetrieveBtcStatusV2WithId } from '@icp-sdk/canisters/ckbtc';
 export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcCk> {
 	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
 	private _interval: number | 'disabled' = BTC_STATUSES_TIMER_INTERVAL_MILLIS;
+	private ref: PostMessageCommon['ref'] | undefined;
 
 	private get queryAndUpdateWithWarmup() {
 		if (isNullish(this._queryAndUpdateWithWarmup)) {
@@ -38,6 +40,8 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcC
 	}
 
 	async start(data: PostMessageDataRequestIcCk | undefined) {
+		this.ref = data?.minterCanisterId;
+
 		await this.timer.start<PostMessageDataRequestIcCk>({
 			interval: this._interval,
 			job: this.syncStatuses,
@@ -99,7 +103,12 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcC
 			data: statuses
 		};
 
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageJsonDataResponse>({
+			ref: this.ref,
 			msg: 'syncBtcStatuses',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)
@@ -108,7 +117,12 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcC
 	};
 
 	private postMessageWalletError(error: unknown) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseError>({
+			ref: this.ref,
 			msg: 'syncBtcStatusesError',
 			data: {
 				error

@@ -1,12 +1,8 @@
 import { WorkerQueue } from '$lib/services/worker-queue.services';
-import type {
-	WithoutWorkerId,
-	WorkerData,
-	WorkerId,
-	WorkerListener,
-	WorkerPostMessageData
-} from '$lib/types/worker';
+import type { WithoutWorkerId, WorkerData, WorkerId } from '$lib/types/worker';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+type MessageHandler = (ev: MessageEvent) => void;
 
 export abstract class AppWorker {
 	readonly #worker: Worker;
@@ -55,7 +51,7 @@ export abstract class AppWorker {
 		return { worker, isSingleton: asSingleton };
 	};
 
-	#addMessageListener = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+	#addMessageListener = (listener: MessageHandler) => {
 		this.#worker.addEventListener('message', listener);
 		this.#listener = listener;
 	};
@@ -70,11 +66,11 @@ export abstract class AppWorker {
 		this.#listener = undefined;
 	};
 
-	#setOnMessageAsSingleton = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+	#setOnMessageAsSingleton = (listener: MessageHandler) => {
 		this.#addMessageListener(listener);
 	};
 
-	protected setOnMessage = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+	protected setOnMessage = (listener: MessageHandler) => {
 		if (this.#isSingleton) {
 			this.#setOnMessageAsSingleton(listener);
 			return;
