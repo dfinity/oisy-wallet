@@ -52,7 +52,7 @@ const initAuthStore = (): AuthStore => {
 
 		const { createAuthClient, safeCreateAuthClient } = AuthClientProvider.getInstance();
 
-		const refreshed = await createAuthClient();
+		const refreshed = await createAuthClient({ hideConsoleWarn: true, forceRecreate: true });
 
 		if (await refreshed.isAuthenticated()) {
 			return refreshed;
