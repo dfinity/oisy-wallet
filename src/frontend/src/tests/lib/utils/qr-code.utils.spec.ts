@@ -308,33 +308,6 @@ describe('decodeUrn', () => {
 					expect(result?.functionName).toBe('transfer');
 				});
 			});
-
-			// TODO: Remove legacy format tests once DFX completes migration to the new URI format.
-			describe('legacy format: icp:{principal}?amount={amount}', () => {
-				it('should parse legacy ICP URI', () => {
-					const result = decodeQrCodeUrn({
-						urn: `icp:${spenderPrincipal}?amount=0.47311479`
-					});
-
-					expect(result).toEqual({
-						prefix: 'icp',
-						destination: spenderPrincipal,
-						amount: 0.47311479
-					});
-				});
-
-				it('should parse legacy vCHF URI (same format, no canister ID)', () => {
-					const result = decodeQrCodeUrn({
-						urn: `icp:${spenderPrincipal}?amount=1.01010101`
-					});
-
-					expect(result).toEqual({
-						prefix: 'icp',
-						destination: spenderPrincipal,
-						amount: 1.01010101
-					});
-				});
-			});
 		});
 	});
 });

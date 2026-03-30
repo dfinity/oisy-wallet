@@ -5,7 +5,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { SaveUserAgreements } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { AgreementsToAccept, UserAgreements } from '$lib/types/user-agreements';
 import { emit } from '$lib/utils/events.utils';
 import { isNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
@@ -16,7 +16,7 @@ export const acceptAgreements = async ({
 	agreementsToAccept,
 	currentUserVersion
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	agreementsToAccept: AgreementsToAccept;
 	currentUserVersion: CanisterApiFunctionParams<SaveUserAgreements>['currentUserVersion'];
 }) => {

@@ -5,7 +5,7 @@ import type {
 	IcpTransaction
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
@@ -57,7 +57,7 @@ export const mapIcpTransaction = ({
 	identity
 }: {
 	transaction: IcpTransaction;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): IcTransactionUi => {
 	const { operation, timestamp, transferToSelf } = transaction;
 

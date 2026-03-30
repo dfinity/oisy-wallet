@@ -2,7 +2,7 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
@@ -74,7 +74,7 @@ export const fetchSolTransactionsForSignature = async ({
 	tokenAddress,
 	tokenOwnerAddress
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
@@ -91,6 +91,7 @@ export const fetchSolTransactionsForSignature = async ({
 	}
 
 	const {
+		slot,
 		blockTime,
 		confirmationStatus: status,
 		transaction: {
@@ -213,6 +214,7 @@ export const fetchSolTransactionsForSignature = async ({
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
+				blockNumber: Number(slot),
 				timestamp: blockTime ?? ZERO,
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
@@ -335,7 +337,7 @@ export const loadNextSolTransactionsByOldest = async ({
 	transactions,
 	...rest
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minTimestamp: number;
 	transactions: SolTransactionUi[];
 	token: Token;

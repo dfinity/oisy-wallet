@@ -7,7 +7,7 @@ import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type {
 	PostMessageDataRequestIcCkBTCUpdateBalance,
 	PostMessageDataResponseBTCAddress,
@@ -105,7 +105,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 	};
 
 	private async loadBtcAddress(params: {
-		identity: OptionIdentity;
+		identity: NullishIdentity;
 		minterCanisterId: CanisterIdText;
 	}): Promise<string> {
 		const address = await getBtcAddress(params);
@@ -137,7 +137,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		btcAddress: address,
 		bitcoinNetwork: network
 	}: {
-		identity: OptionIdentity;
+		identity: NullishIdentity;
 		minterCanisterId: CanisterIdText;
 		btcAddress: string;
 		bitcoinNetwork: BitcoinNetwork;
