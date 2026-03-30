@@ -3,15 +3,47 @@
 	import SignerAlert from '$lib/components/signer/SignerAlert.svelte';
 	import SignerCenteredContent from '$lib/components/signer/SignerCenteredContent.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { mapSignerDomain, mapSignerOriginHost } from '$lib/utils/signer.utils';
+	import { nonNullish } from '@dfinity/utils';
+
+	const STATUS_RESULT_MAP: Record<string, string> = {
+		executing: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+		result: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+		error: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR
+	};
 
 	const {
 		callCanisterPrompt: { payload }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
 	const onPayload = () => {
+		if (nonNullish($payload)) {
+			const resultStatus = STATUS_RESULT_MAP[$payload.status];
+
+			if (nonNullish(resultStatus)) {
+				trackEvent({
+					name: PLAUSIBLE_EVENTS.SIGNER_INTERACTION,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.SIGNER,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER.CALL_CANISTER,
+						result_status: resultStatus,
+						dapp_origin: mapSignerOriginHost($payload.origin),
+						signer_domain: mapSignerDomain()
+					}
+				});
+			}
+		}
+
 		if ($payload?.status !== 'error') {
 			return;
 		}
