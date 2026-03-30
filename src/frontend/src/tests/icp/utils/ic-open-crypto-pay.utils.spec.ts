@@ -224,50 +224,28 @@ describe('ic-open-crypto-pay.utils', () => {
 			});
 		});
 
-		// TODO: Remove legacy format tests once DFX completes migration to the new URI format.
-		describe('legacy format: icp:{principal}?amount={amount}', () => {
-			const mockLegacyData: DecodedUrn = {
-				prefix: 'icp',
-				destination: mockPrincipalText2,
-				amount: mockAmount
-			};
-
-			const params = {
-				decodedData: mockLegacyData,
-				token: mockToken,
-				amount: mockAmountBigInt
-			};
-
-			it('should validate transfer successfully', () => {
-				expect(validateIcTransfer(params)).toEqual(expected);
-			});
-
-			it('should throw if destination is invalid', () => {
+		describe('legacy format should be rejected', () => {
+			it('should throw if URI uses legacy format without functionName and to', () => {
 				expect(() =>
 					validateIcTransfer({
-						...params,
 						decodedData: {
-							...mockLegacyData,
-							destination: 'invalid_principal'
-						}
+							prefix: 'icp',
+							destination: mockPrincipalText2,
+							amount: mockAmount
+						},
+						token: mockToken,
+						amount: mockAmountBigInt
 					})
 				).toThrow(en.pay.error.data_is_incompleted);
-			});
-
-			it('should throw if amount does not match', () => {
-				expect(() =>
-					validateIcTransfer({
-						...params,
-						amount: 987_654_321n
-					})
-				).toThrow(en.pay.error.amount_does_not_match);
 			});
 		});
 
 		describe('shared validation', () => {
 			const mockDecodedData: DecodedUrn = {
 				prefix: 'icp',
-				destination: mockPrincipalText2,
+				destination: ICP_TOKEN.ledgerCanisterId,
+				functionName: 'transfer',
+				to: mockPrincipalText2,
 				amount: mockAmount
 			};
 
