@@ -586,7 +586,7 @@ if (
   - Create a price-fetching function similar to the existing ones in file `src/frontend/src/lib/services/exchange.services.ts`. For example:
 
 ```typescript
-export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	simplePrice({
 		ids: 'binancecoin',
 		vs_currencies: Currency.USD

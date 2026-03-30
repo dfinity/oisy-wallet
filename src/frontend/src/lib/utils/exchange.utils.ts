@@ -61,9 +61,9 @@ export const findMissingLedgerCanisterIds = ({
 	coingeckoResponse
 }: {
 	allLedgerCanisterIds: LedgerCanisterIdText[];
-	coingeckoResponse: CoingeckoSimpleTokenPriceResponse | null;
+	coingeckoResponse: CoingeckoSimpleTokenPriceResponse;
 }): LedgerCanisterIdText[] => {
-	const found = new Set(Object.keys(coingeckoResponse ?? {}));
+	const found = new Set(Object.keys(coingeckoResponse));
 	return allLedgerCanisterIds.filter((id) => !found.has(id.toLowerCase()));
 };
 

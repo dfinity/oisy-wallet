@@ -108,10 +108,10 @@ describe('findMissingCanisterIds', () => {
 		expect(result).toEqual([MOCK_CANISTER_ID_2]);
 	});
 
-	it('returns all IDs if response is null', () => {
+	it('returns all IDs if response is empty', () => {
 		const result = findMissingLedgerCanisterIds({
 			allLedgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
-			coingeckoResponse: null
+			coingeckoResponse: {}
 		});
 
 		expect(result).toEqual([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
@@ -120,7 +120,7 @@ describe('findMissingCanisterIds', () => {
 	it('returns empty array if allLedgerCanisterIds is empty', () => {
 		const result = findMissingLedgerCanisterIds({
 			allLedgerCanisterIds: [],
-			coingeckoResponse: null
+			coingeckoResponse: {}
 		});
 
 		expect(result).toEqual([]);
