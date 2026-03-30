@@ -7,7 +7,8 @@
 		isNetworkIdBase,
 		isNetworkIdBsc,
 		isNetworkIdICP,
-		isNetworkIdPolygon
+		isNetworkIdPolygon,
+		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 
 	interface Props {
@@ -28,12 +29,14 @@
 		class:from-eth-0={isNetworkIdETH(tokenNetworkId)}
 		class:from-icp-0={isNetworkIdICP(tokenNetworkId)}
 		class:from-polygon-0={isNetworkIdPolygon(tokenNetworkId)}
+		class:from-sol-0={isNetworkIdSolana(tokenNetworkId)}
 		class:to-arbitrum-100={isNetworkIdArbitrum(tokenNetworkId)}
 		class:to-base-100={isNetworkIdBase(tokenNetworkId)}
 		class:to-bsc-100={isNetworkIdBsc(tokenNetworkId)}
 		class:to-eth-100={isNetworkIdETH(tokenNetworkId)}
 		class:to-icp-100={isNetworkIdICP(tokenNetworkId)}
 		class:to-polygon-100={isNetworkIdPolygon(tokenNetworkId)}
+		class:to-sol-100={isNetworkIdSolana(tokenNetworkId)}
 	>
 		{@render tokenInput?.()}
 		<div class="absolute inset-0.5 left-1.5 -z-1 rounded-xl bg-secondary"></div>

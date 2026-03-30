@@ -22,6 +22,7 @@ import { createQueryAndUpdateWithWarmup } from '$lib/services/query.services';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type {
+	PostMessageCommon,
 	PostMessageDataRequestBtc,
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
@@ -71,6 +72,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		return this._queryAndUpdateWithWarmup;
 	}
 
+	private ref: PostMessageCommon['ref'] | undefined;
+
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
 
 	private failedSyncCounter = 0;
@@ -86,6 +89,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}
 
 	async start(data: PostMessageDataRequestBtc | undefined) {
+		this.ref = data?.btcAddress.data;
+
 		await this.timer.start<PostMessageDataRequestBtc>({
 			interval: WALLET_TIMER_INTERVAL_MILLIS,
 			job: this.syncWallet,
@@ -354,14 +359,24 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	};
 
 	private postMessageWallet(data: BtcPostMessageDataResponseWallet) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<BtcPostMessageDataResponseWallet>({
+			ref: this.ref,
 			msg: 'syncBtcWallet',
 			data
 		});
 	}
 
 	protected postMessageWalletError({ error }: { error: unknown }) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseError>({
+			ref: this.ref,
 			msg: 'syncBtcWalletError',
 			data: {
 				error
