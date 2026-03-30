@@ -45,6 +45,10 @@ vi.mock('$lib/rest/kongswap.rest', () => ({
 	fetchBatchKongSwapPrices: vi.fn()
 }));
 
+vi.mock('$env/rest/kongswap.env', () => ({
+	KONGSWAP_PROVIDER_ENABLED: true
+}));
+
 vi.mock('$eth/services/erc4626-exchange.services', () => ({
 	calculateErc4626Prices: vi.fn()
 }));
