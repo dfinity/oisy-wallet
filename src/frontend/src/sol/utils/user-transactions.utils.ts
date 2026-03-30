@@ -9,7 +9,7 @@ import { signature as solSignature } from '@solana/kit';
 
 export const mapSolTransactionToUserTransaction = (tx: SolTransactionUi): UserTransaction => ({
 	id: tx.id,
-	block_index: BigInt(tx.blockNumber ?? 0),
+	block_index: BigInt(tx.blockNumber ?? ZERO),
 	timestamp: BigInt(tx.timestamp ?? ZERO),
 	from: tx.from,
 	to: toNullable(tx.to),
@@ -61,7 +61,7 @@ export const mapUserTransactionToSolTransaction = ({
 		id,
 		signature: solSignature(sig),
 		blockNumber: Number(block_index),
-		timestamp: BigInt(timestamp),
+		timestamp,
 		from,
 		to,
 		value,
