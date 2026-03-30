@@ -1,5 +1,5 @@
 import type { ProgressStepsSend, ProgressStepsSendIc } from '$lib/enums/progress-steps';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NftId, NonFungibleToken } from '$lib/types/nft';
 
 export interface TransferParams {
@@ -14,7 +14,7 @@ export interface TransferParams {
 export interface SendNftCommonParams<Steps extends ProgressStepsSend | ProgressStepsSendIc> {
 	token: NonFungibleToken;
 	tokenId: NftId;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	progress?: (step: Steps) => void;
 }
 

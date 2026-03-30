@@ -1,7 +1,7 @@
 import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
@@ -14,7 +14,7 @@ export type IdbTransactionsStoreData =
 	| SolCertifiedTransactionsData;
 
 export interface SetIdbTransactionsParams<T extends IdbTransactionsStoreData> {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokens: Token[];
 	transactionsStoreData: T;
 }

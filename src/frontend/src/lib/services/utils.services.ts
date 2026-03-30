@@ -1,6 +1,6 @@
 import { trackEvent } from '$lib/services/analytics.services';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -17,7 +17,7 @@ export const wrapCallWith =
 	}: {
 		methodToCall: (params: T & { identity: Identity }) => Promise<R>;
 		toastErrorMessage?: string;
-		identity: OptionIdentity;
+		identity: NullishIdentity;
 		trackEventNames?: { success?: string; error?: string };
 	}) =>
 	async (params: Omit<T, 'identity'>): Promise<R | undefined> => {

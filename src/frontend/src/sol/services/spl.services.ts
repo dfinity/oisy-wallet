@@ -6,7 +6,7 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleWarn } from '$lib/utils/console.utils';
@@ -25,7 +25,7 @@ import { fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/ut
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
-export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
+export const loadSplTokens = async ({ identity }: { identity: NullishIdentity }): Promise<void> => {
 	await Promise.all([loadDefaultSplTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
