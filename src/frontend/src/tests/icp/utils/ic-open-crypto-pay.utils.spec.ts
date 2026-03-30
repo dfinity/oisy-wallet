@@ -222,19 +222,16 @@ describe('ic-open-crypto-pay.utils', () => {
 					})
 				).toThrow(en.pay.error.data_is_incompleted);
 			});
-		});
 
-		describe('legacy format should be rejected', () => {
-			it('should throw if URI uses legacy format without functionName and to', () => {
+			it('should throw if functionName is missing', () => {
 				expect(() =>
 					validateIcTransfer({
+						...params,
 						decodedData: {
 							prefix: 'icp',
 							destination: mockPrincipalText2,
 							amount: mockAmount
-						},
-						token: mockToken,
-						amount: mockAmountBigInt
+						}
 					})
 				).toThrow(en.pay.error.data_is_incompleted);
 			});
