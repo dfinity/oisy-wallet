@@ -26,6 +26,13 @@
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { userNetworks } from '$lib/derived/user-networks.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
+	import {
+		PLAUSIBLE_EVENTS,
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENT_RESULT_STATUSES
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -72,6 +79,30 @@
 		};
 	};
 
+	const trackNetworkManageEvents = ({ status }: { status: string }) => {
+		const modifiedNetworks = SUPPORTED_NETWORKS.filter(({ id }) => {
+			const value = enabledNetworks[id]?.enabled ?? false;
+			const initialValue = enabledNetworksInitial[id]?.enabled ?? false;
+			return value !== initialValue;
+		}).map((network) => ({
+			network,
+			enabled: enabledNetworks[network.id]?.enabled ?? false
+		}));
+
+		for (const { network, enabled } of modifiedNetworks) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.NETWORK_MANAGE,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.NETWORKS,
+					event_modifier: enabled ? 'enable' : 'disable',
+					event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.NETWORK,
+					event_value: network.id.description ?? 'unknown',
+					result_status: status
+				}
+			});
+		}
+	};
+
 	let saveLoading = $state(false);
 
 	const save = async () => {
@@ -84,24 +115,31 @@
 		}
 
 		saveLoading = true;
-		await setUserShowTestnets({
-			showTestnets: enabledTestnet,
-			identity: $authIdentity,
-			currentUserVersion: $userProfileVersion
-		});
 
-		// we need to manually reload the profile in order to get the correct $userProfileVersion for the second call to update userNetworkSettings
-		// TODO: refactor this when we have a single method for both calls
-		await loadUserProfile({ identity: $authIdentity, reload: true });
+		try {
+			await setUserShowTestnets({
+				showTestnets: enabledTestnet,
+				identity: $authIdentity,
+				currentUserVersion: $userProfileVersion
+			});
 
-		await updateUserNetworkSettings({
-			identity: $authIdentity,
-			networks: enabledNetworks,
-			currentUserVersion: $userProfileVersion
-		});
+			// we need to manually reload the profile in order to get the correct $userProfileVersion for the second call to update userNetworkSettings
+			// TODO: refactor this when we have a single method for both calls
+			await loadUserProfile({ identity: $authIdentity, reload: true });
 
-		emit({ message: 'oisyRefreshUserProfile' });
-		setTimeout(() => modalStore.close(), 750);
+			await updateUserNetworkSettings({
+				identity: $authIdentity,
+				networks: enabledNetworks,
+				currentUserVersion: $userProfileVersion
+			});
+
+			trackNetworkManageEvents({ status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
+
+			emit({ message: 'oisyRefreshUserProfile' });
+			setTimeout(() => modalStore.close(), 750);
+		} catch (_: unknown) {
+			trackNetworkManageEvents({ status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR });
+		}
 	};
 </script>
 
