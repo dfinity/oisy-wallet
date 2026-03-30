@@ -121,23 +121,14 @@ figcaption {
 	background: var(--color-background-brand-subtle-20);
 }
 
-// TODO: set the scrollbar style for Firefox too. Right now it is not ideal since the modifiable properties are limited and they go in conflict with what we set (https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_scrollbars_styling)
-::-webkit-scrollbar-thumb {
-	border: 1px solid #{$a-white-40};
-	background: #{$a-dark-20};
-	border-radius: 16px;
-
-	&:hover {
-		border-color: #{$a-white-70};
-		background: #{$a-dark-30};
-	}
+* {
+	scrollbar-width: thin;
 }
 
-::-webkit-scrollbar-track {
-	border-radius: 0;
-	background: none;
+:root {
+	scrollbar-color: #{$a-dark-20} transparent;
 }
 
-::-webkit-scrollbar {
-	width: 0.45rem;
+:root[theme='dark'] {
+	scrollbar-color: #{$a-white-40} transparent;
 }

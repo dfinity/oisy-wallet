@@ -14,7 +14,7 @@ export const calculateErc4626Prices = async ({
 	erc20Prices,
 	erc4626TokensExchangeData
 }: {
-	erc20Prices: CoingeckoSimpleTokenPriceResponse | null;
+	erc20Prices: CoingeckoSimpleTokenPriceResponse;
 	erc4626TokensExchangeData: Erc4626TokensExchangeData[];
 }): Promise<CoingeckoSimpleErc4626TokenPriceResponse> => {
 	const results: CoingeckoSimpleErc4626TokenPriceResponse = {};

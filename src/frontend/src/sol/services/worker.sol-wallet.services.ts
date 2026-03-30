@@ -6,7 +6,11 @@ import {
 	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import type { WalletWorker } from '$lib/types/listener';
-import type { PostMessage, PostMessageDataRequestSol } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataRequestSol,
+	PostMessageScheduler
+} from '$lib/types/post-message';
 import type { Token, TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
@@ -30,7 +34,7 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 		super(worker);
 
 		this.setOnMessage(
-			({ data: dataMsg }: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
+			({ data: dataMsg }: MessageEvent<PostMessageScheduler<SolPostMessageDataResponseWallet>>) => {
 				const { ref, msg, data } = dataMsg;
 
 				// This is an additional guard because it may happen that the worker is initialised as a singleton.

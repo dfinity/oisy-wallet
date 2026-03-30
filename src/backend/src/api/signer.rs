@@ -80,7 +80,7 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
         let principal = msg_caller();
         let now_ns = time();
 
-        let (ii_canister_ids, root_key) = delegation::read_ii_verification_config();
+        let (ii_canister_ids, root_key, guard_enabled) = delegation::read_ii_verification_config();
         delegation::require_ii_delegation(
             request
                 .as_ref()
@@ -90,6 +90,7 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
             &ii_canister_ids,
             &root_key,
             now_ns,
+            guard_enabled,
         )
         .map_err(|msg| AllowSigningError::InvalidDelegationChain { msg })?;
 

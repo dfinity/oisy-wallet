@@ -27,9 +27,9 @@ import {
 	type UnixTimestamp
 } from '@solana/kit';
 
-const mockSignature =
+export const mockSignature =
 	'4UjEjyVYfPNkr5TzZ3oH8ZS8PiEzbHsBdhvRtrLiuBfk8pQMRNvY3UUxjHe4nSzxAnhd8JCSQ3YYmAj651ZWeArM';
-const mockSignature2 =
+export const mockSignature2 =
 	'4xiJZFz8wVnFHhjNfLV2ZaGnFFkoJ1U2RcYhTFmyq8szGDNTvha2MtUhzPjqQwcNF9JqNwG4h5FVohFNWrqzrwVc';
 
 export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
