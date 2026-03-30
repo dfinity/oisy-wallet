@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { page } from '$app/state';
+	import { getIdbAllNfts, setIdbAllNfts } from '$lib/api/idb-nfts.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { MILLISECONDS_IN_DAY, NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -12,7 +13,30 @@
 	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
+	let nftCacheLoaded = $state(false);
+
+	const loadCachedNfts = async () => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		const cachedNfts = await getIdbAllNfts($authIdentity.getPrincipal());
+
+		if (isNullish(cachedNfts) || cachedNfts.length === 0) {
+			nftCacheLoaded = true;
+			return;
+		}
+
+		nftStore.addAll(cachedNfts);
+
+		nftCacheLoaded = true;
+	};
+
 	const onLoad = async () => {
+		if (!nftCacheLoaded) {
+			await loadCachedNfts();
+		}
+
 		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
 		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
@@ -35,6 +59,15 @@
 		[$enabledNonFungibleTokens, $authIdentity, $ethAddress];
 
 		untrack(() => debounceLoad());
+	});
+
+	$effect(() => {
+		if (nftCacheLoaded && nonNullish($nftStore)) {
+			setIdbAllNfts({
+				identity: $authIdentity,
+				nfts: $nftStore
+			});
+		}
 	});
 
 	// If we are not in NFTs page or Activity page, there is no need to reload NFTs frequently.

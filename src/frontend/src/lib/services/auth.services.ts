@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import { clearIdbBalances } from '$lib/api/idb-balances.api';
+import { clearIdbNfts } from '$lib/api/idb-nfts.api';
 import { clearIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
 	clearIdbBtcTransactions,
@@ -204,7 +205,9 @@ const clearIdbStoreList = [
 	clearIdbIcTransactions,
 	clearIdbSolTransactions,
 	// Balances
-	clearIdbBalances
+	clearIdbBalances,
+	// NFTs
+	clearIdbNfts
 ];
 
 // eslint-disable-next-line require-await
