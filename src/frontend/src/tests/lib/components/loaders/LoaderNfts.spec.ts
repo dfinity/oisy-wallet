@@ -5,6 +5,7 @@ import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store'
 import * as extTokenApi from '$icp/api/ext-v2-token.api';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { mapExtNft } from '$icp/utils/nft.utils';
+import * as idbNftsApi from '$lib/api/idb-nfts.api';
 import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { nftStore } from '$lib/stores/nft.store';
@@ -291,6 +292,135 @@ describe('LoaderNfts', async () => {
 					{ ...mockErc1155Nft2, balance: 1 },
 					{ ...mockErc1155Nft3, balance: 3 }
 				]);
+			});
+		});
+	});
+
+	describe('IDB cache', () => {
+		let getIdbAllNftsSpy: MockInstance;
+		let setIdbAllNftsSpy: MockInstance;
+
+		beforeEach(() => {
+			getIdbAllNftsSpy = vi.spyOn(idbNftsApi, 'getIdbAllNfts');
+			setIdbAllNftsSpy = vi.spyOn(idbNftsApi, 'setIdbAllNfts');
+
+			getIdbAllNftsSpy.mockResolvedValue(undefined);
+			setIdbAllNftsSpy.mockResolvedValue(undefined);
+		});
+
+		it('should load cached NFTs from IDB on first render', async () => {
+			const cachedNfts = [mockErc721Nft1, mockErc721Nft2];
+			getIdbAllNftsSpy.mockResolvedValue(cachedNfts);
+
+			erc721CustomTokensStore.setAll([{ data: mockedEnabledAzukiToken, certified: false }]);
+
+			mockGetNftsForOwner.mockResolvedValueOnce([mockErc721Nft1]);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				expect(getIdbAllNftsSpy).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
+			});
+		});
+
+		it('should not call getIdbAllNfts when identity is nullish', async () => {
+			mockAuthStore(null);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				expect(getIdbAllNftsSpy).not.toHaveBeenCalled();
+			});
+		});
+
+		it('should populate store with cached NFTs before live data arrives', async () => {
+			const cachedNfts = [mockErc721Nft1, mockErc721Nft2];
+			getIdbAllNftsSpy.mockResolvedValue(cachedNfts);
+
+			erc721CustomTokensStore.setAll([{ data: mockedEnabledAzukiToken, certified: false }]);
+
+			mockGetNftsForOwner.mockImplementation(
+				() =>
+					new Promise((resolve) => {
+						setTimeout(() => resolve([mockErc721Nft3]), 100);
+					})
+			);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				const storeValue = get(nftStore);
+
+				expect(storeValue).toEqual(expect.arrayContaining(cachedNfts));
+			});
+		});
+
+		it('should save NFTs to IDB after live data is loaded', async () => {
+			getIdbAllNftsSpy.mockResolvedValue(undefined);
+
+			erc721CustomTokensStore.setAll([{ data: mockedEnabledAzukiToken, certified: false }]);
+
+			mockGetNftsForOwner.mockResolvedValueOnce([mockErc721Nft1]);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				expect(setIdbAllNftsSpy).toHaveBeenCalled();
+
+				const { calls } = setIdbAllNftsSpy.mock;
+				const [lastCall] = calls[calls.length - 1];
+
+				expect(lastCall.identity).toBe(mockIdentity);
+				expect(lastCall.nfts.length).toBeGreaterThan(0);
+			});
+		});
+
+		it('should replace cached NFTs with live data via setAllByNetwork', async () => {
+			const cachedNft = {
+				...mockErc721Nft1,
+				name: 'Cached Name'
+			};
+			getIdbAllNftsSpy.mockResolvedValue([cachedNft]);
+
+			erc721CustomTokensStore.setAll([{ data: mockedEnabledAzukiToken, certified: false }]);
+
+			const liveNft = { ...mockErc721Nft1, name: 'Live Name' };
+			mockGetNftsForOwner.mockResolvedValueOnce([liveNft]);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				const storeValue = get(nftStore);
+
+				expect(storeValue).toEqual([liveNft]);
+			});
+		});
+
+		it('should skip cache loading on subsequent loads', async () => {
+			getIdbAllNftsSpy.mockResolvedValue([mockErc721Nft1]);
+
+			erc721CustomTokensStore.setAll([{ data: mockedEnabledAzukiToken, certified: false }]);
+
+			mockGetNftsForOwner.mockResolvedValue([mockErc721Nft1]);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				expect(getIdbAllNftsSpy).toHaveBeenCalledOnce();
+			});
+		});
+
+		it('should handle empty cache gracefully', async () => {
+			getIdbAllNftsSpy.mockResolvedValue([]);
+
+			erc721CustomTokensStore.setAll([{ data: mockedEnabledAzukiToken, certified: false }]);
+
+			mockGetNftsForOwner.mockResolvedValueOnce([mockErc721Nft1]);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				expect(get(nftStore)).toEqual([mockErc721Nft1]);
 			});
 		});
 	});

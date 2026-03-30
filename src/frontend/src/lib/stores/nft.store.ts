@@ -33,8 +33,7 @@ const initNftStore = (): NftStore => {
 									address2: oldNft.collection.address,
 									networkId: newNft.collection.network.id
 								}) &&
-								newNft.collection.network.id.description ===
-									oldNft.collection.network.id.description
+								newNft.collection.network.id === oldNft.collection.network.id
 						)
 				);
 
@@ -52,7 +51,7 @@ const initNftStore = (): NftStore => {
 						collection: {
 							network: { id: nftNetworkId }
 						}
-					}) => nftNetworkId.description !== networkId.description
+					}) => nftNetworkId !== networkId
 				);
 
 				return [...oldNfts, ...nfts];
