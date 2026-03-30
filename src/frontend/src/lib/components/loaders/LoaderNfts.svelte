@@ -10,6 +10,7 @@
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftsByNetwork } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
+	import type { Nft } from '$lib/types/nft';
 	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
@@ -61,12 +62,16 @@
 		untrack(() => debounceLoad());
 	});
 
+	const debounceSetIdbNfts = debounce((nfts: Nft[]) => {
+		setIdbAllNfts({
+			identity: untrack(() => $authIdentity),
+			nfts
+		});
+	});
+
 	$effect(() => {
 		if (nftCacheLoaded && nonNullish($nftStore)) {
-			setIdbAllNfts({
-				identity: $authIdentity,
-				nfts: $nftStore
-			});
+			debounceSetIdbNfts($nftStore);
 		}
 	});
 
