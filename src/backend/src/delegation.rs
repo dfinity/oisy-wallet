@@ -186,8 +186,7 @@ mod tests {
 
     #[test]
     fn test_require_controller_bypasses_without_chain() {
-        let result =
-            require_ii_delegation(None, true, Principal::anonymous(), &[], &[], 0, true);
+        let result = require_ii_delegation(None, true, Principal::anonymous(), &[], &[], 0, true);
         assert!(result.is_ok());
     }
 
@@ -195,22 +194,27 @@ mod tests {
     fn test_require_controller_bypasses_with_chain() {
         let pk = make_canister_sig_public_key(test_ii_canister_id());
         let chain = make_chain(pk, valid_delegation(b"session"));
-        let result =
-            require_ii_delegation(Some(&chain), true, Principal::anonymous(), &[], &[], 0, true);
+        let result = require_ii_delegation(
+            Some(&chain),
+            true,
+            Principal::anonymous(),
+            &[],
+            &[],
+            0,
+            true,
+        );
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_require_non_controller_missing_chain_guard_enabled() {
-        let result =
-            require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0, true);
+        let result = require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0, true);
         assert_eq!(result.unwrap_err(), "II delegation chain is required");
     }
 
     #[test]
     fn test_require_non_controller_missing_chain_guard_disabled() {
-        let result =
-            require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0, false);
+        let result = require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0, false);
         assert!(result.is_ok());
     }
 
