@@ -1,5 +1,9 @@
+html {
+	scrollbar-gutter: stable;
+}
+
 body {
-	width: 100vw;
+	width: 100%;
 	height: inherit; // needed for window on:scroll to work
 
 	overflow-y: auto;

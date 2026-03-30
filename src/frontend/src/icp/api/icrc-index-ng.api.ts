@@ -2,7 +2,7 @@ import type { IndexCanisterIdText } from '$icp/types/canister';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import { IcrcIndexCanister, type IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -17,7 +17,7 @@ export const getTransactions = async ({
 	certified = true
 }: {
 	owner: Principal;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	start?: bigint;
 	maxResults?: bigint;
 	indexCanisterId: IndexCanisterIdText;
@@ -39,7 +39,7 @@ export const getLedgerId = async ({
 	indexCanisterId,
 	certified = true
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	indexCanisterId: IndexCanisterIdText;
 } & QueryParams): Promise<Principal> => {
 	assertNonNullish(identity);
@@ -54,7 +54,7 @@ export const getStatus = async ({
 	indexCanisterId,
 	certified = true
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	indexCanisterId: IndexCanisterIdText;
 } & QueryParams): Promise<IcrcIndexDid.Status> => {
 	assertNonNullish(identity);

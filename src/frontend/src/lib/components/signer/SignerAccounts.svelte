@@ -2,7 +2,15 @@
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, type Snippet, untrack } from 'svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER,
+		PLAUSIBLE_EVENT_TYPES_SIGNER,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
+	import { mapSignerDomain, mapSignerOriginHost } from '$lib/utils/signer.utils';
 
 	interface Props {
 		children: Snippet;
@@ -24,7 +32,18 @@
 			return;
 		}
 
-		const { approve } = $payload;
+		const { approve, origin } = $payload;
+
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SIGNER_INTERACTION,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.SIGNER,
+				event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER.ACCOUNTS,
+				event_type: PLAUSIBLE_EVENT_TYPES_SIGNER.REQUESTED,
+				dapp_origin: mapSignerOriginHost(origin),
+				signer_domain: mapSignerDomain()
+			}
+		});
 
 		approve([{ owner: $authIdentity.getPrincipal().toText() }]);
 

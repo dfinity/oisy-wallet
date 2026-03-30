@@ -1,7 +1,7 @@
 import { ETHERSCAN_MAX_CALLS_PER_SECOND } from '$env/rest/etherscan.env';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { batch } from '$lib/services/batch.services';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkEthereum } from '$lib/utils/network.utils';
@@ -14,7 +14,7 @@ export const batchLoadTransactions = ({
 	identity,
 	tokens
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokens: Token[];
 }): AsyncGenerator<PromiseSettledResult<ResultByToken>[]> => {
 	const promises = tokens.reduce<(() => Promise<ResultByToken>)[]>(

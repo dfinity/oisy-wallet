@@ -1,12 +1,12 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 
 export interface SetIdbTokensParams {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokens: CustomToken[];
 }
 
 export interface DeleteIdbTokenParams {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	token: CustomToken;
 }

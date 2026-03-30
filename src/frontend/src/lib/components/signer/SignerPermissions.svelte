@@ -10,11 +10,20 @@
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER,
+		PLAUSIBLE_EVENT_TYPES_SIGNER,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { mapSignerDomain, mapSignerOriginHost } from '$lib/utils/signer.utils';
 
 	const {
 		permissionsPrompt: { payload, reset: resetPrompt }
@@ -23,6 +32,26 @@
 	let scopes = $derived($payload?.requestedScopes ?? []);
 
 	let confirm = $derived($payload?.confirm);
+
+	const signerEventMetadata = $derived({
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.SIGNER,
+		event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER.PERMISSIONS,
+		dapp_origin: mapSignerOriginHost($payload?.origin),
+		signer_domain: mapSignerDomain(),
+		scopes: scopes.map(({ scope: { method } }) => method).join(',')
+	});
+
+	$effect(() => {
+		if (nonNullish($payload)) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.SIGNER_INTERACTION,
+				metadata: {
+					...signerEventMetadata,
+					event_type: PLAUSIBLE_EVENT_TYPES_SIGNER.REQUESTED
+				}
+			});
+		}
+	});
 
 	/**
 	 * During the initial UX review, it was decided that permissions should not be permanently denied when "Rejected," but instead should be ignored.
@@ -37,6 +66,14 @@
 			return;
 		}
 
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SIGNER_INTERACTION,
+			metadata: {
+				...signerEventMetadata,
+				result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+			}
+		});
+
 		confirm([]);
 
 		resetPrompt();
@@ -49,6 +86,14 @@
 			});
 			return;
 		}
+
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SIGNER_INTERACTION,
+			metadata: {
+				...signerEventMetadata,
+				result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			}
+		});
 
 		confirm(scopes.map((scope) => ({ ...scope, state: ICRC25_PERMISSION_GRANTED })));
 

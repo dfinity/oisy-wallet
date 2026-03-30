@@ -20,7 +20,7 @@ import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.uti
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
@@ -39,7 +39,7 @@ export const mapCkEthereumTransaction = ({
 	env
 }: {
 	transaction: IcrcTransaction;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 } & Pick<IcToken, 'ledgerCanisterId'> &
 	Partial<Pick<Network, 'env'>>): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });

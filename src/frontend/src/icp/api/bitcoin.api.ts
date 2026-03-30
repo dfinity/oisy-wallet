@@ -1,13 +1,13 @@
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { BitcoinCanister, type BitcoinDid, type BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
 interface BitcoinCanisterParams {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	bitcoinCanisterId: CanisterIdText;
 	network: BitcoinNetwork;
 	address: string;
