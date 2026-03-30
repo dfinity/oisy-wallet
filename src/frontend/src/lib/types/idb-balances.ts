@@ -1,6 +1,6 @@
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -8,7 +8,7 @@ import type { Principal } from '@icp-sdk/core/principal';
 export type IdbBalancesStoreData = CertifiedStoreData<BalancesData>;
 
 export interface SetIdbBalancesParams {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokens: Token[];
 	balancesStoreData: IdbBalancesStoreData;
 }

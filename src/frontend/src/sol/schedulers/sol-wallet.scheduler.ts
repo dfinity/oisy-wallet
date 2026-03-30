@@ -2,7 +2,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { retryWithDelay } from '$lib/services/rest.services';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type {
 	PostMessageCommon,
 	PostMessageDataRequestSol,
@@ -22,7 +22,7 @@ import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/
 import type { Nullish } from '@dfinity/zod-schemas';
 
 interface LoadSolWalletParams {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
 	tokenAddress?: SplTokenAddress;

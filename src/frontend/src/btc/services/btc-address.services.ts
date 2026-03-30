@@ -20,7 +20,7 @@ import {
 	btcAddressTestnetStore
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import {
@@ -51,7 +51,7 @@ export const getBtcAddress = async ({
 	identity,
 	network
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	network: BitcoinNetwork;
 }): Promise<BtcAddress> => {
 	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
@@ -82,7 +82,7 @@ const loadBtcAddress = ({
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		networkId,
-		getAddress: (identity: OptionIdentity) => getBtcAddress({ identity, network }),
+		getAddress: (identity: NullishIdentity) => getBtcAddress({ identity, network }),
 		...bitcoinMapper[network]
 	});
 

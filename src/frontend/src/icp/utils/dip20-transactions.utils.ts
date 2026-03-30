@@ -5,7 +5,7 @@ import type {
 	IcTransactionAddOnsInfo,
 	IcTransactionUi
 } from '$icp/types/ic-transaction';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 
 // TODO: implement this function
 export const mapTransactionDip20ToSelf = (
@@ -27,6 +27,6 @@ export const mapDip20Transaction = ({
 	identity: __
 }: {
 	transaction: Dip20Transaction;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): IcTransactionUi =>
 	({ id: id.toString(), type: 'approve', status: 'executed' }) as IcTransactionUi;

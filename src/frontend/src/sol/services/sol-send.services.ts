@@ -1,6 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -300,7 +300,7 @@ export const sendSol = async ({
 	destination,
 	source
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	token: Token;
 	amount: bigint;
 	prioritizationFee: bigint;

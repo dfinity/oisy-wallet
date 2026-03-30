@@ -1,6 +1,6 @@
 import { ckEthMinterCanister } from '$icp-eth/api/cketh-minter.api';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertNonNullish } from '@dfinity/utils';
 import type { CkEthMinterDid, Eip1559TransactionPriceParams } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
@@ -10,7 +10,7 @@ export const withdrawEth = async ({
 	minterCanisterId,
 	...params
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 	amount: bigint;
 	address: string;
@@ -28,7 +28,7 @@ export const withdrawErc20 = async ({
 	ledgerCanisterId,
 	...params
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	ledgerCanisterId: CanisterIdText;
 	minterCanisterId: CanisterIdText;
 	amount: bigint;
@@ -49,7 +49,7 @@ export const eip1559TransactionPrice = async ({
 	minterCanisterId,
 	...rest
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 } & Eip1559TransactionPriceParams): Promise<CkEthMinterDid.Eip1559TransactionPrice> => {
 	assertNonNullish(identity);

@@ -16,7 +16,7 @@ import {
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
@@ -57,7 +57,7 @@ const getSolAddress = async ({
 	identity,
 	network
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	network: SolanaNetworkType;
 }): Promise<SolAddress> => {
 	const derivationPath: string[] = [network];
@@ -66,13 +66,13 @@ const getSolAddress = async ({
 	return decoder.decode(Uint8Array.from(publicKey));
 };
 
-export const getSolAddressMainnet = async (identity: OptionIdentity): Promise<SolAddress> =>
+export const getSolAddressMainnet = async (identity: NullishIdentity): Promise<SolAddress> =>
 	await getSolAddress({ identity, network: SolanaNetworks.mainnet });
 
-export const getSolAddressDevnet = async (identity: OptionIdentity): Promise<SolAddress> =>
+export const getSolAddressDevnet = async (identity: NullishIdentity): Promise<SolAddress> =>
 	await getSolAddress({ identity, network: SolanaNetworks.devnet });
 
-export const getSolAddressLocal = async (identity: OptionIdentity): Promise<SolAddress> =>
+export const getSolAddressLocal = async (identity: NullishIdentity): Promise<SolAddress> =>
 	await getSolAddress({ identity, network: SolanaNetworks.local });
 
 const solanaMapper: Record<

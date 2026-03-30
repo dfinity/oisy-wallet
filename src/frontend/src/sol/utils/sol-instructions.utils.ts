@@ -1,5 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { getAccountInfo } from '$sol/api/solana.api';
 import {
@@ -73,7 +73,7 @@ const mapTokenParsedInstruction = async ({
 	cumulativeBalances,
 	addressToToken
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
@@ -234,7 +234,7 @@ const mapToken2022ParsedInstruction = async ({
 	cumulativeBalances,
 	addressToToken
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
@@ -284,7 +284,7 @@ export const mapSolParsedInstruction = async ({
 	cumulativeBalances,
 	addressToToken
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	instruction: SolRpcInstruction;
 	network: SolanaNetworkType;
 	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;

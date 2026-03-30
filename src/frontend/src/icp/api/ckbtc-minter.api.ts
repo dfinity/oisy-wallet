@@ -1,7 +1,7 @@
 import type { MinterInfoParams } from '$icp/types/ck';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import {
 	CkBtcMinterCanister,
@@ -19,7 +19,7 @@ export const retrieveBtc = async ({
 	minterCanisterId,
 	...params
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 	amount: bigint;
 	address: string;
@@ -35,7 +35,7 @@ export const updateBalance = async ({
 	identity,
 	minterCanisterId
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 }): Promise<UpdateBalanceOk> => {
 	assertNonNullish(identity);
@@ -61,7 +61,7 @@ export const getBtcAddress = async ({
 	identity,
 	minterCanisterId
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 }): Promise<string> => {
 	assertNonNullish(identity);
@@ -76,7 +76,7 @@ export const estimateFee = async ({
 	minterCanisterId,
 	...params
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 } & EstimateWithdrawalFeeParams): Promise<EstimateWithdrawalFee> => {
 	assertNonNullish(identity);
@@ -91,7 +91,7 @@ export const withdrawalStatuses = async ({
 	minterCanisterId,
 	...params
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 } & Required<QueryParams>): Promise<RetrieveBtcStatusV2WithId[]> => {
 	assertNonNullish(identity);
@@ -105,7 +105,7 @@ export const getKnownUtxos = async ({
 	identity,
 	minterCanisterId
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 }): Promise<CkBtcMinterDid.Utxo[]> => {
 	assertNonNullish(identity);

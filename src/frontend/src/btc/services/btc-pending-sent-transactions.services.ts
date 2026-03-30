@@ -1,7 +1,7 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { getPendingBtcTransactions } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
@@ -17,7 +17,7 @@ export const loadBtcPendingSentTransactions = async ({
 	networkId
 }: {
 	address: string;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	networkId?: NetworkId;
 }): Promise<ResultSuccess> => {
 	try {
