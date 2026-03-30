@@ -2,6 +2,7 @@
 	import { Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
@@ -22,7 +23,6 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -107,18 +107,7 @@
 		{@render swapFees()}
 	</div>
 
-	{#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
-		<Hr spacing="md" />
-
-		<MessageBox styleClass="sm:text-sm">
-			<Html
-				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
-					$sourceNetwork: $sourceToken.network.name,
-					$destinationNetwork: $destinationToken.network.name
-				})}
-			/>
-		</MessageBox>
-	{/if}
+	<SwapCrossChainInfo hrSpacing="md" />
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
