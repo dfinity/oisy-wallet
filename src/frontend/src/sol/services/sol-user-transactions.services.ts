@@ -4,7 +4,7 @@ import {
 	loadUserTransactions,
 	saveFinalizedTransactions
 } from '$lib/services/user-transactions.services';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { SolAddress } from '$sol/types/address';
@@ -27,7 +27,7 @@ export const loadSolUserTransactions = ({
 	start,
 	maxResults = WALLET_PAGINATION
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokenId: BackendTokenId;
 	address: SolAddress;
 	start?: bigint;
@@ -50,7 +50,7 @@ export const saveSolFinalizedTransactions = ({
 	tokenId,
 	transactions
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokenId: BackendTokenId;
 	transactions: SolTransactionUi[];
 }): Promise<ResultSuccess> =>
