@@ -14,7 +14,9 @@ export enum PLAUSIBLE_EVENTS {
 	UNSTAKE = 'unstake',
 	LOAD_TRANSACTIONS = 'load_transactions',
 	SIGNER_PAGE_VISIT = 'signer_page_visit',
-	SIGNER_INTERACTION = 'signer_interaction'
+	SIGNER_INTERACTION = 'signer_interaction',
+	NETWORK_FILTER = 'network_filter',
+	NETWORK_MANAGE = 'network_manage'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -26,7 +28,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	OPEN_CRYPTOPAY = 'open_cryptopay',
 	EARN = 'earn',
 	TRANSACTIONS = 'transactions',
-	SIGNER = 'signer'
+	SIGNER = 'signer',
+	NETWORKS = 'networks'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -84,7 +87,8 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	SORT = 'sort',
 	SORT_ASC = 'sort_asc',
 	SORT_DESC = 'sort_desc',
-	PRICE = 'price'
+	PRICE = 'price',
+	NETWORK = 'network'
 }
 
 export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
