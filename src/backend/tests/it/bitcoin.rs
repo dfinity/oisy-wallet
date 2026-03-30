@@ -15,7 +15,7 @@ use shared::types::{
 
 use crate::utils::{
     mock::CALLER,
-    pocketic::{controller, setup, setup_with_ii, PicCanisterTrait},
+    pocketic::{controller, setup, setup_with_ii, setup_with_production_config, PicCanisterTrait},
 };
 
 const MOCK_ADDRESS: &str = "bcrt1qpg7udjvq7gx2fp480pgt4hnhj3qc4nhrkstc33";
@@ -70,7 +70,6 @@ fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
 }
 
 #[test]
-#[ignore = "Enable when II_DELEGATION_CHAIN_GUARD_ENABLED is set to true"]
 fn test_add_pending_transaction_requires_delegation_chain() {
     let pic_setup = setup();
 
@@ -102,7 +101,7 @@ fn test_add_pending_transaction_requires_delegation_chain() {
 
 #[test]
 fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disabled() {
-    let pic_setup = setup();
+    let pic_setup = setup_with_production_config();
 
     let caller = Principal::from_text(CALLER).unwrap();
 
@@ -240,7 +239,6 @@ fn test_controller_bypasses_delegation_check() {
 // -------------------------------------------------------------------------------------------------
 
 #[test]
-#[ignore = "Enable when II_DELEGATION_CHAIN_GUARD_ENABLED is set to true"]
 fn test_select_user_utxos_fee_requires_delegation_chain() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
@@ -271,7 +269,7 @@ fn test_select_user_utxos_fee_requires_delegation_chain() {
 
 #[test]
 fn test_select_user_utxos_fee_without_delegation_chain_passes_when_guard_disabled() {
-    let pic_setup = setup();
+    let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
 
     let request = SelectedUtxosFeeRequest {
@@ -370,7 +368,6 @@ fn test_select_user_utxos_fee_with_valid_delegation() {
 // -------------------------------------------------------------------------------------------------
 
 #[test]
-#[ignore = "Enable when II_DELEGATION_CHAIN_GUARD_ENABLED is set to true"]
 fn test_get_pending_transactions_requires_delegation_chain() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
@@ -400,7 +397,7 @@ fn test_get_pending_transactions_requires_delegation_chain() {
 
 #[test]
 fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disabled() {
-    let pic_setup = setup();
+    let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
 
     let request = BtcGetPendingTransactionsRequest {

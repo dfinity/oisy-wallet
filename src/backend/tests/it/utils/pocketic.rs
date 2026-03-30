@@ -479,8 +479,16 @@ impl PicBackend {
 }
 
 pub(crate) fn init_arg() -> Arg {
+    init_arg_with_ecdsa_key("test_key_1")
+}
+
+pub(crate) fn production_init_arg() -> Arg {
+    init_arg_with_ecdsa_key("key_1")
+}
+
+fn init_arg_with_ecdsa_key(ecdsa_key_name: &str) -> Arg {
     Arg::Init(InitArg {
-        ecdsa_key_name: "test_key_1".to_string(),
+        ecdsa_key_name: ecdsa_key_name.to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
         supported_credentials: Some(vec![SupportedCredential {
@@ -496,6 +504,12 @@ pub(crate) fn init_arg() -> Arg {
         ),
         derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
     })
+}
+
+pub fn setup_with_production_config() -> PicBackend {
+    BackendBuilder::default()
+        .with_arg(encode_one(production_init_arg()).unwrap())
+        .deploy()
 }
 
 /// A test Oisy backend canister with a shared reference to the `PocketIc` instance it is installed
