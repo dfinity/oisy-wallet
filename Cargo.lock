@@ -1675,9 +1675,9 @@ dependencies = [
 
 [[package]]
 name = "ic-verifiable-credentials"
-version = "1.0.2"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d353af0ad18bb2375714cb945089bb4b7391ab17ac694dee5f92ce4e244fddae"
+checksum = "dd211454038a593243972005c3a0f1bd377bfe30a1bb56ec76dfdf61661a2f57"
 dependencies = [
  "base64 0.22.1",
  "candid",
@@ -3394,7 +3394,6 @@ dependencies = [
  "cfg-if",
  "libc",
  "psm",
- "windows-sys 0.52.0",
  "windows-sys 0.59.0",
 ]
 

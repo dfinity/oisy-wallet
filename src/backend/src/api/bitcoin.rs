@@ -78,7 +78,8 @@ pub async fn btc_select_user_utxos_fee(
         let principal = msg_caller();
         let now_ns = time();
 
-        let (ii_canister_ids, root_key) = delegation::read_ii_verification_config();
+        let (ii_canister_ids, root_key, guard_enabled) =
+            delegation::read_ii_verification_config();
         delegation::require_ii_delegation(
             params.ii_delegation_chain.as_ref(),
             is_controller(&principal),
@@ -86,6 +87,7 @@ pub async fn btc_select_user_utxos_fee(
             &ii_canister_ids,
             &root_key,
             now_ns,
+            guard_enabled,
         )
         .map_err(|msg| SelectedUtxosFeeError::InvalidDelegationChain { msg })?;
         let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
@@ -174,7 +176,8 @@ pub async fn btc_add_pending_transaction(
         let principal = msg_caller();
         let now_ns = time();
 
-        let (ii_canister_ids, root_key) = delegation::read_ii_verification_config();
+        let (ii_canister_ids, root_key, guard_enabled) =
+            delegation::read_ii_verification_config();
         delegation::require_ii_delegation(
             params.ii_delegation_chain.as_ref(),
             is_controller(&principal),
@@ -182,6 +185,7 @@ pub async fn btc_add_pending_transaction(
             &ii_canister_ids,
             &root_key,
             now_ns,
+            guard_enabled,
         )
         .map_err(|msg| BtcAddPendingTransactionError::InvalidDelegationChain { msg })?;
 
@@ -271,7 +275,8 @@ pub async fn btc_get_pending_transactions(
         let principal = msg_caller();
         let now_ns = time();
 
-        let (ii_canister_ids, root_key) = delegation::read_ii_verification_config();
+        let (ii_canister_ids, root_key, guard_enabled) =
+            delegation::read_ii_verification_config();
         delegation::require_ii_delegation(
             params.ii_delegation_chain.as_ref(),
             is_controller(&principal),
@@ -279,6 +284,7 @@ pub async fn btc_get_pending_transactions(
             &ii_canister_ids,
             &root_key,
             now_ns,
+            guard_enabled,
         )
         .map_err(|msg| BtcGetPendingTransactionsError::InvalidDelegationChain { msg })?;
 
