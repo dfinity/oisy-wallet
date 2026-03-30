@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
 	import SignerAlert from '$lib/components/signer/SignerAlert.svelte';
 	import SignerCenteredContent from '$lib/components/signer/SignerCenteredContent.svelte';
@@ -14,7 +15,6 @@
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { mapSignerDomain, mapSignerOriginHost } from '$lib/utils/signer.utils';
-	import { nonNullish } from '@dfinity/utils';
 
 	const STATUS_RESULT_MAP: Record<string, string> = {
 		executing: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
