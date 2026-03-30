@@ -19,5 +19,4 @@ export const mapSignerOriginHost = (origin: Nullish<Origin>): string => {
 	}
 };
 
-export const mapSignerDomain = (): string =>
-	globalThis.location?.hostname ?? UNKNOWN_ORIGIN;
+export const mapSignerDomain = (): string => globalThis.location?.hostname ?? UNKNOWN_ORIGIN;
