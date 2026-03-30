@@ -7,14 +7,14 @@ use shared::types::delegation::IIDelegationChain;
 
 use crate::state::read_config;
 
-/// When `false`, [`require_ii_delegation`] is a no-op for every caller,
-/// effectively disabling the II delegation chain guard.
-/// Flip to `true` to enforce the full cryptographic verification.
-const II_DELEGATION_CHAIN_GUARD_ENABLED: bool = false;
+const PRODUCTION_ECDSA_KEY_NAME: &str = "key_1";
 
-/// Reads the II verification parameters (known II canister IDs and IC root key)
-/// from the backend configuration.
-pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>) {
+/// Reads the II verification parameters (known II canister IDs, IC root key,
+/// and whether the delegation guard is enabled) from the backend configuration.
+///
+/// The guard is enabled for every environment **except** production
+/// (`ecdsa_key_name == "key_1"`).
+pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>, bool) {
     read_config(|config| {
         let ii_ids = config
             .supported_credentials
@@ -25,11 +25,16 @@ pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>) {
             .ic_root_key_raw
             .clone()
             .expect("IC root key not configured");
-        (ii_ids, root_key)
+        let guard_enabled = config.ecdsa_key_name != PRODUCTION_ECDSA_KEY_NAME;
+        (ii_ids, root_key, guard_enabled)
     })
 }
 
 /// Requires a valid II delegation chain for non-controller callers.
+///
+/// When `guard_enabled` is `false` the check is a no-op and `Ok(())` is
+/// returned immediately.  This is the case for **production** deployments
+/// (`ecdsa_key_name == "key_1"`); local and staging deployments pass `true`.
 ///
 /// Controllers bypass the check entirely and `Ok(())` is returned regardless
 /// of whether a chain is provided.  For all other callers the chain must be
@@ -42,8 +47,9 @@ pub fn require_ii_delegation(
     known_ii_canister_ids: &[Principal],
     ic_root_key_raw: &[u8],
     now_ns: u64,
+    guard_enabled: bool,
 ) -> Result<(), String> {
-    if !II_DELEGATION_CHAIN_GUARD_ENABLED {
+    if !guard_enabled {
         return Ok(());
     }
 
@@ -146,9 +152,7 @@ mod tests {
     use ic_canister_sig_creation::CanisterSigPublicKey;
     use shared::types::delegation::{Delegation, IIDelegationChain, SignedDelegation};
 
-    use super::{
-        require_ii_delegation, verify_ii_delegation_chain, II_DELEGATION_CHAIN_GUARD_ENABLED,
-    };
+    use super::{require_ii_delegation, verify_ii_delegation_chain};
 
     const FAR_FUTURE_NS: u64 = 9_999_999_999_000_000_000;
 
@@ -182,7 +186,7 @@ mod tests {
 
     #[test]
     fn test_require_controller_bypasses_without_chain() {
-        let result = require_ii_delegation(None, true, Principal::anonymous(), &[], &[], 0);
+        let result = require_ii_delegation(None, true, Principal::anonymous(), &[], &[], 0, true);
         assert!(result.is_ok());
     }
 
@@ -190,18 +194,28 @@ mod tests {
     fn test_require_controller_bypasses_with_chain() {
         let pk = make_canister_sig_public_key(test_ii_canister_id());
         let chain = make_chain(pk, valid_delegation(b"session"));
-        let result = require_ii_delegation(Some(&chain), true, Principal::anonymous(), &[], &[], 0);
+        let result = require_ii_delegation(
+            Some(&chain),
+            true,
+            Principal::anonymous(),
+            &[],
+            &[],
+            0,
+            true,
+        );
         assert!(result.is_ok());
     }
 
     #[test]
-    fn test_require_non_controller_missing_chain() {
-        let result = require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0);
-        if II_DELEGATION_CHAIN_GUARD_ENABLED {
-            assert_eq!(result.unwrap_err(), "II delegation chain is required");
-        } else {
-            assert!(result.is_ok());
-        }
+    fn test_require_non_controller_missing_chain_guard_enabled() {
+        let result = require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0, true);
+        assert_eq!(result.unwrap_err(), "II delegation chain is required");
+    }
+
+    #[test]
+    fn test_require_non_controller_missing_chain_guard_disabled() {
+        let result = require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0, false);
+        assert!(result.is_ok());
     }
 
     // ---- verify_ii_delegation_chain ----
