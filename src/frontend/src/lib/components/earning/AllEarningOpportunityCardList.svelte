@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { earningCards } from '$env/earning-cards.env';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import DefaultEarningOpportunityCard from '$lib/components/earning/DefaultEarningOpportunityCard.svelte';
@@ -12,7 +13,7 @@
 	{#each earningCards as card, i (`${card.id}-${i}`)}
 		{#if card.id === currentReward.id}
 			<RewardsEarningOpportunityCard />
-		{:else}
+		{:else if nonNullish($earningData[card.id])}
 			<DefaultEarningOpportunityCard cardData={card} cardFields={$earningData[card.id]} />
 		{/if}
 	{/each}
