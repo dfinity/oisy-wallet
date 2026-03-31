@@ -580,33 +580,33 @@
 				}
 			},
 			"sprinkles_s1e6": {
-  "title": "OISY Sprinkles",
-  "card_title": "OISY Sprinkles : L'épisode 6 est en ligne 🤑",
-  "one_liner": "Gagnez des Sprinkles en étant actif, en parrainant d'autres utilisateurs et en utilisant OISY sur plusieurs chaînes. Vos actions augmentent vos récompenses, et les parrainages actifs les renforcent davantage.<br/>De plus, désormais plus de chaînes signifie de meilleures chances de gagner.",
-  "participate_title": "Gagnez des tokens pour votre activité et vos parrainages. Plus de chaînes signifie plus de chances.",
-  "description": "Restez actif pour vous qualifier : connectez-vous souvent, effectuez des actions dans votre portefeuille et détenez au moins 5 $.<br/>Chaque chaîne active améliore vos chances grâce à un Multiplicateur Multichaîne.<br/>Gagnez 10 % des amis qui se qualifient.",
-  "campaign_href": "",
-  "welcome": {
-    "title": "Bienvenue sur $oisy_short !",
-    "subtitle": "Prêt(e) à gagner ?",
-    "description": "Vous êtes à 2 étapes de votre première récompense : Connectez-vous, détenez 5 $+ et effectuez 2 actions. C'est tout ce qu'il faut pour commencer à gagner des Sprinkles.<br><br>Vous en voulez plus ? Parrainez vos amis et obtenez un bonus chaque fois que l'un d'eux gagne des Sprinkles."
-  },
-  "win": {
-    "default": {
-      "title": "Vous avez été récompensé(e)",
-      "description": "Vos récompenses viennent d'arriver dans votre portefeuille.<br>N'oubliez pas de parrainer et de rester actif(ve) pour en gagner davantage",
-      "share_href": ""
-    },
-    "jackpot": {
-      "title": "Vous avez remporté le drop bonus hebdomadaire",
-      "description": "Vous venez de gagner l'un de nos drops bonus hebdomadaires.<br>Restez actif(ve) et continuez à parrainer pour en gagner davantage",
-      "share_href": ""
-    },
-    "referral": {
-      "title": "Un petit merci",
-      "description": "L'un de vos filleuls vient de recevoir des Sprinkles.",
-      "share_href": ""
-    }
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles : L'épisode 6 est en ligne 🤑",
+				"one_liner": "Gagnez des Sprinkles en étant actif, en parrainant d'autres utilisateurs et en utilisant OISY sur plusieurs chaînes. Vos actions augmentent vos récompenses, et les parrainages actifs les renforcent davantage.<br/>De plus, désormais plus de chaînes signifie de meilleures chances de gagner.",
+				"participate_title": "Gagnez des tokens pour votre activité et vos parrainages. Plus de chaînes signifie plus de chances.",
+				"description": "Restez actif pour vous qualifier : connectez-vous souvent, effectuez des actions dans votre portefeuille et détenez au moins 5 $.<br/>Chaque chaîne active améliore vos chances grâce à un Multiplicateur Multichaîne.<br/>Gagnez 10 % des amis qui se qualifient.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "Bienvenue sur $oisy_short !",
+					"subtitle": "Prêt(e) à gagner ?",
+					"description": "Vous êtes à 2 étapes de votre première récompense : Connectez-vous, détenez 5 $+ et effectuez 2 actions. C'est tout ce qu'il faut pour commencer à gagner des Sprinkles.<br><br>Vous en voulez plus ? Parrainez vos amis et obtenez un bonus chaque fois que l'un d'eux gagne des Sprinkles."
+				},
+				"win": {
+					"default": {
+						"title": "Vous avez été récompensé(e)",
+						"description": "Vos récompenses viennent d'arriver dans votre portefeuille.<br>N'oubliez pas de parrainer et de rester actif(ve) pour en gagner davantage",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Vous avez remporté le drop bonus hebdomadaire",
+						"description": "Vous venez de gagner l'un de nos drops bonus hebdomadaires.<br>Restez actif(ve) et continuez à parrainer pour en gagner davantage",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Un petit merci",
+						"description": "L'un de vos filleuls vient de recevoir des Sprinkles.",
+						"share_href": ""
+					}
 				}
 			}
 		}
