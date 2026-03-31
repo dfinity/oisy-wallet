@@ -1929,19 +1929,19 @@
 			"title": "Gagner",
 			"tab_title": "Gains en cours",
 			"earning_opportunities": "Opportunités de gain",
-			"header_title": "Bienvenue dans Gagner !",
+			"header_title": "Bienvenue dans Gagner\u00a0!",
 			"header_description": "Développez votre portefeuille d'actifs numériques en allouant vos tokens à des opportunités de gain.",
 			"go_to_earn": "Aller à Gagner"
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "Harvest – Autopilote",
-				"description": "Efficacité de rendement maximale avec des vaults en autopilote en un seul clic.",
-				"action": "Aller à l'Autopilote"
+				"title": "Harvest – Autopilot",
+				"description": "Efficacité de rendement maximale avec des vaults en Autopilot en un seul clic.",
+				"action": "Aller à l'Autopilot"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Utilisez OISY et GAGNEZ ! L'épisode 6 est en direct 🎉",
+				"description": "Utilisez OISY et GAGNEZ\u00a0! L'épisode 6 est en direct \uD83C\uDF89",
 				"action": "Vérifier le statut"
 			}
 		},
@@ -1965,23 +1965,23 @@
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "",
+			"autopilot": "Autopilot",
 			"live_apy": "APY actuel"
 		}
 	},
 	"stake": {
 		"text": {
-			"harvest_autopilot_page_description": "Efficacité de rendement maximale avec des vaults en autopilote en un seul clic.",
-			"harvest_autopilot_vault_page_description": "L'Autopilote est propulsé par la technologie <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">IPOR auditée</a> Fusion Vault.",
-			"harvest_autopilot_provider_description": "Harvest Autopilote est un service spécialisé \"configurer et oublier\" qui automatise vos positions DeFi avec un effort minimal.",
+			"harvest_autopilot_page_description": "Efficacité de rendement maximale avec des vaults en Autopilot en un seul clic.",
+			"harvest_autopilot_vault_page_description": "L'Autopilot est propulsé par la technologie <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">IPOR auditée</a> Fusion Vault.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot est un service spécialisé \"configurer et oublier\" qui automatise vos positions DeFi avec un effort minimal.",
 			"harvest_autopilot_stake_terms": "Je confirme avoir lu et compris le produit, avoir lu les <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Divulgations de risques</a> et accepter les <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Conditions générales d'utilisation</a>.",
 			"my_positions": "Mes positions",
-			"available_autopilots": "Autopilotes disponibles",
+			"available_autopilots": "Autopilots disponibles",
 			"vault_info": "Informations sur le vault",
 			"vault_address": "Adresse du vault",
 			"protocol": "Protocole",
 			"harvest": "Harvest",
-			"autopilot": "Autopilote",
+			"autopilot": "Autopilot",
 			"total_value_locked": "Valeur totale bloquée (TVL)",
 			"manager": "Gestionnaire",
 			"vault_description": "Ce pool est conçu comme un service de gestion de rendement \"configurer et oublier\" pour vos $asset_symbol. Il optimise automatiquement votre position DeFi avec un effort minimal de votre part en allouant dynamiquement le capital aux meilleures opportunités.",
@@ -2055,8 +2055,8 @@
 		},
 		"info": {
 			"harvest_autopilot": {
-				"title": "Qu'est-ce que Harvest Autopilote",
-				"description": "Harvest Autopilote est une fonctionnalité spécialisée (et une gamme de produits spécifique) au sein de l'écosystème Harvest Finance, conçue pour automatiser et optimiser vos positions de finance décentralisée (DeFi) avec un effort minimal.",
+				"title": "Qu'est-ce que Harvest Autopilot",
+				"description": "Harvest Autopilot est une fonctionnalité spécialisée (et une gamme de produits spécifique) au sein de l'écosystème Harvest Finance, conçue pour automatiser et optimiser vos positions de finance décentralisée (DeFi) avec un effort minimal.",
 				"fact_1_title": "Allocation intelligente du rendement",
 				"fact_1_description": "Change automatiquement de protocole pour capturer l'APY actuel le plus élevé.",
 				"fact_2_title": "Composition passive",
