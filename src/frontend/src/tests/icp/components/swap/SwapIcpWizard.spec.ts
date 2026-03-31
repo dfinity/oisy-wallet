@@ -144,6 +144,20 @@ describe('SwapIcpWizard', () => {
 		expect(container).toBeInTheDocument();
 	});
 
+	it('renders tiny review amounts in decimal format', () => {
+		const { getByText, queryByText } = render(SwapIcpWizard, {
+			props: {
+				...BASE_PROPS,
+				receiveAmount: 2.6e-7,
+				currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' }
+			},
+			context: mockContext
+		});
+
+		expect(getByText(/0\.00000026/)).toBeInTheDocument();
+		expect(queryByText(/2\.6e-7/i)).not.toBeInTheDocument();
+	});
+
 	it('renders SwapProgress on SWAPPING step', () => {
 		const { container } = renderWithStep(WizardStepsSwap.SWAPPING);
 
@@ -163,7 +177,12 @@ describe('SwapIcpWizard', () => {
 		});
 
 		it('calls onClose after successful swap', async () => {
-			const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
+			const { getByRole, getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(getByRole('checkbox'));
+			}
 
 			await fireEvent.click(getByText('Swap now'));
 			await vi.runOnlyPendingTimersAsync();
@@ -176,7 +195,12 @@ describe('SwapIcpWizard', () => {
 		it('calls onBack when swap fails', async () => {
 			mockSwapFn.mockRejectedValue(new Error('Swap failed'));
 
-			const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
+			const { getByRole, getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(getByRole('checkbox'));
+			}
 
 			await fireEvent.click(getByText('Swap now'));
 			await vi.runOnlyPendingTimersAsync();
@@ -184,6 +208,31 @@ describe('SwapIcpWizard', () => {
 			expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
 			expect(BASE_PROPS.onClose).not.toHaveBeenCalled();
 			expect(toasts.toastsError).toHaveBeenCalled();
+		});
+
+		it('requires confirmation before enabling swap for high negative value difference', async () => {
+			const errorContext = createContext();
+			errorContext.set(SWAP_CONTEXT_KEY, {
+				...(errorContext.get(SWAP_CONTEXT_KEY) as object),
+				destinationTokenExchangeRate: readable(20)
+			});
+
+			const { getByRole, getByText } = render(SwapIcpWizard, {
+				props: {
+					...BASE_PROPS,
+					receiveAmount: 0.1,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' }
+				},
+				context: errorContext
+			});
+
+			const swapButton = getByText('Swap now').closest('button');
+
+			expect(swapButton).toBeDisabled();
+
+			await fireEvent.click(getByRole('checkbox'));
+
+			expect(swapButton).toBeEnabled();
 		});
 	});
 });
