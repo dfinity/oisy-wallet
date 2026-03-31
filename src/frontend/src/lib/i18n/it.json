@@ -437,7 +437,11 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -475,7 +479,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Tieni d'occhio i prossimi airdrop di token! <a href=\"https://x.com/oisy\" target=\"_blank\">Seguici su X</a>, unisciti al nostro <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, o entra nel nostro <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> per rimanere aggiornato.",
-			"coming_soon": "L'episodio 6 di $oisy_short arriverà presto",
+			"coming_soon": "Il prossimo episodio di $oisy_short Sprinkles è in arrivo",
 			"reward_banner": "Banner della campagna $campaignName"
 		},
 		"campaigns": {
@@ -575,6 +579,36 @@
 					"referral": {
 						"title": "Ecco un piccolo ringraziamento",
 						"description": "Uno dei tuoi utenti referenziati ha appena ricevuto degli sprinkles.",
+						"share_href": ""
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: L'Episodio 6 è in diretta 🤑",
+				"one_liner": "Guadagna Sprinkles essendo attivo, invitando altri e usando OISY su più chain. Le tue azioni aumentano le tue ricompense, e i referral attivi le moltiplicano ulteriormente.<br/>Inoltre, ora più chain significa maggiori possibilità di vincere.",
+				"participate_title": "Guadagna token per attività e referral. Più chain significano più opportunità.",
+				"description": "Rimani attivo per qualificarti: accedi spesso, completa azioni nel portafoglio e detieni almeno 5 $.<br/>Ogni chain attiva aumenta le tue probabilità con un Moltiplicatore Multichain.<br/>Guadagna il 10 % dagli amici che si qualificano.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "Benvenuto/a su $oisy_short!",
+					"subtitle": "Pronto/a a guadagnare?",
+					"description": "Sei a 2 passi dalla tua prima ricompensa: Accedi, detieni 5 $+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Invita i tuoi amici e ottieni un bonus ogni volta che uno di loro guadagna Sprinkles."
+				},
+				"win": {
+					"default": {
+						"title": "Sei stato/a premiato/a",
+						"description": "Le tue ricompense sono appena arrivate nel tuo portafoglio.<br>Non dimenticare di invitare e di restare attivo/a per vincere di più",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Hai vinto il drop bonus settimanale",
+						"description": "Hai appena vinto uno dei nostri drop bonus settimanali.<br>Rimani attivo/a e continua a invitare per vincere di più",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Un piccolo ringraziamento",
+						"description": "Uno dei tuoi utenti referiti ha appena ricevuto degli Sprinkles.",
 						"share_href": ""
 					}
 				}

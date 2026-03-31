@@ -280,7 +280,12 @@ interface I18nDapps {
 		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
-		liquidium: { name: string; one_liner: string; description: string };
+		liquidium: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
 	};
 }
 
@@ -359,6 +364,20 @@ interface I18nRewards {
 				default: { title: string; description: string; share_href: string };
 				jackpot: { title: string; description: string; share_href: string };
 				leaderboard: { title: string; description: string; share_href: string };
+				referral: { title: string; description: string; share_href: string };
+			};
+		};
+		sprinkles_s1e6: {
+			title: string;
+			card_title: string;
+			one_liner: string;
+			participate_title: string;
+			description: string;
+			campaign_href: string;
+			welcome: { title: string; subtitle: string; description: string };
+			win: {
+				default: { title: string; description: string; share_href: string };
+				jackpot: { title: string; description: string; share_href: string };
 				referral: { title: string; description: string; share_href: string };
 			};
 		};
