@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Checkbox, Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
+	import { getContext, type Snippet, untrack } from 'svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
@@ -72,23 +72,29 @@
 			$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success
 	);
 
-	let isValueDifferenceError = $derived.by(() => {
-		const valueDifference = calculateValueDifference({
+	let valueDifference = $derived(
+		calculateValueDifference({
 			swapAmount,
 			receiveAmount,
 			sourceTokenExchangeRate: $sourceTokenExchangeRate,
 			destinationTokenExchangeRate: $destinationTokenExchangeRate
-		});
+		})
+	);
 
-		return nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE;
-	});
+	let isValueDifferenceError = $derived(
+		nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE
+	);
 
 	let isValueDifferenceConfirmed = $state(false);
 
+	const reset = () => {
+		isValueDifferenceConfirmed = false;
+	};
+
 	$effect(() => {
-		if (!isValueDifferenceError) {
-			isValueDifferenceConfirmed = false;
-		}
+		[valueDifference, isValueDifferenceError];
+
+		untrack(reset);
 	});
 
 	let swapButtonDisabled = $derived(
@@ -140,7 +146,7 @@
 			<MessageBox level="error">
 				{#snippet icon()}
 					<Checkbox
-						inputId="swap-review-value-difference-confirmation leading-none"
+						inputId="swap-review-value-difference-confirmation"
 						bind:checked={isValueDifferenceConfirmed}
 						on:nnsChange={() => (isValueDifferenceConfirmed = !isValueDifferenceConfirmed)}
 					/>
