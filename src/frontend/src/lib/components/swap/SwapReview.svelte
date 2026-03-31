@@ -146,10 +146,7 @@
 					/>
 				{/snippet}
 
-				<label
-					class="align-top text-sm"
-					for="swap-review-value-difference-confirmation"
-				>
+				<label class="align-top text-sm" for="swap-review-value-difference-confirmation">
 					{$i18n.swap.text.value_difference_error_confirmation}
 				</label>
 			</MessageBox>
