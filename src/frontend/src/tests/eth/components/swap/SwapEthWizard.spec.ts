@@ -35,7 +35,7 @@ import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: vi.fn()
+	parseToken: vi.fn().mockReturnValue(0n)
 }));
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
