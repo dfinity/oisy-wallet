@@ -1926,164 +1926,164 @@
 	},
 	"earning": {
 		"text": {
-			"title": "報酬獲得",
-			"tab_title": "報酬獲得",
-			"earning_opportunities": "報酬獲得のチャンス",
-			"header_title": "報酬を獲得しよう！",
-			"header_description": "トークンを運用に回して、資産を増やしましょう。",
-			"go_to_earn": "報酬獲得へ"
+			"title": "稼ぐ",
+			"tab_title": "稼ぎ中",
+			"earning_opportunities": "稼ぐ機会",
+			"header_title": "稼ぐへようこそ！",
+			"header_description": "トークンを稼ぐ機会に割り当てて、デジタル資産ポートフォリオを増やしましょう。",
+			"go_to_earn": "稼ぐへ移動"
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "Harvest – Autopilot",
+				"description": "ワンクリックのAutopilot vaultで最大限のイールド効率を実現。",
+				"action": "Autopilotへ移動"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "OISYを使って報酬を獲得しよう! Ep. 5公開中 🎉",
-				"action": "ステータス確認"
+				"description": "OISYを使って稼ごう！エピソード6が公開中 \uD83C\uDF89",
+				"action": "ステータスを確認"
 			}
 		},
 		"card_fields": {
 			"apy": "APY",
-			"networks": "",
-			"assets": "",
-			"currentStaked": "ステーキング中",
-			"currentEarning": "獲得済み報酬額",
-			"earningPotential": "これから獲得できる報酬額",
+			"networks": "ネットワーク",
+			"assets": "資産",
+			"currentStaked": "ステーク中",
+			"currentEarning": "現在の収益",
+			"earningPotential": "収益ポテンシャル",
 			"terms": "条件"
 		},
 		"terms": {
-			"flexible": "いつでも引き出し可能"
+			"flexible": "フレキシブル"
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": "Gold DAOで報酬獲得"
+				"cardTitle": "Gold DAOで稼ぐ"
 			}
 		}
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "",
-			"live_apy": ""
+			"autopilot": "Autopilot",
+			"live_apy": "現在のAPY"
 		}
 	},
 	"stake": {
 		"text": {
-			"harvest_autopilot_page_description": "",
-			"harvest_autopilot_vault_page_description": "",
-			"harvest_autopilot_provider_description": "",
-			"harvest_autopilot_stake_terms": "",
-			"my_positions": "",
-			"available_autopilots": "",
-			"vault_info": "",
-			"vault_address": "",
-			"protocol": "",
-			"harvest": "",
-			"autopilot": "",
-			"total_value_locked": "",
-			"manager": "",
-			"vault_description": "",
-			"stake": "",
-			"stake_now": "今すぐステーキング",
-			"stake_amount": "$amount $token_symbolをステーキング",
-			"not_enough_to_stake": "ステーキング可能な$token_symbolがありません。",
-			"estimated_received": "",
-			"estimated_yearly_yield": "",
-			"unstake": "ステーキング解除",
-			"unstake_now": "今すぐ解除",
-			"unstaking": "解除中...",
-			"unstake_token": "$token_symbolを解除",
-			"enable_token_text": "$token_symbolを有効にする必要があります。",
-			"enable_token_button": "$token_symbolを有効化",
-			"review": "トランザクション確認",
+			"harvest_autopilot_page_description": "ワンクリックのAutopilot vaultで最大限のイールド効率を実現。",
+			"harvest_autopilot_vault_page_description": "Autopilotは<a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">監査済みのIPOR</a> Fusion Vault技術によって動作しています。",
+			"harvest_autopilot_provider_description": "Harvest Autopilotは、最小限の労力でDeFiポジションを自動化する「設定して忘れる」専門サービスです。",
+			"harvest_autopilot_stake_terms": "私は本製品を読んで理解し、<a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">リスク開示</a>を読み、<a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">利用規約</a>に同意することを確認します。",
+			"my_positions": "マイポジション",
+			"available_autopilots": "利用可能なAutopilot",
+			"vault_info": "Vault情報",
+			"vault_address": "Vaultアドレス",
+			"protocol": "プロトコル",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "総ロック価値（TVL）",
+			"manager": "マネージャー",
+			"vault_description": "このプールは、$asset_symbol保有者向けの「設定して忘れる」イールド管理サービスとして設計されています。最良の機会に資本を動的に割り当てることで、最小限の労力でDeFiポジションを自動的に最適化します。",
+			"stake": "ステークする",
+			"stake_now": "今すぐステーク",
+			"stake_amount": "$amount $token_symbolをステーク",
+			"not_enough_to_stake": "ステークする$token_symbolがありません",
+			"estimated_received": "受取予定額",
+			"estimated_yearly_yield": "年間予想イールド",
+			"unstake": "アンステークする",
+			"unstake_now": "今すぐアンステーク",
+			"unstaking": "アンステーク中...",
+			"unstake_token": "$token_symbolをアンステーク",
+			"enable_token_text": "$token_symbolを有効にする必要があります",
+			"enable_token_button": "$token_symbolを有効にする",
+			"review": "トランザクションを確認",
 			"executing_transaction": "トランザクション実行中...",
-			"unsupported_token_staking": "選択されたトークンはステーキングに対応していません。",
-			"provider": "ステーキング条件提供: $provider",
-			"earning_potential": "潜在的な報酬獲得額",
-			"earning_potential_hint": "未ステーキング資産の価値と、利用可能な運用機会の最高APYに基づいています。",
-			"active_earning": "獲得済み報酬額",
+			"unsupported_token_staking": "選択したトークンのステーキングはサポートされていません。",
+			"provider": "ステーキング条件は$providerによって提供されています",
+			"earning_potential": "収益ポテンシャル",
+			"earning_potential_hint": "未投資資産の価値と利用可能な稼ぐ機会の最高APYに基づいています。",
+			"active_earning": "アクティブ収益",
 			"active_earning_per_year": "$amount/年",
-			"active_earning_per_year_short": "",
+			"active_earning_per_year_short": "$amount/年",
 			"unproductive_assets": "利用可能",
-			"invested_assets": "運用中",
-			"visit_provider": "ウェブサイトを見る",
+			"invested_assets": "割り当て済み",
+			"visit_provider": "ウェブサイトを訪問",
 			"current_apy_label": "現在のAPY",
-			"max_apy_label": "",
-			"stake_review_subtitle": "ステーキング額",
-			"unstake_review_subtitle": "ステーキング解除額",
+			"max_apy_label": "最大APY",
+			"stake_review_subtitle": "ステーク中",
+			"unstake_review_subtitle": "アンステーク中",
 			"delayed_dissolve": "遅延受取",
 			"immediate_dissolve": "即時受取",
 			"included_token_fee": "ネットワーク手数料込み",
 			"included_dissolve_fee": "ロック解除手数料込み",
-			"delayed_dissolve_terms": "$tokenをステーキングから解除する際、トークンが出金可能になるまで$delay日間ロックされ、その間報酬は発生しません。",
-			"delayed_dissolve_info": "$tokenステークの解除を開始すると、新しい報酬は受け取れなくなります。",
-			"immediate_dissolve_terms": "$tokenを即座に受け取れますが、ロック解除する$tokenトークンに対して手数料が発生します。",
-			"amount_to_receive": "受取額",
+			"delayed_dissolve_terms": "$tokenをステーキングからロック解除する際、トークンは引き出し可能になるまで$delay日間、追加報酬なしでロックされます。",
+			"delayed_dissolve_info": "$tokenステークのロック解除を開始すると、新しい報酬の受取が停止されます。",
+			"immediate_dissolve_terms": "$tokenはすぐに受け取れますが、ロック解除する$tokenトークンに手数料が発生します。",
+			"amount_to_receive": "受取金額",
 			"unclaimed_rewards": "未請求の報酬",
 			"unlock_requests": "ロック解除リクエスト",
-			"unlocking_in": "ロック解除まであと$time",
+			"unlocking_in": "$time後にロック解除",
 			"unlocked": "ロック解除済み",
-			"withdraw": "出金",
-			"withdraw_successful": "トークンの出金が完了しました。",
-			"claim_reward": "報酬を請求する",
-			"claim_rewards": "報酬を請求する",
+			"withdraw": "引き出す",
+			"withdraw_successful": "トークンが正常に引き出されました。",
+			"claim_reward": "報酬を請求",
+			"claim_rewards": "報酬を請求",
 			"claim_reward_short": "請求",
 			"claim_now": "今すぐ請求",
 			"claiming": "請求中...",
-			"get_tokens_with_amount": "最大$amount $token_symbolを入手",
-			"get_asset_tokens": "",
-			"reward_claimed": "受領済み報酬",
-			"staked": "ステーキング中",
-			"unstaked": "ステーキング解除済み",
+			"get_tokens_with_amount": "最大$amount $token_symbolを取得",
+			"get_asset_tokens": "$token_symbolを取得",
+			"reward_claimed": "報酬請求済み",
+			"staked": "ステーク済み",
+			"unstaked": "アンステーク済み",
 			"title_empty_1": "最大",
-			"title_empty_2_usd": "/年を獲得",
-			"title_empty_2_apy": "/年",
+			"title_empty_2_usd": "/年を稼ぐ",
+			"title_empty_2_apy": "年間",
 			"title_empty_3": "",
-			"description_empty": "まだトークンをステーキングしていないようです。",
-			"full_history": "履歴を全て表示",
-			"recent_history": "履歴を閉じる",
-			"harvest_autopilot_carousel_slide_title": "",
-			"harvest_autopilot_carousel_slide_cta": ""
+			"description_empty": "まだトークンをステークしていないようです",
+			"full_history": "全履歴を表示",
+			"recent_history": "全履歴を閉じる",
+			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield FarmingでOISYを稼ぐ",
+			"harvest_autopilot_carousel_slide_cta": "詳しく見る"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "出金中に問題が発生しました。",
-			"unexpected_error_on_unstake": "ステーキング解除中に問題が発生しました。",
-			"unexpected_error_on_stake": "",
-			"dissolvement_limit_reached": "アクティブな解除リクエストの上限$limitに達しました。新しいリクエストを作成する前に、一部を完了してください。<br/>注意: 「即時」オプションを使用すれば、いつでもステーキング解除できます。"
+			"unexpected_error_on_withdraw": "トークンの引き出し中にエラーが発生しました。",
+			"unexpected_error_on_unstake": "トークンのアンステーク中にエラーが発生しました。",
+			"unexpected_error_on_stake": "トークンのステーク中にエラーが発生しました。",
+			"dissolvement_limit_reached": "アクティブなロック解除リクエストの上限$limit件に達しました。新しいリクエストを作成する前にいくつか完了してください。<br/>\"即時\"オプションを使用していつでもアンステークできることをご注意ください。"
 		},
 		"info": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": ""
+				"title": "Harvest Autopilotとは",
+				"description": "Harvest Autopilotは、Harvest Financeエコシステム内の専門的な機能（および特定の製品ライン）であり、最小限の労力で分散型金融（DeFi）ポジションを自動化および最適化するために設計されています。",
+				"fact_1_title": "スマートイールド配分",
+				"fact_1_description": "最高のライブAPYを獲得するために自動的にプロトコルを切り替えます。",
+				"fact_2_title": "パッシブコンパウンディング",
+				"fact_2_description": "報酬は自動的に収穫・再投資され、成長を最大化します。",
+				"fact_3_title": "ガスコストの共有",
+				"fact_3_description": "他のユーザーとトランザクションをまとめることでガスを節約し、費用を削減します。"
 			}
 		},
 		"alt": {
-			"placeholder_image": "まだステーキングされたトークンはありません。"
+			"placeholder_image": "まだステークされたトークンはありません"
 		}
 	},
 	"get_token": {
 		"text": {
-			"title": "$tokenを入手",
+			"title": "$tokenを取得",
 			"swap_to_token": "$tokenにスワップ",
-			"ready_to_swap": "スワップ可能",
+			"ready_to_swap": "スワップ準備完了",
 			"convert_assets": "資産を変換",
 			"convertible_assets": "変換可能な資産",
 			"how_to_convert": "変換方法",
-			"get_more_token": "さらに$tokenを入手",
+			"get_more_token": "さらに$tokenを取得",
 			"receive_token": "$tokenを受け取る",
 			"receive_token_title": "$tokenを直接受け取る",
-			"receive_token_text": "アカウントに直接$tokenを受け取る",
+			"receive_token_text": "$tokenをアカウントに直接受け取る",
 			"buy_assets": "資産を購入",
 			"buy_assets_title": "変換可能な資産を購入",
-			"buy_assets_text": "資産を購入して$tokenに変換"
+			"buy_assets_text": "さらに資産を購入して$tokenに変換する"
 		}
 	},
 	"temporal": {
@@ -2102,7 +2102,7 @@
 			"second_plural": "秒"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {
