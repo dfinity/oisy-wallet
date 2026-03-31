@@ -77,6 +77,42 @@ describe('Transaction', () => {
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: toAddress }));
 	});
 
+	it('should render `to` when we BURN address', () => {
+		const toAddress = '0xburnaddr';
+
+		const { container, getByText } = render(Transaction, {
+			displayAmount: 10n,
+			type: 'burn',
+			status: 'confirmed',
+			timestamp: 1_690_000_000,
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			to: toAddress,
+			children: mockSnippet
+		});
+
+		expect(getByText(/^to$/i)).toBeInTheDocument();
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: toAddress }));
+	});
+
+	it('should render `from` when we MINT address', () => {
+		const fromAddress = '0xmintaddr';
+
+		const { container, getByText } = render(Transaction, {
+			displayAmount: 10n,
+			type: 'mint',
+			status: 'confirmed',
+			timestamp: 1_690_000_000,
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			from: fromAddress,
+			children: mockSnippet
+		});
+
+		expect(getByText(/From/i)).toBeInTheDocument();
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: fromAddress }));
+	});
+
 	it('should show "To" and a shortened address for deposit transactions', () => {
 		const toAddress = '0xdeposit-addr';
 
