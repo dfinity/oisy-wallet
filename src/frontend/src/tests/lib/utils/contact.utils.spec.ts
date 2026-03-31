@@ -1,5 +1,6 @@
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+import type { NonEmptyArray } from '$lib/types/utils';
 import {
 	filterAddressFromContact,
 	getContactForAddress,
@@ -23,7 +24,6 @@ import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
-import type { NonEmptyArray } from '$lib/types/utils';
 
 describe('contact.utils', () => {
 	describe('selectColorForName', () => {

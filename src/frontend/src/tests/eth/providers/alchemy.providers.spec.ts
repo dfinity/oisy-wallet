@@ -2,10 +2,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
-import type {
-	AlchemyProviderContract,
-	AlchemyProviderContracts
-} from '$eth/types/alchemy';
+import type { AlchemyProviderContract, AlchemyProviderContracts } from '$eth/types/alchemy';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { EthereumNetwork } from '$eth/types/network';
 import { MediaStatusEnum } from '$lib/enums/media-status';
@@ -54,15 +51,13 @@ describe('alchemy.providers', () => {
 	const networks: EthereumNetwork[] = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS];
 
 	it('should create the correct map of providers', () => {
-		networks.forEach(
-			({ providers: { alchemyJsonRpcUrl, viemChain } }, index) => {
-				expect(http).toHaveBeenNthCalledWith(index + 1, `${alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`);
-				expect(createPublicClient).toHaveBeenNthCalledWith(index + 1, {
-					chain: viemChain,
-					transport: `${alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`
-				});
-			}
-		);
+		networks.forEach(({ providers: { alchemyJsonRpcUrl, viemChain } }, index) => {
+			expect(http).toHaveBeenNthCalledWith(index + 1, `${alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`);
+			expect(createPublicClient).toHaveBeenNthCalledWith(index + 1, {
+				chain: viemChain,
+				transport: `${alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`
+			});
+		});
 	});
 
 	describe('wait', () => {
