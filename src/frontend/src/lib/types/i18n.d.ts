@@ -852,6 +852,7 @@ interface I18nSwap {
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
+		value_difference_error_confirmation: string;
 	};
 	error: {
 		kong_not_available: string;

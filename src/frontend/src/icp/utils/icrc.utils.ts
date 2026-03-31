@@ -16,6 +16,7 @@ import type {
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
@@ -23,6 +24,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { mapTokenMetadata, type IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> &
 	Partial<IcCkMetadata> & {
@@ -91,6 +93,12 @@ export const mapIcrcToken = ({
 
 	const twinTokenTags = rest.twinToken?.tags;
 
+	const mintingAccount =
+		rest.mintingAccount ??
+		(nonNullish(rest.minterCanisterId)
+			? getIcrcAccount(Principal.fromText(rest.minterCanisterId))
+			: undefined);
+
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
@@ -109,7 +117,8 @@ export const mapIcrcToken = ({
 		tags: customTokenSymbol?.tags ?? twinTokenTags ?? DEFAULT_TOKEN_TAGS,
 		ledgerCanisterId,
 		...metadataToken,
-		...rest
+		...rest,
+		...(nonNullish(mintingAccount) && { mintingAccount })
 	};
 };
 

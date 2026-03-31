@@ -1114,7 +1114,8 @@
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
-			"near_intents_estimated_time": "NEAR Intents (~$minutes min)"
+			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
+			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed."
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -2043,7 +2044,7 @@
 			"description_empty": "It looks like you haven't staked any tokens yet",
 			"full_history": "Show full history",
 			"recent_history": "Close full history",
-			"harvest_autopilot_carousel_slide_title": "Smart Yield Farming with Harvest Autopilot",
+			"harvest_autopilot_carousel_slide_title": "Earn in OISY with Harvest Autopilot Yield Farming",
 			"harvest_autopilot_carousel_slide_cta": "Learn more"
 		},
 		"error": {
