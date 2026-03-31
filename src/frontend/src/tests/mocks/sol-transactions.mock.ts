@@ -33,7 +33,7 @@ export const mockSignature2 =
 	'4xiJZFz8wVnFHhjNfLV2ZaGnFFkoJ1U2RcYhTFmyq8szGDNTvha2MtUhzPjqQwcNF9JqNwG4h5FVohFNWrqzrwVc';
 
 export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
-	Array.from({ length: n }, () => createMockSolTransactionUi(`txn-${n}`));
+	Array.from({ length: n }, (_, i) => createMockSolTransactionUi(`txn-${i + 1}`));
 
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,

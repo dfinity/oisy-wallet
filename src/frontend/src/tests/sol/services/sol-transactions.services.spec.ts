@@ -48,6 +48,10 @@ vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
 }));
 
+vi.mock('$env/user-transactions.env', () => ({
+	USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED: true
+}));
+
 vi.mock('$sol/services/sol-user-transactions.services', () => ({
 	loadSolUserTransactions: vi.fn().mockResolvedValue(undefined),
 	saveSolFinalizedTransactions: vi.fn().mockResolvedValue({ success: true })
