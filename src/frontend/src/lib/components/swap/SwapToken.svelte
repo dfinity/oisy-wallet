@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -19,7 +19,7 @@
 	let { token, amount, exchangeRate, title }: Props = $props();
 
 	let formattedAmount = $derived(
-		nonNullish(token) && nonNullish(amount)
+		nonNullish(token) && nonNullish(amount) && notEmptyString(`${amount}`)
 			? formatToken({
 					value: parseToken({ value: `${amount}`, unitName: token.decimals }),
 					unitName: token.decimals,
