@@ -12,6 +12,10 @@ import {
 	loadNextSolTransactions,
 	loadNextSolTransactionsByOldest
 } from '$sol/services/sol-transactions.services';
+import {
+	loadSolUserTransactions,
+	saveSolFinalizedTransactions
+} from '$sol/services/sol-user-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { LoadNextSolTransactionsParams } from '$sol/types/sol-api';
@@ -42,6 +46,15 @@ import type { MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
+}));
+
+vi.mock('$env/user-transactions.env', () => ({
+	USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED: true
+}));
+
+vi.mock('$sol/services/sol-user-transactions.services', () => ({
+	loadSolUserTransactions: vi.fn().mockResolvedValue(undefined),
+	saveSolFinalizedTransactions: vi.fn().mockResolvedValue({ success: true })
 }));
 
 vi.mock(import('$sol/api/solana.api'), async (importOriginal) => {
@@ -528,6 +541,115 @@ describe('sol-transactions.services', () => {
 				network: SolanaNetworks.devnet
 			});
 		});
+
+		it('should call loadSolUserTransactions with correct params', async () => {
+			spyGetTransactions.mockResolvedValue([]);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(loadSolUserTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SolNativeMainnet: null },
+				address: mockSolAddress
+			});
+		});
+
+		it('should combine stored and new transactions in the store', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `stored-${i}`
+			}));
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: storedTransactions,
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 50n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+
+			const newTransactions = createMockSolTransactionsUi(3).map((tx, i) => ({
+				...tx,
+				id: `new-${i}`
+			}));
+			spyGetTransactions.mockResolvedValue(newTransactions);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(
+				[...newTransactions, ...storedTransactions].map((data) => ({
+					data,
+					certified: false
+				}))
+			);
+		});
+
+		it('should set only new transactions when no stored transactions exist', async () => {
+			vi.mocked(loadSolUserTransactions).mockResolvedValue(undefined);
+
+			const newTransactions = createMockSolTransactionsUi(3);
+			spyGetTransactions.mockResolvedValue(newTransactions);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(
+				newTransactions.map((data) => ({
+					data,
+					certified: false
+				}))
+			);
+		});
+
+		it('should call saveSolFinalizedTransactions when there are new transactions', async () => {
+			vi.mocked(loadSolUserTransactions).mockResolvedValue(undefined);
+
+			const newTransactions = createMockSolTransactionsUi(3);
+			spyGetTransactions.mockResolvedValue(newTransactions);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SolNativeMainnet: null },
+				transactions: newTransactions
+			});
+		});
+
+		it('should not call saveSolFinalizedTransactions when there are no new transactions', async () => {
+			spyGetTransactions.mockResolvedValue([]);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(saveSolFinalizedTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should still succeed when saveSolFinalizedTransactions rejects', async () => {
+			vi.mocked(loadSolUserTransactions).mockResolvedValue(undefined);
+			vi.mocked(saveSolFinalizedTransactions).mockRejectedValue(new Error('Backend save failed'));
+
+			const newTransactions = createMockSolTransactionsUi(2);
+			spyGetTransactions.mockResolvedValue(newTransactions);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(
+				newTransactions.map((data) => ({
+					data,
+					certified: false
+				}))
+			);
+		});
+
+		it('should handle loadSolUserTransactions failure gracefully', async () => {
+			vi.mocked(loadSolUserTransactions).mockRejectedValue(new Error('Backend read failed'));
+
+			const newTransactions = createMockSolTransactionsUi(2);
+			spyGetTransactions.mockResolvedValue(newTransactions);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toBeNull();
+		});
 	});
 
 	describe('loadNextSolTransactionsByOldest', () => {
@@ -561,6 +683,9 @@ describe('sol-transactions.services', () => {
 			mockAuthStore();
 
 			solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue(undefined);
+			spyGetTransactions.mockResolvedValue([]);
 		});
 
 		it('should not load transactions if the transactions list is empty', async () => {
@@ -635,6 +760,8 @@ describe('sol-transactions.services', () => {
 			});
 
 			vi.clearAllMocks();
+			vi.mocked(loadSolUserTransactions).mockResolvedValue(undefined);
+			spyGetTransactions.mockResolvedValue([]);
 
 			const resultWithMillis = await loadNextSolTransactionsByOldest({
 				...mockParams,

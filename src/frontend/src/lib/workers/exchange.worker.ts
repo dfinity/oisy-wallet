@@ -1,9 +1,11 @@
+import { BACKEND_EXCHANGE_ENABLED } from '$env/exchange.env';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import {
 	exchangeRateBNBToUsd,
 	exchangeRateBTCToUsd,
@@ -14,7 +16,8 @@ import {
 	exchangeRatePOLToUsd,
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd,
-	exchangeRateUsdToCurrency
+	exchangeRateUsdToCurrency,
+	fetchAllExchangeRatesFromBackend
 } from '$lib/services/exchange.services';
 import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
@@ -125,6 +128,90 @@ const buildErc20PriceParams = (
 		)
 	);
 
+const syncExchangeFromBackend = async ({
+	currentCurrency,
+	erc20ContractAddresses,
+	icrcLedgerCanisterIds,
+	splTokenAddresses,
+	erc4626TokensExchangeData
+}: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
+	const identity = await AuthClientProvider.getInstance().loadIdentity();
+
+	if (isNullish(identity)) {
+		consoleError(
+			'Error while fetching exchange rate:',
+			'Cannot fetch backend exchange rates without an authenticated identity.'
+		);
+
+		return {
+			currentExchangeRate: {
+				exchangeRateToUsd: null,
+				exchangeRate24hChangeMultiplier: null,
+				currency: currentCurrency
+			},
+			currentEthPrice: undefined,
+			currentBtcPrice: undefined,
+			currentErc20Prices: {},
+			currentIcpPrice: undefined,
+			currentIcrcPrices: {},
+			currentSolPrice: undefined,
+			currentSplPrices: {},
+			currentErc4626Prices: {},
+			currentBnbPrice: undefined,
+			currentPolPrice: undefined
+		};
+	}
+
+	const [currentExchangeRate, backendPrices] = await Promise.all([
+		exchangeRateUsdToCurrency(currentCurrency),
+		fetchAllExchangeRatesFromBackend({
+			identity,
+			erc20Addresses: erc20ContractAddresses,
+			icrcCanisterIds: icrcLedgerCanisterIds,
+			splTokenAddresses
+		})
+	]);
+
+	const {
+		currentEthPrice,
+		currentBtcPrice,
+		currentIcpPrice,
+		currentSolPrice,
+		currentBnbPrice,
+		currentPolPrice,
+		currentArbitrumEthPrice,
+		currentBaseEthPrice,
+		currentErc20Prices,
+		currentIcrcPrices,
+		currentSplPrices
+	} = backendPrices;
+
+	const currentErc4626Prices = await calculateErc4626Prices({
+		erc20Prices: currentErc20Prices,
+		erc4626TokensExchangeData
+	});
+
+	return {
+		currentExchangeRate: {
+			exchangeRateToUsd: currentExchangeRate?.rate ?? null,
+			exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier ?? null,
+			currency: currentCurrency
+		},
+		currentEthPrice,
+		currentBtcPrice,
+		currentErc20Prices,
+		currentIcpPrice,
+		currentIcrcPrices,
+		currentSolPrice,
+		currentSplPrices,
+		currentErc4626Prices,
+		currentBnbPrice,
+		currentPolPrice,
+		currentArbitrumEthPrice,
+		currentBaseEthPrice
+	};
+};
+
 const syncExchangeFromProviders = async ({
 	currentCurrency,
 	erc20ContractAddresses,
@@ -232,7 +319,9 @@ const syncExchange = async (params: SyncExchangeParams) => {
 	syncInProgress = true;
 
 	try {
-		const data = await syncExchangeFromProviders(params);
+		const data = BACKEND_EXCHANGE_ENABLED
+			? await syncExchangeFromBackend(params)
+			: await syncExchangeFromProviders(params);
 
 		postMessage({
 			msg: 'syncExchange',

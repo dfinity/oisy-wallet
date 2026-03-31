@@ -1,4 +1,5 @@
 import { ckMinterBuiltInContacts } from '$icp-eth/derived/ck-minter-contacts.derived';
+import { ckMinterPrincipalBuiltInContacts } from '$icp-eth/utils/ck-minter-principal-contacts.utils';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi, ExtendedAddressContactUiMap } from '$lib/types/contact';
 import { nonNullish } from '@dfinity/utils';
@@ -26,7 +27,11 @@ export const contacts: Readable<ContactUi[]> = derived([contactsStore], ([$conta
  */
 export const allContacts: Readable<ContactUi[]> = derived(
 	[ckMinterBuiltInContacts, contacts],
-	([$ckMinterBuiltInContacts, $contacts]) => [...$ckMinterBuiltInContacts, ...$contacts]
+	([$ckMinterBuiltInContacts, $contacts]) => [
+		...ckMinterPrincipalBuiltInContacts,
+		...$ckMinterBuiltInContacts,
+		...$contacts
+	]
 );
 
 export const sortedContacts: Readable<ContactUi[]> = derived([contacts], ([$contacts]) =>

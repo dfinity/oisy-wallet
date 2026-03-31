@@ -437,7 +437,11 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -568,6 +572,36 @@
 						"share_href": ""
 					},
 					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"welcome": {
+					"title": "",
+					"subtitle": "",
+					"description": ""
+				},
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
 						"title": "",
 						"description": "",
 						"share_href": ""
@@ -1080,7 +1114,8 @@
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
-			"near_intents_estimated_time": ""
+			"near_intents_estimated_time": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",

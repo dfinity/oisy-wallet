@@ -437,7 +437,11 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -475,7 +479,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "예정된 토큰 드롭을 주목하세요! <a href=\"https://x.com/oisy\" target=\"_blank\">X에서 팔로우</a>하거나, <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>에 참여하거나, <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>에서 최신 소식을 받아보세요.",
-			"coming_soon": "$oisy_short 에피소드 6이 곧 출시됩니다",
+			"coming_soon": "다음 $oisy_short Sprinkles 에피소드가 곧 찾아옵니다",
 			"reward_banner": "$campaignName 캠페인 배너"
 		},
 		"campaigns": {
@@ -576,6 +580,36 @@
 						"title": "작은 감사의 표시입니다",
 						"description": "추천한 사용자 중 한 명이 방금 스프링클을 받았습니다.",
 						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: 에피소드 6",
+				"one_liner": "활동하고, 다른 사람을 추천하고, 여러 체인에서 OISY를 사용하여 Sprinkles를 획득하세요. 당신의 행동이 보상을 늘리고, 활성 추천이 보상을 더욱 높입니다.<br/>이제 더 많은 체인은 더 높은 당첨 가능성을 의미합니다.",
+				"participate_title": "활동과 추천으로 토큰을 획득하세요. 체인이 많을수록 기회도 늘어납니다.",
+				"description": "자격을 얻으려면 활발하게 활동하세요: 자주 로그인하고, 지갑 작업을 완료하고, 최소 5 $를 보유하세요.<br/>활성화된 각 체인은 멀티체인 배수로 당첨 확률을 높입니다.<br/>자격을 갖춘 친구로부터 10%를 획득하세요.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "$oisy_short에 오신 것을 환영합니다!",
+					"subtitle": "획득할 준비가 되셨나요?",
+					"description": "첫 번째 보상까지 2단계 남았습니다: 로그인하고, 5 $+ 보유하고, 2가지 작업을 완료하세요. Sprinkles를 획득하기 위해 필요한 것은 그것뿐입니다.<br><br>더 원하시나요? 친구를 추천하고 친구가 Sprinkles를 획득할 때마다 보너스를 받으세요."
+				},
+				"win": {
+					"default": {
+						"title": "보상을 받으셨습니다",
+						"description": "보상이 지갑에 도착했습니다.<br>더 많이 획득하려면 추천하고 활발하게 활동하는 것을 잊지 마세요",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "주간 보너스 드롭에 당첨되셨습니다",
+						"description": "주간 보너스 드롭 중 하나를 획득하셨습니다.<br>더 많이 획득하려면 활발하게 활동하고 계속 추천하세요",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "작은 감사의 표시입니다",
+						"description": "추천하신 사용자 중 한 명이 방금 Sprinkles를 받았습니다.",
+						"share_href": ""
 					}
 				}
 			}
@@ -1080,7 +1114,8 @@
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
-			"near_intents_estimated_time": ""
+			"near_intents_estimated_time": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",
@@ -1891,8 +1926,8 @@
 	},
 	"earning": {
 		"text": {
-			"title": "수익",
-			"tab_title": "수익 창출",
+			"title": "수익 창출",
+			"tab_title": "수익 창출 중",
 			"earning_opportunities": "수익 창출 기회",
 			"header_title": "수익 창출에 오신 것을 환영합니다!",
 			"header_description": "토큰을 수익 창출 기회에 할당하여 디지털 자산 포트폴리오를 늘리세요.",
@@ -1900,13 +1935,13 @@
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "하베스트 - 자동 운용",
-				"description": "원클릭 자동 운용 볼트로 최대 수익 효율 실현.",
-				"action": "자동 운용으로 이동"
+				"title": "Harvest – Autopilot",
+				"description": "원클릭 Autopilot vault로 최대 수익 효율을 실현하세요.",
+				"action": "Autopilot으로 이동"
 			},
 			"sprinkles": {
-				"title": "OISY 스프링클",
-				"description": "OISY를 사용하고 수익을 얻으세요! Ep. 5가 공개되었습니다 🎉",
+				"title": "OISY Sprinkles",
+				"description": "OISY를 사용하고 수익을 창출하세요! 에피소드 6 공개 중 🎉",
 				"action": "상태 확인"
 			}
 		},
@@ -1914,7 +1949,7 @@
 			"apy": "APY",
 			"networks": "네트워크",
 			"assets": "자산",
-			"currentStaked": "스테이킹됨",
+			"currentStaked": "스테이킹 중",
 			"currentEarning": "현재 수익 중",
 			"earningPotential": "수익 잠재력",
 			"terms": "조건"
@@ -1924,54 +1959,54 @@
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": "Gold DAO로 수익 얻기"
+				"cardTitle": "Gold DAO로 수익 창출"
 			}
 		}
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "자동 운용",
-			"live_apy": "실시간 APY"
+			"autopilot": "Autopilot",
+			"live_apy": "현재 APY"
 		}
 	},
 	"stake": {
 		"text": {
-			"harvest_autopilot_page_description": "원클릭 자동 운용 볼트로 최대 수익 효율 실현.",
-			"harvest_autopilot_vault_page_description": "자동 운용은 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">감사 완료된 IPOR</a> Fusion Vault 기술을 기반으로 합니다.",
-			"harvest_autopilot_provider_description": "",
-			"harvest_autopilot_stake_terms": "",
+			"harvest_autopilot_page_description": "원클릭 Autopilot vault로 최대 수익 효율을 실현하세요.",
+			"harvest_autopilot_vault_page_description": "Autopilot은 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">검증된 IPOR</a> Fusion Vault 기술로 구동됩니다.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot은 최소한의 노력으로 DeFi 포지션을 자동화하는 전문적인 \"설정 후 잊어버리기\" 서비스입니다.",
+			"harvest_autopilot_stake_terms": "본 제품을 읽고 이해했으며, <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">위험 공시</a>를 읽었고, <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">이용약관</a>에 동의함을 확인합니다.",
 			"my_positions": "내 포지션",
-			"available_autopilots": "사용 가능한 자동 운용",
-			"vault_info": "볼트 정보",
-			"vault_address": "볼트 주소",
+			"available_autopilots": "이용 가능한 Autopilot",
+			"vault_info": "Vault 정보",
+			"vault_address": "Vault 주소",
 			"protocol": "프로토콜",
-			"harvest": "하베스트",
-			"autopilot": "자동 운용",
-			"total_value_locked": "총 예치 가치 (TVL)",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "총 예치 금액 (TVL)",
 			"manager": "매니저",
-			"vault_description": "이 풀은 $asset_symbol 보유 자산에 대한 '설정 후 방치' 수익 관리 서비스로 설계되었습니다. 최적의 기회에 자본을 동적으로 할당하여 최소한의 노력으로 DeFi 포지션을 자동으로 최적화합니다.",
-			"stake": "$token_symbol 스테이킹",
+			"vault_description": "이 풀은 $asset_symbol 보유자를 위한 \"설정 후 잊어버리기\" 수익 관리 서비스로 설계되었습니다. 최적의 기회에 자본을 동적으로 배분하여 최소한의 노력으로 DeFi 포지션을 자동으로 최적화합니다.",
+			"stake": "스테이킹",
 			"stake_now": "지금 스테이킹",
 			"stake_amount": "$amount $token_symbol 스테이킹",
 			"not_enough_to_stake": "스테이킹할 $token_symbol이 없습니다",
-			"estimated_received": "",
-			"estimated_yearly_yield": "",
+			"estimated_received": "예상 수령액",
+			"estimated_yearly_yield": "예상 연간 수익",
 			"unstake": "언스테이킹",
 			"unstake_now": "지금 언스테이킹",
 			"unstaking": "언스테이킹 중...",
 			"unstake_token": "$token_symbol 언스테이킹",
 			"enable_token_text": "$token_symbol을 활성화해야 합니다",
 			"enable_token_button": "$token_symbol 활성화",
-			"review": "거래 검토",
-			"executing_transaction": "거래 실행 중...",
-			"unsupported_token_staking": "선택한 토큰에 대한 스테이킹은 지원되지 않습니다.",
-			"provider": "$provider가 제공하는 스테이킹 조건",
+			"review": "트랜잭션 검토",
+			"executing_transaction": "트랜잭션 실행 중...",
+			"unsupported_token_staking": "선택한 토큰의 스테이킹은 지원되지 않습니다.",
+			"provider": "스테이킹 조건은 $provider가 제공합니다",
 			"earning_potential": "수익 잠재력",
-			"earning_potential_hint": "투자되지 않은 자산의 가치와 사용 가능한 수익 기회의 최고 APY를 기반으로 합니다.",
+			"earning_potential_hint": "투자되지 않은 자산의 가치와 이용 가능한 수익 창출 기회의 최고 APY를 기반으로 합니다.",
 			"active_earning": "활성 수익",
 			"active_earning_per_year": "$amount/년",
 			"active_earning_per_year_short": "$amount/년",
-			"unproductive_assets": "사용 가능",
+			"unproductive_assets": "이용 가능",
 			"invested_assets": "할당됨",
 			"visit_provider": "웹사이트 방문",
 			"current_apy_label": "현재 APY",
@@ -1980,11 +2015,11 @@
 			"unstake_review_subtitle": "언스테이킹 금액",
 			"delayed_dissolve": "지연 수령",
 			"immediate_dissolve": "즉시 수령",
-			"included_token_fee": "포함된 네트워크 수수료",
-			"included_dissolve_fee": "포함된 잠금 해제 수수료",
-			"delayed_dissolve_terms": "$token을 스테이킹에서 잠금 해제할 때, 토큰은 추가 보상 없이 $delay일 동안 잠기며 이후 출금 가능합니다.",
-			"delayed_dissolve_info": "$token 스테이크 잠금 해제를 시작하면 새로운 보상을 더 이상 받지 못합니다.",
-			"immediate_dissolve_terms": "$token을 즉시 수령하지만 잠금 해제하는 $token 토큰에 대해 수수료가 부과됩니다.",
+			"included_token_fee": "네트워크 수수료 포함",
+			"included_dissolve_fee": "잠금 해제 수수료 포함",
+			"delayed_dissolve_terms": "$token을 스테이킹에서 잠금 해제할 때, 토큰은 인출 가능해지기 전까지 $delay일 동안 추가 보상 없이 잠깁니다.",
+			"delayed_dissolve_info": "$token 스테이크 잠금 해제를 시작하면 새로운 보상을 받을 수 없게 됩니다.",
+			"immediate_dissolve_terms": "$token을 즉시 받을 수 있지만, 잠금 해제하는 $token 토큰에 수수료가 부과됩니다.",
 			"amount_to_receive": "수령 금액",
 			"unclaimed_rewards": "미청구 보상",
 			"unlock_requests": "잠금 해제 요청",
@@ -2002,32 +2037,32 @@
 			"reward_claimed": "보상 청구 완료",
 			"staked": "스테이킹됨",
 			"unstaked": "언스테이킹됨",
-			"title_empty_1": "최대",
-			"title_empty_2_usd": "/년 수익",
+			"title_empty_1": "연간 최대",
+			"title_empty_2_usd": "/년 수익 창출",
 			"title_empty_2_apy": "연간",
 			"title_empty_3": "",
 			"description_empty": "아직 스테이킹한 토큰이 없는 것 같습니다",
-			"full_history": "전체 기록 보기",
-			"recent_history": "전체 기록 닫기",
-			"harvest_autopilot_carousel_slide_title": "",
-			"harvest_autopilot_carousel_slide_cta": ""
+			"full_history": "전체 내역 보기",
+			"recent_history": "전체 내역 닫기",
+			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield Farming으로 OISY에서 수익 창출",
+			"harvest_autopilot_carousel_slide_cta": "자세히 알아보기"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "토큰 출금 중 문제가 발생했습니다.",
-			"unexpected_error_on_unstake": "토큰 언스테이킹 중 문제가 발생했습니다.",
-			"unexpected_error_on_stake": "",
-			"dissolvement_limit_reached": "활성 잠금 해제 요청의 최대 $limit개에 도달했습니다. 새 요청을 만들기 전에 일부를 완료하세요.<br/>참고로 '즉시' 옵션을 사용하여 언제든지 언스테이킹할 수 있습니다."
+			"unexpected_error_on_withdraw": "토큰 출금 중 오류가 발생했습니다.",
+			"unexpected_error_on_unstake": "토큰 언스테이킹 중 오류가 발생했습니다.",
+			"unexpected_error_on_stake": "토큰 스테이킹 중 오류가 발생했습니다.",
+			"dissolvement_limit_reached": "활성 잠금 해제 요청의 최대 $limit개에 도달했습니다. 새 요청을 만들기 전에 일부를 완료하세요.<br/>\"즉시\" 옵션을 사용하여 언제든지 언스테이킹할 수 있습니다."
 		},
 		"info": {
 			"harvest_autopilot": {
-				"title": "하베스트 자동 운용이란",
-				"description": "하베스트 자동 운용은 최소한의 노력으로 탈중앙화 금융(DeFi) 포지션을 자동화하고 최적화하기 위해 설계된 하베스트 파이낸스 생태계 내의 전문 기능(및 특정 제품 라인)입니다.",
-				"fact_1_title": "스마트 수익 할당",
+				"title": "Harvest Autopilot이란",
+				"description": "Harvest Autopilot은 Harvest Finance 생태계 내의 전문 기능(및 특정 제품 라인)으로, 최소한의 노력으로 탈중앙화 금융(DeFi) 포지션을 자동화하고 최적화하도록 설계되었습니다.",
+				"fact_1_title": "스마트 수익 배분",
 				"fact_1_description": "최고의 실시간 APY를 포착하기 위해 자동으로 프로토콜을 전환합니다.",
-				"fact_2_title": "수동적 복리 운용",
+				"fact_2_title": "수동적 복리",
 				"fact_2_description": "보상이 자동으로 수확되고 재투자되어 성장을 극대화합니다.",
-				"fact_3_title": "가스비 분담",
-				"fact_3_description": "다른 사용자와 거래를 묶어 가스비를 절약하여 비용을 낮춥니다."
+				"fact_3_title": "가스 비용 분담",
+				"fact_3_description": "다른 사용자와 트랜잭션을 묶어 가스를 절약하여 비용을 절감합니다."
 			}
 		},
 		"alt": {
@@ -2045,10 +2080,10 @@
 			"get_more_token": "$token 더 받기",
 			"receive_token": "$token 수령",
 			"receive_token_title": "$token 직접 수령",
-			"receive_token_text": "내 계정으로 $token을 직접 수령하세요",
+			"receive_token_text": "$token을 계정으로 직접 수령",
 			"buy_assets": "자산 구매",
 			"buy_assets_title": "변환 가능한 자산 구매",
-			"buy_assets_text": "더 많은 자산을 구매하여 $token으로 변환하세요"
+			"buy_assets_text": "더 많은 자산을 구매하고 $token으로 변환"
 		}
 	},
 	"temporal": {
@@ -2067,7 +2102,7 @@
 			"second_plural": "초"
 		},
 		"time_frame": {
-			"t_24h": "24시간"
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {

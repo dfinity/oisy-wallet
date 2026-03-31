@@ -6,6 +6,10 @@ import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
+import {
+	loadSolUserTransactions,
+	saveSolFinalizedTransactions
+} from '$sol/services/sol-user-transactions.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -19,6 +23,15 @@ import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
+}));
+
+vi.mock('$env/user-transactions.env', () => ({
+	USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED: true
+}));
+
+vi.mock('$sol/services/sol-user-transactions.services', () => ({
+	loadSolUserTransactions: vi.fn().mockResolvedValue(undefined),
+	saveSolFinalizedTransactions: vi.fn().mockResolvedValue({ success: true })
 }));
 
 vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
@@ -357,5 +370,138 @@ describe('sol-wallet.scheduler', () => {
 		afterEach(teardown);
 
 		tests();
+	});
+
+	describe('backend integration', () => {
+		const startData: PostMessageDataRequestSol = {
+			address: {
+				certified: false,
+				data: mockSolAddress
+			},
+			solanaNetwork: SolanaNetworks.mainnet
+		};
+
+		let scheduler: SolWalletScheduler;
+
+		beforeEach(() => {
+			scheduler = new SolWalletScheduler();
+		});
+
+		afterEach(() => {
+			scheduler['store'] = {
+				balance: undefined,
+				transactions: {}
+			};
+
+			scheduler.stop();
+		});
+
+		it('should call loadSolUserTransactions on initial sync', async () => {
+			await scheduler.trigger(startData);
+
+			expect(loadSolUserTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokenId: { SolNativeMainnet: null },
+				address: mockSolAddress
+			});
+		});
+
+		it('should not call loadSolUserTransactions on subsequent syncs', async () => {
+			await scheduler.trigger(startData);
+
+			expect(loadSolUserTransactions).toHaveBeenCalledOnce();
+
+			vi.clearAllMocks();
+
+			await scheduler.trigger(startData);
+
+			expect(loadSolUserTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should call saveSolFinalizedTransactions when new RPC transactions are found', async () => {
+			await scheduler.trigger(startData);
+
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokenId: { SolNativeMainnet: null },
+				transactions: mockSolTransactions
+			});
+		});
+
+		it('should not call saveSolFinalizedTransactions when all RPC transactions are already known', async () => {
+			await scheduler.trigger(startData);
+
+			vi.clearAllMocks();
+
+			await scheduler.trigger(startData);
+
+			expect(saveSolFinalizedTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should load backend stored transactions and include them in the response', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `stored-${i}`
+			}));
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: storedTransactions,
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 50n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+
+			await scheduler.trigger(startData);
+
+			const store = scheduler['store'].transactions;
+			for (const tx of storedTransactions) {
+				expect(store[tx.id]).toEqual({ data: tx, certified: false });
+			}
+		});
+
+		it('should still load RPC transactions when backend load fails', async () => {
+			vi.mocked(loadSolUserTransactions).mockRejectedValue(new Error('Backend read failed'));
+
+			await scheduler.trigger(startData);
+
+			expect(spyLoadTransactions).toHaveBeenCalledOnce();
+
+			const store = scheduler['store'].transactions;
+			for (const tx of mockSolTransactions) {
+				expect(store[tx.id]).toBeDefined();
+			}
+		});
+
+		it('should still succeed when saveSolFinalizedTransactions rejects', async () => {
+			vi.mocked(saveSolFinalizedTransactions).mockRejectedValue(new Error('Backend save failed'));
+
+			await scheduler.trigger(startData);
+
+			const store = scheduler['store'].transactions;
+			for (const tx of mockSolTransactions) {
+				expect(store[tx.id]).toBeDefined();
+			}
+		});
+
+		it('should use correct tokenId for SPL tokens', async () => {
+			const splStartData: PostMessageDataRequestSol = {
+				address: {
+					certified: false,
+					data: mockSolAddress
+				},
+				solanaNetwork: SolanaNetworks.devnet,
+				tokenAddress: DEVNET_USDC_TOKEN.address,
+				tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
+			};
+
+			await scheduler.trigger(splStartData);
+
+			expect(loadSolUserTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
+				address: mockSolAddress
+			});
+		});
 	});
 });

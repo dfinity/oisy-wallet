@@ -437,7 +437,11 @@
 			"liquidium": {
 				"name": "Liquidium",
 				"one_liner": "Borrow & lend native Bitcoin against USDT.",
-				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes."
+				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes.",
+				"carousel": {
+					"text": "Borrow & lend native Bitcoin against USDT",
+					"call_to_action": "Learn more"
+				}
 			}
 		}
 	},
@@ -456,7 +460,7 @@
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
 			"open_wallet": "Take me to the wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles Episode 5 is now Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 6 is now Live!",
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
 			"youre_eligible": "You're eligible!",
@@ -475,13 +479,13 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
-			"coming_soon": "$oisy_short episode 6 is coming soon",
+			"coming_soon": "Next $oisy_short sprinkles episode is coming soon",
 			"reward_banner": "Banner of the campaign $campaignName"
 		},
 		"campaigns": {
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 3 is Live \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episode 3 has ended",
 				"one_liner": "Earn BTC for being active—and now, for <strong>inviting friends</strong>.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer a friend, and earn 10% of the value of their rewards for the entire campaign.",
 				"participate_title": "Earn BTC by staying active - and now by inviting others.",
 				"description": "Meet simple weekly requirements. Log in, make two transactions, and hold at least $20 in tokens to stay eligible for one of 50 BTC drops every day.<br/><strong>Now with referral rewards:</strong> invite a friend to deploy a wallet and earn 10% of their Sprinkles for 30 days. They keep 100% - you earn extra.",
@@ -506,7 +510,7 @@
 			},
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 4 is Live \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episode 4 has ended",
 				"one_liner": "Earn BTC for staying active — and now, earn <strong>guaranteed</strong> Sprinkles for referrals.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer 4 friends and get rewarded directly. Top referrers win even more.",
 				"participate_title": "Earn BTC by staying active - and now by inviting others.",
 				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Now with referral rewards: invite a friend to set up a wallet and you’ll both earn guaranteed Sprinkles. Land in the top 4 referrers and win a jackpot.",
@@ -546,7 +550,7 @@
 			},
 			"sprinkles_s1e5": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 5 is Live 🤑",
+				"card_title": "OISY Sprinkles: Episode 5 has ended",
 				"one_liner": "Earn Sprinkles for being active, referring others, and using OISY across chains. Your actions grow your rewards, and active referrals boost them further.<br/>Plus, now more chains means better chances to win.",
 				"participate_title": "Earn tokens for activity and referrals. More chains mean more chances.",
 				"description": "Stay active over 10 days to qualify: log in often, complete wallet actions, and hold at least $20.<br/>Each active chain boosts your odds with a Multichain Multiplier.<br/>Earn 10% from friends who qualify, and rank top 3 to win a $200 Super Sprinkle.",
@@ -571,6 +575,36 @@
 						"title": "You topped the Leaderboard",
 						"description": "You ranked among the top 3 referrers this season<br>$200 has been added to your wallet",
 						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+					},
+					"referral": {
+						"title": "Here a small thank you",
+						"description": "One of your referred users just got some sprinkles.",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episode 6 is coming soon...",
+				"one_liner": "Earn Sprinkles for being active, referring others, and using OISY across chains. Your actions grow your rewards, and active referrals boost them further.<br/>Plus, now more chains means better chances to win.",
+				"participate_title": "Earn tokens for activity and referrals. More chains mean more chances.",
+				"description": "Stay active to qualify: log in often, complete wallet actions, and hold at least $5.<br/>Each active chain boosts your odds with a Multichain Multiplier.<br/>Earn 10% from friends who qualify.",
+				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"welcome": {
+					"title": "Welcome to $oisy_short!",
+					"subtitle": "Ready to Earn?",
+					"description": "You're 2 steps away from your first reward: Log in, hold $5+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer your friends and get a bonus every time one of them earns sprinkles."
+				},
+				"win": {
+					"default": {
+						"title": "You got rewarded",
+						"description": "Your rewards just landed in your wallet<br>Don't forget to refer and stay active to win more",
+						"share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
+					},
+					"jackpot": {
+						"title": "You've won the weekly bonus drop",
+						"description": "You just earned one of our weekly bonus drops.<br>Stay active, and keep referring to win more",
+						"share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
 					},
 					"referral": {
 						"title": "Here a small thank you",
@@ -1080,7 +1114,8 @@
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
-			"near_intents_estimated_time": "NEAR Intents (~$minutes min)"
+			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
+			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed."
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -1906,7 +1941,7 @@
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Use OISY and EARN! Ep. 5 is live \uD83C\uDF89",
+				"description": "Use OISY and EARN! Ep. 6 is live \uD83C\uDF89",
 				"action": "Check status"
 			}
 		},
@@ -2009,7 +2044,7 @@
 			"description_empty": "It looks like you haven't staked any tokens yet",
 			"full_history": "Show full history",
 			"recent_history": "Close full history",
-			"harvest_autopilot_carousel_slide_title": "Smart Yield Farming with Harvest Autopilot",
+			"harvest_autopilot_carousel_slide_title": "Earn in OISY with Harvest Autopilot Yield Farming",
 			"harvest_autopilot_carousel_slide_cta": "Learn more"
 		},
 		"error": {
