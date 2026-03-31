@@ -585,7 +585,7 @@
 				"one_liner": "Získávej Sprinkles za aktivitu, doporučování ostatních a používání OISY napříč chainy. Tvoje akce zvyšují tvoje odměny a aktivní doporučení je dále posilují.<br/>Navíc více chainů nyní znamená lepší šance na výhru.",
 				"participate_title": "Získávej tokeny za aktivitu a doporučení. Více chainů znamená více šancí.",
 				"description": "Zůstaň aktivní, abys mohl/a participovat: přihlašuj se často, prováděj akce v peněžence a drž alespoň 5 $.<br/>Každý aktivní chain zvyšuje tvoje šance pomocí Multichain Multiplikátoru.<br/>Získej 10 % od přátel, kteří se kvalifikují.",
-				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"campaign_href": "",
 				"welcome": {
 					"title": "Vítej v $oisy_short!",
 					"subtitle": "Připraven/a vydělávat?",
@@ -595,17 +595,17 @@
 					"default": {
 						"title": "Byl/a jsi odměněn/a",
 						"description": "Tvoje odměny právě dorazily do tvé peněženky.<br>Nezapomeň doporučovat a zůstat aktivní/a, abys vyhrál/a více",
-						"share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
+						"share_href": ""
 					},
 					"jackpot": {
 						"title": "Vyhrál/a jsi týdenní bonusový drop",
 						"description": "Právě jsi získal/a jeden z našich týdenních bonusových dropů.<br>Zůstaň aktivní a doporučuj dál, abys vyhrál/a více",
-						"share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
+						"share_href": ""
 					},
 					"referral": {
 						"title": "Malé poděkování",
 						"description": "Jeden z tvých doporučených uživatelů právě získal nějaké Sprinkles.",
-						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+						"share_href": ""
 					}
 				}
 			}
