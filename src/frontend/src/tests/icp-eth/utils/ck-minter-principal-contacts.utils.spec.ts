@@ -8,7 +8,11 @@ import {
 	LOCAL_CKETH_MINTER_CANISTER_ID,
 	STAGING_CKETH_MINTER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
-import { ckMinterPrincipalBuiltInContacts } from '$icp-eth/utils/ck-minter-principal-contacts.utils';
+import { CK_ETHEREUM_MINTER_DISPLAY_NAME } from '$icp-eth/utils/ck-minter-contacts.utils';
+import {
+	CKBTC_MINTER_DISPLAY_NAME,
+	ckMinterPrincipalBuiltInContacts
+} from '$icp-eth/utils/ck-minter-principal-contacts.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 
@@ -17,8 +21,8 @@ describe('ck-minter-principal-contacts.utils', () => {
 		it('should always include mainnet ckBTC and ckETH minter contacts', () => {
 			const names = ckMinterPrincipalBuiltInContacts.map(({ name }) => name);
 
-			expect(names).toContain('ckBTC Minter');
-			expect(names).toContain('ckETH Minter');
+			expect(names).toContain(CKBTC_MINTER_DISPLAY_NAME);
+			expect(names).toContain(CK_ETHEREUM_MINTER_DISPLAY_NAME);
 		});
 
 		it('should use Icrcv2 address type for all contacts', () => {
@@ -30,10 +34,10 @@ describe('ck-minter-principal-contacts.utils', () => {
 
 		it('should use the correct canister IDs as addresses', () => {
 			const ckBtcContact = ckMinterPrincipalBuiltInContacts.find(
-				({ name }) => name === 'ckBTC Minter'
+				({ name }) => name === CKBTC_MINTER_DISPLAY_NAME
 			);
 			const ckEthContact = ckMinterPrincipalBuiltInContacts.find(
-				({ name }) => name === 'ckETH Minter'
+				({ name }) => name === CK_ETHEREUM_MINTER_DISPLAY_NAME
 			);
 
 			expect(ckBtcContact?.addresses[0].address).toBe(IC_CKBTC_MINTER_CANISTER_ID);
@@ -60,10 +64,10 @@ describe('ck-minter-principal-contacts.utils', () => {
 
 		it('should include staging contacts only when staging canister IDs are defined', () => {
 			const hasStagingBtc = ckMinterPrincipalBuiltInContacts.some(
-				({ name }) => name === 'ckBTC Minter (Testnet)'
+				({ name }) => name === `${CKBTC_MINTER_DISPLAY_NAME} (Testnet)`
 			);
 			const hasStagingEth = ckMinterPrincipalBuiltInContacts.some(
-				({ name }) => name === 'ckETH Minter (Testnet)'
+				({ name }) => name === `${CK_ETHEREUM_MINTER_DISPLAY_NAME} (Testnet)`
 			);
 
 			expect(hasStagingBtc).toBe(nonNullish(STAGING_CKBTC_MINTER_CANISTER_ID));
@@ -72,10 +76,10 @@ describe('ck-minter-principal-contacts.utils', () => {
 
 		it('should include local contacts only when local canister IDs are defined', () => {
 			const hasLocalBtc = ckMinterPrincipalBuiltInContacts.some(
-				({ name }) => name === 'ckBTC Minter (Local)'
+				({ name }) => name === `${CKBTC_MINTER_DISPLAY_NAME} (Local)`
 			);
 			const hasLocalEth = ckMinterPrincipalBuiltInContacts.some(
-				({ name }) => name === 'ckETH Minter (Local)'
+				({ name }) => name === `${CK_ETHEREUM_MINTER_DISPLAY_NAME} (Local)`
 			);
 
 			expect(hasLocalBtc).toBe(nonNullish(LOCAL_CKBTC_MINTER_CANISTER_ID));

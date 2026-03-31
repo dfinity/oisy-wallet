@@ -1,6 +1,10 @@
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-import { ckMinterPrincipalBuiltInContacts } from '$icp-eth/utils/ck-minter-principal-contacts.utils';
+import { CK_ETHEREUM_MINTER_DISPLAY_NAME } from '$icp-eth/utils/ck-minter-contacts.utils';
+import {
+	CKBTC_MINTER_DISPLAY_NAME,
+	ckMinterPrincipalBuiltInContacts
+} from '$icp-eth/utils/ck-minter-principal-contacts.utils';
 import {
 	allContacts,
 	contacts,
@@ -71,7 +75,7 @@ describe('contacts.derived', () => {
 			const result = get(allContacts);
 
 			expect(result).toHaveLength(principalCount + 3);
-			expect(result[0].name).toBe('ckBTC Minter');
+			expect(result[0].name).toBe(CKBTC_MINTER_DISPLAY_NAME);
 			expect(result[principalCount].name).toBe('ckETH Minter Helper Contract');
 		});
 
@@ -99,10 +103,10 @@ describe('contacts.derived', () => {
 			const result = get(allContacts);
 
 			expect(result).toHaveLength(principalCount + 4);
-			expect(result[0].name).toBe('ckBTC Minter');
+			expect(result[0].name).toBe(CKBTC_MINTER_DISPLAY_NAME);
 			expect(result[principalCount].name).toBe('ckETH Minter Helper Contract');
 			expect(result[principalCount + 1].name).toBe('ckERC20 Minter Helper Contract');
-			expect(result[principalCount + 2].name).toBe('CK Ethereum Minter');
+			expect(result[principalCount + 2].name).toBe(CK_ETHEREUM_MINTER_DISPLAY_NAME);
 			expect(result[principalCount + 3].name).toBe('Alice');
 		});
 	});
