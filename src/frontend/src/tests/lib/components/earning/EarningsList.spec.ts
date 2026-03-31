@@ -1,10 +1,14 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import * as erc4626Derived from '$eth/derived/erc4626.derived';
 import { allVaults } from '$eth/derived/vaults.derived';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import EarningsList from '$lib/components/earning/EarningsList.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { EARNING_NO_POSITION_PLACEHOLDER } from '$lib/constants/test-ids.constants';
+import {
+	EARNING_CARD_SKELETON,
+	EARNING_NO_POSITION_PLACEHOLDER
+} from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { tokenListStore } from '$lib/stores/token-list.store';
 import type { Vault } from '$lib/types/vaults';
@@ -68,9 +72,22 @@ describe('EarningsList', () => {
 		});
 	};
 
+	const mockCustomTokensInitialized = () => {
+		vi.spyOn(erc4626Derived, 'erc4626CustomTokensNotInitialized', 'get').mockReturnValue(
+			readable(false)
+		);
+	};
+
+	const mockCustomTokensNotInitialized = () => {
+		vi.spyOn(erc4626Derived, 'erc4626CustomTokensNotInitialized', 'get').mockReturnValue(
+			readable(true)
+		);
+	};
+
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		tokenListStore.set({ filter: '' });
+		mockCustomTokensInitialized();
 	});
 
 	it('should render the placeholder when there are no vaults', () => {
@@ -244,5 +261,26 @@ describe('EarningsList', () => {
 
 		expect(getByText('Enabled Vault')).toBeInTheDocument();
 		expect(getByText('Base Vault')).toBeInTheDocument();
+	});
+
+	it('should show skeletons when custom tokens are not initialized', () => {
+		mockCustomTokensNotInitialized();
+		mockAllVaultsStore([]);
+
+		const { getAllByTestId, queryByTestId } = render(EarningsList);
+
+		const skeletons = getAllByTestId(new RegExp(`^${EARNING_CARD_SKELETON}`));
+
+		expect(skeletons.length).toBeGreaterThan(0);
+		expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).not.toBeInTheDocument();
+	});
+
+	it('should not show skeletons when custom tokens are initialized', () => {
+		mockAllVaultsStore([]);
+
+		const { getByTestId, queryByTestId } = render(EarningsList);
+
+		expect(queryByTestId(new RegExp(`^${EARNING_CARD_SKELETON}`))).not.toBeInTheDocument();
+		expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
 	});
 });
