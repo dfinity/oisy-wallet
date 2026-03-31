@@ -475,7 +475,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Следите за новыми аирдропами! <a href=\"https://x.com/oisy\" target=\"_blank\">Подписывайтесь на нас в X</a>, заходите в наш <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> или присоединяйтесь к <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> — не пропустите ничего важного!",
-			"coming_soon": "Эпизод 4 $oisy_short скоро выйдет",
+			"coming_soon": "Следующий эпизод $oisy_short Sprinkles выйдет совсем скоро",
 			"reward_banner": "Баннер кампании $campaignName"
 		},
 		"campaigns": {
