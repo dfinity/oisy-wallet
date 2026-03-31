@@ -1929,7 +1929,7 @@
 			"title": "Gagner",
 			"tab_title": "Gains en cours",
 			"earning_opportunities": "Opportunités de gain",
-			"header_title": "Bienvenue dans Gagner\u00a0!",
+			"header_title": "Bienvenue dans Gagner !",
 			"header_description": "Développez votre portefeuille d'actifs numériques en allouant vos tokens à des opportunités de gain.",
 			"go_to_earn": "Aller à Gagner"
 		},
@@ -1941,7 +1941,7 @@
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Utilisez OISY et GAGNEZ\u00a0! L'épisode 6 est en direct \uD83C\uDF89",
+				"description": "Utilisez OISY et GAGNEZ ! L'épisode 6 est en direct 🎉",
 				"action": "Vérifier le statut"
 			}
 		},
@@ -1965,7 +1965,7 @@
 	},
 	"vaults": {
 		"text": {
-			"autopilote": "Autopilote",
+			"autopilot": "",
 			"live_apy": "APY actuel"
 		}
 	},
