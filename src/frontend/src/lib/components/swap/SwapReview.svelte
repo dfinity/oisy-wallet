@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
+	import { Checkbox, Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
@@ -17,11 +17,15 @@
 		TRACK_OPEN_DOCUMENTATION,
 		TRACK_OPEN_EXTERNAL_LINK
 	} from '$lib/constants/analytics.constants';
-	import { OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK } from '$lib/constants/swap.constants';
+	import {
+		OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK,
+		SWAP_VALUE_DIFFERENCE_ERROR_VALUE
+	} from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
+	import { calculateValueDifference } from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -42,7 +46,7 @@
 		onClose,
 		onSwap,
 		swapFees,
-		isSwapAmountsLoading
+		isSwapAmountsLoading = false
 	}: Props = $props();
 
 	const {
@@ -66,6 +70,29 @@
 	let isManualWithdrawSuccess = $derived(
 		$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS &&
 			$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success
+	);
+
+	let isValueDifferenceError = $derived.by(() => {
+		const valueDifference = calculateValueDifference({
+			swapAmount,
+			receiveAmount,
+			sourceTokenExchangeRate: $sourceTokenExchangeRate,
+			destinationTokenExchangeRate: $destinationTokenExchangeRate
+		});
+
+		return nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE;
+	});
+
+	let isValueDifferenceConfirmed = $state(false);
+
+	$effect(() => {
+		if (!isValueDifferenceError) {
+			isValueDifferenceConfirmed = false;
+		}
+	});
+
+	let swapButtonDisabled = $derived(
+		isSwapAmountsLoading || (isValueDifferenceError && !isValueDifferenceConfirmed)
 	);
 </script>
 
@@ -107,6 +134,27 @@
 	</div>
 
 	<SwapCrossChainInfo hrSpacing="md" />
+
+	{#if isValueDifferenceError}
+		<div class="mt-4">
+			<MessageBox level="error">
+				{#snippet icon()}
+					<Checkbox
+						inputId="swap-review-value-difference-confirmation"
+						bind:checked={isValueDifferenceConfirmed}
+						on:nnsChange={() => (isValueDifferenceConfirmed = !isValueDifferenceConfirmed)}
+					/>
+				{/snippet}
+
+				<label
+					class="cursor-pointer align-top text-sm"
+					for="swap-review-value-difference-confirmation"
+				>
+					{$i18n.swap.text.value_difference_error_confirmation}
+				</label>
+			</MessageBox>
+		</div>
+	{/if}
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
@@ -158,7 +206,7 @@
 			{:else}
 				<ButtonBack onclick={handleBack} />
 
-				<Button disabled={isSwapAmountsLoading} onclick={onSwap}>
+				<Button disabled={swapButtonDisabled} onclick={onSwap}>
 					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
 						? $i18n.transaction.type.withdraw
 						: $i18n.swap.text.swap_button}
