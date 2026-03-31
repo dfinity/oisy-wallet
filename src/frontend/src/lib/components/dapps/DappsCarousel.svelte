@@ -146,7 +146,7 @@
 					onCloseCarouselSlide={closeSlide}
 					pagePath={nonNullish(harvestAutopilotSlide) &&
 					harvestAutopilotSlide.id === dappsCarouselSlide.id
-						? AppPath.EarnAutopilot
+						? AppPath.Earn
 						: undefined}
 				/>
 			{/each}
