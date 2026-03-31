@@ -475,7 +475,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "आगामी टोकन ड्रॉप्स पर नज़र रखें! <a href=\"https://x.com/oisy\" target=\"_blank\">X पर हमें फ़ॉलो करें</a>, हमारे <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> से जुड़ें, या <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> में शामिल हों ताकि अपडेट रहें।",
-			"coming_soon": "$oisy_short एपिसोड 4 जल्द आ रहा है",
+			"coming_soon": "अगला $oisy_short Sprinkles एपिसोड जल्द आ रहा है",
 			"reward_banner": "अभियान $campaignName का बैनर"
 		},
 		"campaigns": {
