@@ -96,7 +96,7 @@
 		"campaignHref": "rewards.campaigns.sprinkles_s1e5.campaign_href",
 		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
 		"startDate": "2025-09-24T12:00:00.000Z",
-		"endDate": "2026-03-24T12:00:00.000Z",
+		"endDate": "2026-03-30T12:00:00.000Z",
 		"welcome": {
 			"title": "rewards.campaigns.sprinkles_s1e5.welcome.title",
 			"subtitle": "rewards.campaigns.sprinkles_s1e5.welcome.subtitle",
@@ -140,8 +140,8 @@
 		"cardBanner": "/images/rewards/oisy-episode-five-campaign.webp",
 		"campaignHref": "rewards.campaigns.sprinkles_s1e6.campaign_href",
 		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
-		"startDate": "2026-03-25T12:00:00.000Z",
-		"endDate": "2026-04-30T12:00:00.000Z",
+		"startDate": "2026-04-8T12:00:00.000Z",
+		"endDate": "2026-05-31T12:00:00.000Z",
 		"welcome": {
 			"title": "rewards.campaigns.sprinkles_s1e6.welcome.title",
 			"subtitle": "rewards.campaigns.sprinkles_s1e6.welcome.subtitle",
