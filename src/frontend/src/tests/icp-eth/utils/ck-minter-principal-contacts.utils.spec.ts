@@ -48,6 +48,7 @@ describe('ck-minter-principal-contacts.utils', () => {
 
 		it('should assign unique IDs to all contacts', () => {
 			const ids = ckMinterPrincipalBuiltInContacts.map(({ id }) => id);
+
 			expect(new Set(ids).size).toBe(ids.length);
 		});
 
