@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { NANO_SECONDS_IN_SECOND, ZERO } from '$lib/constants/app.constants';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -48,19 +50,33 @@
 			: undefined
 	);
 
+	let mintingAccountAddress = $derived(
+		isIcToken(token) && nonNullish(token.mintingAccount)
+			? encodeIcrcAccount(token.mintingAccount)
+			: undefined
+	);
+
+	let listFrom = $derived(
+		type === 'mint' && nonNullish(mintingAccountAddress) ? mintingAccountAddress : from
+	);
+
+	let listTo = $derived(
+		type === 'burn' && nonNullish(mintingAccountAddress) ? mintingAccountAddress : to
+	);
+
 	const modalId = Symbol();
 </script>
 
 <Transaction
 	{approveSpender}
 	{displayAmount}
-	{from}
+	from={listFrom}
 	{iconType}
 	onClick={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
 	{status}
 	styleClass="block w-full border-0"
 	{timestamp}
-	{to}
+	to={listTo}
 	{token}
 	{type}
 >
