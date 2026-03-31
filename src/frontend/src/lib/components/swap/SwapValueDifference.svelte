@@ -42,19 +42,28 @@
 	let isSuccess = $derived(
 		nonNullish(valueDifference) && valueDifference > SWAP_VALUE_DIFFERENCE_WARNING_VALUE
 	);
+
+	let showWarningIcon = $derived(isWarning || isError);
 </script>
+
+{#snippet valueDifferenceWarningIcon()}
+	⚠
+{/snippet}
 
 {#if nonNullish(valueDifference)}
 	<span
-		class="gap-2"
+		class="inline-flex items-center gap-2"
 		class:font-bold={isWarning || isError}
 		class:text-error-primary={isError}
 		class:text-success-primary={isSuccess}
 		class:text-warning-primary={isWarning}
 	>
+		{#if showWarningIcon && iconPosition === 'left'}
+			{@render valueDifferenceWarningIcon()}
+		{/if}
 		{`${valueDifference > 0 ? '+' : ''}${valueDifference.toFixed(2)}`}%
-		{#if isWarning || isError}
-			⚠
+		{#if showWarningIcon && iconPosition === 'right'}
+			{@render valueDifferenceWarningIcon()}
 		{/if}
 	</span>
 {/if}
