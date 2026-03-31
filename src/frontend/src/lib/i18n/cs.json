@@ -1972,7 +1972,7 @@
 		"text": {
 			"harvest_autopilot_page_description": "Maximální výnosová efektivita s automatickými trezory na jeden klik.",
 			"harvest_autopilot_vault_page_description": "Autopilot je poháněn <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">auditovanou technologií IPOR</a> Fusion Vault.",
-			"harvest_autopilot_provider_description": "Harvest Autopilot je specializovaná služba „nastav a zapomeň", která s minimálním úsilím automatizuje vaše DeFi pozice.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot je specializovaná služba \"nastav a zapomeň\", která s minimálním úsilím automatizuje vaše DeFi pozice.",
 			"harvest_autopilot_stake_terms": "Potvrzuji, že jsem si produkt přečetl(a) a rozumím mu, přečetl(a) jsem si <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Zveřejnění rizik</a> a souhlasím s <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Obchodními podmínkami</a>.",
 			"my_positions": "Moje pozice",
 			"available_autopilots": "Dostupné autopiloty",
@@ -1983,7 +1983,7 @@
 			"autopilot": "Autopilot",
 			"total_value_locked": "Celková uzamčená hodnota (TVL)",
 			"manager": "Správce",
-			"vault_description": "Tento fond je navržen jako služba správy výnosů „nastav a zapomeň" pro vaše $asset_symbol aktiva. Automaticky optimalizuje vaši DeFi pozici s minimálním úsilím z vaší strany dynamickým přidělováním kapitálu do nejlepších příležitostí.",
+			"vault_description": "Tento fond je navržen jako služba správy výnosů \"nastav a zapomeň\" pro vaše $asset_symbol aktiva. Automaticky optimalizuje vaši DeFi pozici s minimálním úsilím z vaší strany dynamickým přidělováním kapitálu do nejlepších příležitostí.",
 			"stake": "Stakovat",
 			"stake_now": "Stakovat nyní",
 			"stake_amount": "Stakovat $amount $token_symbol",
@@ -2050,7 +2050,7 @@
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",
 			"unexpected_error_on_unstake": "Při odstakování tokenů došlo k chybě.",
 			"unexpected_error_on_stake": "Při stakování tokenů došlo k chybě.",
-			"dissolvement_limit_reached": "Dosáhli jste maximálního počtu $limit aktivních žádostí o odemčení. Nejprve některé dokončete, než vytvoříte novou.<br/>Upozorňujeme, že vždy můžete vybrat pomocí možnosti „okamžitě"."
+			"dissolvement_limit_reached": "Dosáhli jste maximálního počtu $limit aktivních žádostí o odemčení. Nejprve některé dokončete, než vytvoříte novou.<br/>Upozorňujeme, že vždy můžete vybrat pomocí možnosti \"okamžitě\"."
 		},
 		"info": {
 			"harvest_autopilot": {
