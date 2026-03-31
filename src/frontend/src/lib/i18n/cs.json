@@ -2017,7 +2017,7 @@
 			"included_token_fee": "Včetně síťového poplatku",
 			"included_dissolve_fee": "Včetně poplatku za odemčení",
 			"delayed_dissolve_terms": "Při odemykání $token ze stakování jsou tokeny uzamčeny po dobu $delay dní bez dalších odměn, než je lze vybrat.",
-			"delayed_dissolve_info": "Jakmile zahájíte odemykání vkladu $token, přestanete dostávat nové odměny.",
+			"delayed_dissolve_info": "Jakmile zahájíte odemykání staku $token, přestanete dostávat nové odměny.",
 			"immediate_dissolve_terms": "Své $token obdržíte okamžitě, ale bude vám účtován poplatek z odemykaných $token tokenů.",
 			"amount_to_receive": "Částka k přijetí",
 			"unclaimed_rewards": "Nevybrané odměny",
@@ -2040,7 +2040,7 @@
 			"title_empty_2_usd": "/rok",
 			"title_empty_2_apy": "ročně",
 			"title_empty_3": "",
-			"description_empty": "Zdá se, že jste zatím nevložili žádné tokeny",
+			"description_empty": "Zdá se, že jste zatím nestakovali žádné tokeny",
 			"full_history": "Zobrazit celou historii",
 			"recent_history": "Zavřít celou historii",
 			"harvest_autopilot_carousel_slide_title": "Vydělávejte v OISY s Harvest Autopilot Yield Farming",
@@ -2065,7 +2065,7 @@
 			}
 		},
 		"alt": {
-			"placeholder_image": "Zatím žádné vložené tokeny"
+			"placeholder_image": "Zatím žádné stakované tokeny"
 		}
 	},
 	"get_token": {
