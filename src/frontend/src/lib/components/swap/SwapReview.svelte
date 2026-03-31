@@ -136,7 +136,7 @@
 	<SwapCrossChainInfo hrSpacing="md" />
 
 	{#if isValueDifferenceError}
-		<div class="mt-4 cursor-pointer">
+		<div class="mt-4">
 			<MessageBox level="error">
 				{#snippet icon()}
 					<Checkbox
@@ -147,7 +147,7 @@
 				{/snippet}
 
 				<label
-					class="cursor-pointer align-top text-sm"
+					class="align-top text-sm"
 					for="swap-review-value-difference-confirmation"
 				>
 					{$i18n.swap.text.value_difference_error_confirmation}
