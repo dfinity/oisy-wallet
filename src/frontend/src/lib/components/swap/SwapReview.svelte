@@ -140,7 +140,7 @@
 			<MessageBox level="error">
 				{#snippet icon()}
 					<Checkbox
-						inputId="swap-review-value-difference-confirmation"
+						inputId="swap-review-value-difference-confirmation leading-none"
 						bind:checked={isValueDifferenceConfirmed}
 						on:nnsChange={() => (isValueDifferenceConfirmed = !isValueDifferenceConfirmed)}
 					/>
