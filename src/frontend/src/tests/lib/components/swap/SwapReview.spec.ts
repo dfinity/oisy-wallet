@@ -174,12 +174,12 @@ describe('SwapReview', () => {
 				}
 			});
 
-			const { getByTestId } = render(SwapReview, {
+			const { getByText } = render(SwapReview, {
 				props: baseProps,
 				context
 			});
 
-			await fireEvent.click(getByTestId('button-back'));
+			await fireEvent.click(getByText(en.core.text.back));
 
 			expect(baseProps.onBack).toHaveBeenCalledOnce();
 
@@ -389,14 +389,14 @@ describe('SwapReview', () => {
 				}
 			});
 
-			const { getByText, queryByText, queryByTestId } = render(SwapReview, {
+			const { getByText, queryByText } = render(SwapReview, {
 				props: baseProps,
 				context
 			});
 
 			expect(getByText(en.core.text.close)).toBeInTheDocument();
 			expect(queryByText(en.swap.text.swap_button)).not.toBeInTheDocument();
-			expect(queryByTestId('button-back')).not.toBeInTheDocument();
+			expect(queryByText(en.core.text.back)).not.toBeInTheDocument();
 		});
 
 		it('should call onClose and reset failedSwapError when clicking close', async () => {
@@ -430,12 +430,12 @@ describe('SwapReview', () => {
 				}
 			});
 
-			const { getByText, getByTestId, queryByText } = render(SwapReview, {
+			const { getByText, queryByText } = render(SwapReview, {
 				props: baseProps,
 				context
 			});
 
-			expect(getByTestId('button-back')).toBeInTheDocument();
+			expect(getByText(en.core.text.back)).toBeInTheDocument();
 			expect(getByText(en.swap.text.swap_button)).toBeInTheDocument();
 			expect(queryByText(en.core.text.close)).not.toBeInTheDocument();
 		});
@@ -453,15 +453,16 @@ describe('SwapReview', () => {
 				}
 			});
 
-			const { getByText } = render(SwapReview, {
+			const { getAllByText } = render(SwapReview, {
 				props: baseProps,
 				context
 			});
 
-			const link = getByText('ICPSwap');
+			const icpSwapLinks = getAllByText('ICPSwap');
+			const linkElement = icpSwapLinks.find((el) => el.closest('a'));
 
-			expect(link).toBeInTheDocument();
-			expect(link.closest('a')).toHaveAttribute('href', icpSwapUrl);
+			expect(linkElement).toBeDefined();
+			expect(linkElement?.closest('a')).toHaveAttribute('href', icpSwapUrl);
 		});
 
 		it('should render instructions link for withdraw failed', () => {
@@ -480,7 +481,7 @@ describe('SwapReview', () => {
 			});
 
 			expect(
-				getByText(en.swap.error.swap_failed_instruction_link, { exact: false })
+				getByText(en.swap.error.swap_failed_instruction_link.trim())
 			).toBeInTheDocument();
 		});
 	});
