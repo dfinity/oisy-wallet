@@ -1114,7 +1114,8 @@
 			"gasless": "Bez gazu",
 			"swap_fees": "Opłaty za wymianę",
 			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>",
-			"near_intents_estimated_time": ""
+			"near_intents_estimated_time": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "Obecnie nie ma dostępnej giełdy do wymiany tokenów. Spróbuj ponownie później.",
