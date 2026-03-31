@@ -437,7 +437,11 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -475,7 +479,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Behalte anstehende Token-Drops im Auge! <a href=\"https://x.com/oisy\" target=\"_blank\">Folge uns auf X</a>, tritt unserem <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> bei oder komm in unseren <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>, um auf dem Laufenden zu bleiben.",
-			"coming_soon": "$oisy_short Folge 6 erscheint bald",
+			"coming_soon": "Die nächste $oisy_short Sprinkles-Episode kommt bald",
 			"reward_banner": "Banner der Kampagne $campaignName"
 		},
 		"campaigns": {
@@ -576,6 +580,36 @@
 						"title": "Hier ein kleines Dankeschön",
 						"description": "Ein Benutzer, der durch dich eigeladen wurde, hat soeben OISY Sprinkles gewonnen.",
 						"share_href": "https://x.com/intent/post?text=Habe%20einem%20Freund%20die%20%40OISY%20Wallet%20empfohlen%20-%20and%20gratis%20%24BTC%20gewonnen%20%F0%9F%AA%82%0AWenn%20deine%20Freunde%20gewinnen%2C%20gewinnst%20du%20auch.%20Einfach%21%0AVersuche%20es%20auch%2C%20bei%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episode 6 ist live 🤑",
+				"one_liner": "Verdiene Sprinkles für Aktivität, Empfehlungen und die Nutzung von OISY über mehrere Chains. Deine Aktionen steigern deine Belohnungen, und aktive Empfehlungen verstärken sie zusätzlich.<br/>Außerdem bedeuten jetzt mehr Chains bessere Gewinnchancen.",
+				"participate_title": "Verdiene Token für Aktivität und Empfehlungen. Mehr Chains bedeuten mehr Chancen.",
+				"description": "Bleib aktiv, um teilzunehmen: Melde dich regelmäßig an, führe Wallet-Aktionen durch und halte mindestens 5 $.<br/>Jede aktive Chain erhöht deine Chancen mit einem Multichain-Multiplikator.<br/>Verdiene 10 % von Freunden, die sich qualifizieren.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "Willkommen bei $oisy_short!",
+					"subtitle": "Bereit zu verdienen?",
+					"description": "Du bist 2 Schritte von deiner ersten Belohnung entfernt: Melde dich an, halte 5 $+ und schließe 2 Aktionen ab. Das ist alles, was du brauchst, um Sprinkles zu verdienen.<br><br>Willst du mehr? Empfehle deine Freunde und erhalte jedes Mal einen Bonus, wenn einer von ihnen Sprinkles verdient."
+				},
+				"win": {
+					"default": {
+						"title": "Du wurdest belohnt",
+						"description": "Deine Belohnungen sind gerade in deiner Wallet gelandet.<br>Vergiss nicht, zu empfehlen und aktiv zu bleiben, um mehr zu gewinnen",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Du hast den wöchentlichen Bonus-Drop gewonnen",
+						"description": "Du hast gerade einen unserer wöchentlichen Bonus-Drops erhalten.<br>Bleib aktiv und empfiehl weiter, um mehr zu gewinnen",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Ein kleines Dankeschön",
+						"description": "Einer deiner geworbenen Nutzer hat gerade einige Sprinkles erhalten.",
+						"share_href": ""
 					}
 				}
 			}
@@ -1080,7 +1114,8 @@
 			"gasless": "Gasless",
 			"swap_fees": "Swap Gebühren",
 			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk",
-			"near_intents_estimated_time": ""
+			"near_intents_estimated_time": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",

@@ -437,7 +437,11 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -475,7 +479,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Bądź na bieżąco z nadchodzącymi airdropami tokenów! <a href=\"https://x.com/oisy\" target=\"_blank\">Śledź nas na X</a>, dołącz do naszego <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddita</a> lub dołącz do naszego <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discorda</a>, aby być na bieżąco.",
-			"coming_soon": "Kampania 6 $oisy_short już wkrótce",
+			"coming_soon": "Następny odcinek $oisy_short Sprinkles już wkrótce",
 			"reward_banner": "Baner kampanii $campaignName"
 		},
 		"campaigns": {
@@ -575,6 +579,36 @@
 					"referral": {
 						"title": "Oto małe podziękowanie",
 						"description": "Jeden z Twoich poleconych użytkowników właśnie dostał trochę sprinkles.",
+						"share_href": ""
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Odcinek 6 jest już dostępny 🤑",
+				"one_liner": "Zdobywaj Sprinkles za aktywność, polecanie innych i korzystanie z OISY na różnych sieciach. Twoje działania zwiększają Twoje nagrody, a aktywne polecenia jeszcze je wzmacniają.<br/>Co więcej, więcej sieci oznacza teraz większe szanse na wygraną.",
+				"participate_title": "Zdobywaj tokeny za aktywność i polecenia. Więcej sieci oznacza więcej szans.",
+				"description": "Bądź aktywny/a, aby się kwalifikować: loguj się często, wykonuj działania w portfelu i trzymaj co najmniej 5 $.<br/>Każda aktywna sieć zwiększa Twoje szanse dzięki Mnożnikowi Wielosieciowemu.<br/>Zarabiaj 10% od znajomych, którzy się zakwalifikują.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "Witaj w $oisy_short!",
+					"subtitle": "Gotowy/a do zarabiania?",
+					"description": "Jesteś 2 kroki od swojej pierwszej nagrody: Zaloguj się, trzymaj 5 $+ i ukończ 2 działania. To wszystko, co potrzeba, aby zacząć zdobywać Sprinkles.<br><br>Chcesz więcej? Poleć swoich znajomych i otrzymuj bonus za każdym razem, gdy jeden z nich zdobędzie Sprinkles."
+				},
+				"win": {
+					"default": {
+						"title": "Zostałeś/aś nagrodzony/a",
+						"description": "Twoje nagrody właśnie trafiły do Twojego portfela.<br>Nie zapomnij polecać i pozostawać aktywnym/ą, aby wygrywać więcej",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Wygrałeś/aś tygodniowy bonus drop",
+						"description": "Właśnie zdobyłeś/aś jeden z naszych tygodniowych bonusowych dropów.<br>Pozostań aktywny/a i kontynuuj polecanie, aby wygrywać więcej",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Małe podziękowanie",
+						"description": "Jeden z Twoich poleconych użytkowników właśnie otrzymał Sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -1080,7 +1114,8 @@
 			"gasless": "Bez gazu",
 			"swap_fees": "Opłaty za wymianę",
 			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>",
-			"near_intents_estimated_time": ""
+			"near_intents_estimated_time": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "Obecnie nie ma dostępnej giełdy do wymiany tokenów. Spróbuj ponownie później.",
