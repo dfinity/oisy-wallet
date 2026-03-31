@@ -61,9 +61,18 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}
 
 	protected setRef(data: PostMessageDataRequestSol | undefined) {
-		this.#ref = nonNullish(data)
+		const newRef = nonNullish(data)
 			? `${data.tokenAddress ?? SOLANA_TOKEN.symbol}-${data.solanaNetwork}`
 			: undefined;
+
+		if (this.#ref !== newRef) {
+			this.store = {
+				balance: undefined,
+				transactions: {}
+			};
+		}
+
+		this.#ref = newRef;
 	}
 
 	async start(data: PostMessageDataRequestSol | undefined) {
@@ -77,6 +86,8 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}
 
 	async trigger(data: PostMessageDataRequestSol | undefined) {
+		this.setRef(data);
+
 		await this.timer.trigger<PostMessageDataRequestSol>({
 			job: this.syncWallet,
 			data
