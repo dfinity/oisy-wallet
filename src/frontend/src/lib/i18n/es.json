@@ -1941,7 +1941,7 @@
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "¡Usa OISY y GANA! El episodio 6 está en vivo 🎉",
+				"description": "¡Usa OISY y GANA! El episodio 6 está en vivo \uD83C\uDF89",
 				"action": "Ver estado"
 			}
 		},
@@ -1965,15 +1965,15 @@
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "Autopiloto",
+			"autopilot": "Autopilot",
 			"live_apy": "APY actual"
 		}
 	},
 	"stake": {
 		"text": {
-			"harvest_autopilot_page_description": "Máxima eficiencia de rendimiento con vaults en autopiloto con un solo clic.",
-			"harvest_autopilot_vault_page_description": "Autopiloto funciona con la tecnología <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">auditada IPOR</a> Fusion Vault.",
-			"harvest_autopilot_provider_description": "Harvest Autopiloto es un servicio especializado de \"configurar y olvidar\" que automatiza tus posiciones DeFi con el mínimo esfuerzo.",
+			"harvest_autopilot_page_description": "Máxima eficiencia de rendimiento con vaults en Autopilot con un solo clic.",
+			"harvest_autopilot_vault_page_description": "Autopilot funciona con la tecnología <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">auditada IPOR</a> Fusion Vault.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot es un servicio especializado de \"configurar y olvidar\" que automatiza tus posiciones DeFi con el mínimo esfuerzo.",
 			"harvest_autopilot_stake_terms": "Confirmo que he leído y comprendo el producto, he leído las <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Divulgaciones de riesgo</a> y acepto los <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Términos y condiciones</a>.",
 			"my_positions": "Mis posiciones",
 			"available_autopilots": "Autopilotos disponibles",
