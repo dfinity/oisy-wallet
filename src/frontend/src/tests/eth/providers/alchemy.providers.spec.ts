@@ -526,23 +526,8 @@ describe('alchemy.providers', () => {
 
 			await provider.getNftMetadata({ token: mockValidErc1155Token, tokenId: mockTokenId });
 
-			const fetchCallCount = (global.fetch as ReturnType<typeof vi.fn>).mock.calls.length;
-
-			mockFetchForNftMetadata({
-				tokenId: '1',
-				name: 'AnotherName',
-				image: { originalUrl: 'https://anotherdownload.com' },
-				description: 'another description',
-				raw: { metadata: {} },
-				contract: {
-					address: mockValidErc1155Token.address,
-					tokenType: 'ERC1155',
-					openSeaMetadata: {
-						bannerImageUrl: 'https://anotherdownload.com',
-						lastIngestedAt: '123_456'
-					}
-				}
-			});
+			// Reset fetch mock so the second call can only succeed from cache
+			global.fetch = vi.fn();
 
 			const nft = await provider.getNftMetadata({
 				token: mockValidErc1155Token,
@@ -560,8 +545,7 @@ describe('alchemy.providers', () => {
 				}
 			});
 
-			// No additional NFT API fetch should have been made (only media status fetches at most)
-			expect((global.fetch as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(fetchCallCount);
+			expect(global.fetch).not.toHaveBeenCalled();
 		});
 	});
 

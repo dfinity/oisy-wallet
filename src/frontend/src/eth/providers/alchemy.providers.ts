@@ -25,7 +25,6 @@ import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
 	AlchemySubscription,
-	NftOrdering,
 	type Nft as AlchemyNft,
 	type AlchemySettings,
 	type Network,
@@ -335,12 +334,18 @@ export class AlchemyProvider {
 		params
 	}: {
 		path: string;
-		params: Record<string, string>;
+		params: Record<string, string | string[]>;
 	}): Promise<T> => {
 		const url = new URL(`${this.nftBaseUrl}/${path}`);
 
 		for (const [key, value] of Object.entries(params)) {
-			url.searchParams.append(key, value);
+			if (Array.isArray(value)) {
+				for (const v of value) {
+					url.searchParams.append(key, v);
+				}
+			} else {
+				url.searchParams.append(key, value);
+			}
 		}
 
 		const response = await fetch(url.toString());
@@ -442,10 +447,14 @@ export class AlchemyProvider {
 		address: EthAddress;
 		tokens: EthNonFungibleToken[];
 	}): Promise<Nft[]> => {
-		const result: OwnedNftsResponse = await this.deprecatedProvider.nft.getNftsForOwner(address, {
-			contractAddresses: tokens.map((token) => token.address),
-			omitMetadata: false,
-			orderBy: NftOrdering.TRANSFERTIME
+		const result: OwnedNftsResponse = await this.fetchNftApi({
+			path: 'getNFTsForOwner',
+			params: {
+				owner: address,
+				withMetadata: 'true',
+				orderBy: 'transferTime',
+				contractAddresses: tokens.map(({ address: contractAddress }) => contractAddress)
+			}
 		});
 
 		const nftPromises = result.ownedNfts.reduce<Promise<Nft>[]>((acc, ownedNft) => {
