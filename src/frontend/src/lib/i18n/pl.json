@@ -580,33 +580,33 @@
 				}
 			},
 			"sprinkles_s1e6": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
-				"campaign_href": "",
-				"welcome": {
-					"title": "",
-					"subtitle": "",
-					"description": ""
-				},
-				"win": {
-					"default": {
-						"title": "",
-						"description": "",
-						"share_href": ""
-					},
-					"jackpot": {
-						"title": "",
-						"description": "",
-						"share_href": ""
-					},
-					"referral": {
-						"title": "",
-						"description": "",
-						"share_href": ""
-					}
+  "title": "OISY Sprinkles",
+  "card_title": "OISY Sprinkles: Odcinek 6 jest już dostępny 🤑",
+  "one_liner": "Zdobywaj Sprinkles za aktywność, polecanie innych i korzystanie z OISY na różnych sieciach. Twoje działania zwiększają Twoje nagrody, a aktywne polecenia jeszcze je wzmacniają.<br/>Co więcej, więcej sieci oznacza teraz większe szanse na wygraną.",
+  "participate_title": "Zdobywaj tokeny za aktywność i polecenia. Więcej sieci oznacza więcej szans.",
+  "description": "Bądź aktywny/a, aby się kwalifikować: loguj się często, wykonuj działania w portfelu i trzymaj co najmniej 5 $.<br/>Każda aktywna sieć zwiększa Twoje szanse dzięki Mnożnikowi Wielosieciowemu.<br/>Zarabiaj 10% od znajomych, którzy się zakwalifikują.",
+  "campaign_href": "",
+  "welcome": {
+    "title": "Witaj w $oisy_short!",
+    "subtitle": "Gotowy/a do zarabiania?",
+    "description": "Jesteś 2 kroki od swojej pierwszej nagrody: Zaloguj się, trzymaj 5 $+ i ukończ 2 działania. To wszystko, co potrzeba, aby zacząć zdobywać Sprinkles.<br><br>Chcesz więcej? Poleć swoich znajomych i otrzymuj bonus za każdym razem, gdy jeden z nich zdobędzie Sprinkles."
+  },
+  "win": {
+    "default": {
+      "title": "Zostałeś/aś nagrodzony/a",
+      "description": "Twoje nagrody właśnie trafiły do Twojego portfela.<br>Nie zapomnij polecać i pozostawać aktywnym/ą, aby wygrywać więcej",
+      "share_href": ""
+    },
+    "jackpot": {
+      "title": "Wygrałeś/aś tygodniowy bonus drop",
+      "description": "Właśnie zdobyłeś/aś jeden z naszych tygodniowych bonusowych dropów.<br>Pozostań aktywny/a i kontynuuj polecanie, aby wygrywać więcej",
+      "share_href": ""
+    },
+    "referral": {
+      "title": "Małe podziękowanie",
+      "description": "Jeden z Twoich poleconych użytkowników właśnie otrzymał Sprinkles.",
+      "share_href": ""
+    }
 				}
 			}
 		}
