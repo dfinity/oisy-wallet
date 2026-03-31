@@ -4,7 +4,7 @@
 	import { getContext, type Snippet } from 'svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
+	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -113,7 +113,7 @@
 			{/snippet}
 
 			{#snippet mainValue()}
-				<SwapImpact {receiveAmount} {swapAmount} />
+				<SwapValueDifference iconPosition="left" {receiveAmount} {swapAmount} />
 			{/snippet}
 		</ModalValue>
 	{/if}

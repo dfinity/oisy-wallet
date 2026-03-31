@@ -12,9 +12,10 @@
 	interface Props {
 		swapAmount: OptionAmount;
 		receiveAmount?: number;
+		iconPosition?: 'right' | 'left';
 	}
 
-	let { swapAmount, receiveAmount }: Props = $props();
+	let { swapAmount, receiveAmount, iconPosition = 'right' }: Props = $props();
 
 	const { sourceTokenExchangeRate, destinationTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -27,16 +28,45 @@
 			destinationTokenExchangeRate: $destinationTokenExchangeRate
 		})
 	);
+
+	let isError = $derived(
+		nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE
+	);
+
+	let isWarning = $derived(
+		nonNullish(valueDifference) &&
+			valueDifference <= SWAP_VALUE_DIFFERENCE_WARNING_VALUE &&
+			valueDifference > SWAP_VALUE_DIFFERENCE_ERROR_VALUE
+	);
+
+	let isSuccess = $derived(
+		nonNullish(valueDifference) && valueDifference > SWAP_VALUE_DIFFERENCE_WARNING_VALUE
+	);
+
+	let showWarningIcon = $derived(isWarning || isError);
 </script>
+
+{#snippet valueDifferenceWarningIcon()}
+	<span>⚠</span>
+{/snippet}
 
 {#if nonNullish(valueDifference)}
 	<span
-		class="underline"
-		class:text-error-primary={valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE}
-		class:text-success-primary={valueDifference > SWAP_VALUE_DIFFERENCE_WARNING_VALUE}
-		class:text-warning-primary={valueDifference <= SWAP_VALUE_DIFFERENCE_WARNING_VALUE &&
-			valueDifference > SWAP_VALUE_DIFFERENCE_ERROR_VALUE}
+		class="inline-flex items-center gap-1"
+		class:font-bold={isWarning || isError}
+		class:gap-2={iconPosition === 'left'}
+		class:text-error-primary={isError}
+		class:text-success-primary={isSuccess}
+		class:text-warning-primary={isWarning}
 	>
-		{`${valueDifference > 0 ? '+' : ''}${valueDifference.toFixed(2)}`}%
+		{#if showWarningIcon && iconPosition === 'left'}
+			{@render valueDifferenceWarningIcon()}
+		{/if}
+		<span>
+			{`${valueDifference > 0 ? '+' : ''}${valueDifference.toFixed(2)}`}%
+		</span>
+		{#if showWarningIcon && iconPosition === 'right'}
+			{@render valueDifferenceWarningIcon()}
+		{/if}
 	</span>
 {/if}
