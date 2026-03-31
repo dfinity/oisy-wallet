@@ -5,6 +5,7 @@
 	import { erc4626TokensExchangeData } from '$eth/derived/erc4626.derived';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
@@ -38,12 +39,14 @@
 	$effect(() => {
 		[
 			worker,
+			$authIdentity,
 			$currentCurrency,
 			$enabledMergedErc20TokensAddresses,
 			$enabledIcrcLedgerCanisterIdsNoCk,
 			$enabledSplTokenAddresses,
 			$erc4626TokensExchangeData
 		];
+
 		debounceSyncTimer();
 	});
 </script>

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import { erc4626CustomTokensNotInitialized } from '$eth/derived/erc4626.derived';
 	import { allVaults } from '$eth/derived/vaults.derived';
 	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
+	import EarningsListSkeletons from '$lib/components/earning/EarningsListSkeletons.svelte';
 	import NoStakePlaceholder from '$lib/components/stake/NoStakePlaceholder.svelte';
 	import VaultCard from '$lib/components/vaults/VaultCard.svelte';
 	import { AppPath, VAULT_PARAM } from '$lib/constants/routes.constants';
@@ -12,6 +14,8 @@
 	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils';
 	import { filterEnabledToken } from '$lib/utils/token.utils';
+
+	let loading = $derived($erc4626CustomTokensNotInitialized);
 
 	let filteredVaults = $derived(
 		$allVaults.filter(
@@ -44,23 +48,24 @@
 	});
 </script>
 
-<!-- TODO: add a skeleton -->
-<div class="flex flex-col gap-3">
-	{#if vaultsToDisplay.length === 0}
-		<NoStakePlaceholder />
-	{:else}
-		{#each vaultsToDisplay as vault (vault.token.id)}
-			<div class="overflow-hidden rounded-xl" transition:fade>
-				<VaultCard
-					data={vault}
-					onClick={() =>
-						goto(
-							isTokenHarvestAutopilot(vault.token)
-								? `${AppPath.EarnAutopilot}?${VAULT_PARAM}=${vault.token.address}`
-								: transactionsUrl({ token: vault.token })
-						)}
-				/>
-			</div>
-		{/each}
-	{/if}
-</div>
+<EarningsListSkeletons {loading}>
+	<div class="flex flex-col gap-3">
+		{#if vaultsToDisplay.length === 0}
+			<NoStakePlaceholder />
+		{:else}
+			{#each vaultsToDisplay as vault (vault.token.id)}
+				<div class="overflow-hidden rounded-xl" transition:fade>
+					<VaultCard
+						data={vault}
+						onClick={() =>
+							goto(
+								isTokenHarvestAutopilot(vault.token)
+									? `${AppPath.EarnAutopilot}?${VAULT_PARAM}=${vault.token.address}`
+									: transactionsUrl({ token: vault.token })
+							)}
+					/>
+				</div>
+			{/each}
+		{/if}
+	</div>
+</EarningsListSkeletons>
