@@ -2071,27 +2071,27 @@
 	},
 	"get_token": {
 		"text": {
-			"title": "",
-			"swap_to_token": "",
-			"ready_to_swap": "",
-			"convert_assets": "",
-			"convertible_assets": "",
-			"how_to_convert": "",
-			"get_more_token": "",
-			"receive_token": "",
-			"receive_token_title": "",
-			"receive_token_text": "",
-			"buy_assets": "",
-			"buy_assets_title": "",
-			"buy_assets_text": ""
+			"title": "$token प्राप्त करें",
+			"swap_to_token": "$token के लिए स्वैप करें",
+			"ready_to_swap": "स्वैप के लिए तैयार",
+			"convert_assets": "एसेट रूपांतरित करें",
+			"convertible_assets": "रूपांतरणीय एसेट",
+			"how_to_convert": "कैसे रूपांतरित करें",
+			"get_more_token": "अधिक $token प्राप्त करें",
+			"receive_token": "$token प्राप्त करें",
+			"receive_token_title": "$token सीधे प्राप्त करें",
+			"receive_token_text": "$token सीधे अपने खाते में प्राप्त करें",
+			"buy_assets": "एसेट खरीदें",
+			"buy_assets_title": "रूपांतरणीय एसेट खरीदें",
+			"buy_assets_text": "अधिक एसेट खरीदें और $token में रूपांतरित करें"
 		}
 	},
 	"temporal": {
 		"seconds_to_duration": {
 			"year": "वर्ष",
 			"year_plural": "वर्ष",
-			"month": "माह",
-			"month_plural": "माह",
+			"month": "महीना",
+			"month_plural": "महीने",
 			"day": "दिन",
 			"day_plural": "दिन",
 			"hour": "घंटा",
@@ -2102,7 +2102,7 @@
 			"second_plural": "सेकंड"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {
