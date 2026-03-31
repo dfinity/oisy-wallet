@@ -1927,163 +1927,163 @@
 	"earning": {
 		"text": {
 			"title": "Zarabiaj",
-			"tab_title": "",
-			"earning_opportunities": "",
-			"header_title": "",
-			"header_description": "",
-			"go_to_earn": ""
+			"tab_title": "Zarabianie",
+			"earning_opportunities": "Możliwości zarabiania",
+			"header_title": "Witaj w sekcji Zarabiaj!",
+			"header_description": "Rozwijaj swoje portfolio aktywów cyfrowych, przydzielając tokeny do możliwości zarabiania.",
+			"go_to_earn": "Przejdź do Zarabiaj"
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "Harvest – Autopilot",
+				"description": "Maksymalna wydajność zysku dzięki automatycznym vaultom jednym kliknięciem.",
+				"action": "Przejdź do Autopilot"
 			},
 			"sprinkles": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "OISY Sprinkles",
+				"description": "Używaj OISY i ZARABIAJ! Odcinek 6 jest już dostępny 🎉",
+				"action": "Sprawdź status"
 			}
 		},
 		"card_fields": {
-			"apy": "",
-			"networks": "",
-			"assets": "",
-			"currentStaked": "",
-			"currentEarning": "",
-			"earningPotential": "",
-			"terms": ""
+			"apy": "APY",
+			"networks": "Sieci",
+			"assets": "Aktywa",
+			"currentStaked": "Stakowane",
+			"currentEarning": "Aktualnie zarabiane",
+			"earningPotential": "Potencjał zarobkowy",
+			"terms": "Warunki"
 		},
 		"terms": {
-			"flexible": ""
+			"flexible": "Elastyczne"
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": ""
+				"cardTitle": "Zarabiaj z Gold DAO"
 			}
 		}
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "",
-			"live_apy": ""
+			"autopilot": "Autopilot",
+			"live_apy": "Bieżące APY"
 		}
 	},
 	"stake": {
 		"text": {
-			"harvest_autopilot_page_description": "",
-			"harvest_autopilot_vault_page_description": "",
-			"harvest_autopilot_provider_description": "",
-			"harvest_autopilot_stake_terms": "",
-			"my_positions": "",
-			"available_autopilots": "",
-			"vault_info": "",
-			"vault_address": "",
-			"protocol": "",
-			"harvest": "",
-			"autopilot": "",
-			"total_value_locked": "",
-			"manager": "",
-			"vault_description": "",
-			"stake": "",
-			"stake_now": "",
-			"stake_amount": "",
-			"not_enough_to_stake": "",
-			"estimated_received": "",
-			"estimated_yearly_yield": "",
-			"unstake": "",
-			"unstake_now": "",
-			"unstaking": "",
-			"unstake_token": "",
-			"enable_token_text": "",
-			"enable_token_button": "",
-			"review": "",
-			"executing_transaction": "",
-			"unsupported_token_staking": "",
-			"provider": "",
-			"earning_potential": "",
-			"earning_potential_hint": "",
-			"active_earning": "",
-			"active_earning_per_year": "",
-			"active_earning_per_year_short": "",
-			"unproductive_assets": "",
-			"invested_assets": "",
-			"visit_provider": "",
-			"current_apy_label": "",
-			"max_apy_label": "",
-			"stake_review_subtitle": "",
-			"unstake_review_subtitle": "",
-			"delayed_dissolve": "",
-			"immediate_dissolve": "",
-			"included_token_fee": "",
-			"included_dissolve_fee": "",
-			"delayed_dissolve_terms": "",
-			"delayed_dissolve_info": "",
-			"immediate_dissolve_terms": "",
-			"amount_to_receive": "",
-			"unclaimed_rewards": "",
-			"unlock_requests": "",
-			"unlocking_in": "",
-			"unlocked": "",
-			"withdraw": "",
-			"withdraw_successful": "",
-			"claim_reward": "",
-			"claim_rewards": "",
-			"claim_reward_short": "",
-			"claim_now": "",
-			"claiming": "",
-			"get_tokens_with_amount": "",
-			"get_asset_tokens": "",
-			"reward_claimed": "",
-			"staked": "",
-			"unstaked": "",
-			"title_empty_1": "",
-			"title_empty_2_usd": "",
-			"title_empty_2_apy": "",
+			"harvest_autopilot_page_description": "Maksymalna wydajność zysku dzięki automatycznym vaultom jednym kliknięciem.",
+			"harvest_autopilot_vault_page_description": "Autopilot jest zasilany przez <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">zaudytowaną technologię IPOR</a> Fusion Vault.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot to wyspecjalizowana usługa \"ustaw i zapomnij\", która automatyzuje Twoje pozycje DeFi przy minimalnym wysiłku.",
+			"harvest_autopilot_stake_terms": "Potwierdzam, że przeczytałem(-am) i rozumiem produkt, zapoznałem(-am) się z <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Ujawnieniem ryzyka</a> i zgadzam się z <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Regulaminem</a>.",
+			"my_positions": "Moje pozycje",
+			"available_autopilots": "Dostępne autopiloty",
+			"vault_info": "Informacje o vaulcie",
+			"vault_address": "Adres vaultu",
+			"protocol": "Protokół",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "Całkowita zablokowana wartość (TVL)",
+			"manager": "Menedżer",
+			"vault_description": "Ten pool jest zaprojektowany jako usługa zarządzania zyskiem \"ustaw i zapomnij\" dla Twoich $asset_symbol. Automatycznie optymalizuje Twoją pozycję DeFi przy minimalnym wysiłku, dynamicznie przydzielając kapitał do najlepszych możliwości.",
+			"stake": "Stakuj",
+			"stake_now": "Stakuj teraz",
+			"stake_amount": "Stakuj $amount $token_symbol",
+			"not_enough_to_stake": "Brak $token_symbol do stakowania",
+			"estimated_received": "Szacowana kwota",
+			"estimated_yearly_yield": "Szacowany roczny zysk",
+			"unstake": "Odstakuj",
+			"unstake_now": "Odstakuj teraz",
+			"unstaking": "Odstakowanie...",
+			"unstake_token": "Odstakuj $token_symbol",
+			"enable_token_text": "Musisz aktywować $token_symbol",
+			"enable_token_button": "Aktywuj $token_symbol",
+			"review": "Sprawdź transakcję",
+			"executing_transaction": "Wykonywanie transakcji...",
+			"unsupported_token_staking": "Stakowanie dla wybranego tokena nie jest obsługiwane.",
+			"provider": "Warunki stakowania dostarczone przez $provider",
+			"earning_potential": "Potencjał zarobkowy",
+			"earning_potential_hint": "Na podstawie wartości Twoich niezainwestowanych aktywów i najwyższego APY dostępnych możliwości zarabiania.",
+			"active_earning": "Aktywne zarabianie",
+			"active_earning_per_year": "$amount/rok",
+			"active_earning_per_year_short": "$amount/rok",
+			"unproductive_assets": "Dostępne",
+			"invested_assets": "Przydzielone",
+			"visit_provider": "Odwiedź stronę",
+			"current_apy_label": "Bieżące APY",
+			"max_apy_label": "Maks. APY",
+			"stake_review_subtitle": "Stakujesz",
+			"unstake_review_subtitle": "Odstakujesz",
+			"delayed_dissolve": "Odbierz z opóźnieniem",
+			"immediate_dissolve": "Odbierz natychmiast",
+			"included_token_fee": "Opłata sieciowa wliczona",
+			"included_dissolve_fee": "Opłata za odblokowanie wliczona",
+			"delayed_dissolve_terms": "Przy odblokowywaniu $token ze stakowania tokeny są zablokowane przez $delay dni bez dalszych nagród, zanim będą mogły zostać wypłacone.",
+			"delayed_dissolve_info": "Po rozpoczęciu odblokowywania swojego stake'u $token przestaniesz otrzymywać nowe nagrody.",
+			"immediate_dissolve_terms": "Otrzymasz swoje $token natychmiast, ale zostanie naliczona opłata od odblokowywanych tokenów $token.",
+			"amount_to_receive": "Kwota do odbioru",
+			"unclaimed_rewards": "Nieodebrane nagrody",
+			"unlock_requests": "Żądania odblokowania",
+			"unlocking_in": "Odblokowanie za $time",
+			"unlocked": "Odblokowane",
+			"withdraw": "Wypłać",
+			"withdraw_successful": "Tokeny zostały pomyślnie wypłacone.",
+			"claim_reward": "Odbierz nagrodę",
+			"claim_rewards": "Odbierz nagrody",
+			"claim_reward_short": "Odbierz",
+			"claim_now": "Odbierz teraz",
+			"claiming": "Odbieranie...",
+			"get_tokens_with_amount": "Otrzymaj do $amount $token_symbol",
+			"get_asset_tokens": "Otrzymaj $token_symbol",
+			"reward_claimed": "Nagroda odebrana",
+			"staked": "Stakowane",
+			"unstaked": "Odstakowane",
+			"title_empty_1": "Zarabiaj do",
+			"title_empty_2_usd": "/rok",
+			"title_empty_2_apy": "rocznie",
 			"title_empty_3": "",
-			"description_empty": "",
-			"full_history": "",
-			"recent_history": "",
-			"harvest_autopilot_carousel_slide_title": "",
-			"harvest_autopilot_carousel_slide_cta": ""
+			"description_empty": "Wygląda na to, że nie stakowano jeszcze żadnych tokenów",
+			"full_history": "Pokaż pełną historię",
+			"recent_history": "Zamknij pełną historię",
+			"harvest_autopilot_carousel_slide_title": "Zarabiaj w OISY z Harvest Autopilot Yield Farming",
+			"harvest_autopilot_carousel_slide_cta": "Dowiedz się więcej"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "",
-			"unexpected_error_on_unstake": "",
-			"unexpected_error_on_stake": "",
-			"dissolvement_limit_reached": ""
+			"unexpected_error_on_withdraw": "Coś poszło nie tak podczas wypłacania tokenów.",
+			"unexpected_error_on_unstake": "Coś poszło nie tak podczas odstakowania tokenów.",
+			"unexpected_error_on_stake": "Coś poszło nie tak podczas stakowania tokenów.",
+			"dissolvement_limit_reached": "Osiągnąłeś(-aś) maksymalną liczbę $limit aktywnych żądań odblokowania. Zakończ niektóre przed utworzeniem nowego.<br/>Pamiętaj, że zawsze możesz odstakować używając opcji \"natychmiast\"."
 		},
 		"info": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": ""
+				"title": "Czym jest Harvest Autopilot",
+				"description": "Harvest Autopilot to wyspecjalizowana funkcja (i konkretna linia produktów) w ekosystemie Harvest Finance, zaprojektowana do automatyzacji i optymalizacji pozycji w zdecentralizowanych finansach (DeFi) przy minimalnym wysiłku.",
+				"fact_1_title": "Inteligentna alokacja zysku",
+				"fact_1_description": "Automatycznie przełącza protokoły, aby uchwycić najwyższe bieżące APY.",
+				"fact_2_title": "Pasywne składanie odsetek",
+				"fact_2_description": "Nagrody są automatycznie zbierane i reinwestowane, aby zmaksymalizować Twój wzrost.",
+				"fact_3_title": "Podział kosztów gazu",
+				"fact_3_description": "Obniża Twoje wydatki, łącząc transakcje z innymi użytkownikami w celu oszczędności na gazie."
 			}
 		},
 		"alt": {
-			"placeholder_image": ""
+			"placeholder_image": "Brak stakowanych tokenów"
 		}
 	},
 	"get_token": {
 		"text": {
-			"title": "",
-			"swap_to_token": "",
-			"ready_to_swap": "",
-			"convert_assets": "",
-			"convertible_assets": "",
-			"how_to_convert": "",
-			"get_more_token": "",
-			"receive_token": "",
-			"receive_token_title": "",
-			"receive_token_text": "",
-			"buy_assets": "",
-			"buy_assets_title": "",
-			"buy_assets_text": ""
+			"title": "Zdobądź $token",
+			"swap_to_token": "Zamień na $token",
+			"ready_to_swap": "Gotowy do zamiany",
+			"convert_assets": "Konwertuj aktywa",
+			"convertible_assets": "Konwertowalne aktywa",
+			"how_to_convert": "Jak konwertować",
+			"get_more_token": "Zdobądź więcej $token",
+			"receive_token": "Odbierz $token",
+			"receive_token_title": "Odbierz $token bezpośrednio",
+			"receive_token_text": "Odbierz $token bezpośrednio na swoje konto",
+			"buy_assets": "Kup aktywa",
+			"buy_assets_title": "Kup konwertowalne aktywa",
+			"buy_assets_text": "Kup więcej aktywów i zamień na $token"
 		}
 	},
 	"temporal": {
@@ -2102,7 +2102,7 @@
 			"second_plural": "sekundy"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {
