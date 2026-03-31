@@ -1,7 +1,5 @@
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
-import oisyEpisodeFour from '$lib/assets/oisy-episode-four-coming.svg';
-import oisyNextEpisodeComing from '/images/rewards/oisy-next-episode-is-coming.webp';
 import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
 import {
 	initRewardEligibilityContext,
@@ -12,6 +10,7 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
+import oisyNextEpisodeComing from '/images/rewards/oisy-next-episode-is-coming.webp';
 
 describe('RewardsGroups', () => {
 	const mockRewardCampaign: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
