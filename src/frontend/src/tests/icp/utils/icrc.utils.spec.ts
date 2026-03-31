@@ -2,6 +2,7 @@ import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icr
 import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import {
 	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
 	isTokenDip20,
@@ -25,6 +26,7 @@ import {
 	IcrcMetadataResponseEntries,
 	type IcrcTokenMetadataResponse
 } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('icrc.utils', () => {
 	describe('mapIcrcToken', () => {
@@ -414,6 +416,47 @@ describe('icrc.utils', () => {
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
 					]);
 				});
+			});
+		});
+
+		describe('mintingAccount', () => {
+			it('should use explicit mintingAccount when provided', () => {
+				const token = mapIcrcToken(mockParams);
+
+				expect(token?.mintingAccount).toStrictEqual(mockIcrcAccount);
+			});
+
+			it('should derive mintingAccount from minterCanisterId when mintingAccount is not provided', () => {
+				const { mintingAccount: _, ...paramsWithoutMintingAccount } = mockParams;
+
+				const token = mapIcrcToken({
+					...paramsWithoutMintingAccount,
+					minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
+				});
+
+				expect(token?.mintingAccount).toStrictEqual(
+					getIcrcAccount(Principal.fromText(IC_CKBTC_MINTER_CANISTER_ID))
+				);
+			});
+
+			it('should prefer explicit mintingAccount over minterCanisterId', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
+				});
+
+				expect(token?.mintingAccount).toStrictEqual(mockIcrcAccount);
+				expect(token?.mintingAccount).not.toStrictEqual(
+					getIcrcAccount(Principal.fromText(IC_CKBTC_MINTER_CANISTER_ID))
+				);
+			});
+
+			it('should have undefined mintingAccount when neither mintingAccount nor minterCanisterId is provided', () => {
+				const { mintingAccount: _, ...paramsWithoutMintingAccount } = mockParams;
+
+				const token = mapIcrcToken(paramsWithoutMintingAccount);
+
+				expect(token?.mintingAccount).toBeUndefined();
 			});
 		});
 	});
