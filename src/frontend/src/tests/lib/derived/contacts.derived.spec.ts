@@ -1,5 +1,10 @@
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+import { CK_ETHEREUM_MINTER_DISPLAY_NAME } from '$icp-eth/utils/ck-minter-contacts.utils';
+import {
+	CKBTC_MINTER_DISPLAY_NAME,
+	ckMinterPrincipalBuiltInContacts
+} from '$icp-eth/utils/ck-minter-principal-contacts.utils';
 import {
 	allContacts,
 	contacts,
@@ -52,11 +57,16 @@ describe('contacts.derived', () => {
 	});
 
 	describe('allContacts', () => {
-		it('should return empty array when both stores are empty', () => {
-			expect(get(allContacts)).toEqual([]);
+		const principalCount = ckMinterPrincipalBuiltInContacts.length;
+
+		it('should return only principal built-in contacts when both stores are empty', () => {
+			const result = get(allContacts);
+
+			expect(result).toHaveLength(principalCount);
+			expect(result).toEqual(ckMinterPrincipalBuiltInContacts);
 		});
 
-		it('should return only built-in contacts when contactsStore is not initialized', () => {
+		it('should return principal and Eth built-in contacts when contactsStore is not initialized', () => {
 			ckEthMinterInfoStore.set({
 				id: ETHEREUM_TOKEN_ID,
 				data: certifiedMinterInfo
@@ -64,19 +74,20 @@ describe('contacts.derived', () => {
 
 			const result = get(allContacts);
 
-			expect(result).toHaveLength(3);
-			expect(result[0].name).toBe('ckETH Minter Helper Contract');
+			expect(result).toHaveLength(principalCount + 3);
+			expect(result[0].name).toBe(CKBTC_MINTER_DISPLAY_NAME);
+			expect(result[principalCount].name).toBe('ckETH Minter Helper Contract');
 		});
 
-		it('should return only user contacts when ckEthMinterInfoStore is empty', () => {
+		it('should return principal built-in contacts and user contacts when ckEthMinterInfoStore is empty', () => {
 			contactsStore.addContact(
 				getMockContacts({ n: 1, names: ['Alice'], addresses: [] }).map(mapToFrontendContact)[0]
 			);
 
 			const result = get(allContacts);
 
-			expect(result).toHaveLength(1);
-			expect(result[0].name).toBe('Alice');
+			expect(result).toHaveLength(principalCount + 1);
+			expect(result[principalCount].name).toBe('Alice');
 		});
 
 		it('should place built-in contacts before user contacts', () => {
@@ -91,11 +102,12 @@ describe('contacts.derived', () => {
 
 			const result = get(allContacts);
 
-			expect(result).toHaveLength(4);
-			expect(result[0].name).toBe('ckETH Minter Helper Contract');
-			expect(result[1].name).toBe('ckERC20 Minter Helper Contract');
-			expect(result[2].name).toBe('CK Ethereum Minter');
-			expect(result[3].name).toBe('Alice');
+			expect(result).toHaveLength(principalCount + 4);
+			expect(result[0].name).toBe(CKBTC_MINTER_DISPLAY_NAME);
+			expect(result[principalCount].name).toBe('ckETH Minter Helper Contract');
+			expect(result[principalCount + 1].name).toBe('ckERC20 Minter Helper Contract');
+			expect(result[principalCount + 2].name).toBe(CK_ETHEREUM_MINTER_DISPLAY_NAME);
+			expect(result[principalCount + 3].name).toBe('Alice');
 		});
 	});
 

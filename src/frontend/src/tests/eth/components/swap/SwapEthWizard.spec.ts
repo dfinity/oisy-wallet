@@ -9,6 +9,7 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import { ZERO } from '$lib/constants/app.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -34,9 +35,13 @@ import {
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
 
+const mockParseToken = vi.hoisted(() => vi.fn());
+
 vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: vi.fn()
+	parseToken: mockParseToken
 }));
+
+mockParseToken.mockReturnValue(ZERO);
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	initMinedTransactionsListener: () => ({
