@@ -580,33 +580,33 @@
 				}
 			},
 			"sprinkles_s1e6": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
-				"campaign_href": "",
-				"welcome": {
-					"title": "",
-					"subtitle": "",
-					"description": ""
-				},
-				"win": {
-					"default": {
-						"title": "",
-						"description": "",
-						"share_href": ""
-					},
-					"jackpot": {
-						"title": "",
-						"description": "",
-						"share_href": ""
-					},
-					"referral": {
-						"title": "",
-						"description": "",
-						"share_href": ""
-					}
+  "title": "OISY Sprinkles",
+  "card_title": "OISY Sprinkles: Tập 6 đã ra mắt 🤑",
+  "one_liner": "Kiếm Sprinkles khi hoạt động tích cực, giới thiệu người khác và sử dụng OISY trên nhiều chuỗi. Hành động của bạn tăng phần thưởng, và các lượt giới thiệu tích cực giúp tăng thêm.<br/>Hơn nữa, nhiều chuỗi hơn đồng nghĩa với cơ hội thắng cao hơn.",
+  "participate_title": "Kiếm token nhờ hoạt động và giới thiệu. Nhiều chuỗi hơn nghĩa là nhiều cơ hội hơn.",
+  "description": "Duy trì hoạt động để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các thao tác ví và giữ ít nhất 5 $.<br/>Mỗi chuỗi hoạt động tăng cơ hội của bạn với Hệ số Đa chuỗi.<br/>Kiếm 10% từ bạn bè đủ điều kiện.",
+  "campaign_href": "",
+  "welcome": {
+    "title": "Chào mừng đến với $oisy_short!",
+    "subtitle": "Sẵn sàng kiếm thưởng chưa?",
+    "description": "Bạn chỉ còn 2 bước để nhận phần thưởng đầu tiên: Đăng nhập, giữ 5 $+ và hoàn thành 2 hành động. Đó là tất cả những gì cần để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận thưởng mỗi khi một trong số họ kiếm được Sprinkles."
+  },
+  "win": {
+    "default": {
+      "title": "Bạn đã được thưởng",
+      "description": "Phần thưởng của bạn vừa được chuyển vào ví.<br>Đừng quên giới thiệu và duy trì hoạt động để giành thêm phần thưởng",
+      "share_href": ""
+    },
+    "jackpot": {
+      "title": "Bạn đã thắng phần thưởng drop hàng tuần",
+      "description": "Bạn vừa nhận được một trong các gói thưởng hàng tuần của chúng tôi.<br>Duy trì hoạt động và tiếp tục giới thiệu để giành thêm",
+      "share_href": ""
+    },
+    "referral": {
+      "title": "Một lời cảm ơn nhỏ",
+      "description": "Một trong những người dùng bạn giới thiệu vừa nhận được Sprinkles.",
+      "share_href": ""
+    }
 				}
 			}
 		}
