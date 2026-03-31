@@ -335,7 +335,18 @@ const loadSolTransactions = async ({
 			...rest
 		});
 
-		const allTransactions = [...newTransactions, ...(stored?.transactions ?? [])];
+		const storedTransactions = stored?.transactions ?? [];
+		const newestStoredSlot = stored?.newestBlockIndex;
+
+		// Filter RPC results to only include transactions from slots newer than the stored data.
+		// This avoids overlap by range-partitioning.
+		const freshTransactions = nonNullish(newestStoredSlot)
+			? newTransactions.filter(
+					({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
+				)
+			: newTransactions;
+
+		const allTransactions = [...freshTransactions, ...storedTransactions];
 
 		const certifiedTransactions = allTransactions.map((transaction) => ({
 			data: transaction,
@@ -347,15 +358,18 @@ const loadSolTransactions = async ({
 			transactions: certifiedTransactions
 		});
 
-		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newTransactions.length > 0) {
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && freshTransactions.length > 0) {
 			saveSolFinalizedTransactions({
 				identity,
 				tokenId: backendTokenId,
-				transactions: newTransactions
+				transactions: freshTransactions
 			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
 		}
 
-		return certifiedTransactions;
+		return freshTransactions.map((transaction) => ({
+			data: transaction,
+			certified: false
+		}));
 	} catch (error: unknown) {
 		solTransactionsStore.reset(tokenId);
 
