@@ -7,11 +7,13 @@ describe('SwapValueDifference', () => {
 	const renderComponent = ({
 		swapAmount = '100',
 		receiveAmount,
+		iconPosition,
 		sourceTokenExchangeRate = 1,
 		destinationTokenExchangeRate = 1
 	}: {
 		swapAmount?: string | number | undefined;
 		receiveAmount?: number;
+		iconPosition?: 'right' | 'left';
 		sourceTokenExchangeRate?: number;
 		destinationTokenExchangeRate?: number;
 	} = {}) => {
@@ -24,7 +26,8 @@ describe('SwapValueDifference', () => {
 		return render(SwapValueDifference, {
 			props: {
 				swapAmount,
-				receiveAmount
+				receiveAmount,
+				iconPosition
 			},
 			context
 		});
@@ -51,6 +54,15 @@ describe('SwapValueDifference', () => {
 		const { getByText } = renderComponent({ receiveAmount: 99 });
 
 		const difference = getByText('-1.00% ⚠');
+
+		expect(difference).toHaveClass('text-warning-primary');
+		expect(difference).toHaveClass('font-bold');
+	});
+
+	it('renders warning icon before value when iconPosition is left', () => {
+		const { getByText } = renderComponent({ receiveAmount: 99, iconPosition: 'left' });
+
+		const difference = getByText('⚠ -1.00%');
 
 		expect(difference).toHaveClass('text-warning-primary');
 		expect(difference).toHaveClass('font-bold');
