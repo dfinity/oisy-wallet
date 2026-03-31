@@ -23,7 +23,7 @@ import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
-import type { NonEmptyArray } from 'alchemy-sdk';
+import type { NonEmptyArray } from '$lib/types/utils';
 
 describe('contact.utils', () => {
 	describe('selectColorForName', () => {
