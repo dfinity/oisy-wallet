@@ -1941,7 +1941,7 @@
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "OISY उपयोग करें और कमाएं! एपिसोड 6 लाइव है \uD83C\uDF89",
+				"description": "OISY उपयोग करें और कमाएं! एपिसोड 6 लाइव है 🎉",
 				"action": "स्थिति जांचें"
 			}
 		},
@@ -2067,42 +2067,6 @@
 		},
 		"alt": {
 			"placeholder_image": "अभी तक कोई टोकन स्टेक नहीं किया"
-		}
-	},
-	"get_token": {
-		"text": {
-			"title": "$token प्राप्त करें",
-			"swap_to_token": "$token के लिए स्वैप करें",
-			"ready_to_swap": "स्वैप के लिए तैयार",
-			"convert_assets": "एसेट रूपांतरित करें",
-			"convertible_assets": "रूपांतरणीय एसेट",
-			"how_to_convert": "कैसे रूपांतरित करें",
-			"get_more_token": "अधिक $token प्राप्त करें",
-			"receive_token": "$token प्राप्त करें",
-			"receive_token_title": "$token सीधे प्राप्त करें",
-			"receive_token_text": "$token सीधे अपने खाते में प्राप्त करें",
-			"buy_assets": "एसेट खरीदें",
-			"buy_assets_title": "रूपांतरणीय एसेट खरीदें",
-			"buy_assets_text": "अधिक एसेट खरीदें और $token में रूपांतरित करें"
-		}
-	},
-	"temporal": {
-		"seconds_to_duration": {
-			"year": "वर्ष",
-			"year_plural": "वर्ष",
-			"month": "महीना",
-			"month_plural": "महीने",
-			"day": "दिन",
-			"day_plural": "दिन",
-			"hour": "घंटा",
-			"hour_plural": "घंटे",
-			"minute": "मिनट",
-			"minute_plural": "मिनट",
-			"second": "सेकंड",
-			"second_plural": "सेकंड"
-		},
-		"time_frame": {
-			"t_24h": "24h"
 		}
 	},
 	"get_token": {
