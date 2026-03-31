@@ -1,4 +1,5 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED } from '$env/user-transactions.env';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
@@ -10,6 +11,10 @@ import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.ut
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
+import {
+	loadSolUserTransactions,
+	saveSolFinalizedTransactions
+} from '$sol/services/sol-user-transactions.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
@@ -28,6 +33,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { lamports, address as solAddress } from '@solana/kit';
@@ -305,15 +311,44 @@ export const loadNextSolTransactions = async ({
 const loadSolTransactions = async ({
 	token: { id: tokenId },
 	network,
+	identity,
+	address,
+	tokenAddress,
 	...rest
 }: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	try {
-		const transactions = await getSolTransactions({
+		const backendTokenId = solBackendTokenId({ network, tokenAddress });
+
+		const stored = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED
+			? await loadSolUserTransactions({
+					identity,
+					tokenId: backendTokenId,
+					address
+				})
+			: undefined;
+
+		const newTransactions = await getSolTransactions({
 			network,
+			identity,
+			address,
+			tokenAddress,
 			...rest
 		});
 
-		const certifiedTransactions = transactions.map((transaction) => ({
+		const storedTransactions = stored?.transactions ?? [];
+		const newestStoredSlot = stored?.newestBlockIndex;
+
+		// Filter RPC results to only include transactions from slots newer than the stored data.
+		// This avoids overlap by range-partitioning.
+		const freshTransactions = nonNullish(newestStoredSlot)
+			? newTransactions.filter(
+					({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
+				)
+			: newTransactions;
+
+		const allTransactions = [...freshTransactions, ...storedTransactions];
+
+		const certifiedTransactions = allTransactions.map((transaction) => ({
 			data: transaction,
 			certified: false
 		}));
@@ -323,7 +358,18 @@ const loadSolTransactions = async ({
 			transactions: certifiedTransactions
 		});
 
-		return certifiedTransactions;
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && freshTransactions.length > 0) {
+			saveSolFinalizedTransactions({
+				identity,
+				tokenId: backendTokenId,
+				transactions: freshTransactions
+			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
+		}
+
+		return freshTransactions.map((transaction) => ({
+			data: transaction,
+			certified: false
+		}));
 	} catch (error: unknown) {
 		solTransactionsStore.reset(tokenId);
 
