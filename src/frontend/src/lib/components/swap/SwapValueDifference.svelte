@@ -47,21 +47,24 @@
 </script>
 
 {#snippet valueDifferenceWarningIcon()}
-	⚠
+	<span>⚠</span>
 {/snippet}
 
 {#if nonNullish(valueDifference)}
 	<span
-		class="inline-flex items-center gap-2"
+		class="inline-flex items-center gap-1"
 		class:font-bold={isWarning || isError}
 		class:text-error-primary={isError}
 		class:text-success-primary={isSuccess}
 		class:text-warning-primary={isWarning}
+		class:gap-2={iconPosition === 'left'}
 	>
 		{#if showWarningIcon && iconPosition === 'left'}
 			{@render valueDifferenceWarningIcon()}
 		{/if}
-		{`${valueDifference > 0 ? '+' : ''}${valueDifference.toFixed(2)}`}%
+		<span>
+			{`${valueDifference > 0 ? '+' : ''}${valueDifference.toFixed(2)}`}%
+		</span>
 		{#if showWarningIcon && iconPosition === 'right'}
 			{@render valueDifferenceWarningIcon()}
 		{/if}
