@@ -475,7 +475,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Hãy theo dõi các đợt phát token sắp tới! <a href=\"https://x.com/oisy\" target=\"_blank\">Theo dõi chúng tôi trên X</a>, tham gia <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> của chúng tôi hoặc tham gia <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> để cập nhật thông tin.",
-			"coming_soon": "Phần 6 của $oisy_short sắp ra mắt",
+			"coming_soon": "Tập $oisy_short Sprinkles tiếp theo sắp ra mắt",
 			"reward_banner": "Biểu ngữ của chiến dịch $campaignName"
 		},
 		"campaigns": {
