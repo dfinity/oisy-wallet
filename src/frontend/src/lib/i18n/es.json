@@ -1935,13 +1935,13 @@
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "Harvest – Autopiloto",
-				"description": "Máxima eficiencia de rendimiento con vaults en autopiloto con un solo clic.",
-				"action": "Ir al Autopiloto"
+				"title": "Harvest – Autopilot",
+				"description": "Máxima eficiencia de rendimiento con vaults en Autopilot con un solo clic.",
+				"action": "Ir al Autopilot"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "¡Usa OISY y GANA! El episodio 6 está en vivo 🎉",
+				"description": "¡Usa OISY y GANA! El episodio 6 está en vivo \uD83C\uDF89",
 				"action": "Ver estado"
 			}
 		},
@@ -1976,12 +1976,12 @@
 			"harvest_autopilot_provider_description": "Harvest Autopilot es un servicio especializado de \"configurar y olvidar\" que automatiza tus posiciones DeFi con el mínimo esfuerzo.",
 			"harvest_autopilot_stake_terms": "Confirmo que he leído y comprendo el producto, he leído las <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Divulgaciones de riesgo</a> y acepto los <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Términos y condiciones</a>.",
 			"my_positions": "Mis posiciones",
-			"available_autopilots": "Autopilotos disponibles",
+			"available_autopilots": "Autopilots disponibles",
 			"vault_info": "Información del vault",
 			"vault_address": "Dirección del vault",
 			"protocol": "Protocolo",
 			"harvest": "Harvest",
-			"autopilot": "Autopiloto",
+			"autopilot": "Autopilot",
 			"total_value_locked": "Valor total bloqueado (TVL)",
 			"manager": "Gestor",
 			"vault_description": "Este pool está diseñado como un servicio de gestión de rendimiento \"configurar y olvidar\" para tus $asset_symbol. Optimiza automáticamente tu posición DeFi con el mínimo esfuerzo de tu parte, asignando capital dinámicamente a las mejores oportunidades.",
@@ -2055,8 +2055,8 @@
 		},
 		"info": {
 			"harvest_autopilot": {
-				"title": "Qué es Harvest Autopiloto",
-				"description": "Harvest Autopiloto es una función especializada (y una línea de productos específica) dentro del ecosistema Harvest Finance, diseñada para automatizar y optimizar tus posiciones de finanzas descentralizadas (DeFi) con el mínimo esfuerzo.",
+				"title": "Qué es Harvest Autopilot",
+				"description": "Harvest Autopilot es una función especializada (y una línea de productos específica) dentro del ecosistema Harvest Finance, diseñada para automatizar y optimizar tus posiciones de finanzas descentralizadas (DeFi) con el mínimo esfuerzo.",
 				"fact_1_title": "Asignación inteligente de rendimiento",
 				"fact_1_description": "Cambia automáticamente de protocolo para capturar el APY actual más alto.",
 				"fact_2_title": "Capitalización pasiva",
