@@ -29,17 +29,11 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	let remainingTimeMilliseconds = $derived($authRemainingTimeStore);
-
-	let identity = $derived($authIdentity);
-
-	let principal = $derived($authIdentity?.getPrincipal());
-
 	const getPouhCredential = async () => {
-		if (nonNullish(identity)) {
+		if (nonNullish($authIdentity)) {
 			try {
 				busy.show();
-				await requestPouhCredential({ identity });
+				await requestPouhCredential({ identity: $authIdentity });
 			} finally {
 				busy.stop();
 			}
@@ -62,9 +56,13 @@
 
 		{#snippet value()}
 			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
-				{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
+				{shortenWithMiddleEllipsis({ text: $authIdentity?.getPrincipal()?.toText() ?? '' })}
 			</output>
-			<Copy inline text={$i18n.settings.text.principal_copied} value={principal?.toText() ?? ''} />
+			<Copy
+				inline
+				text={$i18n.settings.text.principal_copied}
+				value={$authIdentity?.getPrincipal()?.toText() ?? ''}
+			/>
 		{/snippet}
 
 		{#snippet info()}
@@ -78,6 +76,8 @@
 		{/snippet}
 
 		{#snippet info()}
+			{@const remainingTimeMilliseconds = $authRemainingTimeStore}
+
 			{#if nonNullish(remainingTimeMilliseconds)}
 				{$i18n.settings.text.session_expires_in}
 				{remainingTimeMilliseconds <= 0
