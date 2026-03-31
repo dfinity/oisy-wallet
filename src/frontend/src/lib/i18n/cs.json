@@ -1948,7 +1948,7 @@
 			"apy": "APY",
 			"networks": "Sítě",
 			"assets": "Aktiva",
-			"currentStaked": "Vloženo",
+			"currentStaked": "Stakováno",
 			"currentEarning": "Aktuálně vyděláváno",
 			"earningPotential": "Výdělečný potenciál",
 			"terms": "Podmínky"
@@ -1998,7 +1998,7 @@
 			"enable_token_button": "Aktivovat $token_symbol",
 			"review": "Zkontrolovat transakci",
 			"executing_transaction": "Provádění transakce...",
-			"unsupported_token_staking": "Vkládání pro vybraný token není podporováno.",
+			"unsupported_token_staking": "Stakování pro vybraný token není podporováno.",
 			"provider": "Podmínky stakování poskytuje $provider",
 			"earning_potential": "Výdělečný potenciál",
 			"earning_potential_hint": "Na základě hodnoty vašich neinvestovaných aktiv a nejvyššího APY dostupných výdělečných příležitostí.",
@@ -2016,7 +2016,7 @@
 			"immediate_dissolve": "Přijmout okamžitě",
 			"included_token_fee": "Včetně síťového poplatku",
 			"included_dissolve_fee": "Včetně poplatku za odemčení",
-			"delayed_dissolve_terms": "Při odemykání $token ze vkládání jsou tokeny uzamčeny po dobu $delay dní bez dalších odměn, než je lze vybrat.",
+			"delayed_dissolve_terms": "Při odemykání $token ze stakování jsou tokeny uzamčeny po dobu $delay dní bez dalších odměn, než je lze vybrat.",
 			"delayed_dissolve_info": "Jakmile zahájíte odemykání vkladu $token, přestanete dostávat nové odměny.",
 			"immediate_dissolve_terms": "Své $token obdržíte okamžitě, ale bude vám účtován poplatek z odemykaných $token tokenů.",
 			"amount_to_receive": "Částka k přijetí",
@@ -2034,8 +2034,8 @@
 			"get_tokens_with_amount": "Získejte až $amount $token_symbol",
 			"get_asset_tokens": "Získat $token_symbol",
 			"reward_claimed": "Odměna nárokována",
-			"staked": "Vloženo",
-			"unstaked": "Vybráno",
+			"staked": "Stakováno",
+			"unstaked": "Odstakováno",
 			"title_empty_1": "Vydělávejte až",
 			"title_empty_2_usd": "/rok",
 			"title_empty_2_apy": "ročně",
@@ -2048,8 +2048,8 @@
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",
-			"unexpected_error_on_unstake": "Při vybírání tokenů došlo k chybě.",
-			"unexpected_error_on_stake": "Při vkládání tokenů došlo k chybě.",
+			"unexpected_error_on_unstake": "Při odstakování tokenů došlo k chybě.",
+			"unexpected_error_on_stake": "Při stakování tokenů došlo k chybě.",
 			"dissolvement_limit_reached": "Dosáhli jste maximálního počtu $limit aktivních žádostí o odemčení. Nejprve některé dokončete, než vytvoříte novou.<br/>Upozorňujeme, že vždy můžete vybrat pomocí možnosti „okamžitě"."
 		},
 		"info": {
