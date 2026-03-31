@@ -14,4 +14,4 @@ export const SPRINKLES_SEASON_1_EPISODE_5_ID = 'sprinkles_s1e5';
 export const SPRINKLES_SEASON_1_EPISODE_6_ID = 'sprinkles_s1e6';
 
 // TODO for v2.0: set it to SPRINKLES_SEASON_1_EPISODE_6_ID
-export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = null;
+export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = '';
