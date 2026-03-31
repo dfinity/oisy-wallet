@@ -179,6 +179,8 @@ const syncExchangeFromBackend = async ({
 		currentSolPrice,
 		currentBnbPrice,
 		currentPolPrice,
+		currentArbitrumEthPrice,
+		currentBaseEthPrice,
 		currentErc20Prices,
 		currentIcrcPrices,
 		currentSplPrices
@@ -204,7 +206,9 @@ const syncExchangeFromBackend = async ({
 		currentSplPrices,
 		currentErc4626Prices,
 		currentBnbPrice,
-		currentPolPrice
+		currentPolPrice,
+		currentArbitrumEthPrice,
+		currentBaseEthPrice
 	};
 };
 
