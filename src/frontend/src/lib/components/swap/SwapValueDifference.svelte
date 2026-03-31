@@ -46,10 +46,10 @@
 {#if nonNullish(valueDifference)}
 	<span
 		class="gap-2"
+		class:font-bold={isWarning || isError}
 		class:text-error-primary={isError}
 		class:text-success-primary={isSuccess}
 		class:text-warning-primary={isWarning}
-		class:font-bold={isWarning || isError}
 	>
 		{`${valueDifference > 0 ? '+' : ''}${valueDifference.toFixed(2)}`}%
 		{#if isWarning || isError}
