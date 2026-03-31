@@ -32,7 +32,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Address } from '$lib/types/address';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
@@ -51,7 +51,7 @@ export const loadEthereumTransactions = ({
 	updateOnly = false,
 	silent = false
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokenId: TokenId;
 	networkId: NetworkId;
 	chainId: EthereumChainId;
@@ -69,7 +69,7 @@ export const loadEthereumTransactions = ({
 // If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
 // Plus, we add new transactions to the existing ones.
 export const reloadEthereumTransactions = (params: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	tokenId: TokenId;
 	networkId: NetworkId;
 	chainId: EthereumChainId;
@@ -85,7 +85,7 @@ const loadEthTransactions = async ({
 	updateOnly = false,
 	silent = false
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	networkId: NetworkId;
 	tokenId: TokenId;
 	chainId: EthereumChainId;

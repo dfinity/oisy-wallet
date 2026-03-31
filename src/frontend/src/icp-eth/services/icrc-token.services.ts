@@ -4,7 +4,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { isNullish } from '@dfinity/utils';
@@ -35,7 +35,7 @@ const findCustomToken = ({
  * @param {Object} params - The parameters for the function.
  * @param {IcrcCustomToken[]} params.icrcCustomTokens - The list of user's ICRC tokens.
  * @param {Token} params.sendToken - The token to be sent.
- * @param {OptionIdentity} params.identity - The user's identity.
+ * @param {NullishIdentity} params.identity - The user's identity.
  * @returns {Promise<{ result: 'loaded' | 'skipped' | 'error' }>} The result of the operation.
  */
 export const autoLoadIcrcToken = async ({
@@ -45,7 +45,7 @@ export const autoLoadIcrcToken = async ({
 }: {
 	icrcCustomTokens: IcrcCustomToken[];
 	sendToken: Token;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): Promise<AutoLoadTokenResult> =>
 	await autoLoadToken({
 		tokens: icrcCustomTokens,

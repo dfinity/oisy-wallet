@@ -8,6 +8,7 @@ This document lists a couple of useful information for development and deploymen
 - [Internationalization](#internationalization)
 - [Faucets](#faucets)
 - [Testing](#testing)
+- [Debugging Reactivity](#debugging-reactivity)
 - [Integrate ckERC20 Tokens](#integrate-ckerc20-tokens)
 - [Bitcoin](#bitcoin)
 - [Routes Styles](#routes-styles)
@@ -137,6 +138,81 @@ This last step will generate the screenshots for the CI and add them to your PR.
 
 - We develop on macOS, while GitHub Actions use Linux. Therefore, there are two sets of screenshots: `darwin` for macOS and `linux` for Linux.
 - For more information, refer to the Playwright [documentation](https://playwright.dev/docs/test-snapshots).
+
+## Debugging Reactivity
+
+When investigating performance issues, runaway reactive loops, or excessive recomputations during login or normal app usage, a built-in reactivity debug tool automatically counts every reactive recomputation in all environments except production (`DFX_NETWORK=ic`). This includes local development, staging, beta, and all test-fe environments.
+
+### How it works
+
+A Vite plugin (`vite.plugin.reactivity-debug.ts`) uses three mechanisms:
+
+1. **`resolveId`** — transparently intercepts every `import { derived } from 'svelte/store'` in user source code (not `node_modules`) and redirects it to a debug wrapper in `$lib/utils/reactivity-debug.utils.ts`. The wrapper delegates to the real `derived` and wraps the derivation callback so that every recomputation increments a counter.
+
+2. **`transform` on `.ts` files** — injects a `_setNextDerivedLabel('file:line:derived')` call before every `derived()` call. Because the label is embedded at compile time it survives minification and works correctly in staging, beta, and other built environments where stack traces only contain mangled chunk names.
+
+3. **`transform` on `.svelte` files** — injects `reactivityDebugHit()` at the top of every `$effect(() => { ... })` and `$derived.by(() => { ... })` callback body, and also injects `_setNextDerivedLabel()` before any `derived()` calls. If an effect already contains a manual `reactivityDebugHit` call, it is left untouched.
+
+All labels are generated at compile time from the source file path and line number, so they are reliable in every environment (dev, staging, beta, etc.).
+
+The plugin activates automatically when `DFX_NETWORK` is not `ic` (production) and is a complete no-op in production builds.
+
+### Coverage
+
+| Reactive primitive              | Coverage                                                                    | Notes                                                                  |
+| ------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `derived()` from `svelte/store` | **Automatic** — all derived store files are instrumented via `resolveId`    | No code changes needed                                                 |
+| `$effect()` runes               | **Automatic** — all `.svelte` files are instrumented via `transform`        | No code changes needed                                                 |
+| `$derived.by()` runes           | **Automatic** — block-body callbacks are instrumented via `transform`       | No code changes needed                                                 |
+| `$derived()` runes (expression) | **Manual** — use Svelte 5's built-in `$inspect(value)` for ad-hoc debugging | See [Svelte docs on $inspect](https://svelte.dev/docs/svelte/$inspect) |
+
+### Usage
+
+1. Start the dev server or deploy to any non-production environment. You will see a purple log confirming activation:
+
+```
+[reactivity-debug] plugin active — store derived + $effect/$derived.by recomputations will be counted
+```
+
+2. Open the browser DevTools console and use the global helpers:
+
+```javascript
+// Clear all counters (e.g. right before logging in)
+__oisyReactivityDebug.reset();
+
+// ... perform login, navigate, wait ...
+
+// Print a ranked table of the top recomputed stores
+__oisyReactivityDebug.printTop();
+
+// Or get the raw sorted array for scripting
+__oisyReactivityDebug.snapshot();
+// → [["lib/derived/tokens.derived.ts:33", 482], ["lib/derived/exchange.derived.ts:42", 310], ...]
+```
+
+### Interpreting results
+
+- If a label's count keeps **climbing while the app is idle**, that reactive primitive is likely part of a loop or an over-triggered dependency chain.
+- Store `derived` labels point to the file and line where the store is declared (e.g. `lib/derived/auth.derived.ts:5`).
+- `$effect` / `$derived.by` labels include the rune type (e.g. `lib/components/loaders/Loader.svelte:51:$effect`).
+- Use `$inspect(value)` in Svelte components to trace which specific `$derived` expression or prop is changing unexpectedly.
+
+### Custom labels (optional)
+
+All `$effect` and `$derived.by` blocks are instrumented automatically. If you prefer a descriptive label for a specific effect, you can add a manual `reactivityDebugHit` call — the plugin detects it and skips its own injection for that block:
+
+```svelte
+<script lang="ts">
+	import { reactivityDebugHit } from '$lib/utils/reactivity-debug.utils';
+
+	$effect(() => {
+		reactivityDebugHit('MyComponent:descriptiveName');
+		// ... effect logic ...
+	});
+</script>
+```
+
+The call is a no-op in production, so it is safe to leave in the codebase.
 
 ## Integrate ckERC20 Tokens
 
