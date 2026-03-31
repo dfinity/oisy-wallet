@@ -35,9 +35,13 @@ import {
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
 
+const mockParseToken = vi.hoisted(() => vi.fn());
+
 vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: vi.fn().mockReturnValue(ZERO)
+	parseToken: mockParseToken
 }));
+
+mockParseToken.mockReturnValue(ZERO);
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	initMinedTransactionsListener: () => ({
