@@ -475,7 +475,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "¡Mantente atento a los próximos lanzamientos de tokens! <a href=\"https://x.com/oisy\" target=\"_blank\">Síguenos en X</a>, únete a nuestro <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, o entra a nuestro <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> para mantenerte informado.",
-			"coming_soon": "El episodio 6 de $oisy_short llegará pronto",
+			"coming_soon": "El próximo episodio de $oisy_short Sprinkles llegará pronto",
 			"reward_banner": "Banner de la campaña $campaignName"
 		},
 		"campaigns": {
@@ -575,6 +575,36 @@
 					"referral": {
 						"title": "Aquí un pequeño agradecimiento",
 						"description": "Uno de tus usuarios referidos acaba de recibir algunos sprinkles.",
+						"share_href": ""
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: El Episodio 6 está en vivo 🤑",
+				"one_liner": "Gana Sprinkles por ser activo, referir a otros y usar OISY en distintas cadenas. Tus acciones aumentan tus recompensas, y las referencias activas las impulsan aún más.<br/>Además, ahora más cadenas significa mejores chances de ganar.",
+				"participate_title": "Gana tokens por actividad y referencias. Más cadenas significan más oportunidades.",
+				"description": "Mantente activo para calificar: inicia sesión con frecuencia, completa acciones en tu billetera y mantén al menos 5 $.<br/>Cada cadena activa mejora tus probabilidades con un Multiplicador Multicadena.<br/>Gana el 10 % de los amigos que califiquen.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "¡Bienvenido/a a $oisy_short!",
+					"subtitle": "¿Listo/a para ganar?",
+					"description": "Estás a 2 pasos de tu primera recompensa: Inicia sesión, mantén 5 $+ y completa 2 acciones. Eso es todo lo que necesitas para empezar a ganar Sprinkles.<br><br>¿Quieres más? Refiere a tus amigos y obtén un bono cada vez que uno de ellos gane Sprinkles."
+				},
+				"win": {
+					"default": {
+						"title": "Fuiste recompensado/a",
+						"description": "Tus recompensas acaban de llegar a tu billetera.<br>No olvides referir y mantenerte activo/a para ganar más",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Ganaste el drop de bono semanal",
+						"description": "Acabas de ganar uno de nuestros drops de bono semanal.<br>Mantente activo/a y sigue refiriendo para ganar más",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Un pequeño agradecimiento",
+						"description": "Uno de tus usuarios referidos acaba de recibir algunos Sprinkles.",
 						"share_href": ""
 					}
 				}

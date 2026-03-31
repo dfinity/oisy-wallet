@@ -475,7 +475,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "예정된 토큰 드롭을 주목하세요! <a href=\"https://x.com/oisy\" target=\"_blank\">X에서 팔로우</a>하거나, <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>에 참여하거나, <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>에서 최신 소식을 받아보세요.",
-			"coming_soon": "$oisy_short 에피소드 6이 곧 출시됩니다",
+			"coming_soon": "다음 $oisy_short Sprinkles 에피소드가 곧 찾아옵니다",
 			"reward_banner": "$campaignName 캠페인 배너"
 		},
 		"campaigns": {
@@ -576,6 +576,36 @@
 						"title": "작은 감사의 표시입니다",
 						"description": "추천한 사용자 중 한 명이 방금 스프링클을 받았습니다.",
 						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: 에피소드 6 공개 🤑",
+				"one_liner": "활동하고, 다른 사람을 추천하고, 여러 체인에서 OISY를 사용하여 Sprinkles를 획득하세요. 당신의 행동이 보상을 늘리고, 활성 추천이 보상을 더욱 높입니다.<br/>이제 더 많은 체인은 더 높은 당첨 가능성을 의미합니다.",
+				"participate_title": "활동과 추천으로 토큰을 획득하세요. 체인이 많을수록 기회도 늘어납니다.",
+				"description": "자격을 얻으려면 활발하게 활동하세요: 자주 로그인하고, 지갑 작업을 완료하고, 최소 5 $를 보유하세요.<br/>활성화된 각 체인은 멀티체인 배수로 당첨 확률을 높입니다.<br/>자격을 갖춘 친구로부터 10%를 획득하세요.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "$oisy_short에 오신 것을 환영합니다!",
+					"subtitle": "획득할 준비가 되셨나요?",
+					"description": "첫 번째 보상까지 2단계 남았습니다: 로그인하고, 5 $+ 보유하고, 2가지 작업을 완료하세요. Sprinkles를 획득하기 위해 필요한 것은 그것뿐입니다.<br><br>더 원하시나요? 친구를 추천하고 친구가 Sprinkles를 획득할 때마다 보너스를 받으세요."
+				},
+				"win": {
+					"default": {
+						"title": "보상을 받으셨습니다",
+						"description": "보상이 지갑에 도착했습니다.<br>더 많이 획득하려면 추천하고 활발하게 활동하는 것을 잊지 마세요",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "주간 보너스 드롭에 당첨되셨습니다",
+						"description": "주간 보너스 드롭 중 하나를 획득하셨습니다.<br>더 많이 획득하려면 활발하게 활동하고 계속 추천하세요",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "작은 감사의 표시입니다",
+						"description": "추천하신 사용자 중 한 명이 방금 Sprinkles를 받았습니다.",
+						"share_href": ""
 					}
 				}
 			}
