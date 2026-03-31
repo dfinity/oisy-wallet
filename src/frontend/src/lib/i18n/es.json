@@ -580,33 +580,33 @@
 				}
 			},
 			"sprinkles_s1e6": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
-				"campaign_href": "",
-				"welcome": {
-					"title": "",
-					"subtitle": "",
-					"description": ""
-				},
-				"win": {
-					"default": {
-						"title": "",
-						"description": "",
-						"share_href": ""
-					},
-					"jackpot": {
-						"title": "",
-						"description": "",
-						"share_href": ""
-					},
-					"referral": {
-						"title": "",
-						"description": "",
-						"share_href": ""
-					}
+  "title": "OISY Sprinkles",
+  "card_title": "OISY Sprinkles: El Episodio 6 está en vivo 🤑",
+  "one_liner": "Gana Sprinkles por ser activo, referir a otros y usar OISY en distintas cadenas. Tus acciones aumentan tus recompensas, y las referencias activas las impulsan aún más.<br/>Además, ahora más cadenas significa mejores chances de ganar.",
+  "participate_title": "Gana tokens por actividad y referencias. Más cadenas significan más oportunidades.",
+  "description": "Mantente activo para calificar: inicia sesión con frecuencia, completa acciones en tu billetera y mantén al menos 5 $.<br/>Cada cadena activa mejora tus probabilidades con un Multiplicador Multicadena.<br/>Gana el 10 % de los amigos que califiquen.",
+  "campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+  "welcome": {
+    "title": "¡Bienvenido/a a $oisy_short!",
+    "subtitle": "¿Listo/a para ganar?",
+    "description": "Estás a 2 pasos de tu primera recompensa: Inicia sesión, mantén 5 $+ y completa 2 acciones. Eso es todo lo que necesitas para empezar a ganar Sprinkles.<br><br>¿Quieres más? Refiere a tus amigos y obtén un bono cada vez que uno de ellos gane Sprinkles."
+  },
+  "win": {
+    "default": {
+      "title": "Fuiste recompensado/a",
+      "description": "Tus recompensas acaban de llegar a tu billetera.<br>No olvides referir y mantenerte activo/a para ganar más",
+      "share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
+    },
+    "jackpot": {
+      "title": "Ganaste el drop de bono semanal",
+      "description": "Acabas de ganar uno de nuestros drops de bono semanal.<br>Mantente activo/a y sigue refiriendo para ganar más",
+      "share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
+    },
+    "referral": {
+      "title": "Un pequeño agradecimiento",
+      "description": "Uno de tus usuarios referidos acaba de recibir algunos Sprinkles.",
+      "share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+    }
 				}
 			}
 		}
