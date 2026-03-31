@@ -475,7 +475,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "今後のトークンドロップをお見逃しなく！<a href=\"https://x.com/oisy\" target=\"_blank\">X（旧Twitter）をフォロー</a>、<a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit に参加</a>、または <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord に参加</a>して最新情報をゲット！",
-			"coming_soon": "$oisy_shortエピソード6近日公開",
+			"coming_soon": "次の $oisy_short Sprinkles エピソードはもうすぐです",
 			"reward_banner": "キャンペーン$campaignNameのバナー"
 		},
 		"campaigns": {
