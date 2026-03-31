@@ -7,7 +7,7 @@ const normalizeAmountString = (value: string): string => {
 	}
 
 	// `ethers` decimal parsers reject scientific notation (e.g. 7.5e-7).
-	// Normalize to plain decimal string before parsing token units.
+	// Normalise to plain decimal string before parsing token units.
 	return new Decimal(value).toFixed();
 };
 
