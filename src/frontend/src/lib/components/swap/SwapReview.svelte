@@ -136,7 +136,7 @@
 	<SwapCrossChainInfo hrSpacing="md" />
 
 	{#if isValueDifferenceError}
-		<div class="mt-4">
+		<div class="mt-4 cursor-pointer">
 			<MessageBox level="error">
 				{#snippet icon()}
 					<Checkbox
