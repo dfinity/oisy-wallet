@@ -1926,32 +1926,32 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Зарабатывать",
-			"tab_title": "Заработок",
+			"title": "Заработок",
+			"tab_title": "Зарабатываю",
 			"earning_opportunities": "Возможности заработка",
-			"header_title": "Добро пожаловать в Заработок!",
-			"header_description": "Увеличивайте свой портфель цифровых активов, размещая токены в возможностях заработка.",
-			"go_to_earn": "Перейти к Заработок"
+			"header_title": "Добро пожаловать в раздел Заработок!",
+			"header_description": "Развивайте свой портфель цифровых активов, распределяя токены по возможностям заработка.",
+			"go_to_earn": "Перейти к Заработку"
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "Harvest – Autopilot",
+				"description": "Максимальная эффективность доходности с автопилотными хранилищами в один клик.",
+				"action": "Перейти к Autopilot"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Используйте OISY и ЗАРАБАТЫВАЙТЕ! Эпизод. 5 уже запущен (uD83C/uDF89)",
+				"description": "Используйте OISY и ЗАРАБАТЫВАЙТЕ! Эпизод 6 уже в эфире \uD83C\uDF89",
 				"action": "Проверить статус"
 			}
 		},
 		"card_fields": {
 			"apy": "APY",
-			"networks": "",
-			"assets": "",
-			"currentStaked": "Застейкано",
-			"currentEarning": "Текущий заработок",
-			"earningPotential": "Потенциал дополнительного заработка",
+			"networks": "Сети",
+			"assets": "Активы",
+			"currentStaked": "В стейкинге",
+			"currentEarning": "Сейчас зарабатываю",
+			"earningPotential": "Потенциал заработка",
 			"terms": "Условия"
 		},
 		"terms": {
@@ -1959,120 +1959,120 @@
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": "Зарабатывать с Gold DAO"
+				"cardTitle": "Зарабатывайте с Gold DAO"
 			}
 		}
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "",
-			"live_apy": ""
+			"autopilot": "Autopilot",
+			"live_apy": "Текущий APY"
 		}
 	},
 	"stake": {
 		"text": {
-			"harvest_autopilot_page_description": "",
-			"harvest_autopilot_vault_page_description": "",
-			"harvest_autopilot_provider_description": "",
-			"harvest_autopilot_stake_terms": "",
-			"my_positions": "",
-			"available_autopilots": "",
-			"vault_info": "",
-			"vault_address": "",
-			"protocol": "",
-			"harvest": "",
-			"autopilot": "",
-			"total_value_locked": "",
-			"manager": "",
-			"vault_description": "",
-			"stake": "",
-			"stake_now": "Стейкать сейчас",
-			"stake_amount": "Сумма стейкинга $token_symbol",
+			"harvest_autopilot_page_description": "Максимальная эффективность доходности с автопилотными хранилищами в один клик.",
+			"harvest_autopilot_vault_page_description": "Autopilot работает на основе <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">проверенной технологии IPOR</a> Fusion Vault.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot — это специализированный сервис \"настрой и забудь\", который автоматизирует ваши DeFi-позиции с минимальными усилиями.",
+			"harvest_autopilot_stake_terms": "Я подтверждаю, что прочитал(-а) и понял(-а) продукт, ознакомился(-ась) с <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Раскрытием рисков</a> и соглашаюсь с <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Условиями использования</a>.",
+			"my_positions": "Мои позиции",
+			"available_autopilots": "Доступные автопилоты",
+			"vault_info": "Информация о хранилище",
+			"vault_address": "Адрес хранилища",
+			"protocol": "Протокол",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "Общая заблокированная стоимость (TVL)",
+			"manager": "Менеджер",
+			"vault_description": "Этот пул разработан как сервис управления доходностью \"настрой и забудь\" для ваших $asset_symbol. Он автоматически оптимизирует вашу DeFi-позицию с минимальными усилиями, динамически распределяя капитал по наилучшим возможностям.",
+			"stake": "Стейкировать",
+			"stake_now": "Стейкировать сейчас",
+			"stake_amount": "Стейкировать $amount $token_symbol",
 			"not_enough_to_stake": "Нет $token_symbol для стейкинга",
-			"estimated_received": "",
-			"estimated_yearly_yield": "",
-			"unstake": "Анстейк",
-			"unstake_now": "Анстейкнуть сейчас",
+			"estimated_received": "Ожидаемое получение",
+			"estimated_yearly_yield": "Ожидаемая годовая доходность",
+			"unstake": "Анстейкировать",
+			"unstake_now": "Анстейкировать сейчас",
 			"unstaking": "Анстейкинг...",
-			"unstake_token": "Анстейкнуть $token_symbol",
-			"enable_token_text": "Включить токен",
-			"enable_token_button": "Включить токен",
-			"review": "Проверить",
-			"executing_transaction": "Выполнение транзакции",
-			"unsupported_token_staking": "Стейкинг не поддерживается для этого токена",
-			"provider": "Провайдер",
-			"earning_potential": "Дополнительный потенциал заработка",
-			"earning_potential_hint": "На основе стоимости ваших неинвестированных активов и самой высокой APY среди доступных возможностей заработка.",
-			"active_earning": "$amount/год",
+			"unstake_token": "Анстейкировать $token_symbol",
+			"enable_token_text": "Необходимо активировать $token_symbol",
+			"enable_token_button": "Активировать $token_symbol",
+			"review": "Проверить транзакцию",
+			"executing_transaction": "Выполнение транзакции...",
+			"unsupported_token_staking": "Стейкинг для выбранного токена не поддерживается.",
+			"provider": "Условия стейкинга предоставлены $provider",
+			"earning_potential": "Потенциал заработка",
+			"earning_potential_hint": "На основе стоимости ваших неинвестированных активов и наивысшего APY доступных возможностей заработка.",
+			"active_earning": "Активный заработок",
 			"active_earning_per_year": "$amount/год",
-			"active_earning_per_year_short": "",
+			"active_earning_per_year_short": "$amount/год",
 			"unproductive_assets": "Доступно",
-			"invested_assets": "Выделено",
-			"visit_provider": "Посетить провайдера",
-			"current_apy_label": "Текущая APY",
-			"max_apy_label": "",
-			"stake_review_subtitle": "Вы стейкаете",
-			"unstake_review_subtitle": "Вы анстейкаете",
+			"invested_assets": "Распределено",
+			"visit_provider": "Посетить сайт",
+			"current_apy_label": "Текущий APY",
+			"max_apy_label": "Макс. APY",
+			"stake_review_subtitle": "Вы стейкируете",
+			"unstake_review_subtitle": "Вы анстейкируете",
 			"delayed_dissolve": "Получить с задержкой",
 			"immediate_dissolve": "Получить немедленно",
-			"included_token_fee": "Включена комиссия сети",
-			"included_dissolve_fee": "Включена комиссия за разблокировку",
-			"delayed_dissolve_terms": "При разблокировке $token из стейкинга токены будут заблокированы на $delay дней без получения дальнейших наград, после чего их можно будет вывести.",
-			"delayed_dissolve_info": "Когда вы начинаете разблокировку стейка $token, вы больше не будете получать новые награды.",
-			"immediate_dissolve_terms": "Вы получите свои $token немедленно, но с вас будет взимана комиссия за $token токены, которые вы разблокировываете.",
+			"included_token_fee": "Комиссия сети включена",
+			"included_dissolve_fee": "Комиссия за разблокировку включена",
+			"delayed_dissolve_terms": "При разблокировке $token из стейкинга токены блокируются на $delay дней без начисления дополнительных вознаграждений, прежде чем их можно будет вывести.",
+			"delayed_dissolve_info": "Как только вы начнёте разблокировку своего стейка $token, новые вознаграждения начисляться не будут.",
+			"immediate_dissolve_terms": "Вы получите свои $token немедленно, но с разблокируемых токенов $token будет удержана комиссия.",
 			"amount_to_receive": "Сумма к получению",
-			"unclaimed_rewards": "Невостребованные награды",
+			"unclaimed_rewards": "Невостребованные вознаграждения",
 			"unlock_requests": "Запросы на разблокировку",
-			"unlocking_in": "Разблокировка через",
+			"unlocking_in": "Разблокировка через $time",
 			"unlocked": "Разблокировано",
 			"withdraw": "Вывести",
 			"withdraw_successful": "Токены успешно выведены.",
-			"claim_reward": "Забрать награду",
-			"claim_rewards": "Забрать награды",
-			"claim_reward_short": "Забрать",
-			"claim_now": "Забрать сейчас",
-			"claiming": "Запрос",
-			"get_tokens_with_amount": "Получить до $amount $token_symbol",
-			"get_asset_tokens": "",
-			"reward_claimed": "Награда получена",
-			"staked": "Застейкано",
-			"unstaked": "Разстейкано",
-			"title_empty_1": "Зарабатывай до",
+			"claim_reward": "Получить вознаграждение",
+			"claim_rewards": "Получить вознаграждения",
+			"claim_reward_short": "Получить",
+			"claim_now": "Получить сейчас",
+			"claiming": "Получение...",
+			"get_tokens_with_amount": "Получите до $amount $token_symbol",
+			"get_asset_tokens": "Получить $token_symbol",
+			"reward_claimed": "Вознаграждение получено",
+			"staked": "В стейкинге",
+			"unstaked": "Анстейкировано",
+			"title_empty_1": "Зарабатывайте до",
 			"title_empty_2_usd": "/год",
-			"title_empty_2_apy": "годовых",
+			"title_empty_2_apy": "в год",
 			"title_empty_3": "",
-			"description_empty": "Похоже, вы ещё не стейкали токены.",
+			"description_empty": "Похоже, вы ещё не стейкировали ни одного токена",
 			"full_history": "Показать полную историю",
-			"recent_history": "Скрыть полную историю",
-			"harvest_autopilot_carousel_slide_title": "",
-			"harvest_autopilot_carousel_slide_cta": ""
+			"recent_history": "Закрыть полную историю",
+			"harvest_autopilot_carousel_slide_title": "Зарабатывайте в OISY с Harvest Autopilot Yield Farming",
+			"harvest_autopilot_carousel_slide_cta": "Узнать больше"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "Что-то пошло не так при выводе токенов.",
-			"unexpected_error_on_unstake": "Что-то пошло не так при анстейкинге токенов.",
-			"unexpected_error_on_stake": "",
-			"dissolvement_limit_reached": "Достигнут максимум активных запросов на разблокировку ($limit). Завершите некоторые, прежде чем создавать новый.<br/>Обратите внимание: вы можете одновременно иметь до $limit активных запросов на разблокировку."
+			"unexpected_error_on_withdraw": "При выводе токенов произошла ошибка.",
+			"unexpected_error_on_unstake": "При анстейкинге токенов произошла ошибка.",
+			"unexpected_error_on_stake": "При стейкинге токенов произошла ошибка.",
+			"dissolvement_limit_reached": "Вы достигли максимального количества активных запросов на разблокировку: $limit. Завершите некоторые из них, прежде чем создавать новый.<br/>Обратите внимание, что вы всегда можете анстейкировать, используя опцию \"немедленно\"."
 		},
 		"info": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": ""
+				"title": "Что такое Harvest Autopilot",
+				"description": "Harvest Autopilot — это специализированная функция (и отдельная продуктовая линейка) в экосистеме Harvest Finance, разработанная для автоматизации и оптимизации ваших позиций в децентрализованных финансах (DeFi) с минимальными усилиями.",
+				"fact_1_title": "Умное распределение доходности",
+				"fact_1_description": "Автоматически переключает протоколы для получения наивысшего текущего APY.",
+				"fact_2_title": "Пассивное начисление сложных процентов",
+				"fact_2_description": "Вознаграждения автоматически собираются и реинвестируются для максимизации вашего роста.",
+				"fact_3_title": "Совместная оплата газа",
+				"fact_3_description": "Снижает ваши расходы за счёт объединения транзакций с другими пользователями для экономии на газе."
 			}
 		},
 		"alt": {
-			"placeholder_image": "Токены ещё не застейканы"
+			"placeholder_image": "Стейкированных токенов пока нет"
 		}
 	},
 	"get_token": {
 		"text": {
 			"title": "Получить $token",
-			"swap_to_token": "Обмен на $token",
+			"swap_to_token": "Обменять на $token",
 			"ready_to_swap": "Готово к обмену",
 			"convert_assets": "Конвертировать активы",
 			"convertible_assets": "Конвертируемые активы",
@@ -2080,29 +2080,29 @@
 			"get_more_token": "Получить больше $token",
 			"receive_token": "Получить $token",
 			"receive_token_title": "Получить $token напрямую",
-			"receive_token_text": "Получить $token напрямую на ваш аккаунт",
+			"receive_token_text": "Получите $token напрямую на свой счёт",
 			"buy_assets": "Купить активы",
 			"buy_assets_title": "Купить конвертируемые активы",
-			"buy_assets_text": "Купите больше активов и конвертируйте в $token"
+			"buy_assets_text": "Купите больше активов и конвертируйте их в $token"
 		}
 	},
 	"temporal": {
 		"seconds_to_duration": {
 			"year": "год",
-			"year_plural": "лет",
+			"year_plural": "года",
 			"month": "месяц",
-			"month_plural": "месяцев",
+			"month_plural": "месяца",
 			"day": "день",
-			"day_plural": "дней",
+			"day_plural": "дня",
 			"hour": "час",
-			"hour_plural": "часов",
+			"hour_plural": "часа",
 			"minute": "минута",
-			"minute_plural": "минут",
+			"minute_plural": "минуты",
 			"second": "секунда",
-			"second_plural": "секунд"
+			"second_plural": "секунды"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24ч"
 		}
 	},
 	"ai_assistant": {
