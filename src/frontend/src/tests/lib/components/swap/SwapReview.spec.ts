@@ -2,8 +2,8 @@ import SwapReview from '$lib/components/swap/SwapReview.svelte';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapContext, type SwapError } from '$lib/stores/swap.store';
 import { SwapErrorCodes } from '$lib/types/swap';
-import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -185,6 +185,7 @@ describe('SwapReview', () => {
 
 			let errorValue: SwapError | undefined;
 			failedSwapErrorStore.subscribe((v) => (errorValue = v))();
+
 			expect(errorValue).toBeUndefined();
 		});
 
@@ -256,9 +257,7 @@ describe('SwapReview', () => {
 		it('should show confirmation message when value difference is below error threshold', () => {
 			const { getByText } = renderWithHighValueDifference();
 
-			expect(
-				getByText(en.swap.text.value_difference_error_confirmation)
-			).toBeInTheDocument();
+			expect(getByText(en.swap.text.value_difference_error_confirmation)).toBeInTheDocument();
 		});
 
 		it('should disable swap button when value difference error is not confirmed', () => {
@@ -419,6 +418,7 @@ describe('SwapReview', () => {
 
 			let errorValue: SwapError | undefined;
 			failedSwapErrorStore.subscribe((v) => (errorValue = v))();
+
 			expect(errorValue).toBeUndefined();
 		});
 
@@ -480,9 +480,7 @@ describe('SwapReview', () => {
 				context
 			});
 
-			expect(
-				getByText(en.swap.error.swap_failed_instruction_link.trim())
-			).toBeInTheDocument();
+			expect(getByText(en.swap.error.swap_failed_instruction_link.trim())).toBeInTheDocument();
 		});
 	});
 });
