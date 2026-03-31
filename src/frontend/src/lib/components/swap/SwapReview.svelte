@@ -86,7 +86,7 @@
 			{/snippet}
 
 			{#snippet mainValue()}
-				<SwapValueDifference {receiveAmount} {swapAmount} iconPosition="left" />
+				<SwapValueDifference iconPosition="left" {receiveAmount} {swapAmount} />
 			{/snippet}
 		</ModalValue>
 	{/if}

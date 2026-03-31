@@ -54,10 +54,10 @@
 	<span
 		class="inline-flex items-center gap-1"
 		class:font-bold={isWarning || isError}
+		class:gap-2={iconPosition === 'left'}
 		class:text-error-primary={isError}
 		class:text-success-primary={isSuccess}
 		class:text-warning-primary={isWarning}
-		class:gap-2={iconPosition === 'left'}
 	>
 		{#if showWarningIcon && iconPosition === 'left'}
 			{@render valueDifferenceWarningIcon()}
