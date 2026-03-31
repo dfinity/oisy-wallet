@@ -12,9 +12,10 @@
 	interface Props {
 		swapAmount: OptionAmount;
 		receiveAmount?: number;
+		iconPosition?: 'right' | 'left';
 	}
 
-	let { swapAmount, receiveAmount }: Props = $props();
+	let { swapAmount, receiveAmount, iconPosition = 'right' }: Props = $props();
 
 	const { sourceTokenExchangeRate, destinationTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
