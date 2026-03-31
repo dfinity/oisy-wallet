@@ -58,13 +58,9 @@
 			{@const principalText = $authIdentity?.getPrincipal()?.toText()}
 
 			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
-				{shortenWithMiddleEllipsis({ text:principalText ?? '' })}
+				{shortenWithMiddleEllipsis({ text: principalText ?? '' })}
 			</output>
-			<Copy
-				inline
-				text={$i18n.settings.text.principal_copied}
-				value={principalText ?? ''}
-			/>
+			<Copy inline text={$i18n.settings.text.principal_copied} value={principalText ?? ''} />
 		{/snippet}
 
 		{#snippet info()}
