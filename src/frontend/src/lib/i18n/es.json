@@ -475,7 +475,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "¡Mantente atento a los próximos lanzamientos de tokens! <a href=\"https://x.com/oisy\" target=\"_blank\">Síguenos en X</a>, únete a nuestro <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, o entra a nuestro <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> para mantenerte informado.",
-			"coming_soon": "El episodio 6 de $oisy_short llegará pronto",
+			"coming_soon": "El próximo episodio de $oisy_short Sprinkles llegará pronto",
 			"reward_banner": "Banner de la campaña $campaignName"
 		},
 		"campaigns": {
