@@ -585,7 +585,7 @@
 				"one_liner": "Verdiene Sprinkles für Aktivität, Empfehlungen und die Nutzung von OISY über mehrere Chains. Deine Aktionen steigern deine Belohnungen, und aktive Empfehlungen verstärken sie zusätzlich.<br/>Außerdem bedeuten jetzt mehr Chains bessere Gewinnchancen.",
 				"participate_title": "Verdiene Token für Aktivität und Empfehlungen. Mehr Chains bedeuten mehr Chancen.",
 				"description": "Bleib aktiv, um teilzunehmen: Melde dich regelmäßig an, führe Wallet-Aktionen durch und halte mindestens 5 $.<br/>Jede aktive Chain erhöht deine Chancen mit einem Multichain-Multiplikator.<br/>Verdiene 10 % von Freunden, die sich qualifizieren.",
-				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"campaign_href": "",
 				"welcome": {
 					"title": "Willkommen bei $oisy_short!",
 					"subtitle": "Bereit zu verdienen?",
@@ -595,17 +595,17 @@
 					"default": {
 						"title": "Du wurdest belohnt",
 						"description": "Deine Belohnungen sind gerade in deiner Wallet gelandet.<br>Vergiss nicht, zu empfehlen und aktiv zu bleiben, um mehr zu gewinnen",
-						"share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
+						"share_href": ""
 					},
 					"jackpot": {
 						"title": "Du hast den wöchentlichen Bonus-Drop gewonnen",
 						"description": "Du hast gerade einen unserer wöchentlichen Bonus-Drops erhalten.<br>Bleib aktiv und empfiehl weiter, um mehr zu gewinnen",
-						"share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
+						"share_href": ""
 					},
 					"referral": {
 						"title": "Ein kleines Dankeschön",
 						"description": "Einer deiner geworbenen Nutzer hat gerade einige Sprinkles erhalten.",
-						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+						"share_href": ""
 					}
 				}
 			}
