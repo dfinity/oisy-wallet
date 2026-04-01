@@ -13,7 +13,7 @@ const TOKEN_PRICE_PATH: &str = "/simple/token_price";
 // Typical payloads are well under this (a few KB); 50 KB provides headroom
 // while keeping http_outcall cycle costs reasonable. Avoid increasing
 // without re-evaluating observed response sizes.
-const MAX_RESPONSE_BYTES: u64 = 50_000;
+const MAX_RESPONSE_BYTES: u64 = 51_200;
 
 #[derive(Deserialize)]
 struct CoinGeckoPrice {
