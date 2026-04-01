@@ -327,7 +327,7 @@ export class AlchemyProvider {
 		for (const [key, value] of Object.entries(params)) {
 			if (Array.isArray(value)) {
 				for (const v of value) {
-					url.searchParams.append(`${key}[]`, v);
+					url.searchParams.append(key, v);
 				}
 			} else {
 				url.searchParams.append(key, value);
@@ -487,7 +487,10 @@ export class AlchemyProvider {
 
 		const nft: AlchemyNft = await this.fetchNftApi({
 			path: 'getNFTMetadata',
-			params: { contractAddress, tokenId }
+			params: {
+				contractAddress,
+				tokenId
+			}
 		});
 
 		const metadata: Nft = await this.mapNftFromRpc({ nft, token });
@@ -506,7 +509,9 @@ export class AlchemyProvider {
 	getTokensForOwner = async (address: EthAddress): Promise<OwnedContract[]> => {
 		const result: AlchemyProviderContracts = await this.fetchNftApi({
 			path: 'getContractsForOwner',
-			params: { owner: address }
+			params: {
+				owner: address
+			}
 		});
 
 		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
@@ -567,7 +572,9 @@ export class AlchemyProvider {
 	): Promise<Erc1155Metadata | Erc721Metadata> => {
 		const result: AlchemyProviderContract = await this.fetchNftApi({
 			path: 'getContractMetadata',
-			params: { contractAddress: address }
+			params: {
+				contractAddress: address
+			}
 		});
 
 		const tokenStandard =
