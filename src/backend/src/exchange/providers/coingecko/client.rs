@@ -9,7 +9,7 @@ use crate::utils::http_outcall::get;
 const DEFAULT_BASE_URL: &str = "https://pro-api.coingecko.com/api/v3";
 const SIMPLE_PRICE_PATH: &str = "/simple/price";
 const TOKEN_PRICE_PATH: &str = "/simple/token_price";
-const MAX_RESPONSE_BYTES: u64 = 8192;
+const MAX_RESPONSE_BYTES: u64 = 50_000;
 
 #[derive(Deserialize)]
 struct CoinGeckoPrice {
