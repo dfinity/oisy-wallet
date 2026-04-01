@@ -25,6 +25,13 @@ import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import type {
+	Nft as AlchemyNft,
+	AlchemySettings,
+	Network,
+	OwnedNft,
+	OwnedNftsResponse
+} from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
