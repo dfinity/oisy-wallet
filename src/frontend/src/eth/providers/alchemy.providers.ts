@@ -25,6 +25,7 @@ import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
 	AlchemySubscription,
+	NftOrdering,
 	type Nft as AlchemyNft,
 	type AlchemySettings,
 	type Network,
@@ -39,6 +40,9 @@ import { createPublicClient, http, isHash, type Chain, type PublicClient } from 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'> & {
 	wssUrl: string;
 };
+
+const ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS = 'alchemy_minedTransactions';
+const ALCHEMY_SUBSCRIPTION_PENDING_TRANSACTIONS = 'alchemy_pendingTransactions';
 
 const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
@@ -176,7 +180,7 @@ export const initMinedTransactionsListener = ({
 	subscribeAlchemyWs<MinedTxEvent>({
 		wssUrl: alchemyConfig(networkId).wssUrl,
 		params: [
-			AlchemySubscription.MINED_TRANSACTIONS,
+			ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS,
 			{
 				hashesOnly: true,
 				addresses: nonNullish(toAddress) ? [{ to: toAddress }] : undefined
@@ -199,7 +203,7 @@ export const initPendingTransactionsListener = ({
 	subscribeAlchemyWs<PendingTxEvent>({
 		wssUrl: alchemyConfig(networkId).wssUrl,
 		params: [
-			AlchemySubscription.PENDING_TRANSACTIONS,
+			ALCHEMY_SUBSCRIPTION_PENDING_TRANSACTIONS,
 			{
 				toAddress,
 				hashesOnly
