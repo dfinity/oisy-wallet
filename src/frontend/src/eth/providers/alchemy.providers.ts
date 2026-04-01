@@ -22,13 +22,12 @@ import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import {
-	Alchemy,
-	type Nft as AlchemyNft,
-	type AlchemySettings,
-	type Network,
-	type OwnedNft,
-	type OwnedNftsResponse
+import type {
+	Nft as AlchemyNft,
+	AlchemySettings,
+	Network,
+	OwnedNft,
+	OwnedNftsResponse
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
@@ -302,11 +301,6 @@ const updateCachedContractMetadata = ({
 export class AlchemyProvider {
 	private readonly provider: PublicClient;
 	private readonly nftBaseUrl: string;
-	/**
-	 * TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
-	 * @deprecated This approach works for now but does not align with the new architectural requirements.
-	 */
-	private readonly deprecatedProvider: Alchemy;
 
 	constructor(
 		private readonly network: Network,
@@ -314,15 +308,6 @@ export class AlchemyProvider {
 		private readonly alchemyJsonRpcUrl: string,
 		private readonly chainId: EthereumChainId
 	) {
-		this.deprecatedProvider = new Alchemy({
-			apiKey: ALCHEMY_API_KEY,
-			network: this.network
-		});
-
-		// The `ethers` library is currently not accepting the BSC network, so we cannot use it as a provider for all our networks.
-		// There is an issue open with `ethers` to add support for BSC: https://github.com/ethers-io/ethers.js/issues/5040
-		// We decided to add `viem` instead which can be used for all EVM networks, in the meanwhile.
-		// TODO: Rely on a single library for the provider, and remove the deprecated one.
 		this.provider = createPublicClient({
 			chain: this.viemChain,
 			transport: http(`${this.alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`)
