@@ -9,6 +9,10 @@ use crate::utils::http_outcall::get;
 const DEFAULT_BASE_URL: &str = "https://pro-api.coingecko.com/api/v3";
 const SIMPLE_PRICE_PATH: &str = "/simple/price";
 const TOKEN_PRICE_PATH: &str = "/simple/token_price";
+// Upper bound for expected CoinGecko responses (simple price / token price).
+// Typical payloads are well under this (a few KB); 50 KB provides headroom
+// while keeping http_outcall cycle costs reasonable. Avoid increasing
+// without re-evaluating observed response sizes.
 const MAX_RESPONSE_BYTES: u64 = 50_000;
 
 #[derive(Deserialize)]
