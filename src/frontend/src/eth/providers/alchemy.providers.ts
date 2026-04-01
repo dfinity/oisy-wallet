@@ -3,9 +3,12 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import type { EthAddress } from '$eth/types/address';
 import type {
+	AlchemyNft,
+	AlchemyOwnedNft,
+	AlchemyOwnedNftsResponse,
 	AlchemyProviderContract,
 	AlchemyProviderContracts
-} from '$eth/types/alchemy-contract';
+} from '$eth/types/alchemy';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { Erc721Metadata } from '$eth/types/erc721';
 import type { EthereumChainId } from '$eth/types/network';
@@ -22,15 +25,14 @@ import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import type { Nft as AlchemyNft, AlchemySettings, OwnedNft, OwnedNftsResponse } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
 import { createPublicClient, http, isHash, type Chain, type PublicClient } from 'viem';
 
-type AlchemyConfig = Pick<AlchemySettings, 'apiKey'> & {
+interface AlchemyConfig {
 	wssUrl: string;
-};
+}
 
 const ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS = 'alchemy_minedTransactions';
 const ALCHEMY_SUBSCRIPTION_PENDING_TRANSACTIONS = 'alchemy_pendingTransactions';
@@ -42,7 +44,6 @@ const configs: Record<NetworkId, AlchemyConfig> = [
 	(acc, { id, providers: { alchemyWsUrl } }) => ({
 		...acc,
 		[id]: {
-			apiKey: ALCHEMY_API_KEY,
 			wssUrl: `${alchemyWsUrl}/${ALCHEMY_API_KEY}`
 		}
 	}),
@@ -360,7 +361,7 @@ export class AlchemyProvider {
 		},
 		token
 	}: {
-		nft: Omit<OwnedNft, 'balance'> & Partial<Pick<OwnedNft, 'balance'>>;
+		nft: AlchemyOwnedNft;
 		token: NonFungibleToken;
 	}): Promise<Nft> => {
 		const mappedAttributes = mapNftAttributes(attributes);
@@ -427,7 +428,7 @@ export class AlchemyProvider {
 		address: EthAddress;
 		tokens: EthNonFungibleToken[];
 	}): Promise<Nft[]> => {
-		const result: OwnedNftsResponse = await this.fetchNftApi({
+		const result: AlchemyOwnedNftsResponse = await this.fetchNftApi({
 			path: 'getNFTsForOwner',
 			params: {
 				owner: address,

@@ -151,6 +151,13 @@ export const exchangeRateERC20ToUsd = async ({
 	});
 };
 
+const icrcFallbackProviders = [
+	{
+		enabled: KONGSWAP_PROVIDER_ENABLED,
+		fetchPrices: fetchIcrcPricesFromKongSwap
+	}
+];
+
 export const exchangeRateICRCToUsd = async (
 	ledgerCanisterIds: LedgerCanisterIdText[]
 ): Promise<CoingeckoSimpleTokenPriceResponse> => {
@@ -160,23 +167,32 @@ export const exchangeRateICRCToUsd = async (
 
 	const coingeckoPrices = await fetchIcrcPricesFromCoingecko(ledgerCanisterIds);
 
-	if (!KONGSWAP_PROVIDER_ENABLED) {
-		return coingeckoPrices;
-	}
+	return icrcFallbackProviders.reduce<Promise<CoingeckoSimpleTokenPriceResponse>>(
+		async (pricesPromise, { enabled, fetchPrices }) => {
+			const prices = await pricesPromise;
 
-	const missingIds = findMissingLedgerCanisterIds({
-		allLedgerCanisterIds: ledgerCanisterIds,
-		coingeckoResponse: coingeckoPrices
-	});
-	if (missingIds.length === 0) {
-		return coingeckoPrices;
-	}
+			if (!enabled) {
+				return prices;
+			}
 
-	const kongSwapPrices = await fetchIcrcPricesFromKongSwap(missingIds);
-	return {
-		...coingeckoPrices,
-		...kongSwapPrices
-	};
+			const missingLedgerCanisterIds = findMissingLedgerCanisterIds({
+				allLedgerCanisterIds: ledgerCanisterIds,
+				coingeckoResponse: prices
+			});
+
+			if (missingLedgerCanisterIds.length === 0) {
+				return prices;
+			}
+
+			const providerPrices = await fetchPrices(missingLedgerCanisterIds);
+
+			return {
+				...prices,
+				...providerPrices
+			};
+		},
+		Promise.resolve(coingeckoPrices)
+	);
 };
 
 export const exchangeRateSPLToUsd = async (

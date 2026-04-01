@@ -2,10 +2,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
-import type {
-	AlchemyProviderContract,
-	AlchemyProviderContracts
-} from '$eth/types/alchemy-contract';
+import type { AlchemyProviderContract, AlchemyProviderContracts } from '$eth/types/alchemy';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { EthereumNetwork } from '$eth/types/network';
 import { MediaStatusEnum } from '$lib/enums/media-status';

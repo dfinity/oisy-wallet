@@ -130,6 +130,11 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemReferralButtonSelector });
 	});
 
+	it('renders the support button in the menu', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemSupportButtonSelector });
+	});
+
 	it('should render the logged out version if not signed in', async () => {
 		mockAuthSignedIn(false);
 
