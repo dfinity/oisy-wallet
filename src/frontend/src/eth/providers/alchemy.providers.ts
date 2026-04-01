@@ -22,19 +22,13 @@ import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import type {
-	Nft as AlchemyNft,
-	AlchemySettings,
-	Network,
-	OwnedNft,
-	OwnedNftsResponse
-} from 'alchemy-sdk';
+import type { Nft as AlchemyNft, AlchemySettings, OwnedNft, OwnedNftsResponse } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
 import { createPublicClient, http, isHash, type Chain, type PublicClient } from 'viem';
 
-type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'> & {
+type AlchemyConfig = Pick<AlchemySettings, 'apiKey'> & {
 	wssUrl: string;
 };
 
@@ -209,37 +203,37 @@ export const initPendingTransactionsListener = ({
 	});
 
 const cachedNftMetadata = new SvelteMap<
-	Network,
+	NetworkId,
 	SvelteMap<EthNonFungibleToken['address'], SvelteMap<NftId, Nft>>
 >();
 
 const getCachedNftMetadata = ({
-	network,
+	networkId,
 	address,
 	tokenId
 }: {
-	network: Network;
+	networkId: NetworkId;
 	address: EthNonFungibleToken['address'];
 	tokenId: NftId;
-}): Nft | undefined => cachedNftMetadata.get(network)?.get(address)?.get(tokenId);
+}): Nft | undefined => cachedNftMetadata.get(networkId)?.get(address)?.get(tokenId);
 
 const updateCachedNftMetadata = ({
-	network,
+	networkId,
 	address,
 	tokenId,
 	metadata
 }: {
-	network: Network;
+	networkId: NetworkId;
 	address: EthNonFungibleToken['address'];
 	tokenId: NftId;
 	metadata: Nft;
 }) => {
 	const networkMap =
-		cachedNftMetadata.get(network) ??
+		cachedNftMetadata.get(networkId) ??
 		(() => {
 			const map = new SvelteMap<EthNonFungibleToken['address'], SvelteMap<NftId, Nft>>();
 
-			cachedNftMetadata.set(network, map);
+			cachedNftMetadata.set(networkId, map);
 
 			return map;
 		})();
@@ -258,7 +252,7 @@ const updateCachedNftMetadata = ({
 };
 
 const cachedContractMetadata = new SvelteMap<
-	Network,
+	NetworkId,
 	SvelteMap<EthAddress, Erc1155Metadata | Erc721Metadata>
 >();
 
@@ -267,29 +261,29 @@ const cachedContractMetadata = new SvelteMap<
 const inFlightContractMetadata = new Map<string, Promise<Erc1155Metadata | Erc721Metadata>>();
 
 const getCachedContractMetadata = ({
-	network,
+	networkId,
 	address
 }: {
-	network: Network;
+	networkId: NetworkId;
 	address: EthAddress;
 }): Erc1155Metadata | Erc721Metadata | undefined =>
-	cachedContractMetadata.get(network)?.get(address);
+	cachedContractMetadata.get(networkId)?.get(address);
 
 const updateCachedContractMetadata = ({
-	network,
+	networkId,
 	address,
 	metadata
 }: {
-	network: Network;
+	networkId: NetworkId;
 	address: EthAddress;
 	metadata: Erc1155Metadata | Erc721Metadata;
 }) => {
 	const networkMap =
-		cachedContractMetadata.get(network) ??
+		cachedContractMetadata.get(networkId) ??
 		(() => {
 			const map = new SvelteMap<EthAddress, Erc1155Metadata | Erc721Metadata>();
 
-			cachedContractMetadata.set(network, map);
+			cachedContractMetadata.set(networkId, map);
 
 			return map;
 		})();
@@ -302,7 +296,7 @@ export class AlchemyProvider {
 	private readonly nftBaseUrl: string;
 
 	constructor(
-		private readonly network: Network,
+		private readonly networkId: NetworkId,
 		private readonly viemChain: Chain,
 		private readonly alchemyJsonRpcUrl: string,
 		private readonly chainId: EthereumChainId
@@ -474,7 +468,7 @@ export class AlchemyProvider {
 		tokenId: NftId;
 	}): Promise<Nft> => {
 		const cachedMetadata = getCachedNftMetadata({
-			network: this.network,
+			networkId: this.networkId,
 			address: token.address,
 			tokenId
 		});
@@ -496,7 +490,7 @@ export class AlchemyProvider {
 		const metadata: Nft = await this.mapNftFromRpc({ nft, token });
 
 		updateCachedNftMetadata({
-			network: this.network,
+			networkId: this.networkId,
 			address: contractAddress,
 			tokenId,
 			metadata
@@ -540,7 +534,7 @@ export class AlchemyProvider {
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-metadata-endpoints/get-contract-metadata-v-3
 	getContractMetadata = async (address: EthAddress): Promise<Erc1155Metadata | Erc721Metadata> => {
 		const cachedMetadata = getCachedContractMetadata({
-			network: this.network,
+			networkId: this.networkId,
 			address
 		});
 
@@ -548,7 +542,7 @@ export class AlchemyProvider {
 			return cachedMetadata;
 		}
 
-		const cacheKey = `${this.network}:${address}`;
+		const cacheKey = `${this.networkId.description}:${address}`;
 
 		const inFlight = inFlightContractMetadata.get(cacheKey);
 
@@ -606,7 +600,7 @@ export class AlchemyProvider {
 		};
 
 		updateCachedContractMetadata({
-			network: this.network,
+			networkId: this.networkId,
 			address,
 			metadata
 		});
@@ -621,7 +615,7 @@ const providers: Record<NetworkId, AlchemyProvider> = [
 ].reduce<Record<NetworkId, AlchemyProvider>>(
 	(acc, { id, chainId, providers: { viemChain, alchemyJsonRpcUrl } }) => ({
 		...acc,
-		[id]: new AlchemyProvider(viemChain, alchemyJsonRpcUrl, chainId)
+		[id]: new AlchemyProvider(id, viemChain, alchemyJsonRpcUrl, chainId)
 	}),
 	{}
 );
