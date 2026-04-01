@@ -4,7 +4,7 @@ mod providers;
 use std::time::Duration;
 
 use ic_cdk::api::time;
-use ic_cdk_timers::set_timer_interval;
+use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::{
     exchange::{ExchangeData, ExchangeError, ExchangeRate},
     token_id::TokenId,
@@ -40,7 +40,18 @@ fn native_token_ids() -> Vec<StoredTokenId> {
 
 /// Starts a recurring timer that refreshes exchange rates for active tokens
 /// every [`PRICE_REFRESH_INTERVAL_SEC`] seconds.
+///
+/// An immediate one-shot refresh runs first so that rates are available right
+/// after canister init / upgrade instead of waiting for the first interval tick.
 pub(crate) fn start_exchange_rate_timer() {
+    set_timer(Duration::ZERO, || {
+        ic_cdk::futures::spawn(async {
+            if let Err(err) = refresh_exchange_rates().await {
+                ic_cdk::println!("Exchange rate initial refresh skipped: {err:?}");
+            }
+        });
+    });
+
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
 
     let _ = set_timer_interval(refresh_interval, || {
