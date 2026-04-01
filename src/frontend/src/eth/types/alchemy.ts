@@ -1,7 +1,7 @@
 // Alchemy NFT API v3 response types.
-// https://www.alchemy.com/docs/reference/nft-api-endpoints
 
 // --- getNFTsForOwner / getNFTMetadata ---
+// https://www.alchemy.com/docs/reference/nft-api-endpoints
 
 export interface AlchemyNftImage {
 	originalUrl?: string;
@@ -18,7 +18,10 @@ export interface AlchemyNftContract {
 }
 
 export interface AlchemyNftRawMetadata {
-	attributes?: unknown[];
+	attributes?: {
+		trait_type: string;
+		value?: string | number | boolean | null;
+	}[];
 }
 
 export interface AlchemyNftRaw {
