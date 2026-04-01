@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
+import { nonNullish } from '@dfinity/utils';
 import { config } from 'dotenv';
-import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ENV, OISY_IC_DOMAIN, findHtmlFiles, replaceEnv } from './build.utils.mjs';
+
+const IS_SIGNER_BUILD = nonNullish(process.env.OISY_SIGNER_TARGET);
 
 config({ path: `.env.${ENV}` });
 
@@ -73,14 +76,9 @@ const removeMetaRobots = (targetFile) => {
 const htmlFiles = findHtmlFiles();
 htmlFiles.forEach((htmlFile) => parseMetadata(htmlFile));
 
-const sitemapPath = join(process.cwd(), 'build', 'sitemap.xml');
-if (existsSync(sitemapPath) && statSync(sitemapPath).isFile()) {
-	parseUrl(sitemapPath);
-}
-
-const manifestPath = join(process.cwd(), 'build', 'manifest.webmanifest');
-if (existsSync(manifestPath) && statSync(manifestPath).isFile()) {
-	parseMetadata(manifestPath);
+if (!IS_SIGNER_BUILD) {
+	parseUrl(join(process.cwd(), 'build', 'sitemap.xml'));
+	parseMetadata(join(process.cwd(), 'build', 'manifest.webmanifest'));
 }
 
 // SEO
