@@ -6,7 +6,6 @@ import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
-import { Network } from 'alchemy-sdk';
 import { base, baseSepolia } from 'viem/chains';
 
 export const BASE_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
@@ -28,7 +27,6 @@ export const BASE_NETWORK: EthereumNetwork = {
 	providers: {
 		infura: 'base',
 		alchemy: 'base',
-		alchemyDeprecated: Network.BASE_MAINNET,
 		alchemyJsonRpcUrl: 'https://base-mainnet.g.alchemy.com/v2',
 		alchemyWsUrl: 'wss://base-mainnet.g.alchemy.com/v2',
 		viemChain: base
@@ -53,7 +51,6 @@ export const BASE_SEPOLIA_NETWORK: EthereumNetwork = {
 	providers: {
 		infura: 'base-sepolia',
 		alchemy: 'base-sepolia',
-		alchemyDeprecated: Network.BASE_SEPOLIA,
 		alchemyJsonRpcUrl: 'https://base-sepolia.g.alchemy.com/v2',
 		alchemyWsUrl: 'wss://base-sepolia.g.alchemy.com/v2',
 		viemChain: baseSepolia

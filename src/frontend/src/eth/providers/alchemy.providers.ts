@@ -45,11 +45,10 @@ const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyConfig>>(
-	(acc, { id, providers: { alchemy: _, alchemyDeprecated, alchemyWsUrl } }) => ({
+	(acc, { id, providers: { alchemy: _, alchemyWsUrl } }) => ({
 		...acc,
 		[id]: {
 			apiKey: ALCHEMY_API_KEY,
-			network: alchemyDeprecated,
 			wssUrl: `${alchemyWsUrl}/${ALCHEMY_API_KEY}`
 		}
 	}),
@@ -620,9 +619,9 @@ const providers: Record<NetworkId, AlchemyProvider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyProvider>>(
-	(acc, { id, chainId, providers: { alchemyDeprecated, viemChain, alchemyJsonRpcUrl } }) => ({
+	(acc, { id, chainId, providers: { viemChain, alchemyJsonRpcUrl } }) => ({
 		...acc,
-		[id]: new AlchemyProvider(alchemyDeprecated, viemChain, alchemyJsonRpcUrl, chainId)
+		[id]: new AlchemyProvider(viemChain, alchemyJsonRpcUrl, chainId)
 	}),
 	{}
 );

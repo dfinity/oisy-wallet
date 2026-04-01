@@ -6,7 +6,6 @@ import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
-import { Network } from 'alchemy-sdk';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
 
 export const ARBITRUM_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
@@ -30,7 +29,6 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 	providers: {
 		infura: 'arbitrum',
 		alchemy: 'arbitrum',
-		alchemyDeprecated: Network.ARB_MAINNET,
 		alchemyJsonRpcUrl: 'https://arb-mainnet.g.alchemy.com/v2',
 		alchemyWsUrl: 'wss://arb-mainnet.g.alchemy.com/v2',
 		viemChain: arbitrum
@@ -57,7 +55,6 @@ export const ARBITRUM_SEPOLIA_NETWORK: EthereumNetwork = {
 	providers: {
 		infura: 'arbitrum-sepolia',
 		alchemy: 'arbitrum-sepolia',
-		alchemyDeprecated: Network.ARB_SEPOLIA,
 		alchemyJsonRpcUrl: 'https://arb-sepolia.g.alchemy.com/v2',
 		alchemyWsUrl: 'wss://arb-sepolia.g.alchemy.com/v2',
 		viemChain: arbitrumSepolia
