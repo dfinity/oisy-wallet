@@ -92,6 +92,7 @@ pub(crate) async fn get(
     max_response_bytes: u64,
 ) -> Result<HttpRequestResult, String> {
     let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
+
     request.transform = Some(transform_context_from_query(
         "http_request_transform".to_string(),
         vec![],
