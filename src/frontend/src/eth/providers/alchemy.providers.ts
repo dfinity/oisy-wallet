@@ -32,7 +32,6 @@ import { createPublicClient, http, isHash, type Chain, type PublicClient } from 
 
 interface AlchemyConfig {
 	wssUrl: string;
-	nftBaseUrl: string;
 }
 
 const ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS = 'alchemy_minedTransactions';
@@ -42,11 +41,10 @@ const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyConfig>>(
-	(acc, { id, providers: { alchemyJsonRpcUrl, alchemyWsUrl } }) => ({
+	(acc, { id, providers: { alchemyWsUrl } }) => ({
 		...acc,
 		[id]: {
-			wssUrl: `${alchemyWsUrl}/${ALCHEMY_API_KEY}`,
-			nftBaseUrl: `${new URL(alchemyJsonRpcUrl).origin}/nft/v3/${ALCHEMY_API_KEY}`
+			wssUrl: `${alchemyWsUrl}/${ALCHEMY_API_KEY}`
 		}
 	}),
 	{}
