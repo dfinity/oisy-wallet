@@ -32,7 +32,7 @@ Each domain maps to a **separate IC asset canister**. This is required because:
 
 All signer domains derive their Internet Identity from the **same canonical origin** as the main wallet, so users see the same accounts everywhere:
 
-- **Production** signer/legacy-signer: `derivationOrigin = 'https://oisy.com'`
+- **Production/Beta** signer/legacy-signer: `derivationOrigin = 'https://oisy.com'`
 - **Staging** signer/legacy-signer: `derivationOrigin = 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'`
 
 For this to work, the signer domains must be listed in the main frontend canister's `/.well-known/ii-alternative-origins`. This is configured via the `VITE_AUTH_ALTERNATIVE_ORIGINS` env var in each environment's `.env` file.
