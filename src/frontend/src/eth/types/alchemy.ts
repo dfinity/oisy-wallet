@@ -18,7 +18,10 @@ export interface AlchemyNftContract {
 }
 
 export interface AlchemyNftRawMetadata {
-	attributes?: unknown[];
+	attributes?: {
+		trait_type: string;
+		value?: string | number | boolean | null;
+	}[];
 }
 
 export interface AlchemyNftRaw {
