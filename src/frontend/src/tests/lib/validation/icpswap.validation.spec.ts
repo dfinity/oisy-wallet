@@ -1,4 +1,4 @@
-import { IcpSwapResponseSchema, IcpSwapTokenSchema } from '$lib/types/icpswap';
+import { IcpSwapResponseSchema, IcpSwapTokenSchema } from '$lib/schema/icpswap.schema';
 import { createMockIcpSwapToken } from '$tests/mocks/icpswap.mock';
 
 describe('Schema: IcpSwapTokenSchema', () => {
