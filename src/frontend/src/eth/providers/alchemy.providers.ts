@@ -24,8 +24,6 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
-	AlchemySubscription,
-	NftOrdering,
 	type Nft as AlchemyNft,
 	type AlchemySettings,
 	type Network,
@@ -40,6 +38,9 @@ import { createPublicClient, http, isHash, type Chain, type PublicClient } from 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'> & {
 	wssUrl: string;
 };
+
+const ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS = 'alchemy_minedTransactions';
+const ALCHEMY_SUBSCRIPTION_PENDING_TRANSACTIONS = 'alchemy_pendingTransactions';
 
 const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
@@ -177,7 +178,7 @@ export const initMinedTransactionsListener = ({
 	subscribeAlchemyWs<MinedTxEvent>({
 		wssUrl: alchemyConfig(networkId).wssUrl,
 		params: [
-			AlchemySubscription.MINED_TRANSACTIONS,
+			ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS,
 			{
 				hashesOnly: true,
 				addresses: nonNullish(toAddress) ? [{ to: toAddress }] : undefined
@@ -200,7 +201,7 @@ export const initPendingTransactionsListener = ({
 	subscribeAlchemyWs<PendingTxEvent>({
 		wssUrl: alchemyConfig(networkId).wssUrl,
 		params: [
-			AlchemySubscription.PENDING_TRANSACTIONS,
+			ALCHEMY_SUBSCRIPTION_PENDING_TRANSACTIONS,
 			{
 				toAddress,
 				hashesOnly
@@ -300,6 +301,7 @@ const updateCachedContractMetadata = ({
 
 export class AlchemyProvider {
 	private readonly provider: PublicClient;
+	private readonly nftBaseUrl: string;
 	/**
 	 * TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
 	 * @deprecated This approach works for now but does not align with the new architectural requirements.
@@ -325,7 +327,37 @@ export class AlchemyProvider {
 			chain: this.viemChain,
 			transport: http(`${this.alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`)
 		});
+
+		this.nftBaseUrl = `${new URL(this.alchemyJsonRpcUrl).origin}/nft/v3/${ALCHEMY_API_KEY}`;
 	}
+
+	private fetchNftApi = async <T>({
+		path,
+		params
+	}: {
+		path: string;
+		params: Record<string, string | string[]>;
+	}): Promise<T> => {
+		const url = new URL(`${this.nftBaseUrl}/${path}`);
+
+		for (const [key, value] of Object.entries(params)) {
+			if (Array.isArray(value)) {
+				for (const v of value) {
+					url.searchParams.append(key, v);
+				}
+			} else {
+				url.searchParams.append(key, value);
+			}
+		}
+
+		const response = await fetch(url.toString());
+
+		if (!response.ok) {
+			throw new Error(`Alchemy NFT API error: ${response.status} ${response.statusText}`);
+		}
+
+		return response.json();
+	};
 
 	wait = async (hash: string) => {
 		if (!isHash(hash)) {
@@ -417,10 +449,14 @@ export class AlchemyProvider {
 		address: EthAddress;
 		tokens: EthNonFungibleToken[];
 	}): Promise<Nft[]> => {
-		const result: OwnedNftsResponse = await this.deprecatedProvider.nft.getNftsForOwner(address, {
-			contractAddresses: tokens.map((token) => token.address),
-			omitMetadata: false,
-			orderBy: NftOrdering.TRANSFERTIME
+		const result: OwnedNftsResponse = await this.fetchNftApi({
+			path: 'getNFTsForOwner',
+			params: {
+				owner: address,
+				withMetadata: 'true',
+				orderBy: 'transferTime',
+				contractAddresses: tokens.map(({ address: contractAddress }) => contractAddress)
+			}
 		});
 
 		const nftPromises = result.ownedNfts.reduce<Promise<Nft>[]>((acc, ownedNft) => {
@@ -465,10 +501,13 @@ export class AlchemyProvider {
 
 		const { address: contractAddress } = token;
 
-		const nft: AlchemyNft = await this.deprecatedProvider.nft.getNftMetadata(
-			contractAddress,
-			tokenId
-		);
+		const nft: AlchemyNft = await this.fetchNftApi({
+			path: 'getNFTMetadata',
+			params: {
+				contractAddress,
+				tokenId
+			}
+		});
 
 		const metadata: Nft = await this.mapNftFromRpc({ nft, token });
 
@@ -484,8 +523,12 @@ export class AlchemyProvider {
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
 	getTokensForOwner = async (address: EthAddress): Promise<OwnedContract[]> => {
-		const result: AlchemyProviderContracts =
-			await this.deprecatedProvider.nft.getContractsForOwner(address);
+		const result: AlchemyProviderContracts = await this.fetchNftApi({
+			path: 'getContractsForOwner',
+			params: {
+				owner: address
+			}
+		});
 
 		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
 			const tokenStandard =
@@ -543,8 +586,12 @@ export class AlchemyProvider {
 	private fetchContractMetadata = async (
 		address: EthAddress
 	): Promise<Erc1155Metadata | Erc721Metadata> => {
-		const result: AlchemyProviderContract =
-			await this.deprecatedProvider.nft.getContractMetadata(address);
+		const result: AlchemyProviderContract = await this.fetchNftApi({
+			path: 'getContractMetadata',
+			params: {
+				contractAddress: address
+			}
+		});
 
 		const tokenStandard =
 			result.tokenType === 'ERC721'
