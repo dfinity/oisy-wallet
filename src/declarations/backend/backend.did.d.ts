@@ -289,11 +289,20 @@ export type GetUserTransactionsResult =
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
+export interface HttpHeader {
+	value: string;
+	name: string;
+}
 export interface HttpRequest {
 	url: string;
 	method: string;
 	body: Uint8Array;
 	headers: Array<[string, string]>;
+}
+export interface HttpRequestResult {
+	status: bigint;
+	body: Uint8Array;
+	headers: Array<HttpHeader>;
 }
 export interface HttpResponse {
 	body: Uint8Array;
@@ -511,6 +520,10 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export interface TransformArgs {
+	context: Uint8Array;
+	response: HttpRequestResult;
+}
 export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
@@ -785,6 +798,15 @@ export interface _SERVICE {
 	 * Processes external HTTP requests.
 	 */
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
+	/**
+	 * Strips volatile HTTP headers so that IC replicas can reach consensus.
+	 *
+	 * Each replica makes the same HTTP request independently and the raw
+	 * responses must match for consensus. Headers like `Date`, `X-Request-Id`,
+	 * `CF-Ray`, etc. differ across replicas, causing consensus failure.
+	 * This transform keeps only status + body.
+	 */
+	http_request_transform: ActorMethod<[TransformArgs], HttpRequestResult>;
 	/**
 	 * List the custom tokens for the calling user.
 	 *
