@@ -47,6 +47,7 @@ export const formatIcpSwapToCoingeckoPrices = (
 			usd_24h_vol: Number(token.volumeUSD24H),
 			usd_24h_change: Number(token.priceChange24H)
 		};
+
 		return acc;
 	}, {});
 
@@ -59,6 +60,7 @@ export const formatKongSwapToCoingeckoPrices = (
 		}
 
 		acc[token.canister_id.toLowerCase()] = mapMetricsToCoingeckoPrice(metrics);
+
 		return acc;
 	}, {});
 
