@@ -10,7 +10,7 @@
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
-	import { mapSignerDomain, mapSignerOriginHost } from '$lib/utils/signer.utils';
+	import { mapSignerOriginHost } from '$lib/utils/signer.utils';
 
 	interface Props {
 		children: Snippet;
@@ -40,8 +40,7 @@
 				event_context: PLAUSIBLE_EVENT_CONTEXTS.SIGNER,
 				event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER.ACCOUNTS,
 				event_type: PLAUSIBLE_EVENT_TYPES_SIGNER.REQUESTED,
-				dapp_origin: mapSignerOriginHost(origin),
-				signer_domain: mapSignerDomain()
+				dapp_origin: mapSignerOriginHost(origin)
 			}
 		});
 
