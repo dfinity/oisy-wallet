@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { config } from 'dotenv';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ENV, OISY_IC_DOMAIN, findHtmlFiles, replaceEnv } from './build.utils.mjs';
 
@@ -73,8 +73,15 @@ const removeMetaRobots = (targetFile) => {
 const htmlFiles = findHtmlFiles();
 htmlFiles.forEach((htmlFile) => parseMetadata(htmlFile));
 
-parseUrl(join(process.cwd(), 'build', 'sitemap.xml'));
-parseMetadata(join(process.cwd(), 'build', 'manifest.webmanifest'));
+const sitemapPath = join(process.cwd(), 'build', 'sitemap.xml');
+if (existsSync(sitemapPath) && statSync(sitemapPath).isFile()) {
+	parseUrl(sitemapPath);
+}
+
+const manifestPath = join(process.cwd(), 'build', 'manifest.webmanifest');
+if (existsSync(manifestPath) && statSync(manifestPath).isFile()) {
+	parseMetadata(manifestPath);
+}
 
 // SEO
 htmlFiles.forEach((htmlFile) => removeMetaRobots(htmlFile));
