@@ -22,14 +22,6 @@ import * as viemMod from 'viem';
 import { createPublicClient, http, type PublicClient } from 'viem';
 import type { MockInstance } from 'vitest';
 
-vi.mock(import('alchemy-sdk'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		Alchemy: vi.fn()
-	};
-});
-
 vi.mock(import('viem'), async (importOriginal) => {
 	const actual = await importOriginal();
 
