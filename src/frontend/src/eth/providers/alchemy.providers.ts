@@ -24,8 +24,6 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
-	AlchemySubscription,
-	NftOrdering,
 	type Nft as AlchemyNft,
 	type AlchemySettings,
 	type Network,
