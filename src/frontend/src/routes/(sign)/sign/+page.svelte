@@ -48,7 +48,6 @@
 		trackEvent({
 			name: PLAUSIBLE_EVENTS.SIGNER_PAGE_VISIT,
 			metadata: {
-				signer_domain: window.location.hostname,
 				...(SIGNER_TARGET ? { signer_target: SIGNER_TARGET } : {})
 			}
 		});
