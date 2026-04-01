@@ -19,11 +19,11 @@ With the upcoming migration to agent-js v5, the signer protocol changes in a **b
 
 Production hostnames:
 
-| Role           | Domain                     |
-| -------------- | -------------------------- |
-| Main wallet    | `oisy.com`                 |
-| Signer         | `signer.oisy.com`          |
-| Legacy signer  | `legacy-signer.oisy.com`   |
+| Role          | Domain                   |
+| ------------- | ------------------------ |
+| Main wallet   | `oisy.com`               |
+| Signer        | `signer.oisy.com`        |
+| Legacy signer | `legacy-signer.oisy.com` |
 
 Staging and beta use the same layout under internal hostnames. Those URLs are maintained for the team in `scripts/domains.json` and per-environment `.env` files and are intentionally not listed here.
 
