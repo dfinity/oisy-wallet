@@ -23,7 +23,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import {  mapSignerOriginHost } from '$lib/utils/signer.utils';
+	import { mapSignerOriginHost } from '$lib/utils/signer.utils';
 
 	const {
 		permissionsPrompt: { payload, reset: resetPrompt }
