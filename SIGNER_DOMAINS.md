@@ -64,15 +64,15 @@ The `OISY_SIGNER_TARGET` env var is baked into each canister's `build` command i
 
 When set, this env var affects the build in several ways:
 
-| Aspect                   | Default (unset)     | `signer`                    | `legacy_signer`                  |
-| ------------------------ | ------------------- | --------------------------- | -------------------------------- |
-| `VITE_OISY_DOMAIN`       | `https://oisy.com`  | `https://signer.oisy.com`   | `https://legacy-signer.oisy.com` |
-| `VITE_APP_VERSION`       | from `package.json` | from `signer-versions.json` | from `signer-versions.json`      |
-| `.well-known/ic-domains` | `oisy.com`          | `signer.oisy.com`           | `legacy-signer.oisy.com`         |
+| Aspect                   | Default (unset)     | `signer`                     | `legacy_signer`                  |
+| ------------------------ | ------------------- | ---------------------------- | -------------------------------- |
+| `VITE_OISY_DOMAIN`       | `https://oisy.com`  | `https://signer.oisy.com`    | `https://legacy-signer.oisy.com` |
+| `VITE_APP_VERSION`       | from `package.json` | from `signer-versions.json`  | from `signer-versions.json`      |
+| `.well-known/ic-domains` | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`         |
 | `AUTH_DERIVATION_ORIGIN` | (varies)            | Canonical origin \*          | Canonical origin \*              |
-| Plausible domain         | `oisy.com`          | `signer.oisy.com`           | `legacy-signer.oisy.com`         |
-| SvelteKit reroute        | Normal routing      | All routes -> `/sign`       | All routes -> `/sign`            |
-| `ii-alternative-origins` | Lists alt origins   | Lists alt origins (from env) | Lists alt origins (from env)    |
+| Plausible domain         | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`         |
+| SvelteKit reroute        | Normal routing      | All routes -> `/sign`        | All routes -> `/sign`            |
+| `ii-alternative-origins` | Lists alt origins   | Lists alt origins (from env) | Lists alt origins (from env)     |
 
 \* Canonical origin per environment: `https://oisy.com` (production/beta), `https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io` (staging). See [Identity Derivation](#identity-derivation).
 
