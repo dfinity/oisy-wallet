@@ -1,9 +1,11 @@
 use candid::Nat;
-use ic_cdk::management_canister::{
-    http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
-    HttpRequestResult, TransformArgs,
+use ic_cdk::{
+    management_canister::{
+        http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
+        HttpRequestResult, TransformArgs,
+    },
+    query,
 };
-use ic_cdk::query;
 
 const USER_AGENT: &str = "OisyWalletBackend";
 
