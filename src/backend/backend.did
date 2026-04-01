@@ -262,11 +262,17 @@ type GetUserTransactionsResult = variant {
 	Err : UserTransactionError
 };
 type HasUserProfileResponse = record { has_user_profile : bool };
+type HttpHeader = record { value : text; name : text };
 type HttpRequest = record {
 	url : text;
 	method : text;
 	body : blob;
 	headers : vec record { text; text }
+};
+type HttpRequestResult = record {
+	status : nat;
+	body : blob;
+	headers : vec HttpHeader
 };
 type HttpResponse = record {
 	body : blob;
@@ -469,6 +475,7 @@ type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
+type TransformArgs = record { context : blob; response : HttpRequestResult };
 type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
 type UpdateExperimentalFeaturesSettingsRequest = record {
 	experimental_features : vec record {
@@ -704,6 +711,13 @@ service : (Arg) -> {
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
+	// Strips volatile HTTP headers so that IC replicas can reach consensus.
+	//
+	// Each replica makes the same HTTP request independently and the raw
+	// responses must match for consensus. Headers like `Date`, `X-Request-Id`,
+	// `CF-Ray`, etc. differ across replicas, causing consensus failure.
+	// This transform keeps only status + body.
+	http_request_transform : (TransformArgs) -> (HttpRequestResult) query;
 	// List the custom tokens for the calling user.
 	//
 	// Note: This method was previously exposed as a *query* but is now an *update*
