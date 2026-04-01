@@ -1,8 +1,6 @@
 import type { IcpSwapToken } from '$lib/types/icpswap';
 
-export const createMockIcpSwapToken = (
-	overrides: Partial<IcpSwapToken> = {}
-): IcpSwapToken => ({
+export const createMockIcpSwapToken = (overrides: Partial<IcpSwapToken> = {}): IcpSwapToken => ({
 	tokenLedgerId: 'aaaaa-aa',
 	tokenName: 'Mock Token',
 	tokenSymbol: 'MOCK',
