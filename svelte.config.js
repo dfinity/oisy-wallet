@@ -1,3 +1,4 @@
+import { nonNullish } from '@dfinity/utils';
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { readFileSync } from 'node:fs';
@@ -33,6 +34,9 @@ const config = {
 			fallback: 'index.html',
 			precompress: false
 		}),
+		prerender: {
+			...(nonNullish(signerTarget) && { handleUnseenRoutes: 'ignore' })
+		},
 		files: {
 			assets: filesPath('static'),
 			hooks: {
