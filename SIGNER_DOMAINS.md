@@ -6,6 +6,8 @@ This document describes the multi-milestone plan to decouple the OISY signer fro
 
 OISY currently serves the signer UI at `oisy.com/sign`. Dapps using `@dfinity/oisy-wallet-signer` (agent-js v4) open this URL to interact with users' wallets via ICRC-21/25/27/49 standards.
 
+A separate signer origin also helps with **Progressive Web Apps**. If both OISY and a dapp are installed as PWAs, the signer standards do not reliably support communication between two installed PWAs. Moving the signer to its own domain lets a dapp open the signer in a normal browser window while users can still install OISY as a PWA.
+
 With the upcoming migration to agent-js v5, the signer protocol changes in a **backwards-incompatible** way. To give dapp developers a smooth transition, the signer is deployed to dedicated subdomains:
 
 - **`signer.oisy.com`** -- the forward-looking signer URL (for dapps on v5, and currently also v4 during the transition)
@@ -15,25 +17,24 @@ With the upcoming migration to agent-js v5, the signer protocol changes in a **b
 
 ## Domain Structure
 
-Each signer domain has staging and beta variants for testing:
+Production hostnames:
 
-| Environment | Main Wallet        | Signer                    | Legacy Signer                    |
-| ----------- | ------------------ | ------------------------- | -------------------------------- |
-| Production  | `oisy.com`         | `signer.oisy.com`         | `legacy-signer.oisy.com`         |
-| Beta        | `beta.oisy.com`    | `beta.signer.oisy.com`    | `beta.legacy-signer.oisy.com`    |
-| Staging     | `staging.oisy.com` | `staging.signer.oisy.com` | `staging.legacy-signer.oisy.com` |
+| Role           | Domain                     |
+| -------------- | -------------------------- |
+| Main wallet    | `oisy.com`                 |
+| Signer         | `signer.oisy.com`          |
+| Legacy signer  | `legacy-signer.oisy.com`   |
 
-Each domain maps to a **separate IC asset canister**. This is required because:
+Staging and beta use the same layout under internal hostnames. Those URLs are maintained for the team in `scripts/domains.json` and per-environment `.env` files and are intentionally not listed here.
+
+Each production hostname maps to a **separate IC asset canister**. This is required because:
 
 1. Different canisters will serve different code versions (starting from Milestone 2)
 2. Custom domains on the IC are bound to specific canisters
 
 ## Identity Derivation
 
-All signer domains derive their Internet Identity from the **same canonical origin** as the main wallet, so users see the same accounts everywhere:
-
-- **Production/Beta** signer/legacy-signer: `derivationOrigin = 'https://oisy.com'`
-- **Staging** signer/legacy-signer: `derivationOrigin = 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'`
+All signer domains derive their Internet Identity from the **same canonical origin** as the main wallet for that environment, so users see the same accounts everywhere. The exact value is `AUTH_DERIVATION_ORIGIN` / `VITE_AUTH_DERIVATION_ORIGIN` in the matching `.env` file (production uses `https://oisy.com`).
 
 For this to work, the signer domains must be listed in the main frontend canister's `/.well-known/ii-alternative-origins`. This is configured via the `VITE_AUTH_ALTERNATIVE_ORIGINS` env var in each environment's `.env` file.
 
@@ -43,20 +44,20 @@ The signer frontends use the **same codebase** as the main wallet. The build tar
 
 ### Build and deploy commands
 
-Each signer canister has a `build` command in `dfx.json` that automatically sets `OISY_SIGNER_TARGET`. This means `dfx deploy` handles everything -- no manual env vars needed:
+Each signer canister has a `build` command in `dfx.json` that automatically sets `OISY_SIGNER_TARGET`. Local, staging, and beta deploys typically use `dfx deploy` with the right network and wallet (no manual `OISY_SIGNER_TARGET` needed):
 
 ```bash
 # Deploy the main frontend (no signer target, uses package.json version)
-dfx deploy frontend --network ic
+dfx deploy frontend --network <network>
 
 # Deploy the signer frontend (automatically sets OISY_SIGNER_TARGET=signer)
-dfx deploy signer_frontend --network ic
+dfx deploy signer_frontend --network <network>
 
 # Deploy the legacy signer frontend (automatically sets OISY_SIGNER_TARGET=legacy_signer)
-dfx deploy legacy_signer_frontend --network ic
+dfx deploy legacy_signer_frontend --network <network>
 ```
 
-Replace `ic` with `staging` or `beta` for other environments.
+**Production (IC):** Upgrades to `frontend`, `signer_frontend`, and `legacy_signer_frontend` on the IC network go through the same **Orbit-controlled** workflow as the main wallet (station approval, `dfx-oisy` / `dfx-orbit` requests), not a one-off `dfx deploy` from a developer laptop. See [Deployment → IC](HACKING.md#ic) in HACKING.md.
 
 The `OISY_SIGNER_TARGET` env var is baked into each canister's `build` command in `dfx.json`, so deployers never need to set it manually. The canister name determines the build target.
 
@@ -74,7 +75,7 @@ When set, this env var affects the build in several ways:
 | SvelteKit reroute        | Normal routing      | All routes -> `/sign`        | All routes -> `/sign`            |
 | `ii-alternative-origins` | Lists alt origins   | Lists alt origins (from env) | Lists alt origins (from env)     |
 
-\* Canonical origin per environment: `https://oisy.com` (production/beta), `https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io` (staging). See [Identity Derivation](#identity-derivation).
+\* Canonical origin per environment: see `AUTH_DERIVATION_ORIGIN` and [Identity Derivation](#identity-derivation).
 
 ### Versioning
 
