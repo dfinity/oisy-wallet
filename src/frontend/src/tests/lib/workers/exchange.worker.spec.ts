@@ -7,6 +7,7 @@ import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants'
 import { Currency } from '$lib/enums/currency';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
+import { fetchBatchIcpSwapPrices } from '$lib/rest/icpswap.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import type {
 	CoingeckoSimpleErc4626TokenPriceResponse,
@@ -41,8 +42,16 @@ vi.mock('$lib/rest/coingecko.rest', () => ({
 	simpleTokenPrice: vi.fn()
 }));
 
+vi.mock('$lib/rest/icpswap.rest', () => ({
+	fetchBatchIcpSwapPrices: vi.fn()
+}));
+
 vi.mock('$lib/rest/kongswap.rest', () => ({
 	fetchBatchKongSwapPrices: vi.fn()
+}));
+
+vi.mock('$env/rest/icpswap.env', () => ({
+	ICPSWAP_PROVIDER_ENABLED: true
 }));
 
 vi.mock('$env/rest/kongswap.env', () => ({
@@ -571,6 +580,8 @@ describe('exchange.worker', () => {
 					vi.mocked(simpleTokenPrice).mockResolvedValueOnce({
 						icrc1: { usd: 2, usd_market_cap: 1000, usd_24h_change: 0.5 }
 					});
+
+					vi.mocked(fetchBatchIcpSwapPrices).mockResolvedValueOnce([]);
 
 					vi.mocked(fetchBatchKongSwapPrices).mockResolvedValueOnce([
 						{
