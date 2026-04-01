@@ -38,6 +38,9 @@ interface AlchemyConfig {
 const ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS = 'alchemy_minedTransactions';
 const ALCHEMY_SUBSCRIPTION_PENDING_TRANSACTIONS = 'alchemy_pendingTransactions';
 
+const ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS = 'alchemy_minedTransactions';
+const ALCHEMY_SUBSCRIPTION_PENDING_TRANSACTIONS = 'alchemy_pendingTransactions';
+
 const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
