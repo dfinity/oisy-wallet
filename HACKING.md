@@ -5,6 +5,7 @@ This document lists a couple of useful information for development and deploymen
 ## Table of content
 
 - [Deployment](#deployment)
+  - [Signer Domains](#signer-domains)
 - [Internationalization](#internationalization)
 - [Faucets](#faucets)
 - [Testing](#testing)
@@ -79,6 +80,10 @@ scripts/docker-build
 
 dfx-orbit request canister install backend --mode upgrade --wasm out/backend.wasm.gz --arg-file out/backend.args.did
 ```
+
+### Signer Domains
+
+The OISY signer is deployed to dedicated subdomains (`signer.oisy.com`, `legacy-signer.oisy.com`) with their own canisters and versioning. For the full architecture, domain structure, build targets, and migration plan, see [SIGNER_DOMAINS.md](SIGNER_DOMAINS.md).
 
 ## Internationalization
 

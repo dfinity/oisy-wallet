@@ -69,10 +69,12 @@ When set, this env var affects the build in several ways:
 | `VITE_OISY_DOMAIN`       | `https://oisy.com`  | `https://signer.oisy.com`   | `https://legacy-signer.oisy.com` |
 | `VITE_APP_VERSION`       | from `package.json` | from `signer-versions.json` | from `signer-versions.json`      |
 | `.well-known/ic-domains` | `oisy.com`          | `signer.oisy.com`           | `legacy-signer.oisy.com`         |
-| `AUTH_DERIVATION_ORIGIN` | (varies)            | `https://oisy.com`          | `https://oisy.com`               |
+| `AUTH_DERIVATION_ORIGIN` | (varies)            | Canonical origin \*          | Canonical origin \*              |
 | Plausible domain         | `oisy.com`          | `signer.oisy.com`           | `legacy-signer.oisy.com`         |
 | SvelteKit reroute        | Normal routing      | All routes -> `/sign`       | All routes -> `/sign`            |
-| `ii-alternative-origins` | Lists alt origins   | Not written (empty)         | Not written (empty)              |
+| `ii-alternative-origins` | Lists alt origins   | Lists alt origins (from env) | Lists alt origins (from env)    |
+
+\* Canonical origin per environment: `https://oisy.com` (production/beta), `https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io` (staging). See [Identity Derivation](#identity-derivation).
 
 ### Versioning
 
@@ -94,13 +96,6 @@ The new canisters are defined in `dfx.json` as `signer_frontend` and `legacy_sig
 ## Analytics
 
 Each signer domain reports to Plausible under its own domain name. This means you can see traffic to each site independently in the Plausible dashboard.
-
-Additionally, a `signer_page_visit` event is fired when the sign page loads, with metadata:
-
-- `signer_domain`: the hostname (e.g., `signer.oisy.com`, `legacy-signer.oisy.com`, `oisy.com`)
-- `signer_target`: the build target (`signer`, `legacy_signer`, or absent for the main wallet)
-
-This allows tracking which signer URL dapps are using, even before the domains are separated by version.
 
 ## Migration Milestones
 
