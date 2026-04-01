@@ -19,7 +19,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { mapSignerDomain, mapSignerOriginHost } from '$lib/utils/signer.utils';
+	import {  mapSignerOriginHost } from '$lib/utils/signer.utils';
 
 	const {
 		consentMessagePrompt: { payload, reset: resetPrompt },
@@ -39,7 +39,6 @@
 		event_context: PLAUSIBLE_EVENT_CONTEXTS.SIGNER,
 		event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER.CONSENT_MESSAGE,
 		dapp_origin: mapSignerOriginHost($payload?.origin),
-		signer_domain: mapSignerDomain()
 	});
 
 	const onPayload = () => {
