@@ -4,254 +4,307 @@ import type { TokenId } from '$lib/types/token';
 import {
 	exchangesDataEqual,
 	findMissingLedgerCanisterIds,
+	formatIcpSwapToCoingeckoPrices,
 	formatKongSwapToCoingeckoPrices
 } from '$lib/utils/exchange.utils';
 import { MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2 } from '$tests/mocks/exchanges.mock';
+import { createMockIcpSwapToken } from '$tests/mocks/icpswap.mock';
 import { createMockKongSwapToken } from '$tests/mocks/kongswap.mock';
 
-describe('formatKongSwapToCoingeckoPrices', () => {
-	it('converts valid token to coingecko price format', () => {
-		const mock = createMockKongSwapToken({
-			token: { canister_id: MOCK_CANISTER_ID_1 },
-			metrics: {
-				price: 1.23,
-				market_cap: 1000000,
-				volume_24h: 50000,
-				price_change_24h: 2.5,
-				updated_at: '2024-01-01T00:00:00.000Z'
-			}
-		});
+describe('exchange.utils', () => {
+	describe('formatIcpSwapToCoingeckoPrices', () => {
+		it('converts valid token to coingecko price format', () => {
+			const mock = createMockIcpSwapToken({
+				tokenLedgerId: MOCK_CANISTER_ID_1,
+				price: '1.230000000000000000',
+				priceChange24H: '2.500000000000000000',
+				volumeUSD24H: '50000.000000000000000000'
+			});
 
-		const result = formatKongSwapToCoingeckoPrices([mock]);
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
 
-		expect(result[MOCK_CANISTER_ID_1.toLowerCase()]).toEqual({
-			usd: 1.23,
-			usd_market_cap: 1_000_000,
-			usd_24h_vol: 50_000,
-			usd_24h_change: 2.5,
-			last_updated_at: new Date('2024-01-01T00:00:00.000Z').getTime()
-		});
-	});
-
-	it('skips tokenData where metrics.price is null', () => {
-		const mock = createMockKongSwapToken({
-			metrics: { price: null as unknown as number }
-		});
-		const result = formatKongSwapToCoingeckoPrices([mock]);
-
-		expect(result).toEqual({});
-	});
-
-	it('skips tokenData where metrics.price is 0', () => {
-		const mock = createMockKongSwapToken({
-			metrics: { price: 0 }
-		});
-		const result = formatKongSwapToCoingeckoPrices([mock]);
-
-		expect(result).toEqual({});
-	});
-
-	it('parses even if some optional metrics fields are missing', () => {
-		const mock = createMockKongSwapToken({
-			token: { canister_id: MOCK_CANISTER_ID_1 },
-			metrics: {
-				price: 1.0,
-				market_cap: undefined as unknown as number,
-				volume_24h: undefined as unknown as number,
-				price_change_24h: undefined as unknown as number,
-				updated_at: '2024-01-01T00:00:00.000Z'
-			}
-		});
-		const result = formatKongSwapToCoingeckoPrices([mock]);
-
-		expect(result[MOCK_CANISTER_ID_1.toLowerCase()].usd).toBe(1);
-		expect(result[MOCK_CANISTER_ID_1.toLowerCase()].usd_market_cap).toBeNaN();
-	});
-});
-
-describe('findMissingCanisterIds', () => {
-	it('returns empty array when all IDs are found in response', () => {
-		const response: CoingeckoSimpleTokenPriceResponse = {
-			[MOCK_CANISTER_ID_1.toLowerCase()]: {
-				usd: 1,
-				usd_market_cap: 1000,
-				usd_24h_vol: 500,
-				usd_24h_change: 2,
-				last_updated_at: 1700000000
-			}
-		};
-
-		const result = findMissingLedgerCanisterIds({
-			allLedgerCanisterIds: [MOCK_CANISTER_ID_1],
-			coingeckoResponse: response
-		});
-
-		expect(result).toEqual([]);
-	});
-
-	it('returns missing IDs not in coingecko response', () => {
-		const response: CoingeckoSimpleTokenPriceResponse = {
-			[MOCK_CANISTER_ID_1.toLowerCase()]: {
-				usd: 1,
-				usd_market_cap: 1000,
-				usd_24h_vol: 500,
-				usd_24h_change: 2,
-				last_updated_at: 1700000000
-			}
-		};
-
-		const result = findMissingLedgerCanisterIds({
-			allLedgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
-			coingeckoResponse: response
-		});
-
-		expect(result).toEqual([MOCK_CANISTER_ID_2]);
-	});
-
-	it('returns all IDs if response is empty', () => {
-		const result = findMissingLedgerCanisterIds({
-			allLedgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
-			coingeckoResponse: {}
-		});
-
-		expect(result).toEqual([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
-	});
-
-	it('returns empty array if allLedgerCanisterIds is empty', () => {
-		const result = findMissingLedgerCanisterIds({
-			allLedgerCanisterIds: [],
-			coingeckoResponse: {}
-		});
-
-		expect(result).toEqual([]);
-	});
-
-	it('handles case-insensitive matching of canister IDs', () => {
-		const response: CoingeckoSimpleTokenPriceResponse = {
-			[MOCK_CANISTER_ID_1.toLowerCase()]: {
-				usd: 1,
-				usd_market_cap: 1000,
-				usd_24h_vol: 500,
-				usd_24h_change: 2,
-				last_updated_at: 1700000000
-			}
-		};
-
-		const result = findMissingLedgerCanisterIds({
-			allLedgerCanisterIds: ['AAAAA-AA'],
-			coingeckoResponse: response
-		});
-
-		expect(result).toEqual([]);
-	});
-
-	it('ignores unrelated extra keys in response', () => {
-		const response: CoingeckoSimpleTokenPriceResponse = {
-			'not-a-canister-id': {
-				usd: 0,
+			expect(result[MOCK_CANISTER_ID_1.toLowerCase()]).toEqual({
+				usd: 1.23,
 				usd_market_cap: 0,
-				usd_24h_vol: 0,
-				usd_24h_change: 0,
-				last_updated_at: 0
-			}
-		};
-
-		const result = findMissingLedgerCanisterIds({
-			allLedgerCanisterIds: [MOCK_CANISTER_ID_1],
-			coingeckoResponse: response
+				usd_24h_vol: 50_000,
+				usd_24h_change: 2.5
+			});
 		});
 
-		expect(result).toEqual([MOCK_CANISTER_ID_1]);
-	});
-});
+		it('skips token where price is "0"', () => {
+			const mock = createMockIcpSwapToken({
+				price: '0.000000000000000000'
+			});
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
 
-describe('exchangesDataEqual', () => {
-	const tokenA = Symbol('tokenA') as TokenId;
-	const tokenB = Symbol('tokenB') as TokenId;
-	const tokenC = Symbol('tokenC') as TokenId;
+			expect(result).toEqual({});
+		});
 
-	const price = (usd: number) => ({ usd });
+		it('skips token where price is not a number', () => {
+			const mock = createMockIcpSwapToken({
+				price: 'NaN' as unknown as string
+			});
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
 
-	it('returns true for two empty records', () => {
-		const a = {} as ExchangesData;
-		const b = {} as ExchangesData;
+			expect(result).toEqual({});
+		});
 
-		expect(exchangesDataEqual(a, b)).toBeTruthy();
-	});
+		it('lowercases canister IDs in output keys', () => {
+			const mock = createMockIcpSwapToken({
+				tokenLedgerId: MOCK_CANISTER_ID_1,
+				price: '5.000000000000000000'
+			});
 
-	it('returns true when both records have the same keys with the same usd values', () => {
-		const a = { [tokenA]: price(1.5), [tokenB]: price(2.0) } as ExchangesData;
-		const b = { [tokenA]: price(1.5), [tokenB]: price(2.0) } as ExchangesData;
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
 
-		expect(exchangesDataEqual(a, b)).toBeTruthy();
-	});
-
-	it('returns true when both entries share the same object reference', () => {
-		const shared = price(10);
-		const a = { [tokenA]: shared } as ExchangesData;
-		const b = { [tokenA]: shared } as ExchangesData;
-
-		expect(exchangesDataEqual(a, b)).toBeTruthy();
+			expect(Object.keys(result)).toEqual([MOCK_CANISTER_ID_1.toLowerCase()]);
+		});
 	});
 
-	it('returns true when both entries are undefined', () => {
-		const a = { [tokenA]: undefined } as ExchangesData;
-		const b = { [tokenA]: undefined } as ExchangesData;
+	describe('formatKongSwapToCoingeckoPrices', () => {
+		it('converts valid token to coingecko price format', () => {
+			const mock = createMockKongSwapToken({
+				token: { canister_id: MOCK_CANISTER_ID_1 },
+				metrics: {
+					price: 1.23,
+					market_cap: 1000000,
+					volume_24h: 50000,
+					price_change_24h: 2.5,
+					updated_at: '2024-01-01T00:00:00.000Z'
+				}
+			});
 
-		expect(exchangesDataEqual(a, b)).toBeTruthy();
+			const result = formatKongSwapToCoingeckoPrices([mock]);
+
+			expect(result[MOCK_CANISTER_ID_1.toLowerCase()]).toEqual({
+				usd: 1.23,
+				usd_market_cap: 1_000_000,
+				usd_24h_vol: 50_000,
+				usd_24h_change: 2.5,
+				last_updated_at: new Date('2024-01-01T00:00:00.000Z').getTime()
+			});
+		});
+
+		it('skips tokenData where metrics.price is null', () => {
+			const mock = createMockKongSwapToken({
+				metrics: { price: null as unknown as number }
+			});
+			const result = formatKongSwapToCoingeckoPrices([mock]);
+
+			expect(result).toEqual({});
+		});
+
+		it('skips tokenData where metrics.price is 0', () => {
+			const mock = createMockKongSwapToken({
+				metrics: { price: 0 }
+			});
+			const result = formatKongSwapToCoingeckoPrices([mock]);
+
+			expect(result).toEqual({});
+		});
+
+		it('parses even if some optional metrics fields are missing', () => {
+			const mock = createMockKongSwapToken({
+				token: { canister_id: MOCK_CANISTER_ID_1 },
+				metrics: {
+					price: 1.0,
+					market_cap: undefined as unknown as number,
+					volume_24h: undefined as unknown as number,
+					price_change_24h: undefined as unknown as number,
+					updated_at: '2024-01-01T00:00:00.000Z'
+				}
+			});
+			const result = formatKongSwapToCoingeckoPrices([mock]);
+
+			expect(result[MOCK_CANISTER_ID_1.toLowerCase()].usd).toBe(1);
+			expect(result[MOCK_CANISTER_ID_1.toLowerCase()].usd_market_cap).toBeNaN();
+		});
 	});
 
-	it('returns false when key counts differ', () => {
-		const a = { [tokenA]: price(1) } as ExchangesData;
-		const b = { [tokenA]: price(1), [tokenB]: price(2) } as ExchangesData;
+	describe('findMissingCanisterIds', () => {
+		it('returns empty array when all IDs are found in response', () => {
+			const response: CoingeckoSimpleTokenPriceResponse = {
+				[MOCK_CANISTER_ID_1.toLowerCase()]: {
+					usd: 1,
+					usd_market_cap: 1000,
+					usd_24h_vol: 500,
+					usd_24h_change: 2,
+					last_updated_at: 1700000000
+				}
+			};
 
-		expect(exchangesDataEqual(a, b)).toBeFalsy();
+			const result = findMissingLedgerCanisterIds({
+				allLedgerCanisterIds: [MOCK_CANISTER_ID_1],
+				coingeckoResponse: response
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('returns missing IDs not in coingecko response', () => {
+			const response: CoingeckoSimpleTokenPriceResponse = {
+				[MOCK_CANISTER_ID_1.toLowerCase()]: {
+					usd: 1,
+					usd_market_cap: 1000,
+					usd_24h_vol: 500,
+					usd_24h_change: 2,
+					last_updated_at: 1700000000
+				}
+			};
+
+			const result = findMissingLedgerCanisterIds({
+				allLedgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
+				coingeckoResponse: response
+			});
+
+			expect(result).toEqual([MOCK_CANISTER_ID_2]);
+		});
+
+		it('returns all IDs if response is empty', () => {
+			const result = findMissingLedgerCanisterIds({
+				allLedgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
+				coingeckoResponse: {}
+			});
+
+			expect(result).toEqual([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
+		});
+
+		it('returns empty array if allLedgerCanisterIds is empty', () => {
+			const result = findMissingLedgerCanisterIds({
+				allLedgerCanisterIds: [],
+				coingeckoResponse: {}
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('handles case-insensitive matching of canister IDs', () => {
+			const response: CoingeckoSimpleTokenPriceResponse = {
+				[MOCK_CANISTER_ID_1.toLowerCase()]: {
+					usd: 1,
+					usd_market_cap: 1000,
+					usd_24h_vol: 500,
+					usd_24h_change: 2,
+					last_updated_at: 1700000000
+				}
+			};
+
+			const result = findMissingLedgerCanisterIds({
+				allLedgerCanisterIds: ['AAAAA-AA'],
+				coingeckoResponse: response
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('ignores unrelated extra keys in response', () => {
+			const response: CoingeckoSimpleTokenPriceResponse = {
+				'not-a-canister-id': {
+					usd: 0,
+					usd_market_cap: 0,
+					usd_24h_vol: 0,
+					usd_24h_change: 0,
+					last_updated_at: 0
+				}
+			};
+
+			const result = findMissingLedgerCanisterIds({
+				allLedgerCanisterIds: [MOCK_CANISTER_ID_1],
+				coingeckoResponse: response
+			});
+
+			expect(result).toEqual([MOCK_CANISTER_ID_1]);
+		});
 	});
 
-	it('returns false when usd values differ for the same key', () => {
-		const a = { [tokenA]: price(1) } as ExchangesData;
-		const b = { [tokenA]: price(999) } as ExchangesData;
+	describe('exchangesDataEqual', () => {
+		const tokenA = Symbol('tokenA') as TokenId;
+		const tokenB = Symbol('tokenB') as TokenId;
+		const tokenC = Symbol('tokenC') as TokenId;
 
-		expect(exchangesDataEqual(a, b)).toBeFalsy();
-	});
+		const price = (usd: number) => ({ usd });
 
-	it('returns false when a key exists in a but not in b', () => {
-		const a = { [tokenA]: price(1) } as ExchangesData;
-		const b = { [tokenB]: price(1) } as ExchangesData;
+		it('returns true for two empty records', () => {
+			const a = {} as ExchangesData;
+			const b = {} as ExchangesData;
 
-		expect(exchangesDataEqual(a, b)).toBeFalsy();
-	});
+			expect(exchangesDataEqual(a, b)).toBeTruthy();
+		});
 
-	it('returns false when one entry is undefined and the other is not', () => {
-		const a = { [tokenA]: undefined } as ExchangesData;
-		const b = { [tokenA]: price(5) } as ExchangesData;
+		it('returns true when both records have the same keys with the same usd values', () => {
+			const a = { [tokenA]: price(1.5), [tokenB]: price(2.0) } as ExchangesData;
+			const b = { [tokenA]: price(1.5), [tokenB]: price(2.0) } as ExchangesData;
 
-		expect(exchangesDataEqual(a, b)).toBeFalsy();
-	});
+			expect(exchangesDataEqual(a, b)).toBeTruthy();
+		});
 
-	it('ignores non-usd fields when comparing', () => {
-		const a = {
-			[tokenA]: { usd: 1, usd_market_cap: 100, usd_24h_vol: 50 }
-		} as ExchangesData;
-		const b = {
-			[tokenA]: { usd: 1, usd_market_cap: 999, usd_24h_vol: 999 }
-		} as ExchangesData;
+		it('returns true when both entries share the same object reference', () => {
+			const shared = price(10);
+			const a = { [tokenA]: shared } as ExchangesData;
+			const b = { [tokenA]: shared } as ExchangesData;
 
-		expect(exchangesDataEqual(a, b)).toBeTruthy();
-	});
+			expect(exchangesDataEqual(a, b)).toBeTruthy();
+		});
 
-	it('handles multiple keys where only one differs', () => {
-		const a = {
-			[tokenA]: price(1),
-			[tokenB]: price(2),
-			[tokenC]: price(3)
-		} as ExchangesData;
-		const b = {
-			[tokenA]: price(1),
-			[tokenB]: price(2),
-			[tokenC]: price(999)
-		} as ExchangesData;
+		it('returns true when both entries are undefined', () => {
+			const a = { [tokenA]: undefined } as ExchangesData;
+			const b = { [tokenA]: undefined } as ExchangesData;
 
-		expect(exchangesDataEqual(a, b)).toBeFalsy();
+			expect(exchangesDataEqual(a, b)).toBeTruthy();
+		});
+
+		it('returns false when key counts differ', () => {
+			const a = { [tokenA]: price(1) } as ExchangesData;
+			const b = { [tokenA]: price(1), [tokenB]: price(2) } as ExchangesData;
+
+			expect(exchangesDataEqual(a, b)).toBeFalsy();
+		});
+
+		it('returns false when usd values differ for the same key', () => {
+			const a = { [tokenA]: price(1) } as ExchangesData;
+			const b = { [tokenA]: price(999) } as ExchangesData;
+
+			expect(exchangesDataEqual(a, b)).toBeFalsy();
+		});
+
+		it('returns false when a key exists in a but not in b', () => {
+			const a = { [tokenA]: price(1) } as ExchangesData;
+			const b = { [tokenB]: price(1) } as ExchangesData;
+
+			expect(exchangesDataEqual(a, b)).toBeFalsy();
+		});
+
+		it('returns false when one entry is undefined and the other is not', () => {
+			const a = { [tokenA]: undefined } as ExchangesData;
+			const b = { [tokenA]: price(5) } as ExchangesData;
+
+			expect(exchangesDataEqual(a, b)).toBeFalsy();
+		});
+
+		it('ignores non-usd fields when comparing', () => {
+			const a = {
+				[tokenA]: { usd: 1, usd_market_cap: 100, usd_24h_vol: 50 }
+			} as ExchangesData;
+			const b = {
+				[tokenA]: { usd: 1, usd_market_cap: 999, usd_24h_vol: 999 }
+			} as ExchangesData;
+
+			expect(exchangesDataEqual(a, b)).toBeTruthy();
+		});
+
+		it('handles multiple keys where only one differs', () => {
+			const a = {
+				[tokenA]: price(1),
+				[tokenB]: price(2),
+				[tokenC]: price(3)
+			} as ExchangesData;
+			const b = {
+				[tokenA]: price(1),
+				[tokenB]: price(2),
+				[tokenC]: price(999)
+			} as ExchangesData;
+
+			expect(exchangesDataEqual(a, b)).toBeFalsy();
+		});
 	});
 });
