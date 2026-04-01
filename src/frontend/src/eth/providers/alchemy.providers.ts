@@ -39,11 +39,10 @@ const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyConfig>>(
-	(acc, { id, providers: { alchemy: _, alchemyDeprecated, alchemyWsUrl } }) => ({
+	(acc, { id, providers: { alchemyWsUrl } }) => ({
 		...acc,
 		[id]: {
 			apiKey: ALCHEMY_API_KEY,
-			network: alchemyDeprecated,
 			wssUrl: `${alchemyWsUrl}/${ALCHEMY_API_KEY}`
 		}
 	}),
