@@ -1,7 +1,11 @@
 #![warn(clippy::wildcard_imports)]
 
 use candid::Principal;
-use ic_cdk::{export_candid, init, post_upgrade};
+use ic_cdk::{
+    export_candid, init,
+    management_canister::{HttpRequestResult, TransformArgs},
+    post_upgrade,
+};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
