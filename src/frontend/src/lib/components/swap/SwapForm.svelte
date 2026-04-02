@@ -256,7 +256,7 @@
 			</TokenInputNetworkWrapper>
 		</div>
 
-		<SwapCrossChainInfo hrSpacing="md" />
+		<SwapCrossChainInfo />
 
 		<SwapSlippage
 			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)
