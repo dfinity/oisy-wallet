@@ -1,9 +1,9 @@
-import type { WizardStep } from '@dfinity/gix-components';
-import type { Component } from 'svelte';
 import type { EarningCardData } from '$lib/types/earning';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { Vault } from '$lib/types/vaults';
+import type { WizardStep } from '@dfinity/gix-components';
+import type { Component } from 'svelte';
 
 export enum StakeProvider {
 	HARVEST_AUTOPILOTS = 'harvest_autopilots'
