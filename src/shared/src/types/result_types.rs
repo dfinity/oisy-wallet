@@ -323,6 +323,22 @@ impl From<Result<(), UpdateAgreementsError>> for UpdateUserAgreementsResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateProviderAgreementsResult {
+    /// The user's provider agreements were updated successfully.
+    Ok(()),
+    /// The user's provider agreements were not updated due to an error.
+    Err(UpdateAgreementsError),
+}
+impl From<Result<(), UpdateAgreementsError>> for UpdateProviderAgreementsResult {
+    fn from(result: Result<(), UpdateAgreementsError>) -> Self {
+        match result {
+            Ok(()) => UpdateProviderAgreementsResult::Ok(()),
+            Err(err) => UpdateProviderAgreementsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum UpdateExperimentalFeaturesSettingsResult {
     /// The user's experimental features settings were updated successfully.
     Ok(()),

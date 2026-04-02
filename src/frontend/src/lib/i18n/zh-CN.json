@@ -80,7 +80,6 @@
 			"source_code_on_github": "GitHub 上的源代码",
 			"view_on_explorer": "在浏览器中查看",
 			"source_code": "源代码",
-			"changelog": "更新日志",
 			"documentation": "文档",
 			"support": "支持",
 			"confirm_navigate": "你确定要离开当前页面吗？",
@@ -100,7 +99,6 @@
 			"activity": "打开活动视图",
 			"airdrops": "打开奖励视图",
 			"menu": "你的钱包地址、设置、登出与外部链接",
-			"changelog": "在 GitHub 上打开 $oisy_name 的更新日志以查看最新更新",
 			"documentation": "打开 $oisy_name 文档",
 			"support": "打开 $oisy_name 文档的支持部分",
 			"open_twitter": "打开 DFINITY 的 X/Twitter 动态",
@@ -1115,6 +1113,7 @@
 			"swap_fees": "交易费",
 			"cross_chain_networks_info": "跨链网络信息",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
