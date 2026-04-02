@@ -499,10 +499,9 @@ type UpdateExperimentalFeaturesSettingsRequest = record {
 	current_user_version : opt nat64
 };
 type UpdateProviderAgreementsRequest = record {
-	provider_agreements : vec record { ProviderAgreementType; UserAgreement };
-	current_user_version : opt nat64
+	current_user_version : opt nat64;
+	provider_agreements : vec record { ProviderAgreementType; UserAgreement }
 };
-type UpdateProviderAgreementsResult = variant { Ok; Err : UpdateAgreementsError };
 type UpdateUserAgreementsRequest = record {
 	agreements : UserAgreements;
 	current_user_version : opt nat64
@@ -795,18 +794,6 @@ service : (Arg) -> {
 	// # Errors
 	// Errors are enumerated by: `ContactError`.
 	update_contact : (Contact) -> (GetContactResult);
-	// Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
-	// for every agreement that was actually changed.
-	//
-	// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
-	// set to `now`.
-	//
-	// # Returns
-	// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
-	// same value.
-	//
-	// # Errors
-	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	// Updates the user's provider agreements, merging with any existing ones, and records an
 	// audit-trail entry for every provider agreement that was actually changed.
 	//
@@ -820,8 +807,20 @@ service : (Arg) -> {
 	// # Errors
 	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	update_provider_agreements : (UpdateProviderAgreementsRequest) -> (
-		UpdateProviderAgreementsResult
+		SetUserShowTestnetsResult
 	);
+	// Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
+	// for every agreement that was actually changed.
+	//
+	// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
+	// set to `now`.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
+	// same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	update_user_agreements : (UpdateUserAgreementsRequest) -> (
 		SetUserShowTestnetsResult
 	);

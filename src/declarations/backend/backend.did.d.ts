@@ -42,9 +42,11 @@ export interface AgreementHistoryEntry {
 export type AgreementType =
 	| { TermsOfUse: null }
 	| { PrivacyPolicy: null }
-	| { LicenseAgreement: null };
+	| { LicenseAgreement: null }
+	| { Provider: ProviderAgreementType };
 export interface Agreements {
 	agreements: UserAgreements;
+	provider_agreements: [] | [Array<[ProviderAgreementType, UserAgreement]>];
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
@@ -385,6 +387,12 @@ export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
 }
+export type ProviderAgreementProvider = { NearIntents: null };
+export type ProviderAgreementScope = { Swap: null };
+export interface ProviderAgreementType {
+	provider: ProviderAgreementProvider;
+	scope: ProviderAgreementScope;
+}
 export interface RateLimitError {
 	max_calls: number;
 	window_ns: bigint;
@@ -528,6 +536,10 @@ export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: 
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 	current_user_version: [] | [bigint];
+}
+export interface UpdateProviderAgreementsRequest {
+	current_user_version: [] | [bigint];
+	provider_agreements: Array<[ProviderAgreementType, UserAgreement]>;
 }
 export interface UpdateUserAgreementsRequest {
 	agreements: UserAgreements;
@@ -877,6 +889,24 @@ export interface _SERVICE {
 	 * Errors are enumerated by: `ContactError`.
 	 */
 	update_contact: ActorMethod<[Contact], GetContactResult>;
+	/**
+	 * Updates the user's provider agreements, merging with any existing ones, and records an
+	 * audit-trail entry for every provider agreement that was actually changed.
+	 *
+	 * Only entries where `accepted` is `Some(_)` are applied. If `Some(true)`,
+	 * `last_accepted_at_ns` is set to `now`.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the provider agreements were saved successfully, or if they were already
+	 * set to the same value.
+	 *
+	 * # Errors
+	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 */
+	update_provider_agreements: ActorMethod<
+		[UpdateProviderAgreementsRequest],
+		SetUserShowTestnetsResult
+	>;
 	/**
 	 * Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
 	 * for every agreement that was actually changed.
