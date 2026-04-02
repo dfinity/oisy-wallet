@@ -1,7 +1,5 @@
 import type {
 	UserAgreement as BackendUserAgreement,
-	ProviderAgreementProvider,
-	ProviderAgreementScope,
 	ProviderAgreementType
 } from '$declarations/backend/backend.did';
 import type { UserProviderAgreements } from '$lib/types/user-provider-agreements';
@@ -22,7 +20,8 @@ describe('provider-agreements.utils', () => {
 
 		it('should throw for unknown provider variant', () => {
 			expect(() =>
-				mapProviderKey({ Unknown: null } as unknown as ProviderAgreementProvider)
+				// @ts-expect-error we test this on purpose
+				mapProviderKey({ Unknown: null })
 			).toThrow();
 		});
 	});
@@ -33,7 +32,8 @@ describe('provider-agreements.utils', () => {
 		});
 
 		it('should throw for unknown scope variant', () => {
-			expect(() => mapScopeKey({ Unknown: null } as unknown as ProviderAgreementScope)).toThrow();
+			// @ts-expect-error we test this on purpose
+			expect(() => mapScopeKey({ Unknown: null })).toThrow();
 		});
 	});
 
