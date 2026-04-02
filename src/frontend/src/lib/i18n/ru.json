@@ -1115,6 +1115,7 @@
 			"swap_fees": "Комиссия за обмен",
 			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
