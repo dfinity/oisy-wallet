@@ -1,8 +1,11 @@
-use std::result::Result;
+use std::{collections::BTreeMap, result::Result};
 
 use ic_cdk::api::time;
 use shared::types::{
-    agreement::{AgreementHistoryEntry, AgreementType, UpdateAgreementsError, UserAgreements},
+    agreement::{
+        AgreementHistoryEntry, AgreementType, ProviderAgreementType, UpdateAgreementsError,
+        UserAgreement, UserAgreements,
+    },
     dapp::AddDappSettingsError,
     experimental_feature::{
         ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
@@ -206,6 +209,70 @@ pub fn update_agreements(
 
     if new_profile.version != user_profile.version {
         let new_entries = collect_history_entries(agreements, now);
+        if !new_entries.is_empty() {
+            let mut history = agreement_history.get(&principal).unwrap_or_default().0;
+            history.extend(new_entries);
+            agreement_history.insert(principal, Candid(history));
+        }
+    }
+
+    Ok(())
+}
+
+/// Builds history entries for provider agreements that were actually changed.
+fn collect_provider_history_entries(
+    request: &BTreeMap<ProviderAgreementType, UserAgreement>,
+    now: Timestamp,
+) -> Vec<AgreementHistoryEntry> {
+    request
+        .iter()
+        .filter_map(|(provider_type, agreement)| {
+            agreement.accepted.map(|accepted| AgreementHistoryEntry {
+                agreement_type: AgreementType::Provider(provider_type.clone()),
+                accepted,
+                timestamp_ns: now,
+                text_sha256: agreement.text_sha256.clone(),
+                last_updated_at_ms: agreement.last_updated_at_ms,
+            })
+        })
+        .collect()
+}
+
+/// Updates the user's provider agreements, merging with any existing ones, and records an
+/// audit-trail entry for every provider agreement that was actually changed.
+///
+/// Only entries where `accepted` is `Some(_)` are applied. If `Some(true)`,
+/// `last_accepted_at_ns` is set to `now`.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `provider_agreements` - The provider agreements to merge.
+/// * `user_profile_model` - The user profile model.
+/// * `agreement_history` - Stable map storing per-user agreement audit trail.
+///
+/// # Returns
+/// - Returns `Ok(())` if the provider agreements were successfully updated or no change was needed.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn update_provider_agreements(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    provider_agreements: &BTreeMap<ProviderAgreementType, UserAgreement>,
+    user_profile_model: &mut UserProfileModel,
+    agreement_history: &mut AgreementHistoryMap,
+) -> Result<(), UpdateAgreementsError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| UpdateAgreementsError::UserNotFound)?;
+    let now = time();
+    let new_profile =
+        user_profile.with_provider_agreements(profile_version, now, provider_agreements.clone())?;
+
+    user_profile_model.store_new(principal, now, &new_profile);
+
+    if new_profile.version != user_profile.version {
+        let new_entries = collect_provider_history_entries(provider_agreements, now);
         if !new_entries.is_empty() {
             let mut history = agreement_history.get(&principal).unwrap_or_default().0;
             history.extend(new_entries);

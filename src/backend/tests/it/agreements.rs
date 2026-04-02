@@ -1,11 +1,13 @@
-use std::sync::LazyLock;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
     agreement::{
-        AgreementHistoryEntry, AgreementType, GetAgreementHistoryError, UpdateAgreementsError,
-        UpdateUserAgreementsRequest, UserAgreement, UserAgreements, SHA256_HEX_LENGTH,
+        AgreementHistoryEntry, AgreementType, GetAgreementHistoryError, ProviderAgreementProvider,
+        ProviderAgreementScope, ProviderAgreementType, UpdateAgreementsError,
+        UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest, UserAgreement,
+        UserAgreements, SHA256_HEX_LENGTH,
     },
     user_profile::{GetUserProfileError, UserProfile},
     Timestamp, Version,
@@ -658,4 +660,343 @@ fn test_agreement_history_not_recorded_when_no_change() {
         .unwrap();
 
     assert!(history.is_empty());
+}
+
+// ---------------------------------------------------------------------------
+// Provider agreements
+// ---------------------------------------------------------------------------
+
+fn provider_agreements_map(
+    entries: Vec<(ProviderAgreementType, UserAgreement)>,
+) -> BTreeMap<ProviderAgreementType, UserAgreement> {
+    entries.into_iter().collect()
+}
+
+#[test]
+fn test_update_provider_agreements_saves_acceptance() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    let arg = UpdateProviderAgreementsRequest {
+        current_user_version: profile.version,
+        provider_agreements: provider_agreements_map(vec![(
+            ProviderAgreementType {
+                provider: ProviderAgreementProvider::NearIntents,
+                scope: ProviderAgreementScope::Swap,
+            },
+            UserAgreement {
+                accepted: Some(true),
+                ..Default::default()
+            },
+        )]),
+    };
+
+    let resp = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+        caller,
+        "update_provider_agreements",
+        arg,
+    );
+    assert_eq!(resp, Ok(Ok(())));
+
+    let user_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    let provider = user_profile
+        .agreements
+        .expect("agreements missing")
+        .provider_agreements
+        .expect("provider_agreements missing");
+
+    let near_swap = provider
+        .get(&ProviderAgreementType {
+            provider: ProviderAgreementProvider::NearIntents,
+            scope: ProviderAgreementScope::Swap,
+        })
+        .expect("NearIntents Swap missing");
+
+    assert_eq!(near_swap.accepted, Some(true));
+    assert!(near_swap.last_accepted_at_ns.is_some());
+}
+
+#[test]
+fn test_update_provider_agreements_version_mismatch() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    // First update succeeds
+    let arg1 = UpdateProviderAgreementsRequest {
+        current_user_version: profile.version,
+        provider_agreements: provider_agreements_map(vec![(
+            ProviderAgreementType {
+                provider: ProviderAgreementProvider::NearIntents,
+                scope: ProviderAgreementScope::Swap,
+            },
+            UserAgreement {
+                accepted: Some(true),
+                ..Default::default()
+            },
+        )]),
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_provider_agreements", arg1)
+        .unwrap()
+        .unwrap();
+
+    // Second update with stale version fails
+    let arg2 = UpdateProviderAgreementsRequest {
+        current_user_version: profile.version,
+        provider_agreements: provider_agreements_map(vec![(
+            ProviderAgreementType {
+                provider: ProviderAgreementProvider::NearIntents,
+                scope: ProviderAgreementScope::Swap,
+            },
+            UserAgreement {
+                accepted: Some(false),
+                ..Default::default()
+            },
+        )]),
+    };
+    let resp = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+        caller,
+        "update_provider_agreements",
+        arg2,
+    );
+    assert_eq!(resp, Ok(Err(UpdateAgreementsError::VersionMismatch)));
+}
+
+#[test]
+fn test_update_provider_agreements_rejects_invalid_sha256() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    let invalid_sha256 = "too_short";
+    let arg = UpdateProviderAgreementsRequest {
+        current_user_version: profile.version,
+        provider_agreements: provider_agreements_map(vec![(
+            ProviderAgreementType {
+                provider: ProviderAgreementProvider::NearIntents,
+                scope: ProviderAgreementScope::Swap,
+            },
+            UserAgreement {
+                accepted: Some(true),
+                text_sha256: Some(invalid_sha256.to_string()),
+                ..Default::default()
+            },
+        )]),
+    };
+
+    let resp = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+        caller,
+        "update_provider_agreements",
+        arg,
+    );
+
+    assert!(resp.is_err());
+    assert!(resp.unwrap_err().contains(
+        format!(
+            "Invalid SHA256 hex length: {}, expected {}",
+            invalid_sha256.len(),
+            SHA256_HEX_LENGTH
+        )
+        .as_str()
+    ));
+}
+
+#[test]
+fn test_provider_agreement_history_recorded() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    let sha = "b".repeat(SHA256_HEX_LENGTH);
+    let arg = UpdateProviderAgreementsRequest {
+        current_user_version: profile.version,
+        provider_agreements: provider_agreements_map(vec![(
+            ProviderAgreementType {
+                provider: ProviderAgreementProvider::NearIntents,
+                scope: ProviderAgreementScope::Swap,
+            },
+            UserAgreement {
+                accepted: Some(true),
+                text_sha256: Some(sha.clone()),
+                last_updated_at_ms: Some(1_700_000_000_000),
+                ..Default::default()
+            },
+        )]),
+    };
+
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_provider_agreements", arg)
+        .unwrap()
+        .unwrap();
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(history.len(), 1);
+    assert_eq!(
+        history[0].agreement_type,
+        AgreementType::Provider(ProviderAgreementType {
+            provider: ProviderAgreementProvider::NearIntents,
+            scope: ProviderAgreementScope::Swap,
+        })
+    );
+    assert!(history[0].accepted);
+    assert_eq!(history[0].text_sha256, Some(sha));
+    assert_eq!(history[0].last_updated_at_ms, Some(1_700_000_000_000));
+}
+
+#[test]
+fn test_provider_and_internal_agreements_coexist() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    // Accept internal agreement
+    let arg1 = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: INITIAL_AGREEMENTS.clone(),
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg1)
+        .unwrap()
+        .unwrap();
+
+    let user_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    // Accept provider agreement
+    let arg2 = UpdateProviderAgreementsRequest {
+        current_user_version: user_profile.version,
+        provider_agreements: provider_agreements_map(vec![(
+            ProviderAgreementType {
+                provider: ProviderAgreementProvider::NearIntents,
+                scope: ProviderAgreementScope::Swap,
+            },
+            UserAgreement {
+                accepted: Some(true),
+                ..Default::default()
+            },
+        )]),
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_provider_agreements", arg2)
+        .unwrap()
+        .unwrap();
+
+    // Verify both coexist
+    let final_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    let agreements = final_profile.agreements.expect("agreements missing");
+    assert_eq!(agreements.agreements.license_agreement.accepted, Some(true));
+
+    let provider = agreements
+        .provider_agreements
+        .expect("provider_agreements missing");
+    let near_swap = provider
+        .get(&ProviderAgreementType {
+            provider: ProviderAgreementProvider::NearIntents,
+            scope: ProviderAgreementScope::Swap,
+        })
+        .expect("NearIntents Swap missing");
+    assert_eq!(near_swap.accepted, Some(true));
+
+    // History should have both types
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(history.len(), 2);
+    assert_eq!(history[0].agreement_type, AgreementType::LicenseAgreement);
+    assert_eq!(
+        history[1].agreement_type,
+        AgreementType::Provider(ProviderAgreementType {
+            provider: ProviderAgreementProvider::NearIntents,
+            scope: ProviderAgreementScope::Swap,
+        })
+    );
+}
+
+#[test]
+fn test_provider_agreements_no_change_when_accepted_none() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<UserProfile>(caller, "create_user_profile", ())
+        .expect("Create failed");
+
+    // Send provider agreement with accepted: None — should be no-op
+    let arg = UpdateProviderAgreementsRequest {
+        current_user_version: profile.version,
+        provider_agreements: provider_agreements_map(vec![(
+            ProviderAgreementType {
+                provider: ProviderAgreementProvider::NearIntents,
+                scope: ProviderAgreementScope::Swap,
+            },
+            UserAgreement {
+                accepted: None,
+                ..Default::default()
+            },
+        )]),
+    };
+
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_provider_agreements", arg)
+        .unwrap()
+        .unwrap();
+
+    let user_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    // Version should not have changed (no actual change made)
+    assert_eq!(user_profile.version, profile.version);
+
+    // No provider_agreements should exist
+    let provider = user_profile
+        .agreements
+        .expect("agreements missing")
+        .provider_agreements;
+    assert!(
+        provider.is_none() || provider.unwrap().is_empty(),
+        "Provider agreements should be empty or None"
+    );
 }
