@@ -141,16 +141,16 @@
 				"entrypoint": "build/index.html"
 			},
 			"source": ["build/"],
-      			"type": "assets"
+			"type": "assets"
 		},
-	"frontend_ai": {
+		"frontend_ai": {
 			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.20.0/src/distributed/assetstorage.did",
 			"build": "npm run build:ai",
 			"frontend": {
 				"entrypoint": "build-ai/index.html"
 			},
 			"source": ["build-ai/"],
-  			"type": "assets"
+			"type": "assets"
 		},
 		"orbit": {
 			"type": "custom",
