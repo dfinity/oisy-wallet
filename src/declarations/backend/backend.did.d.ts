@@ -42,9 +42,11 @@ export interface AgreementHistoryEntry {
 export type AgreementType =
 	| { TermsOfUse: null }
 	| { PrivacyPolicy: null }
-	| { LicenseAgreement: null };
+	| { LicenseAgreement: null }
+	| { Provider: ProviderAgreementType };
 export interface Agreements {
 	agreements: UserAgreements;
+	provider_agreements: [] | [Array<[ProviderAgreementType, UserAgreement]>];
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
@@ -384,6 +386,12 @@ export interface Outpoint {
 export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
+}
+export type ProviderAgreementProvider = { NearIntents: null };
+export type ProviderAgreementScope = { Swap: null };
+export interface ProviderAgreementType {
+	provider: ProviderAgreementProvider;
+	scope: ProviderAgreementScope;
 }
 export interface RateLimitError {
 	max_calls: number;
