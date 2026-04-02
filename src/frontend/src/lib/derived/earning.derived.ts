@@ -1,67 +1,16 @@
-import { goto } from '$app/navigation';
 import { EarningCardFields } from '$env/types/env.earning-cards';
-import {
-	enabledHarvestAutopilotsUsdBalance,
-	harvestAutopilots,
-	harvestAutopilotsCurrentEarning,
-	harvestAutopilotsMaxApy,
-	harvestAutopilotsUsdBalance
-} from '$eth/derived/harvest-autopilots.derived';
-import { AppPath } from '$lib/constants/routes.constants';
-import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { earningProviders } from '$lib/providers/earning.providers';
+import type { EarningData, EarningProviderData } from '$lib/types/earning-provider';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-type EarningDataRecord = { [key in EarningCardFields]?: string | number | string[] } & {
-	action: () => Promise<void>;
-};
-
-type EarningData = Record<string, EarningDataRecord>;
-
 export const earningData: Readable<EarningData> = derived(
-	[
-		enabledMainnetFungibleTokensUsdBalance,
-		harvestAutopilotsUsdBalance,
-		enabledHarvestAutopilotsUsdBalance,
-		harvestAutopilotsCurrentEarning,
-		harvestAutopilots,
-		harvestAutopilotsMaxApy
-	],
-	([
-		$enabledMainnetFungibleTokensUsdBalance,
-		$harvestAutopilotsUsdBalance,
-		$enabledHarvestAutopilotsUsdBalance,
-		$harvestAutopilotsCurrentEarning,
-		$harvestAutopilots,
-		$harvestAutopilotsMaxApy
-	]) => ({
-		'harvest-autopilot': {
-			[EarningCardFields.APY]: $harvestAutopilotsMaxApy,
-			[EarningCardFields.CURRENT_EARNING]: $harvestAutopilotsCurrentEarning,
-			[EarningCardFields.CURRENT_STAKED]: $harvestAutopilotsUsdBalance,
-			[EarningCardFields.NETWORKS]: [
-				...$harvestAutopilots.reduce<Set<string>>(
-					(acc, { token: { network } }) => (nonNullish(network.icon) ? acc.add(network.icon) : acc),
-					new Set()
-				)
-			],
-			[EarningCardFields.ASSETS]: [
-				...$harvestAutopilots.reduce<Set<string>>(
-					(acc, { token: { assetIcon } }) => (nonNullish(assetIcon) ? acc.add(assetIcon) : acc),
-					new Set()
-				)
-			],
-			[EarningCardFields.EARNING_POTENTIAL]: nonNullish($enabledMainnetFungibleTokensUsdBalance)
-				? (($enabledMainnetFungibleTokensUsdBalance - $enabledHarvestAutopilotsUsdBalance) *
-						Number($harvestAutopilotsMaxApy)) /
-					100
-				: undefined,
-			action: () => goto(AppPath.EarnAutopilot)
-		}
-	})
+	earningProviders.map((p) => p.data),
+	(dataValues) =>
+		Object.fromEntries(earningProviders.map((provider, i) => [provider.id, dataValues[i]]))
 );
 
-export const highestApyEarningData: Readable<EarningDataRecord | undefined> = derived(
+export const highestApyEarningData: Readable<EarningProviderData | undefined> = derived(
 	[earningData],
 	([$earningData]) => {
 		const entries = Object.values($earningData);
@@ -70,7 +19,7 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 			return;
 		}
 
-		return entries.reduce<EarningDataRecord | undefined>((highest, record) => {
+		return entries.reduce<EarningProviderData | undefined>((highest, record) => {
 			const apyRaw = record[EarningCardFields.APY];
 			const currentApy = Number(apyRaw);
 
@@ -98,15 +47,12 @@ export const highestApyEarning: Readable<number> = derived(
 );
 
 export const highestEarningPotentialUsd: Readable<number> = derived(
-	[highestApyEarning, enabledMainnetFungibleTokensUsdBalance, enabledHarvestAutopilotsUsdBalance],
-	([
-		$highestApyEarning,
-		$enabledMainnetFungibleTokensUsdBalance,
-		$enabledHarvestAutopilotsUsdBalance
-	]) =>
-		(($enabledMainnetFungibleTokensUsdBalance - $enabledHarvestAutopilotsUsdBalance) *
-			$highestApyEarning) /
-		100
+	[earningData],
+	([$earningData]) =>
+		Object.values($earningData).reduce<number>((acc, record) => {
+			const potential = Number(record[EarningCardFields.EARNING_POTENTIAL]);
+			return !isNaN(potential) ? Math.max(acc, potential) : acc;
+		}, 0)
 );
 
 export const allEarningPositionsUsd: Readable<number> = derived([earningData], ([$earningData]) =>
