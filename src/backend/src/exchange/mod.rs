@@ -1,5 +1,7 @@
 pub(crate) mod provider;
+mod composite;
 mod providers;
+mod supplemental;
 
 use std::time::Duration;
 
@@ -11,7 +13,11 @@ use shared::types::{
 };
 
 use crate::{
-    exchange::{provider::ExchangePriceProvider, providers::coingecko::CoinGeckoProvider},
+    exchange::{
+        composite::fetch_all_prices,
+        providers::{coingecko::CoinGeckoProvider, icpswap::IcpSwapProvider},
+        supplemental::SupplementalPriceProvider,
+    },
     read_state,
     state::{mutate_state, with_api_keys},
     types::storable::{Candid, StoredTokenId},
@@ -74,20 +80,13 @@ fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
     });
 }
 
-async fn fetch_and_update_prices(
-    provider: &impl ExchangePriceProvider,
-    token_ids: &[StoredTokenId],
-) {
-    match provider.fetch_prices(token_ids).await {
-        Ok(prices) => {
-            for (token_id, exchange_data) in &prices {
-                update_price(token_id, exchange_data);
-            }
-        }
-        Err(err) => {
-            ic_cdk::println!("Failed to fetch prices: {err}");
-        }
-    }
+/// Ordered supplemental sources that run after CoinGecko for tokens still missing a valid USD price.
+///
+/// To add another provider: implement [`SupplementalPriceProvider`] for a new type (any token variant
+/// you support), place it under `exchange/providers/`, and append `Box::new(...)` here in priority
+/// order (first match wins; later providers only see still-missing tokens).
+fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
+    vec![Box::new(IcpSwapProvider::default())]
 }
 
 pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
@@ -117,7 +116,12 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
         return Ok(());
     }
 
-    fetch_and_update_prices(&provider, &tokens_to_fetch).await;
+    let supplementals = supplemental_price_providers();
+    let prices = fetch_all_prices(&provider, &supplementals, &tokens_to_fetch).await;
+
+    for (token_id, exchange_data) in prices {
+        update_price(&token_id, &exchange_data);
+    }
 
     Ok(())
 }
