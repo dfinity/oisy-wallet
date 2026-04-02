@@ -102,5 +102,4 @@
 	<SettingsExperimentalFeatures />
 {/if}
 
-
 <SettingsVersion />
