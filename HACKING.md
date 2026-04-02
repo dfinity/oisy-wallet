@@ -5,6 +5,7 @@ This document lists a couple of useful information for development and deploymen
 ## Table of content
 
 - [Deployment](#deployment)
+  - [Signer Domains](#signer-domains)
 - [Internationalization](#internationalization)
 - [Faucets](#faucets)
 - [Testing](#testing)
@@ -79,6 +80,10 @@ scripts/docker-build
 
 dfx-orbit request canister install backend --mode upgrade --wasm out/backend.wasm.gz --arg-file out/backend.args.did
 ```
+
+### Signer Domains
+
+The OISY signer is deployed to dedicated production subdomains (`signer.oisy.com`, `legacy-signer.oisy.com`) with their own canisters and versioning. Production IC deploys for those asset canisters use the **same Orbit-controlled process** as the main wallet `frontend` (see [IC](#ic) above: Docker image build, then `dfx-oisy request deploy`, with verification via `dfx-orbit` where applicable). For architecture, build targets, identity derivation, and the migration plan, see [SIGNER_DOMAINS.md](SIGNER_DOMAINS.md).
 
 ## Internationalization
 
