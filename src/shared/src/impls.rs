@@ -462,7 +462,7 @@ impl StoredUserProfile {
         &self,
         profile_version: Option<Version>,
         now: Timestamp,
-        provider_agreements: BTreeMap<ProviderAgreementType, UserAgreement>,
+        provider_agreements: &BTreeMap<ProviderAgreementType, UserAgreement>,
     ) -> Result<StoredUserProfile, UpdateAgreementsError> {
         if profile_version != self.version {
             return Err(UpdateAgreementsError::VersionMismatch);
@@ -477,7 +477,7 @@ impl StoredUserProfile {
 
         let mut merged = current.clone();
 
-        for (provider_type, agreement) in &provider_agreements {
+        for (provider_type, agreement) in provider_agreements {
             if agreement.accepted.is_some() {
                 merged.insert(provider_type.clone(), agreement.clone());
             }
