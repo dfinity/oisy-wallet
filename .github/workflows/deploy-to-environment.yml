@@ -177,6 +177,7 @@ jobs:
             echo "CANISTER=frontend" >> $GITHUB_ENV
             echo "deploy_frontend=true" >> $GITHUB_ENV
             echo "deploy_backend=true" >> $GITHUB_ENV
+            echo "deploy_signer=true" >> $GITHUB_ENV
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "NETWORK=$NETWORK" >> $GITHUB_ENV
             echo "CANISTER=$CANISTER" >> $GITHUB_ENV
@@ -442,7 +443,6 @@ jobs:
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Pre-build
-        if: env.deploy_signer != 'true'
         run: npm run build
         env:
           VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}
@@ -463,8 +463,13 @@ jobs:
 
       - name: Deploy Frontend to Environment
         run: |
-          if [ "$deploy_frontend" == "true" ] || [ "$deploy_signer" == "true" ] ; then
-            dfx deploy "$CANISTER" --network "$NETWORK" --no-asset-upgrade
+          if [ "$deploy_frontend" == "true" ]; then
+            dfx deploy frontend --network "$NETWORK" --no-asset-upgrade
+          fi
+
+          if [ "$deploy_signer" == "true" ]; then
+            dfx deploy signer_frontend --network "$NETWORK" --no-asset-upgrade
+            dfx deploy legacy_signer_frontend --network "$NETWORK" --no-asset-upgrade
           fi
         env:
           VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}
