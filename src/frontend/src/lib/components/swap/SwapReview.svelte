@@ -112,6 +112,8 @@
 		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 	/>
 
+	<SwapCrossChainInfo hrSpacing="md" />
+
 	{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
 		<ModalValue>
 			{#snippet label()}
@@ -138,8 +140,6 @@
 		<SwapProvider {slippageValue} />
 		{@render swapFees()}
 	</div>
-
-	<SwapCrossChainInfo hrSpacing="md" />
 
 	{#if isValueDifferenceError}
 		<div class="mt-4">
