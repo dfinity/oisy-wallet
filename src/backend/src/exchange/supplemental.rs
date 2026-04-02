@@ -4,9 +4,8 @@ use shared::types::exchange::ExchangeData;
 
 use crate::types::storable::StoredTokenId;
 
-pub(crate) type SupplementalPricesFuture<'a> = Pin<
-    Box<dyn Future<Output = Result<Vec<(StoredTokenId, ExchangeData)>, String>> + 'a>,
->;
+pub(crate) type SupplementalPricesFuture<'a> =
+    Pin<Box<dyn Future<Output = Result<Vec<(StoredTokenId, ExchangeData)>, String>> + 'a>>;
 
 /// Fills exchange-rate gaps after the primary provider (e.g. `CoinGecko`) runs.
 ///
@@ -17,8 +16,5 @@ pub(crate) type SupplementalPricesFuture<'a> = Pin<
 pub(crate) trait SupplementalPriceProvider {
     fn id(&self) -> &'static str;
 
-    fn supplement<'a>(
-        &'a self,
-        missing: &'a [StoredTokenId],
-    ) -> SupplementalPricesFuture<'a>;
+    fn supplement<'a>(&'a self, missing: &'a [StoredTokenId]) -> SupplementalPricesFuture<'a>;
 }

@@ -12,8 +12,7 @@ use crate::{
 
 /// Whether the backend should treat this snapshot as a usable USD price.
 pub(crate) fn has_valid_price(data: &ExchangeData) -> bool {
-    data.price
-        .is_some_and(|p| p.is_finite() && p > 0.0)
+    data.price.is_some_and(|p| p.is_finite() && p > 0.0)
 }
 
 fn merge_valid_primary(

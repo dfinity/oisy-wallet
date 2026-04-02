@@ -103,10 +103,7 @@ impl SupplementalPriceProvider for IcpSwapProvider {
         "icpswap"
     }
 
-    fn supplement<'a>(
-        &'a self,
-        missing: &'a [StoredTokenId],
-    ) -> SupplementalPricesFuture<'a> {
+    fn supplement<'a>(&'a self, missing: &'a [StoredTokenId]) -> SupplementalPricesFuture<'a> {
         Box::pin(async move {
             let mut out = Vec::new();
 
