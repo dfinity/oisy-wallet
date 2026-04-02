@@ -7,8 +7,7 @@ use serde::{de, Deserializer};
 use crate::{
     types::{
         agreement::{
-            Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement,
-            UserAgreements,
+            Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
         },
         backend_config::{Config, InitArg},
         contact::{

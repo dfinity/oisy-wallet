@@ -4,10 +4,10 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
     agreement::{
-        AgreementHistoryEntry, AgreementType, GetAgreementHistoryError,
-        ProviderAgreementProvider, ProviderAgreementScope, ProviderAgreementType,
-        UpdateAgreementsError, UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest,
-        UserAgreement, UserAgreements, SHA256_HEX_LENGTH,
+        AgreementHistoryEntry, AgreementType, GetAgreementHistoryError, ProviderAgreementProvider,
+        ProviderAgreementScope, ProviderAgreementType, UpdateAgreementsError,
+        UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest, UserAgreement,
+        UserAgreements, SHA256_HEX_LENGTH,
     },
     user_profile::{GetUserProfileError, UserProfile},
     Timestamp, Version,
