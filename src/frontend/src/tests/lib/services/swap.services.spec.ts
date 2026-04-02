@@ -150,6 +150,10 @@ vi.mock('$eth/services/eip2612-permit.services', () => ({
 	createPermit: vi.fn()
 }));
 
+vi.mock('$env/rest/kongswap.env', () => ({
+	KONGSWAP_PROVIDER_ENABLED: true
+}));
+
 describe('swap.services', () => {
 	describe('fetchSwapAmounts', () => {
 		const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];

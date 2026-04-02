@@ -9,6 +9,7 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import { ZERO } from '$lib/constants/app.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -34,9 +35,13 @@ import {
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
 
+const mockParseToken = vi.hoisted(() => vi.fn());
+
 vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: vi.fn()
+	parseToken: mockParseToken
 }));
+
+mockParseToken.mockReturnValue(ZERO);
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	initMinedTransactionsListener: () => ({
@@ -418,7 +423,12 @@ describe('SwapEthWizard', () => {
 		};
 
 		it('calls onClose after successful swap', async () => {
-			const { getByText, onClose, onBack } = renderExecution();
+			const { getByRole, getByText, onClose, onBack, queryByRole } = renderExecution();
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(getByRole('checkbox'));
+			}
 
 			await fireEvent.click(getByText('Swap now'));
 			await vi.runOnlyPendingTimersAsync();
@@ -431,7 +441,12 @@ describe('SwapEthWizard', () => {
 		it('calls onBack when swap fails', async () => {
 			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(new Error('Swap failed'));
 
-			const { getByText, onClose, onBack } = renderExecution();
+			const { getByRole, getByText, onClose, onBack, queryByRole } = renderExecution();
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(getByRole('checkbox'));
+			}
 
 			await fireEvent.click(getByText('Swap now'));
 			await vi.runOnlyPendingTimersAsync();
@@ -439,6 +454,33 @@ describe('SwapEthWizard', () => {
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();
 			expect(toasts.toastsError).toHaveBeenCalled();
+		});
+
+		it('requires confirmation before enabling swap for high negative value difference', async () => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+
+			const { getByRole, getByText } = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					receiveAmount: 0.1,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount: vi.fn(),
+					onStopTriggerAmount: vi.fn()
+				},
+				context: createExecutionContext()
+			});
+
+			const swapButton = getByText('Swap now').closest('button');
+
+			expect(swapButton).toBeDisabled();
+
+			await fireEvent.click(getByRole('checkbox'));
+
+			expect(swapButton).toBeEnabled();
 		});
 	});
 });

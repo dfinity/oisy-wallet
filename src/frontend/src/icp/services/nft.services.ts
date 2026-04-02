@@ -11,7 +11,7 @@ import { isTokenIcPunks } from '$icp/utils/icpunks.utils';
 import { mapDip721Nft, mapExtNft, mapIcPunksNft } from '$icp/utils/nft.utils';
 import { TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Nft } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
@@ -132,7 +132,7 @@ export const loadNfts = async ({
 	certified
 }: {
 	tokens: IcNonFungibleToken[];
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 } & QueryParams): Promise<Nft[]> => {
 	if (isNullish(identity)) {
 		return [];

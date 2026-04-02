@@ -32,8 +32,21 @@ export interface AddUserCredentialRequest {
 }
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
+export interface AgreementHistoryEntry {
+	timestamp_ns: bigint;
+	agreement_type: AgreementType;
+	text_sha256: [] | [string];
+	accepted: boolean;
+	last_updated_at_ms: [] | [bigint];
+}
+export type AgreementType =
+	| { TermsOfUse: null }
+	| { PrivacyPolicy: null }
+	| { LicenseAgreement: null }
+	| { Provider: ProviderAgreementType };
 export interface Agreements {
 	agreements: UserAgreements;
+	provider_agreements: [] | [Array<[ProviderAgreementType, UserAgreement]>];
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
@@ -243,6 +256,12 @@ export interface ExperimentalFeaturesSettings {
 export interface ExtV2Token {
 	canister_id: Principal;
 }
+export type GetAgreementHistoryError = { UserNotFound: null };
+export type GetAgreementHistoryResult =
+	| {
+			Ok: Array<AgreementHistoryEntry>;
+	  }
+	| { Err: GetAgreementHistoryError };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
@@ -272,11 +291,20 @@ export type GetUserTransactionsResult =
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
+export interface HttpHeader {
+	value: string;
+	name: string;
+}
 export interface HttpRequest {
 	url: string;
 	method: string;
 	body: Uint8Array;
 	headers: Array<[string, string]>;
+}
+export interface HttpRequestResult {
+	status: bigint;
+	body: Uint8Array;
+	headers: Array<HttpHeader>;
 }
 export interface HttpResponse {
 	body: Uint8Array;
@@ -359,6 +387,12 @@ export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
 }
+export type ProviderAgreementProvider = { NearIntents: null };
+export type ProviderAgreementScope = { Swap: null };
+export interface ProviderAgreementType {
+	provider: ProviderAgreementProvider;
+	scope: ProviderAgreementScope;
+}
 export interface RateLimitError {
 	max_calls: number;
 	window_ns: bigint;
@@ -419,6 +453,7 @@ export interface Stats {
 	custom_token_count: bigint;
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;
+	agreement_history_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
@@ -493,6 +528,10 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export interface TransformArgs {
+	context: Uint8Array;
+	response: HttpRequestResult;
+}
 export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
@@ -724,6 +763,16 @@ export interface _SERVICE {
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
 	get_exchange_rates: ActorMethod<[Array<TokenId>], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
+	 * Returns the full agreement consent/rejection history for the caller.
+	 *
+	 * # Returns
+	 * - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
+	 *
+	 * # Errors
+	 * - `Err(UserNotFound)` if no history exists and the user has no profile.
+	 */
+	get_user_agreement_history: ActorMethod<[], GetAgreementHistoryResult>;
+	/**
 	 * Returns the caller's user profile.
 	 *
 	 * # Errors
@@ -757,6 +806,15 @@ export interface _SERVICE {
 	 * Processes external HTTP requests.
 	 */
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
+	/**
+	 * Strips volatile HTTP headers so that IC replicas can reach consensus.
+	 *
+	 * Each replica makes the same HTTP request independently and the raw
+	 * responses must match for consensus. Headers like `Date`, `X-Request-Id`,
+	 * `CF-Ray`, etc. differ across replicas, causing consensus failure.
+	 * This transform keeps only status + body.
+	 */
+	http_request_transform: ActorMethod<[TransformArgs], HttpRequestResult>;
 	/**
 	 * List the custom tokens for the calling user.
 	 *
@@ -828,7 +886,9 @@ export interface _SERVICE {
 	 */
 	update_contact: ActorMethod<[Contact], GetContactResult>;
 	/**
-	 * Updates the user's agreements, merging with any existing ones.
+	 * Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
+	 * for every agreement that was actually changed.
+	 *
 	 * Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
 	 * set to `now`.
 	 *

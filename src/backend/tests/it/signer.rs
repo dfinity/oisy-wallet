@@ -20,8 +20,8 @@ use shared::types::{
 use crate::utils::{
     mock::{CALLER, VC_HOLDER},
     pocketic::{
-        controller, pic_canister::PicCanisterTrait, setup, setup_with_ii, BackendBuilder,
-        PicBackend,
+        controller, pic_canister::PicCanisterTrait, setup, setup_with_ii,
+        setup_with_production_config, BackendBuilder, PicBackend,
     },
 };
 
@@ -559,7 +559,6 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
 // -------------------------------------------------------------------------------------------------
 
 #[test]
-#[ignore = "Enable when II_DELEGATION_CHAIN_GUARD_ENABLED is set to true"]
 fn test_allow_signing_requires_delegation_chain() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
@@ -577,7 +576,7 @@ fn test_allow_signing_requires_delegation_chain() {
 
 #[test]
 fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
-    let pic_setup = setup();
+    let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
 
     let result = call_allow_signing_with_delegation(&pic_setup, caller, None);

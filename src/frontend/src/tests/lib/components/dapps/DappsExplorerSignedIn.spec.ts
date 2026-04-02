@@ -16,7 +16,7 @@ describe('DappsExplorerSignedIn', () => {
 
 		const button = screen
 			.getAllByRole('button')
-			.find((btn) => btn.getAttribute('aria-label')?.toLowerCase().includes('kongswap'));
+			.find((btn) => btn.getAttribute('aria-label')?.toLowerCase().includes('icpswap'));
 
 		expect(button).toBeTruthy();
 
@@ -25,7 +25,7 @@ describe('DappsExplorerSignedIn', () => {
 
 			expect(trackEventSpy).toHaveBeenCalledWith({
 				name: TRACK_COUNT_DAPP_OPEN_INFO_MODAL,
-				metadata: { dappId: 'kongswap' }
+				metadata: { dappId: 'icpswap' }
 			});
 		}
 	});

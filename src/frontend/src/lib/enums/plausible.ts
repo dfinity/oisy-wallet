@@ -11,7 +11,12 @@ export enum PLAUSIBLE_EVENTS {
 	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help',
 	RATE_LIMITED = 'rate_limited',
 	STAKE = 'stake',
-	UNSTAKE = 'unstake'
+	UNSTAKE = 'unstake',
+	LOAD_TRANSACTIONS = 'load_transactions',
+	SIGNER_PAGE_VISIT = 'signer_page_visit',
+	SIGNER_INTERACTION = 'signer_interaction',
+	NETWORK_FILTER = 'network_filter',
+	NETWORK_MANAGE = 'network_manage'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -21,7 +26,10 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	TOKENS = 'tokens',
 	DFX = 'dfx',
 	OPEN_CRYPTOPAY = 'open_cryptopay',
-	EARN = 'earn'
+	EARN = 'earn',
+	TRANSACTIONS = 'transactions',
+	SIGNER = 'signer',
+	NETWORKS = 'networks'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -40,6 +48,17 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
 	PER_USER = 'per_user',
 	GLOBAL = 'global'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
+	UNCERTIFIED_REMOVED = 'uncertified_removed'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
+	PERMISSIONS = 'permissions',
+	ACCOUNTS = 'accounts',
+	CONSENT_MESSAGE = 'consent_message',
+	CALL_CANISTER = 'call_canister'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
@@ -68,11 +87,18 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	SORT = 'sort',
 	SORT_ASC = 'sort_asc',
 	SORT_DESC = 'sort_desc',
-	PRICE = 'price'
+	PRICE = 'price',
+	NETWORK = 'network'
 }
 
 export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
 	SUCCESS = 'success',
 	ERROR = 'error',
-	CANCEL = 'cancel'
+	CANCEL = 'cancel',
+	EXECUTING = 'executing'
+}
+
+export enum PLAUSIBLE_EVENT_TYPES_SIGNER {
+	REQUESTED = 'requested',
+	PRESENTED = 'presented'
 }

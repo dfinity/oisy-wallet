@@ -1,7 +1,11 @@
 #![warn(clippy::wildcard_imports)]
 
 use candid::Principal;
-use ic_cdk::{export_candid, init, post_upgrade};
+use ic_cdk::{
+    export_candid, init,
+    management_canister::{HttpRequestResult, TransformArgs},
+    post_upgrade,
+};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -23,9 +27,9 @@ use shared::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, GetUserTransactionsResult, SaveUserTransactionsResult,
-            SetUserShowTestnetsResult, UpdateContactResult,
+            DeleteContactResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
+            SaveUserTransactionsResult, SetUserShowTestnetsResult, UpdateContactResult,
             UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
             UpdateUserNetworkSettingsResult,
         },

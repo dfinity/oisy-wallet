@@ -24,7 +24,18 @@
 		"test_fe_5": "c4fs2-pqaaa-aaaal-qsl7a-cai",
 		"test_fe_6": "ehrur-ziaaa-aaaaj-az7lq-cai"
 	},
+	"legacy_signer_frontend": {
+		"beta": "7yrhx-ciaaa-aaaas-amvkq-cai",
+		"ic": "7wtk7-zyaaa-aaaas-amvlq-cai",
+		"staging": "7rsml-uaaaa-aaaas-amvla-cai"
+	},
+	"signer_frontend": {
+		"beta": "7kxqo-oyaaa-aaaas-amvjq-cai",
+		"ic": "77qbd-pqaaa-aaaas-amvka-cai",
+		"staging": "7nww2-daaaa-aaaas-amvja-cai"
+    },
 	"frontend_ai": {
 		"staging": "g2v7y-eaaaa-aaaad-agcxq-cai"
-	}
+    }
+	
 }

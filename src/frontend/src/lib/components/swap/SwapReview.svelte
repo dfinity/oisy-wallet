@@ -1,28 +1,37 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
+	import { Checkbox, Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
+	import { getContext, type Snippet, untrack } from 'svelte';
+	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
+	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
+	import SwapNearIntentsTos from '$lib/components/swap/SwapNearIntentsTos.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
+	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import {
 		TRACK_OPEN_DOCUMENTATION,
 		TRACK_OPEN_EXTERNAL_LINK
 	} from '$lib/constants/analytics.constants';
-	import { OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK } from '$lib/constants/swap.constants';
+	import {
+		OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK,
+		SWAP_VALUE_DIFFERENCE_ERROR_VALUE
+	} from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { SwapErrorCodes } from '$lib/types/swap';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { SwapErrorCodes, SwapProvider as SwapProviderEnum } from '$lib/types/swap';
+	import { calculateValueDifference } from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -43,8 +52,10 @@
 		onClose,
 		onSwap,
 		swapFees,
-		isSwapAmountsLoading
+		isSwapAmountsLoading = false
 	}: Props = $props();
+
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	const {
 		sourceToken,
@@ -53,6 +64,11 @@
 		destinationTokenExchangeRate,
 		failedSwapError
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	let isNearIntentsProvider = $derived(
+		NEAR_INTENTS_SWAP_ENABLED &&
+			$swapAmountsStore?.selectedProvider?.provider === SwapProviderEnum.NEAR_INTENTS
+	);
 
 	const handleBack = () => {
 		failedSwapError.set(undefined);
@@ -67,6 +83,35 @@
 	let isManualWithdrawSuccess = $derived(
 		$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS &&
 			$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success
+	);
+
+	let valueDifference = $derived(
+		calculateValueDifference({
+			swapAmount,
+			receiveAmount,
+			sourceTokenExchangeRate: $sourceTokenExchangeRate,
+			destinationTokenExchangeRate: $destinationTokenExchangeRate
+		})
+	);
+
+	let isValueDifferenceError = $derived(
+		nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE
+	);
+
+	let isValueDifferenceConfirmed = $state(false);
+
+	const reset = () => {
+		isValueDifferenceConfirmed = false;
+	};
+
+	$effect(() => {
+		[valueDifference, isValueDifferenceError];
+
+		untrack(reset);
+	});
+
+	let swapButtonDisabled = $derived(
+		isSwapAmountsLoading || (isValueDifferenceError && !isValueDifferenceConfirmed)
 	);
 </script>
 
@@ -87,7 +132,7 @@
 			{/snippet}
 
 			{#snippet mainValue()}
-				<SwapImpact {receiveAmount} {swapAmount} />
+				<SwapValueDifference iconPosition="left" {receiveAmount} {swapAmount} />
 			{/snippet}
 		</ModalValue>
 	{/if}
@@ -107,17 +152,30 @@
 		{@render swapFees()}
 	</div>
 
-	{#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
-		<Hr spacing="md" />
+	<SwapCrossChainInfo hrSpacing="md" />
 
-		<MessageBox styleClass="sm:text-sm">
-			<Html
-				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
-					$sourceNetwork: $sourceToken.network.name,
-					$destinationNetwork: $destinationToken.network.name
-				})}
-			/>
-		</MessageBox>
+	{#if isNearIntentsProvider}
+		<div class="mt-4">
+			<SwapNearIntentsTos />
+		</div>
+	{/if}
+
+	{#if isValueDifferenceError}
+		<div class="mt-4">
+			<MessageBox level="error">
+				{#snippet icon()}
+					<Checkbox
+						inputId="swap-review-value-difference-confirmation"
+						bind:checked={isValueDifferenceConfirmed}
+						on:nnsChange={() => (isValueDifferenceConfirmed = !isValueDifferenceConfirmed)}
+					/>
+				{/snippet}
+
+				<label class="align-top text-sm" for="swap-review-value-difference-confirmation">
+					{$i18n.swap.text.value_difference_error_confirmation}
+				</label>
+			</MessageBox>
+		</div>
 	{/if}
 
 	{#if nonNullish($failedSwapError)}
@@ -170,7 +228,7 @@
 			{:else}
 				<ButtonBack onclick={handleBack} />
 
-				<Button disabled={isSwapAmountsLoading} onclick={onSwap}>
+				<Button disabled={swapButtonDisabled} onclick={onSwap}>
 					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
 						? $i18n.transaction.type.withdraw
 						: $i18n.swap.text.swap_button}

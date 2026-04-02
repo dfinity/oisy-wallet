@@ -13,7 +13,7 @@ use super::{
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
-    agreement::UpdateAgreementsError,
+    agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
@@ -323,6 +323,22 @@ impl From<Result<(), UpdateAgreementsError>> for UpdateUserAgreementsResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateProviderAgreementsResult {
+    /// The user's provider agreements were updated successfully.
+    Ok(()),
+    /// The user's provider agreements were not updated due to an error.
+    Err(UpdateAgreementsError),
+}
+impl From<Result<(), UpdateAgreementsError>> for UpdateProviderAgreementsResult {
+    fn from(result: Result<(), UpdateAgreementsError>) -> Self {
+        match result {
+            Ok(()) => UpdateProviderAgreementsResult::Ok(()),
+            Err(err) => UpdateProviderAgreementsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum UpdateExperimentalFeaturesSettingsResult {
     /// The user's experimental features settings were updated successfully.
     Ok(()),
@@ -364,6 +380,22 @@ impl From<Result<(), UserTransactionError>> for SaveUserTransactionsResult {
         match result {
             Ok(()) => SaveUserTransactionsResult::Ok(()),
             Err(err) => SaveUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetAgreementHistoryResult {
+    Ok(Vec<AgreementHistoryEntry>),
+    Err(GetAgreementHistoryError),
+}
+impl From<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>
+    for GetAgreementHistoryResult
+{
+    fn from(result: Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>) -> Self {
+        match result {
+            Ok(entries) => GetAgreementHistoryResult::Ok(entries),
+            Err(err) => GetAgreementHistoryResult::Err(err),
         }
     }
 }

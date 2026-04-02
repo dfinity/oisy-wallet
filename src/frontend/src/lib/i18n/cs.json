@@ -80,7 +80,6 @@
 			"source_code_on_github": "Zdrojový kód na GitHubu",
 			"view_on_explorer": "Zobrazit v průzkumníku",
 			"source_code": "Zdrojový kód",
-			"changelog": "Protokol změn",
 			"documentation": "Dokumentace",
 			"support": "Podpora",
 			"confirm_navigate": "Jste si jisti, že chcete odejít?",
@@ -100,7 +99,6 @@
 			"activity": "Otevřít zobrazení aktivity",
 			"airdrops": "Otevřít zobrazení odměn",
 			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
-			"changelog": "Otevřete protokol změn $oisy_name na GitHubu a zkontrolujte nejnovější aktualizace",
 			"documentation": "Otevřít dokumentaci $oisy_name",
 			"support": "Otevřít sekci podpory v dokumentaci $oisy_name",
 			"open_twitter": "Otevřít X/Twitter kanál DFINITY",
@@ -437,7 +435,11 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -475,7 +477,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Sledujte nadcházející airdropy tokenů! <a href=\"https://x.com/oisy\" target=\"_blank\">Sledujte nás na X</a>, připojte se k našemu <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Redditu</a> nebo se přidejte do <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discordu</a>, abyste zůstali v obraze.",
-			"coming_soon": "Epizoda 6 $oisy_short se blíží",
+			"coming_soon": "Další epizoda $oisy_short Sprinkles přichází brzy",
 			"reward_banner": "Banner kampaně $campaignName"
 		},
 		"campaigns": {
@@ -576,6 +578,36 @@
 						"title": "Zde je malé poděkování",
 						"description": "Jeden z vašich doporučených uživatelů právě dostal nějaké sprinkles.",
 						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Epizoda 6",
+				"one_liner": "Získávej Sprinkles za aktivitu, doporučování ostatních a používání OISY napříč chainy. Tvoje akce zvyšují tvoje odměny a aktivní doporučení je dále posilují.<br/>Navíc více chainů nyní znamená lepší šance na výhru.",
+				"participate_title": "Získávej tokeny za aktivitu a doporučení. Více chainů znamená více šancí.",
+				"description": "Zůstaň aktivní, abys mohl/a participovat: přihlašuj se často, prováděj akce v peněžence a drž alespoň 5 $.<br/>Každý aktivní chain zvyšuje tvoje šance pomocí Multichain Multiplikátoru.<br/>Získej 10 % od přátel, kteří se kvalifikují.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "Vítej v $oisy_short!",
+					"subtitle": "Připraven/a vydělávat?",
+					"description": "Jsi 2 kroky od své první odměny: Přihlas se, drž 5 $+ a dokonči 2 akce. To je vše, co potřebuješ k získávání Sprinkles.<br><br>Chceš více? Doporuč své přátele a získej bonus pokaždé, když někdo z nich Sprinkles vydělá."
+				},
+				"win": {
+					"default": {
+						"title": "Byl/a jsi odměněn/a",
+						"description": "Tvoje odměny právě dorazily do tvé peněženky.<br>Nezapomeň doporučovat a zůstat aktivní/a, abys vyhrál/a více",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Vyhrál/a jsi týdenní bonusový drop",
+						"description": "Právě jsi získal/a jeden z našich týdenních bonusových dropů.<br>Zůstaň aktivní a doporučuj dál, abys vyhrál/a více",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Malé poděkování",
+						"description": "Jeden z tvých doporučených uživatelů právě získal nějaké Sprinkles.",
+						"share_href": ""
 					}
 				}
 			}
@@ -1080,7 +1112,9 @@
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
-			"near_intents_estimated_time": ""
+			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
@@ -1891,32 +1925,32 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Vydělat",
+			"title": "Vydělávat",
 			"tab_title": "Vydělávání",
 			"earning_opportunities": "Příležitosti k výdělku",
-			"header_title": "Vítejte v Earn!",
-			"header_description": "Rozšiřte své digitální portfolio alokací tokenů do výdělečných příležitostí.",
-			"go_to_earn": "Přejít do Earn"
+			"header_title": "Vítejte v sekci Vydělávat!",
+			"header_description": "Rozšiřujte své portfolio digitálních aktiv přidělováním tokenů do výdělečných příležitostí.",
+			"go_to_earn": "Přejít na Vydělávat"
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "Harvest – Autopilot",
+				"description": "Maximální výnosová efektivita s automatickými trezory na jeden klik.",
+				"action": "Přejít na Autopilot"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Používejte OISY a VYDĚLÁVEJTE! Ep. 5 je live 🎉",
+				"description": "Používejte OISY a VYDĚLÁVEJTE! Ep. 6 je živě 🎉",
 				"action": "Zkontrolovat stav"
 			}
 		},
 		"card_fields": {
 			"apy": "APY",
-			"networks": "",
-			"assets": "",
+			"networks": "Sítě",
+			"assets": "Aktiva",
 			"currentStaked": "Stakováno",
-			"currentEarning": "Aktuálně vydělává",
-			"earningPotential": "Další potenciál výdělku",
+			"currentEarning": "Aktuálně vyděláváno",
+			"earningPotential": "Výdělečný potenciál",
 			"terms": "Podmínky"
 		},
 		"terms": {
@@ -1930,76 +1964,76 @@
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "",
-			"live_apy": ""
+			"autopilot": "Autopilot",
+			"live_apy": "Aktuální APY"
 		}
 	},
 	"stake": {
 		"text": {
-			"harvest_autopilot_page_description": "",
-			"harvest_autopilot_vault_page_description": "",
-			"harvest_autopilot_provider_description": "",
-			"harvest_autopilot_stake_terms": "",
-			"my_positions": "",
-			"available_autopilots": "",
-			"vault_info": "",
-			"vault_address": "",
-			"protocol": "",
-			"harvest": "",
-			"autopilot": "",
-			"total_value_locked": "",
-			"manager": "",
-			"vault_description": "",
-			"stake": "",
+			"harvest_autopilot_page_description": "Maximální výnosová efektivita s automatickými trezory na jeden klik.",
+			"harvest_autopilot_vault_page_description": "Autopilot je poháněn <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">auditovanou technologií IPOR</a> Fusion Vault.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot je specializovaná služba \"nastav a zapomeň\", která s minimálním úsilím automatizuje vaše DeFi pozice.",
+			"harvest_autopilot_stake_terms": "Potvrzuji, že jsem si produkt přečetl(a) a rozumím mu, přečetl(a) jsem si <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Zveřejnění rizik</a> a souhlasím s <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Obchodními podmínkami</a>.",
+			"my_positions": "Moje pozice",
+			"available_autopilots": "Dostupné autopiloty",
+			"vault_info": "Informace o trezoru",
+			"vault_address": "Adresa trezoru",
+			"protocol": "Protokol",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "Celková uzamčená hodnota (TVL)",
+			"manager": "Správce",
+			"vault_description": "Tento fond je navržen jako služba správy výnosů \"nastav a zapomeň\" pro vaše $asset_symbol aktiva. Automaticky optimalizuje vaši DeFi pozici s minimálním úsilím z vaší strany dynamickým přidělováním kapitálu do nejlepších příležitostí.",
+			"stake": "Stakovat",
 			"stake_now": "Stakovat nyní",
 			"stake_amount": "Stakovat $amount $token_symbol",
-			"not_enough_to_stake": "Nemáte žádné $token_symbol ke stakování",
-			"estimated_received": "",
-			"estimated_yearly_yield": "",
+			"not_enough_to_stake": "Žádné $token_symbol ke stakování",
+			"estimated_received": "Odh. obdrženo",
+			"estimated_yearly_yield": "Odh. roční výnos",
 			"unstake": "Odstakovat",
 			"unstake_now": "Odstakovat nyní",
 			"unstaking": "Odstakování...",
 			"unstake_token": "Odstakovat $token_symbol",
-			"enable_token_text": "Musíte povolit $token_symbol",
-			"enable_token_button": "Povolit $token_symbol",
+			"enable_token_text": "Musíte aktivovat $token_symbol",
+			"enable_token_button": "Aktivovat $token_symbol",
 			"review": "Zkontrolovat transakci",
 			"executing_transaction": "Provádění transakce...",
 			"unsupported_token_staking": "Stakování pro vybraný token není podporováno.",
 			"provider": "Podmínky stakování poskytuje $provider",
-			"earning_potential": "Další potenciál výdělku",
+			"earning_potential": "Výdělečný potenciál",
 			"earning_potential_hint": "Na základě hodnoty vašich neinvestovaných aktiv a nejvyššího APY dostupných výdělečných příležitostí.",
-			"active_earning": "Aktuálně vydělává",
+			"active_earning": "Aktivní výdělek",
 			"active_earning_per_year": "$amount/rok",
-			"active_earning_per_year_short": "",
+			"active_earning_per_year_short": "$amount/rok",
 			"unproductive_assets": "Dostupné",
-			"invested_assets": "Alokované",
+			"invested_assets": "Alokováno",
 			"visit_provider": "Navštívit web",
 			"current_apy_label": "Aktuální APY",
-			"max_apy_label": "",
+			"max_apy_label": "Max. APY",
 			"stake_review_subtitle": "Stakujete",
 			"unstake_review_subtitle": "Odstakujete",
-			"delayed_dissolve": "Obdržet se zpožděním",
-			"immediate_dissolve": "Obdržet okamžitě",
-			"included_token_fee": "Zahrnutý síťový poplatek",
-			"included_dissolve_fee": "Zahrnutý poplatek za odemčení",
-			"delayed_dissolve_terms": "Při odemykání $token ze stakování jsou tokeny uzamčeny na $delay dní bez dalších odměn, než je možné je vybrat.",
-			"delayed_dissolve_info": "Jakmile zahájíte odemykání svého $token staku, přestanete dostávat nové odměny.",
-			"immediate_dissolve_terms": "Tokeny $token obdržíte okamžitě, ale bude vám účtován poplatek z odemykaných $token tokenů.",
-			"amount_to_receive": "Částka k obdržení",
-			"unclaimed_rewards": "Nevyzvednuté odměny",
+			"delayed_dissolve": "Přijmout se zpožděním",
+			"immediate_dissolve": "Přijmout okamžitě",
+			"included_token_fee": "Včetně síťového poplatku",
+			"included_dissolve_fee": "Včetně poplatku za odemčení",
+			"delayed_dissolve_terms": "Při odemykání $token ze stakování jsou tokeny uzamčeny po dobu $delay dní bez dalších odměn, než je lze vybrat.",
+			"delayed_dissolve_info": "Jakmile zahájíte odemykání staku $token, přestanete dostávat nové odměny.",
+			"immediate_dissolve_terms": "Své $token obdržíte okamžitě, ale bude vám účtován poplatek z odemykaných $token tokenů.",
+			"amount_to_receive": "Částka k přijetí",
+			"unclaimed_rewards": "Nevybrané odměny",
 			"unlock_requests": "Žádosti o odemčení",
-			"unlocking_in": "Odemknutí za $time",
+			"unlocking_in": "Odemčení za $time",
 			"unlocked": "Odemčeno",
 			"withdraw": "Vybrat",
 			"withdraw_successful": "Tokeny byly úspěšně vybrány.",
-			"claim_reward": "Vybrat odměnu",
-			"claim_rewards": "Vybrat odměny",
-			"claim_reward_short": "Vybrat",
-			"claim_now": "Vybrat nyní",
-			"claiming": "Vybírání...",
-			"get_tokens_with_amount": "Získat až $amount $token_symbol",
-			"get_asset_tokens": "",
-			"reward_claimed": "Odměna vybrána",
+			"claim_reward": "Nárokovat odměnu",
+			"claim_rewards": "Nárokovat odměny",
+			"claim_reward_short": "Nárokovat",
+			"claim_now": "Nárokovat nyní",
+			"claiming": "Nárokování...",
+			"get_tokens_with_amount": "Získejte až $amount $token_symbol",
+			"get_asset_tokens": "Získat $token_symbol",
+			"reward_claimed": "Odměna nárokována",
 			"staked": "Stakováno",
 			"unstaked": "Odstakováno",
 			"title_empty_1": "Vydělávejte až",
@@ -2009,25 +2043,25 @@
 			"description_empty": "Zdá se, že jste zatím nestakovali žádné tokeny",
 			"full_history": "Zobrazit celou historii",
 			"recent_history": "Zavřít celou historii",
-			"harvest_autopilot_carousel_slide_title": "",
-			"harvest_autopilot_carousel_slide_cta": ""
+			"harvest_autopilot_carousel_slide_title": "Vydělávejte v OISY s Harvest Autopilot Yield Farming",
+			"harvest_autopilot_carousel_slide_cta": "Zjistit více"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",
 			"unexpected_error_on_unstake": "Při odstakování tokenů došlo k chybě.",
-			"unexpected_error_on_stake": "",
-			"dissolvement_limit_reached": "Dosáhli jste maximálního počtu $limit aktivních žádostí o odemčení. Nejprve některé dokončete, než vytvoříte novou.<br/>Vždy můžete použít možnost „okamžitě“."
+			"unexpected_error_on_stake": "Při stakování tokenů došlo k chybě.",
+			"dissolvement_limit_reached": "Dosáhli jste maximálního počtu $limit aktivních žádostí o odemčení. Nejprve některé dokončete, než vytvoříte novou.<br/>Upozorňujeme, že vždy můžete vybrat pomocí možnosti \"okamžitě\"."
 		},
 		"info": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": ""
+				"title": "Co je Harvest Autopilot",
+				"description": "Harvest Autopilot je specializovaná funkce (a konkrétní produktová řada) v ekosystému Harvest Finance navržená k automatizaci a optimalizaci vašich pozic v decentralizovaných financích (DeFi) s minimálním úsilím.",
+				"fact_1_title": "Chytré přidělování výnosů",
+				"fact_1_description": "Automaticky přepíná protokoly, aby zachytil nejvyšší aktuální APY.",
+				"fact_2_title": "Pasivní složení úroků",
+				"fact_2_description": "Odměny jsou automaticky sklízeny a reinvestovány pro maximalizaci vašeho růstu.",
+				"fact_3_title": "Sdílení nákladů na plyn",
+				"fact_3_description": "Snižuje vaše výdaje sdružováním transakcí s ostatními uživateli za účelem úspory paliva."
 			}
 		},
 		"alt": {
@@ -2037,15 +2071,15 @@
 	"get_token": {
 		"text": {
 			"title": "Získat $token",
-			"swap_to_token": "Směnit na $token",
-			"ready_to_swap": "Připraveno ke směně",
+			"swap_to_token": "Vyměnit za $token",
+			"ready_to_swap": "Připraveno k výměně",
 			"convert_assets": "Převést aktiva",
 			"convertible_assets": "Převoditelná aktiva",
 			"how_to_convert": "Jak převést",
 			"get_more_token": "Získat více $token",
 			"receive_token": "Přijmout $token",
 			"receive_token_title": "Přijmout $token přímo",
-			"receive_token_text": "Přijměte $token přímo na svůj účet",
+			"receive_token_text": "Přijmout $token přímo na váš účet",
 			"buy_assets": "Koupit aktiva",
 			"buy_assets_title": "Koupit převoditelná aktiva",
 			"buy_assets_text": "Kupte více aktiv a převeďte je na $token"
@@ -2067,7 +2101,7 @@
 			"second_plural": "sekundy"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {

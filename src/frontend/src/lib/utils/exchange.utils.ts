@@ -6,6 +6,7 @@ import type {
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { IcpSwapToken } from '$lib/types/icpswap';
 import type { KongSwapToken, KongSwapTokenMetrics } from '$lib/types/kongswap';
 import type { TokenId } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
@@ -30,6 +31,26 @@ export const usdValue = ({
 			) * exchangeRate
 		: Number(ZERO);
 
+export const formatIcpSwapToCoingeckoPrices = (
+	tokens: IcpSwapToken[]
+): CoingeckoSimpleTokenPriceResponse =>
+	tokens.reduce<CoingeckoSimpleTokenPriceResponse>((acc, token) => {
+		const price = Number(token.price);
+
+		if (isNullish(token) || isNaN(price) || price === 0) {
+			return acc;
+		}
+
+		acc[token.tokenLedgerId.toLowerCase()] = {
+			usd: price,
+			usd_market_cap: 0,
+			usd_24h_vol: Number(token.volumeUSD24H),
+			usd_24h_change: Number(token.priceChange24H)
+		};
+
+		return acc;
+	}, {});
+
 export const formatKongSwapToCoingeckoPrices = (
 	tokens: KongSwapToken[]
 ): CoingeckoSimpleTokenPriceResponse =>
@@ -39,6 +60,7 @@ export const formatKongSwapToCoingeckoPrices = (
 		}
 
 		acc[token.canister_id.toLowerCase()] = mapMetricsToCoingeckoPrice(metrics);
+
 		return acc;
 	}, {});
 
@@ -61,9 +83,9 @@ export const findMissingLedgerCanisterIds = ({
 	coingeckoResponse
 }: {
 	allLedgerCanisterIds: LedgerCanisterIdText[];
-	coingeckoResponse: CoingeckoSimpleTokenPriceResponse | null;
+	coingeckoResponse: CoingeckoSimpleTokenPriceResponse;
 }): LedgerCanisterIdText[] => {
-	const found = new Set(Object.keys(coingeckoResponse ?? {}));
+	const found = new Set(Object.keys(coingeckoResponse));
 	return allLedgerCanisterIds.filter((id) => !found.has(id.toLowerCase()));
 };
 

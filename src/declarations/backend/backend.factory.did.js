@@ -278,7 +278,16 @@ export const idlFactory = ({ IDL }) => {
 		privacy_policy: UserAgreement,
 		terms_of_use: UserAgreement
 	});
-	const Agreements = IDL.Record({ agreements: UserAgreements });
+	const ProviderAgreementProvider = IDL.Variant({ NearIntents: IDL.Null });
+	const ProviderAgreementScope = IDL.Variant({ Swap: IDL.Null });
+	const ProviderAgreementType = IDL.Record({
+		provider: ProviderAgreementProvider,
+		scope: ProviderAgreementScope
+	});
+	const Agreements = IDL.Record({
+		agreements: UserAgreements,
+		provider_agreements: IDL.Opt(IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement)))
+	});
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -413,6 +422,24 @@ export const idlFactory = ({ IDL }) => {
 		price: IDL.Opt(IDL.Float64)
 	});
 	const ExchangeRate = IDL.Record({ usd: ExchangeData });
+	const AgreementType = IDL.Variant({
+		TermsOfUse: IDL.Null,
+		PrivacyPolicy: IDL.Null,
+		LicenseAgreement: IDL.Null,
+		Provider: ProviderAgreementType
+	});
+	const AgreementHistoryEntry = IDL.Record({
+		timestamp_ns: IDL.Nat64,
+		agreement_type: AgreementType,
+		text_sha256: IDL.Opt(IDL.Text),
+		accepted: IDL.Bool,
+		last_updated_at_ms: IDL.Opt(IDL.Nat64)
+	});
+	const GetAgreementHistoryError = IDL.Variant({ UserNotFound: IDL.Null });
+	const GetAgreementHistoryResult = IDL.Variant({
+		Ok: IDL.Vec(AgreementHistoryEntry),
+		Err: GetAgreementHistoryError
+	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
 	const GetUserProfileResult = IDL.Variant({
 		Ok: UserProfile,
@@ -493,6 +520,16 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
+	const HttpHeader = IDL.Record({ value: IDL.Text, name: IDL.Text });
+	const HttpRequestResult = IDL.Record({
+		status: IDL.Nat,
+		body: IDL.Vec(IDL.Nat8),
+		headers: IDL.Vec(HttpHeader)
+	});
+	const TransformArgs = IDL.Record({
+		context: IDL.Vec(IDL.Nat8),
+		response: HttpRequestResult
+	});
 	const ErcToken = IDL.Record({
 		token_address: IDL.Text,
 		chain_id: IDL.Nat64
@@ -553,6 +590,7 @@ export const idlFactory = ({ IDL }) => {
 		custom_token_count: IDL.Nat64,
 		exchange_rates_count: IDL.Nat64,
 		token_activity_count: IDL.Nat64,
+		agreement_history_count: IDL.Nat64,
 		user_timestamps_count: IDL.Nat64,
 		user_token_count: IDL.Nat64
 	});
@@ -640,6 +678,7 @@ export const idlFactory = ({ IDL }) => {
 			[IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))],
 			['query']
 		),
+		get_user_agreement_history: IDL.Func([], [GetAgreementHistoryResult], ['query']),
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		get_user_transactions: IDL.Func(
 			[GetUserTransactionsRequest],
@@ -648,6 +687,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
+		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(

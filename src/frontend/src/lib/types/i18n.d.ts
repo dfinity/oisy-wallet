@@ -77,7 +77,6 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		changelog: string;
 		documentation: string;
 		support: string;
 		confirm_navigate: string;
@@ -97,7 +96,6 @@ interface I18nNavigation {
 		activity: string;
 		airdrops: string;
 		menu: string;
-		changelog: string;
 		documentation: string;
 		support: string;
 		open_twitter: string;
@@ -280,7 +278,12 @@ interface I18nDapps {
 		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
-		liquidium: { name: string; one_liner: string; description: string };
+		liquidium: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
 	};
 }
 
@@ -359,6 +362,20 @@ interface I18nRewards {
 				default: { title: string; description: string; share_href: string };
 				jackpot: { title: string; description: string; share_href: string };
 				leaderboard: { title: string; description: string; share_href: string };
+				referral: { title: string; description: string; share_href: string };
+			};
+		};
+		sprinkles_s1e6: {
+			title: string;
+			card_title: string;
+			one_liner: string;
+			participate_title: string;
+			description: string;
+			campaign_href: string;
+			welcome: { title: string; subtitle: string; description: string };
+			win: {
+				default: { title: string; description: string; share_href: string };
+				jackpot: { title: string; description: string; share_href: string };
 				referral: { title: string; description: string; share_href: string };
 			};
 		};
@@ -833,6 +850,8 @@ interface I18nSwap {
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
+		near_intents_tos: string;
+		value_difference_error_confirmation: string;
 	};
 	error: {
 		kong_not_available: string;

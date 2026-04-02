@@ -123,7 +123,7 @@ dependencies = [
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
  "ic-ledger-types",
- "ic-signature-verification",
+ "ic-signature-verification 0.3.0",
  "ic-stable-structures",
  "ic-verifiable-credentials",
  "lazy_static",
@@ -1647,6 +1647,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-signature-verification"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0e8f6b8a33244df75bddeef3ef1255552de517785f462a090ba218cf2abd93c"
+dependencies = [
+ "ic-canister-sig-creation",
+ "ic-certification 3.1.0",
+ "ic-verify-bls-signature",
+ "ic_principal",
+ "serde",
+ "serde_bytes",
+ "serde_cbor",
+ "sha2",
+]
+
+[[package]]
 name = "ic-stable-structures"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1675,16 +1691,16 @@ dependencies = [
 
 [[package]]
 name = "ic-verifiable-credentials"
-version = "1.0.2"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d353af0ad18bb2375714cb945089bb4b7391ab17ac694dee5f92ce4e244fddae"
+checksum = "dd211454038a593243972005c3a0f1bd377bfe30a1bb56ec76dfdf61661a2f57"
 dependencies = [
  "base64 0.22.1",
  "candid",
  "ic-canister-sig-creation",
  "ic-cdk",
  "ic-certification 2.6.0",
- "ic-signature-verification",
+ "ic-signature-verification 0.2.0",
  "identity_core",
  "identity_credential",
  "identity_jose",
@@ -3394,7 +3410,6 @@ dependencies = [
  "cfg-if",
  "libc",
  "psm",
- "windows-sys 0.52.0",
  "windows-sys 0.59.0",
 ]
 

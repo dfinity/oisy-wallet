@@ -1,17 +1,23 @@
+mod composite;
 pub(crate) mod provider;
 mod providers;
+mod supplemental;
 
 use std::time::Duration;
 
 use ic_cdk::api::time;
-use ic_cdk_timers::set_timer_interval;
+use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::{
     exchange::{ExchangeData, ExchangeError, ExchangeRate},
     token_id::TokenId,
 };
 
 use crate::{
-    exchange::{provider::ExchangePriceProvider, providers::coingecko::CoinGeckoProvider},
+    exchange::{
+        composite::fetch_all_prices,
+        providers::{coingecko::CoinGeckoProvider, icpswap::IcpSwapProvider},
+        supplemental::SupplementalPriceProvider,
+    },
     read_state,
     state::{mutate_state, with_api_keys},
     types::storable::{Candid, StoredTokenId},
@@ -40,7 +46,18 @@ fn native_token_ids() -> Vec<StoredTokenId> {
 
 /// Starts a recurring timer that refreshes exchange rates for active tokens
 /// every [`PRICE_REFRESH_INTERVAL_SEC`] seconds.
+///
+/// An immediate one-shot refresh runs first so that rates are available right
+/// after canister init / upgrade instead of waiting for the first interval tick.
 pub(crate) fn start_exchange_rate_timer() {
+    set_timer(Duration::ZERO, || {
+        ic_cdk::futures::spawn(async {
+            if let Err(err) = refresh_exchange_rates().await {
+                ic_cdk::println!("Exchange rate initial refresh skipped: {err:?}");
+            }
+        });
+    });
+
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
 
     let _ = set_timer_interval(refresh_interval, || {
@@ -63,20 +80,14 @@ fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
     });
 }
 
-async fn fetch_and_update_prices(
-    provider: &impl ExchangePriceProvider,
-    token_ids: &[StoredTokenId],
-) {
-    match provider.fetch_prices(token_ids).await {
-        Ok(prices) => {
-            for (token_id, exchange_data) in &prices {
-                update_price(token_id, exchange_data);
-            }
-        }
-        Err(err) => {
-            ic_cdk::println!("Failed to fetch prices: {err}");
-        }
-    }
+/// Ordered supplemental sources that run after `CoinGecko` for tokens still missing a valid USD
+/// price.
+///
+/// To add another provider: implement [`SupplementalPriceProvider`] for a new type (any token
+/// variant you support), place it under `exchange/providers/`, and append `Box::new(...)` here in
+/// priority order (first match wins; later providers only see still-missing tokens).
+fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
+    vec![Box::new(IcpSwapProvider::default())]
 }
 
 pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
@@ -106,7 +117,12 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
         return Ok(());
     }
 
-    fetch_and_update_prices(&provider, &tokens_to_fetch).await;
+    let supplementals = supplemental_price_providers();
+    let prices = fetch_all_prices(&provider, &supplementals, &tokens_to_fetch).await;
+
+    for (token_id, exchange_data) in prices {
+        update_price(&token_id, &exchange_data);
+    }
 
     Ok(())
 }

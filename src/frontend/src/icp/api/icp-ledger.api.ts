@@ -1,6 +1,6 @@
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import {
 	AccountIdentifier,
@@ -17,7 +17,7 @@ export const transfer = async ({
 	amount,
 	ledgerCanisterId
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	to: string;
 	amount: bigint;
 	ledgerCanisterId: CanisterIdText;
@@ -39,7 +39,7 @@ export const icrc1Transfer = async ({
 	createdAt,
 	ledgerCanisterId
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	to: IcrcAccount;
 	amount: bigint;
 	createdAt?: bigint;
