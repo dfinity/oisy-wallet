@@ -1,13 +1,12 @@
 use std::{future::Future, pin::Pin};
-use ic_cdk::api::time;
-use ic_cdk::management_canister::HttpHeader;
+
+use ic_cdk::{api::time, management_canister::HttpHeader};
 use serde::Deserialize;
 use serde_json::from_slice;
 use shared::types::{exchange::ExchangeData, token_id::TokenId};
 
 use crate::{
-    exchange::supplemental::SupplementalPriceProvider,
-    types::storable::StoredTokenId,
+    exchange::supplemental::SupplementalPriceProvider, types::storable::StoredTokenId,
     utils::http_outcall,
 };
 
@@ -77,8 +76,14 @@ impl IcpSwapProvider {
         Self { base_url }
     }
 
-    async fn fetch_icrc_token_usd(&self, ledger_text: &str) -> Result<Option<ExchangeData>, String> {
-        let url = format!("{}/info/token/{ledger_text}", self.base_url.trim_end_matches('/'));
+    async fn fetch_icrc_token_usd(
+        &self,
+        ledger_text: &str,
+    ) -> Result<Option<ExchangeData>, String> {
+        let url = format!(
+            "{}/info/token/{ledger_text}",
+            self.base_url.trim_end_matches('/')
+        );
 
         let response = http_outcall::get(
             &url,
@@ -102,7 +107,8 @@ impl SupplementalPriceProvider for IcpSwapProvider {
     fn supplement<'a>(
         &'a self,
         missing: &'a [StoredTokenId],
-    ) -> Pin<Box<dyn Future<Output = Result<Vec<(StoredTokenId, ExchangeData)>, String>> + 'a>> {
+    ) -> Pin<Box<dyn Future<Output = Result<Vec<(StoredTokenId, ExchangeData)>, String>> + 'a>>
+    {
         Box::pin(async move {
             let mut out = Vec::new();
 

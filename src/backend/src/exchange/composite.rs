@@ -4,8 +4,7 @@ use shared::types::exchange::ExchangeData;
 
 use crate::{
     exchange::{
-        provider::ExchangePriceProvider,
-        providers::coingecko::CoinGeckoProvider,
+        provider::ExchangePriceProvider, providers::coingecko::CoinGeckoProvider,
         supplemental::SupplementalPriceProvider,
     },
     types::storable::StoredTokenId,
@@ -18,7 +17,9 @@ pub(crate) fn has_valid_price(data: &ExchangeData) -> bool {
         .unwrap_or(false)
 }
 
-fn merge_valid_primary(primary: Vec<(StoredTokenId, ExchangeData)>) -> BTreeMap<StoredTokenId, ExchangeData> {
+fn merge_valid_primary(
+    primary: Vec<(StoredTokenId, ExchangeData)>,
+) -> BTreeMap<StoredTokenId, ExchangeData> {
     primary
         .into_iter()
         .filter(|(_, d)| has_valid_price(d))
@@ -44,13 +45,10 @@ pub(crate) async fn fetch_all_prices(
     supplementals: &[Box<dyn SupplementalPriceProvider>],
     token_ids: &[StoredTokenId],
 ) -> Vec<(StoredTokenId, ExchangeData)> {
-    let primary_rows = primary
-        .fetch_prices(token_ids)
-        .await
-        .unwrap_or_else(|e| {
-            ic_cdk::println!("Primary exchange provider failed: {e}");
-            Vec::new()
-        });
+    let primary_rows = primary.fetch_prices(token_ids).await.unwrap_or_else(|e| {
+        ic_cdk::println!("Primary exchange provider failed: {e}");
+        Vec::new()
+    });
 
     let mut map = merge_valid_primary(primary_rows);
     let mut missing = still_missing(token_ids, &map);
@@ -86,9 +84,10 @@ pub(crate) async fn fetch_all_prices(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use candid::Principal;
     use shared::types::token_id::TokenId;
+
+    use super::*;
 
     #[test]
     fn has_valid_price_accepts_positive_finite() {

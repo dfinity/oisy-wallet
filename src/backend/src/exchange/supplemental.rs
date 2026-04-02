@@ -8,7 +8,8 @@ use crate::types::storable::StoredTokenId;
 ///
 /// Implementations are responsible for deciding which [`StoredTokenId`] variants they support;
 /// unsupported entries in `missing` are ignored. Callers run providers in order until every
-/// requested token has a price or the chain is exhausted — see [`super::composite::fetch_all_prices`].
+/// requested token has a price or the chain is exhausted — see
+/// [`super::composite::fetch_all_prices`].
 pub(crate) trait SupplementalPriceProvider {
     fn id(&self) -> &'static str;
 

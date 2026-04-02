@@ -1,5 +1,5 @@
-pub(crate) mod provider;
 mod composite;
+pub(crate) mod provider;
 mod providers;
 mod supplemental;
 
@@ -80,11 +80,12 @@ fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
     });
 }
 
-/// Ordered supplemental sources that run after CoinGecko for tokens still missing a valid USD price.
+/// Ordered supplemental sources that run after CoinGecko for tokens still missing a valid USD
+/// price.
 ///
-/// To add another provider: implement [`SupplementalPriceProvider`] for a new type (any token variant
-/// you support), place it under `exchange/providers/`, and append `Box::new(...)` here in priority
-/// order (first match wins; later providers only see still-missing tokens).
+/// To add another provider: implement [`SupplementalPriceProvider`] for a new type (any token
+/// variant you support), place it under `exchange/providers/`, and append `Box::new(...)` here in
+/// priority order (first match wins; later providers only see still-missing tokens).
 fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
     vec![Box::new(IcpSwapProvider::default())]
 }
