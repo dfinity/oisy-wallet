@@ -29,9 +29,11 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import {
 		fetchNearIntentsEvmSwap,
 		fetchVeloraDeltaSwap,
@@ -267,6 +269,27 @@
 			};
 
 			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED) {
+				// To be conservative on the legal side, we only allow the swap if persisting
+				// the provider agreement succeeds. If it fails we abort, since the user must
+				// explicitly accept the ToS before funds move through a third-party provider.
+				try {
+					await acceptProviderAgreement({
+						identity: $authIdentity,
+						currentUserVersion: $userProfileVersion
+					});
+				} catch (err) {
+					toastsError({
+						msg: { text: $i18n.swap.error.cannot_save_provider_agreement },
+						err
+					});
+
+					onBack();
+
+					onStartTriggerAmount();
+
+					return;
+				}
+
 				const params = {
 					...baseParams,
 					destinationToken: $destinationToken as Erc20Token,
