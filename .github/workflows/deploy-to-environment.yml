@@ -30,6 +30,8 @@ on:
         options:
           - frontend
           - backend
+          - signer_frontend
+          - legacy_signer_frontend
       force-backend:
         required: false
         type: boolean
@@ -150,11 +152,19 @@ jobs:
         run: |
           echo "deploy_frontend=false" >> $GITHUB_ENV
           echo "deploy_backend=false" >> $GITHUB_ENV
+          echo "deploy_signer=false" >> $GITHUB_ENV
           if [ "$WORKFLOW_CALL" == "true" ]; then
             echo "NETWORK=$NETWORK_CALL" >> $GITHUB_ENV
             echo "CANISTER=$CANISTER_CALL" >> $GITHUB_ENV
-            echo "deploy_frontend=true" >> $GITHUB_ENV
-            echo "deploy_backend=true" >> $GITHUB_ENV
+            case "$CANISTER_CALL" in
+              signer_frontend|legacy_signer_frontend)
+                echo "deploy_signer=true" >> $GITHUB_ENV
+                ;;
+              *)
+                echo "deploy_frontend=true" >> $GITHUB_ENV
+                echo "deploy_backend=true" >> $GITHUB_ENV
+                ;;
+            esac
           elif [ "${{ github.event_name }}" == "push" ]; then
             if [ "$REF_TYPE" == "branch" ]; then
               echo "NETWORK=staging" >> $GITHUB_ENV
@@ -175,6 +185,9 @@ jobs:
             fi
             if [ "$CANISTER" = "backend" ]; then
               echo "deploy_backend=true" >> $GITHUB_ENV
+            fi
+            if [ "$CANISTER" = "signer_frontend" ] || [ "$CANISTER" = "legacy_signer_frontend" ]; then
+              echo "deploy_signer=true" >> $GITHUB_ENV
             fi
           else
             echo "Error: Unsupported event type."
@@ -203,6 +216,12 @@ jobs:
             echo "deploy_frontend=false" >> $GITHUB_ENV
             echo "Only a backend may be deployed to test_be_* networks"
             exit 1
+          fi
+          if [[ "$CANISTER" = signer_* ]] || [[ "$CANISTER" = legacy_signer_* ]]; then
+            if [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
+              echo "Signer canisters cannot be deployed to test/audit networks."
+              exit 1
+            fi
           fi
         env:
           REF: ${{ github.ref }}
@@ -423,6 +442,7 @@ jobs:
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Pre-build
+        if: env.deploy_signer != 'true'
         run: npm run build
         env:
           VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}
@@ -443,8 +463,8 @@ jobs:
 
       - name: Deploy Frontend to Environment
         run: |
-          if [ "$deploy_frontend" == "true" ] ; then
-            dfx deploy frontend --network "$NETWORK" --no-asset-upgrade
+          if [ "$deploy_frontend" == "true" ] || [ "$deploy_signer" == "true" ] ; then
+            dfx deploy "$CANISTER" --network "$NETWORK" --no-asset-upgrade
           fi
         env:
           VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}
