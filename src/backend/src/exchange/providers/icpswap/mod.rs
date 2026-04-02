@@ -1,17 +1,16 @@
-use std::{future::Future, pin::Pin};
-
 use ic_cdk::{api::time, management_canister::HttpHeader};
 use serde::Deserialize;
 use serde_json::from_slice;
 use shared::types::{exchange::ExchangeData, token_id::TokenId};
 
 use crate::{
-    exchange::supplemental::SupplementalPriceProvider, types::storable::StoredTokenId,
+    exchange::supplemental::{SupplementalPriceProvider, SupplementalPricesFuture},
+    types::storable::StoredTokenId,
     utils::http_outcall,
 };
 
 const DEFAULT_BASE_URL: &str = "https://api.icpswap.com";
-/// ICPSwap token info responses are small JSON objects; keep the cap tight for cycle costs.
+/// `ICPSwap` token info responses are small JSON objects; keep the cap tight for cycle costs.
 const MAX_RESPONSE_BYTES: u64 = 8_192;
 
 #[derive(Debug, Deserialize)]
@@ -107,8 +106,7 @@ impl SupplementalPriceProvider for IcpSwapProvider {
     fn supplement<'a>(
         &'a self,
         missing: &'a [StoredTokenId],
-    ) -> Pin<Box<dyn Future<Output = Result<Vec<(StoredTokenId, ExchangeData)>, String>> + 'a>>
-    {
+    ) -> SupplementalPricesFuture<'a> {
         Box::pin(async move {
             let mut out = Vec::new();
 

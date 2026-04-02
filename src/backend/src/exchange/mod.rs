@@ -80,7 +80,7 @@ fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
     });
 }
 
-/// Ordered supplemental sources that run after CoinGecko for tokens still missing a valid USD
+/// Ordered supplemental sources that run after `CoinGecko` for tokens still missing a valid USD
 /// price.
 ///
 /// To add another provider: implement [`SupplementalPriceProvider`] for a new type (any token
