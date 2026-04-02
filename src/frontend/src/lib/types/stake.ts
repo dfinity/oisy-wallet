@@ -1,6 +1,9 @@
+import type { WizardStep } from '@dfinity/gix-components';
+import type { Component } from 'svelte';
 import type { EarningCardData } from '$lib/types/earning';
-import type { Amount } from '$lib/types/send';
+import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
+import type { Vault } from '$lib/types/vaults';
 
 export enum StakeProvider {
 	HARVEST_AUTOPILOTS = 'harvest_autopilots'
@@ -17,4 +20,27 @@ export interface StakeProviderConfig {
 	logo: string;
 	url: string;
 	card: EarningCardData;
+}
+
+interface StakeWizardBaseProps {
+	amount: OptionAmount;
+	vault: Vault;
+	currentStep?: WizardStep;
+	onClose: () => void;
+	onNext: () => void;
+	onBack: () => void;
+}
+
+export interface StakeWizardComponentProps extends StakeWizardBaseProps {
+	stakeProgressStep: string;
+}
+
+export interface UnstakeWizardComponentProps extends StakeWizardBaseProps {
+	unstakeProgressStep: string;
+}
+
+export interface StakeWizardEntry {
+	matches: (token: Token) => boolean;
+	stakeComponent: Component<StakeWizardComponentProps>;
+	unstakeComponent: Component<UnstakeWizardComponentProps>;
 }
