@@ -9,7 +9,11 @@ import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
 import { SwapProvider } from '$lib/types/swap';
-import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockValidIcCkToken,
+	mockValidIcToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { act, render } from '@testing-library/svelte';
@@ -283,6 +287,92 @@ describe('SwapAmountsContext.svelte', () => {
 
 		expect(fetchMock).toHaveBeenCalled();
 		expect(get(store)?.selectedProvider?.provider).toBe(SwapProvider.KONG_SWAP);
+
+		vi.useRealTimers();
+	});
+
+	it('resets store when source token changes after mount', async () => {
+		vi.useFakeTimers();
+
+		vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue(mockSwapProviders);
+
+		const { rerender } = await act(() =>
+			render(SwapAmountsContext, {
+				props: {
+					amount: '10',
+					sourceToken,
+					destinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
+				},
+				context
+			})
+		);
+
+		await vi.advanceTimersByTimeAsync(350);
+		await tick();
+
+		expect(get(store)?.swaps).toEqual(mockSwapProviders);
+
+		await act(() =>
+			rerender({
+				amount: '10',
+				sourceToken: mockValidIcrcToken,
+				destinationToken,
+				slippageValue: '0.3',
+				children: fakeSnippet,
+				isSwapAmountsLoading: false,
+				isSourceTokenIcrc2: true
+			})
+		);
+		await tick();
+
+		expect(get(store)).toBeNull();
+
+		vi.useRealTimers();
+	});
+
+	it('resets store when destination token changes after mount', async () => {
+		vi.useFakeTimers();
+
+		vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue(mockSwapProviders);
+
+		const { rerender } = await act(() =>
+			render(SwapAmountsContext, {
+				props: {
+					amount: '10',
+					sourceToken,
+					destinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
+				},
+				context
+			})
+		);
+
+		await vi.advanceTimersByTimeAsync(350);
+		await tick();
+
+		expect(get(store)?.swaps).toEqual(mockSwapProviders);
+
+		await act(() =>
+			rerender({
+				amount: '10',
+				sourceToken,
+				destinationToken: mockValidIcrcToken,
+				slippageValue: '0.3',
+				children: fakeSnippet,
+				isSwapAmountsLoading: false,
+				isSourceTokenIcrc2: true
+			})
+		);
+		await tick();
+
+		expect(get(store)).toBeNull();
 
 		vi.useRealTimers();
 	});
