@@ -41,7 +41,7 @@ fn exchange_data_from_icpswap_envelope(
     if !price.is_finite() || price <= 0.0 {
         return None;
     }
-    let price_24h_change_pct = token.price_change_24h.parse().ok();
+    let price_24h_change_pct = token.price_change_24h.parse().ok().filter(|v: &f64| v.is_finite());
     Some(ExchangeData {
         timestamp_ns,
         price: Some(price),
@@ -147,6 +147,15 @@ mod tests {
         let json = br#"{"code":404,"message":"not found","data":null}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
+    }
+
+    #[test]
+    fn parse_icpswap_body_filters_non_finite_price_change() {
+        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.0","priceChange24H":"NaN"}}"#;
+        let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
+        let d = exchange_data_from_icpswap_envelope(parsed, 0).unwrap();
+        assert_eq!(d.price, Some(1.0));
+        assert_eq!(d.price_24h_change_pct, None);
     }
 
     #[test]
