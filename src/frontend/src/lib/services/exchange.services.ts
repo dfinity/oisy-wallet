@@ -4,12 +4,14 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICPSWAP_PROVIDER_ENABLED } from '$env/rest/icpswap.env';
 import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
+import { fetchBatchIcpSwapPrices } from '$lib/rest/icpswap.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -24,6 +26,7 @@ import type { BackendExchangeRate } from '$lib/types/exchange';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import {
 	findMissingLedgerCanisterIds,
+	formatIcpSwapToCoingeckoPrices,
 	formatKongSwapToCoingeckoPrices
 } from '$lib/utils/exchange.utils';
 import { tokenIdKey } from '$lib/utils/token-id.utils';
@@ -42,6 +45,14 @@ const fetchIcrcPricesFromCoingecko = (
 		include_market_cap: true,
 		include_24hr_change: true
 	});
+
+const fetchIcrcPricesFromIcpSwap = async (
+	missingIds: LedgerCanisterIdText[]
+): Promise<CoingeckoSimpleTokenPriceResponse> => {
+	const tokens = await fetchBatchIcpSwapPrices(missingIds);
+
+	return formatIcpSwapToCoingeckoPrices(tokens);
+};
 
 const fetchIcrcPricesFromKongSwap = async (
 	missingIds: LedgerCanisterIdText[]
@@ -152,6 +163,10 @@ export const exchangeRateERC20ToUsd = async ({
 };
 
 const icrcFallbackProviders = [
+	{
+		enabled: ICPSWAP_PROVIDER_ENABLED,
+		fetchPrices: fetchIcrcPricesFromIcpSwap
+	},
 	{
 		enabled: KONGSWAP_PROVIDER_ENABLED,
 		fetchPrices: fetchIcrcPricesFromKongSwap
