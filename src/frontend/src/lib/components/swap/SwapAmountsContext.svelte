@@ -45,19 +45,6 @@
 
 	let timer: NodeJS.Timeout | undefined;
 	let debounceTimer = $state<NodeJS.Timeout | undefined>();
-	let isTokenEffectInitialized = false;
-
-	// Resets the store only after the first run of the token effect.
-	// The guard is needed because {#key currentStep?.name} in SwapModalWizardSteps
-	// remounts this component on every wizard step transition,
-	// and we must preserve the store data (e.g. going to/from the review step).
-	const resetStoreOnTokenChange = () => {
-		if (isTokenEffectInitialized) {
-			store.reset();
-		}
-
-		isTokenEffectInitialized = true;
-	};
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
@@ -150,12 +137,6 @@
 		} else {
 			startTimer();
 		}
-	});
-
-	$effect(() => {
-		[sourceToken, destinationToken];
-
-		untrack(resetStoreOnTokenChange);
 	});
 
 	$effect(() => {
