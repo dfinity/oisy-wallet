@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use candid::{CandidType, Deserialize};
 
 use crate::{
@@ -7,12 +9,37 @@ use crate::{
 
 pub const SHA256_HEX_LENGTH: usize = 64;
 
+/// Which external provider the agreement belongs to.
+///
+/// Add a new variant and redeploy the canister when onboarding a new provider.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub enum ProviderAgreementProvider {
+    NearIntents,
+}
+
+/// The feature/context within a provider that the agreement covers.
+///
+/// A single provider may require separate acknowledgements for different scopes
+/// (e.g., swap, bridge, staking).
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub enum ProviderAgreementScope {
+    Swap,
+}
+
+/// Composite key identifying a specific provider agreement.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct ProviderAgreementType {
+    pub provider: ProviderAgreementProvider,
+    pub scope: ProviderAgreementScope,
+}
+
 /// Identifies which agreement a history entry refers to.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum AgreementType {
     LicenseAgreement,
     TermsOfUse,
     PrivacyPolicy,
+    Provider(ProviderAgreementType),
 }
 
 /// A single audit-trail entry recording that a user accepted (or rejected) a specific agreement
@@ -82,10 +109,16 @@ impl Validate for UserAgreements {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct Agreements {
     pub agreements: UserAgreements,
+    pub provider_agreements: Option<BTreeMap<ProviderAgreementType, UserAgreement>>,
 }
 impl Validate for Agreements {
     fn validate(&self) -> Result<(), candid::Error> {
         self.agreements.validate()?;
+        if let Some(ref provider) = self.provider_agreements {
+            for agreement in provider.values() {
+                agreement.validate()?;
+            }
+        }
         Ok(())
     }
 }
@@ -101,4 +134,11 @@ pub enum UpdateAgreementsError {
 pub struct UpdateUserAgreementsRequest {
     pub current_user_version: Option<Version>,
     pub agreements: UserAgreements,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct UpdateProviderAgreementsRequest {
+    pub current_user_version: Option<Version>,
+    pub provider_agreements: BTreeMap<ProviderAgreementType, UserAgreement>,
 }
