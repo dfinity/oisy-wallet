@@ -643,6 +643,8 @@ describe('exchange.worker', () => {
 						include_24hr_change: true
 					});
 
+					expect(fetchBatchIcpSwapPrices).toHaveBeenCalledExactlyOnceWith(['icrc2']);
+					expect(fetchBatchIcpSwapPrices).toHaveBeenCalledBefore(fetchBatchKongSwapPrices);
 					expect(fetchBatchKongSwapPrices).toHaveBeenCalledExactlyOnceWith(['icrc2']);
 
 					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
