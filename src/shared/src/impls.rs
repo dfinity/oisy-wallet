@@ -892,9 +892,12 @@ impl Validate for ExchangeRate {
 mod tests {
     use std::collections::BTreeMap;
 
-    use super::*;
-    use crate::types::agreement::{
-        ProviderAgreementProvider, ProviderAgreementScope, ProviderAgreementType, UserAgreement,
+    use crate::types::{
+        agreement::{
+            ProviderAgreementProvider, ProviderAgreementScope, ProviderAgreementType,
+            UpdateAgreementsError, UserAgreement,
+        },
+        user_profile::StoredUserProfile,
     };
 
     fn swap_key() -> ProviderAgreementType {
@@ -926,7 +929,11 @@ mod tests {
     }
 
     mod with_provider_agreements {
-        use super::*;
+        use super::{
+            profile_with_provider, swap_key, BTreeMap, ProviderAgreementProvider,
+            ProviderAgreementScope, ProviderAgreementType, StoredUserProfile,
+            UpdateAgreementsError, UserAgreement,
+        };
 
         #[test]
         fn test_version_mismatch_returns_error() {
@@ -1108,8 +1115,9 @@ mod tests {
     }
 
     mod with_agreements {
-        use super::*;
-        use crate::types::agreement::UserAgreements;
+        use crate::types::agreement::{UserAgreement, UserAgreements};
+
+        use super::StoredUserProfile;
 
         #[test]
         fn test_untouched_accepted_agreement_preserves_timestamp() {
