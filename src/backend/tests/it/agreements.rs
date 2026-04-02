@@ -713,15 +713,15 @@ fn test_update_provider_agreements_saves_acceptance() {
         .provider_agreements
         .expect("provider_agreements missing");
 
-    let kong = provider
+    let near_swap = provider
         .get(&ProviderAgreementType {
-                provider: ProviderAgreementProvider::NearIntents,
-                scope: ProviderAgreementScope::Swap,
-            })
-        .expect("NearIntents missing");
+            provider: ProviderAgreementProvider::NearIntents,
+            scope: ProviderAgreementScope::Swap,
+        })
+        .expect("NearIntents Swap missing");
 
-    assert_eq!(kong.accepted, Some(true));
-    assert!(kong.last_accepted_at_ns.is_some());
+    assert_eq!(near_swap.accepted, Some(true));
+    assert!(near_swap.last_accepted_at_ns.is_some());
 }
 
 #[test]
@@ -860,9 +860,9 @@ fn test_provider_agreement_history_recorded() {
     assert_eq!(
         history[0].agreement_type,
         AgreementType::Provider(ProviderAgreementType {
-                provider: ProviderAgreementProvider::NearIntents,
-                scope: ProviderAgreementScope::Swap,
-            })
+            provider: ProviderAgreementProvider::NearIntents,
+            scope: ProviderAgreementScope::Swap,
+        })
     );
     assert!(history[0].accepted);
     assert_eq!(history[0].text_sha256, Some(sha));
@@ -924,13 +924,13 @@ fn test_provider_and_internal_agreements_coexist() {
     let provider = agreements
         .provider_agreements
         .expect("provider_agreements missing");
-    let kong = provider
+    let near_swap = provider
         .get(&ProviderAgreementType {
-                provider: ProviderAgreementProvider::NearIntents,
-                scope: ProviderAgreementScope::Swap,
-            })
-        .expect("NearIntents missing");
-    assert_eq!(kong.accepted, Some(true));
+            provider: ProviderAgreementProvider::NearIntents,
+            scope: ProviderAgreementScope::Swap,
+        })
+        .expect("NearIntents Swap missing");
+    assert_eq!(near_swap.accepted, Some(true));
 
     // History should have both types
     let history = pic_setup
@@ -947,9 +947,9 @@ fn test_provider_and_internal_agreements_coexist() {
     assert_eq!(
         history[1].agreement_type,
         AgreementType::Provider(ProviderAgreementType {
-                provider: ProviderAgreementProvider::NearIntents,
-                scope: ProviderAgreementScope::Swap,
-            })
+            provider: ProviderAgreementProvider::NearIntents,
+            scope: ProviderAgreementScope::Swap,
+        })
     );
 }
 
