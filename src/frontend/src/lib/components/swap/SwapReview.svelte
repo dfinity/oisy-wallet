@@ -26,6 +26,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
 	import { calculateValueDifference } from '$lib/utils/swap.utils';
+	import Hr from "$lib/components/ui/Hr.svelte";
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -112,7 +113,7 @@
 		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 	/>
 
-	<SwapCrossChainInfo hrSpacing="md" />
+	<SwapCrossChainInfo />
 
 	{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
 		<ModalValue>
@@ -140,6 +141,8 @@
 		<SwapProvider {slippageValue} />
 		{@render swapFees()}
 	</div>
+
+	<Hr spacing="md" />
 
 	{#if isValueDifferenceError}
 		<div class="mt-4">
