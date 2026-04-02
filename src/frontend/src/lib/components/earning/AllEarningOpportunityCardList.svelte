@@ -11,7 +11,10 @@
 		{#if provider.type === 'reward'}
 			<RewardsEarningOpportunityCard card={provider.card} />
 		{:else if nonNullish($earningData[provider.id])}
-			<DefaultEarningOpportunityCard cardData={provider.card} cardFields={$earningData[provider.id]} />
+			<DefaultEarningOpportunityCard
+				cardData={provider.card}
+				cardFields={$earningData[provider.id]}
+			/>
 		{/if}
 	{/each}
 </div>
