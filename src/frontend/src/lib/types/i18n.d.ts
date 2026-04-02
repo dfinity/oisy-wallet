@@ -77,7 +77,6 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		changelog: string;
 		documentation: string;
 		support: string;
 		confirm_navigate: string;
@@ -97,7 +96,6 @@ interface I18nNavigation {
 		activity: string;
 		airdrops: string;
 		menu: string;
-		changelog: string;
 		documentation: string;
 		support: string;
 		open_twitter: string;
@@ -841,6 +839,7 @@ interface I18nSwap {
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
+		near_intents_tos: string;
 		value_difference_error_confirmation: string;
 	};
 	error: {

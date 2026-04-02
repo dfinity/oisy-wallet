@@ -80,7 +80,6 @@
 			"source_code_on_github": "الرمز المصدري على GitHub",
 			"view_on_explorer": "عرض على المستكشف",
 			"source_code": "الرمز المصدري",
-			"changelog": "سجل التغييرات",
 			"documentation": "الوثائق",
 			"support": "الدعم",
 			"confirm_navigate": "هل أنت متأكد أنك تريد الانتقال بعيدًا؟",
@@ -100,7 +99,6 @@
 			"activity": "افتح عرض النشاط",
 			"airdrops": "افتح عرض المكافآت",
 			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
-			"changelog": "افتح سجل تغييرات $oisy_name على GitHub لمراجعة آخر التحديثات",
 			"documentation": "افتح وثائق $oisy_name",
 			"support": "افتح قسم الدعم في وثائق $oisy_name",
 			"open_twitter": "افتح حساب DFINITY X/Twitter",
@@ -1104,6 +1102,7 @@
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

@@ -80,7 +80,6 @@
 			"source_code_on_github": "Mã nguồn trên GitHub",
 			"view_on_explorer": "Xem trên trình khám phá",
 			"source_code": "Mã nguồn",
-			"changelog": "Nhật ký thay đổi",
 			"documentation": "Tài liệu",
 			"support": "Hỗ trợ",
 			"confirm_navigate": "Bạn có chắc chắn muốn rời khỏi trang không?",
@@ -100,7 +99,6 @@
 			"activity": "Mở chế độ xem hoạt động",
 			"airdrops": "Mở chế độ xem Phần thưởng",
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
-			"changelog": "Mở nhật ký thay đổi của $oisy_name trên GitHub để xem các bản cập nhật mới nhất",
 			"documentation": "Mở tài liệu $oisy_name",
 			"support": "Mở phần Hỗ trợ trong tài liệu $oisy_name",
 			"open_twitter": "Mở X/Twitter của DFINITY",
@@ -1104,6 +1102,7 @@
 			"swap_fees": "Phí giao dịch",
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

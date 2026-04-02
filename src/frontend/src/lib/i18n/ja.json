@@ -80,7 +80,6 @@
 			"source_code_on_github": "GitHub上のソースコード",
 			"view_on_explorer": "エクスプローラーで確認",
 			"source_code": "ソースコード",
-			"changelog": "変更履歴",
 			"documentation": "ドキュメント",
 			"support": "サポート",
 			"confirm_navigate": "ページを離れても良いですか？",
@@ -100,7 +99,6 @@
 			"activity": "トランザクション履歴を表示",
 			"airdrops": "エアドロップ報酬を表示",
 			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
-			"changelog": "GitHubで $oisy_name の更新履歴を見る",
 			"documentation": "$oisy_nameドキュメントを開く",
 			"support": "$oisy_nameドキュメントのサポートページを開く",
 			"open_twitter": "DFINITY X/Twitterを開く",
@@ -1104,6 +1102,7 @@
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

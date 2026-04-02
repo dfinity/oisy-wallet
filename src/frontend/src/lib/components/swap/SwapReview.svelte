@@ -2,7 +2,9 @@
 	import { Checkbox, Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet, untrack } from 'svelte';
+	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
+	import SwapNearIntentsTos from '$lib/components/swap/SwapNearIntentsTos.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
@@ -22,9 +24,13 @@
 		SWAP_VALUE_DIFFERENCE_ERROR_VALUE
 	} from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { SwapErrorCodes } from '$lib/types/swap';
+	import { SwapErrorCodes, SwapProvider as SwapProviderEnum } from '$lib/types/swap';
 	import { calculateValueDifference } from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -49,6 +55,8 @@
 		isSwapAmountsLoading = false
 	}: Props = $props();
 
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
 	const {
 		sourceToken,
 		destinationToken,
@@ -56,6 +64,11 @@
 		destinationTokenExchangeRate,
 		failedSwapError
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	let isNearIntentsProvider = $derived(
+		NEAR_INTENTS_SWAP_ENABLED &&
+			$swapAmountsStore?.selectedProvider?.provider === SwapProviderEnum.NEAR_INTENTS
+	);
 
 	const handleBack = () => {
 		failedSwapError.set(undefined);
@@ -140,6 +153,12 @@
 	</div>
 
 	<SwapCrossChainInfo hrSpacing="md" />
+
+	{#if isNearIntentsProvider}
+		<div class="mt-4">
+			<SwapNearIntentsTos />
+		</div>
+	{/if}
 
 	{#if isValueDifferenceError}
 		<div class="mt-4">

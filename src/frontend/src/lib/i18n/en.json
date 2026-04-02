@@ -80,7 +80,6 @@
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
-			"changelog": "Changelog",
 			"documentation": "Documentation",
 			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
@@ -100,7 +99,6 @@
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
 			"menu": "Your wallet address, settings, sign-out and external links",
-			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
@@ -1104,6 +1102,7 @@
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
+			"near_intents_tos": "By clicking the \"Swap now\" button, you agree to the <a href=\"$link\" target=\"_blank\" rel=\"external noopener noreferrer\" class=\"underline\">Terms of Service</a> of 1Click Swap API. If you do not agree with those terms, do not use this swap provider.",
 			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed."
 		},
 		"error": {
