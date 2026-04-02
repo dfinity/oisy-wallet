@@ -12,7 +12,7 @@ export const acceptProviderAgreement = async ({
 	identity: NullishIdentity;
 	currentUserVersion: CanisterApiFunctionParams<SaveProviderAgreements>['currentUserVersion'];
 }): Promise<void> => {
-	assertNonNullish(identity, 'Identity is required to save a provider agreement.');
+	assertNonNullish(identity);
 
 	await updateProviderAgreements({
 		identity,
