@@ -11,7 +11,6 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import {
@@ -141,8 +140,6 @@
 		<SwapProvider {slippageValue} />
 		{@render swapFees()}
 	</div>
-
-	<Hr spacing="md" />
 
 	{#if isValueDifferenceError}
 		<div class="mt-4">
