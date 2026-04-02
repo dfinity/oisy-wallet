@@ -1113,6 +1113,7 @@
 			"swap_fees": "Comisiones de Intercambio",
 			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

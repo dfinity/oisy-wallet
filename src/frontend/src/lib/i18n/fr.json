@@ -1113,6 +1113,7 @@
 			"swap_fees": "Frais d'échange",
 			"cross_chain_networks_info": "Vous déplacez des tokens du réseau <b>$sourceNetwork</b> vers le réseau <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

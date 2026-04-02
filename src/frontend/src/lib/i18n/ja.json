@@ -1113,6 +1113,7 @@
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

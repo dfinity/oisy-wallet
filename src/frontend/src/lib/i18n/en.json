@@ -1113,6 +1113,7 @@
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
+			"near_intents_tos": "By clicking the \"Swap now\" button, you agree to the <a href=\"$link\" target=\"_blank\" rel=\"external noopener noreferrer\" class=\"underline\">Terms of Service</a> of 1Click Swap API. If you do not agree with those terms, do not use this swap provider.",
 			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed."
 		},
 		"error": {

@@ -1113,6 +1113,7 @@
 			"swap_fees": "交易费",
 			"cross_chain_networks_info": "跨链网络信息",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

@@ -1113,6 +1113,7 @@
 			"swap_fees": "Swap Gebühren",
 			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

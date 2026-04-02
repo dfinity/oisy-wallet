@@ -45,6 +45,9 @@ export const NEAR_INTENTS_POLL_MAX_ATTEMPTS = 120;
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
 
+export const NEAR_INTENTS_TOS_LINK =
+	'https://docs.near-intents.org/security-compliance/terms-of-service';
+
 export const SWAP_MODE = 'all';
 export const SWAP_SIDE = 'SELL';
 
