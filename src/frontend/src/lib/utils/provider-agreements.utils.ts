@@ -1,8 +1,8 @@
 import type {
+	UserAgreement as BackendUserAgreement,
 	ProviderAgreementProvider,
 	ProviderAgreementScope,
-	ProviderAgreementType,
-	UserAgreement as BackendUserAgreement
+	ProviderAgreementType
 } from '$declarations/backend/backend.did';
 import type {
 	ProviderAgreementId,
@@ -13,7 +13,9 @@ import type {
 import { mapBackendUserAgreement, mapUserAgreement } from '$lib/utils/agreements.utils';
 import { assertNever } from '@dfinity/utils';
 
-export const mapProviderKey = (provider: ProviderAgreementProvider): ProviderAgreementProviderId => {
+export const mapProviderKey = (
+	provider: ProviderAgreementProvider
+): ProviderAgreementProviderId => {
 	if ('NearIntents' in provider) {
 		return 'NearIntents';
 	}
