@@ -7,14 +7,10 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-
-
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 </script>
 
 {#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
-
-
 	<MessageBox styleClass="sm:text-sm">
 		<Html
 			text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {

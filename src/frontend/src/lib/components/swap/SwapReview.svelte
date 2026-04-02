@@ -11,6 +11,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import {
@@ -26,7 +27,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
 	import { calculateValueDifference } from '$lib/utils/swap.utils';
-	import Hr from "$lib/components/ui/Hr.svelte";
 
 	interface Props {
 		swapAmount: OptionAmount;
