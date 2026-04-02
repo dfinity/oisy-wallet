@@ -77,7 +77,6 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		changelog: string;
 		documentation: string;
 		support: string;
 		confirm_navigate: string;
@@ -97,7 +96,6 @@ interface I18nNavigation {
 		activity: string;
 		airdrops: string;
 		menu: string;
-		changelog: string;
 		documentation: string;
 		support: string;
 		open_twitter: string;
