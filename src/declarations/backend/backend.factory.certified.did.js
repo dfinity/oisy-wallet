@@ -278,7 +278,16 @@ export const idlFactory = ({ IDL }) => {
 		privacy_policy: UserAgreement,
 		terms_of_use: UserAgreement
 	});
-	const Agreements = IDL.Record({ agreements: UserAgreements });
+	const ProviderAgreementProvider = IDL.Variant({ NearIntents: IDL.Null });
+	const ProviderAgreementScope = IDL.Variant({ Swap: IDL.Null });
+	const ProviderAgreementType = IDL.Record({
+		provider: ProviderAgreementProvider,
+		scope: ProviderAgreementScope
+	});
+	const Agreements = IDL.Record({
+		agreements: UserAgreements,
+		provider_agreements: IDL.Opt(IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement)))
+	});
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -416,7 +425,8 @@ export const idlFactory = ({ IDL }) => {
 	const AgreementType = IDL.Variant({
 		TermsOfUse: IDL.Null,
 		PrivacyPolicy: IDL.Null,
-		LicenseAgreement: IDL.Null
+		LicenseAgreement: IDL.Null,
+		Provider: ProviderAgreementType
 	});
 	const AgreementHistoryEntry = IDL.Record({
 		timestamp_ns: IDL.Nat64,
