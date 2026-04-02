@@ -80,7 +80,6 @@
 			"source_code_on_github": "GitHub पर स्रोत कोड",
 			"view_on_explorer": "एक्सप्लोरर पर देखें",
 			"source_code": "स्रोत कोड",
-			"changelog": "परिवर्तन लॉग",
 			"documentation": "दस्तावेज़",
 			"support": "सहायता",
 			"confirm_navigate": "क्या आप वाकई बाहर जाना चाहते हैं?",
@@ -100,7 +99,6 @@
 			"activity": "गतिविधि दृश्य खोलें",
 			"airdrops": "पुरस्कार दृश्य खोलें",
 			"menu": "आपका वॉलेट पता, सेटिंग्स, साइन-आउट और बाहरी लिंक",
-			"changelog": "$oisy_name के नवीनतम अपडेट की समीक्षा करने के लिए GitHub पर चेंजलॉग खोलें",
 			"documentation": "$oisy_name दस्तावेज़ खोलें",
 			"support": "$oisy_name दस्तावेज़ों का समर्थन अनुभाग खोलें",
 			"open_twitter": "DFINITY X/Twitter फ़ीड खोलें",
@@ -1115,6 +1113,7 @@
 			"swap_fees": "स्वैप शुल्क",
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

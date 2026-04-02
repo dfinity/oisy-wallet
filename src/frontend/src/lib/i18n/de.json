@@ -80,7 +80,6 @@
 			"source_code_on_github": "Quellcode auf GitHub",
 			"view_on_explorer": "Im Explorer ansehen",
 			"source_code": "Quellcode",
-			"changelog": "Änderungsprotokoll",
 			"documentation": "Dokumentation",
 			"support": "Support",
 			"confirm_navigate": "Möchtest du wirklich die Seite verlassen?",
@@ -100,7 +99,6 @@
 			"activity": "Aktivitätsübersicht öffnen",
 			"airdrops": "Belohnungsübersicht öffnen",
 			"menu": "Deine Wallet-Adresse, Einstellungen, Abmelden und externe Links",
-			"changelog": "Änderungsprotokoll von $oisy_name auf GitHub öffnen, um die neuesten Updates zu sehen",
 			"documentation": "Dokumentation von $oisy_name öffnen",
 			"support": "Support-Bereich der $oisy_name-Dokumentation öffnen",
 			"open_twitter": "X/Twitter-Feed von DFINITY X öffnen",
@@ -1115,6 +1113,7 @@
 			"swap_fees": "Swap Gebühren",
 			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

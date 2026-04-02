@@ -80,7 +80,6 @@
 			"source_code_on_github": "Zdrojový kód na GitHubu",
 			"view_on_explorer": "Zobrazit v průzkumníku",
 			"source_code": "Zdrojový kód",
-			"changelog": "Protokol změn",
 			"documentation": "Dokumentace",
 			"support": "Podpora",
 			"confirm_navigate": "Jste si jisti, že chcete odejít?",
@@ -100,7 +99,6 @@
 			"activity": "Otevřít zobrazení aktivity",
 			"airdrops": "Otevřít zobrazení odměn",
 			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
-			"changelog": "Otevřete protokol změn $oisy_name na GitHubu a zkontrolujte nejnovější aktualizace",
 			"documentation": "Otevřít dokumentaci $oisy_name",
 			"support": "Otevřít sekci podpory v dokumentaci $oisy_name",
 			"open_twitter": "Otevřít X/Twitter kanál DFINITY",
@@ -1115,6 +1113,7 @@
 			"swap_fees": "Poplatky za swap",
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
