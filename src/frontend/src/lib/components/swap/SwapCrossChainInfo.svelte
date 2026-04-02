@@ -11,12 +11,14 @@
 </script>
 
 {#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
-	<MessageBox styleClass="sm:text-sm">
-		<Html
-			text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
-				$sourceNetwork: $sourceToken.network.name,
-				$destinationNetwork: $destinationToken.network.name
-			})}
-		/>
-	</MessageBox>
+	<div class="mt-6">
+		<MessageBox styleClass="sm:text-sm">
+			<Html
+				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
+					$sourceNetwork: $sourceToken.network.name,
+					$destinationNetwork: $destinationToken.network.name
+				})}
+			/>
+		</MessageBox>
+	</div>
 {/if}
