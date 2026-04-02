@@ -1001,11 +1001,7 @@ mod tests {
             let result = profile
                 .with_provider_agreements(profile.version, 2_000, &request)
                 .unwrap();
-            let provider_agreements = result
-                .agreements
-                .unwrap()
-                .provider_agreements
-                .unwrap();
+            let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
             let agreement = provider_agreements.get(&swap_key()).unwrap();
 
             assert_eq!(agreement.accepted, Some(true));
@@ -1026,11 +1022,7 @@ mod tests {
             let result = profile
                 .with_provider_agreements(profile.version, 2_000, &request)
                 .unwrap();
-            let provider_agreements = result
-                .agreements
-                .unwrap()
-                .provider_agreements
-                .unwrap();
+            let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
             let agreement = provider_agreements.get(&swap_key()).unwrap();
 
             assert_eq!(agreement.accepted, Some(false));
@@ -1071,11 +1063,7 @@ mod tests {
             let result = profile
                 .with_provider_agreements(profile.version, 5_000, &request)
                 .unwrap();
-            let provider_agreements = result
-                .agreements
-                .unwrap()
-                .provider_agreements
-                .unwrap();
+            let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
             let agreement = provider_agreements.get(&existing_key).unwrap();
 
             // The key was updated (same key, new text_sha256), so
@@ -1115,9 +1103,8 @@ mod tests {
     }
 
     mod with_agreements {
-        use crate::types::agreement::{UserAgreement, UserAgreements};
-
         use super::StoredUserProfile;
+        use crate::types::agreement::{UserAgreement, UserAgreements};
 
         #[test]
         fn test_untouched_accepted_agreement_preserves_timestamp() {
