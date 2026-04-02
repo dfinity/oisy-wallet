@@ -23,7 +23,6 @@ import {
 } from '$lib/api/backend.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
-import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import type {
 	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
@@ -51,6 +50,8 @@ import {
 import type { QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
+
+const POUH_CREDENTIAL_TYPE = 'ProofOfUniqueness';
 
 describe('backend.api', () => {
 	const backendCanisterMock = mock<BackendCanister>();
