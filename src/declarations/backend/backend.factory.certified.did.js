@@ -619,6 +619,10 @@ export const idlFactory = ({ IDL }) => {
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
+	const UpdateProviderAgreementsRequest = IDL.Record({
+		current_user_version: IDL.Opt(IDL.Nat64),
+		provider_agreements: IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement))
+	});
 	const UpdateUserAgreementsRequest = IDL.Record({
 		agreements: UserAgreements,
 		current_user_version: IDL.Opt(IDL.Nat64)
@@ -696,6 +700,11 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
+		update_provider_agreements: IDL.Func(
+			[UpdateProviderAgreementsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		),
 		update_user_agreements: IDL.Func(
 			[UpdateUserAgreementsRequest],
 			[SetUserShowTestnetsResult],

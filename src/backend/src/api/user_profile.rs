@@ -4,14 +4,17 @@ use ic_cdk::{
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use shared::types::{
-    agreement::{GetAgreementHistoryError, UpdateUserAgreementsRequest},
+    agreement::{
+        GetAgreementHistoryError, UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest,
+    },
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
     experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
     network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
     result_types::{
         AddUserCredentialResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
         GetUserProfileResult, SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
-        UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+        UpdateProviderAgreementsResult, UpdateUserAgreementsResult,
+        UpdateUserNetworkSettingsResult,
     },
     user_profile::{
         AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
@@ -191,6 +194,43 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
             stored_principal,
             current_user_version,
             &agreements,
+            &mut user_profile_model,
+            &mut s.agreement_history,
+        )
+    })
+    .into()
+}
+
+/// Updates the user's provider agreements, merging with any existing ones, and records an
+/// audit-trail entry for every provider agreement that was actually changed.
+///
+/// Only entries where `accepted` is `Some(_)` are applied. If `Some(true)`,
+/// `last_accepted_at_ns` is set to `now`.
+///
+/// # Returns
+/// - Returns `Ok(())` if the provider agreements were saved successfully, or if they were already
+///   set to the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn update_provider_agreements(
+    request: UpdateProviderAgreementsRequest,
+) -> UpdateProviderAgreementsResult {
+    let UpdateProviderAgreementsRequest {
+        current_user_version,
+        provider_agreements,
+    } = request;
+    let stored_principal = StoredPrincipal(msg_caller());
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        service::update_provider_agreements(
+            stored_principal,
+            current_user_version,
+            &provider_agreements,
             &mut user_profile_model,
             &mut s.agreement_history,
         )

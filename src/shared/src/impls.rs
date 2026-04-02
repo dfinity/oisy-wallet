@@ -466,7 +466,7 @@ impl StoredUserProfile {
         &self,
         profile_version: Option<Version>,
         now: Timestamp,
-        provider_agreements: &BTreeMap<ProviderAgreementType, UserAgreement>,
+        provider_agreements: BTreeMap<ProviderAgreementType, UserAgreement>,
     ) -> Result<StoredUserProfile, UpdateAgreementsError> {
         if profile_version != self.version {
             return Err(UpdateAgreementsError::VersionMismatch);
