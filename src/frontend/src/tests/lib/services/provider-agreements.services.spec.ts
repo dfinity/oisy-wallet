@@ -1,3 +1,4 @@
+import { NEAR_INTENTS_TOS_SHA256 } from '$env/rest/near-intents.env';
 import { updateProviderAgreements } from '$lib/api/backend.api';
 import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
@@ -60,7 +61,7 @@ describe('provider-agreements.services', () => {
 						accepted: true,
 						lastAcceptedTimestamp: mockedNow,
 						lastUpdatedTimestamp: mockedNow / NANO_SECONDS_IN_MILLISECOND,
-						textSha256: 'v1'
+						textSha256: NEAR_INTENTS_TOS_SHA256
 					}
 				},
 				currentUserVersion: mockUserVersion
