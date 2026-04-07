@@ -7,10 +7,10 @@ import { MORPHOAUTOPILOT_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/t
 import type { RequiredEvmErc4626Token } from '$evm/types/erc4626';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
-const BASE_ERC4626_TOKENS_MAINNET: RequiredEvmErc4626Token[] = [
-	BAUTOPILOT_EURC_TOKEN,
+const BASE_ERC4626_TOKENS_MAINNET: RequiredEvmErc4626Token[] = [	
 	BAUTOPILOT_USDC_TOKEN,
 	MORPHOAUTOPILOT_USDC_TOKEN,
+	BAUTOPILOT_EURC_TOKEN,
 	BAUTOPILOT_WETH_TOKEN,
 	BAUTOPILOT_CBBTC_TOKEN
 ];
