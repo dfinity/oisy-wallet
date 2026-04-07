@@ -28,7 +28,12 @@ import {
 	mockUserExperimentalFeaturesMap
 } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
-import { mockDefinedUserAgreements, mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
+import {
+	mockDefinedUserAgreements,
+	mockProviderAgreements,
+	mockUserNetworksMap,
+	mockUserProviderAgreements
+} from '$tests/mocks/user-profile.mock';
 import {
 	mockCandidGetUserTransactionsResponse,
 	mockGetUserTransactionsResponse,
@@ -1206,6 +1211,66 @@ describe('backend.canister', () => {
 
 			const res = updateUserAgreements({
 				agreements: mockUserAgreements
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('updateProviderAgreements', () => {
+		it('should update provider agreements with mapped backend tuples', async () => {
+			const response = { Ok: null };
+
+			service.update_provider_agreements.mockResolvedValue(response);
+
+			const { updateProviderAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateProviderAgreements({
+				providerAgreements: mockUserProviderAgreements
+			});
+
+			expect(service.update_provider_agreements).toHaveBeenCalledWith({
+				provider_agreements: mockProviderAgreements,
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should update provider agreements with version', async () => {
+			const response = { Ok: null };
+
+			service.update_provider_agreements.mockResolvedValue(response);
+
+			const { updateProviderAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateProviderAgreements({
+				providerAgreements: mockUserProviderAgreements,
+				currentUserVersion: 1n
+			});
+
+			expect(service.update_provider_agreements).toHaveBeenCalledWith({
+				provider_agreements: mockProviderAgreements,
+				current_user_version: [1n]
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if update_provider_agreements throws', async () => {
+			service.update_provider_agreements.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateProviderAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateProviderAgreements({
+				providerAgreements: mockUserProviderAgreements
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
