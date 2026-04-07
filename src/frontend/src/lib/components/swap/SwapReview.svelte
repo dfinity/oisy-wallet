@@ -155,8 +155,6 @@
 		{@render swapFees()}
 	</div>
 
-	<SwapCrossChainInfo hrSpacing="md" />
-
 	{#if isNearIntentsProvider && !$hasAcknowledgedNearIntentsSwap}
 		<div class="mt-4">
 			<SwapNearIntentsTos />
