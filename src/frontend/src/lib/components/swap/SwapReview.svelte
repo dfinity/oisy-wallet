@@ -126,6 +126,8 @@
 		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 	/>
 
+	<SwapCrossChainInfo />
+
 	{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
 		<ModalValue>
 			{#snippet label()}
