@@ -1,3 +1,4 @@
+import { NEAR_INTENTS_TOS_SHA256 } from '$env/rest/near-intents.env';
 import { updateProviderAgreements } from '$lib/api/backend.api';
 import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { SaveProviderAgreements } from '$lib/types/api';
@@ -22,8 +23,7 @@ export const acceptProviderAgreement = async ({
 				accepted: true,
 				lastAcceptedTimestamp: nowInBigIntNanoSeconds(),
 				lastUpdatedTimestamp: nowInBigIntNanoSeconds() / NANO_SECONDS_IN_MILLISECOND,
-				// TODO: add sha of the terms
-				textSha256: 'v1'
+				textSha256: NEAR_INTENTS_TOS_SHA256
 			}
 		},
 		currentUserVersion
