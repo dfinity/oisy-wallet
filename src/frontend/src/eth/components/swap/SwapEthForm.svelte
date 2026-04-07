@@ -7,7 +7,6 @@
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
-	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -154,8 +153,6 @@
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken) && nonNullish($feeTokenIdStore)}
 			<Hr spacing="md" />
-
-			<SwapCrossChainInfo />
 
 			<div class="flex flex-col gap-3">
 				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
