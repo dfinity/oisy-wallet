@@ -4,6 +4,7 @@
 	import { slide } from 'svelte/transition';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
@@ -254,6 +255,8 @@
 				{/snippet}
 			</TokenInputNetworkWrapper>
 		</div>
+
+		<SwapCrossChainInfo />
 
 		<SwapSlippage
 			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)
