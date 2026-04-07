@@ -2,6 +2,7 @@ import { updateProviderAgreements } from '$lib/api/backend.api';
 import type { SaveProviderAgreements } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { NullishIdentity } from '$lib/types/identity';
+import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { emit } from '$lib/utils/events.utils';
 import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 
@@ -20,8 +21,9 @@ export const acceptProviderAgreement = async ({
 			'NearIntents-Swap': {
 				accepted: true,
 				lastAcceptedTimestamp: nowInBigIntNanoSeconds(),
-				lastUpdatedTimestamp: nowInBigIntNanoSeconds(),
-				textSha256: undefined
+				lastUpdatedTimestamp: nowInBigIntNanoSeconds() / NANO_SECONDS_IN_MILLISECOND,
+				// TODO: add sha of the terms
+			textSha256: 'v1'
 			}
 		},
 		currentUserVersion

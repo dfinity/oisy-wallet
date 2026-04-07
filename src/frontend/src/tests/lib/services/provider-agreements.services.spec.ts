@@ -2,6 +2,7 @@ import { updateProviderAgreements } from '$lib/api/backend.api';
 import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 import * as eventsUtils from '$lib/utils/events.utils';
 import { emit } from '$lib/utils/events.utils';
+import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { nowInBigIntNanoSeconds } from '@dfinity/utils';
 
@@ -58,8 +59,8 @@ describe('provider-agreements.services', () => {
 					'NearIntents-Swap': {
 						accepted: true,
 						lastAcceptedTimestamp: mockedNow,
-						lastUpdatedTimestamp: mockedNow,
-						textSha256: undefined
+						lastUpdatedTimestamp: mockedNow / NANO_SECONDS_IN_MILLISECOND,
+						textSha256: 'v1'
 					}
 				},
 				currentUserVersion: mockUserVersion
