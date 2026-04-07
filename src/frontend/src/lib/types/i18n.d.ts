@@ -126,12 +126,6 @@ interface I18nAuth {
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
-		invalid_pouh_credential: string;
-		error_validating_pouh_credential_oisy: string;
-		error_validating_pouh_credential: string;
-		error_requesting_pouh_credential: string;
-		missing_pouh_issuer_origin: string;
-		no_pouh_credential: string;
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
 	};
@@ -493,11 +487,6 @@ interface I18nSettings {
 		active_networks_description: string;
 		enable_network: string;
 		disable_network: string;
-		credentials_title: string;
-		pouh_credential: string;
-		pouh_credential_description: string;
-		present_pouh_credential: string;
-		pouh_credential_verified: string;
 		appearance: string;
 		appearance_light: string;
 		appearance_dark: string;
