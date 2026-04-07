@@ -23,6 +23,7 @@
 		OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK,
 		SWAP_VALUE_DIFFERENCE_ERROR_VALUE
 	} from '$lib/constants/swap.constants';
+	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -154,7 +155,7 @@
 		{@render swapFees()}
 	</div>
 
-	{#if isNearIntentsProvider}
+	{#if isNearIntentsProvider && !$hasAcknowledgedNearIntentsSwap}
 		<div class="mt-4">
 			<SwapNearIntentsTos />
 		</div>
