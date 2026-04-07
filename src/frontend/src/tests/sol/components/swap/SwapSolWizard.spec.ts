@@ -32,6 +32,12 @@ vi.mock('$lib/services/swap.services', () => ({
 	fetchNearIntentsSolSwap: (...args: unknown[]) => mockFetchNearIntentsSolSwap(...args)
 }));
 
+const mockAcceptProviderAgreement = vi.fn();
+
+vi.mock('$lib/services/provider-agreements.services', () => ({
+	acceptProviderAgreement: (...args: unknown[]) => mockAcceptProviderAgreement(...args)
+}));
+
 vi.mock('$lib/utils/parse.utils', () => ({
 	parseToken: vi.fn().mockReturnValue(ZERO)
 }));
@@ -333,6 +339,102 @@ describe('SwapSolWizard', () => {
 			expect(analytics.trackEvent).toHaveBeenCalledWith(
 				expect.objectContaining({
 					name: TRACK_COUNT_SWAP_ERROR
+				})
+			);
+		});
+	});
+
+	describe('provider agreement on swap', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			vi.spyOn(addrDerived, 'solAddressMainnet', 'get').mockReturnValue(readable(mockSolAddress));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+			vi.spyOn(swapServices, 'fetchNearIntentsSolSwap').mockResolvedValue(undefined);
+			mockAcceptProviderAgreement.mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const createExecutionContext = () => {
+			const executionSwapAmountsStore = initSwapAmountsStore();
+			executionSwapAmountsStore.setSwaps({
+				swaps: nearIntentsSwapProviders,
+				amountForSwap: 1,
+				selectedProvider: nearIntentsSwapProviders[0]
+			});
+
+			const ctx = new Map();
+
+			ctx.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable(mockSourceToken),
+				destinationToken: readable(mockDestToken),
+				failedSwapError: writable(undefined),
+				sourceTokenExchangeRate: readable(10),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				destinationTokenExchangeRate: readable(20),
+				isSourceTokenIcrc2: readable(false),
+				isSourceTokenPermitSupported: readable(undefined),
+				setSourceToken: () => {},
+				setDestinationToken: () => {},
+				setIsTokenPermitSupported: () => {},
+				switchTokens: () => {}
+			});
+
+			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: executionSwapAmountsStore });
+
+			return ctx;
+		};
+
+		const renderExecution = () => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+			const onStartTriggerAmount = vi.fn();
+
+			const result = render(SwapSolWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount,
+					onStopTriggerAmount: vi.fn()
+				},
+				context: createExecutionContext()
+			});
+
+			return { ...result, onClose, onBack, onStartTriggerAmount };
+		};
+
+		it('calls acceptProviderAgreement before swap', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockAcceptProviderAgreement).toHaveBeenCalledOnce();
+			expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledOnce();
+		});
+
+		it('aborts swap and calls onBack when acceptProviderAgreement fails', async () => {
+			mockAcceptProviderAgreement.mockRejectedValueOnce(new Error('Agreement save failed'));
+
+			const { getByText, onBack, onStartTriggerAmount } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(swapServices.fetchNearIntentsSolSwap).not.toHaveBeenCalled();
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({
+					msg: { text: en.swap.error.cannot_save_provider_agreement }
 				})
 			);
 		});

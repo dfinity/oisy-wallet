@@ -870,6 +870,7 @@ interface I18nSwap {
 		swap_sucess_withdraw_failed: string;
 		swap_sucess_manually_withdraw_success: string;
 		swap_completed_close_failed: string;
+		cannot_save_provider_agreement: string;
 	};
 }
 

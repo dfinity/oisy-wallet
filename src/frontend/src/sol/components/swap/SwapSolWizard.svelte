@@ -11,9 +11,12 @@
 	} from '$lib/constants/analytics.constants';
 	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { userProfileVersion } from '$lib/derived/user-profile.derived';
+	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import { fetchNearIntentsSolSwap } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -24,6 +27,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 	import type { OptionAmount } from '$lib/types/send';
+	import { SwapProvider } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import SwapSolForm from '$sol/components/swap/SwapSolForm.svelte';
@@ -124,6 +128,31 @@
 
 		try {
 			failedSwapError.set(undefined);
+
+			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS) {
+				if (!$hasAcknowledgedNearIntentsSwap) {
+					// To be conservative on the legal side, we only allow the swap if persisting
+					// the provider agreement succeeds. If it fails we abort, since the user must
+					// explicitly accept the ToS before funds move through a third-party provider.
+					try {
+						await acceptProviderAgreement({
+							identity: $authIdentity,
+							currentUserVersion: $userProfileVersion
+						});
+					} catch (err) {
+						toastsError({
+							msg: { text: $i18n.swap.error.cannot_save_provider_agreement },
+							err
+						});
+
+						onBack();
+
+						onStartTriggerAmount();
+
+						return;
+					}
+				}
+			}
 
 			await fetchNearIntentsSolSwap({
 				identity: $authIdentity,
