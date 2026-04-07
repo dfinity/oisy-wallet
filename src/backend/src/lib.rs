@@ -10,7 +10,7 @@ use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
     types::{
-        agreement::UpdateUserAgreementsRequest,
+        agreement::{UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest},
         api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
@@ -30,8 +30,8 @@ use shared::{
             DeleteContactResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
             GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
             SaveUserTransactionsResult, SetUserShowTestnetsResult, UpdateContactResult,
-            UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
-            UpdateUserNetworkSettingsResult,
+            UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
+            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
