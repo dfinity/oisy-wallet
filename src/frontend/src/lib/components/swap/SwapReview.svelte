@@ -155,7 +155,6 @@
 		{@render swapFees()}
 	</div>
 
-
 	{#if isNearIntentsProvider && !$hasAcknowledgedNearIntentsSwap}
 		<div class="mt-4">
 			<SwapNearIntentsTos />
