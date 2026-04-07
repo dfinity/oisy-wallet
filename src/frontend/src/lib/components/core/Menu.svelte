@@ -17,8 +17,11 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
+	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -228,8 +231,16 @@
 	{#if $authSignedIn}
 		<Hr />
 
-		<div class="flex max-w-80 flex-col pt-3">
+		<div class="my-4 flex max-w-80 flex-col">
 			<LockOrSignOut onHidePopover={hidePopover} />
 		</div>
 	{/if}
+
+	<Hr />
+
+	<div class="mt-4 flex justify-center gap-2 text-xs text-nowrap text-tertiary">
+		<TermsOfUseLink />
+		<PrivacyPolicyLink />
+		<LicenseAgreementLink />
+	</div>
 </Popover>
