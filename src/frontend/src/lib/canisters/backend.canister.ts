@@ -34,6 +34,7 @@ import type {
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
 	GetUserTransactionsResponse,
+	SaveProviderAgreements,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
@@ -44,6 +45,7 @@ import type {
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
+import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
 import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
@@ -340,6 +342,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await update_user_agreements({
 			agreements: mapBackendUserAgreements(agreements),
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateProviderAgreements = async ({
+		providerAgreements,
+		currentUserVersion
+	}: SaveProviderAgreements): Promise<void> => {
+		const { update_provider_agreements } = this.caller({ certified: true });
+
+		await update_provider_agreements({
+			provider_agreements: mapBackendProviderAgreements(providerAgreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};

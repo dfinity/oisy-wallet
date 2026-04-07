@@ -32,7 +32,9 @@ export const mapUserAgreement = (backendUserAgreement: BackendUserAgreement): Ag
 	textSha256: fromNullable(backendUserAgreement.text_sha256)
 });
 
-const mapBackendUserAgreement = (userAgreement: AgreementData | undefined): BackendUserAgreement =>
+export const mapBackendUserAgreement = (
+	userAgreement: AgreementData | undefined
+): BackendUserAgreement =>
 	nonNullish(userAgreement)
 		? {
 				accepted: toNullable(userAgreement.accepted),
