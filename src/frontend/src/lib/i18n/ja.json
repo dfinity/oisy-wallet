@@ -593,9 +593,9 @@
 						"description": "報酬がウォレットに届きました。<br>さらに獲得するために、招待してアクティブを維持することをお忘れなく",
 						"share_href": ""
 					},
-					"jackpot": {
-						"title": "週間ボーナスドロップを獲得しました",
-						"description": "週間ボーナスドロップの1つを獲得しました。<br>さらに獲得するためにアクティブを維持し、招待を続けましょう",
+					"jackpotX": {
+						"title": "",
+						"description": "",
 						"share_href": ""
 					},
 					"referral": {

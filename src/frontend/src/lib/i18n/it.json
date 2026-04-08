@@ -593,9 +593,9 @@
 						"description": "Le tue ricompense sono appena arrivate nel tuo portafoglio.<br>Non dimenticare di invitare e di restare attivo/a per vincere di più",
 						"share_href": ""
 					},
-					"jackpot": {
-						"title": "Hai vinto il drop bonus settimanale",
-						"description": "Hai appena vinto uno dei nostri drop bonus settimanali.<br>Rimani attivo/a e continua a invitare per vincere di più",
+					"jackpotX": {
+						"title": "",
+						"description": "",
 						"share_href": ""
 					},
 					"referral": {

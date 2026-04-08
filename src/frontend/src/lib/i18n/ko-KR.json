@@ -593,9 +593,9 @@
 						"description": "보상이 지갑에 도착했습니다.<br>더 많이 획득하려면 추천하고 활발하게 활동하는 것을 잊지 마세요",
 						"share_href": ""
 					},
-					"jackpot": {
-						"title": "주간 보너스 드롭에 당첨되셨습니다",
-						"description": "주간 보너스 드롭 중 하나를 획득하셨습니다.<br>더 많이 획득하려면 활발하게 활동하고 계속 추천하세요",
+					"jackpotX": {
+						"title": "",
+						"description": "",
 						"share_href": ""
 					},
 					"referral": {

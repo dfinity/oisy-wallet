@@ -593,9 +593,9 @@
 						"description": "您的奖励刚刚到达您的钱包。<br>别忘了推荐他人并保持活跃，以赢取更多奖励",
 						"share_href": ""
 					},
-					"jackpot": {
-						"title": "您赢得了每周奖励投放",
-						"description": "您刚刚获得了我们每周奖励投放之一。<br>保持活跃并继续推荐，以赢取更多奖励",
+					"jackpotX": {
+						"title": "",
+						"description": "",
 						"share_href": ""
 					},
 					"referral": {

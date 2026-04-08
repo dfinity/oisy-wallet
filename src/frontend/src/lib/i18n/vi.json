@@ -593,9 +593,9 @@
 						"description": "Phần thưởng của bạn vừa được chuyển vào ví.<br>Đừng quên giới thiệu và duy trì hoạt động để giành thêm phần thưởng",
 						"share_href": ""
 					},
-					"jackpot": {
-						"title": "Bạn đã thắng phần thưởng drop hàng tuần",
-						"description": "Bạn vừa nhận được một trong các gói thưởng hàng tuần của chúng tôi.<br>Duy trì hoạt động và tiếp tục giới thiệu để giành thêm",
+					"jackpotX": {
+						"title": "",
+						"description": "",
 						"share_href": ""
 					},
 					"referral": {

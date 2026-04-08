@@ -593,9 +593,9 @@
 						"description": "Tvoje odměny právě dorazily do tvé peněženky.<br>Nezapomeň doporučovat a zůstat aktivní/a, abys vyhrál/a více",
 						"share_href": ""
 					},
-					"jackpot": {
-						"title": "Vyhrál/a jsi týdenní bonusový drop",
-						"description": "Právě jsi získal/a jeden z našich týdenních bonusových dropů.<br>Zůstaň aktivní a doporučuj dál, abys vyhrál/a více",
+					"jackpotX": {
+						"title": "",
+						"description": "",
 						"share_href": ""
 					},
 					"referral": {

@@ -593,9 +593,9 @@
 						"description": "Deine Belohnungen sind gerade in deiner Wallet gelandet.<br>Vergiss nicht, zu empfehlen und aktiv zu bleiben, um mehr zu gewinnen",
 						"share_href": ""
 					},
-					"jackpot": {
-						"title": "Du hast den wöchentlichen Bonus-Drop gewonnen",
-						"description": "Du hast gerade einen unserer wöchentlichen Bonus-Drops erhalten.<br>Bleib aktiv und empfiehl weiter, um mehr zu gewinnen",
+					"jackpotX": {
+						"title": "",
+						"description": "",
 						"share_href": ""
 					},
 					"referral": {

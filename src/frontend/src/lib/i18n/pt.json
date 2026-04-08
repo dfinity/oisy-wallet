@@ -593,9 +593,9 @@
 						"description": "Suas recompensas acabaram de chegar à sua carteira.<br>Não se esqueça de indicar e permanecer ativo(a) para ganhar mais",
 						"share_href": ""
 					},
-					"jackpot": {
-						"title": "Você ganhou o drop de bônus semanal",
-						"description": "Você acabou de ganhar um dos nossos drops de bônus semanais.<br>Fique ativo(a) e continue indicando para ganhar mais",
+					"jackpotX": {
+						"title": "",
+						"description": "",
 						"share_href": ""
 					},
 					"referral": {

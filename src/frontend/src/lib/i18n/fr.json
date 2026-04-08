@@ -593,9 +593,9 @@
 						"description": "Vos récompenses viennent d'arriver dans votre portefeuille.<br>N'oubliez pas de parrainer et de rester actif(ve) pour en gagner davantage",
 						"share_href": ""
 					},
-					"jackpot": {
-						"title": "Vous avez remporté le drop bonus hebdomadaire",
-						"description": "Vous venez de gagner l'un de nos drops bonus hebdomadaires.<br>Restez actif(ve) et continuez à parrainer pour en gagner davantage",
+					"jackpotX": {
+						"title": "",
+						"description": "",
 						"share_href": ""
 					},
 					"referral": {
