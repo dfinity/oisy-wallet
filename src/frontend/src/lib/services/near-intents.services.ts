@@ -37,12 +37,15 @@ export const clearNearIntentsTokensCache = (): void => {
 	cachedTokens = undefined;
 };
 
+const EVM_BLOCKCHAINS = new Set(['eth', 'arb', 'base', 'bsc', 'pol']);
+
 /**
  * Returns the set of supported token identifiers for NEAR Intents,
  * filtered to only include tokens on blockchains matching the given network IDs.
  *
- * Identifiers are lowercased contract addresses for contract-based tokens,
- * or lowercased symbols for native tokens (those without a contract address).
+ * EVM contract addresses are lowercased (hex is case-insensitive).
+ * Solana addresses are kept as-is (Base58 is case-sensitive).
+ * Native tokens (no contract address) use lowercased symbols.
  */
 export const nearIntentsSupportedTokens = async ({
 	networkIds
@@ -52,18 +55,30 @@ export const nearIntentsSupportedTokens = async ({
 	const tokens = await loadNearIntentsTokens();
 
 	const blockchains = new Set(
-		networkIds
-			.map((id) => NEAR_INTENTS_BLOCKCHAIN_MAP[id])
-			.filter((b): b is string => nonNullish(b))
+		networkIds.reduce<string[]>((acc, id) => {
+			const b = NEAR_INTENTS_BLOCKCHAIN_MAP[id];
+
+			if (nonNullish(b)) {
+				acc.push(b);
+			}
+
+			return acc;
+		}, [])
 	);
 
-	return new Set(
-		tokens
-			.filter(({ blockchain }) => blockchains.has(blockchain))
-			.map(({ contractAddress, symbol }) =>
-				nonNullish(contractAddress) ? contractAddress.toLowerCase() : symbol.toLowerCase()
-			)
-	);
+	return tokens.reduce<Set<string>>((acc, { blockchain, contractAddress, symbol }) => {
+		if (!blockchains.has(blockchain)) {
+			return acc;
+		}
+
+		if (nonNullish(contractAddress)) {
+			acc.add(EVM_BLOCKCHAINS.has(blockchain) ? contractAddress.toLowerCase() : contractAddress);
+		} else {
+			acc.add(symbol.toLowerCase());
+		}
+
+		return acc;
+	}, new Set());
 };
 
 export const fetchNearIntentsSwapQuote = async ({
