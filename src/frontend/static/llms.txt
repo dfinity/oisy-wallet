@@ -57,7 +57,7 @@ Key facts:
 - Architecture: Fully on-chain smart contracts (canisters) on the Internet Computer
 - Open source: https://github.com/dfinity/oisy-wallet
 - Built by: DFINITY Foundation (Zurich, Switzerland)
-- Current version: v1.9.13 (March 2026)
+- Current version: v2.0.0 (April 2026)
 - OISY does NOT have a token
 - OISY does NOT have a Telegram channel
 - Official support: Discord or support@oisy.com
