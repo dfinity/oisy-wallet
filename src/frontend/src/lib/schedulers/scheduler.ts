@@ -62,6 +62,8 @@ export class SchedulerTimer {
 				);
 			}
 		}
+
+		return undefined;
 	}
 
 	async start<T>({
@@ -110,6 +112,8 @@ export class SchedulerTimer {
 		scheduleNext();
 	}
 
+	// trigger() is called for on-demand user-initiated actions, not during cold start,
+	// so the identity is expected to be available without retries.
 	async trigger<T>(params: SchedulerParams<T>) {
 		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
