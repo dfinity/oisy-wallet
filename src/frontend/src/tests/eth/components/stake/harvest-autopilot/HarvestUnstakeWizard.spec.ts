@@ -252,10 +252,7 @@ describe('HarvestUnstakeWizard', () => {
 
 		const buildMaxAmountContext = (token = mockVaultToken) => {
 			const context = new Map([]);
-			context.set(
-				SEND_CONTEXT_KEY,
-				initSendContext({ token, customSendBalance: maxBalance })
-			);
+			context.set(SEND_CONTEXT_KEY, initSendContext({ token, customSendBalance: maxBalance }));
 			return context;
 		};
 
@@ -267,9 +264,7 @@ describe('HarvestUnstakeWizard', () => {
 			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
 			vi.spyOn(erc4626Services, 'redeemErc4626').mockResolvedValue(undefined);
 			vi.spyOn(erc4626Services, 'withdrawErc4626').mockResolvedValue(undefined);
-			toggleSpy = vi
-				.spyOn(erc4626Services, 'toggleErc4626Token')
-				.mockResolvedValue(undefined);
+			toggleSpy = vi.spyOn(erc4626Services, 'toggleErc4626Token').mockResolvedValue(undefined);
 
 			feeState = writable({
 				gas: 100n,
