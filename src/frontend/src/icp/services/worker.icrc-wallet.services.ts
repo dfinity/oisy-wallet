@@ -108,8 +108,12 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	protected override stopTimer = () => {
-		this.postMessage({
-			msg: 'stopIcrcWalletTimer'
+		this.postMessage<PostMessage<PostMessageDataRequestIcrc>>({
+			msg: 'stopIcrcWalletTimer',
+			data: {
+				ledgerCanisterId: this.ledgerCanisterId,
+				env: this.env
+			}
 		});
 	};
 

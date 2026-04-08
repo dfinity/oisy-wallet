@@ -10,7 +10,7 @@ import {
 } from '$icp/utils/dip20-transactions.utils';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequestDip20 } from '$lib/types/post-message';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 // TODO: add query for transactions - for now we mock with empty transactions
 interface GetTransactions {
@@ -83,29 +83,47 @@ export const initDip20WalletScheduler = (
 ): IcWalletScheduler<PostMessageDataRequestDip20> =>
 	initDip20WalletBalanceAndTransactionsScheduler();
 
-let scheduler: IcWalletScheduler<PostMessageDataRequestDip20> | undefined;
+const schedulers = new Map<string, IcWalletScheduler<PostMessageDataRequestDip20>>();
 
 export const onDip20WalletMessage = async ({
 	data: dataMsg
 }: MessageEvent<PostMessage<PostMessageDataRequestDip20>>) => {
 	const { msg, data } = dataMsg;
 
-	switch (msg) {
-		case 'startDip20WalletTimer':
-		case 'stopDip20WalletTimer':
-			scheduler?.stop();
+	const schedulerKey = nonNullish(data) && 'canisterId' in data ? data.canisterId : undefined;
+
+	if (isNullish(schedulerKey)) {
+		return;
 	}
 
 	switch (msg) {
 		case 'startDip20WalletTimer': {
-			scheduler = initDip20WalletScheduler(data);
+			schedulers.get(schedulerKey)?.stop();
+
+			const scheduler = initDip20WalletScheduler(data);
+
+			schedulers.set(schedulerKey, scheduler);
+
 			await scheduler.start(data);
+
+			break;
+		}
+		case 'stopDip20WalletTimer': {
+			schedulers.get(schedulerKey)?.stop();
+
+			schedulers.delete(schedulerKey);
+
 			break;
 		}
 		case 'triggerDip20WalletTimer': {
+			let scheduler = schedulers.get(schedulerKey);
+
 			if (isNullish(scheduler)) {
 				scheduler = initDip20WalletScheduler(data);
+
+				schedulers.set(schedulerKey, scheduler);
 			}
+
 			await scheduler.trigger(data);
 		}
 	}

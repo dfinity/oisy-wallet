@@ -162,29 +162,48 @@ export const initIcrcWalletScheduler = (
 		: initIcrcWalletBalanceScheduler();
 };
 
-let scheduler: IcWalletScheduler<PostMessageDataRequestIcrc> | undefined;
+const schedulers = new Map<string, IcWalletScheduler<PostMessageDataRequestIcrc>>();
 
 export const onIcrcWalletMessage = async ({
 	data: dataMsg
 }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
 
-	switch (msg) {
-		case 'startIcrcWalletTimer':
-		case 'stopIcrcWalletTimer':
-			scheduler?.stop();
+	const schedulerKey =
+		nonNullish(data) && 'ledgerCanisterId' in data ? data.ledgerCanisterId : undefined;
+
+	if (isNullish(schedulerKey)) {
+		return;
 	}
 
 	switch (msg) {
 		case 'startIcrcWalletTimer': {
-			scheduler = initIcrcWalletScheduler(data);
+			schedulers.get(schedulerKey)?.stop();
+
+			const scheduler = initIcrcWalletScheduler(data);
+
+			schedulers.set(schedulerKey, scheduler);
+
 			await scheduler.start(data);
+
+			break;
+		}
+		case 'stopIcrcWalletTimer': {
+			schedulers.get(schedulerKey)?.stop();
+
+			schedulers.delete(schedulerKey);
+
 			break;
 		}
 		case 'triggerIcrcWalletTimer': {
+			let scheduler = schedulers.get(schedulerKey);
+
 			if (isNullish(scheduler)) {
 				scheduler = initIcrcWalletScheduler(data);
+
+				schedulers.set(schedulerKey, scheduler);
 			}
+
 			await scheduler.trigger(data);
 		}
 	}
