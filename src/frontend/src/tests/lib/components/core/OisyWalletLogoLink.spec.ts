@@ -23,6 +23,7 @@ describe('OisyWalletLogoLink', () => {
 		const { getByTestId } = render(OisyWalletLogoLink);
 
 		tokenListStore.set({ filter: 'bitcoin' });
+
 		expect(get(tokenListStore).filter).toBe('bitcoin');
 
 		await fireEvent.click(getByTestId(NAVIGATION_ITEM_HOMEPAGE));
