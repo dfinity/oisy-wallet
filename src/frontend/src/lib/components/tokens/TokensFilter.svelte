@@ -24,7 +24,8 @@
 	// Persist the filter when switching between asset tabs (Tokens, NFTs, Earning) or returning from transactions.
 	// Reset it when navigating from any other page (e.g. Settings, Activity).
 	afterNavigate(({ from }) => {
-		const previousRoute = `${from?.route?.id}/`;
+		const previousRoute = from?.route?.id ?? null;
+
 		if (
 			!isTokensPath(previousRoute) &&
 			!isNftsPath(previousRoute) &&
