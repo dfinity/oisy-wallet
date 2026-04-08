@@ -382,8 +382,16 @@ describe('icp-swap.services', () => {
 
 		it('should return unique token addresses from all pools', async () => {
 			const mockPools: PoolData[] = [
-				{ ...mockPool, token0: { address: 'canister-a', standard: 'icrc' }, token1: { address: 'canister-b', standard: 'icrc' } },
-				{ ...mockPool, token0: { address: 'canister-b', standard: 'icrc' }, token1: { address: 'canister-c', standard: 'icrc' } }
+				{
+					...mockPool,
+					token0: { address: 'canister-a', standard: 'icrc' },
+					token1: { address: 'canister-b', standard: 'icrc' }
+				},
+				{
+					...mockPool,
+					token0: { address: 'canister-b', standard: 'icrc' },
+					token1: { address: 'canister-c', standard: 'icrc' }
+				}
 			];
 
 			vi.spyOn(factoryApi, 'getAllPools').mockResolvedValue(mockPools);
