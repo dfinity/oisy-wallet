@@ -32,6 +32,8 @@
 
 	let visible = $state(false);
 
+	let overflowableContentWidth = $state(0);
+
 	let button: HTMLButtonElement | undefined = $state();
 	let inputElement: HTMLInputElement | undefined = $state();
 
@@ -83,7 +85,7 @@
 	{/if}
 
 	{#if nonNullish(overflowableContent)}
-		<div class="flex pr-12">
+		<div class="flex pr-12" bind:clientWidth={overflowableContentWidth}>
 			{@render overflowableContent()}
 		</div>
 	{/if}
@@ -94,6 +96,8 @@
 				class:md:w-[270px]={nonNullish(overflowableContent)}
 				class:w-[270px]={isNullish(overflowableContent)}
 				class:w-full={nonNullish(overflowableContent)}
+				class:overflowable-input={nonNullish(overflowableContent)}
+				style:--overflowable-w="{overflowableContentWidth}px"
 				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
 				out:fade
 			>
@@ -143,3 +147,11 @@
 		</ButtonIcon>
 	</div>
 </div>
+
+<style>
+	@media (min-width: 768px) {
+		.overflowable-input {
+			max-width: calc(100% - var(--overflowable-w, 0px) + 2rem);
+		}
+	}
+</style>
