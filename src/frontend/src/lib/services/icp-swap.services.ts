@@ -1,7 +1,8 @@
-import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
+import { getAllPools, getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import { getQuote } from '$lib/api/icp-swap-pool.api';
 import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
 import type { ICPSwapAmountReply, ICPSwapQuoteParams } from '$lib/types/api';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export const icpSwapAmounts = async ({
 	identity,
@@ -29,4 +30,14 @@ export const icpSwapAmounts = async ({
 	});
 
 	return { receiveAmount: quote };
+};
+
+export const icpSwapSupportedTokens = async ({
+	identity
+}: {
+	identity: Identity;
+}): Promise<Set<string>> => {
+	const pools = await getAllPools({ identity });
+
+	return new Set(pools.flatMap(({ token0, token1 }) => [token0.address, token1.address]));
 };

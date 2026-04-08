@@ -41,4 +41,22 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 
 		throw mapIcpSwapFactoryError(result.err);
 	};
+
+	/**
+	 * Fetches all pools from the factory.
+	 * Read-only (uncertified query call).
+	 *
+	 * @returns Array of all pool data.
+	 * @throws CanisterInternalError if fetching pools fails.
+	 */
+	getPools = async (): Promise<PoolData[]> => {
+		const { getPools } = this.caller({ certified: false });
+		const result = await getPools();
+
+		if ('ok' in result) {
+			return result.ok;
+		}
+
+		throw mapIcpSwapFactoryError(result.err);
+	};
 }
