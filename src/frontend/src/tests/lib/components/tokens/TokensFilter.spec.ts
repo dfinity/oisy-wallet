@@ -39,17 +39,6 @@ const simulateNavigationFrom = (routeId: string | null) => {
 	});
 };
 
-// SvelteKit route IDs don't include trailing slashes.
-// The component adds one via `${from?.route?.id}/`.
-const TOKENS_ROUTE_ID = `${ROUTE_ID_GROUP_APP}`;
-const NFTS_ROUTE_ID = `${ROUTE_ID_GROUP_APP}/nfts`;
-const EARNING_ROUTE_ID = `${ROUTE_ID_GROUP_APP}/earning`;
-const TRANSACTIONS_ROUTE_ID = `${ROUTE_ID_GROUP_APP}/transactions`;
-const WALLET_CONNECT_ROUTE_ID = `${ROUTE_ID_GROUP_APP}/wc`;
-const SETTINGS_ROUTE_ID = `${ROUTE_ID_GROUP_APP}/settings`;
-const ACTIVITY_ROUTE_ID = `${ROUTE_ID_GROUP_APP}/activity`;
-const EXPLORE_ROUTE_ID = `${ROUTE_ID_GROUP_APP}/explore`;
-
 describe('TokensFilter', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -63,86 +52,36 @@ describe('TokensFilter', () => {
 		expect(getByTestId(`${TOKEN_LIST_FILTER}-open-btn`)).toBeInTheDocument();
 	});
 
+	// SvelteKit route IDs don't include trailing slashes (e.g. `/(app)`, `/(app)/nfts`).
+	// The is*Path helpers normalize them internally.
 	describe('filter persistence across asset tabs', () => {
-		it('should preserve filter when navigating from Tokens tab', () => {
+		it.each([
+			{ label: 'Tokens tab', routeId: `${ROUTE_ID_GROUP_APP}` },
+			{ label: 'NFTs tab', routeId: `${ROUTE_ID_GROUP_APP}/nfts` },
+			{ label: 'Earning tab', routeId: `${ROUTE_ID_GROUP_APP}/earning` },
+			{ label: 'Transactions page', routeId: `${ROUTE_ID_GROUP_APP}/transactions` },
+			{ label: 'WalletConnect page', routeId: `${ROUTE_ID_GROUP_APP}/wc` }
+		])('should preserve filter when navigating from $label', ({ routeId }) => {
 			render(TokensFilter);
 
 			tokenListStore.set({ filter: 'bitcoin' });
-			simulateNavigationFrom(TOKENS_ROUTE_ID);
+			simulateNavigationFrom(routeId);
 
 			expect(get(tokenListStore).filter).toBe('bitcoin');
-		});
-
-		it('should preserve filter when navigating from NFTs tab', () => {
-			render(TokensFilter);
-
-			tokenListStore.set({ filter: 'punk' });
-			simulateNavigationFrom(NFTS_ROUTE_ID);
-
-			expect(get(tokenListStore).filter).toBe('punk');
-		});
-
-		it('should preserve filter when navigating from Earning tab', () => {
-			render(TokensFilter);
-
-			tokenListStore.set({ filter: 'vault' });
-			simulateNavigationFrom(EARNING_ROUTE_ID);
-
-			expect(get(tokenListStore).filter).toBe('vault');
-		});
-
-		it('should preserve filter when navigating from Transactions page', () => {
-			render(TokensFilter);
-
-			tokenListStore.set({ filter: 'eth' });
-			simulateNavigationFrom(TRANSACTIONS_ROUTE_ID);
-
-			expect(get(tokenListStore).filter).toBe('eth');
-		});
-
-		it('should preserve filter when navigating from WalletConnect page', () => {
-			render(TokensFilter);
-
-			tokenListStore.set({ filter: 'test' });
-			simulateNavigationFrom(WALLET_CONNECT_ROUTE_ID);
-
-			expect(get(tokenListStore).filter).toBe('test');
 		});
 	});
 
 	describe('filter reset from unrelated pages', () => {
-		it('should reset filter when navigating from Settings', () => {
+		it.each([
+			{ label: 'Settings', routeId: `${ROUTE_ID_GROUP_APP}/settings` },
+			{ label: 'Activity', routeId: `${ROUTE_ID_GROUP_APP}/activity` },
+			{ label: 'Explore', routeId: `${ROUTE_ID_GROUP_APP}/explore` },
+			{ label: 'null (fresh load)', routeId: null }
+		])('should reset filter when navigating from $label', ({ routeId }) => {
 			render(TokensFilter);
 
 			tokenListStore.set({ filter: 'bitcoin' });
-			simulateNavigationFrom(SETTINGS_ROUTE_ID);
-
-			expect(get(tokenListStore).filter).toBe('');
-		});
-
-		it('should reset filter when navigating from Activity', () => {
-			render(TokensFilter);
-
-			tokenListStore.set({ filter: 'bitcoin' });
-			simulateNavigationFrom(ACTIVITY_ROUTE_ID);
-
-			expect(get(tokenListStore).filter).toBe('');
-		});
-
-		it('should reset filter when navigating from Explore', () => {
-			render(TokensFilter);
-
-			tokenListStore.set({ filter: 'bitcoin' });
-			simulateNavigationFrom(EXPLORE_ROUTE_ID);
-
-			expect(get(tokenListStore).filter).toBe('');
-		});
-
-		it('should reset filter when previous route is null', () => {
-			render(TokensFilter);
-
-			tokenListStore.set({ filter: 'bitcoin' });
-			simulateNavigationFrom(null);
+			simulateNavigationFrom(routeId);
 
 			expect(get(tokenListStore).filter).toBe('');
 		});
