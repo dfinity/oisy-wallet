@@ -7,7 +7,7 @@
 	import HarvestStakeForm from '$eth/components/stake/harvest-autopilot/HarvestStakeForm.svelte';
 	import HarvestStakeReview from '$eth/components/stake/harvest-autopilot/HarvestStakeReview.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { depositErc4626 } from '$eth/services/erc4626.services';
+	import { depositErc4626, toggleErc4626Token } from '$eth/services/erc4626.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		type EthFeeContext as FeeContextType,
@@ -198,6 +198,18 @@
 					result_duration_in_seconds_rounded: `${Math.round(durationInSeconds)}`
 				}
 			});
+
+			try {
+				if (!vault.token.enabled) {
+					await toggleErc4626Token({
+						token: vault.token,
+						identity: $authIdentity,
+						enabled: true
+					});
+				}
+			} catch {
+				// if enabling failed, we just proceed with the modal closing
+			}
 
 			stakeProgressStep = ProgressStepsStake.DONE;
 
