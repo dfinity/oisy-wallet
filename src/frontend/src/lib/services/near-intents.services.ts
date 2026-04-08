@@ -1,5 +1,6 @@
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import {
+	NEAR_INTENTS_BLOCKCHAIN_MAP,
 	NEAR_INTENTS_POLL_INTERVAL_MS,
 	NEAR_INTENTS_POLL_MAX_ATTEMPTS,
 	NEAR_INTENTS_QUOTE_DEADLINE_MS
@@ -11,6 +12,7 @@ import {
 	submitNearIntentsDeposit
 } from '$lib/rest/near-intents.rest';
 import { NEAR_INTENTS_TERMINAL_STATUSES, type NearIntentsToken } from '$lib/types/near-intents';
+import type { NetworkId } from '$lib/types/network';
 import type { NearIntentsQuoteParams, SwapMappedResult } from '$lib/types/swap';
 import {
 	buildNearIntentsQuoteRequest,
@@ -33,6 +35,35 @@ export const loadNearIntentsTokens = async (): Promise<NearIntentsToken[]> => {
 
 export const clearNearIntentsTokensCache = (): void => {
 	cachedTokens = undefined;
+};
+
+/**
+ * Returns the set of supported token identifiers for NEAR Intents,
+ * filtered to only include tokens on blockchains matching the given network IDs.
+ *
+ * Identifiers are lowercased contract addresses for contract-based tokens,
+ * or lowercased symbols for native tokens (those without a contract address).
+ */
+export const nearIntentsSupportedTokens = async ({
+	networkIds
+}: {
+	networkIds: NetworkId[];
+}): Promise<Set<string>> => {
+	const tokens = await loadNearIntentsTokens();
+
+	const blockchains = new Set(
+		networkIds
+			.map((id) => NEAR_INTENTS_BLOCKCHAIN_MAP[id])
+			.filter((b): b is string => nonNullish(b))
+	);
+
+	return new Set(
+		tokens
+			.filter(({ blockchain }) => blockchains.has(blockchain))
+			.map(({ contractAddress, symbol }) =>
+				nonNullish(contractAddress) ? contractAddress.toLowerCase() : symbol.toLowerCase()
+			)
+	);
 };
 
 export const fetchNearIntentsSwapQuote = async ({

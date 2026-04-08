@@ -1,14 +1,18 @@
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as nearIntentsApi from '$lib/rest/near-intents.rest';
 import {
 	clearNearIntentsTokensCache,
 	fetchNearIntentsSwapQuote,
 	loadNearIntentsTokens,
+	nearIntentsSupportedTokens,
 	pollNearIntentsStatus,
 	submitNearIntentsDepositTx
 } from '$lib/services/near-intents.services';
+import type { NearIntentsToken } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
 import { mapNearIntentsQuoteResult } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
@@ -410,6 +414,105 @@ describe('near-intents.services', () => {
 				depositAddress: '0xDeposit',
 				depositMemo: 'test-memo'
 			});
+		});
+	});
+
+	describe('nearIntentsSupportedTokens', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+			clearNearIntentsTokensCache();
+		});
+
+		it('should return contract addresses for EVM tokens when filtering by Ethereum network', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [ETHEREUM_NETWORK_ID] });
+
+			expect(result).toEqual(
+				new Set([
+					'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+					'eth'
+				])
+			);
+		});
+
+		it('should return contract addresses and symbols across multiple EVM networks', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+
+			const result = await nearIntentsSupportedTokens({
+				networkIds: [ETHEREUM_NETWORK_ID, ARBITRUM_MAINNET_NETWORK_ID]
+			});
+
+			expect(result).toEqual(
+				new Set([
+					'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+					'eth',
+					'0xaf88d065e77c8cc2239327c5edb3a432268e5831'
+				])
+			);
+		});
+
+		it('should return Solana token addresses when filtering by Solana network', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [SOLANA_MAINNET_NETWORK_ID] });
+
+			expect(result).toEqual(
+				new Set(['sol', 'epjfwdd5aufqssqem2qn1xzybapc8g4weggkzwytdt1v'])
+			);
+		});
+
+		it('should return empty set when no tokens match the given network', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [parseNetworkId('unknown-network')] });
+
+			expect(result).toEqual(new Set());
+		});
+
+		it('should return empty set when token list is empty', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([]);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [ETHEREUM_NETWORK_ID] });
+
+			expect(result).toEqual(new Set());
+		});
+
+		it('should use lowercase symbol for native tokens without contractAddress', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [ETHEREUM_NETWORK_ID] });
+
+			expect(result.has('eth')).toBe(true);
+			expect(result.has('ETH')).toBe(false);
+		});
+
+		it('should lowercase mixed-case EVM contract addresses', async () => {
+			const mixedCaseToken: NearIntentsToken = {
+				assetId: 'nep141:eth-0xA0b86991C6218B36C1D19D4a2E9eB0cE3606eB48.omft.near',
+				decimals: 6,
+				blockchain: 'eth',
+				symbol: 'USDC',
+				price: 1.0,
+				priceUpdatedAt: '2026-03-16T00:00:00.000Z',
+				contractAddress: '0xA0b86991C6218B36C1D19D4a2E9eB0cE3606eB48'
+			};
+
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([mixedCaseToken]);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [ETHEREUM_NETWORK_ID] });
+
+			expect(result.has('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')).toBe(true);
+			expect(result.has('0xA0b86991C6218B36C1D19D4a2E9eB0cE3606eB48')).toBe(false);
+		});
+
+		it('should lowercase mixed-case Solana contract addresses', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [SOLANA_MAINNET_NETWORK_ID] });
+
+			expect(result.has('epjfwdd5aufqssqem2qn1xzybapc8g4weggkzwytdt1v')).toBe(true);
+			expect(result.has('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')).toBe(false);
 		});
 	});
 });
