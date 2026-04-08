@@ -23,6 +23,20 @@ export const getPoolCanister = async ({
 	return getPool(restParams);
 };
 
+export const getAllPools = async ({
+	identity,
+	nullishIdentityErrorMessage,
+	canisterId
+}: CanisterApiFunctionParams): Promise<PoolData[]> => {
+	const { getPools } = await icpSwapFactoryCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return getPools();
+};
+
 const icpSwapFactoryCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
