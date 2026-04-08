@@ -565,5 +565,19 @@
 		"stats": "",
 		"logo": "/images/dapps/parcl-logo.webp",
 		"screenshots": ["/images/dapps/parcl-screenshot.webp"]
+	},
+	{
+		"id": "icexplorer",
+		"name": "dapps.descriptions.icexplorer.name",
+		"oneLiner": "dapps.descriptions.icexplorer.one_liner",
+		"website": "https://www.icexplorer.io/",
+		"twitter": "https://x.com/ICExplorer_io",
+		"github": "https://github.com/Token-Explorer-Hi/ic-explorer-docs",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.defi", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.icexplorer.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/icexplorer-logo.webp",
+		"screenshots": ["/images/dapps/icexplorer-screenshot.webp"]
 	}
 ]
