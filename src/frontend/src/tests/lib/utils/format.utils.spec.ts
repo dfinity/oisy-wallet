@@ -224,11 +224,13 @@ describe('format.utils', () => {
 		describe('large decimals', () => {
 			it('should format 1.0 with 30 decimals', () => {
 				const oneUnit = 10n ** 30n;
+
 				expect(formatToken({ value: oneUnit, unitName: 30 })).toBe('1');
 			});
 
 			it('should format 1.0 with 30 decimals and trailing zeros', () => {
 				const oneUnit = 10n ** 30n;
+
 				expect(formatToken({ value: oneUnit, unitName: 30, trailingZeros: true })).toBe('1.0000');
 			});
 
@@ -244,11 +246,13 @@ describe('format.utils', () => {
 
 			it('should format 1.0 with 50 decimals', () => {
 				const oneUnit = 10n ** 50n;
+
 				expect(formatToken({ value: oneUnit, unitName: 50 })).toBe('1');
 			});
 
 			it('should format a fractional value with 50 decimals showing full precision', () => {
 				const value = 10n ** 50n - 1n;
+
 				expect(formatToken({ value, unitName: 50, displayDecimals: 50 })).toBe(
 					'0.99999999999999999999999999999999999999999999999999'
 				);
@@ -266,23 +270,26 @@ describe('format.utils', () => {
 
 			it('should format a large integer part with 50 decimals', () => {
 				const value = 999999n * 10n ** 50n + 10n ** 50n / 2n;
+
 				expect(formatToken({ value, unitName: 50 })).toBe('999999.5');
 			});
 
 			it('should format with 77 decimals near the ethers limit', () => {
 				const oneUnit = 10n ** 77n;
+
 				expect(formatToken({ value: oneUnit, unitName: 77 })).toBe('1');
 				expect(formatToken({ value: oneUnit, unitName: 77, trailingZeros: true })).toBe('1.0000');
 			});
 
 			it('should format with the maximum 80 decimals', () => {
 				const oneUnit = 10n ** 80n;
+
 				expect(formatToken({ value: oneUnit, unitName: 80 })).toBe('1');
 			});
 
 			it('should format the smallest unit with 80 decimals showing full precision', () => {
 				expect(formatToken({ value: 1n, unitName: 80, displayDecimals: 80 })).toBe(
-					'0.' + '0'.repeat(79) + '1'
+					`0.${'0'.repeat(79)}1`
 				);
 			});
 
@@ -293,6 +300,7 @@ describe('format.utils', () => {
 
 			it('should format with 50 decimals and custom displayDecimals', () => {
 				const value = 123n * 10n ** 47n;
+
 				expect(formatToken({ value, unitName: 50, displayDecimals: 6 })).toBe('0.123');
 				expect(formatToken({ value, unitName: 50, displayDecimals: 6, trailingZeros: true })).toBe(
 					'0.123000'
@@ -301,6 +309,7 @@ describe('format.utils', () => {
 
 			it('should round correctly with large decimals', () => {
 				const value = 15555n * 10n ** 46n;
+
 				expect(formatToken({ value, unitName: 50, displayDecimals: 3 })).toBe('1.556');
 				expect(formatToken({ value, unitName: 50, displayDecimals: 2 })).toBe('1.56');
 				expect(formatToken({ value, unitName: 50, displayDecimals: 1 })).toBe('1.6');
@@ -308,21 +317,25 @@ describe('format.utils', () => {
 
 			it('should handle negative values with large decimals', () => {
 				const oneUnit = -(10n ** 50n);
+
 				expect(formatToken({ value: oneUnit, unitName: 50, showPlusSign: true })).toBe('-1');
 			});
 
 			it('should handle positive values with plus sign and large decimals', () => {
 				const oneUnit = 10n ** 50n;
+
 				expect(formatToken({ value: oneUnit, unitName: 50, showPlusSign: true })).toBe('+1');
 			});
 
 			it('should handle unitName passed as a string with large decimals', () => {
 				const oneUnit = 10n ** 50n;
+
 				expect(formatToken({ value: oneUnit, unitName: '50' })).toBe('1');
 			});
 
 			it('should handle unitName passed as a bigint with large decimals', () => {
 				const oneUnit = 10n ** 50n;
+
 				expect(formatToken({ value: oneUnit, unitName: 50n })).toBe('1');
 			});
 		});

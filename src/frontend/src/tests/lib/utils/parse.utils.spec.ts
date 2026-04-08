@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { normalizeTokenToDecimals, parseToken } from '$lib/utils/parse.utils';
 
 describe('parse.utils', () => {
@@ -16,9 +17,7 @@ describe('parse.utils', () => {
 
 		describe('large decimals', () => {
 			it('parses 1.0 with 30 decimals', () => {
-				expect(parseToken({ value: '1.0', unitName: 30 })).toBe(
-					1000000000000000000000000000000n
-				);
+				expect(parseToken({ value: '1.0', unitName: 30 })).toBe(1000000000000000000000000000000n);
 			});
 
 			it('parses a fractional value with 30 decimals', () => {
@@ -38,6 +37,7 @@ describe('parse.utils', () => {
 					value: '0.00000000000000000000000000000000000000000000000001',
 					unitName: 50
 				});
+
 				expect(result).toBe(1n);
 			});
 
@@ -48,15 +48,11 @@ describe('parse.utils', () => {
 			});
 
 			it('parses with 77 decimals near the ethers limit', () => {
-				expect(parseToken({ value: '1.0', unitName: 77 })).toBe(
-					10n ** 77n
-				);
+				expect(parseToken({ value: '1.0', unitName: 77 })).toBe(10n ** 77n);
 			});
 
 			it('parses with the maximum 80 decimals', () => {
-				expect(parseToken({ value: '1.0', unitName: 80 })).toBe(
-					10n ** 80n
-				);
+				expect(parseToken({ value: '1.0', unitName: 80 })).toBe(10n ** 80n);
 			});
 
 			it('throws for decimals above the 80 limit', () => {
@@ -64,14 +60,12 @@ describe('parse.utils', () => {
 			});
 
 			it('parses zero with large decimals', () => {
-				expect(parseToken({ value: '0', unitName: 50 })).toBe(0n);
-				expect(parseToken({ value: '0.0', unitName: 80 })).toBe(0n);
+				expect(parseToken({ value: '0', unitName: 50 })).toBe(ZERO);
+				expect(parseToken({ value: '0.0', unitName: 80 })).toBe(ZERO);
 			});
 
 			it('parses scientific notation with large decimals', () => {
-				expect(parseToken({ value: '1e-30', unitName: 50 })).toBe(
-					100000000000000000000n
-				);
+				expect(parseToken({ value: '1e-30', unitName: 50 })).toBe(100000000000000000000n);
 			});
 
 			it('parses scientific notation for a tiny value with large decimals', () => {
@@ -87,6 +81,7 @@ describe('parse.utils', () => {
 				oldUnitName: 18,
 				newUnitName: 8
 			});
+
 			expect(result).toBe(100000000n);
 		});
 
@@ -96,6 +91,7 @@ describe('parse.utils', () => {
 				oldUnitName: 8,
 				newUnitName: 18
 			});
+
 			expect(result).toBe(1000000000000000000n);
 		});
 
@@ -105,6 +101,7 @@ describe('parse.utils', () => {
 				oldUnitName: 30,
 				newUnitName: 50
 			});
+
 			expect(result).toBe(100000000000000000000000000000000000000000000000000n);
 		});
 
@@ -114,13 +111,14 @@ describe('parse.utils', () => {
 				oldUnitName: 50,
 				newUnitName: 30
 			});
+
 			expect(result).toBe(1000000000000000000000000000000n);
 		});
 
 		it('preserves zero across large decimal conversions', () => {
-			expect(
-				normalizeTokenToDecimals({ value: 0n, oldUnitName: 50, newUnitName: 80 })
-			).toBe(0n);
+			expect(normalizeTokenToDecimals({ value: ZERO, oldUnitName: 50, newUnitName: 80 })).toBe(
+				ZERO
+			);
 		});
 	});
 });
