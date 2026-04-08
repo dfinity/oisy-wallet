@@ -240,4 +240,102 @@ describe('HarvestStakeWizard', () => {
 			});
 		});
 	});
+
+	describe('enable vault after staking', () => {
+		let toggleSpy: ReturnType<typeof vi.spyOn>;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(fromAddr));
+			vi.spyOn(idDerived, 'authIdentity', 'get').mockImplementation(() => readable(mockIdentity));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(erc4626Services, 'depositErc4626').mockResolvedValue(undefined);
+			toggleSpy = vi.spyOn(erc4626Services, 'toggleErc4626Token').mockResolvedValue(undefined);
+
+			feeState = writable({
+				gas: 100n,
+				maxFeePerGas: 2_000_000n,
+				maxPriorityFeePerGas: 1_000_000n
+			});
+			feeStore = {
+				subscribe: feeState.subscribe,
+				setFee: vi.fn((partial) => {
+					feeState.update((cur) => ({ ...cur, ...partial }));
+				})
+			};
+			vi.spyOn(feeStoreMod, 'initEthFeeStore').mockReturnValue(feeStore);
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(undefined),
+				minGasFee: readable(undefined)
+			}));
+		});
+
+		it('should enable the vault token when it is disabled after successful stake', async () => {
+			const disabledVaultToken = { ...mockVaultToken, enabled: false };
+			const disabledVault: Vault = { token: disabledVaultToken, apy: '5.5' };
+			const disabledContext = new Map([]);
+			disabledContext.set(SEND_CONTEXT_KEY, initSendContext({ token: disabledVaultToken }));
+
+			const { getByTestId } = render(HarvestStakeWizard, {
+				props: {
+					...baseProps,
+					vault: disabledVault,
+					currentStep: { name: WizardStepsStake.REVIEW, title: 'Review' }
+				},
+				context: disabledContext
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toggleSpy).toHaveBeenCalledWith({
+				token: disabledVaultToken,
+				identity: mockIdentity,
+				enabled: true
+			});
+		});
+
+		it('should not enable the vault token when it is already enabled', async () => {
+			const { getByTestId } = render(HarvestStakeWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsStake.REVIEW, title: 'Review' }
+				},
+				context: buildContext()
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toggleSpy).not.toHaveBeenCalled();
+		});
+
+		it('should still close the modal when enabling the vault token fails', async () => {
+			toggleSpy.mockRejectedValue(new Error('Enable failed'));
+
+			const disabledVaultToken = { ...mockVaultToken, enabled: false };
+			const disabledVault: Vault = { token: disabledVaultToken, apy: '5.5' };
+			const disabledContext = new Map([]);
+			disabledContext.set(SEND_CONTEXT_KEY, initSendContext({ token: disabledVaultToken }));
+
+			const onClose = vi.fn();
+
+			const { getByTestId } = render(HarvestStakeWizard, {
+				props: {
+					...baseProps,
+					vault: disabledVault,
+					onClose,
+					currentStep: { name: WizardStepsStake.REVIEW, title: 'Review' }
+				},
+				context: disabledContext
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onClose).toHaveBeenCalled();
+		});
+	});
 });
