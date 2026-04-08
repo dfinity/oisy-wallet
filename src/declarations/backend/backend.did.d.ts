@@ -19,18 +19,6 @@ export interface AddHiddenDappIdRequest {
 	current_user_version: [] | [bigint];
 	dapp_id: string;
 }
-export type AddUserCredentialError =
-	| { InvalidCredential: null }
-	| { VersionMismatch: null }
-	| { ConfigurationError: null }
-	| { UserNotFound: null };
-export interface AddUserCredentialRequest {
-	credential_jwt: string;
-	issuer_canister_id: Principal;
-	current_user_version: [] | [bigint];
-	credential_spec: CredentialSpec;
-}
-export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
 export interface AgreementHistoryEntry {
 	timestamp_ns: bigint;
@@ -83,7 +71,6 @@ export type ApproveError =
 	| { Expired: { ledger_time: bigint } }
 	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
-export type ArgumentValue = { Int: number } | { String: string };
 export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
@@ -155,10 +142,10 @@ export interface CanisterStatusResultV2 {
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export interface Config {
 	derivation_origin: [] | [string];
+	ii_canister_id: [] | [Principal];
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
-	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array];
 }
 export interface Contact {
@@ -192,11 +179,6 @@ export interface CreateContactRequest {
 	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export interface CredentialSpec {
-	arguments: [] | [Array<[string, ArgumentValue]>];
-	credential_type: string;
-}
-export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
 	allow_external_content_source: [] | [boolean];
@@ -341,10 +323,10 @@ export type ImageMimeType =
 	| { 'image/webp': null };
 export interface InitArg {
 	derivation_origin: [] | [string];
+	ii_canister_id: [] | [Principal];
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
-	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array];
 }
 export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
@@ -457,13 +439,6 @@ export interface Stats {
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
-export interface SupportedCredential {
-	ii_canister_id: Principal;
-	issuer_origin: string;
-	issuer_canister_id: Principal;
-	ii_origin: string;
-	credential_type: CredentialType;
-}
 export interface TestnetsSettings {
 	show_testnets: boolean;
 }
@@ -556,14 +531,8 @@ export interface UserAgreements {
 	privacy_policy: UserAgreement;
 	terms_of_use: UserAgreement;
 }
-export interface UserCredential {
-	issuer: string;
-	verified_date_timestamp: [] | [bigint];
-	credential_type: CredentialType;
-}
 export interface UserProfile {
 	agreements: [] | [Agreements];
-	credentials: Array<UserCredential>;
 	version: [] | [bigint];
 	settings: [] | [Settings];
 	created_timestamp: bigint;
@@ -591,13 +560,6 @@ export interface Utxo {
 	outpoint: Outpoint;
 }
 export interface _SERVICE {
-	/**
-	 * Adds a verifiable credential to the user profile.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `AddUserCredentialError`.
-	 */
-	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
 	/**
 	 * Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	 *

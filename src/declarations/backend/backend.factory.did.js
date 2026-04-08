@@ -7,44 +7,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 export const idlFactory = ({ IDL }) => {
-	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
-	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Principal,
-		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Principal,
-		ii_origin: IDL.Text,
-		credential_type: CredentialType
-	});
 	const InitArg = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
+		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
-	const ArgumentValue = IDL.Variant({ Int: IDL.Int32, String: IDL.Text });
-	const CredentialSpec = IDL.Record({
-		arguments: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, ArgumentValue))),
-		credential_type: IDL.Text
-	});
-	const AddUserCredentialRequest = IDL.Record({
-		credential_jwt: IDL.Text,
-		issuer_canister_id: IDL.Principal,
-		current_user_version: IDL.Opt(IDL.Nat64),
-		credential_spec: CredentialSpec
-	});
-	const AddUserCredentialError = IDL.Variant({
-		InvalidCredential: IDL.Null,
-		VersionMismatch: IDL.Null,
-		ConfigurationError: IDL.Null,
-		UserNotFound: IDL.Null
-	});
-	const AddUserCredentialResult = IDL.Variant({
-		Ok: IDL.Null,
-		Err: AddUserCredentialError
-	});
 	const AddHiddenDappIdRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		dapp_id: IDL.Text
@@ -199,10 +170,10 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Config = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
+		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const ImageMimeType = IDL.Variant({
@@ -288,11 +259,6 @@ export const idlFactory = ({ IDL }) => {
 		agreements: UserAgreements,
 		provider_agreements: IDL.Opt(IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement)))
 	});
-	const UserCredential = IDL.Record({
-		issuer: IDL.Text,
-		verified_date_timestamp: IDL.Opt(IDL.Nat64),
-		credential_type: CredentialType
-	});
 	const NetworkSettingsFor = IDL.Variant({
 		ArbitrumMainnet: IDL.Null,
 		InternetComputer: IDL.Null,
@@ -341,7 +307,6 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const UserProfile = IDL.Record({
 		agreements: IDL.Opt(Agreements),
-		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
 		settings: IDL.Opt(Settings),
 		created_timestamp: IDL.Nat64,
@@ -639,7 +604,6 @@ export const idlFactory = ({ IDL }) => {
 	});
 
 	return IDL.Service({
-		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [AddUserHiddenDappIdResult], []),
 		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
 		btc_add_pending_transaction: IDL.Func(
@@ -734,20 +698,12 @@ export const idlFactory = ({ IDL }) => {
 };
 
 export const init = ({ IDL }) => {
-	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
-	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Principal,
-		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Principal,
-		ii_origin: IDL.Text,
-		credential_type: CredentialType
-	});
 	const InitArg = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
+		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });

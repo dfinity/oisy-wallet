@@ -131,12 +131,12 @@ type CanisterStatusResultV2 = record {
 };
 type CanisterStatusType = variant { stopped; stopping; running };
 type Config = record {
+	derivation_origin : opt text;
+	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
-	ic_root_key_raw : opt blob;
-	derivation_origin : opt text;
-	ii_canister_id : opt principal
+	ic_root_key_raw : opt blob
 };
 type Contact = record {
 	id : nat64;
@@ -295,12 +295,12 @@ type ImageMimeType = variant {
 	"image/webp"
 };
 type InitArg = record {
+	derivation_origin : opt text;
+	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
-	ic_root_key_der : opt blob;
-	derivation_origin : opt text;
-	ii_canister_id : opt principal
+	ic_root_key_der : opt blob
 };
 type Network = variant { mainnet; regtest; testnet };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
