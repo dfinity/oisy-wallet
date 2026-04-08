@@ -12,10 +12,7 @@ import type {
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
-import type {
-	BtcAddPendingTransactionParams,
-	BtcSelectUserUtxosFeeParams
-} from '$lib/types/api';
+import type { BtcAddPendingTransactionParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
