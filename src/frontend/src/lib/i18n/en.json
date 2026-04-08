@@ -440,7 +440,7 @@
 				"one_liner": "Fully on-chain analytics and trading dashboard built entirely on the Internet Computer!",
 				"description": "ICP Index is a fully on-chain analytics and trading dashboard built entirely on the Internet Computer. It's a comprehensive dashboard which helps you track everything related to the Internet Computer. Tokens, on-chain statistics, and much more to come!",
 				"carousel": {
-					"text": "Comprehensive index for tokens and analytics on $ICP",
+					"text": "Comprehensive token index and analytics on ICP",
 					"call_to_action": "Learn mode"
 				}
 			}
