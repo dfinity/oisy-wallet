@@ -69,6 +69,7 @@ export interface ApiKeys {
 	etherscan_api_key: [] | [string];
 	coingecko_api_key: [] | [string];
 	infura_api_key: [] | [string];
+	exchange_rate_enabled: [] | [boolean];
 }
 export type ApproveError =
 	| {
