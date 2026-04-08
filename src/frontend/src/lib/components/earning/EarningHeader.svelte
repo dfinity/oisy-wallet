@@ -3,7 +3,7 @@
 	import EarningPotentialCard from '$lib/components/earning/EarningPotentialCard.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_EARN_URL } from '$lib/constants/oisy.constants';
 	import {
 		allEarningPositionsUsd,
 		allEarningYearlyAmountUsd,
@@ -21,7 +21,7 @@
 	{#snippet content()}
 		<p class="w-full text-center">
 			{$i18n.earning.text.header_description}
-			<ExternalLink ariaLabel={$i18n.core.alt.learn_more} href={OISY_DOCS_URL} iconAsLast>
+			<ExternalLink ariaLabel={$i18n.core.alt.learn_more} href={OISY_EARN_URL} iconAsLast>
 				{$i18n.core.text.learn_more}
 			</ExternalLink>
 		</p>
