@@ -1,7 +1,4 @@
-use ic_cdk::{
-    api::msg_caller,
-    query, update,
-};
+use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
     agreement::{
         GetAgreementHistoryError, UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest,

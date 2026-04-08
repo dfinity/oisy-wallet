@@ -698,18 +698,16 @@ mod user_profile {
 
     test_validate_on_deserialize!(
         UserProfile,
-        [
-            TestVector {
-                description: "UserProfile with valid data",
-                input: UserProfile {
-                    created_timestamp: 0,
-                    updated_timestamp: 0,
-                    version: None,
-                    settings: None,
-                    agreements: None,
-                },
-                valid: true,
-            }
-        ]
+        [TestVector {
+            description: "UserProfile with valid data",
+            input: UserProfile {
+                created_timestamp: 0,
+                updated_timestamp: 0,
+                version: None,
+                settings: None,
+                agreements: None,
+            },
+            valid: true,
+        }]
     );
 }

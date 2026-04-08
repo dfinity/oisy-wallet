@@ -16,10 +16,7 @@ const PRODUCTION_ECDSA_KEY_NAME: &str = "key_1";
 /// (`ecdsa_key_name == "key_1"`).
 pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>, bool) {
     read_config(|config| {
-        let ii_ids = config
-            .ii_canister_id
-            .map(|id| vec![id])
-            .unwrap_or_default();
+        let ii_ids = config.ii_canister_id.map(|id| vec![id]).unwrap_or_default();
         let root_key = config
             .ic_root_key_raw
             .clone()

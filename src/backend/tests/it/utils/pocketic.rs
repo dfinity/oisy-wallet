@@ -484,9 +484,7 @@ fn init_arg_with_ecdsa_key(ecdsa_key_name: &str) -> Arg {
             Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
         derivation_origin: None,
-        ii_canister_id: Some(
-            Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id"),
-        ),
+        ii_canister_id: Some(Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id")),
     })
 }
 
