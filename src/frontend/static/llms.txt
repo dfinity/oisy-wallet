@@ -33,7 +33,7 @@ OISY is not only a cryptocurrency wallet. It is a platform for managing digital 
 - Cryptocurrencies: Bitcoin, Ethereum, Solana, ICP, and tokens across BNB Chain, Base, Polygon, and Arbitrum
 - Stablecoins: USDC, USDT, vCHF, and others across multiple chains
 - NFTs: ERC721, ERC1155, EXT, DIP721, and ICPunks standards with image and video support
-- DeFi: Built-in swaps across 100+ DEXs (via Velora, KongSwap, ICPSwap), gasless swaps, ERC4626 yield vault interaction, GLDT staking, and autopilot harvest features
+- DeFi: Built-in swaps across 100+ DEXs (via Velora, ICPSwap, NEAR Intents), gasless swaps, ERC4626 yield vault interaction, GLDT staking, and autopilot harvest features
 - Real-world payments: OISY Pay is live at SPAR supermarkets across Switzerland and integrated with Shopware and WooCommerce for online commerce. Crypto is converted instantly to local currency at checkout.
 - Yield: OISY Earn offers yield opportunities in multiple networks and various tokens
 
