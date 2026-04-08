@@ -64,12 +64,12 @@ describe('scheduler', () => {
 		});
 
 		describe('start', () => {
-			it('should not start if identity is nullish', async () => {
+			it('should not start if identity is nullish after all retries', async () => {
 				const loadIdentity = vi.spyOn(provider, 'loadIdentity').mockResolvedValue(undefined);
 
 				const startPromise = scheduler.start(mockParams);
 
-				// Advance past all identity retry delays (3 retries × 1_000ms)
+				// 1 initial attempt + 3 retries with 1_000ms delay between each
 				await vi.advanceTimersByTimeAsync(3_000);
 
 				await startPromise;
@@ -84,6 +84,25 @@ describe('scheduler', () => {
 				);
 
 				expect(mockJob).not.toHaveBeenCalled();
+			});
+
+			it('should succeed after retrying identity load', async () => {
+				const loadIdentity = vi
+					.spyOn(provider, 'loadIdentity')
+					.mockResolvedValueOnce(undefined)
+					.mockResolvedValueOnce(undefined)
+					.mockResolvedValueOnce(mockIdentity);
+
+				const startPromise = scheduler.start(mockParams);
+
+				// Advance past 2 retry delays (2 × 1_000ms)
+				await vi.advanceTimersByTimeAsync(2_000);
+
+				await startPromise;
+
+				expect(loadIdentity).toHaveBeenCalledTimes(3);
+				expect(mockJob).toHaveBeenCalledOnce();
+				expect(console.error).not.toHaveBeenCalled();
 			});
 
 			it('should post initial and final status messages', async () => {
