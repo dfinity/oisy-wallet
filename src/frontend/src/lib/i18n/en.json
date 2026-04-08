@@ -539,7 +539,7 @@
 					},
 					"jackpot": {
 						"title": "You've won the jackpot",
-						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more",
+						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more.",
 						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
 					},
 					"leaderboard": {
@@ -596,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 6 is coming soon...",
+				"card_title": "OISY Sprinkles: Episode 6 is live 🎉",
 				"one_liner": "Earn Sprinkles for being active, referring others, and using OISY across chains. Your actions grow your rewards, and active referrals boost them further.<br/>Plus, now more chains means better chances to win.",
 				"participate_title": "Earn tokens for activity and referrals. More chains mean more chances.",
 				"description": "Stay active to qualify: log in often, complete wallet actions, and hold at least $5.<br/>Each active chain boosts your odds with a Multichain Multiplier.<br/>Earn 10% from friends who qualify.",
@@ -613,8 +613,8 @@
 						"share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
 					},
 					"jackpot": {
-						"title": "You've won the weekly bonus drop",
-						"description": "You just earned one of our weekly bonus drops.<br>Stay active, and keep referring to win more",
+						"title": "Congratulations on earning today’s largest OISY Sprinkles!",
+						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more.",
 						"share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
 					},
 					"referral": {
