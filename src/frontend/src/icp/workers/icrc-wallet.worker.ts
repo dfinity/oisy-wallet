@@ -164,6 +164,11 @@ export const initIcrcWalletScheduler = (
 
 const schedulers = new Map<string, IcWalletScheduler<PostMessageDataRequestIcrc>>();
 
+const stopAllSchedulers = () => {
+	schedulers.forEach((scheduler) => scheduler.stop());
+	schedulers.clear();
+};
+
 export const onIcrcWalletMessage = async ({
 	data: dataMsg
 }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
@@ -172,12 +177,12 @@ export const onIcrcWalletMessage = async ({
 	const schedulerKey =
 		nonNullish(data) && 'ledgerCanisterId' in data ? data.ledgerCanisterId : undefined;
 
-	if (isNullish(schedulerKey)) {
-		return;
-	}
-
 	switch (msg) {
 		case 'startIcrcWalletTimer': {
+			if (isNullish(schedulerKey)) {
+				return;
+			}
+
 			schedulers.get(schedulerKey)?.stop();
 
 			const scheduler = initIcrcWalletScheduler(data);
@@ -189,6 +194,11 @@ export const onIcrcWalletMessage = async ({
 			break;
 		}
 		case 'stopIcrcWalletTimer': {
+			if (isNullish(schedulerKey)) {
+				stopAllSchedulers();
+				break;
+			}
+
 			schedulers.get(schedulerKey)?.stop();
 
 			schedulers.delete(schedulerKey);
@@ -196,6 +206,10 @@ export const onIcrcWalletMessage = async ({
 			break;
 		}
 		case 'triggerIcrcWalletTimer': {
+			if (isNullish(schedulerKey)) {
+				return;
+			}
+
 			let scheduler = schedulers.get(schedulerKey);
 
 			if (isNullish(scheduler)) {

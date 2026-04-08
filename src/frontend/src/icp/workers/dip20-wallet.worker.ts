@@ -85,6 +85,11 @@ export const initDip20WalletScheduler = (
 
 const schedulers = new Map<string, IcWalletScheduler<PostMessageDataRequestDip20>>();
 
+const stopAllSchedulers = () => {
+	schedulers.forEach((scheduler) => scheduler.stop());
+	schedulers.clear();
+};
+
 export const onDip20WalletMessage = async ({
 	data: dataMsg
 }: MessageEvent<PostMessage<PostMessageDataRequestDip20>>) => {
@@ -92,12 +97,12 @@ export const onDip20WalletMessage = async ({
 
 	const schedulerKey = nonNullish(data) && 'canisterId' in data ? data.canisterId : undefined;
 
-	if (isNullish(schedulerKey)) {
-		return;
-	}
-
 	switch (msg) {
 		case 'startDip20WalletTimer': {
+			if (isNullish(schedulerKey)) {
+				return;
+			}
+
 			schedulers.get(schedulerKey)?.stop();
 
 			const scheduler = initDip20WalletScheduler(data);
@@ -109,6 +114,12 @@ export const onDip20WalletMessage = async ({
 			break;
 		}
 		case 'stopDip20WalletTimer': {
+			if (isNullish(schedulerKey)) {
+				stopAllSchedulers();
+
+				break;
+			}
+
 			schedulers.get(schedulerKey)?.stop();
 
 			schedulers.delete(schedulerKey);
@@ -116,6 +127,10 @@ export const onDip20WalletMessage = async ({
 			break;
 		}
 		case 'triggerDip20WalletTimer': {
+			if (isNullish(schedulerKey)) {
+				return;
+			}
+
 			let scheduler = schedulers.get(schedulerKey);
 
 			if (isNullish(scheduler)) {
