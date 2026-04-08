@@ -369,7 +369,7 @@ interface I18nRewards {
 			welcome: { title: string; subtitle: string; description: string };
 			win: {
 				default: { title: string; description: string; share_href: string };
-				jackpotX: { title: string; description: string; share_href: string };
+				jackpot: { title: string; description: string; share_href: string };
 				referral: { title: string; description: string; share_href: string };
 			};
 		};

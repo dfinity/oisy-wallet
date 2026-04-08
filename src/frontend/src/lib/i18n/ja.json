@@ -593,7 +593,7 @@
 						"description": "報酬がウォレットに届きました。<br>さらに獲得するために、招待してアクティブを維持することをお忘れなく",
 						"share_href": ""
 					},
-					"jackpotX": {
+					"jackpot": {
 						"title": "",
 						"description": "",
 						"share_href": ""
