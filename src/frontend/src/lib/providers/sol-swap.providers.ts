@@ -15,7 +15,7 @@ export const solSwapProviders: SolSwapProviderConfig[] = [
 					isEnabled: NEAR_INTENTS_SWAP_ENABLED,
 					getSupportedTokens: () =>
 						nearIntentsSupportedTokens({ networkIds: [SOLANA_MAINNET_NETWORK_ID] })
-				} satisfies SolSwapProviderConfig
+				}
 			]
 		: [])
 ];
