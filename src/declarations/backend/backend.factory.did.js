@@ -361,6 +361,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: GetAllowedCyclesError
 	});
 	const ApiKeys = IDL.Record({
+		exchange_rate_enabled: IDL.Opt(IDL.Bool),
 		alchemy_api_key: IDL.Opt(IDL.Text),
 		etherscan_api_key: IDL.Opt(IDL.Text),
 		coingecko_api_key: IDL.Opt(IDL.Text),

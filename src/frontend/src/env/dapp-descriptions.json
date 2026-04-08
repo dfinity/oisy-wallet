@@ -73,6 +73,21 @@
 		}
 	},
 	{
+		"id": "icexplorer",
+		"name": "dapps.descriptions.icexplorer.name",
+		"oneLiner": "dapps.descriptions.icexplorer.one_liner",
+		"website": "https://www.icexplorer.io/",
+		"twitter": "https://x.com/ICExplorer_io",
+		"openChat": "https://oc.app/community/m7w7t-haaaa-aaaac-ahdpa-cai/?ref=sdqdc-qaaaa-aaaac-ahnma-cai",
+		"github": "https://github.com/Token-Explorer-Hi/ic-explorer-docs",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.defi", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.icexplorer.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/icexplorer-logo.webp",
+		"screenshots": ["/images/dapps/icexplorer-screenshot.webp"]
+	},
+	{
 		"id": "icpindex",
 		"name": "dapps.descriptions.icpindex.name",
 		"oneLiner": "dapps.descriptions.icpindex.one_liner",
@@ -88,6 +103,19 @@
 			"text": "dapps.descriptions.icpindex.carousel.text",
 			"callToAction": "dapps.descriptions.icpindex.carousel.call_to_action"
 		}
+	},
+	{
+		"id": "icpixel",
+		"name": "dapps.descriptions.icpixel.name",
+		"oneLiner": "dapps.descriptions.icpixel.one_liner",
+		"website": "https://icpixel.org/",
+		"twitter": "https://twitter.com/ICPixelEditor",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.tools", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.icpixel.description",
+		"usesInternetIdentity": true,
+		"stats": "",
+		"logo": "/images/dapps/icpixel-logo.webp",
+		"screenshots": ["/images/dapps/icpixel-screenshot.webp"]
 	},
 	{
 		"id": "openchat",

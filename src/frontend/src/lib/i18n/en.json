@@ -443,6 +443,16 @@
 					"text": "Extensive token index and analytics on ICP",
 					"call_to_action": "Learn mode"
 				}
+			},
+			"icexplorer": {
+				"name": "IC Explorer",
+				"one_liner": "IC Explorer is a Block Explorer and Analytics Platform for ICP",
+				"description": "ICExplorer is a next-generation blockchain explorer hosted on the Internet Computer, paving the way to become the premier on-chain AI-driven data factory in the blockchain ecosystem. By integrating data from the ICP blockchain, Web3 platforms, and Web2 sources, ICExplorer transforms fragmented datasets into a unified, intelligent, and scalable analytics platform."
+			},
+			"icpixel": {
+				"name": "ICPixel",
+				"one_liner": "Create, animate, and export pixel art directly in your browser.",
+				"description": "ICPixel is a free online pixel art editor that runs entirely in your browser. Create sprites, pixel animations, and game assets with layers, timeline tools, and modern export options — no download required."
 			}
 		}
 	},

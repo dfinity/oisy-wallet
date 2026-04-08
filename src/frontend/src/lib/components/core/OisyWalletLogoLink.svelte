@@ -3,7 +3,12 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_ITEM_HOMEPAGE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+
+	const onclick = () => {
+		tokenListStore.set({ filter: '' });
+	};
 </script>
 
 <a
@@ -11,6 +16,7 @@
 	aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
 	data-tid={NAVIGATION_ITEM_HOMEPAGE}
 	href={AppPath.Tokens}
+	{onclick}
 >
 	<OisyWalletLogo />
 </a>
