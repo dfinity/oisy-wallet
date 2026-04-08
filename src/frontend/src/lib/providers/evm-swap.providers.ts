@@ -24,7 +24,7 @@ export const evmSwapProviders: EvmSwapProviderConfig[] = [
 						nearIntentsSupportedTokens({
 							networkIds: [ETHEREUM_NETWORK_ID, ...SUPPORTED_EVM_MAINNET_NETWORK_IDS]
 						})
-				} satisfies EvmSwapProviderConfig
+				}
 			]
 		: [])
 ];
