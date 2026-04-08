@@ -240,4 +240,123 @@ describe('HarvestUnstakeWizard', () => {
 			});
 		});
 	});
+
+	describe('disable vault after full unstake', () => {
+		const fromAddr = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+		// amount 0.01 with 8 decimals = 1_000_000n
+		const maxBalance = 1_000_000n;
+
+		let feeState: Writable<FeeStoreData>;
+		let feeStore: EthFeeStore;
+		let toggleSpy: ReturnType<typeof vi.spyOn>;
+
+		const buildMaxAmountContext = (token = mockVaultToken) => {
+			const context = new Map([]);
+			context.set(
+				SEND_CONTEXT_KEY,
+				initSendContext({ token, customSendBalance: maxBalance })
+			);
+			return context;
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(fromAddr));
+			vi.spyOn(idDerived, 'authIdentity', 'get').mockImplementation(() => readable(mockIdentity));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(erc4626Services, 'redeemErc4626').mockResolvedValue(undefined);
+			vi.spyOn(erc4626Services, 'withdrawErc4626').mockResolvedValue(undefined);
+			toggleSpy = vi
+				.spyOn(erc4626Services, 'toggleErc4626Token')
+				.mockResolvedValue(undefined);
+
+			feeState = writable({
+				gas: 100n,
+				maxFeePerGas: 2_000_000n,
+				maxPriorityFeePerGas: 1_000_000n
+			});
+			feeStore = {
+				subscribe: feeState.subscribe,
+				setFee: vi.fn((partial) => {
+					feeState.update((cur) => ({ ...cur, ...partial }));
+				})
+			};
+			vi.spyOn(feeStoreMod, 'initEthFeeStore').mockReturnValue(feeStore);
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(undefined),
+				minGasFee: readable(undefined)
+			}));
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('should disable the vault token when unstaking the full amount', async () => {
+			const vaultWithBalance: Vault = {
+				token: { ...mockVaultToken, balance: maxBalance },
+				apy: '5.5'
+			};
+
+			const { getByTestId } = render(HarvestUnstakeWizard, {
+				props: {
+					...baseProps,
+					vault: vaultWithBalance,
+					currentStep: { name: WizardStepsUnstake.REVIEW, title: 'Review' }
+				},
+				context: buildMaxAmountContext()
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toggleSpy).toHaveBeenCalledWith({
+				token: vaultWithBalance.token,
+				identity: mockIdentity,
+				enabled: false
+			});
+		});
+
+		it('should not disable the vault token when unstaking a partial amount', async () => {
+			const { getByTestId } = render(HarvestUnstakeWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsUnstake.REVIEW, title: 'Review' }
+				},
+				context: buildContext()
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toggleSpy).not.toHaveBeenCalled();
+		});
+
+		it('should still close the modal when disabling the vault token fails', async () => {
+			toggleSpy.mockRejectedValue(new Error('Disable failed'));
+
+			const vaultWithBalance: Vault = {
+				token: { ...mockVaultToken, balance: maxBalance },
+				apy: '5.5'
+			};
+			const onClose = vi.fn();
+
+			const { getByTestId } = render(HarvestUnstakeWizard, {
+				props: {
+					...baseProps,
+					vault: vaultWithBalance,
+					onClose,
+					currentStep: { name: WizardStepsUnstake.REVIEW, title: 'Review' }
+				},
+				context: buildMaxAmountContext()
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onClose).toHaveBeenCalled();
+		});
+	});
 });
