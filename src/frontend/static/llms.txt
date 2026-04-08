@@ -70,6 +70,7 @@ Key facts:
 - [Sprinkles rewards](https://docs.oisy.com/rewards/oisy-sprinkles): Daily token drops, referral rewards, and jackpot mechanics
 - [How to send tokens via dApps](https://docs.oisy.com/using-oisy-wallet/how-tos/send-a-token-using-a-dapp): WalletConnect integration with Uniswap and other dApps
 - [Migrating from other wallets](https://docs.oisy.com/using-oisy-wallet/how-tos/migrating-wallets): Step-by-step guide for moving assets from MetaMask, Phantom, or other wallets to OISY
+- [What's new / Changelog](https://docs.oisy.com/introduction/whats-new): List of all OISY releases and the new features, improvements, and bugfixes they contain
 
 ## For Developers
 
