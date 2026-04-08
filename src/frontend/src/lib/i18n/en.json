@@ -443,6 +443,11 @@
 					"text": "Extensive token index and analytics on ICP",
 					"call_to_action": "Learn mode"
 				}
+			},
+			"icexplorer": {
+				"name": "IC Explorer",
+				"one_liner": "IC Explorer is a Block Explorer and Analytics Platform for ICP",
+				"description": ""
 			}
 		}
 	},
