@@ -1,5 +1,4 @@
 import type {
-	AddUserCredentialResult,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
@@ -22,7 +21,6 @@ import {
 import { ZERO } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
-	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
 	AllowSigningParams,
@@ -111,22 +109,6 @@ export class BackendCanister extends Canister<BackendService> {
 		const { get_user_profile } = this.caller({ certified });
 
 		return get_user_profile();
-	};
-
-	addUserCredential = ({
-		credentialJwt,
-		issuerCanisterId,
-		currentUserVersion,
-		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResult> => {
-		const { add_user_credential } = this.caller({ certified: true });
-
-		return add_user_credential({
-			credential_jwt: credentialJwt,
-			issuer_canister_id: issuerCanisterId,
-			current_user_version: toNullable(currentUserVersion),
-			credential_spec: credentialSpec
-		});
 	};
 
 	btcAddPendingTransaction = async ({
