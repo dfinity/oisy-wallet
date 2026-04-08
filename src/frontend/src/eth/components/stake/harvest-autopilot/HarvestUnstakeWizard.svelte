@@ -233,11 +233,13 @@
 						enabled: false
 					});
 				}
-			} finally {
-				unstakeProgressStep = ProgressStepsUnstake.DONE;
-
-				setTimeout(() => onClose(), 750);
+			} catch {
+				// if disabling failed, we just proceed with the modal closing
 			}
+
+			unstakeProgressStep = ProgressStepsUnstake.DONE;
+
+			setTimeout(() => onClose(), 750);
 		} catch (error: unknown) {
 			const duration = performance.now() - startTime;
 			const durationInSeconds = duration / 1000;
