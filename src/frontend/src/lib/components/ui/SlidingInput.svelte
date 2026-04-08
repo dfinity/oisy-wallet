@@ -92,12 +92,12 @@
 	<div class="absolute right-0 z-2 w-full">
 		{#if visible}
 			<div
+				style:--overflowable-w={`${overflowableContentWidth}px`}
 				class="input-field condensed absolute right-0 -mt-[11px] mr-px flex overflow-hidden"
 				class:md:w-[270px]={nonNullish(overflowableContent)}
+				class:overflowable-input={nonNullish(overflowableContent)}
 				class:w-[270px]={isNullish(overflowableContent)}
 				class:w-full={nonNullish(overflowableContent)}
-				class:overflowable-input={nonNullish(overflowableContent)}
-				style:--overflowable-w="{overflowableContentWidth}px"
 				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
 				out:fade
 			>
@@ -148,7 +148,7 @@
 	</div>
 </div>
 
-<style>
+<style lang="scss">
 	@media (min-width: 768px) {
 		.overflowable-input {
 			max-width: calc(100% - var(--overflowable-w, 0px) + 2rem);
