@@ -91,6 +91,12 @@ fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
 }
 
 pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
+    let enabled = with_api_keys(|keys| keys.exchange_rate_enabled.unwrap_or(false));
+
+    if !enabled {
+        return Err(ExchangeError::Disabled);
+    }
+
     let api_key =
         with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
 

@@ -65,6 +65,7 @@ export interface AllowSigningResponse {
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export interface ApiKeys {
+	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
 	etherscan_api_key: [] | [string];
 	coingecko_api_key: [] | [string];
