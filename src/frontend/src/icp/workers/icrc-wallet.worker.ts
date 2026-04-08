@@ -162,29 +162,62 @@ export const initIcrcWalletScheduler = (
 		: initIcrcWalletBalanceScheduler();
 };
 
-let scheduler: IcWalletScheduler<PostMessageDataRequestIcrc> | undefined;
+const schedulers = new Map<string, IcWalletScheduler<PostMessageDataRequestIcrc>>();
+
+const stopAllSchedulers = () => {
+	schedulers.forEach((scheduler) => scheduler.stop());
+	schedulers.clear();
+};
 
 export const onIcrcWalletMessage = async ({
 	data: dataMsg
 }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
 
-	switch (msg) {
-		case 'startIcrcWalletTimer':
-		case 'stopIcrcWalletTimer':
-			scheduler?.stop();
-	}
+	const schedulerKey =
+		nonNullish(data) && 'ledgerCanisterId' in data ? data.ledgerCanisterId : undefined;
 
 	switch (msg) {
 		case 'startIcrcWalletTimer': {
-			scheduler = initIcrcWalletScheduler(data);
+			if (isNullish(schedulerKey)) {
+				return;
+			}
+
+			schedulers.get(schedulerKey)?.stop();
+
+			const scheduler = initIcrcWalletScheduler(data);
+
+			schedulers.set(schedulerKey, scheduler);
+
 			await scheduler.start(data);
+
+			break;
+		}
+		case 'stopIcrcWalletTimer': {
+			if (isNullish(schedulerKey)) {
+				stopAllSchedulers();
+				break;
+			}
+
+			schedulers.get(schedulerKey)?.stop();
+
+			schedulers.delete(schedulerKey);
+
 			break;
 		}
 		case 'triggerIcrcWalletTimer': {
+			if (isNullish(schedulerKey)) {
+				return;
+			}
+
+			let scheduler = schedulers.get(schedulerKey);
+
 			if (isNullish(scheduler)) {
 				scheduler = initIcrcWalletScheduler(data);
+
+				schedulers.set(schedulerKey, scheduler);
 			}
+
 			await scheduler.trigger(data);
 		}
 	}

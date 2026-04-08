@@ -87,7 +87,11 @@ describe('worker.icrc-wallet.services', () => {
 
 				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'stopIcrcWalletTimer',
-					workerId: mockId
+					workerId: mockId,
+					data: {
+						ledgerCanisterId,
+						env
+					}
 				});
 			});
 
@@ -110,7 +114,11 @@ describe('worker.icrc-wallet.services', () => {
 
 				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'stopIcrcWalletTimer',
-					workerId: mockId
+					workerId: mockId,
+					data: {
+						ledgerCanisterId,
+						env
+					}
 				});
 
 				expect(workerInstance.terminate).toHaveBeenCalledOnce();
@@ -262,7 +270,11 @@ describe('worker.icrc-wallet.services', () => {
 
 				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'stopIcrcWalletTimer',
-					workerId: mockId
+					workerId: mockId,
+					data: {
+						ledgerCanisterId,
+						env
+					}
 				});
 			});
 
