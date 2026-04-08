@@ -12,11 +12,7 @@ import type {
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
-import type {
-	AddUserCredentialParams,
-	BtcAddPendingTransactionParams,
-	BtcSelectUserUtxosFeeParams
-} from '$lib/types/api';
+import type { BtcAddPendingTransactionParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
@@ -68,22 +64,6 @@ describe('backend.canister', () => {
 	const mockResponseError = new Error('Test response error');
 	const queryParams = {
 		certified: false
-	};
-
-	const addUserCredentialParams = {
-		credentialJwt: 'test-credential-jwt',
-		issuerCanisterId: mockPrincipal,
-		currentUserVersion: ZERO,
-		credentialSpec: {
-			arguments: [],
-			credential_type: ''
-		}
-	} as AddUserCredentialParams;
-	const addUserCredentialEndpointParams = {
-		credential_jwt: addUserCredentialParams.credentialJwt,
-		issuer_canister_id: addUserCredentialParams.issuerCanisterId,
-		current_user_version: toNullable(addUserCredentialParams.currentUserVersion),
-		credential_spec: addUserCredentialParams.credentialSpec
 	};
 
 	const btcAddPendingTransactionParams: BtcAddPendingTransactionParams = {
@@ -309,50 +289,6 @@ describe('backend.canister', () => {
 		});
 
 		const res = getUserProfile(queryParams);
-
-		await expect(res).rejects.toThrow(mockResponseError);
-	});
-
-	it('adds user credentials with success response', async () => {
-		const response = { Ok: null };
-
-		service.add_user_credential.mockResolvedValue(response);
-
-		const { addUserCredential } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await addUserCredential(addUserCredentialParams);
-
-		expect(service.add_user_credential).toHaveBeenCalledWith(addUserCredentialEndpointParams);
-		expect(res).toEqual(response);
-	});
-
-	it('adds user credentials with error response', async () => {
-		const response = { Err: { InvalidCredential: null } };
-		service.add_user_credential.mockResolvedValue(response);
-
-		const { addUserCredential } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await addUserCredential(addUserCredentialParams);
-
-		expect(service.add_user_credential).toHaveBeenCalledWith(addUserCredentialEndpointParams);
-		expect(res).toEqual(response);
-	});
-
-	it('should throw an error if add_user_credential throws', async () => {
-		service.add_user_credential.mockImplementation(async () => {
-			await Promise.resolve();
-			throw mockResponseError;
-		});
-
-		const { addUserCredential } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = addUserCredential(addUserCredentialParams);
 
 		await expect(res).rejects.toThrow(mockResponseError);
 	});

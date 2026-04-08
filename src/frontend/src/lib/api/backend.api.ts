@@ -1,5 +1,4 @@
 import type {
-	AddUserCredentialResult,
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
@@ -12,7 +11,6 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
-	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
 	AllowSigningParams,
@@ -96,15 +94,6 @@ export const getUserProfile = async ({
 	const { getUserProfile } = await backendCanister({ identity });
 
 	return getUserProfile({ certified });
-};
-
-export const addUserCredential = async ({
-	identity,
-	...params
-}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResult> => {
-	const { addUserCredential } = await backendCanister({ identity });
-
-	return addUserCredential(params);
 };
 
 export const addPendingBtcTransaction = async ({
