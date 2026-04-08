@@ -105,6 +105,19 @@
 		}
 	},
 	{
+		"id": "icpixel",
+		"name": "dapps.descriptions.icpixel.name",
+		"oneLiner": "dapps.descriptions.icpixel.one_liner",
+		"website": "https://icpixel.org/",
+		"twitter": "https://twitter.com/ICPixelEditor",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.tools", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.icpixel.description",
+		"usesInternetIdentity": true,
+		"stats": "",
+		"logo": "/images/dapps/icpixel-logo.webp",
+		"screenshots": ["/images/dapps/icpixel-screenshot.webp"]
+	},
+	{
 		"id": "openchat",
 		"name": "dapps.descriptions.openchat.name",
 		"oneLiner": "dapps.descriptions.openchat.one_liner",
