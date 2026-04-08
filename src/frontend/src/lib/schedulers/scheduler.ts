@@ -36,6 +36,34 @@ export class SchedulerTimer {
 
 	constructor(private statusMsg: PostMessageResponseStatus) {}
 
+	private static readonly IDENTITY_MAX_RETRIES = 3;
+	private static readonly IDENTITY_RETRY_DELAY_MS = 1_000;
+
+	/**
+	 * Attempts to load the authenticated identity from IndexedDB with retries.
+	 *
+	 * On cold starts — especially on mobile devices — the worker can fire before
+	 * IndexedDB has finished persisting the identity written by the main thread.
+	 * A single `loadIdentity()` call may return `undefined` in that narrow window,
+	 * silently preventing the scheduler from ever starting.
+	 * Retrying with a short delay gives IDB enough time to settle.
+	 */
+	private async loadIdentityWithRetry(): Promise<Identity | undefined> {
+		for (let attempt = 0; attempt <= SchedulerTimer.IDENTITY_MAX_RETRIES; attempt++) {
+			const identity = await AuthClientProvider.getInstance().loadIdentity();
+
+			if (nonNullish(identity)) {
+				return identity;
+			}
+
+			if (attempt < SchedulerTimer.IDENTITY_MAX_RETRIES) {
+				await new Promise<void>((resolve) =>
+					setTimeout(resolve, SchedulerTimer.IDENTITY_RETRY_DELAY_MS)
+				);
+			}
+		}
+	}
+
 	async start<T>({
 		interval,
 		...rest
@@ -45,7 +73,7 @@ export class SchedulerTimer {
 			return;
 		}
 
-		const identity = await AuthClientProvider.getInstance().loadIdentity();
+		const identity = await this.loadIdentityWithRetry();
 
 		if (isNullish(identity)) {
 			// We do nothing if no identity

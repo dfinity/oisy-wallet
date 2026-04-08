@@ -65,11 +65,17 @@ describe('scheduler', () => {
 
 		describe('start', () => {
 			it('should not start if identity is nullish', async () => {
-				const loadIdentity = vi.spyOn(provider, 'loadIdentity').mockResolvedValueOnce(undefined);
+				const loadIdentity = vi.spyOn(provider, 'loadIdentity').mockResolvedValue(undefined);
 
-				await scheduler.start(mockParams);
+				const startPromise = scheduler.start(mockParams);
 
-				expect(loadIdentity).toHaveBeenCalledOnce();
+				// Advance past all identity retry delays (3 retries × 1_000ms)
+				await vi.advanceTimersByTimeAsync(3_000);
+
+				await startPromise;
+
+				// 1 initial attempt + 3 retries = 4
+				expect(loadIdentity).toHaveBeenCalledTimes(4);
 
 				expect(console.error).toHaveBeenCalledOnce();
 				expect(console.error).toHaveBeenNthCalledWith(
