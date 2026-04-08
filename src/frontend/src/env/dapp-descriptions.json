@@ -73,6 +73,21 @@
 		}
 	},
 	{
+		"id": "icexplorer",
+		"name": "dapps.descriptions.icexplorer.name",
+		"oneLiner": "dapps.descriptions.icexplorer.one_liner",
+		"website": "https://www.icexplorer.io/",
+		"twitter": "https://x.com/ICExplorer_io",
+		"openChat": "https://oc.app/community/m7w7t-haaaa-aaaac-ahdpa-cai/?ref=sdqdc-qaaaa-aaaac-ahnma-cai",
+		"github": "https://github.com/Token-Explorer-Hi/ic-explorer-docs",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.defi", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.icexplorer.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/icexplorer-logo.webp",
+		"screenshots": ["/images/dapps/icexplorer-screenshot.webp"]
+	},
+	{
 		"id": "icpindex",
 		"name": "dapps.descriptions.icpindex.name",
 		"oneLiner": "dapps.descriptions.icpindex.one_liner",
