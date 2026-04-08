@@ -41,10 +41,6 @@ describe('app.constants', () => {
 			VITE_BETA_BACKEND_CANISTER_ID: 'beta-backend-canister-id',
 			VITE_IC_BACKEND_CANISTER_ID: 'ic-backend-canister-id',
 			VITE_LOCAL_INTERNET_IDENTITY_CANISTER_ID: 'local-ii-id',
-			VITE_LOCAL_POUH_ISSUER_CANISTER_ID: 'local-pouh-id',
-			VITE_STAGING_POUH_ISSUER_CANISTER_ID: 'staging-pouh-id',
-			VITE_BETA_POUH_ISSUER_CANISTER_ID: 'beta-pouh-id',
-			VITE_IC_POUH_ISSUER_CANISTER_ID: 'ic-pouh-id',
 			VITE_LOCAL_REWARDS_CANISTER_ID: 'local-rewards-id',
 			VITE_STAGING_REWARDS_CANISTER_ID: 'staging-rewards-id',
 			VITE_BETA_REWARDS_CANISTER_ID: 'beta-rewards-id',
@@ -138,67 +134,6 @@ describe('app.constants', () => {
 			const appConst = await import('$lib/constants/app.constants');
 
 			expect(appConst.INTERNET_IDENTITY_ORIGIN).toBe('https://identity.internetcomputer.org');
-		});
-	});
-
-	describe('POUH_ISSUER_CANISTER_ID', () => {
-		it.each(['local', ...nonTestEnvs])('should resolve for %s', async (mode) => {
-			vi.stubGlobal('VITE_DFX_NETWORK', mode);
-			const appConst = await import('$lib/constants/app.constants');
-			const expected = import.meta.env[`VITE_${mode.toUpperCase()}_POUH_ISSUER_CANISTER_ID`];
-
-			expect(appConst.POUH_ISSUER_CANISTER_ID).toBe(expected);
-		});
-
-		it.each(testEnvs)('should resolve to staging canister for %s', async (mode) => {
-			vi.stubGlobal('VITE_DFX_NETWORK', mode);
-			const appConst = await import('$lib/constants/app.constants');
-
-			expect(appConst.POUH_ISSUER_CANISTER_ID).toBe('staging-pouh-id');
-		});
-
-		it('should be undefined for unknown env', async () => {
-			vi.stubGlobal('VITE_DFX_NETWORK', 'unknown');
-			const appConst = await import('$lib/constants/app.constants');
-
-			expect(appConst.POUH_ISSUER_CANISTER_ID).toBeUndefined();
-		});
-	});
-
-	describe('POUH_ISSUER_ORIGIN', () => {
-		it('should be undefined if unknown env', async () => {
-			vi.stubGlobal('VITE_DFX_NETWORK', 'unknown');
-			const appConst = await import('$lib/constants/app.constants');
-
-			expect(appConst.POUH_ISSUER_ORIGIN).toBeUndefined();
-		});
-
-		it('should resolve to local origin if LOCAL', async () => {
-			vi.stubGlobal('VITE_DFX_NETWORK', 'local');
-			const appConst = await import('$lib/constants/app.constants');
-
-			expect(appConst.POUH_ISSUER_ORIGIN).toBe(`http://local-pouh-id.localhost:4943`);
-		});
-
-		it('should resolve to staging subdomain if STAGING', async () => {
-			vi.stubGlobal('VITE_DFX_NETWORK', 'staging');
-			const appConst = await import('$lib/constants/app.constants');
-
-			expect(appConst.POUH_ISSUER_ORIGIN).toContain('https://staging-pouh-id.');
-		});
-
-		it.each(['beta', 'ic'])('should resolve to fixed domain for %s', async (mode) => {
-			vi.stubGlobal('VITE_DFX_NETWORK', mode);
-			const appConst = await import('$lib/constants/app.constants');
-
-			expect(appConst.POUH_ISSUER_ORIGIN).toBe('https://id.decideai.xyz');
-		});
-
-		it.each(testEnvs)('should resolve to staging subdomain for %s', async (mode) => {
-			vi.stubGlobal('VITE_DFX_NETWORK', mode);
-			const appConst = await import('$lib/constants/app.constants');
-
-			expect(appConst.POUH_ISSUER_ORIGIN).toContain('https://staging-pouh-id.');
 		});
 	});
 

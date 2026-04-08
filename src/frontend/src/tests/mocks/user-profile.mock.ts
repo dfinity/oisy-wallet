@@ -111,7 +111,6 @@ export const mockDefinedUserAgreements: Agreements = {
 export const mockUserProfileVersion = 1n;
 
 export const mockUserProfile: UserProfile = {
-	credentials: [],
 	version: toNullable(mockUserProfileVersion),
 	settings: toNullable(mockUserSettings),
 	agreements: toNullable(mockUserAgreements),

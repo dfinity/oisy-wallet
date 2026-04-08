@@ -1,8 +1,7 @@
 use ic_cdk::{
-    api::{msg_caller, time},
+    api::msg_caller,
     query, update,
 };
-use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use shared::types::{
     agreement::{
         GetAgreementHistoryError, UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest,
@@ -11,71 +10,20 @@ use shared::types::{
     experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
     network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
     result_types::{
-        AddUserCredentialResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
-        GetUserProfileResult, SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
+        AddUserHiddenDappIdResult, GetAgreementHistoryResult, GetUserProfileResult,
+        SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
         UpdateProviderAgreementsResult, UpdateUserAgreementsResult,
         UpdateUserNetworkSettingsResult,
     },
-    user_profile::{
-        AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
-    },
+    user_profile::{HasUserProfileResponse, UserProfile},
 };
 
 use crate::{
-    state::{mutate_state, read_config, read_state},
+    state::{mutate_state, read_state},
     types::StoredPrincipal,
-    user_profile::{credential_config::find_credential_config, model::UserProfileModel, service},
+    user_profile::{model::UserProfileModel, service},
     utils::{guards::caller_is_not_anonymous, housekeeping::spawn_allow_signing_if_below_limit},
 };
-
-/// Adds a verifiable credential to the user profile.
-///
-/// # Errors
-/// Errors are enumerated by: `AddUserCredentialError`.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
-    let user_principal = msg_caller();
-    let stored_principal = StoredPrincipal(user_principal);
-    let current_time_ns = u128::from(time());
-
-    let Some((vc_flow_signers, root_pk_raw, credential_type, derivation_origin)) =
-        read_config(|config| find_credential_config(&request, config))
-    else {
-        return AddUserCredentialResult::Err(AddUserCredentialError::ConfigurationError);
-    };
-
-    let AddUserCredentialRequest {
-        credential_jwt,
-        credential_spec,
-        current_user_version,
-        ..
-    } = request;
-
-    match validate_ii_presentation_and_claims(
-        &credential_jwt,
-        user_principal,
-        derivation_origin,
-        &vc_flow_signers,
-        &credential_spec,
-        &root_pk_raw,
-        current_time_ns,
-    ) {
-        Ok(()) => mutate_state(|s| {
-            let mut user_profile_model =
-                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            service::add_credential(
-                stored_principal,
-                current_user_version,
-                &credential_type,
-                vc_flow_signers.issuer_origin,
-                &mut user_profile_model,
-            )
-            .into()
-        }),
-        Err(_) => AddUserCredentialResult::Err(AddUserCredentialError::InvalidCredential),
-    }
-}
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
 /// existing settings.

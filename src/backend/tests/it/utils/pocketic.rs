@@ -10,13 +10,9 @@ use pocket_ic::{PocketIc, PocketIcBuilder};
 use shared::types::{
     backend_config::{Arg, InitArg},
     user_profile::{OisyUser, UserProfile},
-    verifiable_credential::{CredentialType, SupportedCredential},
 };
 
-use super::mock::{
-    CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, SIGNER_CANISTER_ID,
-    VC_DERIVATION_ORIGIN,
-};
+use super::mock::{CONTROLLER, II_CANISTER_ID, SIGNER_CANISTER_ID};
 use crate::utils::mock::CALLER;
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
@@ -412,18 +408,11 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
         ecdsa_key_name: "test_key_1".to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: Some(root_key),
-        supported_credentials: Some(vec![SupportedCredential {
-            ii_canister_id,
-            ii_origin: II_ORIGIN.to_string(),
-            issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
-                .expect("wrong issuer canister id"),
-            issuer_origin: ISSUER_ORIGIN.to_string(),
-            credential_type: CredentialType::ProofOfUniqueness,
-        }]),
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
-        derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
+        derivation_origin: None,
+        ii_canister_id: Some(ii_canister_id),
     });
 
     let mut builder = BackendBuilder::default().with_arg(encode_one(backend_init).unwrap());
@@ -491,18 +480,13 @@ fn init_arg_with_ecdsa_key(ecdsa_key_name: &str) -> Arg {
         ecdsa_key_name: ecdsa_key_name.to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
-        supported_credentials: Some(vec![SupportedCredential {
-            ii_canister_id: Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id"),
-            ii_origin: II_ORIGIN.to_string(),
-            issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
-                .expect("wrong issuer canister id"),
-            issuer_origin: ISSUER_ORIGIN.to_string(),
-            credential_type: CredentialType::ProofOfUniqueness,
-        }]),
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
-        derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
+        derivation_origin: None,
+        ii_canister_id: Some(
+            Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id"),
+        ),
     })
 }
 
@@ -542,7 +526,6 @@ impl PicBackend {
             let timestamp_nanos = timestamp.as_nanos_since_unix_epoch();
             let expected_user = OisyUser {
                 updated_timestamp: timestamp_nanos,
-                pouh_verified: false,
                 principal: caller,
             };
             expected_users.push(expected_user);

@@ -689,60 +689,19 @@ mod token {
 
 mod user_profile {
     //! Tests for the `user_profile` types.
-    use std::collections::HashMap;
-
-    use candid::{Decode, Encode, Principal};
-    use ic_verifiable_credentials::issuer_api::{ArgumentValue, CredentialSpec};
+    use candid::{Decode, Encode};
 
     use crate::{
-        types::{
-            user_profile::{
-                AddUserCredentialRequest, UserCredential, UserProfile, MAX_ISSUER_LENGTH,
-            },
-            verifiable_credential::CredentialType,
-        },
+        types::user_profile::UserProfile,
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
-
-    test_validate_on_deserialize!(
-        UserCredential,
-        [
-            TestVector {
-                description: "UserCredential with max length issuer",
-                input: UserCredential {
-                    credential_type: CredentialType::ProofOfUniqueness,
-                    issuer: "1".repeat(MAX_ISSUER_LENGTH),
-                    verified_date_timestamp: None,
-                },
-                valid: true,
-            },
-            TestVector {
-                description: "UserCredential with issuer too long",
-                input: UserCredential {
-                    credential_type: CredentialType::ProofOfUniqueness,
-                    issuer: "1".repeat(MAX_ISSUER_LENGTH + 1),
-                    verified_date_timestamp: None,
-                },
-                valid: false,
-            }
-        ]
-    );
-
-    fn sample_user_credential() -> UserCredential {
-        UserCredential {
-            credential_type: CredentialType::ProofOfUniqueness,
-            issuer: "1".repeat(MAX_ISSUER_LENGTH),
-            verified_date_timestamp: None,
-        }
-    }
 
     test_validate_on_deserialize!(
         UserProfile,
         [
             TestVector {
-                description: "UserProfile with max length credentials",
+                description: "UserProfile with valid data",
                 input: UserProfile {
-                    credentials: vec![sample_user_credential(); UserProfile::MAX_CREDENTIALS],
                     created_timestamp: 0,
                     updated_timestamp: 0,
                     version: None,
@@ -750,127 +709,6 @@ mod user_profile {
                     agreements: None,
                 },
                 valid: true,
-            },
-            TestVector {
-                description: "UserProfile with too many credentials",
-                input: UserProfile {
-                    credentials: vec![sample_user_credential(); UserProfile::MAX_CREDENTIALS + 1],
-                    created_timestamp: 0,
-                    updated_timestamp: 0,
-                    version: None,
-                    settings: None,
-                    agreements: None,
-                },
-                valid: false,
-            }
-        ]
-    );
-
-    test_validate_on_deserialize!(
-        AddUserCredentialRequest,
-        [
-            TestVector {
-                description: "AddUserCredentialRequest with credential_jwt at max length is valid",
-                input: AddUserCredentialRequest {
-                    credential_jwt: "1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
-                    credential_spec: CredentialSpec {
-                        credential_type: "test".to_string(),
-                        arguments: None,
-                    },
-                    issuer_canister_id: Principal::anonymous(),
-                    current_user_version: None,
-                },
-                valid: true,
-            },
-            TestVector {
-                description:
-                    "AddUserCredentialRequest with credential_jwt exceeding max length is invalid",
-                input: AddUserCredentialRequest {
-                    credential_jwt: "1"
-                        .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH + 1),
-                    credential_spec: CredentialSpec {
-                        credential_type: "test".to_string(),
-                        arguments: None,
-                    },
-                    issuer_canister_id: Principal::anonymous(),
-                    current_user_version: None,
-                },
-                valid: false,
-            },
-            TestVector {
-                description: "AddUserCredentialRequest with credential_type too long",
-                input: AddUserCredentialRequest {
-                    credential_jwt: "1".repeat(10),
-                    credential_spec: CredentialSpec {
-                        credential_type: "1"
-                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH + 1),
-                        arguments: None,
-                    },
-                    issuer_canister_id: Principal::anonymous(),
-                    current_user_version: None,
-                },
-                valid: false,
-            },
-            TestVector {
-                description: "AddUserCredentialRequest with too many arguments",
-                input: AddUserCredentialRequest {
-                    credential_jwt: "1".repeat(10),
-                    credential_spec: CredentialSpec {
-                        credential_type: "1"
-                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
-                        arguments: Some({
-                            let mut args = HashMap::new();
-                            for i in 0_i32
-                                ..=i32::try_from(
-                                    AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS,
-                                )
-                                .expect("MAX_CREDENTIAL_SPEC_ARGUMENTS should fit into i32")
-                            {
-                                args.insert(i.to_string(), ArgumentValue::Int(i));
-                            }
-                            args
-                        }),
-                    },
-                    issuer_canister_id: Principal::anonymous(),
-                    current_user_version: None,
-                },
-                valid: false,
-            },
-            TestVector {
-                description: "AddUserCredentialRequest with argument key too long",
-                input: AddUserCredentialRequest {
-                    credential_jwt: "1".repeat(10),
-                    credential_spec: CredentialSpec {
-                        credential_type: "1"
-                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
-                        arguments: Some({
-                            let mut args = HashMap::new();
-                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH + 1), ArgumentValue::Int(0));
-                            args
-                        }),
-                    },
-                    issuer_canister_id: Principal::anonymous(),
-                    current_user_version: None,
-                },
-                valid: false,
-            },
-            TestVector {
-                description: "AddUserCredentialRequest with argument value too long",
-                input: AddUserCredentialRequest {
-                    credential_jwt: "1".repeat(10),
-                    credential_spec: CredentialSpec {
-                        credential_type: "1"
-                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
-                        arguments: Some({
-                            let mut args = HashMap::new();
-                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH), ArgumentValue::String("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_VALUE_LENGTH + 1)));
-                            args
-                        }),
-                    },
-                    issuer_canister_id: Principal::anonymous(),
-                    current_user_version: None,
-                },
-                valid: false,
             }
         ]
     );

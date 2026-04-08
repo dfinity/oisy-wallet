@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, fmt};
+use std::collections::BTreeMap;
 
 use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
@@ -29,10 +29,7 @@ use crate::{
         },
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
-        user_profile::{
-            AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
-        },
-        verifiable_credential::CredentialType,
+        user_profile::{OisyUser, StoredUserProfile, UserProfile},
         Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },
     validate::{validate_on_deserialize, Validate},
@@ -163,10 +160,10 @@ impl From<InitArg> for Config {
         let InitArg {
             ecdsa_key_name,
             allowed_callers,
-            supported_credentials,
             ic_root_key_der,
             cfs_canister_id,
             derivation_origin,
+            ii_canister_id,
         } = arg;
         let ic_root_key_raw = match extract_raw_root_pk_from_der(
             &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
@@ -178,9 +175,9 @@ impl From<InitArg> for Config {
             ecdsa_key_name,
             allowed_callers,
             cfs_canister_id,
-            supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),
             derivation_origin,
+            ii_canister_id,
         }
     }
 }
@@ -200,14 +197,6 @@ impl TokenVersion for CustomToken {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
-    }
-}
-
-impl fmt::Display for CredentialType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            CredentialType::ProofOfUniqueness => write!(f, "ProofOfUniqueness"),
-        }
     }
 }
 
@@ -242,41 +231,13 @@ impl StoredUserProfile {
             experimental_features: ExperimentalFeaturesSettings::default(),
         };
         let agreements = Agreements::default();
-        let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
             settings: Some(settings),
             agreements: Some(agreements),
-            credentials,
             created_timestamp: now,
             updated_timestamp: now,
             version: None,
         }
-    }
-
-    /// # Errors
-    ///
-    /// Will return Err if there is a version mismatch.
-    pub fn add_credential(
-        &self,
-        profile_version: Option<Version>,
-        now: Timestamp,
-        credential_type: &CredentialType,
-        issuer: String,
-    ) -> Result<StoredUserProfile, AddUserCredentialError> {
-        if profile_version != self.version {
-            return Err(AddUserCredentialError::VersionMismatch);
-        }
-        let mut new_profile = self.with_incremented_version();
-        let user_credential = UserCredential {
-            credential_type: credential_type.clone(),
-            verified_date_timestamp: Some(now),
-            issuer,
-        };
-        let mut new_credentials = new_profile.credentials.clone();
-        new_credentials.insert(credential_type.clone(), user_credential);
-        new_profile.credentials = new_credentials;
-        new_profile.updated_timestamp = now;
-        Ok(new_profile)
     }
 
     /// Returns a copy with networks map set to the specified value.
@@ -548,7 +509,6 @@ impl From<&StoredUserProfile> for UserProfile {
             created_timestamp,
             updated_timestamp,
             version,
-            credentials,
             settings,
             agreements,
         } = user;
@@ -556,7 +516,6 @@ impl From<&StoredUserProfile> for UserProfile {
             created_timestamp: *created_timestamp,
             updated_timestamp: *updated_timestamp,
             version: *version,
-            credentials: credentials.clone().into_values().collect(),
             settings: settings.clone(),
             agreements: agreements.clone(),
         }
@@ -568,9 +527,6 @@ impl OisyUser {
     pub fn from_profile(user: &StoredUserProfile, principal: Principal) -> OisyUser {
         OisyUser {
             principal,
-            pouh_verified: user
-                .credentials
-                .contains_key(&CredentialType::ProofOfUniqueness),
             updated_timestamp: user.updated_timestamp,
         }
     }
