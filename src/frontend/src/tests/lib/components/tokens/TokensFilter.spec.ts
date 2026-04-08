@@ -1,11 +1,11 @@
-import { render } from '@testing-library/svelte';
-import type { AfterNavigate } from '@sveltejs/kit';
 import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 import { ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import { TOKEN_LIST_FILTER } from '$lib/constants/test-ids.constants';
 import { tokenListStore } from '$lib/stores/token-list.store';
-import { get } from 'svelte/store';
+import type { AfterNavigate } from '@sveltejs/kit';
+import { render } from '@testing-library/svelte';
 import { flushSync } from 'svelte';
+import { get } from 'svelte/store';
 
 let afterNavigateCallbacks: Array<(navigation: AfterNavigate) => void> = [];
 
