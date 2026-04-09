@@ -19,7 +19,8 @@ vi.mock('$lib/utils/parse.utils', () => ({
 }));
 
 vi.mock('$sol/api/solana.api', () => ({
-	estimatePriorityFee: vi.fn().mockResolvedValue(ZERO)
+	estimatePriorityFee: vi.fn().mockResolvedValue(ZERO),
+	getSolCreateAccountFee: vi.fn().mockResolvedValue(2039280n)
 }));
 
 describe('SwapSolForm', () => {

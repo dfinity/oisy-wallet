@@ -1,16 +1,23 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, untrack } from 'svelte';
+	import {
+		SOLANA_DEVNET_TOKEN,
+		SOLANA_LOCAL_TOKEN,
+		SOLANA_TOKEN
+	} from '$env/tokens/tokens.sol.env';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { estimatePriorityFee } from '$sol/api/solana.api';
+	import { estimatePriorityFee, getSolCreateAccountFee } from '$sol/api/solana.api';
 	import {
 		MICROLAMPORTS_PER_LAMPORT,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
@@ -47,6 +54,7 @@
 	let errorType = $state<TokenActionErrorType | undefined>();
 
 	const feeStore = initFeeStore();
+	const ataFeeStore = initFeeStore();
 
 	let feeTimer = $state<ReturnType<typeof setInterval> | undefined>();
 
@@ -69,6 +77,20 @@
 		feeStore.setFee(fee);
 	};
 
+	const estimateAtaFee = async () => {
+		if (isNullish($sourceToken) || !isTokenSpl($sourceToken)) {
+			ataFeeStore.setFee(undefined);
+
+			return;
+		}
+
+		const solNetwork = safeMapNetworkIdToNetwork($sourceToken.network.id);
+
+		const ataFee = await getSolCreateAccountFee(solNetwork);
+
+		ataFeeStore.setFee(ataFee);
+	};
+
 	$effect(() => {
 		[$sourceToken];
 
@@ -79,7 +101,21 @@
 		});
 	});
 
+	$effect(() => {
+		[$sourceToken];
+
+		untrack(() => estimateAtaFee());
+	});
+
 	onDestroy(clearFeeTimer);
+
+	let solanaNativeToken = $derived(
+		isNetworkIdSOLDevnet($sourceToken?.network.id)
+			? SOLANA_DEVNET_TOKEN
+			: isNetworkIdSOLLocal($sourceToken?.network.id)
+				? SOLANA_LOCAL_TOKEN
+				: SOLANA_TOKEN
+	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
 		if (isNullish($sourceToken)) {
@@ -103,6 +139,16 @@
 
 		if (!isTokenSpl($sourceToken) && nonNullish($feeStore)) {
 			if (userAmount + $feeStore > parsedSendBalance) {
+				return 'insufficient-funds-for-fee';
+			}
+		}
+
+		if (isTokenSpl($sourceToken) && nonNullish($feeStore)) {
+			const solBalance = $balancesStore?.[solanaNativeToken.id]?.data ?? ZERO;
+
+			const totalFee = $feeStore + ($ataFeeStore ?? ZERO);
+
+			if (solBalance < totalFee) {
 				return 'insufficient-funds-for-fee';
 			}
 		}
