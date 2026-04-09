@@ -178,14 +178,21 @@ describe('SwapForm', () => {
 		const renderAndSwitch = async ({
 			source,
 			destination,
-			receiveAmount
+			storeReceiveAmount
 		}: {
 			source: IcToken;
 			destination: IcToken;
-			receiveAmount: number | undefined;
+			storeReceiveAmount: bigint;
 		}) => {
 			setupContextWithTokens({ source, destination });
-			const swapAmountsStore = setupSwapAmountsStore(mockSwapAmounts);
+			const swapAmountsStore = setupSwapAmountsStore({
+				amountForSwap: 1,
+				swaps: mockSwapProviders,
+				selectedProvider: {
+					...mockSwapProviders[0],
+					receiveAmount: storeReceiveAmount
+				}
+			});
 			setupIcTokenFeeStore();
 
 			let swapAmount: OptionAmount = '1';
@@ -198,7 +205,7 @@ describe('SwapForm', () => {
 					set swapAmount(v: OptionAmount) {
 						swapAmount = v;
 					},
-					receiveAmount,
+					receiveAmount: undefined,
 					slippageValue: undefined,
 					isSwapAmountsLoading: false,
 					fee: 1000n,
@@ -220,7 +227,7 @@ describe('SwapForm', () => {
 			const { swapAmount } = await renderAndSwitch({
 				source: token8Dec,
 				destination: { ...token8Dec, id: parseTokenId('Token8DecB') } as IcToken,
-				receiveAmount: 1.12345678
+				storeReceiveAmount: 112345678n
 			});
 
 			expect(swapAmount).toBe(1.12345678);
@@ -230,7 +237,7 @@ describe('SwapForm', () => {
 			const { swapAmount } = await renderAndSwitch({
 				source: token8Dec,
 				destination: token18Dec,
-				receiveAmount: 100
+				storeReceiveAmount: 100000000000000000000n
 			});
 
 			expect(swapAmount).toBe(100);
@@ -240,27 +247,17 @@ describe('SwapForm', () => {
 			const { swapAmount } = await renderAndSwitch({
 				source: token8Dec,
 				destination: token18Dec,
-				receiveAmount: 0
+				storeReceiveAmount: 0n
 			});
 
 			expect(swapAmount).toBe(0);
-		});
-
-		it('should handle switch with undefined receiveAmount', async () => {
-			const { swapAmount } = await renderAndSwitch({
-				source: token8Dec,
-				destination: token18Dec,
-				receiveAmount: undefined
-			});
-
-			expect(swapAmount).toBeUndefined();
 		});
 
 		it('should handle switch with very small amount', async () => {
 			const { swapAmount } = await renderAndSwitch({
 				source: token18Dec,
 				destination: token8Dec,
-				receiveAmount: 0.00000001
+				storeReceiveAmount: 1n
 			});
 
 			expect(swapAmount).toBe(0.00000001);
@@ -270,22 +267,10 @@ describe('SwapForm', () => {
 			const { swapAmount } = await renderAndSwitch({
 				source: token8Dec,
 				destination: token18Dec,
-				receiveAmount: 1.5
+				storeReceiveAmount: 1500000000000000000n
 			});
 
 			expect(swapAmount).toBe(1.5);
-		});
-
-		it('should reset swap amounts store on switch', async () => {
-			const { swapAmountsStore } = await renderAndSwitch({
-				source: token8Dec,
-				destination: token18Dec,
-				receiveAmount: 1.5
-			});
-
-			const resetSpy = vi.spyOn(swapAmountsStore, 'reset');
-
-			setupContextWithTokens({ source: token8Dec, destination: token18Dec });
 		});
 	});
 
