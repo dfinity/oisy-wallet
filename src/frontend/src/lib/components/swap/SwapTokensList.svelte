@@ -15,10 +15,12 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import type { TokenUi } from '$lib/types/token-ui';
+	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { sortTokens } from '$lib/utils/tokens.utils';
 
@@ -34,8 +36,19 @@
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
+	let allSwapTokens: TokenToggleable<Token>[] = $derived(
+		filterSwapTokens({
+			tokens: [
+				{ ...ICP_TOKEN, enabled: true },
+				...$allSortedIcrcTokens,
+				...$allCrossChainSwapTokens
+			],
+			supportedData: $swapSupportedTokensStore
+		})
+	);
+
 	let tokensUi: TokenToggleable<TokenUi>[] = $derived(
-		[{ ...ICP_TOKEN, enabled: true }, ...$allSortedIcrcTokens, ...$allCrossChainSwapTokens]
+		allSwapTokens
 			.filter(
 				(token: TokenToggleable<Token>) =>
 					token.id !== $sourceToken?.id && token.id !== $destinationToken?.id

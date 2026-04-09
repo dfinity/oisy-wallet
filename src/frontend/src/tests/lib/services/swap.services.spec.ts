@@ -61,7 +61,8 @@ vi.mock('$lib/api/kong_backend.api', () => ({
 }));
 
 vi.mock('$lib/services/icp-swap.services', () => ({
-	icpSwapAmounts: vi.fn()
+	icpSwapAmounts: vi.fn(),
+	icpSwapSupportedTokens: vi.fn()
 }));
 
 vi.mock('$lib/api/icp-swap-pool.api', () => ({

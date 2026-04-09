@@ -285,6 +285,7 @@ interface I18nDapps {
 			carousel: { text: string; call_to_action: string };
 		};
 		icexplorer: { name: string; one_liner: string; description: string };
+		icpixel: { name: string; one_liner: string; description: string };
 	};
 }
 

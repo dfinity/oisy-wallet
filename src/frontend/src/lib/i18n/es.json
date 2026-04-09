@@ -448,6 +448,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -591,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: El Episodio 6",
+				"card_title": "OISY Sprinkles: El Episodio 6 está en vivo 🎉",
 				"one_liner": "Gana Sprinkles por ser activo, referir a otros y usar OISY en distintas cadenas. Tus acciones aumentan tus recompensas, y las referencias activas las impulsan aún más.<br/>Además, ahora más cadenas significa mejores chances de ganar.",
 				"participate_title": "Gana tokens por actividad y referencias. Más cadenas significan más oportunidades.",
 				"description": "Mantente activo para calificar: inicia sesión con frecuencia, completa acciones en tu billetera y mantén al menos 5 $.<br/>Cada cadena activa mejora tus probabilidades con un Multiplicador Multicadena.<br/>Gana el 10 % de los amigos que califiquen.",
@@ -608,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Ganaste el drop de bono semanal",
-						"description": "Acabas de ganar uno de nuestros drops de bono semanal.<br>Mantente activo/a y sigue refiriendo para ganar más",
+						"title": "¡Felicidades por ganar los OISY Sprinkles más grandes de hoy!",
+						"description": "Acabas de ganar nuestra principal Recompensa de Sprinkles<br>Mantente activo y sigue recomendando para ganar más.",
 						"share_href": ""
 					},
 					"referral": {

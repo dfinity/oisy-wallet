@@ -1,3 +1,4 @@
+import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcrc } from '$icp/services/ic-send.services';
@@ -17,7 +18,7 @@ import {
 } from '$lib/api/icp-swap-pool.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import { icpSwapAmounts } from '$lib/services/icp-swap.services';
+import { icpSwapAmounts, icpSwapSupportedTokens } from '$lib/services/icp-swap.services';
 import { fetchIcpSwap } from '$lib/services/swap.services';
 import { SwapErrorCodes } from '$lib/types/swap';
 import * as swapUtils from '$lib/utils/swap.utils';
@@ -371,6 +372,41 @@ describe('icp-swap.services', () => {
 					fee: ZERO
 				})
 			);
+		});
+	});
+
+	describe('icpSwapSupportedTokens', () => {
+		beforeEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('should return unique token addresses from all pools', async () => {
+			const mockPools: PoolData[] = [
+				{
+					...mockPool,
+					token0: { address: 'canister-a', standard: 'icrc' },
+					token1: { address: 'canister-b', standard: 'icrc' }
+				},
+				{
+					...mockPool,
+					token0: { address: 'canister-b', standard: 'icrc' },
+					token1: { address: 'canister-c', standard: 'icrc' }
+				}
+			];
+
+			vi.spyOn(factoryApi, 'getAllPools').mockResolvedValue(mockPools);
+
+			const result = await icpSwapSupportedTokens({ identity: mockIdentity });
+
+			expect(result).toEqual(new Set(['canister-a', 'canister-b', 'canister-c']));
+		});
+
+		it('should return an empty set when there are no pools', async () => {
+			vi.spyOn(factoryApi, 'getAllPools').mockResolvedValue([]);
+
+			const result = await icpSwapSupportedTokens({ identity: mockIdentity });
+
+			expect(result).toEqual(new Set());
 		});
 	});
 });

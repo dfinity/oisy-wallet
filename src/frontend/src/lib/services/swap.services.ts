@@ -84,7 +84,8 @@ import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
 	geSwapEthTokenAddress,
-	getWithdrawableToken
+	getWithdrawableToken,
+	isKongSupportedIcToken
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { sendSol } from '$sol/services/sol-send.services';
@@ -236,7 +237,7 @@ export const loadKongSwapTokens = async ({
 		if (result.status === 'fulfilled') {
 			return result.value.reduce<KongSwapTokensStoreData>(
 				(innerAcc, kongToken) =>
-					'IC' in kongToken && !kongToken.IC.is_removed && kongToken.IC.chain === 'IC'
+					isKongSupportedIcToken(kongToken)
 						? { ...innerAcc, [kongToken.IC.symbol]: kongToken.IC }
 						: innerAcc,
 				acc
