@@ -167,6 +167,7 @@
 	});
 
 	onDestroy(() => {
+		fetchGeneration++;
 		clearTimer();
 		clearDebounceTimer();
 	});
