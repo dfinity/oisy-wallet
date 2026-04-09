@@ -53,7 +53,7 @@
 	};
 
 	$effect(() => {
-		token;
+		[token];
 
 		untrack(() => updateFee());
 	});
@@ -74,7 +74,9 @@
 
 		if (isNullishOrEmpty(destination)) {
 			const ataFee = await getSolCreateAccountFee(solNetwork);
+
 			ataFeeStore.setFee(ataFee);
+
 			return;
 		}
 
