@@ -75,6 +75,11 @@ export const filterSwapTokens = <T extends Token>({
 		}
 
 		const { info, identifier } = lookup;
+
+		if (isNullish(info)) {
+			return token.enabled;
+		}
+
 		const { coverage, supportedTokenIds } = info;
 
 		if (coverage === 'none') {
