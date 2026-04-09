@@ -368,7 +368,8 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
-			expect(fetchMock).toHaveBeenCalledTimes(1);
+
+			expect(fetchMock).toHaveBeenCalledOnce();
 
 			await act(() =>
 				rerender({
@@ -384,6 +385,7 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
+
 			expect(fetchMock).toHaveBeenCalledTimes(2);
 
 			resolveStale(mockSwapProviders);
@@ -545,11 +547,13 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
-			expect(fetchMock).toHaveBeenCalledTimes(1);
+
+			expect(fetchMock).toHaveBeenCalledOnce();
 			expect(get(store)?.swaps).toEqual(mockSwapProviders);
 
 			await vi.advanceTimersByTimeAsync(5000);
 			await tick();
+
 			expect(fetchMock).toHaveBeenCalledTimes(2);
 
 			store.reset();
@@ -570,6 +574,7 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
+
 			expect(fetchMock).toHaveBeenCalledTimes(3);
 
 			resolvePeriodicFetch(mockSwapProviders);
@@ -633,7 +638,8 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
-			expect(fetchMock).toHaveBeenCalledTimes(1);
+
+			expect(fetchMock).toHaveBeenCalledOnce();
 
 			await act(() =>
 				rerender({
@@ -649,6 +655,7 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
+
 			expect(fetchMock).toHaveBeenCalledTimes(2);
 
 			resolveFirst(mockSwapProviders);
