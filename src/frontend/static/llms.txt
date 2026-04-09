@@ -66,6 +66,7 @@ Key facts:
 
 - [Why OISY Wallet](https://docs.oisy.com/introduction/why-oisy-wallet): Overview of architecture, network custody, and multichain support
 - [FAQ and comparisons](https://docs.oisy.com/using-oisy-wallet/faq): How OISY differs from MetaMask, Phantom, Trust Wallet, and Internet Identity
+- [Internet Identity](https://docs.oisy.com/introduction/internet-identity): A Web3 login system that removes passwords. Secure, private, and designed for recovery if devices are lost
 - [AI assistant](https://docs.oisy.com/using-oisy-wallet/ai-assistant): Privacy-preserving natural language interface for asset management
 - [Sprinkles rewards](https://docs.oisy.com/rewards/oisy-sprinkles): Daily token drops, referral rewards, and jackpot mechanics
 - [How to send tokens via dApps](https://docs.oisy.com/using-oisy-wallet/how-tos/send-a-token-using-a-dapp): WalletConnect integration with Uniswap and other dApps
