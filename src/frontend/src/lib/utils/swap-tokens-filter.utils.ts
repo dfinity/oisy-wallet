@@ -1,4 +1,4 @@
-import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import type {
 	SwapSupportedTokensData,
@@ -26,7 +26,7 @@ const resolveSwapTokenLookup = ({
 		return { info: supportedData.icp, identifier: token.ledgerCanisterId };
 	}
 
-	if (isTokenErc20(token)) {
+	if (isTokenErcFungible(token)) {
 		return { info: supportedData.evm, identifier: token.address.toLowerCase() };
 	}
 

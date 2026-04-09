@@ -4,6 +4,7 @@ import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 
@@ -224,6 +225,46 @@ describe('filterSwapTokens', () => {
 			const result = filterSwapTokens({ tokens: [token], supportedData });
 
 			expect(result).toContain(token);
+		});
+
+		it('matches ERC-4626 address case-insensitively', () => {
+			const token = asToggleable({
+				token: { ...mockValidErc4626Token, address: '0xAbCdEf1234567890' },
+				enabled: false
+			});
+
+			const supportedData: SwapSupportedTokensData = {
+				icp: { coverage: 'none', supportedTokenIds: new Set() },
+				evm: {
+					coverage: 'all',
+					supportedTokenIds: new Set(['0xabcdef1234567890'])
+				},
+				sol: { coverage: 'none', supportedTokenIds: new Set() }
+			};
+
+			const result = filterSwapTokens({ tokens: [token], supportedData });
+
+			expect(result).toContain(token);
+		});
+
+		it('filters out unsupported ERC-4626 tokens when coverage is all', () => {
+			const token = asToggleable({
+				token: { ...mockValidErc4626Token, address: '0xNotSupported' },
+				enabled: false
+			});
+
+			const supportedData: SwapSupportedTokensData = {
+				icp: { coverage: 'none', supportedTokenIds: new Set() },
+				evm: {
+					coverage: 'all',
+					supportedTokenIds: new Set(['0xsomeotheraddress'])
+				},
+				sol: { coverage: 'none', supportedTokenIds: new Set() }
+			};
+
+			const result = filterSwapTokens({ tokens: [token], supportedData });
+
+			expect(result).not.toContain(token);
 		});
 	});
 
