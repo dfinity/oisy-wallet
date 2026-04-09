@@ -704,6 +704,7 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
+
 			expect(fetchMock).toHaveBeenCalledOnce();
 
 			store.reset();
@@ -726,6 +727,7 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
+
 			expect(fetchMock).toHaveBeenCalledTimes(2);
 
 			resolveStale(mockSwapProviders);
@@ -773,6 +775,7 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
+
 			expect(fetchMock).toHaveBeenCalledOnce();
 
 			store.reset();
@@ -795,6 +798,7 @@ describe('SwapAmountsContext.svelte', () => {
 
 			await vi.advanceTimersByTimeAsync(350);
 			await tick();
+
 			expect(fetchMock).toHaveBeenCalledTimes(2);
 
 			rejectStale(new Error('stale error'));
