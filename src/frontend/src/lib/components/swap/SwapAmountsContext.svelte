@@ -146,6 +146,8 @@
 
 	$effect(() => {
 		if (pauseAmountUpdates || !enableAmountUpdates) {
+			fetchGeneration++;
+			untrack(clearDebounceTimer);
 			clearTimer();
 		} else {
 			startTimer();
