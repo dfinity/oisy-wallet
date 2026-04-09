@@ -147,6 +147,7 @@
 	$effect(() => {
 		if (pauseAmountUpdates || !enableAmountUpdates) {
 			fetchGeneration++;
+			isSwapAmountsLoading = false;
 			untrack(clearDebounceTimer);
 			clearTimer();
 		} else {
