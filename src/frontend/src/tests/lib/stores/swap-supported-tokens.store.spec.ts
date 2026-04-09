@@ -20,12 +20,13 @@ describe('swap-supported-tokens.store', () => {
 		swapSupportedTokensStore.set(data);
 
 		const stored = get(swapSupportedTokensStore);
+
 		expect(stored).toBeDefined();
 		expect(stored?.icp.coverage).toBe('all');
-		expect(stored?.icp.supportedTokenIds.has('canister-1')).toBe(true);
-		expect(stored?.icp.supportedTokenIds.has('canister-2')).toBe(true);
+		expect(stored?.icp.supportedTokenIds.has('canister-1')).toBeTruthy();
+		expect(stored?.icp.supportedTokenIds.has('canister-2')).toBeTruthy();
 		expect(stored?.evm.coverage).toBe('some');
-		expect(stored?.evm.supportedTokenIds.has('0xabc')).toBe(true);
+		expect(stored?.evm.supportedTokenIds.has('0xabc')).toBeTruthy();
 		expect(stored?.sol.coverage).toBe('none');
 		expect(stored?.sol.supportedTokenIds.size).toBe(0);
 	});
