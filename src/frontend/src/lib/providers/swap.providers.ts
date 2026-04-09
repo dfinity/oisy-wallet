@@ -1,7 +1,7 @@
 import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import { kongSwapAmounts } from '$lib/api/kong_backend.api';
 import { icpSwapAmounts, icpSwapSupportedTokens } from '$lib/services/icp-swap.services';
-import { kongSwapSupportedTokens } from '$lib/services/swap.services';
+import { kongSwapSupportedTokens } from '$lib/services/kong-swap.services';
 import { SwapProvider, type SwapProviderConfig } from '$lib/types/swap';
 import { mapIcpSwapResult, mapKongSwapResult } from '$lib/utils/swap.utils';
 
