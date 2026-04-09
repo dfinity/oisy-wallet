@@ -27,7 +27,9 @@ const determineCoverage = ({
  * Filters providers that have `getSupportedTokens` and calls it in a single pass,
  * collecting the resulting promises without non-null assertions.
  */
-const buildFetchTokenSets = <P extends { getSupportedTokens?: (...args: never[]) => Promise<Set<string>> }>({
+const buildFetchTokenSets = <
+	P extends { getSupportedTokens?: (...args: never[]) => Promise<Set<string>> }
+>({
 	providers,
 	callFn
 }: {

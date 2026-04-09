@@ -67,9 +67,8 @@ describe('swap-supported-tokens.services', () => {
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set(['0xabc', '0xdef']));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
 
-		const { loadSwapSupportedTokens } = await import(
-			'$lib/services/swap-supported-tokens.services'
-		);
+		const { loadSwapSupportedTokens } =
+			await import('$lib/services/swap-supported-tokens.services');
 		await loadSwapSupportedTokens({ identity: mockIdentity });
 
 		const stored = get(swapSupportedTokensStore);
@@ -97,9 +96,8 @@ describe('swap-supported-tokens.services', () => {
 		mockEvmGetSupportedTokens.mockRejectedValue(new Error('NEAR Intents API error'));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
 
-		const { loadSwapSupportedTokens } = await import(
-			'$lib/services/swap-supported-tokens.services'
-		);
+		const { loadSwapSupportedTokens } =
+			await import('$lib/services/swap-supported-tokens.services');
 		await loadSwapSupportedTokens({ identity: mockIdentity });
 
 		const stored = get(swapSupportedTokensStore);
@@ -125,15 +123,12 @@ describe('swap-supported-tokens.services', () => {
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set());
 		mockSolGetSupportedTokens.mockResolvedValue(new Set());
 
-		const { loadSwapSupportedTokens } = await import(
-			'$lib/services/swap-supported-tokens.services'
-		);
+		const { loadSwapSupportedTokens } =
+			await import('$lib/services/swap-supported-tokens.services');
 		await loadSwapSupportedTokens({ identity: mockIdentity });
 
 		const stored = get(swapSupportedTokensStore);
 
-		expect(stored?.icp.supportedTokenIds).toEqual(
-			new Set(['id-1', 'id-2', 'id-3', 'id-shared'])
-		);
+		expect(stored?.icp.supportedTokenIds).toEqual(new Set(['id-1', 'id-2', 'id-3', 'id-shared']));
 	});
 });
