@@ -80,7 +80,6 @@
 			"source_code_on_github": "الرمز المصدري على GitHub",
 			"view_on_explorer": "عرض على المستكشف",
 			"source_code": "الرمز المصدري",
-			"changelog": "سجل التغييرات",
 			"documentation": "الوثائق",
 			"support": "الدعم",
 			"confirm_navigate": "هل أنت متأكد أنك تريد الانتقال بعيدًا؟",
@@ -100,7 +99,6 @@
 			"activity": "افتح عرض النشاط",
 			"airdrops": "افتح عرض المكافآت",
 			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
-			"changelog": "افتح سجل تغييرات $oisy_name على GitHub لمراجعة آخر التحديثات",
 			"documentation": "افتح وثائق $oisy_name",
 			"support": "افتح قسم الدعم في وثائق $oisy_name",
 			"open_twitter": "افتح حساب DFINITY X/Twitter",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "لا توجد هوية إنترنت.",
-			"invalid_pouh_credential": "عذرًا، حدث خطأ أثناء التحقق من صحة اعتماد الإنسانية. يرجى الاتصال بالجهة المصدرة وطلب الاعتماد مرة أخرى.",
-			"error_validating_pouh_credential_oisy": "عذرًا، حدث خطأ أثناء التحقق من صحة اعتماد الإنسانية في $oisy_short: $error",
-			"error_validating_pouh_credential": "عذرًا، حدث خطأ أثناء التحقق من صحة اعتماد الإنسانية.",
-			"error_requesting_pouh_credential": "عذرًا، حدث خطأ أثناء طلب اعتماد الإنسانية.",
-			"missing_pouh_issuer_origin": "عذرًا، حدث خطأ أثناء طلب اعتماد الإنسانية. أصل الجهة المصدرة مفقود.",
-			"no_pouh_credential": "عذرًا، حدث خطأ أثناء طلب اعتماد الإنسانية. هل لديك اعتماد صالح في Decide AI؟",
 			"error_while_signing_in": "حدث خطأ ما أثناء تسجيل الدخول.",
 			"unexpected_issue_with_syncing": "مشكلة غير متوقعة أثناء مزامنة حالة المصادقة الخاصة بك."
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -735,11 +746,6 @@
 			"active_networks_description": "حدد الشبكات التي تريد العمل بها في $oisy_name. لن تظهر التوكنات والمعاملات من الشبكات غير النشطة أو تُدرج في رصيدك المتاح.",
 			"enable_network": "تمكين الشبكة",
 			"disable_network": "تعطيل الشبكة",
-			"credentials_title": "بيانات الاعتماد",
-			"pouh_credential": "اعتماد الإنسانية",
-			"pouh_credential_description": "اعتماد الإنسانية هو إثبات للإنسانية. يتم إصداره بواسطة Decide AI.",
-			"present_pouh_credential": "تقديم",
-			"pouh_credential_verified": "تم التحقق ✅",
 			"appearance": "المظهر",
 			"appearance_light": "فاتح",
 			"appearance_dark": "داكن",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "",
 			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": "",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

@@ -80,7 +80,6 @@
 			"source_code_on_github": "Codice sorgente su GitHub",
 			"view_on_explorer": "Visualizza sull'explorer",
 			"source_code": "Codice sorgente",
-			"changelog": "Registro modifiche",
 			"documentation": "Documentazione",
 			"support": "Supporto",
 			"confirm_navigate": "Sei sicuro di voler andartene?",
@@ -100,7 +99,6 @@
 			"activity": "Apri la vista attività",
 			"airdrops": "Apri la vista Ricompense",
 			"menu": "Il tuo indirizzo del wallet, impostazioni, disconnessione e collegamenti esterni",
-			"changelog": "Apri il registro modifiche di $oisy_name su GitHub per rivedere gli ultimi aggiornamenti",
 			"documentation": "Apri la documentazione di $oisy_name",
 			"support": "Apri la sezione Supporto della documentazione di $oisy_name",
 			"open_twitter": "Apri il feed X/Twitter di DFINITY",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Nessuna Internet Identity.",
-			"invalid_pouh_credential": "Spiacenti, ma si è verificato un errore durante la convalida della \"Humanity Credential\". Si prega di contattare l'emittente e richiedere nuovamente la credenziale.",
-			"error_validating_pouh_credential_oisy": "Spiacenti, ma si è verificato un errore durante la convalida della \"Humanity Credential\" in $oisy_short: $error",
-			"error_validating_pouh_credential": "Spiacenti, ma si è verificato un errore durante la convalida della \"Humanity Credential\".",
-			"error_requesting_pouh_credential": "Spiacenti, ma si è verificato un errore durante la richiesta della \"Humanity Credential\".",
-			"missing_pouh_issuer_origin": "Spiacenti, ma si è verificato un errore durante la richiesta della \"Humanity Credential\". L'origine dell'emittente è mancante.",
-			"no_pouh_credential": "Spiacenti, ma si è verificato un errore durante la richiesta della \"Humanity Credential\". Hai una credenziale valida in Decide AI?",
 			"error_while_signing_in": "Qualcosa è andato storto durante l'accesso.",
 			"unexpected_issue_with_syncing": "Problema imprevisto durante la sincronizzazione dello stato di autenticazione."
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: L'Episodio 6",
+				"card_title": "OISY Sprinkles: L'Episodio 6 è in diretta 🎉",
 				"one_liner": "Guadagna Sprinkles essendo attivo, invitando altri e usando OISY su più chain. Le tue azioni aumentano le tue ricompense, e i referral attivi le moltiplicano ulteriormente.<br/>Inoltre, ora più chain significa maggiori possibilità di vincere.",
 				"participate_title": "Guadagna token per attività e referral. Più chain significano più opportunità.",
 				"description": "Rimani attivo per qualificarti: accedi spesso, completa azioni nel portafoglio e detieni almeno 5 $.<br/>Ogni chain attiva aumenta le tue probabilità con un Moltiplicatore Multichain.<br/>Guadagna il 10 % dagli amici che si qualificano.",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Hai vinto il drop bonus settimanale",
-						"description": "Hai appena vinto uno dei nostri drop bonus settimanali.<br>Rimani attivo/a e continua a invitare per vincere di più",
+						"title": "Congratulazioni per aver guadagnato il più grande OISY Sprinkles di oggi!",
+						"description": "Hai appena vinto la nostra migliore Ricompensa Sprinkle<br>Rimani attivo e continua a invitare per vincere di più.",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "Seleziona le reti che vuoi utilizzare in $oisy_name. I token e le transazioni delle reti inattive non verranno visualizzati o inclusi nel tuo saldo disponibile.",
 			"enable_network": "Abilita rete",
 			"disable_network": "Disabilita rete",
-			"credentials_title": "Credenziali",
-			"pouh_credential": "Humanity Credential",
-			"pouh_credential_description": "La \"Humanity Credential\" è una prova di umanità. È emessa da Decide AI.",
-			"present_pouh_credential": "Presenta",
-			"pouh_credential_verified": "Verificato ✅",
 			"appearance": "Aspetto",
 			"appearance_light": "Chiaro",
 			"appearance_dark": "Scuro",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "",
 			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": "",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

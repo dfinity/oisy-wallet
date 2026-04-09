@@ -80,8 +80,11 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	}
 
 	protected override stopTimer = () => {
-		this.postMessage({
-			msg: 'stopDip20WalletTimer'
+		this.postMessage<PostMessage<PostMessageDataRequestDip20>>({
+			msg: 'stopDip20WalletTimer',
+			data: {
+				canisterId: this.canisterId
+			}
 		});
 	};
 

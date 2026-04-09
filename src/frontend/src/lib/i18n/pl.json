@@ -80,7 +80,6 @@
 			"source_code_on_github": "Kod źródłowy na GitHubie",
 			"view_on_explorer": "Zobacz w eksploratorze",
 			"source_code": "Kod źródłowy",
-			"changelog": "Dziennik zmian",
 			"documentation": "Dokumentacja",
 			"support": "Wsparcie",
 			"confirm_navigate": "Czy na pewno chcesz opuścić stronę?",
@@ -100,7 +99,6 @@
 			"activity": "Otwórz widok aktywności",
 			"airdrops": "Otwórz widok nagród",
 			"menu": "Adres Twojego portfela, ustawienia, wylogowanie i linki zewnętrzne",
-			"changelog": "Otwórz dziennik zmian $oisy_name na GitHubie, aby przejrzeć najnowsze aktualizacje",
 			"documentation": "Otwórz dokumentację $oisy_name",
 			"support": "Otwórz sekcję wsparcia w dokumentacji $oisy_name",
 			"open_twitter": "Otwórz kanał DFINITY X/Twitter",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Brak tożsamości internetowej.",
-			"invalid_pouh_credential": "Przepraszamy, ale podczas sprawdzania poprawności poświadczenia człowieczeństwa wystąpił błąd. Skontaktuj się z wystawcą i poproś o ponowne wydanie poświadczenia.",
-			"error_validating_pouh_credential_oisy": "Przepraszamy, ale podczas sprawdzania poprawności poświadczenia człowieczeństwa w $oisy_short wystąpił błąd: $error",
-			"error_validating_pouh_credential": "Przepraszamy, ale podczas sprawdzania poprawności poświadczenia człowieczeństwa wystąpił błąd.",
-			"error_requesting_pouh_credential": "Przepraszamy, ale podczas żądania poświadczenia człowieczeństwa wystąpił błąd.",
-			"missing_pouh_issuer_origin": "Przepraszamy, ale podczas żądania poświadczenia człowieczeństwa wystąpił błąd. Brakuje pochodzenia wystawcy.",
-			"no_pouh_credential": "Przepraszamy, ale podczas żądania poświadczenia człowieczeństwa wystąpił błąd. Czy masz ważne poświadczenie w Decide AI?",
 			"error_while_signing_in": "Coś poszło nie tak podczas logowania.",
 			"unexpected_issue_with_syncing": "Nieoczekiwany problem podczas synchronizacji statusu uwierzytelnienia."
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Odcinek 6",
+				"card_title": "OISY Sprinkles: Odcinek 6 jest już dostępny 🎉",
 				"one_liner": "Zdobywaj Sprinkles za aktywność, polecanie innych i korzystanie z OISY na różnych sieciach. Twoje działania zwiększają Twoje nagrody, a aktywne polecenia jeszcze je wzmacniają.<br/>Co więcej, więcej sieci oznacza teraz większe szanse na wygraną.",
 				"participate_title": "Zdobywaj tokeny za aktywność i polecenia. Więcej sieci oznacza więcej szans.",
 				"description": "Bądź aktywny/a, aby się kwalifikować: loguj się często, wykonuj działania w portfelu i trzymaj co najmniej 5 $.<br/>Każda aktywna sieć zwiększa Twoje szanse dzięki Mnożnikowi Wielosieciowemu.<br/>Zarabiaj 10% od znajomych, którzy się zakwalifikują.",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Wygrałeś/aś tygodniowy bonus drop",
-						"description": "Właśnie zdobyłeś/aś jeden z naszych tygodniowych bonusowych dropów.<br>Pozostań aktywny/a i kontynuuj polecanie, aby wygrywać więcej",
+						"title": "Gratulacje z okazji zdobycia największych dzisiejszych OISY Sprinkles!",
+						"description": "Właśnie zdobyłeś naszą najwyższą nagrodę Sprinkles<br>Bądź aktywny i polecaj, aby wygrać więcej.",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "Wybierz sieci, z którymi chcesz pracować w $oisy_name. Tokeny i transakcje z nieaktywnych sieci nie będą wyświetlane ani wliczane do dostępnego salda.",
 			"enable_network": "Włącz sieć",
 			"disable_network": "Wyłącz sieć",
-			"credentials_title": "Poświadczenia",
-			"pouh_credential": "Poświadczenie ludzkości",
-			"pouh_credential_description": "Poświadczenie ludzkości jest dowodem człowieczeństwa. Jest wydawane przez Decide AI.",
-			"present_pouh_credential": "Przedstaw",
-			"pouh_credential_verified": "Zweryfikowano ✅",
 			"appearance": "Wygląd",
 			"appearance_light": "Jasny",
 			"appearance_dark": "Ciemny",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "Opłaty za wymianę",
 			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "Wypłata środków nie powiodła się. <br> Spróbuj ponownie lub postępuj zgodnie z",
 			"swap_sucess_withdraw_failed": "Wymiana została zakończona, ale Twoje tokeny nie mogły zostać automatycznie wypłacone. Kliknij przycisk Wypłać poniżej, aby wypłacić je ręcznie.<br> Lub postępuj zgodnie z",
 			"swap_sucess_manually_withdraw_success": "Tokeny z poprzedniej wymiany zostały pomyślnie wypłacone. Możesz teraz zamknąć to okno.",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

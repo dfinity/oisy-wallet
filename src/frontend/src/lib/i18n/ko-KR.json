@@ -80,7 +80,6 @@
 			"source_code_on_github": "GitHub 소스 코드",
 			"view_on_explorer": "탐색기에서 보기",
 			"source_code": "소스 코드",
-			"changelog": "변경 로그",
 			"documentation": "문서",
 			"support": "지원",
 			"confirm_navigate": "정말로 이 페이지를 떠나시겠습니까?",
@@ -100,7 +99,6 @@
 			"activity": "활동 보기 열기",
 			"airdrops": "리워드 보기 열기",
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
-			"changelog": "GitHub에서 $oisy_name의 변경 로그를 열어 최신 업데이트를 확인하세요",
 			"documentation": "$oisy_name 문서 열기",
 			"support": "$oisy_name 문서의 지원 섹션 열기",
 			"open_twitter": "DFINITY X/트위터 피드 열기",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "인터넷 아이덴티티가 없습니다.",
-			"invalid_pouh_credential": "죄송합니다. 인류 자격 증명을 검증하는 중 오류가 발생했습니다. 발급자에게 문의하여 자격 증명을 다시 요청해 주세요.",
-			"error_validating_pouh_credential_oisy": "죄송합니다. $oisy_short에서 인류 자격 증명을 검증하는 중 오류가 발생했습니다: $error",
-			"error_validating_pouh_credential": "죄송합니다. 인류 자격 증명을 검증하는 중 오류가 발생했습니다.",
-			"error_requesting_pouh_credential": "죄송합니다. 인류 자격 증명을 요청하는 중 오류가 발생했습니다.",
-			"missing_pouh_issuer_origin": "죄송합니다. 인류 자격 증명을 요청하는 중 오류가 발생했습니다. 발급자 출처가 없습니다.",
-			"no_pouh_credential": "죄송합니다. 인류 자격 증명을 요청하는 중 오류가 발생했습니다. Decide AI에 유효한 자격 증명이 있으신가요?",
 			"error_while_signing_in": "로그인 중 문제가 발생했습니다.",
 			"unexpected_issue_with_syncing": "인증 상태를 동기화하는 중 예기치 않은 문제가 발생했습니다."
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: 에피소드 6",
+				"card_title": "OISY Sprinkles: 에피소드 6 공개 🎉",
 				"one_liner": "활동하고, 다른 사람을 추천하고, 여러 체인에서 OISY를 사용하여 Sprinkles를 획득하세요. 당신의 행동이 보상을 늘리고, 활성 추천이 보상을 더욱 높입니다.<br/>이제 더 많은 체인은 더 높은 당첨 가능성을 의미합니다.",
 				"participate_title": "활동과 추천으로 토큰을 획득하세요. 체인이 많을수록 기회도 늘어납니다.",
 				"description": "자격을 얻으려면 활발하게 활동하세요: 자주 로그인하고, 지갑 작업을 완료하고, 최소 5 $를 보유하세요.<br/>활성화된 각 체인은 멀티체인 배수로 당첨 확률을 높입니다.<br/>자격을 갖춘 친구로부터 10%를 획득하세요.",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "주간 보너스 드롭에 당첨되셨습니다",
-						"description": "주간 보너스 드롭 중 하나를 획득하셨습니다.<br>더 많이 획득하려면 활발하게 활동하고 계속 추천하세요",
+						"title": "오늘 가장 큰 OISY 스프링클 획득을 축하합니다!",
+						"description": "최고의 스프링클 보상을 획득하셨습니다<br>더 많이 받으려면 활동을 유지하고 계속 추천하세요",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "$oisy_name에서 사용할 네트워크를 선택하세요. 비활성 네트워크의 토큰과 트랜잭션은 표시되지 않으며 사용 가능한 잔액에 포함되지 않습니다.",
 			"enable_network": "네트워크 활성화",
 			"disable_network": "네트워크 비활성화",
-			"credentials_title": "자격 증명",
-			"pouh_credential": "인류 자격 증명",
-			"pouh_credential_description": "인류 자격 증명은 인간임을 증명하는 것으로, Decide AI에서 발급합니다.",
-			"present_pouh_credential": "제출",
-			"pouh_credential_verified": "인증됨 ✅",
 			"appearance": "외관",
 			"appearance_light": "라이트",
 			"appearance_dark": "다크",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "스왑 수수료",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "자금 출금에 실패했습니다. <br> 다시 시도하거나 다음을 따르세요",
 			"swap_sucess_withdraw_failed": "스왑은 완료되었으나 토큰을 자동으로 출금할 수 없습니다. 아래 출금 버튼을 클릭하여 수동으로 출금하세요.<br> 또는 다음을 따르세요",
 			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다.",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

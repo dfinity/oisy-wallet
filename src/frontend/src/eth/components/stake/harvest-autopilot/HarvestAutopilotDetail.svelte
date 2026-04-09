@@ -196,6 +196,7 @@
 
 <div class="flex flex-col gap-6 pb-6">
 	<StakeProviderContainer
+		apyLabel={$i18n.vaults.text.live_apy}
 		logo={vault?.token.assetIcon ?? vault?.token.icon}
 		maxApy={nonNullish(vault?.apy) ? Number(vault.apy) : 0}
 		pageDescription={$i18n.stake.text.harvest_autopilot_vault_page_description}

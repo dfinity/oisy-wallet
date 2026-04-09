@@ -1,23 +1,24 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy, untrack } from 'svelte';
-	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
+	import { getContext } from 'svelte';
+	import {
+		SOLANA_DEVNET_TOKEN,
+		SOLANA_LOCAL_TOKEN,
+		SOLANA_TOKEN
+	} from '$env/tokens/tokens.sol.env';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { estimatePriorityFee } from '$sol/api/solana.api';
-	import {
-		MICROLAMPORTS_PER_LAMPORT,
-		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
-	} from '$sol/constants/sol.constants';
-	import { initFeeStore } from '$sol/stores/sol-fee.store';
-	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
+	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
+	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -45,42 +46,17 @@
 	const { sourceToken, destinationToken, sourceTokenBalance } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
+	const { feeStore, ataFeeStore }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
+
 	let errorType = $state<TokenActionErrorType | undefined>();
 
-	const feeStore = initFeeStore();
-
-	let feeTimer = $state<ReturnType<typeof setInterval> | undefined>();
-
-	const clearFeeTimer = () => {
-		if (nonNullish(feeTimer)) {
-			clearInterval(feeTimer);
-			feeTimer = undefined;
-		}
-	};
-
-	const estimateSolFee = async () => {
-		if (isNullish($sourceToken)) {
-			return;
-		}
-
-		const solNetwork = safeMapNetworkIdToNetwork($sourceToken.network.id);
-		const addresses = isTokenSpl($sourceToken) ? [$sourceToken.address] : undefined;
-		const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
-		const fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS + priorityFee / MICROLAMPORTS_PER_LAMPORT;
-		feeStore.setFee(fee);
-	};
-
-	$effect(() => {
-		[$sourceToken];
-
-		untrack(() => {
-			clearFeeTimer();
-			estimateSolFee();
-			feeTimer = setInterval(estimateSolFee, 5000);
-		});
-	});
-
-	onDestroy(clearFeeTimer);
+	let solanaNativeToken = $derived(
+		isNetworkIdSOLDevnet($sourceToken?.network.id)
+			? SOLANA_DEVNET_TOKEN
+			: isNetworkIdSOLLocal($sourceToken?.network.id)
+				? SOLANA_LOCAL_TOKEN
+				: SOLANA_TOKEN
+	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
 		if (isNullish($sourceToken)) {
@@ -104,6 +80,16 @@
 
 		if (!isTokenSpl($sourceToken) && nonNullish($feeStore)) {
 			if (userAmount + $feeStore > parsedSendBalance) {
+				return 'insufficient-funds-for-fee';
+			}
+		}
+
+		if (isTokenSpl($sourceToken) && nonNullish($feeStore)) {
+			const solBalance = $balancesStore?.[solanaNativeToken.id]?.data ?? ZERO;
+
+			const totalFee = $feeStore + ($ataFeeStore ?? ZERO);
+
+			if (solBalance < totalFee) {
 				return 'insufficient-funds-for-fee';
 			}
 		}
@@ -140,10 +126,10 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<SwapCrossChainInfo />
-
 			<div class="flex flex-col gap-3">
 				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
+
+				<SwapSolFees />
 			</div>
 		{/if}
 	{/snippet}

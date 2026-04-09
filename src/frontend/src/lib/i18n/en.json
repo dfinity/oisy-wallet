@@ -80,7 +80,6 @@
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
-			"changelog": "Changelog",
 			"documentation": "Documentation",
 			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
@@ -100,7 +99,6 @@
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
 			"menu": "Your wallet address, settings, sign-out and external links",
-			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "No internet identity.",
-			"invalid_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential. Please contact the issuer and request the credential again.",
-			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in $oisy_short: $error",
-			"error_validating_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential.",
-			"error_requesting_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
-			"missing_pouh_issuer_origin": "Sorry, but there was an error while requesting the Humanity Credential. The issuer origin is missing.",
-			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?",
 			"error_while_signing_in": "Something went wrong while sign-in.",
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
 		},
@@ -442,6 +434,25 @@
 					"text": "Borrow & lend native Bitcoin against USDT",
 					"call_to_action": "Learn more"
 				}
+			},
+			"icpindex": {
+				"name": "ICP Index",
+				"one_liner": "Fully on-chain analytics and trading dashboard built entirely on the Internet Computer!",
+				"description": "ICP Index is a fully on-chain analytics and trading dashboard built entirely on the Internet Computer. It's a comprehensive dashboard which helps you track everything related to the Internet Computer. Tokens, on-chain statistics, and much more to come!",
+				"carousel": {
+					"text": "Extensive token index and analytics on ICP",
+					"call_to_action": "Learn mode"
+				}
+			},
+			"icexplorer": {
+				"name": "IC Explorer",
+				"one_liner": "IC Explorer is a Block Explorer and Analytics Platform for ICP",
+				"description": "ICExplorer is a next-generation blockchain explorer hosted on the Internet Computer, paving the way to become the premier on-chain AI-driven data factory in the blockchain ecosystem. By integrating data from the ICP blockchain, Web3 platforms, and Web2 sources, ICExplorer transforms fragmented datasets into a unified, intelligent, and scalable analytics platform."
+			},
+			"icpixel": {
+				"name": "ICPixel",
+				"one_liner": "Create, animate, and export pixel art directly in your browser.",
+				"description": "ICPixel is a free online pixel art editor that runs entirely in your browser. Create sprites, pixel animations, and game assets with layers, timeline tools, and modern export options — no download required."
 			}
 		}
 	},
@@ -528,7 +539,7 @@
 					},
 					"jackpot": {
 						"title": "You've won the jackpot",
-						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more",
+						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more.",
 						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
 					},
 					"leaderboard": {
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 6 is coming soon...",
+				"card_title": "OISY Sprinkles: Episode 6 is live 🎉",
 				"one_liner": "Earn Sprinkles for being active, referring others, and using OISY across chains. Your actions grow your rewards, and active referrals boost them further.<br/>Plus, now more chains means better chances to win.",
 				"participate_title": "Earn tokens for activity and referrals. More chains mean more chances.",
 				"description": "Stay active to qualify: log in often, complete wallet actions, and hold at least $5.<br/>Each active chain boosts your odds with a Multichain Multiplier.<br/>Earn 10% from friends who qualify.",
@@ -602,8 +613,8 @@
 						"share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
 					},
 					"jackpot": {
-						"title": "You've won the weekly bonus drop",
-						"description": "You just earned one of our weekly bonus drops.<br>Stay active, and keep referring to win more",
+						"title": "Congratulations on earning today’s largest OISY Sprinkles!",
+						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more.",
 						"share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions from inactive networks will not show or be included in your available balance.",
 			"enable_network": "Enable network",
 			"disable_network": "Disable network",
-			"credentials_title": "Credentials",
-			"pouh_credential": "Humanity Credential",
-			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
-			"present_pouh_credential": "Present",
-			"pouh_credential_verified": "Verified ✅",
 			"appearance": "Appearance",
 			"appearance_light": "Light",
 			"appearance_dark": "Dark",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
+			"near_intents_tos": "By clicking the \"Swap now\" button, you agree to the <a href=\"$link\" target=\"_blank\" rel=\"external noopener noreferrer\" class=\"underline\">Terms of Service</a> of 1Click Swap API. If you do not agree with those terms, do not use this swap provider.",
 			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed."
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "Withdrawing your funds failed. <br> Please try again or follow",
 			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
 			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
-			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page."
+			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page.",
+			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again."
 		}
 	},
 	"buy": {

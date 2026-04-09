@@ -80,7 +80,6 @@
 			"source_code_on_github": "GitHub 上的源代码",
 			"view_on_explorer": "在浏览器中查看",
 			"source_code": "源代码",
-			"changelog": "更新日志",
 			"documentation": "文档",
 			"support": "支持",
 			"confirm_navigate": "你确定要离开当前页面吗？",
@@ -100,7 +99,6 @@
 			"activity": "打开活动视图",
 			"airdrops": "打开奖励视图",
 			"menu": "你的钱包地址、设置、登出与外部链接",
-			"changelog": "在 GitHub 上打开 $oisy_name 的更新日志以查看最新更新",
 			"documentation": "打开 $oisy_name 文档",
 			"support": "打开 $oisy_name 文档的支持部分",
 			"open_twitter": "打开 DFINITY 的 X/Twitter 动态",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "没有 Internet Identity。",
-			"invalid_pouh_credential": "抱歉，在验证 Humanity Credential 时发生错误。请联系签发方并重新申请该凭证。",
-			"error_validating_pouh_credential_oisy": "抱歉，在 $oisy_short 中验证 Humanity Credential 时发生错误：$error",
-			"error_validating_pouh_credential": "抱歉，在验证 Humanity Credential 时发生错误。",
-			"error_requesting_pouh_credential": "抱歉，在请求 Humanity Credential 时发生错误。",
-			"missing_pouh_issuer_origin": "抱歉，在请求 Humanity Credential 时发生错误。缺少签发方来源。",
-			"no_pouh_credential": "抱歉，在请求 Humanity Credential 时发生错误。你在 Decide AI 中是否拥有有效的凭证？",
 			"error_while_signing_in": "登录过程中发生错误。",
 			"unexpected_issue_with_syncing": "在同步你的认证状态时发生了意外问题。"
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles：第6集",
+				"card_title": "OISY Sprinkles：第6集正式上线 🎉",
 				"one_liner": "通过保持活跃、推荐他人以及在多个链上使用 OISY 来赚取 Sprinkles。您的操作会增加奖励，而活跃的推荐则会进一步提升奖励。<br/>此外，现在更多的链意味着更高的获胜机会。",
 				"participate_title": "通过活动和推荐赚取代币。链越多，机会越多。",
 				"description": "保持活跃以获得资格：经常登录、完成钱包操作并持有至少 5 美元。<br/>每条活跃链都会通过多链乘数提高您的获胜概率。<br/>从符合条件的朋友处获得 10%。",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "您赢得了每周奖励投放",
-						"description": "您刚刚获得了我们每周奖励投放之一。<br>保持活跃并继续推荐，以赢取更多奖励",
+						"title": "恭喜您赢得今天最大的 OISY Sprinkles！",
+						"description": "您刚刚赢得了我们最高的 Sprinkles 奖励<br>保持活跃并继续推荐以赢得更多",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "选择你希望在 $oisy_name 中使用的网络。未启用的网络中的代币和交易将不会显示，也不会包含在可用余额中。",
 			"enable_network": "启用网络",
 			"disable_network": "禁用网络",
-			"credentials_title": "凭证",
-			"pouh_credential": "人类身份凭证",
-			"pouh_credential_description": "人类身份凭证是你人类身份的证明，由 Decide AI 签发。",
-			"present_pouh_credential": "展示",
-			"pouh_credential_verified": "已验证 ✅",
 			"appearance": "外观",
 			"appearance_light": "浅色",
 			"appearance_dark": "深色",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "交易费",
 			"cross_chain_networks_info": "跨链网络信息",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "手动取款失败",
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
 			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

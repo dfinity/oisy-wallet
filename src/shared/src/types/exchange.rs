@@ -20,4 +20,5 @@ pub struct ExchangeRate {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum ExchangeError {
     ApiKeyNotSet,
+    Disabled,
 }

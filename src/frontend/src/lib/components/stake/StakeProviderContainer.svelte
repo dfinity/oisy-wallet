@@ -12,13 +12,14 @@
 	interface Props {
 		content: Snippet;
 		pageTitle?: string;
+		apyLabel?: string;
 		pageDescription: string;
 		backButton?: Snippet;
 		maxApy?: number;
 		logo?: string;
 	}
 
-	let { logo, pageDescription, content, backButton, pageTitle, maxApy }: Props = $props();
+	let { logo, pageDescription, content, backButton, pageTitle, maxApy, apyLabel }: Props = $props();
 </script>
 
 <StakeContentSection {content}>
@@ -48,7 +49,7 @@
 				class:bg-success-subtle-20={maxApy > 0}
 				in:fade
 			>
-				<span class="text-xs">{$i18n.stake.text.max_apy_label}</span>
+				<span class="text-xs">{apyLabel ?? $i18n.stake.text.max_apy_label}</span>
 				<span
 					class="text-sm font-bold"
 					class:text-primary={maxApy <= 0}

@@ -80,7 +80,6 @@
 			"source_code_on_github": "Quellcode auf GitHub",
 			"view_on_explorer": "Im Explorer ansehen",
 			"source_code": "Quellcode",
-			"changelog": "Änderungsprotokoll",
 			"documentation": "Dokumentation",
 			"support": "Support",
 			"confirm_navigate": "Möchtest du wirklich die Seite verlassen?",
@@ -100,7 +99,6 @@
 			"activity": "Aktivitätsübersicht öffnen",
 			"airdrops": "Belohnungsübersicht öffnen",
 			"menu": "Deine Wallet-Adresse, Einstellungen, Abmelden und externe Links",
-			"changelog": "Änderungsprotokoll von $oisy_name auf GitHub öffnen, um die neuesten Updates zu sehen",
 			"documentation": "Dokumentation von $oisy_name öffnen",
 			"support": "Support-Bereich der $oisy_name-Dokumentation öffnen",
 			"open_twitter": "X/Twitter-Feed von DFINITY X öffnen",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Keine Internet Identity.",
-			"invalid_pouh_credential": "Entschuldigung, aber beim Validieren des Humanity-Zertifikats ist ein Fehler aufgetreten. Bitte kontaktiere den Aussteller und fordere das Zertifikat erneut an.",
-			"error_validating_pouh_credential_oisy": "Entschuldigung, aber beim Validieren des Humanity-Zertifikats in $oisy_short ist ein Fehler aufgetreten: $error",
-			"error_validating_pouh_credential": "Entschuldigung, aber beim Validieren des Humanity-Zertifikats ist ein Fehler aufgetreten.",
-			"error_requesting_pouh_credential": "Entschuldigung, aber beim Anfordern des Humanity-Zertifikats ist ein Fehler aufgetreten.",
-			"missing_pouh_issuer_origin": "Entschuldigung, aber beim Anfordern des Humanity-Zertifikats ist ein Fehler aufgetreten. Die Ausstellerquelle fehlt.",
-			"no_pouh_credential": "Entschuldigung, aber beim Anfordern des Humanity-Zertifikats ist ein Fehler aufgetreten. Hast du ein gültiges Zertifikat in Decide AI?",
 			"error_while_signing_in": "Beim Anmelden ist ein Fehler aufgetreten.",
 			"unexpected_issue_with_syncing": "Unerwartetes Problem beim Synchronisieren des Authentifizierungsstatus."
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 6 kommt schon bald...",
+				"card_title": "OISY Sprinkles: Episode 6 ist live 🎉",
 				"one_liner": "Verdiene Sprinkles für Aktivität, Empfehlungen und die Nutzung von OISY über mehrere Chains. Deine Aktionen steigern deine Belohnungen, und aktive Empfehlungen verstärken sie zusätzlich.<br/>Außerdem bedeuten jetzt mehr Chains bessere Gewinnchancen.",
 				"participate_title": "Verdiene Token für Aktivität und Empfehlungen. Mehr Chains bedeuten mehr Chancen.",
 				"description": "Bleib aktiv, um teilzunehmen: Melde dich regelmäßig an, führe Wallet-Aktionen durch und halte mindestens 5 $.<br/>Jede aktive Chain erhöht deine Chancen mit einem Multichain-Multiplikator.<br/>Verdiene 10 % von Freunden, die sich qualifizieren.",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Du hast den wöchentlichen Bonus-Drop gewonnen",
-						"description": "Du hast gerade einen unserer wöchentlichen Bonus-Drops erhalten.<br>Bleib aktiv und empfiehl weiter, um mehr zu gewinnen",
+						"title": "Gratulation zum Erhalt von OISY Jackpot Sprinkles!",
+						"description": "Du hast gerade unsere höchste Sprinkles-Belohnung erhalten.<br>Bleib aktiv und lade weiter ein, um noch mehr zu gewinnen.",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "Wähle die Netzwerke aus, mit denen du in $oisy_name arbeiten möchtest. Token und Transaktionen aus inaktiven Netzwerken werden nicht angezeigt oder in deinem verfügbaren Guthaben berücksichtigt.",
 			"enable_network": "Netzwerk aktivieren",
 			"disable_network": "Netzwerk deaktivieren",
-			"credentials_title": "Zugangsdaten",
-			"pouh_credential": "Humanity Credential",
-			"pouh_credential_description": "Das Humanity Credential ist ein Nachweis der Menschlichkeit. Es wird von Decide AI ausgestellt.",
-			"present_pouh_credential": "Vorzeigen",
-			"pouh_credential_verified": "Verifiziert ✅",
 			"appearance": "Aussehen",
 			"appearance_light": "Hell",
 			"appearance_dark": "Dunkel",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "Swap Gebühren",
 			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "Das Zuruckholen deiner Token ist fehlgeschlagen. <br> Bitte versuche es erneut, oder folge ",
 			"swap_sucess_withdraw_failed": "Der Tausch war erfolgreich, aber deine Token konnten nicht automatisch zurückgeholt werden. Drücke unten den Abheben Knopf um die manuell abzuheben.<br> Oder folge ",
 			"swap_sucess_manually_withdraw_success": "Die Token deines vorherigen Tauschs wurden erfolgeich zurückgeholt. Die kannst dieses Fenster jetzt schliessen.",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

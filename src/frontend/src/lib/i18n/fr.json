@@ -80,7 +80,6 @@
 			"source_code_on_github": "Code source sur GitHub",
 			"view_on_explorer": "Voir sur l'explorateur",
 			"source_code": "Code source",
-			"changelog": "Journal des modifications",
 			"documentation": "Documentation",
 			"support": "Support",
 			"confirm_navigate": "Êtes-vous certain de vouloir quitter cette page ?",
@@ -100,7 +99,6 @@
 			"activity": "Ouvrir la vue d'activité",
 			"airdrops": "Ouvrir la vue des récompenses",
 			"menu": "Votre adresse de portefeuille, les paramètres, la déconnexion et les liens externes",
-			"changelog": "Ouvrir le journal des modifications de $oisy_name sur GitHub pour consulter les dernières mises à jour",
 			"documentation": "Ouvrir la documentation de $oisy_name",
 			"support": "Ouvrir la section Support de la documentation de $oisy_name",
 			"open_twitter": "Ouvrir le fil X/Twitter de DFINITY",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Pas d'Internet Identity.",
-			"invalid_pouh_credential": "Désolé, mais une erreur s'est produite lors de la validation du Certificat d'Humanité. Veuillez contacter l'émetteur et demander à nouveau le Certificat.",
-			"error_validating_pouh_credential_oisy": "Désolé, mais une erreur s'est produite lors de la validation du Certificat d'Humanité dans $oisy_short : $error",
-			"error_validating_pouh_credential": "Désolé, mais une erreur s'est produite lors de la validation du Certificat d'Humanité.",
-			"error_requesting_pouh_credential": "Désolé, mais une erreur s'est produite lors de la demande du Certificat d'Humanité.",
-			"missing_pouh_issuer_origin": "Désolé, mais une erreur s'est produite lors de la demande du Certificat d'Humanité. L'origine de l'émetteur est manquante.",
-			"no_pouh_credential": "Désolé, mais une erreur s'est produite lors de la demande du Certificat d'Humanité. Avez-vous un Certificat valide dans Decide AI ?",
 			"error_while_signing_in": "Quelque chose s'est mal passé lors de la connexion.",
 			"unexpected_issue_with_syncing": "Problème inattendu lors de la synchronisation du statut de votre authentification."
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles : L'épisode 6",
+				"card_title": "OISY Sprinkles : L'épisode 6 est en ligne 🎉",
 				"one_liner": "Gagnez des Sprinkles en étant actif, en parrainant d'autres utilisateurs et en utilisant OISY sur plusieurs chaînes. Vos actions augmentent vos récompenses, et les parrainages actifs les renforcent davantage.<br/>De plus, désormais plus de chaînes signifie de meilleures chances de gagner.",
 				"participate_title": "Gagnez des tokens pour votre activité et vos parrainages. Plus de chaînes signifie plus de chances.",
 				"description": "Restez actif pour vous qualifier : connectez-vous souvent, effectuez des actions dans votre portefeuille et détenez au moins 5 $.<br/>Chaque chaîne active améliore vos chances grâce à un Multiplicateur Multichaîne.<br/>Gagnez 10 % des amis qui se qualifient.",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Vous avez remporté le drop bonus hebdomadaire",
-						"description": "Vous venez de gagner l'un de nos drops bonus hebdomadaires.<br>Restez actif(ve) et continuez à parrainer pour en gagner davantage",
+						"title": "Félicitations pour avoir gagné les plus gros OISY Sprinkles d'aujourd'hui !",
+						"description": "Vous venez de gagner notre meilleure récompense Sprinkles<br>Restez actif et continuez à parrainer pour gagner plus.",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "Sélectionnez les réseaux avec lesquels vous souhaitez travailler dans $oisy_name. Les tokens et transactions des réseaux inactifs ne s'afficheront pas et ne seront pas inclus dans votre solde disponible.",
 			"enable_network": "Activer le réseau",
 			"disable_network": "Désactiver le réseau",
-			"credentials_title": "Identifiants",
-			"pouh_credential": "Certificat d'Humanité",
-			"pouh_credential_description": "Le Certificat d'Humanité est une preuve d'humanité. Il est délivré par Decide AI.",
-			"present_pouh_credential": "Présenter",
-			"pouh_credential_verified": "Vérifié ✅",
 			"appearance": "Apparence",
 			"appearance_light": "Clair",
 			"appearance_dark": "Sombre",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "Frais d'échange",
 			"cross_chain_networks_info": "Vous déplacez des tokens du réseau <b>$sourceNetwork</b> vers le réseau <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "Le retrait de vos fonds a échoué. <br> Veuillez réessayer ou suivez",
 			"swap_sucess_withdraw_failed": "L'échange est terminé, mais vos tokens n'ont pas pu être retirés automatiquement. Cliquez sur le bouton Retirer ci-dessous pour les retirer manuellement.<br> Ou suivez",
 			"swap_sucess_manually_withdraw_success": "Les tokens de votre précédent échange ont été retirés avec succès. Vous pouvez maintenant fermer cette fenêtre.",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

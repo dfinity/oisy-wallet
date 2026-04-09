@@ -80,7 +80,6 @@
 			"source_code_on_github": "GitHub上のソースコード",
 			"view_on_explorer": "エクスプローラーで確認",
 			"source_code": "ソースコード",
-			"changelog": "変更履歴",
 			"documentation": "ドキュメント",
 			"support": "サポート",
 			"confirm_navigate": "ページを離れても良いですか？",
@@ -100,7 +99,6 @@
 			"activity": "トランザクション履歴を表示",
 			"airdrops": "エアドロップ報酬を表示",
 			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
-			"changelog": "GitHubで $oisy_name の更新履歴を見る",
 			"documentation": "$oisy_nameドキュメントを開く",
 			"support": "$oisy_nameドキュメントのサポートページを開く",
 			"open_twitter": "DFINITY X/Twitterを開く",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "internet identityが見つかりません。",
-			"invalid_pouh_credential": "Humanity Credentialの検証中にエラーが発生しました。発行元に再発行を依頼してください。",
-			"error_validating_pouh_credential_oisy": "$oisy_shortでHumanity Credentialを検証中にエラーが発生しました。: $error",
-			"error_validating_pouh_credential": "Humanity Credentialの検証中にエラーが発生しました。",
-			"error_requesting_pouh_credential": "Humanity Credentialを要求する際にエラーが発生しました。",
-			"missing_pouh_issuer_origin": "Humanity Credentialを要求する際にエラーが発生しました。発行元が不明です。",
-			"no_pouh_credential": "Humanity Credentialを要求する際にエラーが発生しました。Decide AIに有効なCredentialをお持ちですか？",
 			"error_while_signing_in": "サインイン処理中に問題が発生しました。",
 			"unexpected_issue_with_syncing": "認証状態の同期中に予期せぬ問題が発生しました。"
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: エピソード6",
+				"card_title": "OISY Sprinkles: エピソード6が公開されました 🎉",
 				"one_liner": "アクティブであること、他のユーザーを招待すること、複数のチェーンでOISYを使用することでSprinklesを獲得できます。あなたの行動が報酬を増やし、アクティブな紹介がさらに報酬を高めます。<br/>さらに、チェーンが増えるほど当選チャンスも広がります。",
 				"participate_title": "アクティビティと紹介でトークンを獲得。チェーンが多いほど、チャンスも増えます。",
 				"description": "資格を得るためにアクティブを維持しましょう：頻繁にログインし、ウォレットアクションを完了し、少なくとも5 $を保有してください。<br/>アクティブな各チェーンはマルチチェーン乗数であなたのオッズを高めます。<br/>資格を得た友達から10%を獲得できます。",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "週間ボーナスドロップを獲得しました",
-						"description": "週間ボーナスドロップの1つを獲得しました。<br>さらに獲得するためにアクティブを維持し、招待を続けましょう",
+						"title": "本日のOISY最大Sprinkles獲得おめでとうございます！",
+						"description": "トップのSprinkles報酬を獲得しました<br>アクティブに活動し、紹介を続けてさらに勝ちましょう。",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "$oisy_nameで操作したいネットワークを選択してください。非アクティブなネットワークのトークンとトランザクションは表示されず、利用可能な残高にも含まれません",
 			"enable_network": "ネットワークを有効化",
 			"disable_network": "ネットワークを無効化",
-			"credentials_title": "認証情報",
-			"pouh_credential": "人間の認証情報",
-			"pouh_credential_description": "人間の認証情報は、人間であることの証明です。Decide AIによって発行されます。",
-			"present_pouh_credential": "提示する",
-			"pouh_credential_verified": "認証済み✅",
 			"appearance": "外観モード",
 			"appearance_light": "ライト",
 			"appearance_dark": "ダーク",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "資金の出金に失敗しました。<br>再度お試しいただくか、以下に従ってください。",
 			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください。",
 			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

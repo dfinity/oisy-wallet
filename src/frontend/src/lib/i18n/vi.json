@@ -80,7 +80,6 @@
 			"source_code_on_github": "Mã nguồn trên GitHub",
 			"view_on_explorer": "Xem trên trình khám phá",
 			"source_code": "Mã nguồn",
-			"changelog": "Nhật ký thay đổi",
 			"documentation": "Tài liệu",
 			"support": "Hỗ trợ",
 			"confirm_navigate": "Bạn có chắc chắn muốn rời khỏi trang không?",
@@ -100,7 +99,6 @@
 			"activity": "Mở chế độ xem hoạt động",
 			"airdrops": "Mở chế độ xem Phần thưởng",
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
-			"changelog": "Mở nhật ký thay đổi của $oisy_name trên GitHub để xem các bản cập nhật mới nhất",
 			"documentation": "Mở tài liệu $oisy_name",
 			"support": "Mở phần Hỗ trợ trong tài liệu $oisy_name",
 			"open_twitter": "Mở X/Twitter của DFINITY",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Không có Internet Identity.",
-			"invalid_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng. Vui lòng liên hệ với nhà phát hành và yêu cầu lại thông tin xác thực.",
-			"error_validating_pouh_credential_oisy": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng trong $oisy_short: $error",
-			"error_validating_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng.",
-			"error_requesting_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi yêu xác thực người dùng.",
-			"missing_pouh_issuer_origin": "Xin lỗi, đã xảy ra lỗi trong khi yêu cầu thông tin xác thực người dùng. Thiếu nguồn gốc nhà phát hành.",
-			"no_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi yêu cầu xác thực người dùng. Bạn có thông tin xác thực hợp lệ trong Decide AI không?",
 			"error_while_signing_in": "Đã xảy ra lỗi trong khi đăng nhập.",
 			"unexpected_issue_with_syncing": "Sự cố không mong muốn trong khi đồng bộ hóa trạng thái xác thực của bạn."
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Tập 6",
+				"card_title": "OISY Sprinkles: Tập 6 đã ra mắt 🎉",
 				"one_liner": "Kiếm Sprinkles khi hoạt động tích cực, giới thiệu người khác và sử dụng OISY trên nhiều chuỗi. Hành động của bạn tăng phần thưởng, và các lượt giới thiệu tích cực giúp tăng thêm.<br/>Hơn nữa, nhiều chuỗi hơn đồng nghĩa với cơ hội thắng cao hơn.",
 				"participate_title": "Kiếm token nhờ hoạt động và giới thiệu. Nhiều chuỗi hơn nghĩa là nhiều cơ hội hơn.",
 				"description": "Duy trì hoạt động để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các thao tác ví và giữ ít nhất 5 $.<br/>Mỗi chuỗi hoạt động tăng cơ hội của bạn với Hệ số Đa chuỗi.<br/>Kiếm 10% từ bạn bè đủ điều kiện.",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Bạn đã thắng phần thưởng drop hàng tuần",
-						"description": "Bạn vừa nhận được một trong các gói thưởng hàng tuần của chúng tôi.<br>Duy trì hoạt động và tiếp tục giới thiệu để giành thêm",
+						"title": "Chúc mừng bạn đã kiếm được OISY Sprinkles lớn nhất hôm nay!",
+						"description": "Bạn vừa kiếm được Phần thưởng Sprinkles cao nhất của chúng tôi<br>Hãy duy trì hoạt động và tiếp tục giới thiệu để giành được nhiều hơn.",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "Chọn mạng bạn muốn làm việc trong $oisy_name. Token và giao dịch từ các mạng không hoạt động sẽ không hiển thị hoặc không được bao gồm trong số dư khả dụng của bạn.",
 			"enable_network": "Bật mạng",
 			"disable_network": "Tắt mạng",
-			"credentials_title": "Thông tin xác thực",
-			"pouh_credential": "Thông tin xác thực người dùng",
-			"pouh_credential_description": "Thông tin xác thực người dùng thật. Nó được phát hành bởi Decide AI.",
-			"present_pouh_credential": "Xuất trình",
-			"pouh_credential_verified": "Đã xác minh ✅",
 			"appearance": "Giao diện",
 			"appearance_light": "Sáng",
 			"appearance_dark": "Tối",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "Phí giao dịch",
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "Rút tiền của bạn không thành công.<br> Vui lòng thử lại hoặc làm theo",
 			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
 			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

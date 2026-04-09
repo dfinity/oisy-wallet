@@ -80,7 +80,6 @@
 			"source_code_on_github": "Código fuente en GitHub",
 			"view_on_explorer": "Ver en el explorador",
 			"source_code": "Código fuente",
-			"changelog": "Registro de cambios",
 			"documentation": "Documentación",
 			"support": "Soporte",
 			"confirm_navigate": "¿Estás seguro de que quieres salir?",
@@ -100,7 +99,6 @@
 			"activity": "Abrir la vista de actividad",
 			"airdrops": "Abrir la vista de Recompensas",
 			"menu": "La dirección de tu billetera, configuración, cierre de sesión y enlaces externos",
-			"changelog": "Abrir el registro de cambios de $oisy_name en GitHub para revisar las últimas actualizaciones",
 			"documentation": "Abrir la documentación de $oisy_name",
 			"support": "Abrir la sección de Soporte de la documentación de $oisy_name",
 			"open_twitter": "Abrir el feed de DFINITY en X/Twitter",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "No hay identidad de Internet.",
-			"invalid_pouh_credential": "Lo sentimos, pero hubo un error al validar la Credencial de Humanidad. Por favor, contacta al emisor y solicita la credencial de nuevo.",
-			"error_validating_pouh_credential_oisy": "Lo sentimos, pero hubo un error al validar la Credencial de Humanidad en $oisy_short: $error",
-			"error_validating_pouh_credential": "Lo sentimos, pero hubo un error al validar la Credencial de Humanidad.",
-			"error_requesting_pouh_credential": "Lo sentimos, pero hubo un error al solicitar la Credencial de Humanidad.",
-			"missing_pouh_issuer_origin": "Lo sentimos, pero hubo un error al solicitar la Credencial de Humanidad. Falta el origen del emisor.",
-			"no_pouh_credential": "Lo sentimos, pero hubo un error al solicitar la Credencial de Humanidad. ¿Tienes una credencial válida en Decide AI?",
 			"error_while_signing_in": "Algo salió mal durante el inicio de sesión.",
 			"unexpected_issue_with_syncing": "Problema inesperado al sincronizar el estado de tu autenticación."
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: El Episodio 6",
+				"card_title": "OISY Sprinkles: El Episodio 6 está en vivo 🎉",
 				"one_liner": "Gana Sprinkles por ser activo, referir a otros y usar OISY en distintas cadenas. Tus acciones aumentan tus recompensas, y las referencias activas las impulsan aún más.<br/>Además, ahora más cadenas significa mejores chances de ganar.",
 				"participate_title": "Gana tokens por actividad y referencias. Más cadenas significan más oportunidades.",
 				"description": "Mantente activo para calificar: inicia sesión con frecuencia, completa acciones en tu billetera y mantén al menos 5 $.<br/>Cada cadena activa mejora tus probabilidades con un Multiplicador Multicadena.<br/>Gana el 10 % de los amigos que califiquen.",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Ganaste el drop de bono semanal",
-						"description": "Acabas de ganar uno de nuestros drops de bono semanal.<br>Mantente activo/a y sigue refiriendo para ganar más",
+						"title": "¡Felicidades por ganar los OISY Sprinkles más grandes de hoy!",
+						"description": "Acabas de ganar nuestra principal Recompensa de Sprinkles<br>Mantente activo y sigue recomendando para ganar más.",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "Selecciona las redes con las que quieres trabajar en $oisy_name. Los tokens y transacciones de redes inactivas no se mostrarán ni se incluirán en tu saldo disponible.",
 			"enable_network": "Habilitar red",
 			"disable_network": "Deshabilitar red",
-			"credentials_title": "Credenciales",
-			"pouh_credential": "Credencial de Humanidad",
-			"pouh_credential_description": "La Credencial de Humanidad es una prueba de humanidad. Es emitida por Decide AI.",
-			"present_pouh_credential": "presentar_credencial_pouh",
-			"pouh_credential_verified": "Verificado ✅",
 			"appearance": "Apariencia",
 			"appearance_light": "Claro",
 			"appearance_dark": "Oscuro",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "Comisiones de Intercambio",
 			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "El retiro de tus fondos falló. <br> Por favor, inténtalo de nuevo o sigue",
 			"swap_sucess_withdraw_failed": "El intercambio se completó, pero tus tokens no pudieron ser retirados automáticamente. Haz clic en el botón de Retirar a continuación para retirarlos manualmente.<br> O sigue",
 			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal.",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {

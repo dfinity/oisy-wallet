@@ -5,10 +5,12 @@ import type {
 	NetworkSettings,
 	NetworkSettingsFor,
 	NetworksSettings,
+	ProviderAgreementType,
 	Settings,
 	UserAgreement,
 	UserProfile
 } from '$declarations/backend/backend.did';
+import type { UserProviderAgreements } from '$lib/types/user-provider-agreements';
 import { toNullable } from '@dfinity/utils';
 
 export const mockUserNetworksMap: Array<[NetworkSettingsFor, NetworkSettings]> = [
@@ -46,12 +48,40 @@ const mockUserAgreement: UserAgreement = {
 	accepted: toNullable()
 };
 
+export const mockProviderAgreementType: ProviderAgreementType = {
+	provider: { NearIntents: null },
+	scope: { Swap: null }
+};
+
+export const mockProviderAgreements: Array<[ProviderAgreementType, UserAgreement]> = [
+	[mockProviderAgreementType, mockUserAgreement]
+];
+
+export const mockUserProviderAgreements: UserProviderAgreements = {
+	'NearIntents-Swap': {
+		accepted: undefined,
+		lastAcceptedTimestamp: undefined,
+		lastUpdatedTimestamp: undefined,
+		textSha256: undefined
+	}
+};
+
+export const mockDefinedUserProviderAgreements: UserProviderAgreements = {
+	'NearIntents-Swap': {
+		accepted: true,
+		lastAcceptedTimestamp: 1677628801n,
+		lastUpdatedTimestamp: 1677628800n,
+		textSha256: 'abc123def456'
+	}
+};
+
 export const mockUserAgreements: Agreements = {
 	agreements: {
 		license_agreement: mockUserAgreement,
 		privacy_policy: mockUserAgreement,
 		terms_of_use: mockUserAgreement
-	}
+	},
+	provider_agreements: toNullable()
 };
 
 export const mockDefinedUserAgreements: Agreements = {
@@ -74,7 +104,8 @@ export const mockDefinedUserAgreements: Agreements = {
 			text_sha256: toNullable('52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930'),
 			accepted: toNullable(true)
 		}
-	}
+	},
+	provider_agreements: toNullable(mockProviderAgreements)
 };
 
 export const mockUserProfileVersion = 1n;

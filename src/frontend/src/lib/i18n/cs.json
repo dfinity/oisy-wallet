@@ -80,7 +80,6 @@
 			"source_code_on_github": "Zdrojový kód na GitHubu",
 			"view_on_explorer": "Zobrazit v průzkumníku",
 			"source_code": "Zdrojový kód",
-			"changelog": "Protokol změn",
 			"documentation": "Dokumentace",
 			"support": "Podpora",
 			"confirm_navigate": "Jste si jisti, že chcete odejít?",
@@ -100,7 +99,6 @@
 			"activity": "Otevřít zobrazení aktivity",
 			"airdrops": "Otevřít zobrazení odměn",
 			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
-			"changelog": "Otevřete protokol změn $oisy_name na GitHubu a zkontrolujte nejnovější aktualizace",
 			"documentation": "Otevřít dokumentaci $oisy_name",
 			"support": "Otevřít sekci podpory v dokumentaci $oisy_name",
 			"open_twitter": "Otevřít X/Twitter kanál DFINITY",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Žádná internetová identita.",
-			"invalid_pouh_credential": "Omlouváme se, ale při ověřování Dokladu Lidskosti došlo k chybě. Obraťte se prosím na vydavatele a požádejte o doklad znovu.",
-			"error_validating_pouh_credential_oisy": "Omlouváme se, ale při ověřování Dokladu Lidskosti v $oisy_short došlo k chybě: $error",
-			"error_validating_pouh_credential": "Omlouváme se, ale při ověřování Dokladu Lidskosti došlo k chybě.",
-			"error_requesting_pouh_credential": "Omlouváme se, ale při vyžádání Dokladu Lidskosti došlo k chybě.",
-			"missing_pouh_issuer_origin": "Omlouváme se, ale při vyžádání Dokladu Lidskosti došlo k chybě. Chybí původ vydavatele.",
-			"no_pouh_credential": "Omlouváme se, ale při vyžádání Dokladu Lidskosti došlo k chybě. Máte platné pověření v Decide AI?",
 			"error_while_signing_in": "Při přihlašování se něco pokazilo.",
 			"unexpected_issue_with_syncing": "Při synchronizaci stavu vašeho ověření došlo k neočekávanému problému."
 		},
@@ -442,6 +434,25 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -585,7 +596,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Epizoda 6",
+				"card_title": "OISY Sprinkles: Epizoda 6 je živě 🎉",
 				"one_liner": "Získávej Sprinkles za aktivitu, doporučování ostatních a používání OISY napříč chainy. Tvoje akce zvyšují tvoje odměny a aktivní doporučení je dále posilují.<br/>Navíc více chainů nyní znamená lepší šance na výhru.",
 				"participate_title": "Získávej tokeny za aktivitu a doporučení. Více chainů znamená více šancí.",
 				"description": "Zůstaň aktivní, abys mohl/a participovat: přihlašuj se často, prováděj akce v peněžence a drž alespoň 5 $.<br/>Každý aktivní chain zvyšuje tvoje šance pomocí Multichain Multiplikátoru.<br/>Získej 10 % od přátel, kteří se kvalifikují.",
@@ -602,8 +613,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Vyhrál/a jsi týdenní bonusový drop",
-						"description": "Právě jsi získal/a jeden z našich týdenních bonusových dropů.<br>Zůstaň aktivní a doporučuj dál, abys vyhrál/a více",
+						"title": "Gratulujeme k získání největších OISY Sprinkles dneška!",
+						"description": "Právě jste získali naši nejvyšší odměnu Sprinkles<br>Zůstaňte aktivní a pokračujte v doporučování, abyste vyhráli více.",
 						"share_href": ""
 					},
 					"referral": {
@@ -735,11 +746,6 @@
 			"active_networks_description": "Vyberte sítě, se kterými chcete v $oisy_name pracovat. Tokeny a transakce z neaktivních sítí se nezobrazí ani nebudou zahrnuty do vašeho dostupného zůstatku.",
 			"enable_network": "Povolit síť",
 			"disable_network": "Zakázat síť",
-			"credentials_title": "Přihlašovací Údaje",
-			"pouh_credential": "Ověření Lidskosti",
-			"pouh_credential_description": "Ověření Lidskosti je důkazem lidskosti. Vydává ho Decide AI.",
-			"present_pouh_credential": "Předložit",
-			"pouh_credential_verified": "Ověřeno ✅",
 			"appearance": "Vzhled",
 			"appearance_light": "Světlý",
 			"appearance_dark": "Tmavý",
@@ -1115,6 +1121,7 @@
 			"swap_fees": "Poplatky za swap",
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1133,7 +1140,8 @@
 			"manually_withdraw_failed": "Výběr vašich finančních prostředků selhal.<br>Zkuste to prosím znovu nebo sledujte ",
 			"swap_sucess_withdraw_failed": "Výměna byla dokončena, ale vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
 			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít.",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
