@@ -1,6 +1,8 @@
 import type {
+	ICTokenReply,
 	SwapAmountsReply,
-	SwapAmountsTxReply
+	SwapAmountsTxReply,
+	TokenReply
 } from '$declarations/kong_backend/kong_backend.did';
 import { dAppDescriptions } from '$env/dapp-descriptions.env';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -392,3 +394,8 @@ export const calculateValueDifference = ({
 
 	return ((receivedValue - paidValue) / paidValue) * 100;
 };
+
+export const isKongSupportedIcToken = (
+	token: TokenReply
+): token is { IC: ICTokenReply } =>
+	'IC' in token && !token.IC.is_removed && token.IC.chain === 'IC';
