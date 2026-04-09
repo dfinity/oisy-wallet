@@ -234,7 +234,7 @@
 	};
 </script>
 
-<SolFeeContext {destination} observe={currentStep?.name !== WizardStepsSend.SENDING}>
+<SolFeeContext token={$sendToken} {destination} observe={currentStep?.name !== WizardStepsSend.SENDING}>
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
 			<SolSendReview {amount} {destination} {network} {onBack} onSend={send} {selectedContact} />
