@@ -2,6 +2,11 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import {
+		SOLANA_DEVNET_TOKEN,
+		SOLANA_LOCAL_TOKEN,
+		SOLANA_TOKEN
+	} from '$env/tokens/tokens.sol.env';
 	import type { ProgressStep } from '$eth/types/send';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -30,6 +35,8 @@
 	import { SwapProvider } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
 	import SwapSolForm from '$sol/components/swap/SwapSolForm.svelte';
 
 	interface Props {
@@ -82,6 +89,20 @@
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
+
+	let networkFee = $state<bigint | undefined>();
+	let ataFee = $state<bigint | undefined>();
+
+	const onNetworkFeeChange = (fee: bigint | undefined) => (networkFee = fee);
+	const onAtaFeeChange = (fee: bigint | undefined) => (ataFee = fee);
+
+	let solanaNativeToken = $derived(
+		isNetworkIdSOLDevnet($sourceToken?.network.id)
+			? SOLANA_DEVNET_TOKEN
+			: isNetworkIdSOLLocal($sourceToken?.network.id)
+				? SOLANA_LOCAL_TOKEN
+				: SOLANA_TOKEN
+	);
 
 	let sourceTokenUsdValue = $derived(
 		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
@@ -210,6 +231,8 @@
 				{onNext}
 				{onShowProviderList}
 				{onShowTokensList}
+				onNetworkFeeChange={(fee) => (networkFee = fee)}
+				onAtaFeeChange={(fee) => (ataFee = fee)}
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue
@@ -224,7 +247,13 @@
 				{slippageValue}
 				{swapAmount}
 			>
-				{#snippet swapFees()}{/snippet}
+				{#snippet swapFees()}
+					<SwapSolFees
+						{networkFee}
+						{ataFee}
+						symbol={solanaNativeToken.symbol}
+					/>
+				{/snippet}
 			</SwapReview>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress sendWithTransfer {swapProgressStep} />

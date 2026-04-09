@@ -22,6 +22,7 @@
 		MICROLAMPORTS_PER_LAMPORT,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
+	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
 	import { initFeeStore } from '$sol/stores/sol-fee.store';
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -30,11 +31,11 @@
 		swapAmount: OptionAmount;
 		receiveAmount?: number;
 		slippageValue: OptionAmount;
-		networkFee?: bigint;
-		ataFee?: bigint;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onShowProviderList: () => void;
+		onNetworkFeeChange?: (fee: bigint | undefined) => void;
+		onAtaFeeChange?: (fee: bigint | undefined) => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -43,11 +44,11 @@
 		swapAmount = $bindable(),
 		receiveAmount = $bindable(),
 		slippageValue = $bindable(),
-		networkFee = $bindable(),
-		ataFee = $bindable(),
 		isSwapAmountsLoading,
 		onShowTokensList,
 		onShowProviderList,
+		onNetworkFeeChange,
+		onAtaFeeChange,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -114,11 +115,11 @@
 	onDestroy(clearFeeTimer);
 
 	$effect(() => {
-		networkFee = $feeStore;
+		onNetworkFeeChange?.($feeStore);
 	});
 
 	$effect(() => {
-		ataFee = $ataFeeStore;
+		onAtaFeeChange?.($ataFeeStore);
 	});
 
 	let solanaNativeToken = $derived(
@@ -199,6 +200,12 @@
 
 			<div class="flex flex-col gap-3">
 				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
+
+				<SwapSolFees
+					networkFee={$feeStore}
+					ataFee={$ataFeeStore}
+					symbol={solanaNativeToken.symbol}
+				/>
 			</div>
 		{/if}
 	{/snippet}

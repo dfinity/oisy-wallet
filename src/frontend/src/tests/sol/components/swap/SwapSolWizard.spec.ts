@@ -215,6 +215,23 @@ describe('SwapSolWizard', () => {
 		});
 	});
 
+	describe('fee display on review step', () => {
+		it('does not render fee section when fees are not available', () => {
+			const { mockContext } = createContext({
+				swaps: nearIntentsSwapProviders,
+				selectedProvider: nearIntentsSwapProviders[0]
+			});
+
+			const { queryByText } = renderWithStep({
+				step: WizardStepsSwap.REVIEW,
+				context: mockContext
+			});
+
+			expect(queryByText(en.fee.text.network_fee)).not.toBeInTheDocument();
+			expect(queryByText(en.fee.text.total_fee)).not.toBeInTheDocument();
+		});
+	});
+
 	describe('swap execution', () => {
 		beforeEach(() => {
 			vi.useFakeTimers();
