@@ -8,8 +8,12 @@ import * as swapService from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
-import { SwapProvider } from '$lib/types/swap';
-import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import {
+	mockValidIcCkToken,
+	mockValidIcToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { act, render } from '@testing-library/svelte';
@@ -326,5 +330,339 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(fetchMock).not.toHaveBeenCalled();
 
 		vi.useRealTimers();
+	});
+
+	describe('fetchGeneration - stale response protection', () => {
+		const alternateDestinationToken = {
+			...mockValidIcrcToken,
+			symbol: 'ALT_DEST'
+		} as IcToken;
+
+		it('discards stale response when destination token changes mid-fetch', async () => {
+			vi.useFakeTimers();
+
+			const freshResults = [mockSwapProviders[0]];
+
+			let resolveStale!: (v: SwapMappedResult[]) => void;
+			let resolveFresh!: (v: SwapMappedResult[]) => void;
+
+			const fetchMock = vi
+				.spyOn(swapService, 'fetchSwapAmounts')
+				.mockImplementationOnce(() => new Promise((r) => (resolveStale = r)))
+				.mockImplementationOnce(() => new Promise((r) => (resolveFresh = r)));
+
+			const { rerender } = await act(() =>
+				render(SwapAmountsContext, {
+					props: {
+						amount: '10',
+						sourceToken,
+						destinationToken,
+						slippageValue: '0.3',
+						children: fakeSnippet,
+						isSwapAmountsLoading: false,
+						isSourceTokenIcrc2: true
+					},
+					context
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+			expect(fetchMock).toHaveBeenCalledTimes(1);
+
+			await act(() =>
+				rerender({
+					amount: '10',
+					sourceToken,
+					destinationToken: alternateDestinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+			expect(fetchMock).toHaveBeenCalledTimes(2);
+
+			resolveStale(mockSwapProviders);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toBeUndefined();
+
+			resolveFresh(freshResults);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toEqual(freshResults);
+			expect(get(store)?.amountForSwap).toBe(10);
+
+			vi.useRealTimers();
+		});
+
+		it('discards stale error when destination token changes mid-fetch', async () => {
+			vi.useFakeTimers();
+
+			const freshResults = [mockSwapProviders[0]];
+
+			let rejectStale!: (e: Error) => void;
+			let resolveFresh!: (v: SwapMappedResult[]) => void;
+
+			vi.spyOn(swapService, 'fetchSwapAmounts')
+				.mockImplementationOnce(() => new Promise((_, rej) => (rejectStale = rej)))
+				.mockImplementationOnce(() => new Promise((r) => (resolveFresh = r)));
+
+			const { rerender } = await act(() =>
+				render(SwapAmountsContext, {
+					props: {
+						amount: '10',
+						sourceToken,
+						destinationToken,
+						slippageValue: '0.3',
+						children: fakeSnippet,
+						isSwapAmountsLoading: false,
+						isSourceTokenIcrc2: true
+					},
+					context
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+
+			await act(() =>
+				rerender({
+					amount: '10',
+					sourceToken,
+					destinationToken: alternateDestinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+
+			rejectStale(new Error('stale error'));
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toBeUndefined();
+
+			resolveFresh(freshResults);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toEqual(freshResults);
+
+			vi.useRealTimers();
+		});
+
+		it('discards in-flight response when pausing for review', async () => {
+			vi.useFakeTimers();
+
+			let resolveStale!: (v: SwapMappedResult[]) => void;
+
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockImplementationOnce(
+				() => new Promise((r) => (resolveStale = r))
+			);
+
+			const { rerender } = await act(() =>
+				render(SwapAmountsContext, {
+					props: {
+						amount: '10',
+						sourceToken,
+						destinationToken,
+						slippageValue: '0.3',
+						children: fakeSnippet,
+						isSwapAmountsLoading: false,
+						isSourceTokenIcrc2: true,
+						pauseAmountUpdates: false
+					},
+					context
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+
+			await act(() =>
+				rerender({
+					amount: '10',
+					sourceToken,
+					destinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true,
+					pauseAmountUpdates: true
+				})
+			);
+
+			resolveStale(mockSwapProviders);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toBeUndefined();
+
+			vi.useRealTimers();
+		});
+
+		it('discards stale periodic refresh when tokens change', async () => {
+			vi.useFakeTimers();
+
+			const freshResults = [mockSwapProviders[0]];
+
+			let resolvePeriodicFetch!: (v: SwapMappedResult[]) => void;
+			let resolveFresh!: (v: SwapMappedResult[]) => void;
+
+			const fetchMock = vi
+				.spyOn(swapService, 'fetchSwapAmounts')
+				.mockResolvedValueOnce(mockSwapProviders)
+				.mockImplementationOnce(() => new Promise((r) => (resolvePeriodicFetch = r)))
+				.mockImplementationOnce(() => new Promise((r) => (resolveFresh = r)));
+
+			const { rerender } = await act(() =>
+				render(SwapAmountsContext, {
+					props: {
+						amount: '10',
+						sourceToken,
+						destinationToken,
+						slippageValue: '0.3',
+						children: fakeSnippet,
+						isSwapAmountsLoading: false,
+						isSourceTokenIcrc2: true,
+						enableAmountUpdates: true,
+						pauseAmountUpdates: false
+					},
+					context
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+			expect(fetchMock).toHaveBeenCalledTimes(1);
+			expect(get(store)?.swaps).toEqual(mockSwapProviders);
+
+			await vi.advanceTimersByTimeAsync(5000);
+			await tick();
+			expect(fetchMock).toHaveBeenCalledTimes(2);
+
+			await act(() =>
+				rerender({
+					amount: '10',
+					sourceToken,
+					destinationToken: alternateDestinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true,
+					enableAmountUpdates: true,
+					pauseAmountUpdates: false
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+			expect(fetchMock).toHaveBeenCalledTimes(3);
+
+			resolvePeriodicFetch(mockSwapProviders);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toEqual(mockSwapProviders);
+
+			resolveFresh(freshResults);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toEqual(freshResults);
+
+			vi.useRealTimers();
+		});
+
+		it('applies only the latest result with rapid successive changes', async () => {
+			vi.useFakeTimers();
+
+			const finalResults = [mockSwapProviders[1]];
+
+			let resolveFirst!: (v: SwapMappedResult[]) => void;
+			let resolveFinal!: (v: SwapMappedResult[]) => void;
+
+			const fetchMock = vi
+				.spyOn(swapService, 'fetchSwapAmounts')
+				.mockImplementationOnce(() => new Promise((r) => (resolveFirst = r)))
+				.mockImplementationOnce(() => new Promise((r) => (resolveFinal = r)));
+
+			const { rerender } = await act(() =>
+				render(SwapAmountsContext, {
+					props: {
+						amount: '10',
+						sourceToken,
+						destinationToken,
+						slippageValue: '0.3',
+						children: fakeSnippet,
+						isSwapAmountsLoading: false,
+						isSourceTokenIcrc2: true
+					},
+					context
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(200);
+
+			await act(() =>
+				rerender({
+					amount: '20',
+					sourceToken,
+					destinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
+				})
+			);
+
+			expect(fetchMock).not.toHaveBeenCalled();
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+			expect(fetchMock).toHaveBeenCalledTimes(1);
+
+			await act(() =>
+				rerender({
+					amount: '30',
+					sourceToken,
+					destinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+			expect(fetchMock).toHaveBeenCalledTimes(2);
+
+			resolveFirst(mockSwapProviders);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.amountForSwap).toBeUndefined();
+
+			resolveFinal(finalResults);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toEqual(finalResults);
+			expect(get(store)?.amountForSwap).toBe(30);
+
+			vi.useRealTimers();
+		});
 	});
 });
