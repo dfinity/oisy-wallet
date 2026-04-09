@@ -15,9 +15,7 @@
 		feeExchangeRateStore: exchangeRate
 	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let totalFee = $derived(
-		nonNullish($networkFee) ? $networkFee + ($ataFee ?? ZERO) : undefined
-	);
+	let totalFee = $derived(nonNullish($networkFee) ? $networkFee + ($ataFee ?? ZERO) : undefined);
 </script>
 
 {#if nonNullish($symbol) && nonNullish($decimals) && nonNullish($networkFee)}

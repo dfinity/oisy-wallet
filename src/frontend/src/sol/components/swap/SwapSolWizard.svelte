@@ -34,8 +34,8 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { TokenId } from '$lib/types/token';
 	import { SwapProvider } from '$lib/types/swap';
+	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
@@ -260,7 +260,7 @@
 </script>
 
 {#if nonNullish($sourceToken)}
-	<SolFeeContext token={$sourceToken} observe={currentStep?.name !== WizardStepsSwap.SWAPPING}>
+	<SolFeeContext observe={currentStep?.name !== WizardStepsSwap.SWAPPING} token={$sourceToken}>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
 				<SwapSolForm
