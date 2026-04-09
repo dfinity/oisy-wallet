@@ -38,7 +38,9 @@ export const clearNearIntentsTokensCache = (): void => {
 };
 
 const EVM_BLOCKCHAINS = new Set(
-	Object.values(NEAR_INTENTS_BLOCKCHAIN_MAP).filter((b) => b !== 'sol')
+	Object.getOwnPropertySymbols(NEAR_INTENTS_BLOCKCHAIN_MAP)
+		.map((s) => NEAR_INTENTS_BLOCKCHAIN_MAP[s as NetworkId])
+		.filter((b) => b !== 'sol')
 );
 
 /**
