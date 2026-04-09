@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		checkIfAccountExists,
@@ -19,27 +19,25 @@
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
+		token: Token;
 		observe: boolean;
 		destination?: string;
 		children: Snippet;
 	}
 
-	let { observe, destination = '', children }: Props = $props();
+	let { token, observe, destination = '', children }: Props = $props();
 
 	const { feeStore, prioritizationFeeStore, ataFeeStore }: FeeContext =
 		getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
 	const estimateFee = async () => {
-		// In case we are already sending, we don't want to update the fee
-		if (!observe) {
+		if (!observe || isNullish(token)) {
 			return;
 		}
 
-		const solNetwork = safeMapNetworkIdToNetwork($sendTokenNetworkId);
+		const solNetwork = safeMapNetworkIdToNetwork(token.network.id);
 
-		const addresses = isTokenSpl($sendToken) ? [$sendToken.address] : undefined;
+		const addresses = isTokenSpl(token) ? [token.address] : undefined;
 		const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
 		const fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS + priorityFee / MICROLAMPORTS_PER_LAMPORT;
 		feeStore.setFee(fee);
@@ -55,7 +53,7 @@
 	};
 
 	$effect(() => {
-		[$sendTokenNetworkId];
+		[token];
 
 		untrack(() => updateFee());
 	});
@@ -67,12 +65,20 @@
 	onDestroy(clearTimer);
 
 	const updateAtaFee = async () => {
-		if (isNullishOrEmpty(destination) || !isTokenSpl($sendToken)) {
+		if (!isTokenSpl(token)) {
 			ataFeeStore.setFee(undefined);
 			return;
 		}
 
-		const solNetwork = safeMapNetworkIdToNetwork($sendTokenNetworkId);
+		const solNetwork = safeMapNetworkIdToNetwork(token.network.id);
+
+		if (isNullishOrEmpty(destination)) {
+			const ataFee = await getSolCreateAccountFee(solNetwork);
+
+			ataFeeStore.setFee(ataFee);
+
+			return;
+		}
 
 		// we check if it is an ATA address and if it is not closed, if it isn't an ATA address or has been closed, we need to charge the ATA fee
 		if (
@@ -86,7 +92,7 @@
 		const tokenAccount = await loadTokenAccount({
 			address: destination,
 			network: solNetwork,
-			tokenAddress: $sendToken.address
+			tokenAddress: token.address
 		});
 
 		if (nonNullish(tokenAccount)) {
@@ -100,7 +106,7 @@
 	};
 
 	$effect(() => {
-		[destination, $sendToken];
+		[destination, token];
 
 		untrack(() => updateAtaFee());
 	});
