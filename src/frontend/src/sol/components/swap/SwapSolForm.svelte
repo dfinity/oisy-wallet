@@ -30,6 +30,8 @@
 		swapAmount: OptionAmount;
 		receiveAmount?: number;
 		slippageValue: OptionAmount;
+		networkFee?: bigint;
+		ataFee?: bigint;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onShowProviderList: () => void;
@@ -41,6 +43,8 @@
 		swapAmount = $bindable(),
 		receiveAmount = $bindable(),
 		slippageValue = $bindable(),
+		networkFee = $bindable(),
+		ataFee = $bindable(),
 		isSwapAmountsLoading,
 		onShowTokensList,
 		onShowProviderList,
@@ -108,6 +112,14 @@
 	});
 
 	onDestroy(clearFeeTimer);
+
+	$effect(() => {
+		networkFee = $feeStore;
+	});
+
+	$effect(() => {
+		ataFee = $ataFeeStore;
+	});
 
 	let solanaNativeToken = $derived(
 		isNetworkIdSOLDevnet($sourceToken?.network.id)
