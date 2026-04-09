@@ -1,6 +1,7 @@
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON,
@@ -247,7 +248,7 @@ describe('SwapForm', () => {
 			const { swapAmount } = await renderAndSwitch({
 				source: token8Dec,
 				destination: token18Dec,
-				storeReceiveAmount: 0n
+				storeReceiveAmount: ZERO
 			});
 
 			expect(swapAmount).toBe(0);
