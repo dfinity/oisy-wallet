@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
@@ -102,10 +101,7 @@
 		const condition2 = !SUPPORTED_CROSS_SWAP_NETWORKS[$destinationToken.network.id]?.includes(
 			$sourceToken.network.id
 		);
-		const condition3 =
-			isDefaultEthereumToken($destinationToken) &&
-			$destinationToken.network.id !== $sourceToken.network.id;
-		return condition1 || condition2 || condition3;
+		return condition1 || condition2;
 	});
 
 	let invalid = $derived(
