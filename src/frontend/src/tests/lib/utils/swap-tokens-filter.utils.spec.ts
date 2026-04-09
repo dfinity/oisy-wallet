@@ -7,10 +7,13 @@ import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.moc
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 
 describe('filterSwapTokens', () => {
-	const asToggleable = <T extends Token>(
-		token: T,
-		enabled: boolean
-	): TokenToggleable<T> => ({
+	const asToggleable = <T extends Token>({
+		token,
+		enabled
+	}: {
+		token: T;
+		enabled: boolean;
+	}): TokenToggleable<T> => ({
 		...token,
 		enabled
 	});
@@ -19,36 +22,37 @@ describe('filterSwapTokens', () => {
 	const CANISTER_ID_UNSUPPORTED = 'utozz-siaaa-aaaam-qaaxq-cai';
 	const CANISTER_ID_NOT_IN_SET = 'u45jl-liaaa-aaaam-abppa-cai';
 
-	const icpTokenActive = asToggleable(mockValidIcToken, true);
-	const icpTokenInactive = asToggleable(
-		{ ...mockValidIcrcToken, ledgerCanisterId: CANISTER_ID_INACTIVE },
-		false
-	);
-	const icpTokenInactiveUnsupported = asToggleable(
-		{ ...mockValidIcrcToken, ledgerCanisterId: CANISTER_ID_UNSUPPORTED },
-		false
-	);
+	const icpTokenActive = asToggleable({ token: mockValidIcToken, enabled: true });
+	const icpTokenInactive = asToggleable({
+		token: { ...mockValidIcrcToken, ledgerCanisterId: CANISTER_ID_INACTIVE },
+		enabled: false
+	});
+	const icpTokenInactiveUnsupported = asToggleable({
+		token: { ...mockValidIcrcToken, ledgerCanisterId: CANISTER_ID_UNSUPPORTED },
+		enabled: false
+	});
 
-	const erc20Active = asToggleable(mockValidErc20Token, true);
-	const erc20Inactive = asToggleable(
-		{ ...mockValidErc20Token, address: '0xInactiveAddr' },
-		false
-	);
-	const erc20InactiveUnsupported = asToggleable(
-		{ ...mockValidErc20Token, address: '0xUnsupportedAddr' },
-		false
-	);
+	const erc20Active = asToggleable({ token: mockValidErc20Token, enabled: true });
+	const erc20Inactive = asToggleable({
+		token: { ...mockValidErc20Token, address: '0xInactiveAddr' },
+		enabled: false
+	});
+	const erc20InactiveUnsupported = asToggleable({
+		token: { ...mockValidErc20Token, address: '0xUnsupportedAddr' },
+		enabled: false
+	});
 
-	const splActive = asToggleable(mockValidSplToken, true);
-	const splInactive = asToggleable(
-		{ ...mockValidSplToken, address: 'InactiveSplAddress' },
-		false
-	);
+	const splActive = asToggleable({ token: mockValidSplToken, enabled: true });
+	const splInactive = asToggleable({
+		token: { ...mockValidSplToken, address: 'InactiveSplAddress' },
+		enabled: false
+	});
 
 	describe('when supportedData is undefined', () => {
 		it('returns all tokens unchanged', () => {
 			const tokens = [icpTokenActive, icpTokenInactive, erc20Active, splActive];
 			const result = filterSwapTokens({ tokens, supportedData: undefined });
+
 			expect(result).toEqual(tokens);
 		});
 	});
@@ -76,10 +80,10 @@ describe('filterSwapTokens', () => {
 		});
 
 		it('filters out active tokens not in the supported set', () => {
-			const unsupportedActive = asToggleable(
-				{ ...mockValidIcrcToken, ledgerCanisterId: CANISTER_ID_NOT_IN_SET },
-				true
-			);
+			const unsupportedActive = asToggleable({
+				token: { ...mockValidIcrcToken, ledgerCanisterId: CANISTER_ID_NOT_IN_SET },
+				enabled: true
+			});
 
 			const supportedData: SwapSupportedTokensData = {
 				icp: {
@@ -202,10 +206,10 @@ describe('filterSwapTokens', () => {
 
 	describe('EVM token identifier matching', () => {
 		it('matches ERC-20 address case-insensitively', () => {
-			const token = asToggleable(
-				{ ...mockValidErc20Token, address: '0xAbCdEf1234567890' },
-				false
-			);
+			const token = asToggleable({
+				token: { ...mockValidErc20Token, address: '0xAbCdEf1234567890' },
+				enabled: false
+			});
 
 			const supportedData: SwapSupportedTokensData = {
 				icp: { coverage: 'none', supportedTokenIds: new Set() },
@@ -217,6 +221,7 @@ describe('filterSwapTokens', () => {
 			};
 
 			const result = filterSwapTokens({ tokens: [token], supportedData });
+
 			expect(result).toContain(token);
 		});
 	});
