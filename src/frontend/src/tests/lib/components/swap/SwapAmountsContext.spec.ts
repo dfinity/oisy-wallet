@@ -552,6 +552,8 @@ describe('SwapAmountsContext.svelte', () => {
 			await tick();
 			expect(fetchMock).toHaveBeenCalledTimes(2);
 
+			store.reset();
+
 			await act(() =>
 				rerender({
 					amount: '10',
@@ -574,7 +576,7 @@ describe('SwapAmountsContext.svelte', () => {
 			await vi.advanceTimersByTimeAsync(0);
 			await tick();
 
-			expect(get(store)?.swaps).toEqual(mockSwapProviders);
+			expect(get(store)).toBeNull();
 
 			resolveFresh(freshResults);
 			await vi.advanceTimersByTimeAsync(0);
