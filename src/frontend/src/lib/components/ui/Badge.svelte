@@ -29,7 +29,7 @@
 		'nft-trait': 'border border-secondary bg-primary font-semibold',
 		'nft-spam': 'bg-warning-primary text-white font-semibold',
 		eligible: 'bg-success-primary text-white font-semibold',
-		'not-eligible': 'bg-primary-inverted text-white opacity-16 font-semibold',
+		'not-eligible': 'bg-disabled-alt2 text-white font-semibold',
 		transparent: 'text-primary border border-secondary'
 	};
 </script>
