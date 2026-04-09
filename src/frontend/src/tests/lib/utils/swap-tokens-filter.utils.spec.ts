@@ -1,3 +1,4 @@
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import type { SwapSupportedTokensData } from '$lib/stores/swap-supported-tokens.store';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -223,6 +224,45 @@ describe('filterSwapTokens', () => {
 			const result = filterSwapTokens({ tokens: [token], supportedData });
 
 			expect(result).toContain(token);
+		});
+	});
+
+	describe('unknown network tokens (nullish lookup)', () => {
+		const btcActive = asToggleable({ token: BTC_MAINNET_TOKEN, enabled: true });
+		const btcInactive = asToggleable({ token: BTC_MAINNET_TOKEN, enabled: false });
+
+		const supportedData: SwapSupportedTokensData = {
+			icp: { coverage: 'all', supportedTokenIds: new Set() },
+			evm: { coverage: 'all', supportedTokenIds: new Set() },
+			sol: { coverage: 'all', supportedTokenIds: new Set() }
+		};
+
+		it('keeps active tokens that do not belong to a known swap network', () => {
+			const result = filterSwapTokens({ tokens: [btcActive], supportedData });
+
+			expect(result).toContain(btcActive);
+		});
+
+		it('filters out inactive tokens that do not belong to a known swap network', () => {
+			const result = filterSwapTokens({ tokens: [btcInactive], supportedData });
+
+			expect(result).not.toContain(btcInactive);
+		});
+	});
+
+	describe('missing network key in supportedData (undefined info)', () => {
+		it('falls back to enabled check when supportedData lacks the network key', () => {
+			const supportedData: SwapSupportedTokensData = {};
+
+			const result = filterSwapTokens({
+				tokens: [icpTokenActive, icpTokenInactive, erc20Active, erc20Inactive],
+				supportedData
+			});
+
+			expect(result).toContain(icpTokenActive);
+			expect(result).not.toContain(icpTokenInactive);
+			expect(result).toContain(erc20Active);
+			expect(result).not.toContain(erc20Inactive);
 		});
 	});
 });
