@@ -16,7 +16,6 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
-import { kongSwapSupportedTokens } from '$lib/services/kong-swap.services';
 import {
 	fetchNearIntentsEvmSwap,
 	fetchNearIntentsSolSwap,
