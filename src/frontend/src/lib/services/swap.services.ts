@@ -248,6 +248,20 @@ export const loadKongSwapTokens = async ({
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
 };
 
+export const kongSwapSupportedTokens = async ({
+	identity
+}: {
+	identity: Identity;
+}): Promise<Set<string>> => {
+	const allTokens = await kongTokens({ identity });
+
+	return new Set(
+		allTokens
+			.filter((token) => 'IC' in token && !token.IC.is_removed && token.IC.chain === 'IC')
+			.map((token) => ('IC' in token ? token.IC.canister_id : ''))
+	);
+};
+
 export const fetchSwapAmounts = async ({
 	identity,
 	sourceToken,
