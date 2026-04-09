@@ -45,6 +45,7 @@
 
 	let timer: NodeJS.Timeout | undefined;
 	let debounceTimer = $state<NodeJS.Timeout | undefined>();
+	let requestVersion = 0;
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
@@ -90,6 +91,8 @@
 			return;
 		}
 
+		const thisRequestVersion = requestVersion;
+
 		isSwapAmountsLoading = true;
 
 		try {
@@ -104,6 +107,10 @@
 				userEthAddress: $ethAddress,
 				userSolAddress: $solAddressMainnet
 			});
+
+			if (thisRequestVersion !== requestVersion) {
+				return;
+			}
 
 			if (swapAmounts.length === 0) {
 				store.setSwaps({
@@ -120,6 +127,10 @@
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (_err: unknown) {
+			if (thisRequestVersion !== requestVersion) {
+				return;
+			}
+
 			// if swapAmounts fails, it means no pool is currently available for the provided tokens
 			store.setSwaps({
 				swaps: [],
@@ -127,7 +138,9 @@
 				selectedProvider: undefined
 			});
 		} finally {
-			isSwapAmountsLoading = false;
+			if (thisRequestVersion === requestVersion) {
+				isSwapAmountsLoading = false;
+			}
 		}
 	};
 
@@ -143,6 +156,7 @@
 		[amount, sourceToken, destinationToken, isSourceTokenIcrc2];
 
 		untrack(() => {
+			requestVersion++;
 			clearDebounceTimer();
 			debounceTimer = setTimeout(() => {
 				loadSwapAmounts(false);
