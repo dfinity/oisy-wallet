@@ -84,7 +84,8 @@ import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
 	geSwapEthTokenAddress,
-	getWithdrawableToken
+	getWithdrawableToken,
+	isKongSupportedIcToken
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { sendSol } from '$sol/services/sol-send.services';
@@ -236,7 +237,7 @@ export const loadKongSwapTokens = async ({
 		if (result.status === 'fulfilled') {
 			return result.value.reduce<KongSwapTokensStoreData>(
 				(innerAcc, kongToken) =>
-					'IC' in kongToken && !kongToken.IC.is_removed && kongToken.IC.chain === 'IC'
+					isKongSupportedIcToken(kongToken)
 						? { ...innerAcc, [kongToken.IC.symbol]: kongToken.IC }
 						: innerAcc,
 				acc
@@ -246,6 +247,22 @@ export const loadKongSwapTokens = async ({
 	}, {});
 
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
+};
+
+export const kongSwapSupportedTokens = async ({
+	identity
+}: {
+	identity: Identity;
+}): Promise<Set<LedgerCanisterIdText>> => {
+	const allTokens = await kongTokens({ identity });
+
+	return allTokens.reduce<Set<LedgerCanisterIdText>>((acc, token) => {
+		if (isKongSupportedIcToken(token)) {
+			acc.add(token.IC.canister_id);
+		}
+
+		return acc;
+	}, new Set<LedgerCanisterIdText>());
 };
 
 export const fetchSwapAmounts = async ({
