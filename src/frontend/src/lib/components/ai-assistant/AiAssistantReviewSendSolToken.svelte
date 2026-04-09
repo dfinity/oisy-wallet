@@ -252,7 +252,7 @@
 </script>
 
 <div class="mt-2 mb-8">
-	<SolFeeContext token={$sendToken} {destination} observe={!loading}>
+	<SolFeeContext {destination} observe={!loading} token={$sendToken}>
 		<SolFeeDisplay />
 
 		<SendFeeInfo
