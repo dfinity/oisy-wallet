@@ -45,7 +45,7 @@
 
 	let timer: NodeJS.Timeout | undefined;
 	let debounceTimer = $state<NodeJS.Timeout | undefined>();
-	let requestVersion = 0;
+	let fetchGeneration = 0;
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
@@ -91,7 +91,7 @@
 			return;
 		}
 
-		const thisRequestVersion = requestVersion;
+		const currentGeneration = fetchGeneration;
 
 		isSwapAmountsLoading = true;
 
@@ -108,7 +108,7 @@
 				userSolAddress: $solAddressMainnet
 			});
 
-			if (thisRequestVersion !== requestVersion) {
+			if (currentGeneration !== fetchGeneration) {
 				return;
 			}
 
@@ -127,7 +127,7 @@
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (_err: unknown) {
-			if (thisRequestVersion !== requestVersion) {
+			if (currentGeneration !== fetchGeneration) {
 				return;
 			}
 
@@ -138,7 +138,7 @@
 				selectedProvider: undefined
 			});
 		} finally {
-			if (thisRequestVersion === requestVersion) {
+			if (currentGeneration === fetchGeneration) {
 				isSwapAmountsLoading = false;
 			}
 		}
@@ -156,7 +156,7 @@
 		[amount, sourceToken, destinationToken, isSourceTokenIcrc2];
 
 		untrack(() => {
-			requestVersion++;
+			fetchGeneration++;
 			clearDebounceTimer();
 			debounceTimer = setTimeout(() => {
 				loadSwapAmounts(false);
