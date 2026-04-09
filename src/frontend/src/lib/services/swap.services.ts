@@ -249,7 +249,6 @@ export const loadKongSwapTokens = async ({
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
 };
 
-
 export const fetchSwapAmounts = async ({
 	identity,
 	sourceToken,

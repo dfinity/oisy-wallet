@@ -1052,7 +1052,6 @@ describe('swap.services', () => {
 		});
 	});
 
-
 	describe('withdrawICPSwapAfterFailedSwap', () => {
 		const identity = mockIdentity;
 		const canisterId = 'test-canister-id';
