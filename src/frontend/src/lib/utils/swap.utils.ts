@@ -395,7 +395,5 @@ export const calculateValueDifference = ({
 	return ((receivedValue - paidValue) / paidValue) * 100;
 };
 
-export const isKongSupportedIcToken = (
-	token: TokenReply
-): token is { IC: ICTokenReply } =>
+export const isKongSupportedIcToken = (token: TokenReply): token is { IC: ICTokenReply } =>
 	'IC' in token && !token.IC.is_removed && token.IC.chain === 'IC';

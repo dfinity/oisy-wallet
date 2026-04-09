@@ -258,7 +258,7 @@ export const kongSwapSupportedTokens = async ({
 
 	return allTokens.reduce<Set<LedgerCanisterIdText>>((acc, token) => {
 		if (isKongSupportedIcToken(token)) {
-			acc.add(token.IC.canister_id as LedgerCanisterIdText);
+			acc.add(token.IC.canister_id);
 		}
 
 		return acc;
