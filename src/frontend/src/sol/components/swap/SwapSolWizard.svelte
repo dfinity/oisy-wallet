@@ -231,8 +231,8 @@
 				{onNext}
 				{onShowProviderList}
 				{onShowTokensList}
-				onNetworkFeeChange={(fee) => (networkFee = fee)}
-				onAtaFeeChange={(fee) => (ataFee = fee)}
+				{onNetworkFeeChange}
+				{onAtaFeeChange}
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue
