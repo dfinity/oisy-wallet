@@ -37,7 +37,9 @@ export const clearNearIntentsTokensCache = (): void => {
 	cachedTokens = undefined;
 };
 
-const EVM_BLOCKCHAINS = new Set(['eth', 'arb', 'base', 'bsc', 'pol']);
+const EVM_BLOCKCHAINS = new Set(
+	Object.values(NEAR_INTENTS_BLOCKCHAIN_MAP).filter((b) => b !== 'sol')
+);
 
 /**
  * Returns the set of supported token identifiers for NEAR Intents,
