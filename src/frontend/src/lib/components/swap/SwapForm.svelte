@@ -34,6 +34,7 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -133,9 +134,20 @@
 
 	const onTokensSwitch = () => {
 		const tempAmount = receiveAmount;
+		const newSourceDecimals = $destinationToken?.decimals;
+
 		swapAmountsStore.reset();
 		amountSetToMax = false;
-		swapAmount = tempAmount;
+
+		swapAmount =
+			nonNullish(tempAmount) && nonNullish(newSourceDecimals)
+				? formatTokenBigintToNumber({
+						value: parseToken({ value: `${tempAmount}`, unitName: newSourceDecimals }),
+						unitName: newSourceDecimals,
+						displayDecimals: newSourceDecimals
+					})
+				: tempAmount;
+
 		switchTokens();
 	};
 </script>

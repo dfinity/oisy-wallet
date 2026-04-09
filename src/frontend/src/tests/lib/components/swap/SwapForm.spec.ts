@@ -1,4 +1,5 @@
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
+import type { IcToken } from '$icp/types/ic-token';
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
@@ -12,6 +13,8 @@ import {
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import type { OptionAmount } from '$lib/types/send';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -135,6 +138,154 @@ describe('SwapForm', () => {
 			await fireEvent.click(button);
 
 			expect(resetSpy).toHaveBeenCalled();
+		});
+	});
+
+	describe('onTokensSwitch amount handling', () => {
+		const token8Dec = {
+			...mockValidIcToken,
+			enabled: true,
+			decimals: 8,
+			id: parseTokenId('Token8Dec')
+		} as IcToken;
+
+		const token18Dec = {
+			...mockValidIcToken,
+			enabled: true,
+			decimals: 18,
+			id: parseTokenId('Token18Dec')
+		} as IcToken;
+
+		const setupContextWithTokens = ({
+			source,
+			destination
+		}: {
+			source: IcToken;
+			destination: IcToken;
+		}) => {
+			const originalContext = initSwapContext({
+				sourceToken: source,
+				destinationToken: destination
+			});
+
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...originalContext,
+				sourceTokenExchangeRate: readable(1),
+				destinationTokenExchangeRate: readable(1)
+			});
+		};
+
+		const renderAndSwitch = async ({
+			source,
+			destination,
+			receiveAmount
+		}: {
+			source: IcToken;
+			destination: IcToken;
+			receiveAmount: number | undefined;
+		}) => {
+			setupContextWithTokens({ source, destination });
+			const swapAmountsStore = setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			let swapAmount: OptionAmount = '1';
+
+			const { getByTestId } = render(SwapForm, {
+				props: {
+					get swapAmount() {
+						return swapAmount;
+					},
+					set swapAmount(v: OptionAmount) {
+						swapAmount = v;
+					},
+					receiveAmount,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			const button = getByTestId(SWAP_SWITCH_TOKENS_BUTTON);
+			await fireEvent.click(button);
+
+			return { swapAmount, swapAmountsStore };
+		};
+
+		it('should preserve amount when source and destination have same decimals', async () => {
+			const { swapAmount } = await renderAndSwitch({
+				source: token8Dec,
+				destination: { ...token8Dec, id: parseTokenId('Token8DecB') } as IcToken,
+				receiveAmount: 1.12345678
+			});
+
+			expect(swapAmount).toBe(1.12345678);
+		});
+
+		it('should handle switch with whole number amount', async () => {
+			const { swapAmount } = await renderAndSwitch({
+				source: token8Dec,
+				destination: token18Dec,
+				receiveAmount: 100
+			});
+
+			expect(swapAmount).toBe(100);
+		});
+
+		it('should handle switch with zero amount', async () => {
+			const { swapAmount } = await renderAndSwitch({
+				source: token8Dec,
+				destination: token18Dec,
+				receiveAmount: 0
+			});
+
+			expect(swapAmount).toBe(0);
+		});
+
+		it('should handle switch with undefined receiveAmount', async () => {
+			const { swapAmount } = await renderAndSwitch({
+				source: token8Dec,
+				destination: token18Dec,
+				receiveAmount: undefined
+			});
+
+			expect(swapAmount).toBeUndefined();
+		});
+
+		it('should handle switch with very small amount', async () => {
+			const { swapAmount } = await renderAndSwitch({
+				source: token18Dec,
+				destination: token8Dec,
+				receiveAmount: 0.00000001
+			});
+
+			expect(swapAmount).toBe(0.00000001);
+		});
+
+		it('should normalize amount through parseToken round-trip on switch', async () => {
+			const { swapAmount } = await renderAndSwitch({
+				source: token8Dec,
+				destination: token18Dec,
+				receiveAmount: 1.5
+			});
+
+			expect(swapAmount).toBe(1.5);
+		});
+
+		it('should reset swap amounts store on switch', async () => {
+			const { swapAmountsStore } = await renderAndSwitch({
+				source: token8Dec,
+				destination: token18Dec,
+				receiveAmount: 1.5
+			});
+
+			const resetSpy = vi.spyOn(swapAmountsStore, 'reset');
+
+			setupContextWithTokens({ source: token8Dec, destination: token18Dec });
 		});
 	});
 
