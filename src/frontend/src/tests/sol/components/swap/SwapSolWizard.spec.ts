@@ -43,7 +43,8 @@ vi.mock('$lib/utils/parse.utils', () => ({
 }));
 
 vi.mock('$sol/api/solana.api', () => ({
-	estimatePriorityFee: vi.fn().mockResolvedValue(ZERO)
+	estimatePriorityFee: vi.fn().mockResolvedValue(ZERO),
+	getSolCreateAccountFee: vi.fn().mockResolvedValue(2039280n)
 }));
 
 describe('SwapSolWizard', () => {
@@ -211,6 +212,23 @@ describe('SwapSolWizard', () => {
 			});
 
 			expect(container).toBeInTheDocument();
+		});
+	});
+
+	describe('fee display on review step', () => {
+		it('does not render fee section when fees are not available', () => {
+			const { mockContext } = createContext({
+				swaps: nearIntentsSwapProviders,
+				selectedProvider: nearIntentsSwapProviders[0]
+			});
+
+			const { queryByText } = renderWithStep({
+				step: WizardStepsSwap.REVIEW,
+				context: mockContext
+			});
+
+			expect(queryByText(en.fee.text.network_fee)).not.toBeInTheDocument();
+			expect(queryByText(en.fee.text.total_fee)).not.toBeInTheDocument();
 		});
 	});
 
