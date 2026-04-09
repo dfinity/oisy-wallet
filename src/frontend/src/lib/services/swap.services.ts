@@ -255,11 +255,13 @@ export const kongSwapSupportedTokens = async ({
 }): Promise<Set<string>> => {
 	const allTokens = await kongTokens({ identity });
 
-	return new Set(
-		allTokens
-			.filter((token) => 'IC' in token && !token.IC.is_removed && token.IC.chain === 'IC')
-			.map((token) => ('IC' in token ? token.IC.canister_id : ''))
-	);
+	return allTokens.reduce<Set<string>>((acc, token) => {
+		if ('IC' in token && !token.IC.is_removed && token.IC.chain === 'IC') {
+			acc.add(token.IC.canister_id);
+		}
+
+		return acc;
+	}, new Set());
 };
 
 export const fetchSwapAmounts = async ({
