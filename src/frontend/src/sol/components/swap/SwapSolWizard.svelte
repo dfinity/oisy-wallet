@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
+	import { writable } from 'svelte/store';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -16,6 +17,7 @@
 	} from '$lib/constants/analytics.constants';
 	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -32,12 +34,20 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { TokenId } from '$lib/types/token';
 	import { SwapProvider } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
 	import SwapSolForm from '$sol/components/swap/SwapSolForm.svelte';
+	import {
+		SOL_FEE_CONTEXT_KEY,
+		type FeeContext as FeeContextType,
+		initFeeContext,
+		initFeeStore
+	} from '$sol/stores/sol-fee.store';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -90,18 +100,45 @@
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 
-	let networkFee = $state<bigint | undefined>();
-	let ataFee = $state<bigint | undefined>();
-
-	const onNetworkFeeChange = (fee: bigint | undefined) => (networkFee = fee);
-	const onAtaFeeChange = (fee: bigint | undefined) => (ataFee = fee);
-
 	let solanaNativeToken = $derived(
 		isNetworkIdSOLDevnet($sourceToken?.network.id)
 			? SOLANA_DEVNET_TOKEN
 			: isNetworkIdSOLLocal($sourceToken?.network.id)
 				? SOLANA_LOCAL_TOKEN
 				: SOLANA_TOKEN
+	);
+
+	const feeStore = initFeeStore();
+	const prioritizationFeeStore = initFeeStore();
+	const ataFeeStore = initFeeStore();
+
+	const feeSymbolStore = writable<string | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	const feeDecimalsStore = writable<number | undefined>(undefined);
+
+	$effect(() => {
+		feeSymbolStore.set(solanaNativeToken.symbol);
+		feeTokenIdStore.set(solanaNativeToken.id);
+		feeDecimalsStore.set(solanaNativeToken.decimals);
+	});
+
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
+
+	$effect(() => {
+		feeExchangeRateStore.set($exchanges?.[solanaNativeToken.id]?.usd);
+	});
+
+	setContext<FeeContextType>(
+		SOL_FEE_CONTEXT_KEY,
+		initFeeContext({
+			feeStore,
+			prioritizationFeeStore,
+			ataFeeStore,
+			feeSymbolStore,
+			feeDecimalsStore,
+			feeTokenIdStore,
+			feeExchangeRateStore
+		})
 	);
 
 	let sourceTokenUsdValue = $derived(
@@ -223,40 +260,36 @@
 </script>
 
 {#if nonNullish($sourceToken)}
-	{#key currentStep?.name}
-		{#if currentStep?.name === WizardStepsSwap.SWAP}
-			<SwapSolForm
-				{isSwapAmountsLoading}
-				{onClose}
-				{onNext}
-				{onShowProviderList}
-				{onShowTokensList}
-				{onNetworkFeeChange}
-				{onAtaFeeChange}
-				bind:swapAmount
-				bind:receiveAmount
-				bind:slippageValue
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview
-				isSwapAmountsLoading={isSwapAmountsLoading &&
-					receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount}
-				{onBack}
-				onSwap={swap}
-				{receiveAmount}
-				{slippageValue}
-				{swapAmount}
-			>
-				{#snippet swapFees()}
-					<SwapSolFees
-						{networkFee}
-						{ataFee}
-						symbol={solanaNativeToken.symbol}
-					/>
-				{/snippet}
-			</SwapReview>
-		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress sendWithTransfer {swapProgressStep} />
-		{/if}
-	{/key}
+	<SolFeeContext token={$sourceToken} observe={currentStep?.name !== WizardStepsSwap.SWAPPING}>
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsSwap.SWAP}
+				<SwapSolForm
+					{isSwapAmountsLoading}
+					{onClose}
+					{onNext}
+					{onShowProviderList}
+					{onShowTokensList}
+					bind:swapAmount
+					bind:receiveAmount
+					bind:slippageValue
+				/>
+			{:else if currentStep?.name === WizardStepsSwap.REVIEW}
+				<SwapReview
+					isSwapAmountsLoading={isSwapAmountsLoading &&
+						receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount}
+					{onBack}
+					onSwap={swap}
+					{receiveAmount}
+					{slippageValue}
+					{swapAmount}
+				>
+					{#snippet swapFees()}
+						<SwapSolFees />
+					{/snippet}
+				</SwapReview>
+			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
+				<SwapProgress sendWithTransfer {swapProgressStep} />
+			{/if}
+		{/key}
+	</SolFeeContext>
 {/if}

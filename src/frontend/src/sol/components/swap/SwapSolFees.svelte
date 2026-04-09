@@ -1,31 +1,34 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
+	import { getContext } from 'svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 
-	interface Props {
-		networkFee?: bigint;
-		ataFee?: bigint;
-		symbol: string;
-	}
+	const {
+		feeStore: networkFee,
+		ataFeeStore: ataFee,
+		feeDecimalsStore: decimals,
+		feeSymbolStore: symbol,
+		feeExchangeRateStore: exchangeRate
+	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let { networkFee, ataFee, symbol }: Props = $props();
-
-	let totalFee = $derived(nonNullish(networkFee) ? networkFee + (ataFee ?? ZERO) : undefined);
+	let totalFee = $derived(
+		nonNullish($networkFee) ? $networkFee + ($ataFee ?? ZERO) : undefined
+	);
 </script>
 
-{#if nonNullish(networkFee)}
-	{#if nonNullish(ataFee) && ataFee > ZERO}
+{#if nonNullish($symbol) && nonNullish($decimals) && nonNullish($networkFee)}
+	{#if nonNullish($ataFee) && $ataFee > ZERO}
 		<ModalExpandableValues>
 			{#snippet listHeader()}
 				<FeeDisplay
-					decimals={SOLANA_DEFAULT_DECIMALS}
-					displayExchangeRate={false}
+					decimals={$decimals}
+					exchangeRate={$exchangeRate}
 					feeAmount={totalFee}
-					{symbol}
+					symbol={$symbol}
 				>
 					{#snippet label()}
 						<span>{$i18n.fee.text.total_fee}</span>
@@ -35,10 +38,10 @@
 
 			{#snippet listItems()}
 				<FeeDisplay
-					decimals={SOLANA_DEFAULT_DECIMALS}
-					displayExchangeRate={false}
-					feeAmount={networkFee}
-					{symbol}
+					decimals={$decimals}
+					exchangeRate={$exchangeRate}
+					feeAmount={$networkFee}
+					symbol={$symbol}
 				>
 					{#snippet label()}
 						<span>{$i18n.fee.text.network_fee}</span>
@@ -46,10 +49,10 @@
 				</FeeDisplay>
 
 				<FeeDisplay
-					decimals={SOLANA_DEFAULT_DECIMALS}
-					displayExchangeRate={false}
-					feeAmount={ataFee}
-					{symbol}
+					decimals={$decimals}
+					exchangeRate={$exchangeRate}
+					feeAmount={$ataFee}
+					symbol={$symbol}
 				>
 					{#snippet label()}
 						<span>{$i18n.fee.text.ata_fee}</span>
@@ -59,10 +62,10 @@
 		</ModalExpandableValues>
 	{:else}
 		<FeeDisplay
-			decimals={SOLANA_DEFAULT_DECIMALS}
-			displayExchangeRate={false}
-			feeAmount={networkFee}
-			{symbol}
+			decimals={$decimals}
+			exchangeRate={$exchangeRate}
+			feeAmount={$networkFee}
+			symbol={$symbol}
 		>
 			{#snippet label()}
 				<span>{$i18n.fee.text.network_fee}</span>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy, untrack } from 'svelte';
+	import { getContext } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -17,14 +17,8 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { estimatePriorityFee, getSolCreateAccountFee } from '$sol/api/solana.api';
-	import {
-		MICROLAMPORTS_PER_LAMPORT,
-		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
-	} from '$sol/constants/sol.constants';
 	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
-	import { initFeeStore } from '$sol/stores/sol-fee.store';
-	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
+	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -34,8 +28,6 @@
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onShowProviderList: () => void;
-		onNetworkFeeChange?: (fee: bigint | undefined) => void;
-		onAtaFeeChange?: (fee: bigint | undefined) => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -47,8 +39,6 @@
 		isSwapAmountsLoading,
 		onShowTokensList,
 		onShowProviderList,
-		onNetworkFeeChange,
-		onAtaFeeChange,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -56,71 +46,9 @@
 	const { sourceToken, destinationToken, sourceTokenBalance } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
+	const { feeStore, ataFeeStore }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
+
 	let errorType = $state<TokenActionErrorType | undefined>();
-
-	const feeStore = initFeeStore();
-	const ataFeeStore = initFeeStore();
-
-	let feeTimer = $state<ReturnType<typeof setInterval> | undefined>();
-
-	const clearFeeTimer = () => {
-		if (nonNullish(feeTimer)) {
-			clearInterval(feeTimer);
-			feeTimer = undefined;
-		}
-	};
-
-	const estimateSolFee = async () => {
-		if (isNullish($sourceToken)) {
-			return;
-		}
-
-		const solNetwork = safeMapNetworkIdToNetwork($sourceToken.network.id);
-		const addresses = isTokenSpl($sourceToken) ? [$sourceToken.address] : undefined;
-		const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
-		const fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS + priorityFee / MICROLAMPORTS_PER_LAMPORT;
-		feeStore.setFee(fee);
-	};
-
-	const estimateAtaFee = async () => {
-		if (isNullish($sourceToken) || !isTokenSpl($sourceToken)) {
-			ataFeeStore.setFee(undefined);
-
-			return;
-		}
-
-		const solNetwork = safeMapNetworkIdToNetwork($sourceToken.network.id);
-
-		const ataFee = await getSolCreateAccountFee(solNetwork);
-
-		ataFeeStore.setFee(ataFee);
-	};
-
-	$effect(() => {
-		[$sourceToken];
-
-		untrack(() => {
-			clearFeeTimer();
-			estimateSolFee();
-			feeTimer = setInterval(estimateSolFee, 5000);
-		});
-	});
-
-	$effect(() => {
-		[$sourceToken];
-
-		untrack(() => estimateAtaFee());
-	});
-
-	onDestroy(clearFeeTimer);
-
-	$effect(() => {
-		onNetworkFeeChange?.($feeStore);
-	});
-
-	$effect(() => {
-		onAtaFeeChange?.($ataFeeStore);
-	});
 
 	let solanaNativeToken = $derived(
 		isNetworkIdSOLDevnet($sourceToken?.network.id)
@@ -201,11 +129,7 @@
 			<div class="flex flex-col gap-3">
 				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
 
-				<SwapSolFees
-					networkFee={$feeStore}
-					ataFee={$ataFeeStore}
-					symbol={solanaNativeToken.symbol}
-				/>
+				<SwapSolFees />
 			</div>
 		{/if}
 	{/snippet}

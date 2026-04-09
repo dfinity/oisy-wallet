@@ -8,19 +8,15 @@ import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import SwapSolForm from '$sol/components/swap/SwapSolForm.svelte';
+import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { readable, writable } from 'svelte/store';
 
 vi.mock('$lib/utils/parse.utils', () => ({
 	parseToken: vi.fn().mockReturnValue(ZERO)
-}));
-
-vi.mock('$sol/api/solana.api', () => ({
-	estimatePriorityFee: vi.fn().mockResolvedValue(ZERO),
-	getSolCreateAccountFee: vi.fn().mockResolvedValue(2039280n)
 }));
 
 describe('SwapSolForm', () => {
@@ -37,6 +33,17 @@ describe('SwapSolForm', () => {
 	];
 
 	const mockContext = new Map();
+
+	const createFeeContext = () =>
+		initFeeContext({
+			feeStore: initFeeStore(),
+			prioritizationFeeStore: initFeeStore(),
+			ataFeeStore: initFeeStore(),
+			feeSymbolStore: writable('SOL'),
+			feeDecimalsStore: writable(9),
+			feeTokenIdStore: writable(undefined),
+			feeExchangeRateStore: writable(undefined)
+		});
 
 	beforeEach(() => {
 		const originalSwapContext = initSwapContext({
@@ -59,6 +66,7 @@ describe('SwapSolForm', () => {
 			selectedProvider: nearIntentsSwapProviders[0]
 		});
 		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+		mockContext.set(SOL_FEE_CONTEXT_KEY, createFeeContext());
 	});
 
 	afterEach(() => {
@@ -134,6 +142,7 @@ describe('SwapSolForm', () => {
 
 		contextWithoutDestination.set(SWAP_CONTEXT_KEY, swapContextWithoutDestination);
 		contextWithoutDestination.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore() });
+		contextWithoutDestination.set(SOL_FEE_CONTEXT_KEY, createFeeContext());
 
 		const { container } = render(SwapSolForm, {
 			props,
@@ -152,6 +161,7 @@ describe('SwapSolForm', () => {
 
 		contextWithoutSource.set(SWAP_CONTEXT_KEY, swapContextWithoutSource);
 		contextWithoutSource.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore() });
+		contextWithoutSource.set(SOL_FEE_CONTEXT_KEY, createFeeContext());
 
 		const { container } = render(SwapSolForm, {
 			props,
