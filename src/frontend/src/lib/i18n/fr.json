@@ -972,7 +972,7 @@
 			"no_pending_bitcoin_transaction": "Une erreur s'est produite lors du chargement des transactions Bitcoin en attente. Veuillez réessayer plus tard.",
 			"unexpected_utxos_fee": "Quelque chose s'est mal passé lors du calcul des frais de transaction.",
 			"unable_to_retrieve_amount": "n/a (impossible de récupérer)",
-			"solana_transaction_expired": "Votre transaction d'envoi n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous l'avons mis à jour au dernier montant recommandé, veuillez donc essayer de l'envoyer à nouveau.",
+			"solana_transaction_expired": "Votre transaction n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous l'avons mis à jour au dernier montant recommandé, veuillez donc réessayer.",
 			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez patienter quelques secondes, puis vérifiez la liste des transactions de votre token si votre transaction a été créée correctement.",
 			"solana_insufficient_funds": "",
 			"solana_insufficient_funds_for_fee": "",
