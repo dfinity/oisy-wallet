@@ -1,5 +1,6 @@
 import { mapSolanaErrorMsg } from '$sol/utils/sol-error.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockPreflightContext } from '$tests/mocks/sol-error.mock';
 import {
 	SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED,
 	SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM,
@@ -27,7 +28,10 @@ describe('sol-error.utils', () => {
 		});
 
 		it('maps block height exceeded to transaction expired', () => {
-			const err = new SolanaError(SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED);
+			const err = new SolanaError(SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED, {
+				currentBlockHeight: 100n,
+				lastValidBlockHeight: 90n
+			});
 
 			expect(mapSolanaErrorMsg(err)).toBe(sendError.solana_transaction_expired);
 		});
@@ -38,7 +42,7 @@ describe('sol-error.utils', () => {
 			});
 			const err = new SolanaError(
 				SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
-				{ cause: inner }
+				mockPreflightContext({ cause: inner })
 			);
 
 			expect(mapSolanaErrorMsg(err)).toBe(sendError.solana_insufficient_funds);
@@ -51,7 +55,7 @@ describe('sol-error.utils', () => {
 			});
 			const err = new SolanaError(
 				SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
-				{ cause: inner }
+				mockPreflightContext({ cause: inner })
 			);
 
 			expect(mapSolanaErrorMsg(err)).toBe(sendError.solana_insufficient_funds);
@@ -64,7 +68,7 @@ describe('sol-error.utils', () => {
 			});
 			const err = new SolanaError(
 				SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
-				{ cause: inner }
+				mockPreflightContext({ cause: inner })
 			);
 
 			expect(mapSolanaErrorMsg(err)).toBeUndefined();
@@ -74,17 +78,19 @@ describe('sol-error.utils', () => {
 			const inner = new SolanaError(SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_FEE);
 			const err = new SolanaError(
 				SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
-				{ cause: inner }
+				mockPreflightContext({ cause: inner })
 			);
 
 			expect(mapSolanaErrorMsg(err)).toBe(sendError.solana_insufficient_funds_for_fee);
 		});
 
 		it('maps insufficient funds for rent', () => {
-			const inner = new SolanaError(SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_RENT);
+			const inner = new SolanaError(SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_RENT, {
+				accountIndex: 0
+			});
 			const err = new SolanaError(
 				SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
-				{ cause: inner }
+				mockPreflightContext({ cause: inner })
 			);
 
 			expect(mapSolanaErrorMsg(err)).toBe(sendError.solana_insufficient_funds_for_fee);
@@ -93,13 +99,13 @@ describe('sol-error.utils', () => {
 		it('detects insufficient funds from program logs as fallback', () => {
 			const err = new SolanaError(
 				SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
-				{
+				mockPreflightContext({
 					logs: [
 						'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [1]',
 						'Program log: Instruction: Transfer',
 						'Program log: Error: insufficient funds'
 					]
-				}
+				})
 			);
 
 			expect(mapSolanaErrorMsg(err)).toBe(sendError.solana_insufficient_funds);
@@ -108,9 +114,9 @@ describe('sol-error.utils', () => {
 		it('returns undefined for an unrecognised SolanaError', () => {
 			const err = new SolanaError(
 				SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
-				{
+				mockPreflightContext({
 					logs: ['Program log: something else entirely']
-				}
+				})
 			);
 
 			expect(mapSolanaErrorMsg(err)).toBeUndefined();
