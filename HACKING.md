@@ -67,18 +67,28 @@ dfx-orbit station show
 
 > To perform production development, you'll need a `.env.production` file for the frontend. Then:
 
-```bash
-DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o target/ .
+#### Frontend
 
-dfx-oisy request deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
+```bash
+./scripts/docker-build.frontend
 ```
 
-For the backend:
+```bash
+dfx-orbit request asset upload frontend --files target/frontend
+```
+
+#### Backend
 
 ```bash
-scripts/docker-build
+./scripts/docker-build
+```
 
-dfx-orbit request canister install backend --mode upgrade --wasm out/backend.wasm.gz --arg-file out/backend.args.did
+```bash
+dfx-orbit --station oisy-prod \
+  request canister install backend \
+  --mode upgrade \
+  --wasm out/backend.wasm.gz \
+  --arg-file out/backend.args.did
 ```
 
 ### Signer Domains

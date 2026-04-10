@@ -1,4 +1,3 @@
-import { AUTOPILOT_USDC_TOKEN } from '$env/tokens/tokens-erc4626/tokens.autopilot_usdc.env';
 import { AAUTOPILOT_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc4626/tokens.aautopilot_usdc.env';
 import { AAUTOPILOT_WBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc4626/tokens.aautopilot_wbtc.env';
 import { AAUTOPILOT_WETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc4626/tokens.aautopilot_weth.env';
@@ -14,7 +13,6 @@ export const HARVEST_AUTOPILOT_ADDRESSES = [
 	BAUTOPILOT_CBBTC_TOKEN.address.toLowerCase(),
 	BAUTOPILOT_WETH_TOKEN.address.toLowerCase(),
 	MORPHOAUTOPILOT_USDC_TOKEN.address.toLowerCase(),
-	AUTOPILOT_USDC_TOKEN.address.toLowerCase(),
 	AAUTOPILOT_USDC_TOKEN.address.toLowerCase(),
 	AAUTOPILOT_WBTC_TOKEN.address.toLowerCase(),
 	AAUTOPILOT_WETH_TOKEN.address.toLowerCase()
