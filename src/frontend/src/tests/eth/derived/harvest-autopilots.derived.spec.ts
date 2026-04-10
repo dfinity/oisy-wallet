@@ -16,7 +16,7 @@ import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { get } from 'svelte/store';
 
 describe('harvest-autopilots.derived', () => {
-	const mockHarvestAddress = '0x3151cee0cdb517c0e7db2b55ff5085e7d1809d90';
+	const mockHarvestAddress = '0x0d877dc7c8fa3ad980dfdb18b48ec9f8768359c4';
 
 	const mockHarvestToken: Erc4626CustomToken = {
 		...mockValidErc4626Token,

@@ -453,6 +453,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -972,8 +978,11 @@
 			"no_pending_bitcoin_transaction": "حدث خطأ أثناء تحميل معاملات البيتكوين المعلقة. يرجى المحاولة مرة أخرى لاحقًا.",
 			"unexpected_utxos_fee": "حدث خطأ ما أثناء حساب رسوم المعاملة.",
 			"unable_to_retrieve_amount": "غير متاح (لا يمكن استرداده)",
-			"solana_transaction_expired": "لم تتم معالجة معاملة الإرسال الخاصة بك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى محاولة إرسالها مرة أخرى.",
+			"solana_transaction_expired": "لم تتم معالجة معاملتك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى المحاولة مرة أخرى.",
 			"solana_confirmation_failed": "لم نتلق تأكيدًا للمعاملة التي أنشأتها للتو. يرجى الانتظار بضع ثوانٍ ثم التحقق من قائمة معاملات التوكن الخاصة بك إذا تم إنشاء معاملتك بشكل صحيح.",
+			"solana_insufficient_funds": "",
+			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": ""
 		}
 	},

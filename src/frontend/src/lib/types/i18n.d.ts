@@ -286,6 +286,7 @@ interface I18nDapps {
 		};
 		icexplorer: { name: string; one_liner: string; description: string };
 		icpixel: { name: string; one_liner: string; description: string };
+		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
 	};
 }
 
@@ -714,6 +715,9 @@ interface I18nSend {
 		unable_to_retrieve_amount: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
+		solana_insufficient_funds: string;
+		solana_insufficient_funds_for_fee: string;
+		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
 	};
 }

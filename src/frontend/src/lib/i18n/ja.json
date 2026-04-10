@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",
-			"standalone_mode": "$oisy_short をホーム画面にインストールした状態での動作を改善しました（現在ご利用の状態です）。$oisy_short への接続やトランザクションの署名で問題が発生する場合は、いったん ホーム画面から $oisy_short を削除し、再度インストールしてください。iPhone の場合は、「Webアプリとして開く（Open as Web App）」のチェックを外していることを必ず確認してください。<a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">詳しく読む</a>",
+			"standalone_mode": "アプリと $oisy_short の両方がホーム画面にインストールされている場合、接続に関する既知の問題が発生することがあります。$oisy_short への接続やトランザクションの署名に問題が生じた場合は、通常のブラウザからアプリを起動してください。現在修正に取り組んでおり、近日中に解決される予定です。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">詳細を見る</a>",
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。"
 		}
 	},
@@ -452,6 +452,12 @@
 			"icpixel": {
 				"name": "",
 				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
 				"description": ""
 			}
 		}
@@ -972,8 +978,11 @@
 			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後でもう一度お試しください。",
 			"unexpected_utxos_fee": "トランザクション手数料の計算中に問題が発生しました。",
 			"unable_to_retrieve_amount": "該当なし（取得できませんでした）",
-			"solana_transaction_expired": "あなたの送信トランザクションはSolanaネットワークによって処理されず、期限切れになりました。これはおそらく提供された優先手数料が不足していたためです。最新の推奨金額に更新しましたので、もう一度送信を試みてください。",
+			"solana_transaction_expired": "あなたのトランザクションはSolanaネットワークによって処理されず、期限切れになりました。これはおそらく提供された優先手数料が不足していたためです。最新の推奨金額に更新しましたので、もう一度お試しください。",
 			"solana_confirmation_failed": "作成したトランザクションの確認を受信できませんでした。数秒待ってから、トークンのトランザクションリストでトランザクションが正しく作成されたかどうかを確認してください。",
+			"solana_insufficient_funds": "",
+			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "指定されたトークン規格がサポートされていないため、手数料を計算できませんでした。"
 		}
 	},

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/kit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { slide } from 'svelte/transition';
@@ -54,6 +53,7 @@
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
+	import { mapSolanaErrorMsg } from '$sol/utils/sol-error.utils';
 
 	interface Props {
 		amount: number;
@@ -239,12 +239,8 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)
-				? $i18n.send.error.solana_transaction_expired
-				: $i18n.send.error.unexpected;
-
 			toastsError({
-				msg: { text: errorMsg },
+				msg: { text: mapSolanaErrorMsg(err) ?? $i18n.send.error.unexpected },
 				err
 			});
 		}
