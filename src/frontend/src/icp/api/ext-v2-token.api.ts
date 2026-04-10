@@ -21,7 +21,7 @@ import { Principal } from '@icp-sdk/core/principal';
  *
  * @param {Object} params - The parameters for fetching transactions.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
- * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {NullishIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
  * @param {QueryParams} params.rest - Additional query parameters.
  * @returns {Promise<Transaction[]>} The array of all collection transactions, not filtered by caller.
@@ -48,7 +48,7 @@ export const transactions = async ({
  *
  * @param {Object} params - The parameters for fetching the balance.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
- * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {NullishIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
  * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
  * @param {QueryParams} params.rest - Additional query parameters.
@@ -93,7 +93,7 @@ export const balance = async ({
  *
  * @param {Object} params - The parameters for fetching the tokens.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
- * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {NullishIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
  * @param {Principal} params.owner - The principal of the owner whose tokens should be fetched.
  * @returns {Promise<TokenIndex[]>} The list of token indices owned by the user.
@@ -152,7 +152,7 @@ export const getTokensByOwner = async ({
  *
  * @param {Object} params - The parameters for the transfer.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
- * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {NullishIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
  * @param {Principal} params.from - The ICRC principal of the sender.
  * @param {Principal} params.to - The ICRC principal of the receiver.
@@ -209,7 +209,7 @@ export const transfer = async ({
  *
  * @param {Object} params - The parameters for fetching the metadata.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
- * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {NullishIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
  * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
  * @param {QueryParams} params.rest - Additional query parameters.

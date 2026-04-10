@@ -42,9 +42,11 @@ export interface AgreementHistoryEntry {
 export type AgreementType =
 	| { TermsOfUse: null }
 	| { PrivacyPolicy: null }
-	| { LicenseAgreement: null };
+	| { LicenseAgreement: null }
+	| { Provider: ProviderAgreementType };
 export interface Agreements {
 	agreements: UserAgreements;
+	provider_agreements: [] | [Array<[ProviderAgreementType, UserAgreement]>];
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
@@ -63,6 +65,7 @@ export interface AllowSigningResponse {
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export interface ApiKeys {
+	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
 	etherscan_api_key: [] | [string];
 	coingecko_api_key: [] | [string];
@@ -289,11 +292,20 @@ export type GetUserTransactionsResult =
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
+export interface HttpHeader {
+	value: string;
+	name: string;
+}
 export interface HttpRequest {
 	url: string;
 	method: string;
 	body: Uint8Array;
 	headers: Array<[string, string]>;
+}
+export interface HttpRequestResult {
+	status: bigint;
+	body: Uint8Array;
+	headers: Array<HttpHeader>;
 }
 export interface HttpResponse {
 	body: Uint8Array;
@@ -375,6 +387,12 @@ export interface Outpoint {
 export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
+}
+export type ProviderAgreementProvider = { NearIntents: null };
+export type ProviderAgreementScope = { Swap: null };
+export interface ProviderAgreementType {
+	provider: ProviderAgreementProvider;
+	scope: ProviderAgreementScope;
 }
 export interface RateLimitError {
 	max_calls: number;
@@ -511,10 +529,18 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export interface TransformArgs {
+	context: Uint8Array;
+	response: HttpRequestResult;
+}
 export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 	current_user_version: [] | [bigint];
+}
+export interface UpdateProviderAgreementsRequest {
+	current_user_version: [] | [bigint];
+	provider_agreements: Array<[ProviderAgreementType, UserAgreement]>;
 }
 export interface UpdateUserAgreementsRequest {
 	agreements: UserAgreements;
@@ -786,6 +812,15 @@ export interface _SERVICE {
 	 */
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	/**
+	 * Strips volatile HTTP headers so that IC replicas can reach consensus.
+	 *
+	 * Each replica makes the same HTTP request independently and the raw
+	 * responses must match for consensus. Headers like `Date`, `X-Request-Id`,
+	 * `CF-Ray`, etc. differ across replicas, causing consensus failure.
+	 * This transform keeps only status + body.
+	 */
+	http_request_transform: ActorMethod<[TransformArgs], HttpRequestResult>;
+	/**
 	 * List the custom tokens for the calling user.
 	 *
 	 * Note: This method was previously exposed as a *query* but is now an *update*
@@ -855,6 +890,24 @@ export interface _SERVICE {
 	 * Errors are enumerated by: `ContactError`.
 	 */
 	update_contact: ActorMethod<[Contact], GetContactResult>;
+	/**
+	 * Updates the user's provider agreements, merging with any existing ones, and records an
+	 * audit-trail entry for every provider agreement that was actually changed.
+	 *
+	 * Only entries where `accepted` is `Some(_)` are applied. If `Some(true)`,
+	 * `last_accepted_at_ns` is set to `now`.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the provider agreements were saved successfully, or if they were already
+	 * set to the same value.
+	 *
+	 * # Errors
+	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 */
+	update_provider_agreements: ActorMethod<
+		[UpdateProviderAgreementsRequest],
+		SetUserShowTestnetsResult
+	>;
 	/**
 	 * Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
 	 * for every agreement that was actually changed.

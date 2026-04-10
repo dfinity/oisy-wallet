@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",
-			"standalone_mode": "$oisy_short をホーム画面にインストールした状態での動作を改善しました（現在ご利用の状態です）。$oisy_short への接続やトランザクションの署名で問題が発生する場合は、いったん ホーム画面から $oisy_short を削除し、再度インストールしてください。iPhone の場合は、「Webアプリとして開く（Open as Web App）」のチェックを外していることを必ず確認してください。<a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">詳しく読む</a>",
+			"standalone_mode": "アプリと $oisy_short の両方がホーム画面にインストールされている場合、接続に関する既知の問題が発生することがあります。$oisy_short への接続やトランザクションの署名に問題が生じた場合は、通常のブラウザからアプリを起動してください。現在修正に取り組んでおり、近日中に解決される予定です。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">詳細を見る</a>",
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。"
 		}
 	},
@@ -80,7 +80,6 @@
 			"source_code_on_github": "GitHub上のソースコード",
 			"view_on_explorer": "エクスプローラーで確認",
 			"source_code": "ソースコード",
-			"changelog": "変更履歴",
 			"documentation": "ドキュメント",
 			"support": "サポート",
 			"confirm_navigate": "ページを離れても良いですか？",
@@ -100,7 +99,6 @@
 			"activity": "トランザクション履歴を表示",
 			"airdrops": "エアドロップ報酬を表示",
 			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
-			"changelog": "GitHubで $oisy_name の更新履歴を見る",
 			"documentation": "$oisy_nameドキュメントを開く",
 			"support": "$oisy_nameドキュメントのサポートページを開く",
 			"open_twitter": "DFINITY X/Twitterを開く",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "internet identityが見つかりません。",
-			"invalid_pouh_credential": "Humanity Credentialの検証中にエラーが発生しました。発行元に再発行を依頼してください。",
-			"error_validating_pouh_credential_oisy": "$oisy_shortでHumanity Credentialを検証中にエラーが発生しました。: $error",
-			"error_validating_pouh_credential": "Humanity Credentialの検証中にエラーが発生しました。",
-			"error_requesting_pouh_credential": "Humanity Credentialを要求する際にエラーが発生しました。",
-			"missing_pouh_issuer_origin": "Humanity Credentialを要求する際にエラーが発生しました。発行元が不明です。",
-			"no_pouh_credential": "Humanity Credentialを要求する際にエラーが発生しました。Decide AIに有効なCredentialをお持ちですか？",
 			"error_while_signing_in": "サインイン処理中に問題が発生しました。",
 			"unexpected_issue_with_syncing": "認証状態の同期中に予期せぬ問題が発生しました。"
 		},
@@ -437,6 +429,35 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
 				"description": ""
 			}
 		}
@@ -475,7 +496,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "今後のトークンドロップをお見逃しなく！<a href=\"https://x.com/oisy\" target=\"_blank\">X（旧Twitter）をフォロー</a>、<a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit に参加</a>、または <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord に参加</a>して最新情報をゲット！",
-			"coming_soon": "$oisy_shortエピソード6近日公開",
+			"coming_soon": "次の $oisy_short Sprinkles エピソードはもうすぐです",
 			"reward_banner": "キャンペーン$campaignNameのバナー"
 		},
 		"campaigns": {
@@ -576,6 +597,36 @@
 						"title": "ささやかな感謝の気持ちです。",
 						"description": "紹介したユーザーの一人がSprinklesを獲得しました。",
 						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: エピソード6が公開されました 🎉",
+				"one_liner": "アクティブであること、他のユーザーを招待すること、複数のチェーンでOISYを使用することでSprinklesを獲得できます。あなたの行動が報酬を増やし、アクティブな紹介がさらに報酬を高めます。<br/>さらに、チェーンが増えるほど当選チャンスも広がります。",
+				"participate_title": "アクティビティと紹介でトークンを獲得。チェーンが多いほど、チャンスも増えます。",
+				"description": "資格を得るためにアクティブを維持しましょう：頻繁にログインし、ウォレットアクションを完了し、少なくとも5 $を保有してください。<br/>アクティブな各チェーンはマルチチェーン乗数であなたのオッズを高めます。<br/>資格を得た友達から10%を獲得できます。",
+				"campaign_href": "",
+				"welcome": {
+					"title": "$oisy_shortへようこそ！",
+					"subtitle": "稼ぐ準備はできていますか？",
+					"description": "最初の報酬まであと2ステップです：ログインし、5 $以上を保有し、2つのアクションを完了してください。Sprinklesを獲得し始めるにはそれだけです。<br><br>もっと欲しいですか？友達を招待して、彼らがSprinklesを獲得するたびにボーナスを得ましょう。"
+				},
+				"win": {
+					"default": {
+						"title": "報酬を受け取りました",
+						"description": "報酬がウォレットに届きました。<br>さらに獲得するために、招待してアクティブを維持することをお忘れなく",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "本日のOISY最大Sprinkles獲得おめでとうございます！",
+						"description": "トップのSprinkles報酬を獲得しました<br>アクティブに活動し、紹介を続けてさらに勝ちましょう。",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "ちょっとしたお礼",
+						"description": "あなたが招待したユーザーの1人がSprinklesを獲得しました。",
+						"share_href": ""
 					}
 				}
 			}
@@ -701,11 +752,6 @@
 			"active_networks_description": "$oisy_nameで操作したいネットワークを選択してください。非アクティブなネットワークのトークンとトランザクションは表示されず、利用可能な残高にも含まれません",
 			"enable_network": "ネットワークを有効化",
 			"disable_network": "ネットワークを無効化",
-			"credentials_title": "認証情報",
-			"pouh_credential": "人間の認証情報",
-			"pouh_credential_description": "人間の認証情報は、人間であることの証明です。Decide AIによって発行されます。",
-			"present_pouh_credential": "提示する",
-			"pouh_credential_verified": "認証済み✅",
 			"appearance": "外観モード",
 			"appearance_light": "ライト",
 			"appearance_dark": "ダーク",
@@ -932,8 +978,11 @@
 			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後でもう一度お試しください。",
 			"unexpected_utxos_fee": "トランザクション手数料の計算中に問題が発生しました。",
 			"unable_to_retrieve_amount": "該当なし（取得できませんでした）",
-			"solana_transaction_expired": "あなたの送信トランザクションはSolanaネットワークによって処理されず、期限切れになりました。これはおそらく提供された優先手数料が不足していたためです。最新の推奨金額に更新しましたので、もう一度送信を試みてください。",
+			"solana_transaction_expired": "あなたのトランザクションはSolanaネットワークによって処理されず、期限切れになりました。これはおそらく提供された優先手数料が不足していたためです。最新の推奨金額に更新しましたので、もう一度お試しください。",
 			"solana_confirmation_failed": "作成したトランザクションの確認を受信できませんでした。数秒待ってから、トークンのトランザクションリストでトランザクションが正しく作成されたかどうかを確認してください。",
+			"solana_insufficient_funds": "",
+			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "指定されたトークン規格がサポートされていないため、手数料を計算できませんでした。"
 		}
 	},
@@ -1080,7 +1129,9 @@
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
-			"near_intents_estimated_time": ""
+			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",
@@ -1098,7 +1149,8 @@
 			"manually_withdraw_failed": "資金の出金に失敗しました。<br>再度お試しいただくか、以下に従ってください。",
 			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください。",
 			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1891,164 +1943,164 @@
 	},
 	"earning": {
 		"text": {
-			"title": "報酬獲得",
-			"tab_title": "報酬獲得",
-			"earning_opportunities": "報酬獲得のチャンス",
-			"header_title": "報酬を獲得しよう！",
-			"header_description": "トークンを運用に回して、資産を増やしましょう。",
-			"go_to_earn": "報酬獲得へ"
+			"title": "稼ぐ",
+			"tab_title": "稼ぎ中",
+			"earning_opportunities": "稼ぐ機会",
+			"header_title": "稼ぐへようこそ！",
+			"header_description": "トークンを稼ぐ機会に割り当てて、デジタル資産ポートフォリオを増やしましょう。",
+			"go_to_earn": "稼ぐへ移動"
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "Harvest – Autopilot",
+				"description": "ワンクリックのAutopilot vaultで最大限のイールド効率を実現。",
+				"action": "Autopilotへ移動"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "OISYを使って報酬を獲得しよう! Ep. 5公開中 🎉",
-				"action": "ステータス確認"
+				"description": "OISYを使って稼ごう！エピソード6が公開中 🎉",
+				"action": "ステータスを確認"
 			}
 		},
 		"card_fields": {
 			"apy": "APY",
-			"networks": "",
-			"assets": "",
-			"currentStaked": "ステーキング中",
-			"currentEarning": "獲得済み報酬額",
-			"earningPotential": "これから獲得できる報酬額",
+			"networks": "ネットワーク",
+			"assets": "資産",
+			"currentStaked": "ステーク中",
+			"currentEarning": "現在の収益",
+			"earningPotential": "収益ポテンシャル",
 			"terms": "条件"
 		},
 		"terms": {
-			"flexible": "いつでも引き出し可能"
+			"flexible": "フレキシブル"
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": "Gold DAOで報酬獲得"
+				"cardTitle": "Gold DAOで稼ぐ"
 			}
 		}
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "",
-			"live_apy": ""
+			"autopilot": "Autopilot",
+			"live_apy": "現在のAPY"
 		}
 	},
 	"stake": {
 		"text": {
-			"harvest_autopilot_page_description": "",
-			"harvest_autopilot_vault_page_description": "",
-			"harvest_autopilot_provider_description": "",
-			"harvest_autopilot_stake_terms": "",
-			"my_positions": "",
-			"available_autopilots": "",
-			"vault_info": "",
-			"vault_address": "",
-			"protocol": "",
-			"harvest": "",
-			"autopilot": "",
-			"total_value_locked": "",
-			"manager": "",
-			"vault_description": "",
-			"stake": "",
-			"stake_now": "今すぐステーキング",
-			"stake_amount": "$amount $token_symbolをステーキング",
-			"not_enough_to_stake": "ステーキング可能な$token_symbolがありません。",
-			"estimated_received": "",
-			"estimated_yearly_yield": "",
-			"unstake": "ステーキング解除",
-			"unstake_now": "今すぐ解除",
-			"unstaking": "解除中...",
-			"unstake_token": "$token_symbolを解除",
-			"enable_token_text": "$token_symbolを有効にする必要があります。",
-			"enable_token_button": "$token_symbolを有効化",
-			"review": "トランザクション確認",
+			"harvest_autopilot_page_description": "ワンクリックのAutopilot vaultで最大限のイールド効率を実現。",
+			"harvest_autopilot_vault_page_description": "Autopilotは<a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">監査済みのIPOR</a> Fusion Vault技術によって動作しています。",
+			"harvest_autopilot_provider_description": "Harvest Autopilotは、最小限の労力でDeFiポジションを自動化する「設定して忘れる」専門サービスです。",
+			"harvest_autopilot_stake_terms": "私は本製品を読んで理解し、<a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">リスク開示</a>を読み、<a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">利用規約</a>に同意することを確認します。",
+			"my_positions": "マイポジション",
+			"available_autopilots": "利用可能なAutopilot",
+			"vault_info": "Vault情報",
+			"vault_address": "Vaultアドレス",
+			"protocol": "プロトコル",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "総ロック価値（TVL）",
+			"manager": "マネージャー",
+			"vault_description": "このプールは、$asset_symbol保有者向けの「設定して忘れる」イールド管理サービスとして設計されています。最良の機会に資本を動的に割り当てることで、最小限の労力でDeFiポジションを自動的に最適化します。",
+			"stake": "ステークする",
+			"stake_now": "今すぐステーク",
+			"stake_amount": "$amount $token_symbolをステーク",
+			"not_enough_to_stake": "ステークする$token_symbolがありません",
+			"estimated_received": "受取予定額",
+			"estimated_yearly_yield": "年間予想イールド",
+			"unstake": "アンステークする",
+			"unstake_now": "今すぐアンステーク",
+			"unstaking": "アンステーク中...",
+			"unstake_token": "$token_symbolをアンステーク",
+			"enable_token_text": "$token_symbolを有効にする必要があります",
+			"enable_token_button": "$token_symbolを有効にする",
+			"review": "トランザクションを確認",
 			"executing_transaction": "トランザクション実行中...",
-			"unsupported_token_staking": "選択されたトークンはステーキングに対応していません。",
-			"provider": "ステーキング条件提供: $provider",
-			"earning_potential": "潜在的な報酬獲得額",
-			"earning_potential_hint": "未ステーキング資産の価値と、利用可能な運用機会の最高APYに基づいています。",
-			"active_earning": "獲得済み報酬額",
+			"unsupported_token_staking": "選択したトークンのステーキングはサポートされていません。",
+			"provider": "ステーキング条件は$providerによって提供されています",
+			"earning_potential": "収益ポテンシャル",
+			"earning_potential_hint": "未投資資産の価値と利用可能な稼ぐ機会の最高APYに基づいています。",
+			"active_earning": "アクティブ収益",
 			"active_earning_per_year": "$amount/年",
-			"active_earning_per_year_short": "",
+			"active_earning_per_year_short": "$amount/年",
 			"unproductive_assets": "利用可能",
-			"invested_assets": "運用中",
-			"visit_provider": "ウェブサイトを見る",
+			"invested_assets": "割り当て済み",
+			"visit_provider": "ウェブサイトを訪問",
 			"current_apy_label": "現在のAPY",
-			"max_apy_label": "",
-			"stake_review_subtitle": "ステーキング額",
-			"unstake_review_subtitle": "ステーキング解除額",
+			"max_apy_label": "最大APY",
+			"stake_review_subtitle": "ステーク中",
+			"unstake_review_subtitle": "アンステーク中",
 			"delayed_dissolve": "遅延受取",
 			"immediate_dissolve": "即時受取",
 			"included_token_fee": "ネットワーク手数料込み",
 			"included_dissolve_fee": "ロック解除手数料込み",
-			"delayed_dissolve_terms": "$tokenをステーキングから解除する際、トークンが出金可能になるまで$delay日間ロックされ、その間報酬は発生しません。",
-			"delayed_dissolve_info": "$tokenステークの解除を開始すると、新しい報酬は受け取れなくなります。",
-			"immediate_dissolve_terms": "$tokenを即座に受け取れますが、ロック解除する$tokenトークンに対して手数料が発生します。",
-			"amount_to_receive": "受取額",
+			"delayed_dissolve_terms": "$tokenをステーキングからロック解除する際、トークンは引き出し可能になるまで$delay日間、追加報酬なしでロックされます。",
+			"delayed_dissolve_info": "$tokenステークのロック解除を開始すると、新しい報酬の受取が停止されます。",
+			"immediate_dissolve_terms": "$tokenはすぐに受け取れますが、ロック解除する$tokenトークンに手数料が発生します。",
+			"amount_to_receive": "受取金額",
 			"unclaimed_rewards": "未請求の報酬",
 			"unlock_requests": "ロック解除リクエスト",
-			"unlocking_in": "ロック解除まであと$time",
+			"unlocking_in": "$time後にロック解除",
 			"unlocked": "ロック解除済み",
-			"withdraw": "出金",
-			"withdraw_successful": "トークンの出金が完了しました。",
-			"claim_reward": "報酬を請求する",
-			"claim_rewards": "報酬を請求する",
+			"withdraw": "引き出す",
+			"withdraw_successful": "トークンが正常に引き出されました。",
+			"claim_reward": "報酬を請求",
+			"claim_rewards": "報酬を請求",
 			"claim_reward_short": "請求",
 			"claim_now": "今すぐ請求",
 			"claiming": "請求中...",
-			"get_tokens_with_amount": "最大$amount $token_symbolを入手",
-			"get_asset_tokens": "",
-			"reward_claimed": "受領済み報酬",
-			"staked": "ステーキング中",
-			"unstaked": "ステーキング解除済み",
+			"get_tokens_with_amount": "最大$amount $token_symbolを取得",
+			"get_asset_tokens": "$token_symbolを取得",
+			"reward_claimed": "報酬請求済み",
+			"staked": "ステーク済み",
+			"unstaked": "アンステーク済み",
 			"title_empty_1": "最大",
-			"title_empty_2_usd": "/年を獲得",
-			"title_empty_2_apy": "/年",
+			"title_empty_2_usd": "/年を稼ぐ",
+			"title_empty_2_apy": "年間",
 			"title_empty_3": "",
-			"description_empty": "まだトークンをステーキングしていないようです。",
-			"full_history": "履歴を全て表示",
-			"recent_history": "履歴を閉じる",
-			"harvest_autopilot_carousel_slide_title": "",
-			"harvest_autopilot_carousel_slide_cta": ""
+			"description_empty": "まだトークンをステークしていないようです",
+			"full_history": "全履歴を表示",
+			"recent_history": "全履歴を閉じる",
+			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield FarmingでOISYを稼ぐ",
+			"harvest_autopilot_carousel_slide_cta": "詳しく見る"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "出金中に問題が発生しました。",
-			"unexpected_error_on_unstake": "ステーキング解除中に問題が発生しました。",
-			"unexpected_error_on_stake": "",
-			"dissolvement_limit_reached": "アクティブな解除リクエストの上限$limitに達しました。新しいリクエストを作成する前に、一部を完了してください。<br/>注意: 「即時」オプションを使用すれば、いつでもステーキング解除できます。"
+			"unexpected_error_on_withdraw": "トークンの引き出し中にエラーが発生しました。",
+			"unexpected_error_on_unstake": "トークンのアンステーク中にエラーが発生しました。",
+			"unexpected_error_on_stake": "トークンのステーク中にエラーが発生しました。",
+			"dissolvement_limit_reached": "アクティブなロック解除リクエストの上限$limit件に達しました。新しいリクエストを作成する前にいくつか完了してください。<br/>\"即時\"オプションを使用していつでもアンステークできることをご注意ください。"
 		},
 		"info": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": ""
+				"title": "Harvest Autopilotとは",
+				"description": "Harvest Autopilotは、Harvest Financeエコシステム内の専門的な機能（および特定の製品ライン）であり、最小限の労力で分散型金融（DeFi）ポジションを自動化および最適化するために設計されています。",
+				"fact_1_title": "スマートイールド配分",
+				"fact_1_description": "最高のライブAPYを獲得するために自動的にプロトコルを切り替えます。",
+				"fact_2_title": "パッシブコンパウンディング",
+				"fact_2_description": "報酬は自動的に収穫・再投資され、成長を最大化します。",
+				"fact_3_title": "ガスコストの共有",
+				"fact_3_description": "他のユーザーとトランザクションをまとめることでガスを節約し、費用を削減します。"
 			}
 		},
 		"alt": {
-			"placeholder_image": "まだステーキングされたトークンはありません。"
+			"placeholder_image": "まだステークされたトークンはありません"
 		}
 	},
 	"get_token": {
 		"text": {
-			"title": "$tokenを入手",
+			"title": "$tokenを取得",
 			"swap_to_token": "$tokenにスワップ",
-			"ready_to_swap": "スワップ可能",
+			"ready_to_swap": "スワップ準備完了",
 			"convert_assets": "資産を変換",
 			"convertible_assets": "変換可能な資産",
 			"how_to_convert": "変換方法",
-			"get_more_token": "さらに$tokenを入手",
+			"get_more_token": "さらに$tokenを取得",
 			"receive_token": "$tokenを受け取る",
 			"receive_token_title": "$tokenを直接受け取る",
-			"receive_token_text": "アカウントに直接$tokenを受け取る",
+			"receive_token_text": "$tokenをアカウントに直接受け取る",
 			"buy_assets": "資産を購入",
 			"buy_assets_title": "変換可能な資産を購入",
-			"buy_assets_text": "資産を購入して$tokenに変換"
+			"buy_assets_text": "さらに資産を購入して$tokenに変換する"
 		}
 	},
 	"temporal": {
@@ -2067,7 +2119,7 @@
 			"second_plural": "秒"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {

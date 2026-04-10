@@ -6,7 +6,6 @@ import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
-import { Network } from 'alchemy-sdk';
 import { bsc, bscTestnet } from 'viem/chains';
 
 export const BSC_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
@@ -28,7 +27,6 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	providers: {
 		infura: 'bnb',
 		alchemy: 'bnb',
-		alchemyDeprecated: Network.BNB_MAINNET,
 		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2',
 		alchemyWsUrl: 'wss://bnb-mainnet.g.alchemy.com/v2',
 		viemChain: bsc
@@ -53,7 +51,6 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 	providers: {
 		infura: 'bnbt',
 		alchemy: 'bnbt',
-		alchemyDeprecated: Network.BNB_TESTNET,
 		alchemyJsonRpcUrl: 'https://bnb-testnet.g.alchemy.com/v2',
 		alchemyWsUrl: 'wss://bnb-testnet.g.alchemy.com/v2',
 		viemChain: bscTestnet

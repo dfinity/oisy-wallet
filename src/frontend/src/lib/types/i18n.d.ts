@@ -77,7 +77,6 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		changelog: string;
 		documentation: string;
 		support: string;
 		confirm_navigate: string;
@@ -97,7 +96,6 @@ interface I18nNavigation {
 		activity: string;
 		airdrops: string;
 		menu: string;
-		changelog: string;
 		documentation: string;
 		support: string;
 		open_twitter: string;
@@ -128,12 +126,6 @@ interface I18nAuth {
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
-		invalid_pouh_credential: string;
-		error_validating_pouh_credential_oisy: string;
-		error_validating_pouh_credential: string;
-		error_requesting_pouh_credential: string;
-		missing_pouh_issuer_origin: string;
-		no_pouh_credential: string;
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
 	};
@@ -280,7 +272,21 @@ interface I18nDapps {
 		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
-		liquidium: { name: string; one_liner: string; description: string };
+		liquidium: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		icpindex: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		icexplorer: { name: string; one_liner: string; description: string };
+		icpixel: { name: string; one_liner: string; description: string };
+		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
 	};
 }
 
@@ -359,6 +365,20 @@ interface I18nRewards {
 				default: { title: string; description: string; share_href: string };
 				jackpot: { title: string; description: string; share_href: string };
 				leaderboard: { title: string; description: string; share_href: string };
+				referral: { title: string; description: string; share_href: string };
+			};
+		};
+		sprinkles_s1e6: {
+			title: string;
+			card_title: string;
+			one_liner: string;
+			participate_title: string;
+			description: string;
+			campaign_href: string;
+			welcome: { title: string; subtitle: string; description: string };
+			win: {
+				default: { title: string; description: string; share_href: string };
+				jackpot: { title: string; description: string; share_href: string };
 				referral: { title: string; description: string; share_href: string };
 			};
 		};
@@ -476,11 +496,6 @@ interface I18nSettings {
 		active_networks_description: string;
 		enable_network: string;
 		disable_network: string;
-		credentials_title: string;
-		pouh_credential: string;
-		pouh_credential_description: string;
-		present_pouh_credential: string;
-		pouh_credential_verified: string;
 		appearance: string;
 		appearance_light: string;
 		appearance_dark: string;
@@ -700,6 +715,9 @@ interface I18nSend {
 		unable_to_retrieve_amount: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
+		solana_insufficient_funds: string;
+		solana_insufficient_funds_for_fee: string;
+		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
 	};
 }
@@ -833,6 +851,8 @@ interface I18nSwap {
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
+		near_intents_tos: string;
+		value_difference_error_confirmation: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -851,6 +871,7 @@ interface I18nSwap {
 		swap_sucess_withdraw_failed: string;
 		swap_sucess_manually_withdraw_success: string;
 		swap_completed_close_failed: string;
+		cannot_save_provider_agreement: string;
 	};
 }
 

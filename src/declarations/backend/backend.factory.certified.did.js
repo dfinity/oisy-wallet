@@ -278,7 +278,16 @@ export const idlFactory = ({ IDL }) => {
 		privacy_policy: UserAgreement,
 		terms_of_use: UserAgreement
 	});
-	const Agreements = IDL.Record({ agreements: UserAgreements });
+	const ProviderAgreementProvider = IDL.Variant({ NearIntents: IDL.Null });
+	const ProviderAgreementScope = IDL.Variant({ Swap: IDL.Null });
+	const ProviderAgreementType = IDL.Record({
+		provider: ProviderAgreementProvider,
+		scope: ProviderAgreementScope
+	});
+	const Agreements = IDL.Record({
+		agreements: UserAgreements,
+		provider_agreements: IDL.Opt(IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement)))
+	});
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -352,6 +361,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: GetAllowedCyclesError
 	});
 	const ApiKeys = IDL.Record({
+		exchange_rate_enabled: IDL.Opt(IDL.Bool),
 		alchemy_api_key: IDL.Opt(IDL.Text),
 		etherscan_api_key: IDL.Opt(IDL.Text),
 		coingecko_api_key: IDL.Opt(IDL.Text),
@@ -416,7 +426,8 @@ export const idlFactory = ({ IDL }) => {
 	const AgreementType = IDL.Variant({
 		TermsOfUse: IDL.Null,
 		PrivacyPolicy: IDL.Null,
-		LicenseAgreement: IDL.Null
+		LicenseAgreement: IDL.Null,
+		Provider: ProviderAgreementType
 	});
 	const AgreementHistoryEntry = IDL.Record({
 		timestamp_ns: IDL.Nat64,
@@ -510,6 +521,16 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
+	const HttpHeader = IDL.Record({ value: IDL.Text, name: IDL.Text });
+	const HttpRequestResult = IDL.Record({
+		status: IDL.Nat,
+		body: IDL.Vec(IDL.Nat8),
+		headers: IDL.Vec(HttpHeader)
+	});
+	const TransformArgs = IDL.Record({
+		context: IDL.Vec(IDL.Nat8),
+		response: HttpRequestResult
+	});
 	const ErcToken = IDL.Record({
 		token_address: IDL.Text,
 		chain_id: IDL.Nat64
@@ -599,6 +620,10 @@ export const idlFactory = ({ IDL }) => {
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
+	const UpdateProviderAgreementsRequest = IDL.Record({
+		current_user_version: IDL.Opt(IDL.Nat64),
+		provider_agreements: IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement))
+	});
 	const UpdateUserAgreementsRequest = IDL.Record({
 		agreements: UserAgreements,
 		current_user_version: IDL.Opt(IDL.Nat64)
@@ -657,6 +682,7 @@ export const idlFactory = ({ IDL }) => {
 		get_user_transactions: IDL.Func([GetUserTransactionsRequest], [GetUserTransactionsResult]),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
+		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
@@ -675,6 +701,11 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
+		update_provider_agreements: IDL.Func(
+			[UpdateProviderAgreementsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		),
 		update_user_agreements: IDL.Func(
 			[UpdateUserAgreementsRequest],
 			[SetUserShowTestnetsResult],

@@ -6,7 +6,9 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        agreement::{Agreements, UpdateAgreementsError, UserAgreements},
+        agreement::{
+            Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
+        },
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -441,6 +443,60 @@ impl StoredUserProfile {
         new_profile.agreements = {
             let mut agreements = new_profile.agreements.unwrap_or_default();
             agreements.agreements = new_agreements;
+            Some(agreements)
+        };
+        new_profile.updated_timestamp = now;
+
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with the specified provider agreements updated.
+    ///
+    /// Only entries where `accepted` is `Some(_)` are applied. Existing provider agreements not
+    /// present in the request are left unchanged.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_provider_agreements(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        provider_agreements: BTreeMap<ProviderAgreementType, UserAgreement>,
+    ) -> Result<StoredUserProfile, UpdateAgreementsError> {
+        if profile_version != self.version {
+            return Err(UpdateAgreementsError::VersionMismatch);
+        }
+
+        let current = self
+            .agreements
+            .clone()
+            .unwrap_or_default()
+            .provider_agreements
+            .unwrap_or_default();
+
+        let mut merged = current.clone();
+
+        for (provider_type, agreement) in provider_agreements {
+            if agreement.accepted.is_some() {
+                merged.insert(provider_type.clone(), agreement.clone());
+            }
+        }
+
+        if current == merged {
+            return Ok(self.clone());
+        }
+
+        for agreement in merged.values_mut() {
+            if matches!(agreement.accepted, Some(true)) {
+                agreement.last_accepted_at_ns = Some(now);
+            }
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.agreements = {
+            let mut agreements = new_profile.agreements.unwrap_or_default();
+            agreements.provider_agreements = Some(merged);
             Some(agreements)
         };
         new_profile.updated_timestamp = now;

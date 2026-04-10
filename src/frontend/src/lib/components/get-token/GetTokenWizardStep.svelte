@@ -49,13 +49,13 @@
 		tokenExchangeRate > 0 && balanceToSpend > 0 ? balanceToSpend / tokenExchangeRate : 0
 	);
 
-	let convertibleAssetsUsdBalance = $derived(
+	let swappableAssetsUsdBalance = $derived(
 		balanceToSpend - $enabledMainnetFungibleIcTokensUsdBalance
 	);
 
-	let noSwappableAssets = $derived($enabledMainnetFungibleIcTokensUsdBalance <= 0);
+	let noConvertibleAssets = $derived($enabledMainnetFungibleIcTokensUsdBalance <= 0);
 
-	let noConvertibleAssets = $derived(convertibleAssetsUsdBalance <= 0);
+	let noSwappableAssets = $derived(swappableAssetsUsdBalance <= 0);
 
 	const onSwapOpen = (onSwapLoad: (callback: () => void) => void) => {
 		onSwapLoad(() => {
@@ -80,7 +80,7 @@
 			{#snippet content()}
 				<GetTokenCardContent
 					{currentApy}
-					potentialTokensUsdBalance={$enabledMainnetFungibleIcTokensUsdBalance}
+					potentialTokensUsdBalance={swappableAssetsUsdBalance}
 					{token}
 				>
 					{#snippet title()}
@@ -112,7 +112,7 @@
 			{#snippet content()}
 				<GetTokenCardContent
 					{currentApy}
-					potentialTokensUsdBalance={convertibleAssetsUsdBalance}
+					potentialTokensUsdBalance={$enabledMainnetFungibleIcTokensUsdBalance}
 					{token}
 				>
 					{#snippet title()}

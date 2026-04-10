@@ -29,8 +29,16 @@ type AgreementHistoryEntry = record {
 	accepted : bool;
 	last_updated_at_ms : opt nat64
 };
-type AgreementType = variant { TermsOfUse; PrivacyPolicy; LicenseAgreement };
-type Agreements = record { agreements : UserAgreements };
+type AgreementType = variant {
+	TermsOfUse;
+	PrivacyPolicy;
+	LicenseAgreement;
+	Provider : ProviderAgreementType
+};
+type Agreements = record {
+	agreements : UserAgreements;
+	provider_agreements : opt vec record { ProviderAgreementType; UserAgreement }
+};
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
 	InvalidDelegationChain : record { msg : text };
@@ -52,6 +60,7 @@ type AllowSigningResult = variant {
 };
 type AllowSigningStatus = variant { Skipped; Failed; Executed };
 type ApiKeys = record {
+	exchange_rate_enabled : opt bool;
 	alchemy_api_key : opt text;
 	etherscan_api_key : opt text;
 	coingecko_api_key : opt text;
@@ -262,11 +271,17 @@ type GetUserTransactionsResult = variant {
 	Err : UserTransactionError
 };
 type HasUserProfileResponse = record { has_user_profile : bool };
+type HttpHeader = record { value : text; name : text };
 type HttpRequest = record {
 	url : text;
 	method : text;
 	body : blob;
 	headers : vec record { text; text }
+};
+type HttpRequestResult = record {
+	status : nat;
+	body : blob;
+	headers : vec HttpHeader
 };
 type HttpResponse = record {
 	body : blob;
@@ -340,6 +355,12 @@ type NetworksSettings = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
+type ProviderAgreementProvider = variant { NearIntents };
+type ProviderAgreementScope = variant { Swap };
+type ProviderAgreementType = record {
+	provider : ProviderAgreementProvider;
+	scope : ProviderAgreementScope
+};
 type RateLimitError = record {
 	max_calls : nat32;
 	window_ns : nat64;
@@ -469,6 +490,7 @@ type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
+type TransformArgs = record { context : blob; response : HttpRequestResult };
 type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
 type UpdateExperimentalFeaturesSettingsRequest = record {
 	experimental_features : vec record {
@@ -476,6 +498,10 @@ type UpdateExperimentalFeaturesSettingsRequest = record {
 		ExperimentalFeatureSettings
 	};
 	current_user_version : opt nat64
+};
+type UpdateProviderAgreementsRequest = record {
+	current_user_version : opt nat64;
+	provider_agreements : vec record { ProviderAgreementType; UserAgreement }
 };
 type UpdateUserAgreementsRequest = record {
 	agreements : UserAgreements;
@@ -704,6 +730,13 @@ service : (Arg) -> {
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
+	// Strips volatile HTTP headers so that IC replicas can reach consensus.
+	//
+	// Each replica makes the same HTTP request independently and the raw
+	// responses must match for consensus. Headers like `Date`, `X-Request-Id`,
+	// `CF-Ray`, etc. differ across replicas, causing consensus failure.
+	// This transform keeps only status + body.
+	http_request_transform : (TransformArgs) -> (HttpRequestResult) query;
 	// List the custom tokens for the calling user.
 	//
 	// Note: This method was previously exposed as a *query* but is now an *update*
@@ -762,6 +795,21 @@ service : (Arg) -> {
 	// # Errors
 	// Errors are enumerated by: `ContactError`.
 	update_contact : (Contact) -> (GetContactResult);
+	// Updates the user's provider agreements, merging with any existing ones, and records an
+	// audit-trail entry for every provider agreement that was actually changed.
+	//
+	// Only entries where `accepted` is `Some(_)` are applied. If `Some(true)`,
+	// `last_accepted_at_ns` is set to `now`.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the provider agreements were saved successfully, or if they were already
+	// set to the same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	update_provider_agreements : (UpdateProviderAgreementsRequest) -> (
+		SetUserShowTestnetsResult
+	);
 	// Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
 	// for every agreement that was actually changed.
 	//

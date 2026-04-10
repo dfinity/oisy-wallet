@@ -11,7 +11,8 @@ import type {
 	PostMessageDataRequestDip20,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
-	PostMessageDataResponseWalletCleanUp
+	PostMessageDataResponseWalletCleanUp,
+	PostMessageScheduler
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
@@ -29,7 +30,7 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 			({
 				data: dataMsg
 			}: MessageEvent<
-				PostMessage<
+				PostMessageScheduler<
 					| PostMessageDataResponseWallet
 					| PostMessageDataResponseError
 					| PostMessageDataResponseWalletCleanUp
@@ -79,8 +80,11 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	}
 
 	protected override stopTimer = () => {
-		this.postMessage({
-			msg: 'stopDip20WalletTimer'
+		this.postMessage<PostMessage<PostMessageDataRequestDip20>>({
+			msg: 'stopDip20WalletTimer',
+			data: {
+				canisterId: this.canisterId
+			}
 		});
 	};
 

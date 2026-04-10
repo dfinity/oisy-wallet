@@ -7,7 +7,7 @@ import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -21,7 +21,7 @@ export const processTransactionSent = async ({
 	token,
 	transaction
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	token: Token;
 	transaction: TransactionResponse;
 }) => {
@@ -43,7 +43,7 @@ export const processTransactionSent = async ({
 };
 
 export const processEthTransaction = async (params: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	hash: string;
 	token: Token;
 }) => await processPendingTransaction(params);
@@ -52,7 +52,7 @@ export const processErc20Transaction = async ({
 	type,
 	...rest
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	hash: string;
 	value: bigint;
 	token: Token;
@@ -72,7 +72,7 @@ const processPendingTransaction = async ({
 	token,
 	value
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	hash: string;
 	token: Token;
 	value?: bigint;
@@ -131,7 +131,7 @@ const processMinedTransaction = async ({
 	identity,
 	token
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	token: Token;
 }) => {
 	const { id: tokenId, standard, network } = token;

@@ -2,9 +2,9 @@ import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
-import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
@@ -78,12 +78,12 @@ export const allFungibleTokens: Readable<Token[]> = derivedMemo(
 );
 
 export const allCrossChainSwapTokens: Readable<
-	TokenToggleable<RequiredToken | Erc20CustomToken | SplCustomToken>[]
+	TokenToggleable<RequiredToken | Erc20CustomToken | Erc4626CustomToken | SplCustomToken>[]
 > = derived(
-	[erc20Tokens, enabledEthEvmNativeTokens, splTokens, enabledSolanaTokens],
-	([$erc20Tokens, $ethEvmNativeTokens, $splTokens, $enabledSolanaTokens]) => [
+	[ercFungibleTokens, enabledEthEvmNativeTokens, splTokens, enabledSolanaTokens],
+	([$ercFungibleTokens, $ethEvmNativeTokens, $splTokens, $enabledSolanaTokens]) => [
 		...$ethEvmNativeTokens.map((token) => ({ ...token, enabled: true })),
-		...$erc20Tokens,
+		...$ercFungibleTokens,
 		...(NEAR_INTENTS_SWAP_ENABLED
 			? [...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })), ...$splTokens]
 			: [])

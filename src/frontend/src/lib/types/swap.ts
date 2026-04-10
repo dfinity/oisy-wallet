@@ -125,6 +125,7 @@ interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> 
 	getQuote: (params: SwapQuoteParams) => Promise<QuoteResult>;
 	mapQuoteResult: (params: QuoteMapParams) => SwapMappedResult;
 	isEnabled: boolean;
+	getSupportedTokens?: (params: { identity: Identity }) => Promise<Set<string>>;
 }
 
 type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsReply, KongQuoteParams>;
@@ -137,12 +138,14 @@ export interface EvmSwapProviderConfig {
 	key: SwapProvider;
 	getQuote: (params: EvmQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
 }
 
 export interface SolSwapProviderConfig {
 	key: SwapProvider;
 	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
 }
 
 export interface SwapParams {

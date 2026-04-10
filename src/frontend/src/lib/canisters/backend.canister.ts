@@ -1,5 +1,4 @@
 import type {
-	AddUserCredentialResult,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
@@ -22,7 +21,6 @@ import {
 import { ZERO } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
-	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
 	AllowSigningParams,
@@ -34,6 +32,7 @@ import type {
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
 	GetUserTransactionsResponse,
+	SaveProviderAgreements,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
@@ -44,6 +43,7 @@ import type {
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
+import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
 import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
@@ -109,22 +109,6 @@ export class BackendCanister extends Canister<BackendService> {
 		const { get_user_profile } = this.caller({ certified });
 
 		return get_user_profile();
-	};
-
-	addUserCredential = ({
-		credentialJwt,
-		issuerCanisterId,
-		currentUserVersion,
-		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResult> => {
-		const { add_user_credential } = this.caller({ certified: true });
-
-		return add_user_credential({
-			credential_jwt: credentialJwt,
-			issuer_canister_id: issuerCanisterId,
-			current_user_version: toNullable(currentUserVersion),
-			credential_spec: credentialSpec
-		});
 	};
 
 	btcAddPendingTransaction = async ({
@@ -340,6 +324,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await update_user_agreements({
 			agreements: mapBackendUserAgreements(agreements),
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateProviderAgreements = async ({
+		providerAgreements,
+		currentUserVersion
+	}: SaveProviderAgreements): Promise<void> => {
+		const { update_provider_agreements } = this.caller({ certified: true });
+
+		await update_provider_agreements({
+			provider_agreements: mapBackendProviderAgreements(providerAgreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};

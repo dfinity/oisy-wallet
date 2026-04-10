@@ -3,6 +3,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
+import { reactivityDebugPlugin } from './vite.plugin.reactivity-debug';
 import { defineViteReplacements, readCanisterIds } from './vite.utils';
 
 // npm run dev = local
@@ -16,7 +17,7 @@ const network = process.env.DFX_NETWORK ?? 'local';
 const projectRoot = fileURLToPath(new URL('.', import.meta.url));
 
 const config: UserConfig = {
-	plugins: [sveltekit()],
+	plugins: [reactivityDebugPlugin(), sveltekit()],
 	resolve: {
 		alias: {
 			$declarations: resolve('./src/declarations'),

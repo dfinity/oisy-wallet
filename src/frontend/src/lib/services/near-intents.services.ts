@@ -1,5 +1,6 @@
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import {
+	NEAR_INTENTS_BLOCKCHAIN_MAP,
 	NEAR_INTENTS_POLL_INTERVAL_MS,
 	NEAR_INTENTS_POLL_MAX_ATTEMPTS,
 	NEAR_INTENTS_QUOTE_DEADLINE_MS
@@ -11,6 +12,7 @@ import {
 	submitNearIntentsDeposit
 } from '$lib/rest/near-intents.rest';
 import { NEAR_INTENTS_TERMINAL_STATUSES, type NearIntentsToken } from '$lib/types/near-intents';
+import type { NetworkId } from '$lib/types/network';
 import type { NearIntentsQuoteParams, SwapMappedResult } from '$lib/types/swap';
 import {
 	buildNearIntentsQuoteRequest,
@@ -33,6 +35,54 @@ export const loadNearIntentsTokens = async (): Promise<NearIntentsToken[]> => {
 
 export const clearNearIntentsTokensCache = (): void => {
 	cachedTokens = undefined;
+};
+
+const EVM_BLOCKCHAINS = new Set(
+	Object.getOwnPropertySymbols(NEAR_INTENTS_BLOCKCHAIN_MAP)
+		.map((s) => NEAR_INTENTS_BLOCKCHAIN_MAP[s as NetworkId])
+		.filter((b) => b !== 'sol')
+);
+
+/**
+ * Returns the set of supported token identifiers for NEAR Intents,
+ * filtered to only include tokens on blockchains matching the given network IDs.
+ *
+ * EVM contract addresses are lowercased (hex is case-insensitive).
+ * Solana addresses are kept as-is (Base58 is case-sensitive).
+ * Native tokens (no contract address) use lowercased symbols.
+ */
+export const nearIntentsSupportedTokens = async ({
+	networkIds
+}: {
+	networkIds: NetworkId[];
+}): Promise<Set<string>> => {
+	const tokens = await loadNearIntentsTokens();
+
+	const blockchains = new Set(
+		networkIds.reduce<string[]>((acc, id) => {
+			const b = NEAR_INTENTS_BLOCKCHAIN_MAP[id];
+
+			if (nonNullish(b)) {
+				acc.push(b);
+			}
+
+			return acc;
+		}, [])
+	);
+
+	return tokens.reduce<Set<string>>((acc, { blockchain, contractAddress, symbol }) => {
+		if (!blockchains.has(blockchain)) {
+			return acc;
+		}
+
+		if (nonNullish(contractAddress)) {
+			acc.add(EVM_BLOCKCHAINS.has(blockchain) ? contractAddress.toLowerCase() : contractAddress);
+		} else {
+			acc.add(symbol.toLowerCase());
+		}
+
+		return acc;
+	}, new Set());
 };
 
 export const fetchNearIntentsSwapQuote = async ({

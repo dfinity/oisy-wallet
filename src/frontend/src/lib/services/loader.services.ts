@@ -15,7 +15,7 @@ import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.servic
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
@@ -68,7 +68,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * - The additional data will be loaded.
  *
  * @param {Object} params The parameters to initialize the loader.
- * @param {OptionIdentity} params.identity The identity to use for the request.
+ * @param {NullishIdentity} params.identity The identity to use for the request.
  * @param {Function} params.progressAndLoad The function to set the next step of the Progress modal and load the additional data.
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
@@ -76,7 +76,7 @@ export const initLoader = async ({
 	identity,
 	progressAndLoad
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	progressAndLoad: () => void;
 }): Promise<void> => {
 	if (isNullish(identity)) {

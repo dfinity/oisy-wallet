@@ -7,7 +7,11 @@
 	import HarvestUnstakeForm from '$eth/components/stake/harvest-autopilot/HarvestUnstakeForm.svelte';
 	import HarvestUnstakeReview from '$eth/components/stake/harvest-autopilot/HarvestUnstakeReview.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { redeemErc4626, withdrawErc4626 } from '$eth/services/erc4626.services';
+	import {
+		redeemErc4626,
+		toggleErc4626Token,
+		withdrawErc4626
+	} from '$eth/services/erc4626.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		type EthFeeContext as FeeContextType,
@@ -220,6 +224,18 @@
 					result_duration_in_seconds_rounded: `${Math.round(durationInSeconds)}`
 				}
 			});
+
+			try {
+				if (isMaxAmount && vault.token.enabled) {
+					await toggleErc4626Token({
+						token: vault.token,
+						identity: $authIdentity,
+						enabled: false
+					});
+				}
+			} catch {
+				// if disabling failed, we just proceed with the modal closing
+			}
 
 			unstakeProgressStep = ProgressStepsUnstake.DONE;
 
