@@ -11,7 +11,7 @@ use shared::types::{
         ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
     },
     network::{NetworkSettingsMap, SetTestnetsSettingsError, UpdateNetworksSettingsError},
-    user_profile::{ GetUserProfileError, StoredUserProfile},
+    user_profile::{GetUserProfileError, StoredUserProfile},
     Timestamp, Version,
 };
 
@@ -49,7 +49,6 @@ pub fn create_profile(
         default_profile
     }
 }
-
 
 /// Updates the user's network settings, merging with any existing settings.
 ///

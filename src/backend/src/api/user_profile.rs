@@ -1,7 +1,4 @@
-use ic_cdk::{
-    api::{msg_caller},
-    query, update,
-};
+use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
     agreement::{
         GetAgreementHistoryError, UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest,
@@ -10,23 +7,20 @@ use shared::types::{
     experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
     network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
     result_types::{
- AddUserHiddenDappIdResult, GetAgreementHistoryResult,
-        GetUserProfileResult, SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
+        AddUserHiddenDappIdResult, GetAgreementHistoryResult, GetUserProfileResult,
+        SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
         UpdateProviderAgreementsResult, UpdateUserAgreementsResult,
         UpdateUserNetworkSettingsResult,
     },
-    user_profile::{
-      HasUserProfileResponse, UserProfile,
-    },
+    user_profile::{HasUserProfileResponse, UserProfile},
 };
 
 use crate::{
     state::{mutate_state, read_state},
     types::StoredPrincipal,
-    user_profile::{ model::UserProfileModel, service},
+    user_profile::{model::UserProfileModel, service},
     utils::{guards::caller_is_not_anonymous, housekeeping::spawn_allow_signing_if_below_limit},
 };
-
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
 /// existing settings.
