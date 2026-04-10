@@ -57,7 +57,19 @@ dfx deploy signer_frontend --network <network>
 dfx deploy legacy_signer_frontend --network <network>
 ```
 
-**Production (IC):** Upgrades to `frontend`, `signer_frontend`, and `legacy_signer_frontend` on the IC network go through the same **Orbit-controlled** workflow as the main wallet (station approval, `dfx-oisy` / `dfx-orbit` requests), not a one-off `dfx deploy` from a developer laptop. See [Deployment → IC](HACKING.md#ic) in HACKING.md.
+**Production (IC):** Upgrades to `frontend`, `signer_frontend`, and `legacy_signer_frontend` on the IC network go through the **Orbit-controlled** workflow (station approval, `dfx-orbit` requests), not a one-off `dfx deploy` from a developer laptop. Each target has its own reproducible Docker build script and orbit upload command:
+
+```bash
+# Signer frontend
+./scripts/docker-build.signer-frontend
+dfx-orbit request asset upload signer_frontend --files target/signer_frontend
+
+# Legacy signer frontend
+./scripts/docker-build.legacy-signer-frontend
+dfx-orbit request asset upload legacy_signer_frontend --files target/legacy_signer_frontend
+```
+
+Verification scripts for reviewers are at `scripts/dfx-orbit.validate.signer-frontend.sh` and `scripts/dfx-orbit.validate.legacy-signer-frontend.sh`. See [Deployment → IC](HACKING.md#ic) in HACKING.md for the full workflow including the main frontend.
 
 The `OISY_SIGNER_TARGET` env var is baked into each canister's `build` command in `dfx.json`, so deployers never need to set it manually. The canister name determines the build target.
 
@@ -129,15 +141,19 @@ Each signer domain reports to Plausible under its own domain name. This means yo
 
 ## Key Files
 
-| File                                              | Purpose                                                |
-| ------------------------------------------------- | ------------------------------------------------------ |
-| `signer-versions.json`                            | Independent version numbers for signer frontends       |
-| `scripts/domains.json`                            | Domain-to-URL mapping per canister + network           |
-| `dfx.json`                                        | Canister definitions and network config                |
-| `canister_ids.json`                               | Canister IDs per network                               |
-| `vite.utils.ts`                                   | Build-time domain resolution + globals                 |
-| `scripts/build.utils.mjs`                         | Post-process domain resolution                         |
-| `src/frontend/src/hooks.ts`                       | SvelteKit reroute hook (signer -> `/sign`)             |
-| `src/frontend/src/lib/constants/app.constants.ts` | `SIGNER_TARGET`, `IS_SIGNER_DOMAIN`, derivation origin |
-| `src/frontend/src/env/plausible.env.ts`           | Plausible domain per signer target                     |
-| `.env.production` / `.env.staging` / `.env.beta`  | `VITE_AUTH_ALTERNATIVE_ORIGINS` with signer domains    |
+| File                                                   | Purpose                                                 |
+| ------------------------------------------------------ | ------------------------------------------------------- |
+| `signer-versions.json`                                 | Independent version numbers for signer frontends        |
+| `scripts/domains.json`                                 | Domain-to-URL mapping per canister + network            |
+| `dfx.json`                                             | Canister definitions and network config                 |
+| `canister_ids.json`                                    | Canister IDs per network                                |
+| `vite.utils.ts`                                        | Build-time domain resolution + globals                  |
+| `scripts/build.utils.mjs`                              | Post-process domain resolution                          |
+| `scripts/docker-build.signer-frontend`                 | Reproducible Docker build for signer frontend           |
+| `scripts/docker-build.legacy-signer-frontend`          | Reproducible Docker build for legacy signer frontend    |
+| `scripts/dfx-orbit.validate.signer-frontend.sh`        | Orbit verification for signer frontend proposals        |
+| `scripts/dfx-orbit.validate.legacy-signer-frontend.sh` | Orbit verification for legacy signer frontend proposals |
+| `src/frontend/src/hooks.ts`                            | SvelteKit reroute hook (signer -> `/sign`)              |
+| `src/frontend/src/lib/constants/app.constants.ts`      | `SIGNER_TARGET`, `IS_SIGNER_DOMAIN`, derivation origin  |
+| `src/frontend/src/env/plausible.env.ts`                | Plausible domain per signer target                      |
+| `.env.production` / `.env.staging` / `.env.beta`       | `VITE_AUTH_ALTERNATIVE_ORIGINS` with signer domains     |
