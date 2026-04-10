@@ -48,6 +48,7 @@
 		initFeeContext,
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
+	import { mapSolanaErrorMsg } from '$sol/utils/sol-error.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -249,7 +250,7 @@
 			failedSwapError.set(undefined);
 
 			toastsError({
-				msg: { text: $i18n.swap.error.unexpected },
+				msg: { text: mapSolanaErrorMsg(err) ?? $i18n.swap.error.unexpected },
 				err
 			});
 
