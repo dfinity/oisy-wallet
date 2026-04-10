@@ -39,7 +39,6 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
 	import SwapSolForm from '$sol/components/swap/SwapSolForm.svelte';
