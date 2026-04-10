@@ -67,8 +67,6 @@ impl AddUserCredentialRequest {
     pub const MAX_CREDENTIAL_TYPE_LENGTH: usize = 32;
 }
 
-
-
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct OisyUser {
     pub principal: Principal,

@@ -29,9 +29,7 @@ use crate::{
         },
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
-        user_profile::{
-            OisyUser, StoredUserProfile, UserCredential, UserProfile,
-        },
+        user_profile::{OisyUser, StoredUserProfile, UserCredential, UserProfile},
         verifiable_credential::CredentialType,
         Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },
@@ -252,8 +250,6 @@ impl StoredUserProfile {
             version: None,
         }
     }
-
-
 
     /// Returns a copy with networks map set to the specified value.
     ///

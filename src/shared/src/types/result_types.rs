@@ -20,7 +20,6 @@ use crate::types::{
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
 
-
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum CreateContactResult {
     /// The contact was retrieved successfully.
