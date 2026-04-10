@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { nonNullish } from '@dfinity/utils';
+import { notEmptyString } from '@dfinity/utils';
 import { config } from 'dotenv';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ENV, OISY_IC_DOMAIN, findHtmlFiles, replaceEnv } from './build.utils.mjs';
 
-const IS_SIGNER_BUILD = nonNullish(process.env.OISY_SIGNER_TARGET);
+const IS_SIGNER_BUILD = notEmptyString(process.env.OISY_SIGNER_TARGET);
 
 config({ path: `.env.${ENV}` });
 
