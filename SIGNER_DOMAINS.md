@@ -141,19 +141,19 @@ Each signer domain reports to Plausible under its own domain name. This means yo
 
 ## Key Files
 
-| File                                              | Purpose                                                |
-| ------------------------------------------------- | ------------------------------------------------------ |
-| `signer-versions.json`                            | Independent version numbers for signer frontends       |
-| `scripts/domains.json`                            | Domain-to-URL mapping per canister + network           |
-| `dfx.json`                                        | Canister definitions and network config                |
-| `canister_ids.json`                               | Canister IDs per network                               |
-| `vite.utils.ts`                                   | Build-time domain resolution + globals                 |
-| `scripts/build.utils.mjs`                         | Post-process domain resolution                         |
-| `scripts/docker-build.signer-frontend`            | Reproducible Docker build for signer frontend          |
-| `scripts/docker-build.legacy-signer-frontend`     | Reproducible Docker build for legacy signer frontend   |
-| `scripts/dfx-orbit.validate.signer-frontend.sh`   | Orbit verification for signer frontend proposals       |
+| File                                                   | Purpose                                                 |
+| ------------------------------------------------------ | ------------------------------------------------------- |
+| `signer-versions.json`                                 | Independent version numbers for signer frontends        |
+| `scripts/domains.json`                                 | Domain-to-URL mapping per canister + network            |
+| `dfx.json`                                             | Canister definitions and network config                 |
+| `canister_ids.json`                                    | Canister IDs per network                                |
+| `vite.utils.ts`                                        | Build-time domain resolution + globals                  |
+| `scripts/build.utils.mjs`                              | Post-process domain resolution                          |
+| `scripts/docker-build.signer-frontend`                 | Reproducible Docker build for signer frontend           |
+| `scripts/docker-build.legacy-signer-frontend`          | Reproducible Docker build for legacy signer frontend    |
+| `scripts/dfx-orbit.validate.signer-frontend.sh`        | Orbit verification for signer frontend proposals        |
 | `scripts/dfx-orbit.validate.legacy-signer-frontend.sh` | Orbit verification for legacy signer frontend proposals |
-| `src/frontend/src/hooks.ts`                       | SvelteKit reroute hook (signer -> `/sign`)             |
-| `src/frontend/src/lib/constants/app.constants.ts` | `SIGNER_TARGET`, `IS_SIGNER_DOMAIN`, derivation origin |
-| `src/frontend/src/env/plausible.env.ts`           | Plausible domain per signer target                     |
-| `.env.production` / `.env.staging` / `.env.beta`  | `VITE_AUTH_ALTERNATIVE_ORIGINS` with signer domains    |
+| `src/frontend/src/hooks.ts`                            | SvelteKit reroute hook (signer -> `/sign`)              |
+| `src/frontend/src/lib/constants/app.constants.ts`      | `SIGNER_TARGET`, `IS_SIGNER_DOMAIN`, derivation origin  |
+| `src/frontend/src/env/plausible.env.ts`                | Plausible domain per signer target                      |
+| `.env.production` / `.env.staging` / `.env.beta`       | `VITE_AUTH_ALTERNATIVE_ORIGINS` with signer domains     |
