@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
-			"standalone_mode": "",
+			"standalone_modeX": "",
 			"video_not_supported": ""
 		}
 	},

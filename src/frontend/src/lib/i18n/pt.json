@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
-			"standalone_mode": "",
+			"standalone_modeX": "",
 			"video_not_supported": ""
 		}
 	},

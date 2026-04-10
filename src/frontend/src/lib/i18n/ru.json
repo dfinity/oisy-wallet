@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
-			"standalone_mode": "Мы улучшили работу $oisy_short при установке на главный экран. Если у вас возникнут проблемы с подключением $oisy_short или подписанием транзакций, пожалуйста удалите $oisy_short с главного экрана и установите его снова. На iPhone убедитесь что снята галочка с пункта «Открыть как веб-приложение».<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>",
+			"standalone_modeX": "",
 			"video_not_supported": "Ваш браузер не поддерживает воспроизведение видео."
 		}
 	},

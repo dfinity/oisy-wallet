@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",
-			"standalone_mode": "$oisy_short をホーム画面にインストールした状態での動作を改善しました（現在ご利用の状態です）。$oisy_short への接続やトランザクションの署名で問題が発生する場合は、いったん ホーム画面から $oisy_short を削除し、再度インストールしてください。iPhone の場合は、「Webアプリとして開く（Open as Web App）」のチェックを外していることを必ず確認してください。<a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">詳しく読む</a>",
+			"standalone_modeX": "",
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。"
 		}
 	},
