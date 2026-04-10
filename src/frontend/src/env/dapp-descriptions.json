@@ -138,6 +138,20 @@
 		}
 	},
 	{
+		"id": "motoko-tokyo",
+		"name": "dapps.descriptions.motoko_tokyo.name",
+		"oneLiner": "dapps.descriptions.motoko_tokyo.one_liner",
+		"website": "https://motokotokyogame.net/",
+		"twitter": "https://x.com/NightscrollerEX",
+		"discord": "https://discord.gg/d3WnbPPkes",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.game", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.motoko_tokyo.description",
+		"usesInternetIdentity": true,
+		"stats": "",
+		"logo": "/images/dapps/motoko-tokyo-logo.webp",
+		"screenshots": ["/images/dapps/motoko-tokyo-screenshot.webp"]
+	},
+	{
 		"id": "icpanda-message",
 		"name": "dapps.descriptions.icpanda_message.name",
 		"oneLiner": "dapps.descriptions.icpanda_message.one_liner",
