@@ -453,6 +453,12 @@
 				"name": "ICPixel",
 				"one_liner": "Create, animate, and export pixel art directly in your browser.",
 				"description": "ICPixel is a free online pixel art editor that runs entirely in your browser. Create sprites, pixel animations, and game assets with layers, timeline tools, and modern export options — no download required."
+			},
+			"motoko_tokyo": {
+				"name": "Motoko Tokyo",
+				"one_liner": "The hunt has begun in search of the elusive Motoko Tokyo and the Nightscroller Syndicate can use your help...",
+				"call_to_action": "Come find me when you're ready...",
+				"description": "Where in the World is Motoko Tokyo is a global, blockchain‑powered puzzle adventure built on the Internet Computer Protocol (ICP). Join an exclusive agency and collaborate with players worldwide to unravel a series of cryptic riddles. Every successful solution brings you one step closer to tracking down Motoko Tokyo. In each round, the first player to solve all riddles claims the bounty and secures a coveted spot on the leaderboard."
 			}
 		}
 	},
