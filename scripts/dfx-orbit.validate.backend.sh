@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 if [ -z "${RELEASE_COMMIT}" ]; then
   echo "RELEASE_COMMIT is unset or set to the empty string"
