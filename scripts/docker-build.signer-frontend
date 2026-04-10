@@ -31,7 +31,10 @@ fi
 rm -fr "$OUTDIR"
 mkdir -p "$OUTDIR"
 
-DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic --build-arg signer_target=signer -o "$OUTDIR/" . "${@}" || { print_docker_help; exit 1; }
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic --build-arg signer_target=signer -o "$OUTDIR/" . "${@}" || {
+  print_docker_help
+  exit 1
+}
 mv "$OUTDIR/frontend" "$OUTDIR/signer_frontend"
 echo "BUILD REPORT:"
 cat "$OUTDIR/signer_frontend/build-report.txt"

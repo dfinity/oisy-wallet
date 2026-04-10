@@ -31,6 +31,9 @@ fi
 rm -fr "$OUTDIR"
 mkdir -p "$OUTDIR"
 
-DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o "$OUTDIR/" . "${@}" || { print_docker_help; exit 1; }
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o "$OUTDIR/" . "${@}" || {
+  print_docker_help
+  exit 1
+}
 echo "BUILD REPORT:"
 cat "$OUTDIR/frontend/build-report.txt"
