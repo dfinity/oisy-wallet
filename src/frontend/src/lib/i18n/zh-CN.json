@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
-			"standalone_mode": "我们改进了 $oisy_short 在像你这样安装到主&nbsp;屏幕时的运行方式。如果你在连接 $oisy_short 或签署交易时遇到问题，请将 $oisy_short 从主&nbsp;屏幕中移除并重新安装。在 iPhone 上，请确保取消选择“以 Web App 打开”。<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">阅读更多</a>",
+			"standalone_mode": "将应用程序和 $oisy_short 同时安装到主屏幕时，存在已知的连接问题。如果在连接 $oisy_short 或签署交易时遇到问题，请从普通浏览器启动应用程序。我们正在修复此问题，将很快解决。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">了解更多</a>",
 			"video_not_supported": "你的浏览器不支持视频播放。"
 		}
 	},
@@ -972,8 +972,11 @@
 			"no_pending_bitcoin_transaction": "加载待处理的比特币交易时出错。请稍后重试。",
 			"unexpected_utxos_fee": "计算交易手续费时发生错误。",
 			"unable_to_retrieve_amount": "无法获取金额（n/a）",
-			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
+			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重试。",
 			"solana_confirmation_failed": "Solana确认失败",
+			"solana_insufficient_funds": "",
+			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "由于不支持所提供的令牌标准，因此无法计算费用。"
 		}
 	},

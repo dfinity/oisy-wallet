@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
-			"standalone_mode": "Zlepšili jsme fungování aplikace $oisy_short při instalaci na domovskou obrazovku, jako je tomu u vás. Pokud narazíte na problémy s připojením k $oisy_short nebo s podepisováním transakcí, odeberte $oisy_short z domovské obrazovky a znovu jej nainstalujte. Na iPhonech se ujistěte, že není vybrána možnost „Otevřít jako webovou aplikaci“.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Přečíst více</a>",
+			"standalone_mode": "Při instalaci aplikace i $oisy_short na domovskou obrazovku jsou známy problémy s připojením. Pokud narazíte na problémy s připojením $oisy_short nebo podepisováním transakcí, spusťte prosím aplikaci z běžného prohlížeče. Pracujeme na opravě, která bude brzy k dispozici. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Více informací</a>",
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa."
 		}
 	},
@@ -972,8 +972,11 @@
 			"no_pending_bitcoin_transaction": "Při načítání čekajících transakcí Bitcoin došlo k chybě. Zkuste to prosím později znovu.",
 			"unexpected_utxos_fee": "Při výpočtu transakčního poplatku se něco pokazilo.",
 			"unable_to_retrieve_amount": "není k dispozici (nelze načíst)",
-			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
+			"solana_transaction_expired": "Vaše transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže to zkuste znovu.",
 			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně.",
+			"solana_insufficient_funds": "",
+			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "Nelze vypočítat poplatek, protože poskytnutý standard tokenu není podporován."
 		}
 	},

@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
-			"standalone_mode": "Nous avons amélioré le fonctionnement de $oisy_short lorsqu'il est installé sur un écran d'accueil, comme c'est votre cas. Si vous rencontrez des problèmes pour connecter $oisy_short ou signer des transactions, veuillez supprimer $oisy_short de l'écran d'accueil et l'installer à nouveau. Sur iPhone, assurez-vous de désélectionner « Ouvrir en tant qu'application Web ».<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Lire la suite</a>",
+			"standalone_mode": "Des problèmes de connexion connus surviennent lorsqu'une application et $oisy_short sont tous deux installés sur l'écran d'accueil. Si vous rencontrez des problèmes de connexion à $oisy_short ou de signature de transactions, veuillez lancer l'application depuis un navigateur classique. Nous travaillons sur un correctif qui sera bientôt disponible. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">En savoir plus</a>",
 			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo."
 		}
 	},
@@ -972,8 +972,11 @@
 			"no_pending_bitcoin_transaction": "Une erreur s'est produite lors du chargement des transactions Bitcoin en attente. Veuillez réessayer plus tard.",
 			"unexpected_utxos_fee": "Quelque chose s'est mal passé lors du calcul des frais de transaction.",
 			"unable_to_retrieve_amount": "n/a (impossible de récupérer)",
-			"solana_transaction_expired": "Votre transaction d'envoi n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous l'avons mis à jour au dernier montant recommandé, veuillez donc essayer de l'envoyer à nouveau.",
+			"solana_transaction_expired": "Votre transaction n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous l'avons mis à jour au dernier montant recommandé, veuillez donc réessayer.",
 			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez patienter quelques secondes, puis vérifiez la liste des transactions de votre token si votre transaction a été créée correctement.",
+			"solana_insufficient_funds": "",
+			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "Impossible de calculer les frais car la norme de token fournie n'est pas prise en charge."
 		}
 	},

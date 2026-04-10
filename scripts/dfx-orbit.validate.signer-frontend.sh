@@ -17,11 +17,12 @@ git checkout "$RELEASE_COMMIT" || exit 1
 
 # Make sure target directory exists but no prior artifacts are there
 mkdir -p target
-rm -fr target/frontend
+rm -fr target/frontend target/signer_frontend
 
-# Check that the frontend ENV file matches the hash and build the frontend
+# Check that the frontend ENV file matches the hash and build the signer frontend
 echo "$ENV_SHA .env.production" | sha256sum -c || exit 1
-DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o target/ .
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic --build-arg signer_target=signer -o target/ .
+mv target/frontend target/signer_frontend
 
 # Check that the artifacts match the commit args
-dfx-orbit verify "$FRONTEND_REQUEST_ID" asset upload frontend --batch-id "$BATCH_ID" --files target/frontend
+dfx-orbit verify "$SIGNER_FRONTEND_REQUEST_ID" asset upload signer_frontend --batch-id "$SIGNER_FRONTEND_BATCH_ID" --files target/signer_frontend

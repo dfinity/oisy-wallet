@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
-			"standalone_mode": "",
+			"standalone_mode": "Sono noti problemi di connessione quando sia un'app che $oisy_short sono installati nella schermata iniziale. Se riscontri problemi di connessione a $oisy_short o di firma delle transazioni, avvia l'app da un browser normale. Stiamo lavorando a una soluzione che sarà disponibile a breve. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Scopri di più</a>",
 			"video_not_supported": ""
 		}
 	},
@@ -972,8 +972,11 @@
 			"no_pending_bitcoin_transaction": "Si è verificato un errore durante il caricamento delle transazioni Bitcoin in sospeso. Riprova più tardi.",
 			"unexpected_utxos_fee": "Qualcosa è andato storto durante il calcolo della fee di transazione.",
 			"unable_to_retrieve_amount": "n/d (impossibile recuperare)",
-			"solana_transaction_expired": "La tua transazione di invio non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la fee di priorità fornita non era sufficiente. L'abbiamo aggiornata all'ultimo importo consigliato, quindi prova a inviarla di nuovo.",
+			"solana_transaction_expired": "La tua transazione non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la fee di priorità fornita non era sufficiente. L'abbiamo aggiornata all'ultimo importo consigliato, quindi riprova.",
 			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Aspetta qualche secondo e poi controlla le transazioni del tuo token per vedere se la tua transazione è stata creata correttamente.",
+			"solana_insufficient_funds": "",
+			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": ""
 		}
 	},
