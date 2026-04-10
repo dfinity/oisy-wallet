@@ -2,7 +2,6 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
-import { ZERO } from '$lib/constants/app.constants';
 import * as addressDerived from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as tokensStore from '$lib/derived/tokens.derived';
@@ -44,10 +43,13 @@ vi.mock('$icp/api/icrc-ledger.api', () => ({
 	icrc1SupportedStandards: vi.fn()
 }));
 
-vi.mock('$sol/api/solana.api', () => ({
-	estimatePriorityFee: vi.fn().mockResolvedValue(ZERO),
-	getSolCreateAccountFee: vi.fn().mockResolvedValue(2039280n)
-}));
+vi.mock('$sol/api/solana.api', async () => {
+	const { ZERO } = await import('$lib/constants/app.constants');
+	return {
+		estimatePriorityFee: vi.fn().mockResolvedValue(ZERO),
+		getSolCreateAccountFee: vi.fn().mockResolvedValue(2039280n)
+	};
+});
 
 describe('SwapTokenWizard', () => {
 	const mockContext = new Map();
