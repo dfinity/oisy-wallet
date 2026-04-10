@@ -21,7 +21,8 @@ const signerTarget = process.env.OISY_SIGNER_TARGET;
 
 const signerKey = notEmptyString(signerTarget) ? SIGNER_TARGET_TO_KEY[signerTarget] : undefined;
 
-const version = (notEmptyString(signerKey) ? signerVersions[signerKey] : undefined) ?? packageVersion;
+const version =
+	(notEmptyString(signerKey) ? signerVersions[signerKey] : undefined) ?? packageVersion;
 
 const filesPath = (/** @type {string} */ path) => `src/frontend/${path}`;
 
