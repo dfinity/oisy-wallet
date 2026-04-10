@@ -43,6 +43,14 @@ vi.mock('$icp/api/icrc-ledger.api', () => ({
 	icrc1SupportedStandards: vi.fn()
 }));
 
+vi.mock('$sol/api/solana.api', async () => {
+	const { ZERO } = await import('$lib/constants/app.constants');
+	return {
+		estimatePriorityFee: vi.fn().mockResolvedValue(ZERO),
+		getSolCreateAccountFee: vi.fn().mockResolvedValue(2039280n)
+	};
+});
+
 describe('SwapTokenWizard', () => {
 	const mockContext = new Map();
 

@@ -2,7 +2,6 @@ import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUCCESS
 } from '$lib/constants/analytics.constants';
-import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -38,14 +37,20 @@ vi.mock('$lib/services/provider-agreements.services', () => ({
 	acceptProviderAgreement: (...args: unknown[]) => mockAcceptProviderAgreement(...args)
 }));
 
-vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: vi.fn().mockReturnValue(ZERO)
-}));
+vi.mock('$lib/utils/parse.utils', async () => {
+	const { ZERO } = await import('$lib/constants/app.constants');
+	return {
+		parseToken: vi.fn().mockReturnValue(ZERO)
+	};
+});
 
-vi.mock('$sol/api/solana.api', () => ({
-	estimatePriorityFee: vi.fn().mockResolvedValue(ZERO),
-	getSolCreateAccountFee: vi.fn().mockResolvedValue(2039280n)
-}));
+vi.mock('$sol/api/solana.api', async () => {
+	const { ZERO } = await import('$lib/constants/app.constants');
+	return {
+		estimatePriorityFee: vi.fn().mockResolvedValue(ZERO),
+		getSolCreateAccountFee: vi.fn().mockResolvedValue(2039280n)
+	};
+});
 
 describe('SwapSolWizard', () => {
 	const mockSourceToken = { ...mockValidSplToken, enabled: true };
