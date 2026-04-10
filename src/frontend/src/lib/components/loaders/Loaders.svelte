@@ -3,9 +3,9 @@
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
 	import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 	import CkBtcUpdateBalanceListener from '$icp/components/core/CkBtcUpdateBalanceListener.svelte';
+	import CkMinterInfoLoader from '$icp/components/loaders/CkMinterInfoLoader.svelte';
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
 	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
-	import StakeContext from '$lib/components/earning/StakeContext.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Guards from '$lib/components/guard/Guards.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
@@ -35,6 +35,8 @@
 
 		<MultipleListeners tokens={$enabledFungibleNetworkTokens} />
 
+		<CkMinterInfoLoader />
+
 		<LoaderEthTransactions />
 
 		<LoaderWallets />
@@ -53,9 +55,7 @@
 
 		<LoaderHarvest />
 
-		<StakeContext>
-			{@render children()}
-		</StakeContext>
+		{@render children()}
 	</Loader>
 </LoaderUserProfile>
 

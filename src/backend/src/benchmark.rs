@@ -4,7 +4,7 @@ use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
 use candid::Principal;
-use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
+use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
 use serde_bytes::ByteBuf;
 use shared::{
     http::HttpRequest,
@@ -422,7 +422,13 @@ fn bench_update_user_agreements() -> BenchResult {
     bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::service::update_agreements(sp, version, agreements.clone(), &mut m)
+            user_profile::service::update_agreements(
+                sp,
+                version,
+                &agreements,
+                &mut m,
+                &mut s.agreement_history,
+            )
         }));
     })
 }

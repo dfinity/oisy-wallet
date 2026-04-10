@@ -48,7 +48,7 @@ impl<'a> UserProfileModel<'a> {
 
     #[cfg(test)]
     fn assert_consistent(&self) {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             self.user_profile_map.len(),
             self.user_profile_updated_map.len(),
             "The number of entries should be the same"
@@ -75,9 +75,11 @@ mod tests {
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
     };
+    use pretty_assertions::assert_eq;
     use shared::types::{user_profile::StoredUserProfile, Timestamp};
 
-    use super::*;
+    use super::UserProfileModel;
+    use crate::types::{Candid, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap};
 
     const USER_1: &str = "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae";
     const USER_2: &str = "ufjdl-kewp5-bgfaq-d7k34-e5w62-nyad4-7r3s5-m2pt2-owqga-kcr5z-jae";
@@ -99,14 +101,14 @@ mod tests {
 
         let user_principal =
             StoredPrincipal(Principal::from_text(USER_1).expect("invalid user principal"));
-        let now: Timestamp = 12345667788223;
+        let now: Timestamp = 12_345_667_788_223;
         let user_profile = StoredUserProfile::from_timestamp(now);
         user_profile_map.insert((now, user_principal), Candid(user_profile.clone()));
         user_profile_updated_map.insert(user_principal, now);
 
         let user_principal_2 =
             StoredPrincipal(Principal::from_text(USER_2).expect("invalid user principal"));
-        let another_now: Timestamp = now + 400000000;
+        let another_now: Timestamp = now + 400_000_000;
         let user_profile_2 = StoredUserProfile::from_timestamp(another_now);
         user_profile_map.insert(
             (another_now, user_principal_2),
@@ -139,14 +141,14 @@ mod tests {
 
         let user_principal =
             StoredPrincipal(Principal::from_text(USER_1).expect("invalid user principal"));
-        let now: Timestamp = 12345667788223;
+        let now: Timestamp = 12_345_667_788_223;
         let user_profile = StoredUserProfile::from_timestamp(now);
         user_profile_map.insert((now, user_principal), Candid(user_profile.clone()));
         user_profile_updated_map.insert(user_principal, now);
 
         let user_principal_2 =
             StoredPrincipal(Principal::from_text(USER_2).expect("invalid user principal"));
-        let another_now: Timestamp = now + 400000000;
+        let another_now: Timestamp = now + 400_000_000;
         let user_profile_2 = StoredUserProfile::from_timestamp(another_now);
         user_profile_map.insert(
             (another_now, user_principal_2),
@@ -158,7 +160,7 @@ mod tests {
             UserProfileModel::new(&mut user_profile_map, &mut user_profile_updated_map);
 
         let mut user_profile_2_updated = user_profile_2.clone();
-        let later_timestamp = another_now + 400000000;
+        let later_timestamp = another_now + 400_000_000;
         user_profile_2_updated.updated_timestamp = later_timestamp;
         user_profile_model.store_new(user_principal_2, later_timestamp, &user_profile_2_updated);
 

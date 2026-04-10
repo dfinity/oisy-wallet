@@ -8,6 +8,8 @@ import {
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import * as batchServices from '$lib/services/batch.services';
 import { batch } from '$lib/services/batch.services';
+import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
 	loadEthereumTransactions: vi.fn()
@@ -39,6 +41,7 @@ describe('eth-transactions-batch.services', () => {
 			);
 
 			const generator = batchLoadTransactions({
+				identity: mockIdentity,
 				tokens: mockTokens
 			});
 
@@ -49,10 +52,18 @@ describe('eth-transactions-batch.services', () => {
 			);
 
 			mockTokens.slice(0, ETHERSCAN_MAX_CALLS_PER_SECOND).forEach((token) => {
+				const { id: tokenId, standard, network } = token;
+
+				assertIsNetworkEthereum(network);
+
+				const { id: networkId, chainId } = network;
+
 				expect(loadEthereumTransactions).toHaveBeenCalledWith({
-					tokenId: token.id,
-					networkId: token.network.id,
-					standard: token.standard
+					identity: mockIdentity,
+					tokenId,
+					networkId,
+					chainId,
+					standard
 				});
 			});
 
@@ -80,6 +91,7 @@ describe('eth-transactions-batch.services', () => {
 			];
 
 			const generator = batchLoadTransactions({
+				identity: mockIdentity,
 				tokens: mockTokens
 			});
 
@@ -98,6 +110,7 @@ describe('eth-transactions-batch.services', () => {
 
 		it('should respect ETHERSCAN_MAX_CALLS_PER_SECOND as batchSize', () => {
 			batchLoadTransactions({
+				identity: mockIdentity,
 				tokens: mockTokens
 			});
 

@@ -52,7 +52,7 @@ describe('dip721.canister', () => {
 
 			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unauthorized operator')
 			);
 
@@ -64,7 +64,7 @@ describe('dip721.canister', () => {
 
 			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Cannot transfer NFT to self')
 			);
 
@@ -76,7 +76,7 @@ describe('dip721.canister', () => {
 
 			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('NFT token not found')
 			);
 
@@ -88,7 +88,7 @@ describe('dip721.canister', () => {
 
 			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unauthorized owner for the NFT')
 			);
 
@@ -100,7 +100,7 @@ describe('dip721.canister', () => {
 
 			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Cannot approve self for the NFT')
 			);
 
@@ -112,7 +112,7 @@ describe('dip721.canister', () => {
 
 			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Operator not found for the NFT')
 			);
 
@@ -124,7 +124,7 @@ describe('dip721.canister', () => {
 
 			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('NFT already exists')
 			);
 
@@ -136,7 +136,7 @@ describe('dip721.canister', () => {
 
 			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Owner not found for the NFT')
 			);
 
@@ -151,7 +151,7 @@ describe('dip721.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(balance(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown Dip721CanisterError')
 			);
 
@@ -166,7 +166,7 @@ describe('dip721.canister', () => {
 
 			const res = balance(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.balanceOf).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
 		});
@@ -197,7 +197,7 @@ describe('dip721.canister', () => {
 
 			const { getTokensByOwner } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unauthorized operator')
 			);
 
@@ -209,7 +209,7 @@ describe('dip721.canister', () => {
 
 			const { getTokensByOwner } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Cannot transfer NFT to self')
 			);
 
@@ -221,7 +221,7 @@ describe('dip721.canister', () => {
 
 			const { getTokensByOwner } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('NFT token not found')
 			);
 
@@ -233,7 +233,7 @@ describe('dip721.canister', () => {
 
 			const { getTokensByOwner } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unauthorized owner for the NFT')
 			);
 
@@ -245,7 +245,7 @@ describe('dip721.canister', () => {
 
 			const { getTokensByOwner } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Cannot approve self for the NFT')
 			);
 
@@ -257,7 +257,7 @@ describe('dip721.canister', () => {
 
 			const { getTokensByOwner } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Operator not found for the NFT')
 			);
 
@@ -269,7 +269,7 @@ describe('dip721.canister', () => {
 
 			const { getTokensByOwner } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('NFT already exists')
 			);
 
@@ -281,7 +281,7 @@ describe('dip721.canister', () => {
 
 			const { getTokensByOwner } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Owner not found for the NFT')
 			);
 
@@ -296,7 +296,7 @@ describe('dip721.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getTokensByOwner(mockParams)).rejects.toThrowError(
+			await expect(getTokensByOwner(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown Dip721CanisterError')
 			);
 
@@ -311,7 +311,7 @@ describe('dip721.canister', () => {
 
 			const res = getTokensByOwner(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.ownerTokenIdentifiers).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
 		});
@@ -348,7 +348,7 @@ describe('dip721.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transfer(mockParams)).rejects.toThrowError(
+			await expect(transfer(mockParams)).rejects.toThrow(
 				new CanisterInternalError('Unknown Dip721CanisterError')
 			);
 
@@ -363,7 +363,7 @@ describe('dip721.canister', () => {
 
 			const res = transfer(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(mockTo, mockTokenId);
 		});

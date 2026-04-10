@@ -1,10 +1,16 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
-	BitcoinNetwork,
+	AllowSigningResponse,
+	TokenId as BackendTokenId,
+	Network as BitcoinNetwork,
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
+	IIDelegationChain,
+	PendingTransaction,
+	SelectedUtxosFeeResponse,
 	UserProfile,
+	UserTransaction,
 	Utxo
 } from '$declarations/backend/backend.did';
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
@@ -20,6 +26,8 @@ import type { Token } from '$lib/types/token';
 import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';
 import type { UserNetworks } from '$lib/types/user-networks';
+import type { UserProviderAgreements } from '$lib/types/user-provider-agreements';
+import type { Nullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -32,15 +40,46 @@ export interface AddUserCredentialParams {
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 
+export interface RateLimitInfo {
+	endpoint: string;
+	limiter: string;
+}
+
+export interface AddPendingTransactionOutcome {
+	response: true;
+	rateLimitInfo?: RateLimitInfo;
+}
+
+export interface GetPendingTransactionsOutcome {
+	response: PendingTransaction[];
+	rateLimitInfo?: RateLimitInfo;
+}
+
+export interface SelectedUtxosFeeOutcome {
+	response: SelectedUtxosFeeResponse;
+	rateLimitInfo?: RateLimitInfo;
+}
+
+export interface AllowSigningParams {
+	iiDelegationChain: Nullable<IIDelegationChain>;
+}
+
+export interface AllowSigningOutcome {
+	response: AllowSigningResponse;
+	rateLimitInfo?: RateLimitInfo;
+}
+
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
 	amountSatoshis: bigint;
 	minConfirmations: [number];
+	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
 export interface BtcGetPendingTransactionParams {
 	network: BitcoinNetwork;
 	address: BtcAddress;
+	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
@@ -76,6 +115,11 @@ export interface SaveUserNetworksSettings {
 
 export interface SaveUserAgreements {
 	agreements: Partial<UserAgreements>;
+	currentUserVersion?: bigint;
+}
+
+export interface SaveProviderAgreements {
+	providerAgreements: UserProviderAgreements;
 	currentUserVersion?: bigint;
 }
 
@@ -173,4 +217,23 @@ export interface DeleteContactParams {
 export interface UpdateUserExperimentalFeatureSettings {
 	experimentalFeatures: UserExperimentalFeatures;
 	currentUserVersion?: bigint;
+}
+
+export interface GetUserTransactionsParams {
+	tokenId: BackendTokenId;
+	start?: bigint;
+	maxResults: bigint;
+}
+
+export interface GetUserTransactionsResponse {
+	transactions: UserTransaction[];
+	newestBlockIndex?: bigint;
+	oldestBlockIndex?: bigint;
+	totalStored: bigint;
+	nextStart?: bigint;
+}
+
+export interface SaveUserTransactionsParams {
+	tokenId: BackendTokenId;
+	transactions: UserTransaction[];
 }

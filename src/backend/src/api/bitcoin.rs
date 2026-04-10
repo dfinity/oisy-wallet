@@ -1,6 +1,9 @@
 use std::collections::HashSet;
 
-use ic_cdk::{api::time, query, update};
+use ic_cdk::{
+    api::{is_controller, msg_caller, time},
+    query, update,
+};
 use shared::types::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -17,9 +20,15 @@ use shared::types::{
 
 use crate::{
     bitcoin::{api, pending_tx_model::BtcUserPendingTransactionsModel, utils},
-    guards::caller_is_not_anonymous,
-    signer,
+    delegation, signer,
     state::mutate_state,
+    utils::{
+        guards::caller_is_not_anonymous,
+        rate_limiter::{
+            self, BTC_ADD_PENDING_TX_RATE_LIMITER, BTC_GET_PENDING_TX_RATE_LIMITER,
+            BTC_SELECT_UTXOS_FEE_RATE_LIMITER,
+        },
+    },
 };
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
@@ -39,7 +48,6 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 /// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
 /// it returns the default percentiles.
 #[query(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
 #[must_use]
 pub fn btc_get_current_fee_percentiles(
     params: BtcGetFeePercentilesRequest,
@@ -51,6 +59,9 @@ pub fn btc_get_current_fee_percentiles(
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
 ///
+/// Requires a valid II delegation chain to verify the caller authenticated
+/// through Internet Identity. Controllers bypass this check.
+///
 /// # Errors
 /// Errors are enumerated by: `SelectedUtxosFeeError`.
 #[update(guard = "caller_is_not_anonymous")]
@@ -60,7 +71,24 @@ pub async fn btc_select_user_utxos_fee(
     async fn inner(
         params: SelectedUtxosFeeRequest,
     ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
-        let principal = ic_cdk::caller();
+        BTC_SELECT_UTXOS_FEE_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(SelectedUtxosFeeError::RateLimited)?;
+
+        let principal = msg_caller();
+        let now_ns = time();
+
+        let (ii_canister_ids, root_key, guard_enabled) = delegation::read_ii_verification_config();
+        delegation::require_ii_delegation(
+            params.ii_delegation_chain.as_ref(),
+            is_controller(&principal),
+            principal,
+            &ii_canister_ids,
+            &root_key,
+            now_ns,
+            guard_enabled,
+        )
+        .map_err(|msg| SelectedUtxosFeeError::InvalidDelegationChain { msg })?;
         let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
@@ -127,6 +155,10 @@ pub async fn btc_select_user_utxos_fee(
 
 /// Adds a pending Bitcoin transaction for the caller.
 ///
+/// Requires a valid II delegation chain to verify the caller authenticated
+/// through Internet Identity. This protects against unauthorised CLI callers.
+/// Controllers bypass this check.
+///
 /// # Errors
 /// Errors are enumerated by: `BtcAddPendingTransactionError`.
 #[update(guard = "caller_is_not_anonymous")]
@@ -136,6 +168,25 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
+        BTC_ADD_PENDING_TX_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(BtcAddPendingTransactionError::RateLimited)?;
+
+        let principal = msg_caller();
+        let now_ns = time();
+
+        let (ii_canister_ids, root_key, guard_enabled) = delegation::read_ii_verification_config();
+        delegation::require_ii_delegation(
+            params.ii_delegation_chain.as_ref(),
+            is_controller(&principal),
+            principal,
+            &ii_canister_ids,
+            &root_key,
+            now_ns,
+            guard_enabled,
+        )
+        .map_err(|msg| BtcAddPendingTransactionError::InvalidDelegationChain { msg })?;
+
         if params.utxos.is_empty() {
             return Err(BtcAddPendingTransactionError::EmptyUtxos);
         }
@@ -150,8 +201,6 @@ pub async fn btc_add_pending_transaction(
             return Err(BtcAddPendingTransactionError::DuplicateUtxos);
         }
 
-        let principal = ic_cdk::caller();
-
         let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
@@ -163,8 +212,6 @@ pub async fn btc_add_pending_transaction(
         )
         .await
         .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-
-        let now_ns = time();
 
         let current_keys: HashSet<(&[u8], u32)> = current_utxos
             .iter()
@@ -207,6 +254,9 @@ pub async fn btc_add_pending_transaction(
 
 /// Returns the pending Bitcoin transactions for the caller.
 ///
+/// Requires a valid II delegation chain to verify the caller authenticated
+/// through Internet Identity. Controllers bypass this check.
+///
 /// # Errors
 /// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 #[update(guard = "caller_is_not_anonymous")]
@@ -216,8 +266,24 @@ pub async fn btc_get_pending_transactions(
     async fn inner(
         params: BtcGetPendingTransactionsRequest,
     ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
-        let principal = ic_cdk::caller();
+        BTC_GET_PENDING_TX_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(BtcGetPendingTransactionsError::RateLimited)?;
+
+        let principal = msg_caller();
         let now_ns = time();
+
+        let (ii_canister_ids, root_key, guard_enabled) = delegation::read_ii_verification_config();
+        delegation::require_ii_delegation(
+            params.ii_delegation_chain.as_ref(),
+            is_controller(&principal),
+            principal,
+            &ii_canister_ids,
+            &root_key,
+            now_ns,
+            guard_enabled,
+        )
+        .map_err(|msg| BtcGetPendingTransactionsError::InvalidDelegationChain { msg })?;
 
         let current_utxos = api::get_all_utxos(
             params.network,

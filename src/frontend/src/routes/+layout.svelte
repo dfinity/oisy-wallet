@@ -26,6 +26,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+	import { consoleWarn } from '$lib/utils/console.utils';
 
 	interface Props {
 		children: Snippet;
@@ -147,7 +148,7 @@
 			// We don't really care if the broadcast channel fails to open or if it fails to set the message handler.
 			// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
 			// We just print a warning in the console for debugging purposes.
-			console.warn('Auth BroadcastChannel initialization failed', err);
+			consoleWarn('Auth BroadcastChannel initialization failed', err);
 		}
 	};
 
@@ -188,8 +189,6 @@
 		userSelectedNetworkStore.set($networkId);
 	});
 </script>
-
-<svelte:window onstorage={syncAuthStore} />
 
 {#await init()}
 	<div class="text-brand-primary" in:fade>

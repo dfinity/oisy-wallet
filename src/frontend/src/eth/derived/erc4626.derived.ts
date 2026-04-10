@@ -136,8 +136,9 @@ export const erc4626CustomTokensNotInitialized: Readable<boolean> = derived(
 export const erc4626AssetAddresses: Readable<Erc4626ContractAddressWithNetwork[]> = derived(
 	[erc4626Tokens],
 	([$erc4626Tokens]) =>
-		$erc4626Tokens.map(({ assetAddress, network: { exchange } }) => ({
+		$erc4626Tokens.map(({ assetAddress, network: { exchange, chainId } }) => ({
 			address: assetAddress,
-			coingeckoId: exchange?.coingeckoId ?? 'ethereum'
+			coingeckoId: exchange?.coingeckoId ?? 'ethereum',
+			chainId
 		}))
 );

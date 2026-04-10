@@ -12,6 +12,10 @@ src/frontend/src/env/tokens/tokens.*.json
 src/frontend/src/env/tokens/tokens-erc20/
 src/frontend/static/icons/dip20/*.png
 src/frontend/static/icons/icrc/*.png
+src/frontend/static/icons/icrc/*.svg
+src/frontend/static/icons/icrc/*.webp
+src/frontend/static/icons/icrc/*.gif
+src/frontend/static/icons/icrc/*.jpg
 src/frontend/static/icons/sns/*.png
 src/frontend/src/icp/assets/*.svg
 src/frontend/src/icp-eth/assets/*.svg

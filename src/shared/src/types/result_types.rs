@@ -7,19 +7,19 @@ use super::{
         BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
     dapp::AddDappSettingsError,
-    pow::{CreateChallengeError, CreateChallengeResponse},
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
-    agreement::UpdateAgreementsError,
+    agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::AddUserCredentialError,
+    user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -205,22 +205,6 @@ impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowe
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum CreatePowChallengeResult {
-    /// The pow challenge was created successfully.
-    Ok(CreateChallengeResponse),
-    /// The pow challenge was not created due to an error.
-    Err(CreateChallengeError),
-}
-impl From<Result<CreateChallengeResponse, CreateChallengeError>> for CreatePowChallengeResult {
-    fn from(result: Result<CreateChallengeResponse, CreateChallengeError>) -> Self {
-        match result {
-            Ok(response) => CreatePowChallengeResult::Ok(response),
-            Err(err) => CreatePowChallengeResult::Err(err),
-        }
-    }
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcSelectUserUtxosFeeResult {
     /// The fee was selected successfully.
     Ok(SelectedUtxosFeeResponse),
@@ -339,6 +323,22 @@ impl From<Result<(), UpdateAgreementsError>> for UpdateUserAgreementsResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateProviderAgreementsResult {
+    /// The user's provider agreements were updated successfully.
+    Ok(()),
+    /// The user's provider agreements were not updated due to an error.
+    Err(UpdateAgreementsError),
+}
+impl From<Result<(), UpdateAgreementsError>> for UpdateProviderAgreementsResult {
+    fn from(result: Result<(), UpdateAgreementsError>) -> Self {
+        match result {
+            Ok(()) => UpdateProviderAgreementsResult::Ok(()),
+            Err(err) => UpdateProviderAgreementsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum UpdateExperimentalFeaturesSettingsResult {
     /// The user's experimental features settings were updated successfully.
     Ok(()),
@@ -352,6 +352,50 @@ impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
         match result {
             Ok(()) => UpdateExperimentalFeaturesSettingsResult::Ok(()),
             Err(err) => UpdateExperimentalFeaturesSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetUserTransactionsResult {
+    Ok(GetUserTransactionsResponse),
+    Err(UserTransactionError),
+}
+impl From<Result<GetUserTransactionsResponse, UserTransactionError>> for GetUserTransactionsResult {
+    fn from(result: Result<GetUserTransactionsResponse, UserTransactionError>) -> Self {
+        match result {
+            Ok(response) => GetUserTransactionsResult::Ok(response),
+            Err(err) => GetUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SaveUserTransactionsResult {
+    Ok(()),
+    Err(UserTransactionError),
+}
+impl From<Result<(), UserTransactionError>> for SaveUserTransactionsResult {
+    fn from(result: Result<(), UserTransactionError>) -> Self {
+        match result {
+            Ok(()) => SaveUserTransactionsResult::Ok(()),
+            Err(err) => SaveUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetAgreementHistoryResult {
+    Ok(Vec<AgreementHistoryEntry>),
+    Err(GetAgreementHistoryError),
+}
+impl From<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>
+    for GetAgreementHistoryResult
+{
+    fn from(result: Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>) -> Self {
+        match result {
+            Ok(entries) => GetAgreementHistoryResult::Ok(entries),
+            Err(err) => GetAgreementHistoryResult::Err(err),
         }
     }
 }

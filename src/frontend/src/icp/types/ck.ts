@@ -1,11 +1,11 @@
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { PostMessageJsonDataResponse } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { QueryParams } from '@dfinity/utils';
 
 export type MinterInfoParams = {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 } & QueryParams;
 

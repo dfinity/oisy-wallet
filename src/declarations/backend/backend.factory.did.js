@@ -59,21 +59,30 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddDappSettingsError
 	});
+	const Delegation = IDL.Record({
+		pubkey: IDL.Vec(IDL.Nat8),
+		targets: IDL.Opt(IDL.Vec(IDL.Principal)),
+		expiration: IDL.Nat64
+	});
+	const SignedDelegation = IDL.Record({
+		signature: IDL.Vec(IDL.Nat8),
+		delegation: Delegation
+	});
+	const IIDelegationChain = IDL.Record({
+		public_key: IDL.Vec(IDL.Nat8),
+		delegations: IDL.Vec(SignedDelegation)
+	});
+	const AllowSigningRequest = IDL.Record({
+		ii_delegation_chain: IDL.Opt(IIDelegationChain)
+	});
 	const AllowSigningStatus = IDL.Variant({
 		Skipped: IDL.Null,
 		Failed: IDL.Null,
 		Executed: IDL.Null
 	});
-	const ChallengeCompletion = IDL.Record({
-		solved_duration_ms: IDL.Nat64,
-		next_allowance_ms: IDL.Nat64,
-		next_difficulty: IDL.Nat32,
-		current_difficulty: IDL.Nat32
-	});
 	const AllowSigningResponse = IDL.Record({
 		status: AllowSigningStatus,
-		challenge_completion: IDL.Opt(ChallengeCompletion),
-		allowed_cycles: IDL.Nat64
+		allowed_cycles: IDL.Nat
 	});
 	const ApproveError = IDL.Variant({
 		GenericError: IDL.Record({
@@ -96,7 +105,9 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const AllowSigningError = IDL.Variant({
 		ApproveError: ApproveError,
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
 		RateLimited: RateLimitError,
+		RateLimitedByGuard: RateLimitError,
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
@@ -104,7 +115,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
 	});
-	const BitcoinNetwork = IDL.Variant({
+	const Network = IDL.Variant({
 		mainnet: IDL.Null,
 		regtest: IDL.Null,
 		testnet: IDL.Null
@@ -120,13 +131,16 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const BtcAddPendingTransactionRequest = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),
-		network: BitcoinNetwork,
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network,
 		utxos: IDL.Vec(Utxo)
 	});
 	const BtcAddPendingTransactionError = IDL.Variant({
 		InvalidUtxos: IDL.Null,
 		EmptyUtxos: IDL.Null,
 		DuplicateUtxos: IDL.Null,
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text }),
 		UtxosAlreadyReserved: IDL.Null
 	});
@@ -134,14 +148,14 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
-	const BtcGetFeePercentilesRequest = IDL.Record({
-		network: BitcoinNetwork
-	});
+	const BtcGetFeePercentilesRequest = IDL.Record({ network: Network });
 	const BtcGetFeePercentilesResponse = IDL.Record({
 		fee_percentiles: IDL.Vec(IDL.Nat64)
 	});
 	const SelectedUtxosFeeError = IDL.Variant({
 		PendingTransactions: IDL.Null,
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetFeePercentilesResult = IDL.Variant({
@@ -149,7 +163,8 @@ export const idlFactory = ({ IDL }) => {
 		Err: SelectedUtxosFeeError
 	});
 	const BtcGetPendingTransactionsRequest = IDL.Record({
-		network: BitcoinNetwork,
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network,
 		address: IDL.Text
 	});
 	const PendingTransaction = IDL.Record({
@@ -160,6 +175,8 @@ export const idlFactory = ({ IDL }) => {
 		transactions: IDL.Vec(PendingTransaction)
 	});
 	const BtcGetPendingTransactionsError = IDL.Variant({
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetPendingTransactionsResult = IDL.Variant({
@@ -167,7 +184,8 @@ export const idlFactory = ({ IDL }) => {
 		Err: BtcGetPendingTransactionsError
 	});
 	const SelectedUtxosFeeRequest = IDL.Record({
-		network: BitcoinNetwork,
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network,
 		amount_satoshis: IDL.Nat64,
 		min_confirmations: IDL.Opt(IDL.Nat32)
 	});
@@ -260,7 +278,16 @@ export const idlFactory = ({ IDL }) => {
 		privacy_policy: UserAgreement,
 		terms_of_use: UserAgreement
 	});
-	const Agreements = IDL.Record({ agreements: UserAgreements });
+	const ProviderAgreementProvider = IDL.Variant({ NearIntents: IDL.Null });
+	const ProviderAgreementScope = IDL.Variant({ Swap: IDL.Null });
+	const ProviderAgreementType = IDL.Record({
+		provider: ProviderAgreementProvider,
+		scope: ProviderAgreementScope
+	});
+	const Agreements = IDL.Record({
+		agreements: UserAgreements,
+		provider_agreements: IDL.Opt(IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement)))
+	});
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -333,6 +360,13 @@ export const idlFactory = ({ IDL }) => {
 		Ok: GetAllowedCyclesResponse,
 		Err: GetAllowedCyclesError
 	});
+	const ApiKeys = IDL.Record({
+		exchange_rate_enabled: IDL.Opt(IDL.Bool),
+		alchemy_api_key: IDL.Opt(IDL.Text),
+		etherscan_api_key: IDL.Opt(IDL.Text),
+		coingecko_api_key: IDL.Opt(IDL.Text),
+		infura_api_key: IDL.Opt(IDL.Text)
+	});
 	const CanisterStatusType = IDL.Variant({
 		stopped: IDL.Null,
 		stopping: IDL.Null,
@@ -364,10 +398,116 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(Contact),
 		Err: ContactError
 	});
+	const TokenId = IDL.Variant({
+		Erc20: IDL.Tuple(IDL.Text, IDL.Nat64),
+		ExtV2: IDL.Principal,
+		SolNativeDevnet: IDL.Null,
+		Icrc: IDL.Principal,
+		EvmNative: IDL.Nat64,
+		BtcNativeMainnet: IDL.Null,
+		Erc721: IDL.Tuple(IDL.Text, IDL.Nat64),
+		SolNativeMainnet: IDL.Null,
+		SplDevnet: IDL.Text,
+		SplMainnet: IDL.Text,
+		IcpNative: IDL.Null,
+		IcPunks: IDL.Principal,
+		BtcNativeTestnet: IDL.Null,
+		Erc1155: IDL.Tuple(IDL.Text, IDL.Nat64),
+		Erc4626: IDL.Tuple(IDL.Text, IDL.Nat64),
+		Dip721: IDL.Principal
+	});
+	const ExchangeData = IDL.Record({
+		price_24h_change_pct: IDL.Opt(IDL.Float64),
+		market_cap: IDL.Opt(IDL.Float64),
+		timestamp_ns: IDL.Nat64,
+		price: IDL.Opt(IDL.Float64)
+	});
+	const ExchangeRate = IDL.Record({ usd: ExchangeData });
+	const AgreementType = IDL.Variant({
+		TermsOfUse: IDL.Null,
+		PrivacyPolicy: IDL.Null,
+		LicenseAgreement: IDL.Null,
+		Provider: ProviderAgreementType
+	});
+	const AgreementHistoryEntry = IDL.Record({
+		timestamp_ns: IDL.Nat64,
+		agreement_type: AgreementType,
+		text_sha256: IDL.Opt(IDL.Text),
+		accepted: IDL.Bool,
+		last_updated_at_ms: IDL.Opt(IDL.Nat64)
+	});
+	const GetAgreementHistoryError = IDL.Variant({ UserNotFound: IDL.Null });
+	const GetAgreementHistoryResult = IDL.Variant({
+		Ok: IDL.Vec(AgreementHistoryEntry),
+		Err: GetAgreementHistoryError
+	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
 	const GetUserProfileResult = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
+	});
+	const GetUserTransactionsRequest = IDL.Record({
+		token_id: TokenId,
+		max_results: IDL.Nat64,
+		start: IDL.Opt(IDL.Nat64)
+	});
+	const BtcTransactionData = IDL.Record({ fee: IDL.Opt(IDL.Nat) });
+	const EvmTransactionData = IDL.Record({
+		nft_token_id: IDL.Opt(IDL.Nat),
+		data: IDL.Opt(IDL.Text),
+		chain_id: IDL.Opt(IDL.Nat64),
+		nonce: IDL.Opt(IDL.Nat64),
+		gas_limit: IDL.Opt(IDL.Nat),
+		gas_used: IDL.Opt(IDL.Nat),
+		gas_price: IDL.Opt(IDL.Nat)
+	});
+	const SolTransactionData = IDL.Record({
+		fee: IDL.Opt(IDL.Nat),
+		to_owner: IDL.Opt(IDL.Text),
+		from_owner: IDL.Opt(IDL.Text)
+	});
+	const IcrcTransactionType = IDL.Variant({
+		Approve: IDL.Record({ spender: IDL.Text }),
+		Burn: IDL.Null,
+		Mint: IDL.Null,
+		Transfer: IDL.Null
+	});
+	const IcrcTransactionData = IDL.Record({
+		fee: IDL.Opt(IDL.Nat),
+		memo: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		tx_type: IcrcTransactionType
+	});
+	const NetworkTransactionData = IDL.Variant({
+		Btc: BtcTransactionData,
+		Evm: EvmTransactionData,
+		Sol: SolTransactionData,
+		Icrc: IcrcTransactionData
+	});
+	const UserTransaction = IDL.Record({
+		id: IDL.Text,
+		to: IDL.Opt(IDL.Text),
+		block_index: IDL.Nat64,
+		value: IDL.Nat,
+		from: IDL.Text,
+		network_data: NetworkTransactionData,
+		timestamp: IDL.Nat64
+	});
+	const GetUserTransactionsResponse = IDL.Record({
+		next_start: IDL.Opt(IDL.Nat64),
+		total_stored: IDL.Nat64,
+		oldest_block_index: IDL.Opt(IDL.Nat64),
+		newest_block_index: IDL.Opt(IDL.Nat64),
+		transactions: IDL.Vec(UserTransaction)
+	});
+	const UserTransactionError = IDL.Variant({
+		DuplicateTransaction: IDL.Record({ id: IDL.Text }),
+		InternalError: IDL.Record({ msg: IDL.Text }),
+		TooManyTransactions: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const GetUserTransactionsResult = IDL.Variant({
+		Ok: GetUserTransactionsResponse,
+		Err: UserTransactionError
 	});
 	const HasUserProfileResponse = IDL.Record({ has_user_profile: IDL.Bool });
 	const HttpRequest = IDL.Record({
@@ -380,6 +520,16 @@ export const idlFactory = ({ IDL }) => {
 		body: IDL.Vec(IDL.Nat8),
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
+	});
+	const HttpHeader = IDL.Record({ value: IDL.Text, name: IDL.Text });
+	const HttpRequestResult = IDL.Record({
+		status: IDL.Nat,
+		body: IDL.Vec(IDL.Nat8),
+		headers: IDL.Vec(HttpHeader)
+	});
+	const TransformArgs = IDL.Record({
+		context: IDL.Vec(IDL.Nat8),
+		response: HttpRequestResult
 	});
 	const ErcToken = IDL.Record({
 		token_address: IDL.Text,
@@ -415,6 +565,14 @@ export const idlFactory = ({ IDL }) => {
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});
+	const SaveUserTransactionsRequest = IDL.Record({
+		token_id: TokenId,
+		transactions: IDL.Vec(UserTransaction)
+	});
+	const SaveUserTransactionsResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: UserTransactionError
+	});
 	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
@@ -429,8 +587,11 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Stats = IDL.Record({
 		user_profile_count: IDL.Nat64,
+		user_transactions_count: IDL.Nat64,
 		custom_token_count: IDL.Nat64,
+		exchange_rates_count: IDL.Nat64,
 		token_activity_count: IDL.Nat64,
+		agreement_history_count: IDL.Nat64,
 		user_timestamps_count: IDL.Nat64,
 		user_token_count: IDL.Nat64
 	});
@@ -459,6 +620,10 @@ export const idlFactory = ({ IDL }) => {
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
+	const UpdateProviderAgreementsRequest = IDL.Record({
+		current_user_version: IDL.Opt(IDL.Nat64),
+		provider_agreements: IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement))
+	});
 	const UpdateUserAgreementsRequest = IDL.Record({
 		agreements: UserAgreements,
 		current_user_version: IDL.Opt(IDL.Nat64)
@@ -477,7 +642,7 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [AddUserHiddenDappIdResult], []),
-		allow_signing: IDL.Func([], [AllowSigningResult], []),
+		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
 		btc_add_pending_transaction: IDL.Func(
 			[BtcAddPendingTransactionRequest],
 			[BtcAddPendingTransactionResult],
@@ -508,14 +673,34 @@ export const idlFactory = ({ IDL }) => {
 			['query']
 		),
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
+		get_api_keys: IDL.Func([], [ApiKeys], ['query']),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult], ['query']),
 		get_contacts: IDL.Func([], [GetContactsResult], ['query']),
+		get_exchange_rate: IDL.Func([TokenId], [IDL.Opt(ExchangeRate)], ['query']),
+		get_exchange_rates: IDL.Func(
+			[IDL.Vec(TokenId)],
+			[IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))],
+			['query']
+		),
+		get_user_agreement_history: IDL.Func([], [GetAgreementHistoryResult], ['query']),
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
+		get_user_transactions: IDL.Func(
+			[GetUserTransactionsRequest],
+			[GetUserTransactionsResult],
+			['query']
+		),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
+		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
+		save_user_transactions: IDL.Func(
+			[SaveUserTransactionsRequest],
+			[SaveUserTransactionsResult],
+			[]
+		),
+		set_api_keys: IDL.Func([ApiKeys], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
@@ -526,6 +711,11 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
+		update_provider_agreements: IDL.Func(
+			[UpdateProviderAgreementsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		),
 		update_user_agreements: IDL.Func(
 			[UpdateUserAgreementsRequest],
 			[SetUserShowTestnetsResult],

@@ -8,9 +8,18 @@
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER,
+		PLAUSIBLE_EVENT_TYPES_SIGNER,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { mapSignerOriginHost } from '$lib/utils/signer.utils';
 
 	const {
 		consentMessagePrompt: { payload, reset: resetPrompt },
@@ -25,6 +34,12 @@
 
 	let loading = $state(false);
 	let displayMessage = $state<string | undefined>();
+
+	const consentEventMetadata = $derived({
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.SIGNER,
+		event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER.CONSENT_MESSAGE,
+		dapp_origin: mapSignerOriginHost($payload?.origin)
+	});
 
 	const onPayload = () => {
 		if ($payload?.status === 'loading') {
@@ -58,6 +73,14 @@
 			nonNullish(consentInfoMsg) && 'GenericDisplayMessage' in consentInfoMsg.consent_message
 				? consentInfoMsg.consent_message.GenericDisplayMessage
 				: undefined;
+
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SIGNER_INTERACTION,
+			metadata: {
+				...consentEventMetadata,
+				event_type: PLAUSIBLE_EVENT_TYPES_SIGNER.PRESENTED
+			}
+		});
 	};
 
 	$effect(() => {
@@ -94,6 +117,14 @@
 			return;
 		}
 
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SIGNER_INTERACTION,
+			metadata: {
+				...consentEventMetadata,
+				result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			}
+		});
+
 		approve?.();
 		resetPrompt();
 	};
@@ -107,6 +138,14 @@
 			resetPrompt();
 			return;
 		}
+
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SIGNER_INTERACTION,
+			metadata: {
+				...consentEventMetadata,
+				result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+			}
+		});
 
 		reject();
 		resetPrompt();

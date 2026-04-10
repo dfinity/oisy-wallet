@@ -1,6 +1,7 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
 	hasSufficientIcrcAllowance,
 	isIcrcTokenSupportIcrc2,
@@ -9,7 +10,7 @@ import {
 	loadDisabledIcrcTokensExchanges
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import * as icrcMetadataUtils from '$icp/utils/icrc-metadata.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
@@ -18,6 +19,7 @@ import {
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS
 } from '$lib/enums/plausible';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -31,7 +33,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, nonNullish, nowInBigIntNanoSeconds, toNullable } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
 	fromCandidAccount,
@@ -140,6 +142,7 @@ describe('icrc.services', () => {
 					certified: true,
 					data: {
 						category: 'custom',
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 						decimals: Number(mockDecimals),
 						enabled: true,
 						fee: mockFee,
@@ -219,6 +222,7 @@ describe('icrc.services', () => {
 					certified: true,
 					data: {
 						category: 'custom',
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 						decimals: 8,
 						enabled: true,
 						fee: 100000n,
@@ -294,9 +298,7 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(idbKeyval.set).toHaveBeenCalledOnce();
-				expect(idbKeyval.set).toHaveBeenNthCalledWith(
-					1,
+				expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
 					mockIdentity.getPrincipal().toText(),
 					[mockCustomToken],
 					expect.any(Object)
@@ -306,9 +308,7 @@ describe('icrc.services', () => {
 			it('should fetch the cached custom tokens in IDB on query call', async () => {
 				await loadCustomTokens({ identity: mockIdentity, useCache: true });
 
-				expect(idbKeyval.get).toHaveBeenCalledOnce();
-				expect(idbKeyval.get).toHaveBeenNthCalledWith(
-					1,
+				expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
 					mockIdentity.getPrincipal().toText(),
 					expect.any(Object)
 				);
@@ -359,9 +359,8 @@ describe('icrc.services', () => {
 
 				await loadCustomTokens({ identity: mockIdentity });
 
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).init.error.icrc_canisters },
-					err
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: get(i18n).init.error.load_token_list }
 				});
 			});
 
@@ -417,7 +416,7 @@ describe('icrc.services', () => {
 				});
 			});
 
-			it('should show a toast on metadata error if the token was enabled', async () => {
+			it('should show a custom toast on metadata error if the token was enabled', async () => {
 				backendCanisterMock.listCustomTokens.mockResolvedValue([
 					{ ...mockCustomToken, enabled: true }
 				]);
@@ -428,8 +427,42 @@ describe('icrc.services', () => {
 				await loadCustomTokens({ identity: mockIdentity });
 
 				expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
-					text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
+					text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading_custom, {
 						$ledgerCanisterId: mockLedgerCanisterId
+					}),
+					level: 'warn'
+				});
+			});
+
+			it('should show a curated toast on metadata error if the token is in the curated list', async () => {
+				const [curatedToken] = SNS_BUILTIN_TOKENS;
+				const curatedLedgerCanisterId = curatedToken.ledgerCanisterId;
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([
+					{
+						...mockCustomToken,
+						enabled: true,
+						token: {
+							Icrc: {
+								index_id: [Principal.fromText(mockIndexCanisterId)],
+								ledger_id: Principal.fromText(curatedLedgerCanisterId)
+							}
+						}
+					}
+				]);
+
+				vi.spyOn(icrcMetadataUtils, 'buildIcrcCustomTokenMetadataPseudoResponse').mockReturnValue(
+					undefined
+				);
+
+				const err = new Error('test');
+				ledgerCanisterMock.metadata.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
+					text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading_curated, {
+						$tokenSymbol: curatedToken.symbol
 					}),
 					level: 'warn'
 				});
@@ -453,16 +486,10 @@ describe('icrc.services', () => {
 
 				expect(initialTokens).toHaveLength(1);
 
-				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
-
-				await loadCustomTokens({ identity: mockIdentity });
-
-				const tokens = get(icrcCustomTokensStore);
-
-				expect(tokens).toHaveLength(2);
-
 				const err = new Error('test');
 				ledgerCanisterMock.metadata.mockRejectedValue(err);
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
 
 				await loadCustomTokens({ identity: mockIdentity });
 
@@ -568,6 +595,8 @@ describe('icrc.services', () => {
 				identity: mockIdentity,
 				disabledIcrcTokens
 			});
+
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 			expect(get(balancesStore)).toEqual({
 				[disabledIcrcTokens[0].id]: {
@@ -741,7 +770,7 @@ describe('icrc.services', () => {
 					spender: mockSpender,
 					amount: mockAmount
 				})
-			).rejects.toThrowError(err);
+			).rejects.toThrow(err);
 		});
 	});
 

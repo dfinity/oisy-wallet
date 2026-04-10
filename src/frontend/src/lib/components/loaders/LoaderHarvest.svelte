@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { EARNING_ENABLED } from '$env/earning';
+	import LoadersHarvestAutopilotBalances from '$eth/components/loaders/LoadersHarvestAutopilotBalances.svelte';
 	import { fetchHarvestVaults } from '$lib/rest/harvest.rest';
 	import { harvestVaultsStore } from '$lib/stores/harvest.store';
+	import { consoleWarn } from '$lib/utils/console.utils';
 
 	onMount(async () => {
 		if (!EARNING_ENABLED) {
@@ -14,7 +16,11 @@
 
 			harvestVaultsStore.set(vaults);
 		} catch (err: unknown) {
-			console.warn('Failed to load Harvest vaults.', err);
+			consoleWarn('Failed to load Harvest vaults.', err);
 		}
 	});
 </script>
+
+{#if EARNING_ENABLED}
+	<LoadersHarvestAutopilotBalances />
+{/if}

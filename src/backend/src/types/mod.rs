@@ -3,8 +3,8 @@ pub(crate) mod storable;
 
 pub(crate) use self::{
     maps::{
-        BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, PowChallengeMap,
-        TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap, VMem,
+        AgreementHistoryMap, BtcUserPendingTransactionsMap, UserProfileMap, UserProfileUpdatedMap,
+        UserTransactionsMap, VMem,
     },
-    storable::{Candid, StoredPrincipal, StoredTokenId},
+    storable::{Candid, StoredPrincipal, StoredTokenId, UserTransactionKey},
 };

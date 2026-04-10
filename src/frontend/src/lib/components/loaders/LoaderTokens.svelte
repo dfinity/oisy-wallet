@@ -1,20 +1,32 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { erc1155CustomTokensNotInitialized } from '$eth/derived/erc1155.derived';
-	import { erc20CustomTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import { erc4626CustomTokensNotInitialized } from '$eth/derived/erc4626.derived';
-	import { erc721CustomTokensNotInitialized } from '$eth/derived/erc721.derived';
-	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
-	import { loadErc20Tokens } from '$eth/services/erc20.services';
-	import { loadErc4626Tokens } from '$eth/services/erc4626.services';
-	import { loadErc721Tokens } from '$eth/services/erc721.services';
-	import { extCustomTokensNotInitialized } from '$icp/derived/ext.derived';
-	import { icPunksCustomTokensNotInitialized } from '$icp/derived/icpunks.derived';
-	import { loadExtTokens } from '$icp/services/ext.services';
-	import { loadIcPunksTokens } from '$icp/services/icpunks.services';
-	import { loadIcrcTokens } from '$icp/services/icrc.services';
+	import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
+	import { onMount, untrack } from 'svelte';
+	import type { CustomToken } from '$declarations/backend/backend.did';
+	import { processCustomTokens as processErc1155CustomTokens } from '$eth/services/erc1155.services';
+	import {
+		loadDefaultErc20Tokens,
+		processCustomTokens as processErc20CustomTokens
+	} from '$eth/services/erc20.services';
+	import {
+		loadDefaultErc4626Tokens,
+		processCustomTokens as processErc4626CustomTokens
+	} from '$eth/services/erc4626.services';
+	import { processCustomTokens as processErc721CustomTokens } from '$eth/services/erc721.services';
+	import {
+		loadDefaultExtTokens,
+		processCustomTokens as processExtCustomTokens
+	} from '$icp/services/ext.services';
+	import {
+		loadDefaultIcPunksTokens,
+		processCustomTokens as processIcPunksCustomTokens
+	} from '$icp/services/icpunks.services';
+	import {
+		loadDefaultIcrcTokens,
+		processCustomTokens as processIcrcCustomTokens
+	} from '$icp/services/icrc.services';
 	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
+	import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
 		ethAddress,
@@ -33,11 +45,22 @@
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
-	import { splCustomTokensNotInitialized } from '$sol/derived/spl.derived';
-	import { loadSplTokens } from '$sol/services/spl.services';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { LoadCustomTokenParams } from '$lib/types/custom-token';
+	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
+	import {
+		loadDefaultSplTokens,
+		processCustomTokens as processSplCustomTokens
+	} from '$sol/services/spl.services';
 
-	$effect(() => {
-		loadIcrcTokens({ identity: $authIdentity });
+	// IC default tokens have no reactive guards, they load once when the component mounts (no tracked dependencies).
+	onMount(() => {
+		loadDefaultIcrcTokens();
+		loadDefaultExtTokens();
+		loadDefaultIcPunksTokens();
 	});
 
 	let loadErc = $derived(
@@ -46,10 +69,13 @@
 				$networkEvmMainnetEnabled ||
 				($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
 	);
-	let loadErc20 = $derived(loadErc && $erc20CustomTokensNotInitialized);
-	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized);
-	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized);
-	let loadErc4626 = $derived(loadErc && $erc4626CustomTokensNotInitialized);
+
+	$effect(() => {
+		if (loadErc) {
+			untrack(loadDefaultErc20Tokens);
+			untrack(loadDefaultErc4626Tokens);
+		}
+	});
 
 	let loadSplMainnet = $derived(nonNullish($solAddressMainnet) && $networkSolanaMainnetEnabled);
 	let loadSplDevnet = $derived(
@@ -58,54 +84,118 @@
 	let loadSplLocal = $derived(
 		$testnetsEnabled && LOCAL && nonNullish($solAddressLocal) && $networkSolanaLocalEnabled
 	);
-	let loadSpl = $derived(
-		(loadSplMainnet || loadSplDevnet || loadSplLocal) && $splCustomTokensNotInitialized
-	);
-
-	let loadExt = $derived($extCustomTokensNotInitialized);
-
-	let loadIcPunks = $derived($icPunksCustomTokensNotInitialized);
-
-	$effect(() => {
-		if (loadErc20) {
-			loadErc20Tokens({ identity: $authIdentity });
-		}
-	});
-
-	$effect(() => {
-		if (loadErc721) {
-			loadErc721Tokens({ identity: $authIdentity });
-		}
-	});
-
-	$effect(() => {
-		if (loadErc1155) {
-			loadErc1155Tokens({ identity: $authIdentity });
-		}
-	});
-
-	$effect(() => {
-		if (loadErc4626) {
-			loadErc4626Tokens({ identity: $authIdentity });
-		}
-	});
+	let loadSpl = $derived(loadSplMainnet || loadSplDevnet || loadSplLocal);
 
 	$effect(() => {
 		if (loadSpl) {
-			loadSplTokens({ identity: $authIdentity });
+			untrack(loadDefaultSplTokens);
 		}
 	});
 
-	$effect(() => {
-		if (loadExt) {
-			loadExtTokens({ identity: $authIdentity });
+	// =====================================================================
+	// Custom token loading — single backend fetch, distributed to loaders
+	// =====================================================================
+	// Previously each loader independently called `list_custom_tokens` via
+	// `queryAndUpdate`, producing up to 16 concurrent backend calls (8 loaders
+	// × query + update). Since `list_custom_tokens` was moved to an update
+	// call, these became slow and error-prone.
+	//
+	// Now we fetch once and fan the result out to per-standard processors.
+
+	let loadParams = $state<LoadCustomTokenParams | undefined>();
+
+	// Guards against stale callbacks from a previous identity's in-flight `queryAndUpdate`.
+	// When identity changes the effect re-runs and bumps the counter; lingering `onLoad`/`onUpdateError`
+	// callbacks from the old request see a mismatched generation and bail out.
+	let fetchGeneration = 0;
+
+	const loadFetchedTokens = async () => {
+		const identity = $authIdentity;
+		const generation = ++fetchGeneration;
+
+		await queryAndUpdate<CustomToken[]>({
+			request: ({ certified }) => loadNetworkCustomTokens({ certified, identity, useCache: true }),
+			onLoad: ({ response: tokens, certified }) => {
+				if (generation !== fetchGeneration) {
+					return;
+				}
+
+				loadParams = { tokens, certified, identity };
+			},
+			onUpdateError: ({ error: err }) => {
+				if (generation !== fetchGeneration) {
+					return;
+				}
+
+				toastsError({
+					msg: { text: $i18n.init.error.load_token_list }
+				});
+
+				trackEvent({
+					name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+					metadata: mapIcErrorMetadata(err)
+				});
+			},
+			identity
+		});
+	};
+
+	const processFetchedIcTokens = async () => {
+		if (isNullish(loadParams)) {
+			return;
 		}
+
+		await Promise.allSettled([
+			processIcrcCustomTokens(loadParams),
+			processExtCustomTokens(loadParams),
+			processIcPunksCustomTokens(loadParams)
+		]);
+	};
+
+	const processFetchedEthTokens = async () => {
+		if (isNullish(loadParams) || !loadErc) {
+			return;
+		}
+
+		await Promise.allSettled([
+			processErc20CustomTokens(loadParams),
+			processErc721CustomTokens(loadParams),
+			processErc1155CustomTokens(loadParams),
+			processErc4626CustomTokens(loadParams)
+		]);
+	};
+
+	const processFetchedSolTokens = async () => {
+		if (isNullish(loadParams) || !loadSpl) {
+			return;
+		}
+
+		await Promise.allSettled([processSplCustomTokens(loadParams)]);
+	};
+
+	// Single queryAndUpdate pipeline — re-runs only when identity changes.
+	$effect(() => {
+		[$authIdentity];
+
+		untrack(loadFetchedTokens);
 	});
 
 	$effect(() => {
-		if (loadIcPunks) {
-			loadIcPunksTokens({ identity: $authIdentity });
-		}
+		[loadParams];
+
+		untrack(processFetchedIcTokens);
+	});
+
+	$effect(() => {
+		[loadParams, loadErc];
+
+		untrack(processFetchedEthTokens);
+	});
+
+	$effect(() => {
+		[loadParams, loadSpl];
+
+		untrack(processFetchedSolTokens);
 	});
 </script>
 

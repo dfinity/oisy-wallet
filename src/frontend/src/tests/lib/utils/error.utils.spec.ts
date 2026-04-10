@@ -1,5 +1,7 @@
 import {
 	errorDetailToString,
+	formatIcCallError,
+	isVersionMismatchError,
 	mapIcErrorMetadata,
 	parseIcErrorMessage,
 	replaceErrorFields,
@@ -530,6 +532,372 @@ Call context:
 			const result = mapIcErrorMetadata(error);
 
 			expect(result).toEqual({ error: 'Simple error message' });
+		});
+	});
+
+	describe('formatIcCallError', () => {
+		it('should pass through non-Error values unchanged', () => {
+			expect(formatIcCallError({ err: 'hello' })).toBe('hello');
+
+			expect(formatIcCallError({ err: 42 })).toBe(42);
+
+			expect(formatIcCallError({ err: null })).toBe(null);
+
+			expect(formatIcCallError({ err: undefined })).toBe(undefined);
+
+			expect(formatIcCallError({ err: true })).toBeTruthy();
+		});
+
+		it('should pass through non-IC errors unchanged', () => {
+			const err = new Error('Something went wrong');
+
+			expect(formatIcCallError({ err })).toBe(err);
+		});
+
+		it('should pass through errors without Call context marker', () => {
+			const err = new Error('Network timeout');
+
+			expect(formatIcCallError({ err })).toBe(err);
+		});
+
+		it('should format RejectError with call context', () => {
+			const err = new Error(
+				'The replica returned a rejection error:\n' +
+					'  Request ID: abc123def456\n' +
+					'  Reject code: 5\n' +
+					'  Reject text: Requested canister has no wasm module\n' +
+					'  Error code: IC0537\n\n' +
+					'Call context:\n' +
+					'  Canister ID: itgqj-7qaaa-aaaaq-aadoa-cai\n' +
+					'  Method name: icrc1_balance_of\n' +
+					'  HTTP details: {"ok":true,"status":200,"statusText":"","headers":[],"body":{"status":"non_replicated_rejection","error_code":"IC0537","reject_code":5,"reject_message":"Requested canister has no wasm module"}}'
+			);
+			err.name = 'RejectError';
+
+			const result = formatIcCallError({ err });
+
+			expect(result).toContain('RejectError');
+			expect(result).toContain('Reject code: 5');
+			expect(result).toContain('Reject text: Requested canister has no wasm module');
+			expect(result).toContain('Error code: IC0537');
+			expect(result).toContain('Canister ID: itgqj-7qaaa-aaaaq-aadoa-cai');
+			expect(result).toContain('Method name: icrc1_balance_of');
+			expect(result).not.toContain('Request ID');
+			expect(result).not.toContain('HTTP details');
+			expect(result).not.toContain('"ok"');
+		});
+
+		it('should preserve the canister trap message while hiding HTTP details', () => {
+			const err = new Error(
+				'Something went wrong while saving the token. / The replica returned a rejection error:\n' +
+					'  Request ID: 8d0f1e2f33f0dc19656dc3d48a27a51978bb1538d182aec1af23432d97188740\n' +
+					'  Reject code: 5\n' +
+					'  Reject text: Error from Canister d3nvo-aaaaa-aaaar-qagzq-cai: Canister called `ic0.trap` with message: \'Version mismatch, token update not allowed. Existing token: CustomToken { token: Erc4626(ErcToken { token_address: ErcTokenId("0xd6701905c59ee618dc36dc747506bce0a4ac760a"), chain_id: 8453 }), enabled: false, version: Some(1) }, New token: CustomToken { token: Erc4626(ErcToken { token_address: ErcTokenId("0xd6701905c59ee618dc36dc747506bce0a4ac760a"), chain_id: 8453 }), enabled: true, version: Some(4) }\'.\n' +
+					'Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation: https://internetcomputer.org/docs/current/references/execution-errors#trapped-explicitly\n' +
+					'  Error code: IC0503\n\n' +
+					'Call context:\n' +
+					'  Canister ID: d3nvo-aaaaa-aaaar-qagzq-cai\n' +
+					'  Method name: set_many_custom_tokens\n' +
+					'  HTTP details: {"ok":true,"status":200,"statusText":"","headers":[],"body":{"status":"replied","certificate":{"0":217,"1":217,"2":247}}}'
+			);
+
+			const result = formatIcCallError({ err }) as string;
+
+			expect(result).toContain('Version mismatch, token update not allowed');
+			expect(result).toContain('Reject code: 5');
+			expect(result).toContain('Error code: IC0503');
+			expect(result).toContain('Canister ID: d3nvo-aaaaa-aaaar-qagzq-cai');
+			expect(result).toContain('Method name: set_many_custom_tokens');
+			expect(result).not.toContain('Request ID');
+			expect(result).not.toContain('Consider gracefully');
+			expect(result).not.toContain('certificate');
+			expect(result).not.toContain('"ok"');
+			expect(result).not.toContain('HTTP details');
+		});
+
+		it('should strip the "Consider gracefully handling" boilerplate', () => {
+			const err = new Error(
+				'The replica returned a rejection error:\n' +
+					'  Reject code: 5\n' +
+					'  Reject text: Canister trapped\n' +
+					'  Error code: IC0503\n' +
+					'Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation: https://internetcomputer.org/docs/current/references/ic-interface-spec/#error-handling\n' +
+					'Call context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {"ok":true,"status":200}'
+			);
+
+			const result = formatIcCallError({ err }) as string;
+
+			expect(result).toContain('Reject code: 5');
+			expect(result).not.toContain('Consider gracefully');
+			expect(result).not.toContain('See documentation');
+		});
+
+		it('should truncate long Return types in UnknownError', () => {
+			const err = new Error(
+				'Unexpected error: "Call was returned undefined. We cannot determine if the call was successful or not. Return types: [variant {Ok:record {balance:nat; transactions:vec record {id:nat; transaction:record {burn:opt record {fee:opt nat}}}}; Err:record {message:text}}]."\n' +
+					'Call context:\n' +
+					'  Canister ID: us3ng-pyaaa-aaaan-q2cva-cai\n' +
+					'  Method name: get_account_transactions\n' +
+					'  HTTP details: {"ok":true,"status":200}'
+			);
+			err.name = 'UnknownError';
+
+			const result = formatIcCallError({ err });
+
+			expect(result).toContain('UnknownError');
+			expect(result).toContain('Return types: [...].');
+			expect(result).not.toContain('variant');
+			expect(result).not.toContain('record');
+			expect(result).toContain('Canister ID: us3ng-pyaaa-aaaan-q2cva-cai');
+			expect(result).toContain('Method name: get_account_transactions');
+		});
+
+		it('should strip HTTP details by default', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {"ok":true,"status":200,"headers":[["content-type","application/cbor"]]}'
+			);
+
+			const result = formatIcCallError({ err });
+
+			expect(result).not.toContain('"ok"');
+			expect(result).not.toContain('200');
+			expect(result).not.toContain('content-type');
+		});
+
+		it('should show HTTP status when showHttpStatus is true', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {"ok":true,"status":200,"statusText":"OK"}'
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpStatus: true } });
+
+			expect(result).toContain('HTTP: 200 OK');
+		});
+
+		it('should show HTTP status without statusText when empty', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {"ok":true,"status":200,"statusText":""}'
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpStatus: true } });
+
+			expect(result).toContain('HTTP: 200');
+			expect(result).not.toMatch(/HTTP: 200\s/);
+		});
+
+		it('should show HTTP headers when showHttpHeaders is true', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {"ok":true,"status":200,"headers":[["content-type","application/cbor"],["content-length","122"]]}'
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpHeaders: true } });
+
+			expect(result).toContain('Headers:');
+			expect(result).toContain('content-type');
+			expect(result).toContain('application/cbor');
+		});
+
+		it('should show sanitized HTTP body with byte arrays replaced', () => {
+			const certificate = Object.fromEntries(
+				Array.from({ length: 20 }, (_, i) => [String(i), 100 + i])
+			);
+			const body = { status: 'replied', certificate };
+
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					`  HTTP details: {"ok":true,"status":200,"body":${JSON.stringify(body)}}`
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpBody: true } });
+
+			expect(result).toContain('Body:');
+			expect(result).toContain('"status":"replied"');
+			expect(result).toContain('[20 bytes]');
+			expect(result).not.toContain('"0":');
+		});
+
+		it('should show sanitized request details with byte arrays replaced', () => {
+			const arg = Object.fromEntries(Array.from({ length: 80 }, (_, i) => [String(i), i]));
+			const nonce = Object.fromEntries(Array.from({ length: 16 }, (_, i) => [String(i), i]));
+			const requestDetails = {
+				request_type: 'call',
+				canister_id: { __principal__: 'abc-cai' },
+				method_name: 'test',
+				arg,
+				sender: { __principal__: 'sender-id' },
+				nonce
+			};
+
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					`  HTTP details: {"ok":true,"status":200,"requestDetails":${JSON.stringify(requestDetails)}}`
+			);
+
+			const result = formatIcCallError({ err, options: { showRequestDetails: true } });
+
+			expect(result).toContain('Request:');
+			expect(result).toContain('"request_type":"call"');
+			expect(result).toContain('[80 bytes]');
+			expect(result).toContain('[16 bytes]');
+			expect(result).toContain('abc-cai');
+			expect(result).not.toContain('"0":0');
+		});
+
+		it('should handle malformed HTTP details JSON gracefully', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {not valid json'
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpStatus: true } });
+
+			expect(result).toContain('Canister ID: abc-cai');
+			expect(result).toContain('Method name: test');
+			expect(result).not.toContain('HTTP:');
+		});
+
+		it('should handle error with Call context but no HTTP details', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' + '  Canister ID: abc-cai\n' + '  Method name: test'
+			);
+
+			const result = formatIcCallError({ err });
+
+			expect(result).toContain('Canister ID: abc-cai');
+			expect(result).toContain('Method name: test');
+		});
+
+		it('should handle multiple options enabled together', () => {
+			const body = { status: 'non_replicated_rejection', error_code: 'IC0537' };
+			const err = new Error(
+				'Error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					`  HTTP details: {"ok":true,"status":200,"statusText":"","headers":[["x-ic-canister-id","abc-cai"]],"body":${JSON.stringify(body)}}`
+			);
+
+			const result = formatIcCallError({
+				err,
+				options: {
+					showHttpStatus: true,
+					showHttpHeaders: true,
+					showHttpBody: true
+				}
+			});
+
+			expect(result).toContain('HTTP: 200');
+			expect(result).toContain('Headers:');
+			expect(result).toContain('Body:');
+			expect(result).toContain('IC0537');
+		});
+
+		it('should not treat small objects as byte arrays', () => {
+			const body = { status: 'replied', data: { '0': 1, '1': 2 } };
+			const err = new Error(
+				'Error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					`  HTTP details: {"ok":true,"status":200,"body":${JSON.stringify(body)}}`
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpBody: true } });
+
+			expect(result).toContain('"0":1');
+			expect(result).not.toContain('bytes');
+		});
+
+		it('should handle HTTP details text without JSON braces', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: no json here at all'
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpStatus: true } });
+
+			expect(result).toContain('Canister ID: abc-cai');
+			expect(result).not.toContain('HTTP:');
+		});
+
+		it('should handle missing canister ID and method name in call context', () => {
+			const err = new Error('Some error\nCall context:\n  Something else');
+
+			const result = formatIcCallError({ err }) as string;
+
+			expect(result).toBeDefined();
+			expect(result).not.toContain('Canister ID:');
+			expect(result).not.toContain('Method name:');
+		});
+
+		it('should show "unknown" when HTTP status is missing from details', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {"ok":false}'
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpStatus: true } });
+
+			expect(result).toContain('HTTP: unknown');
+		});
+	});
+
+	describe('isVersionMismatchError', () => {
+		it('should return true for an Error with "Version mismatch" in the message', () => {
+			expect(
+				isVersionMismatchError(
+					new Error('Version mismatch, token update not allowed. Existing token: ...')
+				)
+			).toBeTruthy();
+		});
+
+		it('should return true for an IC agent error containing "Version mismatch"', () => {
+			expect(
+				isVersionMismatchError(
+					new Error(
+						'AgentError: Call failed:\n  Reject message: "Version mismatch, token update not allowed"'
+					)
+				)
+			).toBeTruthy();
+		});
+
+		it('should return false for an Error without "Version mismatch"', () => {
+			expect(isVersionMismatchError(new Error('Some other error'))).toBeFalsy();
+		});
+
+		it('should return false for a string', () => {
+			expect(isVersionMismatchError('Version mismatch')).toBeFalsy();
+		});
+
+		it('should return false for null', () => {
+			expect(isVersionMismatchError(null)).toBeFalsy();
+		});
+
+		it('should return false for undefined', () => {
+			expect(isVersionMismatchError(undefined)).toBeFalsy();
 		});
 	});
 });

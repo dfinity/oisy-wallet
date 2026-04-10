@@ -8,6 +8,7 @@ import {
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type {
 	IcCkInterface,
+	IcCkMetadata,
 	IcFee,
 	IcInterface,
 	IcToken,
@@ -15,24 +16,22 @@ import type {
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
-import type { CanisterIdText } from '$lib/types/canister';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-import {
-	IcrcMetadataResponseEntries,
-	mapTokenMetadata,
-	type IcrcLedgerDid,
-	type IcrcTokenMetadataResponse
-} from '@icp-sdk/canisters/ledger/icrc';
+import { mapTokenMetadata, type IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 
-export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
-	metadata: IcrcTokenMetadataResponse;
-	category: TokenCategory;
-	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
-};
+export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> &
+	Partial<IcCkMetadata> & {
+		metadata: IcrcTokenMetadataResponse;
+		category: TokenCategory;
+		icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
+	};
 
 export const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
 	[BITCAT_LEDGER_CANISTER_ID]: 'BITCAT',
@@ -90,21 +89,36 @@ export const mapIcrcToken = ({
 	// We do not allow external URLs anyway, so it is safe to use the static icon, even if it does not exist
 	const icon = dynamicIconIsUrl ? staticIcon : dynamicIcon;
 
+	const customTokenSymbol = icrcCustomTokens?.[ledgerCanisterId];
+
+	const twinTokenTags = rest.twinToken?.tags;
+
+	const mintingAccount =
+		rest.mintingAccount ??
+		(nonNullish(rest.minterCanisterId)
+			? getIcrcAccount(Principal.fromText(rest.minterCanisterId))
+			: undefined);
+
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
-		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? { code: 'icrc' },
+		standard: customTokenSymbol?.standard ?? { code: 'icrc' },
 		symbol,
 		...(notEmptyString(icon) && { icon }),
-		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
-			explorerUrl: icrcCustomTokens[ledgerCanisterId].explorerUrl
+		...(nonNullish(customTokenSymbol?.explorerUrl) && {
+			explorerUrl: customTokenSymbol.explorerUrl
 		}),
-		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.alternativeName) && {
-			alternativeName: icrcCustomTokens[ledgerCanisterId].alternativeName
+		...(nonNullish(customTokenSymbol?.alternativeName) && {
+			alternativeName: customTokenSymbol.alternativeName
 		}),
+		...(nonNullish(customTokenSymbol?.deprecated) && {
+			deprecated: customTokenSymbol.deprecated
+		}),
+		tags: customTokenSymbol?.tags ?? twinTokenTags ?? DEFAULT_TOKEN_TAGS,
 		ledgerCanisterId,
 		...metadataToken,
-		...rest
+		...rest,
+		...(nonNullish(mintingAccount) && { mintingAccount })
 	};
 };
 
@@ -121,36 +135,6 @@ export const sortIcTokens = (
 	exchangeCoinIdA === exchangeCoinIdB || isNullish(exchangeCoinIdA) || isNullish(exchangeCoinIdB)
 		? nameA.localeCompare(nameB)
 		: exchangeCoinIdA.localeCompare(exchangeCoinIdB);
-
-export const buildIcrcCustomTokenMetadataPseudoResponse = ({
-	icrcCustomTokens,
-	ledgerCanisterId
-}: {
-	ledgerCanisterId: CanisterIdText;
-	icrcCustomTokens: Record<LedgerCanisterIdText, IcTokenWithoutId>;
-}): IcrcTokenMetadataResponse | undefined => {
-	const token = icrcCustomTokens[ledgerCanisterId];
-
-	if (isNullish(token)) {
-		return undefined;
-	}
-
-	const { symbol, icon: tokenIcon, name, fee, decimals } = token;
-
-	const icon: [IcrcMetadataResponseEntries.LOGO, IcrcLedgerDid.Value] | undefined = nonNullish(
-		tokenIcon
-	)
-		? [IcrcMetadataResponseEntries.LOGO, { Text: tokenIcon }]
-		: undefined;
-
-	return [
-		[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
-		[IcrcMetadataResponseEntries.NAME, { Text: name }],
-		[IcrcMetadataResponseEntries.FEE, { Nat: fee }],
-		[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(decimals) }],
-		...(nonNullish(icon) ? [icon] : [])
-	];
-};
 
 export const isTokenIcp = (token: Partial<IcToken>): token is IcToken =>
 	token.standard?.code === 'icp';

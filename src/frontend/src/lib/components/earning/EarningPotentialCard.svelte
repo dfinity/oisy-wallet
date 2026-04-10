@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
@@ -12,14 +13,16 @@
 
 	interface Props {
 		highestEarningPotentialUsd: number;
+		availableBalance?: number;
+		buttons?: Snippet;
 	}
 
-	let { highestEarningPotentialUsd }: Props = $props();
+	let { highestEarningPotentialUsd, availableBalance, buttons }: Props = $props();
 
 	let infoExpanded = $state(false);
 </script>
 
-<StakeContentCard>
+<StakeContentCard {buttons}>
 	{#snippet content()}
 		<div class="flex items-center justify-center gap-0.5">
 			<div class="text-sm font-bold">{$i18n.stake.text.earning_potential}</div>
@@ -45,7 +48,7 @@
 
 		<div class="text-sm font-bold sm:text-base">
 			{formatCurrency({
-				value: $enabledMainnetFungibleTokensUsdBalance,
+				value: availableBalance ?? $enabledMainnetFungibleTokensUsdBalance,
 				currency: $currentCurrency,
 				exchangeRate: $currencyExchangeStore,
 				language: $currentLanguage

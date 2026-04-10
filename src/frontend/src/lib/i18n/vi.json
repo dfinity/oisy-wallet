@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
-			"standalone_mode": "",
+			"standalone_mode": "Có các sự cố kết nối đã biết khi cả ứng dụng và $oisy_short đều được cài đặt trên màn hình chính. Nếu gặp sự cố khi kết nối $oisy_short hoặc ký giao dịch, vui lòng khởi động ứng dụng từ trình duyệt thông thường. Chúng tôi đang khắc phục sự cố này và sẽ sớm được giải quyết. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Đọc thêm</a>",
 			"video_not_supported": ""
 		}
 	},
@@ -80,7 +80,6 @@
 			"source_code_on_github": "Mã nguồn trên GitHub",
 			"view_on_explorer": "Xem trên trình khám phá",
 			"source_code": "Mã nguồn",
-			"changelog": "Nhật ký thay đổi",
 			"documentation": "Tài liệu",
 			"support": "Hỗ trợ",
 			"confirm_navigate": "Bạn có chắc chắn muốn rời khỏi trang không?",
@@ -100,7 +99,6 @@
 			"activity": "Mở chế độ xem hoạt động",
 			"airdrops": "Mở chế độ xem Phần thưởng",
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
-			"changelog": "Mở nhật ký thay đổi của $oisy_name trên GitHub để xem các bản cập nhật mới nhất",
 			"documentation": "Mở tài liệu $oisy_name",
 			"support": "Mở phần Hỗ trợ trong tài liệu $oisy_name",
 			"open_twitter": "Mở X/Twitter của DFINITY",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Không có Internet Identity.",
-			"invalid_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng. Vui lòng liên hệ với nhà phát hành và yêu cầu lại thông tin xác thực.",
-			"error_validating_pouh_credential_oisy": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng trong $oisy_short: $error",
-			"error_validating_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng.",
-			"error_requesting_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi yêu xác thực người dùng.",
-			"missing_pouh_issuer_origin": "Xin lỗi, đã xảy ra lỗi trong khi yêu cầu thông tin xác thực người dùng. Thiếu nguồn gốc nhà phát hành.",
-			"no_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi yêu cầu xác thực người dùng. Bạn có thông tin xác thực hợp lệ trong Decide AI không?",
 			"error_while_signing_in": "Đã xảy ra lỗi trong khi đăng nhập.",
 			"unexpected_issue_with_syncing": "Sự cố không mong muốn trong khi đồng bộ hóa trạng thái xác thực của bạn."
 		},
@@ -352,7 +344,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "Nền tảng đầu tiên để xây dựng các ứng dụng tự viết.",
-				"call_to_action": "Thử Caffeine",
 				"description": "Caffeine là nền tảng đầu tiên để xây dựng các ứng dụng tự viết. Chỉ cần trò chuyện với AI trên máy tính hoặc điện thoại, nó sẽ tạo ra các ứng dụng và dịch vụ cho bạn – bao gồm cả những ứng dụng kết nối với Ví OISY. Trải nghiệm tương lai của việc phát triển ứng dụng với khả năng sáng tạo được hỗ trợ bởi AI.",
 				"carousel": {
 					"text": "Xin chào, internet tự viết",
@@ -434,6 +425,40 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -471,7 +496,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Hãy theo dõi các đợt phát token sắp tới! <a href=\"https://x.com/oisy\" target=\"_blank\">Theo dõi chúng tôi trên X</a>, tham gia <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> của chúng tôi hoặc tham gia <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> để cập nhật thông tin.",
-			"coming_soon": "Phần 6 của $oisy_short sắp ra mắt",
+			"coming_soon": "Tập $oisy_short Sprinkles tiếp theo sắp ra mắt",
 			"reward_banner": "Biểu ngữ của chiến dịch $campaignName"
 		},
 		"campaigns": {
@@ -574,6 +599,36 @@
 						"share_href": ""
 					}
 				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Tập 6 đã ra mắt 🎉",
+				"one_liner": "Kiếm Sprinkles khi hoạt động tích cực, giới thiệu người khác và sử dụng OISY trên nhiều chuỗi. Hành động của bạn tăng phần thưởng, và các lượt giới thiệu tích cực giúp tăng thêm.<br/>Hơn nữa, nhiều chuỗi hơn đồng nghĩa với cơ hội thắng cao hơn.",
+				"participate_title": "Kiếm token nhờ hoạt động và giới thiệu. Nhiều chuỗi hơn nghĩa là nhiều cơ hội hơn.",
+				"description": "Duy trì hoạt động để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các thao tác ví và giữ ít nhất 5 $.<br/>Mỗi chuỗi hoạt động tăng cơ hội của bạn với Hệ số Đa chuỗi.<br/>Kiếm 10% từ bạn bè đủ điều kiện.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "Chào mừng đến với $oisy_short!",
+					"subtitle": "Sẵn sàng kiếm thưởng chưa?",
+					"description": "Bạn chỉ còn 2 bước để nhận phần thưởng đầu tiên: Đăng nhập, giữ 5 $+ và hoàn thành 2 hành động. Đó là tất cả những gì cần để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận thưởng mỗi khi một trong số họ kiếm được Sprinkles."
+				},
+				"win": {
+					"default": {
+						"title": "Bạn đã được thưởng",
+						"description": "Phần thưởng của bạn vừa được chuyển vào ví.<br>Đừng quên giới thiệu và duy trì hoạt động để giành thêm phần thưởng",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Chúc mừng bạn đã kiếm được OISY Sprinkles lớn nhất hôm nay!",
+						"description": "Bạn vừa kiếm được Phần thưởng Sprinkles cao nhất của chúng tôi<br>Hãy duy trì hoạt động và tiếp tục giới thiệu để giành được nhiều hơn.",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Một lời cảm ơn nhỏ",
+						"description": "Một trong những người dùng bạn giới thiệu vừa nhận được Sprinkles.",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},
@@ -649,7 +704,9 @@
 			"btc_withdrawal_statuses": "Lỗi khi tìm nạp trạng thái rút BTC.",
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
-			"icrc_canister_loading": "Token với canister Ledger $ledgerCanisterId không thể được tải vì hiện tại nó không phản hồi.",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "Token $tokenSymbol không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
+			"icrc_canister_loading_custom": "Token với canister ledger $ledgerCanisterId không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
@@ -659,6 +716,7 @@
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
 			"waiting_for_allowed_cycles_aborted": "Đã hủy bỏ quá trình chuẩn bị cycles ledger. Vui lòng thử đăng nhập lại sau.",
@@ -694,11 +752,6 @@
 			"active_networks_description": "Chọn mạng bạn muốn làm việc trong $oisy_name. Token và giao dịch từ các mạng không hoạt động sẽ không hiển thị hoặc không được bao gồm trong số dư khả dụng của bạn.",
 			"enable_network": "Bật mạng",
 			"disable_network": "Tắt mạng",
-			"credentials_title": "Thông tin xác thực",
-			"pouh_credential": "Thông tin xác thực người dùng",
-			"pouh_credential_description": "Thông tin xác thực người dùng thật. Nó được phát hành bởi Decide AI.",
-			"present_pouh_credential": "Xuất trình",
-			"pouh_credential_verified": "Đã xác minh ✅",
 			"appearance": "Giao diện",
 			"appearance_light": "Sáng",
 			"appearance_dark": "Tối",
@@ -821,6 +874,7 @@
 	"send": {
 		"text": {
 			"send": "Gửi",
+			"send_token": "",
 			"destination": "Tới",
 			"source": "Nguồn",
 			"balance": "Số dư",
@@ -909,23 +963,26 @@
 			"no_nft_selected": "Không NFT đã được chọn để gửi"
 		},
 		"error": {
-			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
-			"destination_address_unknown": "Địa chỉ ví ETH không xác định",
+			"unexpected": "Đã xảy ra lỗi khi gửi giao dịch.",
+			"destination_address_unknown": "Địa chỉ đích ETH không xác định",
 			"metamask_connected": "Không thể lấy tài khoản của bạn. Metamask của bạn có đang mở và đã kết nối chưa?",
 			"metamask_no_accounts": "Không tìm thấy tài khoản Metamask nào.",
-			"metamask_switch_network": "Không thể yêu cầu Metamask chuyển sang ID chuỗi $chain_id. Metamask của bạn có đang sử dụng $network_name không?",
-			"erc20_data_undefined": "Dữ liệu giao dịch Erc20 không được không xác định hoặc null.",
-			"data_undefined": "Dữ liệu giao dịch không được không xác định hoặc null.",
-			"no_identity_calculate_fee": "Không có danh tính nào được cung cấp để tính phí cho principal.",
-			"invalid_destination": "Ví không hợp lệ. Vui lòng thử lại với một địa chỉ ví hợp lệ.",
-			"incompatible_token": "Token không tương thích. Vui lòng thử lại với một token tương thích.",
+			"metamask_switch_network": "Không thể yêu cầu Metamask chuyển sang chain ID $chain_id. Metamask của bạn có đang sử dụng $network_name không?",
+			"erc20_data_undefined": "Dữ liệu giao dịch ERC20 không thể là undefined hoặc null.",
+			"data_undefined": "Dữ liệu giao dịch không thể là undefined hoặc null.",
+			"no_identity_calculate_fee": "Không có danh tính nào được cung cấp để tính phí cho principal của nó.",
+			"invalid_destination": "Địa chỉ đích không hợp lệ. Vui lòng thử lại với địa chỉ ví hoặc địa chỉ đích hợp lệ.",
+			"incompatible_token": "Token không tương thích. Vui lòng thử lại với token tương thích.",
 			"no_btc_network_id": "Mạng hiện tại ($networkId) không phải là mạng Bitcoin.",
 			"no_solana_network_id": "Mạng hiện tại ($networkId) không phải là mạng Solana.",
 			"no_pending_bitcoin_transaction": "Đã xảy ra lỗi khi tải các giao dịch Bitcoin đang chờ xử lý. Vui lòng thử lại sau.",
-			"unexpected_utxos_fee": "Đã xảy ra lỗi trong khi tính phí giao dịch.",
-			"unable_to_retrieve_amount": "không có (không thể truy xuất)",
-			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
-			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
+			"unexpected_utxos_fee": "Đã xảy ra lỗi khi tính phí giao dịch.",
+			"unable_to_retrieve_amount": "n/a (không thể lấy được)",
+			"solana_transaction_expired": "Giao dịch của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể là do phí ưu tiên được cung cấp không đủ. Chúng tôi đã cập nhật lên số tiền được khuyến nghị mới nhất, vì vậy vui lòng thử lại.",
+			"solana_confirmation_failed": "Chúng tôi không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây rồi kiểm tra danh sách giao dịch của token để xem giao dịch của bạn có được tạo chính xác không.",
+			"solana_insufficient_funds": "Số dư token của bạn không đủ để hoàn tất giao dịch này. Số dư của bạn có thể đã thay đổi kể từ lần hiển thị cuối cùng.",
+			"solana_insufficient_funds_for_fee": "Số dư SOL của bạn không đủ để trang trải phí giao dịch.",
+			"solana_insufficient_funds_for_rent": "Số dư SOL của bạn không đủ để trang trải khoản thuê cần thiết cho việc tạo tài khoản.",
 			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
 		}
 	},
@@ -1024,6 +1081,9 @@
 			"loading_cketh_helper": "Lỗi khi tải địa chỉ hợp đồng hỗ trợ ckETH. Không có ID canister minter nào được khởi tạo.",
 			"unexpected": "Đã xảy ra lỗi trong khi chuyển đổi token.",
 			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch chuyển đổi."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Việc chuyển đổi USDC từ/sang ckUSDC hiện đang bị tạm ngừng."
 		}
 	},
 	"swap": {
@@ -1068,7 +1128,10 @@
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
-			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>"
+			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
+			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
@@ -1085,7 +1148,9 @@
 			"manually_withdraw_success": "Token từ giao dịch hoán đổi không thành công trước đó của bạn đã được rút thành công. Bạn có thể thử lại giao dịch hoán đổi hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
 			"manually_withdraw_failed": "Rút tiền của bạn không thành công.<br> Vui lòng thử lại hoặc làm theo",
 			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
-			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này."
+			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1147,9 +1212,15 @@
 			"on_network": " trên mạng $network",
 			"delete_token": "Xóa token",
 			"edit_token": "Chỉnh sửa token",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_value": "Giá trị",
+			"sort_by_performance": "Hiệu suất token",
+			"sort_by_symbol": "Ký hiệu",
+			"hide_asset_types": "Ẩn loại tài sản",
+			"asset_type": "Loại tài sản trong $oisy_name",
+			"asset_type_all": "Tất cả loại tài sản",
+			"no_tokens_for_asset_type": "Ví của bạn không có $asset_type nào",
+			"no_tokens_for_asset_type_zero_tokens": "Không có $asset_type nào trong mạng đã chọn",
+			"no_tokens_for_asset_type_description": "Chọn từ <strong>$count token được hỗ trợ</strong> để tùy chỉnh chế độ xem danh mục đầu tư của bạn."
 		},
 		"details": {
 			"title": "Chi tiết token",
@@ -1266,6 +1337,7 @@
 			"unrecognised_erc_interface": "Không nhận diện được giao diện ERC20.",
 			"no_metadata": "Không có metadata nào được tìm thấy.",
 			"unexpected": "Đã xảy ra lỗi trong khi lưu token.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Đã xảy ra lỗi trong khi ẩn token.",
 			"already_available": "Token đã có sẵn.",
 			"not_toggleable": "Token không thể chuyển đổi, không thể ẩn.",
@@ -1274,6 +1346,23 @@
 			"unexpected_undefined": "Token không xác định. Điều này không mong muốn.",
 			"unexpected_error_on_token_delete": "Đã xảy ra lỗi khi xóa token.",
 			"unexpected_error_on_token_update": "Đã xảy ra lỗi khi cập nhật token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Danh mục",
+			"risk": "Rủi ro"
+		},
+		"category": {
+			"crypto": "Tiền mã hóa",
+			"stablecoin": "Stablecoin",
+			"stock": "Cổ phiếu",
+			"commodity": "Hàng hóa"
+		},
+		"risk": {
+			"low": "Rủi ro thấp",
+			"medium": "Rủi ro trung bình",
+			"high": "Rủi ro cao"
 		}
 	},
 	"nfts": {
@@ -1503,8 +1592,6 @@
 		},
 		"label": {
 			"reimbursement": "Hoàn tiền",
-			"twin_token_sent": "$twinToken đã gửi",
-			"ck_token_sent": "$ckToken đã gửi",
 			"twin_token_converted": "Đã chuyển đổi từ $twinToken",
 			"ck_token_converted": "Đã chuyển đổi từ $ckToken",
 			"sending_twin_token": "Đang gửi $twinToken",
@@ -1857,183 +1944,163 @@
 	"earning": {
 		"text": {
 			"title": "Kiếm tiền",
-			"tab_title": "",
-			"earning_opportunities": "",
-			"header_title": "",
-			"header_description": "",
-			"go_to_earn": ""
+			"tab_title": "Đang kiếm tiền",
+			"earning_opportunities": "Cơ hội kiếm tiền",
+			"header_title": "Chào mừng đến với Kiếm tiền!",
+			"header_description": "Phát triển danh mục tài sản kỹ thuật số của bạn bằng cách phân bổ token vào các cơ hội kiếm tiền.",
+			"go_to_earn": "Đi đến Kiếm tiền"
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "Harvest – Autopilot",
+				"description": "Hiệu quả sinh lời tối đa với các vault Autopilot chỉ một cú nhấp chuột.",
+				"action": "Đi đến Autopilot"
 			},
 			"sprinkles": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "OISY Sprinkles",
+				"description": "Dùng OISY và KIẾM TIỀN! Tập 6 đã ra mắt 🎉",
+				"action": "Kiểm tra trạng thái"
 			}
 		},
 		"card_fields": {
-			"apy": "",
-			"networks": "",
-			"assets": "",
-			"currentStaked": "",
-			"currentEarning": "",
-			"earningPotential": "",
-			"terms": ""
+			"apy": "APY",
+			"networks": "Mạng lưới",
+			"assets": "Tài sản",
+			"currentStaked": "Đang staking",
+			"currentEarning": "Đang kiếm được",
+			"earningPotential": "Tiềm năng kiếm tiền",
+			"terms": "Điều khoản"
 		},
 		"terms": {
-			"flexible": ""
+			"flexible": "Linh hoạt"
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": ""
+				"cardTitle": "Kiếm tiền với Gold DAO"
 			}
 		}
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "",
-			"live_apy": ""
+			"autopilot": "Autopilot",
+			"live_apy": "APY hiện tại"
 		}
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
-			"harvest_autopilot_page_description": "",
-			"harvest_autopilot_vault_page_description": "",
-			"my_positions": "",
-			"available_autopilots": "",
-			"vault_info": "",
-			"vault_address": "",
-			"protocol": "",
-			"harvest": "",
-			"autopilot": "",
-			"total_value_locked": "",
-			"manager": "",
-			"vault_description": "",
-			"stake": "",
-			"stake_now": "",
-			"stake_amount": "",
-			"not_enough_to_stake": "",
-			"unstake": "",
-			"unstake_now": "",
-			"unstaking": "",
-			"unstake_token": "",
-			"enable_token_text": "",
-			"enable_token_button": "",
-			"review": "",
-			"executing_transaction": "",
-			"unsupported_token_staking": "",
-			"provider": "",
-			"earning_potential": "",
-			"earning_potential_hint": "",
-			"active_earning": "",
-			"active_earning_per_year": "",
-			"active_earning_per_year_short": "",
-			"unproductive_assets": "",
-			"invested_assets": "",
-			"visit_provider": "",
-			"current_apy_label": "",
-			"max_apy_label": "",
-			"stake_review_subtitle": "",
-			"unstake_review_subtitle": "",
-			"delayed_dissolve": "",
-			"immediate_dissolve": "",
-			"included_token_fee": "",
-			"included_dissolve_fee": "",
-			"delayed_dissolve_terms": "",
-			"delayed_dissolve_info": "",
-			"immediate_dissolve_terms": "",
-			"amount_to_receive": "",
-			"unclaimed_rewards": "",
-			"unlock_requests": "",
-			"unlocking_in": "",
-			"unlocked": "",
-			"withdraw": "",
-			"withdraw_successful": "",
-			"claim_reward": "",
-			"claim_rewards": "",
-			"claim_reward_short": "",
-			"claim_now": "",
-			"claiming": "",
-			"get_tokens_with_amount": "",
-			"get_tokens": "",
-			"reward_claimed": "",
-			"staked": "",
-			"unstaked": "",
-			"title_empty_1": "",
-			"title_empty_2_usd": "",
-			"title_empty_2_apy": "",
+			"harvest_autopilot_page_description": "Hiệu quả sinh lời tối đa với các vault Autopilot chỉ một cú nhấp chuột.",
+			"harvest_autopilot_vault_page_description": "Autopilot được vận hành bởi công nghệ <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">IPOR đã kiểm toán</a> Fusion Vault.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot là dịch vụ chuyên biệt \"cài đặt và quên đi\" giúp tự động hóa các vị thế DeFi của bạn với nỗ lực tối thiểu.",
+			"harvest_autopilot_stake_terms": "Tôi xác nhận rằng tôi đã đọc và hiểu sản phẩm, đã đọc <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Công bố rủi ro</a> và đồng ý với <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Điều khoản và Điều kiện</a>.",
+			"my_positions": "Vị thế của tôi",
+			"available_autopilots": "Autopilot khả dụng",
+			"vault_info": "Thông tin vault",
+			"vault_address": "Địa chỉ vault",
+			"protocol": "Giao thức",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "Tổng giá trị bị khóa (TVL)",
+			"manager": "Quản lý",
+			"vault_description": "Pool này được thiết kế như một dịch vụ quản lý lợi nhuận \"cài đặt và quên đi\" cho $asset_symbol của bạn. Nó tự động tối ưu hóa vị thế DeFi của bạn với nỗ lực tối thiểu bằng cách phân bổ vốn linh hoạt vào các cơ hội tốt nhất.",
+			"stake": "Staking",
+			"stake_now": "Staking ngay",
+			"stake_amount": "Staking $amount $token_symbol",
+			"not_enough_to_stake": "Không có $token_symbol để staking",
+			"estimated_received": "Dự kiến nhận được",
+			"estimated_yearly_yield": "Lợi nhuận hàng năm dự kiến",
+			"unstake": "Unstaking",
+			"unstake_now": "Unstaking ngay",
+			"unstaking": "Đang unstaking...",
+			"unstake_token": "Unstaking $token_symbol",
+			"enable_token_text": "Bạn cần kích hoạt $token_symbol",
+			"enable_token_button": "Kích hoạt $token_symbol",
+			"review": "Xem lại giao dịch",
+			"executing_transaction": "Đang thực hiện giao dịch...",
+			"unsupported_token_staking": "Staking cho token đã chọn không được hỗ trợ.",
+			"provider": "Điều khoản staking được cung cấp bởi $provider",
+			"earning_potential": "Tiềm năng kiếm tiền",
+			"earning_potential_hint": "Dựa trên giá trị tài sản chưa đầu tư của bạn và APY cao nhất trong các cơ hội kiếm tiền hiện có.",
+			"active_earning": "Kiếm tiền đang hoạt động",
+			"active_earning_per_year": "$amount/năm",
+			"active_earning_per_year_short": "$amount/năm",
+			"unproductive_assets": "Khả dụng",
+			"invested_assets": "Đã phân bổ",
+			"visit_provider": "Truy cập trang web",
+			"current_apy_label": "APY hiện tại",
+			"max_apy_label": "APY tối đa",
+			"stake_review_subtitle": "Bạn đang staking",
+			"unstake_review_subtitle": "Bạn đang unstaking",
+			"delayed_dissolve": "Nhận có trễ hạn",
+			"immediate_dissolve": "Nhận ngay lập tức",
+			"included_token_fee": "Bao gồm phí mạng",
+			"included_dissolve_fee": "Bao gồm phí mở khóa",
+			"delayed_dissolve_terms": "Khi mở khóa $token khỏi staking, các token sẽ bị khóa trong $delay ngày mà không nhận thêm phần thưởng trước khi có thể rút.",
+			"delayed_dissolve_info": "Khi bạn bắt đầu mở khóa stake $token, bạn sẽ không còn nhận được phần thưởng mới.",
+			"immediate_dissolve_terms": "Bạn sẽ nhận $token ngay lập tức nhưng sẽ bị tính phí trên các token $token đang được mở khóa.",
+			"amount_to_receive": "Số tiền nhận được",
+			"unclaimed_rewards": "Phần thưởng chưa nhận",
+			"unlock_requests": "Yêu cầu mở khóa",
+			"unlocking_in": "Mở khóa sau $time",
+			"unlocked": "Đã mở khóa",
+			"withdraw": "Rút tiền",
+			"withdraw_successful": "Token đã được rút thành công.",
+			"claim_reward": "Nhận phần thưởng",
+			"claim_rewards": "Nhận các phần thưởng",
+			"claim_reward_short": "Nhận",
+			"claim_now": "Nhận ngay",
+			"claiming": "Đang nhận...",
+			"get_tokens_with_amount": "Nhận tới $amount $token_symbol",
+			"get_asset_tokens": "Nhận $token_symbol",
+			"reward_claimed": "Đã nhận phần thưởng",
+			"staked": "Đã staking",
+			"unstaked": "Đã unstaking",
+			"title_empty_1": "Kiếm tới",
+			"title_empty_2_usd": "/năm",
+			"title_empty_2_apy": "mỗi năm",
 			"title_empty_3": "",
-			"description_empty": "",
-			"full_history": "",
-			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"description_empty": "Có vẻ như bạn chưa staking token nào",
+			"full_history": "Xem toàn bộ lịch sử",
+			"recent_history": "Đóng toàn bộ lịch sử",
+			"harvest_autopilot_carousel_slide_title": "Kiếm tiền trong OISY với Harvest Autopilot Yield Farming",
+			"harvest_autopilot_carousel_slide_cta": "Tìm hiểu thêm"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "",
-			"unexpected_error_on_unstake": "",
-			"dissolvement_limit_reached": ""
-		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
+			"unexpected_error_on_withdraw": "Đã xảy ra lỗi khi rút token.",
+			"unexpected_error_on_unstake": "Đã xảy ra lỗi khi unstaking token.",
+			"unexpected_error_on_stake": "Đã xảy ra lỗi khi staking token.",
+			"dissolvement_limit_reached": "Bạn đã đạt tối đa $limit yêu cầu mở khóa đang hoạt động. Hãy hoàn thành một số yêu cầu trước khi tạo yêu cầu mới.<br/>Lưu ý rằng bạn luôn có thể unstaking bằng tùy chọn \"ngay lập tức\"."
 		},
 		"info": {
-			"gldt": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
-			},
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": ""
+				"title": "Harvest Autopilot là gì",
+				"description": "Harvest Autopilot là một tính năng chuyên biệt (và một dòng sản phẩm cụ thể) trong hệ sinh thái Harvest Finance, được thiết kế để tự động hóa và tối ưu hóa các vị thế tài chính phi tập trung (DeFi) của bạn với nỗ lực tối thiểu.",
+				"fact_1_title": "Phân bổ lợi nhuận thông minh",
+				"fact_1_description": "Tự động chuyển đổi giao thức để đạt được APY hiện tại cao nhất.",
+				"fact_2_title": "Tích lũy lãi kép thụ động",
+				"fact_2_description": "Phần thưởng được tự động thu hoạch và tái đầu tư để tối đa hóa tăng trưởng của bạn.",
+				"fact_3_title": "Chia sẻ chi phí gas",
+				"fact_3_description": "Giảm chi phí của bạn bằng cách gộp các giao dịch với người dùng khác để tiết kiệm gas."
 			}
 		},
 		"alt": {
-			"placeholder_image": ""
+			"placeholder_image": "Chưa có token nào được staking"
 		}
 	},
 	"get_token": {
 		"text": {
-			"title": "",
-			"swap_to_token": "",
-			"ready_to_swap": "",
-			"convert_assets": "",
-			"convertible_assets": "",
-			"how_to_convert": "",
-			"get_more_token": "",
-			"receive_token": "",
-			"receive_token_title": "",
-			"receive_token_text": "",
-			"buy_assets": "",
-			"buy_assets_title": "",
-			"buy_assets_text": ""
+			"title": "Nhận $token",
+			"swap_to_token": "Đổi sang $token",
+			"ready_to_swap": "Sẵn sàng đổi",
+			"convert_assets": "Chuyển đổi tài sản",
+			"convertible_assets": "Tài sản có thể chuyển đổi",
+			"how_to_convert": "Cách chuyển đổi",
+			"get_more_token": "Nhận thêm $token",
+			"receive_token": "Nhận $token",
+			"receive_token_title": "Nhận $token trực tiếp",
+			"receive_token_text": "Nhận $token trực tiếp vào tài khoản của bạn",
+			"buy_assets": "Mua tài sản",
+			"buy_assets_title": "Mua tài sản có thể chuyển đổi",
+			"buy_assets_text": "Mua thêm tài sản và chuyển đổi sang $token"
 		}
 	},
 	"temporal": {
@@ -2052,7 +2119,7 @@
 			"second_plural": "giây"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {

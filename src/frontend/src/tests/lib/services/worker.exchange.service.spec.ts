@@ -57,7 +57,7 @@ describe('worker.exchange.services', () => {
 
 		const mockData: PostMessageDataRequestExchangeTimer = {
 			currentCurrency: Currency.EUR,
-			erc20Addresses: [{ address: mockEthAddress, coingeckoId: 'ethereum' }],
+			erc20Addresses: [{ address: mockEthAddress, coingeckoId: 'ethereum', chainId: 1n }],
 			icrcCanisterIds: [mockIcrcCustomToken.ledgerCanisterId],
 			splAddresses: [mockSplAddress],
 			erc4626TokensExchangeData: []
@@ -120,7 +120,9 @@ describe('worker.exchange.services', () => {
 					currentSplPrices: {},
 					currentErc4626Prices: {},
 					currentBnbPrice: { binancecoin: { usd: 400 } },
-					currentPolPrice: {}
+					currentPolPrice: {},
+					currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+					currentBaseEthPrice: { ethereum: { usd: 1 } }
 				};
 				const payload = { msg: 'syncExchange', data: mockData };
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);

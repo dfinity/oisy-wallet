@@ -16,7 +16,6 @@ dfx deploy cketh_index
 dfx deploy ckusdc_ledger
 dfx deploy ckusdc_index
 
-dfx deploy kong_backend
 dfx deploy icp_swap_factory
 dfx deploy icp_swap_pool
 

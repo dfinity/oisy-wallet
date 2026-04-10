@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
-			"standalone_mode": "我们改进了 $oisy_short 在像你这样安装到主&nbsp;屏幕时的运行方式。如果你在连接 $oisy_short 或签署交易时遇到问题，请将 $oisy_short 从主&nbsp;屏幕中移除并重新安装。在 iPhone 上，请确保取消选择“以 Web App 打开”。<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">阅读更多</a>",
+			"standalone_mode": "将应用程序和 $oisy_short 同时安装到主屏幕时，存在已知的连接问题。如果在连接 $oisy_short 或签署交易时遇到问题，请从普通浏览器启动应用程序。我们正在修复此问题，将很快解决。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">了解更多</a>",
 			"video_not_supported": "你的浏览器不支持视频播放。"
 		}
 	},
@@ -80,7 +80,6 @@
 			"source_code_on_github": "GitHub 上的源代码",
 			"view_on_explorer": "在浏览器中查看",
 			"source_code": "源代码",
-			"changelog": "更新日志",
 			"documentation": "文档",
 			"support": "支持",
 			"confirm_navigate": "你确定要离开当前页面吗？",
@@ -100,7 +99,6 @@
 			"activity": "打开活动视图",
 			"airdrops": "打开奖励视图",
 			"menu": "你的钱包地址、设置、登出与外部链接",
-			"changelog": "在 GitHub 上打开 $oisy_name 的更新日志以查看最新更新",
 			"documentation": "打开 $oisy_name 文档",
 			"support": "打开 $oisy_name 文档的支持部分",
 			"open_twitter": "打开 DFINITY 的 X/Twitter 动态",
@@ -140,12 +138,6 @@
 		},
 		"error": {
 			"no_internet_identity": "没有 Internet Identity。",
-			"invalid_pouh_credential": "抱歉，在验证 Humanity Credential 时发生错误。请联系签发方并重新申请该凭证。",
-			"error_validating_pouh_credential_oisy": "抱歉，在 $oisy_short 中验证 Humanity Credential 时发生错误：$error",
-			"error_validating_pouh_credential": "抱歉，在验证 Humanity Credential 时发生错误。",
-			"error_requesting_pouh_credential": "抱歉，在请求 Humanity Credential 时发生错误。",
-			"missing_pouh_issuer_origin": "抱歉，在请求 Humanity Credential 时发生错误。缺少签发方来源。",
-			"no_pouh_credential": "抱歉，在请求 Humanity Credential 时发生错误。你在 Decide AI 中是否拥有有效的凭证？",
 			"error_while_signing_in": "登录过程中发生错误。",
 			"unexpected_issue_with_syncing": "在同步你的认证状态时发生了意外问题。"
 		},
@@ -352,7 +344,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "首个用于构建自我编写应用的平台。",
-				"call_to_action": "试用 Caffeine",
 				"description": "Caffeine 是首个用于构建自我编写应用的平台。只需在桌面或移动端与 AI 对话，它就会为你创建应用和服务——包括那些能连接到 OISY 钱包的。体验由 AI 驱动的应用开发未来。",
 				"carousel": {
 					"text": "你好，自我编写的互联网",
@@ -434,6 +425,40 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -471,7 +496,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "请密切关注即将到来的空投活动！<a href=\"https://x.com/oisy\" target=\"_blank\">在 X 上关注我们</a>、加入 <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>，或加入 <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> 社区保持更新。",
-			"coming_soon": "$oisy_short 第四集即将上线",
+			"coming_soon": "下一期 $oisy_short Sprinkles 即将到来",
 			"reward_banner": "活动 $campaignName 的横幅"
 		},
 		"campaigns": {
@@ -574,6 +599,36 @@
 						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
 					}
 				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles：第6集正式上线 🎉",
+				"one_liner": "通过保持活跃、推荐他人以及在多个链上使用 OISY 来赚取 Sprinkles。您的操作会增加奖励，而活跃的推荐则会进一步提升奖励。<br/>此外，现在更多的链意味着更高的获胜机会。",
+				"participate_title": "通过活动和推荐赚取代币。链越多，机会越多。",
+				"description": "保持活跃以获得资格：经常登录、完成钱包操作并持有至少 5 美元。<br/>每条活跃链都会通过多链乘数提高您的获胜概率。<br/>从符合条件的朋友处获得 10%。",
+				"campaign_href": "",
+				"welcome": {
+					"title": "欢迎来到 $oisy_short！",
+					"subtitle": "准备好赚取了吗？",
+					"description": "距离您的第一份奖励只需 2 步：登录、持有 5 美元以上并完成 2 项操作。这就是开始赚取 Sprinkles 所需的全部。<br><br>想要更多？推荐您的朋友，每当他们之中有人赚取 Sprinkles 时，您就能获得奖励。"
+				},
+				"win": {
+					"default": {
+						"title": "您已获得奖励",
+						"description": "您的奖励刚刚到达您的钱包。<br>别忘了推荐他人并保持活跃，以赢取更多奖励",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "恭喜您赢得今天最大的 OISY Sprinkles！",
+						"description": "您刚刚赢得了我们最高的 Sprinkles 奖励<br>保持活跃并继续推荐以赢得更多",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "一点小小的感谢",
+						"description": "您推荐的某位用户刚刚获得了一些 Sprinkles。",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},
@@ -649,7 +704,9 @@
 			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
-			"icrc_canister_loading": "无法加载带有 Ledger 容器 $ledgerCanisterId 的令牌，因为它目前没有响应。",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "$tokenSymbol 代币暂无响应，目前无法加载。请稍后再试。",
+			"icrc_canister_loading_custom": "账本容器 $ledgerCanisterId 的代币暂无响应，目前无法加载。请稍后再试。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
@@ -659,6 +716,7 @@
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"ext_custom_tokens": "加载 EXT 自定义代币时出错。",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
 			"waiting_for_allowed_cycles_aborted": "已中止周期账本准备。请稍后尝试登录。",
@@ -694,11 +752,6 @@
 			"active_networks_description": "选择你希望在 $oisy_name 中使用的网络。未启用的网络中的代币和交易将不会显示，也不会包含在可用余额中。",
 			"enable_network": "启用网络",
 			"disable_network": "禁用网络",
-			"credentials_title": "凭证",
-			"pouh_credential": "人类身份凭证",
-			"pouh_credential_description": "人类身份凭证是你人类身份的证明，由 Decide AI 签发。",
-			"present_pouh_credential": "展示",
-			"pouh_credential_verified": "已验证 ✅",
 			"appearance": "外观",
 			"appearance_light": "浅色",
 			"appearance_dark": "深色",
@@ -821,6 +874,7 @@
 	"send": {
 		"text": {
 			"send": "发送",
+			"send_token": "",
 			"destination": "目标地址",
 			"source": "来源地址",
 			"balance": "余额",
@@ -909,24 +963,27 @@
 			"no_nft_selected": "尚未选择要发送的 NFT。"
 		},
 		"error": {
-			"unexpected": "发送交易时发生错误。",
-			"destination_address_unknown": "ETH 目标地址未知",
-			"metamask_connected": "无法获取你的账户。你的 Metamask 是否已开启并已连接？",
-			"metamask_no_accounts": "未找到 Metamask 账户。",
-			"metamask_switch_network": "无法请求 Metamask 切换至链 ID $chain_id。你当前是否已连接到 $network_name？",
-			"erc20_data_undefined": "ERC20 交易数据不能为 undefined 或 null。",
-			"data_undefined": "交易数据不能为 undefined 或 null。",
-			"no_identity_calculate_fee": "未提供身份，无法为其主体计算手续费。",
-			"invalid_destination": "目标地址无效。请使用有效的钱包地址重试。",
-			"incompatible_token": "代币不兼容。请尝试使用兼容的代币。",
-			"no_btc_network_id": "当前网络 ($networkId) 不是比特币网络。",
-			"no_solana_network_id": "当前网络 ($networkId) 不是 Solana 网络。",
-			"no_pending_bitcoin_transaction": "加载待处理的比特币交易时出错。请稍后重试。",
-			"unexpected_utxos_fee": "计算交易手续费时发生错误。",
-			"unable_to_retrieve_amount": "无法获取金额（n/a）",
-			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
-			"solana_confirmation_failed": "Solana确认失败",
-			"fee_calc_unsupported_standard": "由于不支持所提供的令牌标准，因此无法计算费用。"
+			"unexpected": "发送交易时出现错误。",
+			"destination_address_unknown": "ETH目标地址未知",
+			"metamask_connected": "无法获取您的账户。您的Metamask是否已打开并已连接？",
+			"metamask_no_accounts": "未找到Metamask账户。",
+			"metamask_switch_network": "无法请求Metamask切换到链ID $chain_id。您的Metamask是否正在使用$network_name？",
+			"erc20_data_undefined": "ERC20交易数据不能为undefined或null。",
+			"data_undefined": "交易数据不能为undefined或null。",
+			"no_identity_calculate_fee": "未提供身份以计算其principal的费用。",
+			"invalid_destination": "目标地址无效。请使用有效的钱包地址或目标地址重试。",
+			"incompatible_token": "该代币不兼容。请使用兼容的代币重试。",
+			"no_btc_network_id": "当前网络（$networkId）不是Bitcoin网络。",
+			"no_solana_network_id": "当前网络（$networkId）不是Solana网络。",
+			"no_pending_bitcoin_transaction": "加载待处理的Bitcoin交易时出现错误。请稍后重试。",
+			"unexpected_utxos_fee": "计算交易费用时出现错误。",
+			"unable_to_retrieve_amount": "n/a（无法获取）",
+			"solana_transaction_expired": "您的交易未被Solana网络处理并已过期，很可能是因为提供的优先费用不足。我们已将其更新为最新推荐金额，请重试。",
+			"solana_confirmation_failed": "我们未收到您刚刚创建的交易的确认。请等待几秒钟，然后检查您的代币交易列表，确认您的交易是否已正确创建。",
+			"solana_insufficient_funds": "您的代币余额不足以完成此交易。您的余额自上次显示以来可能已发生变化。",
+			"solana_insufficient_funds_for_fee": "您的SOL余额不足以支付交易费用。",
+			"solana_insufficient_funds_for_rent": "您的SOL余额不足以支付创建账户所需的租金。",
+			"fee_calc_unsupported_standard": "由于提供的代币标准不受支持，无法计算费用。"
 		}
 	},
 	"mint": {
@@ -1024,6 +1081,9 @@
 			"loading_cketh_helper": "加载 ckETH 辅助合约地址出错。未初始化 minter canister ID。",
 			"unexpected": "转换代币时发生错误。",
 			"unexpected_missing_data": "初始化转换交易时出错。"
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "USDC 与 ckUSDC 之间的转换目前已暂停。"
 		}
 	},
 	"swap": {
@@ -1068,7 +1128,10 @@
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
-			"cross_chain_networks_info": "跨链网络信息"
+			"cross_chain_networks_info": "跨链网络信息",
+			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -1085,7 +1148,9 @@
 			"manually_withdraw_success": "手动取款成功",
 			"manually_withdraw_failed": "手动取款失败",
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
-			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功"
+			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1147,9 +1212,15 @@
 			"on_network": " 于 $network",
 			"delete_token": "删除代币",
 			"edit_token": "编辑代币",
-			"sort_by_value": "",
-			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_value": "价值",
+			"sort_by_performance": "代币表现",
+			"sort_by_symbol": "符号",
+			"hide_asset_types": "隐藏资产类型",
+			"asset_type": "$oisy_name 中的资产类型",
+			"asset_type_all": "所有资产类型",
+			"no_tokens_for_asset_type": "您的钱包中没有 $asset_type",
+			"no_tokens_for_asset_type_zero_tokens": "所选网络中没有 $asset_type",
+			"no_tokens_for_asset_type_description": "从 <strong>$count 个支持的代币</strong>中选择，自定义您的投资组合视图。"
 		},
 		"details": {
 			"title": "代币详情",
@@ -1266,6 +1337,7 @@
 			"unrecognised_erc_interface": "无法识别的 ERC 接口。",
 			"no_metadata": "未获取到任何元数据。",
 			"unexpected": "保存代币时发生错误。",
+			"version_mismatch": "",
 			"unexpected_hiding": "隐藏代币时发生错误。",
 			"already_available": "代币已存在。",
 			"not_toggleable": "该代币不可切换，无法隐藏。",
@@ -1274,6 +1346,23 @@
 			"unexpected_undefined": "代币未定义。这是异常情况。",
 			"unexpected_error_on_token_delete": "移除代币时发生错误。",
 			"unexpected_error_on_token_update": "更新代币时发生错误。"
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "类别",
+			"risk": "风险"
+		},
+		"category": {
+			"crypto": "加密货币",
+			"stablecoin": "稳定币",
+			"stock": "股票",
+			"commodity": "大宗商品"
+		},
+		"risk": {
+			"low": "低风险",
+			"medium": "中等风险",
+			"high": "高风险"
 		}
 	},
 	"nfts": {
@@ -1503,8 +1592,6 @@
 		},
 		"label": {
 			"reimbursement": "报销",
-			"twin_token_sent": "已发送 $twinToken",
-			"ck_token_sent": "已发送 $ckToken",
 			"twin_token_converted": "从 $twinToken 转换",
 			"ck_token_converted": "从 $ckToken 转换",
 			"sending_twin_token": "正在发送 $twinToken",
@@ -1857,31 +1944,31 @@
 	"earning": {
 		"text": {
 			"title": "赚取",
-			"tab_title": "收益",
-			"earning_opportunities": "收益机会",
-			"header_title": "欢迎来到 Earn！",
-			"header_description": "通过将你的代币分配到收益机会中来增长你的数字资产组合。",
-			"go_to_earn": "前往 Earn"
+			"tab_title": "赚取中",
+			"earning_opportunities": "赚取机会",
+			"header_title": "欢迎来到赚取！",
+			"header_description": "将您的代币分配到赚取机会中，发展您的数字资产投资组合。",
+			"go_to_earn": "前往赚取"
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "Harvest – Autopilot",
+				"description": "一键Autopilot金库，实现最大收益效率。",
+				"action": "前往Autopilot"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "使用 OISY 并赚取奖励！第 5 集已上线 🎉",
+				"description": "使用OISY并赚取！第6集已上线 🎉",
 				"action": "查看状态"
 			}
 		},
 		"card_fields": {
-			"apy": "年化收益率",
-			"networks": "",
-			"assets": "",
-			"currentStaked": "已质押",
+			"apy": "APY",
+			"networks": "网络",
+			"assets": "资产",
+			"currentStaked": "质押中",
 			"currentEarning": "当前收益",
-			"earningPotential": "额外收益潜力",
+			"earningPotential": "收益潜力",
 			"terms": "条款"
 		},
 		"terms": {
@@ -1889,170 +1976,150 @@
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": "Gold DAO 质押收益"
+				"cardTitle": "通过Gold DAO赚取"
 			}
 		}
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "",
-			"live_apy": ""
+			"autopilot": "Autopilot",
+			"live_apy": "当前APY"
 		}
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
-			"harvest_autopilot_page_description": "",
-			"harvest_autopilot_vault_page_description": "",
-			"my_positions": "",
-			"available_autopilots": "",
-			"vault_info": "",
-			"vault_address": "",
-			"protocol": "",
-			"harvest": "",
-			"autopilot": "",
-			"total_value_locked": "",
-			"manager": "",
-			"vault_description": "",
-			"stake": "",
-			"stake_now": "",
-			"stake_amount": "",
-			"not_enough_to_stake": "",
-			"unstake": "",
-			"unstake_now": "",
-			"unstaking": "",
-			"unstake_token": "",
-			"enable_token_text": "",
-			"enable_token_button": "",
-			"review": "",
-			"executing_transaction": "",
-			"unsupported_token_staking": "",
-			"provider": "",
-			"earning_potential": "",
-			"earning_potential_hint": "",
-			"active_earning": "",
-			"active_earning_per_year": "",
-			"active_earning_per_year_short": "",
-			"unproductive_assets": "",
-			"invested_assets": "",
-			"visit_provider": "",
-			"current_apy_label": "",
-			"max_apy_label": "",
-			"stake_review_subtitle": "",
-			"unstake_review_subtitle": "",
-			"delayed_dissolve": "",
-			"immediate_dissolve": "",
-			"included_token_fee": "",
-			"included_dissolve_fee": "",
-			"delayed_dissolve_terms": "",
-			"delayed_dissolve_info": "",
-			"immediate_dissolve_terms": "",
-			"amount_to_receive": "",
-			"unclaimed_rewards": "",
-			"unlock_requests": "",
-			"unlocking_in": "",
-			"unlocked": "",
-			"withdraw": "",
-			"withdraw_successful": "",
-			"claim_reward": "",
-			"claim_rewards": "",
-			"claim_reward_short": "",
-			"claim_now": "",
-			"claiming": "",
-			"get_tokens_with_amount": "",
-			"get_tokens": "",
-			"reward_claimed": "",
-			"staked": "",
-			"unstaked": "",
-			"title_empty_1": "",
-			"title_empty_2_usd": "",
-			"title_empty_2_apy": "",
+			"harvest_autopilot_page_description": "一键Autopilot金库，实现最大收益效率。",
+			"harvest_autopilot_vault_page_description": "Autopilot由<a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">经过审计的IPOR</a> Fusion Vault技术驱动。",
+			"harvest_autopilot_provider_description": "Harvest Autopilot是一项专业的\"设置后无需操心\"服务，以最少的精力自动化您的DeFi仓位。",
+			"harvest_autopilot_stake_terms": "我确认已阅读并理解该产品，已阅读<a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">风险披露</a>，并同意<a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">条款和条件</a>。",
+			"my_positions": "我的仓位",
+			"available_autopilots": "可用的Autopilot",
+			"vault_info": "金库信息",
+			"vault_address": "金库地址",
+			"protocol": "协议",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "总锁定价值（TVL）",
+			"manager": "管理员",
+			"vault_description": "该资金池设计为您的$asset_symbol持仓提供\"设置后无需操心\"的收益管理服务。它通过将资金动态分配至最佳机会，以最少的精力自动优化您的DeFi仓位。",
+			"stake": "质押",
+			"stake_now": "立即质押",
+			"stake_amount": "质押 $amount $token_symbol",
+			"not_enough_to_stake": "没有可质押的$token_symbol",
+			"estimated_received": "预计收到",
+			"estimated_yearly_yield": "预计年化收益",
+			"unstake": "取消质押",
+			"unstake_now": "立即取消质押",
+			"unstaking": "取消质押中...",
+			"unstake_token": "取消质押 $token_symbol",
+			"enable_token_text": "您需要启用 $token_symbol",
+			"enable_token_button": "启用 $token_symbol",
+			"review": "查看交易",
+			"executing_transaction": "正在执行交易...",
+			"unsupported_token_staking": "所选代币不支持质押。",
+			"provider": "质押条款由 $provider 提供",
+			"earning_potential": "收益潜力",
+			"earning_potential_hint": "基于您未投资资产的价值以及可用赚取机会中的最高APY。",
+			"active_earning": "活跃收益",
+			"active_earning_per_year": "$amount/年",
+			"active_earning_per_year_short": "$amount/年",
+			"unproductive_assets": "可用",
+			"invested_assets": "已分配",
+			"visit_provider": "访问网站",
+			"current_apy_label": "当前APY",
+			"max_apy_label": "最高APY",
+			"stake_review_subtitle": "您正在质押",
+			"unstake_review_subtitle": "您正在取消质押",
+			"delayed_dissolve": "延迟接收",
+			"immediate_dissolve": "立即接收",
+			"included_token_fee": "含网络费用",
+			"included_dissolve_fee": "含解锁费用",
+			"delayed_dissolve_terms": "从质押中解锁$token时，代币将被锁定$delay天且不再获得奖励，之后方可提取。",
+			"delayed_dissolve_info": "开始解锁您的$token质押后，您将不再获得新奖励。",
+			"immediate_dissolve_terms": "您将立即收到您的$token，但正在解锁的$token代币将被收取费用。",
+			"amount_to_receive": "待收金额",
+			"unclaimed_rewards": "未领取奖励",
+			"unlock_requests": "解锁请求",
+			"unlocking_in": "$time后解锁",
+			"unlocked": "已解锁",
+			"withdraw": "提取",
+			"withdraw_successful": "代币已成功提取。",
+			"claim_reward": "领取奖励",
+			"claim_rewards": "领取奖励",
+			"claim_reward_short": "领取",
+			"claim_now": "立即领取",
+			"claiming": "领取中...",
+			"get_tokens_with_amount": "最多获得 $amount $token_symbol",
+			"get_asset_tokens": "获取 $token_symbol",
+			"reward_claimed": "奖励已领取",
+			"staked": "已质押",
+			"unstaked": "已取消质押",
+			"title_empty_1": "每年最高赚取",
+			"title_empty_2_usd": "/年",
+			"title_empty_2_apy": "年化",
 			"title_empty_3": "",
-			"description_empty": "",
-			"full_history": "",
-			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"description_empty": "您似乎还没有质押任何代币",
+			"full_history": "显示完整历史记录",
+			"recent_history": "关闭完整历史记录",
+			"harvest_autopilot_carousel_slide_title": "通过Harvest Autopilot Yield Farming在OISY中赚取",
+			"harvest_autopilot_carousel_slide_cta": "了解更多"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "",
-			"unexpected_error_on_unstake": "",
-			"dissolvement_limit_reached": ""
-		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
+			"unexpected_error_on_withdraw": "提取代币时出现错误。",
+			"unexpected_error_on_unstake": "取消质押代币时出现错误。",
+			"unexpected_error_on_stake": "质押代币时出现错误。",
+			"dissolvement_limit_reached": "您已达到 $limit 个活跃解锁请求的上限。请先完成部分请求再创建新请求。<br/>请注意，您随时可以使用\"立即\"选项取消质押。"
 		},
 		"info": {
-			"gldt": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
-			},
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": ""
+				"title": "什么是Harvest Autopilot",
+				"description": "Harvest Autopilot是Harvest Finance生态系统中的一项专业功能（也是特定产品线），旨在以最少的精力自动化和优化您的去中心化金融（DeFi）仓位。",
+				"fact_1_title": "智能收益分配",
+				"fact_1_description": "自动切换协议以捕获最高的实时APY。",
+				"fact_2_title": "被动复利",
+				"fact_2_description": "奖励自动收取并再投资，以最大化您的增长。",
+				"fact_3_title": "Gas费用共担",
+				"fact_3_description": "通过与其他用户合并交易来节省Gas费用，从而降低您的支出。"
 			}
 		},
 		"alt": {
-			"placeholder_image": ""
+			"placeholder_image": "暂无质押代币"
 		}
 	},
 	"get_token": {
 		"text": {
-			"title": "",
-			"swap_to_token": "",
-			"ready_to_swap": "",
-			"convert_assets": "",
-			"convertible_assets": "",
-			"how_to_convert": "",
-			"get_more_token": "",
-			"receive_token": "",
-			"receive_token_title": "",
-			"receive_token_text": "",
-			"buy_assets": "",
-			"buy_assets_title": "",
-			"buy_assets_text": ""
+			"title": "获取 $token",
+			"swap_to_token": "兑换为 $token",
+			"ready_to_swap": "准备兑换",
+			"convert_assets": "转换资产",
+			"convertible_assets": "可转换资产",
+			"how_to_convert": "如何转换",
+			"get_more_token": "获取更多 $token",
+			"receive_token": "接收 $token",
+			"receive_token_title": "直接接收 $token",
+			"receive_token_text": "将 $token 直接接收到您的账户",
+			"buy_assets": "购买资产",
+			"buy_assets_title": "购买可转换资产",
+			"buy_assets_text": "购买更多资产并转换为 $token"
 		}
 	},
 	"temporal": {
 		"seconds_to_duration": {
-			"year": "年（单数）",
-			"year_plural": "年（复数）",
-			"month": "月（单数）",
-			"month_plural": "月（复数）",
-			"day": "天（单数）",
-			"day_plural": "天（复数）",
-			"hour": "小时（单数）",
-			"hour_plural": "小时（复数）",
-			"minute": "分钟（单数）",
-			"minute_plural": "分钟（复数）",
-			"second": "秒（单数）",
-			"second_plural": "秒（复数）"
+			"year": "年",
+			"year_plural": "年",
+			"month": "个月",
+			"month_plural": "个月",
+			"day": "天",
+			"day_plural": "天",
+			"hour": "小时",
+			"hour_plural": "小时",
+			"minute": "分钟",
+			"minute_plural": "分钟",
+			"second": "秒",
+			"second_plural": "秒"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24小时"
 		}
 	},
 	"ai_assistant": {

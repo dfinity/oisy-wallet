@@ -16,9 +16,9 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
-import type { Option } from '$lib/types/utils';
 import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
 const normalizePath = (s: string | null) =>
@@ -43,8 +43,6 @@ export const isRewardsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarnPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}`) ?? false;
-export const isEarnGoldPath = (path: string | null) =>
-	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}`;
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -67,8 +65,6 @@ export const isRouteEarning = ({ route: { id } }: Page): boolean => isEarningPat
 export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
 
 export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
-
-export const isRouteEarnGold = ({ route: { id } }: Page): boolean => isEarnGoldPath(id);
 
 const tokenUrl = ({
 	token,
@@ -96,7 +92,7 @@ export const networkUrl = ({
 	fromRoute
 }: {
 	path: AppPath;
-	networkId: Option<NetworkId>;
+	networkId: Nullish<NetworkId>;
 	usePreviousRoute: boolean;
 	fromRoute: NavigationTarget | null;
 }) =>
@@ -176,7 +172,7 @@ export const resetRouteParams = (): RouteParams => ({
 	[VAULT_PARAM]: null
 });
 
-export const switchNetwork = async ({ networkId }: { networkId: Option<NetworkId> }) => {
+export const switchNetwork = async ({ networkId }: { networkId: Nullish<NetworkId> }) => {
 	const url = new URL(window.location.href);
 
 	if (isNullish(networkId) || isNullish(networkId.description)) {

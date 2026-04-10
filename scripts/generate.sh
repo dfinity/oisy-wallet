@@ -47,8 +47,6 @@ function install_did_files() {
 ./scripts/did.sh
 # .. downloads candid for the signer
 DFX_NETWORK=ic ./scripts/build.signer.sh
-# .. downloads candid for the kong_backend
-DFX_NETWORK=ic ./scripts/build.kong_backend.sh
 # .. downloads candid for the icp_swap_pool
 DFX_NETWORK=ic ./scripts/build.icp_swap_pool.sh
 # .. downloads candid for the icp_swap_factory
@@ -59,8 +57,6 @@ DFX_NETWORK=ic ./scripts/build.xtc_ledger.sh
 DFX_NETWORK=ic ./scripts/build.sol_rpc.sh
 # .. downloads candid for the llm
 DFX_NETWORK=ic ./scripts/build.llm.sh
-# .. downloads candid for the gkdt_stake
-DFX_NETWORK=ic ./scripts/build.gldt_stake.sh
 # .. downloads candid for the ext_v2_token
 DFX_NETWORK=ic ./scripts/build.ext_v2_token.sh
 # .. downloads candid for the dip721

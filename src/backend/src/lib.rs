@@ -1,10 +1,17 @@
+#![warn(clippy::wildcard_imports)]
+
 use candid::Principal;
-use ic_cdk::{export_candid, init, post_upgrade};
+use ic_cdk::{
+    export_candid, init,
+    management_canister::{HttpRequestResult, TransformArgs},
+    post_upgrade,
+};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
     types::{
-        agreement::UpdateUserAgreementsRequest,
+        agreement::{UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest},
+        api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
             BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
@@ -13,19 +20,26 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
+        exchange::ExchangeRate,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
-            UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
-            UpdateUserNetworkSettingsResult,
+            DeleteContactResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
+            SaveUserTransactionsResult, SetUserShowTestnetsResult, UpdateContactResult,
+            UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
+            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
-        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        signer::{
+            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+            AllowSigningRequest,
+        },
+        token_id::TokenId,
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
+        user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
         Stats, Timestamp,
     },
 };
@@ -35,15 +49,15 @@ use crate::state::{read_state, set_config};
 mod api;
 mod bitcoin;
 mod contacts;
-mod guards;
-mod housekeeping;
-mod random;
-mod rate_limiter;
+mod delegation;
+mod exchange;
 mod signer;
 mod state;
 mod token;
+mod transactions;
 mod types;
 mod user_profile;
+mod utils;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
@@ -58,7 +72,9 @@ pub fn init(arg: Arg) {
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
+    utils::housekeeping::start_periodic_housekeeping_timers();
+
+    exchange::start_exchange_rate_timer();
 }
 
 /// Post-upgrade handler.
@@ -68,6 +84,10 @@ pub fn init(arg: Arg) {
 ///   new installation?
 #[post_upgrade]
 pub fn post_upgrade(arg: Option<Arg>) {
+    // TODO: remove migration after all canisters have been upgraded past this release.
+    // Phase 1: extract old CustomTokenId-keyed entries BEFORE STATE is initialised.
+    let migrated_entries = state::stored_token_migration::extract_legacy_token_activity();
+
     match arg {
         Some(Arg::Init(arg)) => set_config(arg),
         _ => {
@@ -79,10 +99,15 @@ pub fn post_upgrade(arg: Option<Arg>) {
         }
     }
 
+    // Phase 2: insert converted entries now that STATE owns the (empty) map.
+    state::stored_token_migration::insert_migrated_token_activity(migrated_entries);
+
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
+    utils::housekeeping::start_periodic_housekeeping_timers();
+
+    exchange::start_exchange_rate_timer();
 }
 
 export_candid!();
@@ -108,13 +133,13 @@ mod tests {
 
     /// Checks candid interface type compatibility with production.
     #[test]
-    #[ignore] // Not run unless requested explicitly
+    #[ignore = "Not run unless requested explicitly"]
     fn check_candid_interface_compatibility() {
         let canister_interface = super::__export_service();
         let prod_interface_file = workspace_dir().join("target/ic/candid/backend.ic.did");
         service_compatible(
             CandidSource::Text(&canister_interface),
-            CandidSource::File(&prod_interface_file.as_path()),
+            CandidSource::File(prod_interface_file.as_path()),
         )
         .expect("The proposed canister interface is not compatible with the production interface");
     }

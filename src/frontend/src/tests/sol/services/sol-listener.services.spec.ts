@@ -37,9 +37,17 @@ describe('sol-listener.services', () => {
 			solTransactionsStore.reset(tokenId);
 		});
 
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
 		describe('syncWallet', () => {
-			it('should set the balance in balancesStore', () => {
+			it('should set the balance in balancesStore', async () => {
+				vi.useFakeTimers();
+
 				syncWallet({ data: mockPostMessage({}), tokenId });
+
+				await vi.runAllTimersAsync();
 
 				const balance = get(balancesStore);
 

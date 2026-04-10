@@ -67,7 +67,7 @@ describe('PayTokensList', () => {
 			},
 			estimatedGasLimit: 25n
 		}
-	};
+	} as PayableTokenWithConvertedAmount;
 
 	const mockUsdcToken: PayableTokenWithConvertedAmount = {
 		...USDC_TOKEN,
@@ -85,7 +85,7 @@ describe('PayTokensList', () => {
 			},
 			estimatedGasLimit: 40n
 		}
-	};
+	} as PayableTokenWithConvertedAmount;
 
 	const createMockContext = (availableTokens: PayableTokenWithConvertedAmount[]) => ({
 		availableTokens: writable(availableTokens),

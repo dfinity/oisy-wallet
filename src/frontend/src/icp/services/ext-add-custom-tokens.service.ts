@@ -2,7 +2,7 @@ import type { ExtCanisters, ExtToken, ExtTokenWithoutId } from '$icp/types/ext-t
 import { mapExtToken } from '$icp/utils/ext.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { assertExistingTokens } from '$lib/utils/tokens.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -17,7 +17,7 @@ export const loadAndAssertAddCustomToken = ({
 	extTokens,
 	canisterId
 }: Partial<ExtCanisters> & {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	extTokens: ExtToken[];
 }): {
 	result: 'success' | 'error';

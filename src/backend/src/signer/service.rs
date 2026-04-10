@@ -1,12 +1,11 @@
 //! Code for interacting with the chain fusion signer.
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{Nat, Principal};
-use ic_cdk::api::{
-    call::call_with_payment128,
-    management_canister::{
-        bitcoin::BitcoinNetwork,
-        ecdsa::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument},
-    },
+use ic_cdk::{
+    api::msg_caller,
+    bitcoin_canister::Network as BitcoinNetwork,
+    call::Call,
+    management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs},
 };
 use ic_cycles_ledger_client::{
     Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
@@ -80,12 +79,12 @@ const SUFFICIENT_CYCLES_THRESHOLD: u64 = (LEDGER_FEE + SIGNER_FEE) * 18;
 pub async fn get_allowed_cycles() -> Result<Nat, GetAllowedCyclesError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
-    let caller = ic_cdk::caller();
+    let caller = msg_caller();
 
     // Create the AllowanceArgs structure as specified in the JSON
     let allowance_args = AllowanceArgs {
         account: Account {
-            owner: ic_cdk::id(),
+            owner: ic_cdk::api::canister_self(),
             subaccount: None,
         },
         spender: Account {
@@ -103,26 +102,34 @@ pub async fn get_allowed_cycles() -> Result<Nat, GetAllowedCyclesError> {
     Ok(allowance.allowance)
 }
 
-/// Enables the user to sign transactions.
+/// Returns `Some(allowance)` when the caller's current cycles allowance is
+/// at or above [`SUFFICIENT_CYCLES_THRESHOLD`], meaning a new `icrc_2_approve`
+/// is unnecessary.
 ///
-/// Signing costs cycles.  Managing that cycle payment can be painful so we take care of that.
+/// Returns `None` when the allowance is below threshold **or** when the
+/// cycles ledger cannot be contacted (conservative fallback).
+pub async fn has_sufficient_allowance() -> Option<Nat> {
+    match get_allowed_cycles().await {
+        Ok(current) if current >= SUFFICIENT_CYCLES_THRESHOLD => Some(current),
+        _ => None,
+    }
+}
+
+/// Unconditionally creates a new `icrc_2_approve` for signing operations,
+/// **without** checking the current allowance first.
+///
+/// Callers that want the "check first, approve only if needed" behaviour
+/// should call [`has_sufficient_allowance`] beforehand, or use
+/// [`allow_signing`] which does both.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
-/// TODO Remove the Option type (that has been added for backward-compatibility)
-/// as soon as the `PoW` feature has been stabilized
-pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
+pub async fn approve_signing() -> Result<(), AllowSigningError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
-    let caller = ic_cdk::caller();
+    let caller = msg_caller();
 
-    if let Ok(current) = get_allowed_cycles().await {
-        if current >= SUFFICIENT_CYCLES_THRESHOLD {
-            return Ok(());
-        }
-    }
-
-    let amount = Nat::from(allowed_cycles.unwrap_or_else(per_user_cycles_allowance));
+    let amount = Nat::from(per_user_cycles_allowance());
 
     CyclesLedgerService(cycles_ledger)
         .icrc_2_approve(&ApproveArgs {
@@ -144,6 +151,22 @@ pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigni
         .map_err(AllowSigningError::ApproveError)?;
 
     Ok(())
+}
+
+/// Enables the user to sign transactions.
+///
+/// Checks the current allowance first; if already at or above
+/// [`SUFFICIENT_CYCLES_THRESHOLD`], returns immediately without making an
+/// `icrc_2_approve` call.  Otherwise delegates to [`approve_signing`].
+///
+/// # Errors
+/// Errors are enumerated by: `AllowSigningError`
+pub async fn allow_signing() -> Result<(), AllowSigningError> {
+    if has_sufficient_allowance().await.is_some() {
+        return Ok(());
+    }
+
+    approve_signing().await
 }
 
 const SUB_ACCOUNT_ZERO: Subaccount = Subaccount([0; 32]);
@@ -175,7 +198,7 @@ async fn cfs_ecdsa_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
     let btc_schema = vec![0_u8];
     let derivation_path = vec![btc_schema, principal.as_slice().to_vec()];
     let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
-    if let Ok((key,)) = ecdsa_public_key(EcdsaPublicKeyArgument {
+    if let Ok(key) = ecdsa_public_key(&EcdsaPublicKeyArgs {
         canister_id: Some(cfs_canister_id),
         derivation_path,
         key_id: EcdsaKeyId {
@@ -247,7 +270,7 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
     // Cycles ledger account details:
     let cycles_ledger = CyclesLedgerService(*CYCLES_LEDGER);
     let account = Account {
-        owner: ic_cdk::id(),
+        owner: ic_cdk::api::canister_self(),
         subaccount: None,
     };
 
@@ -262,7 +285,7 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
     };
 
     // Cycles directly attached to the backend:
-    let backend_cycles = Nat::from(ic_cdk::api::canister_balance128());
+    let backend_cycles = Nat::from(ic_cdk::api::canister_cycle_balance());
 
     // If the ledger balance is low, send cycles:
     if ledger_balance < request.threshold() {
@@ -279,16 +302,24 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
             to_send.clone().0.try_into().unwrap_or_else(|err| {
                 unreachable!("Failed to convert cycle amount to u128: {}", err)
             });
-        let (result,): (DepositResult,) =
-            match call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
-                .await
-                .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
-                    available: backend_cycles,
-                    tried_to_send: to_send.clone(),
-                }) {
-                Ok(res) => res,
-                Err(err) => return TopUpCyclesLedgerResult::Err(err),
-            };
+        let result: DepositResult = match Call::unbounded_wait(*CYCLES_LEDGER, "deposit")
+            .with_args(&(arg,))
+            .with_cycles(to_send_128)
+            .await
+            .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
+                available: backend_cycles.clone(),
+                tried_to_send: to_send.clone(),
+            })
+            .and_then(|r| {
+                r.candid()
+                    .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
+                        available: backend_cycles,
+                        tried_to_send: to_send.clone(),
+                    })
+            }) {
+            Ok(res) => res,
+            Err(err) => return TopUpCyclesLedgerResult::Err(err),
+        };
         let new_ledger_balance = result.balance;
 
         Ok(TopUpCyclesLedgerResponse {

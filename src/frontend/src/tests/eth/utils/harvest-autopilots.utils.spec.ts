@@ -6,14 +6,20 @@ import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { HARVEST_AUTOPILOT_ADDRESSES } from '$eth/constants/harvest-autopilots.constants';
-import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import {
+	getHarvestAutopilotBaseTrackingMetadata,
 	getHarvestAutopilotVaultTransactions,
 	isTokenHarvestAutopilot
 } from '$eth/utils/harvest-autopilots.utils';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SOURCES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_EARN
+} from '$lib/enums/plausible';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { Vault } from '$lib/types/vaults';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import {
 	createMockEthCertifiedTransactions,
@@ -69,24 +75,19 @@ describe('harvest-autopilots.utils', () => {
 			enabled: true
 		} as TokenUi<Vault['token']>;
 
-		const mockVault: Vault = {
-			token: mockVaultToken,
-			apy: '5.5',
-			totalValueLocked: '1000000'
+		const mockAssetToken = {
+			...mockValidErc20Token,
+			enabled: true
 		};
 
 		const mockCertifiedTransactions = createMockEthCertifiedTransactions(3);
 
-		const ethTransactionsStore: EthCertifiedTransactionsData = {
-			[mockTokenId]: mockCertifiedTransactions
-		};
-
 		const ckMinterInfoAddresses: string[] = [];
 
-		it('should return empty array when vault is undefined', () => {
+		it('should return empty array when vault transactions are empty', () => {
 			const result = getHarvestAutopilotVaultTransactions({
-				vault: undefined,
-				ethTransactionsStore,
+				vaultToken: mockVaultToken,
+				vaultTransactions: [],
 				ethAddress: mockEthAddress,
 				ckMinterInfoAddresses
 			});
@@ -94,23 +95,10 @@ describe('harvest-autopilots.utils', () => {
 			expect(result).toEqual([]);
 		});
 
-		it('should return empty array when transactions store entry is undefined for vault token id', () => {
+		it('should return mapped transactions when vault transactions exist', () => {
 			const result = getHarvestAutopilotVaultTransactions({
-				vault: mockVault,
-				ethTransactionsStore: {
-					[mockTokenId]: undefined
-				} as unknown as EthCertifiedTransactionsData,
-				ethAddress: mockEthAddress,
-				ckMinterInfoAddresses
-			});
-
-			expect(result).toEqual([]);
-		});
-
-		it('should return mapped transactions when vault and transactions exist', () => {
-			const result = getHarvestAutopilotVaultTransactions({
-				vault: mockVault,
-				ethTransactionsStore,
+				vaultToken: mockVaultToken,
+				vaultTransactions: mockCertifiedTransactions,
 				ethAddress: mockEthAddress,
 				ckMinterInfoAddresses
 			});
@@ -120,13 +108,10 @@ describe('harvest-autopilots.utils', () => {
 
 		it('should map transaction type based on ethAddress', () => {
 			const singleTransaction = createMockEthCertifiedTransactions(1);
-			const store: EthCertifiedTransactionsData = {
-				[mockTokenId]: singleTransaction
-			};
 
 			const result = getHarvestAutopilotVaultTransactions({
-				vault: mockVault,
-				ethTransactionsStore: store,
+				vaultToken: mockVaultToken,
+				vaultTransactions: singleTransaction,
 				ethAddress: mockEthAddress,
 				ckMinterInfoAddresses
 			});
@@ -137,13 +122,10 @@ describe('harvest-autopilots.utils', () => {
 
 		it('should map transaction type to receive when ethAddress does not match from', () => {
 			const singleTransaction = createMockEthCertifiedTransactions(1);
-			const store: EthCertifiedTransactionsData = {
-				[mockTokenId]: singleTransaction
-			};
 
 			const result = getHarvestAutopilotVaultTransactions({
-				vault: mockVault,
-				ethTransactionsStore: store,
+				vaultToken: mockVaultToken,
+				vaultTransactions: singleTransaction,
 				ethAddress: '0xDifferentAddress',
 				ckMinterInfoAddresses
 			});
@@ -154,19 +136,123 @@ describe('harvest-autopilots.utils', () => {
 
 		it('should map transaction type to withdraw when from is in ckMinterInfoAddresses', () => {
 			const singleTransaction = createMockEthCertifiedTransactions(1);
-			const store: EthCertifiedTransactionsData = {
-				[mockTokenId]: singleTransaction
-			};
 
 			const result = getHarvestAutopilotVaultTransactions({
-				vault: mockVault,
-				ethTransactionsStore: store,
+				vaultToken: mockVaultToken,
+				vaultTransactions: singleTransaction,
 				ethAddress: mockEthAddress,
 				ckMinterInfoAddresses: [mockEthTransaction.from.toLowerCase()]
 			});
 
 			expect(result).toHaveLength(1);
 			expect(result[0].type).toBe('withdraw');
+		});
+
+		it('should include asset transactions that reference the vault token address', () => {
+			const assetTransactions = createMockEthCertifiedTransactions(1).map((tx) => ({
+				...tx,
+				data: {
+					...tx.data,
+					to: mockVaultToken.address
+				}
+			}));
+
+			const result = getHarvestAutopilotVaultTransactions({
+				vaultToken: mockVaultToken,
+				vaultTransactions: [],
+				assetToken: mockAssetToken,
+				assetTransactions,
+				ethAddress: mockEthAddress,
+				ckMinterInfoAddresses
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].token).toBe(mockAssetToken);
+			expect(result[0].vaultToken).toBe(mockVaultToken);
+		});
+
+		it('should exclude asset transactions that do not reference the vault token address', () => {
+			const assetTransactions = createMockEthCertifiedTransactions(2);
+
+			const result = getHarvestAutopilotVaultTransactions({
+				vaultToken: mockVaultToken,
+				vaultTransactions: [],
+				assetToken: mockAssetToken,
+				assetTransactions,
+				ethAddress: mockEthAddress,
+				ckMinterInfoAddresses
+			});
+
+			expect(result).toHaveLength(0);
+		});
+
+		it('should combine vault and asset transactions', () => {
+			const vaultTransactions = createMockEthCertifiedTransactions(2);
+			const assetTransactions = createMockEthCertifiedTransactions(1).map((tx) => ({
+				...tx,
+				data: {
+					...tx.data,
+					from: mockVaultToken.address
+				}
+			}));
+
+			const result = getHarvestAutopilotVaultTransactions({
+				vaultToken: mockVaultToken,
+				vaultTransactions,
+				assetToken: mockAssetToken,
+				assetTransactions,
+				ethAddress: mockEthAddress,
+				ckMinterInfoAddresses
+			});
+
+			expect(result).toHaveLength(3);
+			expect(result[0].token).toBe(mockVaultToken);
+			expect(result[1].token).toBe(mockVaultToken);
+			expect(result[2].token).toBe(mockAssetToken);
+		});
+
+		it('should not include asset transactions when assetToken is undefined', () => {
+			const assetTransactions = createMockEthCertifiedTransactions(1).map((tx) => ({
+				...tx,
+				data: { ...tx.data, to: mockVaultToken.address }
+			}));
+
+			const result = getHarvestAutopilotVaultTransactions({
+				vaultToken: mockVaultToken,
+				vaultTransactions: [],
+				assetToken: undefined,
+				assetTransactions,
+				ethAddress: mockEthAddress,
+				ckMinterInfoAddresses
+			});
+
+			expect(result).toHaveLength(0);
+		});
+	});
+
+	describe('getHarvestAutopilotBaseTrackingMetadata', () => {
+		it('should return correct tracking metadata', () => {
+			const result = getHarvestAutopilotBaseTrackingMetadata({
+				assetToken: mockValidErc20Token,
+				vaultToken: mockValidErc4626Token
+			});
+
+			expect(result).toEqual({
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.EARN,
+				event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_EARN.HARVEST_AUTOPILOT,
+				source_location: PLAUSIBLE_EVENT_SOURCES.HARVEST_AUTOPILOT,
+				source_sublocation: mockValidErc4626Token.name,
+				token_network: mockValidErc20Token.network.name,
+				token_address: mockValidErc20Token.address,
+				token_standard: mockValidErc20Token.standard.code,
+				token_symbol: mockValidErc20Token.symbol,
+				token_name: mockValidErc20Token.name,
+				token2_network: mockValidErc4626Token.network.name,
+				token2_address: mockValidErc4626Token.address,
+				token2_standard: mockValidErc4626Token.standard.code,
+				token2_symbol: mockValidErc4626Token.symbol,
+				token2_name: mockValidErc4626Token.name
+			});
 		});
 	});
 });

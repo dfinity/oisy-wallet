@@ -175,6 +175,7 @@ export const send = async ({
 	lastProgressStep = ProgressStepsSend.DONE,
 	progress,
 	token,
+	identity,
 	customNonce,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
@@ -187,6 +188,7 @@ export const send = async ({
 		progress,
 		progressSteps: ProgressStepsSend,
 		token,
+		identity,
 		customNonce,
 		...rest
 	});
@@ -198,11 +200,12 @@ export const send = async ({
 		progress,
 		nonce: nonceTransaction,
 		token,
+		identity,
 		...rest
 	});
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
-	processTransactionSent({ token, transaction: transactionSent });
+	processTransactionSent({ identity, token, transaction: transactionSent });
 
 	progress?.(lastProgressStep);
 

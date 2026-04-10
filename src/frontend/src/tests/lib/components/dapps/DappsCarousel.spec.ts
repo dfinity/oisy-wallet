@@ -60,7 +60,7 @@ describe('DappsCarousel', () => {
 					...mockUserSettings.dapp.dapp_carousel,
 					hidden_dapp_ids: [
 						FEATURED_REWARD_CAROUSEL_SLIDE_ID,
-						stakeProvidersConfig[StakeProvider.GLDT].name,
+						stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].name,
 						...mockDappsDescriptions.map(({ id }) => id)
 					]
 				}

@@ -27,7 +27,7 @@ describe('sol-post-message.schema', () => {
 				}
 			};
 
-			expect(() => SolPostMessageDataResponseWalletSchema.parse(invalidData)).toThrowError();
+			expect(() => SolPostMessageDataResponseWalletSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should validate if balance is not a bigint because of zod custom', () => {

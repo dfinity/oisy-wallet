@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import shib from '$icp-eth/assets/shib.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,6 +17,7 @@ export const SHIB_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'SHIBA INU',
 	symbol: SHIB_SYMBOL,
 	decimals: SHIB_DECIMALS,

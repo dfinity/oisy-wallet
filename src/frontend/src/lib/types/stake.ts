@@ -3,7 +3,6 @@ import type { Amount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 
 export enum StakeProvider {
-	GLDT = 'gldt',
 	HARVEST_AUTOPILOTS = 'harvest_autopilots'
 }
 
@@ -14,6 +13,7 @@ export interface ClaimStakingRewardParams {
 
 export interface StakeProviderConfig {
 	name: string;
+	description: string;
 	logo: string;
 	url: string;
 	card: EarningCardData;

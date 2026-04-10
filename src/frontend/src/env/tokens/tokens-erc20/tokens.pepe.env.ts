@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.en
 import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import pepe from '$icp-eth/assets/pepe.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,6 +17,7 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Pepe',
 	symbol: PEPE_SYMBOL,
 	decimals: PEPE_DECIMALS,
@@ -38,6 +40,7 @@ export const SEPOLIA_PEPE_TOKEN: RequiredErc20Token = {
 	network: SEPOLIA_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Pepe',
 	symbol: PEPE_SYMBOL,
 	decimals: PEPE_DECIMALS,

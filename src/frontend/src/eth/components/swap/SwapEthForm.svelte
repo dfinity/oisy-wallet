@@ -11,7 +11,6 @@
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -24,7 +23,6 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
@@ -35,6 +33,7 @@
 		isSwapAmountsLoading: boolean;
 		isApproveNeeded: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		isGasless: boolean;
@@ -48,6 +47,7 @@
 		isSwapAmountsLoading,
 		isApproveNeeded,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext,
 		isGasless
@@ -154,19 +154,8 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken) && nonNullish($feeTokenIdStore)}
 			<Hr spacing="md" />
 
-			{#if $sourceToken.network.id !== $destinationToken.network.id}
-				<MessageBox styleClass="sm:text-sm">
-					<Html
-						text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
-							$sourceNetwork: $sourceToken.network.name,
-							$destinationNetwork: $destinationToken.network.name
-						})}
-					/>
-				</MessageBox>
-			{/if}
-
 			<div class="flex flex-col gap-3">
-				<SwapProvider {slippageValue} />
+				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
 
 				{#if nonNullish($swapAmountsStore?.selectedProvider)}
 					{#if isGasless}

@@ -10,14 +10,16 @@ import {
 	networkSolanaMainnetEnabled
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
+import { trackRateLimited } from '$lib/services/analytics.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { isNullish } from '@dfinity/utils';
+import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -40,7 +42,14 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		await allowSigning({ identity });
+		const { rateLimitInfo } = await allowSigning({
+			identity,
+			iiDelegationChain: nonNullish(identity) ? extractIIDelegationChain(identity) : []
+		});
+
+		if (nonNullish(rateLimitInfo)) {
+			trackRateLimited(rateLimitInfo);
+		}
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
@@ -59,7 +68,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * - The additional data will be loaded.
  *
  * @param {Object} params The parameters to initialize the loader.
- * @param {OptionIdentity} params.identity The identity to use for the request.
+ * @param {NullishIdentity} params.identity The identity to use for the request.
  * @param {Function} params.progressAndLoad The function to set the next step of the Progress modal and load the additional data.
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
@@ -67,7 +76,7 @@ export const initLoader = async ({
 	identity,
 	progressAndLoad
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	progressAndLoad: () => void;
 }): Promise<void> => {
 	if (isNullish(identity)) {

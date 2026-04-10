@@ -18,7 +18,7 @@ import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -26,7 +26,12 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import type { TokensSortType } from '$lib/types/tokens-sort';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { areAddressesPartiallyEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
+import {
+	areAddressesEqual,
+	areAddressesPartiallyEqual,
+	getCaseSensitiveness
+} from '$lib/utils/address.utils';
+import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -120,13 +125,14 @@ const createNetworkComparator =
  * 1. Deprecation status (non-deprecated tokens first).
  * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
  * 3. USD balance (descending).
- * 4. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
- * 5. Token symbol (ascending, locale-aware).
- * 6. Token name (ascending, locale-aware).
- * 7. Networks according to the provided `networkComparator` (which can implement pinning or any other network prioritisation logic).
- * 8. Network name (ascending, locale-aware).
- * 9. Token balance (descending).
- * 10. USD market cap (descending).
+ * 4. If both USD balances are zero: tokens with a non-zero (native/unit) balance first (no further ordering from this rule).
+ * 5. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
+ * 6. Token symbol (ascending, locale-aware).
+ * 7. Token name (ascending, locale-aware).
+ * 8. Networks according to the provided `networkComparator` (which can implement pinning or any other network prioritisation logic).
+ * 9. Network name (ascending, locale-aware).
+ * 10. Token balance (descending).
+ * 11. USD market cap (descending).
  *
  * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
@@ -192,9 +198,30 @@ const createTokenComparator =
 
 		// Tie-breaker after primary strategy
 		// USD Balance descending
-		const usdBalanceDiff = (bUsdBalance ?? 0) - (aUsdBalance ?? 0);
+		const aUsdBalanceForTie = aUsdBalance ?? 0;
+		const bUsdBalanceForTie = bUsdBalance ?? 0;
+		const usdBalanceDiff = bUsdBalanceForTie - aUsdBalanceForTie;
 		if (usdBalanceDiff !== 0) {
 			return usdBalanceDiff;
+		}
+
+		// If both tokens have zero USD balance, prioritise tokens that still have a non-zero (native/unit) balance.
+		// This only separates “has any balance” vs “true zero”; it does not impose any further ordering.
+		if (aUsdBalanceForTie === 0 && bUsdBalanceForTie === 0) {
+			const aHasBalance = nonNullish(aBalance);
+			const bHasBalance = nonNullish(bBalance);
+			if (aHasBalance !== bHasBalance) {
+				return aHasBalance ? -1 : 1;
+			}
+			if (aHasBalance && bHasBalance) {
+				const aVal = aBalance;
+				const bVal = bBalance;
+				const aIsZero = aVal === ZERO;
+				const bIsZero = bVal === ZERO;
+				if (aIsZero !== bIsZero) {
+					return aIsZero ? 1 : -1; // non-zero first
+				}
+			}
 		}
 
 		// Pinned tokens (pinned first; pinned order = order provided)
@@ -258,13 +285,14 @@ export function sortTokens(params: {
  * 1. Deprecation status (non-deprecated tokens first).
  * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
  * 3. USD balance (descending).
- * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
- * 5. Token symbol (ascending, locale-aware).
- * 6. Token name (ascending, locale-aware).
- * 7. Networks according to pinning (pinned networks first, preserving the order provided in `$networksToPin`).
- * 8. Network name (ascending, locale-aware).
- * 9. Token balance (descending).
- * 10. USD market cap (descending).
+ * 4. If both USD balances are zero: tokens with a non-zero (native/unit) balance first (no further ordering from this rule).
+ * 5. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
+ * 6. Token symbol (ascending, locale-aware).
+ * 7. Token name (ascending, locale-aware).
+ * 8. Networks according to pinning (pinned networks first, preserving the order provided in `$networksToPin`).
+ * 9. Network name (ascending, locale-aware).
+ * 10. Token balance (descending).
+ * 11. USD market cap (descending).
  *
  * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
@@ -581,7 +609,7 @@ export const saveAllCustomTokens = async ({
 	modalNext?: () => void;
 	onSuccess?: () => void;
 	onError?: () => void;
-	$authIdentity: OptionIdentity;
+	$authIdentity: NullishIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
 	const tokensWithKey = normalizeTokensForSave(tokens);
@@ -606,13 +634,13 @@ export const saveAllCustomTokens = async ({
 	});
 };
 
-export const filterTokensByNft = ({
+export const filterTokensByNft = <T extends Token>({
 	tokens,
 	filterNfts
 }: {
-	tokens: Token[];
+	tokens: T[];
 	filterNfts?: boolean;
-}): Token[] =>
+}): T[] =>
 	isNullish(filterNfts)
 		? tokens
 		: tokens.filter((t) => {
@@ -703,4 +731,57 @@ export const getCodebaseTokenIconPath = <T extends Token>({
 
 		return `/icons/${networkSymbol}/${identifier}.${extension}`;
 	}
+};
+
+export const findPutativeToken = <T extends Token>({
+	tokens,
+	identifier
+}: {
+	tokens: T[];
+	identifier: string | undefined;
+}): T | undefined =>
+	nonNullish(identifier) && tokens.length > 0
+		? tokens.find((t) => {
+				const address2 = getTokenIdentifier(t);
+
+				return areAddressesEqual({
+					address1: identifier,
+					address2,
+					networkId: t.network.id
+				});
+			})
+		: undefined;
+
+/**
+ * Compares two token arrays by length, token identity (symbol id),
+ * and — for toggleable tokens — the `enabled` flag.
+ * Fast O(n) check — catches the common case of identical token lists
+ * produced from unchanged inputs.
+ */
+// eslint-disable-next-line local-rules/prefer-object-params -- Being a comparison function, it's more ergonomic to take two separate arrays than an object param with two arrays.
+export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolean => {
+	if (a.length !== b.length) {
+		return false;
+	}
+
+	return a.every((item, i) => {
+		const other = b[i];
+
+		if (item.id !== other.id) {
+			return false;
+		}
+
+		const itemHasEnabled = 'enabled' in item;
+		const otherHasEnabled = 'enabled' in other;
+
+		if (itemHasEnabled !== otherHasEnabled) {
+			return false;
+		}
+
+		if (itemHasEnabled && otherHasEnabled) {
+			return (item as { enabled: unknown }).enabled === (other as { enabled: unknown }).enabled;
+		}
+
+		return true;
+	});
 };

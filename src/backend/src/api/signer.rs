@@ -1,17 +1,23 @@
-use ic_cdk::update;
+use candid::Nat;
+use ic_cdk::{
+    api::{is_controller, msg_caller, time},
+    update,
+};
 use shared::types::{
     pow::AllowSigningStatus,
     result_types::{AllowSigningResult, GetAllowedCyclesResult},
     signer::{
         topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-        AllowSigningError, AllowSigningResponse, GetAllowedCyclesResponse,
+        AllowSigningError, AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
     },
 };
 
 use crate::{
-    guards::{caller_is_controller, caller_is_not_anonymous},
-    housekeeping::ALLOW_SIGNING_RATE_LIMITER,
-    rate_limiter, signer,
+    delegation, signer,
+    utils::{
+        guards::{caller_is_controller, caller_is_not_anonymous},
+        rate_limiter::{self, ALLOW_SIGNING_GUARD_LIMITER, ALLOW_SIGNING_RATE_LIMITER},
+    },
 };
 
 /// Adds cycles to the cycles ledger, if it is below a certain threshold.
@@ -43,33 +49,72 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
     }
 }
 
-/// This function authorises the caller to spend a specific
-///  amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
-/// providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
-/// cycles ledger.
+/// Ensures the caller has enough cycles allowance for chain-fusion signer
+/// operations (providing public keys, creating signatures, etc.).
 ///
-/// Note:
-/// - The chain fusion signer performs threshold key operations including providing public keys,
-///   creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+/// Requires a valid II delegation chain to verify the caller authenticated
+/// through Internet Identity. Controllers bypass this check.
+///
+/// If the caller already has sufficient allowance the call returns
+/// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
+/// call is made.  Otherwise, the endpoint is rate-limited and a new
+/// `icrc_2_approve` is issued on the cycles ledger.
+///
+/// # Rate limiting
+/// Two rate limiters are applied in order:
+/// 1. **Guard limiter** – a high-frequency limiter (10 calls/min) checked *before* any
+///    inter-canister call to cheaply reject bursts that would drain cycles.
+/// 2. **Business limiter** – the stricter per-caller limit (3 calls/hour) for normal usage.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub async fn allow_signing() -> AllowSigningResult {
-    async fn inner() -> Result<AllowSigningResponse, AllowSigningError> {
+pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
+    async fn inner(
+        request: Option<AllowSigningRequest>,
+    ) -> Result<AllowSigningResponse, AllowSigningError> {
+        ALLOW_SIGNING_GUARD_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(AllowSigningError::RateLimitedByGuard)?;
+
+        let principal = msg_caller();
+        let now_ns = time();
+
+        let (ii_canister_ids, root_key, guard_enabled) = delegation::read_ii_verification_config();
+        delegation::require_ii_delegation(
+            request
+                .as_ref()
+                .and_then(|r| r.ii_delegation_chain.as_ref()),
+            is_controller(&principal),
+            principal,
+            &ii_canister_ids,
+            &root_key,
+            now_ns,
+            guard_enabled,
+        )
+        .map_err(|msg| AllowSigningError::InvalidDelegationChain { msg })?;
+
+        if let Some(current) = signer::has_sufficient_allowance().await {
+            return Ok(AllowSigningResponse {
+                status: AllowSigningStatus::Skipped,
+                allowed_cycles: current,
+            });
+        }
+
         ALLOW_SIGNING_RATE_LIMITER
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(AllowSigningError::RateLimited)?;
 
-        // Passing None to apply the old cycle calculation logic
-        signer::allow_signing(None).await?;
+        signer::approve_signing().await?;
 
-        // Returning a placeholder response that can be ignored by the frontend.
+        let allowed_cycles = signer::has_sufficient_allowance()
+            .await
+            .unwrap_or_else(|| Nat::from(0u64));
+
         Ok(AllowSigningResponse {
-            status: AllowSigningStatus::Skipped,
-            allowed_cycles: 0u64,
-            challenge_completion: None,
+            status: AllowSigningStatus::Executed,
+            allowed_cycles,
         })
     }
-    inner().await.into()
+    inner(request).await.into()
 }

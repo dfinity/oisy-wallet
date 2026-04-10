@@ -5,6 +5,7 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import { ckUsdcConversionDisabled } from '$icp-eth/derived/cketh.derived';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -28,42 +29,46 @@
 <ContentWithToolbar>
 	<IcReceiveWalletAddress {onQRCode} />
 
-	<Hr spacing="lg" />
+	{#if !$ckUsdcConversionDisabled}
+		<Hr spacing="lg" />
 
-	<Value element="div" ref="ethereum-helper-contract">
-		{#snippet label()}
-			{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
-				$network: $ckEthereumTwinTokenNetwork.name
-			})}
-		{/snippet}
+		<Value element="div" ref="ethereum-helper-contract">
+			{#snippet label()}
+				{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
+					$network: $ckEthereumTwinTokenNetwork.name
+				})}
+			{/snippet}
 
-		{#snippet content()}
-			<p class="py-2 break-normal text-tertiary">
-				{replacePlaceholders(
-					replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
-					{
-						$token: $ckEthereumTwinToken.symbol,
-						$ckToken: $token.symbol,
-						$network: $ckEthereumTwinTokenNetwork.name
-					}
-				)}
-			</p>
-		{/snippet}
-	</Value>
+			{#snippet content()}
+				<p class="py-2 break-normal text-tertiary">
+					{replacePlaceholders(
+						replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
+						{
+							$token: $ckEthereumTwinToken.symbol,
+							$ckToken: $token.symbol,
+							$network: $ckEthereumTwinTokenNetwork.name
+						}
+					)}
+				</p>
+			{/snippet}
+		</Value>
+	{/if}
 
 	{#snippet toolbar()}
 		<div class="flex w-full flex-col gap-3">
-			<Button colorStyle="secondary" onclick={onHowToConvert} paddingSmall>
-				<span class="text-dark-slate-blue font-bold"
-					>{replacePlaceholders(
-						replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
-						{
-							$token: $ckEthereumTwinToken.symbol,
-							$ckToken: $token.symbol
-						}
-					)}</span
-				>
-			</Button>
+			{#if !$ckUsdcConversionDisabled}
+				<Button colorStyle="secondary" onclick={onHowToConvert} paddingSmall>
+					<span class="text-dark-slate-blue font-bold"
+						>{replacePlaceholders(
+							replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
+							{
+								$token: $ckEthereumTwinToken.symbol,
+								$ckToken: $token.symbol
+							}
+						)}</span
+					>
+				</Button>
+			{/if}
 
 			<ButtonDone onclick={close} />
 		</div>

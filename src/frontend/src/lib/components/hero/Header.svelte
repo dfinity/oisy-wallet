@@ -4,7 +4,6 @@
 	import { UNIVERSAL_SCANNER_ENABLED } from '$env/universal-scanner.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
-	import HelpMenu from '$lib/components/core/HelpMenu.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
@@ -26,7 +25,6 @@
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
 	let networkSwitcherOpen = $state(false);
-	let helpMenuOpen = $state(false);
 	let menuOpen = $state(false);
 
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
@@ -35,7 +33,7 @@
 		$modalWalletConnect || $modalUniversalScannerOpen || $modalPayDialogOpen
 	);
 
-	let biggerOverlay = $derived(menuOpen || networkSwitcherOpen || helpMenuOpen || modalsOpen);
+	let biggerOverlay = $derived(menuOpen || networkSwitcherOpen || modalsOpen);
 
 	// When WalletConnect tries to connect, it adds the "Disconnect" label, increasing the width of the header.
 	// That causes the screen to expand, without auto-zooming, and the modals overflow outside of the screen.
@@ -45,6 +43,7 @@
 </script>
 
 <header
+	style="view-transition-name: header"
 	class="pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:1.5xl:fixed={$authSignedIn}
 	class:1.5xl:inset-x-0={$authSignedIn}
@@ -86,8 +85,6 @@
 		{/if}
 
 		{#if $authSignedIn}
-			<HelpMenu bind:visible={helpMenuOpen} />
-
 			<Menu bind:visible={menuOpen} />
 		{:else}
 			<div class="mr-2 flex justify-end gap-3 sm:gap-5 md:mr-0">

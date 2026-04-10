@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -16,9 +15,12 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token } from '$lib/types/token';
+	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import type { TokenUi } from '$lib/types/token-ui';
+	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { sortTokens } from '$lib/utils/tokens.utils';
 
@@ -34,14 +36,24 @@
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
-	let tokensUi: TokenUi[] = $derived(
-		[
-			{ ...ICP_TOKEN, enabled: true },
-			...$allSortedIcrcTokens,
-			...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
-		]
-			.filter((token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id)
-			.map((token: Token) =>
+	let allSwapTokens: TokenToggleable<Token>[] = $derived(
+		filterSwapTokens({
+			tokens: [
+				{ ...ICP_TOKEN, enabled: true },
+				...$allSortedIcrcTokens,
+				...$allCrossChainSwapTokens
+			],
+			supportedData: $swapSupportedTokensStore
+		})
+	);
+
+	let tokensUi: TokenToggleable<TokenUi>[] = $derived(
+		allSwapTokens
+			.filter(
+				(token: TokenToggleable<Token>) =>
+					token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
+			)
+			.map((token: TokenToggleable<Token>) =>
 				mapTokenUi({
 					token,
 					$balances: $balancesStore,
@@ -68,11 +80,7 @@
 	};
 </script>
 
-<ModalTokensList
-	networkSelectorViewOnly={!VELORA_SWAP_ENABLED}
-	{onSelectNetworkFilter}
-	{onTokenButtonClick}
->
+<ModalTokensList {onSelectNetworkFilter} {onTokenButtonClick}>
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />
 	{/snippet}

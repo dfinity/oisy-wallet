@@ -11,11 +11,10 @@ import {
 	transactionFee,
 	transfer
 } from '$icp/api/icrc-ledger.api';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
-import { toNullable } from '@dfinity/utils';
+import { nowInBigIntNanoSeconds, toNullable } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
 	IcrcMetadataResponseEntries,
@@ -25,9 +24,13 @@ import {
 } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn()
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('icrc-ledger.api', () => {
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
@@ -77,7 +80,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(metadata({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(metadata({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -115,7 +118,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transactionFee({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(transactionFee({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -160,7 +163,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(balance({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(balance({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -219,7 +222,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transfer({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -282,7 +285,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(approve({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(approve({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -471,7 +474,7 @@ describe('icrc-ledger.api', () => {
 					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
 					identity: undefined
 				})
-			).rejects.toThrowError();
+			).rejects.toThrow();
 		});
 	});
 
@@ -517,7 +520,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getBlocks({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(getBlocks({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -558,9 +561,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(
-				icrc1SupportedStandards({ ...params, identity: undefined })
-			).rejects.toThrowError();
+			await expect(icrc1SupportedStandards({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -601,9 +602,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(
-				icrc10SupportedStandards({ ...params, identity: undefined })
-			).rejects.toThrowError();
+			await expect(icrc10SupportedStandards({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -645,7 +644,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getMintingAccount({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(getMintingAccount({ ...params, identity: undefined })).rejects.toThrow();
 		});
 
 		it('returns undefined if getMintingAccount throws', async () => {

@@ -3,7 +3,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Address } from '$lib/types/address';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -11,7 +11,7 @@ import { get } from 'svelte/store';
 
 export interface LoadTokenAddressParams<T extends Address> {
 	networkId: NetworkId;
-	getAddress: (identity: OptionIdentity) => Promise<T>;
+	getAddress: (identity: NullishIdentity) => Promise<T>;
 	addressStore: AddressStore<T>;
 }
 

@@ -1,6 +1,6 @@
 import { getMintingAccount } from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { isNullish } from '@dfinity/utils';
 import { encodeIcrcAccount, type IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 
@@ -9,7 +9,7 @@ export const isUserMintingAccount = async ({
 	account,
 	token: { ledgerCanisterId, mintingAccount: tokenMintingAccount }
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	account: IcrcAccount | undefined;
 	token: IcToken;
 }): Promise<boolean> => {

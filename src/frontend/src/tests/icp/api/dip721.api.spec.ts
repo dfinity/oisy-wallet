@@ -86,7 +86,7 @@ describe('dip721.api', () => {
 
 			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(mockError);
 
-			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
+			await expect(getTokensByOwner(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
@@ -123,7 +123,7 @@ describe('dip721.api', () => {
 
 			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError);
 
-			await expect(transfer(params)).rejects.toThrowError(mockError);
+			await expect(transfer(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});

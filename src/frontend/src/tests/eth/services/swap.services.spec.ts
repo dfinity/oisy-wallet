@@ -153,6 +153,7 @@ describe('swap.services', () => {
 
 			expect(processTransactionSent).toHaveBeenCalledOnce();
 			expect(processTransactionSent).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
 				token: ETHEREUM_TOKEN,
 				transaction: mockTransactionResponse
 			});
@@ -212,9 +213,7 @@ describe('swap.services', () => {
 				transaction: { ...mockTransactionParams, gas: null as unknown as string }
 			};
 
-			await expect(swap(paramsWithNullishGas)).rejects.toThrowError(
-				en.send.error.erc20_data_undefined
-			);
+			await expect(swap(paramsWithNullishGas)).rejects.toThrow(en.send.error.erc20_data_undefined);
 
 			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
 			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
@@ -224,7 +223,7 @@ describe('swap.services', () => {
 		it('should handle error when getting transaction count', async () => {
 			mockGetTransactionCount.mockRejectedValue(mockError);
 
-			await expect(swap(mockSwapParams)).rejects.toThrowError(mockError);
+			await expect(swap(mockSwapParams)).rejects.toThrow(mockError);
 
 			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
 			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
@@ -235,7 +234,7 @@ describe('swap.services', () => {
 		it('should handle error when signing transaction', async () => {
 			vi.mocked(signTransaction).mockRejectedValue(mockError);
 
-			await expect(swap(mockSwapParams)).rejects.toThrowError(mockError);
+			await expect(swap(mockSwapParams)).rejects.toThrow(mockError);
 
 			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
 			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
@@ -247,7 +246,7 @@ describe('swap.services', () => {
 		it('should handle error when sending transaction', async () => {
 			mockSendTransaction.mockRejectedValue(mockError);
 
-			await expect(swap(mockSwapParams)).rejects.toThrowError(mockError);
+			await expect(swap(mockSwapParams)).rejects.toThrow(mockError);
 
 			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
 			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);

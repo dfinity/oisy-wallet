@@ -34,6 +34,7 @@ interface TransactionsParams {
 	address: EthAddress;
 	startBlock?: BlockTag;
 	endBlock?: BlockTag;
+	sort?: 'asc' | 'desc';
 }
 
 export class EtherscanProvider {
@@ -53,14 +54,15 @@ export class EtherscanProvider {
 	private async getHistory({
 		address,
 		startBlock,
-		endBlock
+		endBlock,
+		sort
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
 			action: 'txlist',
 			address,
 			startblock: startBlock ?? 0,
 			...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
-			sort: 'asc'
+			sort: sort ?? 'asc'
 		};
 
 		const result: EtherscanProviderTransaction[] = await this.provider.fetch('account', params);
@@ -76,6 +78,7 @@ export class EtherscanProvider {
 				value,
 				gas,
 				gasPrice,
+				gasUsed,
 				input: data
 			}: EtherscanProviderTransaction): Transaction => ({
 				hash,
@@ -86,6 +89,7 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				value: BigInt(value),
 				chainId: this.chainId,
 				data
@@ -97,14 +101,15 @@ export class EtherscanProvider {
 	private async getInternalHistory({
 		address,
 		startBlock,
-		endBlock
+		endBlock,
+		sort
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
 			action: 'txlistinternal',
 			address,
 			startblock: startBlock ?? 0,
 			...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
-			sort: 'asc'
+			sort: sort ?? 'asc'
 		};
 
 		const result: EtherscanProviderInternalTransaction[] = await this.provider.fetch(
@@ -173,6 +178,7 @@ export class EtherscanProvider {
 				nonce,
 				gas,
 				gasPrice,
+				gasUsed,
 				hash,
 				blockNumber,
 				timeStamp,
@@ -189,6 +195,7 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				value: BigInt(value),
 				chainId: this.chainId,
 				data
@@ -224,6 +231,7 @@ export class EtherscanProvider {
 				nonce,
 				gas,
 				gasPrice,
+				gasUsed,
 				hash,
 				blockNumber,
 				timeStamp,
@@ -242,6 +250,7 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				chainId: this.chainId,
 				data
 			})
@@ -276,6 +285,7 @@ export class EtherscanProvider {
 				nonce,
 				gas,
 				gasPrice,
+				gasUsed,
 				hash,
 				blockNumber,
 				timeStamp,
@@ -295,6 +305,7 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				chainId: this.chainId,
 				data
 			})

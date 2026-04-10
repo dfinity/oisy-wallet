@@ -83,6 +83,7 @@ const sendTransaction = async ({
 export const swap = async ({
 	progress,
 	token,
+	identity,
 	transaction,
 	from,
 	sourceNetwork,
@@ -102,13 +103,14 @@ export const swap = async ({
 		progress,
 		nonce,
 		token,
+		identity,
 		from,
 		transaction,
 		sourceNetwork,
 		...rest
 	});
 
-	processTransactionSent({ token, transaction: transactionSent });
+	processTransactionSent({ identity, token, transaction: transactionSent });
 
 	return { hash: transactionSent.hash };
 };

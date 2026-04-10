@@ -11,17 +11,23 @@
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
+	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
+	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
+	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
@@ -39,6 +45,7 @@
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -142,15 +149,6 @@
 			</ButtonMenu>
 
 			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.refer_a_friend}
-				onclick={() => modalStore.openReferralCode(referralModalId)}
-				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-			>
-				<IconShare size="20" />
-				{$i18n.navigation.text.refer_a_friend}
-			</ButtonMenu>
-
-			<ButtonMenu
 				ariaLabel={$isPrivacyMode
 					? $i18n.navigation.alt.show_balances
 					: $i18n.navigation.alt.hide_balances}
@@ -166,6 +164,29 @@
 					{$i18n.navigation.text.hide_balances}
 				{/if}
 			</ButtonMenu>
+
+			<Hr />
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.refer_a_friend}
+				onclick={() => modalStore.openReferralCode(referralModalId)}
+				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
+			>
+				<IconShare size="20" />
+				{$i18n.navigation.text.refer_a_friend}
+			</ButtonMenu>
+
+			<ExternalLink
+				ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.support)}
+				asMenuItem
+				asMenuItemCondensed
+				href={OISY_SUPPORT_URL}
+				iconVisible={false}
+				testId={NAVIGATION_MENU_SUPPORT_BUTTON}
+			>
+				<IconHelpCircle />
+				{$i18n.navigation.text.support}
+			</ExternalLink>
 
 			<Hr />
 
@@ -210,8 +231,16 @@
 	{#if $authSignedIn}
 		<Hr />
 
-		<div class="flex max-w-80 flex-col pt-3">
+		<div class="my-4 flex max-w-80 flex-col">
 			<LockOrSignOut onHidePopover={hidePopover} />
 		</div>
 	{/if}
+
+	<Hr />
+
+	<div class="mt-4 flex justify-center gap-2 text-xs text-nowrap text-tertiary">
+		<TermsOfUseLink />
+		<PrivacyPolicyLink />
+		<LicenseAgreementLink />
+	</div>
 </Popover>

@@ -1,23 +1,21 @@
 use std::collections::HashSet;
 
 use candid::Principal;
-use ic_cdk::api::management_canister::bitcoin::Utxo;
+use ic_cdk::bitcoin_canister::Utxo;
 use shared::types::bitcoin::StoredPendingTransaction;
 
 use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
 
-#[allow(dead_code)]
 const MAX_PENDING_TRANSACTIONS: usize = 1000;
-#[allow(dead_code)]
+
 const MAX_ADDRESS_COUNT_PER_USER: usize = 20;
-#[allow(dead_code)]
+
 const HOUR_IN_NS: u64 = 60 * 60 * 1_000_000_000;
 
 // With this structure, if multiple users share the same address
 // they wouldn't share the pending transactions.
 // This is not possible with the current implementation of the addresses in CFS.
 // But something to have in mind for the future.
-#[allow(dead_code)]
 pub struct BtcUserPendingTransactionsModel<'a> {
     /// Map of `user_principal` to `PendingTransactionsMap`;
     pending_transactions_map: &'a mut BtcUserPendingTransactionsMap,
@@ -28,7 +26,6 @@ pub struct BtcUserPendingTransactionsModel<'a> {
 }
 
 impl<'a> BtcUserPendingTransactionsModel<'a> {
-    #[allow(dead_code)]
     pub fn new(
         pending_transactions_map: &'a mut BtcUserPendingTransactionsMap,
         max_pending_txs: Option<usize>,
@@ -42,7 +39,6 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     }
 
     /// Returns the pending transactions of a specific principal per address.
-    #[allow(dead_code)]
     pub fn get_pending_transactions(
         &self,
         principal: &Principal,
@@ -57,7 +53,6 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
 
     /// Adds a pending transaction for a specific principal and address.
     /// It has a limit of storable transactions set on init.
-    #[allow(dead_code)]
     pub fn add_pending_transaction(
         &mut self,
         principal: Principal,
@@ -92,14 +87,13 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     /// Prunes pending transactions for a specific principal.
     /// A pending transaction can be pruned for two reasons:
     /// - Transaction is older than 1 hour. We consider that if a pending transaction is older than
-    ///   one hour it means it failed and we can free to utxos to be used again.
+    ///   one hour it means it failed, and we can free to utxos to be used again.
     /// - None of the transaction's utxos are present in the current utxos list. We use the pending
-    ///   transactions to avoid double spending. Once we know that a utxos is not available, we can
+    ///   transactions to avoid double spending. Once we know that an utxos is not available, we can
     ///   remove the pending transaction. Normally, all utxos of a pending transaction should be
     ///   present or not. Partial presence could happen if the utxos of a pending transaction were
     ///   not really used in the transaction. We don't remove in partial presence because, in the
     ///   end, partial presence will be temporary for one hour.
-    #[allow(dead_code)]
     pub fn prune_pending_transactions(
         &mut self,
         principal: Principal,
@@ -191,19 +185,23 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
 mod tests {
     use std::{cell::RefCell, collections::HashMap, sync::LazyLock};
 
-    use ic_cdk::api::management_canister::bitcoin::Outpoint;
+    use candid::Principal;
+    use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
     };
+    use pretty_assertions::assert_eq;
+    use shared::types::bitcoin::StoredPendingTransaction;
 
-    use super::*;
+    use super::{BtcUserPendingTransactionsModel, HOUR_IN_NS};
+    use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
 
     const TXID_A: &[u8] = &[0xAA; 32];
     const TXID_B: &[u8] = &[0xBB; 32];
     const TXID_C: &[u8] = &[0xCC; 32];
 
-    const UTXO_1: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_1: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_A.to_vec(),
             vout: 0,
@@ -211,7 +209,7 @@ mod tests {
         value: 1000,
         height: 100,
     });
-    const UTXO_2: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_2: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_A.to_vec(),
             vout: 1,
@@ -219,7 +217,7 @@ mod tests {
         value: 2000,
         height: 120,
     });
-    const UTXO_3: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_3: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_B.to_vec(),
             vout: 2,
@@ -227,7 +225,7 @@ mod tests {
         value: 3000,
         height: 150,
     });
-    const UTXO_4: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_4: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_B.to_vec(),
             vout: 2,
@@ -235,7 +233,7 @@ mod tests {
         value: 8000,
         height: 160,
     });
-    const UTXO_5: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_5: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_C.to_vec(),
             vout: 9,

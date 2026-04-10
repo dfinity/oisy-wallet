@@ -1,20 +1,92 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
+	BtcGetPendingTransactionsError,
 	GetAllowedCyclesError,
+	RateLimitError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+import { assertNever } from '@dfinity/utils';
 import { mapIcrc2ApproveError, type ApproveError } from '@icp-sdk/canisters/ledger/icp';
 
-export const mapBtcPendingTransactionError = (
+// eslint-disable-next-line local-rules/prefer-object-params -- this util is more meaningful with separate parameters instead of an object
+const assertNeverOr = <T>(value: never, fallback: T): T => {
+	try {
+		assertNever(value);
+	} catch {
+		// If a new/untracked variant arrives at runtime, assertNever will throw.
+		// We deliberately return the fallback instead of crashing.
+	}
+
+	return fallback;
+};
+
+const mapRateLimitError = (err: RateLimitError): CanisterInternalError => {
+	const { max_calls: maxCalls, window_ns: windowNs } = err;
+
+	const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+	return new CanisterInternalError(
+		`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+	);
+};
+
+export const mapBtcAddPendingTransactionError = (
 	err: BtcAddPendingTransactionError
 ): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
 	}
 
-	return new CanisterInternalError('Unknown BtcAddPendingTransactionError');
+	if ('InvalidUtxos' in err) {
+		return new CanisterInternalError('The provided UTXOs are invalid.');
+	}
+
+	if ('EmptyUtxos' in err) {
+		return new CanisterInternalError('No UTXOs provided.');
+	}
+
+	if ('DuplicateUtxos' in err) {
+		return new CanisterInternalError('Duplicate UTXOs provided.');
+	}
+
+	if ('UtxosAlreadyReserved' in err) {
+		return new CanisterInternalError('Some of the provided UTXOs are already reserved.');
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcAddPendingTransactionError'));
+};
+
+export const mapBtcGetPendingTransactionsError = (
+	err: BtcGetPendingTransactionsError
+): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetPendingTransactionsError'));
 };
 
 export const mapBtcSelectUserUtxosFeeError = (
@@ -30,7 +102,17 @@ export const mapBtcSelectUserUtxosFeeError = (
 		);
 	}
 
-	return new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError');
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
 };
 
 export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterInternalError => {
@@ -42,7 +124,7 @@ export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterIn
 		return new CanisterInternalError(err.Other);
 	}
 
-	return new CanisterInternalError('Unknown GetAllowedCyclesError');
+	return assertNeverOr(err, new CanisterInternalError('Unknown GetAllowedCyclesError'));
 };
 
 export const mapAllowSigningError = (
@@ -56,9 +138,29 @@ export const mapAllowSigningError = (
 		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
 	}
 
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('RateLimitedByGuard' in err) {
+		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimitedByGuard;
+
+		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+		return new CanisterInternalError(
+			`Guard rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+		);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}
 
-	return new CanisterInternalError('An uknown error occurred.');
+	return assertNeverOr(err, new CanisterInternalError('Unknown AllowSigningError'));
 };

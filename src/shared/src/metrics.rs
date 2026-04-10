@@ -4,7 +4,7 @@
 use core::arch::wasm32::memory_size as wasm_memory_size;
 
 #[cfg(target_arch = "wasm32")]
-use ic_cdk::api::stable::stable_size;
+use ic_cdk::stable::stable_size;
 use ic_metrics_encoder::MetricsEncoder;
 use serde_bytes::ByteBuf;
 
@@ -58,7 +58,7 @@ fn encode_metrics(w: &mut MetricsEncoder<Vec<u8>>) -> std::io::Result<()> {
         gibibytes(wasm_memory_size_bytes()),
         "Amount of wasm memory used by this canister, in GiB",
     )?;
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss)]
     w.encode_gauge(
         "ic_eth_wallet_wasm_memory_size_bytes",
         wasm_memory_size_bytes() as f64,
@@ -94,7 +94,7 @@ fn wasm_memory_size_bytes() -> u64 {
 }
 
 /// Convert bytes to binary gigabytes
-#[allow(clippy::cast_precision_loss)]
+#[expect(clippy::cast_precision_loss)]
 fn gibibytes(bytes: u64) -> f64 {
     (bytes as f64) / f64::from(GIBIBYTE)
 }

@@ -1,24 +1,28 @@
-import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
-import {
-	GLDT_STAKE_CONTEXT_KEY,
-	initGldtStakeStore,
-	type GldtStakeContext
-} from '$icp/stores/gldt-stake.store';
-import type { IcToken } from '$icp/types/ic-token';
+import { BAUTOPILOT_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc4626/tokens.bautopilot_usdc.env';
 import UnstakeWizard from '$lib/components/stake/UnstakeWizard.svelte';
-import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
 import { WizardStepsUnstake } from '$lib/enums/wizard-steps';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import type { Vault } from '$lib/types/vaults';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
+vi.mock('$eth/services/eth-listener.services', () => ({
+	initMinedTransactionsListener: vi.fn(() => ({
+		disconnect: vi.fn()
+	}))
+}));
+
 describe('UnstakeWizard', () => {
-	const mockContext = (token: IcToken) =>
-		new Map<symbol, SendContext | GldtStakeContext>([
-			[SEND_CONTEXT_KEY, initSendContext({ token })],
-			[GLDT_STAKE_CONTEXT_KEY, { store: initGldtStakeStore() }]
+	const mockContext = () =>
+		new Map<symbol, SendContext>([
+			[SEND_CONTEXT_KEY, initSendContext({ token: BAUTOPILOT_USDC_TOKEN })]
 		]);
+
+	const mockVault: Vault = {
+		token: { ...BAUTOPILOT_USDC_TOKEN, enabled: true },
+		apy: '5.5'
+	};
 
 	const props = {
 		amount: 0.001,
@@ -36,23 +40,27 @@ describe('UnstakeWizard', () => {
 		vi.resetAllMocks();
 	});
 
-	it('renders GLDT token wizard', () => {
-		const { getByTestId } = render(UnstakeWizard, {
-			props,
-			context: mockContext({
-				...mockValidIcrcToken,
-				symbol: 'GLDT',
-				ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
-			})
-		});
-
-		expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).toBeInTheDocument();
-	});
-
 	it('renders unsupported staking message', () => {
 		const { container } = render(UnstakeWizard, {
-			props,
-			context: mockContext(mockValidIcrcToken)
+			props
+		});
+
+		expect(container).toHaveTextContent(en.stake.text.unsupported_token_staking);
+	});
+
+	it('renders HarvestUnstakeWizard when vault is harvest autopilot', () => {
+		const { container } = render(UnstakeWizard, {
+			props: { ...props, vault: mockVault },
+			context: mockContext()
+		});
+
+		expect(container).not.toHaveTextContent(en.stake.text.unsupported_token_staking);
+		expect(container).toHaveTextContent(en.send.text.review);
+	});
+
+	it('renders unsupported message when vault token is not harvest autopilot', () => {
+		const { container } = render(UnstakeWizard, {
+			props: { ...props, vault: { token: mockValidIcrcToken, apy: '1.0' } as unknown as Vault }
 		});
 
 		expect(container).toHaveTextContent(en.stake.text.unsupported_token_staking);

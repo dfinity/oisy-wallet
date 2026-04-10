@@ -8,6 +8,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as nftsServices from '$lib/services/nft.services';
+import { modalStore } from '$lib/stores/modal.store';
 import { nftStore } from '$lib/stores/nft.store';
 import { screensStore } from '$lib/stores/screens.store';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -100,6 +101,50 @@ describe('NftSpamButton', () => {
 		const svg = spamBtn.querySelector('svg.spinner');
 
 		expect(svg).toBeInTheDocument();
+	});
+
+	it('should track error event and show toast when updateNftSection fails', async () => {
+		nftStore.addAll([mockNft]);
+		vi.spyOn(nftsServices, 'updateNftSection').mockRejectedValue(new Error('Network error'));
+
+		const { getByTestId } = render(NftSpamButton, {
+			props: { token: mockToken, source: 'collection' }
+		});
+
+		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_SPAM);
+		await fireEvent.click(spamBtn);
+
+		await waitFor(() => {
+			expect(trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
+					metadata: expect.objectContaining({
+						result_status: 'error'
+					})
+				})
+			);
+		});
+	});
+
+	it('should open NftImageConsent modal when savedToken is returned and modal is open', async () => {
+		nftStore.addAll([mockNft]);
+		const savedToken = { ...mockToken, section: CustomTokenSection.SPAM };
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(savedToken);
+
+		modalStore.openNftImageConsent({ id: Symbol(), data: mockNft.collection });
+
+		const openNftImageConsentSpy = vi.spyOn(modalStore, 'openNftImageConsent');
+
+		const { getByTestId } = render(NftSpamButton, {
+			props: { token: mockToken, source: 'collection' }
+		});
+
+		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_SPAM);
+		await fireEvent.click(spamBtn);
+
+		await waitFor(() => {
+			expect(openNftImageConsentSpy).toHaveBeenCalled();
+		});
 	});
 
 	it('should track event with "spam" action when spam button is clicked', async () => {

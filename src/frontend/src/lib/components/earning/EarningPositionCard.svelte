@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -10,12 +11,13 @@
 	interface Props {
 		earningYearlyAmountUsd: number;
 		earningPositionsUsd: number;
+		buttons?: Snippet;
 	}
 
-	let { earningPositionsUsd, earningYearlyAmountUsd }: Props = $props();
+	let { earningPositionsUsd, earningYearlyAmountUsd, buttons }: Props = $props();
 </script>
 
-<StakeContentCard>
+<StakeContentCard {buttons}>
 	{#snippet content()}
 		<div class="text-sm font-bold">{$i18n.stake.text.active_earning}</div>
 

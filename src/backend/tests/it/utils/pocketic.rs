@@ -1,15 +1,9 @@
 //! Utilities for setting up a test environment using `PocketIC`.
 pub mod pic_canister;
-use std::{
-    env,
-    fs::read,
-    ops::RangeBounds,
-    sync::Arc,
-    time::{Duration, UNIX_EPOCH},
-};
+use std::{env, fs::read, ops::RangeBounds, sync::Arc, time::Duration};
 
 use candid::{encode_one, CandidType, Principal};
-use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+use ic_cdk::bitcoin_canister::Network as BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{PocketIc, PocketIcBuilder};
@@ -162,7 +156,7 @@ impl BackendBuilder {
             index_id: None,
         };
 
-        encode_one(&LedgerArgs::Init(init_config)).unwrap()
+        encode_one(LedgerArgs::Init(init_config)).unwrap()
     }
 
     /// The default argument to pass to the backend canister.
@@ -217,16 +211,22 @@ impl Default for BackendBuilder {
 // Customisation
 impl BackendBuilder {
     /// Sets custom controllers for the backend canister.
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn with_controllers(mut self, controllers: Vec<Principal>) -> Self {
         self.controllers = controllers;
         self
     }
 
     /// Configures the deployment to use a custom Wasm file.
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn with_wasm(mut self, wasm_path: &str) -> Self {
         self.wasm_path = wasm_path.to_string();
+        self
+    }
+
+    /// Overrides the init argument passed to the backend canister.
+    pub fn with_arg(mut self, arg: Vec<u8>) -> Self {
+        self.arg = arg;
         self
     }
 }
@@ -250,10 +250,12 @@ impl BackendBuilder {
 
     /// Reads the cycles ledger Wasm bytes from the configured path.
     fn cycles_ledger_wasm_bytes(&self) -> Vec<u8> {
-        read(self.cycles_ledger_wasm_path.clone()).expect(&format!(
-            "Could not find the cycles ledger wasm: {}",
-            self.cycles_ledger_wasm_path
-        ))
+        read(self.cycles_ledger_wasm_path.clone()).unwrap_or_else(|_| {
+            panic!(
+                "Could not find the cycles ledger wasm: {}",
+                self.cycles_ledger_wasm_path
+            )
+        })
     }
 }
 // Builder
@@ -359,13 +361,12 @@ impl BackendBuilder {
 
 impl BackendBuilder {
     /// Enables the cycles ledger canister
-    #[allow(dead_code)]
     pub fn with_cycles_ledger(mut self, cycle_ledger_enabled: bool) -> Self {
         self.cycles_ledger_enabled = cycle_ledger_enabled;
         self
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn with_auto_progress(mut self, auto_progress_enabled: bool) -> Self {
         self.auto_progress_enabled = auto_progress_enabled;
         self
@@ -382,8 +383,62 @@ pub fn setup() -> PicBackend {
     BackendBuilder::default().deploy()
 }
 
+/// Sets up a `PocketIC` environment with NNS subnet (for root key), II subnet, and fiduciary
+/// subnet. Deploys II on the II subnet and initializes the backend with the `PocketIC` root key so
+/// that delegation signature verification works end-to-end.
+pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
+    let pic = PocketIcBuilder::new()
+        .with_nns_subnet()
+        .with_ii_subnet()
+        .with_fiduciary_subnet()
+        .build();
+
+    let root_key = pic
+        .root_key()
+        .expect("PocketIC root key requires NNS subnet");
+
+    let ii_subnet_id = pic
+        .topology()
+        .get_ii()
+        .expect("II subnet not found in topology");
+
+    let ii_canister_id = pic.create_canister_on_subnet(None, None, ii_subnet_id);
+
+    let pic = Arc::new(pic);
+
+    let ii = super::ii::IICanister::deploy(&pic, ii_canister_id);
+
+    let backend_init = Arg::Init(InitArg {
+        ecdsa_key_name: "test_key_1".to_string(),
+        allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
+        ic_root_key_der: Some(root_key),
+        supported_credentials: Some(vec![SupportedCredential {
+            ii_canister_id,
+            ii_origin: II_ORIGIN.to_string(),
+            issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
+                .expect("wrong issuer canister id"),
+            issuer_origin: ISSUER_ORIGIN.to_string(),
+            credential_type: CredentialType::ProofOfUniqueness,
+        }]),
+        cfs_canister_id: Some(
+            Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
+        ),
+        derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
+    });
+
+    let mut builder = BackendBuilder::default().with_arg(encode_one(backend_init).unwrap());
+
+    let backend_canister_id = builder.deploy_to(&pic);
+    let backend = PicBackend {
+        pic: pic.clone(),
+        canister_id: backend_canister_id,
+    };
+
+    (backend, ii)
+}
+
 impl PicBackend {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn upgrade_latest_wasm(&self, encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
         let backend_wasm_path =
             env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
@@ -424,8 +479,16 @@ impl PicBackend {
 }
 
 pub(crate) fn init_arg() -> Arg {
+    init_arg_with_ecdsa_key("test_key_1")
+}
+
+pub(crate) fn production_init_arg() -> Arg {
+    init_arg_with_ecdsa_key("key_1")
+}
+
+fn init_arg_with_ecdsa_key(ecdsa_key_name: &str) -> Arg {
     Arg::Init(InitArg {
-        ecdsa_key_name: "test_key_1".to_string(),
+        ecdsa_key_name: ecdsa_key_name.to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
         supported_credentials: Some(vec![SupportedCredential {
@@ -441,6 +504,12 @@ pub(crate) fn init_arg() -> Arg {
         ),
         derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
     })
+}
+
+pub fn setup_with_production_config() -> PicBackend {
+    BackendBuilder::default()
+        .with_arg(encode_one(production_init_arg()).unwrap())
+        .deploy()
 }
 
 /// A test Oisy backend canister with a shared reference to the `PocketIc` instance it is installed
@@ -470,12 +539,9 @@ impl PicBackend {
             let caller = Principal::self_authenticating(i.to_string());
             let response = self.update::<UserProfile>(caller, "create_user_profile", ());
             let timestamp = self.pic.get_time();
-            let timestamp_nanos = timestamp
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_nanos();
+            let timestamp_nanos = timestamp.as_nanos_since_unix_epoch();
             let expected_user = OisyUser {
-                updated_timestamp: timestamp_nanos as u64,
+                updated_timestamp: timestamp_nanos,
                 pouh_verified: false,
                 principal: caller,
             };

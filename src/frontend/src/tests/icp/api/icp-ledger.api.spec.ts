@@ -1,5 +1,4 @@
 import { icrc1Transfer, transfer } from '$icp/api/icp-ledger.api';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockAccountIdentifierText,
@@ -7,7 +6,7 @@ import {
 	mockPrincipal2,
 	mockPrincipalText2
 } from '$tests/mocks/identity.mock';
-import { toNullable } from '@dfinity/utils';
+import { nowInBigIntNanoSeconds, toNullable } from '@dfinity/utils';
 import {
 	AccountIdentifier,
 	IcpLedgerCanister,
@@ -16,9 +15,13 @@ import {
 import type { IcrcAccount, IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn()
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('icp-ledger.api', () => {
 	const ledgerCanisterMock = mock<IcpLedgerCanister>();
@@ -57,11 +60,11 @@ describe('icp-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transfer({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
 
 		it('throws an error if provided "to" string is not a valid AccountIdentifier', async () => {
-			await expect(transfer({ ...params, to: mockPrincipalText2 })).rejects.toThrowError();
+			await expect(transfer({ ...params, to: mockPrincipalText2 })).rejects.toThrow();
 		});
 	});
 
@@ -120,7 +123,7 @@ describe('icp-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(icrc1Transfer({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(icrc1Transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 });

@@ -187,6 +187,7 @@ export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button
 export const REWARDS_NETWORK_MULTIPLIER_IMAGE = 'reward-network-multiplier-image';
 
 export const EARNING_CARD = 'earning-card';
+export const EARNING_CARD_SKELETON = 'earning-card-skeleton';
 export const EARNING_NO_POSITION_PLACEHOLDER = 'earning-no-position-placeholder';
 export const EARNING_GOTO_BUTTON = 'earning-goto-button';
 
@@ -201,6 +202,7 @@ export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
 
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 export const TRANSACTIONS_DATE_GROUP_PREFIX = 'transactions-date-group-';
+export const TRANSACTION_CHILDREN_CONTAINER = 'transaction-children-container';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

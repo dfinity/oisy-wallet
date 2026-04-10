@@ -43,6 +43,7 @@ import {
 } from '$lib/derived/all-tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
+import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -420,6 +421,16 @@ describe('all-tokens.derived', () => {
 				fn([]);
 				return () => {};
 			});
+
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+
+			vi.spyOn(enabledSolanaTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
 		});
 
 		it('should return empty array when all stores are empty', () => {
@@ -455,35 +466,46 @@ describe('all-tokens.derived', () => {
 			expect(result).toEqual([{ ...mockEvmToken, enabled: true }]);
 		});
 
-		it('should include ERC20 tokens with enabled: true', () => {
+		it('should include ERC20 tokens with their enabled property', () => {
+			const tokens = [
+				{ ...mockErc20Token, id: parseTokenId('MOCK1'), enabled: true },
+				{ ...mockErc20Token, id: parseTokenId('MOCK2'), enabled: false }
+			];
+
 			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
-				fn([mockErc20Token]);
+				fn(tokens);
 				return () => {};
 			});
 
 			const result = get(allCrossChainSwapTokens);
 
-			expect(result).toEqual([{ ...mockErc20Token, enabled: true }]);
+			expect(result).toEqual(tokens);
 		});
 
-		it('should set enabled: true for all tokens regardless of original enabled state', () => {
-			const disabledErc20Token = { ...mockErc20Token, enabled: false };
+		it('should include ERC4626 tokens with their enabled property', () => {
+			const mockErc4626SwapToken: Erc4626CustomToken = {
+				...mockValidErc4626Token,
+				id: parseTokenId('vMOCK'),
+				address: mockEthAddress,
+				enabled: true
+			};
 
-			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
-				fn([disabledErc20Token]);
+			vi.spyOn(erc4626Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc4626SwapToken]);
 				return () => {};
 			});
 
 			const result = get(allCrossChainSwapTokens);
 
-			expect(result).toEqual([{ ...disabledErc20Token, enabled: true }]);
+			expect(result).toEqual([mockErc4626SwapToken]);
 		});
 
 		it('should handle multiple tokens of the same type', () => {
 			const mockErc20Token2 = {
 				...mockErc20Token,
 				id: parseTokenId('MOCK2'),
-				symbol: 'MOCK2'
+				symbol: 'MOsCK2',
+				enabled: false
 			};
 
 			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
@@ -493,9 +515,73 @@ describe('all-tokens.derived', () => {
 
 			const result = get(allCrossChainSwapTokens);
 
+			expect(result).toEqual([mockErc20Token, mockErc20Token2]);
+		});
+
+		it('should include enabled Solana native tokens with enabled: true', () => {
+			vi.spyOn(enabledSolanaTokens, 'subscribe').mockImplementation((fn) => {
+				fn([SOLANA_TOKEN]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([{ ...SOLANA_TOKEN, enabled: true }]);
+		});
+
+		it('should include mainnet SPL tokens', () => {
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockSplToken]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([mockSplToken]);
+		});
+
+		it('should combine EVM and Solana tokens', () => {
+			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
+				fn([ETHEREUM_TOKEN]);
+				return () => {};
+			});
+
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc20Token]);
+				return () => {};
+			});
+
+			vi.spyOn(enabledSolanaTokens, 'subscribe').mockImplementation((fn) => {
+				fn([SOLANA_TOKEN]);
+				return () => {};
+			});
+
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockSplToken]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
 			expect(result).toEqual([
-				{ ...mockErc20Token, enabled: true },
-				{ ...mockErc20Token2, enabled: true }
+				{ ...ETHEREUM_TOKEN, enabled: true },
+				mockErc20Token,
+				{ ...SOLANA_TOKEN, enabled: true },
+				mockSplToken
+			]);
+		});
+
+		it('should not filter Solana tokens by network since upstream stores handle it', () => {
+			vi.spyOn(enabledSolanaTokens, 'subscribe').mockImplementation((fn) => {
+				fn([SOLANA_TOKEN, SOLANA_DEVNET_TOKEN]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([
+				{ ...SOLANA_TOKEN, enabled: true },
+				{ ...SOLANA_DEVNET_TOKEN, enabled: true }
 			]);
 		});
 	});

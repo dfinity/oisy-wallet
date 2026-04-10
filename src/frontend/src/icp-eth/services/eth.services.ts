@@ -20,7 +20,7 @@ import { TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR } from '$lib/constants/analy
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { emit } from '$lib/utils/events.utils';
@@ -37,7 +37,7 @@ export const loadCkEthereumPendingTransactions = async ({
 	toAddress: EthAddress;
 	token: IcToken;
 	lastObservedBlockNumber: bigint;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 } & IcCkLinkedAssets) => {
 	const { id: twinTokenId } = twinToken;
 
@@ -63,7 +63,7 @@ const loadCkETHPendingTransactions = async ({
 	toAddress: EthAddress;
 	token: IcToken;
 	lastObservedBlockNumber: bigint;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 } & IcCkLinkedAssets) => {
 	const logsTopics = (to: EthAddress): (string | null)[] => [
 		CKETH_HELPER_CONTRACT_SIGNATURE,
@@ -87,7 +87,7 @@ const loadCkErc20PendingTransactions = async ({
 }: {
 	toAddress: EthAddress;
 	lastObservedBlockNumber: bigint;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	token: IcToken;
 } & IcCkLinkedAssets) => {
 	const logsTopics = (to: EthAddress): (string | null)[] => [
@@ -117,7 +117,7 @@ const loadPendingTransactions = async ({
 }: {
 	toAddress: EthAddress;
 	lastObservedBlockNumber: bigint;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	logsTopics: (to: EthAddress) => (string | null)[];
 	token: IcToken;
 	mapPendingTransaction: (params: MapCkEthereumPendingTransactionParams) => IcTransactionUi;
