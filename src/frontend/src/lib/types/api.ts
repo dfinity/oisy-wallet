@@ -4,7 +4,6 @@ import type {
 	TokenId as BackendTokenId,
 	Network as BitcoinNetwork,
 	Contact,
-	CredentialSpec,
 	GetUserProfileError,
 	IIDelegationChain,
 	PendingTransaction,
@@ -30,13 +29,6 @@ import type { UserProviderAgreements } from '$lib/types/user-provider-agreements
 import type { Nullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
-
-export interface AddUserCredentialParams {
-	credentialJwt: string;
-	issuerCanisterId: Principal;
-	currentUserVersion?: bigint;
-	credentialSpec: CredentialSpec;
-}
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 

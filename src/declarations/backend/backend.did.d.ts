@@ -19,18 +19,6 @@ export interface AddHiddenDappIdRequest {
 	current_user_version: [] | [bigint];
 	dapp_id: string;
 }
-export type AddUserCredentialError =
-	| { InvalidCredential: null }
-	| { VersionMismatch: null }
-	| { ConfigurationError: null }
-	| { UserNotFound: null };
-export interface AddUserCredentialRequest {
-	credential_jwt: string;
-	issuer_canister_id: Principal;
-	current_user_version: [] | [bigint];
-	credential_spec: CredentialSpec;
-}
-export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
 export interface AgreementHistoryEntry {
 	timestamp_ns: bigint;
@@ -84,7 +72,6 @@ export type ApproveError =
 	| { Expired: { ledger_time: bigint } }
 	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
-export type ArgumentValue = { Int: number } | { String: string };
 export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
@@ -193,10 +180,6 @@ export interface CreateContactRequest {
 	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export interface CredentialSpec {
-	arguments: [] | [Array<[string, ArgumentValue]>];
-	credential_type: string;
-}
 export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
@@ -592,13 +575,6 @@ export interface Utxo {
 	outpoint: Outpoint;
 }
 export interface _SERVICE {
-	/**
-	 * Adds a verifiable credential to the user profile.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `AddUserCredentialError`.
-	 */
-	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
 	/**
 	 * Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	 *
