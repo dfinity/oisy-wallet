@@ -716,6 +716,7 @@ interface I18nSend {
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;
 		solana_insufficient_funds_for_fee: string;
+		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
 	};
 }

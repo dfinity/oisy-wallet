@@ -57,7 +57,9 @@ const isInsufficientFundsForFeeError = (err: unknown): boolean =>
 	findSolanaErrorInChain({
 		err,
 		code: SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_FEE
-	}) ||
+	});
+
+const isInsufficientFundsForRentError = (err: unknown): boolean =>
 	findSolanaErrorInChain({
 		err,
 		code: SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_RENT
@@ -89,5 +91,9 @@ export const mapSolanaErrorMsg = (err: unknown): string | undefined => {
 
 	if (isInsufficientFundsForFeeError(err)) {
 		return error.solana_insufficient_funds_for_fee;
+	}
+
+	if (isInsufficientFundsForRentError(err)) {
+		return error.solana_insufficient_funds_for_rent;
 	}
 };

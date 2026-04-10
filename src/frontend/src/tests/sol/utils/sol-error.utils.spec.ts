@@ -93,7 +93,7 @@ describe('sol-error.utils', () => {
 				mockPreflightContext({ cause: inner })
 			);
 
-			expect(mapSolanaErrorMsg(err)).toBe(sendError.solana_insufficient_funds_for_fee);
+			expect(mapSolanaErrorMsg(err)).toBe(sendError.solana_insufficient_funds_for_rent);
 		});
 
 		it('detects insufficient funds from program logs as fallback', () => {
