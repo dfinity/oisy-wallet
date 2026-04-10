@@ -453,6 +453,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -957,27 +963,27 @@
 			"no_nft_selected": "尚未选择要发送的 NFT。"
 		},
 		"error": {
-			"unexpected": "发送交易时发生错误。",
-			"destination_address_unknown": "ETH 目标地址未知",
-			"metamask_connected": "无法获取你的账户。你的 Metamask 是否已开启并已连接？",
-			"metamask_no_accounts": "未找到 Metamask 账户。",
-			"metamask_switch_network": "无法请求 Metamask 切换至链 ID $chain_id。你当前是否已连接到 $network_name？",
-			"erc20_data_undefined": "ERC20 交易数据不能为 undefined 或 null。",
-			"data_undefined": "交易数据不能为 undefined 或 null。",
-			"no_identity_calculate_fee": "未提供身份，无法为其主体计算手续费。",
-			"invalid_destination": "目标地址无效。请使用有效的钱包地址重试。",
-			"incompatible_token": "代币不兼容。请尝试使用兼容的代币。",
-			"no_btc_network_id": "当前网络 ($networkId) 不是比特币网络。",
-			"no_solana_network_id": "当前网络 ($networkId) 不是 Solana 网络。",
-			"no_pending_bitcoin_transaction": "加载待处理的比特币交易时出错。请稍后重试。",
-			"unexpected_utxos_fee": "计算交易手续费时发生错误。",
-			"unable_to_retrieve_amount": "无法获取金额（n/a）",
-			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重试。",
-			"solana_confirmation_failed": "Solana确认失败",
-			"solana_insufficient_funds": "",
-			"solana_insufficient_funds_for_fee": "",
-			"solana_insufficient_funds_for_rent": "",
-			"fee_calc_unsupported_standard": "由于不支持所提供的令牌标准，因此无法计算费用。"
+			"unexpected": "发送交易时出现错误。",
+			"destination_address_unknown": "ETH目标地址未知",
+			"metamask_connected": "无法获取您的账户。您的Metamask是否已打开并已连接？",
+			"metamask_no_accounts": "未找到Metamask账户。",
+			"metamask_switch_network": "无法请求Metamask切换到链ID $chain_id。您的Metamask是否正在使用$network_name？",
+			"erc20_data_undefined": "ERC20交易数据不能为undefined或null。",
+			"data_undefined": "交易数据不能为undefined或null。",
+			"no_identity_calculate_fee": "未提供身份以计算其principal的费用。",
+			"invalid_destination": "目标地址无效。请使用有效的钱包地址或目标地址重试。",
+			"incompatible_token": "该代币不兼容。请使用兼容的代币重试。",
+			"no_btc_network_id": "当前网络（$networkId）不是Bitcoin网络。",
+			"no_solana_network_id": "当前网络（$networkId）不是Solana网络。",
+			"no_pending_bitcoin_transaction": "加载待处理的Bitcoin交易时出现错误。请稍后重试。",
+			"unexpected_utxos_fee": "计算交易费用时出现错误。",
+			"unable_to_retrieve_amount": "n/a（无法获取）",
+			"solana_transaction_expired": "您的交易未被Solana网络处理并已过期，很可能是因为提供的优先费用不足。我们已将其更新为最新推荐金额，请重试。",
+			"solana_confirmation_failed": "我们未收到您刚刚创建的交易的确认。请等待几秒钟，然后检查您的代币交易列表，确认您的交易是否已正确创建。",
+			"solana_insufficient_funds": "您的代币余额不足以完成此交易。您的余额自上次显示以来可能已发生变化。",
+			"solana_insufficient_funds_for_fee": "您的SOL余额不足以支付交易费用。",
+			"solana_insufficient_funds_for_rent": "您的SOL余额不足以支付创建账户所需的租金。",
+			"fee_calc_unsupported_standard": "由于提供的代币标准不受支持，无法计算费用。"
 		}
 	},
 	"mint": {

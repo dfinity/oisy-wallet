@@ -453,6 +453,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -957,27 +963,27 @@
 			"no_nft_selected": ""
 		},
 		"error": {
-			"unexpected": "Coś poszło nie tak podczas wysyłania transakcji.",
-			"destination_address_unknown": "Adres docelowy ETH jest nieznany",
-			"metamask_connected": "Nie można pobrać Twoich kont. Czy Twój Metamask jest otwarty i już połączony?",
+			"unexpected": "Podczas wysyłania transakcji wystąpił błąd.",
+			"destination_address_unknown": "Docelowy adres ETH jest nieznany",
+			"metamask_connected": "Nie można pobrać Twoich kont. Czy Metamask jest otwarty i już połączony?",
 			"metamask_no_accounts": "Nie znaleziono kont Metamask.",
-			"metamask_switch_network": "Nie można zażądać od Metamask przełączenia na identyfikator łańcucha $chain_id. Czy Twój Metamask używa $network_name?",
-			"erc20_data_undefined": "Dane transakcji ERC20 nie mogą być niezdefiniowane ani zerowe.",
-			"data_undefined": "Dane transakcji nie mogą być niezdefiniowane ani zerowe.",
-			"no_identity_calculate_fee": "Nie podano tożsamości do obliczenia opłaty za jej podmiot.",
-			"invalid_destination": "Miejsce docelowe jest nieprawidłowe. Spróbuj ponownie z prawidłowym adresem portfela lub miejscem docelowym.",
+			"metamask_switch_network": "Nie można poprosić Metamask o przełączenie na chain ID $chain_id. Czy Twój Metamask używa $network_name?",
+			"erc20_data_undefined": "Dane transakcji ERC20 nie mogą być niezdefiniowane ani null.",
+			"data_undefined": "Dane transakcji nie mogą być niezdefiniowane ani null.",
+			"no_identity_calculate_fee": "Nie podano tożsamości do obliczenia opłaty dla jej principal.",
+			"invalid_destination": "Adres docelowy jest nieprawidłowy. Spróbuj ponownie z prawidłowym adresem portfela lub miejscem docelowym.",
 			"incompatible_token": "Token jest niekompatybilny. Spróbuj ponownie z kompatybilnym tokenem.",
 			"no_btc_network_id": "Bieżąca sieć ($networkId) nie jest siecią Bitcoin.",
 			"no_solana_network_id": "Bieżąca sieć ($networkId) nie jest siecią Solana.",
 			"no_pending_bitcoin_transaction": "Wystąpił błąd podczas ładowania oczekujących transakcji Bitcoin. Spróbuj ponownie później.",
-			"unexpected_utxos_fee": "Coś poszło nie tak podczas obliczania opłaty transakcyjnej.",
-			"unable_to_retrieve_amount": "niedostępne (nie można pobrać)",
-			"solana_transaction_expired": "Twoja transakcja nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa nie była wystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj ponownie.",
-			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia transakcji, którą właśnie utworzyłeś. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, aby sprawdzić, czy transakcja została utworzona prawidłowo.",
-			"solana_insufficient_funds": "",
-			"solana_insufficient_funds_for_fee": "",
-			"solana_insufficient_funds_for_rent": "",
-			"fee_calc_unsupported_standard": ""
+			"unexpected_utxos_fee": "Podczas obliczania opłaty transakcyjnej wystąpił błąd.",
+			"unable_to_retrieve_amount": "n/d (nie można pobrać)",
+			"solana_transaction_expired": "Twoja transakcja nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa była niewystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj ponownie.",
+			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia dla właśnie utworzonej transakcji. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, czy Twoja transakcja została utworzona poprawnie.",
+			"solana_insufficient_funds": "Saldo Twojego tokena jest niewystarczające do zrealizowania tej transakcji. Twoje saldo mogło się zmienić od ostatniego wyświetlenia.",
+			"solana_insufficient_funds_for_fee": "Twoje saldo SOL jest niewystarczające do pokrycia opłat transakcyjnych.",
+			"solana_insufficient_funds_for_rent": "Twoje saldo SOL jest niewystarczające do pokrycia czynszu wymaganego do utworzenia konta.",
+			"fee_calc_unsupported_standard": "Nie można obliczyć opłaty, ponieważ podany standard tokena nie jest obsługiwany."
 		}
 	},
 	"mint": {

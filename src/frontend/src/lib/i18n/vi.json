@@ -453,6 +453,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -957,26 +963,26 @@
 			"no_nft_selected": "Không NFT đã được chọn để gửi"
 		},
 		"error": {
-			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
-			"destination_address_unknown": "Địa chỉ ví ETH không xác định",
+			"unexpected": "Đã xảy ra lỗi khi gửi giao dịch.",
+			"destination_address_unknown": "Địa chỉ đích ETH không xác định",
 			"metamask_connected": "Không thể lấy tài khoản của bạn. Metamask của bạn có đang mở và đã kết nối chưa?",
 			"metamask_no_accounts": "Không tìm thấy tài khoản Metamask nào.",
-			"metamask_switch_network": "Không thể yêu cầu Metamask chuyển sang ID chuỗi $chain_id. Metamask của bạn có đang sử dụng $network_name không?",
-			"erc20_data_undefined": "Dữ liệu giao dịch Erc20 không được không xác định hoặc null.",
-			"data_undefined": "Dữ liệu giao dịch không được không xác định hoặc null.",
-			"no_identity_calculate_fee": "Không có danh tính nào được cung cấp để tính phí cho principal.",
-			"invalid_destination": "Ví không hợp lệ. Vui lòng thử lại với một địa chỉ ví hợp lệ.",
-			"incompatible_token": "Token không tương thích. Vui lòng thử lại với một token tương thích.",
+			"metamask_switch_network": "Không thể yêu cầu Metamask chuyển sang chain ID $chain_id. Metamask của bạn có đang sử dụng $network_name không?",
+			"erc20_data_undefined": "Dữ liệu giao dịch ERC20 không thể là undefined hoặc null.",
+			"data_undefined": "Dữ liệu giao dịch không thể là undefined hoặc null.",
+			"no_identity_calculate_fee": "Không có danh tính nào được cung cấp để tính phí cho principal của nó.",
+			"invalid_destination": "Địa chỉ đích không hợp lệ. Vui lòng thử lại với địa chỉ ví hoặc địa chỉ đích hợp lệ.",
+			"incompatible_token": "Token không tương thích. Vui lòng thử lại với token tương thích.",
 			"no_btc_network_id": "Mạng hiện tại ($networkId) không phải là mạng Bitcoin.",
 			"no_solana_network_id": "Mạng hiện tại ($networkId) không phải là mạng Solana.",
 			"no_pending_bitcoin_transaction": "Đã xảy ra lỗi khi tải các giao dịch Bitcoin đang chờ xử lý. Vui lòng thử lại sau.",
-			"unexpected_utxos_fee": "Đã xảy ra lỗi trong khi tính phí giao dịch.",
-			"unable_to_retrieve_amount": "không có (không thể truy xuất)",
-			"solana_transaction_expired": "Giao dịch của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử lại.",
-			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
-			"solana_insufficient_funds": "",
-			"solana_insufficient_funds_for_fee": "",
-			"solana_insufficient_funds_for_rent": "",
+			"unexpected_utxos_fee": "Đã xảy ra lỗi khi tính phí giao dịch.",
+			"unable_to_retrieve_amount": "n/a (không thể lấy được)",
+			"solana_transaction_expired": "Giao dịch của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể là do phí ưu tiên được cung cấp không đủ. Chúng tôi đã cập nhật lên số tiền được khuyến nghị mới nhất, vì vậy vui lòng thử lại.",
+			"solana_confirmation_failed": "Chúng tôi không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây rồi kiểm tra danh sách giao dịch của token để xem giao dịch của bạn có được tạo chính xác không.",
+			"solana_insufficient_funds": "Số dư token của bạn không đủ để hoàn tất giao dịch này. Số dư của bạn có thể đã thay đổi kể từ lần hiển thị cuối cùng.",
+			"solana_insufficient_funds_for_fee": "Số dư SOL của bạn không đủ để trang trải phí giao dịch.",
+			"solana_insufficient_funds_for_rent": "Số dư SOL của bạn không đủ để trang trải khoản thuê cần thiết cho việc tạo tài khoản.",
 			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
 		}
 	},

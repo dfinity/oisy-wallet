@@ -165,6 +165,7 @@ type ContactError = variant {
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
 type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
+type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
 	token : Token;
 	allow_external_content_source : opt bool;

@@ -453,6 +453,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -957,27 +963,27 @@
 			"no_nft_selected": ""
 		},
 		"error": {
-			"unexpected": "Beim Senden der Transaktion ist etwas schiefgelaufen.",
-			"destination_address_unknown": "ETH-Zieladresse ist unbekannt.",
-			"metamask_connected": "Konnte deine Konten nicht abrufen. Ist Metamask geöffnet und verbunden?",
+			"unexpected": "Beim Senden der Transaktion ist ein Fehler aufgetreten.",
+			"destination_address_unknown": "ETH-Zieladresse ist unbekannt",
+			"metamask_connected": "Ihre Konten konnten nicht abgerufen werden. Ist Ihr Metamask geöffnet und bereits verbunden?",
 			"metamask_no_accounts": "Keine Metamask-Konten gefunden.",
-			"metamask_switch_network": "Kann Metamask nicht auffordern, zu Chain ID $chain_id zu wechseln. Nutzt Metamask $network_name?",
-			"erc20_data_undefined": "ERC20-Transaktionsdaten dürfen nicht undefined oder null sein.",
-			"data_undefined": "Transaktionsdaten dürfen nicht undefined oder null sein.",
-			"no_identity_calculate_fee": "Keine Identity vorhanden, um die Gebühr für den Principal zu berechnen.",
-			"invalid_destination": "Das Ziel ist ungültig. Versuche es mit einer gültigen Wallet-Adresse oder einem gültigen Ziel erneut.",
-			"incompatible_token": "Das Token ist inkompatibel. Versuche es mit einem kompatiblen Token erneut.",
-			"no_btc_network_id": "Aktuelles Netzwerk ($networkId) ist kein Bitcoin-Netzwerk.",
-			"no_solana_network_id": "Aktuelles Netzwerk ($networkId) ist kein Solana-Netzwerk.",
-			"no_pending_bitcoin_transaction": "Fehler beim Laden ausstehender Bitcoin-Transaktionen. Bitte später erneut versuchen.",
-			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist etwas schiefgelaufen.",
-			"unable_to_retrieve_amount": "k. A. (konnte nicht abgerufen werden)",
-			"solana_transaction_expired": "Deine Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, wahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichte. Wir haben sie auf den zuletzt empfohlenen Betrag aktualisiert, bitte versuche es erneut.",
-			"solana_confirmation_failed": "Wir konnten keine gültige Bestätigung der soeben getätigten Transaktion erhalten. Bitte warte ein paar Sekunden und überprüfe in der Transaktionsliste des Tokens, ob die Transaktion korrekt getätigt wurde.",
-			"solana_insufficient_funds": "",
-			"solana_insufficient_funds_for_fee": "",
-			"solana_insufficient_funds_for_rent": "",
-			"fee_calc_unsupported_standard": ""
+			"metamask_switch_network": "Metamask konnte nicht aufgefordert werden, zur Chain-ID $chain_id zu wechseln. Verwendet Ihr Metamask $network_name?",
+			"erc20_data_undefined": "ERC20-Transaktionsdaten dürfen nicht undefiniert oder null sein.",
+			"data_undefined": "Transaktionsdaten dürfen nicht undefiniert oder null sein.",
+			"no_identity_calculate_fee": "Keine Identität angegeben, um die Gebühr für den zugehörigen Principal zu berechnen.",
+			"invalid_destination": "Das Ziel ist ungültig. Bitte versuchen Sie es erneut mit einer gültigen Wallet-Adresse oder einem gültigen Ziel.",
+			"incompatible_token": "Der Token ist inkompatibel. Bitte versuchen Sie es erneut mit einem kompatiblen Token.",
+			"no_btc_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Bitcoin-Netzwerk.",
+			"no_solana_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Solana-Netzwerk.",
+			"no_pending_bitcoin_transaction": "Beim Laden der ausstehenden Bitcoin-Transaktionen ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist ein Fehler aufgetreten.",
+			"unable_to_retrieve_amount": "n/v (Betrag konnte nicht abgerufen werden)",
+			"solana_transaction_expired": "Ihre Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, höchstwahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichend war. Wir haben sie auf den aktuell empfohlenen Betrag aktualisiert. Bitte versuchen Sie es erneut.",
+			"solana_confirmation_failed": "Wir haben keine Bestätigung für die soeben erstellte Transaktion erhalten. Bitte warten Sie einige Sekunden und prüfen Sie dann in der Transaktionsliste Ihres Tokens, ob Ihre Transaktion korrekt erstellt wurde.",
+			"solana_insufficient_funds": "Ihr Token-Guthaben reicht nicht aus, um diese Transaktion abzuschließen. Ihr Guthaben kann sich seit der letzten Anzeige geändert haben.",
+			"solana_insufficient_funds_for_fee": "Ihr SOL-Guthaben reicht nicht aus, um die Transaktionsgebühren zu decken.",
+			"solana_insufficient_funds_for_rent": "Ihr SOL-Guthaben reicht nicht aus, um die für die Kontoerstellung erforderliche Miete zu decken.",
+			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird."
 		}
 	},
 	"mint": {

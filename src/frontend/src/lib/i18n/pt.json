@@ -453,6 +453,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -958,13 +964,13 @@
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",
-			"destination_address_unknown": "Endereço de destino ETH desconhecido",
-			"metamask_connected": "Não é possível obter suas contas. Seu Metamask está aberto e já conectado?",
+			"destination_address_unknown": "O endereço de destino ETH é desconhecido",
+			"metamask_connected": "Não é possível obter suas contas. O seu Metamask está aberto e já conectado?",
 			"metamask_no_accounts": "Nenhuma conta Metamask encontrada.",
-			"metamask_switch_network": "Não é possível solicitar que o Metamask mude para o ID de cadeia $chain_id. Seu Metamask está usando $network_name?",
-			"erc20_data_undefined": "Os dados de transação ERC20 não podem ser indefinidos ou nulos.",
-			"data_undefined": "Os dados de transação não podem ser indefinidos ou nulos.",
-			"no_identity_calculate_fee": "Nenhuma identidade fornecida para calcular a taxa para seu principal.",
+			"metamask_switch_network": "Não é possível solicitar ao Metamask que mude para a chain ID $chain_id. O seu Metamask está usando $network_name?",
+			"erc20_data_undefined": "Os dados da transação ERC20 não podem ser indefinidos ou nulos.",
+			"data_undefined": "Os dados da transação não podem ser indefinidos ou nulos.",
+			"no_identity_calculate_fee": "Nenhuma identidade fornecida para calcular a taxa do seu principal.",
 			"invalid_destination": "O destino é inválido. Por favor, tente novamente com um endereço de carteira ou destino válido.",
 			"incompatible_token": "O token é incompatível. Por favor, tente novamente com um token compatível.",
 			"no_btc_network_id": "A rede atual ($networkId) não é uma rede Bitcoin.",
@@ -972,12 +978,12 @@
 			"no_pending_bitcoin_transaction": "Ocorreu um erro ao carregar as transações Bitcoin pendentes. Por favor, tente novamente mais tarde.",
 			"unexpected_utxos_fee": "Algo deu errado ao calcular a taxa de transação.",
 			"unable_to_retrieve_amount": "n/d (não foi possível recuperar)",
-			"solana_transaction_expired": "Sua transação não foi processada pela rede Solana e expirou, provavelmente porque a taxa de prioridade fornecida não foi suficiente. Nós a atualizamos para o valor recomendado mais recente, então tente novamente.",
-			"solana_confirmation_failed": "Não recebemos uma confirmação da transação que você acabou de criar. Aguarde alguns segundos e verifique a lista de transações do seu token para confirmar se a transação foi criada corretamente.",
-			"solana_insufficient_funds": "",
-			"solana_insufficient_funds_for_fee": "",
-			"solana_insufficient_funds_for_rent": "",
-			"fee_calc_unsupported_standard": ""
+			"solana_transaction_expired": "Sua transação não foi processada pela rede Solana e expirou, provavelmente porque a taxa de prioridade fornecida não era suficiente. Atualizamos para o valor recomendado mais recente, por isso tente novamente.",
+			"solana_confirmation_failed": "Não recebemos uma confirmação para a transação que você acabou de criar. Aguarde alguns segundos e verifique a lista de transações do seu token para ver se a sua transação foi criada corretamente.",
+			"solana_insufficient_funds": "O saldo do seu token não é suficiente para concluir esta transação. O seu saldo pode ter mudado desde a última vez que foi exibido.",
+			"solana_insufficient_funds_for_fee": "O seu saldo de SOL não é suficiente para cobrir as taxas de transação.",
+			"solana_insufficient_funds_for_rent": "O seu saldo de SOL não é suficiente para cobrir o aluguel necessário para a criação da conta.",
+			"fee_calc_unsupported_standard": "Não foi possível calcular a taxa pois o padrão de token fornecido não é suportado."
 		}
 	},
 	"mint": {
