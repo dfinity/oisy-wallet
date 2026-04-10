@@ -39,6 +39,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
 	import SwapSolForm from '$sol/components/swap/SwapSolForm.svelte';
@@ -48,6 +49,7 @@
 		initFeeContext,
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
+	import { mapSolanaErrorMsg } from '$sol/utils/sol-error.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -249,7 +251,7 @@
 			failedSwapError.set(undefined);
 
 			toastsError({
-				msg: { text: $i18n.swap.error.unexpected },
+				msg: { text: mapSolanaErrorMsg(err) ?? $i18n.swap.error.unexpected },
 				err
 			});
 
