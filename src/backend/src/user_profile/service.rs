@@ -11,8 +11,7 @@ use shared::types::{
         ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
     },
     network::{NetworkSettingsMap, SetTestnetsSettingsError, UpdateNetworksSettingsError},
-    user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
-    verifiable_credential::CredentialType,
+    user_profile::{ GetUserProfileError, StoredUserProfile},
     Timestamp, Version,
 };
 
@@ -51,27 +50,6 @@ pub fn create_profile(
     }
 }
 
-pub fn add_credential(
-    principal: StoredPrincipal,
-    profile_version: Option<Version>,
-    credential_type: &CredentialType,
-    issuer: String,
-    user_profile_model: &mut UserProfileModel,
-) -> Result<(), AddUserCredentialError> {
-    if let Ok(user_profile) = find_profile(principal, user_profile_model) {
-        let now = time();
-        if let Ok(new_profile) =
-            user_profile.add_credential(profile_version, now, credential_type, issuer)
-        {
-            user_profile_model.store_new(principal, now, &new_profile);
-            Ok(())
-        } else {
-            Err(AddUserCredentialError::VersionMismatch)
-        }
-    } else {
-        Err(AddUserCredentialError::UserNotFound)
-    }
-}
 
 /// Updates the user's network settings, merging with any existing settings.
 ///

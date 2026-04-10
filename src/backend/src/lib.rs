@@ -24,7 +24,7 @@ use shared::{
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         result_types::{
-            AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
+             AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             DeleteContactResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
@@ -38,7 +38,7 @@ use shared::{
             AllowSigningRequest,
         },
         token_id::TokenId,
-        user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
+        user_profile::{ HasUserProfileResponse, UserProfile},
         user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
         Stats, Timestamp,
     },
