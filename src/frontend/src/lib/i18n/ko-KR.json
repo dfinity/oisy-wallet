@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "거래가 완료될 때까지 이 탭을 닫지 마세요",
-			"standalone_mode": "",
+			"standalone_mode": "앱과 $oisy_short 모두 홈 화면에 설치된 경우 알려진 연결 문제가 발생할 수 있습니다. $oisy_short 연결 또는 트랜잭션 서명에 문제가 발생하면 일반 브라우저에서 앱을 실행해 주세요. 현재 수정 작업 중이며 곧 해결될 예정입니다. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">자세히 알아보기</a>",
 			"video_not_supported": "브라우저가 동영상 재생을 지원하지 않습니다."
 		}
 	},
