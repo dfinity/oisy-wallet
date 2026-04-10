@@ -8,19 +8,6 @@ type AddHiddenDappIdRequest = record {
 	current_user_version : opt nat64;
 	dapp_id : text
 };
-type AddUserCredentialError = variant {
-	InvalidCredential;
-	VersionMismatch;
-	ConfigurationError;
-	UserNotFound
-};
-type AddUserCredentialRequest = record {
-	credential_jwt : text;
-	issuer_canister_id : principal;
-	current_user_version : opt nat64;
-	credential_spec : CredentialSpec
-};
-type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
 type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type AgreementHistoryEntry = record {
 	timestamp_ns : nat64;
@@ -78,7 +65,6 @@ type ApproveError = variant {
 	InsufficientFunds : record { balance : nat }
 };
 type Arg = variant { Upgrade; Init : InitArg };
-type ArgumentValue = variant { Int : int32; String : text };
 type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
@@ -179,10 +165,6 @@ type ContactError = variant {
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
 type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
-type CredentialSpec = record {
-	arguments : opt vec record { text; ArgumentValue };
-	credential_type : text
-};
 type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
 	token : Token;
@@ -548,11 +530,6 @@ type UserTransactionError = variant {
 };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
-	// Adds a verifiable credential to the user profile.
-	//
-	// # Errors
-	// Errors are enumerated by: `AddUserCredentialError`.
-	add_user_credential : (AddUserCredentialRequest) -> (AddUserCredentialResult);
 	// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	//
 	// # Arguments
