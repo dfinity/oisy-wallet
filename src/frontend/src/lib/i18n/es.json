@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
-			"standalone_mode": "",
+			"standalone_mode": ""Se han detectado problemas de conexión conocidos cuando tanto una aplicación como $oisy_short están instalados en la pantalla de inicio. Si tiene problemas para conectar $oisy_short o firmar transacciones, inicie la aplicación desde un navegador normal. Estamos trabajando en una solución que estará disponible pronto. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Leer más</a>"",
 			"video_not_supported": ""
 		}
 	},
