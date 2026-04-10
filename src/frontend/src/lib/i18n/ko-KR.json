@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "거래가 완료될 때까지 이 탭을 닫지 마세요",
-			"standalone_modeX": "",
+			"standalone_mode": "",
 			"video_not_supported": "브라우저가 동영상 재생을 지원하지 않습니다."
 		}
 	},

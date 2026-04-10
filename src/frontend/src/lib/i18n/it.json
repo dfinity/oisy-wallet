@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
-			"standalone_modeX": "",
+			"standalone_mode": "",
 			"video_not_supported": ""
 		}
 	},

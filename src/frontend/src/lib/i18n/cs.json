@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
-			"standalone_modeX": "",
+			"standalone_mode": "",
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa."
 		}
 	},

@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
-			"standalone_modeX": "",
+			"standalone_mode": "",
 			"video_not_supported": ""
 		}
 	},

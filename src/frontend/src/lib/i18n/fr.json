@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
-			"standalone_modeX": "",
+			"standalone_mode": "",
 			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo."
 		}
 	},
