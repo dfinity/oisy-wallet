@@ -77,6 +77,26 @@ dfx-orbit station show
 dfx-orbit request asset upload frontend --files target/frontend
 ```
 
+#### Signer frontend
+
+```bash
+./scripts/docker-build.signer-frontend
+```
+
+```bash
+dfx-orbit request asset upload signer_frontend --files target/signer_frontend
+```
+
+#### Legacy signer frontend
+
+```bash
+./scripts/docker-build.legacy-signer-frontend
+```
+
+```bash
+dfx-orbit request asset upload legacy_signer_frontend --files target/legacy_signer_frontend
+```
+
 #### Backend
 
 ```bash
@@ -93,7 +113,7 @@ dfx-orbit --station oisy-prod \
 
 ### Signer Domains
 
-The OISY signer is deployed to dedicated production subdomains (`signer.oisy.com`, `legacy-signer.oisy.com`) with their own canisters and versioning. Production IC deploys for those asset canisters use the **same Orbit-controlled process** as the main wallet `frontend` (see [IC](#ic) above: Docker image build, then `dfx-oisy request deploy`, with verification via `dfx-orbit` where applicable). For architecture, build targets, identity derivation, and the migration plan, see [SIGNER_DOMAINS.md](SIGNER_DOMAINS.md).
+The OISY signer is deployed to dedicated production subdomains (`signer.oisy.com`, `legacy-signer.oisy.com`) with their own canisters and versioning. Production IC deploys for those asset canisters use the **same Orbit-controlled process** as the main wallet `frontend` -- each has its own Docker build script and `dfx-orbit` request (see [IC](#ic) above). For architecture, build targets, identity derivation, and the migration plan, see [SIGNER_DOMAINS.md](SIGNER_DOMAINS.md).
 
 ## Internationalization
 
