@@ -141,6 +141,7 @@
 		"id": "motoko-tokyo",
 		"name": "dapps.descriptions.motoko_tokyo.name",
 		"oneLiner": "dapps.descriptions.motoko_tokyo.one_liner",
+		"callToAction": "dapps.descriptions.motoko_tokyo.call_to_action",
 		"website": "https://motokotokyogame.net/",
 		"twitter": "https://x.com/NightscrollerEX",
 		"discord": "https://discord.gg/d3WnbPPkes",
