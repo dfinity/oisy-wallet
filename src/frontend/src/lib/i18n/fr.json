@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
-			"standalone_mode": "Nous avons amélioré le fonctionnement de $oisy_short lorsqu'il est installé sur un écran d'accueil, comme c'est votre cas. Si vous rencontrez des problèmes pour connecter $oisy_short ou signer des transactions, veuillez supprimer $oisy_short de l'écran d'accueil et l'installer à nouveau. Sur iPhone, assurez-vous de désélectionner « Ouvrir en tant qu'application Web ».<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Lire la suite</a>",
+			"standalone_mode": "Des problèmes de connexion connus surviennent lorsqu'une application et $oisy_short sont tous deux installés sur l'écran d'accueil. Si vous rencontrez des problèmes de connexion à $oisy_short ou de signature de transactions, veuillez lancer l'application depuis un navigateur classique. Nous travaillons sur un correctif qui sera bientôt disponible. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">En savoir plus</a>",
 			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo."
 		}
 	},

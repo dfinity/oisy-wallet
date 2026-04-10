@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
-			"standalone_mode": "",
+			"standalone_mode": "जब किसी ऐप और $oisy_short दोनों को होम स्क्रीन पर इंस्टॉल किया गया हो, तो कनेक्शन संबंधी ज्ञात समस्याएं हो सकती हैं। यदि आपको $oisy_short से कनेक्ट करने या ट्रांज़ैक्शन साइन करने में समस्या आती है, तो कृपया ऐप को एक सामान्य ब्राउज़र से खोलें। हम एक समाधान पर काम कर रहे हैं जो जल्द ही उपलब्ध होगा। <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">अधिक पढ़ें</a>",
 			"video_not_supported": ""
 		}
 	},
