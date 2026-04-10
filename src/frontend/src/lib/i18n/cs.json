@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
-			"standalone_mode": "Zlepšili jsme fungování aplikace $oisy_short při instalaci na domovskou obrazovku, jako je tomu u vás. Pokud narazíte na problémy s připojením k $oisy_short nebo s podepisováním transakcí, odeberte $oisy_short z domovské obrazovky a znovu jej nainstalujte. Na iPhonech se ujistěte, že není vybrána možnost „Otevřít jako webovou aplikaci“.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Přečíst více</a>",
+			"standalone_mode": "Při instalaci aplikace i $oisy_short na domovskou obrazovku jsou známy problémy s připojením. Pokud narazíte na problémy s připojením $oisy_short nebo podepisováním transakcí, spusťte prosím aplikaci z běžného prohlížeče. Pracujeme na opravě, která bude brzy k dispozici. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Více informací</a>",
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa."
 		}
 	},

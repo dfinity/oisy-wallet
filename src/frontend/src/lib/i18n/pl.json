@@ -65,7 +65,7 @@
 		},
 		"warning": {
 			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
-			"standalone_mode": "",
+			"standalone_mode": "Znane są problemy z połączeniem, gdy zarówno aplikacja, jak i $oisy_short są zainstalowane na ekranie głównym. Jeśli napotkasz problemy z połączeniem z $oisy_short lub podpisywaniem transakcji, uruchom aplikację z poziomu zwykłej przeglądarki. Pracujemy nad poprawką, która zostanie wkrótce wdrożona. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Dowiedz się więcej</a>",
 			"video_not_supported": ""
 		}
 	},
