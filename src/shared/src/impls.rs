@@ -30,7 +30,7 @@ use crate::{
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
         user_profile::{
-            AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
+            OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
         verifiable_credential::CredentialType,
         Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
@@ -253,31 +253,7 @@ impl StoredUserProfile {
         }
     }
 
-    /// # Errors
-    ///
-    /// Will return Err if there is a version mismatch.
-    pub fn add_credential(
-        &self,
-        profile_version: Option<Version>,
-        now: Timestamp,
-        credential_type: &CredentialType,
-        issuer: String,
-    ) -> Result<StoredUserProfile, AddUserCredentialError> {
-        if profile_version != self.version {
-            return Err(AddUserCredentialError::VersionMismatch);
-        }
-        let mut new_profile = self.with_incremented_version();
-        let user_credential = UserCredential {
-            credential_type: credential_type.clone(),
-            verified_date_timestamp: Some(now),
-            issuer,
-        };
-        let mut new_credentials = new_profile.credentials.clone();
-        new_credentials.insert(credential_type.clone(), user_credential);
-        new_profile.credentials = new_credentials;
-        new_profile.updated_timestamp = now;
-        Ok(new_profile)
-    }
+
 
     /// Returns a copy with networks map set to the specified value.
     ///
