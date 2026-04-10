@@ -976,6 +976,7 @@
 			"solana_confirmation_failed": "Solana确认失败",
 			"solana_insufficient_funds": "",
 			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "由于不支持所提供的令牌标准，因此无法计算费用。"
 		}
 	},

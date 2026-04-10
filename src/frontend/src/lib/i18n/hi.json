@@ -976,6 +976,7 @@
 			"solana_confirmation_failed": "हमें आपके द्वारा अभी बनाए गए लेनदेन के लिए कोई पुष्टि नहीं मिली। कृपया कुछ सेकंड प्रतीक्षा करें और फिर अपनी टोकन की लेनदेन सूची जांचें कि क्या आपका लेनदेन सही ढंग से बनाया गया था।",
 			"solana_insufficient_funds": "",
 			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": ""
 		}
 	},

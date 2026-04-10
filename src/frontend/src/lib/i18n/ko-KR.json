@@ -976,6 +976,7 @@
 			"solana_confirmation_failed": "방금 생성한 트랜잭션에 대한 확인을 받지 못했습니다. 몇 초 후에 토큰의 트랜잭션 목록에서 트랜잭션이 올바르게 생성되었는지 확인해 주세요.",
 			"solana_insufficient_funds": "",
 			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "제공된 토큰 표준이 지원되지 않아 수수료를 계산할 수 없습니다."
 		}
 	},

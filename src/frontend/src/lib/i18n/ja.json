@@ -976,6 +976,7 @@
 			"solana_confirmation_failed": "作成したトランザクションの確認を受信できませんでした。数秒待ってから、トークンのトランザクションリストでトランザクションが正しく作成されたかどうかを確認してください。",
 			"solana_insufficient_funds": "",
 			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "指定されたトークン規格がサポートされていないため、手数料を計算できませんでした。"
 		}
 	},

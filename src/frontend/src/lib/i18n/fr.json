@@ -976,6 +976,7 @@
 			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez patienter quelques secondes, puis vérifiez la liste des transactions de votre token si votre transaction a été créée correctement.",
 			"solana_insufficient_funds": "",
 			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "Impossible de calculer les frais car la norme de token fournie n'est pas prise en charge."
 		}
 	},
