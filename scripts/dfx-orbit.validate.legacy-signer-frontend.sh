@@ -1,11 +1,12 @@
 #!/bin/bash
+set -euo pipefail
 
-if [ -z "${RELEASE_COMMIT}" ]; then
+if [ -z "${RELEASE_COMMIT:-}" ]; then
   echo "RELEASE_COMMIT is unset or set to the empty string"
   exit 1
 fi
 
-if [ -z "${ENV_SHA}" ]; then
+if [ -z "${ENV_SHA:-}" ]; then
   echo "ENV_SHA is unset or set to the empty string"
   exit 1
 fi
