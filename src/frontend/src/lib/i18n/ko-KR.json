@@ -978,8 +978,11 @@
 			"no_pending_bitcoin_transaction": "대기 중인 비트코인 트랜잭션을 불러오는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
 			"unexpected_utxos_fee": "트랜잭션 수수료를 계산하는 중 문제가 발생했습니다.",
 			"unable_to_retrieve_amount": "N/A (가져올 수 없음)",
-			"solana_transaction_expired": "전송 트랜잭션이 솔라나 네트워크에서 처리되지 않고 만료되었습니다. 제공된 우선 수수료가 충분하지 않았을 가능성이 높습니다. 최신 권장 금액으로 업데이트되었으니 다시 전송해 주세요.",
+			"solana_transaction_expired": "트랜잭션이 솔라나 네트워크에서 처리되지 않고 만료되었습니다. 제공된 우선 수수료가 충분하지 않았을 가능성이 높습니다. 최신 권장 금액으로 업데이트되었으니 다시 시도해 주세요.",
 			"solana_confirmation_failed": "방금 생성한 트랜잭션에 대한 확인을 받지 못했습니다. 몇 초 후에 토큰의 트랜잭션 목록에서 트랜잭션이 올바르게 생성되었는지 확인해 주세요.",
+			"solana_insufficient_funds": "",
+			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "제공된 토큰 표준이 지원되지 않아 수수료를 계산할 수 없습니다."
 		}
 	},

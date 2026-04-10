@@ -978,8 +978,11 @@
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
-			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again.",
+			"solana_transaction_expired": "Your transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try again.",
 			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
+			"solana_insufficient_funds": "Your token balance is not sufficient to complete this transaction. Your balance may have changed since it was last displayed.",
+			"solana_insufficient_funds_for_fee": "Your SOL balance is not sufficient to cover the transaction fees.",
+			"solana_insufficient_funds_for_rent": "Your SOL balance is not sufficient to cover the rent required for account creation.",
 			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
 		}
 	},
