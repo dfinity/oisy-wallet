@@ -2,7 +2,6 @@ use std::fmt::Debug;
 
 use candid::{CandidType, Deserialize, Principal};
 
-
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
     pub ecdsa_key_name: String,
