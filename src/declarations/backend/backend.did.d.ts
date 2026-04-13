@@ -143,6 +143,7 @@ export interface CanisterStatusResultV2 {
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export interface Config {
 	derivation_origin: [] | [string];
+	ii_canister_id: [] | [Principal];
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
@@ -325,6 +326,7 @@ export type ImageMimeType =
 	| { 'image/webp': null };
 export interface InitArg {
 	derivation_origin: [] | [string];
+	ii_canister_id: [] | [Principal];
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;

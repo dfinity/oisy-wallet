@@ -133,6 +133,7 @@ type CanisterStatusResultV2 = record {
 type CanisterStatusType = variant { stopped; stopping; running };
 type Config = record {
 	derivation_origin : opt text;
+	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
@@ -298,6 +299,7 @@ type ImageMimeType = variant {
 };
 type InitArg = record {
 	derivation_origin : opt text;
+	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
