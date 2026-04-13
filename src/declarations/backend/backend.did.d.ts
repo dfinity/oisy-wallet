@@ -15,10 +15,25 @@ export type AddDappSettingsError =
 	| { VersionMismatch: null }
 	| { DappIdTooLong: null }
 	| { UserNotFound: null };
+export type AddDismissedNotificationError =
+	| {
+			TooManyNotificationIds: null;
+	  }
+	| { NotificationIdTooLong: null }
+	| { VersionMismatch: null }
+	| { MaxDismissedNotifications: null }
+	| { UserNotFound: null };
+export interface AddDismissedNotificationRequest {
+	notification_ids: Array<string>;
+	current_user_version: [] | [bigint];
+}
 export interface AddHiddenDappIdRequest {
 	current_user_version: [] | [bigint];
 	dapp_id: string;
 }
+export type AddUserDismissedNotificationResult =
+	| { Ok: null }
+	| { Err: AddDismissedNotificationError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
 export interface AgreementHistoryEntry {
 	timestamp_ns: bigint;
@@ -572,6 +587,26 @@ export interface Utxo {
 	outpoint: Outpoint;
 }
 export interface _SERVICE {
+	/**
+	 * Adds one or more dismissed notification IDs to the user's profile.
+	 *
+	 * Each ID is typically a SHA-256 hash of the notification text, optionally suffixed
+	 * with a qualifier (e.g. `:tokenSymbol`) for per-item dismissal.
+	 *
+	 * # Arguments
+	 * * `request` - The request containing the notification IDs.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the IDs were added successfully, or if they were all already present.
+	 *
+	 * # Errors
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, a
+	 * notification ID exceeds the maximum length, or the batch is too large.
+	 */
+	add_user_dismissed_notification: ActorMethod<
+		[AddDismissedNotificationRequest],
+		AddUserDismissedNotificationResult
+	>;
 	/**
 	 * Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	 *

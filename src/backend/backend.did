@@ -4,9 +4,24 @@ type AddDappSettingsError = variant {
 	DappIdTooLong;
 	UserNotFound
 };
+type AddDismissedNotificationError = variant {
+	TooManyNotificationIds;
+	NotificationIdTooLong;
+	VersionMismatch;
+	MaxDismissedNotifications;
+	UserNotFound
+};
+type AddDismissedNotificationRequest = record {
+	notification_ids : vec text;
+	current_user_version : opt nat64
+};
 type AddHiddenDappIdRequest = record {
 	current_user_version : opt nat64;
 	dapp_id : text
+};
+type AddUserDismissedNotificationResult = variant {
+	Ok;
+	Err : AddDismissedNotificationError
 };
 type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type AgreementHistoryEntry = record {
@@ -525,6 +540,23 @@ type UserTransactionError = variant {
 };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
+	// Adds one or more dismissed notification IDs to the user's profile.
+	//
+	// Each ID is typically a SHA-256 hash of the notification text, optionally suffixed
+	// with a qualifier (e.g. `:tokenSymbol`) for per-item dismissal.
+	//
+	// # Arguments
+	// * `request` - The request containing the notification IDs.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the IDs were added successfully, or if they were all already present.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, a
+	// notification ID exceeds the maximum length, or the batch is too large.
+	add_user_dismissed_notification : (AddDismissedNotificationRequest) -> (
+		AddUserDismissedNotificationResult
+	);
 	// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	//
 	// # Arguments

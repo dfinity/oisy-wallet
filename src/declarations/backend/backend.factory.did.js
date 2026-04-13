@@ -16,6 +16,21 @@ export const idlFactory = ({ IDL }) => {
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
+	const AddDismissedNotificationRequest = IDL.Record({
+		notification_ids: IDL.Vec(IDL.Text),
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
+	const AddDismissedNotificationError = IDL.Variant({
+		TooManyNotificationIds: IDL.Null,
+		NotificationIdTooLong: IDL.Null,
+		VersionMismatch: IDL.Null,
+		MaxDismissedNotifications: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const AddUserDismissedNotificationResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: AddDismissedNotificationError
+	});
 	const AddHiddenDappIdRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		dapp_id: IDL.Text
@@ -616,6 +631,11 @@ export const idlFactory = ({ IDL }) => {
 	});
 
 	return IDL.Service({
+		add_user_dismissed_notification: IDL.Func(
+			[AddDismissedNotificationRequest],
+			[AddUserDismissedNotificationResult],
+			[]
+		),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [AddUserHiddenDappIdResult], []),
 		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
 		btc_add_pending_transaction: IDL.Func(
