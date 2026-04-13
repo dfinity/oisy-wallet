@@ -60,13 +60,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-      - name: Publish Release Notes
-        uses: ./.github/actions/release-notes
-        with:
-          tag: 'legacy-signer/v${{ steps.get_version.outputs.version }}'
-          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
-          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
-
   call-deploy:
     needs: release
     if: needs.release.result == 'success'
