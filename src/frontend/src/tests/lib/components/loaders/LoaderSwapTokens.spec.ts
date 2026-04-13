@@ -1,4 +1,4 @@
-import LoaderSwapSupportedTokens from '$lib/components/loaders/LoaderSwapSupportedTokens.svelte';
+import LoaderSwapTokens from '$lib/components/loaders/LoaderSwapTokens.svelte';
 import * as swapSupportedTokensServices from '$lib/services/swap-supported-tokens.services';
 import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -6,7 +6,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-describe('LoaderSwapSupportedTokens', () => {
+describe('LoaderSwapTokens', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 
@@ -20,7 +20,7 @@ describe('LoaderSwapSupportedTokens', () => {
 			.spyOn(swapSupportedTokensServices, 'loadSwapSupportedTokens')
 			.mockResolvedValueOnce();
 
-		render(LoaderSwapSupportedTokens);
+		render(LoaderSwapTokens);
 
 		await waitFor(() => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -34,7 +34,7 @@ describe('LoaderSwapSupportedTokens', () => {
 			.spyOn(swapSupportedTokensServices, 'loadSwapSupportedTokens')
 			.mockResolvedValueOnce();
 
-		render(LoaderSwapSupportedTokens);
+		render(LoaderSwapTokens);
 
 		expect(spy).not.toHaveBeenCalled();
 	});
@@ -53,7 +53,7 @@ describe('LoaderSwapSupportedTokens', () => {
 			.spyOn(swapSupportedTokensServices, 'loadSwapSupportedTokens')
 			.mockResolvedValueOnce();
 
-		render(LoaderSwapSupportedTokens);
+		render(LoaderSwapTokens);
 
 		expect(spy).not.toHaveBeenCalled();
 		expect(get(swapSupportedTokensStore)).toEqual(mockData);
