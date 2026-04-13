@@ -14,6 +14,7 @@
 					issuer_canister_id = principal "qgxyr-pyaaa-aaaah-qdcwq-cai"
 				}
 			};
+			ii_canister_id = opt principal "rdmx6-jaaaa-aaaaa-aaadq-cai";
 			ic_root_key_der = null
 		}
 	}

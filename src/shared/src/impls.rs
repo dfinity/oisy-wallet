@@ -165,6 +165,7 @@ impl From<InitArg> for Config {
             ic_root_key_der,
             cfs_canister_id,
             derivation_origin,
+            ii_canister_id,
         } = arg;
         let ic_root_key_raw = match extract_raw_root_pk_from_der(
             &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
@@ -179,6 +180,7 @@ impl From<InitArg> for Config {
             supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),
             derivation_origin,
+            ii_canister_id,
         }
     }
 }

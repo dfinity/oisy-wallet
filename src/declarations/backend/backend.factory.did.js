@@ -17,6 +17,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const InitArg = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
+		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
@@ -178,6 +179,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Config = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
+		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
@@ -723,6 +725,7 @@ export const init = ({ IDL }) => {
 	});
 	const InitArg = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
+		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),

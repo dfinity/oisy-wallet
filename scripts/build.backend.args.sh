@@ -88,6 +88,7 @@ echo "(variant {
               issuer_canister_id = principal \"$CANISTER_ID_POUH_ISSUER\";
             }
          };
+         ii_canister_id = opt principal \"$CANISTER_ID_INTERNET_IDENTITY\";
          ic_root_key_der = $ic_root_key_der;
      }
   })" >"$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK"
