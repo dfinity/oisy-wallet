@@ -11,6 +11,7 @@ use shared::types::{
         ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
     },
     network::{NetworkSettingsMap, SetTestnetsSettingsError, UpdateNetworksSettingsError},
+    notification::AddDismissedNotificationError,
     user_profile::{GetUserProfileError, StoredUserProfile},
     Timestamp, Version,
 };
@@ -128,6 +129,37 @@ pub fn add_hidden_dapp_id(
         .map_err(|_| AddDappSettingsError::UserNotFound)?;
     let now = time();
     let new_profile = user_profile.add_hidden_dapp_id(profile_version, now, dapp_id)?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
+}
+
+/// Adds one or more dismissed notification IDs to the user's profile.
+///
+/// Each ID is typically a SHA-256 hash of the notification text, optionally suffixed
+/// with a qualifier (e.g. `:tokenSymbol`) for per-item dismissal.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `notification_ids` - The notification IDs to dismiss.
+/// * `user_profile_model` - The user profile model.
+///
+/// # Returns
+/// - Returns `Ok(())` if the IDs were added successfully, or if they were all already present.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn add_dismissed_notifications(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    notification_ids: Vec<String>,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), AddDismissedNotificationError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| AddDismissedNotificationError::UserNotFound)?;
+    let now = time();
+    let new_profile =
+        user_profile.add_dismissed_notifications(profile_version, now, notification_ids)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }
