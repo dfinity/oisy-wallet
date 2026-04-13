@@ -124,8 +124,8 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 /// - Returns `Ok(())` if the IDs were added successfully, or if they were all already present.
 ///
 /// # Errors
-/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
-///   a notification ID exceeds the maximum length, or the batch is too large.
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, a
+///   notification ID exceeds the maximum length, or the batch is too large.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn add_user_dismissed_notification(
