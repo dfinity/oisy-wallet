@@ -18,7 +18,7 @@ use shared::types::{
 };
 
 use crate::utils::{
-    mock::{CALLER, VC_HOLDER},
+    mock::{CALLER, USER_1},
     pocketic::{
         controller, pic_canister::PicCanisterTrait, setup, setup_with_ii,
         setup_with_production_config, BackendBuilder, PicBackend,
@@ -83,7 +83,7 @@ fn register_ii_caller(
 fn test_topup_cannot_be_called_if_not_controller() {
     let pic_setup = setup();
     // A random unauthorized user.
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
+    let caller = Principal::from_text(USER_1).unwrap();
 
     let response = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
 
@@ -168,7 +168,7 @@ fn test_get_allowed_cycles_requires_authenticated_user() {
 #[test]
 fn test_get_allowed_cycles_returns_correct_amount() {
     let pic_setup = setup_with_cycles_ledger();
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
+    let caller = Principal::from_text(USER_1).unwrap();
 
     // Create a user profile so the allow_signing function is called.
     // `create_user_profile` spawns an async `allow_signing` task; give
@@ -191,7 +191,7 @@ fn test_get_allowed_cycles_returns_correct_amount() {
 #[test]
 fn test_get_allowed_cycles_returns_zero_when_no_allowance() {
     let pic_setup = setup_with_cycles_ledger();
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
+    let caller = Principal::from_text(USER_1).unwrap();
 
     // Call get_allowed_cycles
     let result = call_get_allowed_cycles(&pic_setup, caller);
@@ -205,7 +205,7 @@ fn test_get_allowed_cycles_returns_zero_when_no_allowance() {
 fn test_get_allowed_cycles_returns_correct_error_when_cycles_ledger_unavailable() {
     // Regular setup without cycles ledger
     let pic_setup = setup();
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
+    let caller = Principal::from_text(USER_1).unwrap();
 
     // Call get_allowed_cycles - should fail since cycles ledger is not available
     let result = call_get_allowed_cycles(&pic_setup, caller);
@@ -403,7 +403,7 @@ fn test_allow_signing_rate_limit_is_per_caller() {
 #[test]
 fn test_allow_signing_skips_rate_limit_when_allowance_sufficient() {
     let pic_setup = setup_with_cycles_ledger();
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
+    let caller = Principal::from_text(USER_1).unwrap();
 
     // Create profile → housekeeping spawns allow_signing which sets up the
     // allowance above SUFFICIENT_CYCLES_THRESHOLD (~1.458 T cycles).
