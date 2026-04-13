@@ -174,8 +174,6 @@ const enableSwapDestinationToken = async ({
 			});
 
 			await loadCustomSplTokens({ identity });
-
-			return;
 		}
 	} catch (_: unknown) {
 		// Auto-enabling the token is just a good-to-have extra, not necessary for the continuity of the user flow
