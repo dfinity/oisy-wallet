@@ -1,4 +1,3 @@
-//! Types specifics to the user profile.
 use candid::{CandidType, Deserialize, Principal};
 
 use crate::types::{agreement::Agreements, settings::Settings, Timestamp, Version};
