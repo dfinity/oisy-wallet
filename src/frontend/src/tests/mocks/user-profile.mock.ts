@@ -38,7 +38,8 @@ export const mockDappSettings: DappSettings = { dapp_carousel: { hidden_dapp_ids
 export const mockUserSettings: Settings = {
 	networks: mockNetworksSettings,
 	dapp: mockDappSettings,
-	experimental_features: mockExperimentalFeaturesSettings
+	experimental_features: mockExperimentalFeaturesSettings,
+	notifications: []
 };
 
 const mockUserAgreement: UserAgreement = {
