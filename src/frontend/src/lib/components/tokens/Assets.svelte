@@ -122,7 +122,7 @@
 			{/if}
 		</StickyHeader>
 
-		<div class="mt-12 mb-4 flex w-full justify-center sm:w-auto" in:fade>
+		<div class="mt-4 mb-4 flex w-full justify-center sm:mt-12 sm:w-auto" in:fade>
 			{#if activeTab === TokenTypes.TOKENS || activeTab === TokenTypes.NFTS}
 				<ManageTokensButton>
 					{#snippet label()}
