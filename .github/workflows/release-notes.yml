@@ -6,7 +6,6 @@ on:
   push:
     tags:
       - v*
-      - legacy-signer/v*
   workflow_dispatch:
 
 permissions: {}
