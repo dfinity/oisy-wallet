@@ -121,18 +121,19 @@ export const isContactMatchingFilter = ({
 		));
 
 /**
- * Normalises an ICP address (hex account identifier or ICRC principal) to its
- * canonical hex account identifier form. Returns undefined for non-ICP addresses.
+ * Normalises an ICP address (hex account identifier or ICRC-1 account string,
+ * i.e. principal text with an optional subaccount) to its canonical lowercase
+ * hex account identifier form. Returns undefined for non-ICP addresses.
  */
 const normalizeToIcpAccountIdentifierHex = (address: string): string | undefined => {
+	if (isIcpAccountIdentifier(address)) {
+		return address.toLowerCase();
+	}
+
 	const derived = tryToParseIcrcAccountStringToAccountIdentifierText(address);
 
 	if (nonNullish(derived)) {
 		return derived.toLowerCase();
-	}
-
-	if (isIcpAccountIdentifier(address)) {
-		return address.toLowerCase();
 	}
 };
 
