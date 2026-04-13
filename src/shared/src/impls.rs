@@ -161,7 +161,6 @@ impl From<InitArg> for Config {
         let InitArg {
             ecdsa_key_name,
             allowed_callers,
-            supported_credentials,
             ic_root_key_der,
             cfs_canister_id,
             derivation_origin,
@@ -177,7 +176,6 @@ impl From<InitArg> for Config {
             ecdsa_key_name,
             allowed_callers,
             cfs_canister_id,
-            supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),
             derivation_origin,
             ii_canister_id,

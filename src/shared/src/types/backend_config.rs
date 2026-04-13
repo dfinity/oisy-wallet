@@ -2,15 +2,12 @@ use std::fmt::Debug;
 
 use candid::{CandidType, Deserialize, Principal};
 
-use crate::types::verifiable_credential::SupportedCredential;
-
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
     pub ecdsa_key_name: String,
     /// A list of allowed callers to restrict access to endpoints that do not particularly check or
     /// use the `msg_caller()`
     pub allowed_callers: Vec<Principal>,
-    pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_der: Option<Vec<u8>>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
@@ -35,7 +32,6 @@ pub struct Config {
     /// A list of allowed callers to restrict access to endpoints that do not particularly check or
     /// use the `msg_caller()`
     pub allowed_callers: Vec<Principal>,
-    pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_raw: Option<Vec<u8>>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in

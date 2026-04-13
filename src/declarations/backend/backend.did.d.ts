@@ -147,7 +147,6 @@ export interface Config {
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
-	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array];
 }
 export interface Contact {
@@ -330,7 +329,6 @@ export interface InitArg {
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
-	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array];
 }
 export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
@@ -442,13 +440,6 @@ export interface Stats {
 	agreement_history_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
-}
-export interface SupportedCredential {
-	ii_canister_id: Principal;
-	issuer_origin: string;
-	issuer_canister_id: Principal;
-	ii_origin: string;
-	credential_type: CredentialType;
 }
 export interface TestnetsSettings {
 	show_testnets: boolean;
