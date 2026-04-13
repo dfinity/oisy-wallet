@@ -6,7 +6,7 @@ import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
-import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc } from '$eth/utils/erc.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
@@ -145,7 +145,7 @@ const enableSwapDestinationToken = async ({
 	}
 
 	try {
-		if (isTokenErc20(destinationToken)) {
+		if (isTokenErc(destinationToken)) {
 			await setCustomToken({
 				token: toCustomToken({
 					...destinationToken,

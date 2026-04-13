@@ -41,6 +41,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -1806,6 +1807,37 @@ describe('swap.services', () => {
 				fetchNearIntentsEvmSwap({ ...baseParams, destinationToken })
 			).resolves.not.toThrow();
 		});
+
+		it('should call setCustomToken and loadCustomErc20Tokens when ERC4626 destination token is toggleable and disabled', async () => {
+			const destinationToken = {
+				...mockValidErc4626Token,
+				enabled: false
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
+		});
+
+		it('should not call setCustomToken when ERC4626 destination token is toggleable and already enabled', async () => {
+			const destinationToken = {
+				...mockValidErc4626Token,
+				enabled: true
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+
+		it('should not call setCustomToken when ERC4626 destination token is not toggleable', async () => {
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken: mockValidErc4626Token });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('enableSwapDestinationToken via fetchNearIntentsSolSwap', () => {
@@ -1854,6 +1886,31 @@ describe('swap.services', () => {
 
 			expect(setCustomToken).toHaveBeenCalledOnce();
 			expect(loadCustomSplTokens).toHaveBeenCalledOnce();
+		});
+
+		it('should call setCustomToken and loadCustomErc20Tokens when ERC4626 destination token is toggleable and disabled', async () => {
+			const destinationToken = {
+				...mockValidErc4626Token,
+				enabled: false
+			};
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
+			expect(loadCustomSplTokens).not.toHaveBeenCalled();
+		});
+
+		it('should not call setCustomToken when ERC4626 destination token is toggleable and already enabled', async () => {
+			const destinationToken = {
+				...mockValidErc4626Token,
+				enabled: true
+			};
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
 		});
 	});
 
