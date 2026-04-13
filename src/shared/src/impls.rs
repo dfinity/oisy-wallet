@@ -387,7 +387,10 @@ impl StoredUserProfile {
         }
 
         let settings = self.settings.clone().unwrap_or_default();
-        let mut dismissed = settings.notifications.unwrap_or_default().dismissed_notifications;
+        let mut dismissed = settings
+            .notifications
+            .unwrap_or_default()
+            .dismissed_notifications;
 
         let new_ids: Vec<String> = notification_ids
             .into_iter()

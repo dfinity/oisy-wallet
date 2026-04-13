@@ -25,9 +25,9 @@ pub struct AddDismissedNotificationRequest {
 }
 
 impl AddDismissedNotificationRequest {
+    pub const MAX_BATCH_SIZE: usize = 100;
     /// SHA-256 hex string is 64 chars; compound IDs with a qualifier use `:` separator.
     pub const MAX_ID_LEN: usize = 128;
-    pub const MAX_BATCH_SIZE: usize = 100;
 
     /// Checks whether the request is syntactically valid.
     ///
