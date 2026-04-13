@@ -26,6 +26,7 @@ import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
 import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
+import { ZERO } from '$lib/constants/app.constants';
 
 const mockPrincipal = Principal.fromText(mockPrincipalText);
 const mockDerivedAccountIdentifierHex = AccountIdentifier.fromPrincipal({
@@ -220,7 +221,7 @@ describe('contact.utils', () => {
 				const contactWithPrincipal: ContactUi = {
 					name: 'Principal Only',
 					id: BigInt(10),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [principalAddress]
 				};
 
@@ -236,7 +237,7 @@ describe('contact.utils', () => {
 				const contactWithHex: ContactUi = {
 					name: 'Hex Only',
 					id: BigInt(11),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [hexAccountAddress]
 				};
 
@@ -252,14 +253,14 @@ describe('contact.utils', () => {
 				const contactWithExactHex: ContactUi = {
 					name: 'Exact Match',
 					id: BigInt(12),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [hexAccountAddress]
 				};
 
 				const contactWithPrincipal: ContactUi = {
 					name: 'Derived Match',
 					id: BigInt(13),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [principalAddress]
 				};
 
@@ -275,7 +276,7 @@ describe('contact.utils', () => {
 				const contactWithBtc: ContactUi = {
 					name: 'BTC Contact',
 					id: BigInt(14),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [
 						{
 							address: mockBtcAddress,
@@ -296,7 +297,7 @@ describe('contact.utils', () => {
 				const contactWithPrincipal: ContactUi = {
 					name: 'Case Test',
 					id: BigInt(15),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [principalAddress]
 				};
 
@@ -508,7 +509,7 @@ describe('contact.utils', () => {
 				const contact: ContactUi = {
 					name: 'Test',
 					id: BigInt(20),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [principalAddress]
 				};
 
@@ -524,7 +525,7 @@ describe('contact.utils', () => {
 				const contact: ContactUi = {
 					name: 'Test',
 					id: BigInt(21),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [hexAccountAddress]
 				};
 
@@ -540,7 +541,7 @@ describe('contact.utils', () => {
 				const contact: ContactUi = {
 					name: 'Test',
 					id: BigInt(22),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [hexAccountAddress, principalAddress]
 				};
 
@@ -556,7 +557,7 @@ describe('contact.utils', () => {
 				const contact: ContactUi = {
 					name: 'Test',
 					id: BigInt(23),
-					updateTimestampNs: 0n,
+					updateTimestampNs: ZERO,
 					addresses: [
 						{
 							address: mockBtcAddress,
