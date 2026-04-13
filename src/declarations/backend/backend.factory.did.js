@@ -293,6 +293,9 @@ export const idlFactory = ({ IDL }) => {
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		testnets: TestnetsSettings
 	});
+	const NotificationSettings = IDL.Record({
+		dismissed_notifications: IDL.Vec(IDL.Text)
+	});
 	const DappCarouselSettings = IDL.Record({
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});
@@ -308,6 +311,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Settings = IDL.Record({
 		networks: NetworksSettings,
+		notifications: IDL.Opt(NotificationSettings),
 		dapp: DappSettings,
 		experimental_features: ExperimentalFeaturesSettings
 	});

@@ -335,6 +335,7 @@ type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
 };
+type NotificationSettings = record { dismissed_notifications : vec text };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type ProviderAgreementProvider = variant { NearIntents };
@@ -381,6 +382,7 @@ type SetTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
 type SetUserShowTestnetsResult = variant { Ok; Err : UpdateAgreementsError };
 type Settings = record {
 	networks : NetworksSettings;
+	notifications : opt NotificationSettings;
 	dapp : DappSettings;
 	experimental_features : ExperimentalFeaturesSettings
 };

@@ -363,6 +363,9 @@ export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
 }
+export interface NotificationSettings {
+	dismissed_notifications: Array<string>;
+}
 export interface Outpoint {
 	txid: Uint8Array;
 	vout: number;
@@ -414,6 +417,7 @@ export type SetTestnetsSettingsError = { VersionMismatch: null } | { UserNotFoun
 export type SetUserShowTestnetsResult = { Ok: null } | { Err: UpdateAgreementsError };
 export interface Settings {
 	networks: NetworksSettings;
+	notifications: [] | [NotificationSettings];
 	dapp: DappSettings;
 	experimental_features: ExperimentalFeaturesSettings;
 }
