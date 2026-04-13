@@ -688,7 +688,6 @@ mod token {
 }
 
 mod user_profile {
-    //! Tests for the `user_profile` types.
     use candid::{Decode, Encode};
 
     use crate::{
