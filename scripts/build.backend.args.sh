@@ -29,18 +29,12 @@ case "$DFX_NETWORK" in
   ECDSA_KEY_NAME="test_key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
-  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
-  # Represents more an ID than a URL
-  POUH_ISSUER_VC_URL="https://${CANISTER_ID_POUH_ISSUER}.icp0.io/"
   DERIVATION_ORIGIN="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io"
   ;;
 "ic" | "beta")
   ECDSA_KEY_NAME="key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
-  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
-  # Represents more an ID than a URL
-  POUH_ISSUER_VC_URL="https://id.decideai.xyz/"
   DERIVATION_ORIGIN="https://oisy.com"
   ;;
 *)
@@ -53,9 +47,6 @@ case "$DFX_NETWORK" in
     jq -r '.root_key | reduce .[] as $item ("{ "; "\(.) \($item):nat8;") + " }"')
   echo "Parsed rootkey: ${rootkey_did:0:20}..." >&2
   ic_root_key_der="opt vec $rootkey_did"
-  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
-  # We use the dummy issuer canister for local development
-  POUH_ISSUER_VC_URL="https://dummy-issuer.vc/"
   DERIVATION_ORIGIN="http://${CANISTER_ID_BACKEND}.localhost:4943"
   ;;
 esac
@@ -67,27 +58,12 @@ else
   ALLOWED_CALLERS="vec{ principal \"$CANISTER_ID_REWARDS\" }"
 fi
 
-# URL used by II-issuer in the id_alias-verifiable credentials (hard-coded in II)
-# Represents more an ID than a URL
-II_VC_URL="https://identity.internetcomputer.org"
-
-echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
-
 echo "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = $ALLOWED_CALLERS;
          cfs_canister_id = opt principal \"$CANISTER_ID_SIGNER\";
          derivation_origin = opt \"$DERIVATION_ORIGIN\";
-         supported_credentials = opt vec {
-            record {
-              credential_type = variant { ProofOfUniqueness };
-              ii_origin = \"$II_VC_URL\";
-              ii_canister_id = principal \"$CANISTER_ID_INTERNET_IDENTITY\";
-              issuer_origin = \"$POUH_ISSUER_VC_URL\";
-              issuer_canister_id = principal \"$CANISTER_ID_POUH_ISSUER\";
-            }
-         };
          ii_canister_id = opt principal \"$CANISTER_ID_INTERNET_IDENTITY\";
          ic_root_key_der = $ic_root_key_der;
      }

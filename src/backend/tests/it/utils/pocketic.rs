@@ -412,14 +412,6 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
         ecdsa_key_name: "test_key_1".to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: Some(root_key),
-        supported_credentials: Some(vec![SupportedCredential {
-            ii_canister_id,
-            ii_origin: II_ORIGIN.to_string(),
-            issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
-                .expect("wrong issuer canister id"),
-            issuer_origin: ISSUER_ORIGIN.to_string(),
-            credential_type: CredentialType::ProofOfUniqueness,
-        }]),
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
@@ -492,14 +484,6 @@ fn init_arg_with_ecdsa_key(ecdsa_key_name: &str) -> Arg {
         ecdsa_key_name: ecdsa_key_name.to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
-        supported_credentials: Some(vec![SupportedCredential {
-            ii_canister_id: Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id"),
-            ii_origin: II_ORIGIN.to_string(),
-            issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
-                .expect("wrong issuer canister id"),
-            issuer_origin: ISSUER_ORIGIN.to_string(),
-            credential_type: CredentialType::ProofOfUniqueness,
-        }]),
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
