@@ -2,12 +2,14 @@ import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
+import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+import { setCustomToken } from '$lib/api/backend.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -37,6 +39,7 @@ import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
+import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -149,6 +152,18 @@ vi.mock('$lib/utils/swap.utils', async (importOriginal) => {
 
 vi.mock('$eth/services/eip2612-permit.services', () => ({
 	createPermit: vi.fn()
+}));
+
+vi.mock('$lib/api/backend.api', () => ({
+	setCustomToken: vi.fn()
+}));
+
+vi.mock('$eth/services/erc20.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$sol/services/spl.services', () => ({
+	loadCustomTokens: vi.fn()
 }));
 
 vi.mock('$env/rest/kongswap.env', () => ({
@@ -1701,6 +1716,144 @@ describe('swap.services', () => {
 					})
 				})
 			);
+		});
+	});
+
+	describe('enableSwapDestinationToken via fetchNearIntentsEvmSwap', () => {
+		const sourceToken = {
+			...mockValidErc20Token,
+			decimals: 6,
+			address: '0xUSDC'
+		};
+
+		const mockProgress = vi.fn();
+
+		const baseParams = {
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken,
+			swapAmount: '1',
+			receiveAmount: 900000n,
+			slippageValue: '1',
+			sourceNetwork: ETHEREUM_NETWORK,
+			userAddress: mockEthAddress,
+			gas: 21000n,
+			maxFeePerGas: 20000000000n,
+			maxPriorityFeePerGas: 2000000000n,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+		});
+
+		it('should not call setCustomToken when ERC20 destination token is toggleable and already enabled', async () => {
+			const destinationToken = {
+				...mockValidErc20Token,
+				decimals: 6,
+				address: '0xARB_USDC',
+				enabled: true
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+
+		it('should not call setCustomToken when ERC20 destination token is not toggleable', async () => {
+			const destinationToken = {
+				...mockValidErc20Token,
+				decimals: 6,
+				address: '0xARB_USDC'
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+
+		it('should call setCustomToken and loadCustomErc20Tokens when ERC20 destination token is toggleable and disabled', async () => {
+			const destinationToken = {
+				...mockValidErc20Token,
+				decimals: 6,
+				address: '0xARB_USDC',
+				enabled: false
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
+		});
+
+		it('should silently catch errors from setCustomToken without breaking the swap flow', async () => {
+			const destinationToken = {
+				...mockValidErc20Token,
+				decimals: 6,
+				address: '0xARB_USDC',
+				enabled: false
+			};
+
+			vi.mocked(setCustomToken).mockRejectedValueOnce(new Error('Backend error'));
+
+			await expect(
+				fetchNearIntentsEvmSwap({ ...baseParams, destinationToken })
+			).resolves.not.toThrow();
+		});
+	});
+
+	describe('enableSwapDestinationToken via fetchNearIntentsSolSwap', () => {
+		const sourceToken = mockValidSplToken;
+		const mockProgress = vi.fn();
+
+		const baseParams = {
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken,
+			swapAmount: '1',
+			userAddress: mockSolAddress,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(sendSol).mockResolvedValue(mockSolSignature());
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+		});
+
+		it('should not call setCustomToken when SPL destination token is toggleable and already enabled', async () => {
+			const destinationToken = { ...mockValidSplToken, symbol: 'DEST', enabled: true };
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomSplTokens).not.toHaveBeenCalled();
+		});
+
+		it('should not call setCustomToken when SPL destination token is not toggleable', async () => {
+			const destinationToken = { ...mockValidSplToken, symbol: 'DEST' };
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomSplTokens).not.toHaveBeenCalled();
+		});
+
+		it('should call setCustomToken and loadCustomSplTokens when SPL destination token is toggleable and disabled', async () => {
+			const destinationToken = { ...mockValidSplToken, symbol: 'DEST', enabled: false };
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomSplTokens).toHaveBeenCalledOnce();
 		});
 	});
 

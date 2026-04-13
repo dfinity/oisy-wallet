@@ -140,7 +140,7 @@ const enableSwapDestinationToken = async ({
 	destinationToken: Token;
 	identity: Identity;
 }): Promise<void> => {
-	if (isTokenToggleable(destinationToken) && destinationToken.enabled) {
+	if (!isTokenToggleable(destinationToken) || destinationToken.enabled) {
 		return;
 	}
 
