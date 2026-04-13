@@ -1,7 +1,7 @@
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import Actions from '$lib/components/hero/Actions.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
