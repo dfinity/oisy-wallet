@@ -217,6 +217,7 @@
 				identity: $authIdentity,
 				progress: (step: ProgressStep) => (swapProgressStep = step),
 				sourceToken: $sourceToken,
+				destinationToken: $destinationToken,
 				swapAmount,
 				userAddress: $solAddressMainnet,
 				swapDetails: selectedProvider.swapDetails as NearIntentsQuoteResponse

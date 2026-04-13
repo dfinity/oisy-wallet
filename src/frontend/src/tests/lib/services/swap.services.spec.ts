@@ -716,7 +716,8 @@ describe('swap.services', () => {
 		const mockDestinationToken = {
 			...mockValidErc20Token,
 			address: '0xDestinationToken',
-			decimals: 6
+			decimals: 6,
+			enabled: true
 		};
 
 		const mockSwapAmount = '1000000000000000000'; // 1 ETH
@@ -903,7 +904,8 @@ describe('swap.services', () => {
 		const mockDestinationToken = {
 			...mockValidErc20Token,
 			address: '0xDestinationToken',
-			decimals: 6
+			decimals: 6,
+			enabled: true
 		};
 
 		const mockSwapAmount = '1000000000000000000';
@@ -1712,7 +1714,8 @@ describe('swap.services', () => {
 		const destinationToken = {
 			...mockValidErc20Token,
 			decimals: 6,
-			address: '0xARB_USDC'
+			address: '0xARB_USDC',
+			enabled: true
 		};
 
 		const mockProgress = vi.fn();
@@ -1817,6 +1820,7 @@ describe('swap.services', () => {
 
 	describe('fetchNearIntentsSolSwap', () => {
 		const sourceToken = mockValidSplToken;
+		const destinationToken = { ...mockValidSplToken, symbol: 'DEST', enabled: true };
 		const mockProgress = vi.fn();
 		const solTxSignature = mockSolSignature();
 		const { depositAddress } = mockNearIntentsQuoteResponse.quote;
@@ -1834,6 +1838,7 @@ describe('swap.services', () => {
 				identity: mockIdentity,
 				progress: mockProgress,
 				sourceToken,
+				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				swapDetails: mockNearIntentsQuoteResponse
@@ -1861,6 +1866,7 @@ describe('swap.services', () => {
 				identity: mockIdentity,
 				progress: mockProgress,
 				sourceToken,
+				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				swapDetails: mockNearIntentsQuoteResponse
@@ -1882,6 +1888,7 @@ describe('swap.services', () => {
 				identity: mockIdentity,
 				progress: mockProgress,
 				sourceToken,
+				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				swapDetails: quoteWithMemo
