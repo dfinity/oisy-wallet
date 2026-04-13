@@ -6,8 +6,10 @@ import {
 } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
+import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -37,6 +39,22 @@ const selectedSwappableToken: Readable<Token | undefined> = derived(
 		}
 
 		return undefined;
+	}
+);
+
+export const isPageTokenSwappable: Readable<boolean> = derived(
+	[selectedSwappableToken, swapSupportedTokensStore],
+	([$selectedSwappableToken, $swapSupportedTokensStore]) => {
+		if (isNullish($selectedSwappableToken)) {
+			return false;
+		}
+
+		const result = filterSwapTokens({
+			tokens: [{ ...$selectedSwappableToken, enabled: true }],
+			supportedData: $swapSupportedTokensStore
+		});
+
+		return result.length > 0;
 	}
 );
 

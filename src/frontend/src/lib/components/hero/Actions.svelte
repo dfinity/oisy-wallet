@@ -29,6 +29,7 @@
 	} from '$lib/derived/network.derived';
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken, pageTokenWithFallback } from '$lib/derived/page-token.derived';
+	import { isPageTokenSwappable } from '$lib/derived/swap.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
@@ -46,10 +47,7 @@
 	let isTransactionsPage = $derived(isRouteTransactions(page));
 	let isNftsPage = $derived(isRouteNfts(page));
 
-	let swapAction = $derived(
-		(!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)) &&
-			!isNftsPage
-	);
+	let swapAction = $derived((!isTransactionsPage || $isPageTokenSwappable) && !isNftsPage);
 
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
