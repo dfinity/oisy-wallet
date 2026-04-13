@@ -27,6 +27,10 @@ use crate::{
             NetworkSettingsMap, NetworksSettings, SetTestnetsSettingsError,
             UpdateNetworksSettingsError,
         },
+        notification::{
+            AddDismissedNotificationError, NotificationSettings,
+            MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH,
+        },
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
         user_profile::{OisyUser, StoredUserProfile, UserCredential, UserProfile},
@@ -238,6 +242,7 @@ impl StoredUserProfile {
                 },
             },
             experimental_features: ExperimentalFeaturesSettings::default(),
+            notifications: None,
         };
         let agreements = Agreements::default();
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
@@ -363,6 +368,47 @@ impl StoredUserProfile {
         new_dapp_carousel_settings.hidden_dapp_ids = new_hidden_dapp_ids;
         new_dapp_settings.dapp_carousel = new_dapp_carousel_settings;
         new_settings.dapp = new_dapp_settings;
+        new_profile.settings = Some(new_settings);
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or the list would exceed its capacity.
+    pub fn add_dismissed_notifications(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        notification_ids: Vec<String>,
+    ) -> Result<StoredUserProfile, AddDismissedNotificationError> {
+        if profile_version != self.version {
+            return Err(AddDismissedNotificationError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+        let mut dismissed = settings.notifications.unwrap_or_default().dismissed_notifications;
+
+        let new_ids: Vec<String> = notification_ids
+            .into_iter()
+            .filter(|id| !dismissed.contains(id))
+            .collect();
+
+        if new_ids.is_empty() {
+            return Ok(self.clone());
+        }
+
+        if dismissed.len() + new_ids.len() > MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH {
+            return Err(AddDismissedNotificationError::MaxDismissedNotifications);
+        }
+
+        dismissed.extend(new_ids);
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_settings = new_profile.settings.clone().unwrap_or_default();
+        new_settings.notifications = Some(NotificationSettings {
+            dismissed_notifications: dismissed,
+        });
         new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
         Ok(new_profile)

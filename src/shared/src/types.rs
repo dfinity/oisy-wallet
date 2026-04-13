@@ -16,6 +16,7 @@ pub mod delegation;
 pub mod exchange;
 pub mod experimental_feature;
 pub mod network;
+pub mod notification;
 pub mod number;
 pub mod pow;
 pub mod result_types;
