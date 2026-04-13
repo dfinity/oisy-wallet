@@ -10,13 +10,9 @@ use pocket_ic::{PocketIc, PocketIcBuilder};
 use shared::types::{
     backend_config::{Arg, InitArg},
     user_profile::{OisyUser, UserProfile},
-    verifiable_credential::{CredentialType, SupportedCredential},
 };
 
-use super::mock::{
-    CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, SIGNER_CANISTER_ID,
-    VC_DERIVATION_ORIGIN,
-};
+use super::mock::{CONTROLLER, II_CANISTER_ID, SIGNER_CANISTER_ID, VC_DERIVATION_ORIGIN};
 use crate::utils::mock::CALLER;
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
