@@ -7,21 +7,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 export const idlFactory = ({ IDL }) => {
-	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
-	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Principal,
-		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Principal,
-		ii_origin: IDL.Text,
-		credential_type: CredentialType
-	});
 	const InitArg = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
 		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
@@ -183,7 +174,6 @@ export const idlFactory = ({ IDL }) => {
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const ImageMimeType = IDL.Variant({
@@ -269,6 +259,7 @@ export const idlFactory = ({ IDL }) => {
 		agreements: UserAgreements,
 		provider_agreements: IDL.Opt(IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement)))
 	});
+	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -705,21 +696,12 @@ export const idlFactory = ({ IDL }) => {
 };
 
 export const init = ({ IDL }) => {
-	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
-	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Principal,
-		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Principal,
-		ii_origin: IDL.Text,
-		credential_type: CredentialType
-	});
 	const InitArg = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
 		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
