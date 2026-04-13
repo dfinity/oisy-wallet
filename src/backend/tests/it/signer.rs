@@ -18,13 +18,12 @@ use shared::types::{
 };
 
 use crate::utils::{
-    mock::{CALLER},
+    mock::{CALLER, USER_1},
     pocketic::{
         controller, pic_canister::PicCanisterTrait, setup, setup_with_ii,
         setup_with_production_config, BackendBuilder, PicBackend,
     },
 };
-use crate::utils::mock::USER_1;
 
 pub fn call_create_user_profile(
     pic_setup: &PicBackend,
