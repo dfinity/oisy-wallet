@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
 	import ConvertToCkBtc from '$btc/components/convert/ConvertToCkBtc.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
@@ -47,7 +47,9 @@
 	let isTransactionsPage = $derived(isRouteTransactions(page));
 	let isNftsPage = $derived(isRouteNfts(page));
 
-	let swapAction = $derived((!isTransactionsPage || $isPageTokenSwappable) && !isNftsPage);
+	let swapAction = $derived(
+		(!isTransactionsPage || $isPageTokenSwappable || isNullish($pageToken)) && !isNftsPage
+	);
 
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 

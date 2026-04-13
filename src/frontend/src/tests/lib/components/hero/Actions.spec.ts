@@ -74,6 +74,15 @@ describe('Actions', () => {
 			expect(container.querySelector(swapButtonSelector)).not.toBeInTheDocument();
 		});
 
+		it('should show swap button on transactions page when no token is selected', () => {
+			setTransactionsPage();
+			mockPage.mockNetwork(ICP_TOKEN.network.id.description);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(swapButtonSelector)).toBeInTheDocument();
+		});
+
 		it('should hide swap button on NFTs page', () => {
 			setNftsPage();
 			mockPage.mockToken(ICP_TOKEN);
