@@ -156,7 +156,9 @@ const enableSwapDestinationToken = async ({
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
+
 			await loadCustomErc20Tokens({ identity });
+
 			return;
 		}
 
@@ -170,7 +172,10 @@ const enableSwapDestinationToken = async ({
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
+
 			await loadCustomSplTokens({ identity });
+
+			return;
 		}
 	} catch (_: unknown) {
 		// Auto-enabling the token is just a good-to-have extra, not necessary for the continuity of the user flow
