@@ -97,7 +97,7 @@ The **legacy signer** (`legacy_signer_frontend`) has its own independent version
 
 ```json
 {
-	"legacy_signer_frontend": "1.0.0"
+	"legacy_signer_frontend": "1.2.3"
 }
 ```
 
@@ -127,7 +127,7 @@ The slash-scoped format keeps tags filterable (`git tag -l 'legacy-signer/*'`) a
 | PR branch         | `chore(release)/v2.0.3`                                         | `chore(release)/legacy-signer-v1.0.1`                           |
 | Auto-tag on merge | `tag-release.yml` → `v2.0.3`                                    | `tag-legacy-signer-release.yml` → `legacy-signer/v1.0.1`        |
 | Beta deploy       | `deploy-to-environment.yml` (all canisters)                     | `deploy-to-environment.yml` (`legacy_signer_frontend` only)     |
-| Release notes     | `release-notes.yml` on `v*` push                                | `release-notes.yml` on `legacy-signer/v*` push                  |
+| Release notes     | `release-notes.yml` on `v*` push                                | N/A                                                             |
 | Production (IC)   | Orbit workflow                                                  | Orbit workflow                                                  |
 
 ### Canister definitions
