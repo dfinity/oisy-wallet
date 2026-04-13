@@ -112,23 +112,23 @@ This means:
 
 Git tags use a scoped prefix to distinguish releases:
 
-| Target                    | Tag format              | Example                 |
-| ------------------------- | ----------------------- | ----------------------- |
-| Main OISY + Signer        | `v<semver>`             | `v2.0.3`                |
-| Legacy Signer              | `legacy-signer/v<semver>` | `legacy-signer/v1.0.1` |
+| Target             | Tag format                | Example                |
+| ------------------ | ------------------------- | ---------------------- |
+| Main OISY + Signer | `v<semver>`               | `v2.0.3`               |
+| Legacy Signer      | `legacy-signer/v<semver>` | `legacy-signer/v1.0.1` |
 
 The slash-scoped format keeps tags filterable (`git tag -l 'legacy-signer/*'`) and avoids collisions with the main `v*` tags.
 
 **Release pipelines:**
 
-| Step | Main OISY + Signer | Legacy Signer |
-| ---- | ------------------- | ------------- |
-| Version bump | _Version Bump and Release Branch Creation_ (`bump-version.yml`) | _Legacy Signer Version Bump_ (`bump-legacy-signer-version.yml`) |
-| PR branch | `chore(release)/v2.0.3` | `chore(release)/legacy-signer-v1.0.1` |
-| Auto-tag on merge | `tag-release.yml` → `v2.0.3` | `tag-legacy-signer-release.yml` → `legacy-signer/v1.0.1` |
-| Beta deploy | `deploy-to-environment.yml` (all canisters) | `deploy-to-environment.yml` (`legacy_signer_frontend` only) |
-| Release notes | `release-notes.yml` on `v*` push | `release-notes.yml` on `legacy-signer/v*` push |
-| Production (IC) | Orbit workflow | Orbit workflow |
+| Step              | Main OISY + Signer                                              | Legacy Signer                                                   |
+| ----------------- | --------------------------------------------------------------- | --------------------------------------------------------------- |
+| Version bump      | _Version Bump and Release Branch Creation_ (`bump-version.yml`) | _Legacy Signer Version Bump_ (`bump-legacy-signer-version.yml`) |
+| PR branch         | `chore(release)/v2.0.3`                                         | `chore(release)/legacy-signer-v1.0.1`                           |
+| Auto-tag on merge | `tag-release.yml` → `v2.0.3`                                    | `tag-legacy-signer-release.yml` → `legacy-signer/v1.0.1`        |
+| Beta deploy       | `deploy-to-environment.yml` (all canisters)                     | `deploy-to-environment.yml` (`legacy_signer_frontend` only)     |
+| Release notes     | `release-notes.yml` on `v*` push                                | `release-notes.yml` on `legacy-signer/v*` push                  |
+| Production (IC)   | Orbit workflow                                                  | Orbit workflow                                                  |
 
 ### Canister definitions
 
@@ -185,4 +185,4 @@ Each signer domain reports to Plausible under its own domain name. This means yo
 | `src/frontend/src/lib/constants/app.constants.ts`      | `SIGNER_TARGET`, `IS_SIGNER_DOMAIN`, derivation origin  |
 | `src/frontend/src/env/plausible.env.ts`                | Plausible domain per signer target                      |
 | `.env.production` / `.env.staging` / `.env.beta`       | `VITE_AUTH_ALTERNATIVE_ORIGINS` with signer domains     |
-| `.github/workflows/bump-legacy-signer-version.yml`    | Workflow to independently bump legacy signer version    |
+| `.github/workflows/bump-legacy-signer-version.yml`     | Workflow to independently bump legacy signer version    |
