@@ -259,12 +259,6 @@ export const idlFactory = ({ IDL }) => {
 		agreements: UserAgreements,
 		provider_agreements: IDL.Opt(IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement)))
 	});
-	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
-	const UserCredential = IDL.Record({
-		issuer: IDL.Text,
-		verified_date_timestamp: IDL.Opt(IDL.Nat64),
-		credential_type: CredentialType
-	});
 	const NetworkSettingsFor = IDL.Variant({
 		ArbitrumMainnet: IDL.Null,
 		InternetComputer: IDL.Null,
@@ -313,7 +307,6 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const UserProfile = IDL.Record({
 		agreements: IDL.Opt(Agreements),
-		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
 		settings: IDL.Opt(Settings),
 		created_timestamp: IDL.Nat64,
