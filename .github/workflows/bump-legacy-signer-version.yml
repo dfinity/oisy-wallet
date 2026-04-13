@@ -3,10 +3,15 @@ name: Legacy Signer Version Bump
 on:
   workflow_dispatch:
     inputs:
-      new_version:
-        description: 'New version for legacy_signer_frontend (e.g. 1.0.1)'
+      version_bump:
+        description: 'Version bump type (major, minor, patch)'
         required: true
-        type: string
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
 
 permissions: {}
 
@@ -38,15 +43,22 @@ jobs:
         run: |
           node -e "
             const fs = require('fs');
+            const semver = require('semver');
             const path = 'signer-versions.json';
             const data = JSON.parse(fs.readFileSync(path, 'utf8'));
-            data.legacy_signer_frontend = process.env.NEW_VERSION;
+            const bumped = semver.inc(data.legacy_signer_frontend, process.env.VERSION_BUMP);
+            if (!bumped) {
+              console.error('Failed to bump version');
+              process.exit(1);
+            }
+            data.legacy_signer_frontend = bumped;
             fs.writeFileSync(path, JSON.stringify(data, null, '\t') + '\n');
+            console.log('Bumped legacy signer to version: ' + bumped);
           "
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "Bumped legacy signer to version: $NEW_VERSION"
+          new_version=$(node -p "require('./signer-versions.json').legacy_signer_frontend")
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
         env:
-          NEW_VERSION: ${{ github.event.inputs.new_version }}
+          VERSION_BUMP: ${{ github.event.inputs.version_bump }}
 
       - name: Create Pull Request
         uses: ./.github/actions/create-pr
