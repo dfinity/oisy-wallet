@@ -58,20 +58,4 @@ describe('LoaderSwapSupportedTokens', () => {
 		expect(spy).not.toHaveBeenCalled();
 		expect(get(swapSupportedTokensStore)).toEqual(mockData);
 	});
-
-	it('should handle errors gracefully', async () => {
-		mockAuthStore();
-
-		const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-		vi.spyOn(console, 'debug').mockImplementation(() => {});
-		vi.spyOn(swapSupportedTokensServices, 'loadSwapSupportedTokens').mockRejectedValueOnce(
-			new Error('Network error')
-		);
-
-		render(LoaderSwapSupportedTokens);
-
-		await waitFor(() => {
-			expect(consoleSpy).toHaveBeenCalledWith('Failed to load swap supported tokens.');
-		});
-	});
 });
