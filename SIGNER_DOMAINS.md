@@ -93,13 +93,7 @@ When set, this env var affects the build in several ways:
 
 The **signer** (`signer_frontend`) shares the same version as the main OISY wallet, read from `package.json`. It is released, deployed, and versioned hand-in-hand with OISY.
 
-The **legacy signer** (`legacy_signer_frontend`) has its own independent version, stored in `signer-versions.json`:
-
-```json
-{
-	"legacy_signer_frontend": "1.2.3"
-}
-```
+The **legacy signer** (`legacy_signer_frontend`) has its own independent version, stored in `signer-versions.json`.
 
 When `OISY_SIGNER_TARGET=legacy_signer` is set, both `vite.utils.ts` and `svelte.config.js` read the version from `signer-versions.json`. For all other targets (including `signer`), the version falls through to `package.json`.
 
