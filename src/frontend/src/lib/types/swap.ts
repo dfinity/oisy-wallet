@@ -235,7 +235,7 @@ export interface SwapProvidersConfig {
 export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
-	sourceToken: Erc20Token;
+	sourceToken: ErcFungibleToken;
 	destinationToken: ErcFungibleToken;
 	swapAmount: Amount;
 	receiveAmount: bigint;
