@@ -524,7 +524,6 @@ impl PicBackend {
             let timestamp_nanos = timestamp.as_nanos_since_unix_epoch();
             let expected_user = OisyUser {
                 updated_timestamp: timestamp_nanos,
-                pouh_verified: false,
                 principal: caller,
             };
             expected_users.push(expected_user);

@@ -28,7 +28,6 @@ pub mod token_standard;
 pub mod transaction;
 pub mod user_profile;
 pub mod user_transaction;
-pub mod verifiable_credential;
 
 #[cfg(test)]
 mod tests;

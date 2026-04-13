@@ -1,10 +1,10 @@
 import type { EthAddress } from '$eth/types/address';
-import type { Erc20Token } from '$eth/types/erc20';
+import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Contract } from 'ethers/contract';
 
 export interface PermitParams {
-	token: Erc20Token;
+	token: ErcFungibleToken;
 	userAddress: EthAddress;
 	spender: string;
 	value: string;
@@ -48,7 +48,7 @@ export interface FetchPermitMetadataParams {
 }
 
 export interface CreateEIP2612TypedDataParams {
-	token: Erc20Token;
+	token: ErcFungibleToken;
 	userAddress: EthAddress;
 	spender: string;
 	value: string;

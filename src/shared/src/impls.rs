@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, fmt};
+use std::collections::BTreeMap;
 
 use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
@@ -33,8 +33,7 @@ use crate::{
         },
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
-        user_profile::{OisyUser, StoredUserProfile, UserCredential, UserProfile},
-        verifiable_credential::CredentialType,
+        user_profile::{OisyUser, StoredUserProfile, UserProfile},
         Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },
     validate::{validate_on_deserialize, Validate},
@@ -205,14 +204,6 @@ impl TokenVersion for CustomToken {
     }
 }
 
-impl fmt::Display for CredentialType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            CredentialType::ProofOfUniqueness => write!(f, "ProofOfUniqueness"),
-        }
-    }
-}
-
 impl TokenVersion for StoredUserProfile {
     fn get_version(&self) -> Option<Version> {
         self.version
@@ -245,11 +236,9 @@ impl StoredUserProfile {
             notifications: None,
         };
         let agreements = Agreements::default();
-        let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
             settings: Some(settings),
             agreements: Some(agreements),
-            credentials,
             created_timestamp: now,
             updated_timestamp: now,
             version: None,
@@ -569,7 +558,6 @@ impl From<&StoredUserProfile> for UserProfile {
             created_timestamp,
             updated_timestamp,
             version,
-            credentials,
             settings,
             agreements,
         } = user;
@@ -577,7 +565,6 @@ impl From<&StoredUserProfile> for UserProfile {
             created_timestamp: *created_timestamp,
             updated_timestamp: *updated_timestamp,
             version: *version,
-            credentials: credentials.clone().into_values().collect(),
             settings: settings.clone(),
             agreements: agreements.clone(),
         }
@@ -589,9 +576,6 @@ impl OisyUser {
     pub fn from_profile(user: &StoredUserProfile, principal: Principal) -> OisyUser {
         OisyUser {
             principal,
-            pouh_verified: user
-                .credentials
-                .contains_key(&CredentialType::ProofOfUniqueness),
             updated_timestamp: user.updated_timestamp,
         }
     }
