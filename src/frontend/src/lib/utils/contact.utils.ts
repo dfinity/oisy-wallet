@@ -1,4 +1,5 @@
 import type { Contact } from '$declarations/backend/backend.did';
+import { tryToParseIcrcAccountStringToAccountIdentifierText } from '$icp/utils/icp-account.utils';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 import type { Address, OptionAddress } from '$lib/types/address';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
@@ -9,7 +10,15 @@ import {
 	getDiscriminatorForTokenAccountId,
 	getTokenAccountIdAddressString
 } from '$lib/utils/token-account-id.utils';
-import { fromNullable, isEmptyString, isNullish, notEmptyString, toNullable } from '@dfinity/utils';
+import {
+	fromNullable,
+	isEmptyString,
+	isNullish,
+	nonNullish,
+	notEmptyString,
+	toNullable
+} from '@dfinity/utils';
+import { isIcpAccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
 
 export const selectColorForName = <T>({
 	colors,
@@ -111,20 +120,56 @@ export const isContactMatchingFilter = ({
 				}) && label?.toLowerCase().includes(filterValue.toLowerCase())
 		));
 
+/**
+ * Normalises an ICP address (hex account identifier or ICRC principal) to its
+ * canonical hex account identifier form. Returns undefined for non-ICP addresses.
+ */
+const normalizeToIcpAccountIdentifierHex = (address: string): string | undefined => {
+	const derived = tryToParseIcrcAccountStringToAccountIdentifierText(address);
+
+	if (nonNullish(derived)) {
+		return derived.toLowerCase();
+	}
+
+	if (isIcpAccountIdentifier(address)) {
+		return address.toLowerCase();
+	}
+};
+
 export const filterAddressFromContact = <T extends Address>({
 	contact,
 	address: filterAddress
 }: {
 	contact: ContactUi | undefined;
 	address: OptionAddress<T>;
-}): ContactAddressUi | undefined =>
-	contact?.addresses.find(({ address, addressType }) =>
+}): ContactAddressUi | undefined => {
+	if (isNullish(contact) || isNullish(filterAddress)) {
+		return;
+	}
+
+	const directMatch = contact.addresses.find(({ address, addressType }) =>
 		areAddressesEqual({
 			address1: address,
 			address2: filterAddress,
 			addressType
 		})
 	);
+
+	if (nonNullish(directMatch)) {
+		return directMatch;
+	}
+
+	const normalizedInput = normalizeToIcpAccountIdentifierHex(filterAddress);
+
+	if (isNullish(normalizedInput)) {
+		return;
+	}
+
+	return contact.addresses.find(
+		({ addressType, address }) =>
+			addressType === 'Icrcv2' && normalizeToIcpAccountIdentifierHex(address) === normalizedInput
+	);
+};
 
 export const getNetworkContactKey = ({
 	contact,
