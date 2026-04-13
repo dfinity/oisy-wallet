@@ -1,4 +1,5 @@
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import type { NonEmptyArray } from '$lib/types/utils';
 import {
@@ -26,7 +27,6 @@ import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
 import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
-import { ZERO } from '$lib/constants/app.constants';
 
 const mockPrincipal = Principal.fromText(mockPrincipalText);
 const mockDerivedAccountIdentifierHex = AccountIdentifier.fromPrincipal({
