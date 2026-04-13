@@ -12,17 +12,11 @@ const signerVersionsFile = fileURLToPath(new URL('signer-versions.json', import.
 
 const signerVersions = JSON.parse(readFileSync(signerVersionsFile, 'utf8'));
 
-const SIGNER_TARGET_TO_KEY = {
-	signer: 'signer_frontend',
-	legacy_signer: 'legacy_signer_frontend'
-};
-
 const signerTarget = process.env.OISY_SIGNER_TARGET;
 
-const signerKey = notEmptyString(signerTarget) ? SIGNER_TARGET_TO_KEY[signerTarget] : undefined;
-
 const version =
-	(notEmptyString(signerKey) ? signerVersions[signerKey] : undefined) ?? packageVersion;
+	(signerTarget === 'legacy_signer' ? signerVersions['legacy_signer_frontend'] : undefined) ??
+	packageVersion;
 
 const filesPath = (/** @type {string} */ path) => `src/frontend/${path}`;
 

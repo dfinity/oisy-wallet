@@ -6,6 +6,7 @@ on:
       - main
     tags:
       - v*
+      - legacy-signer/v*
   workflow_dispatch:
     inputs:
       network:
@@ -128,6 +129,7 @@ on:
 run-name: >-
   ${{
     github.event_name == 'push' && github.ref_type == 'branch' && 'Deploying Frontend / Backend to Staging'
+    || github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/legacy-signer/') && format('Deploying Legacy Signer Frontend to Beta ({0})', github.ref_name)
     || github.event_name == 'push' && github.ref_type == 'tag' && 'Deploying Frontend / Backend to Beta'
     || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
     || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
@@ -169,16 +171,25 @@ jobs:
           elif [ "${{ github.event_name }}" == "push" ]; then
             if [ "$REF_TYPE" == "branch" ]; then
               echo "NETWORK=staging" >> $GITHUB_ENV
+              echo "CANISTER=frontend" >> $GITHUB_ENV
+              echo "deploy_frontend=true" >> $GITHUB_ENV
+              echo "deploy_backend=true" >> $GITHUB_ENV
+              echo "deploy_all_signers=true" >> $GITHUB_ENV
             elif [ "$REF_TYPE" == "tag" ]; then
               echo "NETWORK=beta" >> $GITHUB_ENV
+              if [[ "$GIT_REF" == refs/tags/legacy-signer/* ]]; then
+                echo "CANISTER=legacy_signer_frontend" >> $GITHUB_ENV
+                echo "deploy_signer=true" >> $GITHUB_ENV
+              else
+                echo "CANISTER=frontend" >> $GITHUB_ENV
+                echo "deploy_frontend=true" >> $GITHUB_ENV
+                echo "deploy_backend=true" >> $GITHUB_ENV
+                echo "deploy_all_signers=true" >> $GITHUB_ENV
+              fi
             else
               echo "Error: Unsupported ref type."
               exit 1
             fi
-            echo "CANISTER=frontend" >> $GITHUB_ENV
-            echo "deploy_frontend=true" >> $GITHUB_ENV
-            echo "deploy_backend=true" >> $GITHUB_ENV
-            echo "deploy_all_signers=true" >> $GITHUB_ENV
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "NETWORK=$NETWORK" >> $GITHUB_ENV
             echo "CANISTER=$CANISTER" >> $GITHUB_ENV
@@ -196,6 +207,7 @@ jobs:
             exit 1
           fi
         env:
+          GIT_REF: ${{ github.ref }}
           REF_TYPE: ${{ github.ref_type }}
           NETWORK: ${{ github.event.inputs.network }}
           CANISTER: ${{ github.event.inputs.canister }}
