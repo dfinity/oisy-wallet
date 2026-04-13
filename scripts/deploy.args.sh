@@ -41,6 +41,7 @@ echo "(variant {
             issuer_canister_id = principal \"$POUH_ISSUER_CANISTER_ID\";
           }
         };
+        ii_canister_id = opt principal \"$II_CANISTER_ID\";
         ic_root_key_der = $ic_root_key_der;
     }
 })"
