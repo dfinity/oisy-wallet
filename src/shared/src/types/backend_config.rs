@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use candid::{CandidType, Deserialize, Principal};
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct InitArg {
     pub ecdsa_key_name: String,
     /// A list of allowed callers to restrict access to endpoints that do not particularly check or
@@ -20,7 +20,7 @@ pub struct InitArg {
     pub ii_canister_id: Option<Principal>,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum Arg {
     Init(InitArg),
     Upgrade,
