@@ -265,6 +265,7 @@ export interface SwapNearIntentsEvmParams
 }
 
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
+	destinationToken: Token;
 	userAddress: SolAddress;
 }
 
