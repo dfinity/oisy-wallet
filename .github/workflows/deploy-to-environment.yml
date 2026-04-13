@@ -177,7 +177,7 @@ jobs:
               echo "deploy_all_signers=true" >> $GITHUB_ENV
             elif [ "$REF_TYPE" == "tag" ]; then
               echo "NETWORK=beta" >> $GITHUB_ENV
-              if [[ "${{ github.ref }}" == refs/tags/legacy-signer/* ]]; then
+              if [[ "$GIT_REF" == refs/tags/legacy-signer/* ]]; then
                 echo "CANISTER=legacy_signer_frontend" >> $GITHUB_ENV
                 echo "deploy_signer=true" >> $GITHUB_ENV
               else
@@ -207,6 +207,7 @@ jobs:
             exit 1
           fi
         env:
+          GIT_REF: ${{ github.ref }}
           REF_TYPE: ${{ github.ref_type }}
           NETWORK: ${{ github.event.inputs.network }}
           CANISTER: ${{ github.event.inputs.canister }}
