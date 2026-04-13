@@ -691,72 +691,22 @@ mod user_profile {
     use candid::{Decode, Encode};
 
     use crate::{
-        types::{
-            user_profile::{UserCredential, UserProfile, MAX_ISSUER_LENGTH},
-            verifiable_credential::CredentialType,
-        },
+        types::user_profile::UserProfile,
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
 
     test_validate_on_deserialize!(
-        UserCredential,
-        [
-            TestVector {
-                description: "UserCredential with max length issuer",
-                input: UserCredential {
-                    credential_type: CredentialType::ProofOfUniqueness,
-                    issuer: "1".repeat(MAX_ISSUER_LENGTH),
-                    verified_date_timestamp: None,
-                },
-                valid: true,
-            },
-            TestVector {
-                description: "UserCredential with issuer too long",
-                input: UserCredential {
-                    credential_type: CredentialType::ProofOfUniqueness,
-                    issuer: "1".repeat(MAX_ISSUER_LENGTH + 1),
-                    verified_date_timestamp: None,
-                },
-                valid: false,
-            }
-        ]
-    );
-
-    fn sample_user_credential() -> UserCredential {
-        UserCredential {
-            credential_type: CredentialType::ProofOfUniqueness,
-            issuer: "1".repeat(MAX_ISSUER_LENGTH),
-            verified_date_timestamp: None,
-        }
-    }
-
-    test_validate_on_deserialize!(
         UserProfile,
-        [
-            TestVector {
-                description: "UserProfile with max length credentials",
-                input: UserProfile {
-                    credentials: vec![sample_user_credential(); UserProfile::MAX_CREDENTIALS],
-                    created_timestamp: 0,
-                    updated_timestamp: 0,
-                    version: None,
-                    settings: None,
-                    agreements: None,
-                },
-                valid: true,
+        [TestVector {
+            description: "UserProfile with valid data",
+            input: UserProfile {
+                created_timestamp: 0,
+                updated_timestamp: 0,
+                version: None,
+                settings: None,
+                agreements: None,
             },
-            TestVector {
-                description: "UserProfile with too many credentials",
-                input: UserProfile {
-                    credentials: vec![sample_user_credential(); UserProfile::MAX_CREDENTIALS + 1],
-                    created_timestamp: 0,
-                    updated_timestamp: 0,
-                    version: None,
-                    settings: None,
-                    agreements: None,
-                },
-                valid: false,
-            }
-        ]
+            valid: true,
+        }]
     );
 }

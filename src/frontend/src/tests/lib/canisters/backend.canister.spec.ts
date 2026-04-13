@@ -116,13 +116,6 @@ describe('backend.canister', () => {
 	};
 
 	const mockedUserProfile = {
-		credentials: [
-			{
-				issuer: 'test-issuer',
-				verified_date_timestamp: [],
-				credential_type: { ProofOfUniqueness: null }
-			}
-		],
 		version: [],
 		created_timestamp: 1n,
 		updated_timestamp: 1n

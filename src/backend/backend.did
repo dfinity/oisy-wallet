@@ -165,7 +165,6 @@ type ContactError = variant {
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
 type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
-type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
 	token : Token;
 	allow_external_content_source : opt bool;
@@ -493,14 +492,8 @@ type UserAgreements = record {
 	privacy_policy : UserAgreement;
 	terms_of_use : UserAgreement
 };
-type UserCredential = record {
-	issuer : text;
-	verified_date_timestamp : opt nat64;
-	credential_type : CredentialType
-};
 type UserProfile = record {
 	agreements : opt Agreements;
-	credentials : vec UserCredential;
 	version : opt nat64;
 	settings : opt Settings;
 	created_timestamp : nat64;

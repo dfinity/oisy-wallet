@@ -180,7 +180,6 @@ export interface CreateContactRequest {
 	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
 	allow_external_content_source: [] | [boolean];
@@ -533,14 +532,8 @@ export interface UserAgreements {
 	privacy_policy: UserAgreement;
 	terms_of_use: UserAgreement;
 }
-export interface UserCredential {
-	issuer: string;
-	verified_date_timestamp: [] | [bigint];
-	credential_type: CredentialType;
-}
 export interface UserProfile {
 	agreements: [] | [Agreements];
-	credentials: Array<UserCredential>;
 	version: [] | [bigint];
 	settings: [] | [Settings];
 	created_timestamp: bigint;
