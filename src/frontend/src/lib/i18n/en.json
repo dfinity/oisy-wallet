@@ -1763,6 +1763,8 @@
 				"status_used": "Redeemed",
 				"status_expired": "Expired",
 				"status_cancelled": "Cancelled",
+				"created": "Created",
+				"expires": "Expires",
 				"cancel_confirm": "Cancel this gift code?",
 				"cancel_success": "Gift code cancelled.",
 				"show_qr": "Show QR code"

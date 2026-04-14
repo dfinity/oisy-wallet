@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import type { QrGiftCodeEntry, QrGiftCodeValidity } from '$declarations/rewards/rewards.did';
+	import type { IcToken } from '$icp/types/ic-token';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -10,9 +11,16 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { cancelGiftCode, loadMyGiftCodes } from '$lib/services/gift-code.services';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { usdValue } from '$lib/utils/exchange.utils';
+	import { formatCurrency, formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	let codes: QrGiftCodeEntry[] = $state([]);
 	let loading = $state(true);
@@ -24,6 +32,48 @@
 		}
 		loading = false;
 	});
+
+	const findToken = (ledgerCanisterId: string): IcToken | undefined =>
+		$enabledIcTokens.find((t) => t.ledgerCanisterId === ledgerCanisterId);
+
+	const formatEntryTokens = (entry: QrGiftCodeEntry): string =>
+		entry.tokens
+			.map((t) => {
+				const token = findToken(t.ledger.toText());
+				if (nonNullish(token)) {
+					return `${formatToken({ value: t.amount, unitName: token.decimals })} ${token.symbol}`;
+				}
+				return t.amount.toString();
+			})
+			.join(', ');
+
+	const formatEntryFiat = (entry: QrGiftCodeEntry): string | undefined => {
+		const parts: number[] = [];
+		for (const t of entry.tokens) {
+			const token = findToken(t.ledger.toText());
+			if (isNullish(token)) {
+				return undefined;
+			}
+			const exchangeRate = $exchanges?.[token.id]?.usd;
+			if (isNullish(exchangeRate)) {
+				return undefined;
+			}
+			parts.push(
+				usdValue({
+					decimals: token.decimals,
+					balance: t.amount,
+					exchangeRate
+				})
+			);
+		}
+		const total = parts.reduce((sum, v) => sum + v, 0);
+		return formatCurrency({
+			value: total,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		});
+	};
 
 	const validityLabel = (validity: QrGiftCodeValidity): string => {
 		if ('Valid' in validity) {
@@ -118,17 +168,31 @@
 		{:else}
 			<div class="flex flex-col gap-2">
 				{#each codes as entry (entry.code)}
+					{@const tokenDisplay = formatEntryTokens(entry)}
+					{@const fiatDisplay = formatEntryFiat(entry)}
 					<button
 						class="hover:bg-dust flex items-center justify-between rounded-lg border border-transparent p-3 text-left"
 						onclick={() => (selectedCode = entry)}
 					>
-						<div class="flex flex-col">
-							<span class="font-mono text-sm"
-								>{entry.code.slice(0, 8)}...{entry.code.slice(-4)}</span
-							>
-							<span class="text-xs text-secondary">
-								{entry.tokens.map((t) => t.amount.toString()).join(', ')}
+						<div class="flex flex-col gap-0.5">
+							<span class="font-bold">{tokenDisplay}</span>
+							{#if nonNullish(fiatDisplay)}
+								<span class="text-xs text-secondary">{fiatDisplay}</span>
+							{/if}
+							<span class="text-xs text-tertiary">
+								{$i18n.gift_code.list.text.created}: {formatNanosecondsToDate({
+									nanoseconds: entry.created_at,
+									language: $currentLanguage
+								})}
 							</span>
+							{#if isValid(entry.validity)}
+								<span class="text-xs text-tertiary">
+									{$i18n.gift_code.list.text.expires}: {formatNanosecondsToDate({
+										nanoseconds: entry.expiry_date,
+										language: $currentLanguage
+									})}
+								</span>
+							{/if}
 						</div>
 						<span class="text-sm font-medium {validityColor(entry.validity)}">
 							{validityLabel(entry.validity)}
