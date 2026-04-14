@@ -90,9 +90,15 @@ if (!IS_SIGNER_BUILD) {
 		const content = readFileSync(htmlFile, 'utf8');
 
 		const updated = content.replace(
-			/\s*<link\s+crossorigin="anonymous"\s+href="\/manifest\.webmanifest"\s+rel="manifest"\s*\/>/,
+			/\s*<link\b(?=[^>]*\brel\s*=\s*["']manifest["'])(?=[^>]*\bhref\s*=\s*["'][^"']*\/?manifest\.webmanifest["'])[^>]*\/?>/i,
 			''
 		);
+
+		if (updated === content) {
+			console.warn(
+				`Signer build: no manifest link was removed from "${htmlFile}". Check the generated HTML manifest <link> markup.`
+			);
+		}
 
 		writeFileSync(htmlFile, updated);
 	});
