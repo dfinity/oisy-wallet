@@ -12,6 +12,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { createGiftCode } from '$lib/services/gift-code.services';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
@@ -40,6 +41,13 @@
 		}
 		return BigInt(Math.floor(amount * 10 ** selectedToken.decimals));
 	});
+
+	const tokensWithBalance = $derived(
+		$enabledIcTokens.filter((token) => {
+			const balance = $balancesStore?.[token.id]?.data;
+			return nonNullish(balance) && balance > ZERO;
+		})
+	);
 
 	const canProceedFromToken = $derived(
 		nonNullish(selectedToken) && nonNullish(amount) && amount > 0
@@ -101,7 +109,7 @@
 				<p class="text-secondary">{$i18n.gift_code.create.text.select_token}</p>
 
 				<div class="flex flex-col gap-2">
-					{#each $enabledIcTokens as token (token.ledgerCanisterId)}
+					{#each tokensWithBalance as token (token.ledgerCanisterId)}
 						<button
 							class="flex items-center gap-3 rounded-lg border p-3 text-left transition-colors
 								{selectedToken?.ledgerCanisterId === token.ledgerCanisterId
