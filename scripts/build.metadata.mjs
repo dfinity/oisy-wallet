@@ -81,16 +81,19 @@ if (!IS_SIGNER_BUILD) {
 	parseMetadata(join(process.cwd(), 'build', 'manifest.webmanifest'));
 } else {
 	const manifestPath = join(process.cwd(), 'build', 'manifest.webmanifest');
+
 	if (existsSync(manifestPath)) {
 		unlinkSync(manifestPath);
 	}
 
 	htmlFiles.forEach((htmlFile) => {
 		const content = readFileSync(htmlFile, 'utf8');
+
 		const updated = content.replace(
 			/\s*<link\s+crossorigin="anonymous"\s+href="\/manifest\.webmanifest"\s+rel="manifest"\s*\/>/,
 			''
 		);
+
 		writeFileSync(htmlFile, updated);
 	});
 }
