@@ -1721,7 +1721,9 @@
 		"create": {
 			"text": {
 				"title": "",
+				"enter_amount": "",
 				"select_token": "",
+				"token_amount": "",
 				"no_tokens": "",
 				"select_expiry": "",
 				"expiry_1h": "",
