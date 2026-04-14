@@ -118,10 +118,10 @@ export class RewardCanister extends Canister<RewardService> {
 		return cancel_qr_gift_code(code);
 	};
 
-	getQrGiftCodeInfo = async (
-		{ certified = true }: QueryParams,
-		code: string
-	): Promise<QrGiftCodeInfoResponse | undefined> => {
+	getQrGiftCodeInfo = async ({
+		certified = true,
+		code
+	}: { code: string } & QueryParams): Promise<QrGiftCodeInfoResponse | undefined> => {
 		const { qr_gift_code_info } = this.caller({ certified });
 
 		const result = await qr_gift_code_info(code);

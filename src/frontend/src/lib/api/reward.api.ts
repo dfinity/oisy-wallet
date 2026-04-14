@@ -137,7 +137,7 @@ export const getQrGiftCodeInfo = async ({
 > => {
 	const { getQrGiftCodeInfo } = await rewardCanister({ identity });
 
-	return getQrGiftCodeInfo({ certified }, code);
+	return getQrGiftCodeInfo({ certified, code });
 };
 
 export const getMyQrGiftCodes = async ({
