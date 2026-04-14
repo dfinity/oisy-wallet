@@ -45,7 +45,8 @@
 			"sorting": "",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
@@ -77,6 +78,8 @@
 			"activity": "Atividade",
 			"airdrops": "Recompensas",
 			"earning": "Ganhar",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Código-fonte no GitHub",
 			"view_on_explorer": "Ver no explorador",
 			"source_code": "Código-fonte",
@@ -98,6 +101,8 @@
 			"dapp_explorer": "Abrir explorador de aplicativos",
 			"activity": "Abrir a visualização de atividade",
 			"airdrops": "Abrir a visualização de airdrops",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Seu endereço de carteira, configurações, sair e links externos",
 			"documentation": "Abrir a documentação de $oisy_name",
 			"support": "Abrir a seção de Suporte da documentação de $oisy_name",
@@ -1030,7 +1035,13 @@
 			"pay_at_failure": "",
 			"try_again": "",
 			"payment_confirmed": "",
-			"payment_failed": ""
+			"payment_failed": "",
+			"what_is_scan": "",
+			"no_camera_permission": "",
+			"what_is_scan_description": "",
+			"what_is_scan_title": "",
+			"learn_more_about_scan": "",
+			"learn_more_about_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "",

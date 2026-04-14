@@ -45,7 +45,8 @@
 			"sorting": "Sorting",
 			"unlimited": "Unlimited $items",
 			"info": "Info",
-			"asset": "Asset"
+			"asset": "Asset",
+			"got_it": "Got it"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -77,6 +78,8 @@
 			"activity": "Activity",
 			"airdrops": "Rewards",
 			"earning": "Earn",
+			"pay": "$oisy_short PAY",
+			"wallet_connect": "WalletConnect",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -98,6 +101,8 @@
 			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
+			"pay": "Open the $oisy_short PAY",
+			"wallet_connect": "Open the WalletConnect",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
@@ -1030,7 +1035,13 @@
 			"pay_at_failure": "Failed to pay at $receipt",
 			"try_again": "Try again",
 			"payment_confirmed": "Payment Confirmed",
-			"payment_failed": "Payment Failed"
+			"payment_failed": "Payment Failed",
+			"what_is_scan": "What is $oisy_short scan?",
+			"no_camera_permission": "To scan QR codes, you need to allow camera access in your browser's site settings.",
+			"what_is_scan_description": "$oisy_name lets you pay instantly with crypto across supported chains. At any shop that uses OpenCryptoPay, simply scan their payment QR code. Choose the token you want to pay with and confirm the transaction on-chain.",
+			"what_is_scan_title": "$oisy_short Scan understands any QR code",
+			"learn_more_about_scan": "Learn more about $oisy_short Scan",
+			"learn_more_about_pay": "Learn more about $oisy_short Pay"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
