@@ -21,6 +21,7 @@ import {
 import { ZERO } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
+	AddUserDismissedNotificationParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
 	AllowSigningParams,
@@ -288,6 +289,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await add_user_hidden_dapp_id({
 			dapp_id: dappId,
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	addUserDismissedNotification = async ({
+		notifications,
+		currentUserVersion
+	}: AddUserDismissedNotificationParams): Promise<void> => {
+		const { add_user_dismissed_notification } = this.caller({ certified: true });
+
+		await add_user_dismissed_notification({
+			notifications,
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};

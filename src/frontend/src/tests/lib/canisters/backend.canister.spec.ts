@@ -962,6 +962,76 @@ describe('backend.canister', () => {
 		});
 	});
 
+	describe('addUserDismissedNotification', () => {
+		it('should add user dismissed notifications', async () => {
+			const response = { Ok: null };
+
+			service.add_user_dismissed_notification.mockResolvedValue(response);
+
+			const { addUserDismissedNotification } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await addUserDismissedNotification({
+				notifications: [
+					{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } },
+					{ Qualified: { kind: { NoIndexCanister: null }, qualifier: 'ETH', version: 1 } }
+				]
+			});
+
+			expect(service.add_user_dismissed_notification).toHaveBeenCalledWith({
+				notifications: [
+					{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } },
+					{ Qualified: { kind: { NoIndexCanister: null }, qualifier: 'ETH', version: 1 } }
+				],
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should pass current_user_version when provided', async () => {
+			const response = { Ok: null };
+
+			service.add_user_dismissed_notification.mockResolvedValue(response);
+
+			const { addUserDismissedNotification } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await addUserDismissedNotification({
+				notifications: [
+					{ Qualified: { kind: { UnavailableIndexCanister: null }, qualifier: 'BTC', version: 1 } }
+				],
+				currentUserVersion: 3n
+			});
+
+			expect(service.add_user_dismissed_notification).toHaveBeenCalledWith({
+				notifications: [
+					{ Qualified: { kind: { UnavailableIndexCanister: null }, qualifier: 'BTC', version: 1 } }
+				],
+				current_user_version: [3n]
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if add_user_dismissed_notification throws', async () => {
+			service.add_user_dismissed_notification.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { addUserDismissedNotification } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = addUserDismissedNotification({
+				notifications: [{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } }]
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
 	describe('setUserShowTestnets', () => {
 		it('should set user show testnets', async () => {
 			const response = { Ok: null };

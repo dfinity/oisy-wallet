@@ -11,6 +11,7 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
+	AddUserDismissedNotificationParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
 	AllowSigningParams,
@@ -156,6 +157,15 @@ export const addUserHiddenDappId = async ({
 	const { addUserHiddenDappId } = await backendCanister({ identity });
 
 	return addUserHiddenDappId(params);
+};
+
+export const addUserDismissedNotification = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<AddUserDismissedNotificationParams>): Promise<void> => {
+	const { addUserDismissedNotification } = await backendCanister({ identity });
+
+	return addUserDismissedNotification(params);
 };
 
 export const setUserShowTestnets = async ({
