@@ -14,15 +14,6 @@ type AddDismissedNotificationRequest = record {
 	notifications : vec DismissedNotification;
 	current_user_version : opt nat64
 };
-type SimpleNotificationKind = variant { BtcActivityInfo };
-type QualifiedNotificationKind = variant {
-	NoIndexCanister;
-	UnavailableIndexCanister
-};
-type DismissedNotification = variant {
-	Simple : record { kind : SimpleNotificationKind; version : nat32 };
-	Qualified : record { kind : QualifiedNotificationKind; qualifier : text; version : nat32 }
-};
 type AddHiddenDappIdRequest = record {
 	current_user_version : opt nat64;
 	dapp_id : text
@@ -210,6 +201,14 @@ type Delegation = record {
 	expiration : nat64
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
+type DismissedNotification = variant {
+	Qualified : record {
+		kind : QualifiedNotificationKind;
+		version : nat32;
+		qualifier : text
+	};
+	Simple : record { kind : SimpleNotificationKind; version : nat32 }
+};
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
 type EvmTransactionData = record {
@@ -357,7 +356,9 @@ type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
 };
-type NotificationSettings = record { dismissed_notifications : vec DismissedNotification };
+type NotificationSettings = record {
+	dismissed_notifications : vec DismissedNotification
+};
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type ProviderAgreementProvider = variant { NearIntents };
@@ -365,6 +366,10 @@ type ProviderAgreementScope = variant { Swap };
 type ProviderAgreementType = record {
 	provider : ProviderAgreementProvider;
 	scope : ProviderAgreementScope
+};
+type QualifiedNotificationKind = variant {
+	NoIndexCanister;
+	UnavailableIndexCanister
 };
 type RateLimitError = record {
 	max_calls : nat32;
@@ -409,6 +414,7 @@ type Settings = record {
 	experimental_features : ExperimentalFeaturesSettings
 };
 type SignedDelegation = record { signature : blob; delegation : Delegation };
+type SimpleNotificationKind = variant { BtcActivityInfo };
 type SolTransactionData = record {
 	fee : opt nat;
 	to_owner : opt text;
@@ -551,8 +557,8 @@ service : (Arg) -> {
 	// present.
 	//
 	// # Errors
-	// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
-	// or the batch is too large.
+	// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+	// the batch is too large.
 	add_user_dismissed_notification : (AddDismissedNotificationRequest) -> (
 		AddUserDismissedNotificationResult
 	);

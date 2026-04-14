@@ -205,13 +205,6 @@ export interface DappCarouselSettings {
 export interface DappSettings {
 	dapp_carousel: DappCarouselSettings;
 }
-export type SimpleNotificationKind = { BtcActivityInfo: null };
-export type QualifiedNotificationKind =
-	| { NoIndexCanister: null }
-	| { UnavailableIndexCanister: null };
-export type DismissedNotification =
-	| { Simple: { kind: SimpleNotificationKind; version: number } }
-	| { Qualified: { kind: QualifiedNotificationKind; qualifier: string; version: number } };
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
 	freezing_threshold: bigint;
@@ -225,6 +218,15 @@ export interface Delegation {
 	expiration: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
+export type DismissedNotification =
+	| {
+			Qualified: {
+				kind: QualifiedNotificationKind;
+				version: number;
+				qualifier: string;
+			};
+	  }
+	| { Simple: { kind: SimpleNotificationKind; version: number } };
 export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
@@ -398,6 +400,9 @@ export interface ProviderAgreementType {
 	provider: ProviderAgreementProvider;
 	scope: ProviderAgreementScope;
 }
+export type QualifiedNotificationKind =
+	| { NoIndexCanister: null }
+	| { UnavailableIndexCanister: null };
 export interface RateLimitError {
 	max_calls: number;
 	window_ns: bigint;
@@ -443,6 +448,7 @@ export interface SignedDelegation {
 	signature: Uint8Array;
 	delegation: Delegation;
 }
+export type SimpleNotificationKind = { BtcActivityInfo: null };
 export interface SolTransactionData {
 	fee: [] | [bigint];
 	to_owner: [] | [string];
@@ -595,8 +601,8 @@ export interface _SERVICE {
 	 * present.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
-	 * or the batch is too large.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+	 * the batch is too large.
 	 */
 	add_user_dismissed_notification: ActorMethod<
 		[AddDismissedNotificationRequest],
