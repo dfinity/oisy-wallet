@@ -127,22 +127,6 @@
 					/>
 				{/if}
 			</div>
-
-			{#snippet toolbar()}
-				<ButtonGroup>
-					<ButtonCloseModal />
-					<Button
-						colorStyle="primary"
-						disabled={!canProceedFromToken}
-						fullWidth
-						onclick={goToExpiry}
-						paddingSmall
-						type="button"
-					>
-						{$i18n.core.text.next}
-					</Button>
-				</ButtonGroup>
-			{/snippet}
 		{:else if step === 'select-expiry'}
 			<div class="flex flex-col gap-4">
 				<p class="text-secondary">{$i18n.gift_code.create.text.select_expiry}</p>
@@ -161,23 +145,6 @@
 					{/each}
 				</div>
 			</div>
-
-			{#snippet toolbar()}
-				<ButtonGroup>
-					<Button
-						colorStyle="secondary-light"
-						fullWidth
-						onclick={goBack}
-						paddingSmall
-						type="button"
-					>
-						{$i18n.core.text.back}
-					</Button>
-					<Button colorStyle="primary" fullWidth onclick={goToReview} paddingSmall type="button">
-						{$i18n.core.text.next}
-					</Button>
-				</ButtonGroup>
-			{/snippet}
 		{:else if step === 'review'}
 			<div class="flex flex-col gap-4">
 				<h3 class="text-center">{$i18n.gift_code.create.text.review_title}</h3>
@@ -197,23 +164,6 @@
 					</div>
 				</div>
 			</div>
-
-			{#snippet toolbar()}
-				<ButtonGroup>
-					<Button
-						colorStyle="secondary-light"
-						fullWidth
-						onclick={goBack}
-						paddingSmall
-						type="button"
-					>
-						{$i18n.core.text.back}
-					</Button>
-					<Button colorStyle="primary" fullWidth onclick={handleCreate} paddingSmall type="button">
-						{$i18n.gift_code.create.text.confirm}
-					</Button>
-				</ButtonGroup>
-			{/snippet}
 		{:else if step === 'creating'}
 			<div class="flex flex-col items-center gap-4 py-8">
 				<div class="animate-spin text-4xl">&#9696;</div>
@@ -243,12 +193,58 @@
 					/>
 				</div>
 			</div>
+		{/if}
 
-			{#snippet toolbar()}
+		{#snippet toolbar()}
+			{#if step === 'select-token'}
+				<ButtonGroup>
+					<ButtonCloseModal />
+					<Button
+						colorStyle="primary"
+						disabled={!canProceedFromToken}
+						fullWidth
+						onclick={goToExpiry}
+						paddingSmall
+						type="button"
+					>
+						{$i18n.core.text.next}
+					</Button>
+				</ButtonGroup>
+			{:else if step === 'select-expiry'}
+				<ButtonGroup>
+					<Button
+						colorStyle="secondary-light"
+						fullWidth
+						onclick={goBack}
+						paddingSmall
+						type="button"
+					>
+						{$i18n.core.text.back}
+					</Button>
+					<Button colorStyle="primary" fullWidth onclick={goToReview} paddingSmall type="button">
+						{$i18n.core.text.next}
+					</Button>
+				</ButtonGroup>
+			{:else if step === 'review'}
+				<ButtonGroup>
+					<Button
+						colorStyle="secondary-light"
+						fullWidth
+						onclick={goBack}
+						paddingSmall
+						type="button"
+					>
+						{$i18n.core.text.back}
+					</Button>
+					<Button colorStyle="primary" fullWidth onclick={handleCreate} paddingSmall type="button">
+						{$i18n.gift_code.create.text.confirm}
+					</Button>
+				</ButtonGroup>
+			{:else if step === 'success'}
 				<ButtonGroup>
 					<ButtonCloseModal />
 				</ButtonGroup>
-			{/snippet}
-		{/if}
+			{/if}
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

@@ -111,30 +111,10 @@
 					</Button>
 				{/if}
 			</div>
-
-			{#snippet toolbar()}
-				<ButtonGroup>
-					<Button
-						colorStyle="secondary-light"
-						fullWidth
-						onclick={() => (selectedCode = undefined)}
-						paddingSmall
-						type="button"
-					>
-						{$i18n.core.text.back}
-					</Button>
-				</ButtonGroup>
-			{/snippet}
 		{:else if loading}
 			<SkeletonText />
 		{:else if codes.length === 0}
 			<p class="py-8 text-center text-secondary">{$i18n.gift_code.list.text.empty}</p>
-
-			{#snippet toolbar()}
-				<ButtonGroup>
-					<ButtonCloseModal />
-				</ButtonGroup>
-			{/snippet}
 		{:else}
 			<div class="flex flex-col gap-2">
 				{#each codes as entry (entry.code)}
@@ -156,12 +136,26 @@
 					</button>
 				{/each}
 			</div>
+		{/if}
 
-			{#snippet toolbar()}
+		{#snippet toolbar()}
+			{#if nonNullish(selectedCode)}
+				<ButtonGroup>
+					<Button
+						colorStyle="secondary-light"
+						fullWidth
+						onclick={() => (selectedCode = undefined)}
+						paddingSmall
+						type="button"
+					>
+						{$i18n.core.text.back}
+					</Button>
+				</ButtonGroup>
+			{:else}
 				<ButtonGroup>
 					<ButtonCloseModal />
 				</ButtonGroup>
-			{/snippet}
-		{/if}
+			{/if}
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>
