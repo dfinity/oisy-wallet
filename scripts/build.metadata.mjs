@@ -2,7 +2,7 @@
 
 import { notEmptyString } from '@dfinity/utils';
 import { config } from 'dotenv';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ENV, OISY_IC_DOMAIN, findHtmlFiles, replaceEnv } from './build.utils.mjs';
 
@@ -79,6 +79,20 @@ htmlFiles.forEach((htmlFile) => parseMetadata(htmlFile));
 if (!IS_SIGNER_BUILD) {
 	parseUrl(join(process.cwd(), 'build', 'sitemap.xml'));
 	parseMetadata(join(process.cwd(), 'build', 'manifest.webmanifest'));
+} else {
+	const manifestPath = join(process.cwd(), 'build', 'manifest.webmanifest');
+	if (existsSync(manifestPath)) {
+		unlinkSync(manifestPath);
+	}
+
+	htmlFiles.forEach((htmlFile) => {
+		const content = readFileSync(htmlFile, 'utf8');
+		const updated = content.replace(
+			/\s*<link\s+crossorigin="anonymous"\s+href="\/manifest\.webmanifest"\s+rel="manifest"\s*\/>/,
+			''
+		);
+		writeFileSync(htmlFile, updated);
+	});
 }
 
 // SEO
