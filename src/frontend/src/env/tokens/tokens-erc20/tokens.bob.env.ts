@@ -22,7 +22,6 @@ export const BOB_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: BOB_SYMBOL,
 	decimals: BOB_DECIMALS,
 	icon: bob,
-	// Intentionally identical to the Base/Arbitrum BOB token definitions.
 	address: '0xecc5f868AdD75F4ff9FD00bbBDE12C35BA2C9C89',
 	groupData: BOB_TOKEN_GROUP
 };
