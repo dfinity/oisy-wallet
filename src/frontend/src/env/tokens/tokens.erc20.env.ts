@@ -8,6 +8,7 @@ import { AMDON_TOKEN } from '$env/tokens/tokens-erc20/tokens.amdon.env';
 import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
 import { ARMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.armon.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
+import { BOB_TOKEN } from '$env/tokens/tokens-erc20/tokens.bob.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.biduon.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.cbbtc.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.copxon.env';
@@ -72,6 +73,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ARB_TOKEN,
 	ARMON_TOKEN,
 	BABAON_TOKEN,
+	BOB_TOKEN,
 	BIDUON_TOKEN,
 	CBBTC_TOKEN,
 	COPXON_TOKEN,
