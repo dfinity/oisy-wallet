@@ -1374,7 +1374,9 @@ interface I18nGift_code {
 	create: {
 		text: {
 			title: string;
+			enter_amount: string;
 			select_token: string;
+			token_amount: string;
 			no_tokens: string;
 			select_expiry: string;
 			expiry_1h: string;

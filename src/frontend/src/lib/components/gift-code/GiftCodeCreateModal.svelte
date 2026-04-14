@@ -13,6 +13,11 @@
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import {
+		currentCurrencyDecimals,
+		currentCurrencyExchangeRate,
+		currentCurrencySymbol
+	} from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
@@ -21,13 +26,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { TokenUi } from '$lib/types/token-ui';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 
 	type Step = 'select-token' | 'select-expiry' | 'review' | 'creating' | 'success';
 
 	let step: Step = $state('select-token');
 	let selectedToken: IcToken | undefined = $state(undefined);
-	let amount: number | undefined = $state(undefined);
+	let fiatAmount: number | undefined = $state(undefined);
 	let expirySeconds: bigint = $state(86400n);
 	let createdCode: string | undefined = $state(undefined);
 
@@ -42,11 +48,38 @@
 		expiryOptions.find((o) => o.value === expirySeconds)?.label ?? ''
 	);
 
+	const tokenUsdPrice = $derived.by(() => {
+		if (isNullish(selectedToken)) {
+			return undefined;
+		}
+		return $exchanges?.[selectedToken.id]?.usd;
+	});
+
+	const calculatedTokenAmount = $derived.by(() => {
+		if (
+			isNullish(fiatAmount) ||
+			isNullish(tokenUsdPrice) ||
+			tokenUsdPrice === 0 ||
+			isNullish($currentCurrencyExchangeRate) ||
+			$currentCurrencyExchangeRate === 0
+		) {
+			return undefined;
+		}
+		return (fiatAmount / tokenUsdPrice) * $currentCurrencyExchangeRate;
+	});
+
 	const amountBigInt = $derived.by(() => {
-		if (isNullish(amount) || isNullish(selectedToken)) {
+		if (isNullish(calculatedTokenAmount) || isNullish(selectedToken)) {
 			return ZERO;
 		}
-		return BigInt(Math.floor(amount * 10 ** selectedToken.decimals));
+		return BigInt(Math.floor(calculatedTokenAmount * 10 ** selectedToken.decimals));
+	});
+
+	const formattedTokenAmount = $derived.by(() => {
+		if (isNullish(selectedToken) || amountBigInt === ZERO) {
+			return undefined;
+		}
+		return formatToken({ value: amountBigInt, unitName: selectedToken.decimals });
 	});
 
 	const tokensWithBalance: TokenUi<IcToken>[] = $derived(
@@ -64,7 +97,11 @@
 	);
 
 	const canProceedFromToken = $derived(
-		nonNullish(selectedToken) && nonNullish(amount) && amount > 0
+		nonNullish(selectedToken) &&
+			nonNullish(fiatAmount) &&
+			fiatAmount > 0 &&
+			nonNullish(calculatedTokenAmount) &&
+			calculatedTokenAmount > 0
 	);
 
 	const goToExpiry = () => {
@@ -86,7 +123,7 @@
 	};
 
 	const handleCreate = async () => {
-		if (isNullish($authIdentity) || isNullish(selectedToken) || isNullish(amount)) {
+		if (isNullish($authIdentity) || isNullish(selectedToken) || isNullish(calculatedTokenAmount)) {
 			return;
 		}
 
@@ -122,52 +159,76 @@
 			<p class="py-8 text-center text-secondary">{$i18n.gift_code.create.text.no_tokens}</p>
 		{:else if step === 'select-token'}
 			<div class="flex flex-col gap-4">
-				<p class="text-secondary">{$i18n.gift_code.create.text.select_token}</p>
+				<p class="text-secondary">{$i18n.gift_code.create.text.enter_amount}</p>
 
-				<div class="flex flex-col">
-					{#each tokensWithBalance as token (token.ledgerCanisterId)}
-						<button
-							class="flex w-full items-center justify-between rounded-lg px-2 py-3 text-left transition-colors
-								{selectedToken?.ledgerCanisterId === token.ledgerCanisterId
-								? 'bg-brand-subtle-20'
-								: 'hover:bg-brand-subtle-10'}"
-							onclick={() => (selectedToken = token)}
-						>
-							<span class="flex min-w-0 items-center">
-								<span class="mr-2 flex">
-									<TokenLogo badge={{ type: 'network' }} color="white" data={token} logoSize="lg" />
-								</span>
-								<span class="flex min-w-0 flex-col text-left">
-									<span class="text-lg font-bold text-nowrap text-primary">
-										{token.symbol}
-									</span>
-									<span class="truncate text-sm text-tertiary">
-										{token.network.name}
-									</span>
-								</span>
-							</span>
-							<span class="flex flex-col text-right text-nowrap">
-								<span class="text-lg font-bold">
-									<TokenBalance data={token} />
-								</span>
-								<span class="text-sm text-tertiary">
-									<ExchangeTokenValue data={token} />
-								</span>
-							</span>
-						</button>
-					{/each}
-				</div>
-
-				{#if nonNullish(selectedToken)}
+				<div class="flex items-center gap-2">
+					<span class="text-lg font-bold text-tertiary">{$currentCurrencySymbol}</span>
 					<InputCurrency
-						name="gift-amount"
-						decimals={selectedToken.decimals}
+						name="gift-fiat-amount"
+						decimals={$currentCurrencyDecimals}
 						onBlur={() => {}}
 						onFocus={() => {}}
 						onInput={() => {}}
 						placeholder="0"
-						bind:value={amount}
+						bind:value={fiatAmount}
 					/>
+				</div>
+
+				{#if nonNullish(fiatAmount) && fiatAmount > 0}
+					<p class="text-secondary">{$i18n.gift_code.create.text.select_token}</p>
+
+					<div class="flex flex-col">
+						{#each tokensWithBalance as token (token.ledgerCanisterId)}
+							{@const usdPrice = $exchanges?.[token.id]?.usd}
+							{@const tokenAmt =
+								nonNullish(usdPrice) &&
+								usdPrice > 0 &&
+								nonNullish($currentCurrencyExchangeRate) &&
+								$currentCurrencyExchangeRate > 0
+									? (fiatAmount / usdPrice) * $currentCurrencyExchangeRate
+									: undefined}
+							{@const tokenAmtBigInt = nonNullish(tokenAmt)
+								? BigInt(Math.floor(tokenAmt * 10 ** token.decimals))
+								: ZERO}
+							<button
+								class="flex w-full items-center justify-between rounded-lg px-2 py-3 text-left transition-colors
+									{selectedToken?.ledgerCanisterId === token.ledgerCanisterId
+									? 'bg-brand-subtle-20'
+									: 'hover:bg-brand-subtle-10'}"
+								onclick={() => (selectedToken = token)}
+							>
+								<span class="flex min-w-0 items-center">
+									<span class="mr-2 flex">
+										<TokenLogo
+											badge={{ type: 'network' }}
+											color="white"
+											data={token}
+											logoSize="lg"
+										/>
+									</span>
+									<span class="flex min-w-0 flex-col text-left">
+										<span class="text-lg font-bold text-nowrap text-primary">
+											{token.symbol}
+										</span>
+										{#if nonNullish(tokenAmt) && tokenAmtBigInt > ZERO}
+											<span class="text-sm text-tertiary">
+												≈ {formatToken({ value: tokenAmtBigInt, unitName: token.decimals })}
+												{token.symbol}
+											</span>
+										{/if}
+									</span>
+								</span>
+								<span class="flex flex-col text-right text-nowrap">
+									<span class="text-lg font-bold">
+										<TokenBalance data={token} />
+									</span>
+									<span class="text-sm text-tertiary">
+										<ExchangeTokenValue data={token} />
+									</span>
+								</span>
+							</button>
+						{/each}
+					</div>
 				{/if}
 			</div>
 		{:else if step === 'select-expiry'}
@@ -199,7 +260,16 @@
 					</div>
 					<div class="flex justify-between">
 						<span class="text-secondary">{$i18n.gift_code.create.text.review_amount}</span>
-						<span class="font-bold">{amount}</span>
+						<span class="font-bold">
+							{formattedTokenAmount}
+							{selectedToken?.symbol}
+						</span>
+					</div>
+					<div class="flex justify-between">
+						<span class="text-secondary">{$i18n.gift_code.create.text.review_amount}</span>
+						<span class="text-secondary">
+							{$currentCurrencySymbol}{fiatAmount}
+						</span>
 					</div>
 					<div class="flex justify-between">
 						<span class="text-secondary">{$i18n.gift_code.create.text.review_expiry}</span>

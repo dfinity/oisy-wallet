@@ -1721,7 +1721,9 @@
 		"create": {
 			"text": {
 				"title": "Create gift code",
-				"select_token": "Select token and amount",
+				"enter_amount": "How much would you like to gift?",
+				"select_token": "Select a token to send",
+				"token_amount": "≈ {0} {1}",
 				"no_tokens": "You don't have any tokens with a balance to create a gift code. Fund your wallet first.",
 				"select_expiry": "How long should the code be valid?",
 				"expiry_1h": "1 hour",
