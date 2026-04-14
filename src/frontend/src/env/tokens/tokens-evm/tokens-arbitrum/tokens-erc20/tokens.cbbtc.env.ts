@@ -4,7 +4,7 @@ import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import cbbtc from '$sol/assets/cbbtc.svg';
+import cbbtc from '$eth/assets/cbbtc.webp';
 
 export const CBBTC_DECIMALS = 8;
 
