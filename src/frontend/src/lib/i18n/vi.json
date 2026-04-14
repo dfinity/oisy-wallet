@@ -86,6 +86,7 @@
 			"vip_qr_code": "Mã QR VIP",
 			"binance_qr_code": "QR Binance Clubhouse",
 			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Giới thiệu bạn bè của bạn",
 			"address_book": "Sổ địa chỉ",
 			"hide_balances": "Ẩn số dư",
@@ -106,6 +107,7 @@
 			"vip_qr_code": "Tạo liên kết mời",
 			"binance_qr_code": "Tạo liên kết Binance Clubhouse",
 			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Tạo liên kết giới thiệu cho bạn bè",
 			"address_book": "Mở sổ địa chỉ",
 			"hide_balances": "Ẩn số dư hiển thị",
@@ -1720,6 +1722,7 @@
 			"text": {
 				"title": "",
 				"select_token": "",
+				"no_tokens": "",
 				"select_expiry": "",
 				"expiry_1h": "",
 				"expiry_24h": "",
@@ -1760,6 +1763,8 @@
 				"status_used": "",
 				"status_expired": "",
 				"status_cancelled": "",
+				"created": "",
+				"expires": "",
 				"cancel_confirm": "",
 				"cancel_success": "",
 				"show_qr": ""

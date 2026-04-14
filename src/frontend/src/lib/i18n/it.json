@@ -86,6 +86,7 @@
 			"vip_qr_code": "Codici QR VIP",
 			"binance_qr_code": "QR Binance Clubhouse",
 			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Invita i tuoi amici",
 			"address_book": "Contatti",
 			"hide_balances": "Nascondi saldi",
@@ -106,6 +107,7 @@
 			"vip_qr_code": "Genera un link di invito",
 			"binance_qr_code": "Genera un link Binance Clubhouse",
 			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Genera un link di riferimento per un amico",
 			"address_book": "Apri contatti",
 			"hide_balances": "Nascondi i saldi visualizzati",
@@ -1720,6 +1722,7 @@
 			"text": {
 				"title": "",
 				"select_token": "",
+				"no_tokens": "",
 				"select_expiry": "",
 				"expiry_1h": "",
 				"expiry_24h": "",
@@ -1760,6 +1763,8 @@
 				"status_used": "",
 				"status_expired": "",
 				"status_cancelled": "",
+				"created": "",
+				"expires": "",
 				"cancel_confirm": "",
 				"cancel_success": "",
 				"show_qr": ""

@@ -86,6 +86,7 @@
 			"vip_qr_code": "الرمز الخاص",
 			"binance_qr_code": "رمز باينانس التعريفي",
 			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "ادعُ أصدقاءك",
 			"address_book": "جهات الاتصال",
 			"hide_balances": "إخفاء الأرصدة",
@@ -106,6 +107,7 @@
 			"vip_qr_code": "إنشاء رابط دعوة",
 			"binance_qr_code": "إنشاء رابط Binance Clubhouse",
 			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "إنشاء رابط إحالة لصديق",
 			"address_book": "افتح جهات الاتصال",
 			"hide_balances": "إخفاء الأرصدة المعروضة",
@@ -1720,6 +1722,7 @@
 			"text": {
 				"title": "",
 				"select_token": "",
+				"no_tokens": "",
 				"select_expiry": "",
 				"expiry_1h": "",
 				"expiry_24h": "",
@@ -1760,6 +1763,8 @@
 				"status_used": "",
 				"status_expired": "",
 				"status_cancelled": "",
+				"created": "",
+				"expires": "",
 				"cancel_confirm": "",
 				"cancel_success": "",
 				"show_qr": ""
