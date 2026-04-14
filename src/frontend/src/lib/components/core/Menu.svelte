@@ -91,6 +91,7 @@
 	const goldModalId = Symbol();
 	const vipModalId = Symbol();
 	const giftCodeModalId = Symbol();
+	const giftCodeListModalId = Symbol();
 </script>
 
 <ButtonIcon
@@ -221,6 +222,14 @@
 			>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.gift_code}
+			</ButtonMenu>
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.gift_code_list}
+				onclick={() => modalStore.openGiftCodeList(giftCodeListModalId)}
+			>
+				<IconVipQr size="20" />
+				{$i18n.navigation.text.gift_code_list}
 			</ButtonMenu>
 
 			{#if isGold || isVip}
