@@ -104,7 +104,9 @@
 	{/snippet}
 
 	<ContentWithToolbar>
-		{#if step === 'select-token'}
+		{#if step === 'select-token' && tokensWithBalance.length === 0}
+			<p class="py-8 text-center text-secondary">{$i18n.gift_code.create.text.no_tokens}</p>
+		{:else if step === 'select-token'}
 			<div class="flex flex-col gap-4">
 				<p class="text-secondary">{$i18n.gift_code.create.text.select_token}</p>
 
@@ -204,7 +206,11 @@
 		{/if}
 
 		{#snippet toolbar()}
-			{#if step === 'select-token'}
+			{#if step === 'select-token' && tokensWithBalance.length === 0}
+				<ButtonGroup>
+					<ButtonCloseModal />
+				</ButtonGroup>
+			{:else if step === 'select-token'}
 				<ButtonGroup>
 					<ButtonCloseModal />
 					<Button
