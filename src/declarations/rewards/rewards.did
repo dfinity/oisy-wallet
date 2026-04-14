@@ -68,9 +68,9 @@ type CampaignEligibility = record {
 	///
 	criteria : vec CriterionEligibility;
 	///
-	probability_multiplier : opt nat32;
+	probability_multiplier : nat32;
 	///
-	probability_multiplier_enabled : opt bool
+	probability_multiplier_enabled : bool
 
 };
 /// A span of time.
@@ -324,6 +324,14 @@ type SetReferrerResponse = variant {
 	/// Ther was an error setting the referrer.
 	Err : SetReferrerError
 };
+type SetVipCampaignExpiryRequest = record {
+	expiry_date : nat64;
+	campaign_id : text
+};
+type SetVipCampaignExpiryResponse = variant {
+	CampaignNotFound;
+	Success : record { codes_updated : nat32 }
+};
 type SetSprinkleTimestampArg = record {
 	/// The total amount that will be distributed across all users in the current/next sprinkle
 	total_sprinkle_amount : nat;
@@ -417,7 +425,16 @@ type Transaction_Spl = record {
 	timestamp : nat64;
 	amount : nat
 };
-
+type UploadVipCodesRequest = record {
+	codes : vec nat;
+	campaign_id : text;
+	vip_id : principal
+};
+type UploadVipCodesResponse = variant {
+	CampaignNotFound;
+	Success : record { codes_overwritten : nat32; codes_created : nat32 };
+	VipNotInCampaign
+};
 type UsageAndHolding = record {
 	// Account valuation at the time of the last snapshot.
 	approx_usd_valuation : float64;
@@ -447,7 +464,7 @@ type UsageAwardConfig = record {
 	campaign_name : opt text;
 	/// Rules for probability multipliers based on satisfied criteria.
 	/// Maps multiplier values to lists of criterion names that must be satisfied.
-	probability_multiplier_rules : opt vec record { nat32; vec CriterionName }
+	probability_multiplier_rules : vec record { nat32; vec CriterionName }
 };
 type UsageAwardEvent = record {
 	name : text;
@@ -527,6 +544,12 @@ type UserSnapshot = record {
 	accounts : vec AccountSnapshotFor;
 	timestamp : opt nat64
 };
+type VipCodeInfoResponse = record {
+	validity : VipCodeValidity;
+	expiry_date : nat64;
+	campaign_id : text
+};
+type VipCodeValidity = variant { Invalid; Used; Valid; Expired };
 type VipConfig = record {
 	code_validity_duration : nat64;
 	vips : vec principal;
@@ -541,7 +564,120 @@ type VipStats = record {
 	total_redeemed : nat32;
 	total_issued : nat32
 };
+/// A single token and amount for a QR gift code.
+type QrGiftToken = record {
+	/// The ledger canister that manages the token.
+	ledger : principal;
+	/// The amount of tokens to transfer.
+	amount : nat
+};
+/// Validity state of a QR gift code.
+type QrGiftCodeValidity = variant { Valid; Used; Expired; Cancelled; Invalid };
+/// Request to create a new QR gift code.
+type CreateQrGiftCodeRequest = record {
+	/// The tokens to include in this transfer code.
+	tokens : vec QrGiftToken;
+	/// How long the code is valid, in seconds. Must be > 0.
+	expiry_seconds : nat64
+};
+/// Allowance details for a token with insufficient ICRC2 approval.
+type AllowanceDetail = record {
+	/// The ledger canister.
+	ledger : principal;
+	/// The amount needed (transfer amount + fee).
+	needed : nat;
+	/// The current allowance.
+	current : nat
+};
+/// Response from creating a QR gift code.
+type CreateQrGiftCodeResponse = variant {
+	/// Code created successfully.
+	Success : record { code : text };
+	/// The caller is anonymous.
+	AnonymousCaller;
+	/// No tokens specified or an amount is zero.
+	InvalidTokens;
+	/// Expiry seconds must be > 0.
+	InvalidExpiry;
+	/// One or more tokens have insufficient ICRC2 allowance.
+	InsufficientAllowance : record { details : vec AllowanceDetail };
+	/// Failed to query a ledger canister.
+	LedgerQueryFailed : record { ledger : principal }
+};
+/// Request to redeem a QR gift code.
+type RedeemQrGiftCodeRequest = record {
+	/// The hex-encoded code string.
+	code : text
+};
+/// Response from redeeming a QR gift code.
+type RedeemQrGiftCodeResponse = variant {
+	/// Transfer completed successfully.
+	Success;
+	/// The caller is anonymous.
+	AnonymousCaller;
+	/// The code is invalid or not found.
+	InvalidCode;
+	/// The code has already been redeemed.
+	AlreadyRedeemed;
+	/// The code has expired.
+	Expired;
+	/// The code was cancelled by its creator.
+	Cancelled;
+	/// The creator cannot redeem their own code.
+	SelfRedeem;
+	/// The token transfer failed.
+	TransferFailed : record { reason : text }
+};
+/// Response from cancelling a QR gift code.
+type CancelQrGiftCodeResponse = variant {
+	/// Code cancelled successfully.
+	Success;
+	/// The code is invalid or not found.
+	InvalidCode;
+	/// Only the creator can cancel the code.
+	NotOwner;
+	/// The code has already been redeemed.
+	AlreadyRedeemed;
+	/// The caller is anonymous.
+	AnonymousCaller
+};
+/// Public information about a QR gift code.
+type QrGiftCodeInfoResponse = record {
+	/// The tokens that will be transferred when redeemed.
+	tokens : vec QrGiftToken;
+	/// When the code expires (nanoseconds since epoch).
+	expiry_date : nat64;
+	/// Current validity state.
+	validity : QrGiftCodeValidity
+};
+/// A single QR gift code created by the caller, with full details.
+type QrGiftCodeEntry = record {
+	/// The hex-encoded code string.
+	code : text;
+	/// The tokens that will be transferred when redeemed.
+	tokens : vec QrGiftToken;
+	/// When the code was created (nanoseconds since epoch).
+	created_at : nat64;
+	/// When the code expires (nanoseconds since epoch).
+	expiry_date : nat64;
+	/// Current validity state.
+	validity : QrGiftCodeValidity
+};
+/// Aggregate stats for QR gifts.
+type QrGiftCodeStats = record {
+	/// Total codes created.
+	total_created : nat32;
+	/// Total codes successfully redeemed.
+	total_redeemed : nat32;
+	/// Total codes cancelled.
+	total_cancelled : nat32;
+	/// Total redemption attempts that failed at transfer time.
+	total_failed : nat32
+};
+
 service : (opt Config) -> {
+	/// QR Gift Code: Cancels a transfer code (creator only).
+	cancel_qr_gift_code : (text) -> (CancelQrGiftCodeResponse);
 	/// Pays usage rewards.  This is normally called internally after the random timing & user selection
 	/// has taken place.  For testing, it can be convenient to call it directly.
 	claim_usage_award : (UsageAwardEvent, principal) -> ();
@@ -549,6 +685,8 @@ service : (opt Config) -> {
 	claim_vip_reward : (VipReward) -> (ClaimVipRewardResponse, opt ClaimedVipReward);
 	/// Retrieves the current configuration of the canister.
 	config : () -> (Config) query;
+	/// QR Gift Code: Creates a new transfer code.
+	create_qr_gift_code : (CreateQrGiftCodeRequest) -> (CreateQrGiftCodeResponse);
 	/// Configures S1E4 referral rewards.
 	configure_referral : (S1E4ReferralConfig) -> ();
 	/// Configures bonuses for using & holding assets in Oisy.
@@ -567,10 +705,18 @@ service : (opt Config) -> {
 	holdings_popcontest : (HoldingsPopcontestRequest) -> (
 		HoldingsPopcontestResponse
 	) query;
+	/// QR Gift Code: Gets information about a transfer code.
+	qr_gift_code_info : (text) -> (opt QrGiftCodeInfoResponse) query;
+	/// QR Gift Code: Gets overall stats (admin only).
+	qr_gift_code_stats : () -> (QrGiftCodeStats) query;
+	/// QR Gift Code: Redeems a transfer code.
+	redeem_qr_gift_code : (RedeemQrGiftCodeRequest) -> (RedeemQrGiftCodeResponse);
 	/// A histogram of when users were last active
 	last_activity_histogram : (LastActivityHistogramRequest) -> (
 		LastActivityHistogramResponse
 	) query;
+	/// QR Gift Code: Returns all codes created by the caller.
+	my_qr_gift_codes : () -> (vec QrGiftCodeEntry) query;
 	/// Gets a VIP reward token for a given campaign ID.
 	new_vip_reward : (opt ClaimedVipReward) -> (NewVipRewardResponse);
 	/// Get or create referrer info for the caller.
@@ -583,6 +729,10 @@ service : (opt Config) -> {
 	s1e4_eligible_referrers : () -> (vec record { principal; vec principal }) query;
 	/// Sets the caller's referrer.
 	set_referrer : (nat32) -> (SetReferrerResponse);
+	// VIP Rewards: Sets expiry date for all codes in a campaign.
+	set_vip_campaign_expiry : (SetVipCampaignExpiryRequest) -> (
+		SetVipCampaignExpiryResponse
+	);
 	stats_by : (StatsKeyType) -> (StatsResponse) query;
 	stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
 	/// Runs the provided award event.  This is normally done automatically.  It can be useful
@@ -590,6 +740,8 @@ service : (opt Config) -> {
 	trigger_usage_award_event : (UsageAwardEvent) -> ();
 	/// Triggers the S1E4 referrer award event.
 	trigger_s1e4_referrer_award_event : () -> ();
+	// VIP Rewards: Uploads a batch of VIP codes.
+	upload_vip_codes : (UploadVipCodesRequest) -> (UploadVipCodesResponse);
 	/// Aggregate usage stats.
 	usage_stats : () -> (UsageAwardStats) query;
 	/// Finds winners
@@ -600,6 +752,8 @@ service : (opt Config) -> {
 	user_info_for : (principal) -> (UserData) query;
 	/// Stats for an individual user
 	user_stats : (principal) -> (UsageAwardState) query;
+	// VIP Rewards: Gets information about a VIP code.
+	vip_code_info : (text) -> (opt VipCodeInfoResponse) query;
 	/// Gets rewards stats
 	vip_stats : (opt text) -> (VipStats) query
 }

@@ -8,6 +8,7 @@ import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
+import type { GiftCodeRedeemStateData } from '$lib/types/gift-code';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
@@ -69,7 +70,10 @@ export interface Modal<T> {
 		| 'harvest-stake'
 		| 'harvest-unstake'
 		| 'universal-scanner'
-		| 'pay-dialog';
+		| 'pay-dialog'
+		| 'gift-code-create'
+		| 'gift-code-list'
+		| 'gift-code-redeem-result';
 	data?: T;
 	id?: symbol;
 }
@@ -141,6 +145,9 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openUniversalScanner: (id: symbol) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
+	openGiftCodeCreate: (id: symbol) => void;
+	openGiftCodeList: (id: symbol) => void;
+	openGiftCodeRedeemResult: (params: SetWithDataParams<GiftCodeRedeemStateData>) => void;
 	close: () => void;
 }
 
@@ -249,6 +256,11 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openUniversalScanner: setType('universal-scanner'),
 		openPayDialog: setType('pay-dialog'),
 		openGetToken: setType('get-token'),
+		openGiftCodeCreate: setType('gift-code-create'),
+		openGiftCodeList: setType('gift-code-list'),
+		openGiftCodeRedeemResult: <(params: SetWithDataParams<GiftCodeRedeemStateData>) => void>(
+			setTypeWithData('gift-code-redeem-result')
+		),
 		close: () => set(null),
 		subscribe
 	};

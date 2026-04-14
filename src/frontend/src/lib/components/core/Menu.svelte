@@ -35,6 +35,7 @@
 		NAVIGATION_MENU_REFERRAL_BUTTON,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 		NAVIGATION_MENU_GOLD_BUTTON,
+		NAVIGATION_MENU_GIFT_CODE_BUTTON,
 		NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
 		NAVIGATION_MENU_SUPPORT_BUTTON,
 		NAVIGATION_MENU_DOC_BUTTON
@@ -89,6 +90,7 @@
 	const referralModalId = Symbol();
 	const goldModalId = Symbol();
 	const vipModalId = Symbol();
+	const giftCodeModalId = Symbol();
 </script>
 
 <ButtonIcon
@@ -211,6 +213,15 @@
 					{$i18n.navigation.text.binance_qr_code}
 				</ButtonMenu>
 			{/if}
+
+			<ButtonMenu
+					ariaLabel={$i18n.navigation.alt.gift_code}
+					onclick={() => modalStore.openGiftCodeCreate(giftCodeModalId)}
+					testId={NAVIGATION_MENU_GIFT_CODE_BUTTON}
+				>
+					<IconVipQr size="20" />
+					{$i18n.navigation.text.gift_code}
+				</ButtonMenu>
 
 			{#if isGold || isVip}
 				<Hr />

@@ -4,6 +4,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
+import type { GiftCodeRedeemStateData } from '$lib/types/gift-code';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
@@ -309,4 +310,26 @@ export const modalUniversalScannerOpen: Readable<boolean> = derived(
 export const modalPayDialogOpen: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'pay-dialog'
+);
+
+export const modalGiftCodeCreate: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gift-code-create'
+);
+
+export const modalGiftCodeList: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gift-code-list'
+);
+
+export const modalGiftCodeRedeemResult: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gift-code-redeem-result'
+);
+export const modalGiftCodeRedeemResultData: Readable<GiftCodeRedeemStateData | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'gift-code-redeem-result'
+			? ($modalStore?.data as GiftCodeRedeemStateData)
+			: undefined
 );
