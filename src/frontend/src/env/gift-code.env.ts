@@ -1,3 +1,6 @@
-import { parseBoolEnvVar } from '$lib/utils/env.utils';
+import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 
-export const GIFT_CODE_MOCK_ENABLED = parseBoolEnvVar(import.meta.env.VITE_GIFT_CODE_MOCK_ENABLED);
+// Mock mode is ON by default for testing. Set VITE_GIFT_CODE_MOCK_DISABLED=true to use real canister calls.
+export const GIFT_CODE_MOCK_ENABLED = parseEnabledMainnetBoolEnvVar(
+	import.meta.env.VITE_GIFT_CODE_MOCK_DISABLED
+);

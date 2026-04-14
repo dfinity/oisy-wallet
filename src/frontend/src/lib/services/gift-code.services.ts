@@ -34,7 +34,7 @@ import { get } from 'svelte/store';
 
 const APPROVAL_EXPIRY_MINUTES = 5n;
 
-// --- Mock helpers (active when VITE_GIFT_CODE_MOCK_ENABLED=true) ---
+// --- Mock helpers (active by default, set VITE_GIFT_CODE_MOCK_DISABLED=true to use real calls) ---
 
 const MOCK_DELAY_MS = 1500;
 
@@ -44,8 +44,6 @@ const generateMockCode = (): string =>
 	Array.from(crypto.getRandomValues(new Uint8Array(16)))
 		.map((b) => b.toString(16).padStart(2, '0'))
 		.join('');
-
-let mockCodes: QrGiftCodeEntry[] = [];
 
 const mockValidity = (status: 'Valid' | 'Used' | 'Expired' | 'Cancelled'): QrGiftCodeValidity => {
 	switch (status) {
@@ -59,6 +57,56 @@ const mockValidity = (status: 'Valid' | 'Used' | 'Expired' | 'Cancelled'): QrGif
 			return { Cancelled: null };
 	}
 };
+
+const MOCK_LEDGER = Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai');
+const nowNs = BigInt(Date.now()) * 1_000_000n;
+
+const MOCK_SEED_CODES: QrGiftCodeEntry[] = [
+	{
+		code: 'a1b2c3d4e5f6a7b8a1b2c3d4e5f6a7b8',
+		tokens: [{ ledger: MOCK_LEDGER, amount: 100_000_000n }],
+		validity: mockValidity('Valid'),
+		created_at: nowNs - 3_600_000_000_000n,
+		expiry_date: nowNs + 86_400_000_000_000n
+	},
+	{
+		code: 'b2c3d4e5f6a7b8c9b2c3d4e5f6a7b8c9',
+		tokens: [{ ledger: MOCK_LEDGER, amount: 250_000_000n }],
+		validity: mockValidity('Valid'),
+		created_at: nowNs - 7_200_000_000_000n,
+		expiry_date: nowNs + 604_800_000_000_000n
+	},
+	{
+		code: 'c3d4e5f6a7b8c9d0c3d4e5f6a7b8c9d0',
+		tokens: [{ ledger: MOCK_LEDGER, amount: 50_000_000n }],
+		validity: mockValidity('Used'),
+		created_at: nowNs - 86_400_000_000_000n,
+		expiry_date: nowNs + 518_400_000_000_000n
+	},
+	{
+		code: 'd4e5f6a7b8c9d0e1d4e5f6a7b8c9d0e1',
+		tokens: [{ ledger: MOCK_LEDGER, amount: 500_000_000n }],
+		validity: mockValidity('Used'),
+		created_at: nowNs - 172_800_000_000_000n,
+		expiry_date: nowNs + 432_000_000_000_000n
+	},
+	{
+		code: 'e5f6a7b8c9d0e1f2e5f6a7b8c9d0e1f2',
+		tokens: [{ ledger: MOCK_LEDGER, amount: 75_000_000n }],
+		validity: mockValidity('Expired'),
+		created_at: nowNs - 604_800_000_000_000n,
+		expiry_date: nowNs - 3_600_000_000_000n
+	},
+	{
+		code: 'f6a7b8c9d0e1f2a3f6a7b8c9d0e1f2a3',
+		tokens: [{ ledger: MOCK_LEDGER, amount: 150_000_000n }],
+		validity: mockValidity('Cancelled'),
+		created_at: nowNs - 259_200_000_000_000n,
+		expiry_date: nowNs + 345_600_000_000_000n
+	}
+];
+
+let mockCodes: QrGiftCodeEntry[] = [...MOCK_SEED_CODES];
 
 export const createGiftCode = async ({
 	identity,
