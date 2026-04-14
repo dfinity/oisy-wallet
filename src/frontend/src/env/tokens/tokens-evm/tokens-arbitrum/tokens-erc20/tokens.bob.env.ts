@@ -18,7 +18,7 @@ export const BOB_TOKEN: RequiredEvmErc20Token = {
 	standard: { code: 'erc20' },
 	category: 'default',
 	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
-	name: 'Bob',
+	name: 'BOB',
 	symbol: BOB_SYMBOL,
 	decimals: BOB_DECIMALS,
 	icon: bob,
