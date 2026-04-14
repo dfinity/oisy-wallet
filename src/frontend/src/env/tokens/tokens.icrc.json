@@ -253,6 +253,7 @@
 		"symbol": "cbBTC",
 		"fee": {
 			"__bigint__": "20"
-		}
+		},
+		"icon": "/icons/icrc/io25z-dqaaa-aaaar-qbooq-cai.webp"
 	}
 }
