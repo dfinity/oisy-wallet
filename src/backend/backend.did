@@ -4,9 +4,23 @@ type AddDappSettingsError = variant {
 	DappIdTooLong;
 	UserNotFound
 };
+type AddDismissedNotificationError = variant {
+	TooManyNotifications;
+	VersionMismatch;
+	MaxDismissedNotifications;
+	UserNotFound
+};
+type AddDismissedNotificationRequest = record {
+	notifications : vec DismissedNotification;
+	current_user_version : opt nat64
+};
 type AddHiddenDappIdRequest = record {
 	current_user_version : opt nat64;
 	dapp_id : text
+};
+type AddUserDismissedNotificationResult = variant {
+	Ok;
+	Err : AddDismissedNotificationError
 };
 type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type AgreementHistoryEntry = record {
@@ -187,6 +201,14 @@ type Delegation = record {
 	expiration : nat64
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
+type DismissedNotification = variant {
+	Qualified : record {
+		kind : QualifiedNotificationKind;
+		version : nat32;
+		qualifier : text
+	};
+	Simple : record { kind : SimpleNotificationKind; version : nat32 }
+};
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
 type EvmTransactionData = record {
@@ -334,6 +356,9 @@ type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
 };
+type NotificationSettings = record {
+	dismissed_notifications : vec DismissedNotification
+};
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type ProviderAgreementProvider = variant { NearIntents };
@@ -341,6 +366,10 @@ type ProviderAgreementScope = variant { Swap };
 type ProviderAgreementType = record {
 	provider : ProviderAgreementProvider;
 	scope : ProviderAgreementScope
+};
+type QualifiedNotificationKind = variant {
+	NoIndexCanister;
+	UnavailableIndexCanister
 };
 type RateLimitError = record {
 	max_calls : nat32;
@@ -380,10 +409,12 @@ type SetTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
 type SetUserShowTestnetsResult = variant { Ok; Err : UpdateAgreementsError };
 type Settings = record {
 	networks : NetworksSettings;
+	notifications : opt NotificationSettings;
 	dapp : DappSettings;
 	experimental_features : ExperimentalFeaturesSettings
 };
 type SignedDelegation = record { signature : blob; delegation : Delegation };
+type SimpleNotificationKind = variant { BtcActivityInfo };
 type SolTransactionData = record {
 	fee : opt nat;
 	to_owner : opt text;
@@ -516,6 +547,21 @@ type UserTransactionError = variant {
 };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
+	// Adds one or more dismissed notifications to the user's profile.
+	//
+	// # Arguments
+	// * `request` - The request containing the typed notifications to dismiss.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+	// present.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+	// the batch is too large.
+	add_user_dismissed_notification : (AddDismissedNotificationRequest) -> (
+		AddUserDismissedNotificationResult
+	);
 	// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	//
 	// # Arguments

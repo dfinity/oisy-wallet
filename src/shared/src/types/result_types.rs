@@ -6,6 +6,7 @@ use super::{
         BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
     dapp::AddDappSettingsError,
+    notification::AddDismissedNotificationError,
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
@@ -264,6 +265,20 @@ impl From<Result<(), AddDappSettingsError>> for AddUserHiddenDappIdResult {
         match result {
             Ok(()) => AddUserHiddenDappIdResult::Ok(()),
             Err(err) => AddUserHiddenDappIdResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum AddUserDismissedNotificationResult {
+    Ok(()),
+    Err(AddDismissedNotificationError),
+}
+impl From<Result<(), AddDismissedNotificationError>> for AddUserDismissedNotificationResult {
+    fn from(result: Result<(), AddDismissedNotificationError>) -> Self {
+        match result {
+            Ok(()) => AddUserDismissedNotificationResult::Ok(()),
+            Err(err) => AddUserDismissedNotificationResult::Err(err),
         }
     }
 }
