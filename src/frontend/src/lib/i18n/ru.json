@@ -45,7 +45,8 @@
 			"sorting": "Сортировка",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -77,6 +78,8 @@
 			"activity": "Активность",
 			"airdrops": "Награды",
 			"earning": "Зарабатывать",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Исходный код на GitHub",
 			"view_on_explorer": "Посмотреть в проводнике",
 			"source_code": "Исходный код",
@@ -98,6 +101,8 @@
 			"dapp_explorer": "Приложения",
 			"activity": "Просмотр активности",
 			"airdrops": "Просмотр наград",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Адрес кошелька, настройки, выход и ссылки",
 			"documentation": "Документация $oisy_name",
 			"support": "Раздел поддержки документации $oisy_name",
@@ -1030,7 +1035,13 @@
 			"pay_at_failure": "Не удалось оплатить в $receipt",
 			"try_again": "Попробовать снова",
 			"payment_confirmed": "Оплата подтверждена",
-			"payment_failed": "Оплата не удалась"
+			"payment_failed": "Оплата не удалась",
+			"what_is_scan": "",
+			"no_camera_permission": "",
+			"what_is_scan_description": "",
+			"what_is_scan_title": "",
+			"learn_more_about_scan": "",
+			"learn_more_about_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "Код/ссылка недействительна",
