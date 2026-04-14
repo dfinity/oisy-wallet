@@ -1,6 +1,6 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BOB_TOKEN_GROUP } from '$env/tokens/groups/groups.bob.env';
-import bob from '$eth/assets/bob.png';
+import bob from '/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
