@@ -85,16 +85,14 @@
 	<ContentWithToolbar>
 		{#if nonNullish(selectedCode)}
 			<div class="flex flex-col items-center gap-4">
-				<div
-					class="mx-auto aspect-square h-64 max-h-[40vh] max-w-full rounded-xl bg-white p-4"
-				>
+				<div class="mx-auto aspect-square h-64 max-h-[40vh] max-w-full rounded-xl bg-white p-4">
 					<QRCode value={qrCodeUrl} />
 				</div>
 
 				<div
 					class="flex w-full items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
 				>
-					<output class="break-all text-sm">{qrCodeUrl}</output>
+					<output class="text-sm break-all">{qrCodeUrl}</output>
 					<ReceiveCopy
 						address={qrCodeUrl}
 						copyAriaLabel={$i18n.gift_code.create.text.link_copied}
@@ -141,12 +139,14 @@
 			<div class="flex flex-col gap-2">
 				{#each codes as entry (entry.code)}
 					<button
-						class="flex items-center justify-between rounded-lg border border-transparent p-3 text-left hover:bg-dust"
+						class="hover:bg-dust flex items-center justify-between rounded-lg border border-transparent p-3 text-left"
 						onclick={() => (selectedCode = entry)}
 					>
 						<div class="flex flex-col">
-							<span class="font-mono text-sm">{entry.code.slice(0, 8)}...{entry.code.slice(-4)}</span>
-							<span class="text-secondary text-xs">
+							<span class="font-mono text-sm"
+								>{entry.code.slice(0, 8)}...{entry.code.slice(-4)}</span
+							>
+							<span class="text-xs text-secondary">
 								{entry.tokens.map((t) => t.amount.toString()).join(', ')}
 							</span>
 						</div>

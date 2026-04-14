@@ -215,13 +215,13 @@
 			{/if}
 
 			<ButtonMenu
-					ariaLabel={$i18n.navigation.alt.gift_code}
-					onclick={() => modalStore.openGiftCodeCreate(giftCodeModalId)}
-					testId={NAVIGATION_MENU_GIFT_CODE_BUTTON}
-				>
-					<IconVipQr size="20" />
-					{$i18n.navigation.text.gift_code}
-				</ButtonMenu>
+				ariaLabel={$i18n.navigation.alt.gift_code}
+				onclick={() => modalStore.openGiftCodeCreate(giftCodeModalId)}
+				testId={NAVIGATION_MENU_GIFT_CODE_BUTTON}
+			>
+				<IconVipQr size="20" />
+				{$i18n.navigation.text.gift_code}
+			</ButtonMenu>
 
 			{#if isGold || isVip}
 				<Hr />

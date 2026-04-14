@@ -11,1237 +11,1231 @@ import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export interface Account {
-  'owner' : Principal,
-  'subaccount' : [] | [Uint8Array],
+	owner: Principal;
+	subaccount: [] | [Uint8Array];
 }
 export type AccountId_Any = string;
-export type AccountSnapshotFor = { 'Any' : AccountSnapshot_Any } |
-  { 'Icrc' : AccountSnapshot_Icrc } |
-  { 'SplDevnet' : AccountSnapshot_Spl } |
-  { 'SplMainnet' : AccountSnapshot_Spl };
+export type AccountSnapshotFor =
+	| { Any: AccountSnapshot_Any }
+	| { Icrc: AccountSnapshot_Icrc }
+	| { SplDevnet: AccountSnapshot_Spl }
+	| { SplMainnet: AccountSnapshot_Spl };
 export interface AccountSnapshot_Any {
-  'decimals' : number,
-  'token_address' : AnyToken,
-  'network' : AnyNetwork,
-  'approx_usd_per_token' : number,
-  'last_transactions' : Array<Transaction_Any>,
-  'account' : AccountId_Any,
-  'timestamp' : bigint,
-  'amount' : bigint,
+	decimals: number;
+	token_address: AnyToken;
+	network: AnyNetwork;
+	approx_usd_per_token: number;
+	last_transactions: Array<Transaction_Any>;
+	account: AccountId_Any;
+	timestamp: bigint;
+	amount: bigint;
 }
 export interface AccountSnapshot_Icrc {
-  'decimals' : number,
-  'token_address' : Principal,
-  'network' : {},
-  'approx_usd_per_token' : number,
-  'last_transactions' : Array<Transaction_Icrc>,
-  'account' : Principal,
-  'timestamp' : bigint,
-  'amount' : bigint,
+	decimals: number;
+	token_address: Principal;
+	network: {};
+	approx_usd_per_token: number;
+	last_transactions: Array<Transaction_Icrc>;
+	account: Principal;
+	timestamp: bigint;
+	amount: bigint;
 }
 export interface AccountSnapshot_Spl {
-  'decimals' : number,
-  'token_address' : string,
-  'network' : {},
-  'approx_usd_per_token' : number,
-  'last_transactions' : Array<Transaction_Spl>,
-  'account' : string,
-  'timestamp' : bigint,
-  'amount' : bigint,
+	decimals: number;
+	token_address: string;
+	network: {};
+	approx_usd_per_token: number;
+	last_transactions: Array<Transaction_Spl>;
+	account: string;
+	timestamp: bigint;
+	amount: bigint;
 }
 /**
  * / Allowance details for a token with insufficient ICRC2 approval.
  */
 export interface AllowanceDetail {
-  /**
-   * / The amount needed (transfer amount + fee).
-   */
-  'needed' : bigint,
-  /**
-   * / The ledger canister.
-   */
-  'ledger' : Principal,
-  /**
-   * / The current allowance.
-   */
-  'current' : bigint,
+	/**
+	 * / The amount needed (transfer amount + fee).
+	 */
+	needed: bigint;
+	/**
+	 * / The ledger canister.
+	 */
+	ledger: Principal;
+	/**
+	 * / The current allowance.
+	 */
+	current: bigint;
 }
 /**
  * / A network on which a token can be found.
  */
 export interface AnyNetwork {
-  'testnet_for' : [] | [string],
-  'network_id' : string,
+	testnet_for: [] | [string];
+	network_id: string;
 }
 /**
  * / A token on a specified network.
  */
-export interface AnyToken { 'token_symbol' : string, 'wraps' : [] | [string] }
+export interface AnyToken {
+	token_symbol: string;
+	wraps: [] | [string];
+}
 export interface AwardFilter {
-  'award_name' : [] | [string],
-  'campaign_id' : [] | [string],
+	award_name: [] | [string];
+	campaign_id: [] | [string];
 }
 /**
  * /
  */
 export interface CampaignEligibility {
-  /**
-   * /
-   */
-  'probability_multiplier_enabled' : boolean,
-  /**
-   * /
-   */
-  'probability_multiplier' : number,
-  /**
-   * /
-   */
-  'available' : boolean,
-  /**
-   * /
-   */
-  'eligible' : boolean,
-  /**
-   * /
-   */
-  'criteria' : Array<CriterionEligibility>,
+	/**
+	 * /
+	 */
+	probability_multiplier_enabled: boolean;
+	/**
+	 * /
+	 */
+	probability_multiplier: number;
+	/**
+	 * /
+	 */
+	available: boolean;
+	/**
+	 * /
+	 */
+	eligible: boolean;
+	/**
+	 * /
+	 */
+	criteria: Array<CriterionEligibility>;
 }
 /**
  * / Response from cancelling a QR gift code.
  */
-export type CancelQrGiftCodeResponse = {
-    /**
-     * / Code cancelled successfully.
-     */
-    'Success' : null
-  } |
-  {
-    /**
-     * / The code is invalid or not found.
-     */
-    'InvalidCode' : null
-  } |
-  {
-    /**
-     * / Only the creator can cancel the code.
-     */
-    'NotOwner' : null
-  } |
-  {
-    /**
-     * / The code has already been redeemed.
-     */
-    'AlreadyRedeemed' : null
-  } |
-  {
-    /**
-     * / The caller is anonymous.
-     */
-    'AnonymousCaller' : null
-  };
+export type CancelQrGiftCodeResponse =
+	| {
+			/**
+			 * / Code cancelled successfully.
+			 */
+			Success: null;
+	  }
+	| {
+			/**
+			 * / The code is invalid or not found.
+			 */
+			InvalidCode: null;
+	  }
+	| {
+			/**
+			 * / Only the creator can cancel the code.
+			 */
+			NotOwner: null;
+	  }
+	| {
+			/**
+			 * / The code has already been redeemed.
+			 */
+			AlreadyRedeemed: null;
+	  }
+	| {
+			/**
+			 * / The caller is anonymous.
+			 */
+			AnonymousCaller: null;
+	  };
 /**
  * / A span of time.
  */
-export type CandidDuration = { 'Minutes' : bigint } |
-  { 'Seconds' : bigint } |
-  { 'Days' : bigint } |
-  { 'Forever' : null } |
-  { 'Hours' : bigint } |
-  { 'Nanoseconds' : bigint };
-export type ClaimVipRewardResponse = {
-    /**
-     * / The code has been claimed already
-     */
-    'AlreadyClaimed' : null
-  } |
-  {
-    /**
-     * / The reward code
-     */
-    'Success' : null
-  } |
-  {
-    /**
-     * / The code is invalid
-     */
-    'InvalidCode' : null
-  };
+export type CandidDuration =
+	| { Minutes: bigint }
+	| { Seconds: bigint }
+	| { Days: bigint }
+	| { Forever: null }
+	| { Hours: bigint }
+	| { Nanoseconds: bigint };
+export type ClaimVipRewardResponse =
+	| {
+			/**
+			 * / The code has been claimed already
+			 */
+			AlreadyClaimed: null;
+	  }
+	| {
+			/**
+			 * / The reward code
+			 */
+			Success: null;
+	  }
+	| {
+			/**
+			 * / The code is invalid
+			 */
+			InvalidCode: null;
+	  };
 export interface ClaimedVipReward {
-  /**
-   * / The campaign ID
-   */
-  'campaign_id' : string,
+	/**
+	 * / The campaign ID
+	 */
+	campaign_id: string;
 }
 export interface Config {
-  'usage_awards_config' : [] | [UsageAwardConfig],
-  /**
-   * / The VIP configuration
-   */
-  'vip_config' : [] | [VipConfig],
-  /**
-   * / VIP Campaigns
-   */
-  'vip_campaigns' : [] | [Array<[string, VipConfig]>],
-  /**
-   * / Admin principals that have privileges to _read_ configuration and internal status.
-   */
-  'readonly_admins' : Array<Principal>,
-  /**
-   * / Oisy canister to fetch users from
-   */
-  'oisy_canister' : [] | [Principal],
-  /**
-   * / S1E4 referral rewards configuration.
-   */
-  's1e4_referral_config' : [] | [S1E4ReferralConfig],
+	usage_awards_config: [] | [UsageAwardConfig];
+	/**
+	 * / The VIP configuration
+	 */
+	vip_config: [] | [VipConfig];
+	/**
+	 * / VIP Campaigns
+	 */
+	vip_campaigns: [] | [Array<[string, VipConfig]>];
+	/**
+	 * / Admin principals that have privileges to _read_ configuration and internal status.
+	 */
+	readonly_admins: Array<Principal>;
+	/**
+	 * / Oisy canister to fetch users from
+	 */
+	oisy_canister: [] | [Principal];
+	/**
+	 * / S1E4 referral rewards configuration.
+	 */
+	s1e4_referral_config: [] | [S1E4ReferralConfig];
 }
 /**
  * / Request to create a new QR gift code.
  */
 export interface CreateQrGiftCodeRequest {
-  /**
-   * / How long the code is valid, in seconds. Must be > 0.
-   */
-  'expiry_seconds' : bigint,
-  /**
-   * / The tokens to include in this transfer code.
-   */
-  'tokens' : Array<QrGiftToken>,
+	/**
+	 * / How long the code is valid, in seconds. Must be > 0.
+	 */
+	expiry_seconds: bigint;
+	/**
+	 * / The tokens to include in this transfer code.
+	 */
+	tokens: Array<QrGiftToken>;
 }
 /**
  * / Response from creating a QR gift code.
  */
-export type CreateQrGiftCodeResponse = {
-    /**
-     * / Expiry seconds must be > 0.
-     */
-    'InvalidExpiry' : null
-  } |
-  {
-    /**
-     * / One or more tokens have insufficient ICRC2 allowance.
-     */
-    'InsufficientAllowance' : { 'details' : Array<AllowanceDetail> }
-  } |
-  {
-    /**
-     * / Code created successfully.
-     */
-    'Success' : { 'code' : string }
-  } |
-  {
-    /**
-     * / No tokens specified or an amount is zero.
-     */
-    'InvalidTokens' : null
-  } |
-  {
-    /**
-     * / Failed to query a ledger canister.
-     */
-    'LedgerQueryFailed' : { 'ledger' : Principal }
-  } |
-  {
-    /**
-     * / The caller is anonymous.
-     */
-    'AnonymousCaller' : null
-  };
+export type CreateQrGiftCodeResponse =
+	| {
+			/**
+			 * / Expiry seconds must be > 0.
+			 */
+			InvalidExpiry: null;
+	  }
+	| {
+			/**
+			 * / One or more tokens have insufficient ICRC2 allowance.
+			 */
+			InsufficientAllowance: { details: Array<AllowanceDetail> };
+	  }
+	| {
+			/**
+			 * / Code created successfully.
+			 */
+			Success: { code: string };
+	  }
+	| {
+			/**
+			 * / No tokens specified or an amount is zero.
+			 */
+			InvalidTokens: null;
+	  }
+	| {
+			/**
+			 * / Failed to query a ledger canister.
+			 */
+			LedgerQueryFailed: { ledger: Principal };
+	  }
+	| {
+			/**
+			 * / The caller is anonymous.
+			 */
+			AnonymousCaller: null;
+	  };
 /**
  * / A requirement that a user must satisfy to be eligible for an airdrop.
  */
-export type Criterion = {
-    /**
-     * / The user must have made at least `n` transactions across all networks.
-     */
-    'MinTransactions' : { 'duration' : CandidDuration, 'count' : number }
-  } |
-  {
-    /**
-     * / The user must have made at least this many successful referrals.
-     */
-    'MinReferrals' : { 'count' : number }
-  } |
-  {
-    /**
-     * / The user must have made at least `n` transactions per network.
-     */
-    'MinTransactionsInNetwork' : {
-      'duration' : CandidDuration,
-      'count' : number,
-    }
-  } |
-  {
-    /**
-     * / The user must have logged in at least `n` times recently, where recently
-     * / is defined by the duration.
-     */
-    'MinLogins' : {
-      /**
-       * / "recent" is defined by this duration.
-       */
-      'duration' : CandidDuration,
-      /**
-       * / The user must have logged in at least this many times recently.
-       */
-      'count' : number,
-      /**
-       * / The assumed session length.
-       */
-      'session_duration' : [] | [CandidDuration],
-    }
-  } |
-  {
-    /**
-     * / The user must hold total assets of at least `n` USD across all networks.
-     */
-    'MinTotalAssetsUsd' : { 'usd' : number }
-  } |
-  {
-    /**
-     * / The user must hold total assets of at least `n` USD per network.
-     */
-    'MinTotalAssetsUsdInNetwork' : { 'usd' : number }
-  } |
-  {
-    /**
-     * / The minimum time since the user's last sprinkles award.
-     */
-    'Hangover' : {
-      /**
-       * / The time that must pass before a sprinkled user can be eligible again.
-       */
-      'duration' : CandidDuration,
-      /**
-       * / Matching awards that prevent eligibility.  By default, any award will prevent eligibility.
-       */
-      'inhibitors' : [] | [Array<AwardFilter>],
-    }
-  } |
-  {
-    /**
-     * / The minimum number of distinct tokens that the user must hold.
-     */
-    'MinTokens' : { 'count' : number }
-  } |
-  { 'EligibleForUsageAward' : null };
+export type Criterion =
+	| {
+			/**
+			 * / The user must have made at least `n` transactions across all networks.
+			 */
+			MinTransactions: { duration: CandidDuration; count: number };
+	  }
+	| {
+			/**
+			 * / The user must have made at least this many successful referrals.
+			 */
+			MinReferrals: { count: number };
+	  }
+	| {
+			/**
+			 * / The user must have made at least `n` transactions per network.
+			 */
+			MinTransactionsInNetwork: {
+				duration: CandidDuration;
+				count: number;
+			};
+	  }
+	| {
+			/**
+			 * / The user must have logged in at least `n` times recently, where recently
+			 * / is defined by the duration.
+			 */
+			MinLogins: {
+				/**
+				 * / "recent" is defined by this duration.
+				 */
+				duration: CandidDuration;
+				/**
+				 * / The user must have logged in at least this many times recently.
+				 */
+				count: number;
+				/**
+				 * / The assumed session length.
+				 */
+				session_duration: [] | [CandidDuration];
+			};
+	  }
+	| {
+			/**
+			 * / The user must hold total assets of at least `n` USD across all networks.
+			 */
+			MinTotalAssetsUsd: { usd: number };
+	  }
+	| {
+			/**
+			 * / The user must hold total assets of at least `n` USD per network.
+			 */
+			MinTotalAssetsUsdInNetwork: { usd: number };
+	  }
+	| {
+			/**
+			 * / The minimum time since the user's last sprinkles award.
+			 */
+			Hangover: {
+				/**
+				 * / The time that must pass before a sprinkled user can be eligible again.
+				 */
+				duration: CandidDuration;
+				/**
+				 * / Matching awards that prevent eligibility.  By default, any award will prevent eligibility.
+				 */
+				inhibitors: [] | [Array<AwardFilter>];
+			};
+	  }
+	| {
+			/**
+			 * / The minimum number of distinct tokens that the user must hold.
+			 */
+			MinTokens: { count: number };
+	  }
+	| { EligibleForUsageAward: null };
 /**
  * / Whether a user satisfies a given criterion.
  */
 export interface CriterionEligibility {
-  /**
-   * / Whether the user satisfies the criterion
-   */
-  'satisfied' : boolean,
-  /**
-   * /
-   */
-  'criterion' : Criterion,
+	/**
+	 * / Whether the user satisfies the criterion
+	 */
+	satisfied: boolean;
+	/**
+	 * /
+	 */
+	criterion: Criterion;
 }
 /**
  * / Names of criteria for use in probability multiplier rules
  */
-export type CriterionName = { 'MinTransactions' : null } |
-  { 'MinReferrals' : null } |
-  { 'MinTransactionsInNetwork' : null } |
-  { 'MinLogins' : null } |
-  { 'MinTotalAssetsUsd' : null } |
-  { 'MinTotalAssetsUsdInNetwork' : null } |
-  { 'Hangover' : null } |
-  { 'MinTokens' : null } |
-  { 'EligibleForUsageAward' : null };
+export type CriterionName =
+	| { MinTransactions: null }
+	| { MinReferrals: null }
+	| { MinTransactionsInNetwork: null }
+	| { MinLogins: null }
+	| { MinTotalAssetsUsd: null }
+	| { MinTotalAssetsUsdInNetwork: null }
+	| { Hangover: null }
+	| { MinTokens: null }
+	| { EligibleForUsageAward: null };
 /**
  * /
  */
 export type EligibilityError = {
-    /**
-     * /
-     */
-    'NotAuthorized' : null
-  };
+	/**
+	 * /
+	 */
+	NotAuthorized: null;
+};
 /**
  * /
  */
 export interface EligibilityReport {
-  /**
-   * /
-   */
-  'campaigns' : Array<[string, CampaignEligibility]>,
+	/**
+	 * /
+	 */
+	campaigns: Array<[string, CampaignEligibility]>;
 }
 /**
  * /
  */
-export type EligibilityResponse = {
-    /**
-     * /
-     */
-    'Ok' : EligibilityReport
-  } |
-  {
-    /**
-     * /
-     */
-    'Err' : EligibilityError
-  };
+export type EligibilityResponse =
+	| {
+			/**
+			 * /
+			 */
+			Ok: EligibilityReport;
+	  }
+	| {
+			/**
+			 * /
+			 */
+			Err: EligibilityError;
+	  };
 export interface HoldingsPopcontestRequest {
-  'to' : [] | [number],
-  'from' : [] | [number],
+	to: [] | [number];
+	from: [] | [number];
 }
 export interface HoldingsPopcontestResponse {
-  'to' : [] | [number],
-  'from' : [] | [number],
-  'entries' : Array<UserSnapshot>,
+	to: [] | [number];
+	from: [] | [number];
+	entries: Array<UserSnapshot>;
 }
 export interface LastActivityHistogram {
-  'older' : number,
-  'unknown' : number,
-  'buckets' : Array<LastActivityHistogramBucket>,
+	older: number;
+	unknown: number;
+	buckets: Array<LastActivityHistogramBucket>;
 }
 export interface LastActivityHistogramBucket {
-  'start_ns' : bigint,
-  'count' : number,
+	start_ns: bigint;
+	count: number;
 }
 export interface LastActivityHistogramRequest {
-  'bucket_count' : number,
-  'bucket_duration' : CandidDuration,
+	bucket_count: number;
+	bucket_duration: CandidDuration;
 }
 export interface LastActivityHistogramResponse {
-  'request_time' : bigint,
-  'request' : LastActivityHistogramRequest,
-  'response' : LastActivityHistogram,
+	request_time: bigint;
+	request: LastActivityHistogramRequest;
+	response: LastActivityHistogram;
 }
 /**
  * / The ledger configuration used for sending funds and checking balances
  */
 export interface LedgerConfig {
-  /**
-   * / The ledger index indexing `.ledger`
-   */
-  'ledger_index' : Principal,
-  /**
-   * / The ledger canister to use
-   */
-  'ledger' : Principal,
-  /**
-   * / The account on `.ledger` to send funds _from_
-   */
-  'ledger_account' : Account,
+	/**
+	 * / The ledger index indexing `.ledger`
+	 */
+	ledger_index: Principal;
+	/**
+	 * / The ledger canister to use
+	 */
+	ledger: Principal;
+	/**
+	 * / The account on `.ledger` to send funds _from_
+	 */
+	ledger_account: Account;
 }
-export type NewVipRewardResponse = {
-    /**
-     * / The VIP is not logged in.
-     */
-    'Anonymous' : null
-  } |
-  {
-    /**
-     * / User is not a VIP
-     */
-    'NotImportantPerson' : null
-  } |
-  {
-    /**
-     * / The requested VIP campaign doesn't exist.
-     */
-    'UnknownCampaign' : null
-  } |
-  {
-    /**
-     * / The reward code
-     */
-    'VipReward' : VipReward
-  };
-export type PublicAirdropStatus = {
-    /**
-     * / The airdrop is currently ongoing
-     */
-    'Ongoing' : {
-      /**
-       * / The remaining number of airdrops.
-       */
-      'remaining_airdrops' : bigint,
-      /**
-       * / The total number of airdrops.
-       */
-      'total_airdrops' : bigint,
-    }
-  } |
-  {
-    /**
-     * / The airdrop has been completed
-     */
-    'Completed' : {
-      /**
-       * / The total number of airdrops.
-       */
-      'total_airdrops' : bigint,
-    }
-  } |
-  {
-    /**
-     * / The airdrop will start in the future
-     */
-    'Upcoming' : null
-  };
+export type NewVipRewardResponse =
+	| {
+			/**
+			 * / The VIP is not logged in.
+			 */
+			Anonymous: null;
+	  }
+	| {
+			/**
+			 * / User is not a VIP
+			 */
+			NotImportantPerson: null;
+	  }
+	| {
+			/**
+			 * / The requested VIP campaign doesn't exist.
+			 */
+			UnknownCampaign: null;
+	  }
+	| {
+			/**
+			 * / The reward code
+			 */
+			VipReward: VipReward;
+	  };
+export type PublicAirdropStatus =
+	| {
+			/**
+			 * / The airdrop is currently ongoing
+			 */
+			Ongoing: {
+				/**
+				 * / The remaining number of airdrops.
+				 */
+				remaining_airdrops: bigint;
+				/**
+				 * / The total number of airdrops.
+				 */
+				total_airdrops: bigint;
+			};
+	  }
+	| {
+			/**
+			 * / The airdrop has been completed
+			 */
+			Completed: {
+				/**
+				 * / The total number of airdrops.
+				 */
+				total_airdrops: bigint;
+			};
+	  }
+	| {
+			/**
+			 * / The airdrop will start in the future
+			 */
+			Upcoming: null;
+	  };
 export interface PublicSprinkleInfo {
-  /**
-   * / When a sprinkle event was scheduled
-   * / in nanoseconds since the EPOCH.
-   */
-  'timestamp_ns' : bigint,
-  /**
-   * / Total number of tokens that were sprinkled
-   */
-  'total_amount' : bigint,
-  /**
-   * / The number of users that were successfully sprinkled
-   */
-  'n_sprinkled_users' : bigint,
-  /**
-   * / Ledger canister id of the token that was sprinkled
-   */
-  'ledger' : Principal,
+	/**
+	 * / When a sprinkle event was scheduled
+	 * / in nanoseconds since the EPOCH.
+	 */
+	timestamp_ns: bigint;
+	/**
+	 * / Total number of tokens that were sprinkled
+	 */
+	total_amount: bigint;
+	/**
+	 * / The number of users that were successfully sprinkled
+	 */
+	n_sprinkled_users: bigint;
+	/**
+	 * / Ledger canister id of the token that was sprinkled
+	 */
+	ledger: Principal;
 }
 /**
  * / A single QR gift code created by the caller, with full details.
  */
 export interface QrGiftCodeEntry {
-  /**
-   * / Current validity state.
-   */
-  'validity' : QrGiftCodeValidity,
-  /**
-   * / The hex-encoded code string.
-   */
-  'code' : string,
-  /**
-   * / When the code was created (nanoseconds since epoch).
-   */
-  'created_at' : bigint,
-  /**
-   * / The tokens that will be transferred when redeemed.
-   */
-  'tokens' : Array<QrGiftToken>,
-  /**
-   * / When the code expires (nanoseconds since epoch).
-   */
-  'expiry_date' : bigint,
+	/**
+	 * / Current validity state.
+	 */
+	validity: QrGiftCodeValidity;
+	/**
+	 * / The hex-encoded code string.
+	 */
+	code: string;
+	/**
+	 * / When the code was created (nanoseconds since epoch).
+	 */
+	created_at: bigint;
+	/**
+	 * / The tokens that will be transferred when redeemed.
+	 */
+	tokens: Array<QrGiftToken>;
+	/**
+	 * / When the code expires (nanoseconds since epoch).
+	 */
+	expiry_date: bigint;
 }
 /**
  * / Public information about a QR gift code.
  */
 export interface QrGiftCodeInfoResponse {
-  /**
-   * / Current validity state.
-   */
-  'validity' : QrGiftCodeValidity,
-  /**
-   * / The tokens that will be transferred when redeemed.
-   */
-  'tokens' : Array<QrGiftToken>,
-  /**
-   * / When the code expires (nanoseconds since epoch).
-   */
-  'expiry_date' : bigint,
+	/**
+	 * / Current validity state.
+	 */
+	validity: QrGiftCodeValidity;
+	/**
+	 * / The tokens that will be transferred when redeemed.
+	 */
+	tokens: Array<QrGiftToken>;
+	/**
+	 * / When the code expires (nanoseconds since epoch).
+	 */
+	expiry_date: bigint;
 }
 /**
  * / Aggregate stats for QR gifts.
  */
 export interface QrGiftCodeStats {
-  /**
-   * / Total redemption attempts that failed at transfer time.
-   */
-  'total_failed' : number,
-  /**
-   * / Total codes cancelled.
-   */
-  'total_cancelled' : number,
-  /**
-   * / Total codes created.
-   */
-  'total_created' : number,
-  /**
-   * / Total codes successfully redeemed.
-   */
-  'total_redeemed' : number,
+	/**
+	 * / Total redemption attempts that failed at transfer time.
+	 */
+	total_failed: number;
+	/**
+	 * / Total codes cancelled.
+	 */
+	total_cancelled: number;
+	/**
+	 * / Total codes created.
+	 */
+	total_created: number;
+	/**
+	 * / Total codes successfully redeemed.
+	 */
+	total_redeemed: number;
 }
 /**
  * / Validity state of a QR gift code.
  */
-export type QrGiftCodeValidity = { 'Invalid' : null } |
-  { 'Used' : null } |
-  { 'Cancelled' : null } |
-  { 'Valid' : null } |
-  { 'Expired' : null };
+export type QrGiftCodeValidity =
+	| { Invalid: null }
+	| { Used: null }
+	| { Cancelled: null }
+	| { Valid: null }
+	| { Expired: null };
 /**
  * / A single token and amount for a QR gift code.
  */
 export interface QrGiftToken {
-  /**
-   * / The ledger canister that manages the token.
-   */
-  'ledger' : Principal,
-  /**
-   * / The amount of tokens to transfer.
-   */
-  'amount' : bigint,
+	/**
+	 * / The ledger canister that manages the token.
+	 */
+	ledger: Principal;
+	/**
+	 * / The amount of tokens to transfer.
+	 */
+	amount: bigint;
 }
 /**
  * / Request to redeem a QR gift code.
  */
 export interface RedeemQrGiftCodeRequest {
-  /**
-   * / The hex-encoded code string.
-   */
-  'code' : string,
+	/**
+	 * / The hex-encoded code string.
+	 */
+	code: string;
 }
 /**
  * / Response from redeeming a QR gift code.
  */
-export type RedeemQrGiftCodeResponse = {
-    /**
-     * / The creator cannot redeem their own code.
-     */
-    'SelfRedeem' : null
-  } |
-  {
-    /**
-     * / Transfer completed successfully.
-     */
-    'Success' : null
-  } |
-  {
-    /**
-     * / The code is invalid or not found.
-     */
-    'InvalidCode' : null
-  } |
-  {
-    /**
-     * / The code has already been redeemed.
-     */
-    'AlreadyRedeemed' : null
-  } |
-  {
-    /**
-     * / The code was cancelled by its creator.
-     */
-    'Cancelled' : null
-  } |
-  {
-    /**
-     * / The token transfer failed.
-     */
-    'TransferFailed' : { 'reason' : string }
-  } |
-  {
-    /**
-     * / The code has expired.
-     */
-    'Expired' : null
-  } |
-  {
-    /**
-     * / The caller is anonymous.
-     */
-    'AnonymousCaller' : null
-  };
+export type RedeemQrGiftCodeResponse =
+	| {
+			/**
+			 * / The creator cannot redeem their own code.
+			 */
+			SelfRedeem: null;
+	  }
+	| {
+			/**
+			 * / Transfer completed successfully.
+			 */
+			Success: null;
+	  }
+	| {
+			/**
+			 * / The code is invalid or not found.
+			 */
+			InvalidCode: null;
+	  }
+	| {
+			/**
+			 * / The code has already been redeemed.
+			 */
+			AlreadyRedeemed: null;
+	  }
+	| {
+			/**
+			 * / The code was cancelled by its creator.
+			 */
+			Cancelled: null;
+	  }
+	| {
+			/**
+			 * / The token transfer failed.
+			 */
+			TransferFailed: { reason: string };
+	  }
+	| {
+			/**
+			 * / The code has expired.
+			 */
+			Expired: null;
+	  }
+	| {
+			/**
+			 * / The caller is anonymous.
+			 */
+			AnonymousCaller: null;
+	  };
 export interface RefereeConfig {
-  'referees_per_referrer' : number,
-  'awards' : Array<TokenConfig>,
-  'criteria' : Array<Criterion>,
+	referees_per_referrer: number;
+	awards: Array<TokenConfig>;
+	criteria: Array<Criterion>;
 }
 export interface ReferrerConfig {
-  'referrers_per_event' : number,
-  'awards' : Array<TokenConfig>,
-  'criteria' : Array<Criterion>,
+	referrers_per_event: number;
+	awards: Array<TokenConfig>;
+	criteria: Array<Criterion>;
 }
 /**
  * / A user's own referral code & basic stats.
  */
 export interface ReferrerInfo {
-  /**
-   * / A short pseudonymous identifier for the referrer.
-   */
-  'referral_code' : number,
-  /**
-   * / The number of times the referral code has been used.
-   */
-  'num_referrals' : [] | [number],
+	/**
+	 * / A short pseudonymous identifier for the referrer.
+	 */
+	referral_code: number;
+	/**
+	 * / The number of times the referral code has been used.
+	 */
+	num_referrals: [] | [number];
 }
 export interface RewardInfo {
-  /**
-   * / The name of the reward
-   */
-  'name' : [] | [string],
-  /**
-   * / Ledger canister id of the token that was awarded.
-   */
-  'ledger' : Principal,
-  /**
-   * / The timestamp when the reward was awarded.
-   */
-  'timestamp' : bigint,
-  /**
-   * / The amount of tokens awarded.
-   */
-  'amount' : bigint,
-  /**
-   * / The campaign id of the reward
-   */
-  'campaign_id' : string,
-  /**
-   * / The campaign name of the reward
-   */
-  'campaign_name' : [] | [string],
+	/**
+	 * / The name of the reward
+	 */
+	name: [] | [string];
+	/**
+	 * / Ledger canister id of the token that was awarded.
+	 */
+	ledger: Principal;
+	/**
+	 * / The timestamp when the reward was awarded.
+	 */
+	timestamp: bigint;
+	/**
+	 * / The amount of tokens awarded.
+	 */
+	amount: bigint;
+	/**
+	 * / The campaign id of the reward
+	 */
+	campaign_id: string;
+	/**
+	 * / The campaign name of the reward
+	 */
+	campaign_name: [] | [string];
 }
 export interface S1E4ReferralConfig {
-  'referrer' : ReferrerConfig,
-  'cycle_duration' : CandidDuration,
-  'events_per_cycle' : number,
-  'campaign_id' : string,
-  'referee' : RefereeConfig,
+	referrer: ReferrerConfig;
+	cycle_duration: CandidDuration;
+	events_per_cycle: number;
+	campaign_id: string;
+	referee: RefereeConfig;
 }
 export interface S1E4ReferrerInfo {
-  /**
-   * / Unrewarded s1e4 referrees.
-   */
-  'unrewarded_referees' : Array<Principal>,
-  /**
-   * / The number of referrals in S1E4 only.
-   */
-  'referrals_count' : number,
+	/**
+	 * / Unrewarded s1e4 referrees.
+	 */
+	unrewarded_referees: Array<Principal>;
+	/**
+	 * / The number of referrals in S1E4 only.
+	 */
+	referrals_count: number;
 }
 /**
  * / Possible errors for `set_referrer()`
  */
-export type SetReferrerError = {
-    /**
-     * / The caller is attempting to refer themselves.
-     */
-    'SelfReferral' : null
-  } |
-  {
-    /**
-     * / The caller already has a different referrer.
-     * /
-     * / (Repeatedly setting the referrer to the same value will cause no issues.)
-     */
-    'AlreadyHasReferrer' : null
-  } |
-  {
-    /**
-     * / The referrer code is unknown.
-     */
-    'UnknownReferrer' : null
-  } |
-  {
-    /**
-     * / Only new users may set a referrer.
-     * /
-     * / A small allowance for existing state is made, in case the front-end
-     * / sends a snapshot before setting the referrer.
-     */
-    'NotNewUser' : null
-  } |
-  {
-    /**
-     * / The caller is anonymous.
-     */
-    'AnonymousCaller' : null
-  };
+export type SetReferrerError =
+	| {
+			/**
+			 * / The caller is attempting to refer themselves.
+			 */
+			SelfReferral: null;
+	  }
+	| {
+			/**
+			 * / The caller already has a different referrer.
+			 * /
+			 * / (Repeatedly setting the referrer to the same value will cause no issues.)
+			 */
+			AlreadyHasReferrer: null;
+	  }
+	| {
+			/**
+			 * / The referrer code is unknown.
+			 */
+			UnknownReferrer: null;
+	  }
+	| {
+			/**
+			 * / Only new users may set a referrer.
+			 * /
+			 * / A small allowance for existing state is made, in case the front-end
+			 * / sends a snapshot before setting the referrer.
+			 */
+			NotNewUser: null;
+	  }
+	| {
+			/**
+			 * / The caller is anonymous.
+			 */
+			AnonymousCaller: null;
+	  };
 /**
  * / Result of calling `set_referrer()`
  */
-export type SetReferrerResponse = {
-    /**
-     * / The referrer was set successfully.
-     */
-    'Ok' : null
-  } |
-  {
-    /**
-     * / Ther was an error setting the referrer.
-     */
-    'Err' : SetReferrerError
-  };
+export type SetReferrerResponse =
+	| {
+			/**
+			 * / The referrer was set successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * / Ther was an error setting the referrer.
+			 */
+			Err: SetReferrerError;
+	  };
 export interface SetSprinkleTimestampArg {
-  /**
-   * / The total amount that will be distributed across all users in the current/next sprinkle
-   */
-  'total_sprinkle_amount' : bigint,
-  /**
-   * / Minimum amount that must be in any user's account for the user to be eligible
-   * / for the current/next sprinkle
-   */
-  'min_account_amount' : bigint,
-  /**
-   * / The amount that will be distributed to selected users in the current/next sprinkle
-   */
-  'user_sprinkle_amount' : bigint,
-  /**
-   * / The timestamp at which the current/next sprinkle will start (if any)
-   * / in nanos since the epoch
-   */
-  'timestamp' : bigint,
-  /**
-   * / Ledger configuration used in the current/next sprinkle
-   */
-  'ledger_config' : LedgerConfig,
+	/**
+	 * / The total amount that will be distributed across all users in the current/next sprinkle
+	 */
+	total_sprinkle_amount: bigint;
+	/**
+	 * / Minimum amount that must be in any user's account for the user to be eligible
+	 * / for the current/next sprinkle
+	 */
+	min_account_amount: bigint;
+	/**
+	 * / The amount that will be distributed to selected users in the current/next sprinkle
+	 */
+	user_sprinkle_amount: bigint;
+	/**
+	 * / The timestamp at which the current/next sprinkle will start (if any)
+	 * / in nanos since the epoch
+	 */
+	timestamp: bigint;
+	/**
+	 * / Ledger configuration used in the current/next sprinkle
+	 */
+	ledger_config: LedgerConfig;
 }
 export interface SetVipCampaignExpiryRequest {
-  'expiry_date' : bigint,
-  'campaign_id' : string,
+	expiry_date: bigint;
+	campaign_id: string;
 }
-export type SetVipCampaignExpiryResponse = { 'CampaignNotFound' : null } |
-  { 'Success' : { 'codes_updated' : number } };
+export type SetVipCampaignExpiryResponse =
+	| { CampaignNotFound: null }
+	| { Success: { codes_updated: number } };
 export interface SprinkleEvent {
-  /**
-   * / The number of users that were successfully sprinkled
-   */
-  'n_sprinkled_users' : bigint,
-  /**
-   * / When a sprinkle event was scheduled (via set_sprinkle_timestamp)
-   * / in nanoseconds since the EPOCH.
-   */
-  'timestamp_scheduled' : bigint,
-  /**
-   * / The number of users that eligible to get sprinkled during this sprinkle event
-   */
-  'n_eligible_users' : bigint,
-  /**
-   * / The number of users that were selected to receive sprinkle funds during this sprinkle event
-   * / (may be higher than actual number of users that actually received funds due to potential
-   * / transaction errors)
-   */
-  'n_selected_users' : bigint,
+	/**
+	 * / The number of users that were successfully sprinkled
+	 */
+	n_sprinkled_users: bigint;
+	/**
+	 * / When a sprinkle event was scheduled (via set_sprinkle_timestamp)
+	 * / in nanoseconds since the EPOCH.
+	 */
+	timestamp_scheduled: bigint;
+	/**
+	 * / The number of users that eligible to get sprinkled during this sprinkle event
+	 */
+	n_eligible_users: bigint;
+	/**
+	 * / The number of users that were selected to receive sprinkle funds during this sprinkle event
+	 * / (may be higher than actual number of users that actually received funds due to potential
+	 * / transaction errors)
+	 */
+	n_selected_users: bigint;
 }
 /**
  * / The status of the sprinkle
  */
 export interface SprinkleStatus {
-  /**
-   * / The next scheduled event, if any
-   */
-  'next_timestamp' : [] | [bigint],
-  /**
-   * / A list of past sprinkle events that have been completed
-   */
-  'past_events' : Array<SprinkleEvent>,
+	/**
+	 * / The next scheduled event, if any
+	 */
+	next_timestamp: [] | [bigint];
+	/**
+	 * / A list of past sprinkle events that have been completed
+	 */
+	past_events: Array<SprinkleEvent>;
 }
-export type StatsKeyType = { 'TokenGroup' : null } |
-  { 'Network' : null } |
-  { 'TokenSymbol' : null };
-export interface StatsRequest { 'by' : StatsKeyType }
+export type StatsKeyType = { TokenGroup: null } | { Network: null } | { TokenSymbol: null };
+export interface StatsRequest {
+	by: StatsKeyType;
+}
 export interface StatsResponse {
-  'request' : StatsRequest,
-  'stats' : Array<[string, StatsValue]>,
+	request: StatsRequest;
+	stats: Array<[string, StatsValue]>;
 }
-export interface StatsValue { 'user_count' : bigint, 'assets_usd' : number }
+export interface StatsValue {
+	user_count: bigint;
+	assets_usd: number;
+}
 export interface StatusResponse {
-  /**
-   * / The latest last_updated timestamp of a fetched Oisy user
-   */
-  'latest_oisy_user_timestamp' : [] | [bigint],
-  /**
-   * / Timestamps when the last successful fetch from each index canister was initiated.
-   */
-  'last_block_fetch_timestamp' : Array<[Principal, bigint]>,
-  /**
-   * / The number of blocks that are currently in the block buffer
-   */
-  'num_buffered_blocks' : bigint,
-  /**
-   * / Processed block height per ledger index canister
-   */
-  'processed_block_height' : Array<[Principal, bigint]>,
-  /**
-   * / The sprinkle status
-   */
-  'sprinkle_status' : SprinkleStatus,
+	/**
+	 * / The latest last_updated timestamp of a fetched Oisy user
+	 */
+	latest_oisy_user_timestamp: [] | [bigint];
+	/**
+	 * / Timestamps when the last successful fetch from each index canister was initiated.
+	 */
+	last_block_fetch_timestamp: Array<[Principal, bigint]>;
+	/**
+	 * / The number of blocks that are currently in the block buffer
+	 */
+	num_buffered_blocks: bigint;
+	/**
+	 * / Processed block height per ledger index canister
+	 */
+	processed_block_height: Array<[Principal, bigint]>;
+	/**
+	 * / The sprinkle status
+	 */
+	sprinkle_status: SprinkleStatus;
 }
 export interface TokenConfig {
-  /**
-   * / The amount of tokens to distribute per user.
-   */
-  'amount_per_user' : bigint,
-  /**
-   * / Account that holds the tokens for the airdrop.
-   * / The rewards canister will use `icrc2_transfer_from` to distribute the tokens.
-   */
-  'account' : Account,
-  /**
-   * / The ledger canister that manages the token.
-   */
-  'ledger_canister' : Principal,
+	/**
+	 * / The amount of tokens to distribute per user.
+	 */
+	amount_per_user: bigint;
+	/**
+	 * / Account that holds the tokens for the airdrop.
+	 * / The rewards canister will use `icrc2_transfer_from` to distribute the tokens.
+	 */
+	account: Account;
+	/**
+	 * / The ledger canister that manages the token.
+	 */
+	ledger_canister: Principal;
 }
-export type TransactionType = { 'Send' : null } |
-  { 'Receive' : null };
+export type TransactionType = { Send: null } | { Receive: null };
 export interface Transaction_Any {
-  'transaction_type' : TransactionType,
-  'network' : AnyNetwork,
-  'counterparty' : AccountId_Any,
-  'timestamp' : bigint,
-  'amount' : bigint,
+	transaction_type: TransactionType;
+	network: AnyNetwork;
+	counterparty: AccountId_Any;
+	timestamp: bigint;
+	amount: bigint;
 }
 export interface Transaction_Icrc {
-  'transaction_type' : TransactionType,
-  'network' : {},
-  'counterparty' : Principal,
-  'timestamp' : bigint,
-  'amount' : bigint,
+	transaction_type: TransactionType;
+	network: {};
+	counterparty: Principal;
+	timestamp: bigint;
+	amount: bigint;
 }
 export interface Transaction_Spl {
-  'transaction_type' : TransactionType,
-  'network' : {},
-  'counterparty' : string,
-  'timestamp' : bigint,
-  'amount' : bigint,
+	transaction_type: TransactionType;
+	network: {};
+	counterparty: string;
+	timestamp: bigint;
+	amount: bigint;
 }
 export interface UploadVipCodesRequest {
-  'codes' : Array<bigint>,
-  'campaign_id' : string,
-  'vip_id' : Principal,
+	codes: Array<bigint>;
+	campaign_id: string;
+	vip_id: Principal;
 }
-export type UploadVipCodesResponse = { 'CampaignNotFound' : null } |
-  { 'Success' : { 'codes_overwritten' : number, 'codes_created' : number } } |
-  { 'VipNotInCampaign' : null };
+export type UploadVipCodesResponse =
+	| { CampaignNotFound: null }
+	| { Success: { codes_overwritten: number; codes_created: number } }
+	| { VipNotInCampaign: null };
 export interface UsageAndHolding {
-  /**
-   * Time of account creation or first recorded activity.
-   */
-  'first_activity_ns' : [] | [bigint],
-  /**
-   * Account valuation at the time of the last snapshot.
-   */
-  'approx_usd_valuation' : number,
-  /**
-   * Time of last recorded activity.
-   */
-  'last_activity_ns' : [] | [bigint],
+	/**
+	 * Time of account creation or first recorded activity.
+	 */
+	first_activity_ns: [] | [bigint];
+	/**
+	 * Account valuation at the time of the last snapshot.
+	 */
+	approx_usd_valuation: number;
+	/**
+	 * Time of last recorded activity.
+	 */
+	last_activity_ns: [] | [bigint];
 }
 export interface UsageAwardConfig {
-  'cycle_duration' : CandidDuration,
-  /**
-   * / Rules for probability multipliers based on satisfied criteria.
-   * / Maps multiplier values to lists of criterion names that must be satisfied.
-   */
-  'probability_multiplier_rules' : Array<[number, Array<CriterionName>]>,
-  'awards' : Array<UsageAwardEvent>,
-  'eligibility_criteria' : UsageCriteria,
-  /**
-   * / The campaign the award is associated with.
-   */
-  'campaign_name' : [] | [string],
+	cycle_duration: CandidDuration;
+	/**
+	 * / Rules for probability multipliers based on satisfied criteria.
+	 * / Maps multiplier values to lists of criterion names that must be satisfied.
+	 */
+	probability_multiplier_rules: Array<[number, Array<CriterionName>]>;
+	awards: Array<UsageAwardEvent>;
+	eligibility_criteria: UsageCriteria;
+	/**
+	 * / The campaign the award is associated with.
+	 */
+	campaign_name: [] | [string];
 }
 export interface UsageAwardEvent {
-  'name' : string,
-  'num_events_per_cycle' : number,
-  'awards' : Array<TokenConfig>,
-  'num_users_per_event' : number,
-  /**
-   * / The campaign the award is associated with.
-   */
-  'campaign_name' : [] | [string],
+	name: string;
+	num_events_per_cycle: number;
+	awards: Array<TokenConfig>;
+	num_users_per_event: number;
+	/**
+	 * / The campaign the award is associated with.
+	 */
+	campaign_name: [] | [string];
 }
 export interface UsageAwardState {
-  /**
-   * / The time of the first activity.
-   */
-  'first_activity_ns' : [] | [bigint],
-  /**
-   * / Timestamps of recent snapshots
-   */
-  'snapshot_timestamps' : BigUint64Array,
-  /**
-   * / The last few snapshots
-   */
-  'snapshots' : Array<UserSnapshot>,
-  /**
-   * / Pseudonym for user who introduced the caller to Oisy.
-   */
-  'referred_by' : [] | [number],
-  /**
-   * / The time of the last activity.
-   */
-  'last_activity_ns' : [] | [bigint],
-  /**
-   * / User's code for inviting others to the platform, and referral stats.
-   */
-  'referrer_info' : [] | [ReferrerInfo],
-  /**
-   * / Referrer info for s1e4.
-   */
-  's1e4_referrer_info' : [] | [S1E4ReferrerInfo],
+	/**
+	 * / The time of the first activity.
+	 */
+	first_activity_ns: [] | [bigint];
+	/**
+	 * / Timestamps of recent snapshots
+	 */
+	snapshot_timestamps: BigUint64Array;
+	/**
+	 * / The last few snapshots
+	 */
+	snapshots: Array<UserSnapshot>;
+	/**
+	 * / Pseudonym for user who introduced the caller to Oisy.
+	 */
+	referred_by: [] | [number];
+	/**
+	 * / The time of the last activity.
+	 */
+	last_activity_ns: [] | [bigint];
+	/**
+	 * / User's code for inviting others to the platform, and referral stats.
+	 */
+	referrer_info: [] | [ReferrerInfo];
+	/**
+	 * / Referrer info for s1e4.
+	 */
+	s1e4_referrer_info: [] | [S1E4ReferrerInfo];
 }
 export interface UsageAwardStats {
-  'user_count' : bigint,
-  'eligible_user_count' : bigint,
-  'assets_usd' : number,
-  'snapshot_count' : bigint,
-  'awarded_count' : bigint,
-  'award_events' : bigint,
-  'eligible_snapshots' : bigint,
+	user_count: bigint;
+	eligible_user_count: bigint;
+	assets_usd: number;
+	snapshot_count: bigint;
+	awarded_count: bigint;
+	award_events: bigint;
+	eligible_snapshots: bigint;
 }
-export interface UsageCriteria { 'criteria' : Array<Criterion> }
+export interface UsageCriteria {
+	criteria: Array<Criterion>;
+}
 /**
  * /
  */
 export interface UsageVsHoldingStats {
-  /**
-   * /
-   */
-  'holdings' : Array<UsageAndHolding>,
+	/**
+	 * /
+	 */
+	holdings: Array<UsageAndHolding>;
 }
 /**
  * /
  */
 export interface UsageWinnersRequest {
-  'to_ns' : bigint,
-  'from_ns' : bigint,
-  'limit' : number,
-  'after_user' : [] | [UserDbKey],
+	to_ns: bigint;
+	from_ns: bigint;
+	limit: number;
+	after_user: [] | [UserDbKey];
 }
 export interface UsageWinnersResponse {
-  'last' : [] | [UserDbKey],
-  'num_checked' : number,
-  'winners' : Array<Principal>,
+	last: [] | [UserDbKey];
+	num_checked: number;
+	winners: Array<Principal>;
 }
 export interface UserData {
-  /**
-   * / Super Important Powers
-   * /
-   * / Values are: Campaign IDs such as "vip" or "gold".
-   */
-  'superpowers' : [] | [Array<string>],
-  /**
-   * / Airdrops the user has received
-   */
-  'airdrops' : Array<RewardInfo>,
-  /**
-   * / Usage awards the user has received
-   */
-  'usage_awards' : [] | [Array<RewardInfo>],
-  /**
-   * / The last time the user submitted a snapshot, if ever.
-   */
-  'last_snapshot_timestamp' : [] | [bigint],
-  /**
-   * / Very Important Powers
-   */
-  'is_vip' : [] | [boolean],
-  /**
-   * / Sprinkles the user has received
-   */
-  'sprinkles' : Array<RewardInfo>,
+	/**
+	 * / Super Important Powers
+	 * /
+	 * / Values are: Campaign IDs such as "vip" or "gold".
+	 */
+	superpowers: [] | [Array<string>];
+	/**
+	 * / Airdrops the user has received
+	 */
+	airdrops: Array<RewardInfo>;
+	/**
+	 * / Usage awards the user has received
+	 */
+	usage_awards: [] | [Array<RewardInfo>];
+	/**
+	 * / The last time the user submitted a snapshot, if ever.
+	 */
+	last_snapshot_timestamp: [] | [bigint];
+	/**
+	 * / Very Important Powers
+	 */
+	is_vip: [] | [boolean];
+	/**
+	 * / Sprinkles the user has received
+	 */
+	sprinkles: Array<RewardInfo>;
 }
 export interface UserDbKey {
-  'pouh_verified' : boolean,
-  'oisy_user' : Principal,
+	pouh_verified: boolean;
+	oisy_user: Principal;
 }
 export interface UserSnapshot {
-  'accounts' : Array<AccountSnapshotFor>,
-  'timestamp' : [] | [bigint],
+	accounts: Array<AccountSnapshotFor>;
+	timestamp: [] | [bigint];
 }
 export interface VipCodeInfoResponse {
-  'validity' : VipCodeValidity,
-  'expiry_date' : bigint,
-  'campaign_id' : string,
+	validity: VipCodeValidity;
+	expiry_date: bigint;
+	campaign_id: string;
 }
-export type VipCodeValidity = { 'Invalid' : null } |
-  { 'Used' : null } |
-  { 'Valid' : null } |
-  { 'Expired' : null };
+export type VipCodeValidity =
+	| { Invalid: null }
+	| { Used: null }
+	| { Valid: null }
+	| { Expired: null };
 export interface VipConfig {
-  'code_validity_duration' : bigint,
-  'vips' : Array<Principal>,
-  'rewards' : Array<TokenConfig>,
+	code_validity_duration: bigint;
+	vips: Array<Principal>;
+	rewards: Array<TokenConfig>;
 }
 export interface VipReward {
-  /**
-   * / The reward code
-   */
-  'code' : string,
+	/**
+	 * / The reward code
+	 */
+	code: string;
 }
 export interface VipStats {
-  'total_rejected' : number,
-  'total_redeemed' : number,
-  'total_issued' : number,
+	total_rejected: number;
+	total_redeemed: number;
+	total_issued: number;
 }
 export interface _SERVICE {
-  /**
-   * / QR Gift Code: Cancels a transfer code (creator only).
-   */
-  'cancel_qr_gift_code' : ActorMethod<[string], CancelQrGiftCodeResponse>,
-  /**
-   * / Pays usage rewards.  This is normally called internally after the random timing & user selection
-   * / has taken place.  For testing, it can be convenient to call it directly.
-   */
-  'claim_usage_award' : ActorMethod<[UsageAwardEvent, Principal], undefined>,
-  /**
-   * / Requests rewards from a VIP token.
-   */
-  'claim_vip_reward' : ActorMethod<
-    [VipReward],
-    [ClaimVipRewardResponse, [] | [ClaimedVipReward]]
-  >,
-  /**
-   * / Retrieves the current configuration of the canister.
-   */
-  'config' : ActorMethod<[], Config>,
-  /**
-   * / Configures S1E4 referral rewards.
-   */
-  'configure_referral' : ActorMethod<[S1E4ReferralConfig], undefined>,
-  /**
-   * / Configures bonuses for using & holding assets in Oisy.
-   */
-  'configure_usage_awards' : ActorMethod<[UsageAwardConfig], undefined>,
-  /**
-   * / Configures VIP rewards
-   */
-  'configure_vip' : ActorMethod<[VipConfig], undefined>,
-  /**
-   * / Configures VIP campaigns
-   */
-  'configure_vips' : ActorMethod<[Array<[string, VipConfig]>], undefined>,
-  /**
-   * / QR Gift Code: Creates a new transfer code.
-   */
-  'create_qr_gift_code' : ActorMethod<
-    [CreateQrGiftCodeRequest],
-    CreateQrGiftCodeResponse
-  >,
-  /**
-   * / Eligibility of the caller or specified principal for airdrops.
-   */
-  'eligible' : ActorMethod<[[] | [Principal]], EligibilityResponse>,
-  /**
-   * / Grants the provided award event.  This is normally done automatically.
-   * / It can be useful to be able to make a payment directly when testing how
-   * / awards are displayed in the GUI.
-   */
-  'grant_usage_award' : ActorMethod<
-    [UsageAwardEvent, [] | [Principal]],
-    undefined
-  >,
-  /**
-   * / Which tokens are beloved in what amounts?
-   */
-  'holdings_popcontest' : ActorMethod<
-    [HoldingsPopcontestRequest],
-    HoldingsPopcontestResponse
-  >,
-  /**
-   * / A histogram of when users were last active
-   */
-  'last_activity_histogram' : ActorMethod<
-    [LastActivityHistogramRequest],
-    LastActivityHistogramResponse
-  >,
-  /**
-   * / QR Gift Code: Returns all codes created by the caller.
-   */
-  'my_qr_gift_codes' : ActorMethod<[], Array<QrGiftCodeEntry>>,
-  /**
-   * / Gets a VIP reward token for a given campaign ID.
-   */
-  'new_vip_reward' : ActorMethod<
-    [[] | [ClaimedVipReward]],
-    NewVipRewardResponse
-  >,
-  /**
-   * / QR Gift Code: Gets information about a transfer code.
-   */
-  'qr_gift_code_info' : ActorMethod<[string], [] | [QrGiftCodeInfoResponse]>,
-  /**
-   * / QR Gift Code: Gets overall stats (admin only).
-   */
-  'qr_gift_code_stats' : ActorMethod<[], QrGiftCodeStats>,
-  /**
-   * / QR Gift Code: Redeems a transfer code.
-   */
-  'redeem_qr_gift_code' : ActorMethod<
-    [RedeemQrGiftCodeRequest],
-    RedeemQrGiftCodeResponse
-  >,
-  /**
-   * / Get or create referrer info for the caller.
-   */
-  'referrer_info' : ActorMethod<[], ReferrerInfo>,
-  /**
-   * / Get the referrer info for a user.
-   */
-  'referrer_info_for' : ActorMethod<[Principal], [] | [ReferrerInfo]>,
-  /**
-   * / Provides a user's account IDs for airdrop.
-   */
-  'register_airdrop_recipient' : ActorMethod<[UserSnapshot], undefined>,
-  'register_snapshot_for' : ActorMethod<[Principal, UserSnapshot], undefined>,
-  's1e4_eligible_referrers' : ActorMethod<
-    [],
-    Array<[Principal, Array<Principal>]>
-  >,
-  /**
-   * / Sets the caller's referrer.
-   */
-  'set_referrer' : ActorMethod<[number], SetReferrerResponse>,
-  /**
-   * VIP Rewards: Sets expiry date for all codes in a campaign.
-   */
-  'set_vip_campaign_expiry' : ActorMethod<
-    [SetVipCampaignExpiryRequest],
-    SetVipCampaignExpiryResponse
-  >,
-  'stats_by' : ActorMethod<[StatsKeyType], StatsResponse>,
-  'stats_usage_vs_holding' : ActorMethod<[], UsageVsHoldingStats>,
-  /**
-   * / Triggers the S1E4 referrer award event.
-   */
-  'trigger_s1e4_referrer_award_event' : ActorMethod<[], undefined>,
-  /**
-   * / Runs the provided award event.  This is normally done automatically.  It can be useful
-   * / to trigger an event directly when testing.
-   */
-  'trigger_usage_award_event' : ActorMethod<[UsageAwardEvent], undefined>,
-  /**
-   * VIP Rewards: Uploads a batch of VIP codes.
-   */
-  'upload_vip_codes' : ActorMethod<
-    [UploadVipCodesRequest],
-    UploadVipCodesResponse
-  >,
-  /**
-   * / Aggregate usage stats.
-   */
-  'usage_stats' : ActorMethod<[], UsageAwardStats>,
-  /**
-   * / Finds winners
-   */
-  'usage_winners' : ActorMethod<
-    [[] | [UsageWinnersRequest]],
-    UsageWinnersResponse
-  >,
-  /**
-   * / Endpoint for users to query their information with regards to rewards distributed by this canister.
-   */
-  'user_info' : ActorMethod<[], UserData>,
-  /**
-   * / Endpoint for admins to query information about a specific user with regards to rewards distributed by this canister.
-   */
-  'user_info_for' : ActorMethod<[Principal], UserData>,
-  /**
-   * / Stats for an individual user
-   */
-  'user_stats' : ActorMethod<[Principal], UsageAwardState>,
-  /**
-   * VIP Rewards: Gets information about a VIP code.
-   */
-  'vip_code_info' : ActorMethod<[string], [] | [VipCodeInfoResponse]>,
-  /**
-   * / Gets rewards stats
-   */
-  'vip_stats' : ActorMethod<[[] | [string]], VipStats>,
+	/**
+	 * / QR Gift Code: Cancels a transfer code (creator only).
+	 */
+	cancel_qr_gift_code: ActorMethod<[string], CancelQrGiftCodeResponse>;
+	/**
+	 * / Pays usage rewards.  This is normally called internally after the random timing & user selection
+	 * / has taken place.  For testing, it can be convenient to call it directly.
+	 */
+	claim_usage_award: ActorMethod<[UsageAwardEvent, Principal], undefined>;
+	/**
+	 * / Requests rewards from a VIP token.
+	 */
+	claim_vip_reward: ActorMethod<[VipReward], [ClaimVipRewardResponse, [] | [ClaimedVipReward]]>;
+	/**
+	 * / Retrieves the current configuration of the canister.
+	 */
+	config: ActorMethod<[], Config>;
+	/**
+	 * / Configures S1E4 referral rewards.
+	 */
+	configure_referral: ActorMethod<[S1E4ReferralConfig], undefined>;
+	/**
+	 * / Configures bonuses for using & holding assets in Oisy.
+	 */
+	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
+	/**
+	 * / Configures VIP rewards
+	 */
+	configure_vip: ActorMethod<[VipConfig], undefined>;
+	/**
+	 * / Configures VIP campaigns
+	 */
+	configure_vips: ActorMethod<[Array<[string, VipConfig]>], undefined>;
+	/**
+	 * / QR Gift Code: Creates a new transfer code.
+	 */
+	create_qr_gift_code: ActorMethod<[CreateQrGiftCodeRequest], CreateQrGiftCodeResponse>;
+	/**
+	 * / Eligibility of the caller or specified principal for airdrops.
+	 */
+	eligible: ActorMethod<[[] | [Principal]], EligibilityResponse>;
+	/**
+	 * / Grants the provided award event.  This is normally done automatically.
+	 * / It can be useful to be able to make a payment directly when testing how
+	 * / awards are displayed in the GUI.
+	 */
+	grant_usage_award: ActorMethod<[UsageAwardEvent, [] | [Principal]], undefined>;
+	/**
+	 * / Which tokens are beloved in what amounts?
+	 */
+	holdings_popcontest: ActorMethod<[HoldingsPopcontestRequest], HoldingsPopcontestResponse>;
+	/**
+	 * / A histogram of when users were last active
+	 */
+	last_activity_histogram: ActorMethod<
+		[LastActivityHistogramRequest],
+		LastActivityHistogramResponse
+	>;
+	/**
+	 * / QR Gift Code: Returns all codes created by the caller.
+	 */
+	my_qr_gift_codes: ActorMethod<[], Array<QrGiftCodeEntry>>;
+	/**
+	 * / Gets a VIP reward token for a given campaign ID.
+	 */
+	new_vip_reward: ActorMethod<[[] | [ClaimedVipReward]], NewVipRewardResponse>;
+	/**
+	 * / QR Gift Code: Gets information about a transfer code.
+	 */
+	qr_gift_code_info: ActorMethod<[string], [] | [QrGiftCodeInfoResponse]>;
+	/**
+	 * / QR Gift Code: Gets overall stats (admin only).
+	 */
+	qr_gift_code_stats: ActorMethod<[], QrGiftCodeStats>;
+	/**
+	 * / QR Gift Code: Redeems a transfer code.
+	 */
+	redeem_qr_gift_code: ActorMethod<[RedeemQrGiftCodeRequest], RedeemQrGiftCodeResponse>;
+	/**
+	 * / Get or create referrer info for the caller.
+	 */
+	referrer_info: ActorMethod<[], ReferrerInfo>;
+	/**
+	 * / Get the referrer info for a user.
+	 */
+	referrer_info_for: ActorMethod<[Principal], [] | [ReferrerInfo]>;
+	/**
+	 * / Provides a user's account IDs for airdrop.
+	 */
+	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
+	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
+	s1e4_eligible_referrers: ActorMethod<[], Array<[Principal, Array<Principal>]>>;
+	/**
+	 * / Sets the caller's referrer.
+	 */
+	set_referrer: ActorMethod<[number], SetReferrerResponse>;
+	/**
+	 * VIP Rewards: Sets expiry date for all codes in a campaign.
+	 */
+	set_vip_campaign_expiry: ActorMethod<[SetVipCampaignExpiryRequest], SetVipCampaignExpiryResponse>;
+	stats_by: ActorMethod<[StatsKeyType], StatsResponse>;
+	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
+	/**
+	 * / Triggers the S1E4 referrer award event.
+	 */
+	trigger_s1e4_referrer_award_event: ActorMethod<[], undefined>;
+	/**
+	 * / Runs the provided award event.  This is normally done automatically.  It can be useful
+	 * / to trigger an event directly when testing.
+	 */
+	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
+	/**
+	 * VIP Rewards: Uploads a batch of VIP codes.
+	 */
+	upload_vip_codes: ActorMethod<[UploadVipCodesRequest], UploadVipCodesResponse>;
+	/**
+	 * / Aggregate usage stats.
+	 */
+	usage_stats: ActorMethod<[], UsageAwardStats>;
+	/**
+	 * / Finds winners
+	 */
+	usage_winners: ActorMethod<[[] | [UsageWinnersRequest]], UsageWinnersResponse>;
+	/**
+	 * / Endpoint for users to query their information with regards to rewards distributed by this canister.
+	 */
+	user_info: ActorMethod<[], UserData>;
+	/**
+	 * / Endpoint for admins to query information about a specific user with regards to rewards distributed by this canister.
+	 */
+	user_info_for: ActorMethod<[Principal], UserData>;
+	/**
+	 * / Stats for an individual user
+	 */
+	user_stats: ActorMethod<[Principal], UsageAwardState>;
+	/**
+	 * VIP Rewards: Gets information about a VIP code.
+	 */
+	vip_code_info: ActorMethod<[string], [] | [VipCodeInfoResponse]>;
+	/**
+	 * / Gets rewards stats
+	 */
+	vip_stats: ActorMethod<[[] | [string]], VipStats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

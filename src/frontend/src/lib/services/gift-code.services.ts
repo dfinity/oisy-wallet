@@ -206,8 +206,7 @@ export const redeemGiftCode = async ({
 
 		throw new Error('Unknown error redeeming gift code');
 	} catch (err: unknown) {
-		const errorMessage =
-			err instanceof Error ? err.message : get(i18n).gift_code.error.redeeming;
+		const errorMessage = err instanceof Error ? err.message : get(i18n).gift_code.error.redeeming;
 		return { success: false, error: errorMessage };
 	}
 };

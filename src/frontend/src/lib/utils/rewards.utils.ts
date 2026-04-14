@@ -11,7 +11,6 @@ import type {
 	MinTransactionsCriterion,
 	MinTransactionsInNetworkCriterion
 } from '$lib/types/reward';
-import { fromNullable } from '@dfinity/utils';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 

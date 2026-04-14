@@ -41,7 +41,9 @@
 		return BigInt(Math.floor(amount * 10 ** selectedToken.decimals));
 	});
 
-	const canProceedFromToken = $derived(nonNullish(selectedToken) && nonNullish(amount) && amount > 0);
+	const canProceedFromToken = $derived(
+		nonNullish(selectedToken) && nonNullish(amount) && amount > 0
+	);
 
 	const goToExpiry = () => {
 		if (canProceedFromToken) {
@@ -104,11 +106,11 @@
 							class="flex items-center gap-3 rounded-lg border p-3 text-left transition-colors
 								{selectedToken?.ledgerCanisterId === token.ledgerCanisterId
 								? 'border-primary bg-brand-subtle-20'
-								: 'border-transparent hover:bg-dust'}"
+								: 'hover:bg-dust border-transparent'}"
 							onclick={() => (selectedToken = token)}
 						>
 							<span class="font-bold">{token.symbol}</span>
-							<span class="text-secondary text-sm">{token.name}</span>
+							<span class="text-sm text-secondary">{token.name}</span>
 						</button>
 					{/each}
 				</div>
@@ -151,7 +153,7 @@
 							class="rounded-lg border p-3 text-left transition-colors
 								{expirySeconds === option.value
 								? 'border-primary bg-brand-subtle-20'
-								: 'border-transparent hover:bg-dust'}"
+								: 'hover:bg-dust border-transparent'}"
 							onclick={() => (expirySeconds = option.value)}
 						>
 							{option.label}
@@ -171,13 +173,7 @@
 					>
 						{$i18n.core.text.back}
 					</Button>
-					<Button
-						colorStyle="primary"
-						fullWidth
-						onclick={goToReview}
-						paddingSmall
-						type="button"
-					>
+					<Button colorStyle="primary" fullWidth onclick={goToReview} paddingSmall type="button">
 						{$i18n.core.text.next}
 					</Button>
 				</ButtonGroup>
@@ -186,7 +182,7 @@
 			<div class="flex flex-col gap-4">
 				<h3 class="text-center">{$i18n.gift_code.create.text.review_title}</h3>
 
-				<div class="flex flex-col gap-2 rounded-lg bg-dust p-4">
+				<div class="bg-dust flex flex-col gap-2 rounded-lg p-4">
 					<div class="flex justify-between">
 						<span class="text-secondary">{$i18n.gift_code.create.text.review_token}</span>
 						<span class="font-bold">{selectedToken?.symbol}</span>
@@ -213,13 +209,7 @@
 					>
 						{$i18n.core.text.back}
 					</Button>
-					<Button
-						colorStyle="primary"
-						fullWidth
-						onclick={handleCreate}
-						paddingSmall
-						type="button"
-					>
+					<Button colorStyle="primary" fullWidth onclick={handleCreate} paddingSmall type="button">
 						{$i18n.gift_code.create.text.confirm}
 					</Button>
 				</ButtonGroup>
@@ -237,9 +227,7 @@
 					{$i18n.gift_code.create.text.success_description}
 				</p>
 
-				<div
-					class="mx-auto aspect-square h-64 max-h-[40vh] max-w-full rounded-xl bg-white p-4"
-				>
+				<div class="mx-auto aspect-square h-64 max-h-[40vh] max-w-full rounded-xl bg-white p-4">
 					{#if nonNullish(createdCode)}
 						<QRCode value={qrCodeUrl} />
 					{/if}
@@ -248,7 +236,7 @@
 				<div
 					class="flex w-full items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
 				>
-					<output class="break-all text-sm">{qrCodeUrl}</output>
+					<output class="text-sm break-all">{qrCodeUrl}</output>
 					<ReceiveCopy
 						address={qrCodeUrl}
 						copyAriaLabel={$i18n.gift_code.create.text.link_copied}
