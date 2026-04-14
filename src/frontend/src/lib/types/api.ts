@@ -4,6 +4,7 @@ import type {
 	TokenId as BackendTokenId,
 	Network as BitcoinNetwork,
 	Contact,
+	DismissedNotification,
 	GetUserProfileError,
 	IIDelegationChain,
 	PendingTransaction,
@@ -97,6 +98,11 @@ export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
 
 export interface AddUserHiddenDappIdParams {
 	dappId: string;
+	currentUserVersion?: bigint;
+}
+
+export interface AddUserDismissedNotificationParams {
+	notifications: DismissedNotification[];
 	currentUserVersion?: bigint;
 }
 
