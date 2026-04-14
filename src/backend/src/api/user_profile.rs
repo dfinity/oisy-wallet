@@ -6,9 +6,10 @@ use shared::types::{
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
     experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
     network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
+    notification::{AddDismissedNotificationError, AddDismissedNotificationRequest},
     result_types::{
-        AddUserHiddenDappIdResult, GetAgreementHistoryResult, GetUserProfileResult,
-        SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
+        AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
+        GetUserProfileResult, SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
         UpdateProviderAgreementsResult, UpdateUserAgreementsResult,
         UpdateUserNetworkSettingsResult,
     },
@@ -104,6 +105,44 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
                 stored_principal,
                 request.current_user_version,
                 request.dapp_id,
+                &mut user_profile_model,
+            )
+        })
+    }
+    inner(request).into()
+}
+
+/// Adds one or more dismissed notifications to the user's profile.
+///
+/// # Arguments
+/// * `request` - The request containing the typed notifications to dismiss.
+///
+/// # Returns
+/// - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+///   present.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+///   the batch is too large.
+#[update(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn add_user_dismissed_notification(
+    request: AddDismissedNotificationRequest,
+) -> AddUserDismissedNotificationResult {
+    fn inner(
+        request: AddDismissedNotificationRequest,
+    ) -> Result<(), AddDismissedNotificationError> {
+        request.check()?;
+        let user_principal = msg_caller();
+        let stored_principal = StoredPrincipal(user_principal);
+
+        mutate_state(|s| {
+            let mut user_profile_model =
+                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+            service::add_dismissed_notifications(
+                stored_principal,
+                request.current_user_version,
+                request.notifications,
                 &mut user_profile_model,
             )
         })
