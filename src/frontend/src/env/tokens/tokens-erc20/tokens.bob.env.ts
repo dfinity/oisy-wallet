@@ -1,10 +1,10 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { BOB_TOKEN_GROUP } from '$env/tokens/groups/groups.bob.env';
-import bob from '/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import bob from '/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png';
 
 const BOB_DECIMALS = 8;
 
