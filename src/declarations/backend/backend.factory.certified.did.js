@@ -25,7 +25,11 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const DismissedNotification = IDL.Variant({
 		Simple: IDL.Record({ kind: SimpleNotificationKind, version: IDL.Nat32 }),
-		Qualified: IDL.Record({ kind: QualifiedNotificationKind, qualifier: IDL.Text, version: IDL.Nat32 })
+		Qualified: IDL.Record({
+			kind: QualifiedNotificationKind,
+			qualifier: IDL.Text,
+			version: IDL.Nat32
+		})
 	});
 	const AddDismissedNotificationRequest = IDL.Record({
 		notifications: IDL.Vec(DismissedNotification),
