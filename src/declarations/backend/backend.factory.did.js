@@ -16,13 +16,23 @@ export const idlFactory = ({ IDL }) => {
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
+	const SimpleNotificationKind = IDL.Variant({
+		BtcActivityInfo: IDL.Null
+	});
+	const QualifiedNotificationKind = IDL.Variant({
+		NoIndexCanister: IDL.Null,
+		UnavailableIndexCanister: IDL.Null
+	});
+	const DismissedNotification = IDL.Variant({
+		Simple: IDL.Record({ kind: SimpleNotificationKind, version: IDL.Nat32 }),
+		Qualified: IDL.Record({ kind: QualifiedNotificationKind, qualifier: IDL.Text, version: IDL.Nat32 })
+	});
 	const AddDismissedNotificationRequest = IDL.Record({
-		notification_ids: IDL.Vec(IDL.Text),
+		notifications: IDL.Vec(DismissedNotification),
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
 	const AddDismissedNotificationError = IDL.Variant({
-		TooManyNotificationIds: IDL.Null,
-		NotificationIdTooLong: IDL.Null,
+		TooManyNotifications: IDL.Null,
 		VersionMismatch: IDL.Null,
 		MaxDismissedNotifications: IDL.Null,
 		UserNotFound: IDL.Null
@@ -303,7 +313,7 @@ export const idlFactory = ({ IDL }) => {
 		testnets: TestnetsSettings
 	});
 	const NotificationSettings = IDL.Record({
-		dismissed_notifications: IDL.Vec(IDL.Text)
+		dismissed_notifications: IDL.Vec(DismissedNotification)
 	});
 	const DappCarouselSettings = IDL.Record({
 		hidden_dapp_ids: IDL.Vec(IDL.Text)

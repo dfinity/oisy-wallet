@@ -16,15 +16,12 @@ export type AddDappSettingsError =
 	| { DappIdTooLong: null }
 	| { UserNotFound: null };
 export type AddDismissedNotificationError =
-	| {
-			TooManyNotificationIds: null;
-	  }
-	| { NotificationIdTooLong: null }
+	| { TooManyNotifications: null }
 	| { VersionMismatch: null }
 	| { MaxDismissedNotifications: null }
 	| { UserNotFound: null };
 export interface AddDismissedNotificationRequest {
-	notification_ids: Array<string>;
+	notifications: Array<DismissedNotification>;
 	current_user_version: [] | [bigint];
 }
 export interface AddHiddenDappIdRequest {
@@ -208,6 +205,13 @@ export interface DappCarouselSettings {
 export interface DappSettings {
 	dapp_carousel: DappCarouselSettings;
 }
+export type SimpleNotificationKind = { BtcActivityInfo: null };
+export type QualifiedNotificationKind =
+	| { NoIndexCanister: null }
+	| { UnavailableIndexCanister: null };
+export type DismissedNotification =
+	| { Simple: { kind: SimpleNotificationKind; version: number } }
+	| { Qualified: { kind: QualifiedNotificationKind; qualifier: string; version: number } };
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
 	freezing_threshold: bigint;
@@ -378,7 +382,7 @@ export interface NetworksSettings {
 	testnets: TestnetsSettings;
 }
 export interface NotificationSettings {
-	dismissed_notifications: Array<string>;
+	dismissed_notifications: Array<DismissedNotification>;
 }
 export interface Outpoint {
 	txid: Uint8Array;
@@ -581,20 +585,18 @@ export interface Utxo {
 }
 export interface _SERVICE {
 	/**
-	 * Adds one or more dismissed notification IDs to the user's profile.
-	 *
-	 * Each ID is typically a SHA-256 hash of the notification text, optionally suffixed
-	 * with a qualifier (e.g. `:tokenSymbol`) for per-item dismissal.
+	 * Adds one or more dismissed notifications to the user's profile.
 	 *
 	 * # Arguments
-	 * * `request` - The request containing the notification IDs.
+	 * * `request` - The request containing the typed notifications to dismiss.
 	 *
 	 * # Returns
-	 * - Returns `Ok(())` if the IDs were added successfully, or if they were all already present.
+	 * - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+	 * present.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, a
-	 * notification ID exceeds the maximum length, or the batch is too large.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * or the batch is too large.
 	 */
 	add_user_dismissed_notification: ActorMethod<
 		[AddDismissedNotificationRequest],

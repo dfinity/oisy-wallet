@@ -28,7 +28,7 @@ use crate::{
             UpdateNetworksSettingsError,
         },
         notification::{
-            AddDismissedNotificationError, NotificationSettings,
+            AddDismissedNotificationError, DismissedNotification, NotificationSettings,
             MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH,
         },
         settings::Settings,
@@ -364,12 +364,12 @@ impl StoredUserProfile {
 
     /// # Errors
     ///
-    /// Will return Err if there is a version mismatch or the list would exceed its capacity.
+    /// Will return Err if there is a version mismatch or the set would exceed its capacity.
     pub fn add_dismissed_notifications(
         &self,
         profile_version: Option<Version>,
         now: Timestamp,
-        notification_ids: Vec<String>,
+        notifications: Vec<DismissedNotification>,
     ) -> Result<StoredUserProfile, AddDismissedNotificationError> {
         if profile_version != self.version {
             return Err(AddDismissedNotificationError::VersionMismatch);
@@ -381,20 +381,16 @@ impl StoredUserProfile {
             .unwrap_or_default()
             .dismissed_notifications;
 
-        let new_ids: Vec<String> = notification_ids
-            .into_iter()
-            .filter(|id| !dismissed.contains(id))
-            .collect();
+        let old_len = dismissed.len();
+        dismissed.extend(notifications);
 
-        if new_ids.is_empty() {
+        if dismissed.len() == old_len {
             return Ok(self.clone());
         }
 
-        if dismissed.len() + new_ids.len() > MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH {
+        if dismissed.len() > MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH {
             return Err(AddDismissedNotificationError::MaxDismissedNotifications);
         }
-
-        dismissed.extend(new_ids);
 
         let mut new_profile = self.with_incremented_version();
         let mut new_settings = new_profile.settings.clone().unwrap_or_default();
