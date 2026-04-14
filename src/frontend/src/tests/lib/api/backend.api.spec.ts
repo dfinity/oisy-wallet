@@ -513,9 +513,7 @@ describe('backend.api', () => {
 			const result = await addUserDismissedNotification(mockParams);
 
 			expect(result).toEqual(undefined);
-			expect(
-				backendCanisterMock.addUserDismissedNotification
-			).toHaveBeenCalledExactlyOnceWith({
+			expect(backendCanisterMock.addUserDismissedNotification).toHaveBeenCalledExactlyOnceWith({
 				notifications: [
 					{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } },
 					{ Qualified: { kind: { NoIndexCanister: null }, qualifier: 'ETH', version: 1 } }
