@@ -2,7 +2,10 @@
 	import { Modal, QRCode } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
+	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
+	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -10,11 +13,15 @@
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { createGiftCode } from '$lib/services/gift-code.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { TokenUi } from '$lib/types/token-ui';
+	import { mapTokenUi } from '$lib/utils/token.utils';
 
 	type Step = 'select-token' | 'select-expiry' | 'review' | 'creating' | 'success';
 
@@ -42,11 +49,18 @@
 		return BigInt(Math.floor(amount * 10 ** selectedToken.decimals));
 	});
 
-	const tokensWithBalance = $derived(
-		$enabledIcTokens.filter((token) => {
-			const balance = $balancesStore?.[token.id]?.data;
-			return nonNullish(balance) && balance > ZERO;
-		})
+	const tokensWithBalance: TokenUi<IcToken>[] = $derived(
+		$enabledIcTokens
+			.map((token) =>
+				mapTokenUi({
+					token,
+					$balances: $balancesStore,
+					$stakeBalances,
+					$exchanges
+				})
+			)
+			.filter((token) => nonNullish(token.balance) && token.balance > ZERO)
+			.sort((a, b) => (b.usdBalance ?? 0) - (a.usdBalance ?? 0))
 	);
 
 	const canProceedFromToken = $derived(
@@ -110,17 +124,36 @@
 			<div class="flex flex-col gap-4">
 				<p class="text-secondary">{$i18n.gift_code.create.text.select_token}</p>
 
-				<div class="flex flex-col gap-2">
+				<div class="flex flex-col">
 					{#each tokensWithBalance as token (token.ledgerCanisterId)}
 						<button
-							class="flex items-center gap-3 rounded-lg border p-3 text-left transition-colors
+							class="flex w-full items-center justify-between rounded-lg px-2 py-3 text-left transition-colors
 								{selectedToken?.ledgerCanisterId === token.ledgerCanisterId
-								? 'border-primary bg-brand-subtle-20'
-								: 'hover:bg-dust border-transparent'}"
+								? 'bg-brand-subtle-20'
+								: 'hover:bg-brand-subtle-10'}"
 							onclick={() => (selectedToken = token)}
 						>
-							<span class="font-bold">{token.symbol}</span>
-							<span class="text-sm text-secondary">{token.name}</span>
+							<span class="flex min-w-0 items-center">
+								<span class="mr-2 flex">
+									<TokenLogo badge={{ type: 'network' }} color="white" data={token} logoSize="lg" />
+								</span>
+								<span class="flex min-w-0 flex-col text-left">
+									<span class="text-lg font-bold text-nowrap text-primary">
+										{token.symbol}
+									</span>
+									<span class="truncate text-sm text-tertiary">
+										{token.network.name}
+									</span>
+								</span>
+							</span>
+							<span class="flex flex-col text-right text-nowrap">
+								<span class="text-lg font-bold">
+									<TokenBalance data={token} />
+								</span>
+								<span class="text-sm text-tertiary">
+									<ExchangeTokenValue data={token} />
+								</span>
+							</span>
 						</button>
 					{/each}
 				</div>
