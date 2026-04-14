@@ -3,8 +3,10 @@ import type {
 	CreateQrGiftCodeResponse,
 	QrGiftCodeEntry,
 	QrGiftCodeInfoResponse,
+	QrGiftCodeValidity,
 	RedeemQrGiftCodeResponse
 } from '$declarations/rewards/rewards.did';
+import { GIFT_CODE_MOCK_ENABLED } from '$env/gift-code.env';
 import { approve, transactionFee } from '$icp/api/icrc-ledger.api';
 import {
 	cancelQrGiftCode as cancelQrGiftCodeApi,
@@ -32,6 +34,32 @@ import { get } from 'svelte/store';
 
 const APPROVAL_EXPIRY_MINUTES = 5n;
 
+// --- Mock helpers (active when VITE_GIFT_CODE_MOCK_ENABLED=true) ---
+
+const MOCK_DELAY_MS = 1500;
+
+const mockDelay = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+
+const generateMockCode = (): string =>
+	Array.from(crypto.getRandomValues(new Uint8Array(16)))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
+
+let mockCodes: QrGiftCodeEntry[] = [];
+
+const mockValidity = (status: 'Valid' | 'Used' | 'Expired' | 'Cancelled'): QrGiftCodeValidity => {
+	switch (status) {
+		case 'Valid':
+			return { Valid: null };
+		case 'Used':
+			return { Used: null };
+		case 'Expired':
+			return { Expired: null };
+		case 'Cancelled':
+			return { Cancelled: null };
+	}
+};
+
 export const createGiftCode = async ({
 	identity,
 	ledgerCanisterId,
@@ -43,6 +71,24 @@ export const createGiftCode = async ({
 	amount: bigint;
 	expirySeconds: bigint;
 }): Promise<{ success: boolean; code?: string }> => {
+	if (GIFT_CODE_MOCK_ENABLED) {
+		await mockDelay();
+		const code = generateMockCode();
+		const nowNs = BigInt(Date.now()) * 1_000_000n;
+		const expiryNs = nowNs + expirySeconds * 1_000_000_000n;
+		mockCodes = [
+			{
+				code,
+				tokens: [{ ledger: Principal.fromText(ledgerCanisterId), amount }],
+				validity: mockValidity('Valid'),
+				created_at: nowNs,
+				expiry_date: expiryNs
+			},
+			...mockCodes
+		];
+		return { success: true, code };
+	}
+
 	try {
 		const fee = await transactionFee({
 			identity,
@@ -113,6 +159,15 @@ export const redeemGiftCode = async ({
 	identity: Identity;
 	code: string;
 }): Promise<{ success: boolean; error?: string }> => {
+	if (GIFT_CODE_MOCK_ENABLED) {
+		await mockDelay();
+		const entry = mockCodes.find((e) => e.code === code);
+		if (entry) {
+			entry.validity = mockValidity('Used');
+		}
+		return { success: true };
+	}
+
 	try {
 		const response: RedeemQrGiftCodeResponse = await redeemQrGiftCodeApi({
 			identity,
@@ -164,6 +219,20 @@ export const cancelGiftCode = async ({
 	identity: Identity;
 	code: string;
 }): Promise<{ success: boolean }> => {
+	if (GIFT_CODE_MOCK_ENABLED) {
+		await mockDelay();
+		const entry = mockCodes.find((e) => e.code === code);
+		if (entry) {
+			entry.validity = mockValidity('Cancelled');
+		}
+		toastsShow({
+			text: get(i18n).gift_code.list.text.cancel_success,
+			level: 'success',
+			duration: 3000
+		});
+		return { success: true };
+	}
+
 	try {
 		const response: CancelQrGiftCodeResponse = await cancelQrGiftCodeApi({
 			identity,
@@ -206,6 +275,11 @@ export const loadMyGiftCodes = async ({
 }: {
 	identity: Identity;
 }): Promise<QrGiftCodeEntry[]> => {
+	if (GIFT_CODE_MOCK_ENABLED) {
+		await mockDelay();
+		return mockCodes;
+	}
+
 	try {
 		return await getMyQrGiftCodesApi({
 			identity,
@@ -227,6 +301,18 @@ export const getGiftCodeInfo = async ({
 	identity: Identity;
 	code: string;
 }): Promise<QrGiftCodeInfoResponse | undefined> => {
+	if (GIFT_CODE_MOCK_ENABLED) {
+		const entry = mockCodes.find((e) => e.code === code);
+		if (entry) {
+			return { tokens: entry.tokens, validity: entry.validity, expiry_date: entry.expiry_date };
+		}
+		return {
+			tokens: [],
+			validity: mockValidity('Valid'),
+			expiry_date: BigInt(Date.now() + 86_400_000) * 1_000_000n
+		};
+	}
+
 	try {
 		return await getQrGiftCodeInfoApi({
 			identity,
