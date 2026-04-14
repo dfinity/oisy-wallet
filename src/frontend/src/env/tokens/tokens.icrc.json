@@ -118,7 +118,7 @@
 		"fee": {
 			"__bigint__": "1000000"
 		},
-		"groupData": "BOB_TOKEN_GROUP",
+		"group": "BOB_TOKEN_GROUP",
 		"icon": "/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png"
 	},
 	"ICONFUCIUS": {
