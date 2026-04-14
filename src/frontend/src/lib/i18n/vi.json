@@ -45,7 +45,8 @@
 			"sorting": "Sắp xếp",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -77,6 +78,8 @@
 			"activity": "Hoạt động",
 			"airdrops": "Phần thưởng",
 			"earning": "Kiếm tiền",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Mã nguồn trên GitHub",
 			"view_on_explorer": "Xem trên trình khám phá",
 			"source_code": "Mã nguồn",
@@ -98,6 +101,8 @@
 			"dapp_explorer": "Mở trình khám phá ứng dụng",
 			"activity": "Mở chế độ xem hoạt động",
 			"airdrops": "Mở chế độ xem Phần thưởng",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
 			"documentation": "Mở tài liệu $oisy_name",
 			"support": "Mở phần Hỗ trợ trong tài liệu $oisy_name",
@@ -1030,7 +1035,13 @@
 			"pay_at_failure": "",
 			"try_again": "",
 			"payment_confirmed": "",
-			"payment_failed": ""
+			"payment_failed": "",
+			"what_is_scan": "",
+			"no_camera_permission": "",
+			"what_is_scan_description": "",
+			"what_is_scan_title": "",
+			"learn_more_about_scan": "",
+			"learn_more_about_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "",

@@ -45,7 +45,8 @@
 			"sorting": "छँटाई",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -77,6 +78,8 @@
 			"activity": "गतिविधि",
 			"airdrops": "पुरस्कार",
 			"earning": "कमाएँ और पुरस्कार",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "GitHub पर स्रोत कोड",
 			"view_on_explorer": "एक्सप्लोरर पर देखें",
 			"source_code": "स्रोत कोड",
@@ -98,6 +101,8 @@
 			"dapp_explorer": "ऐप एक्सप्लोरर खोलें",
 			"activity": "गतिविधि दृश्य खोलें",
 			"airdrops": "पुरस्कार दृश्य खोलें",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "आपका वॉलेट पता, सेटिंग्स, साइन-आउट और बाहरी लिंक",
 			"documentation": "$oisy_name दस्तावेज़ खोलें",
 			"support": "$oisy_name दस्तावेज़ों का समर्थन अनुभाग खोलें",
@@ -1030,7 +1035,13 @@
 			"pay_at_failure": "",
 			"try_again": "",
 			"payment_confirmed": "",
-			"payment_failed": ""
+			"payment_failed": "",
+			"what_is_scan": "",
+			"no_camera_permission": "",
+			"what_is_scan_description": "",
+			"what_is_scan_title": "",
+			"learn_more_about_scan": "",
+			"learn_more_about_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "",

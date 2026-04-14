@@ -45,7 +45,8 @@
 			"sorting": "",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -77,6 +78,8 @@
 			"activity": "النشاط",
 			"airdrops": "المكافآت",
 			"earning": "الكسب والمكافآت",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "الرمز المصدري على GitHub",
 			"view_on_explorer": "عرض على المستكشف",
 			"source_code": "الرمز المصدري",
@@ -98,6 +101,8 @@
 			"dapp_explorer": "افتح مستكشف التطبيقات",
 			"activity": "افتح عرض النشاط",
 			"airdrops": "افتح عرض المكافآت",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
 			"documentation": "افتح وثائق $oisy_name",
 			"support": "افتح قسم الدعم في وثائق $oisy_name",
@@ -1030,7 +1035,13 @@
 			"pay_at_failure": "",
 			"try_again": "",
 			"payment_confirmed": "",
-			"payment_failed": ""
+			"payment_failed": "",
+			"what_is_scan": "",
+			"no_camera_permission": "",
+			"what_is_scan_description": "",
+			"what_is_scan_title": "",
+			"learn_more_about_scan": "",
+			"learn_more_about_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "",

@@ -45,7 +45,8 @@
 			"sorting": "排序方式",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
@@ -77,6 +78,8 @@
 			"activity": "活动",
 			"airdrops": "奖励",
 			"earning": "赚取",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "GitHub 上的源代码",
 			"view_on_explorer": "在浏览器中查看",
 			"source_code": "源代码",
@@ -98,6 +101,8 @@
 			"dapp_explorer": "打开应用浏览器",
 			"activity": "打开活动视图",
 			"airdrops": "打开奖励视图",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "你的钱包地址、设置、登出与外部链接",
 			"documentation": "打开 $oisy_name 文档",
 			"support": "打开 $oisy_name 文档的支持部分",
@@ -1030,7 +1035,13 @@
 			"pay_at_failure": "向 $receipt 支付失败",
 			"try_again": "再试一次",
 			"payment_confirmed": "支付已确认",
-			"payment_failed": "支付失败"
+			"payment_failed": "支付失败",
+			"what_is_scan": "",
+			"no_camera_permission": "",
+			"what_is_scan_description": "",
+			"what_is_scan_title": "",
+			"learn_more_about_scan": "",
+			"learn_more_about_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "代码 / 链接无效",
