@@ -12,6 +12,7 @@ import { EEMON_TOKEN_GROUP } from '$env/tokens/groups/groups.eemon.env';
 import { EFAON_TOKEN_GROUP } from '$env/tokens/groups/groups.efaon.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
+import { GLDT_TOKEN_GROUP } from '$env/tokens/groups/groups.gldt.env';
 import { IAUON_TOKEN_GROUP } from '$env/tokens/groups/groups.iauon.env';
 import { IVVON_TOKEN_GROUP } from '$env/tokens/groups/groups.ivvon.env';
 import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
