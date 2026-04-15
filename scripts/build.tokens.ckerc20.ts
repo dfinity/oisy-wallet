@@ -166,41 +166,55 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 
 type EnvTokenTags = EnvCkErc20TokensWithMetadata[string]['tags'];
 type EnvTagsRecord = Record<string, Record<string, EnvTokenTags>>;
+type EnvGroupDataIdRecord = Record<string, Record<string, string>>;
 
 interface EnvCuratedData {
 	tags: EnvTagsRecord;
+	groupDataIds: EnvGroupDataIdRecord;
 }
 
 const readExistingCkErc20CuratedData = (): EnvCuratedData => {
 	if (!existsSync(CK_ERC20_JSON_FILE)) {
-		return { tags: {} };
+		return {
+			tags: {},
+			groupDataIds: {}
+		};
 	}
 
 	try {
 		const existing = JSON.parse(readFileSync(CK_ERC20_JSON_FILE, 'utf8'), jsonReviver) as Record<
 			string,
-			Record<string, { tags?: EnvTokenTags }>
+			Record<string, { tags?: EnvTokenTags; groupDataId?: string }>
 		>;
 
 		return Object.entries(existing).reduce<EnvCuratedData>(
 			(envAcc, [env, tokens]) => {
-				const envTags = Object.entries(tokens).reduce<Record<string, EnvTokenTags>>(
-					(acc, [symbol, data]) => {
-						if (nonNullish(data?.tags)) {
-							acc[symbol] = data.tags;
-						}
-						return acc;
-					},
-					{}
-				);
+				const envTags: Record<string, EnvTokenTags> = {};
+				const envGroupDataIds: Record<string, string> = {};
+
+				Object.entries(tokens).forEach(([symbol, data]) => {
+					if (nonNullish(data?.tags)) {
+						envTags[symbol] = data.tags;
+					}
+					if (nonNullish(data?.groupDataId)) {
+						envGroupDataIds[symbol] = data.groupDataId;
+					}
+				});
 
 				if (Object.keys(envTags).length > 0) {
 					envAcc.tags[env] = envTags;
 				}
 
+				if (Object.keys(envGroupDataIds).length > 0) {
+					envAcc.groupDataIds[env] = envGroupDataIds;
+				}
+
 				return envAcc;
 			},
-			{ tags: {} }
+			{
+				tags: {},
+				groupDataIds: {}
+			}
 		);
 	} catch (err: unknown) {
 		console.error(
@@ -213,23 +227,27 @@ const readExistingCkErc20CuratedData = (): EnvCuratedData => {
 
 const mergeCuratedData = ({
 	tokens,
-	envTags
+	envTags,
+	envGroupDataIds
 }: {
 	tokens: EnvCkErc20TokensWithMetadata;
 	envTags: Record<string, EnvTokenTags> | undefined;
+	envGroupDataIds: Record<string, string> | undefined;
 }): EnvCkErc20TokensWithMetadata =>
 	Object.fromEntries(
 		Object.entries(tokens).map(([symbol, data]) => [
 			symbol,
 			{
 				...data,
-				...(nonNullish(envTags?.[symbol]) && { tags: envTags[symbol] })
+				...(nonNullish(envTags?.[symbol]) && { tags: envTags[symbol] }),
+				...(nonNullish(envGroupDataIds?.[symbol]) && { groupDataId: envGroupDataIds[symbol] })
 			}
 		])
 	);
 
 const findCkErc20 = async () => {
-	const { tags: existingTags } = readExistingCkErc20CuratedData();
+	const { tags: existingTags, groupDataIds: existingGroupDataIds } =
+		readExistingCkErc20CuratedData();
 
 	const [
 		{ tokens: staging, icons: stagingIcons },
@@ -241,11 +259,13 @@ const findCkErc20 = async () => {
 	const tokens: EnvTokensCkErc20 = {
 		production: mergeCuratedData({
 			tokens: production,
-			envTags: existingTags['production']
+			envTags: existingTags['production'],
+			envGroupDataIds: existingGroupDataIds['production']
 		}),
 		staging: mergeCuratedData({
 			tokens: staging,
-			envTags: existingTags['staging']
+			envTags: existingTags['staging'],
+			envGroupDataIds: existingGroupDataIds['staging']
 		})
 	};
 
