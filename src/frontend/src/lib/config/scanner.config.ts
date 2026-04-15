@@ -10,6 +10,10 @@ export const scannerWizardSteps = ({
 		title: i18n.scanner.text.scan_qr_code
 	},
 	{
+		name: WizardStepsScanner.OISY_SCANNER_INFO,
+		title: i18n.scanner.text.scan_qr_code
+	},
+	{
 		name: WizardStepsScanner.PAY,
 		title: i18n.scanner.text.pay
 	},

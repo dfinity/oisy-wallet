@@ -1,16 +1,19 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { assertNever, isNullish } from '@dfinity/utils';
-	import { setContext } from 'svelte';
+	import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
+	import { setContext, untrack } from 'svelte';
 	import OpenCryptoPayWizard from '$lib/components/open-crypto-pay/OpenCryptoPayWizard.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
+	import ScannerInfo from '$lib/components/scanner/ScannerInfo.svelte';
 	import ScannerModalPayDataLoader from '$lib/components/scanner/ScannerModalPayDataLoader.svelte';
 	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
+	import { modalUniversalScannerData } from '$lib/derived/modal.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { connectListener } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -63,11 +66,25 @@
 		});
 	};
 
-	const onWalletConnectConnect = async () => {
-		// TODO: implement this function
+	const goToScanStep = () => goToStep(WizardStepsScanner.SCAN);
+
+	const goToInfoStep = () => goToStep(WizardStepsScanner.OISY_SCANNER_INFO);
+
+	const startWalletConnect = async (uri: string) => {
+		goToStep(WizardStepsScanner.WALLET_CONNECT_REVIEW);
+
+		const { result } = await connectListener({ uri, onSessionDeleteCallback: goToScanStep });
+
+		if (result === 'error') {
+			goToStep(WizardStepsScanner.SCAN);
+		}
 	};
 
-	const onNext = (results: ScannerResults) => {
+	const onWalletConnectConnect = async (uri: string) => {
+		await startWalletConnect(uri);
+	};
+
+	const onNext = async ({ results, code }: { results: ScannerResults; code?: string }) => {
 		if (results === ScannerResults.PAY) {
 			goToStep(WizardStepsScanner.PAY);
 
@@ -75,35 +92,67 @@
 		}
 
 		if (results === ScannerResults.WALLET_CONNECT) {
-			// TODO: implement wallet connect flow
+			if (isNullish(code)) {
+				return;
+			}
+
+			await startWalletConnect(code);
 
 			return;
 		}
 
 		assertNever(results, `Unhandled scanner result: ${results}`);
 	};
+
+	// When WalletConnectSession opens the scanner with a WC URI (deep-link), navigate to WC review once the modal renders
+	let walletConnectDeepLinkHandled = $state(false);
+
+	$effect(() => {
+		if (
+			!walletConnectDeepLinkHandled &&
+			nonNullish($modalUniversalScannerData?.walletConnectUri) &&
+			nonNullish(modal)
+		) {
+			walletConnectDeepLinkHandled = true;
+
+			const uri = $modalUniversalScannerData.walletConnectUri;
+
+			untrack(() => startWalletConnect(uri));
+		}
+	});
 </script>
 
 <ScannerModalPayDataLoader>
-	<WizardModal
-		bind:this={modal}
-		disablePointerEvents={currentStep?.name === WizardStepsScanner.TOKENS_LIST}
-		{onClose}
-		{steps}
-		bind:currentStep
-	>
-		{#snippet title()}
-			{currentStep?.title}
-		{/snippet}
+	<div class="scanner-modal">
+		<WizardModal
+			bind:this={modal}
+			disablePointerEvents={currentStep?.name === WizardStepsScanner.TOKENS_LIST}
+			{onClose}
+			{steps}
+			bind:currentStep
+		>
+			{#snippet title()}
+				{currentStep?.title}
+			{/snippet}
 
-		{#key currentStep?.name}
-			{#if currentStep?.name === WizardStepsScanner.SCAN}
-				<ScannerCode {onNext} />
-			{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
-				<OpenCryptoPayWizard {currentStep} {modal} {steps} bind:payProgressStep />
-			{:else if currentStep?.name === WizardStepsScanner.WALLET_CONNECT_CONNECT || currentStep?.name === WizardStepsScanner.WALLET_CONNECT_REVIEW}
-				<WalletConnectSessionWizard {currentStep} onConnect={onWalletConnectConnect} />
-			{/if}
-		{/key}
-	</WizardModal>
+			{#key currentStep?.name}
+				{#if currentStep?.name === WizardStepsScanner.OISY_SCANNER_INFO}
+					<ScannerInfo onButtonClick={goToScanStep} />
+				{:else if currentStep?.name === WizardStepsScanner.SCAN}
+					<ScannerCode {onNext} onOpenInfo={goToInfoStep} />
+				{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
+					<OpenCryptoPayWizard {currentStep} {modal} {steps} bind:payProgressStep />
+				{:else if currentStep?.name === WizardStepsScanner.WALLET_CONNECT_CONNECT || currentStep?.name === WizardStepsScanner.WALLET_CONNECT_REVIEW}
+					<WalletConnectSessionWizard {currentStep} onConnect={onWalletConnectConnect} />
+				{/if}
+			{/key}
+		</WizardModal>
+	</div>
 </ScannerModalPayDataLoader>
+
+<style lang="scss">
+	.scanner-modal :global(.content) {
+		--dialog-padding-x: 0px;
+		--dialog-padding-y: 0px;
+	}
+</style>
