@@ -5,6 +5,7 @@ import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
+import type { UniversalScannerData } from '$lib/types/scanner';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
@@ -304,6 +305,14 @@ export const modalNftFullscreenDisplayData: Readable<Nft | undefined> = derived(
 export const modalUniversalScannerOpen: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'universal-scanner'
+);
+
+export const modalUniversalScannerData: Readable<UniversalScannerData | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'universal-scanner'
+			? ($modalStore?.data as UniversalScannerData)
+			: undefined
 );
 
 export const modalPayDialogOpen: Readable<boolean> = derived(

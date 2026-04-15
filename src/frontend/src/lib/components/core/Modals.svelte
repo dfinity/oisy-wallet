@@ -5,9 +5,11 @@
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+	import PayDialog from '$lib/components/pay/PayDialog.svelte';
 	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
+	import ScannerModal from '$lib/components/scanner/ScannerModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
@@ -30,7 +32,9 @@
 		modalNftFullscreenDisplayData,
 		modalNftFullscreenDisplayOpen,
 		modalReceive,
-		modalReceiveId
+		modalReceiveId,
+		modalPayDialogOpen,
+		modalUniversalScannerOpen
 	} from '$lib/derived/modal.derived';
 	import { getSymbol } from '$lib/utils/modal.utils';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
@@ -63,5 +67,9 @@
 		<FullscreenMediaModal mediaSrc={$modalNftFullscreenDisplayData.imageUrl} />
 	{:else if $modalReceive && $modalReceiveId === getSymbol('menu-addresses')}
 		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
+	{:else if $modalPayDialogOpen}
+		<PayDialog />
+	{:else if $modalUniversalScannerOpen}
+		<ScannerModal />
 	{/if}
 {/if}
