@@ -82,6 +82,8 @@ describe('PayDialog', () => {
 
 		button.click();
 
-		expect(modalStore.openUniversalScanner).toHaveBeenCalledExactlyOnceWith(expect.any(Symbol));
+		expect(modalStore.openUniversalScanner).toHaveBeenCalledExactlyOnceWith({
+			id: expect.any(Symbol)
+		});
 	});
 });
