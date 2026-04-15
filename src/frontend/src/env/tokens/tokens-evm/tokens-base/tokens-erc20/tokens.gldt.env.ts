@@ -22,6 +22,6 @@ export const GLDT_TOKEN: RequiredEvmErc20Token = {
 	symbol: GLDT_SYMBOL,
 	decimals: GLDT_DECIMALS,
 	icon: gldt,
-	address: '0x86856814e74456893cfc8946bedcbb472b5fa856',
+	address: '0x86856814e74456893Cfc8946BedcBb472b5fA856',
 	groupData: GLDT_TOKEN_GROUP
 };
