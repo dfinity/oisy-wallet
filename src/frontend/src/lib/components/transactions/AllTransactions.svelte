@@ -39,7 +39,6 @@
 			{ tokensWithoutCanister: [], tokensWithUnavailableCanister: [] }
 		)
 	);
-
 </script>
 
 <div class="flex flex-col gap-5">
@@ -55,7 +54,7 @@
 	{/if}
 
 	{#if tokensWithoutCanister.length > 0}
-<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
+		<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
 				$token_list: tokensWithoutCanister.map((s) => `$${s}`).join(', ')
 			})}
@@ -63,7 +62,7 @@
 	{/if}
 
 	{#if tokensWithUnavailableCanister.length > 0}
-	<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 				$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
 			})}
