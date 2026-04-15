@@ -112,6 +112,7 @@
 	"BOB": {
 		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
 		"mintingAccount": "6lnhz-oaaaa-aaaas-aabkq-cai",
+		"groupDataId": "BOB",
 		"decimals": 8,
 		"name": "BOB",
 		"symbol": "BOB",
