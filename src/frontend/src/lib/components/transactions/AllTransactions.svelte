@@ -9,9 +9,7 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
-	import {
-		userDismissedNotifications,
-	} from '$lib/derived/user-profile.derived';
+	import { userDismissedNotifications } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -66,7 +64,7 @@
 		)
 	);
 
-		let undismissedNoCanister = $derived(
+	let undismissedNoCanister = $derived(
 		filterUndismissedNotificationQualifiers({
 			kind: 'NoIndexCanister',
 			qualifiers: tokensWithoutCanister,
@@ -96,7 +94,7 @@
 	{/if}
 
 	{#if undismissedNoCanister.length > 0}
-<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
+		<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
 				$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
 			})}
@@ -104,7 +102,7 @@
 	{/if}
 
 	{#if undismissedUnavailable.length > 0}
-	<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 				$token_list: undismissedUnavailable.map((s) => `$${s}`).join(', ')
 			})}
