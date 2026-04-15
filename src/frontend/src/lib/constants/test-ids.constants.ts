@@ -56,6 +56,9 @@ export const PAY_DIALOG = 'pay-dialog';
 export const PAY_DIALOG_PAY_BUTTON = 'pay-dialog-pay-button';
 export const PAY_DIALOG_BANNER = 'pay-dialog-banner';
 
+export const OISY_SCANNER_INFO = 'oisy-scanner-info';
+export const OISY_SCANNER_INFO_GOT_IT_BUTTON = 'oisy-scanner-info-got-it-button';
+
 export const RECEIVE_TOKENS_MODAL_OPEN_BUTTON = 'receive-tokens-modal-open-button';
 export const RECEIVE_TOKENS_MODAL_DONE_BUTTON = 'receive-tokens-modal-done-button';
 export const RECEIVE_TOKENS_MODAL = 'receive-tokens-modal';

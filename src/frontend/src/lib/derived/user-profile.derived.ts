@@ -1,7 +1,9 @@
 import type {
 	Agreements,
+	DismissedNotification,
 	ExperimentalFeaturesSettings,
 	NetworksSettings,
+	NotificationSettings,
 	Settings,
 	UserProfile
 } from '$declarations/backend/backend.did';
@@ -39,4 +41,14 @@ export const userExperimentalFeaturesSettings: Readable<ExperimentalFeaturesSett
 export const userAgreementsData: Readable<Agreements | undefined> = derived(
 	[userProfile],
 	([$userProfile]) => fromNullishNullable($userProfile?.agreements)
+);
+
+export const userNotificationSettings: Readable<NotificationSettings | undefined> = derived(
+	[userSettings],
+	([$userSettings]) => fromNullishNullable($userSettings?.notifications)
+);
+
+export const userDismissedNotifications: Readable<DismissedNotification[]> = derived(
+	[userNotificationSettings],
+	([$userNotificationSettings]) => $userNotificationSettings?.dismissed_notifications ?? []
 );
