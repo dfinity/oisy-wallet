@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { notEmptyString } from '@dfinity/utils';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
@@ -20,32 +19,27 @@
 			.map((token: TokenUi) => token as IcToken)
 	);
 
-	let { tokenListWithoutCanister, tokenListWithUnavailableCanister } = $derived.by(() => {
-		const { enabledTokensWithoutCanister, enabledTokensWithUnavailableCanister } =
-			enabledTokensWithoutTransaction.reduce(
-				(
-					acc: {
-						enabledTokensWithoutCanister: string[];
-						enabledTokensWithUnavailableCanister: string[];
-					},
-					curr
-				) => {
-					hasNoIndexCanister(curr)
-						? acc.enabledTokensWithoutCanister.push(`$${getTokenDisplaySymbol(curr)}`)
-						: acc.enabledTokensWithUnavailableCanister.push(`$${getTokenDisplaySymbol(curr)}`);
-					return acc;
-				},
-				{
-					enabledTokensWithoutCanister: [],
-					enabledTokensWithUnavailableCanister: []
-				}
-			);
+	let { tokensWithoutCanister, tokensWithUnavailableCanister } = $derived.by(() =>
+		enabledTokensWithoutTransaction.reduce<{
+			tokensWithoutCanister: string[];
+			tokensWithUnavailableCanister: string[];
+		}>(
+			(acc, curr) => {
+				// TODO: use a unique token identifier (e.g. token ID + network) instead of the display symbol to avoid collisions if two tokens share the same symbol
+				const symbol = getTokenDisplaySymbol(curr);
 
-		return {
-			tokenListWithoutCanister: enabledTokensWithoutCanister.join(', '),
-			tokenListWithUnavailableCanister: enabledTokensWithUnavailableCanister.join(', ')
-		};
-	});
+				if (hasNoIndexCanister(curr)) {
+					acc.tokensWithoutCanister.push(symbol);
+				} else {
+					acc.tokensWithUnavailableCanister.push(symbol);
+				}
+
+				return acc;
+			},
+			{ tokensWithoutCanister: [], tokensWithUnavailableCanister: [] }
+		)
+	);
+
 </script>
 
 <div class="flex flex-col gap-5">
@@ -60,18 +54,18 @@
 		</span>
 	{/if}
 
-	{#if notEmptyString(tokenListWithoutCanister)}
-		<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
+	{#if tokensWithoutCanister.length > 0}
+<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
-				$token_list: tokenListWithoutCanister
+				$token_list: tokensWithoutCanister.map((s) => `$${s}`).join(', ')
 			})}
 		</MessageBox>
 	{/if}
 
-	{#if notEmptyString(tokenListWithUnavailableCanister)}
-		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+	{#if tokensWithUnavailableCanister.length > 0}
+	<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
-				$token_list: tokenListWithUnavailableCanister
+				$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
 			})}
 		</MessageBox>
 	{/if}
