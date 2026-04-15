@@ -32,6 +32,7 @@ import { WSTETH_TOKEN_GROUP } from '$env/tokens/groups/groups.wsteth.env';
 import { XAUT_TOKEN_GROUP } from '$env/tokens/groups/groups.xaut.env';
 import { ZCHF_TOKEN_GROUP } from '$env/tokens/groups/groups.zchf.env';
 import type { TokenGroupData } from '$lib/types/token-group';
+import { nonNullish } from '@dfinity/utils';
 
 const TOKEN_GROUPS: TokenGroupData[] = [
 	AMDON_TOKEN_GROUP,
@@ -70,9 +71,12 @@ const TOKEN_GROUPS: TokenGroupData[] = [
 ];
 
 export const TOKEN_GROUPS_BY_SYMBOL: Record<string, TokenGroupData> = TOKEN_GROUPS.reduce(
-	(acc, group) => ({
-		...acc,
-		[group.symbol]: group
-	}),
+	(acc, group) =>
+		nonNullish(group.id.description)
+			? {
+					...acc,
+					[group.id.description]: group
+				}
+			: acc,
 	{}
 );
