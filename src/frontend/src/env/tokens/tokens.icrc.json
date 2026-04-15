@@ -25,6 +25,7 @@
 		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai",
 		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
 		"mintingAccount": "6f6ua-hqaaa-aaaar-qairq-cai",
+		"groupDataId": "GLDT",
 		"tags": [
 			{
 				"type": "category",
@@ -249,6 +250,7 @@
 		"ledgerCanisterId": "io25z-dqaaa-aaaar-qbooq-cai",
 		"indexCanisterId": "fsgsm-uaaaa-aaaar-qbphq-cai",
 		"mintingAccount": "5okwm-giaaa-aaaar-qbn6a-cai",
+		"groupDataId": "cbBTC",
 		"decimals": 8,
 		"name": "cbBTC",
 		"symbol": "cbBTC",
