@@ -45,7 +45,8 @@
 			"sorting": "Tri",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
@@ -77,6 +78,8 @@
 			"activity": "Activité",
 			"airdrops": "Récompenses",
 			"earning": "Gains",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Code source sur GitHub",
 			"view_on_explorer": "Voir sur l'explorateur",
 			"source_code": "Code source",
@@ -100,6 +103,8 @@
 			"dapp_explorer": "Ouvrir l'explorateur d'applications",
 			"activity": "Ouvrir la vue d'activité",
 			"airdrops": "Ouvrir la vue des récompenses",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Votre adresse de portefeuille, les paramètres, la déconnexion et les liens externes",
 			"documentation": "Ouvrir la documentation de $oisy_name",
 			"support": "Ouvrir la section Support de la documentation de $oisy_name",
@@ -1034,7 +1039,13 @@
 			"pay_at_failure": "Échec du paiement à $receipt",
 			"try_again": "Réessayer",
 			"payment_confirmed": "Paiement confirmé",
-			"payment_failed": "Paiement échoué"
+			"payment_failed": "Paiement échoué",
+			"what_is_scan": "",
+			"no_camera_permission": "",
+			"what_is_scan_description": "",
+			"what_is_scan_title": "",
+			"learn_more_about_scan": "",
+			"learn_more_about_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "Le code/lien n'est pas valide",

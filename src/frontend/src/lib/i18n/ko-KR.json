@@ -45,7 +45,8 @@
 			"sorting": "정렬",
 			"unlimited": "무제한 $items",
 			"info": "정보",
-			"asset": "자산"
+			"asset": "자산",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "테스트 목적으로만 사용하세요!",
@@ -77,6 +78,8 @@
 			"activity": "활동",
 			"airdrops": "리워드",
 			"earning": "수익",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "GitHub 소스 코드",
 			"view_on_explorer": "탐색기에서 보기",
 			"source_code": "소스 코드",
@@ -100,6 +103,8 @@
 			"dapp_explorer": "앱 탐색기 열기",
 			"activity": "활동 보기 열기",
 			"airdrops": "리워드 보기 열기",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
 			"documentation": "$oisy_name 문서 열기",
 			"support": "$oisy_name 문서의 지원 섹션 열기",
@@ -1034,7 +1039,13 @@
 			"pay_at_failure": "$receipt에서 결제 실패",
 			"try_again": "다시 시도",
 			"payment_confirmed": "결제 확인됨",
-			"payment_failed": "결제 실패"
+			"payment_failed": "결제 실패",
+			"what_is_scan": "",
+			"no_camera_permission": "",
+			"what_is_scan_description": "",
+			"what_is_scan_title": "",
+			"learn_more_about_scan": "",
+			"learn_more_about_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "코드/링크가 유효하지 않습니다",

@@ -1,6 +1,7 @@
 import type { CustomToken, PendingTransaction, TokenId } from '$declarations/backend/backend.did';
 import {
 	addPendingBtcTransaction,
+	addUserDismissedNotification,
 	allowSigning,
 	createUserProfile,
 	getExchangeRate,
@@ -18,6 +19,7 @@ import {
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import type {
 	AddPendingTransactionOutcome,
+	AddUserDismissedNotificationParams,
 	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
@@ -490,6 +492,48 @@ describe('backend.api', () => {
 			});
 
 			await expect(saveUserTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('addUserDismissedNotification', () => {
+		const mockParams: CanisterApiFunctionParams<AddUserDismissedNotificationParams> = {
+			...baseParams,
+			notifications: [
+				{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } },
+				{ Qualified: { kind: { NoIndexCanister: null }, qualifier: 'ETH', version: 1 } }
+			],
+			currentUserVersion: 1n
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.addUserDismissedNotification.mockResolvedValue();
+		});
+
+		it('should successfully call addUserDismissedNotification endpoint', async () => {
+			const result = await addUserDismissedNotification(mockParams);
+
+			expect(result).toEqual(undefined);
+			expect(backendCanisterMock.addUserDismissedNotification).toHaveBeenCalledExactlyOnceWith({
+				notifications: [
+					{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } },
+					{ Qualified: { kind: { NoIndexCanister: null }, qualifier: 'ETH', version: 1 } }
+				],
+				currentUserVersion: 1n
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				addUserDismissedNotification({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if addUserDismissedNotification throws', async () => {
+			backendCanisterMock.addUserDismissedNotification.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(addUserDismissedNotification(mockParams)).rejects.toThrow();
 		});
 	});
 

@@ -45,7 +45,8 @@
 			"sorting": "Řazení",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -77,6 +78,8 @@
 			"activity": "Aktivita",
 			"airdrops": "Odměny",
 			"earning": "Vydělávat",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Zdrojový kód na GitHubu",
 			"view_on_explorer": "Zobrazit v průzkumníku",
 			"source_code": "Zdrojový kód",
@@ -100,6 +103,8 @@
 			"dapp_explorer": "Otevřít průzkumník aplikací",
 			"activity": "Otevřít zobrazení aktivity",
 			"airdrops": "Otevřít zobrazení odměn",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
 			"documentation": "Otevřít dokumentaci $oisy_name",
 			"support": "Otevřít sekci podpory v dokumentaci $oisy_name",
@@ -1034,7 +1039,13 @@
 			"pay_at_failure": "Platba selhala dne $receipt",
 			"try_again": "Zkusit znovu",
 			"payment_confirmed": "Platba potvrzena",
-			"payment_failed": "Platba se nezdařila"
+			"payment_failed": "Platba se nezdařila",
+			"what_is_scan": "",
+			"no_camera_permission": "",
+			"what_is_scan_description": "",
+			"what_is_scan_title": "",
+			"learn_more_about_scan": "",
+			"learn_more_about_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "Kód / odkaz není platný",

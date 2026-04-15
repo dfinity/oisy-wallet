@@ -49,6 +49,7 @@ interface I18nCore {
 		unlimited: string;
 		info: string;
 		asset: string;
+		got_it: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -74,6 +75,8 @@ interface I18nNavigation {
 		activity: string;
 		airdrops: string;
 		earning: string;
+		pay: string;
+		wallet_connect: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -97,6 +100,8 @@ interface I18nNavigation {
 		dapp_explorer: string;
 		activity: string;
 		airdrops: string;
+		pay: string;
+		wallet_connect: string;
 		menu: string;
 		documentation: string;
 		support: string;
@@ -765,6 +770,12 @@ interface I18nScanner {
 		try_again: string;
 		payment_confirmed: string;
 		payment_failed: string;
+		what_is_scan: string;
+		no_camera_permission: string;
+		what_is_scan_description: string;
+		what_is_scan_title: string;
+		learn_more_about_scan: string;
+		learn_more_about_pay: string;
 	};
 	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
