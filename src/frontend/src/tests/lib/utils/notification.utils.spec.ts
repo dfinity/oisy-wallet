@@ -133,7 +133,9 @@ describe('notification.utils', () => {
 				const result = filterUndismissedNotificationQualifiers({
 					kind: 'NoIndexCanister',
 					qualifiers: ['BTC'],
-					dismissedNotifications: [qualified({ kind: 'NoIndexCanister', qualifier: 'BTC', version: 0 })]
+					dismissedNotifications: [
+						qualified({ kind: 'NoIndexCanister', qualifier: 'BTC', version: 0 })
+					]
 				});
 
 				expect(result).toEqual(['BTC']);
@@ -145,7 +147,9 @@ describe('notification.utils', () => {
 				const result = filterUndismissedNotificationQualifiers({
 					kind: 'UnavailableIndexCanister',
 					qualifiers: ['BTC', 'ETH', 'ICP'],
-					dismissedNotifications: [qualified({ kind: 'UnavailableIndexCanister', qualifier: 'ETH' })]
+					dismissedNotifications: [
+						qualified({ kind: 'UnavailableIndexCanister', qualifier: 'ETH' })
+					]
 				});
 
 				expect(result).toEqual(['BTC', 'ICP']);
