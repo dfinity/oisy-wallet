@@ -49,6 +49,91 @@ describe('exchange.utils', () => {
 			expect(result).toEqual({});
 		});
 
+		it('skips token where tvlUSD is below threshold', () => {
+			const mock = createMockIcpSwapToken({
+				price: '1.230000000000000000',
+				tvlUSD: '1.780000000000000000'
+			});
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
+
+			expect(result).toEqual({});
+		});
+
+		it('skips token where tvlUSD is zero', () => {
+			const mock = createMockIcpSwapToken({
+				price: '1.230000000000000000',
+				tvlUSD: '0.000000000000000000'
+			});
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
+
+			expect(result).toEqual({});
+		});
+
+		it('skips token where tvlUSD is exactly at the threshold', () => {
+			const mock = createMockIcpSwapToken({
+				price: '1.230000000000000000',
+				tvlUSD: '10.000000000000000000'
+			});
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
+
+			expect(result).toEqual({});
+		});
+
+		it('accepts token where tvlUSD is just above threshold', () => {
+			const mock = createMockIcpSwapToken({
+				tokenLedgerId: MOCK_CANISTER_ID_1,
+				price: '1.230000000000000000',
+				tvlUSD: '10.010000000000000000'
+			});
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
+
+			expect(result[MOCK_CANISTER_ID_1.toLowerCase()]).toEqual({
+				usd: 1.23,
+				usd_market_cap: 0,
+				usd_24h_vol: 50_000,
+				usd_24h_change: 2.5
+			});
+		});
+
+		it('skips token where tvlUSD is negative', () => {
+			const mock = createMockIcpSwapToken({
+				price: '1.230000000000000000',
+				tvlUSD: '-500.000000000000000000'
+			});
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
+
+			expect(result).toEqual({});
+		});
+
+		it('skips token where tvlUSD is NaN', () => {
+			const mock = createMockIcpSwapToken({
+				price: '1.230000000000000000',
+				tvlUSD: 'NaN' as unknown as string
+			});
+			const result = formatIcpSwapToCoingeckoPrices([mock]);
+
+			expect(result).toEqual({});
+		});
+
+		it('filters stale tokens but keeps healthy ones in a batch', () => {
+			const stale = createMockIcpSwapToken({
+				tokenLedgerId: MOCK_CANISTER_ID_1,
+				price: '99000.000000000000000000',
+				tvlUSD: '1.780000000000000000'
+			});
+			const healthy = createMockIcpSwapToken({
+				tokenLedgerId: MOCK_CANISTER_ID_2,
+				price: '2.500000000000000000',
+				tvlUSD: '500000.000000000000000000'
+			});
+
+			const result = formatIcpSwapToCoingeckoPrices([stale, healthy]);
+
+			expect(result[MOCK_CANISTER_ID_1.toLowerCase()]).toBeUndefined();
+			expect(result[MOCK_CANISTER_ID_2.toLowerCase()]).toBeDefined();
+			expect(result[MOCK_CANISTER_ID_2.toLowerCase()].usd).toBe(2.5);
+		});
+
 		it('lowercases canister IDs in output keys', () => {
 			const mock = createMockIcpSwapToken({
 				tokenLedgerId: MOCK_CANISTER_ID_1,
