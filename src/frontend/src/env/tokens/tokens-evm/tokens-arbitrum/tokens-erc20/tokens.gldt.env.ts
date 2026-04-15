@@ -17,7 +17,7 @@ export const GLDT_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.COMMODITY }],
 	name: 'GLDT',
 	symbol: GLDT_SYMBOL,
 	decimals: GLDT_DECIMALS,
