@@ -27,6 +27,7 @@ describe('Scanner', () => {
 		mockModalOpen.set(false);
 		vi.mocked(modalStore).openUniversalScanner = vi.fn();
 		vi.mocked(modalDerived).modalUniversalScannerOpen = mockModalOpen;
+		vi.mocked(modalDerived).modalUniversalScannerData = writable(undefined);
 	});
 
 	it('should render button with correct text', () => {
@@ -57,7 +58,9 @@ describe('Scanner', () => {
 		const button = screen.getByRole('button', { name: en.scanner.text.scan_qr_code });
 		await fireEvent.click(button);
 
-		expect(modalStore.openUniversalScanner).toHaveBeenCalledExactlyOnceWith(expect.any(Symbol));
+		expect(modalStore.openUniversalScanner).toHaveBeenCalledExactlyOnceWith({
+			id: expect.any(Symbol)
+		});
 	});
 
 	it('should pass a unique modalId symbol on click', async () => {
@@ -68,7 +71,7 @@ describe('Scanner', () => {
 
 		const [[callArg]] = vi.mocked(modalStore.openUniversalScanner).mock.calls;
 
-		expect(typeof callArg).toBe('symbol');
+		expect(typeof callArg.id).toBe('symbol');
 	});
 
 	it('should render ButtonIcon with correct props', () => {
