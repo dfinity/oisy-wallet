@@ -4,10 +4,7 @@
 	import { onDestroy, untrack } from 'svelte';
 	import { page } from '$app/state';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
-	import {
-		walletConnectPaired,
-		walletConnectReconnecting
-	} from '$eth/stores/wallet-connect.store';
+	import { walletConnectPaired, walletConnectReconnecting } from '$eth/stores/wallet-connect.store';
 	import { URI_PARAM } from '$lib/constants/routes.constants';
 	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
