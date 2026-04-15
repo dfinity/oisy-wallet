@@ -2,6 +2,7 @@ import { ARBITRUM_MAINNET_ENABLED } from '$env/networks/networks-evm/networks.ev
 import { ARB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.arb.env';
 import { BOB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.bob.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.bonk.env';
+import { CBBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.cbbtc.env';
 import {
 	ARB_SEPOLIA_USDC_TOKEN,
 	USDC_TOKEN
@@ -21,6 +22,7 @@ const ARBITRUM_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
 	ARB_TOKEN,
 	BOB_TOKEN,
 	BONK_TOKEN,
+	CBBTC_TOKEN,
 	WBTC_TOKEN,
 	WETH_TOKEN,
 	ZCHF_TOKEN
