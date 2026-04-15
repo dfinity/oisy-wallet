@@ -25,13 +25,13 @@
 		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai",
 		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
 		"mintingAccount": "6f6ua-hqaaa-aaaar-qairq-cai",
-		"groupDataId": "GLDT",
 		"tags": [
 			{
 				"type": "category",
 				"value": "commodity"
 			}
 		],
+		"groupDataId": "GLDT",
 		"decimals": 8,
 		"name": "Gold Token",
 		"symbol": "GLDT",
