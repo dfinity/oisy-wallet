@@ -3,8 +3,8 @@ import { ARB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/t
 import { BOB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.bob.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.bonk.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.cbbtc.env';
-import { GLDT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.gldt.env';
 import { CHAT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.chat.env';
+import { GLDT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.gldt.env';
 import {
 	ARB_SEPOLIA_USDC_TOKEN,
 	USDC_TOKEN
