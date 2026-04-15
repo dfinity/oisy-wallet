@@ -196,36 +196,45 @@ const mapDeprecatedSnsMetadata = ({
 	...rest
 });
 
-const readExistingTags = (): Record<CanisterIdText, EnvSnsTokenWithIcon['tags']> => {
+interface ExistingCuratedData {
+	tags: Record<CanisterIdText, EnvSnsTokenWithIcon['tags']>;
+}
+
+const readExistingCuratedData = (): ExistingCuratedData => {
 	if (!existsSync(SNS_JSON_FILE)) {
-		return {};
+		return {
+			tags: {}
+		};
 	}
 
 	try {
-		const existing: { ledgerCanisterId: string; tags?: EnvSnsTokenWithIcon['tags'] }[] = JSON.parse(
-			readFileSync(SNS_JSON_FILE, 'utf8')
-		);
+		const existing: {
+			ledgerCanisterId: string;
+			tags?: EnvSnsTokenWithIcon['tags'];
+		}[] = JSON.parse(readFileSync(SNS_JSON_FILE, 'utf8'));
 
-		return existing.reduce<Record<CanisterIdText, EnvSnsTokenWithIcon['tags']>>(
+		return existing.reduce<ExistingCuratedData>(
 			(acc, { ledgerCanisterId, tags }) => {
 				if (nonNullish(tags)) {
-					acc[ledgerCanisterId] = tags;
+					acc.tags[ledgerCanisterId] = tags;
 				}
 				return acc;
 			},
-			{}
+			{
+				tags: {}
+			}
 		);
 	} catch (err: unknown) {
 		console.error(
-			`Failed to read or parse existing SNS tags from "${SNS_JSON_FILE}". Aborting to avoid overwriting manual tags.`,
+			`Failed to read or parse existing SNS curated data from "${SNS_JSON_FILE}". Aborting to avoid overwriting manual data.`,
 			err
 		);
-		throw err instanceof Error ? err : new Error('Failed to read existing SNS tags');
+		throw err instanceof Error ? err : new Error('Failed to read existing SNS curated data');
 	}
 };
 
 const findSnses = async () => {
-	const existingTags = readExistingTags();
+	const { tags: existingTags } = readExistingCuratedData();
 
 	const data = await querySnsAggregator();
 
