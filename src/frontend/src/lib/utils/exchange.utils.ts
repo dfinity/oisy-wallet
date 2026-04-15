@@ -31,6 +31,8 @@ export const usdValue = ({
 			) * exchangeRate
 		: Number(ZERO);
 
+const ICPSWAP_MIN_TVL_USD = 10;
+
 export const formatIcpSwapToCoingeckoPrices = (
 	tokens: IcpSwapToken[]
 ): CoingeckoSimpleTokenPriceResponse =>
@@ -38,6 +40,12 @@ export const formatIcpSwapToCoingeckoPrices = (
 		const price = Number(token.price);
 
 		if (isNullish(token) || isNaN(price) || price === 0) {
+			return acc;
+		}
+
+		const tvl = Number(token.tvlUSD);
+
+		if (isNaN(tvl) || tvl <= ICPSWAP_MIN_TVL_USD) {
 			return acc;
 		}
 
