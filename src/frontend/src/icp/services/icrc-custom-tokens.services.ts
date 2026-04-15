@@ -5,6 +5,7 @@ import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { IcTokenWithoutId } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { mapEnvGroupData } from '$icp/utils/map-token-group.utils';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -52,7 +53,8 @@ const mapIcrcCustomToken = ({
 	governanceCanisterId,
 	metadata: { name, decimals, symbol, fee, alternativeName },
 	deprecated,
-	tags
+	tags,
+	groupDataId
 }: EnvSnsToken): IcTokenWithoutId => ({
 	ledgerCanisterId,
 	indexCanisterId,
@@ -69,5 +71,6 @@ const mapIcrcCustomToken = ({
 	alternativeName,
 	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,
 	deprecated,
-	...(deprecated !== true && { icon: `/icons/sns/${ledgerCanisterId}.png` })
+	...(deprecated !== true && { icon: `/icons/sns/${ledgerCanisterId}.png` }),
+	...mapEnvGroupData(groupDataId)
 });
