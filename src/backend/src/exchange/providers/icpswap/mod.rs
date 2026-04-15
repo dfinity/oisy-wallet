@@ -223,7 +223,8 @@ mod tests {
 
     #[test]
     fn parse_icpswap_body_rejects_missing_tvl() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5"}}"#;
+        let json =
+            br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5"}}"#;
         let parsed: Result<IcpSwapEnvelope, _> = serde_json::from_slice(json);
         assert!(parsed
             .ok()
