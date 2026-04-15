@@ -4,7 +4,7 @@ import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import chat from '/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png';
+import chat from '/icons/sns/2ouva-viaaa-aaaaq-aaamq-cai.png';
 
 const CHAT_DECIMALS = 8;
 
