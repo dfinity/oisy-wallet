@@ -11,6 +11,7 @@ import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.biduon.env';
 import { BOB_TOKEN } from '$env/tokens/tokens-erc20/tokens.bob.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.cbbtc.env';
+import { CHAT_TOKEN } from '$env/tokens/tokens-erc20/tokens.chat.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.copxon.env';
 import { DAI_TOKEN } from '$env/tokens/tokens-erc20/tokens.dai.env';
 import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
@@ -76,6 +77,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	BIDUON_TOKEN,
 	BOB_TOKEN,
 	CBBTC_TOKEN,
+	CHAT_TOKEN,
 	COPXON_TOKEN,
 	DAI_TOKEN,
 	DMAIL_TOKEN,
