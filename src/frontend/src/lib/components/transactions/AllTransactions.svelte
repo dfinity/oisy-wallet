@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { DismissedNotification } from '$declarations/backend/backend.did';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
@@ -8,10 +9,30 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { userDismissedNotifications } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isSimpleNotificationDismissed } from '$lib/utils/notification.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+
+	// The backend call is an update call that takes some time to complete.
+	// If the user profile is reactively refreshed before the call completes, the store would
+	// temporarily lose the dismissal, causing the banner to flicker back into view.
+	// To prevent this, we keep an optimistic local copy, merged with the store.
+	let temporaryDismissedNotifications = $state<DismissedNotification[]>([]);
+
+	let allDismissedNotifications = $derived([
+		...$userDismissedNotifications,
+		...temporaryDismissedNotifications
+	]);
+
+	let btcBannerDismissed = $derived(
+		isSimpleNotificationDismissed({
+			kind: 'BtcActivityInfo',
+			dismissedNotifications: allDismissedNotifications
+		})
+	);
 
 	let enabledTokensWithoutTransaction = $derived(
 		$enabledFungibleNetworkTokens
@@ -39,7 +60,6 @@
 			{ tokensWithoutCanister: [], tokensWithUnavailableCanister: [] }
 		)
 	);
-
 </script>
 
 <div class="flex flex-col gap-5">
@@ -55,7 +75,7 @@
 	{/if}
 
 	{#if tokensWithoutCanister.length > 0}
-<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
+		<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
 				$token_list: tokensWithoutCanister.map((s) => `$${s}`).join(', ')
 			})}
@@ -63,16 +83,18 @@
 	{/if}
 
 	{#if tokensWithUnavailableCanister.length > 0}
-	<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 				$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
 			})}
 		</MessageBox>
 	{/if}
 
-	<MessageBox closableKey="oisy_ic_hide_bitcoin_activity" level="plain">
-		{$i18n.activity.info.btc_transactions}
-	</MessageBox>
+	{#if !btcBannerDismissed}
+		<MessageBox closableKey="oisy_ic_hide_bitcoin_activity" level="plain">
+			{$i18n.activity.info.btc_transactions}
+		</MessageBox>
+	{/if}
 
 	<AllTransactionsList />
 </div>
