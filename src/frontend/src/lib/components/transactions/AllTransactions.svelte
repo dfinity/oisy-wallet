@@ -9,11 +9,16 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
-	import { userDismissedNotifications } from '$lib/derived/user-profile.derived';
+	import {
+		userDismissedNotifications,
+	} from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isSimpleNotificationDismissed } from '$lib/utils/notification.utils';
+	import {
+		filterUndismissedNotificationQualifiers,
+		isSimpleNotificationDismissed
+	} from '$lib/utils/notification.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	// The backend call is an update call that takes some time to complete.
@@ -60,6 +65,22 @@
 			{ tokensWithoutCanister: [], tokensWithUnavailableCanister: [] }
 		)
 	);
+
+		let undismissedNoCanister = $derived(
+		filterUndismissedNotificationQualifiers({
+			kind: 'NoIndexCanister',
+			qualifiers: tokensWithoutCanister,
+			dismissedNotifications: allDismissedNotifications
+		})
+	);
+
+	let undismissedUnavailable = $derived(
+		filterUndismissedNotificationQualifiers({
+			kind: 'UnavailableIndexCanister',
+			qualifiers: tokensWithUnavailableCanister,
+			dismissedNotifications: allDismissedNotifications
+		})
+	);
 </script>
 
 <div class="flex flex-col gap-5">
@@ -74,18 +95,18 @@
 		</span>
 	{/if}
 
-	{#if tokensWithoutCanister.length > 0}
-		<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
+	{#if undismissedNoCanister.length > 0}
+<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
-				$token_list: tokensWithoutCanister.map((s) => `$${s}`).join(', ')
+				$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
 			})}
 		</MessageBox>
 	{/if}
 
-	{#if tokensWithUnavailableCanister.length > 0}
-		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+	{#if undismissedUnavailable.length > 0}
+	<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
-				$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
+				$token_list: undismissedUnavailable.map((s) => `$${s}`).join(', ')
 			})}
 		</MessageBox>
 	{/if}
