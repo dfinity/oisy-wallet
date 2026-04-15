@@ -40,7 +40,7 @@
 			.map((token: TokenUi) => token as IcToken)
 	);
 
-	let { tokensWithoutCanister, tokensWithUnavailableCanister } = $derived.by(() =>
+	let { tokensWithoutCanister, tokensWithUnavailableCanister } = $derived(
 		enabledTokensWithoutTransaction.reduce<{
 			tokensWithoutCanister: string[];
 			tokensWithUnavailableCanister: string[];
