@@ -1,6 +1,7 @@
 import { BASE_MAINNET_ENABLED } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BOB_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.bob.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.cbbtc.env';
+import { CHAT_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.chat.env';
 import {
 	EURC_TOKEN,
 	SEPOLIA_EURC_TOKEN
@@ -22,6 +23,7 @@ const BASE_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
 	BOB_TOKEN,
 	CBBTC_TOKEN,
 	GLDT_TOKEN,
+	CHAT_TOKEN,
 	EURC_TOKEN,
 	SPX_TOKEN,
 	USDC_TOKEN,

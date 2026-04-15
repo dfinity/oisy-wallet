@@ -167,9 +167,13 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 type EnvTokenTags = EnvCkErc20TokensWithMetadata[string]['tags'];
 type EnvTagsRecord = Record<string, Record<string, EnvTokenTags>>;
 
-const readExistingCkErc20Tags = (): EnvTagsRecord => {
+interface EnvCuratedData {
+	tags: EnvTagsRecord;
+}
+
+const readExistingCkErc20CuratedData = (): EnvCuratedData => {
 	if (!existsSync(CK_ERC20_JSON_FILE)) {
-		return {};
+		return { tags: {} };
 	}
 
 	try {
@@ -178,50 +182,54 @@ const readExistingCkErc20Tags = (): EnvTagsRecord => {
 			Record<string, { tags?: EnvTokenTags }>
 		>;
 
-		return Object.entries(existing).reduce<EnvTagsRecord>((envAcc, [env, tokens]) => {
-			const envTags = Object.entries(tokens).reduce<Record<string, EnvTokenTags>>(
-				(acc, [symbol, data]) => {
-					if (nonNullish(data?.tags)) {
-						acc[symbol] = data.tags;
-					}
-					return acc;
-				},
-				{}
-			);
+		return Object.entries(existing).reduce<EnvCuratedData>(
+			(envAcc, [env, tokens]) => {
+				const envTags = Object.entries(tokens).reduce<Record<string, EnvTokenTags>>(
+					(acc, [symbol, data]) => {
+						if (nonNullish(data?.tags)) {
+							acc[symbol] = data.tags;
+						}
+						return acc;
+					},
+					{}
+				);
 
-			if (Object.keys(envTags).length > 0) {
-				envAcc[env] = envTags;
-			}
+				if (Object.keys(envTags).length > 0) {
+					envAcc.tags[env] = envTags;
+				}
 
-			return envAcc;
-		}, {});
+				return envAcc;
+			},
+			{ tags: {} }
+		);
 	} catch (err: unknown) {
 		console.error(
-			`Failed to parse existing CK ERC20 tags from ${CK_ERC20_JSON_FILE}. Aborting to avoid losing curated tags.`,
+			`Failed to parse existing CK ERC20 curated data from ${CK_ERC20_JSON_FILE}. Aborting to avoid losing curated data.`,
 			err
 		);
 		throw err;
 	}
 };
 
-const mergeTags = ({
+const mergeCuratedData = ({
 	tokens,
 	envTags
 }: {
 	tokens: EnvCkErc20TokensWithMetadata;
 	envTags: Record<string, EnvTokenTags> | undefined;
 }): EnvCkErc20TokensWithMetadata =>
-	isNullish(envTags)
-		? tokens
-		: Object.fromEntries(
-				Object.entries(tokens).map(([symbol, data]) => [
-					symbol,
-					nonNullish(envTags[symbol]) ? { ...data, tags: envTags[symbol] } : data
-				])
-			);
+	Object.fromEntries(
+		Object.entries(tokens).map(([symbol, data]) => [
+			symbol,
+			{
+				...data,
+				...(nonNullish(envTags?.[symbol]) && { tags: envTags[symbol] })
+			}
+		])
+	);
 
 const findCkErc20 = async () => {
-	const existingTags = readExistingCkErc20Tags();
+	const { tags: existingTags } = readExistingCkErc20CuratedData();
 
 	const [
 		{ tokens: staging, icons: stagingIcons },
@@ -231,8 +239,14 @@ const findCkErc20 = async () => {
 	);
 
 	const tokens: EnvTokensCkErc20 = {
-		production: mergeTags({ tokens: production, envTags: existingTags['production'] }),
-		staging: mergeTags({ tokens: staging, envTags: existingTags['staging'] })
+		production: mergeCuratedData({
+			tokens: production,
+			envTags: existingTags['production']
+		}),
+		staging: mergeCuratedData({
+			tokens: staging,
+			envTags: existingTags['staging']
+		})
 	};
 
 	writeFileSync(CK_ERC20_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));
