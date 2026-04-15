@@ -6,6 +6,7 @@ import {
 	EURC_TOKEN,
 	SEPOLIA_EURC_TOKEN
 } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
+import { GLDT_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.gldt.env';
 import { SPX_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.spx.env';
 import {
 	SEPOLIA_USDC_TOKEN,
@@ -21,6 +22,7 @@ const BASE_ERC20_TOKENS_SEPOLIA: RequiredEvmErc20Token[] = [SEPOLIA_USDC_TOKEN, 
 const BASE_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
 	BOB_TOKEN,
 	CBBTC_TOKEN,
+	GLDT_TOKEN,
 	CHAT_TOKEN,
 	EURC_TOKEN,
 	SPX_TOKEN,
