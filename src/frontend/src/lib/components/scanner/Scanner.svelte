@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
+	import AnimatedScanIcon from '$lib/components/icons/animated/AnimatedScanIcon.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -14,7 +14,7 @@
 	onclick={() => modalStore.openUniversalScanner({ id: modalId })}
 >
 	{#snippet icon()}
-		<IconScanLine size="24" />
+		<AnimatedScanIcon />
 	{/snippet}
 	{$i18n.scanner.text.scan_qr_code}
 </ButtonIcon>
