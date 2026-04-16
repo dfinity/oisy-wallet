@@ -1514,7 +1514,7 @@
 			"sign_message": "Sign Message",
 			"connected_apps": "Connected Apps",
 			"no_connected_apps": "No apps are currently connected.",
-			"wallet_connect": "Wallet Connect"
+			"wallet_connect": "WalletConnect"
 		},
 		"alt": {
 			"connect_input": "e.g. wc:a281567bb3e4..."
