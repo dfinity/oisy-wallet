@@ -198,12 +198,14 @@ const mapDeprecatedSnsMetadata = ({
 
 interface ExistingCuratedData {
 	tags: Record<CanisterIdText, EnvSnsTokenWithIcon['tags']>;
+	groupDataIds: Record<CanisterIdText, string>;
 }
 
 const readExistingCuratedData = (): ExistingCuratedData => {
 	if (!existsSync(SNS_JSON_FILE)) {
 		return {
-			tags: {}
+			tags: {},
+			groupDataIds: {}
 		};
 	}
 
@@ -211,17 +213,22 @@ const readExistingCuratedData = (): ExistingCuratedData => {
 		const existing: {
 			ledgerCanisterId: string;
 			tags?: EnvSnsTokenWithIcon['tags'];
+			groupDataId?: string;
 		}[] = JSON.parse(readFileSync(SNS_JSON_FILE, 'utf8'));
 
 		return existing.reduce<ExistingCuratedData>(
-			(acc, { ledgerCanisterId, tags }) => {
+			(acc, { ledgerCanisterId, tags, groupDataId }) => {
 				if (nonNullish(tags)) {
 					acc.tags[ledgerCanisterId] = tags;
+				}
+				if (nonNullish(groupDataId)) {
+					acc.groupDataIds[ledgerCanisterId] = groupDataId;
 				}
 				return acc;
 			},
 			{
-				tags: {}
+				tags: {},
+				groupDataIds: {}
 			}
 		);
 	} catch (err: unknown) {
@@ -234,7 +241,7 @@ const readExistingCuratedData = (): ExistingCuratedData => {
 };
 
 const findSnses = async () => {
-	const { tags: existingTags } = readExistingCuratedData();
+	const { tags: existingTags, groupDataIds: existingGroupDataIds } = readExistingCuratedData();
 
 	const data = await querySnsAggregator();
 
@@ -258,6 +265,9 @@ const findSnses = async () => {
 						metadata,
 						...(nonNullish(existingTags[ledgerCanisterId]) && {
 							tags: existingTags[ledgerCanisterId]
+						}),
+						...(nonNullish(existingGroupDataIds[ledgerCanisterId]) && {
+							groupDataId: existingGroupDataIds[ledgerCanisterId]
 						})
 					}
 				],

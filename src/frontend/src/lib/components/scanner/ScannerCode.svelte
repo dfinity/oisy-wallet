@@ -7,9 +7,10 @@
 	import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 	import { OCP_PAY_WITH_BTC_ENABLED } from '$env/open-crypto-pay.env';
 	import IconChain from '$lib/components/icons/IconChain.svelte';
-	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
+	import ScannerCodeInfoButton from '$lib/components/scanner/ScannerCodeInfoButton.svelte';
 	import ScannerCodeInput from '$lib/components/scanner/ScannerCodeInput.svelte';
+	import ScannerInfo from '$lib/components/scanner/ScannerInfo.svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
@@ -26,13 +27,12 @@
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import type { QrStatus } from '$lib/types/qr-code';
 	import { ScannerResults } from '$lib/types/scanner';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
 
 	interface Props {
 		onNext: (params: { results: ScannerResults; code?: string }) => void;
-		onOpenInfo?: () => void;
+		onOpenInfo: () => void;
 	}
 
 	let { onNext, onOpenInfo }: Props = $props();
@@ -40,6 +40,7 @@
 	const WALLET_CONNECT_URI_PREFIX = 'wc:';
 
 	let openBottomSheet = $state(false);
+	let openInfoBottomSheet = $state(false);
 	let uri = $state('');
 	let error = $state('');
 	let isEmptyUri = $derived(isEmptyString(uri));
@@ -162,14 +163,17 @@
 		</div>
 	</Responsive>
 
-	<Button
-		fullWidth
-		link
-		onclick={onOpenInfo}
-		styleClass="text-secondary bg-surface py-4 rounded-none"
-	>
-		<span>{replaceOisyPlaceholders($i18n.scanner.text.what_is_scan)}</span>
+	<Responsive up="md">
+		<ScannerCodeInfoButton onclick={onOpenInfo} />
+	</Responsive>
 
-		<IconHelpCircle />
-	</Button>
+	<Responsive down="sm">
+		<ScannerCodeInfoButton onclick={() => (openInfoBottomSheet = true)} />
+
+		<BottomSheet bind:visible={openInfoBottomSheet}>
+			{#snippet content()}
+				<ScannerInfo onButtonClick={() => (openInfoBottomSheet = false)} />
+			{/snippet}
+		</BottomSheet>
+	</Responsive>
 </div>

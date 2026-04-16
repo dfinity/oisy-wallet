@@ -772,6 +772,7 @@ interface I18nScanner {
 		what_is_scan_title: string;
 		learn_more_about_scan: string;
 		learn_more_about_pay: string;
+		universal_scanner: string;
 	};
 	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
@@ -1188,6 +1189,9 @@ interface I18nWallet_connect {
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
+		connected_apps: string;
+		no_connected_apps: string;
+		wallet_connect: string;
 	};
 	alt: { connect_input: string };
 	domain: {

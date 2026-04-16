@@ -1036,12 +1036,13 @@
 			"try_again": "Try again",
 			"payment_confirmed": "Payment Confirmed",
 			"payment_failed": "Payment Failed",
-			"what_is_scan": "What is $oisy_short scan?",
+			"what_is_scan": "What is the universal scanner",
 			"no_camera_permission": "To scan QR codes, you need to allow camera access in your browser's site settings.",
-			"what_is_scan_description": "$oisy_name lets you pay instantly with crypto across supported chains. At any shop that uses OpenCryptoPay, simply scan their payment QR code. Choose the token you want to pay with and confirm the transaction on-chain.",
-			"what_is_scan_title": "$oisy_short Scan understands any QR code",
-			"learn_more_about_scan": "Learn more about $oisy_short Scan",
-			"learn_more_about_pay": "Learn more about $oisy_short Pay"
+			"what_is_scan_description": "The $oisy_short's universal scanner scans a variety of QR codes and initiates the correct action right away.<br> Scan a WalletConnect QR code to establish a new connection, or scan the checkout code at any shop that uses Open CryptoPay to pay.",
+			"what_is_scan_title": "$oisy_short understands any QR code",
+			"learn_more_about_scan": "Learn more about the universal scanner",
+			"learn_more_about_pay": "Learn more about $oisy_short Pay",
+			"universal_scanner": "Universal Scanner"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
@@ -1510,7 +1511,10 @@
 			"amount": "Amount",
 			"hex_data": "HEX Data",
 			"raw_copied": "Raw transaction data copied to clipboard.",
-			"sign_message": "Sign Message"
+			"sign_message": "Sign Message",
+			"connected_apps": "Connected Apps",
+			"no_connected_apps": "No apps are currently connected.",
+			"wallet_connect": "WalletConnect"
 		},
 		"alt": {
 			"connect_input": "e.g. wc:a281567bb3e4..."

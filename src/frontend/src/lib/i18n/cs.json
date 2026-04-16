@@ -1041,7 +1041,8 @@
 			"what_is_scan_description": "",
 			"what_is_scan_title": "",
 			"learn_more_about_scan": "",
-			"learn_more_about_pay": ""
+			"learn_more_about_pay": "",
+			"universal_scanner": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "Kód / odkaz není platný",
@@ -1510,7 +1511,10 @@
 			"amount": "Částka",
 			"hex_data": "HEX data",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
-			"sign_message": "Podepsat zprávu"
+			"sign_message": "Podepsat zprávu",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "např. wc:a281567bb3e4..."
