@@ -1511,7 +1511,10 @@
 			"amount": "Montant",
 			"hex_data": "Données HEX",
 			"raw_copied": "Données brutes de la transaction copiées dans le presse-papiers.",
-			"sign_message": "Signer le message"
+			"sign_message": "Signer le message",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "ex: wc:a281567bb3e4..."
