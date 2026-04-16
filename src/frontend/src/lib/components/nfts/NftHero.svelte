@@ -2,8 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { fade } from 'svelte/transition';
-	import { afterNavigate } from '$app/navigation';
-	import Back from '$lib/components/core/Back.svelte';
+	import { IconBack } from '@dfinity/gix-components';
+	import { afterNavigate, goto } from '$app/navigation';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
@@ -52,6 +52,8 @@
 				]
 			: [])
 	]);
+
+	const parentUrl = $derived(breadcrumbItems[breadcrumbItems.length - 1]?.url);
 
 	const normalizedNftName = $derived(nonNullish(nft) ? getNftDisplayName(nft) : undefined);
 
@@ -114,7 +116,13 @@
 
 	<div class="bg-primary p-4">
 		<div class="flex items-center gap-2">
-			<Back onlyArrow />
+			<button
+				class="pointer-events-auto flex text-brand-primary"
+				aria-label={$i18n.core.alt.back}
+				onclick={() => goto(parentUrl)}
+			>
+				<IconBack />
+			</button>
 			<BreadcrumbNavigation items={breadcrumbItems} />
 		</div>
 
