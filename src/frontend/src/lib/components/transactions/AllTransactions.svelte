@@ -138,7 +138,7 @@
 	{/if}
 
 	{#if tokensWithUnavailableCanister.length > 0}
-		<MessageBox level="warning">
+		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 				$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
 			})}

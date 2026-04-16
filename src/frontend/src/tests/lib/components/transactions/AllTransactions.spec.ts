@@ -100,7 +100,7 @@ describe('AllTransactions', () => {
 		expect(getByText(exceptedText)).toBeInTheDocument();
 	});
 
-	it('renders the unavailable Index canister warning box without a close button', () => {
+	it('closes the unavailable Index canister warning via sessionStorage, not backend persistence', async () => {
 		const tokenWithUnavailableIndexCanister: IcrcCustomToken = {
 			...customIcrcToken,
 			symbol: 'UTC',
@@ -114,15 +114,29 @@ describe('AllTransactions', () => {
 		assertNonNullish(tokenId);
 		icTransactionsStore.nullify(tokenId);
 
+		const spySessionStorage = vi.spyOn(Storage.prototype, 'setItem');
+		const spyDismiss = vi
+			.spyOn(notificationServices, 'dismissNotifications')
+			.mockResolvedValue();
+
 		const { container } = render(AllTransactions);
 
-		const warningBoxes = container.querySelectorAll('.bg-warning-light');
-		expect(warningBoxes.length).toBeGreaterThan(0);
+		const warningBox = container.querySelector('.bg-warning-light');
+		assertNonNullish(warningBox);
 
-		const unavailableWarning = warningBoxes[0];
-		const closeButton = unavailableWarning.querySelector('button');
+		const closeButton = warningBox.querySelector('button');
+		assertNonNullish(closeButton);
 
-		expect(closeButton).toBeNull();
+		await fireEvent.click(closeButton);
+
+		expect(spySessionStorage).toHaveBeenCalledWith(
+			'oisy_ic_hide_transaction_unavailable_canister',
+			'true'
+		);
+		expect(spyDismiss).not.toHaveBeenCalled();
+
+		spySessionStorage.mockRestore();
+		spyDismiss.mockRestore();
 	});
 
 	it('renders the info box list', () => {
