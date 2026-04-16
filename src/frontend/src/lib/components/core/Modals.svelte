@@ -13,6 +13,7 @@
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
+	import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalDAppDetails,
@@ -34,7 +35,8 @@
 		modalReceive,
 		modalReceiveId,
 		modalPayDialogOpen,
-		modalUniversalScannerOpen
+		modalUniversalScannerOpen,
+		modalWalletConnectSessions
 	} from '$lib/derived/modal.derived';
 	import { getSymbol } from '$lib/utils/modal.utils';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
@@ -71,5 +73,7 @@
 		<PayDialog />
 	{:else if $modalUniversalScannerOpen}
 		<ScannerModal />
+	{:else if $modalWalletConnectSessions}
+		<WalletConnectSessionsModal />
 	{/if}
 {/if}

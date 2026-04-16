@@ -70,7 +70,8 @@ export interface Modal<T> {
 		| 'harvest-stake'
 		| 'harvest-unstake'
 		| 'universal-scanner'
-		| 'pay-dialog';
+		| 'pay-dialog'
+		| 'wallet-connect-sessions';
 	data?: T;
 	id?: symbol;
 }
@@ -142,6 +143,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
+	openWalletConnectSessions: (id: symbol) => void;
 	close: () => void;
 }
 
@@ -252,6 +254,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openPayDialog: setType('pay-dialog'),
 		openGetToken: setType('get-token'),
+		openWalletConnectSessions: setType('wallet-connect-sessions'),
 		close: () => set(null),
 		subscribe
 	};
