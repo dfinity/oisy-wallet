@@ -246,19 +246,6 @@
 		},
 		"icon": "/icons/icrc/7rrmx-tyaaa-aaaal-qsraq-cai.png"
 	},
-	"cbBTC": {
-		"ledgerCanisterId": "io25z-dqaaa-aaaar-qbooq-cai",
-		"indexCanisterId": "fsgsm-uaaaa-aaaar-qbphq-cai",
-		"mintingAccount": "5okwm-giaaa-aaaar-qbn6a-cai",
-		"groupDataId": "cbBTC",
-		"decimals": 8,
-		"name": "cbBTC",
-		"symbol": "cbBTC",
-		"fee": {
-			"__bigint__": "20"
-		},
-		"icon": "/icons/icrc/io25z-dqaaa-aaaar-qbooq-cai.svg"
-	},
 	"USDC": {
 		"ledgerCanisterId": "53nhb-haaaa-aaaar-qbn5q-cai",
 		"indexCanisterId": "f4e7e-pqaaa-aaaar-qbpgq-cai",
