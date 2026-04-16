@@ -68,15 +68,15 @@
 			.map((token: TokenUi) => token as IcToken)
 	);
 
-	let { tokensWithoutCanister, tokensWithUnavailableCanister } = $derived.by(() =>
+	let { tokensWithoutCanister, tokensWithUnavailableCanister } = $derived(
 		enabledTokensWithoutTransaction.reduce<{
 			tokensWithoutCanister: string[];
 			tokensWithUnavailableCanister: string[];
 		}>(
 			(acc, curr) => {
-				// TODO: use a unique token identifier (e.g. token ID + network) instead of the display symbol
-				// to avoid collisions if two tokens share the same symbol.
+				// TODO: use a unique token identifier (e.g. token ID + network) instead of the display symbol to avoid collisions if two tokens share the same symbol
 				const symbol = getTokenDisplaySymbol(curr);
+
 				if (hasNoIndexCanister(curr)) {
 					acc.tokensWithoutCanister.push(symbol);
 				} else {
