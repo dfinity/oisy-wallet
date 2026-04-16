@@ -118,7 +118,7 @@
 		<div class="flex items-center gap-2">
 			<button
 				class="pointer-events-auto flex text-brand-primary"
-				aria-label={$i18n.core.alt.back}
+				aria-label="Up"
 				onclick={() => goto(parentUrl)}
 			>
 				<IconBack />
