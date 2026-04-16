@@ -9,18 +9,19 @@
 		icons: string[];
 		size?: LogoSize;
 		color?: 'off-white' | 'white';
+		styleClass?: string;
 		invertColor?: boolean;
 	}
 
-	let { icons, size = 'xxs', invertColor, color = 'off-white' }: Props = $props();
+	let { icons, size = 'xxs', invertColor, color = 'off-white', styleClass = '' }: Props = $props();
 </script>
 
-<div class="flex items-center">
+<div class={`${styleClass} flex items-center`}>
 	{#if icons.length > 0}
 		{#each icons as icon, i (icon)}
 			<div
-				style={`max-height: ${logoSizes[size]}; margin-right: calc(-${logoSizes[size]} / 3); z-index: ${i + 1};`}
-				class="relative rounded-full bg-primary ring ring-disabled last:mr-0"
+				style={`max-height: ${logoSizes[size]}; ${i < icons.length - 1 ? `margin-right: calc(-${logoSizes[size]} / 3);` : ''} z-index: ${i + 1};`}
+				class="relative rounded-full bg-primary ring ring-disabled"
 				in:fade
 			>
 				<span class="inline-flex" class:invert-on-dark-theme={invertColor}>
