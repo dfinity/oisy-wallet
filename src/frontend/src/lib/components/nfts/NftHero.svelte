@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { IconBack } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { fade } from 'svelte/transition';
-	import { IconBack } from '@dfinity/gix-components';
 	import { afterNavigate, goto } from '$app/navigation';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
