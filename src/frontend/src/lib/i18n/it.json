@@ -1511,7 +1511,10 @@
 			"amount": "",
 			"hex_data": "Dati HEX",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
-			"sign_message": "Firma messaggio"
+			"sign_message": "Firma messaggio",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "es. wc:a281567bb3e4..."

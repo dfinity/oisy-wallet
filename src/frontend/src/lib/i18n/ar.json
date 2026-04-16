@@ -1511,7 +1511,10 @@
 			"amount": "",
 			"hex_data": "بيانات HEX",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
-			"sign_message": "توقيع الرسالة"
+			"sign_message": "توقيع الرسالة",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "على سبيل المثال: wc:a281567bb3e4..."

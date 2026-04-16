@@ -1511,7 +1511,10 @@
 			"amount": "",
 			"hex_data": "Dữ liệu HEX",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
-			"sign_message": "Ký Tin Nhắn"
+			"sign_message": "Ký Tin Nhắn",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "ví dụ: wc:a281567bb3e4..."

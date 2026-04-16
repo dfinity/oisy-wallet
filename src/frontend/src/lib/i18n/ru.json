@@ -1511,7 +1511,10 @@
 			"amount": "Сумма",
 			"hex_data": "HEX-данные",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
-			"sign_message": "Подписать сообщение"
+			"sign_message": "Подписать сообщение",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "например, wc:a281567bb3e4..."

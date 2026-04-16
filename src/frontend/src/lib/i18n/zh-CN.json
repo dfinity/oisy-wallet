@@ -1511,7 +1511,10 @@
 			"amount": "金额",
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
-			"sign_message": "签署消息"
+			"sign_message": "签署消息",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "例如：wc:a281567bb3e4..."
