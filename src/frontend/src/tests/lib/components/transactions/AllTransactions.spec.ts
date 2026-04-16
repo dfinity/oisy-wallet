@@ -115,9 +115,7 @@ describe('AllTransactions', () => {
 		icTransactionsStore.nullify(tokenId);
 
 		const spySessionStorage = vi.spyOn(Storage.prototype, 'setItem');
-		const spyDismiss = vi
-			.spyOn(notificationServices, 'dismissNotifications')
-			.mockResolvedValue();
+		const spyDismiss = vi.spyOn(notificationServices, 'dismissNotifications').mockResolvedValue();
 
 		const { container } = render(AllTransactions);
 

@@ -18,8 +18,15 @@
 		onDismiss?: () => void;
 	}
 
-	let { children, icon, level = 'info', closableKey, styleClass, testId, onDismiss }: Props =
-		$props();
+	let {
+		children,
+		icon,
+		level = 'info',
+		closableKey,
+		styleClass,
+		testId,
+		onDismiss
+	}: Props = $props();
 
 	const closable = $derived(nonNullish(onDismiss) || nonNullish(closableKey));
 
