@@ -31,6 +31,7 @@
 				"value": "commodity"
 			}
 		],
+		"groupDataId": "GLDT",
 		"decimals": 8,
 		"name": "Gold Token",
 		"symbol": "GLDT",
@@ -244,17 +245,5 @@
 			"__bigint__": "1000000"
 		},
 		"icon": "/icons/icrc/7rrmx-tyaaa-aaaal-qsraq-cai.png"
-	},
-	"cbBTC": {
-		"ledgerCanisterId": "io25z-dqaaa-aaaar-qbooq-cai",
-		"indexCanisterId": "fsgsm-uaaaa-aaaar-qbphq-cai",
-		"mintingAccount": "5okwm-giaaa-aaaar-qbn6a-cai",
-		"decimals": 8,
-		"name": "cbBTC",
-		"symbol": "cbBTC",
-		"fee": {
-			"__bigint__": "20"
-		},
-		"icon": "/icons/icrc/io25z-dqaaa-aaaar-qbooq-cai.svg"
 	}
 }

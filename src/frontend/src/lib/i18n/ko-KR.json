@@ -1041,7 +1041,8 @@
 			"what_is_scan_description": "",
 			"what_is_scan_title": "",
 			"learn_more_about_scan": "",
-			"learn_more_about_pay": ""
+			"learn_more_about_pay": "",
+			"universal_scanner": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "코드/링크가 유효하지 않습니다",

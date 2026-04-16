@@ -33,13 +33,13 @@ describe('ScannerInfo', () => {
 	});
 
 	it('should render the description', () => {
-		render(ScannerInfo, {
+		const { container } = render(ScannerInfo, {
 			props: { onButtonClick: mockOnButtonClick }
 		});
 
 		const description = replaceOisyPlaceholders(en.scanner.text.what_is_scan_description);
 
-		expect(screen.getByText(description, { exact: false })).toBeInTheDocument();
+		expect(container.innerHTML).toContain(description);
 	});
 
 	it('should render the "learn more about scan" link', () => {
