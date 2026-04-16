@@ -258,5 +258,18 @@
 			"__bigint__": "20"
 		},
 		"icon": "/icons/icrc/io25z-dqaaa-aaaar-qbooq-cai.svg"
+	},
+	"USDC": {
+		"ledgerCanisterId": "53nhb-haaaa-aaaar-qbn5q-cai",
+		"indexCanisterId": "f4e7e-pqaaa-aaaar-qbpgq-cai",
+		"mintingAccount": "5okwm-giaaa-aaaar-qbn6a-cai",
+		"groupDataId": "USDC",
+		"decimals": 6,
+		"name": "USDC",
+		"symbol": "USDC",
+		"fee": {
+			"__bigint__": "10000"
+		},
+		"icon": "/icons/icrc/53nhb-haaaa-aaaar-qbn5q-cai.webp"
 	}
 }
