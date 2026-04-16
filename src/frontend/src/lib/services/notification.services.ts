@@ -26,6 +26,6 @@ export const dismissNotifications = async ({
 
 		emit({ message: 'oisyRefreshUserProfile' });
 	} catch (_: unknown) {
-		// We can ignore the issue created by this service since it is not disruptive of the user flow
+		// We can ignore the issue created by this service since it is not disruptive to the user flow
 	}
 };
