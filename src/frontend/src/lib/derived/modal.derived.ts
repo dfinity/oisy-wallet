@@ -258,10 +258,27 @@ export const modalWelcomeData: Readable<WelcomeData | undefined> = derived(
 		$modalStore?.type === 'welcome' ? ($modalStore?.data as WelcomeData) : undefined
 );
 
+export const modalWalletConnectSessions: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'wallet-connect-sessions'
+);
 export const modalWalletConnect: Readable<boolean> = derived(
-	[modalWalletConnectAuth, modalWalletConnectSign, modalWalletConnectSend],
-	([$modalWalletConnectAuth, $modalWalletConnectSign, $modalWalletConnectSend]) =>
-		$modalWalletConnectAuth || $modalWalletConnectSign || $modalWalletConnectSend
+	[
+		modalWalletConnectAuth,
+		modalWalletConnectSign,
+		modalWalletConnectSend,
+		modalWalletConnectSessions
+	],
+	([
+		$modalWalletConnectAuth,
+		$modalWalletConnectSign,
+		$modalWalletConnectSend,
+		$modalWalletConnectSessions
+	]) =>
+		$modalWalletConnectAuth ||
+		$modalWalletConnectSign ||
+		$modalWalletConnectSend ||
+		$modalWalletConnectSessions
 );
 
 export const modalSettingsState: Readable<boolean> = derived(

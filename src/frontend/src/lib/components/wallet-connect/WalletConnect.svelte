@@ -1,18 +1,12 @@
 <script lang="ts">
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
-	import { disconnectListener } from '$lib/services/wallet-connect.services';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsShow } from '$lib/stores/toasts.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
-	const disconnect = async () => {
-		await disconnectListener();
+	const modalId = Symbol();
 
-		toastsShow({
-			text: $i18n.wallet_connect.info.disconnected,
-			level: 'info',
-			duration: 2000
-		});
+	const openSessions = () => {
+		modalStore.openWalletConnectSessions(modalId);
 	};
 </script>
 
-<WalletConnectButton onclick={disconnect} />
+<WalletConnectButton onclick={openSessions} />
