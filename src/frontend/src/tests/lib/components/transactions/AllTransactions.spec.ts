@@ -191,7 +191,8 @@ describe('AllTransactions', () => {
 
 			await fireEvent.click(closeButton);
 
-			expect(notificationServices.dismissNotifications).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+			expect(notificationServices.dismissNotifications).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
 					notifications: [
 						{
 							Simple: {
@@ -200,7 +201,8 @@ describe('AllTransactions', () => {
 							}
 						}
 					]
-				}));
+				})
+			);
 		});
 
 		it('should not render the no-index-canister warning when dismissed in user profile', () => {
@@ -275,7 +277,8 @@ describe('AllTransactions', () => {
 
 			await fireEvent.click(closeButton);
 
-			expect(notificationServices.dismissNotifications).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+			expect(notificationServices.dismissNotifications).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
 					notifications: [
 						{
 							Qualified: {
@@ -285,7 +288,8 @@ describe('AllTransactions', () => {
 							}
 						}
 					]
-				}));
+				})
+			);
 		});
 	});
 
