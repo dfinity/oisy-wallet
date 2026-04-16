@@ -3,6 +3,7 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { fade } from 'svelte/transition';
+	import Back from '$lib/components/core/Back.svelte';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
