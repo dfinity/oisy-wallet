@@ -7,9 +7,15 @@
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
+	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
-	import { userDismissedNotifications } from '$lib/derived/user-profile.derived';
+	import {
+		userDismissedNotifications,
+		userProfileVersion
+	} from '$lib/derived/user-profile.derived';
+	import { dismissNotifications } from '$lib/services/notification.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -37,6 +43,25 @@
 		})
 	);
 
+	const dismissBtcBanner = () => {
+		const notifications: DismissedNotification[] = [
+			{
+				Simple: {
+					kind: { BtcActivityInfo: null },
+					version: NOTIFICATION_VERSIONS.BtcActivityInfo
+				}
+			}
+		];
+
+		temporaryDismissedNotifications = [...temporaryDismissedNotifications, ...notifications];
+
+		dismissNotifications({
+			notifications,
+			identity: $authIdentity,
+			currentUserVersion: $userProfileVersion
+		});
+	};
+
 	let enabledTokensWithoutTransaction = $derived(
 		$enabledFungibleNetworkTokens
 			.filter((token) => $icTransactionsStore?.[token.id] === null)
@@ -57,7 +82,6 @@
 				} else {
 					acc.tokensWithUnavailableCanister.push(symbol);
 				}
-
 				return acc;
 			},
 			{ tokensWithoutCanister: [], tokensWithUnavailableCanister: [] }
@@ -79,6 +103,46 @@
 			dismissedNotifications: allDismissedNotifications
 		})
 	);
+
+	const dismissNoCanisterWarning = () => {
+		if (undismissedNoCanister.length > 0) {
+			const notifications: DismissedNotification[] = undismissedNoCanister.map((symbol) => ({
+				Qualified: {
+					kind: { NoIndexCanister: null },
+					qualifier: symbol,
+					version: NOTIFICATION_VERSIONS.NoIndexCanister
+				}
+			}));
+
+			temporaryDismissedNotifications = [...temporaryDismissedNotifications, ...notifications];
+
+			dismissNotifications({
+				notifications,
+				identity: $authIdentity,
+				currentUserVersion: $userProfileVersion
+			});
+		}
+	};
+
+	const dismissUnavailableWarning = () => {
+		if (undismissedUnavailable.length > 0) {
+			const notifications: DismissedNotification[] = undismissedUnavailable.map((symbol) => ({
+				Qualified: {
+					kind: { UnavailableIndexCanister: null },
+					qualifier: symbol,
+					version: NOTIFICATION_VERSIONS.UnavailableIndexCanister
+				}
+			}));
+
+			temporaryDismissedNotifications = [...temporaryDismissedNotifications, ...notifications];
+
+			dismissNotifications({
+				notifications,
+				identity: $authIdentity,
+				currentUserVersion: $userProfileVersion
+			});
+		}
+	};
 </script>
 
 <div class="flex flex-col gap-5">
@@ -94,7 +158,7 @@
 	{/if}
 
 	{#if undismissedNoCanister.length > 0}
-		<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
+		<MessageBox level="warning" onDismiss={dismissNoCanisterWarning}>
 			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
 				$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
 			})}
@@ -102,7 +166,7 @@
 	{/if}
 
 	{#if undismissedUnavailable.length > 0}
-		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+		<MessageBox level="warning" onDismiss={dismissUnavailableWarning}>
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 				$token_list: undismissedUnavailable.map((s) => `$${s}`).join(', ')
 			})}
@@ -110,7 +174,7 @@
 	{/if}
 
 	{#if !btcBannerDismissed}
-		<MessageBox closableKey="oisy_ic_hide_bitcoin_activity" level="plain">
+		<MessageBox level="plain" onDismiss={dismissBtcBanner}>
 			{$i18n.activity.info.btc_transactions}
 		</MessageBox>
 	{/if}
