@@ -1,5 +1,5 @@
-import type { DismissedNotification } from '$declarations/backend/backend.did';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import type { DismissedNotification } from '$declarations/backend/backend.did';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
@@ -191,9 +191,7 @@ describe('AllTransactions', () => {
 
 			await fireEvent.click(closeButton);
 
-			expect(notificationServices.dismissNotifications).toHaveBeenCalledOnce();
-			expect(notificationServices.dismissNotifications).toHaveBeenCalledWith(
-				expect.objectContaining({
+			expect(notificationServices.dismissNotifications).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
 					notifications: [
 						{
 							Simple: {
@@ -202,8 +200,7 @@ describe('AllTransactions', () => {
 							}
 						}
 					]
-				})
-			);
+				}));
 		});
 
 		it('should not render the no-index-canister warning when dismissed in user profile', () => {
@@ -234,9 +231,7 @@ describe('AllTransactions', () => {
 		});
 
 		it('should not render the unavailable-index-canister warning when dismissed in user profile', () => {
-			icrcCustomTokensStore.setAll([
-				{ data: tokenWithUnavailableIndexCanister, certified: true }
-			]);
+			icrcCustomTokensStore.setAll([{ data: tokenWithUnavailableIndexCanister, certified: true }]);
 
 			const store = get(icrcCustomTokensStore);
 			const tokenId = store?.at(0)?.data.id;
@@ -255,12 +250,9 @@ describe('AllTransactions', () => {
 
 			const { queryByText } = render(AllTransactions);
 
-			const expectedText = replacePlaceholders(
-				en.activity.warning.unavailable_index_canister,
-				{
-					$token_list: '$UIC'
-				}
-			);
+			const expectedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
+				$token_list: '$UIC'
+			});
 
 			expect(queryByText(expectedText)).not.toBeInTheDocument();
 		});
@@ -283,9 +275,7 @@ describe('AllTransactions', () => {
 
 			await fireEvent.click(closeButton);
 
-			expect(notificationServices.dismissNotifications).toHaveBeenCalledOnce();
-			expect(notificationServices.dismissNotifications).toHaveBeenCalledWith(
-				expect.objectContaining({
+			expect(notificationServices.dismissNotifications).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
 					notifications: [
 						{
 							Qualified: {
@@ -295,8 +285,7 @@ describe('AllTransactions', () => {
 							}
 						}
 					]
-				})
-			);
+				}));
 		});
 	});
 

@@ -1,6 +1,6 @@
 import MessageBox from '$lib/components/ui/MessageBox.svelte';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import en from '$tests/mocks/i18n.mock';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
@@ -147,6 +147,7 @@ describe('MessageBox', () => {
 			const box = container.querySelector('.mb-4');
 
 			assertNonNullish(box);
+
 			expect(box.getAttribute('data-tid')).toBeNull();
 		});
 	});
