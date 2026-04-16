@@ -9,16 +9,26 @@
 		children: Snippet;
 		disabled?: boolean;
 		ariaLabel: string;
+		styleClass?: string;
 		testId?: string;
 		tag?: string;
 		tagVariant?: TagVariant;
 	}
 
-	let { onclick, children, disabled = false, ariaLabel, testId, tag, tagVariant }: Props = $props();
+	let {
+		onclick,
+		children,
+		disabled = false,
+		ariaLabel,
+		styleClass = '',
+		testId,
+		tag,
+		tagVariant
+	}: Props = $props();
 </script>
 
 <button
-	class="nav-item nav-item-condensed"
+	class={`${styleClass} nav-item nav-item-condensed`}
 	class:opacity-50={disabled}
 	aria-label={ariaLabel}
 	data-tid={testId}

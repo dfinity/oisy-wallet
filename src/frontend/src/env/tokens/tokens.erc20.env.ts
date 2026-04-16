@@ -11,6 +11,7 @@ import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.biduon.env';
 import { BOB_TOKEN } from '$env/tokens/tokens-erc20/tokens.bob.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.cbbtc.env';
+import { CHAT_TOKEN } from '$env/tokens/tokens-erc20/tokens.chat.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.copxon.env';
 import { DAI_TOKEN } from '$env/tokens/tokens-erc20/tokens.dai.env';
 import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
@@ -18,6 +19,7 @@ import { EEMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.eemon.env';
 import { EFAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.efaon.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { FLOKI_TOKEN } from '$env/tokens/tokens-erc20/tokens.floki.env';
+import { GLDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.gldt.env';
 import { IAUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.iauon.env';
 import { IVVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.ivvon.env';
 import { JASMY_TOKEN } from '$env/tokens/tokens-erc20/tokens.jasmy.env';
@@ -76,12 +78,14 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	BIDUON_TOKEN,
 	BOB_TOKEN,
 	CBBTC_TOKEN,
+	CHAT_TOKEN,
 	COPXON_TOKEN,
 	DAI_TOKEN,
 	DMAIL_TOKEN,
 	EEMON_TOKEN,
 	EFAON_TOKEN,
 	FLOKI_TOKEN,
+	GLDT_TOKEN,
 	IAUON_TOKEN,
 	IVVON_TOKEN,
 	JASMY_TOKEN,

@@ -24,5 +24,7 @@ export const OisyMetadataSchema = z.object({
 	OISY_HOW_TO_CONVERT_DOCS_URL: z.url(),
 	OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL: z.url(),
 	OISY_LOGGING_INTO_OISY_URL: z.url(),
-	OISY_CREATING_A_WALLET_URL: z.url()
+	OISY_CREATING_A_WALLET_URL: z.url(),
+	OISY_SCAN_URL: z.url(),
+	OISY_PAY_URL: z.url()
 });

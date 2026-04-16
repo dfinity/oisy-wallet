@@ -1045,7 +1045,8 @@
 			"what_is_scan_description": "",
 			"what_is_scan_title": "",
 			"learn_more_about_scan": "",
-			"learn_more_about_pay": ""
+			"learn_more_about_pay": "",
+			"universal_scanner": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/URL ist nicht gültig",
@@ -1514,7 +1515,10 @@
 			"amount": "",
 			"hex_data": "HEX-Daten",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
-			"sign_message": "Nachricht signieren"
+			"sign_message": "Nachricht signieren",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "z. B. wc:a281567bb3e4..."

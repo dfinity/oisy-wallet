@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
-	import { UNIVERSAL_SCANNER_ENABLED } from '$env/universal-scanner.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
-	import Pay from '$lib/components/pay/Pay.svelte';
+	import Scanner from '$lib/components/scanner/Scanner.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
@@ -74,14 +73,11 @@
 		{/if}
 
 		{#if $authSignedIn}
-			<WalletConnect />
-
-			{#if UNIVERSAL_SCANNER_ENABLED}
-				<!-- TODO: Re-enable the scanner button when it includes WalletConnect and remove the modal from pay button -->
-				<!-- <Scanner /> -->
-
-				<Pay />
+			{#if nonNullish($walletConnectListenerStore)}
+				<WalletConnect />
 			{/if}
+
+			<Scanner />
 		{/if}
 
 		{#if $authSignedIn}

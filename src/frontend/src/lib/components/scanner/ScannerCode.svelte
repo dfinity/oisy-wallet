@@ -8,11 +8,11 @@
 	import { OCP_PAY_WITH_BTC_ENABLED } from '$env/open-crypto-pay.env';
 	import IconChain from '$lib/components/icons/IconChain.svelte';
 	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
+	import ScannerCodeInfoButton from '$lib/components/scanner/ScannerCodeInfoButton.svelte';
 	import ScannerCodeInput from '$lib/components/scanner/ScannerCodeInput.svelte';
+	import ScannerInfo from '$lib/components/scanner/ScannerInfo.svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet } from '$lib/derived/address.derived';
@@ -31,12 +31,16 @@
 	import { waitReady } from '$lib/utils/timeout.utils';
 
 	interface Props {
-		onNext: (results: ScannerResults) => void;
+		onNext: (params: { results: ScannerResults; code?: string }) => void;
+		onOpenInfo: () => void;
 	}
 
-	let { onNext }: Props = $props();
+	let { onNext, onOpenInfo }: Props = $props();
+
+	const WALLET_CONNECT_URI_PREFIX = 'wc:';
 
 	let openBottomSheet = $state(false);
+	let openInfoBottomSheet = $state(false);
 	let uri = $state('');
 	let error = $state('');
 	let isEmptyUri = $derived(isEmptyString(uri));
@@ -44,6 +48,11 @@
 	const { setData, setAvailableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	const processCode = async (code: string) => {
+		if (code.startsWith(WALLET_CONNECT_URI_PREFIX)) {
+			onNext({ results: ScannerResults.WALLET_CONNECT, code });
+			return;
+		}
+
 		busy.start();
 
 		error = '';
@@ -74,7 +83,7 @@
 
 			setAvailableTokens(tokensWithFees);
 
-			onNext(ScannerResults.PAY);
+			onNext({ results: ScannerResults.PAY });
 		} catch (_: unknown) {
 			error = $i18n.scanner.error.code_link_is_not_valid;
 		} finally {
@@ -101,8 +110,8 @@
 	});
 </script>
 
-<ContentWithToolbar styleClass="flex flex-col gap-3 md:gap-4 w-full">
-	<QrCodeScanner onScan={handleScan} />
+<div class="relative flex w-full flex-col bg-tertiary">
+	<QrCodeScanner expandedLayout onScan={handleScan} />
 
 	<Responsive up="md">
 		<ScannerCodeInput
@@ -110,58 +119,61 @@
 			{error}
 			label={$i18n.scanner.text.url_or_code}
 			placeholder={$i18n.scanner.text.enter_or_paste_code}
+			styleClass="absolute right-0 bottom-[90px] left-0 mx-auto w-[90%] rounded-lg bg-surface"
 			bind:value={uri}
-		/>
+		>
+			<Button disabled={isEmptyUri} fullWidth onclick={handleManualConnect} paddingSmall>
+				{$i18n.core.text.continue}
+			</Button>
+		</ScannerCodeInput>
 	</Responsive>
 
 	<Responsive down="sm">
 		<BottomSheet contentClass="min-h-[10vh]" bind:visible={openBottomSheet}>
 			{#snippet content()}
-				<div class="mb-4">
-					<ScannerCodeInput
-						name="uri"
-						{error}
-						label={$i18n.scanner.text.url_or_code}
-						placeholder={$i18n.scanner.text.enter_or_paste_code}
-						bind:value={uri}
-					/>
-				</div>
+				<ScannerCodeInput
+					name="uri"
+					{error}
+					label={$i18n.scanner.text.url_or_code}
+					placeholder={$i18n.scanner.text.enter_or_paste_code}
+					bind:value={uri}
+				>
+					<Button disabled={isEmptyUri} fullWidth onclick={handleManualConnect} paddingSmall>
+						{$i18n.core.text.continue}
+					</Button>
+				</ScannerCodeInput>
 			{/snippet}
+		</BottomSheet>
 
-			{#snippet footer()}
-				<Button disabled={isEmptyUri} fullWidth onclick={handleManualConnect}>
-					{$i18n.core.text.continue}
-				</Button>
+		<div class="absolute right-0 bottom-[90px] left-0 mx-auto flex w-[200px] justify-center">
+			<Button
+				colorStyle="tertiary"
+				innerStyleClass="flex items-center justify-center"
+				onclick={() => {
+					uri = '';
+					error = '';
+					openBottomSheet = true;
+				}}
+				testId={OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON}
+			>
+				{$i18n.scanner.text.enter_manually}
+
+				<IconChain />
+			</Button>
+		</div>
+	</Responsive>
+
+	<Responsive up="md">
+		<ScannerCodeInfoButton onclick={onOpenInfo} />
+	</Responsive>
+
+	<Responsive down="sm">
+		<ScannerCodeInfoButton onclick={() => (openInfoBottomSheet = true)} />
+
+		<BottomSheet bind:visible={openInfoBottomSheet}>
+			{#snippet content()}
+				<ScannerInfo onButtonClick={() => (openInfoBottomSheet = false)} />
 			{/snippet}
 		</BottomSheet>
 	</Responsive>
-
-	{#snippet toolbar()}
-		<Responsive up="md">
-			<ButtonGroup>
-				<Button disabled={isEmptyUri} onclick={handleManualConnect}>
-					{$i18n.core.text.continue}
-				</Button>
-			</ButtonGroup>
-		</Responsive>
-
-		<Responsive down="sm">
-			<div class="mb-4 flex flex-0">
-				<Button
-					colorStyle="primary"
-					innerStyleClass="flex items-center justify-center"
-					link
-					onclick={() => {
-						uri = '';
-						error = '';
-						openBottomSheet = true;
-					}}
-					testId={OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON}
-				>
-					{$i18n.scanner.text.enter_manually}
-					<IconChain />
-				</Button>
-			</div>
-		</Responsive>
-	{/snippet}
-</ContentWithToolbar>
+</div>

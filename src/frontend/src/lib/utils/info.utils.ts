@@ -4,10 +4,7 @@ import { consoleError } from '$lib/utils/console.utils';
 export type HideInfoKey =
 	| 'oisy_ic_hide_bitcoin_info'
 	| 'oisy_ic_hide_ethereum_info'
-	| 'oisy_ic_hide_erc20_info'
-	| 'oisy_ic_hide_bitcoin_activity'
-	| 'oisy_ic_hide_transaction_no_canister'
-	| 'oisy_ic_hide_transaction_unavailable_canister';
+	| 'oisy_ic_hide_erc20_info';
 
 export const saveHideInfo = (key: HideInfoKey) => {
 	try {

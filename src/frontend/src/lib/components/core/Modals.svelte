@@ -7,12 +7,15 @@
 	import GiftCodeCreateModal from '$lib/components/gift-code/GiftCodeCreateModal.svelte';
 	import GiftCodeListModal from '$lib/components/gift-code/GiftCodeListModal.svelte';
 	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+	import PayDialog from '$lib/components/pay/PayDialog.svelte';
 	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
+	import ScannerModal from '$lib/components/scanner/ScannerModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
+	import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalDAppDetails,
@@ -34,7 +37,10 @@
 		modalNftFullscreenDisplayData,
 		modalNftFullscreenDisplayOpen,
 		modalReceive,
-		modalReceiveId
+		modalReceiveId,
+		modalPayDialogOpen,
+		modalUniversalScannerOpen,
+		modalWalletConnectSessions
 	} from '$lib/derived/modal.derived';
 	import { getSymbol } from '$lib/utils/modal.utils';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
@@ -71,5 +77,11 @@
 		<GiftCodeCreateModal />
 	{:else if $modalGiftCodeList}
 		<GiftCodeListModal />
+	{:else if $modalPayDialogOpen}
+		<PayDialog />
+	{:else if $modalUniversalScannerOpen}
+		<ScannerModal />
+	{:else if $modalWalletConnectSessions}
+		<WalletConnectSessionsModal />
 	{/if}
 {/if}

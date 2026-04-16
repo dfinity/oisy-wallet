@@ -1,30 +1,19 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { ethAddressNotLoaded, solAddressMainnetNotLoaded } from '$lib/derived/address.derived';
 
 	interface Props {
 		loading?: boolean;
 		ariaLabel?: string;
 		onclick: () => void;
-		children?: Snippet;
 	}
 
-	let { loading = false, ariaLabel, onclick, children }: Props = $props();
+	let { loading = false, ariaLabel, onclick }: Props = $props();
 
 	let disabled = $derived(loading || ($ethAddressNotLoaded && $solAddressMainnetNotLoaded));
 </script>
 
-<button
-	class="tertiary-alt h-10"
-	class:icon={isNullish(children)}
-	aria-label={ariaLabel}
-	{disabled}
-	{onclick}
-	in:fade
->
+<Button {ariaLabel} {disabled} {onclick} paddingSmall styleClass="h-10 px-2 rounded-xl">
 	<IconWalletConnect size="24" />
-	{@render children?.()}
-</button>
+</Button>

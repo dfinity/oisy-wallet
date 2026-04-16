@@ -1045,7 +1045,8 @@
 			"what_is_scan_description": "",
 			"what_is_scan_title": "",
 			"learn_more_about_scan": "",
-			"learn_more_about_pay": ""
+			"learn_more_about_pay": "",
+			"universal_scanner": ""
 		},
 		"error": {
 			"code_link_is_not_valid": "",
@@ -1514,7 +1515,10 @@
 			"amount": "",
 			"hex_data": "हेक्स डेटा",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
-			"sign_message": "संदेश पर हस्ताक्षर करें"
+			"sign_message": "संदेश पर हस्ताक्षर करें",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "उदाहरण के लिए wc:a281567bb3e4..."

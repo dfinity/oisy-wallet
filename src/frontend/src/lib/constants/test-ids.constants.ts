@@ -6,6 +6,8 @@ export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_GIFT_CODE_BUTTON = 'navigation-menu-gift-code-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
+export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
+export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
 export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
 export const NAVIGATION_MENU_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const NAVIGATION_MENU_DOC_BUTTON = 'navigation-documentation-button';
@@ -56,6 +58,9 @@ export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
 export const PAY_DIALOG = 'pay-dialog';
 export const PAY_DIALOG_PAY_BUTTON = 'pay-dialog-pay-button';
 export const PAY_DIALOG_BANNER = 'pay-dialog-banner';
+
+export const OISY_SCANNER_INFO = 'oisy-scanner-info';
+export const OISY_SCANNER_INFO_GOT_IT_BUTTON = 'oisy-scanner-info-got-it-button';
 
 export const RECEIVE_TOKENS_MODAL_OPEN_BUTTON = 'receive-tokens-modal-open-button';
 export const RECEIVE_TOKENS_MODAL_DONE_BUTTON = 'receive-tokens-modal-done-button';

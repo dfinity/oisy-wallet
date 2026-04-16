@@ -22,5 +22,7 @@
 	"OISY_HOW_TO_CONVERT_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#convert-assets-from-to-the-icp-network",
 	"OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/support/oisy-wallet-switches-to-internet-identity-2.0",
 	"OISY_LOGGING_INTO_OISY_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/logging-into-oisy",
-	"OISY_CREATING_A_WALLET_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/creating-a-wallet"
+	"OISY_CREATING_A_WALLET_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/creating-a-wallet",
+	"OISY_SCAN_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/universal-scanner",
+	"OISY_PAY_URL": "https://docs.oisy.com/using-oisy-wallet/oisy-pay"
 }
