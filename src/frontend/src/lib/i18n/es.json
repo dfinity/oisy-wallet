@@ -1511,7 +1511,10 @@
 			"amount": "Cantidad",
 			"hex_data": "Datos HEX",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
-			"sign_message": "Firmar Mensaje"
+			"sign_message": "Firmar Mensaje",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "ej. wc:a281567bb3e4..."

@@ -1511,7 +1511,10 @@
 			"amount": "",
 			"hex_data": "HEX-Daten",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
-			"sign_message": "Nachricht signieren"
+			"sign_message": "Nachricht signieren",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "z. B. wc:a281567bb3e4..."

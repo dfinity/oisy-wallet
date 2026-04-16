@@ -1511,7 +1511,10 @@
 			"amount": "Částka",
 			"hex_data": "HEX data",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
-			"sign_message": "Podepsat zprávu"
+			"sign_message": "Podepsat zprávu",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "např. wc:a281567bb3e4..."

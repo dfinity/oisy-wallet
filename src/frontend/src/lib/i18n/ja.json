@@ -1511,7 +1511,10 @@
 			"amount": "数量",
 			"hex_data": "HEXデータ",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
-			"sign_message": "メッセージに署名"
+			"sign_message": "メッセージに署名",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "例: wc:a281567bb3e4..."

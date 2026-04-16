@@ -1511,7 +1511,10 @@
 			"amount": "",
 			"hex_data": "Dane HEX",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
-			"sign_message": "Podpisz wiadomość"
+			"sign_message": "Podpisz wiadomość",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "np. wc:a281567bb3e4..."
