@@ -1036,13 +1036,13 @@
 			"try_again": "Попробовать снова",
 			"payment_confirmed": "Оплата подтверждена",
 			"payment_failed": "Оплата не удалась",
-			"what_is_scan": "",
-			"no_camera_permission": "",
-			"what_is_scan_description": "",
-			"what_is_scan_title": "",
-			"learn_more_about_scan": "",
-			"learn_more_about_pay": "",
-			"universal_scanner": ""
+			"what_is_scan": "Что такое сканер",
+			"no_camera_permission": "Для сканирования QR-кодов необходимо разрешить доступ к камере в настройках сайта вашего браузера.",
+			"what_is_scan_description": "Сканер $oisy_short может считывать различные QR-коды и мгновенно выполнять нужное действие. Отсканируйте QR-код WalletConnect, чтобы установить новое соединение, или отсканируйте код оплаты в любом магазине, использующем Open CryptoPay, чтобы оплатить счёт через OISY Pay.",
+			"what_is_scan_title": "$oisy_short распознаёт любой QR-код",
+			"learn_more_about_scan": "Узнать больше о сканере",
+			"learn_more_about_pay": "Узнать больше о $oisy_short Pay",
+			"universal_scanner": "Сканер"
 		},
 		"error": {
 			"code_link_is_not_valid": "Код/ссылка недействительна",
