@@ -63,6 +63,7 @@ interface I18nCore {
 		more: string;
 		less: string;
 		learn_more: string;
+		up: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
