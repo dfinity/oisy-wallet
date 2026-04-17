@@ -57,7 +57,7 @@
 	<div class="relative flex h-64 w-full">
 		<button
 			class="absolute top-3 right-3 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border-0 bg-black/40 p-1 transition-colors duration-200 hover:bg-black/60 [&>svg]:size-5"
-			aria-label={$i18n.core.alt.back}
+			aria-label={$i18n.core.alt.close}
 			onclick={() => goto(assetsUrl)}
 		>
 			<IconClose />
