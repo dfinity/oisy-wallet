@@ -1043,7 +1043,7 @@
 			"what_is_scan_title": "$oisy_shortはあらゆるQRコードに対応",
 			"learn_more_about_scan": "スキャナーについて詳しく",
 			"learn_more_about_pay": "$oisy_short Payについて詳しく",
-			"universal_scanner": "スキャナー"
+			"scanner": "スキャナー"
 		},
 		"error": {
 			"code_link_is_not_valid": "コード/リンクが無効です",

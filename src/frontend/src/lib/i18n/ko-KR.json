@@ -1043,7 +1043,7 @@
 			"what_is_scan_title": "$oisy_short는 모든 QR 코드를 인식합니다",
 			"learn_more_about_scan": "스캐너에 대해 자세히 알아보기",
 			"learn_more_about_pay": "$oisy_short Pay에 대해 자세히 알아보기",
-			"universal_scanner": "스캐너"
+			"scanner": "스캐너"
 		},
 		"error": {
 			"code_link_is_not_valid": "코드/링크가 유효하지 않습니다",

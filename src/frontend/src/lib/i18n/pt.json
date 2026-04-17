@@ -1043,7 +1043,7 @@
 			"what_is_scan_title": "$oisy_short entende qualquer código QR",
 			"learn_more_about_scan": "Saiba mais sobre o scanner",
 			"learn_more_about_pay": "Saiba mais sobre o $oisy_short Pay",
-			"universal_scanner": "Scanner"
+			"scanner": "Scanner"
 		},
 		"error": {
 			"code_link_is_not_valid": "O código/link não é válido",

@@ -1043,7 +1043,7 @@
 			"what_is_scan_title": "$oisy_short 可识别任何二维码",
 			"learn_more_about_scan": "了解更多关于扫描器的信息",
 			"learn_more_about_pay": "了解更多关于 $oisy_short Pay 的信息",
-			"universal_scanner": "扫描器"
+			"scanner": "扫描器"
 		},
 		"error": {
 			"code_link_is_not_valid": "代码 / 链接无效",
