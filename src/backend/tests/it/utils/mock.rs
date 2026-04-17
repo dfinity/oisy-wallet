@@ -5,5 +5,6 @@ pub const CONTROLLER: &str = "l3lfs-gak7g-xrbil-j4v4h-aztjn-4jyki-wprso-m27h3-ib
 /// A normal user, without any special permissions.
 pub const USER_1: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
 
+pub const FRONTEND_DERIVATION_ORIGIN: &str = "https://l7rua-raaaa-aaaap-ahh6a-cai.ic0.app";
 pub const II_CANISTER_ID: &str = "fgte5-ciaaa-aaaad-aaatq-cai";
 pub const SIGNER_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
