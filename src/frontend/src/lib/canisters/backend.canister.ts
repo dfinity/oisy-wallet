@@ -39,7 +39,8 @@ import type {
 	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
@@ -411,6 +412,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await update_user_experimental_feature_settings({
 			experimental_features: mapUserExperimentalFeatures(experimentalFeatures),
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateUserTransactionFilterSettings = async ({
+		hideMicroTransactions,
+		currentUserVersion
+	}: UpdateUserTransactionFilterSettings): Promise<void> => {
+		const { update_user_transaction_filter_settings } = this.caller({ certified: true });
+
+		await update_user_transaction_filter_settings({
+			filter: { hide_micro_transactions: hideMicroTransactions },
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};
