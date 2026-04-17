@@ -62,7 +62,8 @@
 			"switch_currency": "통화 전환",
 			"more": "전체 텍스트 보기",
 			"less": "텍스트 접기",
-			"learn_more": "링크를 따라 자세히 알아보기"
+			"learn_more": "링크를 따라 자세히 알아보기",
+			"up_one_level": "한 단계 위로 이동"
 		},
 		"warning": {
 			"do_not_close": "거래가 완료될 때까지 이 탭을 닫지 마세요",
@@ -1036,13 +1037,13 @@
 			"try_again": "다시 시도",
 			"payment_confirmed": "결제 확인됨",
 			"payment_failed": "결제 실패",
-			"what_is_scan": "",
-			"no_camera_permission": "",
-			"what_is_scan_description": "",
-			"what_is_scan_title": "",
-			"learn_more_about_scan": "",
-			"learn_more_about_pay": "",
-			"universal_scanner": ""
+			"what_is_scan": "스캐너란",
+			"no_camera_permission": "QR 코드를 스캔하려면 브라우저의 사이트 설정에서 카메라 접근을 허용해야 합니다.",
+			"what_is_scan_description": "$oisy_short 스캐너는 다양한 QR 코드를 읽고 즉시 적절한 작업을 수행할 수 있습니다. WalletConnect QR 코드를 스캔하여 새 연결을 설정하거나, Open CryptoPay를 사용하는 매장에서 결제 코드를 스캔하여 $oisy_short Pay로 결제할 수 있습니다.",
+			"what_is_scan_title": "$oisy_short는 모든 QR 코드를 인식합니다",
+			"learn_more_about_scan": "스캐너에 대해 자세히 알아보기",
+			"learn_more_about_pay": "$oisy_short Pay에 대해 자세히 알아보기",
+			"scanner": "스캐너"
 		},
 		"error": {
 			"code_link_is_not_valid": "코드/링크가 유효하지 않습니다",
@@ -1511,7 +1512,10 @@
 			"amount": "금액",
 			"hex_data": "HEX 데이터",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
-			"sign_message": "메시지 서명"
+			"sign_message": "메시지 서명",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "예: wc:a281567bb3e4..."

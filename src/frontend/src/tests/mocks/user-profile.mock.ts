@@ -39,7 +39,8 @@ export const mockUserSettings: Settings = {
 	networks: mockNetworksSettings,
 	dapp: mockDappSettings,
 	experimental_features: mockExperimentalFeaturesSettings,
-	notifications: []
+	notifications: [],
+	transactions: [{ filter: [{ hide_micro_transactions: true }] }]
 };
 
 const mockUserAgreement: UserAgreement = {

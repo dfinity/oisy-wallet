@@ -443,12 +443,13 @@ export interface Settings {
 	notifications: [] | [NotificationSettings];
 	dapp: DappSettings;
 	experimental_features: ExperimentalFeaturesSettings;
+	transactions: [] | [TransactionSettings];
 }
 export interface SignedDelegation {
 	signature: Uint8Array;
 	delegation: Delegation;
 }
-export type SimpleNotificationKind = { BtcActivityInfo: null };
+export type SimpleNotificationKind = { BtcActivityInfo: null } | { HiddenMicroTransactions: null };
 export interface SolTransactionData {
 	fee: [] | [bigint];
 	to_owner: [] | [string];
@@ -533,6 +534,12 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export interface TransactionFilterSettings {
+	hide_micro_transactions: boolean;
+}
+export interface TransactionSettings {
+	filter: [] | [TransactionFilterSettings];
+}
 export interface TransformArgs {
 	context: Uint8Array;
 	response: HttpRequestResult;

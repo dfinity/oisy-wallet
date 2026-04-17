@@ -11,7 +11,7 @@ export const scannerWizardSteps = ({
 	},
 	{
 		name: WizardStepsScanner.OISY_SCANNER_INFO,
-		title: i18n.scanner.text.universal_scanner
+		title: i18n.scanner.text.scanner
 	},
 	{
 		name: WizardStepsScanner.PAY,
