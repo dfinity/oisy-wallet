@@ -59,7 +59,7 @@
 								{/snippet}
 							</EarningYearlyAmount>
 						{:else if (cardField === EarningCardFields.NETWORKS || cardField === EarningCardFields.ASSETS) && Array.isArray(cardFields[cardField])}
-							{#if (cardFields[cardField]).length > 0}
+							{#if cardFields[cardField].length > 0}
 								<OverlappedLogos
 									icons={cardFields[cardField]}
 									invertColor={cardField === EarningCardFields.NETWORKS}
@@ -105,8 +105,7 @@
 			disabled={cardFields.disabled}
 			fullWidth
 			onclick={cardFields.action}
-			paddingSmall
-			>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
+			paddingSmall>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
 		>
 	{/snippet}
 </EarningOpportunityCard>
