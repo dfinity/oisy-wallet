@@ -1970,7 +1970,8 @@
 			"harvest_autopilot": {
 				"title": "Harvest - Autopilot",
 				"description": "Maximized yield efficiency with 1-click autopilot vaults.",
-				"action": "Go to Autopilot"
+				"action": "Go to Autopilot",
+				"no_networks_enabled": "None of the supported networks are currently enabled."
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
