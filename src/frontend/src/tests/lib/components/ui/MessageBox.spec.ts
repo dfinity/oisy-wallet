@@ -81,7 +81,7 @@ describe('MessageBox', () => {
 	});
 
 	describe('close button', () => {
-		it('should not render a close button when onDismiss is not provided', () => {
+		it('should not render a close button when neither onDismiss nor closableKey is provided', () => {
 			const { queryByRole } = render(MessageBox, {
 				props: { children: childrenSnippet }
 			});
@@ -92,6 +92,14 @@ describe('MessageBox', () => {
 		it('should render a close button when onDismiss is provided', () => {
 			const { getByRole } = render(MessageBox, {
 				props: { children: childrenSnippet, onDismiss: vi.fn() }
+			});
+
+			expect(getByRole('button', { name: en.core.text.close })).toBeInTheDocument();
+		});
+
+		it('should render a close button when closableKey is provided', () => {
+			const { getByRole } = render(MessageBox, {
+				props: { children: childrenSnippet, closableKey: 'oisy_ic_hide_bitcoin_info' }
 			});
 
 			expect(getByRole('button', { name: en.core.text.close })).toBeInTheDocument();
@@ -127,6 +135,44 @@ describe('MessageBox', () => {
 			await fireEvent.click(closeButton);
 
 			expect(onDismiss).toHaveBeenCalledOnce();
+		});
+
+		it('should save to sessionStorage when closableKey is provided and close is clicked', async () => {
+			const spySetItem = vi.spyOn(Storage.prototype, 'setItem');
+
+			const { getByRole } = render(MessageBox, {
+				props: {
+					children: childrenSnippet,
+					closableKey: 'oisy_ic_hide_transaction_unavailable_canister'
+				}
+			});
+
+			const closeButton = getByRole('button', { name: en.core.text.close });
+
+			await fireEvent.click(closeButton);
+
+			expect(spySetItem).toHaveBeenCalledWith(
+				'oisy_ic_hide_transaction_unavailable_canister',
+				'true'
+			);
+
+			spySetItem.mockRestore();
+		});
+
+		it('should not be visible when closableKey was previously saved in sessionStorage', () => {
+			vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('true');
+
+			const { queryByTestId } = render(MessageBox, {
+				props: {
+					children: childrenSnippet,
+					closableKey: 'oisy_ic_hide_transaction_unavailable_canister',
+					testId: 'msg-box'
+				}
+			});
+
+			expect(queryByTestId('msg-box')).not.toBeInTheDocument();
+
+			vi.restoreAllMocks();
 		});
 	});
 
