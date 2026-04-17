@@ -449,7 +449,7 @@ export interface SignedDelegation {
 	signature: Uint8Array;
 	delegation: Delegation;
 }
-export type SimpleNotificationKind = { BtcActivityInfo: null };
+export type SimpleNotificationKind = { BtcActivityInfo: null } | { HiddenMicroTransactions: null };
 export interface SolTransactionData {
 	fee: [] | [bigint];
 	to_owner: [] | [string];
