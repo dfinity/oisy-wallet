@@ -63,7 +63,7 @@
 			"more": "显示完整文本",
 			"less": "显示更少文本",
 			"learn_more": "点击链接了解更多",
-			"up_one_level": "Go up one level"
+			"up_one_level": "返回上一级"
 		},
 		"warning": {
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
