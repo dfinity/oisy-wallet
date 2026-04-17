@@ -1970,7 +1970,8 @@
 			"harvest_autopilot": {
 				"title": "Harvest – Autopilot",
 				"description": "ワンクリックのAutopilot vaultで最大限のイールド効率を実現。",
-				"action": "Autopilotへ移動"
+				"action": "Autopilotへ移動",
+				"no_networks_enabled": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",

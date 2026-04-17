@@ -1970,7 +1970,8 @@
 			"harvest_autopilot": {
 				"title": "Harvest – Autopilot",
 				"description": "Максимальная эффективность доходности с автопилотными хранилищами в один клик.",
-				"action": "Перейти к Autopilot"
+				"action": "Перейти к Autopilot",
+				"no_networks_enabled": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",

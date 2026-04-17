@@ -1970,7 +1970,8 @@
 			"harvest_autopilot": {
 				"title": "Harvest – Autopilot",
 				"description": "Maximální výnosová efektivita s automatickými trezory na jeden klik.",
-				"action": "Přejít na Autopilot"
+				"action": "Přejít na Autopilot",
+				"no_networks_enabled": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",

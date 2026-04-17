@@ -1970,7 +1970,8 @@
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",
-				"action": ""
+				"action": "",
+				"no_networks_enabled": ""
 			},
 			"sprinkles": {
 				"title": "",

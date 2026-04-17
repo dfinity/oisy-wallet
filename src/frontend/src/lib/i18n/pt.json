@@ -1970,7 +1970,8 @@
 			"harvest_autopilot": {
 				"title": "Harvest – Autopilot",
 				"description": "Máxima eficiência de rendimento com vaults no Autopilot com um único clique.",
-				"action": "Ir para o Autopilot"
+				"action": "Ir para o Autopilot",
+				"no_networks_enabled": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
