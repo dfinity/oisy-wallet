@@ -512,6 +512,12 @@ interface I18nSettings {
 		enable_beta_feature: string;
 		disable_beta_feature: string;
 		save_beta_feature_success: string;
+		hide_micro_transactions: string;
+		hide_micro_transactions_description: string;
+		enable_hide_micro_transactions: string;
+		disable_hide_micro_transactions: string;
+		save_spam_filter_success: string;
+		learn_more: string;
 	};
 	alt: {
 		testnets_toggle: string;
@@ -1506,7 +1512,7 @@ interface I18nPrivacy_policy {
 
 interface I18nActivity {
 	text: { title: string };
-	info: { btc_transactions: string };
+	info: { btc_transactions: string; hidden_micro_transactions: string };
 	warning: { no_index_canister: string; unavailable_index_canister: string };
 }
 
