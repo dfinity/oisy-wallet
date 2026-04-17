@@ -2,8 +2,8 @@
 	import { IconBack } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
-	import { afterNavigate, goto } from '$app/navigation';
 	import { slide } from 'svelte/transition';
+	import { afterNavigate, goto } from '$app/navigation';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
