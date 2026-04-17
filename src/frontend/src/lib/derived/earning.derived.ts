@@ -1,6 +1,7 @@
 import { goto } from '$app/navigation';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
+	allHarvestAutopilotTokens,
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots,
 	harvestAutopilotsCurrentEarning,
@@ -27,7 +28,8 @@ export const earningData: Readable<EarningData> = derived(
 		enabledHarvestAutopilotsUsdBalance,
 		harvestAutopilotsCurrentEarning,
 		harvestAutopilots,
-		harvestAutopilotsMaxApy
+		harvestAutopilotsMaxApy,
+		allHarvestAutopilotTokens
 	],
 	([
 		$enabledMainnetFungibleTokensUsdBalance,
@@ -35,21 +37,22 @@ export const earningData: Readable<EarningData> = derived(
 		$enabledHarvestAutopilotsUsdBalance,
 		$harvestAutopilotsCurrentEarning,
 		$harvestAutopilots,
-		$harvestAutopilotsMaxApy
+		$harvestAutopilotsMaxApy,
+		$allHarvestAutopilotTokens
 	]) => ({
 		'harvest-autopilot': {
 			[EarningCardFields.APY]: $harvestAutopilotsMaxApy,
 			[EarningCardFields.CURRENT_EARNING]: $harvestAutopilotsCurrentEarning,
 			[EarningCardFields.CURRENT_STAKED]: $harvestAutopilotsUsdBalance,
 			[EarningCardFields.NETWORKS]: [
-				...$harvestAutopilots.reduce<Set<string>>(
-					(acc, { token: { network } }) => (nonNullish(network.icon) ? acc.add(network.icon) : acc),
+				...$allHarvestAutopilotTokens.reduce<Set<string>>(
+					(acc, { network }) => (nonNullish(network.icon) ? acc.add(network.icon) : acc),
 					new Set()
 				)
 			],
 			[EarningCardFields.ASSETS]: [
-				...$harvestAutopilots.reduce<Set<string>>(
-					(acc, { token: { assetIcon } }) => (nonNullish(assetIcon) ? acc.add(assetIcon) : acc),
+				...$allHarvestAutopilotTokens.reduce<Set<string>>(
+					(acc, { assetIcon }) => (nonNullish(assetIcon) ? acc.add(assetIcon) : acc),
 					new Set()
 				)
 			],

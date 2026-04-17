@@ -1,5 +1,6 @@
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
+	allHarvestAutopilotTokens,
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots,
 	harvestAutopilotsCurrentEarning,
@@ -23,18 +24,23 @@ describe('earning.derived', () => {
 	});
 
 	describe('earningData', () => {
+		const defaultAllTokens = [{ network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' }];
+		const defaultVaults = [{ token: { network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' } }];
+
 		const setupStores = ({
 			enabledMainnetUsdBalance = 1000,
 			harvestUsdBalance = 100,
 			enabledHarvestUsdBalance = 100,
 			currentEarning = 5,
-			vaults = [{ token: { network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' } }],
+			allTokens = defaultAllTokens,
+			vaults = defaultVaults,
 			maxApy = '5.5'
 		}: {
 			enabledMainnetUsdBalance?: number | null;
 			harvestUsdBalance?: number;
 			enabledHarvestUsdBalance?: number;
 			currentEarning?: number;
+			allTokens?: { network: { icon?: string }; assetIcon?: string }[];
 			vaults?: { token: { network: { icon?: string }; assetIcon?: string } }[];
 			maxApy?: string;
 		} = {}) => {
@@ -52,6 +58,10 @@ describe('earning.derived', () => {
 			});
 			vi.spyOn(harvestAutopilotsCurrentEarning, 'subscribe').mockImplementation((fn) => {
 				fn(currentEarning);
+				return () => {};
+			});
+			vi.spyOn(allHarvestAutopilotTokens, 'subscribe').mockImplementation((fn) => {
+				fn(allTokens as never);
 				return () => {};
 			});
 			vi.spyOn(harvestAutopilots, 'subscribe').mockImplementation((fn) => {
@@ -104,10 +114,10 @@ describe('earning.derived', () => {
 
 		it('deduplicates network and asset icons', () => {
 			setupStores({
-				vaults: [
-					{ token: { network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' } },
-					{ token: { network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' } },
-					{ token: { network: { icon: 'base-icon' }, assetIcon: 'usdt-icon' } }
+				allTokens: [
+					{ network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' },
+					{ network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' },
+					{ network: { icon: 'base-icon' }, assetIcon: 'usdt-icon' }
 				]
 			});
 
@@ -120,11 +130,21 @@ describe('earning.derived', () => {
 
 		it('excludes nullish icons from networks and assets', () => {
 			setupStores({
-				vaults: [
-					{ token: { network: { icon: 'eth-icon' }, assetIcon: undefined } },
-					{ token: { network: { icon: undefined }, assetIcon: 'usdc-icon' } }
+				allTokens: [
+					{ network: { icon: 'eth-icon' }, assetIcon: undefined },
+					{ network: { icon: undefined }, assetIcon: 'usdc-icon' }
 				]
 			});
+
+			const result = get(earningData);
+			const record = result['harvest-autopilot'];
+
+			expect(record[EarningCardFields.NETWORKS]).toEqual(['eth-icon']);
+			expect(record[EarningCardFields.ASSETS]).toEqual(['usdc-icon']);
+		});
+
+		it('shows all network icons even when no vaults are enabled', () => {
+			setupStores({ vaults: [] });
 
 			const result = get(earningData);
 			const record = result['harvest-autopilot'];
