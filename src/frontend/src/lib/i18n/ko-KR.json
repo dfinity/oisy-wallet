@@ -62,7 +62,8 @@
 			"switch_currency": "통화 전환",
 			"more": "전체 텍스트 보기",
 			"less": "텍스트 접기",
-			"learn_more": "링크를 따라 자세히 알아보기"
+			"learn_more": "링크를 따라 자세히 알아보기",
+			"up_one_level": "한 단계 위로 이동"
 		},
 		"warning": {
 			"do_not_close": "거래가 완료될 때까지 이 탭을 닫지 마세요",
