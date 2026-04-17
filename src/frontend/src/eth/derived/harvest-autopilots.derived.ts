@@ -1,3 +1,4 @@
+import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import type { Erc4626Token } from '$eth/types/erc4626';
@@ -15,7 +16,7 @@ import { derived, type Readable } from 'svelte/store';
 export const allHarvestAutopilotTokens: Readable<Erc4626Token[]> = derived(
 	[erc4626DefaultTokensStore],
 	([$erc4626DefaultTokensStore]) =>
-		($erc4626DefaultTokensStore ?? []).filter(isTokenHarvestAutopilot)
+		($erc4626DefaultTokensStore ?? ERC4626_TOKENS).filter(isTokenHarvestAutopilot)
 );
 
 export const allHarvestAutopilotsMaxApy: Readable<string> = derived(
