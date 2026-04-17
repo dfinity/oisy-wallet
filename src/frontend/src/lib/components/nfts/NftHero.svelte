@@ -63,7 +63,7 @@
 <div class="relative overflow-hidden rounded-xl" in:fade>
 	<div class="relative h-64 w-full overflow-hidden">
 		<button
-			class="absolute top-3 right-3 z-10 flex cursor-pointer items-center justify-center rounded-full border-0 bg-black/40 p-1 transition-colors duration-200 hover:bg-black/60"
+			class="absolute top-3 right-3 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border-0 bg-black/40 p-1 transition-colors duration-200 hover:bg-black/60 [&>svg]:size-5"
 			aria-label={$i18n.core.alt.back}
 			onclick={() => back({ pop: nonNullish(fromRoute) })}
 		>
