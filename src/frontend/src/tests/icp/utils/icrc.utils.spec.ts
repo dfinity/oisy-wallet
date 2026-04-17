@@ -18,6 +18,7 @@ import {
 } from '$icp/utils/icrc.utils';
 import { TokenCategoryTagValue, TokenRiskTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
+import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
@@ -416,6 +417,58 @@ describe('icrc.utils', () => {
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
 					]);
 				});
+			});
+		});
+
+		describe('groupData', () => {
+			const mockGroupData = {
+				id: parseTokenGroupId('TEST'),
+				name: 'Test Group',
+				symbol: 'TEST'
+			};
+
+			it('should propagate groupData from icrcCustomTokens when present', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: { ...mockToken, groupData: mockGroupData }
+					}
+				});
+
+				expect(token?.groupData).toStrictEqual(mockGroupData);
+			});
+
+			it('should not set groupData when the token in icrcCustomTokens has no groupData', () => {
+				const { groupData: _, ...mockTokenWithoutGroupData } = mockToken;
+
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: mockTokenWithoutGroupData
+					}
+				});
+
+				expect(token?.groupData).toBeUndefined();
+			});
+
+			it('should not set groupData when icrcCustomTokens is not provided', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: undefined
+				});
+
+				expect(token?.groupData).toBeUndefined();
+			});
+
+			it('should not set groupData when the token is not found in icrcCustomTokens', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						['other-canister-id']: { ...mockToken, groupData: mockGroupData }
+					}
+				});
+
+				expect(token?.groupData).toBeUndefined();
 			});
 		});
 
