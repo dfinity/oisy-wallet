@@ -1038,7 +1038,7 @@
 			"payment_failed": "Bezahlung Fehlgeschlagen",
 			"what_is_scan": "Was ist der Scanner",
 			"no_camera_permission": "Um QR-Codes zu scannen, musst du den Kamerazugriff in den Seiteneinstellungen deines Browsers erlauben.",
-			"what_is_scan_description": "Der $oisy_short Scanner kann verschiedenste QR-Codes lesen und sofort die richtige Aktion einleiten. Scanne einen WalletConnect QR-Code, um eine neue Verbindung herzustellen, oder scanne den Bezahlcode in jedem Geschäft, das Open CryptoPay nutzt, um die Rechnung mit OISY Pay zu begleichen.",
+			"what_is_scan_description": "Der $oisy_short Scanner kann verschiedenste QR-Codes lesen und sofort die richtige Aktion einleiten. Scanne einen WalletConnect QR-Code, um eine neue Verbindung herzustellen, oder scanne den Bezahlcode in jedem Geschäft, das Open CryptoPay nutzt, um die Rechnung mit $oisy_short Pay zu begleichen.",
 			"what_is_scan_title": "$oisy_short versteht jeden QR-Code",
 			"learn_more_about_scan": "Mehr über den Scanner erfahren",
 			"learn_more_about_pay": "Mehr über $oisy_short Pay erfahren",

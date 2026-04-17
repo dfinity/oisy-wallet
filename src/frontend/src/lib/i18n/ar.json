@@ -1038,7 +1038,7 @@
 			"payment_failed": "فشل الدفع",
 			"what_is_scan": "ما هو الماسح الضوئي",
 			"no_camera_permission": "لمسح رموز QR، تحتاج إلى السماح بالوصول إلى الكاميرا في إعدادات الموقع في متصفحك.",
-			"what_is_scan_description": "يمكن لماسح $oisy_short قراءة مجموعة متنوعة من رموز QR وبدء الإجراء الصحيح على الفور. امسح رمز QR الخاص بـ WalletConnect لإنشاء اتصال جديد، أو امسح رمز الدفع في أي متجر يستخدم Open CryptoPay لتسوية الفاتورة باستخدام OISY Pay.",
+			"what_is_scan_description": "يمكن لماسح $oisy_short قراءة مجموعة متنوعة من رموز QR وبدء الإجراء الصحيح على الفور. امسح رمز QR الخاص بـ WalletConnect لإنشاء اتصال جديد، أو امسح رمز الدفع في أي متجر يستخدم Open CryptoPay لتسوية الفاتورة باستخدام $oisy_short Pay.",
 			"what_is_scan_title": "$oisy_short يفهم أي رمز QR",
 			"learn_more_about_scan": "معرفة المزيد عن الماسح الضوئي",
 			"learn_more_about_pay": "معرفة المزيد عن $oisy_short Pay",

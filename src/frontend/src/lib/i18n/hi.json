@@ -1038,7 +1038,7 @@
 			"payment_failed": "भुगतान विफल",
 			"what_is_scan": "स्कैनर क्या है",
 			"no_camera_permission": "QR कोड स्कैन करने के लिए, आपको अपने ब्राउज़र की साइट सेटिंग में कैमरा एक्सेस की अनुमति देनी होगी।",
-			"what_is_scan_description": "$oisy_short स्कैनर विभिन्न प्रकार के QR कोड पढ़ सकता है और तुरंत सही कार्रवाई शुरू कर सकता है। नया कनेक्शन स्थापित करने के लिए WalletConnect QR कोड स्कैन करें, या Open CryptoPay का उपयोग करने वाली किसी भी दुकान में चेकआउट कोड स्कैन करके OISY Pay से बिल का भुगतान करें।",
+			"what_is_scan_description": "$oisy_short स्कैनर विभिन्न प्रकार के QR कोड पढ़ सकता है और तुरंत सही कार्रवाई शुरू कर सकता है। नया कनेक्शन स्थापित करने के लिए WalletConnect QR कोड स्कैन करें, या Open CryptoPay का उपयोग करने वाली किसी भी दुकान में चेकआउट कोड स्कैन करके $oisy_short Pay से बिल का भुगतान करें।",
 			"what_is_scan_title": "$oisy_short किसी भी QR कोड को समझता है",
 			"learn_more_about_scan": "स्कैनर के बारे में और जानें",
 			"learn_more_about_pay": "$oisy_short Pay के बारे में और जानें",

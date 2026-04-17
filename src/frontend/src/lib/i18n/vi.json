@@ -1038,7 +1038,7 @@
 			"payment_failed": "Thanh toán thất bại",
 			"what_is_scan": "Máy quét là gì",
 			"no_camera_permission": "Để quét mã QR, bạn cần cho phép truy cập camera trong cài đặt trang web của trình duyệt.",
-			"what_is_scan_description": "Máy quét $oisy_short có thể đọc nhiều loại mã QR và thực hiện hành động phù hợp ngay lập tức. Quét mã QR WalletConnect để thiết lập kết nối mới, hoặc quét mã thanh toán tại bất kỳ cửa hàng nào sử dụng Open CryptoPay để thanh toán hóa đơn bằng OISY Pay.",
+			"what_is_scan_description": "Máy quét $oisy_short có thể đọc nhiều loại mã QR và thực hiện hành động phù hợp ngay lập tức. Quét mã QR WalletConnect để thiết lập kết nối mới, hoặc quét mã thanh toán tại bất kỳ cửa hàng nào sử dụng Open CryptoPay để thanh toán hóa đơn bằng $oisy_short Pay.",
 			"what_is_scan_title": "$oisy_short hiểu mọi mã QR",
 			"learn_more_about_scan": "Tìm hiểu thêm về máy quét",
 			"learn_more_about_pay": "Tìm hiểu thêm về $oisy_short Pay",

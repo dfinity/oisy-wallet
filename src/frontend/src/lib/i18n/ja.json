@@ -1038,7 +1038,7 @@
 			"payment_failed": "支払い失敗",
 			"what_is_scan": "スキャナーとは",
 			"no_camera_permission": "QRコードをスキャンするには、ブラウザのサイト設定でカメラへのアクセスを許可する必要があります。",
-			"what_is_scan_description": "$oisy_shortスキャナーはさまざまなQRコードを読み取り、適切なアクションを即座に実行します。WalletConnect QRコードをスキャンして新しい接続を確立したり、Open CryptoPayを利用している店舗のチェックアウトコードをスキャンしてOISY Payで支払いを行えます。",
+			"what_is_scan_description": "$oisy_shortスキャナーはさまざまなQRコードを読み取り、適切なアクションを即座に実行します。WalletConnect QRコードをスキャンして新しい接続を確立したり、Open CryptoPayを利用している店舗のチェックアウトコードをスキャンして$oisy_short Payで支払いを行えます。",
 			"what_is_scan_title": "$oisy_shortはあらゆるQRコードに対応",
 			"learn_more_about_scan": "スキャナーについて詳しく",
 			"learn_more_about_pay": "$oisy_short Payについて詳しく",

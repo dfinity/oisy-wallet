@@ -1038,7 +1038,7 @@
 			"payment_failed": "Pagamento falhou",
 			"what_is_scan": "O que é o scanner",
 			"no_camera_permission": "Para ler códigos QR, você precisa permitir o acesso à câmera nas configurações do site no seu navegador.",
-			"what_is_scan_description": "O scanner do $oisy_short pode ler diversos códigos QR e iniciar a ação correta imediatamente. Leia um código QR WalletConnect para estabelecer uma nova conexão, ou leia o código de pagamento em qualquer loja que use Open CryptoPay para pagar a conta com OISY Pay.",
+			"what_is_scan_description": "O scanner do $oisy_short pode ler diversos códigos QR e iniciar a ação correta imediatamente. Leia um código QR WalletConnect para estabelecer uma nova conexão, ou leia o código de pagamento em qualquer loja que use Open CryptoPay para pagar a conta com $oisy_short Pay.",
 			"what_is_scan_title": "$oisy_short entende qualquer código QR",
 			"learn_more_about_scan": "Saiba mais sobre o scanner",
 			"learn_more_about_pay": "Saiba mais sobre o $oisy_short Pay",

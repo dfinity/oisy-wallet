@@ -1038,7 +1038,7 @@
 			"payment_failed": "Platba se nezdařila",
 			"what_is_scan": "Co je skener",
 			"no_camera_permission": "Pro skenování QR kódů musíte povolit přístup ke kameře v nastavení webu ve vašem prohlížeči.",
-			"what_is_scan_description": "Skener $oisy_short dokáže přečíst různé QR kódy a okamžitě provést správnou akci. Naskenujte QR kód WalletConnect pro navázání nového spojení nebo naskenujte platební kód v jakémkoli obchodě používajícím Open CryptoPay a zaplaťte účet pomocí OISY Pay.",
+			"what_is_scan_description": "Skener $oisy_short dokáže přečíst různé QR kódy a okamžitě provést správnou akci. Naskenujte QR kód WalletConnect pro navázání nového spojení nebo naskenujte platební kód v jakémkoli obchodě používajícím Open CryptoPay a zaplaťte účet pomocí $oisy_short Pay.",
 			"what_is_scan_title": "$oisy_short rozumí jakémukoli QR kódu",
 			"learn_more_about_scan": "Více o skeneru",
 			"learn_more_about_pay": "Více o $oisy_short Pay",
