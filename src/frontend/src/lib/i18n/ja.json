@@ -62,7 +62,8 @@
 			"switch_currency": "通貨を切り替え",
 			"more": "全文表示",
 			"less": "省略表示",
-			"learn_more": "詳細を見る"
+			"learn_more": "詳細を見る",
+			"up_one_level": "一つ上のレベルへ移動"
 		},
 		"warning": {
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",
