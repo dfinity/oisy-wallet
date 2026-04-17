@@ -1,8 +1,8 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import {
-	allHarvestAutopilotTokens,
 	allHarvestAutopilotsMaxApy,
+	allHarvestAutopilotTokens,
 	disabledHarvestAutopilotTokens,
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots,
@@ -11,8 +11,8 @@ import {
 	harvestAutopilotsUsdBalance,
 	harvestAutopilotTokens
 } from '$eth/derived/harvest-autopilots.derived';
-import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { harvestVaultsStore } from '$lib/stores/harvest.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
