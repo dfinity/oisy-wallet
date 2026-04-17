@@ -514,6 +514,10 @@ type UpdateProviderAgreementsRequest = record {
 	current_user_version : opt nat64;
 	provider_agreements : vec record { ProviderAgreementType; UserAgreement }
 };
+type UpdateTransactionFilterSettingsRequest = record {
+	filter : TransactionFilterSettings;
+	current_user_version : opt nat64
+};
 type UpdateUserAgreementsRequest = record {
 	agreements : UserAgreements;
 	current_user_version : opt nat64
@@ -863,5 +867,16 @@ service : (Arg) -> {
 	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	update_user_network_settings : (SaveNetworksSettingsRequest) -> (
 		SetUserShowTestnetsResult
-	)
+	);
+	// Updates the user's transaction filter settings.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the transaction filter settings were updated successfully, or if they were
+	// already set to the same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	update_user_transaction_filter_settings : (
+		UpdateTransactionFilterSettingsRequest
+	) -> (SetUserShowTestnetsResult)
 }

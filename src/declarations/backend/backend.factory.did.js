@@ -647,6 +647,10 @@ export const idlFactory = ({ IDL }) => {
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
+	const UpdateTransactionFilterSettingsRequest = IDL.Record({
+		filter: TransactionFilterSettings,
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
 
 	return IDL.Service({
 		add_user_dismissed_notification: IDL.Func(
@@ -741,6 +745,11 @@ export const idlFactory = ({ IDL }) => {
 		),
 		update_user_network_settings: IDL.Func(
 			[SaveNetworksSettingsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		),
+		update_user_transaction_filter_settings: IDL.Func(
+			[UpdateTransactionFilterSettingsRequest],
 			[SetUserShowTestnetsResult],
 			[]
 		)
