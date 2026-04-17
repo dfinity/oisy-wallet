@@ -368,7 +368,7 @@ describe('NftHero', () => {
 			}
 		});
 
-		const backButton = getByLabelText('Up');
+		const backButton = getByLabelText(get(i18n).core.alt.up);
 
 		await fireEvent.click(backButton);
 
