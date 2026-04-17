@@ -3,7 +3,6 @@ import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
-import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import {
 	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
 	isTokenDip20,
@@ -19,6 +18,7 @@ import {
 } from '$icp/utils/icrc.utils';
 import { TokenCategoryTagValue, TokenRiskTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
+import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
