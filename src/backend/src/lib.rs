@@ -1,5 +1,7 @@
 #![warn(clippy::wildcard_imports)]
 
+use shared::types::result_types::UpdateTransactionFilterSettingsResult;
+use shared::types::transaction_settings::UpdateTransactionFilterSettingsRequest;
 use candid::Principal;
 use ic_cdk::{
     export_candid, init,
