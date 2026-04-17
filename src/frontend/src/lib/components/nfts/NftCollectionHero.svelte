@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { IconBack } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { slide } from 'svelte/transition';
-	import Back from '$lib/components/core/Back.svelte';
+	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
@@ -14,7 +17,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { back, nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 
 	interface Props {
@@ -24,6 +27,12 @@
 
 	const { token, nfts }: Props = $props();
 
+	let fromRoute = $state<NavigationTarget | null | undefined>();
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
+
 	const breadcrumbItems = $derived([
 		{
 			label: $i18n.navigation.text.tokens,
@@ -32,6 +41,8 @@
 			})
 		}
 	]);
+
+	const parentUrl = $derived(breadcrumbItems[breadcrumbItems.length - 1]?.url);
 
 	const firstNft = $derived(nfts?.[0]);
 	const firstNftDisplayImageUrl = $derived(
@@ -44,7 +55,15 @@
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
-	<div class="flex h-64 w-full">
+	<div class="relative flex h-64 w-full">
+		<button
+			class="absolute top-3 right-3 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border-0 bg-black/40 p-1 transition-colors duration-200 hover:bg-black/60 [&>svg]:size-5"
+			aria-label={$i18n.core.alt.back}
+			onclick={() => back({ pop: nonNullish(fromRoute) })}
+		>
+			<IconClose />
+		</button>
+
 		<NftDisplayGuard
 			location={{
 				source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION,
@@ -59,7 +78,13 @@
 
 	<div class="bg-primary p-4">
 		<div class="flex items-center gap-2">
-			<Back onlyArrow />
+			<button
+				class="pointer-events-auto flex text-brand-primary"
+				aria-label="Up"
+				onclick={() => goto(parentUrl)}
+			>
+				<IconBack />
+			</button>
 			<BreadcrumbNavigation items={breadcrumbItems} />
 		</div>
 
