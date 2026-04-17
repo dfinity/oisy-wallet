@@ -80,7 +80,7 @@ describe('harvest-autopilots.derived', () => {
 			const result = get(allHarvestAutopilotTokens);
 
 			expect(result.length).toBeGreaterThan(0);
-			expect(result.every(isTokenHarvestAutopilot)).toBe(true);
+			expect(result.every(isTokenHarvestAutopilot)).toBeTruthy();
 		});
 
 		it('should return empty array when no harvest autopilot tokens exist', () => {
