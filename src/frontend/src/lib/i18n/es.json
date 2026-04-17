@@ -63,7 +63,7 @@
 			"more": "Mas",
 			"less": "Menos",
 			"learn_more": "Siga el enlace para obtener más información.",
-			"up": "Go up one level"
+			"up_one_level": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",

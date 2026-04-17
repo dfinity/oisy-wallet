@@ -63,7 +63,7 @@
 			"more": "全文表示",
 			"less": "省略表示",
 			"learn_more": "詳細を見る",
-			"up": "Go up one level"
+			"up_one_level": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",

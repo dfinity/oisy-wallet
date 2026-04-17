@@ -63,7 +63,7 @@
 			"more": "Show full text",
 			"less": "Show less text",
 			"learn_more": "Follow the link to learn more",
-			"up": "Go up one level"
+			"up_one_level": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",

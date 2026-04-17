@@ -79,7 +79,7 @@
 		<div class="flex items-center gap-2">
 			<button
 				class="pointer-events-auto flex text-brand-primary"
-				aria-label={$i18n.core.alt.up}
+				aria-label={$i18n.core.alt.up_one_level}
 				onclick={() => goto(parentUrl)}
 			>
 				<IconBack />

@@ -75,7 +75,7 @@ describe('NftCollectionHero', () => {
 			}
 		});
 
-		const backButton = getByLabelText(get(i18n).core.alt.up);
+		const backButton = getByLabelText(get(i18n).core.alt.up_one_level);
 
 		await fireEvent.click(backButton);
 
