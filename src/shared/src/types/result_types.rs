@@ -1,5 +1,4 @@
 use candid::{CandidType, Deserialize};
-use serde::Serialize;
 
 use super::{
     bitcoin::{
@@ -7,6 +6,7 @@ use super::{
         BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
     dapp::AddDappSettingsError,
+    notification::AddDismissedNotificationError,
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
@@ -18,45 +18,8 @@ use crate::types::{
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
-    user_profile::AddUserCredentialError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
-
-#[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum AddUserCredentialResult {
-    /// The user's credential was added successfully.
-    Ok(()),
-    /// The user's credential was not added due to an error.
-    Err(AddUserCredentialError),
-}
-impl AddUserCredentialResult {
-    #[must_use]
-    pub fn is_err(&self) -> bool {
-        matches!(self, Self::Err(_))
-    }
-
-    /// Returns the contained `AddUserCredentialError` if the result is an `Err`.
-    ///
-    /// # Panics
-    /// - If the result is `Ok`.
-    #[must_use]
-    pub fn unwrap_err(self) -> AddUserCredentialError {
-        match self {
-            Self::Err(err) => err,
-            Self::Ok(()) => {
-                panic!("Called `AddUserCredentialResult.unwrap_err()` on an `Ok` value")
-            }
-        }
-    }
-}
-impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
-    fn from(result: Result<(), AddUserCredentialError>) -> Self {
-        match result {
-            Ok(()) => AddUserCredentialResult::Ok(()),
-            Err(err) => AddUserCredentialResult::Err(err),
-        }
-    }
-}
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum CreateContactResult {
@@ -302,6 +265,20 @@ impl From<Result<(), AddDappSettingsError>> for AddUserHiddenDappIdResult {
         match result {
             Ok(()) => AddUserHiddenDappIdResult::Ok(()),
             Err(err) => AddUserHiddenDappIdResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum AddUserDismissedNotificationResult {
+    Ok(()),
+    Err(AddDismissedNotificationError),
+}
+impl From<Result<(), AddDismissedNotificationError>> for AddUserDismissedNotificationResult {
+    fn from(result: Result<(), AddDismissedNotificationError>) -> Self {
+        match result {
+            Ok(()) => AddUserDismissedNotificationResult::Ok(()),
+            Err(err) => AddUserDismissedNotificationResult::Err(err),
         }
     }
 }

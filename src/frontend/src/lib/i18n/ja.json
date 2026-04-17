@@ -45,7 +45,8 @@
 			"sorting": "並べ替え",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -61,7 +62,8 @@
 			"switch_currency": "通貨を切り替え",
 			"more": "全文表示",
 			"less": "省略表示",
-			"learn_more": "詳細を見る"
+			"learn_more": "詳細を見る",
+			"up_one_level": "一つ上のレベルへ移動"
 		},
 		"warning": {
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",
@@ -77,6 +79,8 @@
 			"activity": "履歴",
 			"airdrops": "エアドロップ",
 			"earning": "収益",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "GitHub上のソースコード",
 			"view_on_explorer": "エクスプローラーで確認",
 			"source_code": "ソースコード",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "Dapp一覧を表示",
 			"activity": "トランザクション履歴を表示",
 			"airdrops": "エアドロップ報酬を表示",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
 			"documentation": "$oisy_nameドキュメントを開く",
 			"support": "$oisy_nameドキュメントのサポートページを開く",
@@ -963,27 +969,27 @@
 			"no_nft_selected": "送信するNFTが選択されていません。"
 		},
 		"error": {
-			"unexpected": "トランザクションの送信中に問題が発生しました。",
-			"destination_address_unknown": "ETHの送信先アドレスが不明です。",
-			"metamask_connected": "アカウントを取得できません。Metamaskは起動、接続されていますか？",
-			"metamask_no_accounts": "Metamaskアカウントが見つかりません。",
-			"metamask_switch_network": "MetamaskにチェーンID $chain_idへの切り替えを要求できません。現在$network_nameを使用していますか？",
-			"erc20_data_undefined": "ERC20トランザクションのデータが未定義または null です。",
-			"data_undefined": "トランザクションデータが未定義または null です。",
-			"no_identity_calculate_fee": "手数料計算に必要なIDが指定されていません。",
+			"unexpected": "トランザクションの送信中にエラーが発生しました。",
+			"destination_address_unknown": "ETH送信先アドレスが不明です",
+			"metamask_connected": "アカウントを取得できません。Metamaskは開いており、すでに接続されていますか？",
+			"metamask_no_accounts": "Metamaskのアカウントが見つかりません。",
+			"metamask_switch_network": "MetamaskにチェーンID $chain_id への切り替えを要求できません。お使いのMetamaskは $network_name を使用していますか？",
+			"erc20_data_undefined": "ERC20トランザクションデータは未定義またはnullにできません。",
+			"data_undefined": "トランザクションデータは未定義またはnullにできません。",
+			"no_identity_calculate_fee": "principalの手数料を計算するための識別情報が提供されていません。",
 			"invalid_destination": "送信先が無効です。有効なウォレットアドレスまたは送信先で再度お試しください。",
-			"incompatible_token": "トークンが非対応です。互換性のあるトークンで再度お試しください。",
+			"incompatible_token": "トークンに互換性がありません。互換性のあるトークンで再度お試しください。",
 			"no_btc_network_id": "現在のネットワーク（$networkId）はBitcoinネットワークではありません。",
 			"no_solana_network_id": "現在のネットワーク（$networkId）はSolanaネットワークではありません。",
-			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後でもう一度お試しください。",
-			"unexpected_utxos_fee": "トランザクション手数料の計算中に問題が発生しました。",
-			"unable_to_retrieve_amount": "該当なし（取得できませんでした）",
-			"solana_transaction_expired": "あなたのトランザクションはSolanaネットワークによって処理されず、期限切れになりました。これはおそらく提供された優先手数料が不足していたためです。最新の推奨金額に更新しましたので、もう一度お試しください。",
-			"solana_confirmation_failed": "作成したトランザクションの確認を受信できませんでした。数秒待ってから、トークンのトランザクションリストでトランザクションが正しく作成されたかどうかを確認してください。",
-			"solana_insufficient_funds": "",
-			"solana_insufficient_funds_for_fee": "",
-			"solana_insufficient_funds_for_rent": "",
-			"fee_calc_unsupported_standard": "指定されたトークン規格がサポートされていないため、手数料を計算できませんでした。"
+			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後ほど再度お試しください。",
+			"unexpected_utxos_fee": "トランザクション手数料の計算中にエラーが発生しました。",
+			"unable_to_retrieve_amount": "n/a（取得できません）",
+			"solana_transaction_expired": "お客様のトランザクションはSolanaネットワークで処理されず、期限切れになりました。これは、提供された優先手数料が不十分だったためと考えられます。最新の推奨額に更新しましたので、再度お試しください。",
+			"solana_confirmation_failed": "作成されたトランザクションの確認を受信できませんでした。数秒お待ちいただいた後、トークンのトランザクション一覧でトランザクションが正しく作成されたかご確認ください。",
+			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",
+			"solana_insufficient_funds_for_fee": "トランザクション手数料を賄うためのSOL残高が不足しています。",
+			"solana_insufficient_funds_for_rent": "アカウント作成に必要なレントを賄うためのSOL残高が不足しています。",
+			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。"
 		}
 	},
 	"mint": {
@@ -1030,11 +1036,18 @@
 			"pay_at_failure": "$receiptへの支払いに失敗しました。",
 			"try_again": "再試行",
 			"payment_confirmed": "支払い確認完了",
-			"payment_failed": "支払い失敗"
+			"payment_failed": "支払い失敗",
+			"what_is_scan": "スキャナーとは",
+			"no_camera_permission": "QRコードをスキャンするには、ブラウザのサイト設定でカメラへのアクセスを許可する必要があります。",
+			"what_is_scan_description": "$oisy_shortスキャナーはさまざまなQRコードを読み取り、適切なアクションを即座に実行します。WalletConnect QRコードをスキャンして新しい接続を確立したり、Open CryptoPayを利用している店舗のチェックアウトコードをスキャンして$oisy_short Payで支払いを行えます。",
+			"what_is_scan_title": "$oisy_shortはあらゆるQRコードに対応",
+			"learn_more_about_scan": "スキャナーについて詳しく",
+			"learn_more_about_pay": "$oisy_short Payについて詳しく",
+			"scanner": "スキャナー"
 		},
 		"error": {
-			"code_link_is_not_valid": "",
-			"data_is_incompleted": ""
+			"code_link_is_not_valid": "コード/リンクが無効です",
+			"data_is_incompleted": "受信したデータが不完全です。必要な情報の一部が欠けています。"
 		}
 	},
 	"convert": {
@@ -1499,7 +1512,10 @@
 			"amount": "数量",
 			"hex_data": "HEXデータ",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
-			"sign_message": "メッセージに署名"
+			"sign_message": "メッセージに署名",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "例: wc:a281567bb3e4..."

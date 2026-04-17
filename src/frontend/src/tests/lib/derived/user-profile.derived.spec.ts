@@ -1,6 +1,8 @@
 import {
 	userAgreementsData,
+	userDismissedNotifications,
 	userExperimentalFeaturesSettings,
+	userNotificationSettings,
 	userProfile,
 	userProfileLoaded,
 	userProfileVersion,
@@ -16,6 +18,7 @@ import {
 	mockUserProfileVersion,
 	mockUserSettings
 } from '$tests/mocks/user-profile.mock';
+import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 describe('user-profile.derived', () => {
@@ -128,6 +131,78 @@ describe('user-profile.derived', () => {
 			userProfileStore.set({ certified, profile: mockUserProfile });
 
 			expect(get(userAgreementsData)).toEqual(mockUserAgreements);
+		});
+	});
+
+	describe('userNotificationSettings', () => {
+		it('should return undefined when user profile is not set', () => {
+			userProfileStore.reset();
+
+			expect(get(userNotificationSettings)).toBeUndefined();
+		});
+
+		it('should return undefined when settings have no notifications', () => {
+			userProfileStore.set({ certified, profile: mockUserProfile });
+
+			expect(get(userNotificationSettings)).toBeUndefined();
+		});
+
+		it('should return notification settings if they are set', () => {
+			const mockNotificationSettings = {
+				dismissed_notifications: [
+					{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } },
+					{ Qualified: { kind: { NoIndexCanister: null }, qualifier: 'ETH', version: 1 } }
+				]
+			};
+
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						notifications: toNullable(mockNotificationSettings)
+					})
+				}
+			});
+
+			expect(get(userNotificationSettings)).toEqual(mockNotificationSettings);
+		});
+	});
+
+	describe('userDismissedNotifications', () => {
+		it('should return empty array when user profile is not set', () => {
+			userProfileStore.reset();
+
+			expect(get(userDismissedNotifications)).toEqual([]);
+		});
+
+		it('should return empty array when settings have no notifications', () => {
+			userProfileStore.set({ certified, profile: mockUserProfile });
+
+			expect(get(userDismissedNotifications)).toEqual([]);
+		});
+
+		it('should return dismissed notifications when set', () => {
+			const dismissed = [
+				{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } },
+				{ Qualified: { kind: { NoIndexCanister: null }, qualifier: 'ETH', version: 1 } }
+			];
+
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						notifications: toNullable({
+							dismissed_notifications: dismissed
+						})
+					})
+				}
+			});
+
+			expect(get(userDismissedNotifications)).toEqual(dismissed);
 		});
 	});
 });

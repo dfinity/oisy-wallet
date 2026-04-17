@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
 	import ConvertToCkBtc from '$btc/components/convert/ConvertToCkBtc.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
@@ -29,6 +29,7 @@
 	} from '$lib/derived/network.derived';
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken, pageTokenWithFallback } from '$lib/derived/page-token.derived';
+	import { isPageTokenSwappable } from '$lib/derived/swap.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
@@ -47,8 +48,7 @@
 	let isNftsPage = $derived(isRouteNfts(page));
 
 	let swapAction = $derived(
-		(!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)) &&
-			!isNftsPage
+		(!isTransactionsPage || $isPageTokenSwappable || isNullish($pageToken)) && !isNftsPage
 	);
 
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);

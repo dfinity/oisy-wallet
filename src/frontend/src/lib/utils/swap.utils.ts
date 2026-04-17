@@ -5,7 +5,7 @@ import type {
 	TokenReply
 } from '$declarations/kong_backend/kong_backend.did';
 import { dAppDescriptions } from '$env/dapp-descriptions.env';
-import type { Erc20Token } from '$eth/types/erc20';
+import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import type { IcToken } from '$icp/types/ic-token';
@@ -314,7 +314,7 @@ export const buildNearIntentsQuoteRequest = ({
 	deadline: new Date(Date.now() + deadlineMs).toISOString()
 });
 
-export const geSwapEthTokenAddress = (token: Erc20Token) => {
+export const geSwapEthTokenAddress = (token: ErcFungibleToken) => {
 	if (isDefaultEthereumToken(token)) {
 		return SWAP_ETH_TOKEN_PLACEHOLDER;
 	}

@@ -25,7 +25,7 @@
 	const modalId = Symbol();
 
 	const openScanner = () => {
-		modalStore.openUniversalScanner(modalId);
+		modalStore.openUniversalScanner({ id: modalId });
 	};
 </script>
 

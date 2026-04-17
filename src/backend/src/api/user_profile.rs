@@ -1,8 +1,4 @@
-use ic_cdk::{
-    api::{msg_caller, time},
-    query, update,
-};
-use ic_verifiable_credentials::validate_ii_presentation_and_claims;
+use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
     agreement::{
         GetAgreementHistoryError, UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest,
@@ -10,72 +6,22 @@ use shared::types::{
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
     experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
     network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
+    notification::{AddDismissedNotificationError, AddDismissedNotificationRequest},
     result_types::{
-        AddUserCredentialResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
+        AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
         GetUserProfileResult, SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
         UpdateProviderAgreementsResult, UpdateUserAgreementsResult,
         UpdateUserNetworkSettingsResult,
     },
-    user_profile::{
-        AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
-    },
+    user_profile::{HasUserProfileResponse, UserProfile},
 };
 
 use crate::{
-    state::{mutate_state, read_config, read_state},
+    state::{mutate_state, read_state},
     types::StoredPrincipal,
-    user_profile::{credential_config::find_credential_config, model::UserProfileModel, service},
+    user_profile::{model::UserProfileModel, service},
     utils::{guards::caller_is_not_anonymous, housekeeping::spawn_allow_signing_if_below_limit},
 };
-
-/// Adds a verifiable credential to the user profile.
-///
-/// # Errors
-/// Errors are enumerated by: `AddUserCredentialError`.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
-    let user_principal = msg_caller();
-    let stored_principal = StoredPrincipal(user_principal);
-    let current_time_ns = u128::from(time());
-
-    let Some((vc_flow_signers, root_pk_raw, credential_type, derivation_origin)) =
-        read_config(|config| find_credential_config(&request, config))
-    else {
-        return AddUserCredentialResult::Err(AddUserCredentialError::ConfigurationError);
-    };
-
-    let AddUserCredentialRequest {
-        credential_jwt,
-        credential_spec,
-        current_user_version,
-        ..
-    } = request;
-
-    match validate_ii_presentation_and_claims(
-        &credential_jwt,
-        user_principal,
-        derivation_origin,
-        &vc_flow_signers,
-        &credential_spec,
-        &root_pk_raw,
-        current_time_ns,
-    ) {
-        Ok(()) => mutate_state(|s| {
-            let mut user_profile_model =
-                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            service::add_credential(
-                stored_principal,
-                current_user_version,
-                &credential_type,
-                vc_flow_signers.issuer_origin,
-                &mut user_profile_model,
-            )
-            .into()
-        }),
-        Err(_) => AddUserCredentialResult::Err(AddUserCredentialError::InvalidCredential),
-    }
-}
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
 /// existing settings.
@@ -159,6 +105,44 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
                 stored_principal,
                 request.current_user_version,
                 request.dapp_id,
+                &mut user_profile_model,
+            )
+        })
+    }
+    inner(request).into()
+}
+
+/// Adds one or more dismissed notifications to the user's profile.
+///
+/// # Arguments
+/// * `request` - The request containing the typed notifications to dismiss.
+///
+/// # Returns
+/// - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+///   present.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+///   the batch is too large.
+#[update(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn add_user_dismissed_notification(
+    request: AddDismissedNotificationRequest,
+) -> AddUserDismissedNotificationResult {
+    fn inner(
+        request: AddDismissedNotificationRequest,
+    ) -> Result<(), AddDismissedNotificationError> {
+        request.check()?;
+        let user_principal = msg_caller();
+        let stored_principal = StoredPrincipal(user_principal);
+
+        mutate_state(|s| {
+            let mut user_profile_model =
+                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+            service::add_dismissed_notifications(
+                stored_principal,
+                request.current_user_version,
+                request.notifications,
                 &mut user_profile_model,
             )
         })

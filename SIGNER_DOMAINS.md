@@ -80,7 +80,7 @@ When set, this env var affects the build in several ways:
 | Aspect                   | Default (unset)     | `signer`                     | `legacy_signer`                  |
 | ------------------------ | ------------------- | ---------------------------- | -------------------------------- |
 | `VITE_OISY_DOMAIN`       | `https://oisy.com`  | `https://signer.oisy.com`    | `https://legacy-signer.oisy.com` |
-| `VITE_APP_VERSION`       | from `package.json` | from `signer-versions.json`  | from `signer-versions.json`      |
+| `VITE_APP_VERSION`       | from `package.json` | from `package.json`          | from `signer-versions.json`      |
 | `.well-known/ic-domains` | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`         |
 | `AUTH_DERIVATION_ORIGIN` | (varies)            | Canonical origin \*          | Canonical origin \*              |
 | Plausible domain         | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`         |
@@ -91,16 +91,38 @@ When set, this env var affects the build in several ways:
 
 ### Versioning
 
-The signer frontends have their own version numbers, independent of the main wallet's `package.json` version. These are stored in `signer-versions.json`:
+The **signer** (`signer_frontend`) shares the same version as the main OISY wallet, read from `package.json`. It is released, deployed, and versioned hand-in-hand with OISY.
 
-```json
-{
-	"signer_frontend": "1.0.0",
-	"legacy_signer_frontend": "1.0.0"
-}
-```
+The **legacy signer** (`legacy_signer_frontend`) has its own independent version, stored in `signer-versions.json`.
 
-When `OISY_SIGNER_TARGET` is set, both `vite.utils.ts` and `svelte.config.js` read the version from this file instead of `package.json`. This allows each signer to be released independently -- particularly important when `legacy-signer` is frozen at v4 while `signer` advances with v5.
+When `OISY_SIGNER_TARGET=legacy_signer` is set, both `vite.utils.ts` and `svelte.config.js` read the version from `signer-versions.json`. For all other targets (including `signer`), the version falls through to `package.json`.
+
+This means:
+
+- **Signer** version advances automatically whenever the OISY wallet version is bumped (via the existing _Version Bump and Release Branch Creation_ workflow).
+- **Legacy signer** version is bumped independently via the _Legacy Signer Version Bump_ workflow. At some point the legacy signer will be frozen to a snapshot of `main` and only receive hotfixes.
+
+### Tagging convention
+
+Git tags use a scoped prefix to distinguish releases:
+
+| Target             | Tag format                | Example                |
+| ------------------ | ------------------------- | ---------------------- |
+| Main OISY + Signer | `v<semver>`               | `v2.0.3`               |
+| Legacy Signer      | `legacy-signer/v<semver>` | `legacy-signer/v1.0.1` |
+
+The slash-scoped format keeps tags filterable (`git tag -l 'legacy-signer/*'`) and avoids collisions with the main `v*` tags.
+
+**Release pipelines:**
+
+| Step              | Main OISY + Signer                                              | Legacy Signer                                                   |
+| ----------------- | --------------------------------------------------------------- | --------------------------------------------------------------- |
+| Version bump      | _Version Bump and Release Branch Creation_ (`bump-version.yml`) | _Legacy Signer Version Bump_ (`bump-legacy-signer-version.yml`) |
+| PR branch         | `chore(release)/v2.0.3`                                         | `chore(release)/legacy-signer-v1.0.1`                           |
+| Auto-tag on merge | `tag-release.yml` → `v2.0.3`                                    | `tag-legacy-signer-release.yml` → `legacy-signer/v1.0.1`        |
+| Beta deploy       | `deploy-to-environment.yml` (all canisters)                     | `deploy-to-environment.yml` (`legacy_signer_frontend` only)     |
+| Release notes     | `release-notes.yml` on `v*` push                                | N/A                                                             |
+| Production (IC)   | Orbit workflow                                                  | Orbit workflow                                                  |
 
 ### Canister definitions
 
@@ -143,7 +165,7 @@ Each signer domain reports to Plausible under its own domain name. This means yo
 
 | File                                                   | Purpose                                                 |
 | ------------------------------------------------------ | ------------------------------------------------------- |
-| `signer-versions.json`                                 | Independent version numbers for signer frontends        |
+| `signer-versions.json`                                 | Independent version number for legacy signer frontend   |
 | `scripts/domains.json`                                 | Domain-to-URL mapping per canister + network            |
 | `dfx.json`                                             | Canister definitions and network config                 |
 | `canister_ids.json`                                    | Canister IDs per network                                |
@@ -157,3 +179,4 @@ Each signer domain reports to Plausible under its own domain name. This means yo
 | `src/frontend/src/lib/constants/app.constants.ts`      | `SIGNER_TARGET`, `IS_SIGNER_DOMAIN`, derivation origin  |
 | `src/frontend/src/env/plausible.env.ts`                | Plausible domain per signer target                      |
 | `.env.production` / `.env.staging` / `.env.beta`       | `VITE_AUTH_ALTERNATIVE_ORIGINS` with signer domains     |
+| `.github/workflows/bump-legacy-signer-version.yml`     | Workflow to independently bump legacy signer version    |

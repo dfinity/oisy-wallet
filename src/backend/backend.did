@@ -4,23 +4,24 @@ type AddDappSettingsError = variant {
 	DappIdTooLong;
 	UserNotFound
 };
+type AddDismissedNotificationError = variant {
+	TooManyNotifications;
+	VersionMismatch;
+	MaxDismissedNotifications;
+	UserNotFound
+};
+type AddDismissedNotificationRequest = record {
+	notifications : vec DismissedNotification;
+	current_user_version : opt nat64
+};
 type AddHiddenDappIdRequest = record {
 	current_user_version : opt nat64;
 	dapp_id : text
 };
-type AddUserCredentialError = variant {
-	InvalidCredential;
-	VersionMismatch;
-	ConfigurationError;
-	UserNotFound
+type AddUserDismissedNotificationResult = variant {
+	Ok;
+	Err : AddDismissedNotificationError
 };
-type AddUserCredentialRequest = record {
-	credential_jwt : text;
-	issuer_canister_id : principal;
-	current_user_version : opt nat64;
-	credential_spec : CredentialSpec
-};
-type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
 type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type AgreementHistoryEntry = record {
 	timestamp_ns : nat64;
@@ -78,7 +79,6 @@ type ApproveError = variant {
 	InsufficientFunds : record { balance : nat }
 };
 type Arg = variant { Upgrade; Init : InitArg };
-type ArgumentValue = variant { Int : int32; String : text };
 type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
@@ -147,10 +147,10 @@ type CanisterStatusResultV2 = record {
 type CanisterStatusType = variant { stopped; stopping; running };
 type Config = record {
 	derivation_origin : opt text;
+	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
-	supported_credentials : opt vec SupportedCredential;
 	ic_root_key_raw : opt blob
 };
 type Contact = record {
@@ -179,11 +179,6 @@ type ContactError = variant {
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
 type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
-type CredentialSpec = record {
-	arguments : opt vec record { text; ArgumentValue };
-	credential_type : text
-};
-type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
 	token : Token;
 	allow_external_content_source : opt bool;
@@ -206,6 +201,14 @@ type Delegation = record {
 	expiration : nat64
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
+type DismissedNotification = variant {
+	Qualified : record {
+		kind : QualifiedNotificationKind;
+		version : nat32;
+		qualifier : text
+	};
+	Simple : record { kind : SimpleNotificationKind; version : nat32 }
+};
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
 type EvmTransactionData = record {
@@ -316,10 +319,10 @@ type ImageMimeType = variant {
 };
 type InitArg = record {
 	derivation_origin : opt text;
+	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
-	supported_credentials : opt vec SupportedCredential;
 	ic_root_key_der : opt blob
 };
 type Network = variant { mainnet; regtest; testnet };
@@ -353,6 +356,9 @@ type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
 };
+type NotificationSettings = record {
+	dismissed_notifications : vec DismissedNotification
+};
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type ProviderAgreementProvider = variant { NearIntents };
@@ -360,6 +366,10 @@ type ProviderAgreementScope = variant { Swap };
 type ProviderAgreementType = record {
 	provider : ProviderAgreementProvider;
 	scope : ProviderAgreementScope
+};
+type QualifiedNotificationKind = variant {
+	NoIndexCanister;
+	UnavailableIndexCanister
 };
 type RateLimitError = record {
 	max_calls : nat32;
@@ -399,10 +409,16 @@ type SetTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
 type SetUserShowTestnetsResult = variant { Ok; Err : UpdateAgreementsError };
 type Settings = record {
 	networks : NetworksSettings;
+	notifications : opt NotificationSettings;
 	dapp : DappSettings;
-	experimental_features : ExperimentalFeaturesSettings
+	experimental_features : ExperimentalFeaturesSettings;
+	transactions : opt TransactionSettings
 };
 type SignedDelegation = record { signature : blob; delegation : Delegation };
+type SimpleNotificationKind = variant {
+	BtcActivityInfo;
+	HiddenMicroTransactions
+};
 type SolTransactionData = record {
 	fee : opt nat;
 	to_owner : opt text;
@@ -422,13 +438,6 @@ type Stats = record {
 	agreement_history_count : nat64;
 	user_timestamps_count : nat64;
 	user_token_count : nat64
-};
-type SupportedCredential = record {
-	ii_canister_id : principal;
-	issuer_origin : text;
-	issuer_canister_id : principal;
-	ii_origin : text;
-	credential_type : CredentialType
 };
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
@@ -490,6 +499,8 @@ type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
+type TransactionFilterSettings = record { hide_micro_transactions : bool };
+type TransactionSettings = record { filter : opt TransactionFilterSettings };
 type TransformArgs = record { context : blob; response : HttpRequestResult };
 type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
 type UpdateExperimentalFeaturesSettingsRequest = record {
@@ -518,14 +529,8 @@ type UserAgreements = record {
 	privacy_policy : UserAgreement;
 	terms_of_use : UserAgreement
 };
-type UserCredential = record {
-	issuer : text;
-	verified_date_timestamp : opt nat64;
-	credential_type : CredentialType
-};
 type UserProfile = record {
 	agreements : opt Agreements;
-	credentials : vec UserCredential;
 	version : opt nat64;
 	settings : opt Settings;
 	created_timestamp : nat64;
@@ -548,11 +553,21 @@ type UserTransactionError = variant {
 };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
-	// Adds a verifiable credential to the user profile.
+	// Adds one or more dismissed notifications to the user's profile.
+	//
+	// # Arguments
+	// * `request` - The request containing the typed notifications to dismiss.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+	// present.
 	//
 	// # Errors
-	// Errors are enumerated by: `AddUserCredentialError`.
-	add_user_credential : (AddUserCredentialRequest) -> (AddUserCredentialResult);
+	// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+	// the batch is too large.
+	add_user_dismissed_notification : (AddDismissedNotificationRequest) -> (
+		AddUserDismissedNotificationResult
+	);
 	// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	//
 	// # Arguments

@@ -19,8 +19,15 @@
 	const USD_AMOUNT_THRESHOLD = 20;
 </script>
 
-<div class="flex flex-col items-center gap-5 px-6 py-10" data-tid={EARNING_NO_POSITION_PLACEHOLDER}>
-	<Img alt={$i18n.stake.alt.placeholder_image} src={noEarningBanner} />
+<div
+	class="flex flex-col items-center gap-3 px-6 py-4 sm:gap-5 sm:py-10"
+	data-tid={EARNING_NO_POSITION_PLACEHOLDER}
+>
+	<Img
+		alt={$i18n.stake.alt.placeholder_image}
+		src={noEarningBanner}
+		styleClass="h-16 w-16 sm:h-auto sm:w-auto"
+	/>
 
 	<div class="flex flex-col items-center gap-2">
 		{#if notEmptyString($i18n.stake.text.title_empty_1)}
@@ -28,7 +35,7 @@
 		{/if}
 		<h5 class="text-brand-primary">
 			{#if $highestEarningPotentialUsd >= USD_AMOUNT_THRESHOLD}
-				<span class="text-4xl font-bold">
+				<span class="text-2xl font-bold sm:text-4xl">
 					{formatCurrency({
 						value: $highestEarningPotentialUsd,
 						currency: $currentCurrency,
@@ -38,7 +45,7 @@
 				</span>
 				{$i18n.stake.text.title_empty_2_usd}
 			{:else}
-				<span class="text-4xl font-bold">{$highestApyEarning}%</span>
+				<span class="text-2xl font-bold sm:text-4xl">{$highestApyEarning}%</span>
 				{$i18n.stake.text.title_empty_2_apy}
 			{/if}
 		</h5>

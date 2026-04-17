@@ -1,5 +1,6 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
+import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStep } from '$eth/types/send';
@@ -234,8 +235,8 @@ export interface SwapProvidersConfig {
 export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
-	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
+	sourceToken: ErcFungibleToken;
+	destinationToken: ErcFungibleToken;
 	swapAmount: Amount;
 	receiveAmount: bigint;
 	slippageValue: Amount;
@@ -256,8 +257,8 @@ interface SwapNearIntentsParams {
 
 export interface SwapNearIntentsEvmParams
 	extends SwapNearIntentsParams, RequiredTransactionFeeData {
-	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
+	sourceToken: ErcFungibleToken;
+	destinationToken: ErcFungibleToken;
 	receiveAmount: bigint;
 	slippageValue: Amount;
 	sourceNetwork: EthereumNetwork;
@@ -265,6 +266,7 @@ export interface SwapNearIntentsEvmParams
 }
 
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
+	destinationToken: Token;
 	userAddress: SolAddress;
 }
 

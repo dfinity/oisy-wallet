@@ -15,22 +15,22 @@ export type AddDappSettingsError =
 	| { VersionMismatch: null }
 	| { DappIdTooLong: null }
 	| { UserNotFound: null };
+export type AddDismissedNotificationError =
+	| { TooManyNotifications: null }
+	| { VersionMismatch: null }
+	| { MaxDismissedNotifications: null }
+	| { UserNotFound: null };
+export interface AddDismissedNotificationRequest {
+	notifications: Array<DismissedNotification>;
+	current_user_version: [] | [bigint];
+}
 export interface AddHiddenDappIdRequest {
 	current_user_version: [] | [bigint];
 	dapp_id: string;
 }
-export type AddUserCredentialError =
-	| { InvalidCredential: null }
-	| { VersionMismatch: null }
-	| { ConfigurationError: null }
-	| { UserNotFound: null };
-export interface AddUserCredentialRequest {
-	credential_jwt: string;
-	issuer_canister_id: Principal;
-	current_user_version: [] | [bigint];
-	credential_spec: CredentialSpec;
-}
-export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
+export type AddUserDismissedNotificationResult =
+	| { Ok: null }
+	| { Err: AddDismissedNotificationError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
 export interface AgreementHistoryEntry {
 	timestamp_ns: bigint;
@@ -84,7 +84,6 @@ export type ApproveError =
 	| { Expired: { ledger_time: bigint } }
 	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
-export type ArgumentValue = { Int: number } | { String: string };
 export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
@@ -156,10 +155,10 @@ export interface CanisterStatusResultV2 {
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export interface Config {
 	derivation_origin: [] | [string];
+	ii_canister_id: [] | [Principal];
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
-	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array];
 }
 export interface Contact {
@@ -193,11 +192,6 @@ export interface CreateContactRequest {
 	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export interface CredentialSpec {
-	arguments: [] | [Array<[string, ArgumentValue]>];
-	credential_type: string;
-}
-export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
 	allow_external_content_source: [] | [boolean];
@@ -224,6 +218,15 @@ export interface Delegation {
 	expiration: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
+export type DismissedNotification =
+	| {
+			Qualified: {
+				kind: QualifiedNotificationKind;
+				version: number;
+				qualifier: string;
+			};
+	  }
+	| { Simple: { kind: SimpleNotificationKind; version: number } };
 export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
@@ -342,10 +345,10 @@ export type ImageMimeType =
 	| { 'image/webp': null };
 export interface InitArg {
 	derivation_origin: [] | [string];
+	ii_canister_id: [] | [Principal];
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
-	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array];
 }
 export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
@@ -380,6 +383,9 @@ export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
 }
+export interface NotificationSettings {
+	dismissed_notifications: Array<DismissedNotification>;
+}
 export interface Outpoint {
 	txid: Uint8Array;
 	vout: number;
@@ -394,6 +400,9 @@ export interface ProviderAgreementType {
 	provider: ProviderAgreementProvider;
 	scope: ProviderAgreementScope;
 }
+export type QualifiedNotificationKind =
+	| { NoIndexCanister: null }
+	| { UnavailableIndexCanister: null };
 export interface RateLimitError {
 	max_calls: number;
 	window_ns: bigint;
@@ -431,13 +440,16 @@ export type SetTestnetsSettingsError = { VersionMismatch: null } | { UserNotFoun
 export type SetUserShowTestnetsResult = { Ok: null } | { Err: UpdateAgreementsError };
 export interface Settings {
 	networks: NetworksSettings;
+	notifications: [] | [NotificationSettings];
 	dapp: DappSettings;
 	experimental_features: ExperimentalFeaturesSettings;
+	transactions: [] | [TransactionSettings];
 }
 export interface SignedDelegation {
 	signature: Uint8Array;
 	delegation: Delegation;
 }
+export type SimpleNotificationKind = { BtcActivityInfo: null } | { HiddenMicroTransactions: null };
 export interface SolTransactionData {
 	fee: [] | [bigint];
 	to_owner: [] | [string];
@@ -457,13 +469,6 @@ export interface Stats {
 	agreement_history_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
-}
-export interface SupportedCredential {
-	ii_canister_id: Principal;
-	issuer_origin: string;
-	issuer_canister_id: Principal;
-	ii_origin: string;
-	credential_type: CredentialType;
 }
 export interface TestnetsSettings {
 	show_testnets: boolean;
@@ -529,6 +534,12 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export interface TransactionFilterSettings {
+	hide_micro_transactions: boolean;
+}
+export interface TransactionSettings {
+	filter: [] | [TransactionFilterSettings];
+}
 export interface TransformArgs {
 	context: Uint8Array;
 	response: HttpRequestResult;
@@ -557,14 +568,8 @@ export interface UserAgreements {
 	privacy_policy: UserAgreement;
 	terms_of_use: UserAgreement;
 }
-export interface UserCredential {
-	issuer: string;
-	verified_date_timestamp: [] | [bigint];
-	credential_type: CredentialType;
-}
 export interface UserProfile {
 	agreements: [] | [Agreements];
-	credentials: Array<UserCredential>;
 	version: [] | [bigint];
 	settings: [] | [Settings];
 	created_timestamp: bigint;
@@ -593,12 +598,23 @@ export interface Utxo {
 }
 export interface _SERVICE {
 	/**
-	 * Adds a verifiable credential to the user profile.
+	 * Adds one or more dismissed notifications to the user's profile.
+	 *
+	 * # Arguments
+	 * * `request` - The request containing the typed notifications to dismiss.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+	 * present.
 	 *
 	 * # Errors
-	 * Errors are enumerated by: `AddUserCredentialError`.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+	 * the batch is too large.
 	 */
-	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
+	add_user_dismissed_notification: ActorMethod<
+		[AddDismissedNotificationRequest],
+		AddUserDismissedNotificationResult
+	>;
 	/**
 	 * Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	 *
