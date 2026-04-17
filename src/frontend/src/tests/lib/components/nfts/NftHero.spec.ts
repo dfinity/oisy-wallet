@@ -18,7 +18,6 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-
 import * as navUtils from '$lib/utils/nav.utils';
 
 let afterNavigateCallbacks: Array<(navigation: AfterNavigate) => void> = [];
