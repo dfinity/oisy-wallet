@@ -1,7 +1,5 @@
 #![warn(clippy::wildcard_imports)]
 
-use shared::types::result_types::UpdateTransactionFilterSettingsResult;
-use shared::types::transaction_settings::UpdateTransactionFilterSettingsRequest;
 use candid::Principal;
 use ic_cdk::{
     export_candid, init,
@@ -34,13 +32,15 @@ use shared::{
             GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
             SaveUserTransactionsResult, SetUserShowTestnetsResult, UpdateContactResult,
             UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
-            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+            UpdateTransactionFilterSettingsResult, UpdateUserAgreementsResult,
+            UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest,
         },
         token_id::TokenId,
+        transaction_settings::UpdateTransactionFilterSettingsRequest,
         user_profile::{HasUserProfileResponse, UserProfile},
         user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
         Stats, Timestamp,
