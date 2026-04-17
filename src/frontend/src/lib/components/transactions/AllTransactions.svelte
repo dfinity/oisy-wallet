@@ -5,6 +5,7 @@
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
+	import HiddenMicroTransactionsInfoBox from '$lib/components/transactions/HiddenMicroTransactionsInfoBox.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
@@ -178,6 +179,8 @@
 			{$i18n.activity.info.btc_transactions}
 		</MessageBox>
 	{/if}
+
+	<HiddenMicroTransactionsInfoBox />
 
 	<AllTransactionsList />
 </div>
