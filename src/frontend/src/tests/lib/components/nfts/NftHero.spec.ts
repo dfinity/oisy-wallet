@@ -10,6 +10,7 @@ import { modalStore } from '$lib/stores/modal.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import type { Nft } from '$lib/types/nft';
 import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import * as navUtils from '$lib/utils/nav.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -18,7 +19,6 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import * as navUtils from '$lib/utils/nav.utils';
 
 let afterNavigateCallbacks: Array<(navigation: AfterNavigate) => void> = [];
 
