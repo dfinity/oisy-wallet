@@ -1521,7 +1521,12 @@ interface I18nEarning {
 		go_to_earn: string;
 	};
 	cards: {
-		harvest_autopilot: { title: string; description: string; action: string };
+		harvest_autopilot: {
+			title: string;
+			description: string;
+			action: string;
+			no_networks_enabled: string;
+		};
 		sprinkles: { title: string; description: string; action: string };
 	};
 	card_fields: {

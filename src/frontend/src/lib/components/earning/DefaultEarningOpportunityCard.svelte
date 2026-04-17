@@ -15,6 +15,8 @@
 		cardData: EarningCards;
 		cardFields: { [key in EarningCardFields]?: string | number | string[] } & {
 			action: () => Promise<void>;
+			disabled?: boolean;
+			disabledNotice?: string;
 		};
 	}
 
@@ -57,10 +59,14 @@
 								{/snippet}
 							</EarningYearlyAmount>
 						{:else if (cardField === EarningCardFields.NETWORKS || cardField === EarningCardFields.ASSETS) && Array.isArray(cardFields[cardField])}
-							<OverlappedLogos
-								icons={cardFields[cardField]}
-								invertColor={cardField === EarningCardFields.NETWORKS}
-							/>
+							{#if cardFields[cardField].length > 0}
+								<OverlappedLogos
+									icons={cardFields[cardField]}
+									invertColor={cardField === EarningCardFields.NETWORKS}
+								/>
+							{:else}
+								-
+							{/if}
 						{:else if cardField === EarningCardFields.CURRENT_EARNING}
 							<EarningYearlyAmount
 								showAsSuccess
@@ -89,8 +95,17 @@
 		</List>
 	{/snippet}
 	{#snippet button()}
-		<Button colorStyle="success" fullWidth onclick={cardFields.action} paddingSmall
-			>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
+		{#if nonNullish(cardFields.disabledNotice)}
+			<p class="mb-2 text-xs text-tertiary"
+				>{resolveText({ i18n: $i18n, path: cardFields.disabledNotice })}</p
+			>
+		{/if}
+		<Button
+			colorStyle="success"
+			disabled={cardFields.disabled}
+			fullWidth
+			onclick={cardFields.action}
+			paddingSmall>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
 		>
 	{/snippet}
 </EarningOpportunityCard>

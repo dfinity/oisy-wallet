@@ -1970,7 +1970,8 @@
 			"harvest_autopilot": {
 				"title": "Harvest – Autopilot",
 				"description": "Hiệu quả sinh lời tối đa với các vault Autopilot chỉ một cú nhấp chuột.",
-				"action": "Đi đến Autopilot"
+				"action": "Đi đến Autopilot",
+				"no_networks_enabled": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",

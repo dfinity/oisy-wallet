@@ -1970,7 +1970,8 @@
 			"harvest_autopilot": {
 				"title": "Harvest – Autopilot",
 				"description": "एक क्लिक के Autopilot vaults के साथ अधिकतम यील्ड दक्षता।",
-				"action": "Autopilot पर जाएं"
+				"action": "Autopilot पर जाएं",
+				"no_networks_enabled": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",

@@ -132,6 +132,26 @@ describe('earning.derived', () => {
 			expect(record[EarningCardFields.NETWORKS]).toEqual(['eth-icon']);
 			expect(record[EarningCardFields.ASSETS]).toEqual(['usdc-icon']);
 		});
+
+		it('sets disabled and disabledNotice when no vaults are available', () => {
+			setupStores({ vaults: [] });
+
+			const result = get(earningData);
+			const record = result['harvest-autopilot'];
+
+			expect(record.disabled).toBeTruthy();
+			expect(record.disabledNotice).toBe('earning.cards.harvest_autopilot.no_networks_enabled');
+		});
+
+		it('clears disabled and disabledNotice when vaults are available', () => {
+			setupStores();
+
+			const result = get(earningData);
+			const record = result['harvest-autopilot'];
+
+			expect(record.disabled).toBeFalsy();
+			expect(record.disabledNotice).toBeUndefined();
+		});
 	});
 
 	describe('highestApyEarningData', () => {
