@@ -46,7 +46,7 @@ describe('QrCodeScanner', () => {
 
 		const wrapper = getByTestId(ADDRESS_BOOK_QR_CODE_SCAN);
 
-		expect(wrapper.classList.contains('h-[calc(100vh-128px)]')).toBeTruthy();
+		expect(wrapper.classList.contains('h-[calc(100dvh-128px)]')).toBeTruthy();
 	});
 
 	it('should show camera permission denied message on NotAllowedError', async () => {

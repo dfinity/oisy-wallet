@@ -68,9 +68,9 @@
 <div
 	class="qr-code-wrapper relative flex w-full items-start justify-center"
 	class:h-[60vh]={!universalScanner}
-	class:h-[calc(100vh-128px)]={universalScanner}
+	class:h-[calc(100dvh-128px)]={universalScanner}
 	class:min-h-[300px]={!universalScanner}
-	class:sm:h-[calc(100vh-148px)]={universalScanner}
+	class:sm:h-[calc(100dvh-148px)]={universalScanner}
 	class:sm:max-h-[700px]={universalScanner}
 	class:sm:min-h-[500px]={universalScanner}
 	data-tid={ADDRESS_BOOK_QR_CODE_SCAN}

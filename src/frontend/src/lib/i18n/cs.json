@@ -1042,7 +1042,7 @@
 			"what_is_scan_title": "$oisy_short rozumí jakémukoli QR kódu",
 			"learn_more_about_scan": "Více o skeneru",
 			"learn_more_about_pay": "Více o $oisy_short Pay",
-			"universal_scanner": "Skener"
+			"scanner": "Skener"
 		},
 		"error": {
 			"code_link_is_not_valid": "Kód / odkaz není platný",

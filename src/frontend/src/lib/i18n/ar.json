@@ -1042,7 +1042,7 @@
 			"what_is_scan_title": "$oisy_short يفهم أي رمز QR",
 			"learn_more_about_scan": "معرفة المزيد عن الماسح الضوئي",
 			"learn_more_about_pay": "معرفة المزيد عن $oisy_short Pay",
-			"universal_scanner": "الماسح الضوئي"
+			"scanner": "الماسح الضوئي"
 		},
 		"error": {
 			"code_link_is_not_valid": "الرمز/الرابط غير صالح",
