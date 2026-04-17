@@ -10,9 +10,10 @@ use shared::types::{
     result_types::{
         AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
         GetUserProfileResult, SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
-        UpdateProviderAgreementsResult, UpdateUserAgreementsResult,
-        UpdateUserNetworkSettingsResult,
+        UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
+        UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
     },
+    transaction_settings::UpdateTransactionFilterSettingsRequest,
     user_profile::{HasUserProfileResponse, UserProfile},
 };
 
@@ -270,6 +271,35 @@ pub fn update_user_experimental_feature_settings(
             stored_principal,
             request.current_user_version,
             request.experimental_features,
+            &mut user_profile_model,
+        )
+    })
+    .into()
+}
+
+/// Updates the user's transaction filter settings.
+///
+/// # Returns
+/// - Returns `Ok(())` if the transaction filter settings were updated successfully, or if they were
+///   already set to the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn update_user_transaction_filter_settings(
+    request: UpdateTransactionFilterSettingsRequest,
+) -> UpdateTransactionFilterSettingsResult {
+    let user_principal = msg_caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        service::update_transaction_filter_settings(
+            stored_principal,
+            request.current_user_version,
+            request.filter,
             &mut user_profile_model,
         )
     })
