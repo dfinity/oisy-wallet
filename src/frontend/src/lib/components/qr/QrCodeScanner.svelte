@@ -7,14 +7,15 @@
 	import { ADDRESS_BOOK_QR_CODE_SCAN } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { QrStatus } from '$lib/types/qr-code';
+	import { isMobile } from '$lib/utils/device.utils';
 
 	interface Props {
 		onScan: ({ status, code }: { status: QrStatus; code?: string }) => void;
-		expandedLayout?: boolean;
+		universalScanner?: boolean;
 		onBack?: () => void;
 	}
 
-	let { onScan, onBack, expandedLayout = false }: Props = $props();
+	let { onScan, onBack, universalScanner = false }: Props = $props();
 
 	let resolveQrCodePromise:
 		| (({ status, code }: { status: QrStatus; code?: string }) => void)
@@ -23,7 +24,9 @@
 	let cameraPermissionDenied = $state(false);
 
 	onMount(async () => {
-		await scanQrCode();
+		if (isMobile() || !universalScanner) {
+			await scanQrCode();
+		}
 	});
 
 	const scanQrCode = async () => {
@@ -63,33 +66,41 @@
 </script>
 
 <div
-	class="qr-code-wrapper relative flex w-full items-center justify-center"
-	class:h-[60vh]={!expandedLayout}
-	class:h-[calc(100vh-128px)]={expandedLayout}
-	class:min-h-[300px]={!expandedLayout}
-	class:sm:h-[calc(100vh-148px)]={expandedLayout}
-	class:sm:max-h-[700px]={expandedLayout}
-	class:sm:min-h-[500px]={expandedLayout}
+	class="qr-code-wrapper relative flex w-full items-start justify-center"
+	class:h-[60vh]={!universalScanner}
+	class:h-[calc(100vh-128px)]={universalScanner}
+	class:min-h-[300px]={!universalScanner}
+	class:sm:h-[calc(100vh-148px)]={universalScanner}
+	class:sm:max-h-[700px]={universalScanner}
+	class:sm:min-h-[500px]={universalScanner}
 	data-tid={ADDRESS_BOOK_QR_CODE_SCAN}
 >
 	{#if nonNullish(resolveQrCodePromise)}
 		<QrCodeReader
-			{expandedLayout}
+			{universalScanner}
 			on:nnsCancel={onCancel}
 			on:nnsQRCode={onQRCode}
 			on:nnsQRCodeError={onError}
 		/>
-	{:else if cameraPermissionDenied}
-		<div class="text-center text-sm text-tertiary">
-			{$i18n.scanner.text.no_camera_permission}
-		</div>
 	{:else}
-		<div class="absolute inset-0 flex h-full w-full items-center justify-center">
-			<Button onclick={scanQrCode} paddingSmall styleClass="max-w-[16rem]">
-				<span>{$i18n.scanner.text.scan_qr_code}</span>
+		<div
+			class="flex w-[90%] items-center justify-center rounded-lg border border-dashed border-secondary"
+			class:h-[60%]={universalScanner}
+			class:h-full={!universalScanner}
+			class:my-10={universalScanner}
+			class:sm:h-[calc(100%-280px)]={universalScanner}
+		>
+			{#if cameraPermissionDenied}
+				<div class="text-center text-sm text-tertiary">
+					{$i18n.scanner.text.no_camera_permission}
+				</div>
+			{:else}
+				<Button onclick={scanQrCode} paddingSmall styleClass="max-w-[16rem]">
+					<span>{$i18n.scanner.text.scan_qr_code}</span>
 
-				<IconScanLine />
-			</Button>
+					<IconScanLine />
+				</Button>
+			{/if}
 		</div>
 	{/if}
 </div>

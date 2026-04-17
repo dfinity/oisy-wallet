@@ -28,9 +28,9 @@ describe('QrCodeScanner', () => {
 		expect(getByTestId(ADDRESS_BOOK_QR_CODE_SCAN)).toBeInTheDocument();
 	});
 
-	it('should apply default height classes when expandedLayout is false', () => {
+	it('should apply default height classes when universalScanner is false', () => {
 		const { getByTestId } = render(QrCodeScanner, {
-			props: { onScan: mockOnScan, expandedLayout: false }
+			props: { onScan: mockOnScan, universalScanner: false }
 		});
 
 		const wrapper = getByTestId(ADDRESS_BOOK_QR_CODE_SCAN);
@@ -39,9 +39,9 @@ describe('QrCodeScanner', () => {
 		expect(wrapper.classList.contains('min-h-[300px]')).toBeTruthy();
 	});
 
-	it('should apply expanded height classes when expandedLayout is true', () => {
+	it('should apply expanded height classes when universalScanner is true', () => {
 		const { getByTestId } = render(QrCodeScanner, {
-			props: { onScan: mockOnScan, expandedLayout: true }
+			props: { onScan: mockOnScan, universalScanner: true }
 		});
 
 		const wrapper = getByTestId(ADDRESS_BOOK_QR_CODE_SCAN);
