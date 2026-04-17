@@ -59,7 +59,7 @@ describe('NftCollectionHero', () => {
 			}
 		});
 
-		const closeButton = getByLabelText(get(i18n).core.alt.back);
+		const closeButton = getByLabelText(get(i18n).core.text.close);
 
 		await fireEvent.click(closeButton);
 
