@@ -584,7 +584,6 @@ impl StoredUserProfile {
             let mut settings = new_profile.settings.unwrap_or_default();
             settings.transactions = Some(TransactionSettings {
                 filter: Some(filter),
-                ..settings.transactions.unwrap_or_default()
             });
             Some(settings)
         };
