@@ -32,11 +32,10 @@ use crate::{
             MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH,
         },
         settings::Settings,
-        transaction_settings::{
-            TransactionFilterSettings, TransactionSettings,
-            UpdateTransactionFilterSettingsError,
-        },
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
+        transaction_settings::{
+            TransactionFilterSettings, TransactionSettings, UpdateTransactionFilterSettingsError,
+        },
         user_profile::{OisyUser, StoredUserProfile, UserProfile},
         Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },

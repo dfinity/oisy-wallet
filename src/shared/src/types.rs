@@ -22,11 +22,11 @@ pub mod pow;
 pub mod result_types;
 pub mod settings;
 pub mod signer;
-pub mod transaction_settings;
 pub mod token;
 pub mod token_id;
 pub mod token_standard;
 pub mod transaction;
+pub mod transaction_settings;
 pub mod user_profile;
 pub mod user_transaction;
 
