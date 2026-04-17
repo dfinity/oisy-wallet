@@ -21,6 +21,7 @@
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		modalBtcTransaction,
 		modalEthTransaction,
@@ -31,15 +32,20 @@
 		enabledFungibleNetworkTokens,
 		enabledNonFungibleNetworkTokensWithoutSpam
 	} from '$lib/derived/network-tokens.derived';
+	import { hideMicroTransactions } from '$lib/derived/user-profile.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
+	import {
+		filterReceivedMicroTransactions,
+		mapAllTransactionsUi,
+		sortTransactions
+	} from '$lib/utils/transactions.utils';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
-	let transactions = $derived(
+	let allTransactions = $derived(
 		mapAllTransactionsUi({
 			tokens: [...$enabledFungibleNetworkTokens, ...$enabledNonFungibleNetworkTokensWithoutSpam],
 			$btcTransactions: $btcTransactionsStore,
@@ -53,6 +59,15 @@
 			$icPendingTransactionsStore,
 			$ckBtcPendingUtxosStore
 		})
+	);
+
+	let transactions = $derived(
+		$hideMicroTransactions
+			? filterReceivedMicroTransactions({
+					transactions: allTransactions,
+					exchanges: $exchanges
+				})
+			: allTransactions
 	);
 
 	let sortedTransactions = $derived(

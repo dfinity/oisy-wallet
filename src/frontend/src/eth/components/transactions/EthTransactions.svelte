@@ -14,15 +14,18 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		modalEthTransaction,
 		modalEthToken,
 		modalEthTokenData
 	} from '$lib/derived/modal.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { hideMicroTransactions } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { filterReceivedMicroTransactions } from '$lib/utils/transactions.utils';
 
 	let ckMinterInfoAddresses = $derived(
 		toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$nativeEthereumTokenId])
@@ -47,11 +50,23 @@
 
 	let token = $derived($tokenWithFallback);
 
+	let mappedTransactions = $derived(
+		sortedTransactionsUi.map((transaction) => ({
+			component: 'ethereum' as const,
+			transaction,
+			token
+		}))
+	);
+
+	let filteredTransactions = $derived(
+		$hideMicroTransactions
+			? filterReceivedMicroTransactions({ transactions: mappedTransactions, exchanges: $exchanges })
+			: mappedTransactions
+	);
+
 	let groupedTransactions = $derived(
 		nonNullish(sortedTransactionsUi)
-			? groupTransactionsByDate(
-					sortedTransactionsUi.map((transaction) => ({ component: 'ethereum', transaction, token }))
-				)
+			? groupTransactionsByDate(filteredTransactions)
 			: undefined
 	);
 </script>

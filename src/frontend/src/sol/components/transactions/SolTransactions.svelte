@@ -5,15 +5,18 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		modalSolToken,
 		modalSolTokenData,
 		modalSolTransaction
 	} from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
+	import { hideMicroTransactions } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { filterReceivedMicroTransactions } from '$lib/utils/transactions.utils';
 	import SolTokenModal from '$sol/components/tokens/SolTokenModal.svelte';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import SolTransactionsScroll from '$sol/components/transactions/SolTransactionsScroll.svelte';
@@ -30,11 +33,23 @@
 
 	let token = $derived($pageToken ?? DEFAULT_SOLANA_TOKEN);
 
+	let mappedTransactions = $derived(
+		$solTransactions.map((transaction) => ({
+			component: 'solana' as const,
+			transaction,
+			token
+		}))
+	);
+
+	let filteredTransactions = $derived(
+		$hideMicroTransactions
+			? filterReceivedMicroTransactions({ transactions: mappedTransactions, exchanges: $exchanges })
+			: mappedTransactions
+	);
+
 	let groupedTransactions = $derived(
 		nonNullish($solTransactions)
-			? groupTransactionsByDate(
-					$solTransactions.map((transaction) => ({ component: 'solana', transaction, token }))
-				)
+			? groupTransactionsByDate(filteredTransactions)
 			: undefined
 	);
 </script>
