@@ -357,7 +357,9 @@ describe('token-group.utils', () => {
 				id: ETH_TOKEN_GROUP.id,
 				decimals: BASE_ETH_TOKEN.decimals,
 				groupData: ETH_TOKEN_GROUP,
-				tokens: [{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn2Bi, usdBalance: 200 }],
+				tokens: [
+					{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn2Bi, usdBalance: 200 }
+				],
 				balance: bn2Bi,
 				usdBalance: 200,
 				usdPrice: undefined,
@@ -377,7 +379,9 @@ describe('token-group.utils', () => {
 				id: ETH_TOKEN_GROUP.id,
 				decimals: BASE_ETH_TOKEN.decimals,
 				groupData: ETH_TOKEN_GROUP,
-				tokens: [{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn1Bi, usdBalance: 100 }],
+				tokens: [
+					{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn1Bi, usdBalance: 100 }
+				],
 				balance: bn1Bi,
 				usdBalance: 100,
 				usdPrice: 1500,
@@ -395,7 +399,10 @@ describe('token-group.utils', () => {
 				usdPriceChangePercentage24h: -0.5
 			};
 
-			const result = updateTokenGroup({ token: tokenWithDifferentPrice, tokenGroup: groupWithPrice });
+			const result = updateTokenGroup({
+				token: tokenWithDifferentPrice,
+				tokenGroup: groupWithPrice
+			});
 
 			expect(result.usdPrice).toBe(groupWithPrice.usdPrice);
 			expect(result.usdMarketCap).toBe(groupWithPrice.usdMarketCap);
