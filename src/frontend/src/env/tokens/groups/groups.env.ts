@@ -7,7 +7,6 @@ import { BOB_TOKEN_GROUP } from '$env/tokens/groups/groups.bob.env';
 import { BONK_TOKEN_GROUP } from '$env/tokens/groups/groups.bonk.env';
 import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
 import { CBBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.cbbtc.env';
-import { CHAT_TOKEN_GROUP } from '$env/tokens/groups/groups.chat.env';
 import { COPXON_TOKEN_GROUP } from '$env/tokens/groups/groups.copxon.env';
 import { EEMON_TOKEN_GROUP } from '$env/tokens/groups/groups.eemon.env';
 import { EFAON_TOKEN_GROUP } from '$env/tokens/groups/groups.efaon.env';
@@ -46,7 +45,6 @@ const TOKEN_GROUPS: TokenGroupData[] = [
 	BONK_TOKEN_GROUP,
 	BTC_TOKEN_GROUP,
 	CBBTC_TOKEN_GROUP,
-	CHAT_TOKEN_GROUP,
 	COPXON_TOKEN_GROUP,
 	EEMON_TOKEN_GROUP,
 	EFAON_TOKEN_GROUP,
