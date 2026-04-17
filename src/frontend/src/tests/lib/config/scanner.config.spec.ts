@@ -11,6 +11,10 @@ describe('scanner.config', () => {
 				title: en.scanner.text.scan_qr_code
 			},
 			{
+				name: WizardStepsScanner.OISY_SCANNER_INFO,
+				title: en.scanner.text.scanner
+			},
+			{
 				name: WizardStepsScanner.PAY,
 				title: en.scanner.text.pay
 			},

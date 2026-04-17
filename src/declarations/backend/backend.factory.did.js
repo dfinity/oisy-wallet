@@ -16,6 +16,39 @@ export const idlFactory = ({ IDL }) => {
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
+	const QualifiedNotificationKind = IDL.Variant({
+		NoIndexCanister: IDL.Null,
+		UnavailableIndexCanister: IDL.Null
+	});
+	const SimpleNotificationKind = IDL.Variant({
+		BtcActivityInfo: IDL.Null,
+		HiddenMicroTransactions: IDL.Null
+	});
+	const DismissedNotification = IDL.Variant({
+		Qualified: IDL.Record({
+			kind: QualifiedNotificationKind,
+			version: IDL.Nat32,
+			qualifier: IDL.Text
+		}),
+		Simple: IDL.Record({
+			kind: SimpleNotificationKind,
+			version: IDL.Nat32
+		})
+	});
+	const AddDismissedNotificationRequest = IDL.Record({
+		notifications: IDL.Vec(DismissedNotification),
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
+	const AddDismissedNotificationError = IDL.Variant({
+		TooManyNotifications: IDL.Null,
+		VersionMismatch: IDL.Null,
+		MaxDismissedNotifications: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const AddUserDismissedNotificationResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: AddDismissedNotificationError
+	});
 	const AddHiddenDappIdRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		dapp_id: IDL.Text
@@ -287,6 +320,9 @@ export const idlFactory = ({ IDL }) => {
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		testnets: TestnetsSettings
 	});
+	const NotificationSettings = IDL.Record({
+		dismissed_notifications: IDL.Vec(DismissedNotification)
+	});
 	const DappCarouselSettings = IDL.Record({
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});
@@ -300,10 +336,18 @@ export const idlFactory = ({ IDL }) => {
 			IDL.Tuple(ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings)
 		)
 	});
+	const TransactionFilterSettings = IDL.Record({
+		hide_micro_transactions: IDL.Bool
+	});
+	const TransactionSettings = IDL.Record({
+		filter: IDL.Opt(TransactionFilterSettings)
+	});
 	const Settings = IDL.Record({
 		networks: NetworksSettings,
+		notifications: IDL.Opt(NotificationSettings),
 		dapp: DappSettings,
-		experimental_features: ExperimentalFeaturesSettings
+		experimental_features: ExperimentalFeaturesSettings,
+		transactions: IDL.Opt(TransactionSettings)
 	});
 	const UserProfile = IDL.Record({
 		agreements: IDL.Opt(Agreements),
@@ -605,6 +649,11 @@ export const idlFactory = ({ IDL }) => {
 	});
 
 	return IDL.Service({
+		add_user_dismissed_notification: IDL.Func(
+			[AddDismissedNotificationRequest],
+			[AddUserDismissedNotificationResult],
+			[]
+		),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [AddUserHiddenDappIdResult], []),
 		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
 		btc_add_pending_transaction: IDL.Func(

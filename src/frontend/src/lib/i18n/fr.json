@@ -45,7 +45,8 @@
 			"sorting": "Tri",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
@@ -61,7 +62,8 @@
 			"switch_currency": "Changer de devise",
 			"more": "Afficher tout le texte",
 			"less": "Afficher moins de texte",
-			"learn_more": "Suivre le lien pour en savoir plus"
+			"learn_more": "Suivre le lien pour en savoir plus",
+			"up_one_level": "Monter d'un niveau"
 		},
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
@@ -77,6 +79,8 @@
 			"activity": "Activité",
 			"airdrops": "Récompenses",
 			"earning": "Gains",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Code source sur GitHub",
 			"view_on_explorer": "Voir sur l'explorateur",
 			"source_code": "Code source",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "Ouvrir l'explorateur d'applications",
 			"activity": "Ouvrir la vue d'activité",
 			"airdrops": "Ouvrir la vue des récompenses",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Votre adresse de portefeuille, les paramètres, la déconnexion et les liens externes",
 			"documentation": "Ouvrir la documentation de $oisy_name",
 			"support": "Ouvrir la section Support de la documentation de $oisy_name",
@@ -1030,7 +1036,14 @@
 			"pay_at_failure": "Échec du paiement à $receipt",
 			"try_again": "Réessayer",
 			"payment_confirmed": "Paiement confirmé",
-			"payment_failed": "Paiement échoué"
+			"payment_failed": "Paiement échoué",
+			"what_is_scan": "Qu'est-ce que le scanner",
+			"no_camera_permission": "Pour scanner les codes QR, vous devez autoriser l'accès à la caméra dans les paramètres de votre navigateur.",
+			"what_is_scan_description": "Le scanner $oisy_short peut lire une grande variété de codes QR et lancer immédiatement l'action appropriée. Scannez un code QR WalletConnect pour établir une nouvelle connexion, ou scannez le code de paiement dans tout magasin utilisant Open CryptoPay pour régler la facture avec $oisy_short Pay.",
+			"what_is_scan_title": "$oisy_short comprend tous les codes QR",
+			"learn_more_about_scan": "En savoir plus sur le scanner",
+			"learn_more_about_pay": "En savoir plus sur $oisy_short Pay",
+			"scanner": "Scanner"
 		},
 		"error": {
 			"code_link_is_not_valid": "Le code/lien n'est pas valide",
@@ -1499,7 +1512,10 @@
 			"amount": "Montant",
 			"hex_data": "Données HEX",
 			"raw_copied": "Données brutes de la transaction copiées dans le presse-papiers.",
-			"sign_message": "Signer le message"
+			"sign_message": "Signer le message",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "ex: wc:a281567bb3e4..."

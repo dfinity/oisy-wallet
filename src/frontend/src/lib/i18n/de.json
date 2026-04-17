@@ -45,7 +45,8 @@
 			"sorting": "Sortierung",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
@@ -61,7 +62,8 @@
 			"switch_currency": "Währung wechseln",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up_one_level": "Eine Ebene nach oben"
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
@@ -77,6 +79,8 @@
 			"activity": "Aktivität",
 			"airdrops": "Prämien",
 			"earning": "Verdienen",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Quellcode auf GitHub",
 			"view_on_explorer": "Im Explorer ansehen",
 			"source_code": "Quellcode",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "App-Explorer öffnen",
 			"activity": "Aktivitätsübersicht öffnen",
 			"airdrops": "Belohnungsübersicht öffnen",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Deine Wallet-Adresse, Einstellungen, Abmelden und externe Links",
 			"documentation": "Dokumentation von $oisy_name öffnen",
 			"support": "Support-Bereich der $oisy_name-Dokumentation öffnen",
@@ -1004,7 +1010,7 @@
 		"text": {
 			"scan_qr_code": "QR Code scannen",
 			"pay_to": "Zahlung an $receipt",
-			"powered_by": "",
+			"powered_by": "Bereitgestellt von",
 			"recipient": "Empfänger",
 			"name": "Name",
 			"address": "Adresse",
@@ -1030,7 +1036,14 @@
 			"pay_at_failure": "Bezahlung an $receipt ist fehlgeschlagen",
 			"try_again": "Erneut versuchen",
 			"payment_confirmed": "Bezahlung Erfolgreich",
-			"payment_failed": "Bezahlung Fehlgeschlagen"
+			"payment_failed": "Bezahlung Fehlgeschlagen",
+			"what_is_scan": "Was ist der Scanner",
+			"no_camera_permission": "Um QR-Codes zu scannen, musst du den Kamerazugriff in den Seiteneinstellungen deines Browsers erlauben.",
+			"what_is_scan_description": "Der $oisy_short Scanner kann verschiedenste QR-Codes lesen und sofort die richtige Aktion einleiten. Scanne einen WalletConnect QR-Code, um eine neue Verbindung herzustellen, oder scanne den Bezahlcode in jedem Geschäft, das Open CryptoPay nutzt, um die Rechnung mit $oisy_short Pay zu begleichen.",
+			"what_is_scan_title": "$oisy_short versteht jeden QR-Code",
+			"learn_more_about_scan": "Mehr über den Scanner erfahren",
+			"learn_more_about_pay": "Mehr über $oisy_short Pay erfahren",
+			"scanner": "Scanner"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/URL ist nicht gültig",
@@ -1499,7 +1512,10 @@
 			"amount": "",
 			"hex_data": "HEX-Daten",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
-			"sign_message": "Nachricht signieren"
+			"sign_message": "Nachricht signieren",
+			"connected_apps": "",
+			"no_connected_apps": "",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "z. B. wc:a281567bb3e4..."

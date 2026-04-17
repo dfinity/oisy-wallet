@@ -45,7 +45,8 @@
 			"sorting": "Sorting",
 			"unlimited": "Unlimited $items",
 			"info": "Info",
-			"asset": "Asset"
+			"asset": "Asset",
+			"got_it": "Got it"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -61,7 +62,8 @@
 			"switch_currency": "Switch currency",
 			"more": "Show full text",
 			"less": "Show less text",
-			"learn_more": "Follow the link to learn more"
+			"learn_more": "Follow the link to learn more",
+			"up_one_level": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
@@ -77,6 +79,8 @@
 			"activity": "Activity",
 			"airdrops": "Rewards",
 			"earning": "Earn",
+			"pay": "$oisy_short PAY",
+			"wallet_connect": "WalletConnect",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
+			"pay": "Open the $oisy_short PAY",
+			"wallet_connect": "Open the WalletConnect",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
@@ -1030,7 +1036,14 @@
 			"pay_at_failure": "Failed to pay at $receipt",
 			"try_again": "Try again",
 			"payment_confirmed": "Payment Confirmed",
-			"payment_failed": "Payment Failed"
+			"payment_failed": "Payment Failed",
+			"what_is_scan": "What is the scanner",
+			"no_camera_permission": "To scan QR codes, you need to allow camera access in your browser's site settings.",
+			"what_is_scan_description": "The $oisy_short scanner can read a variety of QR codes and initiate the correct action right away. Scan a WalletConnect QR code to establish a new connection, or scan the checkout code at any shop that uses Open CryptoPay to settle the bill with $oisy_short Pay.",
+			"what_is_scan_title": "$oisy_short understands any QR code",
+			"learn_more_about_scan": "Learn more about the scanner",
+			"learn_more_about_pay": "Learn more about $oisy_short Pay",
+			"scanner": "Scanner"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
@@ -1499,7 +1512,10 @@
 			"amount": "Amount",
 			"hex_data": "HEX Data",
 			"raw_copied": "Raw transaction data copied to clipboard.",
-			"sign_message": "Sign Message"
+			"sign_message": "Sign Message",
+			"connected_apps": "Connected Apps",
+			"no_connected_apps": "No apps are currently connected.",
+			"wallet_connect": "WalletConnect"
 		},
 		"alt": {
 			"connect_input": "e.g. wc:a281567bb3e4..."

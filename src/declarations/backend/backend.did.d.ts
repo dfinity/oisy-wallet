@@ -15,10 +15,22 @@ export type AddDappSettingsError =
 	| { VersionMismatch: null }
 	| { DappIdTooLong: null }
 	| { UserNotFound: null };
+export type AddDismissedNotificationError =
+	| { TooManyNotifications: null }
+	| { VersionMismatch: null }
+	| { MaxDismissedNotifications: null }
+	| { UserNotFound: null };
+export interface AddDismissedNotificationRequest {
+	notifications: Array<DismissedNotification>;
+	current_user_version: [] | [bigint];
+}
 export interface AddHiddenDappIdRequest {
 	current_user_version: [] | [bigint];
 	dapp_id: string;
 }
+export type AddUserDismissedNotificationResult =
+	| { Ok: null }
+	| { Err: AddDismissedNotificationError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
 export interface AgreementHistoryEntry {
 	timestamp_ns: bigint;
@@ -206,6 +218,15 @@ export interface Delegation {
 	expiration: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
+export type DismissedNotification =
+	| {
+			Qualified: {
+				kind: QualifiedNotificationKind;
+				version: number;
+				qualifier: string;
+			};
+	  }
+	| { Simple: { kind: SimpleNotificationKind; version: number } };
 export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
@@ -362,6 +383,9 @@ export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
 }
+export interface NotificationSettings {
+	dismissed_notifications: Array<DismissedNotification>;
+}
 export interface Outpoint {
 	txid: Uint8Array;
 	vout: number;
@@ -376,6 +400,9 @@ export interface ProviderAgreementType {
 	provider: ProviderAgreementProvider;
 	scope: ProviderAgreementScope;
 }
+export type QualifiedNotificationKind =
+	| { NoIndexCanister: null }
+	| { UnavailableIndexCanister: null };
 export interface RateLimitError {
 	max_calls: number;
 	window_ns: bigint;
@@ -413,13 +440,16 @@ export type SetTestnetsSettingsError = { VersionMismatch: null } | { UserNotFoun
 export type SetUserShowTestnetsResult = { Ok: null } | { Err: UpdateAgreementsError };
 export interface Settings {
 	networks: NetworksSettings;
+	notifications: [] | [NotificationSettings];
 	dapp: DappSettings;
 	experimental_features: ExperimentalFeaturesSettings;
+	transactions: [] | [TransactionSettings];
 }
 export interface SignedDelegation {
 	signature: Uint8Array;
 	delegation: Delegation;
 }
+export type SimpleNotificationKind = { BtcActivityInfo: null } | { HiddenMicroTransactions: null };
 export interface SolTransactionData {
 	fee: [] | [bigint];
 	to_owner: [] | [string];
@@ -504,6 +534,12 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export interface TransactionFilterSettings {
+	hide_micro_transactions: boolean;
+}
+export interface TransactionSettings {
+	filter: [] | [TransactionFilterSettings];
+}
 export interface TransformArgs {
 	context: Uint8Array;
 	response: HttpRequestResult;
@@ -561,6 +597,24 @@ export interface Utxo {
 	outpoint: Outpoint;
 }
 export interface _SERVICE {
+	/**
+	 * Adds one or more dismissed notifications to the user's profile.
+	 *
+	 * # Arguments
+	 * * `request` - The request containing the typed notifications to dismiss.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+	 * present.
+	 *
+	 * # Errors
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+	 * the batch is too large.
+	 */
+	add_user_dismissed_notification: ActorMethod<
+		[AddDismissedNotificationRequest],
+		AddUserDismissedNotificationResult
+	>;
 	/**
 	 * Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	 *
