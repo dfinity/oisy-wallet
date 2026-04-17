@@ -20,7 +20,10 @@ export const idlFactory = ({ IDL }) => {
 		NoIndexCanister: IDL.Null,
 		UnavailableIndexCanister: IDL.Null
 	});
-	const SimpleNotificationKind = IDL.Variant({ BtcActivityInfo: IDL.Null });
+	const SimpleNotificationKind = IDL.Variant({
+		BtcActivityInfo: IDL.Null,
+		HiddenMicroTransactions: IDL.Null
+	});
 	const DismissedNotification = IDL.Variant({
 		Qualified: IDL.Record({
 			kind: QualifiedNotificationKind,

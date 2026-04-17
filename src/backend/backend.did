@@ -414,7 +414,10 @@ type Settings = record {
 	experimental_features : ExperimentalFeaturesSettings
 };
 type SignedDelegation = record { signature : blob; delegation : Delegation };
-type SimpleNotificationKind = variant { BtcActivityInfo };
+type SimpleNotificationKind = variant {
+	BtcActivityInfo;
+	HiddenMicroTransactions
+};
 type SolTransactionData = record {
 	fee : opt nat;
 	to_owner : opt text;
