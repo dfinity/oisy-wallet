@@ -62,7 +62,8 @@
 			"switch_currency": "Zmień walutę",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",

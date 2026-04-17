@@ -62,7 +62,8 @@
 			"switch_currency": "Přepnout měnu",
 			"more": "Více",
 			"less": "Méně",
-			"learn_more": "Zjistit více"
+			"learn_more": "Zjistit více",
+			"up": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",

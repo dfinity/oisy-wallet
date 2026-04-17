@@ -62,7 +62,8 @@
 			"switch_currency": "Mudar moeda",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída",

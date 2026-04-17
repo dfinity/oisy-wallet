@@ -62,7 +62,8 @@
 			"switch_currency": "मुद्रा बदलें",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",

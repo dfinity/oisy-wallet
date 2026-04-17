@@ -62,7 +62,8 @@
 			"switch_currency": "Changer de devise",
 			"more": "Afficher tout le texte",
 			"less": "Afficher moins de texte",
-			"learn_more": "Suivre le lien pour en savoir plus"
+			"learn_more": "Suivre le lien pour en savoir plus",
+			"up": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",

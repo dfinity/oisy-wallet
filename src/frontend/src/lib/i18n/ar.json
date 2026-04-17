@@ -62,7 +62,8 @@
 			"switch_currency": "تبديل العملة",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",

@@ -62,7 +62,8 @@
 			"switch_currency": "Chuyển đổi tiền tệ",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
