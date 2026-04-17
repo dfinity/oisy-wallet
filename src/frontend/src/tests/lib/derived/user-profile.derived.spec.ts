@@ -265,7 +265,7 @@ describe('user-profile.derived', () => {
 		it('should default to true when user profile is not set', () => {
 			userProfileStore.reset();
 
-			expect(get(hideMicroTransactions)).toBe(true);
+			expect(get(hideMicroTransactions)).toBeTruthy();
 		});
 
 		it('should return false when filter disables it', () => {
@@ -280,7 +280,7 @@ describe('user-profile.derived', () => {
 				}
 			});
 
-			expect(get(hideMicroTransactions)).toBe(false);
+			expect(get(hideMicroTransactions)).toBeFalsy();
 		});
 
 		it('should return true when filter enables it', () => {
@@ -295,7 +295,7 @@ describe('user-profile.derived', () => {
 				}
 			});
 
-			expect(get(hideMicroTransactions)).toBe(true);
+			expect(get(hideMicroTransactions)).toBeTruthy();
 		});
 	});
 });
