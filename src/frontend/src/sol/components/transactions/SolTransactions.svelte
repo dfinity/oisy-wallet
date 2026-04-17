@@ -48,9 +48,7 @@
 	);
 
 	let groupedTransactions = $derived(
-		nonNullish($solTransactions)
-			? groupTransactionsByDate(filteredTransactions)
-			: undefined
+		nonNullish($solTransactions) ? groupTransactionsByDate(filteredTransactions) : undefined
 	);
 </script>
 

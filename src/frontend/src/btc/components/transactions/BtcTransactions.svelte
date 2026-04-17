@@ -49,9 +49,7 @@
 	);
 
 	let groupedTransactions = $derived(
-		nonNullish($sortedBtcTransactions)
-			? groupTransactionsByDate(filteredTransactions)
-			: undefined
+		nonNullish($sortedBtcTransactions) ? groupTransactionsByDate(filteredTransactions) : undefined
 	);
 </script>
 
