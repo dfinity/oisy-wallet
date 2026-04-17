@@ -582,9 +582,9 @@ impl StoredUserProfile {
         let mut new_profile = self.with_incremented_version();
         new_profile.settings = {
             let mut settings = new_profile.settings.unwrap_or_default();
-            settings.transactions = Some(TransactionSettings {
-                filter: Some(filter),
-            });
+            let mut transactions = settings.transactions.unwrap_or_default();
+            transactions.filter = Some(filter);
+            settings.transactions = Some(transactions);
             Some(settings)
         };
         new_profile.updated_timestamp = now;
