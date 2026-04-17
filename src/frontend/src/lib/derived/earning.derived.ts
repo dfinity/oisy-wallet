@@ -14,6 +14,8 @@ import { derived, type Readable } from 'svelte/store';
 
 type EarningDataRecord = { [key in EarningCardFields]?: string | number | string[] } & {
 	action: () => Promise<void>;
+	disabled?: boolean;
+	disabledNotice?: string;
 };
 
 type EarningData = Record<string, EarningDataRecord>;
@@ -56,6 +58,11 @@ export const earningData: Readable<EarningData> = derived(
 						Number($harvestAutopilotsMaxApy)) /
 					100
 				: undefined,
+			disabled: $harvestAutopilots.length === 0,
+			disabledNotice:
+				$harvestAutopilots.length === 0
+					? 'earning.cards.harvest_autopilot.no_networks_enabled'
+					: undefined,
 			action: () => goto(AppPath.EarnAutopilot)
 		}
 	})
