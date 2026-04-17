@@ -13,9 +13,25 @@ import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/forma
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import type { AfterNavigate } from '@sveltejs/kit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+
+import * as navUtils from '$lib/utils/nav.utils';
+
+let afterNavigateCallbacks: Array<(navigation: AfterNavigate) => void> = [];
+
+const mockGoto = vi.fn();
+const mockBack = vi.fn();
+
+vi.mock('$app/navigation', () => ({
+	afterNavigate: (fn: (navigation: AfterNavigate) => void) => {
+		afterNavigateCallbacks.push(fn);
+	},
+	goto: (...args: unknown[]) => mockGoto(...args)
+}));
 
 vi.mock('$lib/services/url.services', () => ({
 	extractMediaUrls: vi.fn()
@@ -32,6 +48,9 @@ describe('NftHero', () => {
 		vi.mocked(extractMediaUrls).mockResolvedValue([]);
 
 		userSelectedNetworkStore.set(undefined);
+		afterNavigateCallbacks = [];
+		mockBack.mockReset();
+		vi.spyOn(navUtils, 'back').mockImplementation(mockBack);
 
 		openFullscreenSpy = vi
 			.spyOn(modalStore, 'openNftFullscreenDisplay')
@@ -297,5 +316,64 @@ describe('NftHero', () => {
 
 			expect(acquired_at).not.toBeInTheDocument();
 		});
+	});
+
+	it('should call back with pop true when the close button is clicked and there is a previous route', async () => {
+		const { getByLabelText } = render(NftHero, {
+			props: {
+				nft: mockValidErc1155Nft
+			}
+		});
+
+		flushSync(() => {
+			for (const cb of afterNavigateCallbacks) {
+				cb({
+					from: { route: { id: '/nfts' }, url: new URL('https://oisy.com/nfts'), params: {} },
+					to: {
+						route: { id: '/nfts' },
+						url: new URL('https://oisy.com/nfts?nft=1'),
+						params: {}
+					},
+					type: 'goto',
+					willUnload: false,
+					complete: Promise.resolve()
+				} as unknown as AfterNavigate);
+			}
+		});
+
+		const closeButton = getByLabelText(get(i18n).core.alt.back);
+
+		await fireEvent.click(closeButton);
+
+		expect(mockBack).toHaveBeenCalledWith({ pop: true });
+	});
+
+	it('should call back with pop false when the close button is clicked and there is no previous route', async () => {
+		const { getByLabelText } = render(NftHero, {
+			props: {
+				nft: mockValidErc1155Nft
+			}
+		});
+
+		const closeButton = getByLabelText(get(i18n).core.alt.back);
+
+		await fireEvent.click(closeButton);
+
+		expect(mockBack).toHaveBeenCalledWith({ pop: false });
+	});
+
+	it('should navigate one level up when the back arrow button is clicked', async () => {
+		const { getByLabelText } = render(NftHero, {
+			props: {
+				nft: mockValidErc1155Nft
+			}
+		});
+
+		const backButton = getByLabelText('Up');
+
+		await fireEvent.click(backButton);
+
+		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/nfts'));
+		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('collection='));
 	});
 });
