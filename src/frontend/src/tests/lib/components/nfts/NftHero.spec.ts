@@ -186,7 +186,7 @@ describe('NftHero', () => {
 			}
 		});
 
-		const nftImageButton = container.querySelector('.h-64 button');
+		const nftImageButton = container.querySelector('.h-64 button.block');
 
 		assertNonNullish(nftImageButton);
 
