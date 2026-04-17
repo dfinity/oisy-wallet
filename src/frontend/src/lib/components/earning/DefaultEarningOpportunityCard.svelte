@@ -93,13 +93,14 @@
 				</ListItem>
 			{/each}
 		</List>
-	{/snippet}
-	{#snippet button()}
+
 		{#if nonNullish(cardFields.disabledNotice)}
-			<p class="mb-2 text-xs text-tertiary"
+			<p class="text-center text-xs text-tertiary"
 				>{resolveText({ i18n: $i18n, path: cardFields.disabledNotice })}</p
 			>
 		{/if}
+	{/snippet}
+	{#snippet button()}
 		<Button
 			colorStyle="success"
 			disabled={cardFields.disabled}
