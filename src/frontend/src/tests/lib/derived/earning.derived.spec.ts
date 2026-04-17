@@ -139,7 +139,7 @@ describe('earning.derived', () => {
 			const result = get(earningData);
 			const record = result['harvest-autopilot'];
 
-			expect(record.disabled).toBe(true);
+			expect(record.disabled).toBeTruthy();
 			expect(record.disabledNotice).toBe('earning.cards.harvest_autopilot.no_networks_enabled');
 		});
 
@@ -149,7 +149,7 @@ describe('earning.derived', () => {
 			const result = get(earningData);
 			const record = result['harvest-autopilot'];
 
-			expect(record.disabled).toBe(false);
+			expect(record.disabled).toBeFalsy();
 			expect(record.disabledNotice).toBeUndefined();
 		});
 	});
