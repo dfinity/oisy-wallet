@@ -21,13 +21,10 @@ export const allHarvestAutopilotTokens: Readable<Erc4626Token[]> = derived(
 export const allHarvestAutopilotsMaxApy: Readable<string> = derived(
 	[allHarvestAutopilotTokens, harvestVaultsStore],
 	([$allHarvestAutopilotTokens, $harvestVaultsStore]) =>
-		$allHarvestAutopilotTokens.reduce<string>(
-			(acc, { address }) => {
-				const apy = $harvestVaultsStore[address.toLowerCase()]?.estimatedApy;
-				return nonNullish(apy) ? `${Math.max(Number(acc), Number(apy))}` : acc;
-			},
-			'0'
-		)
+		$allHarvestAutopilotTokens.reduce<string>((acc, { address }) => {
+			const apy = $harvestVaultsStore[address.toLowerCase()]?.estimatedApy;
+			return nonNullish(apy) ? `${Math.max(Number(acc), Number(apy))}` : acc;
+		}, '0')
 );
 
 export const harvestAutopilotTokens: Readable<Erc4626CustomToken[]> = derived(
