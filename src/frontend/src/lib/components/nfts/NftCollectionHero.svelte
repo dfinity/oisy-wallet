@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { IconBack } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { slide } from 'svelte/transition';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
@@ -17,7 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { back, nftsUrl } from '$lib/utils/nav.utils';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 
 	interface Props {
@@ -27,11 +26,11 @@
 
 	const { token, nfts }: Props = $props();
 
-	let fromRoute = $state<NavigationTarget | null | undefined>();
-
-	afterNavigate(({ from }) => {
-		fromRoute = from;
-	});
+	const assetsUrl = $derived(
+		nftsUrl({
+			originSelectedNetwork: $userSelectedNetworkStore
+		})
+	);
 
 	const breadcrumbItems = $derived([
 		{
@@ -59,7 +58,7 @@
 		<button
 			class="absolute top-3 right-3 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border-0 bg-black/40 p-1 transition-colors duration-200 hover:bg-black/60 [&>svg]:size-5"
 			aria-label={$i18n.core.alt.back}
-			onclick={() => back({ pop: nonNullish(fromRoute) })}
+			onclick={() => goto(assetsUrl)}
 		>
 			<IconClose />
 		</button>
