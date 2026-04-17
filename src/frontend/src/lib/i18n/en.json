@@ -1036,13 +1036,13 @@
 			"try_again": "Try again",
 			"payment_confirmed": "Payment Confirmed",
 			"payment_failed": "Payment Failed",
-			"what_is_scan": "What is the universal scanner",
+			"what_is_scan": "What is the scanner",
 			"no_camera_permission": "To scan QR codes, you need to allow camera access in your browser's site settings.",
-			"what_is_scan_description": "The $oisy_short's universal scanner scans a variety of QR codes and initiates the correct action right away.<br> Scan a WalletConnect QR code to establish a new connection, or scan the checkout code at any shop that uses Open CryptoPay to pay.",
+			"what_is_scan_description": "The $oisy_short scanner can read a variety of QR codes and initiate the correct action right away. Scan a WalletConnect QR code to establish a new connection, or scan the checkout code at any shop that uses Open CryptoPay to settle the bill with $oisy_short Pay.",
 			"what_is_scan_title": "$oisy_short understands any QR code",
-			"learn_more_about_scan": "Learn more about the universal scanner",
+			"learn_more_about_scan": "Learn more about the scanner",
 			"learn_more_about_pay": "Learn more about $oisy_short Pay",
-			"universal_scanner": "Universal Scanner"
+			"universal_scanner": "Scanner"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
