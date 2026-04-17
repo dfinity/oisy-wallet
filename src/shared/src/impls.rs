@@ -32,6 +32,10 @@ use crate::{
             MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH,
         },
         settings::Settings,
+        transaction_settings::{
+            TransactionFilterSettings, TransactionSettings,
+            UpdateTransactionFilterSettingsError,
+        },
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
         user_profile::{OisyUser, StoredUserProfile, UserProfile},
         Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
@@ -234,6 +238,9 @@ impl StoredUserProfile {
             },
             experimental_features: ExperimentalFeaturesSettings::default(),
             notifications: None,
+            transactions: Some(TransactionSettings {
+                filter: Some(TransactionFilterSettings::default()),
+            }),
         };
         let agreements = Agreements::default();
         StoredUserProfile {
@@ -541,6 +548,45 @@ impl StoredUserProfile {
         new_profile.settings = {
             let mut settings = new_profile.settings.unwrap_or_default();
             settings.experimental_features.experimental_features = new_experimental_features;
+            Some(settings)
+        };
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with the transaction filter settings updated.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_transaction_filter_settings(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        filter: TransactionFilterSettings,
+    ) -> Result<StoredUserProfile, UpdateTransactionFilterSettingsError> {
+        if profile_version != self.version {
+            return Err(UpdateTransactionFilterSettingsError::VersionMismatch);
+        }
+
+        let transactions = self
+            .settings
+            .clone()
+            .unwrap_or_default()
+            .transactions
+            .unwrap_or_default();
+
+        if transactions.filter.as_ref() == Some(&filter) {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.transactions = Some(TransactionSettings {
+                filter: Some(filter),
+                ..settings.transactions.unwrap_or_default()
+            });
             Some(settings)
         };
         new_profile.updated_timestamp = now;
