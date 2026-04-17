@@ -99,7 +99,11 @@ export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams):
 					: balance
 			)
 		),
-		usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance])
+		usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance]),
+		usdPrice: tokenGroup.usdPrice ?? token.usdPrice,
+		usdMarketCap: tokenGroup.usdMarketCap ?? token.usdMarketCap,
+		usdPriceChangePercentage24h:
+			tokenGroup.usdPriceChangePercentage24h ?? token.usdPriceChangePercentage24h
 	};
 };
 
