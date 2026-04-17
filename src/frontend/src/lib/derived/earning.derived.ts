@@ -2,6 +2,7 @@ import { goto } from '$app/navigation';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
 	allHarvestAutopilotTokens,
+	allHarvestAutopilotsMaxApy,
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots,
 	harvestAutopilotsCurrentEarning,
@@ -29,7 +30,8 @@ export const earningData: Readable<EarningData> = derived(
 		harvestAutopilotsCurrentEarning,
 		harvestAutopilots,
 		harvestAutopilotsMaxApy,
-		allHarvestAutopilotTokens
+		allHarvestAutopilotTokens,
+		allHarvestAutopilotsMaxApy
 	],
 	([
 		$enabledMainnetFungibleTokensUsdBalance,
@@ -38,10 +40,11 @@ export const earningData: Readable<EarningData> = derived(
 		$harvestAutopilotsCurrentEarning,
 		$harvestAutopilots,
 		$harvestAutopilotsMaxApy,
-		$allHarvestAutopilotTokens
+		$allHarvestAutopilotTokens,
+		$allHarvestAutopilotsMaxApy
 	]) => ({
 		'harvest-autopilot': {
-			[EarningCardFields.APY]: $harvestAutopilotsMaxApy,
+			[EarningCardFields.APY]: $allHarvestAutopilotsMaxApy,
 			[EarningCardFields.CURRENT_EARNING]: $harvestAutopilotsCurrentEarning,
 			[EarningCardFields.CURRENT_STAKED]: $harvestAutopilotsUsdBalance,
 			[EarningCardFields.NETWORKS]: [

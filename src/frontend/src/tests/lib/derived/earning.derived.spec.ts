@@ -1,6 +1,7 @@
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
 	allHarvestAutopilotTokens,
+	allHarvestAutopilotsMaxApy,
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots,
 	harvestAutopilotsCurrentEarning,
@@ -34,7 +35,8 @@ describe('earning.derived', () => {
 			currentEarning = 5,
 			allTokens = defaultAllTokens,
 			vaults = defaultVaults,
-			maxApy = '5.5'
+			maxApy = '5.5',
+			allMaxApy = '5.5'
 		}: {
 			enabledMainnetUsdBalance?: number | null;
 			harvestUsdBalance?: number;
@@ -43,6 +45,7 @@ describe('earning.derived', () => {
 			allTokens?: { network: { icon?: string }; assetIcon?: string }[];
 			vaults?: { token: { network: { icon?: string }; assetIcon?: string } }[];
 			maxApy?: string;
+			allMaxApy?: string;
 		} = {}) => {
 			vi.spyOn(enabledMainnetFungibleTokensUsdBalance, 'subscribe').mockImplementation((fn) => {
 				fn(enabledMainnetUsdBalance as number);
@@ -70,6 +73,10 @@ describe('earning.derived', () => {
 			});
 			vi.spyOn(harvestAutopilotsMaxApy, 'subscribe').mockImplementation((fn) => {
 				fn(maxApy);
+				return () => {};
+			});
+			vi.spyOn(allHarvestAutopilotsMaxApy, 'subscribe').mockImplementation((fn) => {
+				fn(allMaxApy);
 				return () => {};
 			});
 		};
@@ -151,6 +158,15 @@ describe('earning.derived', () => {
 
 			expect(record[EarningCardFields.NETWORKS]).toEqual(['eth-icon']);
 			expect(record[EarningCardFields.ASSETS]).toEqual(['usdc-icon']);
+		});
+
+		it('shows allMaxApy as APY even when no vaults are enabled', () => {
+			setupStores({ vaults: [], allMaxApy: '12.5' });
+
+			const result = get(earningData);
+			const record = result['harvest-autopilot'];
+
+			expect(record[EarningCardFields.APY]).toBe('12.5');
 		});
 
 		it('sets disabled and disabledNotice when no vaults are available', () => {
