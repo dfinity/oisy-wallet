@@ -12,6 +12,7 @@ use shared::types::{
     },
     network::{NetworkSettingsMap, SetTestnetsSettingsError, UpdateNetworksSettingsError},
     notification::{AddDismissedNotificationError, DismissedNotification},
+    transaction_settings::{TransactionFilterSettings, UpdateTransactionFilterSettingsError},
     user_profile::{GetUserProfileError, StoredUserProfile},
     Timestamp, Version,
 };
@@ -317,6 +318,34 @@ pub fn update_experimental_feature_settings(
         now,
         experimental_features,
     )?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
+}
+
+/// Updates the user's transaction filter settings.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `filter` - The new transaction filter settings.
+/// * `user_profile_model` - The user profile model.
+///
+/// # Returns
+/// - Returns `Ok(())` if the settings were successfully updated.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn update_transaction_filter_settings(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    filter: TransactionFilterSettings,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), UpdateTransactionFilterSettingsError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| UpdateTransactionFilterSettingsError::UserNotFound)?;
+    let now = time();
+    let new_profile =
+        user_profile.with_transaction_filter_settings(profile_version, now, filter)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }

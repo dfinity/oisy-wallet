@@ -553,6 +553,10 @@ export interface UpdateProviderAgreementsRequest {
 	current_user_version: [] | [bigint];
 	provider_agreements: Array<[ProviderAgreementType, UserAgreement]>;
 }
+export interface UpdateTransactionFilterSettingsRequest {
+	filter: TransactionFilterSettings;
+	current_user_version: [] | [bigint];
+}
 export interface UpdateUserAgreementsRequest {
 	agreements: UserAgreements;
 	current_user_version: [] | [bigint];
@@ -967,6 +971,20 @@ export interface _SERVICE {
 	 */
 	update_user_network_settings: ActorMethod<
 		[SaveNetworksSettingsRequest],
+		SetUserShowTestnetsResult
+	>;
+	/**
+	 * Updates the user's transaction filter settings.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the transaction filter settings were updated successfully, or if they were
+	 * already set to the same value.
+	 *
+	 * # Errors
+	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 */
+	update_user_transaction_filter_settings: ActorMethod<
+		[UpdateTransactionFilterSettingsRequest],
 		SetUserShowTestnetsResult
 	>;
 }

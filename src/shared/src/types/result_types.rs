@@ -18,6 +18,7 @@ use crate::types::{
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
+    transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
 
@@ -329,6 +330,22 @@ impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
         match result {
             Ok(()) => UpdateExperimentalFeaturesSettingsResult::Ok(()),
             Err(err) => UpdateExperimentalFeaturesSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateTransactionFilterSettingsResult {
+    Ok(()),
+    Err(UpdateTransactionFilterSettingsError),
+}
+impl From<Result<(), UpdateTransactionFilterSettingsError>>
+    for UpdateTransactionFilterSettingsResult
+{
+    fn from(result: Result<(), UpdateTransactionFilterSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateTransactionFilterSettingsResult::Ok(()),
+            Err(err) => UpdateTransactionFilterSettingsResult::Err(err),
         }
     }
 }
