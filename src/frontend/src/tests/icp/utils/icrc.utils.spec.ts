@@ -3,6 +3,7 @@ import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import {
 	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
 	isTokenDip20,
@@ -416,6 +417,58 @@ describe('icrc.utils', () => {
 						{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
 					]);
 				});
+			});
+		});
+
+		describe('groupData', () => {
+			const mockGroupData = {
+				id: parseTokenGroupId('TEST'),
+				name: 'Test Group',
+				symbol: 'TEST'
+			};
+
+			it('should propagate groupData from icrcCustomTokens when present', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: { ...mockToken, groupData: mockGroupData }
+					}
+				});
+
+				expect(token?.groupData).toStrictEqual(mockGroupData);
+			});
+
+			it('should not set groupData when the token in icrcCustomTokens has no groupData', () => {
+				const { groupData: _, ...mockTokenWithoutGroupData } = mockToken;
+
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: mockTokenWithoutGroupData
+					}
+				});
+
+				expect(token?.groupData).toBeUndefined();
+			});
+
+			it('should not set groupData when icrcCustomTokens is not provided', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: undefined
+				});
+
+				expect(token?.groupData).toBeUndefined();
+			});
+
+			it('should not set groupData when the token is not found in icrcCustomTokens', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						['other-canister-id']: { ...mockToken, groupData: mockGroupData }
+					}
+				});
+
+				expect(token?.groupData).toBeUndefined();
 			});
 		});
 
