@@ -1,7 +1,7 @@
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
-import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import type { Erc4626Token } from '$eth/types/erc4626';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { stakeBalances } from '$lib/derived/stake.derived';
@@ -14,7 +14,8 @@ import { derived, type Readable } from 'svelte/store';
 
 export const allHarvestAutopilotTokens: Readable<Erc4626Token[]> = derived(
 	[erc4626DefaultTokensStore],
-	([$erc4626DefaultTokensStore]) => ($erc4626DefaultTokensStore ?? []).filter(isTokenHarvestAutopilot)
+	([$erc4626DefaultTokensStore]) =>
+		($erc4626DefaultTokensStore ?? []).filter(isTokenHarvestAutopilot)
 );
 
 export const harvestAutopilotTokens: Readable<Erc4626CustomToken[]> = derived(
