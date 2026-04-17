@@ -111,4 +111,83 @@ describe('DefaultEarningOpportunityCard', () => {
 
 		expect(mockAction).toHaveBeenCalledOnce();
 	});
+
+	describe('NETWORKS and ASSETS fields', () => {
+		const cardDataWithIcons = {
+			...mockCardData,
+			fields: [EarningCardFields.NETWORKS, EarningCardFields.ASSETS]
+		};
+
+		it('renders a dash when the icons array is empty', () => {
+			render(DefaultEarningOpportunityCard, {
+				cardData: cardDataWithIcons,
+				cardFields: {
+					...mockCardFields,
+					[EarningCardFields.NETWORKS]: [],
+					[EarningCardFields.ASSETS]: []
+				}
+			});
+
+			expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2);
+		});
+
+		it('does not render a dash when icons are provided', () => {
+			render(DefaultEarningOpportunityCard, {
+				cardData: cardDataWithIcons,
+				cardFields: {
+					...mockCardFields,
+					[EarningCardFields.NETWORKS]: ['/icon-eth.svg'],
+					[EarningCardFields.ASSETS]: ['/icon-usdc.svg']
+				}
+			});
+
+			expect(screen.queryByText('-')).toBeNull();
+		});
+	});
+
+	describe('disabled state', () => {
+		it('disables the button when disabled is true', () => {
+			render(DefaultEarningOpportunityCard, {
+				cardData: mockCardData,
+				cardFields: { ...mockCardFields, disabled: true }
+			});
+
+			expect(screen.getByRole('button')).toBeDisabled();
+		});
+
+		it('does not disable the button when disabled is false', () => {
+			render(DefaultEarningOpportunityCard, {
+				cardData: mockCardData,
+				cardFields: { ...mockCardFields, disabled: false }
+			});
+
+			expect(screen.getByRole('button')).not.toBeDisabled();
+		});
+
+		it('shows disabledNotice text when set', () => {
+			render(DefaultEarningOpportunityCard, {
+				cardData: mockCardData,
+				cardFields: {
+					...mockCardFields,
+					disabled: true,
+					disabledNotice: 'earning.cards.harvest_autopilot.no_networks_enabled'
+				}
+			});
+
+			expect(
+				screen.getByText(get(i18n).earning.cards.harvest_autopilot.no_networks_enabled)
+			).toBeInTheDocument();
+		});
+
+		it('does not show notice text when disabledNotice is not set', () => {
+			render(DefaultEarningOpportunityCard, {
+				cardData: mockCardData,
+				cardFields: mockCardFields
+			});
+
+			expect(
+				screen.queryByText(get(i18n).earning.cards.harvest_autopilot.no_networks_enabled)
+			).toBeNull();
+		});
+	});
 });

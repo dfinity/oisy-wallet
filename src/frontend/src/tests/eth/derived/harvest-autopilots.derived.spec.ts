@@ -1,6 +1,8 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import {
+	allHarvestAutopilotTokens,
+	allHarvestAutopilotsMaxApy,
 	disabledHarvestAutopilotTokens,
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots,
@@ -10,6 +12,7 @@ import {
 	harvestAutopilotTokens
 } from '$eth/derived/harvest-autopilots.derived';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
+import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import { harvestVaultsStore } from '$lib/stores/harvest.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -51,6 +54,73 @@ describe('harvest-autopilots.derived', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 		harvestVaultsStore.reset();
+	});
+
+	const mockErc4626DefaultTokensStore = (tokens: Erc4626CustomToken[] | undefined) => {
+		vi.spyOn(erc4626DefaultTokensStore, 'subscribe').mockImplementation((fn) => {
+			fn(tokens as never);
+			return () => {};
+		});
+	};
+
+	describe('allHarvestAutopilotTokens', () => {
+		it('should filter only harvest autopilot tokens from the default tokens store', () => {
+			mockErc4626DefaultTokensStore([mockHarvestToken, mockNonHarvestToken]);
+
+			const result = get(allHarvestAutopilotTokens);
+
+			expect(result).toHaveLength(1);
+			expect(result[0].address).toBe(mockHarvestAddress);
+		});
+
+		it('should return empty array when store is undefined', () => {
+			mockErc4626DefaultTokensStore(undefined);
+
+			expect(get(allHarvestAutopilotTokens)).toEqual([]);
+		});
+
+		it('should return empty array when no harvest autopilot tokens exist', () => {
+			mockErc4626DefaultTokensStore([mockNonHarvestToken]);
+
+			expect(get(allHarvestAutopilotTokens)).toEqual([]);
+		});
+	});
+
+	describe('allHarvestAutopilotsMaxApy', () => {
+		it('should return max APY from vault store regardless of network enablement', () => {
+			mockErc4626DefaultTokensStore([mockHarvestToken]);
+			harvestVaultsStore.set([
+				{ id: 'vault-1', vaultAddress: mockHarvestAddress, estimatedApy: '12.5' }
+			]);
+
+			expect(get(allHarvestAutopilotsMaxApy)).toBe('12.5');
+		});
+
+		it('should return the highest APY across multiple vaults', () => {
+			const secondAddress = '0x31a421271414641cb5063b71594b642d2666db6b';
+			mockErc4626DefaultTokensStore([
+				mockHarvestToken,
+				{ ...mockHarvestToken, address: secondAddress }
+			]);
+			harvestVaultsStore.set([
+				{ id: 'vault-1', vaultAddress: mockHarvestAddress, estimatedApy: '5' },
+				{ id: 'vault-2', vaultAddress: secondAddress, estimatedApy: '18.3' }
+			]);
+
+			expect(get(allHarvestAutopilotsMaxApy)).toBe('18.3');
+		});
+
+		it('should return "0" when vault store has no matching data', () => {
+			mockErc4626DefaultTokensStore([mockHarvestToken]);
+
+			expect(get(allHarvestAutopilotsMaxApy)).toBe('0');
+		});
+
+		it('should return "0" when token list is empty', () => {
+			mockErc4626DefaultTokensStore([]);
+
+			expect(get(allHarvestAutopilotsMaxApy)).toBe('0');
+		});
 	});
 
 	describe('harvestAutopilotTokens', () => {
