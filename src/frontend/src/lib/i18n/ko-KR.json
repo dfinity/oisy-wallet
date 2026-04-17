@@ -767,7 +767,13 @@
 			"beta_features": "베타 기능",
 			"enable_beta_feature": "베타 기능 활성화",
 			"disable_beta_feature": "베타 기능 비활성화",
-			"save_beta_feature_success": "베타 기능 설정이 업데이트되었습니다."
+			"save_beta_feature_success": "베타 기능 설정이 업데이트되었습니다.",
+			"hide_micro_transactions": "",
+			"hide_micro_transactions_description": "",
+			"enable_hide_micro_transactions": "",
+			"disable_hide_micro_transactions": "",
+			"save_spam_filter_success": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "테스트넷 표시 또는 숨기기 토글",
@@ -1949,7 +1955,8 @@
 			"title": "최근 활동"
 		},
 		"info": {
-			"btc_transactions": "BTC 거래 정보는 중앙 집중식 제3자로부터 제공되므로 독립적으로 검증해야 합니다."
+			"btc_transactions": "BTC 거래 정보는 중앙 집중식 제3자로부터 제공되므로 독립적으로 검증해야 합니다.",
+			"hidden_micro_transactions": ""
 		},
 		"warning": {
 			"no_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 사용 가능한 인덱스 캐니스터가 없습니다.",
