@@ -2,8 +2,8 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
     transaction_settings::{
-        TransactionFilterSettings, TransactionSettings,
-        UpdateTransactionFilterSettingsError, UpdateTransactionFilterSettingsRequest,
+        TransactionFilterSettings, TransactionSettings, UpdateTransactionFilterSettingsError,
+        UpdateTransactionFilterSettingsRequest,
     },
     user_profile::{GetUserProfileError, UserProfile},
 };
@@ -103,8 +103,8 @@ fn test_update_user_transaction_filter_settings_cannot_update_wrong_version() {
         current_user_version: profile.version,
     };
 
-    let update_response_stale =
-        pic_setup.update::<Result<(), UpdateTransactionFilterSettingsError>>(
+    let update_response_stale = pic_setup
+        .update::<Result<(), UpdateTransactionFilterSettingsError>>(
             caller,
             "update_user_transaction_filter_settings",
             update_request_stale,
