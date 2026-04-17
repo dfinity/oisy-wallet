@@ -411,7 +411,8 @@ type Settings = record {
 	networks : NetworksSettings;
 	notifications : opt NotificationSettings;
 	dapp : DappSettings;
-	experimental_features : ExperimentalFeaturesSettings
+	experimental_features : ExperimentalFeaturesSettings;
+	transactions : opt TransactionSettings
 };
 type SignedDelegation = record { signature : blob; delegation : Delegation };
 type SimpleNotificationKind = variant { BtcActivityInfo };
@@ -495,6 +496,8 @@ type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
+type TransactionFilterSettings = record { hide_micro_transactions : bool };
+type TransactionSettings = record { filter : opt TransactionFilterSettings };
 type TransformArgs = record { context : blob; response : HttpRequestResult };
 type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
 type UpdateExperimentalFeaturesSettingsRequest = record {

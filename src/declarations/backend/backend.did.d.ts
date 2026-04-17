@@ -443,6 +443,7 @@ export interface Settings {
 	notifications: [] | [NotificationSettings];
 	dapp: DappSettings;
 	experimental_features: ExperimentalFeaturesSettings;
+	transactions: [] | [TransactionSettings];
 }
 export interface SignedDelegation {
 	signature: Uint8Array;
@@ -533,6 +534,12 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export interface TransactionFilterSettings {
+	hide_micro_transactions: boolean;
+}
+export interface TransactionSettings {
+	filter: [] | [TransactionFilterSettings];
+}
 export interface TransformArgs {
 	context: Uint8Array;
 	response: HttpRequestResult;

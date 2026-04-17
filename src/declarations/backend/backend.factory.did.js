@@ -333,11 +333,18 @@ export const idlFactory = ({ IDL }) => {
 			IDL.Tuple(ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings)
 		)
 	});
+	const TransactionFilterSettings = IDL.Record({
+		hide_micro_transactions: IDL.Bool
+	});
+	const TransactionSettings = IDL.Record({
+		filter: IDL.Opt(TransactionFilterSettings)
+	});
 	const Settings = IDL.Record({
 		networks: NetworksSettings,
 		notifications: IDL.Opt(NotificationSettings),
 		dapp: DappSettings,
-		experimental_features: ExperimentalFeaturesSettings
+		experimental_features: ExperimentalFeaturesSettings,
+		transactions: IDL.Opt(TransactionSettings)
 	});
 	const UserProfile = IDL.Record({
 		agreements: IDL.Opt(Agreements),
