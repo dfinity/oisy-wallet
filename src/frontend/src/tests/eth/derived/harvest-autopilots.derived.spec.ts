@@ -1,6 +1,5 @@
-import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
-import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import {
 	allHarvestAutopilots,
@@ -14,10 +13,8 @@ import {
 	harvestAutopilotsUsdBalance,
 	harvestAutopilotTokens
 } from '$eth/derived/harvest-autopilots.derived';
-import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
-import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
-import type { Erc4626Token } from '$eth/types/erc4626';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
+import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 import { harvestVaultsStore } from '$lib/stores/harvest.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -171,100 +168,47 @@ describe('harvest-autopilots.derived', () => {
 	});
 
 	describe('all-harvest-autopilots (network-independent)', () => {
-		const harvestAddressBase = mockHarvestAddress;
-		const harvestAddressArbitrum = '0x407d3d942d0911a2fea7e22417f81e27c02d6c6f';
-
-		const mockHarvestDefaultBaseToken: Erc4626Token = {
-			...mockValidErc4626Token,
-			id: parseTokenId('HarvestDefaultBaseTokenId'),
-			network: BASE_NETWORK,
-			address: harvestAddressBase
-		};
-
-		const mockHarvestDefaultArbitrumToken: Erc4626Token = {
-			...mockValidErc4626Token,
-			id: parseTokenId('HarvestDefaultArbitrumTokenId'),
-			network: ARBITRUM_MAINNET_NETWORK,
-			address: harvestAddressArbitrum
-		};
-
-		const mockHarvestCustomToken: Erc4626CustomToken = {
-			...mockValidErc4626Token,
-			id: parseTokenId('HarvestCustomTokenId'),
-			network: ARBITRUM_MAINNET_NETWORK,
-			address: harvestAddressArbitrum,
-			enabled: false
-		};
+		const expectedHarvestTokens = ERC4626_TOKENS.filter((token) =>
+			isTokenHarvestAutopilot(token)
+		);
 
 		beforeEach(() => {
-			erc4626DefaultTokensStore.reset();
-			erc4626CustomTokensStore.resetAll();
 			harvestVaultsStore.reset();
 		});
 
 		describe('allHarvestAutopilotTokens', () => {
-			it('should include default harvest tokens regardless of enabled networks', () => {
-				erc4626DefaultTokensStore.set([
-					mockHarvestDefaultBaseToken,
-					mockHarvestDefaultArbitrumToken
-				]);
-
+			it('should include all harvest autopilot tokens from the static env regardless of enabled networks', () => {
 				const result = get(allHarvestAutopilotTokens);
 
-				expect(result).toHaveLength(2);
-				expect(result.map(({ address }) => address)).toEqual(
-					expect.arrayContaining([harvestAddressBase, harvestAddressArbitrum])
+				expect(result).toHaveLength(expectedHarvestTokens.length);
+				expect(result.map(({ address }) => address.toLowerCase())).toEqual(
+					expect.arrayContaining(
+						expectedHarvestTokens.map(({ address }) => address.toLowerCase())
+					)
 				);
-			});
-
-			it('should deduplicate custom tokens that overlap default tokens', () => {
-				erc4626DefaultTokensStore.set([mockHarvestDefaultArbitrumToken]);
-				erc4626CustomTokensStore.setAll([{ data: mockHarvestCustomToken, certified: false }]);
-
-				expect(get(allHarvestAutopilotTokens)).toHaveLength(1);
-			});
-
-			it('should include custom harvest tokens without a matching default', () => {
-				erc4626CustomTokensStore.setAll([{ data: mockHarvestCustomToken, certified: false }]);
-
-				const result = get(allHarvestAutopilotTokens);
-
-				expect(result).toHaveLength(1);
-				expect(result[0].address).toBe(harvestAddressArbitrum);
-			});
-
-			it('should return empty array when no harvest tokens exist', () => {
-				expect(get(allHarvestAutopilotTokens)).toEqual([]);
 			});
 		});
 
 		describe('allHarvestAutopilots', () => {
 			it('should include vaults regardless of enabled networks', () => {
-				erc4626DefaultTokensStore.set([
-					mockHarvestDefaultBaseToken,
-					mockHarvestDefaultArbitrumToken
-				]);
-
-				expect(get(allHarvestAutopilots)).toHaveLength(2);
+				expect(get(allHarvestAutopilots)).toHaveLength(expectedHarvestTokens.length);
 			});
 		});
 
 		describe('allHarvestAutopilotsMaxApy', () => {
 			it('should return the max APY across all vaults', () => {
-				erc4626DefaultTokensStore.set([
-					mockHarvestDefaultBaseToken,
-					mockHarvestDefaultArbitrumToken
-				]);
+				const [first, second] = expectedHarvestTokens;
+
 				harvestVaultsStore.set([
 					{
 						id: 'vault-1',
-						vaultAddress: harvestAddressBase,
+						vaultAddress: first.address,
 						estimatedApy: '5.5',
 						totalValueLocked: '1000000'
 					},
 					{
 						id: 'vault-2',
-						vaultAddress: harvestAddressArbitrum,
+						vaultAddress: second.address,
 						estimatedApy: '9.25',
 						totalValueLocked: '2000000'
 					}
@@ -273,7 +217,7 @@ describe('harvest-autopilots.derived', () => {
 				expect(get(allHarvestAutopilotsMaxApy)).toBe('9.25');
 			});
 
-			it('should return "0" when there are no autopilots', () => {
+			it('should return "0" when the vault store is empty', () => {
 				expect(get(allHarvestAutopilotsMaxApy)).toBe('0');
 			});
 		});

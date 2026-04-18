@@ -1,17 +1,15 @@
+import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
-import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
-import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
-import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { stakeBalances } from '$lib/derived/stake.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { harvestVaultsStore } from '$lib/stores/harvest.store';
 import type { Vault } from '$lib/types/vaults';
 import { mapDefaultTokenToToggleable, mapTokenUi } from '$lib/utils/token.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { derived, type Readable } from 'svelte/store';
+import { nonNullish } from '@dfinity/utils';
+import { derived, readable, type Readable } from 'svelte/store';
 
 export const harvestAutopilotTokens: Readable<Erc4626CustomToken[]> = derived(
 	[erc4626Tokens],
@@ -80,39 +78,10 @@ export const enabledHarvestAutopilotsUsdBalance: Readable<number> = derived(
 		)
 );
 
-export const allHarvestAutopilotTokens: Readable<Erc4626CustomToken[]> = derived(
-	[erc4626DefaultTokensStore, erc4626CustomTokensStore],
-	([$erc4626DefaultTokensStore, $erc4626CustomTokensStore]) => {
-		const defaults = ($erc4626DefaultTokensStore ?? []).filter((token) =>
-			isTokenHarvestAutopilot(token)
-		);
-		const customs = ($erc4626CustomTokensStore ?? [])
-			.map(({ data }) => data)
-			.filter((token) => isTokenHarvestAutopilot(token));
-
-		const toggleableDefaults = defaults.map((defaultToken) => {
-			const customToken = customs.find(
-				({ address, network: { chainId } }) =>
-					mapAddressStartsWith0x(defaultToken.address).toLowerCase() ===
-						mapAddressStartsWith0x(address).toLowerCase() &&
-					defaultToken.network.chainId === chainId
-			);
-
-			return mapDefaultTokenToToggleable({ defaultToken, customToken });
-		});
-
-		const extraCustoms = customs.filter(({ address, network: { chainId } }) =>
-			isNullish(
-				defaults.find(
-					({ address: defaultAddress, network: { chainId: defaultChainId } }) =>
-						mapAddressStartsWith0x(defaultAddress).toLowerCase() ===
-							mapAddressStartsWith0x(address).toLowerCase() && defaultChainId === chainId
-				)
-			)
-		);
-
-		return [...toggleableDefaults, ...extraCustoms];
-	}
+export const allHarvestAutopilotTokens: Readable<Erc4626CustomToken[]> = readable(
+	ERC4626_TOKENS.filter((token) => isTokenHarvestAutopilot(token)).map((defaultToken) =>
+		mapDefaultTokenToToggleable({ defaultToken, customToken: undefined })
+	)
 );
 
 export const allHarvestAutopilots: Readable<Vault[]> = derived(
