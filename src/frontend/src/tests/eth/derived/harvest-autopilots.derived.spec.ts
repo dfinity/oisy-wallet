@@ -170,9 +170,7 @@ describe('harvest-autopilots.derived', () => {
 	});
 
 	describe('all-harvest-autopilots (network-independent)', () => {
-		const expectedHarvestTokens = ERC4626_TOKENS.filter((token) =>
-			isTokenHarvestAutopilot(token)
-		);
+		const expectedHarvestTokens = ERC4626_TOKENS.filter((token) => isTokenHarvestAutopilot(token));
 
 		beforeEach(() => {
 			harvestVaultsStore.reset();
@@ -184,9 +182,7 @@ describe('harvest-autopilots.derived', () => {
 
 				expect(result).toHaveLength(expectedHarvestTokens.length);
 				expect(result.map(({ address }) => address.toLowerCase())).toEqual(
-					expect.arrayContaining(
-						expectedHarvestTokens.map(({ address }) => address.toLowerCase())
-					)
+					expect.arrayContaining(expectedHarvestTokens.map(({ address }) => address.toLowerCase()))
 				);
 			});
 
