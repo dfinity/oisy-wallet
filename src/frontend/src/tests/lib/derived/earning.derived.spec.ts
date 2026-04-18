@@ -1,9 +1,9 @@
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
+	allHarvestAutopilots,
+	allHarvestAutopilotsMaxApy,
 	enabledHarvestAutopilotsUsdBalance,
-	harvestAutopilots,
 	harvestAutopilotsCurrentEarning,
-	harvestAutopilotsMaxApy,
 	harvestAutopilotsUsdBalance
 } from '$eth/derived/harvest-autopilots.derived';
 import {
@@ -54,11 +54,11 @@ describe('earning.derived', () => {
 				fn(currentEarning);
 				return () => {};
 			});
-			vi.spyOn(harvestAutopilots, 'subscribe').mockImplementation((fn) => {
+			vi.spyOn(allHarvestAutopilots, 'subscribe').mockImplementation((fn) => {
 				fn(vaults as never);
 				return () => {};
 			});
-			vi.spyOn(harvestAutopilotsMaxApy, 'subscribe').mockImplementation((fn) => {
+			vi.spyOn(allHarvestAutopilotsMaxApy, 'subscribe').mockImplementation((fn) => {
 				fn(maxApy);
 				return () => {};
 			});
