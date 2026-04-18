@@ -1,6 +1,11 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import {
+	allHarvestAutopilots,
+	allHarvestAutopilotsMaxApy,
+	allHarvestAutopilotTokens,
 	disabledHarvestAutopilotTokens,
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots,
@@ -9,6 +14,9 @@ import {
 	harvestAutopilotsUsdBalance,
 	harvestAutopilotTokens
 } from '$eth/derived/harvest-autopilots.derived';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
+import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { harvestVaultsStore } from '$lib/stores/harvest.store';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -159,6 +167,115 @@ describe('harvest-autopilots.derived', () => {
 			mockErc4626TokensStore([mockDisabledHarvestToken]);
 
 			expect(get(enabledHarvestAutopilotsUsdBalance)).toBe(0);
+		});
+	});
+
+	describe('all-harvest-autopilots (network-independent)', () => {
+		const harvestAddressBase = mockHarvestAddress;
+		const harvestAddressArbitrum = '0x407d3d942d0911a2fea7e22417f81e27c02d6c6f';
+
+		const mockHarvestDefaultBaseToken: Erc4626Token = {
+			...mockValidErc4626Token,
+			id: parseTokenId('HarvestDefaultBaseTokenId'),
+			network: BASE_NETWORK,
+			address: harvestAddressBase
+		};
+
+		const mockHarvestDefaultArbitrumToken: Erc4626Token = {
+			...mockValidErc4626Token,
+			id: parseTokenId('HarvestDefaultArbitrumTokenId'),
+			network: ARBITRUM_MAINNET_NETWORK,
+			address: harvestAddressArbitrum
+		};
+
+		const mockHarvestCustomToken: Erc4626CustomToken = {
+			...mockValidErc4626Token,
+			id: parseTokenId('HarvestCustomTokenId'),
+			network: ARBITRUM_MAINNET_NETWORK,
+			address: harvestAddressArbitrum,
+			enabled: false
+		};
+
+		beforeEach(() => {
+			erc4626DefaultTokensStore.reset();
+			erc4626CustomTokensStore.resetAll();
+			harvestVaultsStore.reset();
+		});
+
+		describe('allHarvestAutopilotTokens', () => {
+			it('should include default harvest tokens regardless of enabled networks', () => {
+				erc4626DefaultTokensStore.set([
+					mockHarvestDefaultBaseToken,
+					mockHarvestDefaultArbitrumToken
+				]);
+
+				const result = get(allHarvestAutopilotTokens);
+
+				expect(result).toHaveLength(2);
+				expect(result.map(({ address }) => address)).toEqual(
+					expect.arrayContaining([harvestAddressBase, harvestAddressArbitrum])
+				);
+			});
+
+			it('should deduplicate custom tokens that overlap default tokens', () => {
+				erc4626DefaultTokensStore.set([mockHarvestDefaultArbitrumToken]);
+				erc4626CustomTokensStore.setAll([{ data: mockHarvestCustomToken, certified: false }]);
+
+				expect(get(allHarvestAutopilotTokens)).toHaveLength(1);
+			});
+
+			it('should include custom harvest tokens without a matching default', () => {
+				erc4626CustomTokensStore.setAll([{ data: mockHarvestCustomToken, certified: false }]);
+
+				const result = get(allHarvestAutopilotTokens);
+
+				expect(result).toHaveLength(1);
+				expect(result[0].address).toBe(harvestAddressArbitrum);
+			});
+
+			it('should return empty array when no harvest tokens exist', () => {
+				expect(get(allHarvestAutopilotTokens)).toEqual([]);
+			});
+		});
+
+		describe('allHarvestAutopilots', () => {
+			it('should include vaults regardless of enabled networks', () => {
+				erc4626DefaultTokensStore.set([
+					mockHarvestDefaultBaseToken,
+					mockHarvestDefaultArbitrumToken
+				]);
+
+				expect(get(allHarvestAutopilots)).toHaveLength(2);
+			});
+		});
+
+		describe('allHarvestAutopilotsMaxApy', () => {
+			it('should return the max APY across all vaults', () => {
+				erc4626DefaultTokensStore.set([
+					mockHarvestDefaultBaseToken,
+					mockHarvestDefaultArbitrumToken
+				]);
+				harvestVaultsStore.set([
+					{
+						id: 'vault-1',
+						vaultAddress: harvestAddressBase,
+						estimatedApy: '5.5',
+						totalValueLocked: '1000000'
+					},
+					{
+						id: 'vault-2',
+						vaultAddress: harvestAddressArbitrum,
+						estimatedApy: '9.25',
+						totalValueLocked: '2000000'
+					}
+				]);
+
+				expect(get(allHarvestAutopilotsMaxApy)).toBe('9.25');
+			});
+
+			it('should return "0" when there are no autopilots', () => {
+				expect(get(allHarvestAutopilotsMaxApy)).toBe('0');
+			});
 		});
 	});
 });
