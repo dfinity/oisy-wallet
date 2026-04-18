@@ -13,6 +13,8 @@ import {
 	harvestAutopilotsUsdBalance,
 	harvestAutopilotTokens
 } from '$eth/derived/harvest-autopilots.derived';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
+import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 import { harvestVaultsStore } from '$lib/stores/harvest.store';
@@ -187,10 +189,24 @@ describe('harvest-autopilots.derived', () => {
 					)
 				);
 			});
+
+			it('should return tokens even when the erc4626 token stores are empty (no ETH/EVM network enabled)', () => {
+				erc4626DefaultTokensStore.reset();
+				erc4626CustomTokensStore.resetAll();
+
+				expect(get(allHarvestAutopilotTokens)).toHaveLength(expectedHarvestTokens.length);
+			});
 		});
 
 		describe('allHarvestAutopilots', () => {
 			it('should include vaults regardless of enabled networks', () => {
+				expect(get(allHarvestAutopilots)).toHaveLength(expectedHarvestTokens.length);
+			});
+
+			it('should include vaults even when the erc4626 token stores are empty (no ETH/EVM network enabled)', () => {
+				erc4626DefaultTokensStore.reset();
+				erc4626CustomTokensStore.resetAll();
+
 				expect(get(allHarvestAutopilots)).toHaveLength(expectedHarvestTokens.length);
 			});
 		});
@@ -215,6 +231,24 @@ describe('harvest-autopilots.derived', () => {
 				]);
 
 				expect(get(allHarvestAutopilotsMaxApy)).toBe('9.25');
+			});
+
+			it('should return the max APY even when the erc4626 token stores are empty (no ETH/EVM network enabled)', () => {
+				erc4626DefaultTokensStore.reset();
+				erc4626CustomTokensStore.resetAll();
+
+				const [first] = expectedHarvestTokens;
+
+				harvestVaultsStore.set([
+					{
+						id: 'vault-1',
+						vaultAddress: first.address,
+						estimatedApy: '7.75',
+						totalValueLocked: '1000000'
+					}
+				]);
+
+				expect(get(allHarvestAutopilotsMaxApy)).toBe('7.75');
 			});
 
 			it('should return "0" when the vault store is empty', () => {
