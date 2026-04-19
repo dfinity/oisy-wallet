@@ -20,7 +20,6 @@
 		"rootCanisterId": "3e3x2-xyaaa-aaaaq-aaalq-cai",
 		"indexCanisterId": "2awyi-oyaaa-aaaaq-aaanq-cai",
 		"governanceCanisterId": "2jvtu-yqaaa-aaaaq-aaama-cai",
-		"groupDataId": "CHAT",
 		"metadata": {
 			"decimals": 8,
 			"name": "CHAT",
@@ -30,7 +29,8 @@
 			},
 			"alternativeName": "OpenChat",
 			"url": "https://oc.app"
-		}
+		},
+		"groupDataId": "CHAT"
 	},
 	{
 		"ledgerCanisterId": "73mez-iiaaa-aaaaq-aaasq-cai",
