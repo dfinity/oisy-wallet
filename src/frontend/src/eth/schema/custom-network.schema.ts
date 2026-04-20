@@ -1,9 +1,23 @@
 import { NetworkEnvironmentSchema, NetworkIdSchema } from '$lib/schema/network.schema';
 import { UrlSchema } from '$lib/validation/url.validation';
+import { createUrlSchema } from '@dfinity/zod-schemas';
 import * as z from 'zod';
 
 const BigIntStringSchema = z.string().regex(/^[1-9]\d*$/, {
 	message: 'Must be a positive integer string'
+});
+
+/**
+ * URL schema for JSON-RPC endpoints.
+ *
+ * The generic `UrlSchema` permits `ipfs:` because it doubles as the validator
+ * for asset URLs (icons, metadata). That is not valid for an RPC endpoint,
+ * which must speak HTTP(S) or WebSocket(S). Keep this narrow so bogus URLs
+ * fail at input time rather than at the first `eth_*` call.
+ */
+const RpcUrlSchema = createUrlSchema({
+	additionalProtocols: ['wss:'],
+	allowHttpLocally: false
 });
 
 /**
@@ -18,7 +32,7 @@ export const CustomEvmNetworkSchema = z.object({
 	id: NetworkIdSchema,
 	chainId: z.bigint().positive(),
 	name: z.string().min(1),
-	rpcUrl: UrlSchema,
+	rpcUrl: RpcUrlSchema,
 	currencySymbol: z.string().min(1),
 	explorerUrl: UrlSchema.optional(),
 	iconUrl: UrlSchema.optional(),
@@ -42,7 +56,7 @@ export const CustomEvmNetworkInputSchema = CustomEvmNetworkSchema.omit({ id: tru
 export const PersistedCustomEvmNetworkSchema = z.object({
 	chainId: BigIntStringSchema,
 	name: z.string().min(1),
-	rpcUrl: UrlSchema,
+	rpcUrl: RpcUrlSchema,
 	currencySymbol: z.string().min(1),
 	explorerUrl: UrlSchema.optional(),
 	iconUrl: UrlSchema.optional(),

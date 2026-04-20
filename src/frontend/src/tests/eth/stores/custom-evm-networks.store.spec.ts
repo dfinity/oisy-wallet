@@ -183,6 +183,15 @@ describe('custom-evm-networks.store', () => {
 			expect(setStorage).not.toHaveBeenCalled();
 		});
 
+		it('rejects an rpcUrl with a non-http(s)/ws(s) protocol', () => {
+			const store = initCustomEvmNetworksStore();
+
+			expect(() => store.add({ ...optimism, rpcUrl: 'ipfs://bafybeigdyrzt/' })).toThrow(
+				/Invalid custom EVM network/
+			);
+			expect(get(store)).toEqual([]);
+		});
+
 		it('rejects invalid chainId before deriving a NetworkId', () => {
 			const store = initCustomEvmNetworksStore();
 
@@ -211,9 +220,10 @@ describe('custom-evm-networks.store', () => {
 	});
 
 	describe('update', () => {
-		it('replaces only the patched fields', () => {
+		it('replaces only the patched fields and persists', () => {
 			const store = initCustomEvmNetworksStore();
 			store.add(optimism);
+			vi.mocked(setStorage).mockClear();
 
 			store.update({
 				chainId: 10n,
@@ -225,6 +235,20 @@ describe('custom-evm-networks.store', () => {
 			expect(network.name).toBe('Optimism (edited)');
 			expect(network.rpcUrl).toBe('https://op.example');
 			expect(network.currencySymbol).toBe('ETH');
+			expect(setStorage).toHaveBeenCalledExactlyOnceWith({
+				key: CUSTOM_EVM_NETWORKS_STORAGE_KEY,
+				value: [
+					{
+						chainId: '10',
+						name: 'Optimism (edited)',
+						rpcUrl: 'https://op.example',
+						currencySymbol: 'ETH',
+						explorerUrl: 'https://optimistic.etherscan.io',
+						iconUrl: undefined,
+						env: 'mainnet'
+					}
+				]
+			});
 		});
 
 		it('throws when the chainId is not in the store', () => {
