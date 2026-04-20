@@ -8,6 +8,7 @@
 		btcTransactionsNotInitialized
 	} from '$btc/derived/btc-transactions.derived';
 	import type { BtcTransactionUi } from '$btc/types/btc';
+	import HiddenMicroTransactionsInfoBox from '$lib/components/transactions/HiddenMicroTransactionsInfoBox.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
@@ -45,6 +46,8 @@
 </script>
 
 <BtcTransactionsHeader />
+
+<HiddenMicroTransactionsInfoBox />
 
 <TransactionsSkeletons loading={$btcTransactionsNotInitialized}>
 	{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
