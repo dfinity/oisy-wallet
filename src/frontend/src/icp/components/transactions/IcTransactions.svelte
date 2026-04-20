@@ -89,7 +89,7 @@
 </Header>
 
 <IcTransactionsSkeletons>
-	{#if $icTransactions.length > 0}
+	{#if filteredTransactions.length > 0}
 		<IcTransactionsScroll {token}>
 			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}

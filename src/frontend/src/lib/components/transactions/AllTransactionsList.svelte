@@ -61,7 +61,10 @@
 		})
 	);
 
-	let transactions = $derived(
+	// Filtering is only applied on the display path. The unfiltered `allTransactions` is fed to
+	// `AllTransactionsLoader` so its `transactions.length === 0` short-circuit and `minTimestamp`
+	// pagination anchor remain based on the actual loaded set, not the filtered one.
+	let displayTransactions = $derived(
 		$hideMicroTransactions
 			? filterReceivedMicroTransactions({
 					transactions: allTransactions,
@@ -71,7 +74,7 @@
 	);
 
 	let sortedTransactions = $derived(
-		transactions.sort(({ transaction: a }, { transaction: b }) =>
+		displayTransactions.sort(({ transaction: a }, { transaction: b }) =>
 			sortTransactions({ transactionA: a, transactionB: b })
 		)
 	);
@@ -110,7 +113,7 @@
 </script>
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
-	<AllTransactionsLoader {transactions}>
+	<AllTransactionsLoader transactions={allTransactions}>
 		<AllTransactionsScroll {sortedTransactions} bind:transactionsToDisplay>
 			{#if Object.values(groupedTransactions).length > 0}
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}

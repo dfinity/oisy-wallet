@@ -60,7 +60,7 @@
 <HiddenMicroTransactionsInfoBox />
 
 <SolTransactionsSkeletons>
-	{#if $solTransactions.length > 0}
+	{#if filteredTransactions.length > 0}
 		<SolTransactionsScroll {token}>
 			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
