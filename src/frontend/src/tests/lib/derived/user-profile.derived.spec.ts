@@ -1,4 +1,5 @@
 import {
+	hideMicroTransactions,
 	userAgreementsData,
 	userDismissedNotifications,
 	userExperimentalFeaturesSettings,
@@ -7,7 +8,8 @@ import {
 	userProfileLoaded,
 	userProfileVersion,
 	userSettings,
-	userSettingsNetworks
+	userSettingsNetworks,
+	userTransactionFilterSettings
 } from '$lib/derived/user-profile.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import {
@@ -203,6 +205,97 @@ describe('user-profile.derived', () => {
 			});
 
 			expect(get(userDismissedNotifications)).toEqual(dismissed);
+		});
+	});
+
+	describe('userTransactionFilterSettings', () => {
+		it('should default to hide_micro_transactions true when user profile is not set', () => {
+			userProfileStore.reset();
+
+			expect(get(userTransactionFilterSettings)).toEqual({ hide_micro_transactions: true });
+		});
+
+		it('should default to hide_micro_transactions true when transactions is not set', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						transactions: []
+					})
+				}
+			});
+
+			expect(get(userTransactionFilterSettings)).toEqual({ hide_micro_transactions: true });
+		});
+
+		it('should default to hide_micro_transactions true when filter is not set', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						transactions: [{ filter: [] }]
+					})
+				}
+			});
+
+			expect(get(userTransactionFilterSettings)).toEqual({ hide_micro_transactions: true });
+		});
+
+		it('should return filter settings when set', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						transactions: [{ filter: [{ hide_micro_transactions: false }] }]
+					})
+				}
+			});
+
+			expect(get(userTransactionFilterSettings)).toEqual({ hide_micro_transactions: false });
+		});
+	});
+
+	describe('hideMicroTransactions', () => {
+		it('should default to true when user profile is not set', () => {
+			userProfileStore.reset();
+
+			expect(get(hideMicroTransactions)).toBeTruthy();
+		});
+
+		it('should return false when filter disables it', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						transactions: [{ filter: [{ hide_micro_transactions: false }] }]
+					})
+				}
+			});
+
+			expect(get(hideMicroTransactions)).toBeFalsy();
+		});
+
+		it('should return true when filter enables it', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						transactions: [{ filter: [{ hide_micro_transactions: true }] }]
+					})
+				}
+			});
+
+			expect(get(hideMicroTransactions)).toBeTruthy();
 		});
 	});
 });
