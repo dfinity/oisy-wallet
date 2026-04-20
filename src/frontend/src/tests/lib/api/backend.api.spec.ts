@@ -14,7 +14,8 @@ import {
 	saveUserTransactions,
 	setCustomToken,
 	setManyCustomTokens,
-	updateUserExperimentalFeatureSettings
+	updateUserExperimentalFeatureSettings,
+	updateUserTransactionFilterSettings
 } from '$lib/api/backend.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import type {
@@ -27,7 +28,8 @@ import type {
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
 	SaveUserTransactionsParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
@@ -422,6 +424,44 @@ describe('backend.api', () => {
 			});
 
 			await expect(updateUserExperimentalFeatureSettings(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('updateUserTransactionFilterSettings', () => {
+		const mockParams: CanisterApiFunctionParams<UpdateUserTransactionFilterSettings> = {
+			...baseParams,
+			hideMicroTransactions: true,
+			currentUserVersion: 1n
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.updateUserTransactionFilterSettings.mockResolvedValue();
+		});
+
+		it('should successfully call updateUserTransactionFilterSettings endpoint', async () => {
+			const result = await updateUserTransactionFilterSettings(mockParams);
+
+			expect(result).toEqual(undefined);
+			expect(
+				backendCanisterMock.updateUserTransactionFilterSettings
+			).toHaveBeenCalledExactlyOnceWith({
+				hideMicroTransactions: true,
+				currentUserVersion: 1n
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				updateUserTransactionFilterSettings({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if updateUserTransactionFilterSettings throws', async () => {
+			backendCanisterMock.updateUserTransactionFilterSettings.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(updateUserTransactionFilterSettings(mockParams)).rejects.toThrow();
 		});
 	});
 
