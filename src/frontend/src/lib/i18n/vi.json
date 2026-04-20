@@ -768,13 +768,7 @@
 			"beta_features": "Tính năng Beta",
 			"enable_beta_feature": "Bật tính tăng beta",
 			"disable_beta_feature": "Tắt tính năng beta",
-			"save_beta_feature_success": "Tính năng beta của bạn đã được cập nhật",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
-			"learn_more": ""
+			"save_beta_feature_success": "Tính năng beta của bạn đã được cập nhật"
 		},
 		"alt": {
 			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
@@ -1956,8 +1950,7 @@
 			"title": "Hoạt động gần đây"
 		},
 		"info": {
-			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
-			"hidden_micro_transactions": ""
+			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập."
 		},
 		"warning": {
 			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",

@@ -768,13 +768,7 @@
 			"beta_features": "测试功能",
 			"enable_beta_feature": "启用测试功能",
 			"disable_beta_feature": "禁用测试功能",
-			"save_beta_feature_success": "你的测试功能设置已更新。",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
-			"learn_more": ""
+			"save_beta_feature_success": "你的测试功能设置已更新。"
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -1956,8 +1950,7 @@
 			"title": "最近活动"
 		},
 		"info": {
-			"btc_transactions": "BTC 交易信息来自中心化第三方，应自行核实。",
-			"hidden_micro_transactions": ""
+			"btc_transactions": "BTC 交易信息来自中心化第三方，应自行核实。"
 		},
 		"warning": {
 			"no_index_canister": "无法显示 $token_list 的交易记录。未提供 Index canister。",

@@ -768,13 +768,7 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": "",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
-			"learn_more": ""
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Przełącz, aby pokazać lub ukryć sieci testowe",
@@ -1956,8 +1950,7 @@
 			"title": "Ostatnia aktywność"
 		},
 		"info": {
-			"btc_transactions": "Informacje o transakcjach BTC są uzyskiwane od centralnych stron trzecich i powinny być niezależnie weryfikowane.",
-			"hidden_micro_transactions": ""
+			"btc_transactions": "Informacje o transakcjach BTC są uzyskiwane od centralnych stron trzecich i powinny być niezależnie weryfikowane."
 		},
 		"warning": {
 			"no_index_canister": "Transakcje dla $token_list nie mogą być wyświetlane. Brak dostępnego kanistra indeksu.",
