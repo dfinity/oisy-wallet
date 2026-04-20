@@ -7,6 +7,7 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
+import { ICP_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.icp.env';
 import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.testnet.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
@@ -115,7 +116,7 @@ describe('user-snapshot.services', () => {
 						network_id: ICP_NETWORK_ID.description
 					},
 					account: mockIdentity.getPrincipal().toString(),
-					token_address: { token_symbol: ICP_TOKEN_ID.description, wraps: toNullable() },
+					token_address: { token_symbol: ICP_TOKEN_ID.description, wraps: toNullable(ICP_TOKEN_GROUP_ID.description) },
 					last_transactions: mockIcTransactions
 						.slice(0, 5)
 						.map(({ value, timestamp, to }: IcTransactionUi): Transaction_Any => {
