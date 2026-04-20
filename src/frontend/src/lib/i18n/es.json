@@ -768,7 +768,13 @@
 			"beta_features": "Funciones beta",
 			"enable_beta_feature": "Habilitar función beta",
 			"disable_beta_feature": "Deshabilitar función beta",
-			"save_beta_feature_success": "Tus configuraciones de funciones beta han sido actualizadas."
+			"save_beta_feature_success": "Tus configuraciones de funciones beta han sido actualizadas.",
+			"hide_micro_transactions": "",
+			"hide_micro_transactions_description": "",
+			"enable_hide_micro_transactions": "",
+			"disable_hide_micro_transactions": "",
+			"save_spam_filter_success": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "Alternar para mostrar u ocultar redes de prueba",
@@ -1950,7 +1956,8 @@
 			"title": ""
 		},
 		"info": {
-			"btc_transactions": ""
+			"btc_transactions": "",
+			"hidden_micro_transactions": ""
 		},
 		"warning": {
 			"no_index_canister": "",

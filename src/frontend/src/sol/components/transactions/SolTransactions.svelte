@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import HiddenMicroTransactionsInfoBox from '$lib/components/transactions/HiddenMicroTransactionsInfoBox.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
@@ -42,6 +43,8 @@
 <Header>
 	{$i18n.transactions.text.title}
 </Header>
+
+<HiddenMicroTransactionsInfoBox />
 
 <SolTransactionsSkeletons>
 	{#if $solTransactions.length > 0}
