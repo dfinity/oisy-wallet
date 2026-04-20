@@ -1,4 +1,5 @@
 import {
+	CustomEvmNetworkInputSchema,
 	CustomEvmNetworkSchema,
 	PersistedCustomEvmNetworkListSchema
 } from '$eth/schema/custom-network.schema';
@@ -102,11 +103,11 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 						`A custom EVM network with chainId ${input.chainId} has already been added.`
 					);
 				}
-				const entry: CustomEvmNetwork = { ...input, id: toNetworkId(input.chainId) };
-				const parsed = CustomEvmNetworkSchema.safeParse(entry);
+				const parsed = CustomEvmNetworkInputSchema.safeParse(input);
 				if (!parsed.success) {
 					throw new Error(`Invalid custom EVM network: ${parsed.error.message}`);
 				}
+				const entry: CustomEvmNetwork = { ...input, id: toNetworkId(input.chainId) };
 				const next: CustomEvmNetwork[] = [...current, entry];
 				persist(next);
 				return next;

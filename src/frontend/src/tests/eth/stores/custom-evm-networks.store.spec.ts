@@ -4,6 +4,7 @@ import {
 	type CustomEvmNetworkInput
 } from '$eth/stores/custom-evm-networks.store';
 import type { PersistedCustomEvmNetwork } from '$eth/types/custom-network';
+import { ZERO } from '$lib/constants/app.constants';
 import { del as delStorage, get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { get } from 'svelte/store';
 
@@ -180,6 +181,13 @@ describe('custom-evm-networks.store', () => {
 			expect(() => store.add({ ...optimism, name: '' })).toThrow(/Invalid custom EVM network/);
 			expect(get(store)).toEqual([]);
 			expect(setStorage).not.toHaveBeenCalled();
+		});
+
+		it('rejects invalid chainId before deriving a NetworkId', () => {
+			const store = initCustomEvmNetworksStore();
+
+			expect(() => store.add({ ...optimism, chainId: ZERO })).toThrow(/Invalid custom EVM network/);
+			expect(get(store)).toEqual([]);
 		});
 
 		it('supports multiple distinct chains', () => {

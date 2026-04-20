@@ -26,6 +26,13 @@ export const CustomEvmNetworkSchema = z.object({
 });
 
 /**
+ * Input shape for `customEvmNetworksStore.add`: the full network minus the
+ * derived `NetworkId`. Validated before the id is computed so that invalid
+ * inputs don't populate the module-level `networkIdCache`.
+ */
+export const CustomEvmNetworkInputSchema = CustomEvmNetworkSchema.omit({ id: true });
+
+/**
  * Serialized representation persisted in localStorage.
  *
  * `NetworkId` is a branded `symbol` and cannot be JSON-serialized, so it is
