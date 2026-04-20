@@ -214,10 +214,12 @@ describe('custom-evm-networks.store', () => {
 		it('is a no-op when the chainId is not present', () => {
 			const store = initCustomEvmNetworksStore();
 			store.add(optimism);
+			vi.mocked(setStorage).mockClear();
 
 			store.remove({ chainId: 999n });
 
 			expect(get(store)).toHaveLength(1);
+			expect(setStorage).not.toHaveBeenCalled();
 		});
 	});
 

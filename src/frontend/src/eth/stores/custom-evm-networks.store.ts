@@ -108,6 +108,9 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 		remove: ({ chainId }) => {
 			updateWritable((current) => {
 				const next = current.filter((n) => n.chainId !== chainId);
+				if (next.length === current.length) {
+					return current;
+				}
 				persist(next);
 				return next;
 			});
