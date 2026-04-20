@@ -15,7 +15,7 @@ vi.mock('$lib/utils/storage.utils', () => ({
 }));
 
 describe('custom-evm-networks.store', () => {
-	const optimism: Omit<CustomEvmNetworkInput, 'id'> = {
+	const optimism: CustomEvmNetworkInput = {
 		chainId: 10n,
 		name: 'Optimism',
 		rpcUrl: 'https://mainnet.optimism.io',
@@ -24,7 +24,7 @@ describe('custom-evm-networks.store', () => {
 		env: 'mainnet'
 	};
 
-	const gnosis: Omit<CustomEvmNetworkInput, 'id'> = {
+	const gnosis: CustomEvmNetworkInput = {
 		chainId: 100n,
 		name: 'Gnosis',
 		rpcUrl: 'https://rpc.gnosischain.com',
