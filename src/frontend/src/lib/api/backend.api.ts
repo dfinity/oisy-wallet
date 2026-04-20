@@ -33,7 +33,8 @@ import type {
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
@@ -250,6 +251,15 @@ export const updateUserExperimentalFeatureSettings = async ({
 	const { updateUserExperimentalFeatureSettings } = await backendCanister({ identity });
 
 	return updateUserExperimentalFeatureSettings(params);
+};
+
+export const updateUserTransactionFilterSettings = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<UpdateUserTransactionFilterSettings>): Promise<void> => {
+	const { updateUserTransactionFilterSettings } = await backendCanister({ identity });
+
+	return updateUserTransactionFilterSettings(params);
 };
 
 export const getExchangeRate = async ({
