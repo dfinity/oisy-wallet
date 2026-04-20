@@ -1,4 +1,7 @@
-import { PersistedCustomEvmNetworkListSchema } from '$eth/schema/custom-network.schema';
+import {
+	CustomEvmNetworkSchema,
+	PersistedCustomEvmNetworkListSchema
+} from '$eth/schema/custom-network.schema';
 import type { CustomEvmNetwork, PersistedCustomEvmNetwork } from '$eth/types/custom-network';
 import type { NetworkId } from '$lib/types/network';
 import { del as delStorage, get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
@@ -88,7 +91,12 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 						`A custom EVM network with chainId ${input.chainId} has already been added.`
 					);
 				}
-				const next: CustomEvmNetwork[] = [...current, { ...input, id: toNetworkId(input.chainId) }];
+				const entry: CustomEvmNetwork = { ...input, id: toNetworkId(input.chainId) };
+				const parsed = CustomEvmNetworkSchema.safeParse(entry);
+				if (!parsed.success) {
+					throw new Error(`Invalid custom EVM network: ${parsed.error.message}`);
+				}
+				const next: CustomEvmNetwork[] = [...current, entry];
 				persist(next);
 				return next;
 			});
@@ -99,8 +107,13 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 				if (index === -1) {
 					throw new Error(`No custom EVM network with chainId ${chainId} exists; cannot update.`);
 				}
+				const merged: CustomEvmNetwork = { ...current[index], ...patch };
+				const parsed = CustomEvmNetworkSchema.safeParse(merged);
+				if (!parsed.success) {
+					throw new Error(`Invalid custom EVM network update: ${parsed.error.message}`);
+				}
 				const next = [...current];
-				next[index] = { ...next[index], ...patch };
+				next[index] = merged;
 				persist(next);
 				return next;
 			});

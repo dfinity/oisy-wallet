@@ -134,6 +134,7 @@ describe('custom-evm-networks.store', () => {
 						rpcUrl: 'https://mainnet.optimism.io',
 						currencySymbol: 'ETH',
 						explorerUrl: 'https://optimistic.etherscan.io',
+						iconUrl: undefined,
 						env: 'mainnet'
 					}
 				]
@@ -147,6 +148,14 @@ describe('custom-evm-networks.store', () => {
 
 			expect(() => store.add(optimism)).toThrow(/already been added/);
 			expect(get(store)).toHaveLength(1);
+		});
+
+		it('rejects input that fails schema validation and does not persist', () => {
+			const store = initCustomEvmNetworksStore();
+
+			expect(() => store.add({ ...optimism, name: '' })).toThrow(/Invalid custom EVM network/);
+			expect(get(store)).toEqual([]);
+			expect(setStorage).not.toHaveBeenCalled();
 		});
 
 		it('supports multiple distinct chains', () => {
