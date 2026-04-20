@@ -7,7 +7,7 @@ import type { CustomEvmNetwork, PersistedCustomEvmNetwork } from '$eth/types/cus
 import type { NetworkId } from '$lib/types/network';
 import { del as delStorage, get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
-import { writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export const CUSTOM_EVM_NETWORKS_STORAGE_KEY = 'custom-evm-networks';
 
@@ -72,8 +72,7 @@ export type CustomEvmNetworkInput = Omit<CustomEvmNetwork, 'id'>;
 
 export type CustomEvmNetworkPatch = Partial<Omit<CustomEvmNetwork, 'id' | 'chainId'>>;
 
-export interface CustomEvmNetworksStore {
-	subscribe: (run: (value: CustomEvmNetwork[]) => void) => () => void;
+export interface CustomEvmNetworksStore extends Readable<CustomEvmNetwork[]> {
 	add: (network: CustomEvmNetworkInput) => void;
 	update: (params: { chainId: bigint; patch: CustomEvmNetworkPatch }) => void;
 	remove: (params: { chainId: bigint }) => void;
@@ -103,6 +102,9 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 						`A custom EVM network with chainId ${input.chainId} has already been added.`
 					);
 				}
+				// Validate the raw input (without `id`) so that invalid chainIds
+				// don't populate the networkIdCache. The derived `id` is deterministic
+				// given a valid chainId, so it does not require a second pass.
 				const parsed = CustomEvmNetworkInputSchema.safeParse(input);
 				if (!parsed.success) {
 					throw new Error(`Invalid custom EVM network: ${parsed.error.message}`);
