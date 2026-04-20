@@ -116,7 +116,10 @@ describe('user-snapshot.services', () => {
 						network_id: ICP_NETWORK_ID.description
 					},
 					account: mockIdentity.getPrincipal().toString(),
-					token_address: { token_symbol: ICP_TOKEN_ID.description, wraps: toNullable(ICP_TOKEN_GROUP_ID.description) },
+					token_address: {
+						token_symbol: ICP_TOKEN_ID.description,
+						wraps: toNullable(ICP_TOKEN_GROUP_ID.description)
+					},
 					last_transactions: mockIcTransactions
 						.slice(0, 5)
 						.map(({ value, timestamp, to }: IcTransactionUi): Transaction_Any => {
