@@ -12,7 +12,7 @@ describe('scanner.config', () => {
 			},
 			{
 				name: WizardStepsScanner.OISY_SCANNER_INFO,
-				title: en.scanner.text.universal_scanner
+				title: en.scanner.text.scanner
 			},
 			{
 				name: WizardStepsScanner.PAY,

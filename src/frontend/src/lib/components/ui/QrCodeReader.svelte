@@ -5,10 +5,10 @@
 	import { nextElementId } from '$lib/utils/html.utils';
 
 	interface Props {
-		expandedLayout?: boolean;
+		universalScanner?: boolean;
 	}
 
-	let { expandedLayout = false }: Props = $props();
+	let { universalScanner = false }: Props = $props();
 
 	const id = nextElementId('qrcode-reader-');
 
@@ -131,7 +131,7 @@
 
 	<div
 		class="[container-type:size] pointer-events-none absolute inset-0 flex h-full items-center justify-center"
-		class:sm:h-[70%]={expandedLayout}
+		class:sm:h-[70%]={universalScanner}
 	>
 		<div class="relative aspect-square w-[min(60cqw,60cqh)]">
 			<span class="{cornerBase} top-0 left-0 rounded-tl-xl border-t-[5px] border-l-[5px]"></span>
