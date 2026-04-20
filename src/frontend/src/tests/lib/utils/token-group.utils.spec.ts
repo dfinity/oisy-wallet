@@ -153,11 +153,6 @@ describe('token-group.utils', () => {
 	});
 
 	describe('updateTokenGroup', () => {
-		const noPriceFields = {
-			usdPrice: undefined,
-			usdMarketCap: undefined,
-			usdPriceChangePercentage24h: undefined
-		} as const;
 		const token = {
 			...ETHEREUM_TOKEN,
 			groupData: ETH_TOKEN_GROUP,
