@@ -1,6 +1,9 @@
+import { ICP_TOKEN as ICP_ETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.icp.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { ICP_TOKEN as ICP_ARB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.icp.env';
+import { ICP_TOKEN as ICP_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.icp.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
@@ -551,7 +554,10 @@ describe('token.utils', () => {
 				setupMock: setupSuggestedTokenMock
 			},
 			{ description: 'Suggested ERC20 token USDC', token: USDC_TOKEN },
-			{ description: 'Suggested ERC20 token USDT', token: USDT_TOKEN }
+			{ description: 'Suggested ERC20 token USDT', token: USDT_TOKEN },
+			{ description: 'Suggested ERC20 token ICP on Ethereum', token: ICP_ETH_TOKEN },
+			{ description: 'Suggested ERC20 token ICP on Arbitrum', token: ICP_ARB_TOKEN },
+			{ description: 'Suggested ERC20 token ICP on Base', token: ICP_BASE_TOKEN }
 		])('$description - Suggested Tokens', ({ token, setupMock }) => {
 			if (setupMock) {
 				beforeEach(() => setupMock(token.ledgerCanisterId));
