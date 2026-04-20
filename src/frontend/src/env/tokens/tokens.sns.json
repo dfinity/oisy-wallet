@@ -29,7 +29,8 @@
 			},
 			"alternativeName": "OpenChat",
 			"url": "https://oc.app"
-		}
+		},
+		"groupDataId": "CHAT"
 	},
 	{
 		"ledgerCanisterId": "73mez-iiaaa-aaaaq-aaasq-cai",
