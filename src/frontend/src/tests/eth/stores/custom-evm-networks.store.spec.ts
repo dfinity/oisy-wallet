@@ -183,7 +183,7 @@ describe('custom-evm-networks.store', () => {
 			expect(setStorage).not.toHaveBeenCalled();
 		});
 
-		it('rejects an rpcUrl with a non-http(s)/ws(s) protocol', () => {
+		it('rejects an rpcUrl with a non-https/wss protocol', () => {
 			const store = initCustomEvmNetworksStore();
 
 			expect(() => store.add({ ...optimism, rpcUrl: 'ipfs://bafybeigdyrzt/' })).toThrow(

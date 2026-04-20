@@ -12,8 +12,9 @@ const BigIntStringSchema = z.string().regex(/^[1-9]\d*$/, {
  *
  * The generic `UrlSchema` permits `ipfs:` because it doubles as the validator
  * for asset URLs (icons, metadata). That is not valid for an RPC endpoint,
- * which must speak HTTP(S) or WebSocket(S). Keep this narrow so bogus URLs
- * fail at input time rather than at the first `eth_*` call.
+ * which must speak HTTPS or secure WebSocket. Plain `http:` and `ws:` are
+ * rejected in line with the existing `allowHttpLocally: false` stance on the
+ * generic schema — we do not accept unencrypted remote endpoints even in dev.
  */
 const RpcUrlSchema = createUrlSchema({
 	additionalProtocols: ['wss:'],
