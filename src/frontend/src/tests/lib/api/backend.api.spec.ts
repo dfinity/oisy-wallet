@@ -39,7 +39,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockIIDelegationChain } from '$tests/mocks/ii-delegation.mock';
 import { mockUserExperimentalFeatures } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
-import { mockUserTransactionFilterSettings } from '$tests/mocks/user-transaction-filter-settings.mock';
 import {
 	mockGetUserTransactionsResponse,
 	mockUserTransactionTokenId
@@ -431,7 +430,7 @@ describe('backend.api', () => {
 	describe('updateUserTransactionFilterSettings', () => {
 		const mockParams: CanisterApiFunctionParams<UpdateUserTransactionFilterSettings> = {
 			...baseParams,
-			hideMicroTransactions: mockUserTransactionFilterSettings.hideMicroTransactions,
+			hideMicroTransactions: true,
 			currentUserVersion: 1n
 		};
 
@@ -446,7 +445,7 @@ describe('backend.api', () => {
 			expect(
 				backendCanisterMock.updateUserTransactionFilterSettings
 			).toHaveBeenCalledExactlyOnceWith({
-				hideMicroTransactions: mockUserTransactionFilterSettings.hideMicroTransactions,
+				hideMicroTransactions: true,
 				currentUserVersion: 1n
 			});
 		});

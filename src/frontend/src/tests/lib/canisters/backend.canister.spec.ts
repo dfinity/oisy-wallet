@@ -25,10 +25,6 @@ import {
 } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import {
-	mockUserTransactionFilterSettings,
-	mockUserTransactionFilterSettingsMap
-} from '$tests/mocks/user-transaction-filter-settings.mock';
-import {
 	mockDefinedUserAgreements,
 	mockProviderAgreements,
 	mockUserNetworksMap,
@@ -1164,11 +1160,11 @@ describe('backend.canister', () => {
 			});
 
 			const res = await updateUserTransactionFilterSettings({
-				hideMicroTransactions: mockUserTransactionFilterSettings.hideMicroTransactions
+				hideMicroTransactions: true
 			});
 
 			expect(service.update_user_transaction_filter_settings).toHaveBeenCalledWith({
-				filter: mockUserTransactionFilterSettingsMap,
+				filter: { hide_micro_transactions: true },
 				current_user_version: []
 			});
 			expect(res).toBeUndefined();
@@ -1184,12 +1180,12 @@ describe('backend.canister', () => {
 			});
 
 			const res = await updateUserTransactionFilterSettings({
-				hideMicroTransactions: mockUserTransactionFilterSettings.hideMicroTransactions,
+				hideMicroTransactions: false,
 				currentUserVersion: 1n
 			});
 
 			expect(service.update_user_transaction_filter_settings).toHaveBeenCalledWith({
-				filter: mockUserTransactionFilterSettingsMap,
+				filter: { hide_micro_transactions: false },
 				current_user_version: [1n]
 			});
 			expect(res).toBeUndefined();
@@ -1206,7 +1202,7 @@ describe('backend.canister', () => {
 			});
 
 			const res = updateUserTransactionFilterSettings({
-				hideMicroTransactions: mockUserTransactionFilterSettings.hideMicroTransactions
+				hideMicroTransactions: true
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
