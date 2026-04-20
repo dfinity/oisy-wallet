@@ -2,8 +2,8 @@ import { NetworkEnvironmentSchema, NetworkIdSchema } from '$lib/schema/network.s
 import { UrlSchema } from '$lib/validation/url.validation';
 import * as z from 'zod';
 
-const BigIntStringSchema = z.string().regex(/^\d+$/, {
-	message: 'Must be a non-negative integer string'
+const BigIntStringSchema = z.string().regex(/^[1-9]\d*$/, {
+	message: 'Must be a positive integer string'
 });
 
 /**
