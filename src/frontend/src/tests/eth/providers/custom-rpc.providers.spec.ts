@@ -1,0 +1,179 @@
+import {
+	CustomRpcProvider,
+	__resetCustomRpcProvidersCache,
+	customRpcProviders
+} from '$eth/providers/custom-rpc.providers';
+import type { CustomEvmNetwork } from '$eth/types/custom-network';
+import { TRACK_ETH_ESTIMATE_GAS_ERROR } from '$lib/constants/analytics.constants';
+import * as analytics from '$lib/services/analytics.services';
+import { parseNetworkId } from '$lib/validation/network.validation';
+import { JsonRpcProvider, Network } from 'ethers/providers';
+
+const buildNetwork = (overrides: Partial<CustomEvmNetwork> = {}): CustomEvmNetwork => ({
+	id: parseNetworkId('custom-evm-test'),
+	chainId: 10n,
+	name: 'Optimism',
+	rpcUrl: 'https://mainnet.optimism.io',
+	currencySymbol: 'ETH',
+	env: 'mainnet',
+	...overrides
+});
+
+describe('custom-rpc.providers', () => {
+	const mockJsonRpcProvider = vi.mocked(JsonRpcProvider);
+	const mockNetwork = vi.mocked(Network);
+
+	const mockGetBalance = vi.fn();
+	const mockGetFeeData = vi.fn();
+	const mockEstimateGas = vi.fn();
+	const mockBroadcastTransaction = vi.fn();
+	const mockGetTransactionCount = vi.fn();
+	const mockGetBlockNumber = vi.fn();
+	const mockDestroy = vi.fn();
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		__resetCustomRpcProvidersCache();
+
+		mockJsonRpcProvider.prototype.getBalance = mockGetBalance;
+		mockJsonRpcProvider.prototype.getFeeData = mockGetFeeData;
+		mockJsonRpcProvider.prototype.estimateGas = mockEstimateGas;
+		mockJsonRpcProvider.prototype.broadcastTransaction = mockBroadcastTransaction;
+		mockJsonRpcProvider.prototype.getTransactionCount = mockGetTransactionCount;
+		mockJsonRpcProvider.prototype.getBlockNumber = mockGetBlockNumber;
+		mockJsonRpcProvider.prototype.destroy = mockDestroy;
+	});
+
+	describe('CustomRpcProvider', () => {
+		it('constructs a JsonRpcProvider with the user-supplied URL and a static Network', () => {
+			new CustomRpcProvider({
+				rpcUrl: 'https://rpc.example',
+				chainId: 10n,
+				name: 'Optimism'
+			});
+
+			expect(mockNetwork).toHaveBeenCalledExactlyOnceWith('Optimism', 10n);
+			expect(mockJsonRpcProvider).toHaveBeenCalledExactlyOnceWith(
+				'https://rpc.example',
+				expect.any(Object),
+				{ staticNetwork: expect.any(Object) }
+			);
+		});
+
+		it('delegates balance to provider.getBalance', async () => {
+			mockGetBalance.mockResolvedValue(42n);
+			const provider = new CustomRpcProvider({
+				rpcUrl: 'https://rpc.example',
+				chainId: 10n,
+				name: 'Optimism'
+			});
+
+			const result = await provider.balance('0xabc');
+
+			expect(result).toBe(42n);
+			expect(mockGetBalance).toHaveBeenCalledExactlyOnceWith('0xabc');
+		});
+
+		it('delegates getFeeData, getBlockNumber, sendTransaction, getTransactionCount, estimateGas', async () => {
+			mockGetFeeData.mockResolvedValue('fee-data');
+			mockGetBlockNumber.mockResolvedValue(123);
+			mockBroadcastTransaction.mockResolvedValue('tx-response');
+			mockGetTransactionCount.mockResolvedValue(7);
+			mockEstimateGas.mockResolvedValue(21000n);
+
+			const provider = new CustomRpcProvider({
+				rpcUrl: 'https://rpc.example',
+				chainId: 10n,
+				name: 'Optimism'
+			});
+
+			await expect(provider.getFeeData()).resolves.toBe('fee-data');
+			await expect(provider.getBlockNumber()).resolves.toBe(123);
+			await expect(provider.sendTransaction('0xsigned')).resolves.toBe('tx-response');
+			await expect(provider.getTransactionCount({ address: '0xabc', tag: 'latest' })).resolves.toBe(
+				7
+			);
+			await expect(provider.estimateGas({ to: '0xabc' } as never)).resolves.toBe(21000n);
+
+			expect(mockBroadcastTransaction).toHaveBeenCalledExactlyOnceWith('0xsigned');
+			expect(mockGetTransactionCount).toHaveBeenCalledExactlyOnceWith('0xabc', 'latest');
+		});
+
+		describe('safeEstimateGas', () => {
+			it('returns the estimate on success', async () => {
+				mockEstimateGas.mockResolvedValue(21000n);
+				const provider = new CustomRpcProvider({
+					rpcUrl: 'https://rpc.example',
+					chainId: 10n,
+					name: 'Optimism'
+				});
+
+				const result = await provider.safeEstimateGas({ to: '0xabc' } as never);
+
+				expect(result).toBe(21000n);
+			});
+
+			it('tracks an analytics event and returns undefined on failure', async () => {
+				const trackSpy = vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+				mockEstimateGas.mockRejectedValue(new Error('boom'));
+				const provider = new CustomRpcProvider({
+					rpcUrl: 'https://rpc.example',
+					chainId: 10n,
+					name: 'Optimism'
+				});
+
+				const result = await provider.safeEstimateGas({ to: '0xabc' } as never);
+
+				expect(result).toBeUndefined();
+				expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_ETH_ESTIMATE_GAS_ERROR,
+					metadata: {
+						error: 'Error: boom',
+						network: 'Optimism'
+					},
+					warning: 'Error estimating gas for custom network Optimism: Error: boom'
+				});
+			});
+		});
+
+		it('destroy delegates to provider.destroy', () => {
+			const provider = new CustomRpcProvider({
+				rpcUrl: 'https://rpc.example',
+				chainId: 10n,
+				name: 'Optimism'
+			});
+
+			provider.destroy();
+
+			expect(mockDestroy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('customRpcProviders (factory)', () => {
+		it('caches providers per (chainId, rpcUrl) pair', () => {
+			const network = buildNetwork();
+
+			const first = customRpcProviders(network);
+			const second = customRpcProviders(network);
+
+			expect(first).toBe(second);
+			expect(mockJsonRpcProvider).toHaveBeenCalledOnce();
+		});
+
+		it('creates a new provider when rpcUrl changes', () => {
+			const first = customRpcProviders(buildNetwork({ rpcUrl: 'https://a.example' }));
+			const second = customRpcProviders(buildNetwork({ rpcUrl: 'https://b.example' }));
+
+			expect(first).not.toBe(second);
+			expect(mockJsonRpcProvider).toHaveBeenCalledTimes(2);
+		});
+
+		it('creates a new provider when chainId changes', () => {
+			const first = customRpcProviders(buildNetwork({ chainId: 10n }));
+			const second = customRpcProviders(buildNetwork({ chainId: 100n }));
+
+			expect(first).not.toBe(second);
+			expect(mockJsonRpcProvider).toHaveBeenCalledTimes(2);
+		});
+	});
+});
