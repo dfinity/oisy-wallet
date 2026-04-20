@@ -153,6 +153,11 @@ describe('token-group.utils', () => {
 	});
 
 	describe('updateTokenGroup', () => {
+		const noPriceFields = {
+			usdPrice: undefined,
+			usdMarketCap: undefined,
+			usdPriceChangePercentage24h: undefined
+		} as const;
 		const token = {
 			...ETHEREUM_TOKEN,
 			groupData: ETH_TOKEN_GROUP,
@@ -194,10 +199,7 @@ describe('token-group.utils', () => {
 			decimals: expectedDecimals,
 			tokens: [anotherToken, token],
 			balance: expectedBalance,
-			usdBalance: anotherToken.usdBalance + token.usdBalance,
-			usdPrice: undefined,
-			usdMarketCap: undefined,
-			usdPriceChangePercentage24h: undefined
+			usdBalance: anotherToken.usdBalance + token.usdBalance
 		};
 
 		it('should add a token to a token group successfully', () => {
@@ -221,10 +223,7 @@ describe('token-group.utils', () => {
 				...tokenGroup,
 				tokens: [anotherToken, thirdToken, token],
 				balance: expectedBalance + thirdToken.balance,
-				usdBalance: anotherToken.usdBalance + thirdToken.usdBalance + token.usdBalance,
-				usdPrice: undefined,
-				usdMarketCap: undefined,
-				usdPriceChangePercentage24h: undefined
+				usdBalance: anotherToken.usdBalance + thirdToken.usdBalance + token.usdBalance
 			});
 		});
 
@@ -310,10 +309,7 @@ describe('token-group.utils', () => {
 				decimals: newDecimals,
 				tokens: [...tokenGroup.tokens, newToken],
 				balance: expectedBalance,
-				usdBalance: tokenGroup.usdBalance + newToken.usdBalance,
-				usdPrice: undefined,
-				usdMarketCap: undefined,
-				usdPriceChangePercentage24h: undefined
+				usdBalance: tokenGroup.usdBalance + newToken.usdBalance
 			});
 
 			const thirdToken = {
