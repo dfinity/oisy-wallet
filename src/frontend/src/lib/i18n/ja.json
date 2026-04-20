@@ -768,7 +768,13 @@
 			"beta_features": "ベータ機能",
 			"enable_beta_feature": "ベータ機能を有効化",
 			"disable_beta_feature": "ベータ機能を無効化",
-			"save_beta_feature_success": "ベータ機能の設定が保存されました。"
+			"save_beta_feature_success": "ベータ機能の設定が保存されました。",
+			"hide_micro_transactions": "",
+			"hide_micro_transactions_description": "",
+			"enable_hide_micro_transactions": "",
+			"disable_hide_micro_transactions": "",
+			"save_spam_filter_success": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "テストネットの表示/非表示を切り替え",
@@ -1950,7 +1956,8 @@
 			"title": "最近のアクティビティ"
 		},
 		"info": {
-			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。"
+			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。",
+			"hidden_micro_transactions": ""
 		},
 		"warning": {
 			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",

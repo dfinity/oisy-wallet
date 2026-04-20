@@ -768,7 +768,13 @@
 			"beta_features": "Бета-функции",
 			"enable_beta_feature": "Включить бета-функцию",
 			"disable_beta_feature": "Отключить бета-функцию",
-			"save_beta_feature_success": "Настройки ваших бета-функций обновлены."
+			"save_beta_feature_success": "Настройки ваших бета-функций обновлены.",
+			"hide_micro_transactions": "",
+			"hide_micro_transactions_description": "",
+			"enable_hide_micro_transactions": "",
+			"disable_hide_micro_transactions": "",
+			"save_spam_filter_success": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "Переключить, чтобы показать или скрыть тестовые сети",
@@ -1950,7 +1956,8 @@
 			"title": "Недавняя активность"
 		},
 		"info": {
-			"btc_transactions": "Данные о транзакциях Bitcoin поступают от внешних сервисов — рекомендуем проверять их самостоятельно."
+			"btc_transactions": "Данные о транзакциях Bitcoin поступают от внешних сервисов — рекомендуем проверять их самостоятельно.",
+			"hidden_micro_transactions": ""
 		},
 		"warning": {
 			"no_index_canister": "Транзакции для $token_list не могут быть отображены. Нет доступного контейнера индекса.",

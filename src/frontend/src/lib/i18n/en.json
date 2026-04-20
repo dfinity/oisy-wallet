@@ -768,7 +768,13 @@
 			"beta_features": "Beta features",
 			"enable_beta_feature": "Enable beta feature",
 			"disable_beta_feature": "Disable beta feature",
-			"save_beta_feature_success": "Your beta feature settings have been updated."
+			"save_beta_feature_success": "Your beta feature settings have been updated.",
+			"hide_micro_transactions": "Hide transactions with very small values",
+			"hide_micro_transactions_description": "Transactions with very small values are typically spam and intend to trick a user into copying their sender address instead of a valid one. Hiding them in transaction lists is recommended.",
+			"enable_hide_micro_transactions": "Enable hiding of transactions with very small values",
+			"disable_hide_micro_transactions": "Disable hiding of transactions with very small values",
+			"save_spam_filter_success": "Your spam filter settings have been updated.",
+			"learn_more": "Learn more"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -1950,7 +1956,8 @@
 			"title": "Recent Activity"
 		},
 		"info": {
-			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
+			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified.",
+			"hidden_micro_transactions": "Transactions with very small token values are currently hidden. To show them, go to <a href=\"/settings\">Settings</a>."
 		},
 		"warning": {
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
