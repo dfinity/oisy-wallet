@@ -12,7 +12,7 @@ use shared::types::{
     user_profile::{OisyUser, UserProfile},
 };
 
-use super::mock::{CONTROLLER, II_CANISTER_ID, SIGNER_CANISTER_ID, VC_DERIVATION_ORIGIN};
+use super::mock::{CONTROLLER, FRONTEND_DERIVATION_ORIGIN, II_CANISTER_ID, SIGNER_CANISTER_ID};
 use crate::utils::mock::CALLER;
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
@@ -411,7 +411,7 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
-        derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
+        derivation_origin: Some(FRONTEND_DERIVATION_ORIGIN.to_string()),
         ii_canister_id: Some(ii_canister_id),
     });
 
@@ -483,7 +483,7 @@ fn init_arg_with_ecdsa_key(ecdsa_key_name: &str) -> Arg {
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
-        derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
+        derivation_origin: Some(FRONTEND_DERIVATION_ORIGIN.to_string()),
         ii_canister_id: Some(Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id")),
     })
 }

@@ -62,7 +62,8 @@
 			"switch_currency": "通貨を切り替え",
 			"more": "全文表示",
 			"less": "省略表示",
-			"learn_more": "詳細を見る"
+			"learn_more": "詳細を見る",
+			"up_one_level": "一つ上のレベルへ移動"
 		},
 		"warning": {
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",
@@ -1036,17 +1037,17 @@
 			"try_again": "再試行",
 			"payment_confirmed": "支払い確認完了",
 			"payment_failed": "支払い失敗",
-			"what_is_scan": "",
-			"no_camera_permission": "",
-			"what_is_scan_description": "",
-			"what_is_scan_title": "",
-			"learn_more_about_scan": "",
-			"learn_more_about_pay": "",
-			"universal_scanner": ""
+			"what_is_scan": "スキャナーとは",
+			"no_camera_permission": "QRコードをスキャンするには、ブラウザのサイト設定でカメラへのアクセスを許可する必要があります。",
+			"what_is_scan_description": "$oisy_shortスキャナーはさまざまなQRコードを読み取り、適切なアクションを即座に実行します。WalletConnect QRコードをスキャンして新しい接続を確立したり、Open CryptoPayを利用している店舗のチェックアウトコードをスキャンして$oisy_short Payで支払いを行えます。",
+			"what_is_scan_title": "$oisy_shortはあらゆるQRコードに対応",
+			"learn_more_about_scan": "スキャナーについて詳しく",
+			"learn_more_about_pay": "$oisy_short Payについて詳しく",
+			"scanner": "スキャナー"
 		},
 		"error": {
-			"code_link_is_not_valid": "",
-			"data_is_incompleted": ""
+			"code_link_is_not_valid": "コード/リンクが無効です",
+			"data_is_incompleted": "受信したデータが不完全です。必要な情報の一部が欠けています。"
 		}
 	},
 	"convert": {

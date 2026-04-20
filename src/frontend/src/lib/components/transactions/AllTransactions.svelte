@@ -97,14 +97,6 @@
 		})
 	);
 
-	let undismissedUnavailable = $derived(
-		filterUndismissedNotificationQualifiers({
-			kind: 'UnavailableIndexCanister',
-			qualifiers: tokensWithUnavailableCanister,
-			dismissedNotifications: allDismissedNotifications
-		})
-	);
-
 	const dismissNoCanisterWarning = () => {
 		if (undismissedNoCanister.length > 0) {
 			const notifications: DismissedNotification[] = undismissedNoCanister.map((symbol) => ({
@@ -112,26 +104,6 @@
 					kind: { NoIndexCanister: null },
 					qualifier: symbol,
 					version: NOTIFICATION_VERSIONS.NoIndexCanister
-				}
-			}));
-
-			temporaryDismissedNotifications = [...temporaryDismissedNotifications, ...notifications];
-
-			dismissNotifications({
-				notifications,
-				identity: $authIdentity,
-				currentUserVersion: $userProfileVersion
-			});
-		}
-	};
-
-	const dismissUnavailableWarning = () => {
-		if (undismissedUnavailable.length > 0) {
-			const notifications: DismissedNotification[] = undismissedUnavailable.map((symbol) => ({
-				Qualified: {
-					kind: { UnavailableIndexCanister: null },
-					qualifier: symbol,
-					version: NOTIFICATION_VERSIONS.UnavailableIndexCanister
 				}
 			}));
 
@@ -166,10 +138,10 @@
 		</MessageBox>
 	{/if}
 
-	{#if undismissedUnavailable.length > 0}
-		<MessageBox level="warning" onDismiss={dismissUnavailableWarning}>
+	{#if tokensWithUnavailableCanister.length > 0}
+		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
-				$token_list: undismissedUnavailable.map((s) => `$${s}`).join(', ')
+				$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
 			})}
 		</MessageBox>
 	{/if}

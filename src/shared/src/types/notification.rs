@@ -9,6 +9,7 @@ pub const MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH: usize = 1000;
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub enum SimpleNotificationKind {
     BtcActivityInfo,
+    HiddenMicroTransactions,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
