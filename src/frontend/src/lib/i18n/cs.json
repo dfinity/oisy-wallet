@@ -62,7 +62,8 @@
 			"switch_currency": "Přepnout měnu",
 			"more": "Více",
 			"less": "Méně",
-			"learn_more": "Zjistit více"
+			"learn_more": "Zjistit více",
+			"up_one_level": "Přejít o úroveň výš"
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
@@ -1036,13 +1037,13 @@
 			"try_again": "Zkusit znovu",
 			"payment_confirmed": "Platba potvrzena",
 			"payment_failed": "Platba se nezdařila",
-			"what_is_scan": "",
-			"no_camera_permission": "",
-			"what_is_scan_description": "",
-			"what_is_scan_title": "",
-			"learn_more_about_scan": "",
-			"learn_more_about_pay": "",
-			"universal_scanner": ""
+			"what_is_scan": "Co je skener",
+			"no_camera_permission": "Pro skenování QR kódů musíte povolit přístup ke kameře v nastavení webu ve vašem prohlížeči.",
+			"what_is_scan_description": "Skener $oisy_short dokáže přečíst různé QR kódy a okamžitě provést správnou akci. Naskenujte QR kód WalletConnect pro navázání nového spojení nebo naskenujte platební kód v jakémkoli obchodě používajícím Open CryptoPay a zaplaťte účet pomocí $oisy_short Pay.",
+			"what_is_scan_title": "$oisy_short rozumí jakémukoli QR kódu",
+			"learn_more_about_scan": "Více o skeneru",
+			"learn_more_about_pay": "Více o $oisy_short Pay",
+			"scanner": "Skener"
 		},
 		"error": {
 			"code_link_is_not_valid": "Kód / odkaz není platný",

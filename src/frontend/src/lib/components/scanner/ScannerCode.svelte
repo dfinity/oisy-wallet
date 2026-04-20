@@ -111,7 +111,7 @@
 </script>
 
 <div class="relative flex w-full flex-col bg-tertiary">
-	<QrCodeScanner expandedLayout onScan={handleScan} />
+	<QrCodeScanner onScan={handleScan} universalScanner />
 
 	<Responsive up="md">
 		<ScannerCodeInput

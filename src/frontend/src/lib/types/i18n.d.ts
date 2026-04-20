@@ -63,6 +63,7 @@ interface I18nCore {
 		more: string;
 		less: string;
 		learn_more: string;
+		up_one_level: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
@@ -772,7 +773,7 @@ interface I18nScanner {
 		what_is_scan_title: string;
 		learn_more_about_scan: string;
 		learn_more_about_pay: string;
-		universal_scanner: string;
+		scanner: string;
 	};
 	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }

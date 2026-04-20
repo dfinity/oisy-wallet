@@ -21,12 +21,12 @@ describe('notification.utils', () => {
 		qualifier,
 		version = NOTIFICATION_VERSIONS[kind]
 	}: {
-		kind: 'NoIndexCanister' | 'UnavailableIndexCanister';
+		kind: 'NoIndexCanister';
 		qualifier: string;
 		version?: number;
 	}): DismissedNotification => ({
 		Qualified: {
-			kind: { [kind]: null } as { NoIndexCanister: null } | { UnavailableIndexCanister: null },
+			kind: { [kind]: null } as { NoIndexCanister: null },
 			qualifier,
 			version
 		}
@@ -120,10 +120,7 @@ describe('notification.utils', () => {
 				const result = filterUndismissedNotificationQualifiers({
 					kind: 'NoIndexCanister',
 					qualifiers: ['BTC', 'ETH'],
-					dismissedNotifications: [
-						qualified({ kind: 'UnavailableIndexCanister', qualifier: 'BTC' }),
-						simple({ kind: 'BtcActivityInfo' })
-					]
+					dismissedNotifications: [simple({ kind: 'BtcActivityInfo' })]
 				});
 
 				expect(result).toEqual(['BTC', 'ETH']);
@@ -136,30 +133,6 @@ describe('notification.utils', () => {
 					dismissedNotifications: [
 						qualified({ kind: 'NoIndexCanister', qualifier: 'BTC', version: 0 })
 					]
-				});
-
-				expect(result).toEqual(['BTC']);
-			});
-		});
-
-		describe('UnavailableIndexCanister kind', () => {
-			it('should filter dismissed UnavailableIndexCanister qualifiers', () => {
-				const result = filterUndismissedNotificationQualifiers({
-					kind: 'UnavailableIndexCanister',
-					qualifiers: ['BTC', 'ETH', 'ICP'],
-					dismissedNotifications: [
-						qualified({ kind: 'UnavailableIndexCanister', qualifier: 'ETH' })
-					]
-				});
-
-				expect(result).toEqual(['BTC', 'ICP']);
-			});
-
-			it('should not filter qualifiers dismissed under NoIndexCanister', () => {
-				const result = filterUndismissedNotificationQualifiers({
-					kind: 'UnavailableIndexCanister',
-					qualifiers: ['BTC'],
-					dismissedNotifications: [qualified({ kind: 'NoIndexCanister', qualifier: 'BTC' })]
 				});
 
 				expect(result).toEqual(['BTC']);

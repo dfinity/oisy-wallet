@@ -100,6 +100,43 @@ describe('AllTransactions', () => {
 		expect(getByText(exceptedText)).toBeInTheDocument();
 	});
 
+	it('closes the unavailable Index canister warning via sessionStorage, not backend persistence', async () => {
+		const tokenWithUnavailableIndexCanister: IcrcCustomToken = {
+			...customIcrcToken,
+			symbol: 'UTC',
+			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
+		};
+
+		icrcCustomTokensStore.setAll([{ data: tokenWithUnavailableIndexCanister, certified: true }]);
+
+		const store = get(icrcCustomTokensStore);
+		const tokenId = store?.at(0)?.data.id;
+		assertNonNullish(tokenId);
+		icTransactionsStore.nullify(tokenId);
+
+		const spySessionStorage = vi.spyOn(Storage.prototype, 'setItem');
+		const spyDismiss = vi.spyOn(notificationServices, 'dismissNotifications').mockResolvedValue();
+
+		const { container } = render(AllTransactions);
+
+		const warningBox = container.querySelector('.bg-warning-light');
+		assertNonNullish(warningBox);
+
+		const closeButton = warningBox.querySelector('button');
+		assertNonNullish(closeButton);
+
+		await fireEvent.click(closeButton);
+
+		expect(spySessionStorage).toHaveBeenCalledWith(
+			'oisy_ic_hide_transaction_unavailable_canister',
+			'true'
+		);
+		expect(spyDismiss).not.toHaveBeenCalled();
+
+		spySessionStorage.mockRestore();
+		spyDismiss.mockRestore();
+	});
+
 	it('renders the info box list', () => {
 		const { getByText } = render(AllTransactions);
 
@@ -128,12 +165,6 @@ describe('AllTransactions', () => {
 		const tokenWithoutIndexCanister: IcrcCustomToken = {
 			...customIcrcToken,
 			symbol: 'NIC'
-		};
-
-		const tokenWithUnavailableIndexCanister: IcrcCustomToken = {
-			...customIcrcToken,
-			symbol: 'UIC',
-			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
 		};
 
 		const setUserProfileWithDismissals = (dismissed: DismissedNotification[]) => {
@@ -227,33 +258,6 @@ describe('AllTransactions', () => {
 
 			const expectedText = replacePlaceholders(en.activity.warning.no_index_canister, {
 				$token_list: '$NIC'
-			});
-
-			expect(queryByText(expectedText)).not.toBeInTheDocument();
-		});
-
-		it('should not render the unavailable-index-canister warning when dismissed in user profile', () => {
-			icrcCustomTokensStore.setAll([{ data: tokenWithUnavailableIndexCanister, certified: true }]);
-
-			const store = get(icrcCustomTokensStore);
-			const tokenId = store?.at(0)?.data.id;
-			assertNonNullish(tokenId);
-			icTransactionsStore.nullify(tokenId);
-
-			setUserProfileWithDismissals([
-				{
-					Qualified: {
-						kind: { UnavailableIndexCanister: null },
-						qualifier: 'UIC',
-						version: NOTIFICATION_VERSIONS.UnavailableIndexCanister
-					}
-				}
-			]);
-
-			const { queryByText } = render(AllTransactions);
-
-			const expectedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
-				$token_list: '$UIC'
 			});
 
 			expect(queryByText(expectedText)).not.toBeInTheDocument();
