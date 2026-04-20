@@ -62,7 +62,8 @@
 			"switch_currency": "切换货币",
 			"more": "显示完整文本",
 			"less": "显示更少文本",
-			"learn_more": "点击链接了解更多"
+			"learn_more": "点击链接了解更多",
+			"up_one_level": "返回上一级"
 		},
 		"warning": {
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
@@ -1042,13 +1043,13 @@
 			"try_again": "再试一次",
 			"payment_confirmed": "支付已确认",
 			"payment_failed": "支付失败",
-			"what_is_scan": "",
-			"no_camera_permission": "",
-			"what_is_scan_description": "",
-			"what_is_scan_title": "",
-			"learn_more_about_scan": "",
-			"learn_more_about_pay": "",
-			"universal_scanner": ""
+			"what_is_scan": "什么是扫描器",
+			"no_camera_permission": "要扫描二维码，您需要在浏览器的网站设置中允许访问摄像头。",
+			"what_is_scan_description": "$oisy_short 扫描器可以读取各种二维码并立即执行相应操作。扫描 WalletConnect 二维码建立新连接，或在使用 Open CryptoPay 的商店扫描结账码，通过 $oisy_short Pay 完成付款。",
+			"what_is_scan_title": "$oisy_short 可识别任何二维码",
+			"learn_more_about_scan": "了解更多关于扫描器的信息",
+			"learn_more_about_pay": "了解更多关于 $oisy_short Pay 的信息",
+			"scanner": "扫描器"
 		},
 		"error": {
 			"code_link_is_not_valid": "代码 / 链接无效",

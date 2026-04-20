@@ -1,7 +1,6 @@
 use candid::{CandidType, Deserialize, Principal};
 
-use super::Timestamp;
-use crate::types::{agreement::Agreements, settings::Settings, Version};
+use crate::types::{agreement::Agreements, settings::Settings, Timestamp, Version};
 
 pub mod impls;
 
