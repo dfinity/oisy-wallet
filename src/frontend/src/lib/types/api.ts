@@ -217,6 +217,11 @@ export interface UpdateUserExperimentalFeatureSettings {
 	currentUserVersion?: bigint;
 }
 
+export interface UpdateUserTransactionFilterSettings {
+	hideMicroTransactions: boolean;
+	currentUserVersion?: bigint;
+}
+
 export interface GetUserTransactionsParams {
 	tokenId: BackendTokenId;
 	start?: bigint;
