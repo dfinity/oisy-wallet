@@ -9,6 +9,7 @@
 	import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
+	import HiddenMicroTransactionsInfoBox from '$lib/components/transactions/HiddenMicroTransactionsInfoBox.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
@@ -57,6 +58,8 @@
 </script>
 
 <Header>{$i18n.transactions.text.title}</Header>
+
+<HiddenMicroTransactionsInfoBox />
 
 <EthTransactionsSkeletons>
 	{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
