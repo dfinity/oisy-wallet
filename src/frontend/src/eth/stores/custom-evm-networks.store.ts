@@ -1,8 +1,8 @@
 import { PersistedCustomEvmNetworkListSchema } from '$eth/schema/custom-network.schema';
 import type { CustomEvmNetwork, PersistedCustomEvmNetwork } from '$eth/types/custom-network';
 import type { NetworkId } from '$lib/types/network';
-import { parseNetworkId } from '$lib/validation/network.validation';
 import { del as delStorage, get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
+import { parseNetworkId } from '$lib/validation/network.validation';
 import { writable } from 'svelte/store';
 
 export const CUSTOM_EVM_NETWORKS_STORAGE_KEY = 'custom-evm-networks';
@@ -66,7 +66,11 @@ export interface CustomEvmNetworksStore {
 }
 
 export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
-	const { subscribe, update: updateWritable, set } = writable<CustomEvmNetwork[]>(loadFromStorage());
+	const {
+		subscribe,
+		update: updateWritable,
+		set
+	} = writable<CustomEvmNetwork[]>(loadFromStorage());
 
 	const persist = (list: CustomEvmNetwork[]) => {
 		setStorage<PersistedCustomEvmNetwork[]>({
@@ -84,10 +88,7 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 						`A custom EVM network with chainId ${input.chainId} has already been added.`
 					);
 				}
-				const next: CustomEvmNetwork[] = [
-					...current,
-					{ ...input, id: toNetworkId(input.chainId) }
-				];
+				const next: CustomEvmNetwork[] = [...current, { ...input, id: toNetworkId(input.chainId) }];
 				persist(next);
 				return next;
 			});
@@ -96,9 +97,7 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 			updateWritable((current) => {
 				const index = current.findIndex((n) => n.chainId === chainId);
 				if (index === -1) {
-					throw new Error(
-						`No custom EVM network with chainId ${chainId} exists; cannot update.`
-					);
+					throw new Error(`No custom EVM network with chainId ${chainId} exists; cannot update.`);
 				}
 				const next = [...current];
 				next[index] = { ...next[index], ...patch };
