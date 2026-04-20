@@ -47,13 +47,24 @@ const fromPersisted = (persisted: PersistedCustomEvmNetwork): CustomEvmNetwork =
 	};
 };
 
+const dedupeByChainId = (networks: PersistedCustomEvmNetwork[]): PersistedCustomEvmNetwork[] => {
+	const seen = new Set<string>();
+	return networks.filter(({ chainId }) => {
+		if (seen.has(chainId)) {
+			return false;
+		}
+		seen.add(chainId);
+		return true;
+	});
+};
+
 const loadFromStorage = (): CustomEvmNetwork[] => {
 	const raw = getStorage<unknown>({ key: CUSTOM_EVM_NETWORKS_STORAGE_KEY });
 	const parsed = PersistedCustomEvmNetworkListSchema.safeParse(raw ?? []);
 	if (!parsed.success) {
 		return [];
 	}
-	return parsed.data.map(fromPersisted);
+	return dedupeByChainId(parsed.data).map(fromPersisted);
 };
 
 export type CustomEvmNetworkInput = Omit<CustomEvmNetwork, 'id'>;

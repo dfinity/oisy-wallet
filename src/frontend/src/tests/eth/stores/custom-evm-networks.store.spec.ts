@@ -89,6 +89,30 @@ describe('custom-evm-networks.store', () => {
 			expect(get(store)).toEqual([]);
 		});
 
+		it('dedupes persisted entries with the same chainId, keeping the first', () => {
+			vi.mocked(getStorage).mockImplementation(() => [
+				{
+					chainId: '10',
+					name: 'Optimism',
+					rpcUrl: 'https://mainnet.optimism.io',
+					currencySymbol: 'ETH',
+					env: 'mainnet'
+				},
+				{
+					chainId: '10',
+					name: 'Optimism duplicate',
+					rpcUrl: 'https://other.example',
+					currencySymbol: 'ETH',
+					env: 'mainnet'
+				}
+			]);
+
+			const list = get(initCustomEvmNetworksStore());
+
+			expect(list).toHaveLength(1);
+			expect(list[0].name).toBe('Optimism');
+		});
+
 		it('derives the same NetworkId symbol for the same chainId across reloads', () => {
 			vi.mocked(getStorage).mockImplementation(() => [
 				{
