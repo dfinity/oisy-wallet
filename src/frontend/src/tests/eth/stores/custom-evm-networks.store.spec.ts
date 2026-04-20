@@ -190,6 +190,14 @@ describe('custom-evm-networks.store', () => {
 			expect(get(store)).toEqual([]);
 		});
 
+		it('strips unknown caller-supplied properties', () => {
+			const store = initCustomEvmNetworksStore();
+
+			store.add({ ...optimism, junk: 'ignored' } as CustomEvmNetworkInput);
+
+			expect(get(store)[0]).not.toHaveProperty('junk');
+		});
+
 		it('supports multiple distinct chains', () => {
 			const store = initCustomEvmNetworksStore();
 
@@ -223,6 +231,23 @@ describe('custom-evm-networks.store', () => {
 			const store = initCustomEvmNetworksStore();
 
 			expect(() => store.update({ chainId: 999n, patch: { name: 'x' } })).toThrow(/cannot update/);
+		});
+
+		it('preserves id and chainId even if a caller tries to override them', () => {
+			const store = initCustomEvmNetworksStore();
+			store.add(optimism);
+			const originalId = get(store)[0].id;
+
+			store.update({
+				chainId: 10n,
+				patch: { id: Symbol('hacked'), chainId: 99n, name: 'renamed' } as never
+			});
+
+			const [network] = get(store);
+
+			expect(network.id).toBe(originalId);
+			expect(network.chainId).toBe(10n);
+			expect(network.name).toBe('renamed');
 		});
 	});
 
