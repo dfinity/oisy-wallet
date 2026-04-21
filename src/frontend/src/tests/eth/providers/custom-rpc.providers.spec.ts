@@ -46,9 +46,12 @@ describe('custom-rpc.providers', () => {
 	const mockDestroy = vi.fn();
 
 	beforeEach(() => {
-		vi.clearAllMocks();
+		// Reset the cache first so any `destroy()` calls triggered by leftover
+		// entries from the previous test are wiped by `clearAllMocks` below
+		// rather than counted against the current test's expectations.
 		__resetCustomRpcProvidersCache();
 		customEvmNetworksStoreMock.set([]);
+		vi.clearAllMocks();
 
 		mockJsonRpcProvider.prototype.getBalance = mockGetBalance;
 		mockJsonRpcProvider.prototype.getFeeData = mockGetFeeData;
@@ -194,6 +197,16 @@ describe('custom-rpc.providers', () => {
 		it('creates a new provider when name changes', () => {
 			const first = customRpcProviders(buildNetwork({ name: 'Optimism' }));
 			const second = customRpcProviders(buildNetwork({ name: 'Optimism (renamed)' }));
+
+			expect(first).not.toBe(second);
+			expect(mockJsonRpcProvider).toHaveBeenCalledTimes(2);
+		});
+
+		it('does not collide when a moved `:` segment shifts between rpcUrl and name', () => {
+			// Sanity check for the cache-key encoding: naive `${chainId}:${rpcUrl}:${name}`
+			// would collapse these two tuples into the same string.
+			const first = customRpcProviders(buildNetwork({ rpcUrl: 'https://foo:8545', name: 'bar' }));
+			const second = customRpcProviders(buildNetwork({ rpcUrl: 'https://foo', name: '8545:bar' }));
 
 			expect(first).not.toBe(second);
 			expect(mockJsonRpcProvider).toHaveBeenCalledTimes(2);

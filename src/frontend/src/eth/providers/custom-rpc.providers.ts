@@ -79,7 +79,7 @@ const cacheKey = ({
 	chainId: bigint;
 	rpcUrl: string;
 	name: string;
-}): string => `${chainId}:${rpcUrl}:${name}`;
+}): string => JSON.stringify([chainId.toString(), rpcUrl, name]);
 
 /**
  * Returns a cached `CustomRpcProvider` for the given custom network, or
@@ -126,7 +126,12 @@ const reconcileCache = (networks: readonly CustomEvmNetwork[]): void => {
 
 customEvmNetworksStore.subscribe(reconcileCache);
 
-/** Test-only: clear the module-level provider cache. */
+/**
+ * Test-only: clear the module-level provider cache, destroying each cached
+ * provider first so its underlying ethers resources are released. Delegates
+ * to `reconcileCache([])` so "reset" and "every network removed" take the
+ * same code path.
+ */
 export const __resetCustomRpcProvidersCache = (): void => {
-	cache.clear();
+	reconcileCache([]);
 };
