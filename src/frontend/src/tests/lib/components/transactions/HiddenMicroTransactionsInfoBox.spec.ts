@@ -4,6 +4,7 @@ import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 import * as notificationServices from '$lib/services/notification.services';
 import { hiddenMicroTransactionsResetStore } from '$lib/stores/settings.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import en from '$tests/mocks/i18n.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -50,7 +51,7 @@ describe('HiddenMicroTransactionsInfoBox', () => {
 
 		const { queryByRole } = render(HiddenMicroTransactionsInfoBox);
 
-		expect(queryByRole('button', { name: 'Close' })).toBeInTheDocument();
+		expect(queryByRole('button', { name: en.core.text.close })).toBeInTheDocument();
 	});
 
 	it('is hidden when the feature is off', () => {
@@ -58,7 +59,7 @@ describe('HiddenMicroTransactionsInfoBox', () => {
 
 		const { queryByRole } = render(HiddenMicroTransactionsInfoBox);
 
-		expect(queryByRole('button', { name: 'Close' })).not.toBeInTheDocument();
+		expect(queryByRole('button', { name: en.core.text.close })).not.toBeInTheDocument();
 	});
 
 	it('is hidden when the backend notification is dismissed and the reset flag is off', () => {
@@ -69,7 +70,7 @@ describe('HiddenMicroTransactionsInfoBox', () => {
 
 		const { queryByRole } = render(HiddenMicroTransactionsInfoBox);
 
-		expect(queryByRole('button', { name: 'Close' })).not.toBeInTheDocument();
+		expect(queryByRole('button', { name: en.core.text.close })).not.toBeInTheDocument();
 	});
 
 	it('re-shows the info box when the reset flag is on, even if the backend notification is dismissed (OISY-2876)', () => {
@@ -84,7 +85,7 @@ describe('HiddenMicroTransactionsInfoBox', () => {
 
 		const { queryByRole } = render(HiddenMicroTransactionsInfoBox);
 
-		expect(queryByRole('button', { name: 'Close' })).toBeInTheDocument();
+		expect(queryByRole('button', { name: en.core.text.close })).toBeInTheDocument();
 	});
 
 	it('clears the reset flag and persists the backend dismissal when the user closes the box', async () => {
@@ -99,7 +100,7 @@ describe('HiddenMicroTransactionsInfoBox', () => {
 
 		const { getByRole } = render(HiddenMicroTransactionsInfoBox);
 
-		await fireEvent.click(getByRole('button', { name: 'Close' }));
+		await fireEvent.click(getByRole('button', { name: en.core.text.close }));
 
 		expect(get(hiddenMicroTransactionsResetStore).enabled).toBeFalsy();
 
