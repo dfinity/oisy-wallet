@@ -1,4 +1,7 @@
-import { verifyChainId } from '$eth/services/chain-id-verification.services';
+import {
+	VERIFY_CHAIN_ID_TIMEOUT_MS,
+	verifyChainId
+} from '$eth/services/chain-id-verification.services';
 import { JsonRpcProvider } from 'ethers/providers';
 
 describe('chain-id-verification.services', () => {
@@ -61,5 +64,31 @@ describe('chain-id-verification.services', () => {
 
 		expect(result.status).toBe('unreachable');
 		expect(mockDestroy).not.toHaveBeenCalled();
+	});
+
+	it('returns unreachable and destroys the provider when the probe exceeds the timeout', async () => {
+		vi.useFakeTimers();
+		// A promise that never resolves — simulates a silently-hung RPC.
+		mockGetNetwork.mockImplementation(() => new Promise(() => {}));
+
+		try {
+			const pending = verifyChainId({
+				rpcUrl: 'https://slow.example',
+				expectedChainId: 10n
+			});
+
+			await vi.advanceTimersByTimeAsync(VERIFY_CHAIN_ID_TIMEOUT_MS);
+
+			const result = await pending;
+
+			expect(result.status).toBe('unreachable');
+			expect(result).toEqual({
+				status: 'unreachable',
+				error: `RPC probe timed out after ${VERIFY_CHAIN_ID_TIMEOUT_MS}ms`
+			});
+			expect(mockDestroy).toHaveBeenCalledOnce();
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 });
