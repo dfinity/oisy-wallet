@@ -8,6 +8,20 @@ import { TRACK_ETH_ESTIMATE_GAS_ERROR } from '$lib/constants/analytics.constants
 import * as analytics from '$lib/services/analytics.services';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { JsonRpcProvider, Network } from 'ethers/providers';
+import type { Writable, writable } from 'svelte/store';
+
+const { customEvmNetworksStoreMock } = vi.hoisted(
+	(): { customEvmNetworksStoreMock: Writable<CustomEvmNetwork[]> } => {
+		// Require so that the writable is created before `vi.mock` is hoisted.
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		const svelteStore = require('svelte/store') as { writable: typeof writable };
+		return { customEvmNetworksStoreMock: svelteStore.writable<CustomEvmNetwork[]>([]) };
+	}
+);
+
+vi.mock('$eth/stores/custom-evm-networks.store', () => ({
+	customEvmNetworksStore: customEvmNetworksStoreMock
+}));
 
 const buildNetwork = (overrides: Partial<CustomEvmNetwork> = {}): CustomEvmNetwork => ({
 	id: parseNetworkId('custom-evm-test'),
@@ -34,6 +48,7 @@ describe('custom-rpc.providers', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		__resetCustomRpcProvidersCache();
+		customEvmNetworksStoreMock.set([]);
 
 		mockJsonRpcProvider.prototype.getBalance = mockGetBalance;
 		mockJsonRpcProvider.prototype.getFeeData = mockGetFeeData;
@@ -150,7 +165,7 @@ describe('custom-rpc.providers', () => {
 	});
 
 	describe('customRpcProviders (factory)', () => {
-		it('caches providers per (chainId, rpcUrl) pair', () => {
+		it('caches providers per (chainId, rpcUrl, name) tuple', () => {
 			const network = buildNetwork();
 
 			const first = customRpcProviders(network);
@@ -174,6 +189,56 @@ describe('custom-rpc.providers', () => {
 
 			expect(first).not.toBe(second);
 			expect(mockJsonRpcProvider).toHaveBeenCalledTimes(2);
+		});
+
+		it('creates a new provider when name changes', () => {
+			const first = customRpcProviders(buildNetwork({ name: 'Optimism' }));
+			const second = customRpcProviders(buildNetwork({ name: 'Optimism (renamed)' }));
+
+			expect(first).not.toBe(second);
+			expect(mockJsonRpcProvider).toHaveBeenCalledTimes(2);
+		});
+
+		describe('cache eviction via store subscription', () => {
+			it('destroys and drops cached providers that are no longer in the store', () => {
+				const network = buildNetwork();
+				customEvmNetworksStoreMock.set([network]);
+
+				const provider = customRpcProviders(network);
+
+				customEvmNetworksStoreMock.set([]);
+
+				expect(mockDestroy).toHaveBeenCalledOnce();
+
+				const rebuilt = customRpcProviders(network);
+
+				expect(rebuilt).not.toBe(provider);
+				expect(mockJsonRpcProvider).toHaveBeenCalledTimes(2);
+			});
+
+			it('evicts the stale entry when a network is edited (rpcUrl, name, or chainId)', () => {
+				const original = buildNetwork({ rpcUrl: 'https://a.example' });
+				customEvmNetworksStoreMock.set([original]);
+				customRpcProviders(original);
+
+				const edited = { ...original, rpcUrl: 'https://b.example' };
+				customEvmNetworksStoreMock.set([edited]);
+
+				expect(mockDestroy).toHaveBeenCalledOnce();
+			});
+
+			it('leaves unrelated cached providers intact', () => {
+				const a = buildNetwork({ chainId: 10n, rpcUrl: 'https://a.example' });
+				const b = buildNetwork({ chainId: 100n, rpcUrl: 'https://b.example' });
+				customEvmNetworksStoreMock.set([a, b]);
+				const providerA = customRpcProviders(a);
+				customRpcProviders(b);
+
+				customEvmNetworksStoreMock.set([a]);
+
+				expect(mockDestroy).toHaveBeenCalledOnce();
+				expect(customRpcProviders(a)).toBe(providerA);
+			});
 		});
 	});
 });

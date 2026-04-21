@@ -1,3 +1,4 @@
+import { customEvmNetworksStore } from '$eth/stores/custom-evm-networks.store';
 import type { EthAddress } from '$eth/types/address';
 import type { CustomEvmNetwork } from '$eth/types/custom-network';
 import type { GetFeeData } from '$eth/types/infura';
@@ -68,17 +69,29 @@ export class CustomRpcProvider {
 
 const cache = new Map<string, CustomRpcProvider>();
 
-const cacheKey = ({ chainId, rpcUrl }: { chainId: bigint; rpcUrl: string }): string =>
-	`${chainId}:${rpcUrl}`;
+const cacheKey = ({
+	chainId,
+	rpcUrl,
+	name
+}: {
+	chainId: bigint;
+	rpcUrl: string;
+	name: string;
+}): string => `${chainId}:${rpcUrl}:${name}`;
 
 /**
  * Returns a cached `CustomRpcProvider` for the given custom network, or
  * constructs a new one if the cache does not yet contain an entry for the
- * `(chainId, rpcUrl)` pair. Editing either field in the store produces a
- * cache miss on the next call, so stale providers never serve traffic.
+ * `(chainId, rpcUrl, name)` tuple. Editing any of these fields in the store
+ * produces a cache miss on the next call, so stale providers never serve
+ * traffic; the evicted entry is destroyed by the store subscription below.
  */
 export const customRpcProviders = (network: CustomEvmNetwork): CustomRpcProvider => {
-	const key = cacheKey({ chainId: network.chainId, rpcUrl: network.rpcUrl });
+	const key = cacheKey({
+		chainId: network.chainId,
+		rpcUrl: network.rpcUrl,
+		name: network.name
+	});
 	const cached = cache.get(key);
 	if (cached !== undefined) {
 		return cached;
@@ -91,6 +104,25 @@ export const customRpcProviders = (network: CustomEvmNetwork): CustomRpcProvider
 	cache.set(key, provider);
 	return provider;
 };
+
+/**
+ * Reconciles the provider cache against the current set of custom networks:
+ * any cached entry whose key is no longer present is destroyed and removed.
+ * Wired to the store below so that `update`/`remove` release the underlying
+ * ethers `JsonRpcProvider` (and its websocket / keep-alive handles) instead
+ * of leaking them for the lifetime of the page.
+ */
+const reconcileCache = (networks: readonly CustomEvmNetwork[]): void => {
+	const liveKeys = new Set(networks.map((network) => cacheKey(network)));
+	for (const [key, provider] of cache) {
+		if (!liveKeys.has(key)) {
+			provider.destroy();
+			cache.delete(key);
+		}
+	}
+};
+
+customEvmNetworksStore.subscribe(reconcileCache);
 
 /** Test-only: clear the module-level provider cache. */
 export const __resetCustomRpcProvidersCache = (): void => {
