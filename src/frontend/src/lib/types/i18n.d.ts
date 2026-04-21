@@ -556,6 +556,9 @@ interface I18nCustom_networks {
 		review_intro: string;
 		mainnet: string;
 		testnet: string;
+		list_title: string;
+		list_empty: string;
+		list_chain_id_label: string;
 	};
 	field: {
 		name: string;
@@ -577,6 +580,8 @@ interface I18nCustom_networks {
 		verify: string;
 		back: string;
 		add: string;
+		remove: string;
+		confirm_remove: string;
 	};
 	error: {
 		name_required: string;

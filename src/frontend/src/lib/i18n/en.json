@@ -810,7 +810,10 @@
 			"form_intro": "Add any EVM-compatible chain by its RPC endpoint. We'll probe the endpoint to confirm the chain ID before saving.",
 			"review_intro": "The RPC confirmed this chain. Review the details and add the network to your wallet.",
 			"mainnet": "Mainnet",
-			"testnet": "Testnet"
+			"testnet": "Testnet",
+			"list_title": "Saved custom networks",
+			"list_empty": "No custom networks saved yet.",
+			"list_chain_id_label": "Chain ID $chainId"
 		},
 		"field": {
 			"name": "Network name",
@@ -831,7 +834,9 @@
 			"cancel": "Cancel",
 			"verify": "Verify and continue",
 			"back": "Back",
-			"add": "Add network"
+			"add": "Add network",
+			"remove": "Remove",
+			"confirm_remove": "Click again to confirm"
 		},
 		"error": {
 			"name_required": "Network name is required.",

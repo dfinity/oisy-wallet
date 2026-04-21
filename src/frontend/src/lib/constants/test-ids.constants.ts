@@ -186,6 +186,11 @@ export const ADD_CUSTOM_NETWORK_VERIFY_BUTTON = 'add-custom-network-verify-butto
 export const ADD_CUSTOM_NETWORK_CONFIRM_BUTTON = 'add-custom-network-confirm-button';
 export const ADD_CUSTOM_NETWORK_VERIFICATION_BANNER = 'add-custom-network-verification-banner';
 
+export const CUSTOM_EVM_NETWORKS_LIST = 'custom-evm-networks-list';
+export const CUSTOM_EVM_NETWORKS_LIST_EMPTY = 'custom-evm-networks-list-empty';
+export const CUSTOM_EVM_NETWORKS_LIST_ITEM = 'custom-evm-networks-list-item';
+export const CUSTOM_EVM_NETWORKS_REMOVE_BUTTON = 'custom-evm-networks-remove-button';
+
 export const THEME_SELECTOR_CARD = 'theme-selector-card';
 
 export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';

@@ -2,6 +2,7 @@
 	import { Toggle } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
+	import CustomEvmNetworksList from '$eth/components/networks/CustomEvmNetworksList.svelte';
 	import { updateUserTransactionFilterSettings } from '$lib/api/backend.api';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
@@ -189,6 +190,10 @@
 			{replaceOisyPlaceholders($i18n.settings.text.add_custom_network_description)}
 		{/snippet}
 	</SettingsCardItem>
+
+	<!-- Saved custom EVM networks - inline list with per-row remove -->
+	<h5 class="mt-5 mb-2 text-sm font-bold">{$i18n.custom_networks.text.list_title}</h5>
+	<CustomEvmNetworksList />
 </SettingsCard>
 
 {#if AI_ASSISTANT_CONSOLE_ENABLED}
