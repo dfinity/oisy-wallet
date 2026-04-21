@@ -15,6 +15,7 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { enabledCustomEvmNetworks } from '$eth/derived/custom-networks.derived';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 import type { Network } from '$lib/types/network';
@@ -22,19 +23,29 @@ import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 import { derived, type Readable } from 'svelte/store';
 
 export const networks: Readable<Network[]> = derived(
-	[enabledBitcoinNetworks, enabledEthereumNetworks, enabledSolanaNetworks, enabledEvmNetworks],
+	[
+		enabledBitcoinNetworks,
+		enabledEthereumNetworks,
+		enabledSolanaNetworks,
+		enabledEvmNetworks,
+		enabledCustomEvmNetworks
+	],
 	([
 		$enabledBitcoinNetworks,
 		$enabledEthereumNetworks,
 		$enabledSolanaNetworks,
-		$enabledEvmNetworks
+		$enabledEvmNetworks,
+		$enabledCustomEvmNetworks
 	]) => [
 		...$enabledBitcoinNetworks,
 		...$enabledEthereumNetworks,
 		ICP_NETWORK,
 		ICP_PSEUDO_TESTNET_NETWORK,
 		...$enabledSolanaNetworks,
-		...$enabledEvmNetworks
+		...$enabledEvmNetworks,
+		// Custom EVM networks are appended last so they render below built-in
+		// chains in any list that consumes `networks` in insertion order.
+		...$enabledCustomEvmNetworks
 	]
 );
 
