@@ -45,7 +45,7 @@ describe('chain-id-verification.services', () => {
 			expectedChainId: 10n
 		});
 
-		expect(result).toEqual({ status: 'unreachable', error: 'Error: ECONNREFUSED' });
+		expect(result).toEqual({ status: 'unreachable', error: 'ECONNREFUSED' });
 		expect(mockDestroy).toHaveBeenCalledOnce();
 	});
 

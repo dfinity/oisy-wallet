@@ -143,10 +143,10 @@ describe('custom-rpc.providers', () => {
 				expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
 					name: TRACK_ETH_ESTIMATE_GAS_ERROR,
 					metadata: {
-						error: 'Error: boom',
+						error: 'boom',
 						network: 'Optimism'
 					},
-					warning: 'Error estimating gas for custom network Optimism: Error: boom'
+					warning: 'Error estimating gas for custom network Optimism: boom'
 				});
 			});
 		});

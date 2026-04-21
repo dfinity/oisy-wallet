@@ -1,3 +1,4 @@
+import { errorDetailToString } from '$lib/utils/error.utils';
 import { JsonRpcProvider } from 'ethers/providers';
 
 export type VerifyChainIdResult =
@@ -32,7 +33,7 @@ export const verifyChainId = async ({
 			? { status: 'ok' }
 			: { status: 'mismatch', actualChainId: chainId };
 	} catch (err: unknown) {
-		return { status: 'unreachable', error: `${err}` };
+		return { status: 'unreachable', error: errorDetailToString(err) ?? `${err}` };
 	} finally {
 		provider?.destroy();
 	}

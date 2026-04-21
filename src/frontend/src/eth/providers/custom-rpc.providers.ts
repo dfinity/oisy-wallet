@@ -4,6 +4,7 @@ import type { CustomEvmNetwork } from '$eth/types/custom-network';
 import type { GetFeeData } from '$eth/types/infura';
 import { TRACK_ETH_ESTIMATE_GAS_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
+import { errorDetailToString } from '$lib/utils/error.utils';
 import { JsonRpcProvider, Network, type FeeData, type TransactionResponse } from 'ethers/providers';
 
 /**
@@ -36,13 +37,14 @@ export class CustomRpcProvider {
 		try {
 			return await this.estimateGas(params);
 		} catch (err: unknown) {
+			const detail = errorDetailToString(err) ?? `${err}`;
 			trackEvent({
 				name: TRACK_ETH_ESTIMATE_GAS_ERROR,
 				metadata: {
-					error: `${err}`,
+					error: detail,
 					network: this.networkName
 				},
-				warning: `Error estimating gas for custom network ${this.networkName}: ${err}`
+				warning: `Error estimating gas for custom network ${this.networkName}: ${detail}`
 			});
 
 			return undefined;
