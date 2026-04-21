@@ -27,6 +27,11 @@ export const showSpamStore = initStorageStore<SettingsData>({
 	defaultValue: { enabled: false }
 });
 
+export const hiddenMicroTransactionsResetStore = initStorageStore<SettingsData>({
+	key: 'hidden-micro-transactions-reset',
+	defaultValue: { enabled: false }
+});
+
 export const tokensSortStore = initStorageStore<TokensSortingType>({
 	key: 'tokens-sort',
 	defaultValue: {
