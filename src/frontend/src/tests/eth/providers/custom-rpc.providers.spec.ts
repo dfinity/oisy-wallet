@@ -252,6 +252,29 @@ describe('custom-rpc.providers', () => {
 				expect(mockDestroy).toHaveBeenCalledOnce();
 				expect(customRpcProviders(a)).toBe(providerA);
 			});
+
+			it('does not evict when a new network is added alongside an existing one', () => {
+				const a = buildNetwork({ chainId: 10n, rpcUrl: 'https://a.example' });
+				const b = buildNetwork({ chainId: 100n, rpcUrl: 'https://b.example' });
+				customEvmNetworksStoreMock.set([a]);
+				const providerA = customRpcProviders(a);
+
+				customEvmNetworksStoreMock.set([a, b]);
+
+				expect(mockDestroy).not.toHaveBeenCalled();
+				expect(customRpcProviders(a)).toBe(providerA);
+			});
+
+			it('is a no-op when the same list is re-set (no destroy, same instance)', () => {
+				const network = buildNetwork();
+				customEvmNetworksStoreMock.set([network]);
+				const provider = customRpcProviders(network);
+
+				customEvmNetworksStoreMock.set([network]);
+
+				expect(mockDestroy).not.toHaveBeenCalled();
+				expect(customRpcProviders(network)).toBe(provider);
+			});
 		});
 	});
 });
