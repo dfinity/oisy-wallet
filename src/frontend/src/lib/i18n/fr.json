@@ -756,6 +756,9 @@
 			"enable_testnets": "Activer les réseaux de test",
 			"active_networks": "Réseaux actifs ",
 			"active_networks_description": "Sélectionnez les réseaux avec lesquels vous souhaitez travailler dans $oisy_name. Les tokens et transactions des réseaux inactifs ne s'afficheront pas et ne seront pas inclus dans votre solde disponible.",
+			"add_custom_network": "",
+			"add_custom_network_button": "",
+			"add_custom_network_description": "",
 			"enable_network": "Activer le réseau",
 			"disable_network": "Désactiver le réseau",
 			"appearance": "Apparence",
@@ -799,6 +802,56 @@
 		"number_of_enabled": "$numNetworksEnabled sur $numNetworksTotal activés",
 		"filter": "Filtrer les réseaux",
 		"manage": "Gérer les réseaux"
+	},
+	"custom_networks": {
+		"text": {
+			"add_title": "",
+			"review_title": "",
+			"form_intro": "",
+			"review_intro": "",
+			"mainnet": "",
+			"testnet": "",
+			"list_title": "",
+			"list_empty": "",
+			"list_chain_id_label": ""
+		},
+		"field": {
+			"name": "",
+			"name_placeholder": "",
+			"chain_id": "",
+			"chain_id_placeholder": "",
+			"rpc_url": "",
+			"rpc_url_placeholder": "",
+			"currency_symbol": "",
+			"currency_symbol_placeholder": "",
+			"explorer_url": "",
+			"explorer_url_placeholder": "",
+			"icon_url": "",
+			"icon_url_placeholder": "",
+			"environment": ""
+		},
+		"button": {
+			"cancel": "",
+			"verify": "",
+			"back": "",
+			"add": "",
+			"remove": "",
+			"confirm_remove": ""
+		},
+		"error": {
+			"name_required": "",
+			"chain_id_required": "",
+			"chain_id_invalid": "",
+			"rpc_url_required": "",
+			"rpc_url_invalid": "",
+			"currency_symbol_required": "",
+			"explorer_url_required": "",
+			"explorer_url_invalid": "",
+			"icon_url_invalid": "",
+			"chain_mismatch": "",
+			"rpc_unreachable": "",
+			"duplicate": ""
+		}
 	},
 	"receive": {
 		"text": {

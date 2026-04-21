@@ -756,6 +756,9 @@
 			"enable_testnets": "Bật mạng thử nghiệm",
 			"active_networks": "Mạng đang hoạt động",
 			"active_networks_description": "Chọn mạng bạn muốn làm việc trong $oisy_name. Token và giao dịch từ các mạng không hoạt động sẽ không hiển thị hoặc không được bao gồm trong số dư khả dụng của bạn.",
+			"add_custom_network": "",
+			"add_custom_network_button": "",
+			"add_custom_network_description": "",
 			"enable_network": "Bật mạng",
 			"disable_network": "Tắt mạng",
 			"appearance": "Giao diện",
@@ -799,6 +802,56 @@
 		"number_of_enabled": "$numNetworksEnabled trong số $numNetworksTotal được bật",
 		"filter": "Lọc mạng",
 		"manage": "Quản lý mạng"
+	},
+	"custom_networks": {
+		"text": {
+			"add_title": "",
+			"review_title": "",
+			"form_intro": "",
+			"review_intro": "",
+			"mainnet": "",
+			"testnet": "",
+			"list_title": "",
+			"list_empty": "",
+			"list_chain_id_label": ""
+		},
+		"field": {
+			"name": "",
+			"name_placeholder": "",
+			"chain_id": "",
+			"chain_id_placeholder": "",
+			"rpc_url": "",
+			"rpc_url_placeholder": "",
+			"currency_symbol": "",
+			"currency_symbol_placeholder": "",
+			"explorer_url": "",
+			"explorer_url_placeholder": "",
+			"icon_url": "",
+			"icon_url_placeholder": "",
+			"environment": ""
+		},
+		"button": {
+			"cancel": "",
+			"verify": "",
+			"back": "",
+			"add": "",
+			"remove": "",
+			"confirm_remove": ""
+		},
+		"error": {
+			"name_required": "",
+			"chain_id_required": "",
+			"chain_id_invalid": "",
+			"rpc_url_required": "",
+			"rpc_url_invalid": "",
+			"currency_symbol_required": "",
+			"explorer_url_required": "",
+			"explorer_url_invalid": "",
+			"icon_url_invalid": "",
+			"chain_mismatch": "",
+			"rpc_unreachable": "",
+			"duplicate": ""
+		}
 	},
 	"receive": {
 		"text": {

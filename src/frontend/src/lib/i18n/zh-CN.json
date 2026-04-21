@@ -756,6 +756,9 @@
 			"enable_testnets": "启用测试网络",
 			"active_networks": "已启用网络",
 			"active_networks_description": "选择你希望在 $oisy_name 中使用的网络。未启用的网络中的代币和交易将不会显示，也不会包含在可用余额中。",
+			"add_custom_network": "",
+			"add_custom_network_button": "",
+			"add_custom_network_description": "",
 			"enable_network": "启用网络",
 			"disable_network": "禁用网络",
 			"appearance": "外观",
@@ -799,6 +802,56 @@
 		"number_of_enabled": "$numNetworksTotal 个网络中已启用 $numNetworksEnabled 个",
 		"filter": "筛选网络",
 		"manage": "管理网络"
+	},
+	"custom_networks": {
+		"text": {
+			"add_title": "",
+			"review_title": "",
+			"form_intro": "",
+			"review_intro": "",
+			"mainnet": "",
+			"testnet": "",
+			"list_title": "",
+			"list_empty": "",
+			"list_chain_id_label": ""
+		},
+		"field": {
+			"name": "",
+			"name_placeholder": "",
+			"chain_id": "",
+			"chain_id_placeholder": "",
+			"rpc_url": "",
+			"rpc_url_placeholder": "",
+			"currency_symbol": "",
+			"currency_symbol_placeholder": "",
+			"explorer_url": "",
+			"explorer_url_placeholder": "",
+			"icon_url": "",
+			"icon_url_placeholder": "",
+			"environment": ""
+		},
+		"button": {
+			"cancel": "",
+			"verify": "",
+			"back": "",
+			"add": "",
+			"remove": "",
+			"confirm_remove": ""
+		},
+		"error": {
+			"name_required": "",
+			"chain_id_required": "",
+			"chain_id_invalid": "",
+			"rpc_url_required": "",
+			"rpc_url_invalid": "",
+			"currency_symbol_required": "",
+			"explorer_url_required": "",
+			"explorer_url_invalid": "",
+			"icon_url_invalid": "",
+			"chain_mismatch": "",
+			"rpc_unreachable": "",
+			"duplicate": ""
+		}
 	},
 	"receive": {
 		"text": {
