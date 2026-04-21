@@ -25,11 +25,14 @@
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalIcToken, modalIcTokenData, modalIcTransaction } from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
+	import { hideMicroTransactions } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { filterReceivedMicroTransactions } from '$lib/utils/transactions.utils';
 
 	let ckEthereum = $derived($tokenCkEthLedger || $tokenCkErc20Ledger);
 
@@ -46,12 +49,22 @@
 
 	let token = $derived($pageToken ?? ICP_TOKEN);
 
+	let mappedTransactions = $derived(
+		$icTransactions.map(({ data: transaction }) => ({
+			component: 'ic' as const,
+			transaction,
+			token
+		}))
+	);
+
+	let filteredTransactions = $derived(
+		$hideMicroTransactions
+			? filterReceivedMicroTransactions({ transactions: mappedTransactions, exchanges: $exchanges })
+			: mappedTransactions
+	);
+
 	let groupedTransactions = $derived(
-		nonNullish($icTransactions)
-			? groupTransactionsByDate(
-					$icTransactions.map(({ data: transaction }) => ({ component: 'ic', transaction, token }))
-				)
-			: undefined
+		nonNullish($icTransactions) ? groupTransactionsByDate(filteredTransactions) : undefined
 	);
 </script>
 
@@ -76,7 +89,7 @@
 </Header>
 
 <IcTransactionsSkeletons>
-	{#if $icTransactions.length > 0}
+	{#if filteredTransactions.length > 0}
 		<IcTransactionsScroll {token}>
 			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
