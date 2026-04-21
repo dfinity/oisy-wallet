@@ -28,7 +28,8 @@ export const {
 	OISY_LOGGING_INTO_OISY_URL,
 	OISY_CREATING_A_WALLET_URL,
 	OISY_SCAN_URL,
-	OISY_PAY_URL
+	OISY_PAY_URL,
+	OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL
 } = safeParse({
 	schema: OisyMetadataSchema,
 	value: metadata,
@@ -58,7 +59,8 @@ export const {
 		OISY_LOGGING_INTO_OISY_URL: '',
 		OISY_CREATING_A_WALLET_URL: '',
 		OISY_SCAN_URL: '',
-		OISY_PAY_URL: ''
+		OISY_PAY_URL: '',
+		OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL: ''
 	}
 });
 
