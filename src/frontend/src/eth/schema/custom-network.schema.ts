@@ -35,7 +35,12 @@ export const CustomEvmNetworkSchema = z.object({
 	name: z.string().min(1),
 	rpcUrl: RpcUrlSchema,
 	currencySymbol: z.string().min(1),
-	explorerUrl: UrlSchema.optional(),
+	// `explorerUrl` is required here even though `NetworkSchema.explorerUrl`
+	// on built-in chains is also required. Prompting the user for it mirrors
+	// MetaMask's add-network flow and means the custom-network adapter can
+	// emit a valid `Network` into the shared `networks` store without
+	// synthesizing placeholder URLs.
+	explorerUrl: UrlSchema,
 	iconUrl: UrlSchema.optional(),
 	env: NetworkEnvironmentSchema
 });
@@ -59,7 +64,7 @@ export const PersistedCustomEvmNetworkSchema = z.object({
 	name: z.string().min(1),
 	rpcUrl: RpcUrlSchema,
 	currencySymbol: z.string().min(1),
-	explorerUrl: UrlSchema.optional(),
+	explorerUrl: UrlSchema,
 	iconUrl: UrlSchema.optional(),
 	env: NetworkEnvironmentSchema
 });

@@ -83,19 +83,26 @@ describe('network.schema', () => {
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
-		it('should fail validation when icon is not a valid SVG string', () => {
-			const invalidNetwork = {
+		it('should accept a non-SVG http(s) URL as icon (custom-network path)', () => {
+			const network = {
 				...validNetwork,
-				icon: 'https://example.com/invalid-icon.png'
+				icon: 'https://example.com/icon.png'
 			};
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
+			expect(NetworkSchema.parse(network).icon).toBe('https://example.com/icon.png');
 		});
 
-		it('should fail validation when iconBW is not a valid SVG string', () => {
+		it('should accept a data:image/svg+xml icon', () => {
+			const svgDataUrl = 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=';
+			const network = { ...validNetwork, icon: svgDataUrl };
+
+			expect(NetworkSchema.parse(network).icon).toBe(svgDataUrl);
+		});
+
+		it('should fail validation when icon is neither an SVG nor a URL', () => {
 			const invalidNetwork = {
 				...validNetwork,
-				icon: 'https://example.com/invalid-icon-bw.png'
+				icon: 'not-a-url-and-not-an-svg'
 			};
 
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();

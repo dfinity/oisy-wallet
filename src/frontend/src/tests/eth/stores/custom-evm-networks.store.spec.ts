@@ -29,6 +29,7 @@ describe('custom-evm-networks.store', () => {
 		name: 'Gnosis',
 		rpcUrl: 'https://rpc.gnosischain.com',
 		currencySymbol: 'xDAI',
+		explorerUrl: 'https://gnosisscan.io',
 		env: 'mainnet'
 	};
 
@@ -97,6 +98,7 @@ describe('custom-evm-networks.store', () => {
 					name: 'Optimism',
 					rpcUrl: 'https://mainnet.optimism.io',
 					currencySymbol: 'ETH',
+					explorerUrl: 'https://optimistic.etherscan.io',
 					env: 'mainnet'
 				},
 				{
@@ -104,6 +106,7 @@ describe('custom-evm-networks.store', () => {
 					name: 'Optimism duplicate',
 					rpcUrl: 'https://other.example',
 					currencySymbol: 'ETH',
+					explorerUrl: 'https://other-explorer.example',
 					env: 'mainnet'
 				}
 			]);
@@ -121,6 +124,7 @@ describe('custom-evm-networks.store', () => {
 					name: 'Optimism',
 					rpcUrl: 'https://mainnet.optimism.io',
 					currencySymbol: 'ETH',
+					explorerUrl: 'https://optimistic.etherscan.io',
 					env: 'mainnet'
 				}
 			]);
@@ -293,7 +297,7 @@ describe('custom-evm-networks.store', () => {
 						name: 'Gnosis',
 						rpcUrl: 'https://rpc.gnosischain.com',
 						currencySymbol: 'xDAI',
-						explorerUrl: undefined,
+						explorerUrl: 'https://gnosisscan.io',
 						iconUrl: undefined,
 						env: 'mainnet'
 					}
