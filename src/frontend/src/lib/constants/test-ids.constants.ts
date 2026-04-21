@@ -96,6 +96,7 @@ export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
 export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
+export const SETTINGS_ADD_CUSTOM_NETWORK_BUTTON = 'settings-add-custom-network-button';
 
 export const SETTINGS_NETWORKS_MODAL = 'settings-networks-modal';
 export const SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX = 'settings-networks-modal-testnet-checkbox';

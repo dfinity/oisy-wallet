@@ -500,6 +500,9 @@ interface I18nSettings {
 		enable_testnets: string;
 		active_networks: string;
 		active_networks_description: string;
+		add_custom_network: string;
+		add_custom_network_button: string;
+		add_custom_network_description: string;
 		enable_network: string;
 		disable_network: string;
 		appearance: string;

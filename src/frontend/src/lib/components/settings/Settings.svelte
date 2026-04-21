@@ -13,7 +13,8 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import {
 		SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
-		SETTINGS_ADDRESS_LABEL
+		SETTINGS_ADDRESS_LABEL,
+		SETTINGS_ADD_CUSTOM_NETWORK_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { hideMicroTransactions, userProfileVersion } from '$lib/derived/user-profile.derived';
@@ -166,6 +167,26 @@
 
 		{#snippet info()}
 			{replaceOisyPlaceholders($i18n.settings.text.active_networks_description)}
+		{/snippet}
+	</SettingsCardItem>
+
+	<SettingsCardItem>
+		{#snippet key()}
+			{$i18n.settings.text.add_custom_network}
+		{/snippet}
+
+		{#snippet value()}
+			<Button
+				link
+				onclick={() => openSettingsModal(SettingsModalEnum.ADD_CUSTOM_NETWORK)}
+				testId={SETTINGS_ADD_CUSTOM_NETWORK_BUTTON}
+			>
+				{$i18n.settings.text.add_custom_network_button} >
+			</Button>
+		{/snippet}
+
+		{#snippet info()}
+			{replaceOisyPlaceholders($i18n.settings.text.add_custom_network_description)}
 		{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
