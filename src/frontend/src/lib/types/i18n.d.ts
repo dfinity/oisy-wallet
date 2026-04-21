@@ -545,6 +545,52 @@ interface I18nNetworks {
 	manage: string;
 }
 
+interface I18nCustom_networks {
+	text: {
+		add_title: string;
+		review_title: string;
+		form_intro: string;
+		review_intro: string;
+		mainnet: string;
+		testnet: string;
+	};
+	field: {
+		name: string;
+		name_placeholder: string;
+		chain_id: string;
+		chain_id_placeholder: string;
+		rpc_url: string;
+		rpc_url_placeholder: string;
+		currency_symbol: string;
+		currency_symbol_placeholder: string;
+		explorer_url: string;
+		explorer_url_placeholder: string;
+		icon_url: string;
+		icon_url_placeholder: string;
+		environment: string;
+	};
+	button: {
+		cancel: string;
+		verify: string;
+		back: string;
+		add: string;
+	};
+	error: {
+		name_required: string;
+		chain_id_required: string;
+		chain_id_invalid: string;
+		rpc_url_required: string;
+		rpc_url_invalid: string;
+		currency_symbol_required: string;
+		explorer_url_required: string;
+		explorer_url_invalid: string;
+		icon_url_invalid: string;
+		chain_mismatch: string;
+		rpc_unreachable: string;
+		duplicate: string;
+	};
+}
+
 interface I18nReceive {
 	text: { receive: string; address: string; receive_token: string };
 	icp: {
@@ -1727,6 +1773,7 @@ interface I18n {
 	settings: I18nSettings;
 	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;
+	custom_networks: I18nCustom_networks;
 	receive: I18nReceive;
 	send: I18nSend;
 	mint: I18nMint;

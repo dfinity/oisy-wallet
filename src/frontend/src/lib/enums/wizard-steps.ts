@@ -75,6 +75,11 @@ export enum WizardStepsManageTokens {
 	SAVING = 'Saving'
 }
 
+export enum WizardStepsAddCustomNetwork {
+	FORM = 'Form',
+	REVIEW = 'Review'
+}
+
 export enum WizardStepsStake {
 	STAKE = 'Stake',
 	REVIEW = 'Review',

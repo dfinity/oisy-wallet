@@ -172,6 +172,19 @@ export const MANAGE_TOKENS_IC_ADD_NFT_INPUT = 'manage-tokens-ic-add-nft-input';
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
 
+export const ADD_CUSTOM_NETWORK_MODAL = 'add-custom-network-modal';
+export const ADD_CUSTOM_NETWORK_INPUT_NAME = 'add-custom-network-input-name';
+export const ADD_CUSTOM_NETWORK_INPUT_CHAIN_ID = 'add-custom-network-input-chain-id';
+export const ADD_CUSTOM_NETWORK_INPUT_RPC_URL = 'add-custom-network-input-rpc-url';
+export const ADD_CUSTOM_NETWORK_INPUT_CURRENCY_SYMBOL = 'add-custom-network-input-currency-symbol';
+export const ADD_CUSTOM_NETWORK_INPUT_EXPLORER_URL = 'add-custom-network-input-explorer-url';
+export const ADD_CUSTOM_NETWORK_INPUT_ICON_URL = 'add-custom-network-input-icon-url';
+export const ADD_CUSTOM_NETWORK_ENV_MAINNET = 'add-custom-network-env-mainnet';
+export const ADD_CUSTOM_NETWORK_ENV_TESTNET = 'add-custom-network-env-testnet';
+export const ADD_CUSTOM_NETWORK_VERIFY_BUTTON = 'add-custom-network-verify-button';
+export const ADD_CUSTOM_NETWORK_CONFIRM_BUTTON = 'add-custom-network-confirm-button';
+export const ADD_CUSTOM_NETWORK_VERIFICATION_BANNER = 'add-custom-network-verification-banner';
+
 export const THEME_SELECTOR_CARD = 'theme-selector-card';
 
 export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';
