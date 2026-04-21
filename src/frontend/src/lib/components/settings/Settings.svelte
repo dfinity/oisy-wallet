@@ -24,6 +24,7 @@
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { hiddenMicroTransactionsResetStore } from '$lib/stores/settings.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { emit } from '$lib/utils/events.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -48,6 +49,14 @@
 				identity: $authIdentity,
 				hideMicroTransactions: !$hideMicroTransactions,
 				currentUserVersion: $userProfileVersion
+			});
+
+			// Reset the local override so the `HiddenMicroTransactionsInfoBox` reappears after the
+			// user switches the feature. The backend keeps the dismissed notification,
+			// but this flag overrides it until the user dismisses the info box again.
+			hiddenMicroTransactionsResetStore.set({
+				key: 'hidden-micro-transactions-reset',
+				value: { enabled: true }
 			});
 
 			emit({ message: 'oisyRefreshUserProfile' });
