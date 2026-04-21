@@ -1,9 +1,13 @@
-import { PersistedCustomEvmNetworkListSchema } from '$eth/schema/custom-network.schema';
+import {
+	CustomEvmNetworkInputSchema,
+	CustomEvmNetworkSchema,
+	PersistedCustomEvmNetworkListSchema
+} from '$eth/schema/custom-network.schema';
 import type { CustomEvmNetwork, PersistedCustomEvmNetwork } from '$eth/types/custom-network';
 import type { NetworkId } from '$lib/types/network';
 import { del as delStorage, get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
-import { writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export const CUSTOM_EVM_NETWORKS_STORAGE_KEY = 'custom-evm-networks';
 
@@ -44,21 +48,31 @@ const fromPersisted = (persisted: PersistedCustomEvmNetwork): CustomEvmNetwork =
 	};
 };
 
+const dedupeByChainId = (networks: PersistedCustomEvmNetwork[]): PersistedCustomEvmNetwork[] => {
+	const seen = new Set<string>();
+	return networks.filter(({ chainId }) => {
+		if (seen.has(chainId)) {
+			return false;
+		}
+		seen.add(chainId);
+		return true;
+	});
+};
+
 const loadFromStorage = (): CustomEvmNetwork[] => {
 	const raw = getStorage<unknown>({ key: CUSTOM_EVM_NETWORKS_STORAGE_KEY });
 	const parsed = PersistedCustomEvmNetworkListSchema.safeParse(raw ?? []);
 	if (!parsed.success) {
 		return [];
 	}
-	return parsed.data.map(fromPersisted);
+	return dedupeByChainId(parsed.data).map(fromPersisted);
 };
 
 export type CustomEvmNetworkInput = Omit<CustomEvmNetwork, 'id'>;
 
 export type CustomEvmNetworkPatch = Partial<Omit<CustomEvmNetwork, 'id' | 'chainId'>>;
 
-export interface CustomEvmNetworksStore {
-	subscribe: (run: (value: CustomEvmNetwork[]) => void) => () => void;
+export interface CustomEvmNetworksStore extends Readable<CustomEvmNetwork[]> {
 	add: (network: CustomEvmNetworkInput) => void;
 	update: (params: { chainId: bigint; patch: CustomEvmNetworkPatch }) => void;
 	remove: (params: { chainId: bigint }) => void;
@@ -88,7 +102,15 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 						`A custom EVM network with chainId ${input.chainId} has already been added.`
 					);
 				}
-				const next: CustomEvmNetwork[] = [...current, { ...input, id: toNetworkId(input.chainId) }];
+				// Validate the raw input (without `id`) so that invalid chainIds
+				// don't populate the networkIdCache. The derived `id` is deterministic
+				// given a valid chainId, so it does not require a second pass.
+				const parsed = CustomEvmNetworkInputSchema.safeParse(input);
+				if (!parsed.success) {
+					throw new Error(`Invalid custom EVM network: ${parsed.error.message}`);
+				}
+				const entry: CustomEvmNetwork = { ...parsed.data, id: toNetworkId(parsed.data.chainId) };
+				const next: CustomEvmNetwork[] = [...current, entry];
 				persist(next);
 				return next;
 			});
@@ -99,8 +121,19 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 				if (index === -1) {
 					throw new Error(`No custom EVM network with chainId ${chainId} exists; cannot update.`);
 				}
+				const existing = current[index];
+				const merged: CustomEvmNetwork = {
+					...existing,
+					...patch,
+					id: existing.id,
+					chainId: existing.chainId
+				};
+				const parsed = CustomEvmNetworkSchema.safeParse(merged);
+				if (!parsed.success) {
+					throw new Error(`Invalid custom EVM network update: ${parsed.error.message}`);
+				}
 				const next = [...current];
-				next[index] = { ...next[index], ...patch };
+				next[index] = parsed.data;
 				persist(next);
 				return next;
 			});
@@ -108,6 +141,9 @@ export const initCustomEvmNetworksStore = (): CustomEvmNetworksStore => {
 		remove: ({ chainId }) => {
 			updateWritable((current) => {
 				const next = current.filter((n) => n.chainId !== chainId);
+				if (next.length === current.length) {
+					return current;
+				}
 				persist(next);
 				return next;
 			});

@@ -1,9 +1,24 @@
 import { NetworkEnvironmentSchema, NetworkIdSchema } from '$lib/schema/network.schema';
 import { UrlSchema } from '$lib/validation/url.validation';
+import { createUrlSchema } from '@dfinity/zod-schemas';
 import * as z from 'zod';
 
-const BigIntStringSchema = z.string().regex(/^\d+$/, {
-	message: 'Must be a non-negative integer string'
+const BigIntStringSchema = z.string().regex(/^[1-9]\d*$/, {
+	message: 'Must be a positive integer string'
+});
+
+/**
+ * URL schema for JSON-RPC endpoints.
+ *
+ * The generic `UrlSchema` permits `ipfs:` because it doubles as the validator
+ * for asset URLs (icons, metadata). That is not valid for an RPC endpoint,
+ * which must speak HTTPS or secure WebSocket. Plain `http:` and `ws:` are
+ * rejected in line with the existing `allowHttpLocally: false` stance on the
+ * generic schema — we do not accept unencrypted remote endpoints even in dev.
+ */
+const RpcUrlSchema = createUrlSchema({
+	additionalProtocols: ['wss:'],
+	allowHttpLocally: false
 });
 
 /**
@@ -18,12 +33,19 @@ export const CustomEvmNetworkSchema = z.object({
 	id: NetworkIdSchema,
 	chainId: z.bigint().positive(),
 	name: z.string().min(1),
-	rpcUrl: UrlSchema,
+	rpcUrl: RpcUrlSchema,
 	currencySymbol: z.string().min(1),
 	explorerUrl: UrlSchema.optional(),
 	iconUrl: UrlSchema.optional(),
 	env: NetworkEnvironmentSchema
 });
+
+/**
+ * Input shape for `customEvmNetworksStore.add`: the full network minus the
+ * derived `NetworkId`. Validated before the id is computed so that invalid
+ * inputs don't populate the module-level `networkIdCache`.
+ */
+export const CustomEvmNetworkInputSchema = CustomEvmNetworkSchema.omit({ id: true });
 
 /**
  * Serialized representation persisted in localStorage.
@@ -35,7 +57,7 @@ export const CustomEvmNetworkSchema = z.object({
 export const PersistedCustomEvmNetworkSchema = z.object({
 	chainId: BigIntStringSchema,
 	name: z.string().min(1),
-	rpcUrl: UrlSchema,
+	rpcUrl: RpcUrlSchema,
 	currencySymbol: z.string().min(1),
 	explorerUrl: UrlSchema.optional(),
 	iconUrl: UrlSchema.optional(),
