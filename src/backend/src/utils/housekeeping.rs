@@ -129,7 +129,7 @@ pub(crate) fn start_periodic_housekeeping_timers() {
     set_timer(immediate, spawn_housekeeping_if_idle);
 
     // Then periodically:
-    let hour = Duration::from_secs(60 * 60);
+    let hour = Duration::from_hours(1);
     let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
 }
 

@@ -12,6 +12,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
 		SETTINGS_ADDRESS_LABEL,
@@ -138,7 +139,7 @@
 
 				<ExternalLink
 					ariaLabel={$i18n.settings.text.learn_more}
-					href="https://support.oisy.com/hc/hidden-transactions"
+					href={OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL}
 					iconVisible={false}>{$i18n.settings.text.learn_more}</ExternalLink
 				>
 			</span>
