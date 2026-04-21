@@ -11,6 +11,7 @@
 	} from '$lib/derived/user-profile.derived';
 	import { dismissNotifications } from '$lib/services/notification.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { hiddenMicroTransactionsResetStore } from '$lib/stores/settings.store';
 	import { isSimpleNotificationDismissed } from '$lib/utils/notification.utils';
 
 	let temporaryDismissedNotifications = $state<DismissedNotification[]>([]);
@@ -20,12 +21,17 @@
 		...temporaryDismissedNotifications
 	]);
 
-	let dismissed = $derived(
+	let backendDismissed = $derived(
 		isSimpleNotificationDismissed({
 			kind: 'HiddenMicroTransactions',
 			dismissedNotifications: allDismissedNotifications
 		})
 	);
+
+	// When the user toggles the "hide micro transactions" feature, we re-show the
+	// info box even if the backend still has the notification stored as dismissed. The override
+	// is cleared as soon as the user dismisses the info box again.
+	let dismissed = $derived(backendDismissed && !$hiddenMicroTransactionsResetStore.enabled);
 
 	let visible = $derived($hideMicroTransactions && !dismissed);
 
@@ -40,6 +46,11 @@
 		];
 
 		temporaryDismissedNotifications = [...temporaryDismissedNotifications, ...notifications];
+
+		hiddenMicroTransactionsResetStore.set({
+			key: 'hidden-micro-transactions-reset',
+			value: { enabled: false }
+		});
 
 		dismissNotifications({
 			notifications,
