@@ -33,10 +33,16 @@ const validInput: CustomEvmNetworkInput = {
  * Fill in the six required form fields with a valid Optimism fixture. The
  * individual tests override specific fields as needed — e.g. to leave one
  * blank to trigger a required-field error.
+ *
+ * The parameter is typed structurally rather than as
+ * `ReturnType<typeof render>` because the generic default of
+ * `RenderResult<Component | SvelteComponent, Queries>` makes `container`
+ * incompatible with the `Queries` index signature when `tsc` runs over
+ * `tsconfig.spec.json`.
  */
-const fillForm = async (container: ReturnType<typeof render>) => {
+const fillForm = async (rendered: { getByTestId: (testId: string) => HTMLElement }) => {
 	const set = async ({ testId, value }: { testId: string; value: string }) =>
-		await fireEvent.input(container.getByTestId(testId), { target: { value } });
+		await fireEvent.input(rendered.getByTestId(testId), { target: { value } });
 	await set({ testId: ADD_CUSTOM_NETWORK_INPUT_NAME, value: validInput.name });
 	await set({ testId: ADD_CUSTOM_NETWORK_INPUT_CHAIN_ID, value: validInput.chainId.toString() });
 	await set({ testId: ADD_CUSTOM_NETWORK_INPUT_RPC_URL, value: validInput.rpcUrl });

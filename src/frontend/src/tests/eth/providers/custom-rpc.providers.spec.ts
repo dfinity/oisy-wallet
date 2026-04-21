@@ -29,6 +29,7 @@ const buildNetwork = (overrides: Partial<CustomEvmNetwork> = {}): CustomEvmNetwo
 	name: 'Optimism',
 	rpcUrl: 'https://mainnet.optimism.io',
 	currencySymbol: 'ETH',
+	explorerUrl: 'https://optimistic.etherscan.io',
 	env: 'mainnet',
 	...overrides
 });
