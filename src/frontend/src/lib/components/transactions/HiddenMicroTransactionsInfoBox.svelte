@@ -28,7 +28,7 @@
 		})
 	);
 
-	// OISY-2876: when the user toggles the "hide micro transactions" feature, we re-show the
+	// When the user toggles the "hide micro transactions" feature, we re-show the
 	// info box even if the backend still has the notification stored as dismissed. The override
 	// is cleared as soon as the user dismisses the info box again.
 	let dismissed = $derived(backendDismissed && !$hiddenMicroTransactionsResetStore.enabled);

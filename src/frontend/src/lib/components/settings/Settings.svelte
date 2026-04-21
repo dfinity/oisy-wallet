@@ -52,7 +52,7 @@
 			});
 
 			// Reset the local override so the `HiddenMicroTransactionsInfoBox` reappears after the
-			// user switches the feature (OISY-2876). The backend keeps the dismissed notification,
+			// user switches the feature. The backend keeps the dismissed notification,
 			// but this flag overrides it until the user dismisses the info box again.
 			hiddenMicroTransactionsResetStore.set({
 				key: 'hidden-micro-transactions-reset',
