@@ -1,5 +1,5 @@
+import { ethProviders } from '$eth/providers/eth.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
-import { infuraProviders } from '$eth/providers/infura.providers';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc4626Token } from '$eth/types/erc4626';
@@ -45,7 +45,7 @@ const loadEthBalance = async ({
 	}
 
 	try {
-		const { balance } = infuraProviders(networkId);
+		const { balance } = ethProviders(networkId);
 		const data = await balance(address);
 
 		balancesStore.batchSet({ id: tokenId, data: { data, certified: false } });

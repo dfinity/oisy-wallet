@@ -2,7 +2,7 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { infuraProviders } from '$eth/providers/infura.providers';
+	import { ethProviders } from '$eth/providers/eth.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -22,7 +22,7 @@
 
 	const loadCurrentBlockNumber = async () => {
 		try {
-			const { getBlockNumber } = infuraProviders(token.network.id);
+			const { getBlockNumber } = ethProviders(token.network.id);
 			currentBlockNumber = await getBlockNumber();
 		} catch (err: unknown) {
 			disconnect();

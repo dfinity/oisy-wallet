@@ -2,9 +2,9 @@ import { CKERC20_FEE } from '$eth/constants/ckerc20.constants';
 import { CKETH_FEE } from '$eth/constants/cketh.constants';
 import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
+import { ethProviders, type EthProvider } from '$eth/providers/eth.providers';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
-import { infuraProviders, type InfuraProvider } from '$eth/providers/infura.providers';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -111,7 +111,7 @@ export const getEthFeeDataWithProvider = async ({
 	to: EthAddress;
 }): Promise<{
 	feeData: Omit<TransactionFeeData, 'gas'>;
-	provider: InfuraProvider;
+	provider: EthProvider;
 	params: GetFeeData;
 }> => {
 	const params: GetFeeData = {
@@ -119,7 +119,7 @@ export const getEthFeeDataWithProvider = async ({
 		from: mapAddressStartsWith0x(from)
 	};
 
-	const provider = infuraProviders(networkId);
+	const provider = ethProviders(networkId);
 	const { getFeeData } = provider;
 
 	const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();

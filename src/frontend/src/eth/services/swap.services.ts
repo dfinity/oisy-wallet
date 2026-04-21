@@ -1,5 +1,5 @@
 import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
-import { infuraProviders } from '$eth/providers/infura.providers';
+import { ethProviders } from '$eth/providers/eth.providers';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import { getNonce } from '$eth/services/nonce.services';
 import type { SwapParams } from '$eth/types/swap';
@@ -61,7 +61,7 @@ const sendTransaction = async ({
 	}): Promise<TransactionResponse> => {
 	const { id: networkId } = sourceNetwork;
 
-	const { sendTransaction } = infuraProviders(networkId);
+	const { sendTransaction } = ethProviders(networkId);
 
 	const transactionParams = prepareTransactionParams({
 		maxPriorityFeePerGas,
