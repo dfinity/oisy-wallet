@@ -27,6 +27,16 @@ export const showSpamStore = initStorageStore<SettingsData>({
 	defaultValue: { enabled: false }
 });
 
+// Local override that re-shows the `HiddenMicroTransactionsInfoBox` after the user toggles
+// the "hide micro transactions" feature, even if the backend still has the notification
+// stored as dismissed. The backend has no endpoint to remove a dismissed notification, so
+// this flag takes precedence over the backend-dismissed state. It is cleared when the user
+// dismisses the info box again.
+export const hiddenMicroTransactionsResetStore = initStorageStore<SettingsData>({
+	key: 'hidden-micro-transactions-reset',
+	defaultValue: { enabled: false }
+});
+
 export const tokensSortStore = initStorageStore<TokensSortingType>({
 	key: 'tokens-sort',
 	defaultValue: {
