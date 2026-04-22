@@ -39,7 +39,7 @@
 	};
 </script>
 
-<div data-app-view class="fixed inset-0 z-4 flex h-full w-full flex-col bg-page">
+<div class="fixed inset-0 z-4 flex h-full w-full flex-col bg-page" data-app-view>
 	<div class="fixed inset-0 -z-10 bg-overlay-page-30 backdrop-blur-xs">
 		<Responsive up="xl">
 			{#await import(`$lib/assets/lockpage-assets/lock-image-1440-${$themeStore ?? 'light'}.webp`) then { default: src1440 }}
