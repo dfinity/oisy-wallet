@@ -769,11 +769,11 @@
 			"enable_beta_feature": "ベータ機能を有効化",
 			"disable_beta_feature": "ベータ機能を無効化",
 			"save_beta_feature_success": "ベータ機能の設定が保存されました。",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "非常に小さな価値のトランザクションを非表示にする",
+			"hide_micro_transactions_description": "非常に小さな価値のトランザクションは通常スパムであり、ユーザーを騙して有効なアドレスではなく送信者のアドレスをコピーさせることを目的としています。トランザクション一覧で非表示にすることを推奨します。",
+			"enable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を有効にする",
+			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
+			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1519,8 @@
 			"hex_data": "HEXデータ",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "接続済みアプリ",
+			"no_connected_apps": "現在接続されているアプリはありません。",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1957,7 +1957,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。"
 		},
 		"warning": {
 			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",
