@@ -999,7 +999,8 @@
 			"solana_insufficient_funds": "Saldo Twojego tokena jest niewystarczające do zrealizowania tej transakcji. Twoje saldo mogło się zmienić od ostatniego wyświetlenia.",
 			"solana_insufficient_funds_for_fee": "Twoje saldo SOL jest niewystarczające do pokrycia opłat transakcyjnych.",
 			"solana_insufficient_funds_for_rent": "Twoje saldo SOL jest niewystarczające do pokrycia czynszu wymaganego do utworzenia konta.",
-			"fee_calc_unsupported_standard": "Nie można obliczyć opłaty, ponieważ podany standard tokena nie jest obsługiwany."
+			"fee_calc_unsupported_standard": "Nie można obliczyć opłaty, ponieważ podany standard tokena nie jest obsługiwany.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {

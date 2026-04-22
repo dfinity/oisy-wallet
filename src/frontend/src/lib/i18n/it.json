@@ -999,7 +999,8 @@
 			"solana_insufficient_funds": "Il saldo del tuo token non è sufficiente per completare questa transazione. Il tuo saldo potrebbe essere cambiato dall'ultima volta che è stato visualizzato.",
 			"solana_insufficient_funds_for_fee": "Il tuo saldo SOL non è sufficiente per coprire le commissioni di transazione.",
 			"solana_insufficient_funds_for_rent": "Il tuo saldo SOL non è sufficiente per coprire l'affitto richiesto per la creazione dell'account.",
-			"fee_calc_unsupported_standard": "Impossibile calcolare la commissione poiché lo standard token fornito non è supportato."
+			"fee_calc_unsupported_standard": "Impossibile calcolare la commissione poiché lo standard token fornito non è supportato.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {

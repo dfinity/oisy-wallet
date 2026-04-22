@@ -999,7 +999,8 @@
 			"solana_insufficient_funds": "El saldo de su token no es suficiente para completar esta transacción. Su saldo puede haber cambiado desde la última vez que se mostró.",
 			"solana_insufficient_funds_for_fee": "Su saldo de SOL no es suficiente para cubrir las tarifas de la transacción.",
 			"solana_insufficient_funds_for_rent": "Su saldo de SOL no es suficiente para cubrir el alquiler requerido para la creación de la cuenta.",
-			"fee_calc_unsupported_standard": "No se pudo calcular la tarifa porque el estándar de token proporcionado no es compatible."
+			"fee_calc_unsupported_standard": "No se pudo calcular la tarifa porque el estándar de token proporcionado no es compatible.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {

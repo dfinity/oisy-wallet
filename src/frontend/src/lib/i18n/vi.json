@@ -999,7 +999,8 @@
 			"solana_insufficient_funds": "Số dư token của bạn không đủ để hoàn tất giao dịch này. Số dư của bạn có thể đã thay đổi kể từ lần hiển thị cuối cùng.",
 			"solana_insufficient_funds_for_fee": "Số dư SOL của bạn không đủ để trang trải phí giao dịch.",
 			"solana_insufficient_funds_for_rent": "Số dư SOL của bạn không đủ để trang trải khoản thuê cần thiết cho việc tạo tài khoản.",
-			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
+			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {

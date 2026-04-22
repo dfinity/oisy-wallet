@@ -999,7 +999,8 @@
 			"solana_insufficient_funds": "Ihr Token-Guthaben reicht nicht aus, um diese Transaktion abzuschließen. Ihr Guthaben kann sich seit der letzten Anzeige geändert haben.",
 			"solana_insufficient_funds_for_fee": "Ihr SOL-Guthaben reicht nicht aus, um die Transaktionsgebühren zu decken.",
 			"solana_insufficient_funds_for_rent": "Ihr SOL-Guthaben reicht nicht aus, um die für die Kontoerstellung erforderliche Miete zu decken.",
-			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird."
+			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {

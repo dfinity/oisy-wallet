@@ -999,7 +999,8 @@
 			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",
 			"solana_insufficient_funds_for_fee": "トランザクション手数料を賄うためのSOL残高が不足しています。",
 			"solana_insufficient_funds_for_rent": "アカウント作成に必要なレントを賄うためのSOL残高が不足しています。",
-			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。"
+			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
