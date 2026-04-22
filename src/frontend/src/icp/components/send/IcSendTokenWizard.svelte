@@ -64,7 +64,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendToken, sendTokenSymbol } =
+	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendMemo } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
@@ -171,6 +171,7 @@
 					unitName: $sendTokenDecimals
 				}),
 				identity: $authIdentity,
+				memo: $sendMemo || undefined,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
 			};
 
