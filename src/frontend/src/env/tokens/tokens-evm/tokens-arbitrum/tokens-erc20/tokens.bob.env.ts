@@ -4,7 +4,6 @@ import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import bob from '/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png';
 
 export const BOB_DECIMALS = 8;
 
@@ -21,7 +20,7 @@ export const BOB_TOKEN: RequiredEvmErc20Token = {
 	name: 'BOB',
 	symbol: BOB_SYMBOL,
 	decimals: BOB_DECIMALS,
-	icon: bob,
+	icon: '/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png',
 	address: '0xecc5f868AdD75F4ff9FD00bbBDE12C35BA2C9C89',
 	groupData: BOB_TOKEN_GROUP
 };
