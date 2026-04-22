@@ -927,6 +927,7 @@
 		},
 		"placeholder": {
 			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
 			"enter_recipient_address": "أدخل عنوان المستلم، الاسم أو الاسم المستعار",
 			"enter_wallet_address": "أدخل عنوان المحفظة، الاسم أو الاسم المستعار",
@@ -954,6 +955,7 @@
 			"unknown_cketh": "لا يمكن استرداد توكن ckETH.",
 			"destination_address_invalid": "عنوان الوجهة غير صالح.",
 			"amount_invalid": "المبلغ غير صالح.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "أموال غير كافية للغاز",
 			"insufficient_funds_for_amount": "أموال غير كافية للمبلغ",
@@ -1593,7 +1595,8 @@
 			"for": "",
 			"for_copied": "",
 			"expiration": "",
-			"approve_label": ""
+			"approve_label": "",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "تم التأكيد",

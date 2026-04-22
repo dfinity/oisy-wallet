@@ -927,6 +927,7 @@
 		},
 		"placeholder": {
 			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "Введите публичный адрес (0x), имя или псевдоним",
 			"enter_recipient_address": "Введите адрес получателя, имя или псевдоним",
 			"enter_wallet_address": "Введите адрес кошелька, имя или псевдоним",
@@ -954,6 +955,7 @@
 			"unknown_cketh": "Токен ckETH не может быть получен.",
 			"destination_address_invalid": "Адрес получателя недействителен.",
 			"amount_invalid": "Сумма недействительна.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Недостаточно средств для газа",
 			"insufficient_funds_for_amount": "Недостаточно средств для этой суммы",
@@ -1593,7 +1595,8 @@
 			"for": "Для",
 			"for_copied": "Скопировать",
 			"expiration": "Истечение срока",
-			"approve_label": "Одобрить"
+			"approve_label": "Одобрить",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "Подтверждено",

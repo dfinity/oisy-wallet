@@ -927,6 +927,7 @@
 		},
 		"placeholder": {
 			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "Saisir l'adresse publique (0x), le nom ou l'alias",
 			"enter_recipient_address": "Saisir l'adresse du destinataire, le nom ou l'alias",
 			"enter_wallet_address": "Saisir l'adresse du portefeuille, le nom ou l'alias",
@@ -954,6 +955,7 @@
 			"unknown_cketh": "Le token ckETH ne peut pas être récupéré.",
 			"destination_address_invalid": "L'adresse de destination est invalide.",
 			"amount_invalid": "Le montant est invalide.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Fonds insuffisants pour le gaz",
 			"insufficient_funds_for_amount": "Fonds insuffisants pour le montant",
@@ -1593,7 +1595,8 @@
 			"for": "Pour",
 			"for_copied": "Adresse du dépensier copiée dans le presse-papiers.",
 			"expiration": "Expiration",
-			"approve_label": "Approuver $approveAmount"
+			"approve_label": "Approuver $approveAmount",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "Confirmé",

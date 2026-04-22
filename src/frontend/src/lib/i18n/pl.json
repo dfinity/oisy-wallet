@@ -927,6 +927,7 @@
 		},
 		"placeholder": {
 			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "Wprowadź adres publiczny (0x), nazwę lub alias",
 			"enter_recipient_address": "Wprowadź adres odbiorcy, nazwę lub alias",
 			"enter_wallet_address": "Wprowadź adres portfela, nazwę lub alias",
@@ -954,6 +955,7 @@
 			"unknown_cketh": "Nie można pobrać tokena ckETH.",
 			"destination_address_invalid": "Adres docelowy jest nieprawidłowy.",
 			"amount_invalid": "Kwota jest nieprawidłowa.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Niewystarczające środki na gaz",
 			"insufficient_funds_for_amount": "Niewystarczające środki na kwotę",
@@ -1593,7 +1595,8 @@
 			"for": "",
 			"for_copied": "",
 			"expiration": "",
-			"approve_label": ""
+			"approve_label": "",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "Potwierdzono",

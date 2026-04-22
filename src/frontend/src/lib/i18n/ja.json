@@ -927,6 +927,7 @@
 		},
 		"placeholder": {
 			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
@@ -954,6 +955,7 @@
 			"unknown_cketh": "ckETHトークンは取得できません。",
 			"destination_address_invalid": "送信先アドレスが無効です。",
 			"amount_invalid": "金額が無効です。",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています。",
 			"insufficient_funds_for_amount": "送金額に対して残高が不足しています。",
@@ -1593,7 +1595,8 @@
 			"for": "承認先",
 			"for_copied": "承認先アドレスをクリップボードにコピーしました。",
 			"expiration": "有効期限",
-			"approve_label": "$approveAmount を承認"
+			"approve_label": "$approveAmount を承認",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "確認済み",

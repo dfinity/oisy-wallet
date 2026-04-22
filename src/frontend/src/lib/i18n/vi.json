@@ -927,6 +927,7 @@
 		},
 		"placeholder": {
 			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
@@ -954,6 +955,7 @@
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
 			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
 			"amount_invalid": "Số lượng không hợp lệ.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Không đủ tiền cho gas",
 			"insufficient_funds_for_amount": "Không đủ tiền cho số lượng",
@@ -1593,7 +1595,8 @@
 			"for": "",
 			"for_copied": "",
 			"expiration": "",
-			"approve_label": ""
+			"approve_label": "",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "Đã xác nhận",

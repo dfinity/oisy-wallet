@@ -927,6 +927,7 @@
 		},
 		"placeholder": {
 			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
@@ -954,6 +955,7 @@
 			"unknown_cketh": "无法获取 ckETH 代币。",
 			"destination_address_invalid": "目标地址无效。",
 			"amount_invalid": "金额无效。",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "燃料费不足",
 			"insufficient_funds_for_amount": "金额不足",
@@ -1593,7 +1595,8 @@
 			"for": "用于",
 			"for_copied": "支出方地址已复制到剪贴板。",
 			"expiration": "过期时间",
-			"approve_label": "批准 $approveAmount"
+			"approve_label": "批准 $approveAmount",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "已确认",

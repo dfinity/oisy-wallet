@@ -662,6 +662,7 @@ interface I18nSend {
 	};
 	placeholder: {
 		enter_memo: string;
+		enter_memo_nat64: string;
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
@@ -689,6 +690,7 @@ interface I18nSend {
 		unknown_cketh: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
+		memo_invalid_nat64: string;
 		insufficient_funds_verbose_btc: string;
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
@@ -1270,6 +1272,7 @@ interface I18nTransaction {
 		for_copied: string;
 		expiration: string;
 		approve_label: string;
+		memo: string;
 	};
 	status: {
 		confirmed: string;

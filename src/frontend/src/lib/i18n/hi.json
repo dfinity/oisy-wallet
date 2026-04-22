@@ -927,6 +927,7 @@
 		},
 		"placeholder": {
 			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "सार्वजनिक पता (0x), नाम या उपनाम दर्ज करें",
 			"enter_recipient_address": "प्राप्तकर्ता का पता, नाम या उपनाम दर्ज करें",
 			"enter_wallet_address": "वॉलेट पता, नाम या उपनाम दर्ज करें",
@@ -954,6 +955,7 @@
 			"unknown_cketh": "ckETH टोकन पुनः प्राप्त नहीं किया जा सकता है।",
 			"destination_address_invalid": "गंतव्य पता अमान्य है।",
 			"amount_invalid": "राशि अमान्य है।",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "गैस के लिए अपर्याप्त धन",
 			"insufficient_funds_for_amount": "राशि के लिए अपर्याप्त धन",
@@ -1593,7 +1595,8 @@
 			"for": "",
 			"for_copied": "",
 			"expiration": "",
-			"approve_label": ""
+			"approve_label": "",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "पुष्टि",
