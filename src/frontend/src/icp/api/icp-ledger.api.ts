@@ -55,7 +55,7 @@ export const transfer = async ({
 	return transfer({
 		to: AccountIdentifier.fromHex(to),
 		amount,
-		memo
+		...(memo !== undefined ? { memo } : {})
 	});
 };
 
