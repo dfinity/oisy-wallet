@@ -920,6 +920,7 @@
 			"contacts_empty_state_title": "你的联系人将显示在此处",
 			"contacts_empty_state_description": "你似乎还没有添加联系人",
 			"send_review_subtitle": "你将发送",
+			"memo": "",
 			"no_nfts_found": "未找到 NFT",
 			"no_nfts_found_desc": "请调整搜索条件或网络以查找你的 NFT",
 			"select_nft": "选择 NFT"
@@ -928,6 +929,7 @@
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
+			"enter_memo": "",
 			"select_network": "选择网络",
 			"search_nfts": "搜索 NFT"
 		},

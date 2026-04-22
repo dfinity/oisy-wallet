@@ -920,6 +920,7 @@
 			"contacts_empty_state_title": "Deine Kontakte werden hier angezeigt",
 			"contacts_empty_state_description": "Es sieht so aus, als hättest du noch keine Kontakte hinzugefügt",
 			"send_review_subtitle": "Du sendest",
+			"memo": "",
 			"no_nfts_found": "Keine NFTs gefunden",
 			"no_nfts_found_desc": "Passe die Suche oder das Netzwerk an um deine NFTs zu finden",
 			"select_nft": "NFT auswählen"
@@ -928,6 +929,7 @@
 			"enter_eth_address": "Gib öffentliche Adresse (0x), Name oder Alias ein",
 			"enter_recipient_address": "Gib Empfängeradresse, Name oder Alias ein",
 			"enter_wallet_address": "Gib Wallet-Adresse, Name oder Alias ein",
+			"enter_memo": "",
 			"select_network": "Netzwerk auswählen",
 			"search_nfts": "NFTs suchen"
 		},

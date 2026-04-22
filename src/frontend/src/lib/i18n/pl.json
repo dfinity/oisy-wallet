@@ -920,6 +920,7 @@
 			"contacts_empty_state_title": "Twoje kontakty pojawią się tutaj",
 			"contacts_empty_state_description": "Wygląda na to, że nie dodałeś jeszcze żadnych kontaktów",
 			"send_review_subtitle": "Wysyłasz",
+			"memo": "",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
 			"select_nft": ""
@@ -928,6 +929,7 @@
 			"enter_eth_address": "Wprowadź adres publiczny (0x), nazwę lub alias",
 			"enter_recipient_address": "Wprowadź adres odbiorcy, nazwę lub alias",
 			"enter_wallet_address": "Wprowadź adres portfela, nazwę lub alias",
+			"enter_memo": "",
 			"select_network": "Wybierz sieć",
 			"search_nfts": ""
 		},
