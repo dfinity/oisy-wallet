@@ -17,16 +17,15 @@
 	interface Props {
 		destination?: string;
 		amount?: OptionAmount;
-		memo?: string;
 		selectedContact?: ContactUi;
 		nft?: Nft;
 		onBack: () => void;
 		onSend: () => void;
 	}
 
-	let { destination = '', amount, memo, selectedContact, nft, onBack, onSend }: Props = $props();
+	let { destination = '', amount, selectedContact, nft, onBack, onSend }: Props = $props();
 
-	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenStandard, sendMemo } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = $derived(
@@ -51,10 +50,10 @@
 	{/snippet}
 
 	{#snippet info()}
-		{#if nonNullish(memo) && memo.trim() !== ''}
+		{#if $sendMemo.trim() !== ''}
 			<ModalValue>
 				{#snippet label()}{$i18n.send.text.memo}{/snippet}
-				{#snippet mainValue()}{memo}{/snippet}
+				{#snippet mainValue()}{$sendMemo}{/snippet}
 			</ModalValue>
 		{/if}
 	{/snippet}

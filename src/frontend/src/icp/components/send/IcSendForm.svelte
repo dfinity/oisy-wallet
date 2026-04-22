@@ -17,7 +17,6 @@
 	interface Props {
 		amount: OptionAmount;
 		destination?: string;
-		memo?: string;
 		selectedContact?: ContactUi;
 		onBack: () => void;
 		onNext: () => void;
@@ -28,7 +27,6 @@
 	let {
 		amount = $bindable(),
 		destination = $bindable(''),
-		memo = $bindable(''),
 		selectedContact,
 		onBack,
 		onNext,
@@ -36,7 +34,13 @@
 		cancel
 	}: Props = $props();
 
-	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenStandard, sendMemo } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let memo = $state($sendMemo);
+
+	$effect(() => {
+		sendMemo.set(memo);
+	});
 
 	let amountError = $state<IcAmountAssertionError | undefined>();
 
