@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
-	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import { invalidIcpAddress } from '$icp/utils/account.utils';
+	import { isInvalidDestinationIc, isInvalidNat64Memo } from '$icp/utils/ic-send.utils';
+	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -52,7 +56,22 @@
 			})
 	);
 
-	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
+	// Classic ICP addresses use the nat64 memo (numeric). ICRC-style addresses accept any text.
+	let isClassicIcpAddress = $derived(
+		!isNullishOrEmpty(destination) &&
+			invalidIcrcAddress(destination) &&
+			!invalidIcpAddress(destination)
+	);
+
+	let memoError = $derived(
+		isClassicIcpAddress && memo.trim() !== '' && isInvalidNat64Memo(memo)
+			? $i18n.send.assertion.memo_invalid_nat64
+			: undefined
+	);
+
+	let invalid = $derived(
+		invalidDestination || nonNullish(amountError) || isNullish(amount) || nonNullish(memoError)
+	);
 </script>
 
 <SendForm
@@ -79,10 +98,17 @@
 			<label class="mb-1 block text-sm text-tertiary" for="memo">{$i18n.send.text.memo}</label>
 			<InputText
 				name="memo"
-				placeholder={$i18n.send.placeholder.enter_memo}
+				placeholder={isClassicIcpAddress
+					? $i18n.send.placeholder.enter_memo_nat64
+					: $i18n.send.placeholder.enter_memo}
 				required={false}
 				bind:value={memo}
 			/>
+			{#if nonNullish(memoError)}
+				<p class="mt-2 mb-0 text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
+					{memoError}
+				</p>
+			{/if}
 		</div>
 	{/snippet}
 </SendForm>

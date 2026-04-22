@@ -927,6 +927,7 @@
 		},
 		"placeholder": {
 			"enter_memo": "Optional memo",
+			"enter_memo_nat64": "Optional memo (0–18446744073709551615)",
 			"enter_eth_address": "Enter public address (0x), name or alias",
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
@@ -954,6 +955,7 @@
 			"unknown_cketh": "The ckETH token cannot be retrieved.",
 			"destination_address_invalid": "Destination address is invalid.",
 			"amount_invalid": "Amount is invalid.",
+			"memo_invalid_nat64": "Memo must be a whole number between 0 and 18446744073709551615.",
 			"insufficient_funds_verbose_btc": "The specified amount is higher than the amount you have available to send. Note that amounts from unconfirmed incoming Bitcoin can't be sent until confirmed.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
