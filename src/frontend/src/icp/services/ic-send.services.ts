@@ -109,6 +109,7 @@ export const sendIcrc = ({
 	to,
 	amount,
 	identity,
+	memo,
 	ledgerCanisterId,
 	progress
 }: IcSendParams): Promise<IcrcLedgerDid.BlockIndex> => {
@@ -121,11 +122,15 @@ export const sendIcrc = ({
 
 	progress?.(ProgressStepsSendIc.SEND);
 
+	const encodedMemo =
+		memo !== undefined && memo.trim() !== '' ? new TextEncoder().encode(memo) : undefined;
+
 	return transferIcrc({
 		identity,
 		ledgerCanisterId,
 		to: decodeIcrcAccount(to),
-		amount
+		amount,
+		memo: encodedMemo
 	});
 };
 
