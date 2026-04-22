@@ -230,7 +230,15 @@
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<IcSendProgress {sendProgressStep} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount bind:memo>
+		<IcSendForm
+			{onBack}
+			{onNext}
+			{onTokensList}
+			{selectedContact}
+			bind:destination
+			bind:amount
+			bind:memo
+		>
 			{#snippet cancel()}
 				<ButtonBack onclick={back} />
 			{/snippet}
