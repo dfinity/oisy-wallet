@@ -8,18 +8,22 @@
 
 	const cards = $derived([
 		{
+			id: 'asset_types',
 			icon: IconWallet,
 			label: $i18n.auth.text.asset_types
 		},
 		{
+			id: 'advanced_cryptography',
 			icon: IconShieldCheck,
 			label: $i18n.auth.text.advanced_cryptography
 		},
 		{
+			id: 'instant_and_private',
 			icon: IconSparkles,
 			label: $i18n.auth.text.instant_and_private
 		},
 		{
+			id: 'social_login',
 			icon: IconScanFace,
 			label: $i18n.auth.text.social_login,
 			extra: IconSocialLogin
@@ -28,7 +32,7 @@
 </script>
 
 <div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 1.5md:grid-cols-4">
-	{#each cards as { icon: IconCmp, label, extra: ExtraCmp } (label)}
+	{#each cards as { id, icon: IconCmp, label, extra: ExtraCmp } (id)}
 		<div
 			class="flex min-h-32 flex-col justify-between gap-4 rounded-xl border border-brand-subtle-10 bg-brand-subtle-10 py-4 pr-12 pl-4 text-primary backdrop-blur-md sm:min-h-44 sm:rounded-3xl"
 		>
