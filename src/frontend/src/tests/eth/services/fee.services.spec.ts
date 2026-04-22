@@ -1,7 +1,15 @@
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as infuraMod from '$eth/providers/infura.providers';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import { getEthFeeDataWithProvider } from '$eth/services/fee.services';
+import {
+	BSC_MIN_MAX_FEE_PER_GAS,
+	BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
+} from '$evm/bsc/constants/bsc.constants';
 import { ZERO } from '$lib/constants/app.constants';
 
 vi.mock('$eth/rest/infura.rest', () => ({
@@ -249,6 +257,100 @@ describe('eth-fee-data.services', () => {
 			expect(result.provider).toHaveProperty('getFeeData');
 			expect(result.provider).toHaveProperty('safeEstimateGas');
 			expect(result.provider).toHaveProperty('estimateGas');
+		});
+
+		describe('BSC gas fee floor', () => {
+			// Reproduces the staging error:
+			// "transaction underpriced: gas tip cap 100000000, minimum needed 1000000000"
+			// where both ethers.getFeeData() and the Infura Gas API returned values below
+			// BSC's 1 gwei minimum tip.
+			const lowTip = 100_000_000n; // 0.1 gwei
+			const lowMax = 500_000_000n; // 0.5 gwei
+
+			beforeEach(() => {
+				vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
+					getFeeData: async () =>
+						await new Promise((resolve) =>
+							resolve({
+								gasPrice: null,
+								maxFeePerGas: lowMax,
+								maxPriorityFeePerGas: lowTip
+							})
+						)
+				} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+
+				InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
+					maxFeePerGas: lowMax,
+					maxPriorityFeePerGas: lowTip
+				});
+			});
+
+			it('should apply the BSC mainnet fee floor when both sources return values below the minimum', async () => {
+				const result = await getEthFeeDataWithProvider({
+					networkId: BSC_MAINNET_NETWORK.id,
+					chainId: BSC_MAINNET_NETWORK.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(result.feeData.maxPriorityFeePerGas).toBe(BSC_MIN_MAX_PRIORITY_FEE_PER_GAS);
+				expect(result.feeData.maxFeePerGas).toBe(BSC_MIN_MAX_FEE_PER_GAS);
+			});
+
+			it('should apply the BSC testnet fee floor when both sources return values below the minimum', async () => {
+				const result = await getEthFeeDataWithProvider({
+					networkId: BSC_TESTNET_NETWORK.id,
+					chainId: BSC_TESTNET_NETWORK.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(result.feeData.maxPriorityFeePerGas).toBe(BSC_MIN_MAX_PRIORITY_FEE_PER_GAS);
+				expect(result.feeData.maxFeePerGas).toBe(BSC_MIN_MAX_FEE_PER_GAS);
+			});
+
+			it('should keep higher provider values on BSC when they exceed the floor', async () => {
+				const highTip = BSC_MIN_MAX_PRIORITY_FEE_PER_GAS * 5n;
+				const highMax = BSC_MIN_MAX_FEE_PER_GAS * 5n;
+
+				vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
+					getFeeData: async () =>
+						await new Promise((resolve) =>
+							resolve({
+								gasPrice: null,
+								maxFeePerGas: highMax,
+								maxPriorityFeePerGas: highTip
+							})
+						)
+				} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+
+				InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
+					maxFeePerGas: lowMax,
+					maxPriorityFeePerGas: lowTip
+				});
+
+				const result = await getEthFeeDataWithProvider({
+					networkId: BSC_MAINNET_NETWORK.id,
+					chainId: BSC_MAINNET_NETWORK.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(result.feeData.maxPriorityFeePerGas).toBe(highTip);
+				expect(result.feeData.maxFeePerGas).toBe(highMax);
+			});
+
+			it('should NOT apply the BSC floor on non-BSC chains (Ethereum)', async () => {
+				const result = await getEthFeeDataWithProvider({
+					networkId: network.id,
+					chainId: network.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(result.feeData.maxPriorityFeePerGas).toBe(lowTip);
+				expect(result.feeData.maxFeePerGas).toBe(lowMax);
+			});
 		});
 	});
 });
