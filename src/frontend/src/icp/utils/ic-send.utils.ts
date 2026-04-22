@@ -9,7 +9,6 @@ import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { I18nSend } from '$lib/types/i18n';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
 import { errorDetailToString } from '$lib/utils/error.utils';

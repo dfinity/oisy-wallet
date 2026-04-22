@@ -8,7 +8,6 @@ import {
 	isInvalidNat64Memo,
 	mapIcSendErrorMsg
 } from '$icp/utils/ic-send.utils';
-import type { I18nSend } from '$lib/types/i18n';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
@@ -132,7 +131,7 @@ describe('ic-send.utils', () => {
 				memo_too_large: 'The memo you entered is too long. Please shorten it and try again.',
 				unexpected: 'Something went wrong while sending the transaction.'
 			}
-		} as unknown as I18nSend;
+		} as unknown as Parameters<typeof mapIcSendErrorMsg>[0]['i18n'];
 
 		it('returns memo_too_large message when canister reports memo field is too large', () => {
 			const err = new Error(
