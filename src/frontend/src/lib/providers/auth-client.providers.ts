@@ -1,11 +1,17 @@
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	AuthClient,
+	type AuthClientCreateOptions,
 	IdbStorage,
 	KEY_STORAGE_DELEGATION,
 	KEY_STORAGE_KEY
 } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
+
+type SignInAuthClientOptions = Pick<
+	AuthClientCreateOptions,
+	'identityProvider' | 'windowOpenerFeatures' | 'derivationOrigin'
+>;
 
 export class AuthClientProvider {
 	static #instance: AuthClientProvider;
@@ -27,10 +33,21 @@ export class AuthClientProvider {
 		return this.#instance;
 	}
 
+	// `@icp-sdk/auth` v6 replaced the async `AuthClient.create` with a synchronous constructor,
+	// which we rely on in the sign-in flow: the client must be built inside
+	// the user-gesture call stack so popup blockers (e.g. Safari) don't kick in.
+	#buildAuthClient = (signInOptions?: SignInAuthClientOptions): AuthClient =>
+		new AuthClient({
+			storage: this.#storage,
+			idleOptions: {
+				disableIdle: true,
+				disableDefaultIdleCallback: true
+			},
+			...signInOptions
+		});
+
 	createAuthClient = async (
-		{ hideConsoleWarn, forceRecreate }: { hideConsoleWarn: boolean; forceRecreate?: boolean } = {
-			hideConsoleWarn: true
-		}
+		{ forceRecreate }: { forceRecreate?: boolean } = {}
 	): Promise<AuthClient> => {
 		const authClient = this.#authClient;
 
@@ -38,36 +55,9 @@ export class AuthClientProvider {
 			return authClient;
 		}
 
-		this.#authClient = undefined;
+		this.#authClient = this.#buildAuthClient();
 
-		const hideWarn = (): (() => void) => {
-			// TODO: Workaround for agent-js. Disable the console.warn "You are using a custom storage provider..."
-			// printed in the browser console as pseudo-documentation. There is no opt-out, and we know our custom storage
-			// supports CryptoKey as it's literally the default provided implementation.
-			const hideAgentJsConsoleWarn = globalThis.console.warn;
-			globalThis.console.warn = (): null => null;
-
-			return () => {
-				// Redo console.warn
-				globalThis.console.warn = hideAgentJsConsoleWarn;
-			};
-		};
-
-		const redoConsoleWarn = hideConsoleWarn ? hideWarn() : undefined;
-
-		try {
-			this.#authClient = await AuthClient.create({
-				storage: this.#storage,
-				idleOptions: {
-					disableIdle: true,
-					disableDefaultIdleCallback: true
-				}
-			});
-
-			return this.#authClient;
-		} finally {
-			redoConsoleWarn?.();
-		}
+		return this.#authClient;
 	};
 
 	/**
@@ -76,21 +66,36 @@ export class AuthClientProvider {
 	 * To ensure each session starts clean and safe, we clear the stored keys
 	 * before creating a new AuthClient.
 	 *
-	 * We also remove the delegation because `AuthClient.create` does not
-	 * overwrite or discard an existing delegation — it reads it from storage
-	 * and pairs it with whatever key is present. Once the key is cleared and
-	 * a fresh one generated, the old delegation would reference a different
-	 * public key, producing an ECDSA P256 signature / delegation mismatch.
+	 * We also remove the delegation because constructing a new `AuthClient`
+	 * does not overwrite or discard an existing delegation — it reads it from
+	 * storage and pairs it with whatever key is present. Once the key is
+	 * cleared and a fresh one generated, the old delegation would reference a
+	 * different public key, producing an ECDSA P256 signature / delegation mismatch.
 	 */
-	safeCreateAuthClient = async (
-		args: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
-	): Promise<AuthClient> => {
+	safeCreateAuthClient = async (): Promise<AuthClient> => {
 		await Promise.all([
 			this.#storage.remove(KEY_STORAGE_KEY),
 			this.#storage.remove(KEY_STORAGE_DELEGATION)
 		]);
 
-		return await this.createAuthClient({ ...args, forceRecreate: true });
+		return await this.createAuthClient({ forceRecreate: true });
+	};
+
+	/**
+	 * Synchronously creates a fresh `AuthClient` tailored to a sign-in attempt.
+	 *
+	 * In `@icp-sdk/auth` v6, `identityProvider`, `windowOpenerFeatures` and `derivationOrigin`
+	 * are constructor-bound (they used to be passed to `login()`), so a new client
+	 * is required per sign-in. Construction stays synchronous so this can be
+	 * called from a user-gesture handler without triggering popup blockers.
+	 *
+	 * The new client replaces the cached one so subsequent calls via
+	 * `createAuthClient` return the same instance.
+	 */
+	createAuthClientForSignIn = (signInOptions: SignInAuthClientOptions): AuthClient => {
+		this.#authClient = this.#buildAuthClient(signInOptions);
+
+		return this.#authClient;
 	};
 
 	/**
@@ -99,14 +104,13 @@ export class AuthClientProvider {
 	 */
 	loadIdentity = async (): Promise<Identity | undefined> => {
 		const authClient = await this.createAuthClient();
-		const authenticated = await authClient.isAuthenticated();
 
 		// Not authenticated, therefore, we provide no identity as a result
-		if (!authenticated) {
+		if (!authClient.isAuthenticated()) {
 			return undefined;
 		}
 
-		return authClient.getIdentity();
+		return await authClient.getIdentity();
 	};
 
 	get storage(): IdbStorage {
