@@ -138,6 +138,7 @@ export const sendIcp = ({
 	to,
 	amount,
 	identity,
+	memo,
 	ledgerCanisterId,
 	progress
 }: IcSendParams): Promise<BlockHeight> => {
@@ -151,19 +152,30 @@ export const sendIcp = ({
 
 	progress?.(ProgressStepsSendIc.SEND);
 
-	return validIcrcAddress
-		? icrc1TransferIcp({
-				identity,
-				ledgerCanisterId,
-				to: decodeIcrcAccount(to),
-				amount
-			})
-		: transferIcp({
-				identity,
-				ledgerCanisterId,
-				to,
-				amount
-			});
+	if (validIcrcAddress) {
+		const encodedMemo =
+			memo !== undefined && memo.trim() !== '' ? new TextEncoder().encode(memo) : undefined;
+
+		return icrc1TransferIcp({
+			identity,
+			ledgerCanisterId,
+			to: decodeIcrcAccount(to),
+			amount,
+			memo: encodedMemo
+		});
+	}
+
+	// Classic ICP address: memo is nat64 (bigint), already validated by the UI
+	const nat64Memo =
+		memo !== undefined && memo.trim() !== '' ? BigInt(memo.trim()) : undefined;
+
+	return transferIcp({
+		identity,
+		ledgerCanisterId,
+		to,
+		amount,
+		memo: nat64Memo
+	});
 };
 
 export const sendDip20 = ({
