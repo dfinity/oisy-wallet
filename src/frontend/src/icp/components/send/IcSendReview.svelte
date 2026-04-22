@@ -49,7 +49,7 @@
 		<IcReviewNetwork />
 	{/snippet}
 
-	{#snippet info()}
+	{#snippet memo()}
 		{#if $sendMemo.trim() !== ''}
 			<ModalValue>
 				{#snippet label()}{$i18n.send.text.memo}{/snippet}

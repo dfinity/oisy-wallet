@@ -40,10 +40,10 @@
 
 	const { sendTokenStandard, sendMemo } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let memo = $state($sendMemo);
+	let memoText = $state($sendMemo);
 
 	$effect(() => {
-		sendMemo.set(memo);
+		sendMemo.set(memoText);
 	});
 
 	let amountError = $state<IcAmountAssertionError | undefined>();
@@ -64,7 +64,7 @@
 	);
 
 	let memoError = $derived(
-		isClassicIcpAddress && memo.trim() !== '' && isInvalidNat64Memo(memo)
+		isClassicIcpAddress && memoText.trim() !== '' && isInvalidNat64Memo(memoText)
 			? $i18n.send.assertion.memo_invalid_nat64
 			: undefined
 	);
@@ -93,7 +93,7 @@
 		{/if}
 	{/snippet}
 
-	{#snippet info()}
+	{#snippet memo()}
 		<div class="mb-4">
 			<label class="mb-1 block text-sm text-tertiary" for="memo">{$i18n.send.text.memo}</label>
 			<InputText
@@ -102,7 +102,7 @@
 					? $i18n.send.placeholder.enter_memo_nat64
 					: $i18n.send.placeholder.enter_memo}
 				required={false}
-				bind:value={memo}
+				bind:value={memoText}
 			/>
 			{#if nonNullish(memoError)}
 				<p class="mt-2 mb-0 text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
