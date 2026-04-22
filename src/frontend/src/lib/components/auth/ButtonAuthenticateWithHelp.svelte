@@ -50,7 +50,6 @@
 
 <div
 	class="flex w-full flex-col items-center"
-	class:md:items-center={helpAlignment === 'center'}
 	class:md:items-start={helpAlignment !== 'center'}
 >
 	<ButtonAuthenticate
