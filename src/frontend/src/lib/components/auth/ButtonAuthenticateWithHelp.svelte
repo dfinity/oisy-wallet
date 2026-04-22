@@ -48,11 +48,7 @@
 	};
 </script>
 
-<div
-	class="flex w-full flex-col items-center"
-	class:md:items-center={helpAlignment === 'center'}
-	class:md:items-start={helpAlignment !== 'center'}
->
+<div class="flex w-full flex-col items-center" class:md:items-start={helpAlignment !== 'center'}>
 	<ButtonAuthenticate
 		{fullWidth}
 		onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
