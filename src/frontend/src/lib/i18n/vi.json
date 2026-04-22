@@ -769,11 +769,11 @@
 			"enable_beta_feature": "Bật tính tăng beta",
 			"disable_beta_feature": "Tắt tính năng beta",
 			"save_beta_feature_success": "Tính năng beta của bạn đã được cập nhật",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "Ẩn các giao dịch có giá trị rất nhỏ",
+			"hide_micro_transactions_description": "Các giao dịch có giá trị rất nhỏ thường là spam và nhằm mục đích lừa người dùng sao chép địa chỉ người gửi thay vì địa chỉ hợp lệ. Khuyến nghị ẩn chúng trong danh sách giao dịch.",
+			"enable_hide_micro_transactions": "Bật ẩn các giao dịch có giá trị rất nhỏ",
+			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
+			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1519,8 @@
 			"hex_data": "Dữ liệu HEX",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Ứng dụng đã kết nối",
+			"no_connected_apps": "Hiện không có ứng dụng nào được kết nối.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1957,7 +1957,7 @@
 		},
 		"info": {
 			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>."
 		},
 		"warning": {
 			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",

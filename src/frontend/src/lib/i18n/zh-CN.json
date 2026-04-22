@@ -769,11 +769,11 @@
 			"enable_beta_feature": "启用测试功能",
 			"disable_beta_feature": "禁用测试功能",
 			"save_beta_feature_success": "你的测试功能设置已更新。",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "隐藏价值非常小的交易",
+			"hide_micro_transactions_description": "价值非常小的交易通常是垃圾信息，目的是诱骗用户复制发送方地址而不是有效地址。建议在交易列表中隐藏它们。",
+			"enable_hide_micro_transactions": "启用隐藏价值非常小的交易",
+			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
+			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1519,8 @@
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "已连接的应用",
+			"no_connected_apps": "当前没有已连接的应用。",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1957,7 +1957,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC 交易信息来自中心化第三方，应自行核实。",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "代币价值非常小的交易当前已被隐藏。要显示它们，请前往<a href=\"/settings/\">设置</a>。"
 		},
 		"warning": {
 			"no_index_canister": "无法显示 $token_list 的交易记录。未提供 Index canister。",
