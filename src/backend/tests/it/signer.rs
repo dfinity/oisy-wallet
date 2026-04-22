@@ -235,7 +235,7 @@ fn test_housekeeping_lock_resets_after_failed_topup() {
     // (no cycles ledger) and must release the guard so the next tick can
     // spawn a new one.
     for _ in 0..3 {
-        pic_setup.pic.advance_time(Duration::from_secs(60 * 60));
+        pic_setup.pic.advance_time(Duration::from_hours(1));
         for _ in 0..10 {
             pic_setup.pic.tick();
         }
@@ -294,7 +294,7 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
 
     // Advance well past the first hourly interval and process messages, giving
     // the canister time to run housekeeping with a working cycles ledger.
-    pic_setup.pic.advance_time(Duration::from_secs(2 * 60 * 60));
+    pic_setup.pic.advance_time(Duration::from_hours(2));
     for _ in 0..20 {
         pic_setup.pic.tick();
     }
