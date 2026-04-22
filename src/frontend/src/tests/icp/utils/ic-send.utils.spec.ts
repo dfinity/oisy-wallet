@@ -3,7 +3,11 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { isInvalidDestinationIc, isInvalidNat64Memo, mapIcSendErrorMsg } from '$icp/utils/ic-send.utils';
+import {
+	isInvalidDestinationIc,
+	isInvalidNat64Memo,
+	mapIcSendErrorMsg
+} from '$icp/utils/ic-send.utils';
 import type { I18nSend } from '$lib/types/i18n';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress3 } from '$tests/mocks/eth.mock';
@@ -135,7 +139,9 @@ describe('ic-send.utils', () => {
 				"Reject text: Error from Canister: Canister called `ic0.trap` with message: 'the memo field is too large'."
 			);
 
-			expect(mapIcSendErrorMsg({ err, i18n: mockI18nSend })).toBe(mockI18nSend.error.memo_too_large);
+			expect(mapIcSendErrorMsg({ err, i18n: mockI18nSend })).toBe(
+				mockI18nSend.error.memo_too_large
+			);
 		});
 
 		it('returns undefined for unrecognised errors', () => {
@@ -145,7 +151,9 @@ describe('ic-send.utils', () => {
 		});
 
 		it('returns undefined for non-Error values', () => {
-			expect(mapIcSendErrorMsg({ err: 'a plain string error', i18n: mockI18nSend })).toBeUndefined();
+			expect(
+				mapIcSendErrorMsg({ err: 'a plain string error', i18n: mockI18nSend })
+			).toBeUndefined();
 		});
 	});
 
