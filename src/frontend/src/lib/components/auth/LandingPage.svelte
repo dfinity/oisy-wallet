@@ -11,14 +11,16 @@
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 </script>
 
-<div class="mx-auto flex w-full max-w-screen-md flex-1 flex-col items-center gap-8 md:gap-20 px-5 md:px-8">
+<div
+	class="mx-auto flex w-full max-w-screen-md flex-1 flex-col items-center gap-8 px-5 md:gap-20 md:px-8"
+>
 	<div class="flex w-full flex-col items-center justify-center">
 		<HeroSignIn />
 	</div>
 
 	<div class="flex w-full justify-center">
 		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
-			<Img {src} alt={ariaLabel} styleClass="h-full w-full object-cover" />
+			<Img alt={ariaLabel} {src} styleClass="h-full w-full object-cover" />
 		{/await}
 	</div>
 </div>
