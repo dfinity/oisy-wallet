@@ -31,9 +31,9 @@
 	]);
 </script>
 
-<div class="flex flex-col items-center text-center md:items-start md:text-left">
+<div class="flex flex-col items-center text-center">
 	<!-- Invite Rewards Banner -->
-	<div class="flex justify-center md:justify-start">
+	<div class="flex justify-center">
 		<InviteRewardsBanner />
 	</div>
 
@@ -45,7 +45,7 @@
 		</h1>
 	</div>
 
-	<div class="mb-7 flex flex-col items-center gap-2 md:items-start md:gap-3 md:text-lg">
+	<div class="mb-7 flex flex-col items-center gap-2 md:gap-3 md:text-lg">
 		{#each infoList as { label, icon: IconCmp, endIcon: EndIconCmp } (label)}
 			<div class="flex items-center gap-4">
 				<div class="hidden md:block">
@@ -64,5 +64,5 @@
 		{/each}
 	</div>
 
-	<ButtonAuthenticateWithHelp needHelpLink={false} />
+	<ButtonAuthenticateWithHelp helpAlignment="center" needHelpLink={false} />
 </div>
