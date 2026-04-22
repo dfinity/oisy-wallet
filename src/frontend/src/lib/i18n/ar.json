@@ -920,11 +920,13 @@
 			"contacts_empty_state_title": "ستظهر جهات اتصالك هنا",
 			"contacts_empty_state_description": "يبدو أنك لم تقم بإضافة جهات اتصال بعد",
 			"send_review_subtitle": "أنت ترسل",
+			"memo": "",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
 			"select_nft": ""
 		},
 		"placeholder": {
+			"enter_memo": "",
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
 			"enter_recipient_address": "أدخل عنوان المستلم، الاسم أو الاسم المستعار",
 			"enter_wallet_address": "أدخل عنوان المحفظة، الاسم أو الاسم المستعار",

@@ -920,11 +920,13 @@
 			"contacts_empty_state_title": "आपके संपर्क यहाँ दिखाई देंगे",
 			"contacts_empty_state_description": "ऐसा लगता है कि आपने अभी तक संपर्क नहीं जोड़े हैं",
 			"send_review_subtitle": "आप भेजते हैं",
+			"memo": "",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
 			"select_nft": ""
 		},
 		"placeholder": {
+			"enter_memo": "",
 			"enter_eth_address": "सार्वजनिक पता (0x), नाम या उपनाम दर्ज करें",
 			"enter_recipient_address": "प्राप्तकर्ता का पता, नाम या उपनाम दर्ज करें",
 			"enter_wallet_address": "वॉलेट पता, नाम या उपनाम दर्ज करें",

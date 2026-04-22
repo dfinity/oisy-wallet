@@ -920,11 +920,13 @@
 			"contacts_empty_state_title": "Vos contacts apparaîtront ici",
 			"contacts_empty_state_description": "Il semble que vous n'ayez pas encore ajouté de contacts",
 			"send_review_subtitle": "Vous envoyez",
+			"memo": "",
 			"no_nfts_found": "Aucun NFT trouvé",
 			"no_nfts_found_desc": "Ajustez votre recherche ou votre réseau pour trouver vos NFT",
 			"select_nft": "Sélectionner un NFT"
 		},
 		"placeholder": {
+			"enter_memo": "",
 			"enter_eth_address": "Saisir l'adresse publique (0x), le nom ou l'alias",
 			"enter_recipient_address": "Saisir l'adresse du destinataire, le nom ou l'alias",
 			"enter_wallet_address": "Saisir l'adresse du portefeuille, le nom ou l'alias",
