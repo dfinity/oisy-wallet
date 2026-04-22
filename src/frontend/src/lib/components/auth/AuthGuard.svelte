@@ -14,7 +14,7 @@
 {#if $authNotSignedIn}
 	<LandingPage />
 {:else}
-	<div in:fade>
+	<div data-app-view in:fade>
 		{@render children?.()}
 	</div>
 {/if}
