@@ -5,9 +5,6 @@
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
-	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
-	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
-	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import { OISY_REPO_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
@@ -53,13 +50,6 @@
 					<IconGitHub />
 				</ExternalLinkIcon>
 			</div>
-			{#if $authNotSignedIn}
-				<div class="mb-2 flex gap-2 text-xs text-nowrap text-tertiary">
-					<TermsOfUseLink />
-					<PrivacyPolicyLink />
-					<LicenseAgreementLink />
-				</div>
-			{/if}
 		</div>
 
 		{#if $aiAssistantConsoleOpen}
