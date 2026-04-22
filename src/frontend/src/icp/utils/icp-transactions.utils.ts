@@ -1,11 +1,11 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
-import { ZERO } from '$lib/constants/app.constants';
 import type {
 	IcTransactionAddOnsInfo,
 	IcTransactionUi,
 	IcpTransaction
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import { fromNullable, fromNullishNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';

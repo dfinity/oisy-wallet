@@ -1,5 +1,5 @@
-import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import type { IcpTransaction } from '$icp/types/ic-transaction';
+import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 
 const mockAccountIdentifier = 'aaaabbbbccccdddd'.repeat(4);
