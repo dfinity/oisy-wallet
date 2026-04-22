@@ -120,6 +120,7 @@
 		"jsdom": "^29.0.1",
 		"jsqr": "^1.4.0",
 		"lockfile-lint": "^5.0.0",
+		"oxlint": "^1.52.0",
 		"pem-file": "^1.0.1",
 		"postcss": "^8.5.8",
 		"prettier": "^3.8.1",
