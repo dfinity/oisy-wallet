@@ -166,8 +166,7 @@ export const sendIcp = ({
 	}
 
 	// Classic ICP address: memo is nat64 (bigint), already validated by the UI
-	const nat64Memo =
-		memo !== undefined && memo.trim() !== '' ? BigInt(memo.trim()) : undefined;
+	const nat64Memo = memo !== undefined && memo.trim() !== '' ? BigInt(memo.trim()) : undefined;
 
 	return transferIcp({
 		identity,
