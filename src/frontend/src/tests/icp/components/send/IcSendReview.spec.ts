@@ -56,4 +56,43 @@ describe('IcSendReview', () => {
 
 		expect(queryByText(en.fee.text.fee)).toBeNull();
 	});
+
+	it('should render the memo when provided', () => {
+		const memo = 'payment for invoice #42';
+
+		const { getByText } = render(IcSendReview, {
+			props: { ...props, memo },
+			context: mockContext
+		});
+
+		expect(getByText(en.send.text.memo)).toBeInTheDocument();
+		expect(getByText(memo)).toBeInTheDocument();
+	});
+
+	it('should not render the memo label when memo is not provided', () => {
+		const { queryByText } = render(IcSendReview, {
+			props,
+			context: mockContext
+		});
+
+		expect(queryByText(en.send.text.memo)).toBeNull();
+	});
+
+	it('should not render the memo label when memo is empty', () => {
+		const { queryByText } = render(IcSendReview, {
+			props: { ...props, memo: '' },
+			context: mockContext
+		});
+
+		expect(queryByText(en.send.text.memo)).toBeNull();
+	});
+
+	it('should not render the memo label when memo is whitespace only', () => {
+		const { queryByText } = render(IcSendReview, {
+			props: { ...props, memo: '   ' },
+			context: mockContext
+		});
+
+		expect(queryByText(en.send.text.memo)).toBeNull();
+	});
 });

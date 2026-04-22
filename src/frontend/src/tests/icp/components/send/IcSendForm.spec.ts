@@ -65,4 +65,25 @@ describe('IcSendForm', () => {
 
 		expect(queryByText(en.fee.text.fee)).toBeNull();
 	});
+
+	it('should render the memo label and input', () => {
+		const { getByText, getByPlaceholderText } = render(IcSendForm, {
+			props,
+			context: mockContext
+		});
+
+		expect(getByText(en.send.text.memo)).toBeInTheDocument();
+		expect(getByPlaceholderText(en.send.placeholder.enter_memo)).toBeInTheDocument();
+	});
+
+	it('should render memo input as optional', () => {
+		const { getByPlaceholderText } = render(IcSendForm, {
+			props,
+			context: mockContext
+		});
+
+		const memoInput = getByPlaceholderText(en.send.placeholder.enter_memo);
+
+		expect(memoInput).not.toBeRequired();
+	});
 });
