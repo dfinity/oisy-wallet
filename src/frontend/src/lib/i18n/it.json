@@ -768,12 +768,12 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": "",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"save_beta_feature_success": "Le impostazioni delle funzionalità beta sono state aggiornate.",
+			"hide_micro_transactions": "Nascondi transazioni con valori molto piccoli",
+			"hide_micro_transactions_description": "Le transazioni con valori molto piccoli sono in genere spam e hanno lo scopo di indurre l'utente a copiare l'indirizzo del mittente invece di uno valido. Si consiglia di nasconderle negli elenchi delle transazioni.",
+			"enable_hide_micro_transactions": "Abilita l'occultamento delle transazioni con valori molto piccoli",
+			"disable_hide_micro_transactions": "Disabilita l'occultamento delle transazioni con valori molto piccoli",
+			"save_spam_filter_success": "Le impostazioni del filtro antispam sono state aggiornate.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1519,8 @@
 			"hex_data": "Dati HEX",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
 			"sign_message": "Firma messaggio",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "App connesse",
+			"no_connected_apps": "Attualmente non ci sono app connesse.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1957,7 +1957,7 @@
 		},
 		"info": {
 			"btc_transactions": "Le informazioni sulle transazioni BTC sono ottenute da terze parti centralizzate e devono essere verificate in modo indipendente.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "Le transazioni con valori di token molto piccoli sono attualmente nascoste. Per mostrarle, vai su <a href=\"/settings/\">Impostazioni</a>."
 		},
 		"warning": {
 			"no_index_canister": "Le transazioni per $token_list non possono essere visualizzate. Nessun canister Index disponibile.",

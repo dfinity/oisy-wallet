@@ -46,7 +46,7 @@ const initAuthStore = (): AuthStore => {
 	// With different tabs opened of OISY in the same browser, it may happen that separate authClient objects are out-of-sync among themselves.
 	// To avoid issues, we use this method to pick the most up-to-date authClient object, since the data are cached in IndexedDB.
 	const pickAuthClient = async (): Promise<AuthClient> => {
-		if (nonNullish(authClient) && (await authClient.isAuthenticated())) {
+		if (nonNullish(authClient) && authClient.isAuthenticated()) {
 			return authClient;
 		}
 
@@ -54,7 +54,7 @@ const initAuthStore = (): AuthStore => {
 
 		const refreshed = await createAuthClient();
 
-		if (await refreshed.isAuthenticated()) {
+		if (refreshed.isAuthenticated()) {
 			return refreshed;
 		}
 
@@ -70,9 +70,9 @@ const initAuthStore = (): AuthStore => {
 			? await AuthClientProvider.getInstance().createAuthClient()
 			: await pickAuthClient();
 
-		const isAuthenticated: boolean = await authClient.isAuthenticated();
+		const isAuthenticated: boolean = authClient.isAuthenticated();
 
-		set({ identity: isAuthenticated ? authClient.getIdentity() : null });
+		set({ identity: isAuthenticated ? await authClient.getIdentity() : null });
 	};
 
 	return {
@@ -86,57 +86,59 @@ const initAuthStore = (): AuthStore => {
 			await sync({ forceSync: true });
 		},
 
-		signIn: ({ domain, asPopup }: AuthSignInParams) =>
-			// eslint-disable-next-line no-async-promise-executor
-			new Promise<void>(async (resolve, reject) => {
-				// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
-				// We are not able to recreate authClient safely here since there are some browsers (like Safari) that block popups if there is an additional async call in this call stack.
-				if (isNullish(authClient)) {
-					reject(new AuthClientNotInitializedError());
+		signIn: async ({ domain, asPopup }: AuthSignInParams) => {
+			// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
+			// We are not able to recreate authClient safely here since there are some browsers (like Safari) that block popups if there is an additional async call in this call stack.
+			if (isNullish(authClient)) {
+				throw new AuthClientNotInitializedError();
+			}
 
-					return;
-				}
+			const identityProvider = nonNullish(INTERNET_IDENTITY_CANISTER_ID)
+				? /apple/i.test(navigator?.vendor)
+					? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
+					: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
+				: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}${domain === InternetIdentityDomain.VERSION_2_0 ? '/?feature_flag_min_guided_upgrade=true' : ''}`;
 
-				const identityProvider = nonNullish(INTERNET_IDENTITY_CANISTER_ID)
-					? /apple/i.test(navigator?.vendor)
-						? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
-						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-					: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}${domain === InternetIdentityDomain.VERSION_2_0 ? '/?feature_flag_min_guided_upgrade=true' : ''}`;
-
-				await authClient.login({
-					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
-					onSuccess: () => {
-						set({ identity: authClient?.getIdentity() });
-
-						try {
-							// If the user has more than one tab open in the same browser,
-							// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
-							// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
-							// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
-							const bc = AuthBroadcastChannel.getInstance();
-							bc.postLoginSuccess();
-						} catch (err: unknown) {
-							// We don't really care if the broadcast channel fails to open or if it fails to post messages.
-							// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
-							// We just print a warning in the console for debugging purposes.
-							consoleWarn('Auth BroadcastChannel posting failed', err);
+			// In `@icp-sdk/auth` v6, `identityProvider`, `windowOpenerFeatures` and
+			// `derivationOrigin` are constructor-bound rather than `login()` params, so
+			// we build a dedicated client for this sign-in. Construction is synchronous,
+			// so the user-gesture stack is preserved up to the `signIn()` call that
+			// opens the popup.
+			const client = AuthClientProvider.getInstance().createAuthClientForSignIn({
+				identityProvider,
+				...(asPopup
+					? {
+							windowOpenerFeatures: popupCenter({
+								width: AUTH_POPUP_WIDTH,
+								height: AUTH_POPUP_HEIGHT
+							})
 						}
+					: {}),
+				...getOptionalDerivationOrigin()
+			});
 
-						resolve();
-					},
-					onError: reject,
-					identityProvider,
-					...(asPopup
-						? {
-								windowOpenerFeatures: popupCenter({
-									width: AUTH_POPUP_WIDTH,
-									height: AUTH_POPUP_HEIGHT
-								})
-							}
-						: {}),
-					...getOptionalDerivationOrigin()
-				});
-			}),
+			authClient = client;
+
+			const identity = await client.signIn({
+				maxTimeToLive: AUTH_MAX_TIME_TO_LIVE
+			});
+
+			set({ identity });
+
+			try {
+				// If the user has more than one tab open in the same browser,
+				// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
+				// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
+				// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
+				const bc = AuthBroadcastChannel.getInstance();
+				bc.postLoginSuccess();
+			} catch (err: unknown) {
+				// We don't really care if the broadcast channel fails to open or if it fails to post messages.
+				// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
+				// We just print a warning in the console for debugging purposes.
+				consoleWarn('Auth BroadcastChannel posting failed', err);
+			}
+		},
 
 		signOut: async () => {
 			const client: AuthClient =

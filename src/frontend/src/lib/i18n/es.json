@@ -769,11 +769,11 @@
 			"enable_beta_feature": "Habilitar función beta",
 			"disable_beta_feature": "Deshabilitar función beta",
 			"save_beta_feature_success": "Tus configuraciones de funciones beta han sido actualizadas.",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "Ocultar transacciones con valores muy pequeños",
+			"hide_micro_transactions_description": "Las transacciones con valores muy pequeños suelen ser spam y tienen la intención de engañar al usuario para que copie la dirección del remitente en lugar de una válida. Se recomienda ocultarlas en las listas de transacciones.",
+			"enable_hide_micro_transactions": "Habilitar la ocultación de transacciones con valores muy pequeños",
+			"disable_hide_micro_transactions": "Deshabilitar la ocultación de transacciones con valores muy pequeños",
+			"save_spam_filter_success": "La configuración de tu filtro de spam se ha actualizado.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1519,8 @@
 			"hex_data": "Datos HEX",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Aplicaciones conectadas",
+			"no_connected_apps": "Actualmente no hay aplicaciones conectadas.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1956,8 +1956,8 @@
 			"title": ""
 		},
 		"info": {
-			"btc_transactions": "",
-			"hidden_micro_transactions": ""
+			"btc_transactions": "La información de las transacciones de BTC se obtiene de terceros centralizados y debe verificarse de forma independiente.",
+			"hidden_micro_transactions": "Las transacciones con valores de token muy pequeños están actualmente ocultas. Para mostrarlas, ve a <a href=\"/settings/\">Configuración</a>."
 		},
 		"warning": {
 			"no_index_canister": "",
