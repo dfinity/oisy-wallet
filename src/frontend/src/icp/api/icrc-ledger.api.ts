@@ -113,12 +113,14 @@ export const transfer = async ({
 	to,
 	amount,
 	createdAt,
+	memo,
 	ledgerCanisterId
 }: {
 	identity: NullishIdentity;
 	to: IcrcAccount;
 	amount: bigint;
 	createdAt?: bigint;
+	memo?: Uint8Array;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<IcrcLedgerDid.BlockIndex> => {
 	assertNonNullish(identity);
@@ -128,6 +130,7 @@ export const transfer = async ({
 	return transfer({
 		to: toCandidAccount(to),
 		amount,
+		memo,
 		created_at_time: createdAt ?? nowInBigIntNanoSeconds()
 	});
 };
