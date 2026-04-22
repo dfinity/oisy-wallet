@@ -10,8 +10,7 @@ import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
-import { fireEvent } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('IcSendForm', () => {
 	const mockContext = new Map([]);
@@ -108,9 +107,7 @@ describe('IcSendForm', () => {
 				context: icpMockContext
 			});
 
-			expect(
-				getByPlaceholderText(en.send.placeholder.enter_memo_nat64)
-			).toBeInTheDocument();
+			expect(getByPlaceholderText(en.send.placeholder.enter_memo_nat64)).toBeInTheDocument();
 		});
 
 		it('should show a validation error when memo is not a valid nat64', async () => {
@@ -139,7 +136,7 @@ describe('IcSendForm', () => {
 			expect(queryByText(en.send.assertion.memo_invalid_nat64)).toBeNull();
 		});
 
-		it('should not show a validation error when memo is empty', async () => {
+		it('should not show a validation error when memo is empty', () => {
 			const { queryByText } = render(IcSendForm, {
 				props: icpProps,
 				context: icpMockContext
