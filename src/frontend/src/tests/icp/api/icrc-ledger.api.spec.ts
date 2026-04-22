@@ -241,9 +241,11 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(
-				expect.not.objectContaining({ memo: expect.anything() })
-			);
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: toAccount,
+				created_at_time: createdAt
+			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
