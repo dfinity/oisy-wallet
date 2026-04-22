@@ -768,12 +768,12 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": "",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"save_beta_feature_success": "تم تحديث إعدادات ميزة النسخة التجريبية الخاصة بك.",
+			"hide_micro_transactions": "إخفاء المعاملات ذات القيم الصغيرة جدًا",
+			"hide_micro_transactions_description": "عادةً ما تكون المعاملات ذات القيم الصغيرة جدًا بريدًا عشوائيًا وتهدف إلى خداع المستخدم لنسخ عنوان المُرسِل بدلاً من عنوان صالح. يُوصى بإخفائها في قوائم المعاملات.",
+			"enable_hide_micro_transactions": "تمكين إخفاء المعاملات ذات القيم الصغيرة جدًا",
+			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
+			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1519,8 @@
 			"hex_data": "بيانات HEX",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "التطبيقات المتصلة",
+			"no_connected_apps": "لا توجد تطبيقات متصلة حاليًا.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1957,7 +1957,7 @@
 		},
 		"info": {
 			"btc_transactions": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>."
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",

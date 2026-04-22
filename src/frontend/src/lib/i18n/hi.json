@@ -768,12 +768,12 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": "",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"save_beta_feature_success": "आपकी बीटा फ़ीचर सेटिंग्स अपडेट कर दी गई हैं।",
+			"hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन छिपाएं",
+			"hide_micro_transactions_description": "बहुत छोटे मूल्यों वाले लेनदेन आमतौर पर स्पैम होते हैं और उपयोगकर्ता को वैध पते के बजाय प्रेषक के पते को कॉपी करने के लिए धोखा देने का इरादा रखते हैं। इन्हें लेनदेन सूचियों में छिपाने की अनुशंसा की जाती है।",
+			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
+			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
+			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1519,8 @@
 			"hex_data": "हेक्स डेटा",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "जुड़े हुए ऐप्स",
+			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1957,7 +1957,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं।"
 		},
 		"warning": {
 			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",
