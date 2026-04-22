@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendReview from '$lib/components/send/SendReview.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
@@ -15,13 +17,14 @@
 	interface Props {
 		destination?: string;
 		amount?: OptionAmount;
+		memo?: string;
 		selectedContact?: ContactUi;
 		nft?: Nft;
 		onBack: () => void;
 		onSend: () => void;
 	}
 
-	let { destination = '', amount, selectedContact, nft, onBack, onSend }: Props = $props();
+	let { destination = '', amount, memo, selectedContact, nft, onBack, onSend }: Props = $props();
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -45,5 +48,14 @@
 
 	{#snippet network()}
 		<IcReviewNetwork />
+	{/snippet}
+
+	{#snippet info()}
+		{#if nonNullish(memo) && memo.trim() !== ''}
+			<ModalValue>
+				{#snippet label()}{$i18n.send.text.memo}{/snippet}
+				{#snippet mainValue()}{memo}{/snippet}
+			</ModalValue>
+		{/if}
 	{/snippet}
 </SendReview>
