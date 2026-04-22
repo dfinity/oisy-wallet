@@ -53,4 +53,5 @@ export interface IcTransactionUi {
 	approveSpender?: string;
 	approveSpenderExplorerUrl?: string;
 	approveExpiresAt?: bigint;
+	memo?: string;
 }
