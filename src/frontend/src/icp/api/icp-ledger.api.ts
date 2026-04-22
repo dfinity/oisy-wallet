@@ -31,7 +31,7 @@ export const transfer = async ({
 	return transfer({
 		to: AccountIdentifier.fromHex(to),
 		amount,
-		memo
+		...(memo !== undefined ? { memo } : {})
 	});
 };
 
@@ -57,8 +57,8 @@ export const icrc1Transfer = async ({
 	return icrc1Transfer({
 		to: toCandidAccount(to),
 		amount,
-		icrc1Memo: memo,
-		createdAt: createdAt ?? nowInBigIntNanoSeconds()
+		createdAt: createdAt ?? nowInBigIntNanoSeconds(),
+		...(memo !== undefined ? { icrc1Memo: memo } : {})
 	});
 };
 
