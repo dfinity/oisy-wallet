@@ -9,6 +9,7 @@
 	import { sendNft } from '$icp/services/nft-send.services';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
+	import { mapIcSendErrorMsg } from '$icp/utils/ic-send.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
@@ -202,7 +203,7 @@
 			});
 
 			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
+				msg: { text: mapIcSendErrorMsg({ err, i18n: $i18n.send }) ?? $i18n.send.error.unexpected },
 				err
 			});
 

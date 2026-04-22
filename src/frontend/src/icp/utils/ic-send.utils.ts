@@ -10,8 +10,10 @@ import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';
+import type { I18nSend } from '$lib/types/i18n';
 import type { TokenStandard } from '$lib/types/token';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
+import { errorDetailToString } from '$lib/utils/error.utils';
 import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -50,6 +52,26 @@ export const isInvalidNat64Memo = (memo: string): boolean => {
 	} catch {
 		return true;
 	}
+};
+
+/**
+ * Maps known IC canister send errors to user-friendly i18n messages.
+ * Returns `undefined` for unrecognised errors so the caller can fall back to a generic message.
+ */
+export const mapIcSendErrorMsg = ({
+	err,
+	i18n
+}: {
+	err: unknown;
+	i18n: I18nSend;
+}): string | undefined => {
+	const message = errorDetailToString(err) ?? '';
+
+	if (message.includes('memo field is too large')) {
+		return i18n.error.memo_too_large;
+	}
+
+	return undefined;
 };
 
 export const isInvalidDestinationIc = ({
