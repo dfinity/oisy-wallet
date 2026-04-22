@@ -769,11 +769,11 @@
 			"enable_beta_feature": "Povolit beta funkci",
 			"disable_beta_feature": "Zakázat beta funkci",
 			"save_beta_feature_success": "Vaše nastavení beta funkcí bylo aktualizováno.",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "Skrýt transakce s velmi malými hodnotami",
+			"hide_micro_transactions_description": "Transakce s velmi malými hodnotami jsou obvykle spam a mají za cíl uživatele oklamat, aby zkopíroval adresu odesílatele místo platné adresy. Doporučujeme je v seznamech transakcí skrýt.",
+			"enable_hide_micro_transactions": "Povolit skrývání transakcí s velmi malými hodnotami",
+			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
+			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1521,8 +1521,8 @@
 			"hex_data": "HEX data",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Připojené aplikace",
+			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1959,7 +1959,7 @@
 		},
 		"info": {
 			"btc_transactions": "Informace o transakcích BTC jsou získány od centrálních třetích stran a měly by být nezávisle ověřeny.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "Transakce s velmi malými hodnotami tokenů jsou aktuálně skryty. Chcete-li je zobrazit, přejděte do <a href=\"/settings/\">Nastavení</a>."
 		},
 		"warning": {
 			"no_index_canister": "Transakce pro $token_list nelze zobrazit. Není k dispozici žádný indexový kanystr.",

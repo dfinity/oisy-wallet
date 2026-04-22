@@ -769,11 +769,11 @@
 			"enable_beta_feature": "베타 기능 활성화",
 			"disable_beta_feature": "베타 기능 비활성화",
 			"save_beta_feature_success": "베타 기능 설정이 업데이트되었습니다.",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "매우 작은 가치의 거래 숨기기",
+			"hide_micro_transactions_description": "매우 작은 가치의 거래는 일반적으로 스팸이며 사용자가 유효한 주소 대신 발신자 주소를 복사하도록 속이려는 의도를 가지고 있습니다. 거래 목록에서 숨기는 것을 권장합니다.",
+			"enable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 활성화",
+			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
+			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1521,8 +1521,8 @@
 			"hex_data": "HEX 데이터",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "연결된 앱",
+			"no_connected_apps": "현재 연결된 앱이 없습니다.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1959,7 +1959,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC 거래 정보는 중앙 집중식 제3자로부터 제공되므로 독립적으로 검증해야 합니다.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "매우 작은 토큰 가치의 거래가 현재 숨겨져 있습니다. 표시하려면 <a href=\"/settings/\">설정</a>으로 이동하세요."
 		},
 		"warning": {
 			"no_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 사용 가능한 인덱스 캐니스터가 없습니다.",

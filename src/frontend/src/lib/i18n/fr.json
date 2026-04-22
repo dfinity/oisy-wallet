@@ -769,11 +769,11 @@
 			"enable_beta_feature": "Activer la fonctionnalité bêta",
 			"disable_beta_feature": "Désactiver la fonctionnalité bêta",
 			"save_beta_feature_success": "Vos paramètres de fonctionnalité bêta ont été mis à jour.",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "Masquer les transactions de très petites valeurs",
+			"hide_micro_transactions_description": "Les transactions de très petites valeurs sont généralement du spam et visent à tromper l'utilisateur pour qu'il copie l'adresse de l'expéditeur au lieu d'une adresse valide. Il est recommandé de les masquer dans les listes de transactions.",
+			"enable_hide_micro_transactions": "Activer le masquage des transactions de très petites valeurs",
+			"disable_hide_micro_transactions": "Désactiver le masquage des transactions de très petites valeurs",
+			"save_spam_filter_success": "Les paramètres de votre filtre anti-spam ont été mis à jour.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1521,8 +1521,8 @@
 			"hex_data": "Données HEX",
 			"raw_copied": "Données brutes de la transaction copiées dans le presse-papiers.",
 			"sign_message": "Signer le message",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Applications connectées",
+			"no_connected_apps": "Aucune application n'est actuellement connectée.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1959,7 +1959,7 @@
 		},
 		"info": {
 			"btc_transactions": "Les informations sur les transactions BTC sont obtenues auprès de tiers centraux et doivent être vérifiées indépendamment.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "Les transactions avec de très petites valeurs de jetons sont actuellement masquées. Pour les afficher, accédez aux <a href=\"/settings/\">Paramètres</a>."
 		},
 		"warning": {
 			"no_index_canister": "Les transactions pour $token_list ne peuvent pas être affichées. Aucun canister Index disponible.",

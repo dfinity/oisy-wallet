@@ -152,7 +152,9 @@
 			}
 
 			#app-background-light,
-			#app-background-dark {
+			#app-background-dark,
+			#app-background-landing-light,
+			#app-background-landing-dark {
 				contain: paint;
 				pointer-events: none;
 
@@ -160,24 +162,34 @@
 				min-width: 1728px;
 			}
 
-			:root[theme='light'] {
-				#app-background-light {
-					display: block;
-				}
-
-				#app-background-dark {
-					display: none;
-				}
+			/* Default background: landing page artwork (shown pre-hydration and on the signed-out landing screen). */
+			#app-background-light,
+			#app-background-dark,
+			#app-background-landing-light,
+			#app-background-landing-dark {
+				display: none;
 			}
 
-			:root[theme='dark'] {
-				#app-background-light {
-					display: none;
-				}
+			:root[theme='light'] #app-background-landing-light {
+				display: block;
+			}
 
-				#app-background-dark {
-					display: block;
-				}
+			:root[theme='dark'] #app-background-landing-dark {
+				display: block;
+			}
+
+			/* In-app views (signed-in routes, lock page) opt out via [data-app-view] and fall back to the classic OISY background. */
+			:root[theme='light'] body:has([data-app-view]) #app-background-landing-light,
+			:root[theme='dark'] body:has([data-app-view]) #app-background-landing-dark {
+				display: none;
+			}
+
+			:root[theme='light'] body:has([data-app-view]) #app-background-light {
+				display: block;
+			}
+
+			:root[theme='dark'] body:has([data-app-view]) #app-background-dark {
+				display: block;
 			}
 		</style>
 
@@ -189,11 +201,27 @@
 				id="app-background-light"
 				src="/images/oisy_bg_light.webp"
 				alt="OISY Background light theme"
+				decoding="sync"
 			/>
 			<img
 				id="app-background-dark"
 				src="/images/oisy_bg_dark.webp"
 				alt="OISY Background dark theme"
+				decoding="sync"
+			/>
+			<img
+				id="app-background-landing-light"
+				src="/images/landing_bg_light.webp"
+				alt="OISY Background light theme"
+				fetchpriority="high"
+				decoding="sync"
+			/>
+			<img
+				id="app-background-landing-dark"
+				src="/images/landing_bg_dark.webp"
+				alt="OISY Background dark theme"
+				fetchpriority="high"
+				decoding="sync"
 			/>
 		</div>
 
