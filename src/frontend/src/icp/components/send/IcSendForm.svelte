@@ -7,6 +7,8 @@
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import InputText from '$lib/components/ui/InputText.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
@@ -32,7 +34,7 @@
 		cancel
 	}: Props = $props();
 
-	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenStandard, sendMemo } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError = $state<IcAmountAssertionError | undefined>();
 
@@ -58,6 +60,16 @@
 >
 	{#snippet sendAmount()}
 		<IcSendAmount {onTokensList} bind:amount bind:amountError />
+	{/snippet}
+
+	{#snippet memo()}
+		<label class="font-bold" for="memo">{$i18n.send.text.memo}:</label>
+		<InputText
+			name="memo"
+			placeholder={$i18n.send.placeholder.enter_memo}
+			required={false}
+			bind:value={$sendMemo}
+		/>
 	{/snippet}
 
 	{#snippet fee()}

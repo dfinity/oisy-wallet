@@ -655,6 +655,7 @@ interface I18nSend {
 		contacts_empty_state_title: string;
 		contacts_empty_state_description: string;
 		send_review_subtitle: string;
+		memo: string;
 		no_nfts_found: string;
 		no_nfts_found_desc: string;
 		select_nft: string;
@@ -663,6 +664,7 @@ interface I18nSend {
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
+		enter_memo: string;
 		select_network: string;
 		search_nfts: string;
 	};

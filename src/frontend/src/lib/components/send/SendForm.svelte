@@ -16,6 +16,7 @@
 		onBack: () => void;
 		onNext: () => void;
 		sendAmount: Snippet;
+		memo?: Snippet;
 		fee?: Snippet;
 		info?: Snippet;
 		cancel: Snippet;
@@ -29,6 +30,7 @@
 		onBack,
 		onNext,
 		sendAmount,
+		memo,
 		fee,
 		info,
 		cancel
@@ -47,6 +49,8 @@
 			onSendDestinationStep={back}
 			{selectedContact}
 		/>
+
+		{@render memo?.()}
 
 		{@render fee?.()}
 
