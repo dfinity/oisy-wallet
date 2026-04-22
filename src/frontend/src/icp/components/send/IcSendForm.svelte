@@ -7,6 +7,8 @@
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import InputText from '$lib/components/ui/InputText.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
@@ -15,6 +17,7 @@
 	interface Props {
 		amount: OptionAmount;
 		destination?: string;
+		memo?: string;
 		selectedContact?: ContactUi;
 		onBack: () => void;
 		onNext: () => void;
@@ -25,6 +28,7 @@
 	let {
 		amount = $bindable(),
 		destination = $bindable(''),
+		memo = $bindable(''),
 		selectedContact,
 		onBack,
 		onNext,
@@ -64,5 +68,17 @@
 		{#if !$isIcMintingAccount}
 			<IcTokenFee />
 		{/if}
+	{/snippet}
+
+	{#snippet info()}
+		<div class="mb-4">
+			<label class="mb-1 block text-sm text-tertiary" for="memo">{$i18n.send.text.memo}</label>
+			<InputText
+				name="memo"
+				placeholder={$i18n.send.placeholder.enter_memo}
+				required={false}
+				bind:value={memo}
+			/>
+		</div>
 	{/snippet}
 </SendForm>

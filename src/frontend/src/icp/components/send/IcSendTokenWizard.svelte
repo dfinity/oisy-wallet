@@ -60,6 +60,8 @@
 		onTokensList
 	}: Props = $props();
 
+	let memo = $state('');
+
 	/**
 	 * Send context store
 	 */
@@ -171,6 +173,7 @@
 					unitName: $sendTokenDecimals
 				}),
 				identity: $authIdentity,
+				memo: memo.trim() !== '' ? memo : undefined,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
 			};
 
@@ -218,6 +221,7 @@
 		<IcSendReview
 			{amount}
 			{destination}
+			{memo}
 			{nft}
 			{onBack}
 			onSend={nonNullish(nft) ? nftSend : send}
@@ -226,7 +230,7 @@
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<IcSendProgress {sendProgressStep} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+		<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount bind:memo>
 			{#snippet cancel()}
 				<ButtonBack onclick={back} />
 			{/snippet}
