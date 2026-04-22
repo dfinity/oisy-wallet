@@ -82,7 +82,7 @@ describe('ckbtc-transactions.utils', () => {
 		});
 
 		describe('mint transactions', () => {
-			it('should map a mint transaction as twin_token_converted', () => {
+			it('should map a mint transaction as a plain receive', () => {
 				const result = mapCkBTCTransaction({
 					transaction: createMockIcrcMintTransaction(),
 					identity: undefined,
@@ -90,8 +90,8 @@ describe('ckbtc-transactions.utils', () => {
 					env: 'mainnet'
 				});
 
-				expect(result.fromLabel).toBe('transaction.label.twin_network');
-				expect(result.typeLabel).toBe('transaction.label.twin_token_converted');
+				expect(result.fromLabel).toBeUndefined();
+				expect(result.typeLabel).toBe('receive.text.receive');
 				expect(result.status).toBe('executed');
 			});
 
