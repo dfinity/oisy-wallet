@@ -26,10 +26,7 @@ import { maxBigInt } from '$lib/utils/bigint.utils';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 
-const BSC_CHAIN_IDS: EthereumChainId[] = [
-	BSC_MAINNET_NETWORK.chainId,
-	BSC_TESTNET_NETWORK.chainId
-];
+const BSC_CHAIN_IDS: EthereumChainId[] = [BSC_MAINNET_NETWORK.chainId, BSC_TESTNET_NETWORK.chainId];
 
 const getGasFeeFloor = (
 	chainId: EthereumChainId
@@ -154,10 +151,8 @@ export const getEthFeeDataWithProvider = async ({
 		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
 	} = await getSuggestedFeeData();
 
-	const {
-		maxFeePerGas: floorMaxFeePerGas,
-		maxPriorityFeePerGas: floorMaxPriorityFeePerGas
-	} = getGasFeeFloor(chainId);
+	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
+		getGasFeeFloor(chainId);
 
 	const feeData = {
 		...feeDataRest,
