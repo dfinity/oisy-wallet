@@ -50,9 +50,9 @@ export class AuthClientProvider {
 	// matches `safeCreateAuthClient` (which is genuinely async) and so all
 	// callers uniformly `await` the result.
 	// eslint-disable-next-line require-await
-	createAuthClient = async (
-		{ forceRecreate }: { forceRecreate?: boolean } = {}
-	): Promise<AuthClient> => {
+	createAuthClient = async ({
+		forceRecreate
+	}: { forceRecreate?: boolean } = {}): Promise<AuthClient> => {
 		const authClient = this.#authClient;
 
 		if (!forceRecreate && nonNullish(authClient)) {
