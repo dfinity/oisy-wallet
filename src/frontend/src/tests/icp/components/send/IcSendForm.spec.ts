@@ -55,6 +55,15 @@ describe('IcSendForm', () => {
 		expect(toolbar).not.toBeNull();
 	});
 
+	it('should render the memo input field', () => {
+		const { getByPlaceholderText } = render(IcSendForm, {
+			props,
+			context: mockContext
+		});
+
+		expect(getByPlaceholderText(en.send.placeholder.enter_memo)).toBeInTheDocument();
+	});
+
 	it('should not render the fee if the user is the minting account', () => {
 		isIcMintingAccount.set(true);
 
