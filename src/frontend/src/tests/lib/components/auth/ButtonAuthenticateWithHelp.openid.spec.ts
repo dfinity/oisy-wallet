@@ -1,4 +1,5 @@
 import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
+import type * as AppConstants from '$lib/constants/app.constants';
 import {
 	LOGIN_BUTTON,
 	LOGIN_BUTTON_APPLE,
@@ -17,7 +18,7 @@ import { get } from 'svelte/store';
 // `DFX_NETWORK=local` where that canister id IS defined, so we override it
 // here to exercise the production code path.
 vi.mock('$lib/constants/app.constants', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('$lib/constants/app.constants')>();
+	const actual = await importOriginal<typeof AppConstants>();
 
 	return {
 		...actual,

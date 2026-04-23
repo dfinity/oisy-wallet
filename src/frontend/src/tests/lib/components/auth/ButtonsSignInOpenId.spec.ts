@@ -59,7 +59,7 @@ describe('ButtonsSignInOpenId', () => {
 
 	it.each(cases)(
 		'should invoke onProviderSelected with "$provider" when its button is clicked',
-		async ({ provider, testId }) => {
+		({ provider, testId }) => {
 			const onProviderSelected = vi.fn();
 
 			const { container } = render(ButtonsSignInOpenId, { props: { onProviderSelected } });

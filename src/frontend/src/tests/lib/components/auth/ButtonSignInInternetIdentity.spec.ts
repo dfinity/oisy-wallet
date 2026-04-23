@@ -22,7 +22,7 @@ describe('ButtonSignInInternetIdentity', () => {
 		expect(button?.textContent).toContain(get(i18n).auth.text.internet_identity);
 	});
 
-	it('should call onclick when the button is clicked', async () => {
+	it('should call onclick when the button is clicked', () => {
 		const onclick = vi.fn();
 
 		const { container } = render(ButtonSignInInternetIdentity, { props: { onclick } });
