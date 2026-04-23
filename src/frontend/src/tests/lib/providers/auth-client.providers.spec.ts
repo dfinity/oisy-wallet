@@ -1,6 +1,20 @@
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { AuthClient, KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
+import type * as IcpSdkIdentity from '@icp-sdk/core/identity';
+import { DelegationChain, isDelegationValid } from '@icp-sdk/core/identity';
+
+vi.mock('@icp-sdk/core/identity', async () => {
+	const actual = await vi.importActual<typeof IcpSdkIdentity>('@icp-sdk/core/identity');
+	return {
+		...actual,
+		isDelegationValid: vi.fn(actual.isDelegationValid),
+		DelegationChain: {
+			...actual.DelegationChain,
+			fromJSON: vi.fn(actual.DelegationChain.fromJSON)
+		}
+	};
+});
 
 describe('auth-client.providers', () => {
 	const {
@@ -92,29 +106,62 @@ describe('auth-client.providers', () => {
 	});
 
 	describe('loadIdentity', () => {
+		const mockDelegationChainJson = 'mock-delegation-chain-json';
+		const mockParsedChain = {} as DelegationChain;
+
 		beforeEach(() => {
-			vi.spyOn(AuthClient.prototype, 'isAuthenticated').mockReturnValue(false);
 			vi.spyOn(AuthClient.prototype, 'getIdentity').mockResolvedValue(mockIdentity);
+
+			vi.mocked(DelegationChain.fromJSON).mockReturnValue(mockParsedChain);
+			vi.mocked(isDelegationValid).mockReturnValue(true);
 		});
 
-		it('should return undefined if not authenticated', async () => {
-			vi.spyOn(AuthClient.prototype, 'isAuthenticated').mockReturnValue(false);
+		it('should return undefined when no delegation is stored', async () => {
+			vi.mocked(authClientStorage.get).mockResolvedValue(null);
 
 			const result = await loadIdentity();
 
 			expect(result).toBeUndefined();
 		});
 
-		it('should return identity if authenticated', async () => {
-			vi.spyOn(AuthClient.prototype, 'isAuthenticated').mockReturnValue(true);
+		it('should return undefined when the stored delegation is not a string', async () => {
+			vi.mocked(authClientStorage.get).mockResolvedValue({} as unknown as string);
+
+			const result = await loadIdentity();
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when the delegation is invalid', async () => {
+			vi.mocked(authClientStorage.get).mockResolvedValue(mockDelegationChainJson);
+			vi.mocked(isDelegationValid).mockReturnValue(false);
+
+			const result = await loadIdentity();
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when parsing the delegation throws', async () => {
+			vi.mocked(authClientStorage.get).mockResolvedValue(mockDelegationChainJson);
+			vi.mocked(DelegationChain.fromJSON).mockImplementation(() => {
+				throw new Error('invalid json');
+			});
+
+			const result = await loadIdentity();
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return the identity when the delegation is valid', async () => {
+			vi.mocked(authClientStorage.get).mockResolvedValue(mockDelegationChainJson);
 
 			const result = await loadIdentity();
 
 			expect(result).toBe(mockIdentity);
 		});
 
-		it('should not call getIdentity when not authenticated', async () => {
-			vi.spyOn(AuthClient.prototype, 'isAuthenticated').mockReturnValue(false);
+		it('should not call getIdentity when the delegation is missing or invalid', async () => {
+			vi.mocked(authClientStorage.get).mockResolvedValue(null);
 			const getIdentitySpy = vi
 				.spyOn(AuthClient.prototype, 'getIdentity')
 				.mockResolvedValue(mockIdentity);
@@ -122,6 +169,15 @@ describe('auth-client.providers', () => {
 			await loadIdentity();
 
 			expect(getIdentitySpy).not.toHaveBeenCalled();
+		});
+
+		it('should not rely on AuthClient.isAuthenticated (not worker-safe in @icp-sdk/auth v6)', async () => {
+			vi.mocked(authClientStorage.get).mockResolvedValue(mockDelegationChainJson);
+			const isAuthenticatedSpy = vi.spyOn(AuthClient.prototype, 'isAuthenticated');
+
+			await loadIdentity();
+
+			expect(isAuthenticatedSpy).not.toHaveBeenCalled();
 		});
 	});
 });
