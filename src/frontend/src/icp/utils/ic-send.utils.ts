@@ -58,14 +58,14 @@ export const mapIcSendErrorMsg = ({
 }: {
 	err: unknown;
 	i18n: I18n;
-}): string => {
-	const message = err instanceof Error ? err.message : String(err);
+}): { text: string; known: boolean } => {
+	const message = (err instanceof Error ? err.message : String(err)).toLowerCase();
 
-	if (message.includes('Memo size') || message.toLowerCase().includes('memo too long')) {
-		return i18n.send.error.memo_too_long;
+	if (message.includes('memo size') || message.includes('memo too long')) {
+		return { text: i18n.send.error.memo_too_long, known: true };
 	}
 
-	return i18n.send.error.unexpected;
+	return { text: i18n.send.error.unexpected, known: false };
 };
 
 export const isInvalidDestinationIc = ({
