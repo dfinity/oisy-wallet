@@ -1,5 +1,10 @@
 import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
-import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
+import {
+	AUTH_SIGNING_IN_HELP_LINK,
+	LOGIN_BUTTON_APPLE,
+	LOGIN_BUTTON_GOOGLE,
+	LOGIN_BUTTON_MICROSOFT
+} from '$lib/constants/test-ids.constants';
 import * as auth from '$lib/services/auth.services';
 import { authLocked } from '$lib/stores/locked.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -145,4 +150,20 @@ describe('ButtonAuthenticateWithHelp', () => {
 		expect(tokensSortResetSpy).not.toHaveBeenCalled();
 		expect(tokenCategoryFilterResetSpy).not.toHaveBeenCalled();
 	});
+
+	// Test env runs with DFX_NETWORK=local, so INTERNET_IDENTITY_CANISTER_ID is
+	// defined and the component must hide the One-Click OpenID buttons. This
+	// protects us from accidentally exposing them on a local II replica, which
+	// doesn't handle the `?openid=...` query param. The non-local path (social
+	// buttons visible) is covered in `ButtonAuthenticateWithHelp.openid.spec.ts`.
+	it.each([LOGIN_BUTTON_GOOGLE, LOGIN_BUTTON_APPLE, LOGIN_BUTTON_MICROSOFT])(
+		'should not render the %s button in local dev',
+		(testId) => {
+			const { container } = render(ButtonAuthenticateWithHelp);
+
+			expect(
+				container.querySelector<HTMLButtonElement>(`button[data-tid="${testId}"]`)
+			).not.toBeInTheDocument();
+		}
+	);
 });
