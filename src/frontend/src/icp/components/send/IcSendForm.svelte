@@ -5,6 +5,7 @@
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
+	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
@@ -47,6 +48,8 @@
 	);
 
 	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
+
+	let isIcrcDestination = $derived(!invalidIcrcAddress(destination));
 </script>
 
 <SendForm
@@ -63,13 +66,15 @@
 	{/snippet}
 
 	{#snippet memo()}
-		<label class="font-bold" for="memo">{$i18n.send.text.memo}:</label>
-		<InputText
-			name="memo"
-			placeholder={$i18n.send.placeholder.enter_memo}
-			required={false}
-			bind:value={$sendMemo}
-		/>
+		{#if isIcrcDestination}
+			<label class="font-bold" for="memo">{$i18n.send.text.memo}:</label>
+			<InputText
+				name="memo"
+				placeholder={$i18n.send.placeholder.enter_memo}
+				required={false}
+				bind:value={$sendMemo}
+			/>
+		{/if}
 	{/snippet}
 
 	{#snippet fee()}

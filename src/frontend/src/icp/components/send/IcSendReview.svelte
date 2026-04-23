@@ -43,10 +43,10 @@
 	{/snippet}
 
 	{#snippet memo()}
-		{#if notEmptyString($sendMemo)}
+		{#if notEmptyString($sendMemo.trim())}
 			<div class="mb-4">
 				<p class="text-tertiary text-sm">{$i18n.send.text.memo}</p>
-				<p>{$sendMemo}</p>
+				<p>{$sendMemo.trim()}</p>
 			</div>
 		{/if}
 	{/snippet}

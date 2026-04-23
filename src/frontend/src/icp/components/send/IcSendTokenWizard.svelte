@@ -7,6 +7,7 @@
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import { sendNft } from '$icp/services/nft-send.services';
+	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -171,7 +172,7 @@
 					unitName: $sendTokenDecimals
 				}),
 				identity: $authIdentity,
-				memo: $sendMemo || undefined,
+				...(!invalidIcrcAddress(destination) ? { memo: $sendMemo || undefined } : {}),
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
 			};
 
