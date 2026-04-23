@@ -38,7 +38,8 @@
 		fee,
 		incoming,
 		approveSpender,
-		approveExpiresAt
+		approveExpiresAt,
+		memo
 	} = $derived(transaction);
 
 	let isIncoming = $derived(type === 'receive' || type === 'mint');
@@ -154,6 +155,13 @@
 							language: $currentLanguage
 						})}
 					</output>
+				</ListItem>
+			{/if}
+
+			{#if nonNullish(memo)}
+				<ListItem>
+					<span>{$i18n.send.text.memo}</span>
+					<output>{memo}</output>
 				</ListItem>
 			{/if}
 		</List>
