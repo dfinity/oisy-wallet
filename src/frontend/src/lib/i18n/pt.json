@@ -1934,7 +1934,7 @@
 				"possessive": "nossos "
 			},
 			"title": "",
-			"instruction": "Ao se registrar, você concorda com os $link",
+			"instruction": "Ao fazer login, você concorda com os $link",
 			"body": ""
 		},
 		"alt": {
