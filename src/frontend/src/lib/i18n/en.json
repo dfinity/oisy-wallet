@@ -1063,6 +1063,7 @@
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
 			"enter_memo": "Enter memo (optional)",
+			"enter_memo_nat64": "Enter memo as a number (optional)",
 			"xrp_destination_tag": "Enter XRP destination tag (optional)",
 			"select_network": "Select network",
 			"search_nfts": "Search collectibles"
@@ -1094,6 +1095,7 @@
 			"unknown_cketh": "The ckETH token cannot be retrieved.",
 			"destination_address_invalid": "Destination address is invalid.",
 			"amount_invalid": "Amount is invalid.",
+			"invalid_nat64_memo": "Memo must be a whole number between 0 and 18446744073709551615.",
 			"xrp_destination_tag_invalid": "XRP destination tag must be a whole number between 0 and 4294967295.",
 			"insufficient_funds_verbose_btc": "The specified amount is higher than the amount you have available to send. Note that amounts from unconfirmed incoming Bitcoin can't be sent until confirmed.",
 			"insufficient_funds_for_reserve": "Insufficient funds: the amount must leave enough to cover the fee and the required XRP account reserve.",
