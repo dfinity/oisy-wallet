@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import {isNullish, nonNullish} from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ButtonSignInInternetIdentity from '$lib/components/auth/ButtonSignInInternetIdentity.svelte';
 	import ButtonsSignInOpenId from '$lib/components/auth/ButtonsSignInOpenId.svelte';
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
