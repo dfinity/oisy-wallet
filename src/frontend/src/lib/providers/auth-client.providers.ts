@@ -125,13 +125,13 @@ export class AuthClientProvider {
 	 * available inside Web Workers and throws
 	 * `ReferenceError: localStorage is not defined`.
 	 *
-	 * Instead we read the delegation directly from IndexedDB (the same
+	 * Instead, we read the delegation directly from IndexedDB (the same
 	 * backing store the `AuthClient` uses) and validate it. This works
 	 * identically in the main thread and in workers.
 	 */
 	loadIdentity = async (): Promise<Identity | undefined> => {
 		if (!(await this.#hasValidDelegation())) {
-			return undefined;
+			return;
 		}
 
 		const authClient = await this.createAuthClient();
