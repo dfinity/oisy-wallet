@@ -1148,6 +1148,7 @@
 			"solana_insufficient_funds_for_fee": "O seu saldo de SOL não é suficiente para cobrir as taxas de transação.",
 			"solana_insufficient_funds_for_rent": "O seu saldo de SOL não é suficiente para cobrir o aluguel necessário para a criação da conta.",
 			"fee_calc_unsupported_standard": "Não foi possível calcular a taxa pois o padrão de token fornecido não é suportado.",
+			"memo_too_long": "O memo é muito longo. Por favor, encurte-o e tente novamente.",
 			"xrp_send_expired": "Seu envio de $amount $symbol em $network não foi concluído: a rede não o incluiu em tempo. Nada saiu da sua carteira e é seguro enviar novamente.",
 			"xrp_send_already_in_flight": "Um pagamento XRP anterior deste endereço ainda não foi liquidado. Nada foi enviado — aguarde a conclusão, o que leva cerca de um minuto, e envie novamente.",
 			"xrp_send_not_guarded": "Não conseguimos verificar se um pagamento XRP anterior ainda está sendo liquidado. Nada foi enviado — tente novamente em um momento.",

@@ -52,6 +52,22 @@ export const isInvalidNat64Memo = (memo: string): boolean => {
 	}
 };
 
+export const mapIcSendErrorMsg = ({
+	err,
+	i18n
+}: {
+	err: unknown;
+	i18n: I18n;
+}): string => {
+	const message = err instanceof Error ? err.message : String(err);
+
+	if (message.includes('Memo size') || message.toLowerCase().includes('memo too long')) {
+		return i18n.send.error.memo_too_long;
+	}
+
+	return i18n.send.error.unexpected;
+};
+
 export const isInvalidDestinationIc = ({
 	destination,
 	tokenStandard,

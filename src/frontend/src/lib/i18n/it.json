@@ -1148,6 +1148,7 @@
 			"solana_insufficient_funds_for_fee": "Il tuo saldo SOL non è sufficiente per coprire le commissioni di transazione.",
 			"solana_insufficient_funds_for_rent": "Il tuo saldo SOL non è sufficiente per coprire l'affitto richiesto per la creazione dell'account.",
 			"fee_calc_unsupported_standard": "Impossibile calcolare la commissione poiché lo standard token fornito non è supportato.",
+			"memo_too_long": "Il memo è troppo lungo. Accorcialo e riprova.",
 			"xrp_send_expired": "Il tuo invio di $amount $symbol su $network non è stato completato: la rete non lo ha incluso in tempo. Nulla ha lasciato il tuo wallet ed è sicuro inviare di nuovo.",
 			"xrp_send_already_in_flight": "Un pagamento XRP precedente da questo indirizzo non è ancora stato regolato. Non è stato inviato nulla — attendi che si concluda, ci vuole circa un minuto, poi invia di nuovo.",
 			"xrp_send_not_guarded": "Non abbiamo potuto verificare se un pagamento XRP precedente sia ancora in corso di regolamento. Non è stato inviato nulla — riprova tra un momento.",

@@ -1148,6 +1148,7 @@
 			"solana_insufficient_funds_for_fee": "Váš zůstatek SOL není dostatečný k pokrytí poplatků za transakci.",
 			"solana_insufficient_funds_for_rent": "Váš zůstatek SOL není dostatečný k pokrytí nájmu požadovaného pro vytvoření účtu.",
 			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován.",
+			"memo_too_long": "Poznámka je příliš dlouhá. Prosím zkraťte ji a zkuste znovu.",
 			"xrp_send_expired": "Vaše odeslání $amount $symbol na $network nebylo dokončeno: síť ji nezahrnula včas. Nic neopustilo vaši peněženku a je bezpečné odeslat znovu.",
 			"xrp_send_already_in_flight": "Předchozí platba XRP z této adresy ještě nebyla vypořádána. Nic nebylo odesláno — vyčkejte, než se dokončí, což trvá přibližně minutu, a poté odešlete znovu.",
 			"xrp_send_not_guarded": "Nepodařilo se nám zkontrolovat, zda se předchozí platba XRP stále vypořádává. Nic nebylo odesláno — zkuste to za okamžik znovu.",

@@ -1148,6 +1148,7 @@
 			"solana_insufficient_funds_for_fee": "Your SOL balance is not sufficient to cover the transaction fees.",
 			"solana_insufficient_funds_for_rent": "Your SOL balance is not sufficient to cover the rent required for account creation.",
 			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported.",
+			"memo_too_long": "The memo is too long. Please shorten it and try again.",
 			"xrp_send_expired": "Your send of $amount $symbol on $network was not completed: the network did not include it in time. Nothing left your wallet, and it is safe to send again.",
 			"xrp_send_already_in_flight": "An earlier XRP payment from this address has not settled yet. Nothing was sent — wait for it to finish, which takes about a minute, then send again.",
 			"xrp_send_not_guarded": "The wallet could not check whether an earlier XRP payment is still settling. Nothing was sent — try again in a moment.",
