@@ -129,6 +129,10 @@ export const mapIcrcTransaction = ({
 		? encodeIcrcAccount(fromCandidAccount(transferSpenderAccount))
 		: undefined;
 
+	const memoBytes = fromNullable(data.memo);
+	const memoText = nonNullish(memoBytes) ? new TextDecoder().decode(memoBytes) : undefined;
+	const memoField = nonNullish(memoText) && memoText.trim() !== '' ? { memo: memoText } : {};
+
 	return {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
 		type,
@@ -143,6 +147,7 @@ export const mapIcrcTransaction = ({
 			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approveSpender}`
 		}),
 		...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
-		...(nonNullish(transferSpender) && { transferSpender })
+		...(nonNullish(transferSpender) && { transferSpender }),
+		...memoField
 	};
 };
