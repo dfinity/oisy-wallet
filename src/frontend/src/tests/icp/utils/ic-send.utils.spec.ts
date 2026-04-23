@@ -123,28 +123,32 @@ describe('ic-send.utils', () => {
 	});
 
 	describe('mapIcSendErrorMsg', () => {
-		it('should return memo_too_long for Memo size errors', () => {
-			expect(mapIcSendErrorMsg({ err: new Error('Memo size exceeds limit'), i18n: en })).toBe(
-				en.send.error.memo_too_long
-			);
+		it('should return memo_too_long and known=true for Memo size errors', () => {
+			expect(mapIcSendErrorMsg({ err: new Error('Memo size exceeds limit'), i18n: en })).toEqual({
+				text: en.send.error.memo_too_long,
+				known: true
+			});
 		});
 
-		it('should return memo_too_long for memo too long errors', () => {
-			expect(mapIcSendErrorMsg({ err: new Error('memo too long'), i18n: en })).toBe(
-				en.send.error.memo_too_long
-			);
+		it('should return memo_too_long and known=true for memo too long errors', () => {
+			expect(mapIcSendErrorMsg({ err: new Error('memo too long'), i18n: en })).toEqual({
+				text: en.send.error.memo_too_long,
+				known: true
+			});
 		});
 
-		it('should return unexpected for unknown errors', () => {
-			expect(mapIcSendErrorMsg({ err: new Error('some other error'), i18n: en })).toBe(
-				en.send.error.unexpected
-			);
+		it('should return unexpected and known=false for unknown errors', () => {
+			expect(mapIcSendErrorMsg({ err: new Error('some other error'), i18n: en })).toEqual({
+				text: en.send.error.unexpected,
+				known: false
+			});
 		});
 
 		it('should handle non-Error objects', () => {
-			expect(mapIcSendErrorMsg({ err: 'some string error', i18n: en })).toBe(
-				en.send.error.unexpected
-			);
+			expect(mapIcSendErrorMsg({ err: 'some string error', i18n: en })).toEqual({
+				text: en.send.error.unexpected,
+				known: false
+			});
 		});
 	});
 

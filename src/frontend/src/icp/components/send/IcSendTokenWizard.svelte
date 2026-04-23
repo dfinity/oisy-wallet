@@ -206,12 +206,13 @@
 				}
 			});
 
-			const msg = { text: mapIcSendErrorMsg({ err, i18n: $i18n }) };
+			const { text, known } = mapIcSendErrorMsg({ err, i18n: $i18n });
+			const msg = { text };
 
-			if (msg.text === $i18n.send.error.unexpected) {
-				toastsError({ msg, err });
-			} else {
+			if (known) {
 				toastsErrorNoTrace({ msg, err });
+			} else {
+				toastsError({ msg, err });
 			}
 
 			onBack();
