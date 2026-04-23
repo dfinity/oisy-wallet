@@ -5,7 +5,8 @@
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
-	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import { invalidIcpAddress } from '$icp/utils/account.utils';
+	import { isInvalidDestinationIc, isInvalidNat64Memo } from '$icp/utils/ic-send.utils';
 	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
@@ -47,9 +48,16 @@
 			})
 	);
 
-	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
-
 	let isIcrcDestination = $derived(!invalidIcrcAddress(destination));
+	let isIcpDestination = $derived(!invalidIcpAddress(destination));
+
+	let invalidMemo = $derived(
+		isIcpDestination && nonNullish($sendMemo) && $sendMemo !== '' && isInvalidNat64Memo($sendMemo)
+	);
+
+	let invalid = $derived(
+		invalidDestination || nonNullish(amountError) || isNullish(amount) || invalidMemo
+	);
 </script>
 
 <SendForm
@@ -66,19 +74,24 @@
 	{/snippet}
 
 	{#snippet memo()}
-		{#if isIcrcDestination}
+		{#if isIcrcDestination || isIcpDestination}
 			<div class="-mt-6 mb-4">
 				<div class="flex items-center gap-3">
 					<label class="shrink-0 text-sm text-tertiary" for="memo">{$i18n.send.text.memo}</label>
 					<div class="flex-1">
 						<InputText
 							name="memo"
-							placeholder={$i18n.send.placeholder.enter_memo}
+							placeholder={isIcpDestination
+								? $i18n.send.placeholder.enter_memo_nat64
+								: $i18n.send.placeholder.enter_memo}
 							required={false}
 							bind:value={$sendMemo}
 						/>
 					</div>
 				</div>
+				{#if invalidMemo}
+					<p class="mt-1 text-sm text-error-primary">{$i18n.send.assertion.invalid_nat64_memo}</p>
+				{/if}
 			</div>
 		{/if}
 	{/snippet}
