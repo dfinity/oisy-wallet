@@ -55,9 +55,18 @@ describe('IcSendForm', () => {
 		expect(toolbar).not.toBeNull();
 	});
 
-	it('should render the memo input field', () => {
-		const { getByPlaceholderText } = render(IcSendForm, {
+	it('should not render the memo input field for non-ICRC destinations', () => {
+		const { queryByPlaceholderText } = render(IcSendForm, {
 			props,
+			context: mockContext
+		});
+
+		expect(queryByPlaceholderText(en.send.placeholder.enter_memo)).toBeNull();
+	});
+
+	it('should render the memo input field for ICRC destinations', () => {
+		const { getByPlaceholderText } = render(IcSendForm, {
+			props: { ...props, destination: 'rrkah-fqaaa-aaaaa-aaaaq-cai' },
 			context: mockContext
 		});
 
