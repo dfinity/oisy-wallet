@@ -68,8 +68,7 @@ export const mapIcpTransaction = ({
 		: nat64Memo !== ZERO
 			? nat64Memo.toString()
 			: undefined;
-	const memoField =
-		nonNullish(memoText) && memoText.trim() !== '' ? { memo: memoText } : {};
+	const memoField = nonNullish(memoText) && memoText.trim() !== '' ? { memo: memoText } : {};
 
 	const tx: Pick<IcTransactionUi, 'timestamp' | 'id' | 'status' | 'txExplorerUrl'> = {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
