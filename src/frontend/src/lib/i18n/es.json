@@ -1938,7 +1938,7 @@
 				"possessive": "nuestros "
 			},
 			"title": "",
-			"instruction": "Al hacer clic en este botón, aceptas los $link",
+			"instruction": "Al iniciar sesión, aceptas los $link",
 			"body": ""
 		},
 		"alt": {
