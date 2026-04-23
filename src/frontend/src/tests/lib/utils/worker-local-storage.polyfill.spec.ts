@@ -97,7 +97,7 @@ describe('worker-local-storage.polyfill', () => {
 			globalThis.localStorage.setItem('b', '2');
 			globalThis.localStorage.clear();
 
-			expect(globalThis.localStorage.length).toBe(0);
+			expect(globalThis.localStorage).toHaveLength(0);
 			expect(globalThis.localStorage.getItem('a')).toBeNull();
 			expect(globalThis.localStorage.getItem('b')).toBeNull();
 		});
@@ -108,7 +108,7 @@ describe('worker-local-storage.polyfill', () => {
 			globalThis.localStorage.setItem('a', '1');
 			globalThis.localStorage.setItem('b', '2');
 
-			expect(globalThis.localStorage.length).toBe(2);
+			expect(globalThis.localStorage).toHaveLength(2);
 			expect(globalThis.localStorage.key(0)).toBe('a');
 			expect(globalThis.localStorage.key(1)).toBe('b');
 			expect(globalThis.localStorage.key(999)).toBeNull();

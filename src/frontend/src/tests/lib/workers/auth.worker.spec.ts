@@ -4,12 +4,11 @@ import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-messag
 import { onAuthMessage } from '$lib/workers/auth.worker';
 import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
 import { KEY_STORAGE_DELEGATION } from '@icp-sdk/auth/client';
+import type * as IcpSdkIdentity from '@icp-sdk/core/identity';
 import { DelegationChain, isDelegationValid } from '@icp-sdk/core/identity';
 
 vi.mock('@icp-sdk/core/identity', async () => {
-	const actual = await vi.importActual<typeof import('@icp-sdk/core/identity')>(
-		'@icp-sdk/core/identity'
-	);
+	const actual = await vi.importActual<typeof IcpSdkIdentity>('@icp-sdk/core/identity');
 	return {
 		...actual,
 		isDelegationValid: vi.fn(actual.isDelegationValid),
@@ -68,10 +67,6 @@ describe('auth.worker', () => {
 		globalThis.postMessage = postMessageMock;
 	});
 
-	afterAll(() => {
-		globalThis.postMessage = originalPostMessage;
-	});
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
@@ -86,6 +81,10 @@ describe('auth.worker', () => {
 		// Ensure the module-level timer is cleared so tests don't leak into each other.
 		onAuthMessage(createEvent('stopIdleTimer'));
 		vi.useRealTimers();
+	});
+
+	afterAll(() => {
+		globalThis.postMessage = originalPostMessage;
 	});
 
 	describe('onAuthMessage', () => {
@@ -128,7 +127,10 @@ describe('auth.worker', () => {
 			await onAuthMessage(createEvent('startIdleTimer'));
 			await vi.advanceTimersByTimeAsync(AUTH_TIMER_INTERVAL);
 
-			const expected = Number(MOCK_EXPIRATION_NS / 1_000_000n) - now;
+			// `Date.now()` at the moment the worker computes the remaining time has
+			// advanced by `AUTH_TIMER_INTERVAL` (the fake timer tick that triggered
+			// the check), so we subtract it from the delegation expiration in ms.
+			const expected = Number(MOCK_EXPIRATION_NS / 1_000_000n) - (now + AUTH_TIMER_INTERVAL);
 
 			expect(postMessageMock).toHaveBeenCalledWith({
 				msg: 'delegationRemainingTime',
@@ -149,7 +151,7 @@ describe('auth.worker', () => {
 			await onAuthMessage(createEvent('startIdleTimer'));
 			await vi.advanceTimersByTimeAsync(AUTH_TIMER_INTERVAL);
 
-			expect(AuthClientProvider.getInstance().storage.get).toHaveBeenCalledTimes(1);
+			expect(AuthClientProvider.getInstance().storage.get).toHaveBeenCalledOnce();
 		});
 
 		it('should emit `signOutIdleTimer` when no delegation is stored', async () => {
@@ -182,6 +184,7 @@ describe('auth.worker', () => {
 			const signOutCalls = postMessageMock.mock.calls.filter(
 				([payload]) => payload?.msg === 'signOutIdleTimer'
 			);
+
 			expect(signOutCalls).toHaveLength(1);
 		});
 
@@ -204,8 +207,7 @@ describe('auth.worker', () => {
 
 			await onAuthMessage(createEvent('stopIdleTimer'));
 
-			const callsBefore = vi.mocked(AuthClientProvider.getInstance().storage.get).mock.calls
-				.length;
+			const callsBefore = vi.mocked(AuthClientProvider.getInstance().storage.get).mock.calls.length;
 			await vi.advanceTimersByTimeAsync(AUTH_TIMER_INTERVAL * 3);
 			const callsAfter = vi.mocked(AuthClientProvider.getInstance().storage.get).mock.calls.length;
 

@@ -49,3 +49,7 @@ if (typeof globalThis.localStorage === 'undefined') {
 		writable: false
 	});
 }
+
+// Mark this file as a module (it otherwise has no imports/exports and TS
+// treats it as a global script, which breaks `await import()` in tests).
+export {};
