@@ -7,7 +7,7 @@ import {
 } from '$lib/constants/app.constants';
 import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
-import { InternetIdentityDomain } from '$lib/types/auth';
+import { InternetIdentityDomain, type OpenIdProvider } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { NullishIdentity } from '$lib/types/identity';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
@@ -28,6 +28,13 @@ let authClient: Nullish<AuthClient>;
 export interface AuthSignInParams {
 	domain?: InternetIdentityDomain;
 	asPopup?: boolean;
+	/**
+	 * When provided, sign-in goes through Internet Identity 2.0 using the
+	 * matching OpenID Connect provider (One-Click sign-in with Google, Apple
+	 * or Microsoft). Leaving it undefined falls back to the standard II
+	 * passkey / device authentication flow.
+	 */
+	openIdProvider?: OpenIdProvider;
 }
 
 export interface AuthStore extends Readable<AuthStoreData> {
@@ -86,29 +93,38 @@ const initAuthStore = (): AuthStore => {
 			await sync({ forceSync: true });
 		},
 
-		signIn: async ({ domain, asPopup }: AuthSignInParams) => {
+		signIn: async ({ domain, asPopup, openIdProvider }: AuthSignInParams) => {
 			// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
 			// We are not able to recreate authClient safely here since there are some browsers (like Safari) that block popups if there is an additional async call in this call stack.
 			if (isNullish(authClient)) {
 				throw new AuthClientNotInitializedError();
 			}
 
+			// One-Click OpenID sign-in is only supported by Internet Identity 2.0
+			// on mainnet (id.ai); the local II replica does not handle the
+			// `?openid=…` query param, so we always force id.ai for this flow.
+			const effectiveDomain =
+				nonNullish(openIdProvider) && isNullish(INTERNET_IDENTITY_CANISTER_ID)
+					? InternetIdentityDomain.VERSION_2_0
+					: domain;
+
 			// `@icp-sdk/auth` v6 relies on ICRC-29 `PostMessageTransport` (heartbeat
 			// + JSON-RPC), which Internet Identity serves from `/authorize`. The
 			// root `/` on `id.ai` returns the marketing landing page and the
 			// heartbeat handshake silently times out there, which is why sign-in
 			// appeared to do nothing after the v4 → v6 migration.
-			const identityProvider = nonNullish(INTERNET_IDENTITY_CANISTER_ID)
-				? /apple/i.test(navigator?.vendor)
-					? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
-					: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-				: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}/authorize${domain === InternetIdentityDomain.VERSION_2_0 ? '?feature_flag_min_guided_upgrade=true' : ''}`;
+			const identityProvider =
+				nonNullish(INTERNET_IDENTITY_CANISTER_ID) && isNullish(openIdProvider)
+					? /apple/i.test(navigator?.vendor)
+						? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
+						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
+					: `https://${effectiveDomain ?? InternetIdentityDomain.VERSION_1_0}/authorize${effectiveDomain === InternetIdentityDomain.VERSION_2_0 ? '?feature_flag_min_guided_upgrade=true' : ''}`;
 
-			// In `@icp-sdk/auth` v6, `identityProvider`, `windowOpenerFeatures` and
-			// `derivationOrigin` are constructor-bound rather than `login()` params, so
-			// we build a dedicated client for this sign-in. Construction is synchronous,
-			// so the user-gesture stack is preserved up to the `signIn()` call that
-			// opens the popup.
+			// In `@icp-sdk/auth` v6, `identityProvider`, `windowOpenerFeatures`,
+			// `derivationOrigin` and `openIdProvider` are constructor-bound rather
+			// than `login()` params, so we build a dedicated client for this
+			// sign-in. Construction is synchronous, so the user-gesture stack is
+			// preserved up to the `signIn()` call that opens the popup.
 			const client = AuthClientProvider.getInstance().createAuthClientForSignIn({
 				identityProvider,
 				...(asPopup
@@ -119,6 +135,7 @@ const initAuthStore = (): AuthStore => {
 							})
 						}
 					: {}),
+				...(nonNullish(openIdProvider) ? { openIdProvider } : {}),
 				...getOptionalDerivationOrigin()
 			});
 
