@@ -39,6 +39,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.memo).toBeUndefined();
 		});
 
@@ -48,6 +49,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.memo).toBe('12345');
 		});
 
@@ -59,6 +61,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.memo).toBe(text);
 		});
 
@@ -70,6 +73,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.memo).toBe(text);
 		});
 
@@ -80,6 +84,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.memo).toBeUndefined();
 		});
 
@@ -95,6 +100,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.memo).toBe('7');
 		});
 
@@ -110,6 +116,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.memo).toBe('8');
 		});
 
@@ -132,6 +139,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.memo).toBe('9');
 		});
 
@@ -141,6 +149,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.memo).toBe('42');
 		});
 	});
@@ -152,6 +161,7 @@ describe('mapIcpTransaction', () => {
 				transaction: { transaction, id },
 				identity: mockIdentity
 			});
+
 			expect(result.id).toBe('42');
 			expect(result.timestamp).toBe(mockTimestamp);
 			expect(result.status).toBe('executed');
