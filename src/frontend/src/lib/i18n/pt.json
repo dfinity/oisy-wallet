@@ -126,13 +126,17 @@
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
+			"internet_identity": "",
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
 			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
 			"social_login": "Acesso instantâneo e privado + login social"
 		},
 		"alt": {
-			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"
+			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": ""

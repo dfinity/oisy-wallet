@@ -10,7 +10,7 @@ import type { Identity } from '@icp-sdk/core/agent';
 
 type SignInAuthClientOptions = Pick<
 	AuthClientCreateOptions,
-	'identityProvider' | 'windowOpenerFeatures' | 'derivationOrigin'
+	'identityProvider' | 'windowOpenerFeatures' | 'derivationOrigin' | 'openIdProvider'
 >;
 
 export class AuthClientProvider {
@@ -88,13 +88,19 @@ export class AuthClientProvider {
 	/**
 	 * Synchronously creates a fresh `AuthClient` tailored to a sign-in attempt.
 	 *
-	 * In `@icp-sdk/auth` v6, `identityProvider`, `windowOpenerFeatures` and `derivationOrigin`
-	 * are constructor-bound (they used to be passed to `login()`), so a new client
-	 * is required per sign-in. Construction stays synchronous so this can be
-	 * called from a user-gesture handler without triggering popup blockers.
+	 * In `@icp-sdk/auth` v6, `identityProvider`, `windowOpenerFeatures`,
+	 * `derivationOrigin` and `openIdProvider` are constructor-bound
+	 * (they used to be passed to `login()`), so a new client is required per
+	 * sign-in. Construction stays synchronous so this can be called from a
+	 * user-gesture handler without triggering popup blockers.
 	 *
 	 * The new client replaces the cached one so subsequent calls via
 	 * `createAuthClient` return the same instance.
+	 *
+	 * Passing `openIdProvider` (e.g. `'google'`) makes the SDK append an
+	 * `?openid=<issuer>` query param to the `identityProvider` URL and Internet
+	 * Identity 2.0 (id.ai) performs the OIDC flow against that provider before
+	 * returning a delegation identical to a normal II sign-in.
 	 */
 	createAuthClientForSignIn = (signInOptions: SignInAuthClientOptions): AuthClient => {
 		this.#authClient = this.#buildAuthClient(signInOptions);
