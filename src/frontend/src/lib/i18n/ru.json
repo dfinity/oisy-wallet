@@ -1934,7 +1934,7 @@
 				"possessive": "our "
 			},
 			"title": "",
-			"instruction": "Нажимая на кнопку вы одобряете $link",
+			"instruction": "Регистрируясь, вы принимаете $link",
 			"body": ""
 		},
 		"alt": {

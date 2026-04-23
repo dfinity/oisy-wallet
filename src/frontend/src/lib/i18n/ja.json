@@ -1934,7 +1934,7 @@
 				"possessive": "当財団の"
 			},
 			"title": "",
-			"instruction": "このボタンをクリックすると、以下に同意したことになります。$link",
+			"instruction": "登録することで、以下に同意したことになります。$link",
 			"body": ""
 		},
 		"alt": {
