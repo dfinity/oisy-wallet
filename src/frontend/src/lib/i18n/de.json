@@ -1063,6 +1063,7 @@
 			"enter_recipient_address": "Gib Empfängeradresse, Name oder Alias ein",
 			"enter_wallet_address": "Gib Wallet-Adresse, Name oder Alias ein",
 			"enter_memo": "Memo eingeben (optional)",
+			"enter_memo_nat64": "",
 			"xrp_destination_tag": "Gib XRP-Ziel-Tag ein (optional)",
 			"select_network": "Netzwerk auswählen",
 			"search_nfts": "Sammlerstücke suchen"
@@ -1094,6 +1095,7 @@
 			"unknown_cketh": "Das ckETH-Token kann nicht abgerufen werden.",
 			"destination_address_invalid": "Zieladresse ist ungültig.",
 			"amount_invalid": "Betrag ist ungültig.",
+			"invalid_nat64_memo": "",
 			"xrp_destination_tag_invalid": "Das XRP-Ziel-Tag muss eine ganze Zahl zwischen 0 und 4294967295 sein.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Unzureichende Mittel: Der Betrag muss genug übrig lassen, um die Gebühr und die erforderliche XRP-Kontoreserve zu decken.",
