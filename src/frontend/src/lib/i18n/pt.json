@@ -934,6 +934,7 @@
 			"enter_recipient_address": "Insira o endereço do destinatário, nome ou alias",
 			"enter_wallet_address": "Insira o endereço da carteira, nome ou alias",
 			"enter_memo": "Inserir memo (opcional)",
+			"enter_memo_nat64": "",
 			"select_network": "Selecionar rede",
 			"search_nfts": ""
 		},
@@ -958,6 +959,7 @@
 			"unknown_cketh": "O token ckETH não pode ser recuperado.",
 			"destination_address_invalid": "Endereço de destino inválido.",
 			"amount_invalid": "Valor inválido.",
+			"invalid_nat64_memo": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Fundos insuficientes para gás",
 			"insufficient_funds_for_amount": "Fundos insuficientes para o valor",
