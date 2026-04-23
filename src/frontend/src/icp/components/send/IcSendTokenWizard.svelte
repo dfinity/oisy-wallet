@@ -6,10 +6,10 @@
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import { sendNft } from '$icp/services/nft-send.services';
-	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { toIcNftSendErrorType } from '$icp/utils/ic-nft.utils';
+	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
