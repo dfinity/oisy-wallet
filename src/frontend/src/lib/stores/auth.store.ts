@@ -93,11 +93,16 @@ const initAuthStore = (): AuthStore => {
 				throw new AuthClientNotInitializedError();
 			}
 
+			// `@icp-sdk/auth` v6 relies on ICRC-29 `PostMessageTransport` (heartbeat
+			// + JSON-RPC), which Internet Identity serves from `/authorize`. The
+			// root `/` on `id.ai` returns the marketing landing page and the
+			// heartbeat handshake silently times out there, which is why sign-in
+			// appeared to do nothing after the v4 → v6 migration.
 			const identityProvider = nonNullish(INTERNET_IDENTITY_CANISTER_ID)
 				? /apple/i.test(navigator?.vendor)
 					? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
 					: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-				: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}${domain === InternetIdentityDomain.VERSION_2_0 ? '/?feature_flag_min_guided_upgrade=true' : ''}`;
+				: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}/authorize${domain === InternetIdentityDomain.VERSION_2_0 ? '?feature_flag_min_guided_upgrade=true' : ''}`;
 
 			// In `@icp-sdk/auth` v6, `identityProvider`, `windowOpenerFeatures` and
 			// `derivationOrigin` are constructor-bound rather than `login()` params, so
