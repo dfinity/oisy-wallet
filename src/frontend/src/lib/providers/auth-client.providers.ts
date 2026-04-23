@@ -1,3 +1,9 @@
+// Side-effect import: installs an in-memory `localStorage` shim on `globalThis`
+// when missing (i.e. inside Web Workers), so that `@icp-sdk/auth` v6 — which
+// reaches into `localStorage` from several code paths — doesn't crash with
+// `ReferenceError: localStorage is not defined` when this provider is used
+// from a worker. No-op in the main thread.
+import '$lib/utils/worker-local-storage.polyfill';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	AuthClient,
@@ -7,6 +13,7 @@ import {
 	KEY_STORAGE_KEY
 } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
+import { DelegationChain, isDelegationValid } from '@icp-sdk/core/identity';
 
 type SignInAuthClientOptions = Pick<
 	AuthClientCreateOptions,
@@ -111,16 +118,40 @@ export class AuthClientProvider {
 	/**
 	 * In certain features, we want to execute jobs with the authenticated identity without getting it from the auth.store.
 	 * This is notably useful for Web Workers who do not have access to the window.
+	 *
+	 * We deliberately do NOT call `AuthClient.isAuthenticated()` here.
+	 * In `@icp-sdk/auth` v6, that method became synchronous and reads a
+	 * cached delegation expiration from `localStorage` — which is not
+	 * available inside Web Workers and throws
+	 * `ReferenceError: localStorage is not defined`.
+	 *
+	 * Instead we read the delegation directly from IndexedDB (the same
+	 * backing store the `AuthClient` uses) and validate it. This works
+	 * identically in the main thread and in workers.
 	 */
 	loadIdentity = async (): Promise<Identity | undefined> => {
-		const authClient = await this.createAuthClient();
-
-		// Not authenticated, therefore, we provide no identity as a result
-		if (!authClient.isAuthenticated()) {
+		if (!(await this.#hasValidDelegation())) {
 			return undefined;
 		}
 
+		const authClient = await this.createAuthClient();
+
 		return await authClient.getIdentity();
+	};
+
+	#hasValidDelegation = async (): Promise<boolean> => {
+		const raw = await this.#storage.get(KEY_STORAGE_DELEGATION);
+
+		if (typeof raw !== 'string') {
+			return false;
+		}
+
+		try {
+			const chain = DelegationChain.fromJSON(raw);
+			return isDelegationValid(chain);
+		} catch {
+			return false;
+		}
 	};
 
 	get storage(): IdbStorage {
