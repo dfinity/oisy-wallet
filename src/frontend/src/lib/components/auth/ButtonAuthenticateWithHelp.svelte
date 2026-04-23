@@ -69,7 +69,6 @@
 		<ButtonSignInInternetIdentity {fullWidth} onclick={() => onAuthenticate()} />
 
 		{#if openIdEnabled}
-			<!-- 1 px separator: horizontal (35×1) when stacked, vertical (1×35) in the desktop row. -->
 			<div
 				class="h-px w-[35px] bg-brand-subtle-20"
 				class:md:h-[35px]={!fullWidth}
