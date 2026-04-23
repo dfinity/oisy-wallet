@@ -122,6 +122,10 @@ export const mapIcrcTransaction = ({
 
 	const approveExpiresAt = fromNullishNullable(approveData?.expires_at);
 
+	const memoBytes = fromNullable(data.memo);
+	const memoText = nonNullish(memoBytes) ? new TextDecoder().decode(memoBytes) : undefined;
+	const memoField = nonNullish(memoText) && memoText.trim() !== '' ? { memo: memoText } : {};
+
 	return {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
 		type,
@@ -135,6 +139,7 @@ export const mapIcrcTransaction = ({
 		...(nonNullish(approveSpender) && {
 			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approveSpender}`
 		}),
-		...(nonNullish(approveExpiresAt) && { approveExpiresAt })
+		...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
+		...memoField
 	};
 };
