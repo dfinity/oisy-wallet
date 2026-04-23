@@ -52,8 +52,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 		it('should render sign in button', () => {
 			const { container } = render(ButtonAuthenticateWithHelp);
 
-			const signInButton: HTMLButtonElement | null =
-				container.querySelector(signInButtonSelector);
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
 			expect(signInButton).toBeInTheDocument();
 
@@ -69,8 +68,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 			const { container } = render(ButtonAuthenticateWithHelp);
 
-			const signInButton: HTMLButtonElement | null =
-				container.querySelector(signInButtonSelector);
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
 			expect(signInButton).toBeInTheDocument();
 
@@ -86,8 +84,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 			const { container } = render(ButtonAuthenticateWithHelp);
 
-			const signInButton: HTMLButtonElement | null =
-				container.querySelector(signInButtonSelector);
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
 			expect(signInButton).toBeInTheDocument();
 
@@ -108,8 +105,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 				}
 			});
 
-			const signInButton: HTMLButtonElement | null =
-				container.querySelector(signInButtonSelector);
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
 			expect(signInButton).toBeInTheDocument();
 
@@ -128,8 +124,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 			const { container } = render(ButtonAuthenticateWithHelp);
 
-			const signInButton: HTMLButtonElement | null =
-				container.querySelector(signInButtonSelector);
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
 			expect(signInButton).toBeInTheDocument();
 
@@ -153,8 +148,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 			const { container } = render(ButtonAuthenticateWithHelp);
 
-			const signInButton: HTMLButtonElement | null =
-				container.querySelector(signInButtonSelector);
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
 			expect(signInButton).toBeInTheDocument();
 
@@ -174,8 +168,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 			const { container } = render(ButtonAuthenticateWithHelp);
 
-			const signInButton: HTMLButtonElement | null =
-				container.querySelector(signInButtonSelector);
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
 			expect(signInButton).toBeInTheDocument();
 

@@ -44,8 +44,8 @@
 <div class="flex items-center justify-center gap-4">
 	{#each providers as { provider, icon: Icon, ariaLabel, testId } (provider)}
 		<button
+			class="hover:border-brand-primary-alt focus-visible:outline-brand-primary-alt flex size-14 items-center justify-center rounded-xl border border-brand-subtle-20 bg-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
 			aria-label={ariaLabel}
-			class="flex size-14 items-center justify-center rounded-xl border border-brand-subtle-20 bg-primary transition-colors hover:border-brand-primary-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary-alt"
 			data-tid={testId}
 			onclick={() => onProviderSelected(provider)}
 			type="button"

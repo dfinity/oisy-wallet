@@ -12,7 +12,7 @@
 </script>
 
 <button
-	class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-brand-subtle-20 bg-primary px-5 py-4 text-base leading-[22px] font-semibold whitespace-nowrap text-brand-primary-alt transition-colors hover:border-brand-primary-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary-alt"
+	class="hover:border-brand-primary-alt focus-visible:outline-brand-primary-alt flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-brand-subtle-20 bg-primary px-5 py-4 text-base leading-[22px] font-semibold whitespace-nowrap text-brand-primary-alt transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
 	class:md:w-[200px]={!fullWidth}
 	data-tid={LOGIN_BUTTON}
 	{onclick}

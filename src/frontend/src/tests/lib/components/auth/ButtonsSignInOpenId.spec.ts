@@ -13,10 +13,7 @@ describe('ButtonsSignInOpenId', () => {
 	const cases: Array<{
 		provider: OpenIdProvider;
 		testId: string;
-		ariaLabelKey:
-			| 'sign_in_with_google'
-			| 'sign_in_with_apple'
-			| 'sign_in_with_microsoft';
+		ariaLabelKey: 'sign_in_with_google' | 'sign_in_with_apple' | 'sign_in_with_microsoft';
 	}> = [
 		{ provider: 'google', testId: LOGIN_BUTTON_GOOGLE, ariaLabelKey: 'sign_in_with_google' },
 		{ provider: 'apple', testId: LOGIN_BUTTON_APPLE, ariaLabelKey: 'sign_in_with_apple' },
@@ -46,9 +43,7 @@ describe('ButtonsSignInOpenId', () => {
 				props: { onProviderSelected: vi.fn() }
 			});
 
-			const button = container.querySelector<HTMLButtonElement>(
-				`button[data-tid="${testId}"]`
-			);
+			const button = container.querySelector<HTMLButtonElement>(`button[data-tid="${testId}"]`);
 
 			expect(button).toBeInTheDocument();
 			expect(button?.getAttribute('aria-label')).toBe(get(i18n).auth.alt[ariaLabelKey]);

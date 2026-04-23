@@ -47,7 +47,7 @@ describe('ButtonSignInInternetIdentity', () => {
 			props: { onclick: vi.fn() }
 		});
 
-		expect(container.querySelector(selector)?.classList.contains('md:w-[200px]')).toBe(true);
+		expect(container.querySelector(selector)?.classList.contains('md:w-[200px]')).toBeTruthy();
 	});
 
 	it('should not cap the width when fullWidth is true', () => {
@@ -55,6 +55,6 @@ describe('ButtonSignInInternetIdentity', () => {
 			props: { onclick: vi.fn(), fullWidth: true }
 		});
 
-		expect(container.querySelector(selector)?.classList.contains('md:w-[200px]')).toBe(false);
+		expect(container.querySelector(selector)?.classList.contains('md:w-[200px]')).toBeFalsy();
 	});
 });

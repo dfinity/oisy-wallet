@@ -8,12 +8,12 @@
 </script>
 
 <svg
+	aria-hidden="true"
 	fill="none"
 	height={size}
 	viewBox="0 0 20 20"
 	width={size}
 	xmlns="http://www.w3.org/2000/svg"
-	aria-hidden="true"
 >
 	<path
 		d="M19.6 10.227c0-.709-.064-1.39-.182-2.045H10v3.868h5.382a4.6 4.6 0 0 1-1.996 3.018v2.51h3.232c1.891-1.744 2.982-4.308 2.982-7.351Z"
