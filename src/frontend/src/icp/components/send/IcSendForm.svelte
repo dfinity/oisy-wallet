@@ -67,13 +67,19 @@
 
 	{#snippet memo()}
 		{#if isIcrcDestination}
-			<label class="font-bold" for="memo">{$i18n.send.text.memo}:</label>
-			<InputText
-				name="memo"
-				placeholder={$i18n.send.placeholder.enter_memo}
-				required={false}
-				bind:value={$sendMemo}
-			/>
+			<div class="-mt-6 mb-4">
+				<div class="flex items-center gap-3">
+					<label class="shrink-0 text-sm text-tertiary" for="memo">{$i18n.send.text.memo}</label>
+					<div class="flex-1">
+						<InputText
+							name="memo"
+							placeholder={$i18n.send.placeholder.enter_memo}
+							required={false}
+							bind:value={$sendMemo}
+						/>
+					</div>
+				</div>
+			</div>
 		{/if}
 	{/snippet}
 
