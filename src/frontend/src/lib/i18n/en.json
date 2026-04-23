@@ -126,13 +126,17 @@
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
+			"internet_identity": "Internet Identity",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
 			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
 			"social_login": "Instant and private access + social login"
 		},
 		"alt": {
-			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
+			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile",
+			"sign_in_with_google": "Sign in with Google",
+			"sign_in_with_apple": "Sign in with Apple",
+			"sign_in_with_microsoft": "Sign in with Microsoft"
 		},
 		"message": {
 			"session_locked": "Your session was locked in another tab."

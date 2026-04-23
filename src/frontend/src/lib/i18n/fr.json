@@ -126,13 +126,17 @@
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
+			"internet_identity": "",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
 			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
 			"social_login": "Accès instantané et privé + connexion via les réseaux sociaux"
 		},
 		"alt": {
-			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile"
+			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "Votre session a été verrouillée dans un autre onglet."

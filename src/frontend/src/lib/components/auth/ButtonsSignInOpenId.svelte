@@ -1,0 +1,56 @@
+<script lang="ts">
+	import IconApple from '$lib/components/icons/IconApple.svelte';
+	import IconGoogle from '$lib/components/icons/IconGoogle.svelte';
+	import IconMicrosoft from '$lib/components/icons/IconMicrosoft.svelte';
+	import {
+		LOGIN_BUTTON_APPLE,
+		LOGIN_BUTTON_GOOGLE,
+		LOGIN_BUTTON_MICROSOFT
+	} from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { OpenIdProvider } from '$lib/types/auth';
+
+	interface Props {
+		onProviderSelected: (provider: OpenIdProvider) => void;
+	}
+
+	let { onProviderSelected }: Props = $props();
+
+	// One-Click sign-in providers — see `@icp-sdk/auth` v6 `OpenIdProvider`.
+	// Internet Identity 2.0 performs the OIDC flow against these and returns
+	// a delegation that is indistinguishable from a passkey-based II sign-in.
+	const providers = $derived([
+		{
+			provider: 'google' as const,
+			icon: IconGoogle,
+			ariaLabel: $i18n.auth.alt.sign_in_with_google,
+			testId: LOGIN_BUTTON_GOOGLE
+		},
+		{
+			provider: 'apple' as const,
+			icon: IconApple,
+			ariaLabel: $i18n.auth.alt.sign_in_with_apple,
+			testId: LOGIN_BUTTON_APPLE
+		},
+		{
+			provider: 'microsoft' as const,
+			icon: IconMicrosoft,
+			ariaLabel: $i18n.auth.alt.sign_in_with_microsoft,
+			testId: LOGIN_BUTTON_MICROSOFT
+		}
+	]);
+</script>
+
+<div class="flex items-center justify-center gap-4">
+	{#each providers as { provider, icon: Icon, ariaLabel, testId } (provider)}
+		<button
+			class="hover:border-brand-primary-alt focus-visible:outline-brand-primary-alt flex size-14 items-center justify-center rounded-xl border border-brand-subtle-20 bg-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+			aria-label={ariaLabel}
+			data-tid={testId}
+			onclick={() => onProviderSelected(provider)}
+			type="button"
+		>
+			<Icon size="20" />
+		</button>
+	{/each}
+</div>

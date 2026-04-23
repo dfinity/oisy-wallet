@@ -122,12 +122,18 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
+		internet_identity: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
 		social_login: string;
 	};
-	alt: { preview: string };
+	alt: {
+		preview: string;
+		sign_in_with_google: string;
+		sign_in_with_apple: string;
+		sign_in_with_microsoft: string;
+	};
 	message: { session_locked: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
