@@ -49,9 +49,7 @@ export const signIn = async (
 
 	const trackingMetadata = {
 		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0,
-		...(nonNullish(params.openIdProvider)
-			? { openid_provider: params.openIdProvider }
-			: {})
+		...(nonNullish(params.openIdProvider) ? { openid_provider: params.openIdProvider } : {})
 	};
 
 	try {
