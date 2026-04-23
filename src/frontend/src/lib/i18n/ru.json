@@ -126,13 +126,17 @@
 			"logout": "Выйти",
 			"lock": "Закрыть",
 			"authenticate": "Открыть или создать",
+			"internet_identity": "",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP и другие",
 			"instant_and_private": "Приватный доступ в любой момент",
 			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain",
 			"social_login": ""
 		},
 		"alt": {
-			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"
+			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "Сессия заблокирована"
