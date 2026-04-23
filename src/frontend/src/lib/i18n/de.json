@@ -934,6 +934,7 @@
 			"enter_recipient_address": "Gib Empfängeradresse, Name oder Alias ein",
 			"enter_wallet_address": "Gib Wallet-Adresse, Name oder Alias ein",
 			"enter_memo": "Memo eingeben (optional)",
+			"enter_memo_nat64": "",
 			"select_network": "Netzwerk auswählen",
 			"search_nfts": "NFTs suchen"
 		},
@@ -958,6 +959,7 @@
 			"unknown_cketh": "Das ckETH-Token kann nicht abgerufen werden.",
 			"destination_address_invalid": "Zieladresse ist ungültig.",
 			"amount_invalid": "Betrag ist ungültig.",
+			"invalid_nat64_memo": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Unzureichende Mittel für Gas.",
 			"insufficient_funds_for_amount": "Unzureichende Mittel für den Betrag.",

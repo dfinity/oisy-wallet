@@ -934,6 +934,7 @@
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
 			"enter_memo": "Nhập ghi chú (tuỳ chọn)",
+			"enter_memo_nat64": "",
 			"select_network": "Chọn mạng",
 			"search_nfts": "Tìm kiếm NFT"
 		},
@@ -958,6 +959,7 @@
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
 			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
 			"amount_invalid": "Số lượng không hợp lệ.",
+			"invalid_nat64_memo": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Không đủ tiền cho gas",
 			"insufficient_funds_for_amount": "Không đủ tiền cho số lượng",

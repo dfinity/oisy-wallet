@@ -934,6 +934,7 @@
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
 			"enter_memo": "Zadejte poznámku (volitelné)",
+			"enter_memo_nat64": "",
 			"select_network": "Vybrat síť",
 			"search_nfts": "Hledat NFT"
 		},
@@ -958,6 +959,7 @@
 			"unknown_cketh": "Token ckETH nelze získat.",
 			"destination_address_invalid": "Cílová adresa je neplatná.",
 			"amount_invalid": "Částka je neplatná.",
+			"invalid_nat64_memo": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Nedostatek prostředků na gas/poplatky",
 			"insufficient_funds_for_amount": "Nedostatek prostředků na částku",
