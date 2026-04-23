@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import {isNullish, nonNullish} from '@dfinity/utils';
 	import ButtonSignInInternetIdentity from '$lib/components/auth/ButtonSignInInternetIdentity.svelte';
 	import ButtonsSignInOpenId from '$lib/components/auth/ButtonsSignInOpenId.svelte';
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
@@ -35,7 +35,7 @@
 	// One-Click OpenID sign-in only targets Internet Identity 2.0 on mainnet
 	// (`id.ai`). The local II replica doesn't support the `?openid=...` query
 	// param, so we hide the social buttons entirely in local dev.
-	const openIdEnabled = nonNullish(INTERNET_IDENTITY_CANISTER_ID) ? false : true;
+	const openIdEnabled = $derived(isNullish(INTERNET_IDENTITY_CANISTER_ID));
 
 	const onAuthenticate = async ({ openIdProvider }: { openIdProvider?: OpenIdProvider } = {}) => {
 		const { success } = await signIn({
