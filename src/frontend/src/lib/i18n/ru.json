@@ -1062,6 +1062,7 @@
 			"enter_recipient_address": "Введите адрес получателя, имя или псевдоним",
 			"enter_wallet_address": "Введите адрес кошелька, имя или псевдоним",
 			"enter_memo": "Введите памятку (необязательно)",
+			"enter_memo_nat64": "",
 			"xrp_destination_tag": "Введите тег назначения XRP (необязательно)",
 			"select_network": "Выбрать сеть",
 			"search_nfts": "Поиск коллекционных предметов"
@@ -1093,6 +1094,7 @@
 			"unknown_cketh": "Токен ckETH не может быть получен.",
 			"destination_address_invalid": "Адрес получателя недействителен.",
 			"amount_invalid": "Сумма недействительна.",
+			"invalid_nat64_memo": "",
 			"xrp_destination_tag_invalid": "Тег назначения XRP должен быть целым числом от 0 до 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Недостаточно средств: сумма должна оставить достаточно для покрытия сбора и требуемого резерва аккаунта XRP.",
