@@ -126,13 +126,17 @@
 			"logout": "로그아웃",
 			"lock": "잠금",
 			"authenticate": "열기 또는 만들기",
+			"internet_identity": "",
 			"asset_types": "비트코인, 솔라나, 이더리움, ICP 등 다양한 자산 관리",
 			"instant_and_private": "개인정보 보호가 기본인 내장 AI 어시스턴트",
 			"advanced_cryptography": "고급 암호화 기술로 보호 - 100% 온체인",
 			"social_login": "즉각적이고 프라이빗한 액세스 + 소셜 로그인"
 		},
 		"alt": {
-			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기"
+			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "다른 탭에서 세션이 잠겼습니다."

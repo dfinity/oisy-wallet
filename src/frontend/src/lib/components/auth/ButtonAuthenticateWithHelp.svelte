@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import ButtonSignInInternetIdentity from '$lib/components/auth/ButtonSignInInternetIdentity.svelte';
+	import ButtonsSignInOpenId from '$lib/components/auth/ButtonsSignInOpenId.svelte';
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
-	import IconAstronautArrow from '$lib/components/icons/icon-astronaut/IconAstronautArrow.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
-	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
-	import { AUTH_SIGNING_IN_HELP_LINK, LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
+	import { INTERNET_IDENTITY_CANISTER_ID } from '$lib/constants/app.constants';
+	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { tokenCategoryFilterStore, tokensSortStore } from '$lib/stores/settings.store';
-	import { InternetIdentityDomain } from '$lib/types/auth';
+	import { InternetIdentityDomain, type OpenIdProvider } from '$lib/types/auth';
 	import { componentToHtml } from '$lib/utils/component.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -30,10 +32,16 @@
 
 	const modalId = Symbol();
 
-	const onAuthenticate = async (domain: InternetIdentityDomain) => {
+	// One-Click OpenID sign-in only targets Internet Identity 2.0 on mainnet
+	// (`id.ai`). The local II replica doesn't support the `?openid=...` query
+	// param, so we hide the social buttons entirely in local dev.
+	const openIdEnabled = $derived(isNullish(INTERNET_IDENTITY_CANISTER_ID));
+
+	const onAuthenticate = async ({ openIdProvider }: { openIdProvider?: OpenIdProvider } = {}) => {
 		const { success } = await signIn({
-			domain,
-			asPopup
+			domain: InternetIdentityDomain.VERSION_2_0,
+			asPopup,
+			...(nonNullish(openIdProvider) ? { openIdProvider } : {})
 		});
 
 		if (success === 'ok') {
@@ -48,19 +56,34 @@
 	};
 </script>
 
-<div class="flex w-full flex-col items-center" class:md:items-start={helpAlignment !== 'center'}>
-	<ButtonAuthenticate
-		{fullWidth}
-		onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
-		styleClass="bg-brand-primary text-primary-inverted"
-		testId={LOGIN_BUTTON}
+<div
+	class="flex w-full flex-col items-center gap-4"
+	class:md:items-start={helpAlignment !== 'center'}
+>
+	<div
+		class="flex w-full flex-col items-center gap-4"
+		class:md:flex-row={!fullWidth}
+		class:md:justify-center={!fullWidth && helpAlignment === 'center'}
+		class:md:justify-start={!fullWidth && helpAlignment !== 'center'}
 	>
-		{$i18n.auth.text.authenticate}
-		<IconAstronautArrow />
-	</ButtonAuthenticate>
+		<ButtonSignInInternetIdentity {fullWidth} onclick={() => onAuthenticate()} />
+
+		{#if openIdEnabled}
+			<div
+				class="h-px w-[35px] bg-brand-subtle-20"
+				class:md:h-[35px]={!fullWidth}
+				class:md:w-px={!fullWidth}
+				aria-hidden="true"
+			></div>
+
+			<ButtonsSignInOpenId
+				onProviderSelected={(provider) => onAuthenticate({ openIdProvider: provider })}
+			/>
+		{/if}
+	</div>
 
 	<span
-		class="mt-4 flex flex-col text-sm text-tertiary"
+		class="flex flex-col text-sm text-tertiary"
 		class:sm:w-85={!fullWidth}
 		class:text-center={helpAlignment === 'center'}
 		class:w-full={fullWidth}

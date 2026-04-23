@@ -126,13 +126,17 @@
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
+			"internet_identity": "",
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
 			"social_login": "Okamžitý a soukromý přístup + přihlášení přes sociální sítě"
 		},
 		"alt": {
-			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
+			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "Vaše relace byla uzamčena v jiné kartě."
