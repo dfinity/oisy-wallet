@@ -1936,7 +1936,7 @@
 				"possessive": "nos "
 			},
 			"title": "",
-			"instruction": "En cliquant sur ce bouton, vous acceptez les $link",
+			"instruction": "En vous connectant, vous acceptez les $link",
 			"body": ""
 		},
 		"alt": {

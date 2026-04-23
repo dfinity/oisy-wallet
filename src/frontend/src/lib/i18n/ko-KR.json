@@ -1936,7 +1936,7 @@
 				"possessive": "당사 "
 			},
 			"title": "",
-			"instruction": "이 버튼을 클릭하면 $link에 동의하는 것으로 간주합니다",
+			"instruction": "로그인하면 $link에 동의하는 것으로 간주합니다",
 			"body": ""
 		},
 		"alt": {
