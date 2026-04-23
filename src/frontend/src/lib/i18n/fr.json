@@ -1003,7 +1003,8 @@
 			"solana_insufficient_funds": "Le solde de votre token est insuffisant pour effectuer cette transaction. Votre solde a peut-être changé depuis son dernier affichage.",
 			"solana_insufficient_funds_for_fee": "Votre solde SOL est insuffisant pour couvrir les frais de transaction.",
 			"solana_insufficient_funds_for_rent": "Votre solde SOL est insuffisant pour couvrir le loyer requis pour la création du compte.",
-			"fee_calc_unsupported_standard": "Impossible de calculer les frais car le standard de token fourni n'est pas pris en charge."
+			"fee_calc_unsupported_standard": "Impossible de calculer les frais car le standard de token fourni n'est pas pris en charge.",
+			"memo_too_long": "Le mémo est trop long. Veuillez le raccourcir et réessayer."
 		}
 	},
 	"mint": {

@@ -10,6 +10,7 @@
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { invalidIcpAddress } from '$icp/utils/account.utils';
+	import { mapIcSendErrorMsg } from '$icp/utils/ic-send.utils';
 	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
@@ -23,7 +24,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
@@ -205,10 +206,13 @@
 				}
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
+			const msg = { text: mapIcSendErrorMsg({ err, i18n: $i18n }) };
+
+			if (msg.text === $i18n.send.error.unexpected) {
+				toastsError({ msg, err });
+			} else {
+				toastsErrorNoTrace({ msg, err });
+			}
 
 			onBack();
 		}
