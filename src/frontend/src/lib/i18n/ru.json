@@ -126,13 +126,17 @@
 			"logout": "Выйти",
 			"lock": "Закрыть",
 			"authenticate": "Открыть или создать",
+			"internet_identity": "",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP и другие",
 			"instant_and_private": "Приватный доступ в любой момент",
-			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain",
+			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain",
 			"social_login": ""
 		},
 		"alt": {
-			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"
+			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "Сессия заблокирована"
@@ -769,11 +773,11 @@
 			"enable_beta_feature": "Включить бета-функцию",
 			"disable_beta_feature": "Отключить бета-функцию",
 			"save_beta_feature_success": "Настройки ваших бета-функций обновлены.",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "Скрыть транзакции с очень маленькими значениями",
+			"hide_micro_transactions_description": "Транзакции с очень маленькими значениями обычно являются спамом и предназначены для того, чтобы обманом заставить пользователя скопировать адрес отправителя вместо действительного. Рекомендуется скрывать их в списках транзакций.",
+			"enable_hide_micro_transactions": "Включить скрытие транзакций с очень маленькими значениями",
+			"disable_hide_micro_transactions": "Отключить скрытие транзакций с очень маленькими значениями",
+			"save_spam_filter_success": "Настройки вашего спам-фильтра были обновлены.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1523,8 @@
 			"hex_data": "HEX-данные",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Подключённые приложения",
+			"no_connected_apps": "В настоящее время нет подключённых приложений.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1930,7 +1934,7 @@
 				"possessive": "our "
 			},
 			"title": "",
-			"instruction": "Нажимая на кнопку вы одобряете $link",
+			"instruction": "Входя в систему, вы принимаете $link",
 			"body": ""
 		},
 		"alt": {
@@ -1957,7 +1961,7 @@
 		},
 		"info": {
 			"btc_transactions": "Данные о транзакциях Bitcoin поступают от внешних сервисов — рекомендуем проверять их самостоятельно.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>."
 		},
 		"warning": {
 			"no_index_canister": "Транзакции для $token_list не могут быть отображены. Нет доступного контейнера индекса.",

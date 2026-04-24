@@ -506,7 +506,7 @@
 			"fee": {
 				"__bigint__": "500000000"
 			},
-			"alternativeName": "Alice Strategy",
+			"alternativeName": "ALICE",
 			"url": "https://alice.fun/"
 		}
 	},

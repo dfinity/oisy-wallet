@@ -165,6 +165,29 @@ fn test_get_allowed_cycles_requires_authenticated_user() {
     );
 }
 
+/// Sanity check for the `caller_is_registered_user` guard: a non-anonymous
+/// caller that has not created a user profile must be rejected by the guard
+/// *before* any endpoint logic runs. Without this test, dropping the guard
+/// from a user-keyed endpoint would go unnoticed, because every other test
+/// calls `create_user_profile`/`ensure_user_profile` up front.
+#[test]
+fn test_get_allowed_cycles_requires_registered_user() {
+    let pic_setup = setup_with_cycles_ledger();
+    // Non-anonymous caller, but no user profile has been created.
+    let caller = Principal::from_text(USER_1).unwrap();
+
+    let response = pic_setup.update::<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>>(
+        caller,
+        "get_allowed_cycles",
+        (),
+    );
+
+    assert_eq!(
+        response,
+        Err("Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Caller has no user profile. Please create a user profile first via `create_user_profile`.".to_string())
+    );
+}
+
 #[test]
 fn test_get_allowed_cycles_returns_correct_amount() {
     let pic_setup = setup_with_cycles_ledger();
@@ -192,6 +215,7 @@ fn test_get_allowed_cycles_returns_correct_amount() {
 fn test_get_allowed_cycles_returns_zero_when_no_allowance() {
     let pic_setup = setup_with_cycles_ledger();
     let caller = Principal::from_text(USER_1).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Call get_allowed_cycles
     let result = call_get_allowed_cycles(&pic_setup, caller);
@@ -206,6 +230,7 @@ fn test_get_allowed_cycles_returns_correct_error_when_cycles_ledger_unavailable(
     // Regular setup without cycles ledger
     let pic_setup = setup();
     let caller = Principal::from_text(USER_1).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Call get_allowed_cycles - should fail since cycles ledger is not available
     let result = call_get_allowed_cycles(&pic_setup, caller);
@@ -235,7 +260,7 @@ fn test_housekeeping_lock_resets_after_failed_topup() {
     // (no cycles ledger) and must release the guard so the next tick can
     // spawn a new one.
     for _ in 0..3 {
-        pic_setup.pic.advance_time(Duration::from_secs(60 * 60));
+        pic_setup.pic.advance_time(Duration::from_hours(1));
         for _ in 0..10 {
             pic_setup.pic.tick();
         }
@@ -294,7 +319,7 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
 
     // Advance well past the first hourly interval and process messages, giving
     // the canister time to run housekeeping with a working cycles ledger.
-    pic_setup.pic.advance_time(Duration::from_secs(2 * 60 * 60));
+    pic_setup.pic.advance_time(Duration::from_hours(2));
     for _ in 0..20 {
         pic_setup.pic.tick();
     }
@@ -562,6 +587,7 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
 fn test_allow_signing_requires_delegation_chain() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let result = call_allow_signing_with_delegation(&pic_setup, caller, None);
 
@@ -578,6 +604,7 @@ fn test_allow_signing_requires_delegation_chain() {
 fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
     let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let result = call_allow_signing_with_delegation(&pic_setup, caller, None);
 
@@ -593,6 +620,7 @@ fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
 #[test]
 fn test_allow_signing_controller_bypasses_delegation_check() {
     let pic_setup = setup();
+    pic_setup.ensure_user_profile(controller());
 
     let result = call_allow_signing_with_delegation(&pic_setup, controller(), None);
 
@@ -623,6 +651,7 @@ fn test_allow_signing_with_valid_delegation() {
     );
 
     let caller = Principal::self_authenticating(&delegation_chain.public_key);
+    pic_setup.ensure_user_profile(caller);
 
     let result = call_allow_signing_with_delegation(&pic_setup, caller, Some(delegation_chain));
 

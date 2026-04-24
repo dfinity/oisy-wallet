@@ -126,13 +126,17 @@
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
+			"internet_identity": "",
 			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
 			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
-			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
+			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
 			"social_login": "Natychmiastowy i prywatny dostęp + logowanie społecznościowe"
 		},
 		"alt": {
-			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"
+			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": ""
@@ -768,12 +772,12 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": "",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"save_beta_feature_success": "Ustawienia funkcji beta zostały zaktualizowane.",
+			"hide_micro_transactions": "Ukryj transakcje o bardzo małych wartościach",
+			"hide_micro_transactions_description": "Transakcje o bardzo małych wartościach są zazwyczaj spamem i mają na celu oszukanie użytkownika, aby skopiował adres nadawcy zamiast prawidłowego. Zaleca się ich ukrywanie na listach transakcji.",
+			"enable_hide_micro_transactions": "Włącz ukrywanie transakcji o bardzo małych wartościach",
+			"disable_hide_micro_transactions": "Wyłącz ukrywanie transakcji o bardzo małych wartościach",
+			"save_spam_filter_success": "Ustawienia filtra spamu zostały zaktualizowane.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1523,8 @@
 			"hex_data": "Dane HEX",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Połączone aplikacje",
+			"no_connected_apps": "Obecnie żadne aplikacje nie są połączone.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1930,7 +1934,7 @@
 				"possessive": "nasze "
 			},
 			"title": "",
-			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
+			"instruction": "Logując się, zgadzasz się na $link",
 			"body": ""
 		},
 		"alt": {
@@ -1957,7 +1961,7 @@
 		},
 		"info": {
 			"btc_transactions": "Informacje o transakcjach BTC są uzyskiwane od centralnych stron trzecich i powinny być niezależnie weryfikowane.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "Transakcje o bardzo małych wartościach tokenów są obecnie ukryte. Aby je wyświetlić, przejdź do <a href=\"/settings/\">Ustawień</a>."
 		},
 		"warning": {
 			"no_index_canister": "Transakcje dla $token_list nie mogą być wyświetlane. Brak dostępnego kanistra indeksu.",

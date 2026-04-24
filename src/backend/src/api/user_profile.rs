@@ -21,7 +21,10 @@ use crate::{
     state::{mutate_state, read_state},
     types::StoredPrincipal,
     user_profile::{model::UserProfileModel, service},
-    utils::{guards::caller_is_not_anonymous, housekeeping::spawn_allow_signing_if_below_limit},
+    utils::{
+        guards::{caller_is_not_anonymous, caller_is_registered_user},
+        housekeeping::spawn_allow_signing_if_below_limit,
+    },
 };
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
@@ -33,7 +36,7 @@ use crate::{
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_user_network_settings(
     request: SaveNetworksSettingsRequest,
@@ -62,7 +65,7 @@ pub fn update_user_network_settings(
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTestnetsResult {
     let user_principal = msg_caller();
@@ -91,7 +94,7 @@ pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTes
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHiddenDappIdResult {
     fn inner(request: AddHiddenDappIdRequest) -> Result<(), AddDappSettingsError> {
@@ -125,7 +128,7 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 /// # Errors
 /// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
 ///   the batch is too large.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn add_user_dismissed_notification(
     request: AddDismissedNotificationRequest,
@@ -163,7 +166,7 @@ pub fn add_user_dismissed_notification(
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
     let UpdateUserAgreementsRequest {
@@ -198,7 +201,7 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_provider_agreements(
     request: UpdateProviderAgreementsRequest,
@@ -256,7 +259,7 @@ pub fn get_user_agreement_history() -> GetAgreementHistoryResult {
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_user_experimental_feature_settings(
     request: UpdateExperimentalFeaturesSettingsRequest,
@@ -285,7 +288,7 @@ pub fn update_user_experimental_feature_settings(
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_user_transaction_filter_settings(
     request: UpdateTransactionFilterSettingsRequest,

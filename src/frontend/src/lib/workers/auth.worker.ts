@@ -1,7 +1,7 @@
 import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { KEY_STORAGE_DELEGATION } from '@icp-sdk/auth/client';
 import { DelegationChain, isDelegationValid } from '@icp-sdk/core/identity';
 
@@ -53,10 +53,10 @@ const stopIdleTimer = () => {
 };
 
 const onIdleSignOut = async () => {
-	const [auth, chain] = await Promise.all([checkAuthentication(), checkDelegationChain()]);
+	const chain = await checkDelegationChain();
 
-	// Both identity and delegation are alright, so all good
-	if (auth && chain.valid && chain.delegation !== null) {
+	// Delegation is valid — the user has an active session
+	if (chain.valid && chain.delegation !== null) {
 		emitExpirationTime(chain.delegation);
 		return;
 	}
@@ -65,19 +65,17 @@ const onIdleSignOut = async () => {
 };
 
 /**
- * If the user is not authenticated - i.e. no identity or anonymous and there is no valid delegation chain, then identity is not valid
+ * Reads the delegation chain from IndexedDB and checks its validity.
  *
- * @returns true if authenticated
- */
-const checkAuthentication = async (): Promise<boolean> => {
-	const authClient = await AuthClientProvider.getInstance().createAuthClient();
-	return authClient.isAuthenticated();
-};
-
-/**
- * If there is no delegation or if not valid, then the delegation is not valid
+ * Prior to `@icp-sdk/auth` v6 the worker also called
+ * `AuthClient.isAuthenticated()` as an extra signal. In v6 that call is
+ * synchronous and reads from `localStorage`, which isn't available inside
+ * Web Workers (`ReferenceError: localStorage is not defined`). Since the
+ * delegation chain stored in IndexedDB is already the source of truth for
+ * an active session, a single IDB-based check is sufficient and is
+ * worker-safe.
  *
- * @returns true if delegation is valid
+ * @returns the parsed delegation (if any) and whether it is still valid.
  */
 const checkDelegationChain = async (): Promise<{
 	valid: boolean;
@@ -86,10 +84,10 @@ const checkDelegationChain = async (): Promise<{
 	const delegationChain =
 		await AuthClientProvider.getInstance().storage.get(KEY_STORAGE_DELEGATION);
 
-	const delegation = delegationChain !== null ? DelegationChain.fromJSON(delegationChain) : null;
+	const delegation = isNullish(delegationChain) ? null : DelegationChain.fromJSON(delegationChain);
 
 	return {
-		valid: delegation !== null && isDelegationValid(delegation),
+		valid: nonNullish(delegation) && isDelegationValid(delegation),
 		delegation
 	};
 };

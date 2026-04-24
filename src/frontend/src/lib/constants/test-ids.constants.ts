@@ -20,6 +20,9 @@ export const CURRENCY_SWITCHER_DROPDOWN_BUTTON = 'currency-switcher-dropdown-but
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
+export const LOGIN_BUTTON_GOOGLE = 'login-button-google';
+export const LOGIN_BUTTON_APPLE = 'login-button-apple';
+export const LOGIN_BUTTON_MICROSOFT = 'login-button-microsoft';
 export const LOCK_BUTTON = 'lock-button';
 export const MAX_BUTTON = 'max-button';
 

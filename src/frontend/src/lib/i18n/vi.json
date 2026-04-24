@@ -126,13 +126,17 @@
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
+			"internet_identity": "",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
-			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
+			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
 			"social_login": "Truy cập tức thì và riêng tư + đăng nhập bằng tài khoản mạng xã hội"
 		},
 		"alt": {
-			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
+			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": ""
@@ -769,11 +773,11 @@
 			"enable_beta_feature": "Bật tính tăng beta",
 			"disable_beta_feature": "Tắt tính năng beta",
 			"save_beta_feature_success": "Tính năng beta của bạn đã được cập nhật",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "Ẩn các giao dịch có giá trị rất nhỏ",
+			"hide_micro_transactions_description": "Các giao dịch có giá trị rất nhỏ thường là spam và nhằm mục đích lừa người dùng sao chép địa chỉ người gửi thay vì địa chỉ hợp lệ. Khuyến nghị ẩn chúng trong danh sách giao dịch.",
+			"enable_hide_micro_transactions": "Bật ẩn các giao dịch có giá trị rất nhỏ",
+			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
+			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1519,8 +1523,8 @@
 			"hex_data": "Dữ liệu HEX",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Ứng dụng đã kết nối",
+			"no_connected_apps": "Hiện không có ứng dụng nào được kết nối.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1930,7 +1934,7 @@
 				"possessive": ""
 			},
 			"title": "",
-			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
+			"instruction": "Bằng cách đăng nhập, bạn đồng ý với $link",
 			"body": ""
 		},
 		"alt": {
@@ -1957,7 +1961,7 @@
 		},
 		"info": {
 			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>."
 		},
 		"warning": {
 			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",
