@@ -1961,7 +1961,7 @@
 		},
 		"info": {
 			"btc_transactions": "Данные о транзакциях Bitcoin поступают от внешних сервисов — рекомендуем проверять их самостоятельно.",
-			"hidden_micro_transactions": "<strong>OISY защищает вас</strong>! Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>.&nbsp;&nbsp;&nbsp;<a class='no-underline blue-link' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Узнать больше</a>"
+			"hidden_micro_transactions": "<strong>OISY защищает вас</strong>! Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Узнать больше</a>"
 		},
 		"warning": {
 			"no_index_canister": "Транзакции для $token_list не могут быть отображены. Нет доступного контейнера индекса.",
