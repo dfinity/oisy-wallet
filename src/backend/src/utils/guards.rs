@@ -1,11 +1,7 @@
 use candid::Principal;
 use ic_cdk::api::{is_controller, msg_caller};
 
-use crate::{
-    state::read_config,
-    types::StoredPrincipal,
-    user_profile::service::has_user_profile,
-};
+use crate::{state::read_config, types::StoredPrincipal, user_profile::service::has_user_profile};
 
 pub(crate) fn caller_is_not_anonymous() -> Result<(), String> {
     if msg_caller() == Principal::anonymous() {
