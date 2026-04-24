@@ -353,6 +353,16 @@ pub fn new_user_signups_allowed() -> bool {
     state::read_new_user_signups_allowed()
 }
 
+/// Returns whether sign-ups of new users are currently allowed.
+///
+/// Exposed as an unauthenticated query so the landing page can display an info banner before the
+/// user signs in.
+#[query]
+#[must_use]
+pub fn new_user_signups_allowed() -> bool {
+    state::read_new_user_signups_allowed()
+}
+
 /// Returns the caller's user profile.
 ///
 /// # Errors
