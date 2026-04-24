@@ -16,12 +16,11 @@ fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let profile = create_profile_response
         .expect("Create call failed")
@@ -76,12 +75,11 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let initial_profile = create_profile_response
         .expect("Create call failed")
@@ -159,12 +157,11 @@ fn test_add_user_hidden_dapp_id_cannot_update_wrong_version() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let profile = create_profile_response
         .expect("Create call failed")
@@ -235,12 +232,11 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let initial_profile = create_profile_response
         .expect("Create call failed")
@@ -318,12 +314,11 @@ fn test_add_user_hidden_dapp_id_does_not_allow_long_ids() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let profile = create_profile_response
         .expect("Create call failed")
@@ -381,12 +376,11 @@ fn test_add_user_hidden_dapp_id_does_not_allow_to_add_too_many_ids() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let profile = create_profile_response
         .expect("Create call failed")
