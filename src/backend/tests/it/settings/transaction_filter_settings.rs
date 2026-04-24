@@ -5,7 +5,7 @@ use shared::types::{
         TransactionFilterSettings, TransactionSettings, UpdateTransactionFilterSettingsError,
         UpdateTransactionFilterSettingsRequest,
     },
-    user_profile::{GetUserProfileError, UserProfile},
+    user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
 };
 
 use crate::utils::{
@@ -20,9 +20,15 @@ fn test_update_user_transaction_filter_settings_saves_settings() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     assert_eq!(
         profile.settings.as_ref().unwrap().transactions,
@@ -77,9 +83,15 @@ fn test_update_user_transaction_filter_settings_cannot_update_wrong_version() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let update_request = UpdateTransactionFilterSettingsRequest {
         filter: TransactionFilterSettings {
@@ -123,9 +135,15 @@ fn test_update_user_transaction_filter_settings_does_not_change_version_if_same(
     let caller = Principal::from_text(CALLER).unwrap();
 
     let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let initial_version = profile.version;
 

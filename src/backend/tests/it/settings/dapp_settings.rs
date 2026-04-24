@@ -2,7 +2,7 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest, MAX_DAPP_ID_LIST_LENGTH},
-    user_profile::{GetUserProfileError, UserProfile},
+    user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
 };
 
 use crate::utils::{
@@ -17,9 +17,15 @@ fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
     assert_eq!(
         profile
             .settings
@@ -71,9 +77,15 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
 
-    let initial_profile = create_profile_response.expect("Create failed");
+    let initial_profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
     assert_eq!(
         initial_profile
             .settings
@@ -148,9 +160,15 @@ fn test_add_user_hidden_dapp_id_cannot_update_wrong_version() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
     assert_eq!(
         profile
             .settings
@@ -218,9 +236,15 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
 
-    let initial_profile = create_profile_response.expect("Create failed");
+    let initial_profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
     assert_eq!(
         initial_profile
             .settings
@@ -295,9 +319,15 @@ fn test_add_user_hidden_dapp_id_does_not_allow_long_ids() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
     assert_eq!(
         profile
             .settings
@@ -352,9 +382,15 @@ fn test_add_user_hidden_dapp_id_does_not_allow_to_add_too_many_ids() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
     assert_eq!(
         profile
             .settings

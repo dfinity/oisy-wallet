@@ -13,7 +13,7 @@ use shared::types::{
         AllowSigningError, AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
         GetAllowedCyclesResponse, RateLimitError,
     },
-    user_profile::UserProfile,
+    user_profile::{CreateUserProfileError, UserProfile},
     Stats,
 };
 
@@ -29,13 +29,12 @@ pub fn call_create_user_profile(
     pic_setup: &PicBackend,
     caller: Principal,
 ) -> Result<UserProfile, String> {
-    let result = pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
-    assert!(
-        result.is_ok(),
-        "Expected Ok, but got Err: {}",
-        result.unwrap_err()
-    );
-    result
+    let profile_result = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())?;
+    match profile_result {
+        Ok(profile) => Ok(profile),
+        Err(err) => panic!("create_user_profile rejected with {err:?}"),
+    }
 }
 
 pub fn call_allow_signing(
@@ -284,7 +283,7 @@ fn test_allow_signing_backpressure_under_burst() {
 
     for i in 0u8..60 {
         let caller = Principal::self_authenticating(i.to_string());
-        let _ = pic_setup.update::<shared::types::user_profile::UserProfile>(
+        let _ = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
             caller,
             "create_user_profile",
             (),

@@ -151,7 +151,8 @@ type Config = record {
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
-	ic_root_key_raw : opt blob
+	ic_root_key_raw : opt blob;
+	new_user_signups_allowed : opt bool
 };
 type Contact = record {
 	id : nat64;
@@ -179,6 +180,11 @@ type ContactError = variant {
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
 type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
+type CreateUserProfileError = variant { SignupsClosed };
+type CreateUserProfileResult = variant {
+	Ok : UserProfile;
+	Err : CreateUserProfileError
+};
 type CustomToken = record {
 	token : Token;
 	allow_external_content_source : opt bool;
@@ -323,7 +329,8 @@ type InitArg = record {
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
-	ic_root_key_der : opt blob
+	ic_root_key_der : opt blob;
+	new_user_signups_allowed : opt bool
 };
 type Network = variant { mainnet; regtest; testnet };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
@@ -665,7 +672,12 @@ service : (Arg) -> {
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
 	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
-	create_user_profile : () -> (UserProfile);
+	//
+	// # Errors
+	// - Returns `Err(SignupsClosed)` when sign-ups of new users are disabled on the backend and the
+	// caller does not already have a profile. Existing users are unaffected and still receive
+	// `Ok(profile)` for idempotent calls.
+	create_user_profile : () -> (CreateUserProfileResult);
 	// Deletes a contact for the caller.
 	//
 	// # Errors
@@ -756,6 +768,11 @@ service : (Arg) -> {
 	// `CF-Ray`, etc. differ across replicas, causing consensus failure.
 	// This transform keeps only status + body.
 	http_request_transform : (TransformArgs) -> (HttpRequestResult) query;
+	// Returns whether sign-ups of new users are currently allowed.
+	//
+	// Exposed as an unauthenticated query so the landing page can display an info banner before the
+	// user signs in.
+	new_user_signups_allowed : () -> (bool) query;
 	// List the custom tokens for the calling user.
 	//
 	// Note: This method was previously exposed as a *query* but is now an *update*

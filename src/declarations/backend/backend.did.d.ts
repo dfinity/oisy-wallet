@@ -160,6 +160,7 @@ export interface Config {
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	ic_root_key_raw: [] | [Uint8Array];
+	new_user_signups_allowed: [] | [boolean];
 }
 export interface Contact {
 	id: bigint;
@@ -192,6 +193,8 @@ export interface CreateContactRequest {
 	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
+export type CreateUserProfileError = { SignupsClosed: null };
+export type CreateUserProfileResult = { Ok: UserProfile } | { Err: CreateUserProfileError };
 export interface CustomToken {
 	token: Token;
 	allow_external_content_source: [] | [boolean];
@@ -350,6 +353,7 @@ export interface InitArg {
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	ic_root_key_der: [] | [Uint8Array];
+	new_user_signups_allowed: [] | [boolean];
 }
 export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface NetworkSettings {
@@ -728,8 +732,13 @@ export interface _SERVICE {
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.
+	 *
+	 * # Errors
+	 * - Returns `Err(SignupsClosed)` when sign-ups of new users are disabled on the backend and the
+	 * caller does not already have a profile. Existing users are unaffected and still receive
+	 * `Ok(profile)` for idempotent calls.
 	 */
-	create_user_profile: ActorMethod<[], UserProfile>;
+	create_user_profile: ActorMethod<[], CreateUserProfileResult>;
 	/**
 	 * Deletes a contact for the caller.
 	 *
@@ -856,6 +865,13 @@ export interface _SERVICE {
 	 * update method.
 	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
+	/**
+	 * Returns whether sign-ups of new users are currently allowed.
+	 *
+	 * Exposed as an unauthenticated query so the landing page can display an info banner before the
+	 * user signs in.
+	 */
+	new_user_signups_allowed: ActorMethod<[], boolean>;
 	/**
 	 * Remove custom token for the user.
 	 */
