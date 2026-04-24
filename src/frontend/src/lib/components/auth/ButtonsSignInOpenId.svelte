@@ -13,9 +13,10 @@
 	interface Props {
 		onProviderSelected: (provider: OpenIdProvider) => void;
 		variant?: 'login' | 'lock';
+		rowBreakpoint?: 'sm' | 'md';
 	}
 
-	let { onProviderSelected, variant = 'login' }: Props = $props();
+	let { onProviderSelected, variant = 'login', rowBreakpoint = 'md' }: Props = $props();
 
 	// One-Click sign-in providers — see `@icp-sdk/auth` v6 `OpenIdProvider`.
 	// Internet Identity 2.0 performs the OIDC flow against these and returns
@@ -48,7 +49,11 @@
 	);
 </script>
 
-<div class="flex items-center justify-center gap-4">
+<div
+	class="flex items-center justify-center gap-4"
+	class:md:gap-1={rowBreakpoint === 'md' && variant === 'lock'}
+	class:sm:gap-1={rowBreakpoint === 'sm' && variant === 'lock'}
+>
 	{#each providers as { provider, icon: Icon, ariaLabel, testId } (provider)}
 		<button
 			class={`flex size-14 items-center justify-center rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses}`}
