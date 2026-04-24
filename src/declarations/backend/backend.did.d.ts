@@ -895,6 +895,14 @@ export interface _SERVICE {
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	/**
+	 * Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
+	 *
+	 * When disabled, `create_user_profile` rejects callers that do not already have a profile with
+	 * `CreateUserProfileError::SignupsClosed`. Existing users are unaffected. All other `Config`
+	 * fields are preserved.
+	 */
+	set_new_user_signups_allowed: ActorMethod<[boolean], undefined>;
+	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *
 	 * # Returns

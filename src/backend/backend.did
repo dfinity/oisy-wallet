@@ -773,6 +773,12 @@ service : (Arg) -> {
 	// Exposed as an unauthenticated query so the landing page can display an info banner before the
 	// user signs in.
 	new_user_signups_allowed : () -> (bool) query;
+	// Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
+	//
+	// When disabled, `create_user_profile` rejects callers that do not already have a profile with
+	// `CreateUserProfileError::SignupsClosed`. Existing users are unaffected. All other `Config`
+	// fields are preserved.
+	set_new_user_signups_allowed : (bool) -> ();
 	// List the custom tokens for the calling user.
 	//
 	// Note: This method was previously exposed as a *query* but is now an *update*
