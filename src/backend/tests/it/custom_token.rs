@@ -161,6 +161,23 @@ fn test_add_custom_tokens() {
     }
 }
 
+/// Sanity check for the `caller_is_registered_user` guard on
+/// `set_custom_token`: a non-anonymous caller that has not created a user
+/// profile must be rejected by the guard before any endpoint logic runs.
+#[test]
+fn test_set_custom_token_requires_registered_user() {
+    let pic_setup = setup();
+    // Non-anonymous caller, but no user profile has been created.
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let response = pic_setup.update::<()>(caller, "set_custom_token", USER_TOKEN.clone());
+
+    assert_eq!(
+        response,
+        Err("Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Caller has no user profile. Please create a user profile first via `create_user_profile`.".to_string())
+    );
+}
+
 fn test_add_custom_token(user_token: &CustomToken) {
     let pic_setup = setup();
 

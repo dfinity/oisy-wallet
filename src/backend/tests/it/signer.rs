@@ -165,6 +165,29 @@ fn test_get_allowed_cycles_requires_authenticated_user() {
     );
 }
 
+/// Sanity check for the `caller_is_registered_user` guard: a non-anonymous
+/// caller that has not created a user profile must be rejected by the guard
+/// *before* any endpoint logic runs. Without this test, dropping the guard
+/// from a user-keyed endpoint would go unnoticed, because every other test
+/// calls `create_user_profile`/`ensure_user_profile` up front.
+#[test]
+fn test_get_allowed_cycles_requires_registered_user() {
+    let pic_setup = setup_with_cycles_ledger();
+    // Non-anonymous caller, but no user profile has been created.
+    let caller = Principal::from_text(USER_1).unwrap();
+
+    let response = pic_setup.update::<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>>(
+        caller,
+        "get_allowed_cycles",
+        (),
+    );
+
+    assert_eq!(
+        response,
+        Err("Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Caller has no user profile. Please create a user profile first via `create_user_profile`.".to_string())
+    );
+}
+
 #[test]
 fn test_get_allowed_cycles_returns_correct_amount() {
     let pic_setup = setup_with_cycles_ledger();

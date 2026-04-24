@@ -2,8 +2,9 @@ use candid::Principal;
 use ic_cdk::api::{is_controller, msg_caller};
 
 use crate::{
-    state::{read_config, read_state},
+    state::read_config,
     types::StoredPrincipal,
+    user_profile::service::has_user_profile,
 };
 
 pub(crate) fn caller_is_not_anonymous() -> Result<(), String> {
@@ -31,10 +32,7 @@ pub(crate) fn caller_is_not_anonymous() -> Result<(), String> {
 pub(crate) fn caller_is_registered_user() -> Result<(), String> {
     caller_is_not_anonymous()?;
 
-    let stored_principal = StoredPrincipal(msg_caller());
-    let has_profile = read_state(|s| s.user_profile_updated.contains_key(&stored_principal));
-
-    if has_profile {
+    if has_user_profile(StoredPrincipal(msg_caller())) {
         Ok(())
     } else {
         Err("Update call error. RejectionCode: CanisterReject, Error: Caller has no user profile. Please create a user profile first via `create_user_profile`.".to_string())

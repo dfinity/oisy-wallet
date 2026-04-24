@@ -9,7 +9,7 @@ pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{PocketIc, PocketIcBuilder};
 use shared::types::{
     backend_config::{Arg, InitArg},
-    user_profile::{OisyUser, UserProfile},
+    user_profile::{HasUserProfileResponse, OisyUser, UserProfile},
 };
 
 use super::mock::{CONTROLLER, FRONTEND_DERIVATION_ORIGIN, II_CANISTER_ID, SIGNER_CANISTER_ID};
@@ -536,10 +536,25 @@ impl PicBackend {
     ///
     /// Most guarded update endpoints require the caller to already have a user
     /// profile, so tests that exercise such endpoints as an authenticated user
-    /// must first call `create_user_profile`. This helper is idempotent: the
-    /// `create_user_profile` endpoint itself returns the existing profile if
-    /// one exists, so callers can invoke this freely before each test action.
+    /// must first call `create_user_profile`.
+    ///
+    /// This helper is idempotent and designed to be safe to call repeatedly:
+    /// it first issues a `has_user_profile` query and only invokes the
+    /// `create_user_profile` update when the profile does not yet exist. This
+    /// avoids the side effects of `create_user_profile` (notably
+    /// `spawn_allow_signing_if_below_limit`, which consumes per-caller
+    /// rate-limit entries and spawns an inter-canister call) on repeated
+    /// invocations.
     pub fn ensure_user_profile(&self, caller: Principal) {
+        let exists = self
+            .query::<HasUserProfileResponse>(caller, "has_user_profile", ())
+            .expect("Failed to query has_user_profile")
+            .has_user_profile;
+
+        if exists {
+            return;
+        }
+
         let response = self.update::<UserProfile>(caller, "create_user_profile", ());
         assert!(
             response.is_ok(),
