@@ -25,6 +25,7 @@ pub fn call_create_contact(
     caller: Principal,
     name: String,
 ) -> Result<Contact, ContactError> {
+    pic_setup.ensure_user_profile(caller);
     let request = CreateContactRequest { name, image: None };
     let wrapped_result =
         pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
@@ -53,6 +54,7 @@ pub fn call_update_contact(
     caller: Principal,
     contact: Contact,
 ) -> Result<Contact, ContactError> {
+    pic_setup.ensure_user_profile(caller);
     let request = UpdateContactRequest {
         id: contact.id,
         name: contact.name,
@@ -166,6 +168,7 @@ fn test_create_contact_should_fail_when_limit_reached() {
 fn test_create_contact_should_fail_with_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Test empty string
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
@@ -197,6 +200,7 @@ fn test_create_contact_should_fail_with_whitespace_name() {
 fn test_create_contact_should_fail_with_leading_and_trailing_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Create a contact with a name that has leading whitespace
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(

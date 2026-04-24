@@ -1,13 +1,43 @@
 use candid::Principal;
 use ic_cdk::api::{is_controller, msg_caller};
 
-use crate::state::read_config;
+use crate::{
+    state::{read_config, read_state},
+    types::StoredPrincipal,
+};
 
 pub(crate) fn caller_is_not_anonymous() -> Result<(), String> {
     if msg_caller() == Principal::anonymous() {
         Err("Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized.".to_string())
     } else {
         Ok(())
+    }
+}
+
+/// Guard for authenticated endpoints that require the caller to already have a
+/// registered user profile. It ensures that:
+/// - the caller is not the anonymous principal, and
+/// - a user profile exists for the caller in the canister state.
+///
+/// New users must therefore call `create_user_profile` (which is only protected
+/// by `caller_is_not_anonymous`) before they can invoke any other update call
+/// protected by this guard.
+///
+/// Note: controllers are *not* exempt. These endpoints are user-facing and
+/// their state is keyed to the caller principal, so a controller without a
+/// profile is, conceptually, not a "registered user" either. Controller-only
+/// administrative endpoints use dedicated guards (`caller_is_controller`,
+/// `caller_is_allowed`) instead.
+pub(crate) fn caller_is_registered_user() -> Result<(), String> {
+    caller_is_not_anonymous()?;
+
+    let stored_principal = StoredPrincipal(msg_caller());
+    let has_profile = read_state(|s| s.user_profile_updated.contains_key(&stored_principal));
+
+    if has_profile {
+        Ok(())
+    } else {
+        Err("Update call error. RejectionCode: CanisterReject, Error: Caller has no user profile. Please create a user profile first via `create_user_profile`.".to_string())
     }
 }
 

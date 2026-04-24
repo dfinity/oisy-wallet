@@ -192,6 +192,7 @@ fn test_get_allowed_cycles_returns_correct_amount() {
 fn test_get_allowed_cycles_returns_zero_when_no_allowance() {
     let pic_setup = setup_with_cycles_ledger();
     let caller = Principal::from_text(USER_1).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Call get_allowed_cycles
     let result = call_get_allowed_cycles(&pic_setup, caller);
@@ -206,6 +207,7 @@ fn test_get_allowed_cycles_returns_correct_error_when_cycles_ledger_unavailable(
     // Regular setup without cycles ledger
     let pic_setup = setup();
     let caller = Principal::from_text(USER_1).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Call get_allowed_cycles - should fail since cycles ledger is not available
     let result = call_get_allowed_cycles(&pic_setup, caller);
@@ -562,6 +564,7 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
 fn test_allow_signing_requires_delegation_chain() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let result = call_allow_signing_with_delegation(&pic_setup, caller, None);
 
@@ -578,6 +581,7 @@ fn test_allow_signing_requires_delegation_chain() {
 fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
     let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let result = call_allow_signing_with_delegation(&pic_setup, caller, None);
 
@@ -593,6 +597,7 @@ fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
 #[test]
 fn test_allow_signing_controller_bypasses_delegation_check() {
     let pic_setup = setup();
+    pic_setup.ensure_user_profile(controller());
 
     let result = call_allow_signing_with_delegation(&pic_setup, controller(), None);
 
@@ -623,6 +628,7 @@ fn test_allow_signing_with_valid_delegation() {
     );
 
     let caller = Principal::self_authenticating(&delegation_chain.public_key);
+    pic_setup.ensure_user_profile(caller);
 
     let result = call_allow_signing_with_delegation(&pic_setup, caller, Some(delegation_chain));
 

@@ -531,4 +531,19 @@ impl PicBackend {
         }
         expected_users
     }
+
+    /// Test helper that ensures the given `caller` has a user profile created.
+    ///
+    /// Most guarded update endpoints require the caller to already have a user
+    /// profile, so tests that exercise such endpoints as an authenticated user
+    /// must first call `create_user_profile`. This helper is idempotent: the
+    /// `create_user_profile` endpoint itself returns the existing profile if
+    /// one exists, so callers can invoke this freely before each test action.
+    pub fn ensure_user_profile(&self, caller: Principal) {
+        let response = self.update::<UserProfile>(caller, "create_user_profile", ());
+        assert!(
+            response.is_ok(),
+            "Failed to create user profile for caller {caller}: {response:?}"
+        );
+    }
 }
