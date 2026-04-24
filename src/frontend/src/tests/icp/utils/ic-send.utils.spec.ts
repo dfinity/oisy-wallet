@@ -3,11 +3,15 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { isInvalidDestinationIc, isInvalidNat64Memo, mapIcSendErrorMsg } from '$icp/utils/ic-send.utils';
-import en from '$tests/mocks/i18n.mock';
+import {
+	isInvalidDestinationIc,
+	isInvalidNat64Memo,
+	mapIcSendErrorMsg
+} from '$icp/utils/ic-send.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
