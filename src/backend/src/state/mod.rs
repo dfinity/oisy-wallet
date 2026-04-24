@@ -114,6 +114,17 @@ pub(crate) fn set_config(arg: InitArg) {
     });
 }
 
+/// Returns whether sign-ups of new users are currently allowed.
+///
+/// An unset (`None`) flag is treated as "allowed" to preserve the behaviour of canisters whose
+/// config was persisted before this field existed.
+///
+/// # Panics
+/// - If the `STATE.config` is not initialized.
+pub(crate) fn read_new_user_signups_allowed() -> bool {
+    read_config(|c| c.new_user_signups_allowed.unwrap_or(true))
+}
+
 pub(crate) fn with_api_keys<R>(f: impl FnOnce(&ApiKeys) -> R) -> R {
     read_state(|state| {
         let default = ApiKeys::default();

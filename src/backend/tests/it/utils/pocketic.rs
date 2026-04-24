@@ -413,6 +413,7 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
         ),
         derivation_origin: Some(FRONTEND_DERIVATION_ORIGIN.to_string()),
         ii_canister_id: Some(ii_canister_id),
+        new_user_signups_allowed: None,
     });
 
     let mut builder = BackendBuilder::default().with_arg(encode_one(backend_init).unwrap());
@@ -485,6 +486,7 @@ fn init_arg_with_ecdsa_key(ecdsa_key_name: &str) -> Arg {
         ),
         derivation_origin: Some(FRONTEND_DERIVATION_ORIGIN.to_string()),
         ii_canister_id: Some(Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id")),
+        new_user_signups_allowed: None,
     })
 }
 

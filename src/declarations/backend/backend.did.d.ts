@@ -481,6 +481,7 @@ export interface Config {
 	 * Root of trust for checking canister signatures.
 	 */
 	ic_root_key_raw: [] | [Uint8Array];
+	new_user_signups_allowed: [] | [boolean];
 }
 export interface Contact {
 	id: bigint;
@@ -914,6 +915,7 @@ export interface InitArg {
 	 * Root of trust for checking canister signatures.
 	 */
 	ic_root_key_der: [] | [Uint8Array];
+	new_user_signups_allowed: [] | [boolean];
 }
 /**
  * Bitcoin Network.
@@ -1736,6 +1738,13 @@ export interface _SERVICE {
 	 * update method.
 	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
+	/**
+	 * Returns whether sign-ups of new users are currently allowed.
+	 *
+	 * Exposed as an unauthenticated query so the landing page can display an info banner before the
+	 * user signs in.
+	 */
+	new_user_signups_allowed: ActorMethod<[], boolean>;
 	/**
 	 * Remove custom token for the user.
 	 */

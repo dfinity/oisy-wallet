@@ -18,7 +18,7 @@ use shared::types::{
 };
 
 use crate::{
-    state::{mutate_state, read_state},
+    state::{self, mutate_state, read_state},
     types::StoredPrincipal,
     user_profile::{model::UserProfileModel, service},
     utils::{
@@ -331,6 +331,16 @@ pub fn create_user_profile() -> UserProfile {
     spawn_allow_signing_if_below_limit(stored_principal);
 
     user_profile
+}
+
+/// Returns whether sign-ups of new users are currently allowed.
+///
+/// Exposed as an unauthenticated query so the landing page can display an info banner before the
+/// user signs in.
+#[query]
+#[must_use]
+pub fn new_user_signups_allowed() -> bool {
+    state::read_new_user_signups_allowed()
 }
 
 /// Returns the caller's user profile.

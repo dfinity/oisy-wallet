@@ -126,3 +126,17 @@ fn test_exists_profile_should_return_false_if_profile_not_exists() {
             .has_user_profile
     );
 }
+
+#[test]
+fn test_new_user_signups_allowed_defaults_to_true() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let response = pic_setup.query::<bool>(caller, "new_user_signups_allowed", ());
+
+    assert_eq!(
+        response.expect("Call to new_user_signups_allowed failed"),
+        true
+    );
+}

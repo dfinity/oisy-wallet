@@ -1167,6 +1167,11 @@ service : (Arg) -> {
 	// - Integrations that previously relied on query semantics must be updated to invoke this as an
 	// update method.
 	list_custom_tokens : () -> (vec CustomToken);
+	// Returns whether sign-ups of new users are currently allowed.
+	//
+	// Exposed as an unauthenticated query so the landing page can display an info banner before the
+	// user signs in.
+	new_user_signups_allowed : () -> (bool) query;
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
 	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
