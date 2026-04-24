@@ -29,8 +29,11 @@ pub fn call_create_user_profile(
     pic_setup: &PicBackend,
     caller: Principal,
 ) -> Result<UserProfile, String> {
-    let profile_result = pic_setup
-        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())?;
+    let profile_result = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    )?;
     match profile_result {
         Ok(profile) => Ok(profile),
         Err(err) => panic!("create_user_profile rejected with {err:?}"),
