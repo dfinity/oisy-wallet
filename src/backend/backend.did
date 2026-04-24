@@ -151,7 +151,8 @@ type Config = record {
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
-	ic_root_key_raw : opt blob
+	ic_root_key_raw : opt blob;
+	new_user_signups_allowed : opt bool
 };
 type Contact = record {
 	id : nat64;
@@ -323,7 +324,8 @@ type InitArg = record {
 	ecdsa_key_name : text;
 	cfs_canister_id : opt principal;
 	allowed_callers : vec principal;
-	ic_root_key_der : opt blob
+	ic_root_key_der : opt blob;
+	new_user_signups_allowed : opt bool
 };
 type Network = variant { mainnet; regtest; testnet };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
@@ -770,6 +772,11 @@ service : (Arg) -> {
 	// - Integrations that previously relied on query semantics must be updated to invoke this as an
 	// update method.
 	list_custom_tokens : () -> (vec CustomToken);
+	// Returns whether sign-ups of new users are currently allowed.
+	//
+	// Exposed as an unauthenticated query so the landing page can display an info banner before the
+	// user signs in.
+	new_user_signups_allowed : () -> (bool) query;
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
 	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.

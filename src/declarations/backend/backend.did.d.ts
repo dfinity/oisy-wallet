@@ -160,6 +160,7 @@ export interface Config {
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	ic_root_key_raw: [] | [Uint8Array];
+	new_user_signups_allowed: [] | [boolean];
 }
 export interface Contact {
 	id: bigint;
@@ -350,6 +351,7 @@ export interface InitArg {
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	ic_root_key_der: [] | [Uint8Array];
+	new_user_signups_allowed: [] | [boolean];
 }
 export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface NetworkSettings {
@@ -856,6 +858,13 @@ export interface _SERVICE {
 	 * update method.
 	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
+	/**
+	 * Returns whether sign-ups of new users are currently allowed.
+	 *
+	 * Exposed as an unauthenticated query so the landing page can display an info banner before the
+	 * user signs in.
+	 */
+	new_user_signups_allowed: ActorMethod<[], boolean>;
 	/**
 	 * Remove custom token for the user.
 	 */
