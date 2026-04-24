@@ -358,6 +358,11 @@ export const idlFactory = ({ IDL }) => {
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});
+	const CreateUserProfileError = IDL.Variant({ SignupsClosed: IDL.Null });
+	const CreateUserProfileResult = IDL.Variant({
+		Ok: UserProfile,
+		Err: CreateUserProfileError
+	});
 	const DeleteContactResult = IDL.Variant({
 		Ok: IDL.Nat64,
 		Err: ContactError
@@ -456,11 +461,6 @@ export const idlFactory = ({ IDL }) => {
 	const GetUserProfileResult = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
-	});
-	const CreateUserProfileError = IDL.Variant({ SignupsClosed: IDL.Null });
-	const CreateUserProfileResult = IDL.Variant({
-		Ok: UserProfile,
-		Err: CreateUserProfileError
 	});
 	const GetUserTransactionsRequest = IDL.Record({
 		token_id: TokenId,
