@@ -12,9 +12,10 @@
 
 	interface Props {
 		onProviderSelected: (provider: OpenIdProvider) => void;
+		variant?: 'login' | 'lock';
 	}
 
-	let { onProviderSelected }: Props = $props();
+	let { onProviderSelected, variant = 'login' }: Props = $props();
 
 	// One-Click sign-in providers — see `@icp-sdk/auth` v6 `OpenIdProvider`.
 	// Internet Identity 2.0 performs the OIDC flow against these and returns
@@ -39,12 +40,18 @@
 			testId: LOGIN_BUTTON_MICROSOFT
 		}
 	]);
+
+	const variantClasses = $derived(
+		variant === 'lock'
+			? 'bg-brand-subtle-10 hover:bg-brand-subtle-20 focus-visible:outline-brand-primary'
+			: 'bg-primary border border-brand-subtle-20 hover:border-brand-primary-alt focus-visible:outline-brand-primary-alt'
+	);
 </script>
 
 <div class="flex items-center justify-center gap-4">
 	{#each providers as { provider, icon: Icon, ariaLabel, testId } (provider)}
 		<button
-			class="hover:border-brand-primary-alt focus-visible:outline-brand-primary-alt flex size-14 items-center justify-center rounded-xl border border-brand-subtle-20 bg-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+			class={`flex size-14 items-center justify-center rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses}`}
 			aria-label={ariaLabel}
 			data-tid={testId}
 			onclick={() => onProviderSelected(provider)}
