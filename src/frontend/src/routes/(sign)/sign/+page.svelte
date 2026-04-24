@@ -74,8 +74,8 @@
 					<SignerCallCanister />
 				{/if}
 			</SignerAccounts>
-		</LoaderUserProfile>
 
-		<AgreementsGuard />
+			<AgreementsGuard />
+		</LoaderUserProfile>
 	{/if}
 </article>
