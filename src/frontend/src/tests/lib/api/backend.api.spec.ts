@@ -278,7 +278,7 @@ describe('backend.api', () => {
 		it('should successfully call newUserSignupsAllowed endpoint', async () => {
 			const result = await newUserSignupsAllowed(mockParams);
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 			expect(backendCanisterMock.newUserSignupsAllowed).toHaveBeenCalledExactlyOnceWith({
 				certified
 			});
@@ -289,13 +289,11 @@ describe('backend.api', () => {
 
 			const result = await newUserSignupsAllowed(mockParams);
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(
-				newUserSignupsAllowed({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			await expect(newUserSignupsAllowed({ ...mockParams, identity: undefined })).rejects.toThrow();
 		});
 	});
 

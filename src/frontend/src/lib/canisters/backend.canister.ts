@@ -18,7 +18,6 @@ import {
 	mapBtcSelectUserUtxosFeeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
-import { SignupsClosedError } from '$lib/types/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
@@ -44,6 +43,7 @@ import type {
 	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { SignupsClosedError } from '$lib/types/errors';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
 import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
