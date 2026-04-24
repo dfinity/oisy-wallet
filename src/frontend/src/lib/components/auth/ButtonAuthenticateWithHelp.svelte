@@ -54,9 +54,9 @@
 	class:md:items-start={helpAlignment !== 'center'}
 >
 	<ButtonsSignIn
-		{onAuthenticate}
 		{fullWidth}
 		justify={helpAlignment === 'center' ? 'center' : 'start'}
+		{onAuthenticate}
 	/>
 
 	<span
