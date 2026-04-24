@@ -6,14 +6,25 @@
 	interface Props {
 		onclick: () => void;
 		fullWidth?: boolean;
+		variant?: 'login' | 'lock';
+		rowBreakpoint?: 'sm' | 'md';
 	}
 
-	let { onclick, fullWidth = false }: Props = $props();
+	let { onclick, fullWidth = false, variant = 'login', rowBreakpoint = 'md' }: Props = $props();
+
+	const variantClasses = $derived(
+		variant === 'lock'
+			? 'bg-brand-primary text-primary-inverted hover:bg-brand-secondary focus-visible:outline-brand-primary'
+			: 'bg-primary text-brand-primary-alt border border-brand-subtle-20 hover:border-brand-primary-alt focus-visible:outline-brand-primary-alt'
+	);
+
+	const widthClasses = $derived(
+		fullWidth ? '' : rowBreakpoint === 'sm' ? 'sm:flex-1' : 'md:w-[200px]'
+	);
 </script>
 
 <button
-	class="hover:border-brand-primary-alt focus-visible:outline-brand-primary-alt flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-brand-subtle-20 bg-primary px-5 py-4 text-base leading-[22px] font-semibold whitespace-nowrap text-brand-primary-alt transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
-	class:md:w-[200px]={!fullWidth}
+	class={`flex h-14 w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-base leading-[22px] font-semibold whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses} ${widthClasses}`}
 	data-tid={LOGIN_BUTTON}
 	{onclick}
 	type="button"
