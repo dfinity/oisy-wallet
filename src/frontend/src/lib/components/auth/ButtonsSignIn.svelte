@@ -30,9 +30,11 @@
 <div
 	class="flex w-full flex-col items-center gap-4"
 	class:md:flex-row={!fullWidth && rowBreakpoint === 'md'}
+	class:md:gap-2={!fullWidth && rowBreakpoint === 'md' && variant === 'lock'}
 	class:md:justify-center={!fullWidth && rowBreakpoint === 'md' && justify === 'center'}
 	class:md:justify-start={!fullWidth && rowBreakpoint === 'md' && justify === 'start'}
 	class:sm:flex-row={!fullWidth && rowBreakpoint === 'sm'}
+	class:sm:gap-2={!fullWidth && rowBreakpoint === 'sm' && variant === 'lock'}
 >
 	<ButtonSignInInternetIdentity
 		{fullWidth}
@@ -53,6 +55,7 @@
 
 		<ButtonsSignInOpenId
 			onProviderSelected={(provider) => onAuthenticate({ openIdProvider: provider })}
+			{rowBreakpoint}
 			{variant}
 		/>
 	{/if}
