@@ -1003,7 +1003,8 @@
 			"solana_insufficient_funds": "O saldo do seu token não é suficiente para concluir esta transação. O seu saldo pode ter mudado desde a última vez que foi exibido.",
 			"solana_insufficient_funds_for_fee": "O seu saldo de SOL não é suficiente para cobrir as taxas de transação.",
 			"solana_insufficient_funds_for_rent": "O seu saldo de SOL não é suficiente para cobrir o aluguel necessário para a criação da conta.",
-			"fee_calc_unsupported_standard": "Não foi possível calcular a taxa pois o padrão de token fornecido não é suportado."
+			"fee_calc_unsupported_standard": "Não foi possível calcular a taxa pois o padrão de token fornecido não é suportado.",
+			"memo_too_long": "O memo é muito longo. Por favor, encurte-o e tente novamente."
 		}
 	},
 	"mint": {
@@ -1938,7 +1939,7 @@
 				"possessive": "nossos "
 			},
 			"title": "",
-			"instruction": "Ao clicar neste botão, você concorda com os $link",
+			"instruction": "Ao fazer login, você concorda com os $link",
 			"body": ""
 		},
 		"alt": {
