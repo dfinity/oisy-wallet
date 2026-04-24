@@ -23,7 +23,7 @@ use crate::{
     delegation, signer,
     state::mutate_state,
     utils::{
-        guards::caller_is_not_anonymous,
+        guards::{caller_is_not_anonymous, caller_is_registered_user},
         rate_limiter::{
             self, BTC_ADD_PENDING_TX_RATE_LIMITER, BTC_GET_PENDING_TX_RATE_LIMITER,
             BTC_SELECT_UTXOS_FEE_RATE_LIMITER,
@@ -64,7 +64,7 @@ pub fn btc_get_current_fee_percentiles(
 ///
 /// # Errors
 /// Errors are enumerated by: `SelectedUtxosFeeError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
 ) -> BtcSelectUserUtxosFeeResult {
@@ -161,7 +161,7 @@ pub async fn btc_select_user_utxos_fee(
 ///
 /// # Errors
 /// Errors are enumerated by: `BtcAddPendingTransactionError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub async fn btc_add_pending_transaction(
     params: BtcAddPendingTransactionRequest,
 ) -> BtcAddPendingTransactionResult {
@@ -259,7 +259,7 @@ pub async fn btc_add_pending_transaction(
 ///
 /// # Errors
 /// Errors are enumerated by: `BtcGetPendingTransactionsError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub async fn btc_get_pending_transactions(
     params: BtcGetPendingTransactionsRequest,
 ) -> BtcGetPendingTransactionsResult {
