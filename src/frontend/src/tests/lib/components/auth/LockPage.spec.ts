@@ -10,6 +10,7 @@ import * as authServices from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { authLocked } from '$lib/stores/locked.store';
 import { InternetIdentityDomain, type OpenIdProvider } from '$lib/types/auth';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -77,7 +78,9 @@ describe('LockPage', () => {
 
 		expect(signInButton).toBeInTheDocument();
 
-		await fireEvent.click(signInButton!);
+		assertNonNullish(signInButton);
+
+		await fireEvent.click(signInButton);
 
 		expect(signInMock).toHaveBeenCalledExactlyOnceWith({
 			domain: InternetIdentityDomain.VERSION_2_0
@@ -135,9 +138,7 @@ describe('LockPage', () => {
 		it.each(openIdCases)(
 			'should call signIn with openIdProvider "$provider" and unlock the lock store when the "$testId" button is clicked',
 			async ({ provider, testId }) => {
-				const signInMock = vi
-					.spyOn(authServices, 'signIn')
-					.mockResolvedValue({ success: 'ok' });
+				const signInMock = vi.spyOn(authServices, 'signIn').mockResolvedValue({ success: 'ok' });
 
 				const { container } = render(LockPage);
 
