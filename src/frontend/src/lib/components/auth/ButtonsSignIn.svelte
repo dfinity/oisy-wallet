@@ -29,25 +29,25 @@
 
 <div
 	class="flex w-full flex-col items-center gap-4"
-	class:sm:flex-row={!fullWidth && rowBreakpoint === 'sm'}
 	class:md:flex-row={!fullWidth && rowBreakpoint === 'md'}
 	class:md:justify-center={!fullWidth && rowBreakpoint === 'md' && justify === 'center'}
 	class:md:justify-start={!fullWidth && rowBreakpoint === 'md' && justify === 'start'}
+	class:sm:flex-row={!fullWidth && rowBreakpoint === 'sm'}
 >
 	<ButtonSignInInternetIdentity
-		onclick={() => onAuthenticate()}
 		{fullWidth}
-		{variant}
+		onclick={() => onAuthenticate()}
 		{rowBreakpoint}
+		{variant}
 	/>
 
 	{#if openIdEnabled}
 		<div
 			class="h-px w-[35px] bg-brand-subtle-20"
-			class:sm:h-[35px]={!fullWidth && rowBreakpoint === 'sm'}
-			class:sm:w-px={!fullWidth && rowBreakpoint === 'sm'}
 			class:md:h-[35px]={!fullWidth && rowBreakpoint === 'md'}
 			class:md:w-px={!fullWidth && rowBreakpoint === 'md'}
+			class:sm:h-[35px]={!fullWidth && rowBreakpoint === 'sm'}
+			class:sm:w-px={!fullWidth && rowBreakpoint === 'sm'}
 			aria-hidden="true"
 		></div>
 
