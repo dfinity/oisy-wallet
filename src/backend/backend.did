@@ -316,7 +316,12 @@ type Config = record {
 	// use the `msg_caller()`
 	allowed_callers : vec principal;
 	// Root of trust for checking canister signatures.
-	ic_root_key_raw : opt blob
+	ic_root_key_raw : opt blob;
+	// Whether sign-ups of new users (i.e. new user profiles) are allowed.
+	//
+	// `None` is treated as "allowed" (the default), ensuring backward compatibility with
+	// config payloads persisted before this field existed.
+	new_user_signups_allowed : opt bool
 };
 type Contact = record {
 	id : nat64;
@@ -596,7 +601,15 @@ type InitArg = record {
 	// use the `msg_caller()`
 	allowed_callers : vec principal;
 	// Root of trust for checking canister signatures.
-	ic_root_key_der : opt blob
+	ic_root_key_der : opt blob;
+	// Whether sign-ups of new users (i.e. new user profiles) are allowed.
+	//
+	// When `Some(false)`, `create_user_profile` rejects callers that do not already have a
+	// profile with `CreateUserProfileError::SignupsClosed`. Existing users are unaffected.
+	//
+	// `None` is treated as "allowed" (the default), ensuring backward compatibility with
+	// deployments that pre-date this field.
+	new_user_signups_allowed : opt bool
 };
 // Bitcoin Network.
 type Network = variant {

@@ -481,6 +481,12 @@ export interface Config {
 	 * Root of trust for checking canister signatures.
 	 */
 	ic_root_key_raw: [] | [Uint8Array];
+	/**
+	 * Whether sign-ups of new users (i.e. new user profiles) are allowed.
+	 *
+	 * `None` is treated as "allowed" (the default), ensuring backward compatibility with
+	 * config payloads persisted before this field existed.
+	 */
 	new_user_signups_allowed: [] | [boolean];
 }
 export interface Contact {
@@ -915,6 +921,15 @@ export interface InitArg {
 	 * Root of trust for checking canister signatures.
 	 */
 	ic_root_key_der: [] | [Uint8Array];
+	/**
+	 * Whether sign-ups of new users (i.e. new user profiles) are allowed.
+	 *
+	 * When `Some(false)`, `create_user_profile` rejects callers that do not already have a
+	 * profile with `CreateUserProfileError::SignupsClosed`. Existing users are unaffected.
+	 *
+	 * `None` is treated as "allowed" (the default), ensuring backward compatibility with
+	 * deployments that pre-date this field.
+	 */
 	new_user_signups_allowed: [] | [boolean];
 }
 /**
