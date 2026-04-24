@@ -1,5 +1,7 @@
 export class UserProfileNotFoundError extends Error {}
 
+export class SignupsClosedError extends Error {}
+
 export class UserNotVipError extends Error {}
 
 export class EligibilityError extends Error {}
