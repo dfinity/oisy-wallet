@@ -358,6 +358,11 @@ export const idlFactory = ({ IDL }) => {
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});
+	const CreateUserProfileError = IDL.Variant({ SignupsClosed: IDL.Null });
+	const CreateUserProfileResult = IDL.Variant({
+		Ok: UserProfile,
+		Err: CreateUserProfileError
+	});
 	const DeleteContactResult = IDL.Variant({
 		Ok: IDL.Nat64,
 		Err: ContactError
@@ -456,11 +461,6 @@ export const idlFactory = ({ IDL }) => {
 	const GetUserProfileResult = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
-	});
-	const CreateUserProfileError = IDL.Variant({ SignupsClosed: IDL.Null });
-	const CreateUserProfileResult = IDL.Variant({
-		Ok: UserProfile,
-		Err: CreateUserProfileError
 	});
 	const GetUserTransactionsRequest = IDL.Record({
 		token_id: TokenId,
@@ -708,7 +708,7 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
-		new_user_signups_allowed: IDL.Func([], [IDL.Bool], ['query']),
+		new_user_signups_allowed: IDL.Func([], [IDL.Bool]),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
 			[SaveUserTransactionsRequest],

@@ -768,17 +768,6 @@ service : (Arg) -> {
 	// `CF-Ray`, etc. differ across replicas, causing consensus failure.
 	// This transform keeps only status + body.
 	http_request_transform : (TransformArgs) -> (HttpRequestResult) query;
-	// Returns whether sign-ups of new users are currently allowed.
-	//
-	// Exposed as an unauthenticated query so the landing page can display an info banner before the
-	// user signs in.
-	new_user_signups_allowed : () -> (bool) query;
-	// Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
-	//
-	// When disabled, `create_user_profile` rejects callers that do not already have a profile with
-	// `CreateUserProfileError::SignupsClosed`. Existing users are unaffected. All other `Config`
-	// fields are preserved.
-	set_new_user_signups_allowed : (bool) -> ();
 	// List the custom tokens for the calling user.
 	//
 	// Note: This method was previously exposed as a *query* but is now an *update*
@@ -793,6 +782,11 @@ service : (Arg) -> {
 	// - Integrations that previously relied on query semantics must be updated to invoke this as an
 	// update method.
 	list_custom_tokens : () -> (vec CustomToken);
+	// Returns whether sign-ups of new users are currently allowed.
+	//
+	// Exposed as an unauthenticated query so the landing page can display an info banner before the
+	// user signs in.
+	new_user_signups_allowed : () -> (bool) query;
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
 	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
@@ -809,6 +803,12 @@ service : (Arg) -> {
 	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
+	// Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
+	//
+	// When disabled, `create_user_profile` rejects callers that do not already have a profile with
+	// `CreateUserProfileError::SignupsClosed`. Existing users are unaffected. All other `Config`
+	// fields are preserved.
+	set_new_user_signups_allowed : (bool) -> ();
 	// Sets the user's preference to show (or hide) testnets in the interface.
 	//
 	// # Returns
