@@ -1961,7 +1961,7 @@
 		},
 		"info": {
 			"btc_transactions": "As informações de transação BTC são obtidas de terceiros centralizados e devem ser verificadas independentemente.",
-			"hidden_micro_transactions": "OISY protege você! As transações com valores de token muito pequenos estão atualmente ocultas. Para mostrá-las, vá para <a href=\"/settings/\">Configurações</a>. <a href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Saiba mais</a>"
+			"hidden_micro_transactions": "OISY protege você! As transações com valores de token muito pequenos estão atualmente ocultas. Para mostrá-las, vá para <a href=\"/settings/\">Configurações</a>.&nbsp;&nbsp;&nbsp;<a class='no-underline blue-link' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Saiba mais</a>"
 		},
 		"warning": {
 			"no_index_canister": "As transações para $token_list não podem ser exibidas. Nenhum canister Index disponível.",
