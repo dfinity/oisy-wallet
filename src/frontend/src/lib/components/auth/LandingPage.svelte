@@ -19,9 +19,9 @@
 		<HeroSignIn />
 	</div>
 
-	<div class="flex w-full justify-center">
+	<div class="relative w-full overflow-hidden">
 		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
-			<Img alt={ariaLabel} {src} styleClass="h-full w-full object-cover" />
+			<Img alt={ariaLabel} {src} styleClass="relative left-1/2 -translate-x-1/2" />
 		{/await}
 	</div>
 
