@@ -1003,7 +1003,8 @@
 			"solana_insufficient_funds": "您的代币余额不足以完成此交易。您的余额自上次显示以来可能已发生变化。",
 			"solana_insufficient_funds_for_fee": "您的SOL余额不足以支付交易费用。",
 			"solana_insufficient_funds_for_rent": "您的SOL余额不足以支付创建账户所需的租金。",
-			"fee_calc_unsupported_standard": "由于提供的代币标准不受支持，无法计算费用。"
+			"fee_calc_unsupported_standard": "由于提供的代币标准不受支持，无法计算费用。",
+			"memo_too_long": "备注太长。请缩短后重试。"
 		}
 	},
 	"mint": {
@@ -1938,7 +1939,7 @@
 				"possessive": "我们的 "
 			},
 			"title": "",
-			"instruction": "点击此按钮即表示你同意 $link",
+			"instruction": "登录即表示你同意 $link",
 			"body": ""
 		},
 		"alt": {
