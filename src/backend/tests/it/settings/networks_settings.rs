@@ -113,12 +113,11 @@ fn test_update_user_network_settings_saves_settings() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let profile = create_profile_response
         .expect("Create call failed")
@@ -160,12 +159,11 @@ fn test_update_user_network_settings_merges_with_existing_settings() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let profile = create_profile_response
         .expect("Create call failed")
@@ -235,12 +233,11 @@ fn test_update_user_network_settings_cannot_update_wrong_version() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let profile = create_profile_response
         .expect("Create call failed")
@@ -302,12 +299,11 @@ fn test_update_user_network_settings_does_not_change_existing_value_if_same() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        );
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
     let profile = create_profile_response
         .expect("Create call failed")

@@ -207,11 +207,7 @@ fn test_create_user_profile_is_rejected_when_signups_are_closed() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let response = pic_setup
-        .update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        )
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
         .expect("Canister call to create_user_profile failed");
 
     assert_eq!(response, Err(CreateUserProfileError::SignupsClosed));
@@ -224,11 +220,7 @@ fn test_existing_user_can_still_create_user_profile_when_signups_are_closed() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let first_create = pic_setup
-        .update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        )
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
         .expect("Canister call to create_user_profile failed")
         .expect("create_user_profile should succeed while signups are open");
 
@@ -238,11 +230,7 @@ fn test_existing_user_can_still_create_user_profile_when_signups_are_closed() {
 
     // Existing users still get their profile back (idempotent).
     let second_create = pic_setup
-        .update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        )
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
         .expect("Canister call to create_user_profile failed")
         .expect("Existing users must still be able to fetch their profile via create");
 
@@ -263,11 +251,7 @@ fn test_set_new_user_signups_allowed_re_enables_signups() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let response = pic_setup
-        .update::<Result<UserProfile, CreateUserProfileError>>(
-            caller,
-            "create_user_profile",
-            (),
-        )
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
         .expect("Canister call to create_user_profile failed");
 
     assert!(response.is_ok());
