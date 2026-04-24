@@ -98,6 +98,15 @@ export const getUserProfile = async ({
 	return getUserProfile({ certified });
 };
 
+export const newUserSignupsAllowed = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<boolean> => {
+	const { newUserSignupsAllowed } = await backendCanister({ identity });
+
+	return newUserSignupsAllowed({ certified });
+};
+
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params

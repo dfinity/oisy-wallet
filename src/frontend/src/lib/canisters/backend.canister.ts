@@ -18,6 +18,7 @@ import {
 	mapBtcSelectUserUtxosFeeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
+import { SignupsClosedError } from '$lib/types/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
@@ -101,16 +102,32 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<UserProfile> => {
+	createUserProfile = async (): Promise<UserProfile> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
-		return create_user_profile();
+		const response = await create_user_profile();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		if ('SignupsClosed' in response.Err) {
+			throw new SignupsClosedError();
+		}
+
+		throw response.Err;
 	};
 
 	getUserProfile = ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
 		const { get_user_profile } = this.caller({ certified });
 
 		return get_user_profile();
+	};
+
+	newUserSignupsAllowed = ({ certified }: QueryParams): Promise<boolean> => {
+		const { new_user_signups_allowed } = this.caller({ certified });
+
+		return new_user_signups_allowed();
 	};
 
 	btcAddPendingTransaction = async ({

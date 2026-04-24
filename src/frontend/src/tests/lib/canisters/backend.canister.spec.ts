@@ -219,7 +219,7 @@ describe('backend.canister', () => {
 	});
 
 	it('creates user profile', async () => {
-		service.create_user_profile.mockResolvedValue(mockedUserProfile);
+		service.create_user_profile.mockResolvedValue({ Ok: mockedUserProfile });
 
 		const { createUserProfile } = await createBackendCanister({
 			serviceOverride: service
@@ -228,6 +228,18 @@ describe('backend.canister', () => {
 		const res = await createUserProfile();
 
 		expect(res).toEqual(mockedUserProfile);
+	});
+
+	it('should throw SignupsClosedError when backend returns SignupsClosed', async () => {
+		service.create_user_profile.mockResolvedValue({ Err: { SignupsClosed: null } });
+
+		const { createUserProfile } = await createBackendCanister({
+			serviceOverride: service
+		});
+
+		const { SignupsClosedError } = await import('$lib/types/errors');
+
+		await expect(createUserProfile()).rejects.toThrow(SignupsClosedError);
 	});
 
 	it('should throw an error if create_user_profile throws', async () => {

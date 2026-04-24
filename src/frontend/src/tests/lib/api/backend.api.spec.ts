@@ -10,6 +10,7 @@ import {
 	getUserProfile,
 	getUserTransactions,
 	listCustomTokens,
+	newUserSignupsAllowed,
 	removeCustomToken,
 	saveUserTransactions,
 	setCustomToken,
@@ -261,6 +262,40 @@ describe('backend.api', () => {
 			});
 
 			await expect(getUserProfile(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('newUserSignupsAllowed', () => {
+		const mockParams: CanisterApiFunctionParams<QueryParams> = {
+			...baseParams,
+			certified
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.newUserSignupsAllowed.mockResolvedValue(true);
+		});
+
+		it('should successfully call newUserSignupsAllowed endpoint', async () => {
+			const result = await newUserSignupsAllowed(mockParams);
+
+			expect(result).toBe(true);
+			expect(backendCanisterMock.newUserSignupsAllowed).toHaveBeenCalledExactlyOnceWith({
+				certified
+			});
+		});
+
+		it('should return false when signups are closed', async () => {
+			backendCanisterMock.newUserSignupsAllowed.mockResolvedValue(false);
+
+			const result = await newUserSignupsAllowed(mockParams);
+
+			expect(result).toBe(false);
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				newUserSignupsAllowed({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
 		});
 	});
 

@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": "Your session was locked in another tab."
 		},
+		"info": {
+			"signups_closed": "New sign-ups are currently restricted. Please try again later."
+		},
+		"banner": {
+			"signups_closed": "Currently, sign-ups of new users are not possible. Existing users can use $oisy_short normally."
+		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
 			"session_expired": "You have been logged out because your session has expired.",

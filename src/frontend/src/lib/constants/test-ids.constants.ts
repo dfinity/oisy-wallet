@@ -338,6 +338,9 @@ export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-with
 export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
 export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-button';
 
+// Signups closed
+export const SIGNUPS_CLOSED_BANNER_TEST_ID = 'signups-closed-banner';
+
 // OpenCryptoPay
 export const OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON = 'open-crypto-pay-enter-manually-button';
 

@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": "Tu sesión fue bloqueada."
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "No has iniciado sesión. Por favor, inicia sesión para continuar.",
 			"session_expired": "Has sido desconectado porque tu sesión ha expirado.",

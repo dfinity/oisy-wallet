@@ -12,6 +12,7 @@ import { nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { AllowSigningOutcome } from '$lib/types/api';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -160,11 +161,30 @@ describe('loader.services', () => {
 		});
 
 		it('should sign out if the user profile is not loaded', async () => {
-			vi.mocked(loadUserProfile).mockResolvedValueOnce({ success: false });
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({ success: false, err: 'unknown' });
 
 			await initLoader(mockParams);
 
 			expect(signOut).toHaveBeenCalledOnce();
+		});
+
+		it('should show an info toast and sign out when signups are closed', async () => {
+			const toastsShowSpy = vi.spyOn(toastsStore, 'toastsShow');
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: false,
+				err: 'signups-closed'
+			});
+
+			await initLoader(mockParams);
+
+			expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
+				text: expect.stringMatching(/sign-?ups/i),
+				level: 'info'
+			});
+			expect(signOut).toHaveBeenCalledExactlyOnceWith({
+				resetUrl: true,
+				source: 'signups-closed'
+			});
 		});
 
 		it('should load addresses from the backend', async () => {

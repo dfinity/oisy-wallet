@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": ""
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
 			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
