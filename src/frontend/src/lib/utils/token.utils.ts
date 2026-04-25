@@ -15,7 +15,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { StakeBalances } from '$lib/types/stake-balance';
-import type { RequiredTokenWithLinkedData, Token, TokenStandard } from '$lib/types/token';
+import type { RequiredTokenWithLinkedData, Token, TokenId, TokenStandard } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -25,6 +25,9 @@ import { formatToken } from '$lib/utils/format.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+const ERC20_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(ERC20_SUGGESTED_TOKENS.map(({ id }) => id));
+const SPL_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(SPL_SUGGESTED_TOKENS.map(({ id }) => id));
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -94,10 +97,8 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
 		(nonNullish(ledgerCanisterId) &&
 			ICRC_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
-		(isTokenErc20(defaultToken) &&
-			ERC20_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id)) ||
-		(isTokenSpl(defaultToken) &&
-			SPL_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id));
+		(isTokenErc20(defaultToken) && ERC20_SUGGESTED_TOKEN_IDS.has(defaultToken.id)) ||
+		(isTokenSpl(defaultToken) && SPL_SUGGESTED_TOKEN_IDS.has(defaultToken.id));
 
 	return {
 		...defaultToken,
