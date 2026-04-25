@@ -945,8 +945,7 @@
 			"no_available_utxos": "Nebudete mít k dispozici žádné UTXO k provedení této transakce.",
 			"unknown_destination": "S touto adresou jste dosud neinteragovali. Ujistěte se, že znáte příjemce.",
 			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>",
-			"icp_memo_methods": "",
-			"icp_memo_learn_more": ""
+			"icp_memo_methods": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Neplatná cílová adresa",

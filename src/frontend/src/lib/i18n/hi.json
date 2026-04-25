@@ -945,8 +945,7 @@
 			"no_available_utxos": "आपके पास इस लेनदेन को करने के लिए कोई उपलब्ध utxos नहीं होगा।",
 			"unknown_destination": "आपने पहले इस पते के साथ इंटरैक्ट नहीं किया है। कृपया सुनिश्चित करें कि आप प्राप्तकर्ता को जानते हैं।",
 			"fee_info": "शुल्क का भुगतान $feeSymbol में किया जाएगा। उपलब्ध: <strong>$feeBalance $feeSymbol</strong>",
-			"icp_memo_methods": "",
-			"icp_memo_learn_more": ""
+			"icp_memo_methods": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "अमान्य गंतव्य पता",

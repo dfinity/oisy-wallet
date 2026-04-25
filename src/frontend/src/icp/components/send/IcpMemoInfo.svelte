@@ -14,13 +14,13 @@
 	<div>
 		{$i18n.send.info.icp_memo_methods}
 		<ExternalLink
-			ariaLabel={$i18n.send.info.icp_memo_learn_more}
+			ariaLabel={$i18n.core.alt.learn_more}
 			color="blue"
 			href={OISY_ICP_MEMO_DOCS_URL}
 			iconVisible={false}
 			styleClass="font-semibold"
 		>
-			{$i18n.send.info.icp_memo_learn_more}
+			{$i18n.core.text.learn_more}
 		</ExternalLink>
 	</div>
 </div>

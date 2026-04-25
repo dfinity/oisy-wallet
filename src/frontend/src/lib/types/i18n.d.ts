@@ -683,7 +683,6 @@ interface I18nSend {
 		unknown_destination: string;
 		fee_info: string;
 		icp_memo_methods: string;
-		icp_memo_learn_more: string;
 	};
 	assertion: {
 		invalid_destination_address: string;

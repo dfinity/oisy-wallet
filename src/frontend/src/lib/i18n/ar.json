@@ -945,8 +945,7 @@
 			"no_available_utxos": "لن يكون لديك UTXOs متاحة لإجراء هذه المعاملة.",
 			"unknown_destination": "لم تتفاعل مع هذا العنوان من قبل. يرجى التأكد من معرفة المستلم.",
 			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>",
-			"icp_memo_methods": "",
-			"icp_memo_learn_more": ""
+			"icp_memo_methods": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "عنوان الوجهة غير صالح",

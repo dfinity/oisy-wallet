@@ -945,8 +945,7 @@
 			"no_available_utxos": "Non avrai UTXO disponibili per eseguire questa transazione.",
 			"unknown_destination": "Non hai mai interagito con questo indirizzo prima. Assicurati di conoscere il destinatario.",
 			"fee_info": "La fee sarà pagata in $feeSymbol. Disponibile: <strong>$feeBalance $feeSymbol</strong>",
-			"icp_memo_methods": "",
-			"icp_memo_learn_more": ""
+			"icp_memo_methods": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Indirizzo di destinazione non valido",

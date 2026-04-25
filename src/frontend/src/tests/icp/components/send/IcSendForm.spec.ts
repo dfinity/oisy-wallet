@@ -143,7 +143,7 @@ describe('IcSendForm', () => {
 			});
 
 			expect(getByText(en.send.info.icp_memo_methods)).toBeInTheDocument();
-			expect(getByText(en.send.info.icp_memo_learn_more)).toBeInTheDocument();
+			expect(getByText(en.core.text.learn_more)).toBeInTheDocument();
 		});
 
 		it('should not render the info box for non-ICP IC tokens even when a memo is entered', () => {
