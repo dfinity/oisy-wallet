@@ -532,6 +532,27 @@ export type CreateContactResult =
 			 */
 			Err: ContactError;
 	  };
+export type CreateUserProfileError = {
+	/**
+	 * Sign-ups of new users are currently disabled on the backend. Callers that already have a
+	 * profile are unaffected; this variant is only returned for principals without an existing
+	 * profile.
+	 */
+	SignupsClosed: null;
+};
+export type CreateUserProfileResult =
+	| {
+			/**
+			 * The user's profile was created (or already existed) and is returned.
+			 */
+			Ok: UserProfile;
+	  }
+	| {
+			/**
+			 * The profile could not be created due to an error.
+			 */
+			Err: CreateUserProfileError;
+	  };
 /**
  * User preferences for any token
  */
