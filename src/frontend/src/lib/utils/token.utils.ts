@@ -7,7 +7,6 @@ import { SPL_SUGGESTED_TOKENS } from '$env/tokens/tokens.spl.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
-import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -23,6 +22,7 @@ import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
