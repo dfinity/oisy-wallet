@@ -46,7 +46,7 @@
 				</div>
 			{/if}
 
-			<p class="m-0 text-lg leading-tight">
+			<p class="m-0 text-2xl leading-tight font-semibold">
 				{label}
 			</p>
 		</div>

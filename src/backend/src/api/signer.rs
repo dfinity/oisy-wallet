@@ -15,7 +15,7 @@ use shared::types::{
 use crate::{
     delegation, signer,
     utils::{
-        guards::{caller_is_controller, caller_is_not_anonymous},
+        guards::{caller_is_controller, caller_is_registered_user},
         rate_limiter::{self, ALLOW_SIGNING_GUARD_LIMITER, ALLOW_SIGNING_RATE_LIMITER},
     },
 };
@@ -40,7 +40,7 @@ pub async fn top_up_cycles_ledger(
 /// # Errors
 /// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 /// - `Other`: If another error occurred during the operation
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
     let allowed_cycles = signer::get_allowed_cycles().await;
     match allowed_cycles {
@@ -68,7 +68,7 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
     async fn inner(
         request: Option<AllowSigningRequest>,

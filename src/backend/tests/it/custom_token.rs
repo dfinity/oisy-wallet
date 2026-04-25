@@ -161,10 +161,28 @@ fn test_add_custom_tokens() {
     }
 }
 
+/// Sanity check for the `caller_is_registered_user` guard on
+/// `set_custom_token`: a non-anonymous caller that has not created a user
+/// profile must be rejected by the guard before any endpoint logic runs.
+#[test]
+fn test_set_custom_token_requires_registered_user() {
+    let pic_setup = setup();
+    // Non-anonymous caller, but no user profile has been created.
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let response = pic_setup.update::<()>(caller, "set_custom_token", USER_TOKEN.clone());
+
+    assert_eq!(
+        response,
+        Err("Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Caller has no user profile. Please create a user profile first via `create_user_profile`.".to_string())
+    );
+}
+
 fn test_add_custom_token(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let before_set = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
@@ -234,6 +252,7 @@ fn test_remove_custom_token(token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let before_set = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
@@ -271,6 +290,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let result = pic_setup.update::<()>(caller, "set_custom_token", user_token.clone());
 
@@ -321,6 +341,7 @@ fn test_add_many_custom_tokens(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let before_set = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
@@ -356,6 +377,7 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let tokens: Vec<CustomToken> = vec![user_token.clone(), ANOTHER_USER_TOKEN.clone()];
 
@@ -416,6 +438,7 @@ fn test_list_custom_tokens() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let _ = pic_setup.update::<()>(caller, "set_custom_token", USER_TOKEN.clone());
 
@@ -449,6 +472,7 @@ fn test_cannot_update_custom_token_without_version(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let result = pic_setup.update::<()>(caller, "set_custom_token", user_token.clone());
 
@@ -484,6 +508,7 @@ fn test_cannot_update_custom_token_with_invalid_version(user_token: &CustomToken
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let result = pic_setup.update::<()>(caller, "set_custom_token", user_token.clone());
 
@@ -544,12 +569,14 @@ fn test_user_cannot_list_another_custom_tokens() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let _ = pic_setup.update::<()>(caller, "set_custom_token", USER_TOKEN.clone());
 
     let another_caller =
         Principal::from_text("yaa3n-twfur-6xz6e-3z7ep-xln56-222kz-w2b2m-y5wqz-vu6kk-s3fdg-lqe")
             .unwrap();
+    pic_setup.ensure_user_profile(another_caller);
 
     let results = pic_setup.update::<Vec<CustomToken>>(another_caller, "list_custom_tokens", ());
 
@@ -565,6 +592,7 @@ fn test_set_custom_token_tracks_activity() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let stats_before = pic_setup
         .query::<Stats>(controller(), "stats", ())
@@ -588,6 +616,7 @@ fn test_set_many_custom_tokens_tracks_activity() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let tokens: Vec<CustomToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
 
@@ -607,6 +636,7 @@ fn test_set_custom_token_updates_activity_for_same_token() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     pic_setup
         .update::<()>(caller, "set_custom_token", USER_TOKEN.clone())
