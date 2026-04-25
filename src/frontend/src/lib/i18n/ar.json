@@ -1966,7 +1966,7 @@
 		},
 		"info": {
 			"btc_transactions": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
-			"hidden_micro_transactions": "المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>."
+			"hidden_micro_transactions": "<strong>OISY يحميك!</strong> المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">معرفة المزيد</a>"
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",
