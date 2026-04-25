@@ -46,6 +46,7 @@ fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
     );
 
     let caller = Principal::self_authenticating(&delegation_chain.public_key);
+    pic_setup.ensure_user_profile(caller);
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
@@ -74,6 +75,7 @@ fn test_add_pending_transaction_requires_delegation_chain() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let add_request = BtcAddPendingTransactionRequest {
         txid: vec![],
@@ -104,6 +106,7 @@ fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disab
     let pic_setup = setup_with_production_config();
 
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let add_request = BtcAddPendingTransactionRequest {
         txid: vec![],
@@ -146,6 +149,7 @@ fn test_get_pending_transactions_returns_empty_for_new_user() {
     );
 
     let caller = Principal::self_authenticating(&delegation_chain.public_key);
+    pic_setup.ensure_user_profile(caller);
 
     let read_request = BtcGetPendingTransactionsRequest {
         address: MOCK_ADDRESS.to_string(),
@@ -182,6 +186,7 @@ fn test_add_pending_transaction_with_valid_delegation() {
     );
 
     let caller = Principal::self_authenticating(&delegation_chain.public_key);
+    pic_setup.ensure_user_profile(caller);
 
     let add_request = BtcAddPendingTransactionRequest {
         txid: vec![],
@@ -209,6 +214,7 @@ fn test_add_pending_transaction_with_valid_delegation() {
 #[test]
 fn test_controller_bypasses_delegation_check() {
     let pic_setup = setup();
+    pic_setup.ensure_user_profile(controller());
 
     let add_request = BtcAddPendingTransactionRequest {
         txid: vec![],
@@ -242,6 +248,7 @@ fn test_controller_bypasses_delegation_check() {
 fn test_select_user_utxos_fee_requires_delegation_chain() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
@@ -271,6 +278,7 @@ fn test_select_user_utxos_fee_requires_delegation_chain() {
 fn test_select_user_utxos_fee_without_delegation_chain_passes_when_guard_disabled() {
     let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
@@ -299,6 +307,7 @@ fn test_select_user_utxos_fee_without_delegation_chain_passes_when_guard_disable
 #[test]
 fn test_select_user_utxos_fee_controller_bypasses_delegation_check() {
     let pic_setup = setup();
+    pic_setup.ensure_user_profile(controller());
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
@@ -342,6 +351,7 @@ fn test_select_user_utxos_fee_with_valid_delegation() {
     );
 
     let caller = Principal::self_authenticating(&delegation_chain.public_key);
+    pic_setup.ensure_user_profile(caller);
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
@@ -371,6 +381,7 @@ fn test_select_user_utxos_fee_with_valid_delegation() {
 fn test_get_pending_transactions_requires_delegation_chain() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let request = BtcGetPendingTransactionsRequest {
         address: MOCK_ADDRESS.to_string(),
@@ -399,6 +410,7 @@ fn test_get_pending_transactions_requires_delegation_chain() {
 fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disabled() {
     let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     let request = BtcGetPendingTransactionsRequest {
         address: MOCK_ADDRESS.to_string(),
@@ -426,6 +438,7 @@ fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disa
 #[test]
 fn test_get_pending_transactions_controller_bypasses_delegation_check() {
     let pic_setup = setup();
+    pic_setup.ensure_user_profile(controller());
 
     let request = BtcGetPendingTransactionsRequest {
         address: MOCK_ADDRESS.to_string(),
@@ -468,6 +481,7 @@ fn test_get_pending_transactions_with_valid_delegation() {
     );
 
     let caller = Principal::self_authenticating(&delegation_chain.public_key);
+    pic_setup.ensure_user_profile(caller);
 
     let request = BtcGetPendingTransactionsRequest {
         address: MOCK_ADDRESS.to_string(),
@@ -517,6 +531,7 @@ fn call_btc_select_user_utxos_fee(
 fn test_btc_select_user_utxos_fee_rate_limited_after_exceeding_limit() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     for i in 0..10 {
         let result = call_btc_select_user_utxos_fee(&pic_setup, caller);
@@ -546,6 +561,7 @@ fn test_btc_select_user_utxos_fee_rate_limited_after_exceeding_limit() {
 fn test_btc_select_user_utxos_fee_rate_limit_resets_after_window() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     for _ in 0..10 {
         let _ = call_btc_select_user_utxos_fee(&pic_setup, caller);
@@ -599,6 +615,7 @@ fn call_btc_add_pending_transaction(
 fn test_btc_add_pending_transaction_rate_limited_after_exceeding_limit() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     for i in 0..10 {
         let result = call_btc_add_pending_transaction(&pic_setup, caller);
@@ -651,6 +668,7 @@ fn call_btc_get_pending_transactions(
 fn test_btc_get_pending_transactions_rate_limited_after_exceeding_limit() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     for i in 0..15 {
         let result = call_btc_get_pending_transactions(&pic_setup, caller);
@@ -681,6 +699,8 @@ fn test_btc_get_pending_transactions_rate_limit_is_per_caller() {
     let pic_setup = setup();
     let caller_a = Principal::from_text(CALLER).unwrap();
     let caller_b = Principal::self_authenticating("btc-rate-limit-b");
+    pic_setup.ensure_user_profile(caller_a);
+    pic_setup.ensure_user_profile(caller_b);
 
     // Exhaust caller_a's rate limit (15 calls/min).
     for _ in 0..15 {
