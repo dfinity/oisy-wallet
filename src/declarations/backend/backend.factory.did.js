@@ -13,7 +13,8 @@ export const idlFactory = ({ IDL }) => {
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const QualifiedNotificationKind = IDL.Variant({
@@ -207,7 +208,8 @@ export const idlFactory = ({ IDL }) => {
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
 	const ImageMimeType = IDL.Variant({
 		'image/gif': IDL.Null,
@@ -711,6 +713,7 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
+		new_user_signups_allowed: IDL.Func([], [IDL.Bool], ['query']),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
 			[SaveUserTransactionsRequest],
@@ -763,7 +766,8 @@ export const init = ({ IDL }) => {
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 
