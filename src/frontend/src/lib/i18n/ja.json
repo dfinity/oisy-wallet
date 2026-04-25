@@ -934,6 +934,7 @@
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
 			"enter_memo": "メモを入力（任意）",
+			"enter_memo_nat64": "",
 			"select_network": "ネットワークを選択",
 			"search_nfts": "NFTを検索"
 		},
@@ -958,6 +959,7 @@
 			"unknown_cketh": "ckETHトークンは取得できません。",
 			"destination_address_invalid": "送信先アドレスが無効です。",
 			"amount_invalid": "金額が無効です。",
+			"invalid_nat64_memo": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています。",
 			"insufficient_funds_for_amount": "送金額に対して残高が不足しています。",

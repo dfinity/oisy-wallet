@@ -934,6 +934,7 @@
 			"enter_recipient_address": "수신자 주소, 이름 또는 별칭 입력",
 			"enter_wallet_address": "지갑 주소, 이름 또는 별칭 입력",
 			"enter_memo": "메모 입력 (선택사항)",
+			"enter_memo_nat64": "",
 			"select_network": "네트워크 선택",
 			"search_nfts": "NFT 검색"
 		},
@@ -958,6 +959,7 @@
 			"unknown_cketh": "ckETH 토큰을 가져올 수 없습니다.",
 			"destination_address_invalid": "수신 주소가 유효하지 않습니다.",
 			"amount_invalid": "금액이 유효하지 않습니다.",
+			"invalid_nat64_memo": "",
 			"insufficient_funds_verbose_btc": "지정한 금액이 전송 가능한 금액보다 많습니다. 미확인 수신 비트코인은 확인 전까지 전송할 수 없습니다.",
 			"insufficient_funds_for_gas": "가스 비용을 위한 잔액이 부족합니다",
 			"insufficient_funds_for_amount": "금액을 위한 잔액이 부족합니다",

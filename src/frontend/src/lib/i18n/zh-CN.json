@@ -934,6 +934,7 @@
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
 			"enter_memo": "输入备注（可选）",
+			"enter_memo_nat64": "",
 			"select_network": "选择网络",
 			"search_nfts": "搜索 NFT"
 		},
@@ -958,6 +959,7 @@
 			"unknown_cketh": "无法获取 ckETH 代币。",
 			"destination_address_invalid": "目标地址无效。",
 			"amount_invalid": "金额无效。",
+			"invalid_nat64_memo": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "燃料费不足",
 			"insufficient_funds_for_amount": "金额不足",
