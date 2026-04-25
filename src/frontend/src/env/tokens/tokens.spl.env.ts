@@ -142,4 +142,8 @@ export const SPL_TOKENS: RequiredSplToken[] = defineSupportedTokens({
 });
 
 // Suggested tokens to be enabled by default if the user set no preference
-export const SPL_SUGGESTED_TOKENS = [USDC_TOKEN, USDT_TOKEN];
+export const SPL_SUGGESTED_TOKENS: RequiredSplToken[] = defineSupportedTokens({
+	mainnetFlag: SOL_MAINNET_ENABLED,
+	mainnetTokens: [USDC_TOKEN, USDT_TOKEN],
+	testnetTokens: [DEVNET_USDC_TOKEN]
+});
