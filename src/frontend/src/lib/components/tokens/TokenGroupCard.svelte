@@ -43,6 +43,7 @@
 
 	const showTokenInGroup = (token: TokenUi) => token.neverCollapseInTokenGroup;
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
+	const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
 
 	const categoryFilteredTokens: TokenUi[] = $derived(
 		$showTokenCategoryFilter
@@ -78,7 +79,7 @@
 			return isCkToken(a) ? -1 : 1;
 		}
 
-		return a.network.name.localeCompare(b.network.name, undefined, { sensitivity: 'base' });
+		return collator.compare(a.network.name, b.network.name);
 	};
 
 	const sortedFilteredTokens: TokenUi[] = $derived([...filteredTokens].sort(compareTokens));
