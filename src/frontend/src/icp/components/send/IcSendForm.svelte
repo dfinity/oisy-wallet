@@ -2,8 +2,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
-	import IcpMemoInfo from '$icp/components/send/IcpMemoInfo.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
+	import IcpMemoInfo from '$icp/components/send/IcpMemoInfo.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { invalidIcpAddress } from '$icp/utils/account.utils';
@@ -41,9 +41,7 @@
 
 	let isIcpToken = $derived($sendTokenStandard.code === 'icp');
 
-	let showIcpMemoInfo = $derived(
-		isIcpToken && nonNullish($sendMemo) && $sendMemo !== ''
-	);
+	let showIcpMemoInfo = $derived(isIcpToken && nonNullish($sendMemo) && $sendMemo !== '');
 
 	let amountError = $state<IcAmountAssertionError | undefined>();
 
