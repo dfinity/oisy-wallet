@@ -1079,6 +1079,8 @@
 			"xrp_destination_tag_missing": "Kein XRP-Ziel-Tag. Wenn du an eine Börse sendest, prüfe, ob sie eines verlangt, sonst können deine Mittel verloren gehen.",
 			"fee_expired": "",
 			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": "",
+			"icp_memo_learn_more": "",
 			"scanned_address_only_destination": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du das richtige Token auswählst, den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!",
 			"scanned_address_only_destination_single_token": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!"
 		},

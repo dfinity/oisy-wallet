@@ -1079,6 +1079,8 @@
 			"xrp_destination_tag_missing": "Brak tagu docelowego XRP. Jeśli wysyłasz na giełdę, sprawdź, czy go wymaga, w przeciwnym razie możesz stracić środki.",
 			"fee_expired": "",
 			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": "",
+			"icp_memo_learn_more": "",
 			"scanned_address_only_destination": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wybierasz właściwy token, wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!",
 			"scanned_address_only_destination_single_token": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!"
 		},

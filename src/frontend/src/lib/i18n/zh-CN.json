@@ -1079,6 +1079,8 @@
 			"xrp_destination_tag_missing": "未填写 XRP 目标标签。如果您要发送到交易所，请确认其是否要求标签，否则资金可能丢失。",
 			"fee_expired": "",
 			"fee_info": "手续费将以 $feeSymbol 支付。可用余额：<strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": "",
+			"icp_memo_learn_more": "",
 			"scanned_address_only_destination": "扫描的内容仅包含接收地址。请确保选择正确的代币、输入正确的金额，并仔细核对接收地址！",
 			"scanned_address_only_destination_single_token": "扫描的内容仅包含接收地址。请确保输入正确的金额，并仔细核对接收地址！"
 		},
