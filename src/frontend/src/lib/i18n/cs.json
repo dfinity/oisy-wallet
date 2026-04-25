@@ -1003,7 +1003,8 @@
 			"solana_insufficient_funds": "Zůstatek vašeho tokenu není dostatečný k dokončení této transakce. Váš zůstatek se mohl od posledního zobrazení změnit.",
 			"solana_insufficient_funds_for_fee": "Váš zůstatek SOL není dostatečný k pokrytí poplatků za transakci.",
 			"solana_insufficient_funds_for_rent": "Váš zůstatek SOL není dostatečný k pokrytí nájmu požadovaného pro vytvoření účtu.",
-			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován."
+			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován.",
+			"memo_too_long": "Poznámka je příliš dlouhá. Prosím zkraťte ji a zkuste znovu."
 		}
 	},
 	"mint": {
