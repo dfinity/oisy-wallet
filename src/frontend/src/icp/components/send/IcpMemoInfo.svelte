@@ -6,7 +6,7 @@
 </script>
 
 <div
-	class="memo-info mb-4 mt-6 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium text-primary sm:text-base"
+	class="memo-info mt-6 mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium text-primary sm:text-base"
 >
 	<div class="min-w-5 py-0 text-brand-primary sm:py-0.5">
 		<IconInfo />
