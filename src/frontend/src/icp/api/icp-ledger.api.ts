@@ -15,11 +15,13 @@ export const transfer = async ({
 	identity,
 	to,
 	amount,
+	memo,
 	ledgerCanisterId
 }: {
 	identity: NullishIdentity;
 	to: string;
 	amount: bigint;
+	memo?: bigint;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<BlockHeight> => {
 	assertNonNullish(identity);
@@ -28,7 +30,8 @@ export const transfer = async ({
 
 	return transfer({
 		to: AccountIdentifier.fromHex(to),
-		amount
+		amount,
+		...(memo !== undefined ? { memo } : {})
 	});
 };
 
@@ -37,12 +40,14 @@ export const icrc1Transfer = async ({
 	to,
 	amount,
 	createdAt,
+	memo,
 	ledgerCanisterId
 }: {
 	identity: NullishIdentity;
 	to: IcrcAccount;
 	amount: bigint;
 	createdAt?: bigint;
+	memo?: Uint8Array;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<BlockHeight> => {
 	assertNonNullish(identity);
@@ -52,7 +57,8 @@ export const icrc1Transfer = async ({
 	return icrc1Transfer({
 		to: toCandidAccount(to),
 		amount,
-		createdAt: createdAt ?? nowInBigIntNanoSeconds()
+		createdAt: createdAt ?? nowInBigIntNanoSeconds(),
+		...(memo !== undefined ? { icrc1Memo: memo } : {})
 	});
 };
 
