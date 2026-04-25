@@ -5,7 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<MessageBox level="plain" styleClass="mt-6">
+<MessageBox level="info" styleClass="mt-6">
 	{$i18n.send.info.icp_memo_methods}
 	<ExternalLink
 		ariaLabel={$i18n.core.alt.learn_more}
