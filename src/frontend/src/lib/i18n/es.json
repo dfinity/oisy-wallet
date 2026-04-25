@@ -1078,6 +1078,8 @@
 			"xrp_destination_tag_missing": "Sin etiqueta de destino de XRP. Si envías a un exchange, comprueba si la exige; de lo contrario, podrías perder tus fondos.",
 			"fee_expired": "",
 			"fee_info": "La comisión se pagará en $feeSymbol. Disponible: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": "",
+			"icp_memo_learn_more": "",
 			"scanned_address_only_destination": "El código escaneado solo contenía una dirección de destino. ¡Asegúrate de seleccionar el token correcto, introducir la cantidad adecuada y revisar con atención la dirección de destino!",
 			"scanned_address_only_destination_single_token": "El código escaneado solo contenía una dirección de destino. ¡Asegúrate de introducir la cantidad adecuada y revisar con atención la dirección de destino!"
 		},

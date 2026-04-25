@@ -1078,6 +1078,8 @@
 			"xrp_destination_tag_missing": "XRP 목적지 태그가 없습니다. 거래소로 보내는 경우 태그가 필요한지 확인하세요. 그렇지 않으면 자금을 잃을 수 있습니다.",
 			"fee_expired": "",
 			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": "",
+			"icp_memo_learn_more": "",
 			"scanned_address_only_destination": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 올바른 토큰을 선택하고, 정확한 금액을 입력한 후, 수신 주소를 주의 깊게 확인해 주세요!",
 			"scanned_address_only_destination_single_token": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 정확한 금액을 입력하고, 수신 주소를 주의 깊게 확인해 주세요!"
 		},
