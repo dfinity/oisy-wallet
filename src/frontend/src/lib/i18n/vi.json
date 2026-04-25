@@ -1967,7 +1967,7 @@
 		},
 		"info": {
 			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
-			"hidden_micro_transactions": "Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>."
+			"hidden_micro_transactions": "<strong>OISY bảo vệ bạn!</strong> Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
 		},
 		"warning": {
 			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",
