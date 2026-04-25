@@ -7,7 +7,7 @@ use shared::types::{
 use crate::{
     state::{mutate_state, read_state},
     transactions::model,
-    utils::guards::caller_is_not_anonymous,
+    utils::guards::{caller_is_not_anonymous, caller_is_registered_user},
 };
 
 /// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
@@ -45,7 +45,7 @@ pub fn get_user_transactions(request: GetUserTransactionsRequest) -> GetUserTran
 ///
 /// # Errors
 /// Errors are enumerated by: `UserTransactionError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub fn save_user_transactions(request: SaveUserTransactionsRequest) -> SaveUserTransactionsResult {
     let SaveUserTransactionsRequest {
         token_id,
