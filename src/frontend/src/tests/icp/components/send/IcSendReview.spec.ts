@@ -56,4 +56,28 @@ describe('IcSendReview', () => {
 
 		expect(queryByText(en.fee.text.fee)).toBeNull();
 	});
+
+	it('should not render memo section when memo is empty', () => {
+		const { queryByText } = render(IcSendReview, {
+			props,
+			context: mockContext
+		});
+
+		expect(queryByText(en.send.text.memo)).toBeNull();
+	});
+
+	it('should render memo section when memo is set', () => {
+		const contextWithMemo = new Map([]);
+		const context = initSendContext({ token: ICP_TOKEN });
+		context.sendMemo.set('test memo');
+		contextWithMemo.set(SEND_CONTEXT_KEY, context);
+
+		const { getByText } = render(IcSendReview, {
+			props,
+			context: contextWithMemo
+		});
+
+		expect(getByText(en.send.text.memo)).toBeInTheDocument();
+		expect(getByText('test memo')).toBeInTheDocument();
+	});
 });

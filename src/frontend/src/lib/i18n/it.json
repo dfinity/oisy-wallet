@@ -924,6 +924,7 @@
 			"contacts_empty_state_title": "I tuoi contatti appariranno qui",
 			"contacts_empty_state_description": "Sembra che tu non abbia ancora aggiunto contatti",
 			"send_review_subtitle": "Tu invii",
+			"memo": "Memo",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
 			"select_nft": ""
@@ -932,6 +933,7 @@
 			"enter_eth_address": "Inserisci indirizzo pubblico (0x), nome o alias",
 			"enter_recipient_address": "Inserisci indirizzo del destinatario, nome o alias",
 			"enter_wallet_address": "Inserisci indirizzo del wallet, nome o alias",
+			"enter_memo": "Inserisci un memo (opzionale)",
 			"select_network": "Seleziona rete",
 			"search_nfts": ""
 		},
