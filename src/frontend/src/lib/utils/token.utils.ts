@@ -3,9 +3,11 @@ import {
 	ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
+import { SPL_SUGGESTED_TOKENS } from '$env/tokens/tokens.spl.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -90,7 +92,9 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 		(nonNullish(ledgerCanisterId) &&
 			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
 		(isTokenErc20(defaultToken) &&
-			ERC20_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id));
+			ERC20_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id)) ||
+		(isTokenSpl(defaultToken) &&
+			SPL_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id));
 
 	return {
 		...defaultToken,
