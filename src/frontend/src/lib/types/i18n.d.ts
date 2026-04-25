@@ -682,6 +682,8 @@ interface I18nSend {
 		no_available_utxos: string;
 		unknown_destination: string;
 		fee_info: string;
+		icp_memo_methods: string;
+		icp_memo_learn_more: string;
 	};
 	assertion: {
 		invalid_destination_address: string;

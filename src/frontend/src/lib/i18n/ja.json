@@ -944,7 +944,9 @@
 			"pending_bitcoin_transaction": "現在のBTCトランザクションが完了するまで、新たな送信はできません。",
 			"no_available_utxos": "このトランザクションを行うための利用可能なUTXOが不足しています。",
 			"unknown_destination": "このアドレスとやり取りは初めてです。送信先を確認してください。",
-			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": "",
+			"icp_memo_learn_more": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "送信先アドレスが無効です",

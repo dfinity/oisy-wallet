@@ -944,7 +944,9 @@
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
-			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": "ICP can be sent via the legacy transfer method or the newer icrc1_transfer method. Each uses a different memo format, so make sure the recipient expects the format you are sending.",
+			"icp_memo_learn_more": "Learn more"
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
