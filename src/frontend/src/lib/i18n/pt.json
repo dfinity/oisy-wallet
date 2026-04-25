@@ -1080,7 +1080,6 @@
 			"fee_expired": "",
 			"fee_info": "A taxa será paga em $feeSymbol. Disponível: <strong>$feeBalance $feeSymbol</strong>",
 			"icp_memo_methods": "",
-			"icp_memo_learn_more": "",
 			"scanned_address_only_destination": "O código escaneado continha apenas um endereço de destino. Certifique-se de selecionar o token correto, inserir o valor certo e revisar o endereço de destino com atenção!",
 			"scanned_address_only_destination_single_token": "O código escaneado continha apenas um endereço de destino. Certifique-se de inserir o valor certo e revisar o endereço de destino com atenção!"
 		},
