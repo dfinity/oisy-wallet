@@ -78,7 +78,7 @@
 			return isCkToken(a) ? -1 : 1;
 		}
 
-		return 0;
+		return a.network.name.localeCompare(b.network.name, undefined, { sensitivity: 'base' });
 	};
 
 	const sortedFilteredTokens: TokenUi[] = $derived([...filteredTokens].sort(compareTokens));
