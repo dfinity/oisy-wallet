@@ -63,12 +63,16 @@ export const mapIcpTransaction = ({
 	const { operation, timestamp, transferToSelf, memo: nat64Memo, icrc1_memo } = transaction;
 
 	const icrc1MemoBytes = fromNullable(icrc1_memo);
-	const memoText = nonNullish(icrc1MemoBytes)
-		? new TextDecoder().decode(icrc1MemoBytes)
-		: nat64Memo !== ZERO
-			? nat64Memo.toString()
-			: undefined;
-	const memoField = nonNullish(memoText) && memoText.trim() !== '' ? { memo: memoText } : {};
+	const icrc1MemoText = nonNullish(icrc1MemoBytes)
+		? new TextDecoder().decode(icrc1MemoBytes).trim()
+		: undefined;
+	const memoText =
+		nonNullish(icrc1MemoText) && icrc1MemoText !== ''
+			? icrc1MemoText
+			: nat64Memo !== ZERO
+				? nat64Memo.toString()
+				: undefined;
+	const memoField = nonNullish(memoText) ? { memo: memoText } : {};
 
 	const tx: Pick<IcTransactionUi, 'timestamp' | 'id' | 'status' | 'txExplorerUrl'> = {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
