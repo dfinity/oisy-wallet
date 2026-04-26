@@ -65,6 +65,8 @@ export const MEMORY_FIX_IC_TRANSACTIONS_DERIVED = flags.has('2');
 export const MEMORY_FIX_EXCHANGE_STORE = flags.has('3');
 export const MEMORY_FIX_WORKER_SINGLETON = flags.has('4');
 
+export const MEMORY_FIX_ACTIVE_FLAGS: readonly string[] = ALL_FLAGS.filter((f) => flags.has(f));
+
 if (typeof window !== 'undefined' && flags.size > 0) {
 	// eslint-disable-next-line no-console
 	console.info(`[memFlags] enabled: ${Array.from(flags).join(',')}`);
