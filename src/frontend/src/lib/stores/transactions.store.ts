@@ -59,8 +59,7 @@ export const initTransactionsStore = <T extends TransactionTypes>(): Transaction
 
 	type StateRecord = Record<TokenId, TransactionsData<T>>;
 
-	const ensure = (state: StateRecord | undefined): StateRecord =>
-		state ?? ({} as StateRecord);
+	const ensure = (state: StateRecord | undefined): StateRecord => state ?? ({} as StateRecord);
 
 	return {
 		set: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>
@@ -102,9 +101,7 @@ export const initTransactionsStore = <T extends TransactionTypes>(): Transaction
 					if (existing == null || existing.length === 0) {
 						next[tokenId] = [...transactions];
 					} else {
-						const incomingIds = new Set(
-							transactions.map(({ data }) => getIdentifier(data))
-						);
+						const incomingIds = new Set(transactions.map(({ data }) => getIdentifier(data)));
 						let writeIdx = 0;
 						for (let i = 0; i < existing.length; i++) {
 							const item = existing[i];
@@ -137,9 +134,7 @@ export const initTransactionsStore = <T extends TransactionTypes>(): Transaction
 					if (existing == null || existing.length === 0) {
 						next[tokenId] = [...transactions];
 					} else {
-						const existingIds = new Set(
-							existing.map(({ data }) => getIdentifier(data))
-						);
+						const existingIds = new Set(existing.map(({ data }) => getIdentifier(data)));
 						for (const tx of transactions) {
 							if (!existingIds.has(getIdentifier(tx.data))) {
 								existing.push(tx);
