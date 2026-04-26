@@ -34,8 +34,8 @@ Every method (`set`, `add`, `prepend`, `append`, `update`, `cleanUp`,
 
 ```ts
 update((state) => ({
-    ...(nonNullish(state) && state),
-    [tokenId]: [...(state?.[tokenId] ?? []), ...transactions]
+	...(nonNullish(state) && state),
+	[tokenId]: [...(state?.[tokenId] ?? []), ...transactions]
 }));
 ```
 
@@ -92,6 +92,7 @@ onMessage handler already makes a singleton worker safe.
 ### Why the post-reload spike
 
 Two effects compound during init:
+
 - **All workers boot simultaneously** → 50 derived recomputes hit at
   once, each allocating 500-tx arrays in 2–3 forms (raw, parsed,
   display).
@@ -124,15 +125,15 @@ Four fixes, each behind its own runtime feature flag.
 - **One commit per fix** for clean isolation; the prep commit adds the
   flag mechanism.
 - **Code style is intentionally pragmatic** (`if (FLAG) { new path }
-  else { original }`). This branch does not need to be production-ready
+else { original }`). This branch does not need to be production-ready
   because it does not aim to land.
 
-| # | Flag constant | File | What changes when enabled |
-|---|---|---|---|
-| 1 | `MEMORY_FIX_TRANSACTIONS_STORE` | [transactions.store.ts](src/frontend/src/lib/stores/transactions.store.ts) | Mutate the per-token array in place (push / unshift / in-place filter) and shallow-copy only the outer object for Svelte reactivity. |
-| 2 | `MEMORY_FIX_IC_TRANSACTIONS_DERIVED` | [ic-transactions.derived.ts](src/frontend/src/icp/derived/ic-transactions.derived.ts) | Memoize on the 9 input references; if all inputs are reference-equal to the previous call, return the cached result. |
-| 3 | `MEMORY_FIX_EXCHANGE_STORE` | [exchange.store.ts](src/frontend/src/lib/stores/exchange.store.ts) | Replace the `reduce`-with-spread merge with a single-pass `Object.assign` into one accumulator. |
-| 4 | `MEMORY_FIX_WORKER_SINGLETON` | [worker.icrc-wallet.services.ts](src/frontend/src/icp/services/worker.icrc-wallet.services.ts) | Pass `asSingleton: true` on non-iOS too — all ICRC tokens share one `AppWorker`. The per-message `ledgerCanisterId` guard already handles routing. |
+| #   | Flag constant                        | File                                                                                           | What changes when enabled                                                                                                                          |
+| --- | ------------------------------------ | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `MEMORY_FIX_TRANSACTIONS_STORE`      | [transactions.store.ts](src/frontend/src/lib/stores/transactions.store.ts)                     | Mutate the per-token array in place (push / unshift / in-place filter) and shallow-copy only the outer object for Svelte reactivity.               |
+| 2   | `MEMORY_FIX_IC_TRANSACTIONS_DERIVED` | [ic-transactions.derived.ts](src/frontend/src/icp/derived/ic-transactions.derived.ts)          | Memoize on the 9 input references; if all inputs are reference-equal to the previous call, return the cached result.                               |
+| 3   | `MEMORY_FIX_EXCHANGE_STORE`          | [exchange.store.ts](src/frontend/src/lib/stores/exchange.store.ts)                             | Replace the `reduce`-with-spread merge with a single-pass `Object.assign` into one accumulator.                                                    |
+| 4   | `MEMORY_FIX_WORKER_SINGLETON`        | [worker.icrc-wallet.services.ts](src/frontend/src/icp/services/worker.icrc-wallet.services.ts) | Pass `asSingleton: true` on non-iOS too — all ICRC tokens share one `AppWorker`. The per-message `ledgerCanisterId` guard already handles routing. |
 
 ---
 
@@ -152,14 +153,14 @@ configuration, which is what we need to measure the post-reload spike.
 
 ### URL param syntax
 
-| URL | Result |
-|---|---|
-| (no `memFlags` param) | leaves whatever is currently in `localStorage` |
-| `?memFlags=` (empty value) | clears all flags |
-| `?memFlags=4` | enables only flag 4 |
-| `?memFlags=1,3` | enables flags 1 and 3 |
-| `?memFlags=1,2,3,4` | enables all four |
-| `?memFlags=all` | enables all four (alias) |
+| URL                        | Result                                         |
+| -------------------------- | ---------------------------------------------- |
+| (no `memFlags` param)      | leaves whatever is currently in `localStorage` |
+| `?memFlags=` (empty value) | clears all flags                               |
+| `?memFlags=4`              | enables only flag 4                            |
+| `?memFlags=1,3`            | enables flags 1 and 3                          |
+| `?memFlags=1,2,3,4`        | enables all four                               |
+| `?memFlags=all`            | enables all four (alias)                       |
 
 When at least one flag is on, the console logs `[memFlags] enabled: ...`
 at startup so you can confirm the setup before profiling.
@@ -191,6 +192,7 @@ where the doubling shows up.
 3. **Combined.** Repeat step 1 with `?memFlags=all`.
 
 Notes:
+
 - Flag 4 (singleton worker) is most likely the largest single drop in
   baseline; it's also the cheapest to enable.
 - Flag 2 alone is expected to show little impact, because upstream
