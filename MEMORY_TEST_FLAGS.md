@@ -109,19 +109,25 @@ For scope reasons we agreed to skip:
 - **Transaction list virtualization** — would require swapping the
   rendering tree (`{#if flag}` around two `{#each}` blocks). Memory cost
   is comparatively small (~1–2 MB for 500 DOM nodes).
-- **agent-js / reload cleanup** — a `beforeunload` reset of cached
-  agents could help the spike, but the effect is speculative until
-  measured. Treated as a follow-up.
+
+> **Update:** the `agent-js` / reload cleanup item that we initially
+> deferred was added later as flag 5 after measurements showed the
+> spike still grows reload-over-reload even with flags 1–4 on. See the
+> table below.
 
 ---
 
 ## Approach we agreed on
 
-Four fixes, each behind its own runtime feature flag.
+Five fixes, each behind its own runtime feature flag.
 
 - **Default: all flags off** → behavior on this branch matches `main`.
 - **Toggle at runtime** via URL param, persisted to `localStorage` —
   no rebuild required between measurement runs.
+- **Active flag set is shown in the footer** next to the Twitter and
+  GitHub icons (e.g. `memFlags: 1,3,4` or `memFlags: none`), so the
+  configuration is visually verifiable on every page without opening
+  DevTools.
 - **One commit per fix** for clean isolation; the prep commit adds the
   flag mechanism.
 - **Code style is intentionally pragmatic** (`if (FLAG) { new path }
@@ -160,8 +166,8 @@ configuration, which is what we need to measure the post-reload spike.
 | `?memFlags=` (empty value) | clears all flags                               |
 | `?memFlags=4`              | enables only flag 4                            |
 | `?memFlags=1,3`            | enables flags 1 and 3                          |
-| `?memFlags=1,2,3,4`        | enables all four                               |
-| `?memFlags=all`            | enables all four (alias)                       |
+| `?memFlags=1,2,3,4,5`      | enables all flags                              |
+| `?memFlags=all`            | enables all flags (alias)                      |
 
 When at least one flag is on, the console logs `[memFlags] enabled: ...`
 at startup so you can confirm the setup before profiling.
@@ -189,7 +195,7 @@ where the doubling shows up.
    50-token / 500-transaction scenario. Snapshot before reload, hard
    reload, snapshot again at the spike, snapshot once it settles.
 2. **Each flag alone.** Repeat step 1 with `?memFlags=N` for each of
-   `1`, `2`, `3`, `4`. This isolates each fix.
+   `1`, `2`, `3`, `4`, `5`. This isolates each fix.
 3. **Combined.** Repeat step 1 with `?memFlags=all`.
 
 Notes:
@@ -201,6 +207,10 @@ Notes:
   most interesting pairing is **1 + 2**, where #1 stops emitting new
   inner-array references and #2's memoization can actually hit.
 - Flag 3's impact will scale with how often exchange rates refresh.
+- Flag 5 targets the reload-over-reload accumulation specifically —
+  it should not move the first-load baseline, only the spike on
+  subsequent reloads. The most informative pairing for the spike is
+  **4 + 5**.
 
 ---
 
@@ -218,3 +228,13 @@ Notes:
   `if (ref !== this.ledgerCanisterId) return;` guard inside
   `IcrcWalletWorker.setOnMessage` is what makes the singleton path
   correct — review that handler if anything looks off in the data.
+- **Flag 5** runs cleanup synchronously inside `beforeunload` /
+  `pagehide`. The browser doesn't reliably wait for async work in
+  those events, so the cleanup is intentionally sync (worker
+  terminate + agent reset). The agent reset is best-effort —
+  `@dfinity/utils`'s `AgentManager` doesn't expose a documented reset
+  API, so the cleanup probes a few likely method names (`reset`,
+  `clear`, `destroy`, `reinitialize`) and corresponding cache fields,
+  and silently skips any that don't exist. When the cleanup runs, the
+  console logs `[memFlags#5] running pre-unload cleanup` — useful to
+  confirm it actually fired.
