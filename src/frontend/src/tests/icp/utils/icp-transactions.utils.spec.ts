@@ -77,7 +77,7 @@ describe('mapIcpTransaction', () => {
 			expect(result.memo).toBe(text);
 		});
 
-		it('should not include memo when icrc1_memo decodes to whitespace-only', () => {
+		it('should not include memo when icrc1_memo decodes to whitespace-only and nat64 is zero', () => {
 			const bytes = new TextEncoder().encode('   ');
 			const { transaction, id } = makeTransaction({ memo: ZERO, icrc1_memo: [bytes] });
 			const result = mapIcpTransaction({
@@ -86,6 +86,17 @@ describe('mapIcpTransaction', () => {
 			});
 
 			expect(result.memo).toBeUndefined();
+		});
+
+		it('should fall back to nat64 memo when icrc1_memo decodes to whitespace-only', () => {
+			const bytes = new TextEncoder().encode('   ');
+			const { transaction, id } = makeTransaction({ memo: 99n, icrc1_memo: [bytes] });
+			const result = mapIcpTransaction({
+				transaction: { transaction, id },
+				identity: mockIdentity
+			});
+
+			expect(result.memo).toBe('99');
 		});
 
 		it('should propagate memo to Burn transactions', () => {
