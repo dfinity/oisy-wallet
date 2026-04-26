@@ -10,6 +10,8 @@ import type { NullishIdentity } from '$lib/types/identity';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
+const TEXT_DECODER = new TextDecoder();
+
 export const mapTransactionIcpToSelf = (
 	tx: IcpIndexDid.TransactionWithId
 ): ({ transaction: IcpIndexDid.Transaction & IcTransactionAddOnsInfo } & Pick<
@@ -64,7 +66,7 @@ export const mapIcpTransaction = ({
 
 	const icrc1MemoBytes = fromNullable(icrc1_memo);
 	const icrc1MemoText = nonNullish(icrc1MemoBytes)
-		? new TextDecoder().decode(icrc1MemoBytes).trim()
+		? TEXT_DECODER.decode(icrc1MemoBytes).trim()
 		: undefined;
 	const memoText =
 		nonNullish(icrc1MemoText) && icrc1MemoText !== ''
