@@ -52,7 +52,7 @@
 				</ExternalLinkIcon>
 
 				<span
-					class="rounded bg-secondary px-2 py-0.5 font-mono text-xs text-primary"
+					class="font-mono rounded bg-secondary px-2 py-0.5 text-xs text-primary"
 					title="Active memory test flags (set via ?memFlags=...)"
 				>
 					memFlags: {MEMORY_FIX_ACTIVE_FLAGS.length > 0
