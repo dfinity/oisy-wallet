@@ -15,13 +15,14 @@
 //   2 = ic-transactions derived: memoize on input references
 //   3 = exchange store: single-pass merge instead of reduce-with-spread
 //   4 = icrc wallet worker: singleton on non-iOS too
+//   5 = reload cleanup: terminate worker + best-effort agent reset on unload
 //
 // This module is intentionally not "proper" production code — it exists only
 // to A/B the memory fixes on the chore-frontend/memory-consumption-test-flags
 // branch and is not meant to land on main.
 
 const STORAGE_KEY = 'oisy.memFlags';
-const ALL_FLAGS = ['1', '2', '3', '4'] as const;
+const ALL_FLAGS = ['1', '2', '3', '4', '5'] as const;
 
 const readRaw = (): string | null => {
 	if (typeof window === 'undefined') {
@@ -64,6 +65,7 @@ export const MEMORY_FIX_TRANSACTIONS_STORE = flags.has('1');
 export const MEMORY_FIX_IC_TRANSACTIONS_DERIVED = flags.has('2');
 export const MEMORY_FIX_EXCHANGE_STORE = flags.has('3');
 export const MEMORY_FIX_WORKER_SINGLETON = flags.has('4');
+export const MEMORY_FIX_RELOAD_CLEANUP = flags.has('5');
 
 export const MEMORY_FIX_ACTIVE_FLAGS: readonly string[] = ALL_FLAGS.filter((f) => flags.has(f));
 

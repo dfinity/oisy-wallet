@@ -134,6 +134,7 @@ else { original }`). This branch does not need to be production-ready
 | 2   | `MEMORY_FIX_IC_TRANSACTIONS_DERIVED` | [ic-transactions.derived.ts](src/frontend/src/icp/derived/ic-transactions.derived.ts)          | Memoize on the 9 input references; if all inputs are reference-equal to the previous call, return the cached result.                               |
 | 3   | `MEMORY_FIX_EXCHANGE_STORE`          | [exchange.store.ts](src/frontend/src/lib/stores/exchange.store.ts)                             | Replace the `reduce`-with-spread merge with a single-pass `Object.assign` into one accumulator.                                                    |
 | 4   | `MEMORY_FIX_WORKER_SINGLETON`        | [worker.icrc-wallet.services.ts](src/frontend/src/icp/services/worker.icrc-wallet.services.ts) | Pass `asSingleton: true` on non-iOS too — all ICRC tokens share one `AppWorker`. The per-message `ledgerCanisterId` guard already handles routing. |
+| 5   | `MEMORY_FIX_RELOAD_CLEANUP`          | [memory-reload-cleanup.utils.ts](src/frontend/src/lib/utils/memory-reload-cleanup.utils.ts)    | On `beforeunload` / `pagehide`, terminate the singleton `AppWorker` and best-effort reset the `AgentManager` cache. Targets the post-reload accumulation pattern (memory growing reload-over-reload). |
 
 ---
 
