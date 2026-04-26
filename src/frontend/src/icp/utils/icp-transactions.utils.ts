@@ -5,9 +5,12 @@ import type {
 	IcpTransaction
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+
+const TEXT_DECODER = new TextDecoder();
 
 export const mapTransactionIcpToSelf = (
 	tx: IcpIndexDid.TransactionWithId
@@ -59,7 +62,19 @@ export const mapIcpTransaction = ({
 	transaction: IcpTransaction;
 	identity: NullishIdentity;
 }): IcTransactionUi => {
-	const { operation, timestamp, transferToSelf } = transaction;
+	const { operation, timestamp, transferToSelf, memo: nat64Memo, icrc1_memo } = transaction;
+
+	const icrc1MemoBytes = fromNullable(icrc1_memo);
+	const icrc1MemoText = nonNullish(icrc1MemoBytes)
+		? TEXT_DECODER.decode(icrc1MemoBytes).trim()
+		: undefined;
+	const memoText =
+		nonNullish(icrc1MemoText) && icrc1MemoText !== ''
+			? icrc1MemoText
+			: nat64Memo !== ZERO
+				? nat64Memo.toString()
+				: undefined;
+	const memoField = nonNullish(memoText) ? { memo: memoText } : {};
 
 	const tx: Pick<IcTransactionUi, 'timestamp' | 'id' | 'status' | 'txExplorerUrl'> = {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
@@ -101,7 +116,8 @@ export const mapIcpTransaction = ({
 			...(nonNullish(approveFee) && { fee: approveFee }),
 			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
 			approveSpender: approve.spender,
-			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approve.spender}`
+			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approve.spender}`,
+			...memoField
 		};
 	}
 
@@ -110,7 +126,8 @@ export const mapIcpTransaction = ({
 			...tx,
 			type: 'burn',
 			...mapFrom(operation.Burn.from),
-			value: operation.Burn.amount.e8s
+			value: operation.Burn.amount.e8s,
+			...memoField
 		};
 	}
 
@@ -120,7 +137,8 @@ export const mapIcpTransaction = ({
 			type: 'mint',
 			...mapTo(operation.Mint.to),
 			incoming: true,
-			value: operation.Mint.amount.e8s
+			value: operation.Mint.amount.e8s,
+			...memoField
 		};
 	}
 
@@ -134,7 +152,8 @@ export const mapIcpTransaction = ({
 			...source,
 			...mapTo(operation.Transfer.to),
 			value: operation.Transfer.amount.e8s,
-			...(nonNullish(transferFee) && { fee: transferFee })
+			...(nonNullish(transferFee) && { fee: transferFee }),
+			...memoField
 		};
 	}
 
