@@ -17,7 +17,7 @@ describe('SwapDetailsNearIntents', () => {
 	mockContext.set(
 		SWAP_CONTEXT_KEY,
 		initSwapContext({
-			destinationToken: ICP_TOKEN as IcTokenToggleable
+			destinationToken: ICP_TOKEN
 		})
 	);
 

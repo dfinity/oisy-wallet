@@ -53,7 +53,7 @@ describe('erc.services', () => {
 			mockFetch.mockResolvedValue({
 				ok: true,
 				json: () => mockMetadataResponse
-			} as unknown as Response);
+			});
 
 			vi.spyOn(nftsUtils, 'parseMetadataResourceUrl');
 		});
@@ -82,7 +82,7 @@ describe('erc.services', () => {
 			mockFetch.mockResolvedValueOnce({
 				ok: true,
 				json: () => undefined
-			} as unknown as Response);
+			});
 
 			const result = await fetchMetadataFromUri(mockParams);
 
@@ -96,7 +96,7 @@ describe('erc.services', () => {
 					...mockMetadataResponse,
 					image: undefined
 				})
-			} as unknown as Response);
+			});
 
 			const result = await fetchMetadataFromUri(mockParams);
 
@@ -119,7 +119,7 @@ describe('erc.services', () => {
 					image: undefined,
 					image_url: mockImageUrl
 				})
-			} as unknown as Response);
+			});
 
 			const result = await fetchMetadataFromUri(mockParams);
 

@@ -191,7 +191,7 @@ describe('auth.worker', () => {
 		it('should not emit anything when the delegation has no first delegation entry', async () => {
 			vi.mocked(DelegationChain.fromJSON).mockReturnValue({
 				delegations: []
-			} as unknown as DelegationChain);
+			});
 
 			await onAuthMessage(createEvent('startIdleTimer'));
 			await vi.advanceTimersByTimeAsync(AUTH_TIMER_INTERVAL);

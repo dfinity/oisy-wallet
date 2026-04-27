@@ -39,7 +39,7 @@ describe('EarningYearlyAmount', () => {
 			setExchangeRateCurrency: vi.fn(),
 			setExchangeRate: vi.fn(),
 			setExchangeRate24hChangeMultiplier: vi.fn()
-		} as CurrencyExchangeStore);
+		});
 
 		vi.spyOn(currencyDerived, 'currentCurrency', 'get').mockReturnValue({
 			subscribe: (fn: (v: Currency) => void) => {
@@ -100,7 +100,7 @@ describe('EarningYearlyAmount', () => {
 
 		expect(container.textContent?.trim()).toBe('');
 
-		rerender({ value: null as unknown as number });
+		rerender({ value: null });
 
 		expect(container.textContent?.trim()).toBe('');
 	});

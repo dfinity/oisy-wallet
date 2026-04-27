@@ -1260,7 +1260,7 @@ export const mockSolSignedTransaction: SolSignedTransaction = {
 		[mockSolAddress2]: Uint8Array.from([
 			173, 246, 119, 142, 238, 105, 46, 1, 187, 26, 128, 178, 141, 79, 197, 130, 141, 96, 178, 129
 		])
-	} as SignaturesMap
+	}
 } as unknown as SolSignedTransaction;
 
 export const mockSolParsedTransactionMessage: CompilableTransactionMessage = {

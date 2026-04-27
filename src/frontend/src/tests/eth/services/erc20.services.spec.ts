@@ -139,7 +139,7 @@ describe('erc20.services', () => {
 
 			infuraProvidersSpy.mockReturnValue({
 				metadata: mockMetadata
-			} as unknown as InfuraErc20Provider);
+			});
 		});
 
 		it('should save the default tokens in the store', async () => {
@@ -237,7 +237,7 @@ describe('erc20.services', () => {
 
 			infuraProvidersSpy.mockReturnValue({
 				metadata: mockMetadata
-			} as unknown as InfuraErc20Provider);
+			});
 		});
 
 		it('should load custom ERC20 tokens', async () => {

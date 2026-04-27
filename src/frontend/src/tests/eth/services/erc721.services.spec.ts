@@ -122,7 +122,7 @@ describe('erc721.services', () => {
 
 			alchemyProvidersSpy.mockReturnValue({
 				getContractMetadata: mockMetadata
-			} as unknown as AlchemyProvider);
+			});
 		});
 
 		it('should save the custom tokens in the store', async () => {
@@ -221,7 +221,7 @@ describe('erc721.services', () => {
 
 			alchemyProvidersSpy.mockReturnValue({
 				getContractMetadata: mockMetadata
-			} as unknown as AlchemyProvider);
+			});
 		});
 
 		it('should load custom ERC721 tokens', async () => {

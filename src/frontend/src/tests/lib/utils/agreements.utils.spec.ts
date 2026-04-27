@@ -26,7 +26,7 @@ describe('agreements.utils', () => {
 			vi.restoreAllMocks();
 
 			vi.spyOn(agreementsEnv, 'agreementsData', 'get').mockImplementation(
-				() => transformAgreementsJsonBigint(mock) as unknown as EnvAgreements
+				() => transformAgreementsJsonBigint(mock)
 			);
 		});
 

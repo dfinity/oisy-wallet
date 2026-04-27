@@ -42,7 +42,7 @@ describe('DappsCarousel', () => {
 
 	it('should render nothing if no dApps, featured reward is unknown and earning is not enabled', () => {
 		vi.spyOn(rewards, 'FEATURED_REWARD_CAROUSEL_SLIDE_ID', 'get').mockReturnValue(
-			'test' as typeof FEATURED_REWARD_CAROUSEL_SLIDE_ID
+			'test'
 		);
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 

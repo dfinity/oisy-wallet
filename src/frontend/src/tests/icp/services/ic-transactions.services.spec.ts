@@ -202,9 +202,9 @@ describe('ic-transactions.services', () => {
 								created_at_time: []
 							},
 							id: BigInt(transaction.id)
-						}) as IcpIndexDid.TransactionWithId
+						})
 				)
-			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
+			});
 		});
 
 		it('should not load transactions if the last ID is not parseable', async () => {
@@ -347,7 +347,7 @@ describe('ic-transactions.services', () => {
 
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
 				transactions: [] as IcpIndexDid.TransactionWithId[]
-			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
+			});
 
 			await loadNextIcTransactions(mockParams);
 
@@ -357,7 +357,7 @@ describe('ic-transactions.services', () => {
 		it('should call signalEnd if no transactions are returned', async () => {
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
 				transactions: [] as IcpIndexDid.TransactionWithId[]
-			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
+			});
 
 			await loadNextIcTransactions(mockParams);
 

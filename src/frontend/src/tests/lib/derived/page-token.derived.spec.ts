@@ -415,7 +415,7 @@ describe('page-token.derived', () => {
 		});
 
 		it('should return false if Solana token is toggleable', () => {
-			mockPage.mockToken({ ...SOLANA_TOKEN, enabled: true } as SplCustomToken);
+			mockPage.mockToken({ ...SOLANA_TOKEN, enabled: true });
 
 			expect(get(pageTokenToggleable)).toBeFalsy();
 		});

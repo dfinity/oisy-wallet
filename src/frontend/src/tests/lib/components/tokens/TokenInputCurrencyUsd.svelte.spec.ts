@@ -60,7 +60,7 @@ describe('TokenInputCurrencyFiat', () => {
 	it('updates display value when tokenAmount changes', async () => {
 		const testProps = $state({
 			...defaultProps,
-			tokenAmount: '123.456789' as OptionAmount
+			tokenAmount: '123.456789'
 		});
 
 		const { getByTestId } = render(TokenInputCurrencyFiat, { props: testProps });

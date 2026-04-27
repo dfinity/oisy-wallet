@@ -22,7 +22,7 @@ describe('SwapFormEth', () => {
 	beforeEach(() => {
 		const originalSwapContext = initSwapContext({
 			sourceToken: mockValidErc20Token,
-			destinationToken: ETHEREUM_TOKEN as Erc20Token
+			destinationToken: ETHEREUM_TOKEN
 		});
 
 		const mockSwapContext = {

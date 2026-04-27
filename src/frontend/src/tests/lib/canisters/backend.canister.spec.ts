@@ -107,7 +107,7 @@ describe('backend.canister', () => {
 		minConfirmations: [100],
 		amountSatoshis: 100n,
 		iiDelegationChain: mockIIDelegationChain
-	} as BtcSelectUserUtxosFeeParams;
+	};
 	const btcSelectUserUtxosFeeEndpointParams = {
 		network: btcSelectUserUtxosFeeParams.network,
 		min_confirmations: btcSelectUserUtxosFeeParams.minConfirmations,
@@ -126,7 +126,7 @@ describe('backend.canister', () => {
 			Icrc: {
 				ledger_id: mockPrincipal,
 				index_id: []
-			} as IcrcToken
+			}
 		},
 		version: [],
 		enabled: false
@@ -368,7 +368,7 @@ describe('backend.canister', () => {
 			};
 
 			service.btc_add_pending_transaction.mockResolvedValue(
-				response as unknown as BtcAddPendingTransactionResult
+				response
 			);
 
 			const { btcAddPendingTransaction } = await createBackendCanister({
@@ -395,7 +395,7 @@ describe('backend.canister', () => {
 			};
 
 			service.btc_add_pending_transaction.mockResolvedValue(
-				response as unknown as BtcAddPendingTransactionResult
+				response
 			);
 
 			const { btcAddPendingTransaction } = await createBackendCanister({
@@ -483,7 +483,7 @@ describe('backend.canister', () => {
 			};
 
 			service.btc_get_pending_transactions.mockResolvedValue(
-				response as unknown as BtcGetPendingTransactionsResult
+				response
 			);
 
 			const { btcGetPendingTransactions } = await createBackendCanister({
@@ -510,7 +510,7 @@ describe('backend.canister', () => {
 			};
 
 			service.btc_get_pending_transactions.mockResolvedValue(
-				response as unknown as BtcGetPendingTransactionsResult
+				response
 			);
 
 			const { btcGetPendingTransactions } = await createBackendCanister({
@@ -625,7 +625,7 @@ describe('backend.canister', () => {
 			};
 
 			service.btc_select_user_utxos_fee.mockResolvedValue(
-				response as unknown as BtcSelectUserUtxosFeeResult
+				response
 			);
 
 			const { btcSelectUserUtxosFee } = await createBackendCanister({
@@ -655,7 +655,7 @@ describe('backend.canister', () => {
 			};
 
 			service.btc_select_user_utxos_fee.mockResolvedValue(
-				response as unknown as BtcSelectUserUtxosFeeResult
+				response
 			);
 
 			const { btcSelectUserUtxosFee } = await createBackendCanister({
@@ -858,7 +858,7 @@ describe('backend.canister', () => {
 				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
 			};
 
-			service.allow_signing.mockResolvedValue(response as unknown as AllowSigningResult);
+			service.allow_signing.mockResolvedValue(response);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service
@@ -890,7 +890,7 @@ describe('backend.canister', () => {
 				}
 			};
 
-			service.allow_signing.mockResolvedValue(response as unknown as AllowSigningResult);
+			service.allow_signing.mockResolvedValue(response);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service
@@ -916,7 +916,7 @@ describe('backend.canister', () => {
 				Err: { InvalidDelegationChain: { msg: 'chain expired' } }
 			};
 
-			service.allow_signing.mockResolvedValue(response as unknown as AllowSigningResult);
+			service.allow_signing.mockResolvedValue(response);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service

@@ -218,7 +218,7 @@ describe('eth.utils', () => {
 		});
 
 		it('returns DEFAULT_ETHEREUM_NETWORK.explorerUrl if wrong data is provided', () => {
-			const result1 = getExplorerUrl({ token: null as unknown as undefined });
+			const result1 = getExplorerUrl({ token: null });
 
 			expect(result1).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
 

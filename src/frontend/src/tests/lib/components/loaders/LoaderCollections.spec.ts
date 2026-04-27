@@ -33,7 +33,7 @@ describe('LoaderCollections', () => {
 		alchemyProvidersSpy = vi.spyOn(alchemyProvidersModule, 'alchemyProviders');
 		alchemyProvidersSpy.mockReturnValue({
 			getTokensForOwner: mockGetTokensForOwner
-		} as unknown as AlchemyProvider);
+		});
 
 		extGetTokensByOwnerSpy = vi.spyOn(extTokenApi, 'getTokensByOwner');
 		extGetTokensByOwnerSpy.mockResolvedValue([]);

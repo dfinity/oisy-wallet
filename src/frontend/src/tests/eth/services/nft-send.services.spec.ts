@@ -25,11 +25,11 @@ describe('nft-send.services', () => {
 
 		const transfer721Spy = vi
 			.spyOn(nftTransferServices, 'transferErc721')
-			.mockResolvedValue({} as unknown as TransactionResponse);
+			.mockResolvedValue({});
 
 		const transfer1155Spy = vi
 			.spyOn(nftTransferServices, 'transferErc1155')
-			.mockResolvedValue({} as unknown as TransactionResponse);
+			.mockResolvedValue({});
 
 		const token721: NonFungibleToken = {
 			address: from,

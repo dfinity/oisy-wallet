@@ -79,7 +79,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							},
 							estimatedGasLimit: 25000n
 						}
-					} as PayableTokenWithConvertedAmount
+					}
 				})
 			).toBeUndefined();
 		});
@@ -297,7 +297,7 @@ describe('ic-open-crypto-pay.utils', () => {
 						token: {
 							...mockToken,
 							fee: undefined
-						} as PayableTokenWithConvertedAmount
+						}
 					})
 				).toThrow(en.pay.error.data_is_incompleted);
 			});
@@ -316,7 +316,7 @@ describe('ic-open-crypto-pay.utils', () => {
 								},
 								estimatedGasLimit: 25000n
 							}
-						} as PayableTokenWithConvertedAmount
+						}
 					})
 				).toThrow(en.pay.error.data_is_incompleted);
 			});

@@ -18,7 +18,7 @@ class MockWorker {
 	terminate: () => void = vi.fn();
 }
 
-vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
+vi.stubGlobal('Worker', MockWorker);
 
 let workerInstance: Worker;
 

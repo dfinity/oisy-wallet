@@ -221,7 +221,7 @@ describe('sol-instructions-token-2022.utils', () => {
 			const { accounts: _, ...withoutAccounts } = mockInstruction;
 
 			expect(() =>
-				parseSolToken2022Instruction(withoutAccounts as unknown as SolInstruction)
+				parseSolToken2022Instruction(withoutAccounts)
 			).toThrow('The instruction does not have any accounts');
 		});
 

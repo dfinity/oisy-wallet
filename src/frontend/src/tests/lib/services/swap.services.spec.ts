@@ -191,7 +191,7 @@ describe('swap.services', () => {
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
 				receiveAmount: 975n
-			} as unknown as ICPSwapAmountReply;
+			};
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
 			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
@@ -260,7 +260,7 @@ describe('swap.services', () => {
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
 				receiveAmount: 975n
-			} as unknown as ICPSwapAmountReply;
+			};
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
 			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
@@ -791,7 +791,7 @@ describe('swap.services', () => {
 			};
 
 			vi.mocked(constructSimpleSDK).mockReturnValue(
-				mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
+				mockSdk
 			);
 			mockDeltaContractGetDeltaContract.mockResolvedValue(mockDeltaContract);
 			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
@@ -981,7 +981,7 @@ describe('swap.services', () => {
 			};
 
 			vi.mocked(constructSimpleSDK).mockReturnValue(
-				mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
+				mockSdk
 			);
 			mockSwapGetSpender.mockResolvedValue('0xTokenTransferProxy');
 			mockSwapBuildTx.mockResolvedValue({
@@ -1108,7 +1108,7 @@ describe('swap.services', () => {
 			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-			} as PoolMetadata);
+			});
 
 			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 				balance0: 100n,
@@ -1146,7 +1146,7 @@ describe('swap.services', () => {
 			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-			} as PoolMetadata);
+			});
 			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 				balance0: ZERO,
 				balance1: ZERO
@@ -1188,7 +1188,7 @@ describe('swap.services', () => {
 			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-			} as PoolMetadata);
+			});
 			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 				balance0: 1n,
 				balance1: ZERO
@@ -1219,7 +1219,7 @@ describe('swap.services', () => {
 			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-			} as PoolMetadata);
+			});
 			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 				balance0: ZERO,
 				balance1: ZERO
@@ -1251,7 +1251,7 @@ describe('swap.services', () => {
 			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-			} as PoolMetadata);
+			});
 			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 				balance0: ZERO,
 				balance1: 1n
@@ -1295,7 +1295,7 @@ describe('swap.services', () => {
 			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-			} as PoolMetadata);
+			});
 
 			await withdrawUserUnusedBalance({
 				identity,
@@ -1317,7 +1317,7 @@ describe('swap.services', () => {
 			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-			} as PoolMetadata);
+			});
 
 			await expect(
 				withdrawUserUnusedBalance({
@@ -1341,7 +1341,7 @@ describe('swap.services', () => {
 			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-			} as PoolMetadata);
+			});
 
 			await withdrawUserUnusedBalance({
 				identity,
@@ -1369,7 +1369,7 @@ describe('swap.services', () => {
 			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-			} as PoolMetadata);
+			});
 
 			await withdrawUserUnusedBalance({
 				identity,
@@ -1418,7 +1418,7 @@ describe('swap.services', () => {
 			vi.clearAllMocks();
 			vi.mocked(constructSimpleSDK).mockReturnValue({
 				quote: { getQuote: mockGetQuote }
-			} as unknown as ReturnType<typeof constructSimpleSDK>);
+			});
 
 			exchangeStore.set([
 				{ [sourceToken.address.toLowerCase()]: { usd: 1.5 } },

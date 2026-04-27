@@ -74,7 +74,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: btcAddress.address }));
 
 		// Check that alias is displayed
-		expect(container).toHaveTextContent(btcAddress.label as string);
+		expect(container).toHaveTextContent(btcAddress.label);
 
 		// Check that the separator dot is displayed
 		expect(container).toHaveTextContent('•');

@@ -124,7 +124,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: '',
 				description: ''
-			} as unknown as RewardCampaignDescription
+			}
 		]);
 
 		const mockCtx = {
@@ -160,7 +160,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: 'x',
 				description: 'y'
-			} as unknown as RewardCampaignDescription
+			}
 		]);
 
 		const mockCtx = {
@@ -192,7 +192,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: '',
 				description: ''
-			} as unknown as RewardCampaignDescription
+			}
 		]);
 
 		const mockEligibility = readable({
@@ -229,7 +229,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: '',
 				description: ''
-			} as unknown as RewardCampaignDescription
+			}
 		]);
 
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
@@ -259,7 +259,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: '',
 				description: ''
-			} as unknown as RewardCampaignDescription
+			}
 		]);
 
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([]);

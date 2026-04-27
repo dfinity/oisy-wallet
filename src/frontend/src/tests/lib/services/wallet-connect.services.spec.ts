@@ -22,7 +22,7 @@ describe('wallet-connect.services', () => {
 		getActiveSessions: vi.fn(),
 		approveRequest: vi.fn(),
 		disconnect: vi.fn()
-	} as WalletConnectListener;
+	};
 	const mockRequest = {} as WalletKitTypes.SessionRequest;
 	const mockParams = {
 		request: mockRequest,

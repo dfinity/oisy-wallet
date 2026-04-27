@@ -104,7 +104,7 @@ describe('wallet-connect.services', () => {
 		vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 
 		vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue(
-			mockParsedTransaction as unknown as CompilableTransactionMessage
+			mockParsedTransaction
 		);
 		vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockImplementation(
 			() => mockMappedTransaction
@@ -116,7 +116,7 @@ describe('wallet-connect.services', () => {
 		vi.mocked(isTransactionMessageWithBlockhashLifetime).mockReturnValue(true);
 
 		vi.spyOn(solSendServices, 'setLifetimeAndFeePayerToTransaction').mockResolvedValue(
-			mockTransactionMessage as unknown as SolTransactionMessage
+			mockTransactionMessage
 		);
 
 		vi.spyOn(solSignServices, 'signTransaction').mockResolvedValue({
@@ -170,7 +170,7 @@ describe('wallet-connect.services', () => {
 			getActiveSessions: vi.fn(),
 			approveRequest: vi.fn(),
 			disconnect: vi.fn()
-		} as WalletConnectListener;
+		};
 		const mockTransaction = { mock: 'mock-transaction' };
 		const mockRequest = {
 			params: {
@@ -465,7 +465,7 @@ describe('wallet-connect.services', () => {
 
 				vi.spyOn(mockRpc, 'simulateTransaction').mockReturnValueOnce({
 					send: vi.fn(() => Promise.resolve(mockSimulationResult))
-				} as unknown as ReturnType<typeof mockRpc.simulateTransaction>);
+				});
 
 				const result = await sign(mockParams);
 

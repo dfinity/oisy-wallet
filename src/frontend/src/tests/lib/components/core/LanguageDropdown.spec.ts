@@ -29,7 +29,7 @@ describe('LanguageDropdown', () => {
 		const { container } = render(LanguageDropdown, {});
 
 		expect(container.querySelector('.dropdown-button')).toContainHTML(
-			LANGUAGES[get(currentLanguage) as keyof typeof LANGUAGES]
+			LANGUAGES[get(currentLanguage)]
 		);
 	});
 
@@ -110,6 +110,6 @@ describe('LanguageDropdown', () => {
 				language: Languages.GERMAN,
 				source: 'landing-page'
 			}
-		} as TrackEventParams);
+		});
 	});
 });

@@ -14,7 +14,7 @@ describe('AvatarWithBadge', () => {
 					n: 1,
 					name,
 					addresses: [mockContactIcrcAddressUi]
-				})[0] as unknown as ContactUi
+				})[0]
 			}
 		});
 
