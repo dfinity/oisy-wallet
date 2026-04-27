@@ -126,13 +126,17 @@
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
+			"internet_identity": "",
 			"asset_types": "跨 Bitcoin、Solana、Ethereum、ICP 等管理资产",
 			"instant_and_private": "内置 AI 助手，隐私保护为默认标准",
-			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
+			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
 			"social_login": "即时私密访问 + 社交登录"
 		},
 		"alt": {
-			"preview": "登录后 $oisy_name 的预览效果，适用于桌面端和移动端"
+			"preview": "登录后 $oisy_name 的预览效果，适用于桌面端和移动端",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "你的会话已在另一个标签页中被锁定。"
@@ -768,7 +772,13 @@
 			"beta_features": "测试功能",
 			"enable_beta_feature": "启用测试功能",
 			"disable_beta_feature": "禁用测试功能",
-			"save_beta_feature_success": "你的测试功能设置已更新。"
+			"save_beta_feature_success": "你的测试功能设置已更新。",
+			"hide_micro_transactions": "隐藏价值非常小的交易",
+			"hide_micro_transactions_description": "价值非常小的交易通常是垃圾信息，目的是诱骗用户复制发送方地址而不是有效地址。建议在交易列表中隐藏它们。",
+			"enable_hide_micro_transactions": "启用隐藏价值非常小的交易",
+			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
+			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -1513,8 +1523,8 @@
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "已连接的应用",
+			"no_connected_apps": "当前没有已连接的应用。",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1924,7 +1934,7 @@
 				"possessive": "我们的 "
 			},
 			"title": "",
-			"instruction": "点击此按钮即表示你同意 $link",
+			"instruction": "登录即表示你同意 $link",
 			"body": ""
 		},
 		"alt": {
@@ -1950,7 +1960,8 @@
 			"title": "最近活动"
 		},
 		"info": {
-			"btc_transactions": "BTC 交易信息来自中心化第三方，应自行核实。"
+			"btc_transactions": "BTC 交易信息来自中心化第三方，应自行核实。",
+			"hidden_micro_transactions": "<strong>OISY 保护您！</strong>代币价值非常小的交易当前已被隐藏。要显示它们，请前往<a href=\"/settings/\">设置</a>。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">了解更多</a>"
 		},
 		"warning": {
 			"no_index_canister": "无法显示 $token_list 的交易记录。未提供 Index canister。",

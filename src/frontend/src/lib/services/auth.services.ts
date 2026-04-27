@@ -48,7 +48,8 @@ export const signIn = async (
 	busy.show();
 
 	const trackingMetadata = {
-		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0
+		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0,
+		...(nonNullish(params.openIdProvider) ? { openid_provider: params.openIdProvider } : {})
 	};
 
 	try {

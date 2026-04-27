@@ -14,7 +14,8 @@ import {
 	saveUserTransactions,
 	setCustomToken,
 	setManyCustomTokens,
-	updateUserExperimentalFeatureSettings
+	updateUserExperimentalFeatureSettings,
+	updateUserTransactionFilterSettings
 } from '$lib/api/backend.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import type {
@@ -24,10 +25,12 @@ import type {
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
+	CreateUserProfileResponse,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
 	SaveUserTransactionsParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
@@ -196,15 +199,27 @@ describe('backend.api', () => {
 			...baseParams
 		};
 
+		const mockResponse: CreateUserProfileResponse = { Ok: mockUserProfile };
+
 		beforeEach(() => {
-			backendCanisterMock.createUserProfile.mockResolvedValue(mockUserProfile);
+			backendCanisterMock.createUserProfile.mockResolvedValue(mockResponse);
 		});
 
 		it('should successfully call createUserProfile endpoint', async () => {
 			const result = await createUserProfile(mockParams);
 
-			expect(result).toEqual(mockUserProfile);
+			expect(result).toEqual(mockResponse);
 			expect(backendCanisterMock.createUserProfile).toHaveBeenCalledOnce();
+		});
+
+		it('should return the backend error', async () => {
+			const mockErrResponse: CreateUserProfileResponse = { Err: { SignupsClosed: null } };
+
+			backendCanisterMock.createUserProfile.mockResolvedValue(mockErrResponse);
+
+			const result = await createUserProfile(mockParams);
+
+			expect(result).toEqual(mockErrResponse);
 		});
 
 		it('should throw an error if identity is undefined', async () => {
@@ -422,6 +437,44 @@ describe('backend.api', () => {
 			});
 
 			await expect(updateUserExperimentalFeatureSettings(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('updateUserTransactionFilterSettings', () => {
+		const mockParams: CanisterApiFunctionParams<UpdateUserTransactionFilterSettings> = {
+			...baseParams,
+			hideMicroTransactions: true,
+			currentUserVersion: 1n
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.updateUserTransactionFilterSettings.mockResolvedValue();
+		});
+
+		it('should successfully call updateUserTransactionFilterSettings endpoint', async () => {
+			const result = await updateUserTransactionFilterSettings(mockParams);
+
+			expect(result).toEqual(undefined);
+			expect(
+				backendCanisterMock.updateUserTransactionFilterSettings
+			).toHaveBeenCalledExactlyOnceWith({
+				hideMicroTransactions: true,
+				currentUserVersion: 1n
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				updateUserTransactionFilterSettings({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if updateUserTransactionFilterSettings throws', async () => {
+			backendCanisterMock.updateUserTransactionFilterSettings.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(updateUserTransactionFilterSettings(mockParams)).rejects.toThrow();
 		});
 	});
 

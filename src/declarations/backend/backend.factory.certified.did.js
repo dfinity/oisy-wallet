@@ -13,7 +13,8 @@ export const idlFactory = ({ IDL }) => {
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const QualifiedNotificationKind = IDL.Variant({
@@ -207,7 +208,8 @@ export const idlFactory = ({ IDL }) => {
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
 	const ImageMimeType = IDL.Variant({
 		'image/gif': IDL.Null,
@@ -355,6 +357,11 @@ export const idlFactory = ({ IDL }) => {
 		settings: IDL.Opt(Settings),
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
+	});
+	const CreateUserProfileError = IDL.Variant({ SignupsClosed: IDL.Null });
+	const CreateUserProfileResult = IDL.Variant({
+		Ok: UserProfile,
+		Err: CreateUserProfileError
 	});
 	const DeleteContactResult = IDL.Variant({
 		Ok: IDL.Nat64,
@@ -647,6 +654,10 @@ export const idlFactory = ({ IDL }) => {
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
+	const UpdateTransactionFilterSettingsRequest = IDL.Record({
+		filter: TransactionFilterSettings,
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
 
 	return IDL.Service({
 		add_user_dismissed_notification: IDL.Func(
@@ -677,7 +688,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		config: IDL.Func([], [Config]),
 		create_contact: IDL.Func([CreateContactRequest], [CreateContactResult], []),
-		create_user_profile: IDL.Func([], [UserProfile], []),
+		create_user_profile: IDL.Func([], [CreateUserProfileResult], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
 		get_account_creation_timestamps: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))]),
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
@@ -697,6 +708,7 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
+		new_user_signups_allowed: IDL.Func([], [IDL.Bool]),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
 			[SaveUserTransactionsRequest],
@@ -733,6 +745,11 @@ export const idlFactory = ({ IDL }) => {
 			[SaveNetworksSettingsRequest],
 			[SetUserShowTestnetsResult],
 			[]
+		),
+		update_user_transaction_filter_settings: IDL.Func(
+			[UpdateTransactionFilterSettingsRequest],
+			[SetUserShowTestnetsResult],
+			[]
 		)
 	});
 };
@@ -744,7 +761,8 @@ export const init = ({ IDL }) => {
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 

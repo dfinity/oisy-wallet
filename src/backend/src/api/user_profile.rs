@@ -8,19 +8,24 @@ use shared::types::{
     network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
     notification::{AddDismissedNotificationError, AddDismissedNotificationRequest},
     result_types::{
-        AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
-        GetUserProfileResult, SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
-        UpdateProviderAgreementsResult, UpdateUserAgreementsResult,
+        AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, CreateUserProfileResult,
+        GetAgreementHistoryResult, GetUserProfileResult, SetUserShowTestnetsResult,
+        UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
+        UpdateTransactionFilterSettingsResult, UpdateUserAgreementsResult,
         UpdateUserNetworkSettingsResult,
     },
-    user_profile::{HasUserProfileResponse, UserProfile},
+    transaction_settings::UpdateTransactionFilterSettingsRequest,
+    user_profile::{CreateUserProfileError, HasUserProfileResponse, UserProfile},
 };
 
 use crate::{
-    state::{mutate_state, read_state},
+    state::{self, mutate_state, read_state},
     types::StoredPrincipal,
     user_profile::{model::UserProfileModel, service},
-    utils::{guards::caller_is_not_anonymous, housekeeping::spawn_allow_signing_if_below_limit},
+    utils::{
+        guards::{caller_is_not_anonymous, caller_is_registered_user},
+        housekeeping::spawn_allow_signing_if_below_limit,
+    },
 };
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
@@ -32,7 +37,7 @@ use crate::{
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_user_network_settings(
     request: SaveNetworksSettingsRequest,
@@ -61,7 +66,7 @@ pub fn update_user_network_settings(
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTestnetsResult {
     let user_principal = msg_caller();
@@ -90,7 +95,7 @@ pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTes
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHiddenDappIdResult {
     fn inner(request: AddHiddenDappIdRequest) -> Result<(), AddDappSettingsError> {
@@ -124,7 +129,7 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 /// # Errors
 /// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
 ///   the batch is too large.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn add_user_dismissed_notification(
     request: AddDismissedNotificationRequest,
@@ -162,7 +167,7 @@ pub fn add_user_dismissed_notification(
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
     let UpdateUserAgreementsRequest {
@@ -197,7 +202,7 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_provider_agreements(
     request: UpdateProviderAgreementsRequest,
@@ -255,7 +260,7 @@ pub fn get_user_agreement_history() -> GetAgreementHistoryResult {
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_user_experimental_feature_settings(
     request: UpdateExperimentalFeaturesSettingsRequest,
@@ -276,12 +281,50 @@ pub fn update_user_experimental_feature_settings(
     .into()
 }
 
+/// Updates the user's transaction filter settings.
+///
+/// # Returns
+/// - Returns `Ok(())` if the transaction filter settings were updated successfully, or if they were
+///   already set to the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "caller_is_registered_user")]
+#[must_use]
+pub fn update_user_transaction_filter_settings(
+    request: UpdateTransactionFilterSettingsRequest,
+) -> UpdateTransactionFilterSettingsResult {
+    let user_principal = msg_caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        service::update_transaction_filter_settings(
+            stored_principal,
+            request.current_user_version,
+            request.filter,
+            &mut user_profile_model,
+        )
+    })
+    .into()
+}
+
 /// It creates a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
+///
+/// # Errors
+/// - Returns `Err(SignupsClosed)` when sign-ups of new users are disabled on the backend and the
+///   caller does not already have a profile. Existing users are unaffected and still receive
+///   `Ok(profile)` for idempotent calls.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn create_user_profile() -> UserProfile {
+pub fn create_user_profile() -> CreateUserProfileResult {
     let stored_principal = StoredPrincipal(msg_caller());
+
+    if !state::read_new_user_signups_allowed() && !service::has_user_profile(stored_principal) {
+        return Err(CreateUserProfileError::SignupsClosed).into();
+    }
 
     let user_profile: UserProfile = mutate_state(|s| {
         let mut user_profile_model =
@@ -297,7 +340,17 @@ pub fn create_user_profile() -> UserProfile {
     // be invoked before any signer-related calls (e.g., get_eth_address).
     spawn_allow_signing_if_below_limit(stored_principal);
 
-    user_profile
+    Ok::<UserProfile, CreateUserProfileError>(user_profile).into()
+}
+
+/// Returns whether sign-ups of new users are currently allowed.
+///
+/// Exposed as an unauthenticated query so the landing page can display an info banner before the
+/// user signs in.
+#[query]
+#[must_use]
+pub fn new_user_signups_allowed() -> bool {
+    state::read_new_user_signups_allowed()
 }
 
 /// Returns the caller's user profile.

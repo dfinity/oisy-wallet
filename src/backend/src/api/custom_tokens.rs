@@ -8,11 +8,11 @@ use crate::{
     state::{mutate_state, read_state},
     token::{self, MAX_TOKEN_LIST_LENGTH},
     types::StoredPrincipal,
-    utils::guards::caller_is_not_anonymous,
+    utils::guards::caller_is_registered_user,
 };
 
 /// Add or update custom token for the user.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(msg_caller());
 
@@ -30,7 +30,7 @@ pub fn set_custom_token(token: CustomToken) {
     token::mark_token_active(&TokenId::from(&token));
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let tokens = tokens.into_boxed_slice();
 
@@ -57,7 +57,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 }
 
 /// Remove custom token for the user.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub fn remove_custom_token(token: CustomToken) {
     let CustomToken { token, .. } = token;
 
@@ -85,7 +85,7 @@ pub fn remove_custom_token(token: CustomToken) {
 /// - It consumes cycles as an update call.
 /// - Integrations that previously relied on query semantics must be updated to invoke this as an
 ///   update method.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(msg_caller());

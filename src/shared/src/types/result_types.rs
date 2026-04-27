@@ -10,7 +10,7 @@ use super::{
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
-    user_profile::{GetUserProfileError, UserProfile},
+    user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
 };
 use crate::types::{
     agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
@@ -18,6 +18,7 @@ use crate::types::{
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
+    transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
 
@@ -147,6 +148,22 @@ impl From<Result<UserProfile, GetUserProfileError>> for GetUserProfileResult {
         match result {
             Ok(profile) => GetUserProfileResult::Ok(Box::new(profile)),
             Err(err) => GetUserProfileResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreateUserProfileResult {
+    /// The user's profile was created (or already existed) and is returned.
+    Ok(Box<UserProfile>),
+    /// The profile could not be created due to an error.
+    Err(CreateUserProfileError),
+}
+impl From<Result<UserProfile, CreateUserProfileError>> for CreateUserProfileResult {
+    fn from(result: Result<UserProfile, CreateUserProfileError>) -> Self {
+        match result {
+            Ok(profile) => CreateUserProfileResult::Ok(Box::new(profile)),
+            Err(err) => CreateUserProfileResult::Err(err),
         }
     }
 }
@@ -329,6 +346,22 @@ impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
         match result {
             Ok(()) => UpdateExperimentalFeaturesSettingsResult::Ok(()),
             Err(err) => UpdateExperimentalFeaturesSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateTransactionFilterSettingsResult {
+    Ok(()),
+    Err(UpdateTransactionFilterSettingsError),
+}
+impl From<Result<(), UpdateTransactionFilterSettingsError>>
+    for UpdateTransactionFilterSettingsResult
+{
+    fn from(result: Result<(), UpdateTransactionFilterSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateTransactionFilterSettingsResult::Ok(()),
+            Err(err) => UpdateTransactionFilterSettingsResult::Err(err),
         }
     }
 }

@@ -3,8 +3,7 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	TokenId,
-	UserProfile
+	TokenId
 } from '$declarations/backend/backend.did';
 import { CanisterApi } from '$lib/api/canister.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -20,6 +19,7 @@ import type {
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	CreateContactParams,
+	CreateUserProfileResponse,
 	DeleteContactParams,
 	GetContactParams,
 	GetPendingTransactionsOutcome,
@@ -33,7 +33,8 @@ import type {
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
@@ -82,7 +83,7 @@ export const removeCustomToken = async ({
 
 export const createUserProfile = async ({
 	identity
-}: CanisterApiFunctionParams): Promise<UserProfile> => {
+}: CanisterApiFunctionParams): Promise<CreateUserProfileResponse> => {
 	const { createUserProfile } = await backendCanister({ identity });
 
 	return createUserProfile();
@@ -250,6 +251,15 @@ export const updateUserExperimentalFeatureSettings = async ({
 	const { updateUserExperimentalFeatureSettings } = await backendCanister({ identity });
 
 	return updateUserExperimentalFeatureSettings(params);
+};
+
+export const updateUserTransactionFilterSettings = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<UpdateUserTransactionFilterSettings>): Promise<void> => {
+	const { updateUserTransactionFilterSettings } = await backendCanister({ identity });
+
+	return updateUserTransactionFilterSettings(params);
 };
 
 export const getExchangeRate = async ({

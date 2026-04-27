@@ -5,6 +5,7 @@ import { BONK_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/
 import { CBBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.cbbtc.env';
 import { CHAT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.chat.env';
 import { GLDT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.gldt.env';
+import { ICP_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.icp.env';
 import {
 	ARB_SEPOLIA_USDC_TOKEN,
 	USDC_TOKEN
@@ -27,6 +28,7 @@ const ARBITRUM_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
 	CBBTC_TOKEN,
 	GLDT_TOKEN,
 	CHAT_TOKEN,
+	ICP_TOKEN,
 	WBTC_TOKEN,
 	WETH_TOKEN,
 	ZCHF_TOKEN

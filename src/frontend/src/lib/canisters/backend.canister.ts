@@ -5,8 +5,7 @@ import type {
 	CustomToken,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
-	TokenId,
-	UserProfile
+	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
@@ -29,6 +28,7 @@ import type {
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
@@ -39,7 +39,8 @@ import type {
 	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
@@ -100,7 +101,7 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<UserProfile> => {
+	createUserProfile = (): Promise<CreateUserProfileResponse> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
 		return create_user_profile();
@@ -411,6 +412,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await update_user_experimental_feature_settings({
 			experimental_features: mapUserExperimentalFeatures(experimentalFeatures),
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateUserTransactionFilterSettings = async ({
+		hideMicroTransactions,
+		currentUserVersion
+	}: UpdateUserTransactionFilterSettings): Promise<void> => {
+		const { update_user_transaction_filter_settings } = this.caller({ certified: true });
+
+		await update_user_transaction_filter_settings({
+			filter: { hide_micro_transactions: hideMicroTransactions },
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};

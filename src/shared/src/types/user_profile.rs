@@ -1,7 +1,6 @@
 use candid::{CandidType, Deserialize, Principal};
 
-use super::Timestamp;
-use crate::types::{agreement::Agreements, settings::Settings, Version};
+use crate::types::{agreement::Agreements, settings::Settings, Timestamp, Version};
 
 pub mod impls;
 
@@ -39,4 +38,12 @@ pub struct HasUserProfileResponse {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum GetUserProfileError {
     NotFound,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreateUserProfileError {
+    /// Sign-ups of new users are currently disabled on the backend. Callers that already have a
+    /// profile are unaffected; this variant is only returned for principals without an existing
+    /// profile.
+    SignupsClosed,
 }

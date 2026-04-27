@@ -219,7 +219,8 @@ describe('backend.canister', () => {
 	});
 
 	it('creates user profile', async () => {
-		service.create_user_profile.mockResolvedValue(mockedUserProfile);
+		const response = { Ok: mockedUserProfile };
+		service.create_user_profile.mockResolvedValue(response);
 
 		const { createUserProfile } = await createBackendCanister({
 			serviceOverride: service
@@ -227,7 +228,7 @@ describe('backend.canister', () => {
 
 		const res = await createUserProfile();
 
-		expect(res).toEqual(mockedUserProfile);
+		expect(res).toEqual(response);
 	});
 
 	it('should throw an error if create_user_profile throws', async () => {
@@ -1143,6 +1144,66 @@ describe('backend.canister', () => {
 
 			const res = updateUserExperimentalFeatureSettings({
 				experimentalFeatures: mockUserExperimentalFeatures
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('updateUserTransactionFilterSettings', () => {
+		it('should update user transaction filter settings', async () => {
+			const response = { Ok: null };
+
+			service.update_user_transaction_filter_settings.mockResolvedValue(response);
+
+			const { updateUserTransactionFilterSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateUserTransactionFilterSettings({
+				hideMicroTransactions: true
+			});
+
+			expect(service.update_user_transaction_filter_settings).toHaveBeenCalledWith({
+				filter: { hide_micro_transactions: true },
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should update user transaction filter settings with current user version', async () => {
+			const response = { Ok: null };
+
+			service.update_user_transaction_filter_settings.mockResolvedValue(response);
+
+			const { updateUserTransactionFilterSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateUserTransactionFilterSettings({
+				hideMicroTransactions: false,
+				currentUserVersion: 1n
+			});
+
+			expect(service.update_user_transaction_filter_settings).toHaveBeenCalledWith({
+				filter: { hide_micro_transactions: false },
+				current_user_version: [1n]
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if update_user_transaction_filter_settings throws', async () => {
+			service.update_user_transaction_filter_settings.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateUserTransactionFilterSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateUserTransactionFilterSettings({
+				hideMicroTransactions: true
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
