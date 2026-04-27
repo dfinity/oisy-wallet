@@ -5,8 +5,7 @@ import type {
 	CustomToken,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
-	TokenId,
-	UserProfile
+	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
@@ -29,6 +28,7 @@ import type {
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
@@ -101,7 +101,7 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<UserProfile> => {
+	createUserProfile = (): Promise<CreateUserProfileResponse> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
 		return create_user_profile();

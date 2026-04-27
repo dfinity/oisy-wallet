@@ -354,6 +354,18 @@ type CreateContactResult = variant {
 	// The contact could not be created due to an error
 	Err : ContactError
 };
+type CreateUserProfileError = variant {
+	// Sign-ups of new users are currently disabled on the backend. Callers that already have a
+	// profile are unaffected; this variant is only returned for principals without an existing
+	// profile.
+	SignupsClosed
+};
+type CreateUserProfileResult = variant {
+	// The user's profile was created (or already existed) and is returned.
+	Ok : UserProfile;
+	// The profile could not be created due to an error.
+	Err : CreateUserProfileError
+};
 // User preferences for any token
 type CustomToken = record {
 	token : Token;
@@ -1075,7 +1087,12 @@ service : (Arg) -> {
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
 	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
-	create_user_profile : () -> (UserProfile);
+	//
+	// # Errors
+	// - Returns `Err(SignupsClosed)` when sign-ups of new users are disabled on the backend and the
+	// caller does not already have a profile. Existing users are unaffected and still receive
+	// `Ok(profile)` for idempotent calls.
+	create_user_profile : () -> (CreateUserProfileResult);
 	// Deletes a contact for the caller.
 	//
 	// # Errors
