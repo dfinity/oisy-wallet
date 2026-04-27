@@ -1,10 +1,10 @@
 import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
+import { ethProviders } from '$eth/providers/eth.providers';
 import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
-import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve } from '$eth/services/approve.services';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import { prepare } from '$eth/services/prepare.services';
@@ -231,7 +231,7 @@ const sendTransaction = async ({
 	RequiredTransactionFeeData & { nonce: number }): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
-	const { sendTransaction } = infuraProviders(networkId);
+	const { sendTransaction } = ethProviders(networkId);
 
 	const principalEthAddress = (): string => {
 		const {

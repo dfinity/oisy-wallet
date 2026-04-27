@@ -9,8 +9,8 @@ import {
 import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { ERC4626_ABI } from '$eth/constants/erc4626.constants';
+import { ethProviders } from '$eth/providers/eth.providers';
 import { infuraErc4626Providers } from '$eth/providers/infura-erc4626.providers';
-import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve } from '$eth/services/approve.services';
 import { safeLoadMetadata as safeLoadErc20Metadata } from '$eth/services/erc20.services';
 import { getNonce } from '$eth/services/nonce.services';
@@ -356,7 +356,7 @@ export const depositErc4626 = async ({
 		receiver: from
 	});
 
-	const { safeEstimateGas } = infuraProviders(networkId);
+	const { safeEstimateGas } = ethProviders(networkId);
 
 	const depositGas = await safeEstimateGas({
 		from,
@@ -380,7 +380,7 @@ export const depositErc4626 = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	const { sendTransaction } = infuraProviders(networkId);
+	const { sendTransaction } = ethProviders(networkId);
 	await sendTransaction(rawTransaction);
 
 	progress?.(ProgressStepsStake.UPDATE_UI);
@@ -457,7 +457,7 @@ const sendErc4626Unstake = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	const { sendTransaction } = infuraProviders(networkId);
+	const { sendTransaction } = ethProviders(networkId);
 	await sendTransaction(rawTransaction);
 
 	progress?.(ProgressStepsUnstake.UPDATE_UI);

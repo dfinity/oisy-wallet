@@ -1,7 +1,7 @@
 import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
+import { ethProviders } from '$eth/providers/eth.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
-import { infuraProviders } from '$eth/providers/infura.providers';
 import { getNonce } from '$eth/services/nonce.services';
 import { prepare } from '$eth/services/prepare.services';
 import type { EthAddress } from '$eth/types/address';
@@ -123,7 +123,7 @@ const prepareAndSignApproval = async ({
 
 	progress?.(progressSteps.APPROVE);
 
-	const { sendTransaction } = infuraProviders(networkId);
+	const { sendTransaction } = ethProviders(networkId);
 
 	const { hash } = await sendTransaction(rawTransaction);
 

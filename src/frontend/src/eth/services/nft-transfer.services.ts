@@ -1,7 +1,7 @@
 import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
-import { infuraProviders } from '$eth/providers/infura.providers';
+import { ethProviders } from '$eth/providers/eth.providers';
 import { getNonce } from '$eth/services/nonce.services';
 import type { EthAddress } from '$eth/types/address';
 import type {
@@ -105,7 +105,7 @@ const sendRaw = ({
 }: {
 	networkId: NetworkId;
 	raw: string;
-}): Promise<TransactionResponse> => infuraProviders(networkId).sendTransaction(raw);
+}): Promise<TransactionResponse> => ethProviders(networkId).sendTransaction(raw);
 
 const transferErc = async ({
 	identity,

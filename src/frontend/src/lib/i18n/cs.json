@@ -760,6 +760,9 @@
 			"enable_testnets": "Povolit testovací sítě",
 			"active_networks": "Aktivní sítě",
 			"active_networks_description": "Vyberte sítě, se kterými chcete v $oisy_name pracovat. Tokeny a transakce z neaktivních sítí se nezobrazí ani nebudou zahrnuty do vašeho dostupného zůstatku.",
+			"add_custom_network": "",
+			"add_custom_network_button": "",
+			"add_custom_network_description": "",
 			"enable_network": "Povolit síť",
 			"disable_network": "Zakázat síť",
 			"appearance": "Vzhled",
@@ -803,6 +806,56 @@
 		"number_of_enabled": "$numNetworksEnabled z $numNetworksTotal povoleno",
 		"filter": "Filtrovat sítě",
 		"manage": "Spravovat sítě"
+	},
+	"custom_networks": {
+		"text": {
+			"add_title": "",
+			"review_title": "",
+			"form_intro": "",
+			"review_intro": "",
+			"mainnet": "",
+			"testnet": "",
+			"list_title": "",
+			"list_empty": "",
+			"list_chain_id_label": ""
+		},
+		"field": {
+			"name": "",
+			"name_placeholder": "",
+			"chain_id": "",
+			"chain_id_placeholder": "",
+			"rpc_url": "",
+			"rpc_url_placeholder": "",
+			"currency_symbol": "",
+			"currency_symbol_placeholder": "",
+			"explorer_url": "",
+			"explorer_url_placeholder": "",
+			"icon_url": "",
+			"icon_url_placeholder": "",
+			"environment": ""
+		},
+		"button": {
+			"cancel": "",
+			"verify": "",
+			"back": "",
+			"add": "",
+			"remove": "",
+			"confirm_remove": ""
+		},
+		"error": {
+			"name_required": "",
+			"chain_id_required": "",
+			"chain_id_invalid": "",
+			"rpc_url_required": "",
+			"rpc_url_invalid": "",
+			"currency_symbol_required": "",
+			"explorer_url_required": "",
+			"explorer_url_invalid": "",
+			"icon_url_invalid": "",
+			"chain_mismatch": "",
+			"rpc_unreachable": "",
+			"duplicate": ""
+		}
 	},
 	"receive": {
 		"text": {

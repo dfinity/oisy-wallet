@@ -760,6 +760,9 @@
 			"enable_testnets": "Enable test networks",
 			"active_networks": "Active networks ",
 			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions from inactive networks will not show or be included in your available balance.",
+			"add_custom_network": "Custom EVM networks",
+			"add_custom_network_button": "Add network",
+			"add_custom_network_description": "Connect any EVM-compatible chain by its RPC endpoint. $oisy_name verifies the chain ID before saving.",
 			"enable_network": "Enable network",
 			"disable_network": "Disable network",
 			"appearance": "Appearance",
@@ -803,6 +806,56 @@
 		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled",
 		"filter": "Filter networks",
 		"manage": "Manage networks"
+	},
+	"custom_networks": {
+		"text": {
+			"add_title": "Add custom EVM network",
+			"review_title": "Review network",
+			"form_intro": "Add any EVM-compatible chain by its RPC endpoint. We'll probe the endpoint to confirm the chain ID before saving.",
+			"review_intro": "The RPC confirmed this chain. Review the details and add the network to your wallet.",
+			"mainnet": "Mainnet",
+			"testnet": "Testnet",
+			"list_title": "Saved custom networks",
+			"list_empty": "No custom networks saved yet.",
+			"list_chain_id_label": "Chain ID $chainId"
+		},
+		"field": {
+			"name": "Network name",
+			"name_placeholder": "e.g. Optimism",
+			"chain_id": "Chain ID",
+			"chain_id_placeholder": "e.g. 10",
+			"rpc_url": "RPC URL",
+			"rpc_url_placeholder": "https://…",
+			"currency_symbol": "Currency symbol",
+			"currency_symbol_placeholder": "e.g. ETH",
+			"explorer_url": "Block explorer URL",
+			"explorer_url_placeholder": "https://…",
+			"icon_url": "Icon URL (optional)",
+			"icon_url_placeholder": "https://…",
+			"environment": "Environment"
+		},
+		"button": {
+			"cancel": "Cancel",
+			"verify": "Verify and continue",
+			"back": "Back",
+			"add": "Add network",
+			"remove": "Remove",
+			"confirm_remove": "Click again to confirm"
+		},
+		"error": {
+			"name_required": "Network name is required.",
+			"chain_id_required": "Chain ID is required.",
+			"chain_id_invalid": "Chain ID must be a positive integer.",
+			"rpc_url_required": "RPC URL is required.",
+			"rpc_url_invalid": "RPC URL must be a valid https URL.",
+			"currency_symbol_required": "Currency symbol is required.",
+			"explorer_url_required": "Block explorer URL is required.",
+			"explorer_url_invalid": "Block explorer URL must be a valid URL.",
+			"icon_url_invalid": "Icon URL must be a valid URL.",
+			"chain_mismatch": "This RPC reports chain ID $actualChainId, not $expectedChainId. Double-check the endpoint.",
+			"rpc_unreachable": "The RPC endpoint could not be reached: $error",
+			"duplicate": "A custom network with this chain ID is already saved."
+		}
 	},
 	"receive": {
 		"text": {

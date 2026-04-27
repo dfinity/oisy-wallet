@@ -760,6 +760,9 @@
 			"enable_testnets": "テストネットを有効化",
 			"active_networks": "アクティブなネットワーク",
 			"active_networks_description": "$oisy_nameで操作したいネットワークを選択してください。非アクティブなネットワークのトークンとトランザクションは表示されず、利用可能な残高にも含まれません",
+			"add_custom_network": "",
+			"add_custom_network_button": "",
+			"add_custom_network_description": "",
 			"enable_network": "ネットワークを有効化",
 			"disable_network": "ネットワークを無効化",
 			"appearance": "外観モード",
@@ -803,6 +806,56 @@
 		"number_of_enabled": "$numNetworksTotalのうち$numNetworksEnabledが有効",
 		"filter": "ネットワークを絞り込み",
 		"manage": "ネットワークを管理"
+	},
+	"custom_networks": {
+		"text": {
+			"add_title": "",
+			"review_title": "",
+			"form_intro": "",
+			"review_intro": "",
+			"mainnet": "",
+			"testnet": "",
+			"list_title": "",
+			"list_empty": "",
+			"list_chain_id_label": ""
+		},
+		"field": {
+			"name": "",
+			"name_placeholder": "",
+			"chain_id": "",
+			"chain_id_placeholder": "",
+			"rpc_url": "",
+			"rpc_url_placeholder": "",
+			"currency_symbol": "",
+			"currency_symbol_placeholder": "",
+			"explorer_url": "",
+			"explorer_url_placeholder": "",
+			"icon_url": "",
+			"icon_url_placeholder": "",
+			"environment": ""
+		},
+		"button": {
+			"cancel": "",
+			"verify": "",
+			"back": "",
+			"add": "",
+			"remove": "",
+			"confirm_remove": ""
+		},
+		"error": {
+			"name_required": "",
+			"chain_id_required": "",
+			"chain_id_invalid": "",
+			"rpc_url_required": "",
+			"rpc_url_invalid": "",
+			"currency_symbol_required": "",
+			"explorer_url_required": "",
+			"explorer_url_invalid": "",
+			"icon_url_invalid": "",
+			"chain_mismatch": "",
+			"rpc_unreachable": "",
+			"duplicate": ""
+		}
 	},
 	"receive": {
 		"text": {

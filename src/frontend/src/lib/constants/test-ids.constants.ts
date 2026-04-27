@@ -99,6 +99,7 @@ export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
 export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
+export const SETTINGS_ADD_CUSTOM_NETWORK_BUTTON = 'settings-add-custom-network-button';
 
 export const SETTINGS_NETWORKS_MODAL = 'settings-networks-modal';
 export const SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX = 'settings-networks-modal-testnet-checkbox';
@@ -174,6 +175,24 @@ export const MANAGE_TOKENS_IC_ADD_NFT_INPUT = 'manage-tokens-ic-add-nft-input';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
+
+export const ADD_CUSTOM_NETWORK_MODAL = 'add-custom-network-modal';
+export const ADD_CUSTOM_NETWORK_INPUT_NAME = 'add-custom-network-input-name';
+export const ADD_CUSTOM_NETWORK_INPUT_CHAIN_ID = 'add-custom-network-input-chain-id';
+export const ADD_CUSTOM_NETWORK_INPUT_RPC_URL = 'add-custom-network-input-rpc-url';
+export const ADD_CUSTOM_NETWORK_INPUT_CURRENCY_SYMBOL = 'add-custom-network-input-currency-symbol';
+export const ADD_CUSTOM_NETWORK_INPUT_EXPLORER_URL = 'add-custom-network-input-explorer-url';
+export const ADD_CUSTOM_NETWORK_INPUT_ICON_URL = 'add-custom-network-input-icon-url';
+export const ADD_CUSTOM_NETWORK_ENV_MAINNET = 'add-custom-network-env-mainnet';
+export const ADD_CUSTOM_NETWORK_ENV_TESTNET = 'add-custom-network-env-testnet';
+export const ADD_CUSTOM_NETWORK_VERIFY_BUTTON = 'add-custom-network-verify-button';
+export const ADD_CUSTOM_NETWORK_CONFIRM_BUTTON = 'add-custom-network-confirm-button';
+export const ADD_CUSTOM_NETWORK_VERIFICATION_BANNER = 'add-custom-network-verification-banner';
+
+export const CUSTOM_EVM_NETWORKS_LIST = 'custom-evm-networks-list';
+export const CUSTOM_EVM_NETWORKS_LIST_EMPTY = 'custom-evm-networks-list-empty';
+export const CUSTOM_EVM_NETWORKS_LIST_ITEM = 'custom-evm-networks-list-item';
+export const CUSTOM_EVM_NETWORKS_REMOVE_BUTTON = 'custom-evm-networks-remove-button';
 
 export const THEME_SELECTOR_CARD = 'theme-selector-card';
 

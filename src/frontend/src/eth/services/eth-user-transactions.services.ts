@@ -1,6 +1,6 @@
 import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
+import { ethProviders } from '$eth/providers/eth.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
-import { infuraProviders } from '$eth/providers/infura.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import {
@@ -215,7 +215,7 @@ const loadOlderFromEtherscan = async ({
 
 		if (!skipSave) {
 			try {
-				const { getBlockNumber } = infuraProviders(networkId);
+				const { getBlockNumber } = ethProviders(networkId);
 
 				const latestBlockNumber = await getBlockNumber();
 

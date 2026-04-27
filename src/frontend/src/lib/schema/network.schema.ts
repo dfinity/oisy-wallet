@@ -1,6 +1,7 @@
 import { CoingeckoPlatformIdSchema } from '$lib/schema/coingecko.schema';
 import { OnramperNetworkIdSchema } from '$lib/schema/onramper.schema';
 import { UrlSchema } from '$lib/validation/url.validation';
+import { createUrlSchema } from '@dfinity/zod-schemas';
 import * as z from 'zod';
 
 export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
@@ -30,11 +31,25 @@ const NetworkPaySchema = z.object({
 	openCryptoPay: NetworkOpenCryptoPaySchema
 });
 
+/**
+ * Built-in network icons are bundled SVG assets (either an import result ending
+ * in `.svg` or an inlined `data:image/svg+xml` URL). User-added custom networks
+ * can paste an http(s) URL pointing at any image format — we do not mandate SVG
+ * for those because most block-explorer logos are served as raster images. Any
+ * other string (non-URL, non-SVG path) is still rejected to keep accidental
+ * typos out of the rendered icon slot.
+ */
+const RemoteIconUrlSchema = createUrlSchema({});
+
 const IconSchema = z
 	.string()
-	.refine((value) => value.endsWith('.svg') || value.startsWith('data:image/svg+xml'), {
-		message: 'Must be an SVG file'
-	});
+	.refine(
+		(value) =>
+			value.endsWith('.svg') ||
+			value.startsWith('data:image/svg+xml') ||
+			RemoteIconUrlSchema.safeParse(value).success,
+		{ message: 'Must be an SVG file or a valid http(s) URL' }
+	);
 
 /**
  * Zod schema defining the shape of a network-like object.
