@@ -23,7 +23,7 @@ use crate::{
     types::StoredPrincipal,
     user_profile::{model::UserProfileModel, service},
     utils::{
-        guards::{caller_is_not_anonymous, caller_is_registered_user},
+        guards::{caller_is_controller, caller_is_not_anonymous, caller_is_registered_user},
         housekeeping::spawn_allow_signing_if_below_limit,
     },
 };
@@ -351,6 +351,16 @@ pub fn create_user_profile() -> CreateUserProfileResult {
 #[must_use]
 pub fn new_user_signups_allowed() -> bool {
     state::read_new_user_signups_allowed()
+}
+
+/// Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
+///
+/// When disabled, `create_user_profile` rejects callers that do not already have a profile with
+/// `CreateUserProfileError::SignupsClosed`. Existing users are unaffected. All other `Config`
+/// fields are preserved.
+#[update(guard = "caller_is_controller")]
+pub fn set_new_user_signups_allowed(allowed: bool) {
+    state::set_new_user_signups_allowed(allowed);
 }
 
 /// Returns the caller's user profile.
