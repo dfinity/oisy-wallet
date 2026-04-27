@@ -45,7 +45,8 @@ export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'alternativeN
 	buy: {
 		onramperId: 'icp_icp'
 	},
-	groupData: ICP_TOKEN_GROUP
+	groupData: ICP_TOKEN_GROUP,
+	neverCollapseInTokenGroup: true
 };
 
 /**
