@@ -1,4 +1,5 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 import {
@@ -8,6 +9,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
@@ -113,5 +115,48 @@ describe('IcSendForm', () => {
 		});
 
 		expect(queryByText(en.fee.text.fee)).toBeNull();
+	});
+
+	describe('IcpMemoInfo box', () => {
+		const icpDestination = '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a';
+
+		it('should not render the info box for the ICP token when the memo is empty', () => {
+			const context = initSendContext({ token: ICP_TOKEN });
+			const contextMap = new Map([[SEND_CONTEXT_KEY, context]]);
+
+			const { queryByText } = render(IcSendForm, {
+				props: { ...props, destination: icpDestination },
+				context: contextMap
+			});
+
+			expect(queryByText(en.send.info.icp_memo_methods)).toBeNull();
+		});
+
+		it('should render the info box for the ICP token when a memo is entered', () => {
+			const context = initSendContext({ token: ICP_TOKEN });
+			context.sendMemo.set('42');
+			const contextMap = new Map([[SEND_CONTEXT_KEY, context]]);
+
+			const { getByText } = render(IcSendForm, {
+				props: { ...props, destination: icpDestination },
+				context: contextMap
+			});
+
+			expect(getByText(en.send.info.icp_memo_methods)).toBeInTheDocument();
+			expect(getByText(en.core.text.learn_more)).toBeInTheDocument();
+		});
+
+		it('should not render the info box for non-ICP IC tokens even when a memo is entered', () => {
+			const context = initSendContext({ token: mockValidIcrcToken });
+			context.sendMemo.set('a memo');
+			const contextMap = new Map([[SEND_CONTEXT_KEY, context]]);
+
+			const { queryByText } = render(IcSendForm, {
+				props: { ...props, destination: 'rrkah-fqaaa-aaaaa-aaaaq-cai' },
+				context: contextMap
+			});
+
+			expect(queryByText(en.send.info.icp_memo_methods)).toBeNull();
+		});
 	});
 });

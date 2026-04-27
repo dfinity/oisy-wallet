@@ -944,7 +944,8 @@
 			"pending_bitcoin_transaction": "待处理的比特币交易完成后，你可以发送另一笔交易。",
 			"no_available_utxos": "你没有可用的 UTXO 来执行此交易。",
 			"unknown_destination": "你之前未与该地址交互，请确认你认识收款人。",
-			"fee_info": "手续费将以 $feeSymbol 支付。可用余额：<strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "手续费将以 $feeSymbol 支付。可用余额：<strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "目标地址无效",

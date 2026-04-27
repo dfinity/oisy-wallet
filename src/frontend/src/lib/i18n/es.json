@@ -944,7 +944,8 @@
 			"pending_bitcoin_transaction": "Puedes enviar otra transacción de Bitcoin una vez que la pendiente esté completa.",
 			"no_available_utxos": "No tendrás utxos disponibles para realizar esta transacción.",
 			"unknown_destination": "No has interactuado con esta dirección antes. Por favor, asegúrate de que conoces al destinatario.",
-			"fee_info": "La comisión se pagará en $feeSymbol. Disponible: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "La comisión se pagará en $feeSymbol. Disponible: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Dirección de destino inválida",

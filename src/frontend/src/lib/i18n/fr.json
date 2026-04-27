@@ -944,7 +944,8 @@
 			"pending_bitcoin_transaction": "Vous pourrez envoyer une autre transaction Bitcoin une fois celle en attente terminée.",
 			"no_available_utxos": "Vous n'aurez pas d'utxos disponibles pour effectuer cette transaction.",
 			"unknown_destination": "Vous n'avez pas interagi avec cette adresse auparavant. Veuillez vous assurer de connaître le destinataire.",
-			"fee_info": "Les frais seront payés en $feeSymbol. Disponible : <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Les frais seront payés en $feeSymbol. Disponible : <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Adresse de destination invalide",
