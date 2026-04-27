@@ -16,7 +16,7 @@ import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
 import { icPunksTokens } from '$icp/derived/icpunks.derived';
-import { icrcChainFusionDefaultTokens, icrcTokens } from '$icp/derived/icrc.derived';
+import { icrcTokens } from '$icp/derived/icrc.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
@@ -85,8 +85,8 @@ export const tokens: Readable<Token[]> = derivedMemo(
 );
 
 export const tokensToPin: Readable<TokenToPin[]> = derived(
-	[icrcChainFusionDefaultTokens, enabledEvmTokens],
-	([$icrcChainFusionDefaultTokens, $enabledEvmTokens]) => [
+	[enabledEvmTokens],
+	([$enabledEvmTokens]) => [
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
@@ -94,7 +94,6 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		BNB_MAINNET_TOKEN,
 		POL_MAINNET_TOKEN,
 		SOLANA_TOKEN,
-		...$icrcChainFusionDefaultTokens,
 		...$enabledEvmTokens
 	]
 );
