@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Theme, themeStore } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
@@ -119,29 +120,36 @@
 
 	let isVeurToken = $derived(nonNullish($pageToken) && isVEURTokenUtil($pageToken));
 
+	let isIcpHero = $derived($networkICP && !isGLDTToken);
+
+	let isDarkTheme = $derived($themeStore === Theme.DARK);
+
 	let isGradientToRight = $derived($networkSolana && !isTrumpToken);
 
 	let isGradientToBottomRight = $derived(isGLDTToken || $networkBsc);
 
-	let rateChangeBackground = $derived(
-		$networkICP ||
-			$networkBase ||
-			$networkPolygon ||
-			$networkArbitrum ||
-			isTrumpToken ||
-			isVeurToken
+	let rateChangeBackground = $derived.by(() => {
+		if (isIcpHero) {
+			return isDarkTheme ? ('dark' as const) : ('light' as const);
+		}
+
+		return $networkBase || $networkPolygon || $networkArbitrum || isTrumpToken || isVeurToken
 			? ('dark' as const)
-			: ('light' as const)
-	);
+			: ('light' as const);
+	});
+
 </script>
 
 <div
-	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center text-primary-inverted transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5"
+	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5"
+	class:text-primary={isIcpHero}
+	class:text-primary-inverted={!isIcpHero}
 	class:bg-center={isVeurToken}
 	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
 	class:bg-gradient-to-r={isGradientToRight}
+	class:bg-icp-token-hero-gradient={isIcpHero}
 	class:bg-linear-105={isGradientToBottomRight}
-	class:bg-linear-to-b={!isGradientToRight && !isGradientToBottomRight}
+	class:bg-linear-to-b={!isIcpHero && !isGradientToRight && !isGradientToBottomRight}
 	class:bg-pos-100={!$pseudoNetworkChainFusion}
 	class:bg-size-200={!isTrumpToken}
 	class:bg-top-right={isVchfToken}
@@ -155,7 +163,6 @@
 	class:from-default-0={$pseudoNetworkChainFusion}
 	class:from-eth-0={$networkEthereum}
 	class:from-gold-0={isGLDTToken}
-	class:from-icp-0={$networkICP && !isGLDTToken}
 	class:from-polygon-0={$networkPolygon}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:from-trump-0={isTrumpToken}
@@ -166,7 +173,6 @@
 	class:to-default-100={$pseudoNetworkChainFusion}
 	class:to-eth-100={$networkEthereum}
 	class:to-gold-100={isGLDTToken}
-	class:to-icp-100={$networkICP && !isGLDTToken}
 	class:to-polygon-100={$networkPolygon}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:to-trump-100={isTrumpToken}
