@@ -205,7 +205,7 @@ export interface GetQuoteParams extends QuoteParams<'all'> {
 
 export interface EvmQuoteParams {
 	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
+	destinationToken: Erc20Token | IcToken;
 	amount: bigint;
 	userAddress: OptionEthAddress;
 	slippage: Slippage;
