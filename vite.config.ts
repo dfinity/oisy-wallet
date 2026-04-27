@@ -31,7 +31,10 @@ const config: UserConfig = {
 			// so we explicitly point it at the CSS entry shipped by tailwindcss v4.
 			// Use an exact-match regex so JS subpath imports like
 			// `tailwindcss/defaultTheme` keep going through normal resolution.
-			{ find: /^tailwindcss$/, replacement: resolve(projectRoot, 'node_modules/tailwindcss/index.css') }
+			{
+				find: /^tailwindcss$/,
+				replacement: resolve(projectRoot, 'node_modules/tailwindcss/index.css')
+			}
 		]
 	},
 	build: {
