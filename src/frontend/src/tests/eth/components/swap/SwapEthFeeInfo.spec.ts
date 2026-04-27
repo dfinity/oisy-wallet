@@ -23,7 +23,7 @@ describe('SwapEthFeeInfo', () => {
 	it('does not render the info message if fee symbol is the same as swap token symbol', () => {
 		const { getByTestId } = render(SwapEthFeeInfo, {
 			props,
-			context: mockContext({ sourceToken: ETHEREUM_TOKEN as Erc20Token })
+			context: mockContext({ sourceToken: ETHEREUM_TOKEN })
 		});
 
 		expect(() => getByTestId(SWAP_FEE_INFO)).toThrow();

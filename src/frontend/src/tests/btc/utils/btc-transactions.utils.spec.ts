@@ -109,7 +109,7 @@ describe('mapBtcTransaction', () => {
 		const transaction = {
 			...sendTransaction,
 			block_index: mockBtcTransactionUi.blockNumber
-		} as BitcoinTransaction;
+		};
 		const result = mapBtcTransaction({
 			transaction,
 			btcAddress: mockBtcAddress,
@@ -133,7 +133,7 @@ describe('mapBtcTransaction', () => {
 		const transaction = {
 			...sendTransaction,
 			block_index: mockBtcTransactionUi.blockNumber
-		} as BitcoinTransaction;
+		};
 		const result = mapBtcTransaction({
 			transaction,
 			btcAddress: mockBtcAddress,
@@ -180,7 +180,7 @@ describe('mapBtcTransaction', () => {
 					value: 43_955
 				}
 			]
-		} as BitcoinTransaction;
+		};
 		const result = mapBtcTransaction({
 			transaction,
 			btcAddress: mockBtcAddress,

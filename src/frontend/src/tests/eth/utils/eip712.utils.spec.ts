@@ -291,7 +291,7 @@ describe('EIP - 712 utils methods', () => {
 			vi.spyOn(TypedDataEncoder, 'hash').mockReturnValue(expectedHash);
 			vi.spyOn(Signature, 'from').mockReturnValue({
 				compactSerialized: expectedCompactSignature
-			} as Signature);
+			});
 
 			const hash = getSignParamsEIP712(orderData);
 			const compactSig = getCompactSignature(signatureString);

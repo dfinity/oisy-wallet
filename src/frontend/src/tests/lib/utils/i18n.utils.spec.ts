@@ -158,7 +158,7 @@ describe('i18n-utils', () => {
 
 			const result = mergeWithFallback({
 				refLang: mockEnglishTranslations as unknown as I18n,
-				targetLang: brokenTarget as unknown as I18n
+				targetLang: brokenTarget
 			});
 
 			expect((result as unknown as MockI18n).nested).toEqual(mockEnglishTranslations.nested);

@@ -245,7 +245,7 @@ export const fetchSolTransactionsForSignature = async ({
 									...newTransaction,
 									id: `${newTransaction.id}-self`,
 									type: newTransaction.type === 'send' ? 'receive' : 'send'
-								} as SolTransactionUi
+								}
 							]
 						: [])
 				],

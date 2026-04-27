@@ -10,7 +10,7 @@ describe('blockchain.rest', () => {
 					ok: true,
 					json: () => Promise.resolve(mockBlockchainResponse)
 				})
-			) as unknown as typeof fetch;
+			);
 		});
 
 		it('fetches BTC address data with cors=true', async () => {
@@ -29,7 +29,7 @@ describe('blockchain.rest', () => {
 					ok: false,
 					json: () => Promise.resolve({ error: 'Not Found' })
 				})
-			) as unknown as typeof fetch;
+			);
 
 			await expect(btcAddressData({ btcAddress: mockBtcAddress })).rejects.toThrow(
 				'Blockchain API response not ok.'

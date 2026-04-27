@@ -122,7 +122,7 @@ describe('nft-transfer.services', () => {
 			vi.spyOn(providersMod, 'infuraProviders').mockReturnValue({
 				getTransactionCount,
 				sendTransaction
-			} as unknown as InfuraProvider);
+			});
 
 			const signTransactionSpy = vi
 				.spyOn(signerApi, 'signTransaction')
@@ -186,7 +186,7 @@ describe('nft-transfer.services', () => {
 			vi.spyOn(providersMod, 'infuraProviders').mockReturnValue({
 				getTransactionCount,
 				sendTransaction
-			} as unknown as InfuraProvider);
+			});
 
 			const signTransactionSpy = vi
 				.spyOn(signerApi, 'signTransaction')

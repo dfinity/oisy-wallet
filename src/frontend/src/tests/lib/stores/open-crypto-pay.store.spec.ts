@@ -621,7 +621,7 @@ describe('OpenCryptoPayStore', () => {
 				amountInUSD: sumInUSD - 1,
 				feeInUSD: 1,
 				sumInUSD
-			}) as PayableTokenWithConvertedAmount;
+			});
 
 		const icpToken = buildToken({
 			network: { ...ICP_NETWORK, pay: { openCryptoPay: 'InternetComputer' } },

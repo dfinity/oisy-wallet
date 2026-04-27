@@ -44,7 +44,7 @@ describe('WalletConnectSessionsModal', () => {
 		getActiveSessions: vi.fn(),
 		approveRequest: vi.fn(),
 		disconnect: vi.fn()
-	} as unknown as WalletConnectListener;
+	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -55,7 +55,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({})
-		} as unknown as WalletConnectListener);
+		});
 
 		const { getByText } = render(WalletConnectSessionsModal);
 
@@ -70,7 +70,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
-		} as unknown as WalletConnectListener);
+		});
 
 		const { getByText } = render(WalletConnectSessionsModal);
 
@@ -85,7 +85,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
-		} as unknown as WalletConnectListener);
+		});
 
 		const { getByText } = render(WalletConnectSessionsModal);
 
@@ -108,7 +108,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
-		} as unknown as WalletConnectListener);
+		});
 
 		const { container } = render(WalletConnectSessionsModal);
 
@@ -128,7 +128,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
-		} as unknown as WalletConnectListener);
+		});
 
 		const { container } = render(WalletConnectSessionsModal);
 
@@ -156,7 +156,7 @@ describe('WalletConnectSessionsModal', () => {
 				'topic-1': { ...session1, topic: 'topic-1' },
 				'topic-2': { ...session2, topic: 'topic-2' }
 			})
-		} as unknown as WalletConnectListener);
+		});
 
 		const { getByText } = render(WalletConnectSessionsModal);
 

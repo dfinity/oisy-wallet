@@ -84,7 +84,7 @@ describe('eth-transactions.services', () => {
 					erc20Transactions: mockErcTransactions,
 					erc721Transactions: mockErcTransactions,
 					erc1155Transactions: mockErcTransactions
-				} as unknown as EtherscanProvider);
+				});
 
 				erc721CustomTokensStore.resetAll();
 				erc721CustomTokensStore.setAll([
@@ -299,7 +299,7 @@ describe('eth-transactions.services', () => {
 
 				etherscanProvidersSpy.mockReturnValue({
 					transactions: mockEthTransactionsProvider
-				} as unknown as EtherscanProvider);
+				});
 
 				vi.mocked(loadEthUserTransactions).mockResolvedValue(undefined);
 				vi.mocked(saveEthFinalizedTransactions).mockResolvedValue({ success: true });
@@ -674,7 +674,7 @@ describe('eth-transactions.services', () => {
 
 				etherscanProvidersSpy.mockReturnValue({
 					erc20Transactions: mockErcTransactions
-				} as unknown as EtherscanProvider);
+				});
 
 				erc4626DefaultTokensStore.set([mockValidErc4626Token]);
 			});
@@ -790,7 +790,7 @@ describe('eth-transactions.services', () => {
 
 			etherscanProvidersSpy.mockReturnValue({
 				erc20Transactions: mockErc20Transactions
-			} as unknown as EtherscanProvider);
+			});
 		});
 
 		it('should handle ERC20 token transactions correctly', async () => {

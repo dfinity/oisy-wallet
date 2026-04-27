@@ -122,7 +122,7 @@ describe('LoaderNfts', async () => {
 		alchemyProvidersSpy = vi.spyOn(alchemyProvidersModule, 'alchemyProviders');
 		alchemyProvidersSpy.mockReturnValue({
 			getNftsByOwner: mockGetNftsForOwner
-		} as unknown as AlchemyProvider);
+		});
 
 		extGetTokensByOwnerSpy = vi.spyOn(extTokenApi, 'getTokensByOwner');
 		extGetTokensByOwnerSpy.mockResolvedValue([]);

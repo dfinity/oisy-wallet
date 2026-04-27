@@ -32,7 +32,7 @@ describe('eth-fee-data.services', () => {
 				),
 			safeEstimateGas: async () => await new Promise((resolve) => resolve(ZERO)),
 			estimateGas: async () => await new Promise((resolve) => resolve(ZERO))
-		} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+		});
 	});
 
 	describe('getEthFeeDataWithProvider', () => {
@@ -82,7 +82,7 @@ describe('eth-fee-data.services', () => {
 							maxPriorityFeePerGas: 50n
 						})
 					)
-			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+			});
 
 			InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
 				maxFeePerGas: 12n,
@@ -110,7 +110,7 @@ describe('eth-fee-data.services', () => {
 							maxPriorityFeePerGas: 5n
 						})
 					)
-			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+			});
 
 			InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
 				maxFeePerGas: 12n,
@@ -138,7 +138,7 @@ describe('eth-fee-data.services', () => {
 							maxPriorityFeePerGas: null
 						})
 					)
-			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+			});
 
 			InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
 				maxFeePerGas: 12n,
@@ -166,7 +166,7 @@ describe('eth-fee-data.services', () => {
 							maxPriorityFeePerGas: null
 						})
 					)
-			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+			});
 
 			InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
 				maxFeePerGas: null,

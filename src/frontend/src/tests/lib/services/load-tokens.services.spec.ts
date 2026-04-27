@@ -84,8 +84,8 @@ describe('load-tokens.services', () => {
 		const params: Params = {
 			...loadParams,
 			tokens: mockCustomTokens,
-			filterCustomToken: filterCustomToken as unknown as Params['filterCustomToken'],
-			mapCustomToken: mapCustomToken as unknown as Params['mapCustomToken'],
+			filterCustomToken,
+			mapCustomToken,
 			errorMsg
 		};
 

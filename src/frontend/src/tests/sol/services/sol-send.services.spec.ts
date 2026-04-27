@@ -182,7 +182,7 @@ describe('sol-send.services', () => {
 				);
 			spyCreateAtaInstruction = vi
 				.spyOn(accountServices, 'createAtaInstruction')
-				.mockResolvedValue({ keys: 'mock-ata-creation-instruction' } as unknown as SolInstruction);
+				.mockResolvedValue({ keys: 'mock-ata-creation-instruction' });
 		});
 
 		it('should send SOL successfully', async () => {
@@ -300,7 +300,7 @@ describe('sol-send.services', () => {
 						})
 					)
 				}))
-			} as unknown as Rpc<SolanaRpcApi>);
+			});
 
 			await expect(
 				sendSol({
@@ -350,7 +350,7 @@ describe('sol-send.services', () => {
 						})
 					)
 				}))
-			} as unknown as Rpc<SolanaRpcApi>);
+			});
 
 			await expect(
 				sendSol({
@@ -421,7 +421,7 @@ describe('sol-send.services', () => {
 				getTokenAccountsByOwner: vi.fn(() => ({
 					send: vi.fn(() => Promise.resolve({ value: [{ pubkey: 'different-address' }] }))
 				}))
-			} as unknown as Rpc<SolanaRpcApi>);
+			});
 
 			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrow(
 				`Destination ATA address is different from the calculated one. Destination: different-address, Calculated: ${mockAtaAddress2}`

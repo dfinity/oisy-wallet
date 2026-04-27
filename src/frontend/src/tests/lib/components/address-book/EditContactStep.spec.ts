@@ -216,7 +216,7 @@ describe('EditContactStep', () => {
 				onClose: mockClose,
 				onEdit: mockEdit,
 				onEditAddress: mockEditAddress,
-				onAddAddress: null as unknown as () => void,
+				onAddAddress: null,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
 				onAvatarEdit

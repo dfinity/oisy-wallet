@@ -125,7 +125,7 @@ describe('auth-client.providers', () => {
 		});
 
 		it('should return undefined when the stored delegation is not a string', async () => {
-			vi.mocked(authClientStorage.get).mockResolvedValue({} as unknown as string);
+			vi.mocked(authClientStorage.get).mockResolvedValue({});
 
 			const result = await loadIdentity();
 

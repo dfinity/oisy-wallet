@@ -991,7 +991,7 @@ describe('eth-open-crypto-pay.utils', () => {
 				expect(() =>
 					validateEthEvmTransfer({
 						decodedData,
-						token: tokenWithoutFee as unknown as PayableTokenWithConvertedAmount,
+						token: tokenWithoutFee,
 						amount: 1000000000000000000n,
 						uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
 					})

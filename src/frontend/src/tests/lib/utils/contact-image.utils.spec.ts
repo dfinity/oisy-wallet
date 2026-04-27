@@ -5,7 +5,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 describe('contact-image.utils', () => {
 	const MOCK_IMAGE: ContactImage = {
 		data: new Uint8Array([1, 2, 3]),
-		mime_type: { 'image/png': null } as ImageMimeType
+		mime_type: { 'image/png': null }
 	};
 
 	beforeEach(() => {

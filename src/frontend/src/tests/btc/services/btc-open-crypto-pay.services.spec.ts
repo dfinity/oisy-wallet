@@ -47,7 +47,7 @@ describe('btc-open-crypto-pay.services', () => {
 				subscribe: readable(storeValue).subscribe,
 				setFeeRateFromPercentiles: vi.fn(),
 				reset: vi.fn()
-			} as unknown as FeeRatePercentilesStore);
+			});
 		};
 
 		const mockUtxosStore = (utxos: BitcoinDid.utxo[] | undefined) => {
@@ -56,7 +56,7 @@ describe('btc-open-crypto-pay.services', () => {
 				subscribe: readable(storeValue).subscribe,
 				setAllUtxos: vi.fn(),
 				reset: vi.fn()
-			} as unknown as AllUtxosStore);
+			});
 		};
 
 		const baseToken: PayableToken = {

@@ -120,7 +120,7 @@ describe('erc1155.services', () => {
 
 			alchemyProvidersSpy.mockReturnValue({
 				getContractMetadata: mockMetadata
-			} as unknown as AlchemyProvider);
+			});
 		});
 
 		it('should save the custom tokens in the store', async () => {

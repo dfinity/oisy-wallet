@@ -96,7 +96,7 @@ describe('EthSendTokenWizard.spec', () => {
 			minGasFee: readable(undefined)
 		}));
 
-		vi.spyOn(sendServices, 'send').mockResolvedValue({} as TransactionResponse);
+		vi.spyOn(sendServices, 'send').mockResolvedValue({});
 		vi.spyOn(nftSendServices, 'sendNft').mockResolvedValue(undefined);
 	});
 

@@ -68,7 +68,7 @@ describe('_worker.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
+			vi.stubGlobal('Worker', MockWorker);
 
 			vi.stubGlobal('crypto', {
 				randomUUID: vi.fn().mockReturnValueOnce(mockId).mockReturnValueOnce('0000')

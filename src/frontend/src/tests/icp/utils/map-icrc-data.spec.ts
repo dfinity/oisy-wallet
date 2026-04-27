@@ -32,7 +32,7 @@ describe('mapIcrcData', () => {
 			vi.resetAllMocks();
 
 			envs.forEach(({ env: e }) => {
-				vi.spyOn(appConstants, e as keyof typeof appConstants, 'get').mockImplementation(
+				vi.spyOn(appConstants, e, 'get').mockImplementation(
 					() => false
 				);
 			});

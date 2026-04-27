@@ -250,14 +250,14 @@ describe('icp-swap.services', () => {
 			vi.mocked(poolApi.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: 'token0', standard: 'icrc' },
 				token1: { address: 'token1', standard: 'icrc' }
-			} as PoolMetadata);
+			});
 
 			vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: 1n, balance1: ZERO });
 
 			vi.spyOn(swapUtils, 'getWithdrawableToken').mockReturnValueOnce({
 				ledgerCanisterId: 'ledger-0',
 				fee: ZERO
-			} as unknown as IcTokenToggleable);
+			});
 
 			vi.mocked(withdraw).mockResolvedValueOnce(1n);
 
@@ -280,14 +280,14 @@ describe('icp-swap.services', () => {
 			vi.mocked(poolApi.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: 'token0', standard: 'icrc' },
 				token1: { address: 'token1', standard: 'icrc' }
-			} as PoolMetadata);
+			});
 
 			vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: ZERO, balance1: 1n });
 
 			vi.spyOn(swapUtils, 'getWithdrawableToken').mockReturnValueOnce({
 				ledgerCanisterId: 'ledger-1',
 				fee: ZERO
-			} as unknown as IcTokenToggleable);
+			});
 
 			vi.mocked(withdraw).mockResolvedValueOnce(1n);
 
@@ -310,7 +310,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(poolApi.getPoolMetadata).mockResolvedValueOnce({
 				token0: { address: 'token0', standard: 'icrc' },
 				token1: { address: 'token1', standard: 'icrc' }
-			} as PoolMetadata);
+			});
 
 			vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: 1n, balance1: 1n });
 

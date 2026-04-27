@@ -9,7 +9,7 @@ dotenv.config({
 });
 
 dotenv.populate(
-	process.env as DotenvPopulateInput,
+	process.env,
 	readCanisterIds({
 		filePath: join(process.cwd(), 'canister_e2e_ids.json'),
 		prefix: 'E2E_'

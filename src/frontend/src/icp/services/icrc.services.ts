@@ -183,7 +183,7 @@ const loadCustomIcrcTokensData = async ({
 
 		const {
 			Icrc: { ledger_id, index_id }
-		} = token as { Icrc: IcrcToken };
+		} = token;
 
 		const indexCanisterId = fromNullable(index_id);
 

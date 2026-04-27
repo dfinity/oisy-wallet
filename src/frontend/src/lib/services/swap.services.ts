@@ -152,7 +152,7 @@ const enableSwapDestinationToken = async ({
 					enabled: true,
 					chainId: destinationToken.network.chainId,
 					networkKey: 'Erc20'
-				} as SaveCustomTokenWithKey),
+				}),
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
@@ -168,7 +168,7 @@ const enableSwapDestinationToken = async ({
 					...destinationToken,
 					enabled: true,
 					networkKey: isNetworkIdSOLDevnet(destinationToken.network.id) ? 'SplDevnet' : 'SplMainnet'
-				} as SaveCustomTokenWithKey),
+				}),
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
@@ -1244,7 +1244,7 @@ export const fetchVeloraMarketSwap = async ({
 		destToken: geSwapEthTokenAddress(destinationToken),
 		srcAmount: swapDetails.srcAmount,
 		slippage: Number(slippageValue) * 100,
-		priceRoute: swapDetails as OptimalRate,
+		priceRoute: swapDetails,
 		userAddress,
 		partner: OISY_URL_HOSTNAME
 	});

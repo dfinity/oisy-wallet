@@ -209,7 +209,7 @@ describe('erc4626.services', () => {
 			infuraProvidersSpy.mockReturnValue({
 				metadata: mockMetadataFn,
 				getAssetAddress: mockGetAssetAddress
-			} as unknown as InfuraErc4626Provider);
+			});
 		});
 
 		describe('loadErc4626Tokens', () => {

@@ -94,13 +94,13 @@ describe('eth-user-transactions.services', () => {
 		etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
 		etherscanProvidersSpy.mockReturnValue({
 			transactions: mockTransactionsProvider
-		} as unknown as EtherscanProvider);
+		});
 
 		mockGetBlockNumber = vi.fn().mockResolvedValue(MOCK_LATEST_BLOCK_NUMBER);
 		infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraProviders');
 		infuraProvidersSpy.mockReturnValue({
 			getBlockNumber: mockGetBlockNumber
-		} as unknown as InfuraProvider);
+		});
 	});
 
 	describe('loadEthUserTransactions', () => {

@@ -72,11 +72,11 @@ describe('infura-erc20.providers', () => {
 				mockSymbol.mockResolvedValue('mock-symbol');
 				mockDecimals.mockResolvedValue('18');
 
-				mockContract.prototype.name = mockName as unknown as typeof mockContract.prototype.name;
+				mockContract.prototype.name = mockName;
 				mockContract.prototype.symbol =
-					mockSymbol as unknown as typeof mockContract.prototype.symbol;
+					mockSymbol;
 				mockContract.prototype.decimals =
-					mockDecimals as unknown as typeof mockContract.prototype.decimals;
+					mockDecimals;
 			});
 
 			it('should return the fetched metadata', async () => {
@@ -134,7 +134,7 @@ describe('infura-erc20.providers', () => {
 				mockBalanceOf.mockResolvedValue(123456n);
 
 				mockContract.prototype.balanceOf =
-					mockBalanceOf as unknown as typeof mockContract.prototype.balanceOf;
+					mockBalanceOf;
 			});
 
 			it('should return the fetched balance', async () => {
@@ -437,7 +437,7 @@ describe('infura-erc20.providers', () => {
 				mockAllowance.mockResolvedValue(123456n);
 
 				mockContract.prototype.allowance =
-					mockAllowance as unknown as typeof mockContract.prototype.allowance;
+					mockAllowance;
 			});
 
 			it('should return the fetched allowance', async () => {
@@ -489,7 +489,7 @@ describe('infura-erc20.providers', () => {
 				mockDecimals.mockResolvedValue('18');
 
 				mockContract.prototype.decimals =
-					mockDecimals as unknown as typeof mockContract.prototype.decimals;
+					mockDecimals;
 			});
 
 			it('should return true if contract is erc20', async () => {
@@ -540,11 +540,11 @@ describe('infura-erc20.providers', () => {
 				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				mockContract.prototype.nonces =
-					mockNonces as unknown as typeof mockContract.prototype.nonces;
+					mockNonces;
 				mockContract.prototype.DOMAIN_SEPARATOR =
-					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+					mockDomainSeparator;
 				mockContract.prototype.version =
-					mockVersion as unknown as typeof mockContract.prototype.version;
+					mockVersion;
 
 				const provider = new InfuraErc20Provider('sepolia');
 				const result = await provider.isErc20SupportsPermit({
@@ -563,11 +563,11 @@ describe('infura-erc20.providers', () => {
 				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				mockContract.prototype.nonces =
-					mockNonces as unknown as typeof mockContract.prototype.nonces;
+					mockNonces;
 				mockContract.prototype.DOMAIN_SEPARATOR =
-					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+					mockDomainSeparator;
 				mockContract.prototype.version =
-					mockVersion as unknown as typeof mockContract.prototype.version;
+					mockVersion;
 
 				const provider = new InfuraErc20Provider('sepolia');
 				const result = await provider.isErc20SupportsPermit({
@@ -585,11 +585,11 @@ describe('infura-erc20.providers', () => {
 				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				mockContract.prototype.nonces =
-					mockNonces as unknown as typeof mockContract.prototype.nonces;
+					mockNonces;
 				mockContract.prototype.DOMAIN_SEPARATOR =
-					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+					mockDomainSeparator;
 				mockContract.prototype.version =
-					mockVersion as unknown as typeof mockContract.prototype.version;
+					mockVersion;
 
 				const provider = new InfuraErc20Provider('sepolia');
 				const result = await provider.isErc20SupportsPermit({
@@ -609,11 +609,11 @@ describe('infura-erc20.providers', () => {
 				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				mockContract.prototype.nonces =
-					mockNonces as unknown as typeof mockContract.prototype.nonces;
+					mockNonces;
 				mockContract.prototype.DOMAIN_SEPARATOR =
-					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+					mockDomainSeparator;
 				mockContract.prototype.version =
-					mockVersion as unknown as typeof mockContract.prototype.version;
+					mockVersion;
 
 				const provider = new InfuraErc20Provider('sepolia');
 				const result = await provider.isErc20SupportsPermit({
@@ -630,11 +630,11 @@ describe('infura-erc20.providers', () => {
 				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				mockContract.prototype.nonces =
-					mockNonces as unknown as typeof mockContract.prototype.nonces;
+					mockNonces;
 				mockContract.prototype.DOMAIN_SEPARATOR =
-					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+					mockDomainSeparator;
 				mockContract.prototype.version =
-					mockVersion as unknown as typeof mockContract.prototype.version;
+					mockVersion;
 
 				const provider = new InfuraErc20Provider('sepolia');
 				await provider.isErc20SupportsPermit({
