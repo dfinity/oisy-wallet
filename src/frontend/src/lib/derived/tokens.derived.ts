@@ -90,8 +90,9 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		// Native EVM tokens (e.g. BNB, POL) also appear inside `$enabledEvmTokens`.
 		// Dedupe by id so the explicit pin order above wins over the later occurrence,
 		// which would otherwise overwrite the pin index in the comparator's Map.
+		const result: TokenToPin[] = [];
 		const seen = new Set<TokenToPin['id']>();
-		return [
+		for (const token of [
 			BTC_MAINNET_TOKEN,
 			ETHEREUM_TOKEN,
 			ICP_TOKEN,
@@ -100,7 +101,13 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 			POL_MAINNET_TOKEN,
 			SOLANA_TOKEN,
 			...$enabledEvmTokens
-		].filter(({ id }) => (seen.has(id) ? false : (seen.add(id), true)));
+		]) {
+			if (!seen.has(token.id)) {
+				seen.add(token.id);
+				result.push(token);
+			}
+		}
+		return result;
 	}
 );
 
