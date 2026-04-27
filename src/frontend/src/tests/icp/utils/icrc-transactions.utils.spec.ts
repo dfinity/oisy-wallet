@@ -1,4 +1,5 @@
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import type { IcrcTransaction } from '$icp/types/ic-transaction';
 import {
 	createMockIcrcBurnTransaction,
 	createMockIcrcMintTransaction,
@@ -12,7 +13,7 @@ const mockTimestamp = 1_700_000_000_000_000_000n;
 const createMockIcrcApproveTransaction = ({
 	id = 400n,
 	memo
-}: { id?: bigint; memo?: Uint8Array } = {}) => ({
+}: { id?: bigint; memo?: Uint8Array } = {}): IcrcTransaction => ({
 	id,
 	transaction: {
 		kind: 'approve',
@@ -120,7 +121,7 @@ describe('mapIcrcTransaction', () => {
 			const bytes = new TextEncoder().encode(text);
 			const tx = createMockIcrcApproveTransaction({ memo: bytes });
 			const result = mapIcrcTransaction({
-				transaction: tx as never,
+				transaction: tx,
 				identity: mockIdentity
 			});
 
@@ -130,7 +131,7 @@ describe('mapIcrcTransaction', () => {
 		it('should not include memo when memo is empty on an Approve', () => {
 			const tx = createMockIcrcApproveTransaction();
 			const result = mapIcrcTransaction({
-				transaction: tx as never,
+				transaction: tx,
 				identity: mockIdentity
 			});
 
