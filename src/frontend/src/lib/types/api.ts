@@ -4,6 +4,7 @@ import type {
 	TokenId as BackendTokenId,
 	Network as BitcoinNetwork,
 	Contact,
+	CreateUserProfileError,
 	DismissedNotification,
 	GetUserProfileError,
 	IIDelegationChain,
@@ -32,6 +33,8 @@ import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
+
+export type CreateUserProfileResponse = { Ok: UserProfile } | { Err: CreateUserProfileError };
 
 export interface RateLimitInfo {
 	endpoint: string;

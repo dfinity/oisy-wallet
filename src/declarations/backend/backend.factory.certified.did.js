@@ -358,6 +358,11 @@ export const idlFactory = ({ IDL }) => {
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});
+	const CreateUserProfileError = IDL.Variant({ SignupsClosed: IDL.Null });
+	const CreateUserProfileResult = IDL.Variant({
+		Ok: UserProfile,
+		Err: CreateUserProfileError
+	});
 	const DeleteContactResult = IDL.Variant({
 		Ok: IDL.Nat64,
 		Err: ContactError
@@ -683,7 +688,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		config: IDL.Func([], [Config]),
 		create_contact: IDL.Func([CreateContactRequest], [CreateContactResult], []),
-		create_user_profile: IDL.Func([], [UserProfile], []),
+		create_user_profile: IDL.Func([], [CreateUserProfileResult], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
 		get_account_creation_timestamps: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))]),
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
