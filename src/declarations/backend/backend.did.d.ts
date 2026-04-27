@@ -481,6 +481,12 @@ export interface Config {
 	 * Root of trust for checking canister signatures.
 	 */
 	ic_root_key_raw: [] | [Uint8Array];
+	/**
+	 * Whether sign-ups of new users (i.e. new user profiles) are allowed.
+	 *
+	 * `None` is treated as "allowed" (the default), ensuring backward compatibility with
+	 * config payloads persisted before this field existed.
+	 */
 	new_user_signups_allowed: [] | [boolean];
 }
 export interface Contact {
@@ -513,9 +519,43 @@ export interface CreateContactRequest {
 	name: string;
 	image: [] | [ContactImage];
 }
-export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export type CreateUserProfileError = { SignupsClosed: null };
-export type CreateUserProfileResult = { Ok: UserProfile } | { Err: CreateUserProfileError };
+export type CreateContactResult =
+	| {
+			/**
+			 * The contact was retrieved successfully.
+			 */
+			Ok: Contact;
+	  }
+	| {
+			/**
+			 * The contact could not be created due to an error
+			 */
+			Err: ContactError;
+	  };
+export type CreateUserProfileError = {
+	/**
+	 * Sign-ups of new users are currently disabled on the backend. Callers that already have a
+	 * profile are unaffected; this variant is only returned for principals without an existing
+	 * profile.
+	 */
+	SignupsClosed: null;
+};
+export type CreateUserProfileResult =
+	| {
+			/**
+			 * The user's profile was created (or already existed) and is returned.
+			 */
+			Ok: UserProfile;
+	  }
+	| {
+			/**
+			 * The profile could not be created due to an error.
+			 */
+			Err: CreateUserProfileError;
+	  };
+/**
+ * User preferences for any token
+ */
 export interface CustomToken {
 	token: Token;
 	allow_external_content_source: [] | [boolean];
@@ -902,6 +942,15 @@ export interface InitArg {
 	 * Root of trust for checking canister signatures.
 	 */
 	ic_root_key_der: [] | [Uint8Array];
+	/**
+	 * Whether sign-ups of new users (i.e. new user profiles) are allowed.
+	 *
+	 * When `Some(false)`, `create_user_profile` rejects callers that do not already have a
+	 * profile with `CreateUserProfileError::SignupsClosed`. Existing users are unaffected.
+	 *
+	 * `None` is treated as "allowed" (the default), ensuring backward compatibility with
+	 * deployments that pre-date this field.
+	 */
 	new_user_signups_allowed: [] | [boolean];
 }
 /**
