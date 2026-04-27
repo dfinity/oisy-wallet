@@ -1431,6 +1431,32 @@ describe('swap.services', () => {
 			exchangeStore.reset();
 		});
 
+		it('returns undefined without calling the SDK when userAddress is nullish', async () => {
+			const result = await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress: null,
+				slippage
+			});
+
+			expect(result).toBeUndefined();
+			expect(constructSimpleSDK).not.toHaveBeenCalled();
+		});
+
+		it('returns undefined without calling the SDK when destination is not an EVM network', async () => {
+			const result = await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken: mockValidIcToken as unknown as Erc20Token,
+				amount,
+				userAddress,
+				slippage
+			});
+
+			expect(result).toBeUndefined();
+			expect(constructSimpleSDK).not.toHaveBeenCalled();
+		});
+
 		it('should track SWAP_OFFER with delta event type on successful delta quote', async () => {
 			mockGetQuote.mockResolvedValue({
 				delta: {
