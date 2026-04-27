@@ -1,3 +1,4 @@
+import type { Erc20Token } from '$eth/types/erc20';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import { SWAP_MODE, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
@@ -10,6 +11,7 @@ import {
 	type SwapMappedResult
 } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
+import { isNetworkEthereum } from '$lib/utils/network.utils';
 import {
 	geSwapEthTokenAddress,
 	mapVeloraMarketSwapResult,
@@ -25,13 +27,15 @@ export const fetchVeloraSwapAmount = async ({
 	amount,
 	userAddress
 }: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
-	if (isNullish(userAddress)) {
+	if (isNullish(userAddress) || !isNetworkEthereum(destinationToken.network)) {
 		return;
 	}
 
+	const erc20DestinationToken = destinationToken as Erc20Token;
+
 	const {
 		network: { chainId: destChainId }
-	} = destinationToken;
+	} = erc20DestinationToken;
 
 	const {
 		network: { chainId: srcChainId }
@@ -45,7 +49,7 @@ export const fetchVeloraSwapAmount = async ({
 	const baseParams: GetQuoteParams = {
 		amount: `${amount}`,
 		srcToken: geSwapEthTokenAddress(sourceToken),
-		destToken: geSwapEthTokenAddress(destinationToken),
+		destToken: geSwapEthTokenAddress(erc20DestinationToken),
 		srcDecimals: sourceToken.decimals,
 		destDecimals: destinationToken.decimals,
 		mode: SWAP_MODE,
@@ -71,7 +75,7 @@ export const fetchVeloraSwapAmount = async ({
 		token_id: String(sourceToken.id),
 		token2_symbol: destinationToken.symbol,
 		token2_network: destinationToken.network.name,
-		token2_address: destinationToken.address,
+		token2_address: erc20DestinationToken.address,
 		token2_name: destinationToken.name,
 		token2_standard: destinationToken.standard.code,
 		token2_id: String(destinationToken.id),
