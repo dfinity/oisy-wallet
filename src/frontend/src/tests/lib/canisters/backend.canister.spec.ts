@@ -2,17 +2,13 @@ import type {
 	AllowSigningResponse,
 	AllowSigningResult,
 	_SERVICE as BackendService,
-	BtcAddPendingTransactionResult,
-	BtcGetPendingTransactionsResult,
-	BtcSelectUserUtxosFeeResult,
 	CustomToken,
-	IcrcToken,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
-import type { BtcAddPendingTransactionParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
+import type { BtcAddPendingTransactionParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
@@ -367,9 +363,7 @@ describe('backend.canister', () => {
 				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
 			};
 
-			service.btc_add_pending_transaction.mockResolvedValue(
-				response
-			);
+			service.btc_add_pending_transaction.mockResolvedValue(response);
 
 			const { btcAddPendingTransaction } = await createBackendCanister({
 				serviceOverride: service
@@ -394,9 +388,7 @@ describe('backend.canister', () => {
 				Err: { InvalidDelegationChain: { msg: 'chain expired' } }
 			};
 
-			service.btc_add_pending_transaction.mockResolvedValue(
-				response
-			);
+			service.btc_add_pending_transaction.mockResolvedValue(response);
 
 			const { btcAddPendingTransaction } = await createBackendCanister({
 				serviceOverride: service
@@ -482,9 +474,7 @@ describe('backend.canister', () => {
 				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
 			};
 
-			service.btc_get_pending_transactions.mockResolvedValue(
-				response
-			);
+			service.btc_get_pending_transactions.mockResolvedValue(response);
 
 			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
@@ -509,9 +499,7 @@ describe('backend.canister', () => {
 				Err: { InvalidDelegationChain: { msg: 'chain expired' } }
 			};
 
-			service.btc_get_pending_transactions.mockResolvedValue(
-				response
-			);
+			service.btc_get_pending_transactions.mockResolvedValue(response);
 
 			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
@@ -624,9 +612,7 @@ describe('backend.canister', () => {
 				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
 			};
 
-			service.btc_select_user_utxos_fee.mockResolvedValue(
-				response
-			);
+			service.btc_select_user_utxos_fee.mockResolvedValue(response);
 
 			const { btcSelectUserUtxosFee } = await createBackendCanister({
 				serviceOverride: service
@@ -654,9 +640,7 @@ describe('backend.canister', () => {
 				Err: { InvalidDelegationChain: { msg: 'unknown canister' } }
 			};
 
-			service.btc_select_user_utxos_fee.mockResolvedValue(
-				response
-			);
+			service.btc_select_user_utxos_fee.mockResolvedValue(response);
 
 			const { btcSelectUserUtxosFee } = await createBackendCanister({
 				serviceOverride: service

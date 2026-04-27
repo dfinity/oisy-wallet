@@ -28,5 +28,4 @@ export const mapDip20Transaction = ({
 }: {
 	transaction: Dip20Transaction;
 	identity: NullishIdentity;
-}): IcTransactionUi =>
-	({ id: id.toString(), type: 'approve', status: 'executed' });
+}): IcTransactionUi => ({ id: id.toString(), type: 'approve', status: 'executed' });

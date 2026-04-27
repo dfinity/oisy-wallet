@@ -1,9 +1,7 @@
 import { calculateBtcFee, payBtc } from '$btc/services/btc-open-crypto-pay.services';
 import * as btcSendServices from '$btc/services/btc-send.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
-import type { AllUtxosStore } from '$btc/stores/all-utxos.store';
 import * as allUtxosStoreLib from '$btc/stores/all-utxos.store';
-import type { FeeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import * as feeRatePercentilesStoreLib from '$btc/stores/fee-rate-percentiles.store';
 import type { OptionBtcAddress } from '$btc/types/address';
 import type { UtxosFee } from '$btc/types/btc-send';

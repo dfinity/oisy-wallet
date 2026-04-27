@@ -1,6 +1,6 @@
 import { notEmptyString } from '@dfinity/utils';
 import { defineConfig, devices } from '@playwright/test';
-import dotenv, { type DotenvPopulateInput } from 'dotenv';
+import dotenv from 'dotenv';
 import { join } from 'node:path';
 import { readCanisterIds } from './env.utils';
 

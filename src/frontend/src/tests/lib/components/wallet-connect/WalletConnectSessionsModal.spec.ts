@@ -1,6 +1,5 @@
 import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
 import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
-import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import type { SessionTypes } from '@walletconnect/types';

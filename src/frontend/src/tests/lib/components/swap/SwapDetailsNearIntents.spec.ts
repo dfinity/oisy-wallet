@@ -1,5 +1,4 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.svelte';
 import * as userProviderAgreementsDerived from '$lib/derived/user-provider-agreements.derived';
 import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';

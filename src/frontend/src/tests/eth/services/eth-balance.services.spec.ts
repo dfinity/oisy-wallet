@@ -187,8 +187,7 @@ describe('eth-balance.services', () => {
 
 			vi.spyOn(infuraErc20ProvidersLib, 'infuraErc20Providers');
 
-			mockContract.prototype.balanceOf =
-				mockGetBalance;
+			mockContract.prototype.balanceOf = mockGetBalance;
 			mockGetBalance.mockResolvedValue(mockBalance);
 
 			ethAddressStore.reset();
@@ -313,8 +312,7 @@ describe('eth-balance.services', () => {
 			vi.spyOn(infuraErc20ProvidersLib, 'infuraErc20Providers');
 
 			mockProvider.prototype.getBalance = mockGetBalance;
-			mockContract.prototype.balanceOf =
-				mockGetBalance;
+			mockContract.prototype.balanceOf = mockGetBalance;
 			mockGetBalance.mockResolvedValue(mockBalance);
 
 			ethAddressStore.set({ data: mockEthAddress, certified: false });

@@ -9,7 +9,6 @@ import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.provid
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import type { SolAddress } from '$sol/types/address';
-import type { SolInstruction } from '$sol/types/sol-instructions';
 import type { SplToken } from '$sol/types/spl';
 import * as networkUtils from '$sol/utils/safe-network.utils';
 import en from '$tests/mocks/i18n.mock';

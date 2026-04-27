@@ -52,8 +52,7 @@ describe('infura-erc165.providers', () => {
 
 				mockSupportedInterface.mockResolvedValue(true);
 
-				mockContract.prototype.supportsInterface =
-					mockSupportedInterface;
+				mockContract.prototype.supportsInterface = mockSupportedInterface;
 			});
 
 			it.each(Object.entries(Erc165Identifier))(

@@ -3,7 +3,6 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
-import type { InfuraErc4626Provider } from '$eth/providers/infura-erc4626.providers';
 import * as infuraErc4626ProvidersModule from '$eth/providers/infura-erc4626.providers';
 import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProvidersModule from '$eth/providers/infura.providers';

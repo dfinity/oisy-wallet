@@ -58,7 +58,6 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
-import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import type { Amount } from '$lib/types/send';
 import {
@@ -98,12 +97,7 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
-import {
-	constructSimpleSDK,
-	type DeltaAuction,
-	type DeltaPrice,
-	type OptimalRate
-} from '@velora-dex/sdk';
+import { constructSimpleSDK, type DeltaAuction, type DeltaPrice } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
 const checkNeedsApproval = async ({

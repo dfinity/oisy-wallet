@@ -22,7 +22,6 @@ import {
 	stringifiedNumber,
 	type Base58EncodedBytes,
 	type Blockhash,
-	type SignaturesMap,
 	type TransactionMessageBytes,
 	type UnixTimestamp
 } from '@solana/kit';

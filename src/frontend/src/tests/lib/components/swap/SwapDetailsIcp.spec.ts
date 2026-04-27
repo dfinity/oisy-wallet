@@ -1,5 +1,4 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';

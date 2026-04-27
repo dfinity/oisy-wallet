@@ -1,5 +1,4 @@
 import * as agreementsEnv from '$env/agreements.env';
-import type { EnvAgreements } from '$env/types/env-agreements';
 import { MILLISECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import { getAgreementLastUpdated } from '$lib/utils/agreements.utils';
 import { transformAgreementsJsonBigint } from '$lib/utils/env.agreements.utils';
@@ -25,8 +24,8 @@ describe('agreements.utils', () => {
 		beforeEach(() => {
 			vi.restoreAllMocks();
 
-			vi.spyOn(agreementsEnv, 'agreementsData', 'get').mockImplementation(
-				() => transformAgreementsJsonBigint(mock)
+			vi.spyOn(agreementsEnv, 'agreementsData', 'get').mockImplementation(() =>
+				transformAgreementsJsonBigint(mock)
 			);
 		});
 

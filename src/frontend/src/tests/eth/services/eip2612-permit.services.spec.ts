@@ -87,8 +87,7 @@ describe('EIP2612 Permit Services', () => {
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version =
-				mockVersionFn;
+			mockContract.prototype.version = mockVersionFn;
 
 			vi.mocked(Signature.from).mockReturnValue({
 				v: 27,
@@ -113,8 +112,7 @@ describe('EIP2612 Permit Services', () => {
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version =
-				mockVersionFn;
+			mockContract.prototype.version = mockVersionFn;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -142,8 +140,7 @@ describe('EIP2612 Permit Services', () => {
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version =
-				mockVersionFn;
+			mockContract.prototype.version = mockVersionFn;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -173,8 +170,7 @@ describe('EIP2612 Permit Services', () => {
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version =
-				mockVersionFn;
+			mockContract.prototype.version = mockVersionFn;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -210,8 +206,7 @@ describe('EIP2612 Permit Services', () => {
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version =
-				mockVersionFn;
+			mockContract.prototype.version = mockVersionFn;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -250,8 +245,7 @@ describe('EIP2612 Permit Services', () => {
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version =
-				mockVersionFn;
+			mockContract.prototype.version = mockVersionFn;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -281,8 +275,7 @@ describe('EIP2612 Permit Services', () => {
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version =
-				mockVersionFn;
+			mockContract.prototype.version = mockVersionFn;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -309,8 +302,7 @@ describe('EIP2612 Permit Services', () => {
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version =
-				mockVersionFn;
+			mockContract.prototype.version = mockVersionFn;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -339,8 +331,7 @@ describe('EIP2612 Permit Services', () => {
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version =
-				mockVersionFn;
+			mockContract.prototype.version = mockVersionFn;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);

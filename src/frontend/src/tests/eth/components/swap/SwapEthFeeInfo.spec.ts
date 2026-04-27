@@ -1,7 +1,6 @@
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import SwapEthFeeInfo from '$eth/components/swap/SwapEthFeeInfo.svelte';
-import type { Erc20Token } from '$eth/types/erc20';
 import { SWAP_FEE_INFO } from '$lib/constants/test-ids.constants';
 import { SWAP_CONTEXT_KEY, initSwapContext, type SwapData } from '$lib/stores/swap.store';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';

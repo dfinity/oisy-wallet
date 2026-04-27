@@ -182,28 +182,25 @@ describe('ic-transactions.services', () => {
 			icTransactionsStore.reset(mockToken.id);
 
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
-				transactions: mockTransactions.map(
-					(transaction) =>
-						({
-							transaction: {
-								...transaction,
-								memo: ZERO,
-								icrc1_memo: [],
-								operation: {
-									Transfer: {
-										to: transaction.to,
-										fee: { e8s: 456n },
-										from: transaction.from,
-										amount: { e8s: transaction.value },
-										spender: []
-									}
-								},
-								timestamp: toNullable({ timestamp_nanos: transaction.timestamp }),
-								created_at_time: []
-							},
-							id: BigInt(transaction.id)
-						})
-				)
+				transactions: mockTransactions.map((transaction) => ({
+					transaction: {
+						...transaction,
+						memo: ZERO,
+						icrc1_memo: [],
+						operation: {
+							Transfer: {
+								to: transaction.to,
+								fee: { e8s: 456n },
+								from: transaction.from,
+								amount: { e8s: transaction.value },
+								spender: []
+							}
+						},
+						timestamp: toNullable({ timestamp_nanos: transaction.timestamp }),
+						created_at_time: []
+					},
+					id: BigInt(transaction.id)
+				}))
 			});
 		});
 
