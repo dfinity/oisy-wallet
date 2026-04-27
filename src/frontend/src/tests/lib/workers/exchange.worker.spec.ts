@@ -1321,7 +1321,7 @@ describe('exchange.worker', () => {
 
 			it('should post a sync success message and log error when identity is nullish', async () => {
 				const provider = AuthClientProvider.getInstance();
-				vi.mocked(provider.loadIdentity).mockResolvedValue(null);
+				vi.mocked(provider.loadIdentity).mockResolvedValue(null as unknown as undefined);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
 					...createEvent(msg),

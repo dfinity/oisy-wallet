@@ -1,6 +1,6 @@
 import { notEmptyString } from '@dfinity/utils';
 import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
+import dotenv, { type DotenvPopulateInput } from 'dotenv';
 import { join } from 'node:path';
 import { readCanisterIds } from './env.utils';
 
@@ -9,7 +9,7 @@ dotenv.config({
 });
 
 dotenv.populate(
-	process.env,
+	process.env as DotenvPopulateInput,
 	readCanisterIds({
 		filePath: join(process.cwd(), 'canister_e2e_ids.json'),
 		prefix: 'E2E_'

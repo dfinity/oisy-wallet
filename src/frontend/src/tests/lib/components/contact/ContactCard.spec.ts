@@ -249,7 +249,7 @@ describe('ContactCard', () => {
 		expect(infoButtons).toHaveLength(4); // One for each address
 
 		// Click the second info button (BTC address)
-		await fireEvent.click(infoButtons[1]);
+		await fireEvent.click(infoButtons[1] as HTMLElement);
 
 		// Check that onInfo was called with the BTC address index
 		expect(onInfo).toHaveBeenCalledWith(1);

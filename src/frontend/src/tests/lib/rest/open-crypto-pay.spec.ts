@@ -57,7 +57,7 @@ describe('OpenCryptoPay REST client', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => mockApiResponse
-			});
+			} as unknown as Response);
 
 			const validUrl = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 			const result = await fetchOpenCryptoPay(validUrl);
@@ -73,7 +73,7 @@ describe('OpenCryptoPay REST client', () => {
 		it('throws when fetch response is not ok', async () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: false
-			});
+			} as Response);
 
 			const validUrl = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 

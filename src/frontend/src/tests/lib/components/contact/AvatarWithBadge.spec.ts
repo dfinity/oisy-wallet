@@ -1,5 +1,6 @@
 import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 import { AVATAR_WITH_BADGE_FALLBACK_IMAGE } from '$lib/constants/test-ids.constants';
+import type { ContactUi } from '$lib/types/contact';
 import { getMockContactsUi, mockContactIcrcAddressUi } from '$tests/mocks/contacts.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
@@ -13,7 +14,7 @@ describe('AvatarWithBadge', () => {
 					n: 1,
 					name,
 					addresses: [mockContactIcrcAddressUi]
-				})[0]
+				})[0] as unknown as ContactUi
 			}
 		});
 

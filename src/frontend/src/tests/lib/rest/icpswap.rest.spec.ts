@@ -20,7 +20,7 @@ describe('ICPSwap REST client', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve(mockApiResponse)
-			});
+			} as unknown as Response);
 
 			const result = await getIcpSwapTokenById(MOCK_CANISTER_ID_1);
 
@@ -34,7 +34,7 @@ describe('ICPSwap REST client', () => {
 		it('throws when fetch response is not ok', async () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: false
-			});
+			} as Response);
 
 			await expect(getIcpSwapTokenById(MOCK_CANISTER_ID_1)).rejects.toThrow(
 				'Fetching ICPSwap failed.'
@@ -45,7 +45,7 @@ describe('ICPSwap REST client', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve({ code: 200, message: null, data: { invalid: true } })
-			});
+			} as unknown as Response);
 
 			const result = await getIcpSwapTokenById(MOCK_CANISTER_ID_1);
 
@@ -59,11 +59,11 @@ describe('ICPSwap REST client', () => {
 				.mockResolvedValueOnce({
 					ok: true,
 					json: () => Promise.resolve(mockApiResponse)
-				})
+				} as unknown as Response)
 				.mockResolvedValueOnce({
 					ok: true,
 					json: () => Promise.resolve(mockApiResponse)
-				});
+				} as unknown as Response);
 
 			const result = await fetchBatchIcpSwapPrices([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 
@@ -76,10 +76,10 @@ describe('ICPSwap REST client', () => {
 				.mockResolvedValueOnce({
 					ok: true,
 					json: () => Promise.resolve(mockApiResponse)
-				})
+				} as unknown as Response)
 				.mockResolvedValueOnce({
 					ok: false
-				});
+				} as unknown as Response);
 
 			const result = await fetchBatchIcpSwapPrices([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 
@@ -93,7 +93,7 @@ describe('ICPSwap REST client', () => {
 				json: () => {
 					throw new Error('JSON error');
 				}
-			});
+			} as unknown as Response);
 
 			const result = await fetchBatchIcpSwapPrices([MOCK_CANISTER_ID_1]);
 
@@ -105,10 +105,10 @@ describe('ICPSwap REST client', () => {
 			vi.mocked(fetch)
 				.mockResolvedValueOnce({
 					ok: false
-				})
+				} as unknown as Response)
 				.mockResolvedValueOnce({
 					ok: false
-				});
+				} as unknown as Response);
 
 			const result = await fetchBatchIcpSwapPrices([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 
@@ -120,7 +120,7 @@ describe('ICPSwap REST client', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve({ code: 200, message: null, data: null })
-			});
+			} as unknown as Response);
 
 			const result = await fetchBatchIcpSwapPrices([MOCK_CANISTER_ID_1]);
 

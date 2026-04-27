@@ -9,6 +9,7 @@ import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.provid
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import type { SolAddress } from '$sol/types/address';
+import type { SolInstruction } from '$sol/types/sol-instructions';
 import type { SplToken } from '$sol/types/spl';
 import * as networkUtils from '$sol/utils/safe-network.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -181,7 +182,7 @@ describe('sol-send.services', () => {
 				);
 			spyCreateAtaInstruction = vi
 				.spyOn(accountServices, 'createAtaInstruction')
-				.mockResolvedValue({ keys: 'mock-ata-creation-instruction' });
+				.mockResolvedValue({ keys: 'mock-ata-creation-instruction' } as unknown as SolInstruction);
 		});
 
 		it('should send SOL successfully', async () => {
@@ -299,7 +300,7 @@ describe('sol-send.services', () => {
 						})
 					)
 				}))
-			});
+			} as unknown as Rpc<SolanaRpcApi>);
 
 			await expect(
 				sendSol({
@@ -349,7 +350,7 @@ describe('sol-send.services', () => {
 						})
 					)
 				}))
-			});
+			} as unknown as Rpc<SolanaRpcApi>);
 
 			await expect(
 				sendSol({
@@ -420,7 +421,7 @@ describe('sol-send.services', () => {
 				getTokenAccountsByOwner: vi.fn(() => ({
 					send: vi.fn(() => Promise.resolve({ value: [{ pubkey: 'different-address' }] }))
 				}))
-			});
+			} as unknown as Rpc<SolanaRpcApi>);
 
 			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrow(
 				`Destination ATA address is different from the calculated one. Destination: different-address, Calculated: ${mockAtaAddress2}`

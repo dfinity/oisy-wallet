@@ -46,7 +46,7 @@ describe('sol-address.services', () => {
 			decode: vi.fn().mockReturnValue(mockSolAddress),
 			read: vi.fn().mockReturnValue(mockSolAddress)
 		};
-		vi.mocked(getAddressDecoder).mockReturnValue(mockDecoder);
+		vi.mocked(getAddressDecoder).mockReturnValue(mockDecoder as never);
 
 		spyGetSchnorrPublicKey = vi.spyOn(signerApi, 'getSchnorrPublicKey');
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');

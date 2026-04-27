@@ -32,7 +32,7 @@ describe('eth-address.services integration', () => {
 		{ env: 'test_fe_any', checkEnv: (c) => c.STAGING && c.TEST_FE },
 		...Array.from({ length: 6 }, (_, i) => ({
 			env: `test_fe_${i + 1}` as EnvName,
-			checkEnv: (c) => c.STAGING && c.TEST_FE
+			checkEnv: ((c) => c.STAGING && c.TEST_FE) as EnvCheck
 		}))
 	];
 

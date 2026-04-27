@@ -4,6 +4,7 @@ import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN, USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import {
 	loadEthereumTransactions,
@@ -83,7 +84,7 @@ describe('eth-transactions.services', () => {
 					erc20Transactions: mockErcTransactions,
 					erc721Transactions: mockErcTransactions,
 					erc1155Transactions: mockErcTransactions
-				});
+				} as unknown as EtherscanProvider);
 
 				erc721CustomTokensStore.resetAll();
 				erc721CustomTokensStore.setAll([
@@ -298,7 +299,7 @@ describe('eth-transactions.services', () => {
 
 				etherscanProvidersSpy.mockReturnValue({
 					transactions: mockEthTransactionsProvider
-				});
+				} as unknown as EtherscanProvider);
 
 				vi.mocked(loadEthUserTransactions).mockResolvedValue(undefined);
 				vi.mocked(saveEthFinalizedTransactions).mockResolvedValue({ success: true });
@@ -673,7 +674,7 @@ describe('eth-transactions.services', () => {
 
 				etherscanProvidersSpy.mockReturnValue({
 					erc20Transactions: mockErcTransactions
-				});
+				} as unknown as EtherscanProvider);
 
 				erc4626DefaultTokensStore.set([mockValidErc4626Token]);
 			});
@@ -789,7 +790,7 @@ describe('eth-transactions.services', () => {
 
 			etherscanProvidersSpy.mockReturnValue({
 				erc20Transactions: mockErc20Transactions
-			});
+			} as unknown as EtherscanProvider);
 		});
 
 		it('should handle ERC20 token transactions correctly', async () => {

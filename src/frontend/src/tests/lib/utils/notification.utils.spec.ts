@@ -13,7 +13,7 @@ describe('notification.utils', () => {
 		kind: 'BtcActivityInfo';
 		version?: number;
 	}): DismissedNotification => ({
-		Simple: { kind: { [kind]: null }, version }
+		Simple: { kind: { [kind]: null } as { BtcActivityInfo: null }, version }
 	});
 
 	const qualified = ({
@@ -26,7 +26,7 @@ describe('notification.utils', () => {
 		version?: number;
 	}): DismissedNotification => ({
 		Qualified: {
-			kind: { [kind]: null },
+			kind: { [kind]: null } as { NoIndexCanister: null },
 			qualifier,
 			version
 		}

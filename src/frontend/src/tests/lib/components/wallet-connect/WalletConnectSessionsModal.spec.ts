@@ -1,5 +1,6 @@
 import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
 import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import type { SessionTypes } from '@walletconnect/types';
@@ -43,7 +44,7 @@ describe('WalletConnectSessionsModal', () => {
 		getActiveSessions: vi.fn(),
 		approveRequest: vi.fn(),
 		disconnect: vi.fn()
-	};
+	} as unknown as WalletConnectListener;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -54,7 +55,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({})
-		});
+		} as unknown as WalletConnectListener);
 
 		const { getByText } = render(WalletConnectSessionsModal);
 
@@ -69,7 +70,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
-		});
+		} as unknown as WalletConnectListener);
 
 		const { getByText } = render(WalletConnectSessionsModal);
 
@@ -84,7 +85,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
-		});
+		} as unknown as WalletConnectListener);
 
 		const { getByText } = render(WalletConnectSessionsModal);
 
@@ -107,7 +108,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
-		});
+		} as unknown as WalletConnectListener);
 
 		const { container } = render(WalletConnectSessionsModal);
 
@@ -127,7 +128,7 @@ describe('WalletConnectSessionsModal', () => {
 		walletConnectListenerStore.set({
 			...mockListener,
 			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
-		});
+		} as unknown as WalletConnectListener);
 
 		const { container } = render(WalletConnectSessionsModal);
 
@@ -155,7 +156,7 @@ describe('WalletConnectSessionsModal', () => {
 				'topic-1': { ...session1, topic: 'topic-1' },
 				'topic-2': { ...session2, topic: 'topic-2' }
 			})
-		});
+		} as unknown as WalletConnectListener);
 
 		const { getByText } = render(WalletConnectSessionsModal);
 

@@ -6,6 +6,7 @@ import { currentLanguage } from '$lib/derived/i18n.derived';
 import { Languages } from '$lib/enums/languages';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
+import type { TrackEventParams } from '$lib/types/analytics';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -28,7 +29,7 @@ describe('LanguageDropdown', () => {
 		const { container } = render(LanguageDropdown, {});
 
 		expect(container.querySelector('.dropdown-button')).toContainHTML(
-			LANGUAGES[get(currentLanguage)]
+			LANGUAGES[get(currentLanguage) as keyof typeof LANGUAGES]
 		);
 	});
 
@@ -109,6 +110,6 @@ describe('LanguageDropdown', () => {
 				language: Languages.GERMAN,
 				source: 'landing-page'
 			}
-		});
+		} as TrackEventParams);
 	});
 });

@@ -35,7 +35,8 @@ describe('erc4626-exchange.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			mockContract.prototype.convertToAssets = mockConvertToAssets;
+			mockContract.prototype.convertToAssets =
+				mockConvertToAssets as unknown as typeof mockContract.prototype.convertToAssets;
 			mockConvertToAssets.mockResolvedValue(1050000n);
 		});
 

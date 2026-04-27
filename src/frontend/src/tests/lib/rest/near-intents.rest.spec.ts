@@ -26,7 +26,7 @@ describe('near-intents.rest', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve(mockNearIntentsTokens)
-			});
+			} as unknown as Response);
 
 			const result = await fetchNearIntentsTokens();
 
@@ -38,7 +38,7 @@ describe('near-intents.rest', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: false,
 				statusText: 'Internal Server Error'
-			});
+			} as Response);
 
 			await expect(fetchNearIntentsTokens()).rejects.toThrow(
 				'Failed to fetch NEAR Intents tokens: Internal Server Error'
@@ -66,7 +66,7 @@ describe('near-intents.rest', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve(mockNearIntentsQuoteResponse)
-			});
+			} as unknown as Response);
 
 			const result = await fetchNearIntentsQuote(quoteRequest);
 
@@ -85,7 +85,7 @@ describe('near-intents.rest', () => {
 				ok: false,
 				statusText: 'Bad Request',
 				json: () => Promise.resolve({ message: 'Invalid origin asset' })
-			});
+			} as unknown as Response);
 
 			await expect(fetchNearIntentsQuote(quoteRequest)).rejects.toThrow(
 				'NEAR Intents quote failed: Invalid origin asset'
@@ -97,7 +97,7 @@ describe('near-intents.rest', () => {
 				ok: false,
 				statusText: 'Bad Request',
 				json: () => Promise.reject(new Error('parse error'))
-			});
+			} as unknown as Response);
 
 			await expect(fetchNearIntentsQuote(quoteRequest)).rejects.toThrow(
 				'NEAR Intents quote failed: Bad Request'
@@ -110,7 +110,7 @@ describe('near-intents.rest', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve(mockNearIntentsStatusSuccess)
-			});
+			} as unknown as Response);
 
 			const result = await fetchNearIntentsStatus({
 				depositAddress: '0xDeposit123'
@@ -131,7 +131,7 @@ describe('near-intents.rest', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve(mockNearIntentsStatusSuccess)
-			});
+			} as unknown as Response);
 
 			await fetchNearIntentsStatus({
 				depositAddress: '0xDeposit123',
@@ -148,7 +148,7 @@ describe('near-intents.rest', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: false,
 				statusText: 'Not Found'
-			});
+			} as Response);
 
 			await expect(fetchNearIntentsStatus({ depositAddress: '0xInvalid' })).rejects.toThrow(
 				'NEAR Intents status check failed: Not Found'
@@ -161,7 +161,7 @@ describe('near-intents.rest', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve(mockNearIntentsStatusSuccess)
-			});
+			} as unknown as Response);
 
 			const request = {
 				txHash: '0xTxHash123',
@@ -184,7 +184,7 @@ describe('near-intents.rest', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: false,
 				statusText: 'Bad Request'
-			});
+			} as Response);
 
 			await expect(
 				submitNearIntentsDeposit({

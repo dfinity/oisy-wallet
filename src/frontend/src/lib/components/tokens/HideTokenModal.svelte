@@ -96,17 +96,17 @@
 			step: ProgressStepsHideToken.INITIALIZATION,
 			text: $i18n.tokens.text.initializing,
 			state: 'in_progress'
-		},
+		} as ProgressStep,
 		{
 			step: ProgressStepsHideToken.HIDE,
 			text: $i18n.tokens.hide.hiding,
 			state: 'next'
-		},
+		} as ProgressStep,
 		{
 			step: ProgressStepsHideToken.UPDATE_UI,
 			text: $i18n.tokens.text.updating_ui,
 			state: 'next'
-		}
+		} as ProgressStep
 	];
 
 	let hideProgressStep = $state<ProgressStepsHideToken>(ProgressStepsHideToken.INITIALIZATION);

@@ -58,6 +58,7 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import type { Amount } from '$lib/types/send';
 import {
@@ -97,7 +98,12 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
-import { constructSimpleSDK, type DeltaAuction, type DeltaPrice } from '@velora-dex/sdk';
+import {
+	constructSimpleSDK,
+	type DeltaAuction,
+	type DeltaPrice,
+	type OptimalRate
+} from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
 const checkNeedsApproval = async ({
@@ -146,7 +152,7 @@ const enableSwapDestinationToken = async ({
 					enabled: true,
 					chainId: destinationToken.network.chainId,
 					networkKey: 'Erc20'
-				}),
+				} as SaveCustomTokenWithKey),
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
@@ -162,7 +168,7 @@ const enableSwapDestinationToken = async ({
 					...destinationToken,
 					enabled: true,
 					networkKey: isNetworkIdSOLDevnet(destinationToken.network.id) ? 'SplDevnet' : 'SplMainnet'
-				}),
+				} as SaveCustomTokenWithKey),
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
@@ -1238,7 +1244,7 @@ export const fetchVeloraMarketSwap = async ({
 		destToken: geSwapEthTokenAddress(destinationToken),
 		srcAmount: swapDetails.srcAmount,
 		slippage: Number(slippageValue) * 100,
-		priceRoute: swapDetails,
+		priceRoute: swapDetails as OptimalRate,
 		userAddress,
 		partner: OISY_URL_HOSTNAME
 	});

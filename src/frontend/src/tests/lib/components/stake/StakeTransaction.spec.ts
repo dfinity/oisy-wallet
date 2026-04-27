@@ -66,7 +66,7 @@ describe('StakeTransaction', () => {
 			const { blockNumber: _, ...txWithoutBlock } = harvestTx;
 
 			render(StakeTransaction, {
-				transaction: txWithoutBlock
+				transaction: txWithoutBlock as unknown as StakingTransactionsUiWithToken
 			});
 
 			expect(screen.getByText(/pending/i)).toBeInTheDocument();
@@ -98,7 +98,7 @@ describe('StakeTransaction', () => {
 			const { blockNumber: _, ...txWithoutBlock } = assetTokenTx;
 
 			render(StakeTransaction, {
-				transaction: txWithoutBlock
+				transaction: txWithoutBlock as unknown as StakingTransactionsUiWithToken
 			});
 
 			expect(screen.getByText(/pending/i)).toBeInTheDocument();

@@ -1,7 +1,9 @@
 import type { UserTransaction } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
+import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import {
 	loadEthUserTransactions,
@@ -92,13 +94,13 @@ describe('eth-user-transactions.services', () => {
 		etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
 		etherscanProvidersSpy.mockReturnValue({
 			transactions: mockTransactionsProvider
-		});
+		} as unknown as EtherscanProvider);
 
 		mockGetBlockNumber = vi.fn().mockResolvedValue(MOCK_LATEST_BLOCK_NUMBER);
 		infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraProviders');
 		infuraProvidersSpy.mockReturnValue({
 			getBlockNumber: mockGetBlockNumber
-		});
+		} as unknown as InfuraProvider);
 	});
 
 	describe('loadEthUserTransactions', () => {

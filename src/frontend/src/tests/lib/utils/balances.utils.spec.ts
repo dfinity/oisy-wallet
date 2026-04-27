@@ -52,7 +52,7 @@ describe('balances.utils', () => {
 		});
 
 		it('should return false if store is empty', () => {
-			expect(checkAnyNonZeroBalance({})).toBeFalsy();
+			expect(checkAnyNonZeroBalance({} as unknown as CertifiedStoreData<BalancesData>)).toBeFalsy();
 		});
 
 		it('should return false if store is not initialized', () => {

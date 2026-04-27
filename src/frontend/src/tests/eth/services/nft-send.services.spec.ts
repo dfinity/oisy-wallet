@@ -7,6 +7,7 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import type { TransactionResponse } from 'ethers/providers';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	alchemyProviders: vi.fn(),
@@ -22,9 +23,13 @@ describe('nft-send.services', () => {
 		const maxFeePerGas = 5_000_000n;
 		const maxPriorityFeePerGas = 2_000_000n;
 
-		const transfer721Spy = vi.spyOn(nftTransferServices, 'transferErc721').mockResolvedValue({});
+		const transfer721Spy = vi
+			.spyOn(nftTransferServices, 'transferErc721')
+			.mockResolvedValue({} as unknown as TransactionResponse);
 
-		const transfer1155Spy = vi.spyOn(nftTransferServices, 'transferErc1155').mockResolvedValue({});
+		const transfer1155Spy = vi
+			.spyOn(nftTransferServices, 'transferErc1155')
+			.mockResolvedValue({} as unknown as TransactionResponse);
 
 		const token721: NonFungibleToken = {
 			address: from,

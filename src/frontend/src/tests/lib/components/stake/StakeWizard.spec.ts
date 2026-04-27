@@ -59,7 +59,7 @@ describe('StakeWizard', () => {
 
 	it('renders unsupported message when vault token is not harvest autopilot', () => {
 		const { container } = render(StakeWizard, {
-			props: { ...props, vault: { token: mockValidIcrcToken, apy: '1.0' } }
+			props: { ...props, vault: { token: mockValidIcrcToken, apy: '1.0' } as unknown as Vault }
 		});
 
 		expect(container).toHaveTextContent(en.stake.text.unsupported_token_staking);

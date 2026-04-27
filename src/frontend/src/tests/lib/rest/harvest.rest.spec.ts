@@ -31,7 +31,7 @@ describe('Harvest REST client', () => {
 						arbitrum: { 'arb-1': arbVault },
 						base: { 'base-1': baseVault }
 					})
-			});
+			} as unknown as Response);
 
 			const result = await fetchHarvestVaults();
 
@@ -53,7 +53,7 @@ describe('Harvest REST client', () => {
 						arbitrum: {},
 						base: {}
 					})
-			});
+			} as unknown as Response);
 
 			const result = await fetchHarvestVaults();
 
@@ -63,7 +63,7 @@ describe('Harvest REST client', () => {
 		it('throws when fetch response is not ok', async () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: false
-			});
+			} as Response);
 
 			await expect(fetchHarvestVaults()).rejects.toThrow('Fetching Harvest failed.');
 		});
@@ -75,7 +75,7 @@ describe('Harvest REST client', () => {
 					Promise.resolve({
 						eth: { 'vault-1': { id: 123, vaultAddress: null } }
 					})
-			});
+			} as unknown as Response);
 
 			await expect(fetchHarvestVaults()).rejects.toThrow('Invalid Harvest vaults response.');
 		});
@@ -89,7 +89,7 @@ describe('Harvest REST client', () => {
 						arbitrum: {},
 						base: {}
 					})
-			});
+			} as unknown as Response);
 
 			const result = await fetchHarvestVaults();
 

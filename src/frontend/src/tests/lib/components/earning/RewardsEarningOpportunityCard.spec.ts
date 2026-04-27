@@ -1,6 +1,7 @@
 import * as navModule from '$app/navigation';
 import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import RewardsEarningOpportunityCard from '$lib/components/earning/RewardsEarningOpportunityCard.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
@@ -123,7 +124,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: '',
 				description: ''
-			}
+			} as unknown as RewardCampaignDescription
 		]);
 
 		const mockCtx = {
@@ -159,7 +160,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: 'x',
 				description: 'y'
-			}
+			} as unknown as RewardCampaignDescription
 		]);
 
 		const mockCtx = {
@@ -191,7 +192,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: '',
 				description: ''
-			}
+			} as unknown as RewardCampaignDescription
 		]);
 
 		const mockEligibility = readable({
@@ -228,7 +229,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: '',
 				description: ''
-			}
+			} as unknown as RewardCampaignDescription
 		]);
 
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
@@ -258,7 +259,7 @@ describe('RewardsEarningOpportunityCard', () => {
 				endDate: new Date(),
 				title: '',
 				description: ''
-			}
+			} as unknown as RewardCampaignDescription
 		]);
 
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([]);

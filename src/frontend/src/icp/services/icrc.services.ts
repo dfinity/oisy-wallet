@@ -1,4 +1,4 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
+import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ADDITIONAL_ICRC_TOKENS_INDEXED } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ICRC_TOKENS, ICRC_TOKENS_METADATA } from '$env/tokens/tokens-icrc/tokens.icrc.env';
@@ -183,7 +183,7 @@ const loadCustomIcrcTokensData = async ({
 
 		const {
 			Icrc: { ledger_id, index_id }
-		} = token;
+		} = token as { Icrc: IcrcToken };
 
 		const indexCanisterId = fromNullable(index_id);
 

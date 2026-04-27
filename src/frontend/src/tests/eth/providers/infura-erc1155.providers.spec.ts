@@ -168,8 +168,9 @@ describe('infura-erc1155.providers', () => {
 				mockSupportsInterface.mockResolvedValue(true);
 				mockUri.mockResolvedValue(mockMetadataUrl);
 
-				mockContract.prototype.supportsInterface = mockSupportsInterface;
-				mockContract.prototype.uri = mockUri;
+				mockContract.prototype.supportsInterface =
+					mockSupportsInterface as unknown as typeof mockContract.prototype.supportsInterface;
+				mockContract.prototype.uri = mockUri as unknown as typeof mockContract.prototype.uri;
 			});
 
 			it('should return the NFT metadata of the token ID', async () => {
@@ -280,7 +281,8 @@ describe('infura-erc1155.providers', () => {
 
 				mockBalanceOf.mockResolvedValue(mockBalance);
 
-				mockContract.prototype.balanceOf = mockBalanceOf;
+				mockContract.prototype.balanceOf =
+					mockBalanceOf as unknown as typeof mockContract.prototype.balanceOf;
 			});
 
 			it('should return the balance of the token ID for a specific wallet', async () => {

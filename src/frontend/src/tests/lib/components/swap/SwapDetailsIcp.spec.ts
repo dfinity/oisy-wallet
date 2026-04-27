@@ -1,4 +1,5 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
@@ -12,7 +13,7 @@ describe('SwapDetailsIcp', () => {
 	mockContext.set(
 		SWAP_CONTEXT_KEY,
 		initSwapContext({
-			destinationToken: ICP_TOKEN
+			destinationToken: ICP_TOKEN as IcTokenToggleable
 		})
 	);
 

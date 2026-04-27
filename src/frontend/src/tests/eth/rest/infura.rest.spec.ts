@@ -55,7 +55,7 @@ describe('infura.rest', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => mockApiResponse
-			});
+			} as unknown as Response);
 
 			const mockFetch = vi.mocked(fetch);
 
@@ -76,7 +76,7 @@ describe('infura.rest', () => {
 		it('should throw an error if the API call fails', async () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: false
-			});
+			} as unknown as Response);
 
 			const infuraRest = new InfuraGasRest(chainId);
 

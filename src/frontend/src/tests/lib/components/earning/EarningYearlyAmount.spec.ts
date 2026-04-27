@@ -3,6 +3,7 @@ import * as currencyDerived from '$lib/derived/currency.derived';
 import * as i18nDerived from '$lib/derived/i18n.derived';
 import { Currency as CurrencyEnum, type Currency } from '$lib/enums/currency';
 import { Languages as LangEnum, type Languages } from '$lib/enums/languages';
+import type { CurrencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import * as currencyExchange from '$lib/stores/currency-exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { CurrencyExchangeData } from '$lib/types/currency';
@@ -38,7 +39,7 @@ describe('EarningYearlyAmount', () => {
 			setExchangeRateCurrency: vi.fn(),
 			setExchangeRate: vi.fn(),
 			setExchangeRate24hChangeMultiplier: vi.fn()
-		});
+		} as CurrencyExchangeStore);
 
 		vi.spyOn(currencyDerived, 'currentCurrency', 'get').mockReturnValue({
 			subscribe: (fn: (v: Currency) => void) => {
@@ -99,7 +100,7 @@ describe('EarningYearlyAmount', () => {
 
 		expect(container.textContent?.trim()).toBe('');
 
-		rerender({ value: null });
+		rerender({ value: null as unknown as number });
 
 		expect(container.textContent?.trim()).toBe('');
 	});

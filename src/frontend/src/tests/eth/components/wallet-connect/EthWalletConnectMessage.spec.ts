@@ -226,7 +226,7 @@ describe('EthWalletConnectMessage', () => {
 				},
 				chainId: ETHEREUM_NETWORK.chainId.toString()
 			}
-		};
+		} as WalletKitTypes.SessionRequest;
 
 		const { queryByText } = render(EthWalletConnectMessage, {
 			props: {
@@ -295,7 +295,7 @@ describe('EthWalletConnectMessage', () => {
 				},
 				chainId: ETHEREUM_NETWORK.chainId.toString()
 			}
-		};
+		} as WalletKitTypes.SessionRequest;
 
 		const { queryByText } = render(EthWalletConnectMessage, {
 			props: {
@@ -337,7 +337,7 @@ describe('EthWalletConnectMessage', () => {
 				},
 				chainId: ETHEREUM_NETWORK.chainId.toString()
 			}
-		};
+		} as WalletKitTypes.SessionRequest;
 
 		const { queryByText } = render(EthWalletConnectMessage, {
 			props: {

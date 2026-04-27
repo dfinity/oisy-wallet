@@ -89,7 +89,7 @@ describe('sol-instructions-token.utils', () => {
 		it('should raise an error if the instruction is missing the accounts', () => {
 			const { accounts: _, ...withoutAccounts } = mockInstruction;
 
-			expect(() => parseSolTokenInstruction(withoutAccounts)).toThrow(
+			expect(() => parseSolTokenInstruction(withoutAccounts as unknown as SolInstruction)).toThrow(
 				'The instruction does not have any accounts'
 			);
 		});

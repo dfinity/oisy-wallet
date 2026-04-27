@@ -86,14 +86,15 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version = mockVersionFn;
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(Signature.from).mockReturnValue({
 				v: 27,
 				r: `0x${'a'.repeat(64)}`,
 				s: `0x${'b'.repeat(64)}`
-			});
+			} as unknown as Signature);
 
 			await createPermit({
 				token: mockValidErc20Token,
@@ -111,8 +112,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version = mockVersionFn;
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -120,7 +122,7 @@ describe('EIP2612 Permit Services', () => {
 				v: 27,
 				r: `0x${'a'.repeat(64)}`,
 				s: `0x${'b'.repeat(64)}`
-			});
+			} as unknown as Signature);
 			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
 
 			const result = await createPermit({
@@ -139,8 +141,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version = mockVersionFn;
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -148,7 +151,7 @@ describe('EIP2612 Permit Services', () => {
 				v: 27,
 				r: `0x${'a'.repeat(64)}`,
 				s: `0x${'b'.repeat(64)}`
-			});
+			} as unknown as Signature);
 			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
 
 			const result = await createPermit({
@@ -169,8 +172,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version = mockVersionFn;
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -178,7 +182,7 @@ describe('EIP2612 Permit Services', () => {
 				v: 27,
 				r: `0x${'a'.repeat(64)}`,
 				s: `0x${'b'.repeat(64)}`
-			});
+			} as unknown as Signature);
 			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
 
 			await createPermit({
@@ -205,8 +209,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version = mockVersionFn;
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -214,7 +219,7 @@ describe('EIP2612 Permit Services', () => {
 				v: 27,
 				r: `0x${'a'.repeat(64)}`,
 				s: `0x${'b'.repeat(64)}`
-			});
+			} as unknown as Signature);
 			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
 
 			await createPermit({
@@ -244,8 +249,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version = mockVersionFn;
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -253,7 +259,7 @@ describe('EIP2612 Permit Services', () => {
 				v: 27,
 				r: `0x${'a'.repeat(64)}`,
 				s: `0x${'b'.repeat(64)}`
-			});
+			} as unknown as Signature);
 			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
 
 			await createPermit({
@@ -274,8 +280,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version = mockVersionFn;
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -283,7 +290,7 @@ describe('EIP2612 Permit Services', () => {
 				v: 27,
 				r: `0x${'a'.repeat(64)}`,
 				s: `0x${'b'.repeat(64)}`
-			});
+			} as unknown as Signature);
 			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
 
 			await createPermit({
@@ -301,8 +308,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version = mockVersionFn;
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -310,7 +318,7 @@ describe('EIP2612 Permit Services', () => {
 				v: 27,
 				r: `0x${'a'.repeat(64)}`,
 				s: `0x${'b'.repeat(64)}`
-			});
+			} as unknown as Signature);
 			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
 
 			await createPermit({
@@ -330,8 +338,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			mockContract.prototype.nonces = mockNonces;
-			mockContract.prototype.version = mockVersionFn;
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -339,7 +348,7 @@ describe('EIP2612 Permit Services', () => {
 				v: 27,
 				r: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
 				s: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-			});
+			} as unknown as Signature);
 			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
 			vi.mocked(zeroPadValue).mockImplementation((data: BytesLike) => data as string);
 			vi.mocked(toBeHex).mockImplementation((value: BigNumberish) => `0x${value.toString()}`);
@@ -395,7 +404,7 @@ describe('EIP2612 Permit Services', () => {
 				s: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 			};
 
-			vi.mocked(Signature.from).mockReturnValue(mockSignature);
+			vi.mocked(Signature.from).mockReturnValue(mockSignature as unknown as Signature);
 
 			await createPermit({
 				token: mockValidErc20Token,

@@ -611,16 +611,17 @@ describe('OpenCryptoPayStore', () => {
 			tokenNetwork: PayableTokenWithConvertedAmount['tokenNetwork'];
 			symbol: string;
 			sumInUSD: number;
-		}): PayableTokenWithConvertedAmount => ({
-			...ETHEREUM_TOKEN,
-			network,
-			tokenNetwork,
-			symbol,
-			amount: '1',
-			amountInUSD: sumInUSD - 1,
-			feeInUSD: 1,
-			sumInUSD
-		});
+		}): PayableTokenWithConvertedAmount =>
+			({
+				...ETHEREUM_TOKEN,
+				network,
+				tokenNetwork,
+				symbol,
+				amount: '1',
+				amountInUSD: sumInUSD - 1,
+				feeInUSD: 1,
+				sumInUSD
+			}) as PayableTokenWithConvertedAmount;
 
 		const icpToken = buildToken({
 			network: { ...ICP_NETWORK, pay: { openCryptoPay: 'InternetComputer' } },

@@ -39,7 +39,7 @@ describe('earning.derived', () => {
 			maxApy?: string;
 		} = {}) => {
 			vi.spyOn(enabledMainnetFungibleTokensUsdBalance, 'subscribe').mockImplementation((fn) => {
-				fn(enabledMainnetUsdBalance);
+				fn(enabledMainnetUsdBalance as number);
 				return () => {};
 			});
 			vi.spyOn(harvestAutopilotsUsdBalance, 'subscribe').mockImplementation((fn) => {
@@ -55,7 +55,7 @@ describe('earning.derived', () => {
 				return () => {};
 			});
 			vi.spyOn(harvestAutopilots, 'subscribe').mockImplementation((fn) => {
-				fn(vaults);
+				fn(vaults as never);
 				return () => {};
 			});
 			vi.spyOn(harvestAutopilotsMaxApy, 'subscribe').mockImplementation((fn) => {

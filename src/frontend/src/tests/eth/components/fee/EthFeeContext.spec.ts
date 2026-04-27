@@ -133,7 +133,7 @@ describe('EthFeeContext', () => {
 				),
 			safeEstimateGas: async () => await new Promise((resolve) => resolve(ZERO)),
 			estimateGas: async () => await new Promise((resolve) => resolve(ZERO))
-		});
+		} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
 		vi.spyOn(feeServices, 'getEthFeeData').mockReturnValue(21n);
 		vi.spyOn(feeServices, 'getCkErc20FeeData').mockResolvedValue(ZERO);

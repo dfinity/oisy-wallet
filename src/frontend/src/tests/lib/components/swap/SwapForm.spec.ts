@@ -227,7 +227,7 @@ describe('SwapForm', () => {
 		it('should preserve amount when source and destination have same decimals', async () => {
 			const { swapAmount } = await renderAndSwitch({
 				source: token8Dec,
-				destination: { ...token8Dec, id: parseTokenId('Token8DecB') },
+				destination: { ...token8Dec, id: parseTokenId('Token8DecB') } as IcToken,
 				storeReceiveAmount: 112345678n
 			});
 

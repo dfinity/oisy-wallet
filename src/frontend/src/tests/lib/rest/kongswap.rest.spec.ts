@@ -18,7 +18,7 @@ describe('KongSwap REST client', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => mockTokenResponse
-			});
+			} as unknown as Response);
 
 			const result = await getKongSwapTokenById(MOCK_CANISTER_ID_1);
 
@@ -32,7 +32,7 @@ describe('KongSwap REST client', () => {
 		it('throws when fetch response is not ok', async () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: false
-			});
+			} as Response);
 
 			await expect(getKongSwapTokenById(MOCK_CANISTER_ID_1)).rejects.toThrow(
 				'Fetching KongSwap failed.'
@@ -46,11 +46,11 @@ describe('KongSwap REST client', () => {
 				.mockResolvedValueOnce({
 					ok: true,
 					json: () => Promise.resolve(mockTokenResponse)
-				})
+				} as unknown as Response)
 				.mockResolvedValueOnce({
 					ok: true,
 					json: () => Promise.resolve(mockTokenResponse)
-				});
+				} as unknown as Response);
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 
@@ -63,10 +63,10 @@ describe('KongSwap REST client', () => {
 				.mockResolvedValueOnce({
 					ok: true,
 					json: () => Promise.resolve(mockTokenResponse)
-				})
+				} as unknown as Response)
 				.mockResolvedValueOnce({
 					ok: false
-				});
+				} as unknown as Response);
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 
@@ -80,7 +80,7 @@ describe('KongSwap REST client', () => {
 				json: () => {
 					throw new Error('JSON error');
 				}
-			});
+			} as unknown as Response);
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
 
@@ -92,10 +92,10 @@ describe('KongSwap REST client', () => {
 			vi.mocked(fetch)
 				.mockResolvedValueOnce({
 					ok: false
-				})
+				} as unknown as Response)
 				.mockResolvedValueOnce({
 					ok: false
-				});
+				} as unknown as Response);
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 
@@ -109,7 +109,7 @@ describe('KongSwap REST client', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve(invalidResponse)
-			});
+			} as unknown as Response);
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
 
@@ -123,7 +123,7 @@ describe('KongSwap REST client', () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve(invalidResponse)
-			});
+			} as unknown as Response);
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
 

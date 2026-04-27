@@ -182,26 +182,29 @@ describe('ic-transactions.services', () => {
 			icTransactionsStore.reset(mockToken.id);
 
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
-				transactions: mockTransactions.map((transaction) => ({
-					transaction: {
-						...transaction,
-						memo: ZERO,
-						icrc1_memo: [],
-						operation: {
-							Transfer: {
-								to: transaction.to,
-								fee: { e8s: 456n },
-								from: transaction.from,
-								amount: { e8s: transaction.value },
-								spender: []
-							}
-						},
-						timestamp: toNullable({ timestamp_nanos: transaction.timestamp }),
-						created_at_time: []
-					},
-					id: BigInt(transaction.id)
-				}))
-			});
+				transactions: mockTransactions.map(
+					(transaction) =>
+						({
+							transaction: {
+								...transaction,
+								memo: ZERO,
+								icrc1_memo: [],
+								operation: {
+									Transfer: {
+										to: transaction.to,
+										fee: { e8s: 456n },
+										from: transaction.from,
+										amount: { e8s: transaction.value },
+										spender: []
+									}
+								},
+								timestamp: toNullable({ timestamp_nanos: transaction.timestamp }),
+								created_at_time: []
+							},
+							id: BigInt(transaction.id)
+						}) as IcpIndexDid.TransactionWithId
+				)
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
 		});
 
 		it('should not load transactions if the last ID is not parseable', async () => {
@@ -344,7 +347,7 @@ describe('ic-transactions.services', () => {
 
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
 				transactions: [] as IcpIndexDid.TransactionWithId[]
-			});
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
 
 			await loadNextIcTransactions(mockParams);
 
@@ -354,7 +357,7 @@ describe('ic-transactions.services', () => {
 		it('should call signalEnd if no transactions are returned', async () => {
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
 				transactions: [] as IcpIndexDid.TransactionWithId[]
-			});
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
 
 			await loadNextIcTransactions(mockParams);
 

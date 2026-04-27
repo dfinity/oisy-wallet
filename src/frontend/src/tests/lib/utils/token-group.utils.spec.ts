@@ -93,7 +93,7 @@ describe('token-group.utils', () => {
 		];
 
 		it('should give me all token groups', () => {
-			const groupedTokens = groupTokens(reorderedTokens);
+			const groupedTokens = groupTokens(reorderedTokens as TokenUi[]);
 
 			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: true });
 
@@ -106,7 +106,7 @@ describe('token-group.utils', () => {
 				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
 				{ ...tokens[3], balance: ZERO, usdBalance: 0 } // ckETH
 			];
-			const groupedTokens = groupTokens(customReorderedTokens);
+			const groupedTokens = groupTokens(customReorderedTokens as TokenUi[]);
 
 			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
 
@@ -139,7 +139,7 @@ describe('token-group.utils', () => {
 				{ ...tokens[2], balance: ZERO, usdBalance: 0 }, // ETH
 				{ ...tokens[3], balance: ZERO, usdBalance: 1 } // ckETH
 			];
-			const groupedTokens = groupTokens(customReorderedTokens);
+			const groupedTokens = groupTokens(customReorderedTokens as TokenUi[]);
 
 			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
 
