@@ -31,14 +31,42 @@ export interface AddHiddenDappIdRequest {
 export type AddUserDismissedNotificationResult =
 	| { Ok: null }
 	| { Err: AddDismissedNotificationError };
-export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
+export type AddUserHiddenDappIdResult =
+	| {
+			/**
+			 * The user's hidden dapp id was added successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's hidden dapp id was not added due to an error.
+			 */
+			Err: AddDappSettingsError;
+	  };
+/**
+ * A single audit-trail entry recording that a user accepted (or rejected) a specific agreement
+ * version at a point in time.
+ */
 export interface AgreementHistoryEntry {
+	/**
+	 * Canister timestamp (nanos since epoch) when this action was recorded.
+	 */
 	timestamp_ns: bigint;
 	agreement_type: AgreementType;
+	/**
+	 * SHA256 hash of the agreement text the user was shown, if provided.
+	 */
 	text_sha256: [] | [string];
 	accepted: boolean;
+	/**
+	 * Document-version timestamp (millis since epoch) of the agreement the user acted on.
+	 */
 	last_updated_at_ms: [] | [bigint];
 }
+/**
+ * Identifies which agreement a history entry refers to.
+ */
 export type AgreementType =
 	| { TermsOfUse: null }
 	| { PrivacyPolicy: null }
@@ -50,9 +78,25 @@ export interface Agreements {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
-	| { InvalidDelegationChain: { msg: string } }
-	| { RateLimited: RateLimitError }
-	| { RateLimitedByGuard: RateLimitError }
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller exceeded the per-caller business rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The caller hit the high-frequency guard rate limit designed to prevent
+			 * cycle-draining attacks before any inter-canister call is made.
+			 */
+			RateLimitedByGuard: RateLimitError;
+	  }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
 export interface AllowSigningRequest {
@@ -62,9 +106,26 @@ export interface AllowSigningResponse {
 	status: AllowSigningStatus;
 	allowed_cycles: bigint;
 }
-export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
+export type AllowSigningResult =
+	| {
+			/**
+			 * The signing was allowed successfully.
+			 */
+			Ok: AllowSigningResponse;
+	  }
+	| {
+			/**
+			 * The signing was not allowed due to an error.
+			 */
+			Err: AllowSigningError;
+	  };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export interface ApiKeys {
+	/**
+	 * When `Some(true)` the backend periodically fetches exchange rates via
+	 * HTTP outcalls.  Any other value (including the default `None`) keeps the
+	 * feature disabled so no cycles are spent on outcalls.
+	 */
 	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
 	etherscan_api_key: [] | [string];
@@ -85,26 +146,200 @@ export type ApproveError =
 	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type BtcAddPendingTransactionError =
-	| { InvalidUtxos: null }
-	| { EmptyUtxos: null }
-	| { DuplicateUtxos: null }
-	| { InvalidDelegationChain: { msg: string } }
-	| { RateLimited: RateLimitError }
-	| { InternalError: { msg: string } }
-	| { UtxosAlreadyReserved: null };
+	| {
+			/**
+			 * One or more provided UTXOs not in current UTXO list for the address
+			 */
+			InvalidUtxos: null;
+	  }
+	| {
+			/**
+			 * The provided list of UTXOs is empty
+			 */
+			EmptyUtxos: null;
+	  }
+	| {
+			/**
+			 * One or more provided UTXOs are duplicates among themselves
+			 */
+			DuplicateUtxos: null;
+	  }
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * Server-side / unexpected
+			 */
+			InternalError: { msg: string };
+	  }
+	| {
+			/**
+			 * Intersects with caller's existing pending reservations
+			 */
+			UtxosAlreadyReserved: null;
+	  };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
 	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
 	utxos: Array<Utxo>;
 }
-export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
+export type BtcAddPendingTransactionResult =
+	| {
+			/**
+			 * The pending transaction was added successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The pending transaction was not added due to an error.
+			 */
+			Err: BtcAddPendingTransactionError;
+	  };
+/**
+ * A bitcoin address
+ *
+ * # Reference
+ * - <https://en.bitcoin.it/wiki/Address>
+ * - <https://www.unchained.com/blog/bitcoin-address-types-compared>
+ */
 export type BtcAddress =
-	| { P2WPKH: string }
-	| { P2PKH: string }
-	| { P2WSH: string }
-	| { P2SH: string }
-	| { P2TR: string };
+	| {
+			/**
+			 * Pay-to-Witness-Public-Key-Hash (P2WPKH)
+			 *
+			 * ## Format
+			 * Pay-to-Witness-Public-Key-Hash (P2WPKH) is the first of two address
+			 * types introduced to bitcoin upon the Segwit Soft Fork in August 2017.
+			 * The story behind this extremely important and particularly contentious
+			 * soft fork is documented in a book called The Blocksize War, written by
+			 * Jonathan Bier.
+			 *
+			 * P2WPKH is the segwit variant of P2PKH, which at a basic level, means
+			 * that choosing this address type rather than older P2PKH addresses will
+			 * help you save money on transaction fees when moving your bitcoin around.
+			 *
+			 * Segwit addresses look quite different from the older address types
+			 * because, per BIP 173, they use Bech32 encoding instead of Base58. Most
+			 * notably, there are no capital letters in Bech32. P2WPKH addresses can be
+			 * identified by a prefix of bc1q and a character length of exactly 42.
+			 *
+			 * ## Example
+			 * - `bc1q34aq5drpuwy3wgl9lhup9892qp6svr8ldzyy7c`
+			 *
+			 * ## Reference
+			 * - <https://en.bitcoin.it/wiki/BIP_0173>
+			 * - <https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki>
+			 */
+			P2WPKH: string;
+	  }
+	| {
+			/**
+			 * Legacy format.
+			 *
+			 * This is the widely used original format encoded using Base58, which
+			 * excludes characters that are frequently confused with one another.
+			 * Addresses starting with “1” use the Pay-to-Public-Key-Hash (P2PKH)
+			 * script type and are case-sensitive. In the context of P2PKH, “Pay-to”
+			 * refers to the recipient’s ability to claim the funds, “Public-Key”
+			 * refers to the recipient’s public cryptographic key, and “Hash” refers to
+			 * a cryptographic hash of the public key.
+			 *
+			 * They offer a straightforward way to send and receive Bitcoin since they
+			 * are generated from the hash of the recipient’s public key. Legacy
+			 * addresses are widely compatible because the majority of wallets and
+			 * exchanges support them.
+			 *
+			 * ## Format
+			 * A string, 27-34 alphanumeric characters in length, starting with the
+			 * digit "1".
+			 *
+			 * The string is a base58 encoded [u8;25] where the first byte is 0x00 and
+			 * the last 4 bytes are a checksum.
+			 *
+			 * ## Example
+			 * - `1RainRzqJtJxHTngafpCejDLfYq2y4KBc`
+			 *
+			 * ## Reference
+			 * <https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses>
+			 */
+			P2PKH: string;
+	  }
+	| {
+			/**
+			 * Pay-to-Witness-Script-Hash (P2WSH)
+			 *
+			 * Pay-to-Witness-Script-Hash (P2WSH) is the segwit variant of P2SH. The main advantage to
+			 * using P2WSH over P2SH is that it can help lower transaction fees, and the primary reason to
+			 * use a script hash instead of a public key hash is to accommodate multisig arrangements.
+			 *
+			 * ## Format
+			 * P2WSH addresses are exactly 62 characters in length, starting with `bc1q`.
+			 *
+			 * ## Example
+			 * - `bc1qeklep85ntjz4605drds6aww9u0qr46qzrv5xswd35uhjuj8ahfcqgf6hak`
+			 *
+			 * ## Reference
+			 * - <https://en.bitcoin.it/wiki/BIP_0173>
+			 */
+			P2WSH: string;
+	  }
+	| {
+			/**
+			 * Pay-to-Script-Hash (P2SH)
+			 *
+			 * ## Format
+			 * P2SH addresses are exactly 34 characters in length, and they begin with
+			 * a prefix of 3, as specified by BIP 13.
+			 *
+			 * ## Example
+			 * - `342ftSRCvFHfCeFFBuz4xwbeqnDw6BGUey`
+			 *
+			 * ## Reference
+			 * - <https://en.bitcoin.it/wiki/BIP_0013>
+			 */
+			P2SH: string;
+	  }
+	| {
+			/**
+			 * Pay-to-Taproot (P2TR)
+			 *
+			 * Pay-to-Taproot (P2TR) is the newest address type, made available by the Taproot soft-fork
+			 * in November 2021. P2TR adoption remains quite low at the time of writing, and many bitcoin
+			 * softwares and services are still working on integration.
+			 *
+			 * While P2WPKH and P2WSH are known as Segwit V0, P2TR is considered Segwit V1. Notably, P2TR
+			 * utilizes a digital signature algorithm called Schnorr, which differs from the ECDSA format
+			 * used in earlier bitcoin transaction types. Schnorr signatures have several advantages,
+			 * including additional transaction fee reductions and increased privacy.
+			 *
+			 * Regarding privacy, the key and signature aggregations made possible by Schnorr allow
+			 * multisig addresses to be indistinguishable from singlesig, and the full spending conditions
+			 * for a P2TR address are not necessarily revealed publicly. The creator of the address can
+			 * even include multiple customized redeem scripts to choose from in order to spend the
+			 * bitcoin later.
+			 *
+			 * ## Format
+			 * P2TR addresses are 62 characters long, and they use Bech32m encoding, a slightly modified
+			 * version of Bech32, as described in BIP 350. P2TR addresses can be identified by their
+			 * unique bc1p prefix.
+			 *
+			 * ## Example
+			 * - `bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k`
+			 */
+			P2TR: string;
+	  };
 export interface BtcGetFeePercentilesRequest {
 	network: Network;
 }
@@ -113,14 +348,33 @@ export interface BtcGetFeePercentilesResponse {
 }
 export type BtcGetFeePercentilesResult =
 	| {
+			/**
+			 * The fee was selected successfully.
+			 */
 			Ok: BtcGetFeePercentilesResponse;
 	  }
-	| { Err: SelectedUtxosFeeError };
+	| {
+			/**
+			 * The fee was not selected due to an error.
+			 */
+			Err: SelectedUtxosFeeError;
+	  };
+/**
+ * Errors that can occur when retrieving pending Bitcoin transactions.
+ */
 export type BtcGetPendingTransactionsError =
 	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
 			InvalidDelegationChain: { msg: string };
 	  }
-	| { RateLimited: RateLimitError }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
 	| { InternalError: { msg: string } };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
@@ -132,15 +386,39 @@ export interface BtcGetPendingTransactionsRequest {
 }
 export type BtcGetPendingTransactionsResult =
 	| {
+			/**
+			 * The pending transactions were retrieved successfully.
+			 */
 			Ok: BtcGetPendingTransactionsReponse;
 	  }
-	| { Err: BtcGetPendingTransactionsError };
+	| {
+			/**
+			 * The pending transactions were not retrieved due to an error.
+			 */
+			Err: BtcGetPendingTransactionsError;
+	  };
 export type BtcSelectUserUtxosFeeResult =
-	| { Ok: SelectedUtxosFeeResponse }
-	| { Err: SelectedUtxosFeeError };
+	| {
+			/**
+			 * The fee was selected successfully.
+			 */
+			Ok: SelectedUtxosFeeResponse;
+	  }
+	| {
+			/**
+			 * The fee was not selected due to an error.
+			 */
+			Err: SelectedUtxosFeeError;
+	  };
+/**
+ * Bitcoin transaction data.
+ */
 export interface BtcTransactionData {
 	fee: [] | [bigint];
 }
+/**
+ * Copy of the synonymous Rosetta type.
+ */
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -152,13 +430,56 @@ export interface CanisterStatusResultV2 {
 	idle_cycles_burned_per_day: bigint;
 	module_hash: [] | [Uint8Array];
 }
-export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
+/**
+ * # Canister Status Type
+ *
+ * Status of a canister.
+ *
+ * See [`CanisterStatusResult::status`].
+ */
+export type CanisterStatusType =
+	| {
+			/**
+			 * The canister is stopped.
+			 */
+			stopped: null;
+	  }
+	| {
+			/**
+			 * The canister is stopping.
+			 */
+			stopping: null;
+	  }
+	| {
+			/**
+			 * The canister is running.
+			 */
+			running: null;
+	  };
 export interface Config {
+	/**
+	 * The derivation origin used for II authentication, ensuring users get a
+	 * consistent identity across different domains.
+	 */
 	derivation_origin: [] | [string];
+	/**
+	 * The Internet Identity canister used for delegation verification.
+	 */
 	ii_canister_id: [] | [Principal];
 	ecdsa_key_name: string;
+	/**
+	 * Chain Fusion Signer canister id. Used to derive the bitcoin address in
+	 * `btc_select_user_utxos_fee`
+	 */
 	cfs_canister_id: [] | [Principal];
+	/**
+	 * A list of allowed callers to restrict access to endpoints that do not particularly check or
+	 * use the `msg_caller()`
+	 */
 	allowed_callers: Array<Principal>;
+	/**
+	 * Root of trust for checking canister signatures.
+	 */
 	ic_root_key_raw: [] | [Uint8Array];
 	new_user_signups_allowed: [] | [boolean];
 }
@@ -208,6 +529,9 @@ export interface DappCarouselSettings {
 export interface DappSettings {
 	dapp_carousel: DappCarouselSettings;
 }
+/**
+ * Copy of synonymous Rosetta type.
+ */
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
 	freezing_threshold: bigint;
@@ -215,12 +539,27 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+/**
+ * Represents an IC delegation (public data only, no private keys).
+ */
 export interface Delegation {
 	pubkey: Uint8Array;
 	targets: [] | [Array<Principal>];
 	expiration: bigint;
 }
-export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
+export type DeleteContactResult =
+	| {
+			/**
+			 * The contact was deleted successfully.
+			 */
+			Ok: bigint;
+	  }
+	| {
+			/**
+			 * The contact was not deleted due to an error.
+			 */
+			Err: ContactError;
+	  };
 export type DismissedNotification =
 	| {
 			Qualified: {
@@ -230,13 +569,38 @@ export type DismissedNotification =
 			};
 	  }
 	| { Simple: { kind: SimpleNotificationKind; version: number } };
+/**
+ * An ERC compliant token on the Ethereum or EVM-compatible networks (for example, ERC20, ERC721,
+ * ERC1155).
+ */
 export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
 }
-export type EthAddress = { Public: string };
+export type EthAddress = {
+	/**
+	 * A public Ethereum address.
+	 *
+	 * # Format
+	 * A string, 42 characters long, starting with "0x" followed by
+	 * hex.  The address is case-insensitive.
+	 *
+	 * # Example
+	 * - `0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B`
+	 */
+	Public: string;
+};
+/**
+ * EVM / Ethereum-family transaction data.
+ */
 export interface EvmTransactionData {
+	/**
+	 * NFT token ID (ERC-721 / ERC-1155).
+	 */
 	nft_token_id: [] | [bigint];
+	/**
+	 * Hex-encoded input data.
+	 */
 	data: [] | [string];
 	chain_id: [] | [bigint];
 	nonce: [] | [bigint];
@@ -256,10 +620,16 @@ export interface ExchangeRate {
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;
 }
+/**
+ * A flat list of logical experimental features.
+ */
 export type ExperimentalFeatureSettingsFor = { AiAssistantBeta: null };
 export interface ExperimentalFeaturesSettings {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 }
+/**
+ * An EXT v2 compliant token on the Internet Computer.
+ */
 export interface ExtV2Token {
 	canister_id: Principal;
 }
@@ -269,27 +639,113 @@ export type GetAgreementHistoryResult =
 			Ok: Array<AgreementHistoryEntry>;
 	  }
 	| { Err: GetAgreementHistoryError };
+/**
+ * Types related to topping up the cycles ledger account for use with the signer.
+ */
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
 }
 export type GetAllowedCyclesResult =
-	| { Ok: GetAllowedCyclesResponse }
-	| { Err: GetAllowedCyclesError };
-export type GetContactResult = { Ok: Contact } | { Err: ContactError };
-export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
+	| {
+			/**
+			 * The allowed cycles were retrieved successfully.
+			 */
+			Ok: GetAllowedCyclesResponse;
+	  }
+	| {
+			/**
+			 * The allowed cycles were not retrieved due to an error.
+			 */
+			Err: GetAllowedCyclesError;
+	  };
+export type GetContactResult =
+	| {
+			/**
+			 * The contacts were retrieved successfully.
+			 */
+			Ok: Contact;
+	  }
+	| {
+			/**
+			 * The contacts were not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
+export type GetContactsResult =
+	| {
+			/**
+			 * The contacts were retrieved successfully.
+			 */
+			Ok: Array<Contact>;
+	  }
+	| {
+			/**
+			 * The contacts were not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
 export type GetUserProfileError = { NotFound: null };
-export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
+export type GetUserProfileResult =
+	| {
+			/**
+			 * The user's profile was retrieved successfully.
+			 */
+			Ok: UserProfile;
+	  }
+	| {
+			/**
+			 * The user's profile was not retrieved due to an error.
+			 */
+			Err: GetUserProfileError;
+	  };
+/**
+ * Request to retrieve stored transactions with cursor-based pagination.
+ */
 export interface GetUserTransactionsRequest {
+	/**
+	 * Which token's transactions to retrieve
+	 */
 	token_id: TokenId;
+	/**
+	 * Maximum number of transactions to return (capped at `MAX_GET_USER_TRANSACTIONS_RESULTS`)
+	 */
 	max_results: bigint;
+	/**
+	 * Opaque pagination cursor returned as `next_start` from a previous response.
+	 * `None` starts from the newest transactions.
+	 */
 	start: [] | [bigint];
 }
+/**
+ * Response containing stored transactions and pagination info.
+ */
 export interface GetUserTransactionsResponse {
+	/**
+	 * Opaque cursor for the next page. Pass as `start` to fetch older transactions.
+	 * `None` when there are no more older transactions.
+	 */
 	next_start: [] | [bigint];
+	/**
+	 * Total number of transactions stored for this (user, token) pair.
+	 * The frontend can compare this against `MAX_USER_TRANSACTIONS_PER_TOKEN` to skip
+	 * saving older transactions that would be immediately evicted.
+	 */
 	total_stored: bigint;
+	/**
+	 * Block index of the oldest stored transaction for this token.
+	 * The frontend can fetch from the network with `endBlock = oldest_block_index - 1`
+	 * to load even older history.
+	 */
 	oldest_block_index: [] | [bigint];
+	/**
+	 * Block index of the newest stored transaction for this token.
+	 * The frontend should fetch from the network starting after this block.
+	 */
 	newest_block_index: [] | [bigint];
+	/**
+	 * The requested transactions, sorted newest first
+	 */
 	transactions: Array<UserTransaction>;
 }
 export type GetUserTransactionsResult =
@@ -298,19 +754,60 @@ export type GetUserTransactionsResult =
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
+/**
+ * # HTTP Header.
+ *
+ * Represents a HTTP header.
+ *
+ * See [`HttpRequestArgs::headers`] and [`HttpRequestResult::headers`].
+ */
 export interface HttpHeader {
+	/**
+	 * Value of the header.
+	 */
 	value: string;
+	/**
+	 * Name of the header.
+	 */
 	name: string;
 }
 export interface HttpRequest {
+	/**
+	 * The requested path and query string, for example `/some/path?foo=bar`.
+	 *
+	 * Note: This does NOT contain the domain, port or protocol.
+	 */
 	url: string;
+	/**
+	 * The HTTP method of the request, such as `GET` or `POST`.
+	 */
 	method: string;
+	/**
+	 * The complete body of the HTTP request
+	 */
 	body: Uint8Array;
+	/**
+	 * The HTTP request headers
+	 */
 	headers: Array<[string, string]>;
 }
+/**
+ * # HTTP Request Result
+ *
+ * Result type of [`http_request`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-http_request).
+ */
 export interface HttpRequestResult {
+	/**
+	 * The response status (e.g. 200, 404).
+	 */
 	status: bigint;
+	/**
+	 * The response’s body.
+	 */
 	body: Uint8Array;
+	/**
+	 * List of HTTP response headers and their corresponding values.
+	 */
 	headers: Array<HttpHeader>;
 }
 export interface HttpResponse {
@@ -318,48 +815,124 @@ export interface HttpResponse {
 	headers: Array<[string, string]>;
 	status_code: number;
 }
+/**
+ * The public part of an Internet Identity delegation chain.
+ *
+ * This contains only public information (no private session keys) and
+ * is safe to transmit over the wire for backend verification.
+ */
 export interface IIDelegationChain {
 	public_key: Uint8Array;
 	delegations: Array<SignedDelegation>;
 }
+/**
+ * An ICRC-1 compliant token on the Internet Computer.
+ */
 export interface IcrcToken {
 	ledger_id: Principal;
 	index_id: [] | [Principal];
 }
+/**
+ * ICRC / ICP transaction data.
+ */
 export interface IcrcTransactionData {
 	fee: [] | [bigint];
 	memo: [] | [Uint8Array];
 	tx_type: IcrcTransactionType;
 }
+/**
+ * The kind of ICRC ledger operation.
+ */
 export type IcrcTransactionType =
 	| { Approve: { spender: string } }
 	| { Burn: null }
 	| { Mint: null }
 	| { Transfer: null };
+/**
+ * An account identifier for Internet Computer tokens.
+ */
 export type Icrcv2AccountId =
-	| { Account: Uint8Array }
 	| {
+			/**
+			 * This is a redacted identifier typically available from transaction records.
+			 */
+			Account: Uint8Array;
+	  }
+	| {
+			/**
+			 * An account identifier that declares the owner's principal.
+			 *
+			 * Note: Given a transaction, it is NOT typically possible to determine the owner
+			 * principal & subaccount ID.  A such, this type is primarily used for internal management
+			 * of accounts within a wallet.  It is not normally available for transactions with third
+			 * parties.
+			 */
 			WithPrincipal: { owner: Principal; subaccount: [] | [Uint8Array] };
 	  };
+/**
+ * Represents the MIME type of image.
+ */
 export type ImageMimeType =
 	| { 'image/gif': null }
 	| { 'image/png': null }
 	| { 'image/jpeg': null }
 	| { 'image/webp': null };
 export interface InitArg {
+	/**
+	 * The derivation origin used for II authentication, ensuring users get a
+	 * consistent identity across different domains.
+	 */
 	derivation_origin: [] | [string];
+	/**
+	 * The Internet Identity canister used for delegation verification.
+	 */
 	ii_canister_id: [] | [Principal];
 	ecdsa_key_name: string;
+	/**
+	 * Chain Fusion Signer canister id. Used to derive the bitcoin address in
+	 * `btc_select_user_utxos_fee`
+	 */
 	cfs_canister_id: [] | [Principal];
+	/**
+	 * A list of allowed callers to restrict access to endpoints that do not particularly check or
+	 * use the `msg_caller()`
+	 */
 	allowed_callers: Array<Principal>;
+	/**
+	 * Root of trust for checking canister signatures.
+	 */
 	ic_root_key_der: [] | [Uint8Array];
 	new_user_signups_allowed: [] | [boolean];
 }
-export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
+/**
+ * Bitcoin Network.
+ */
+export type Network =
+	| {
+			/**
+			 * The Bitcoin mainnet.
+			 */
+			mainnet: null;
+	  }
+	| {
+			/**
+			 * The Bitcoin regtest, used for local testing purposes.
+			 */
+			regtest: null;
+	  }
+	| {
+			/**
+			 * The Bitcoin testnet.
+			 */
+			testnet: null;
+	  };
 export interface NetworkSettings {
 	enabled: boolean;
 	is_testnet: boolean;
 }
+/**
+ * A flat list of logical networks.
+ */
 export type NetworkSettingsFor =
 	| { ArbitrumMainnet: null }
 	| { InternetComputer: null }
@@ -378,6 +951,9 @@ export type NetworkSettingsFor =
 	| { SolanaMainnet: null }
 	| { BitcoinMainnet: null }
 	| { BscTestnet: null };
+/**
+ * Discriminated union carrying the chain-specific portion of a transaction.
+ */
 export type NetworkTransactionData =
 	| { Btc: BtcTransactionData }
 	| { Evm: EvmTransactionData }
@@ -390,16 +966,43 @@ export interface NetworksSettings {
 export interface NotificationSettings {
 	dismissed_notifications: Array<DismissedNotification>;
 }
+/**
+ * Outpoint.
+ */
 export interface Outpoint {
+	/**
+	 * Transaction ID (TxID).
+	 *
+	 * The hash of the transaction that created the UTXO.
+	 */
 	txid: Uint8Array;
+	/**
+	 * Output Index (vout).
+	 *
+	 * The index of the specific output within that transaction (since a transaction can have multiple outputs).
+	 */
 	vout: number;
 }
 export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
 }
+/**
+ * Which external provider the agreement belongs to.
+ *
+ * Add a new variant and redeploy the canister when onboarding a new provider.
+ */
 export type ProviderAgreementProvider = { NearIntents: null };
+/**
+ * The feature/context within a provider that the agreement covers.
+ *
+ * A single provider may require separate acknowledgements for different scopes
+ * (e.g., swap, bridge, staking).
+ */
 export type ProviderAgreementScope = { Swap: null };
+/**
+ * Composite key identifying a specific provider agreement.
+ */
 export interface ProviderAgreementType {
 	provider: ProviderAgreementProvider;
 	scope: ProviderAgreementScope;
@@ -407,6 +1010,9 @@ export interface ProviderAgreementType {
 export type QualifiedNotificationKind =
 	| { NoIndexCanister: null }
 	| { UnavailableIndexCanister: null };
+/**
+ * Error returned when a caller exceeds the allowed call rate.
+ */
 export interface RateLimitError {
 	max_calls: number;
 	window_ns: bigint;
@@ -416,15 +1022,34 @@ export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
+/**
+ * Request to save finalized transactions.
+ */
 export interface SaveUserTransactionsRequest {
+	/**
+	 * Which token these transactions belong to
+	 */
 	token_id: TokenId;
+	/**
+	 * Transactions to save (must be finalized/immutable)
+	 */
 	transactions: Array<UserTransaction>;
 }
 export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
-	| { InvalidDelegationChain: { msg: string } }
-	| { RateLimited: RateLimitError }
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
 	| { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
 	ii_delegation_chain: [] | [IIDelegationChain];
@@ -441,7 +1066,19 @@ export interface SetShowTestnetsRequest {
 	show_testnets: boolean;
 }
 export type SetTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
-export type SetUserShowTestnetsResult = { Ok: null } | { Err: UpdateAgreementsError };
+export type SetUserShowTestnetsResult =
+	| {
+			/**
+			 * The user's show testnets was set successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's show testnets was not set due to an error.
+			 */
+			Err: UpdateAgreementsError;
+	  };
 export interface Settings {
 	networks: NetworksSettings;
 	notifications: [] | [NotificationSettings];
@@ -449,16 +1086,31 @@ export interface Settings {
 	experimental_features: ExperimentalFeaturesSettings;
 	transactions: [] | [TransactionSettings];
 }
+/**
+ * A signed delegation from the delegation chain.
+ */
 export interface SignedDelegation {
 	signature: Uint8Array;
 	delegation: Delegation;
 }
 export type SimpleNotificationKind = { BtcActivityInfo: null } | { HiddenMicroTransactions: null };
+/**
+ * Solana transaction data.
+ */
 export interface SolTransactionData {
 	fee: [] | [bigint];
+	/**
+	 * Owner account that controls the destination token account.
+	 */
 	to_owner: [] | [string];
+	/**
+	 * Owner account that controls the source token account (relevant for SPL).
+	 */
 	from_owner: [] | [string];
 }
+/**
+ * A Solana token
+ */
 export interface SplToken {
 	decimals: [] | [number];
 	token_address: string;
@@ -477,6 +1129,9 @@ export interface Stats {
 export interface TestnetsSettings {
 	show_testnets: boolean;
 }
+/**
+ * A variant describing any token
+ */
 export type Token =
 	| { Erc20: ErcToken }
 	| { ExtV2: ExtV2Token }
@@ -493,24 +1148,114 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
+/**
+ * A unified token identifier covering both native and custom tokens for the main supported chains.
+ * Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
+ * selected native tokens (e.g., ETH, ICP, SOL, BTC) and distinguishes several ERC sub-standards.
+ * Suitable for flows that need to reference one of these supported tokens: transactions, activity,
+ * etc.
+ */
 export type TokenId =
-	| { Erc20: [string, bigint] }
-	| { ExtV2: Principal }
-	| { SolNativeDevnet: null }
-	| { Icrc: Principal }
-	| { EvmNative: bigint }
-	| { BtcNativeMainnet: null }
-	| { Erc721: [string, bigint] }
-	| { SolNativeMainnet: null }
-	| { SplDevnet: string }
-	| { SplMainnet: string }
-	| { IcpNative: null }
-	| { IcPunks: Principal }
-	| { BtcNativeTestnet: null }
-	| { Erc1155: [string, bigint] }
-	| { Erc4626: [string, bigint] }
-	| { Dip721: Principal };
+	| {
+			/**
+			 * ERC-20 token on an EVM chain
+			 */
+			Erc20: [string, bigint];
+	  }
+	| {
+			/**
+			 * EXT v2 token on the Internet Computer
+			 */
+			ExtV2: Principal;
+	  }
+	| {
+			/**
+			 * Native SOL on devnet
+			 */
+			SolNativeDevnet: null;
+	  }
+	| {
+			/**
+			 * ICRC token on ICP
+			 */
+			Icrc: Principal;
+	  }
+	| {
+			/**
+			 * Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
+			 */
+			EvmNative: bigint;
+	  }
+	| {
+			/**
+			 * Native BTC on mainnet
+			 */
+			BtcNativeMainnet: null;
+	  }
+	| {
+			/**
+			 * ERC-721 NFT on an EVM chain
+			 */
+			Erc721: [string, bigint];
+	  }
+	| {
+			/**
+			 * Native SOL on mainnet
+			 */
+			SolNativeMainnet: null;
+	  }
+	| {
+			/**
+			 * SPL token on Solana devnet
+			 */
+			SplDevnet: string;
+	  }
+	| {
+			/**
+			 * SPL token on Solana mainnet
+			 */
+			SplMainnet: string;
+	  }
+	| {
+			/**
+			 * Native ICP
+			 */
+			IcpNative: null;
+	  }
+	| {
+			/**
+			 * ICPunks-compatible token on the Internet Computer
+			 */
+			IcPunks: Principal;
+	  }
+	| {
+			/**
+			 * Native BTC on testnet
+			 */
+			BtcNativeTestnet: null;
+	  }
+	| {
+			/**
+			 * ERC-1155 multi-token on an EVM chain
+			 */
+			Erc1155: [string, bigint];
+	  }
+	| {
+			/**
+			 * ERC-4626 vault token on an EVM chain
+			 */
+			Erc4626: [string, bigint];
+	  }
+	| {
+			/**
+			 * DIP721 token on the Internet Computer
+			 */
+			Dip721: Principal;
+	  };
 export type TokenSection = { Spam: null } | { Hidden: null };
+/**
+ * Possible error conditions when topping up the cycles ledger.
+ */
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {
@@ -526,26 +1271,77 @@ export type TopUpCyclesLedgerError =
 				available: bigint;
 			};
 	  };
+/**
+ * A request to top up the cycles ledger.
+ */
 export interface TopUpCyclesLedgerRequest {
+	/**
+	 * If the cycles ledger account balance is below this threshold, top it up.
+	 */
 	threshold: [] | [bigint];
+	/**
+	 * The percentage of the backend canister's own cycles to send to the cycles ledger.
+	 */
 	percentage: [] | [number];
 }
+/**
+ * Possible successful responses when topping up the cycles ledger.
+ */
 export interface TopUpCyclesLedgerResponse {
+	/**
+	 * The backend canister cycles after topping up.
+	 */
 	backend_cycles: bigint;
+	/**
+	 * The ledger balance after topping up.
+	 */
 	ledger_balance: bigint;
+	/**
+	 * The amount topped up.
+	 * - Zero if the ledger balance was already sufficient.
+	 * - The requested amount otherwise.
+	 */
 	topped_up: bigint;
 }
 export type TopUpCyclesLedgerResult =
-	| { Ok: TopUpCyclesLedgerResponse }
-	| { Err: TopUpCyclesLedgerError };
+	| {
+			/**
+			 * The cycles ledger was topped up successfully.
+			 */
+			Ok: TopUpCyclesLedgerResponse;
+	  }
+	| {
+			/**
+			 * The cycles ledger could not be topped up due to an error.
+			 */
+			Err: TopUpCyclesLedgerError;
+	  };
 export interface TransactionFilterSettings {
 	hide_micro_transactions: boolean;
 }
 export interface TransactionSettings {
 	filter: [] | [TransactionFilterSettings];
 }
+/**
+ * # Transform Args.
+ *
+ * ```text
+ * record {
+ * response : http_response;
+ * context : blob;
+ * }
+ * ```
+ *
+ * See [`TransformContext`].
+ */
 export interface TransformArgs {
+	/**
+	 * Context for response transformation
+	 */
 	context: Uint8Array;
+	/**
+	 * Raw response from remote service, to be transformed
+	 */
 	response: HttpRequestResult;
 }
 export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
@@ -565,12 +1361,31 @@ export interface UpdateUserAgreementsRequest {
 	agreements: UserAgreements;
 	current_user_version: [] | [bigint];
 }
+/**
+ * Per-agreement status/metadata.
+ */
 export interface UserAgreement {
+	/**
+	 * When the user last accepted this agreement (nanos since epoch).
+	 */
 	last_accepted_at_ns: [] | [bigint];
+	/**
+	 * SHA256 hash of the agreement text, to detect changes.
+	 */
 	text_sha256: [] | [string];
+	/**
+	 * Whether the user has accepted this agreement (true), rejected it (false), or has not yet
+	 * responded (null).
+	 */
 	accepted: [] | [boolean];
+	/**
+	 * When the agreement itself was last updated (millis since epoch).
+	 */
 	last_updated_at_ms: [] | [bigint];
 }
+/**
+ * The user agreements tracked by the system.
+ */
 export interface UserAgreements {
 	license_agreement: UserAgreement;
 	privacy_policy: UserAgreement;
@@ -583,25 +1398,75 @@ export interface UserProfile {
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }
+/**
+ * A finalized transaction stored in the backend.
+ *
+ * Contains common fields shared across all networks plus a network-specific
+ * payload via [`NetworkTransactionData`]. Only fully confirmed/finalized
+ * transactions should be stored here.
+ */
 export interface UserTransaction {
+	/**
+	 * Network-unique identifier (EVM tx hash, BTC txid, SOL signature,
+	 * stringified ICRC block index, etc.)
+	 */
 	id: string;
+	/**
+	 * Recipient address or account (`None` for contract creation, mint, burn, …).
+	 */
 	to: [] | [string];
+	/**
+	 * Chain-specific ordering index (EVM block number, Bitcoin block height,
+	 * Solana slot, ICP block index, etc.)
+	 */
 	block_index: bigint;
+	/**
+	 * Value transferred in the token's smallest unit.
+	 */
 	value: bigint;
+	/**
+	 * Sender address or account.
+	 */
 	from: string;
+	/**
+	 * Network-specific data that only applies to a particular chain family.
+	 */
 	network_data: NetworkTransactionData;
+	/**
+	 * Block timestamp in seconds since epoch.
+	 */
 	timestamp: bigint;
 }
 export type UserTransactionError =
 	| {
+			/**
+			 * Reserved — duplicates are currently silently skipped during save.
+			 */
 			DuplicateTransaction: { id: string };
 	  }
 	| { InternalError: { msg: string } }
 	| { TooManyTransactions: null }
-	| { UserNotFound: null };
+	| {
+			/**
+			 * Reserved for future caller-validation logic.
+			 */
+			UserNotFound: null;
+	  };
+/**
+ * Unspent Transaction Output (UTXO).
+ */
 export interface Utxo {
+	/**
+	 * The block height at which the UTXO was created.
+	 */
 	height: number;
+	/**
+	 * The value of the UTXO in satoshis.
+	 */
 	value: bigint;
+	/**
+	 * The outpoint of the UTXO.
+	 */
 	outpoint: Outpoint;
 }
 export interface _SERVICE {

@@ -46,7 +46,14 @@ import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import { ZCHF_TOKEN } from '$env/tokens/tokens-erc20/tokens.zchf.env';
 import { ICP_TOKEN as ICP_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.icp.env';
+import { USDC_TOKEN as USDC_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
 import { ICP_TOKEN as ICP_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.icp.env';
+import { USDC_TOKEN as USDC_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { USDC_TOKEN as USDC_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
+import { USDC_TOKEN as USDC_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdt.env';
 import type {
 	Erc20Contract,
 	RequiredAdditionalErc20Token,
@@ -147,5 +154,12 @@ export const ERC20_SUGGESTED_TOKENS = [
 	USDC_TOKEN,
 	ICP_TOKEN,
 	ICP_ARBITRUM_TOKEN,
-	ICP_BASE_TOKEN
+	ICP_BASE_TOKEN,
+	USDC_ARBITRUM_TOKEN,
+	USDT_ARBITRUM_TOKEN,
+	USDC_BASE_TOKEN,
+	USDC_BSC_TOKEN,
+	USDT_BSC_TOKEN,
+	USDC_POLYGON_TOKEN,
+	USDT_POLYGON_TOKEN
 ];

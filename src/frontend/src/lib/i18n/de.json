@@ -129,7 +129,7 @@
 			"internet_identity": "",
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
-			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
+			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
 			"social_login": "Einfacher und sicherer Zugriff via Social Login"
 		},
 		"alt": {
@@ -1961,7 +1961,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC-Transaktionsinformationen stammen von zentralen Drittanbietern und sollten eigenständig überprüft werden.",
-			"hidden_micro_transactions": "Transaktionen mit sehr kleinen Token-Werten sind derzeit ausgeblendet. Um sie anzuzeigen, gehen Sie zu <a href=\"/settings/\">Einstellungen</a>."
+			"hidden_micro_transactions": "<strong>OISY schützt dich!</strong> Transaktionen mit sehr kleinen Token-Werten sind derzeit ausgeblendet. Um sie anzuzeigen, gehe zu <a href=\"/settings/\">Einstellungen</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Mehr erfahren</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transaktionen für $token_list können nicht angezeigt werden. Kein Index-Canister verfügbar.",
