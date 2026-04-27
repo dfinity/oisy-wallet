@@ -1,3 +1,4 @@
+import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcrc } from '$icp/services/ic-send.services';
@@ -17,7 +18,7 @@ import {
 } from '$lib/api/icp-swap-pool.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import { icpSwapAmounts } from '$lib/services/icp-swap.services';
+import { icpSwapAmounts, icpSwapSupportedTokens } from '$lib/services/icp-swap.services';
 import { fetchIcpSwap } from '$lib/services/swap.services';
 import { SwapErrorCodes } from '$lib/types/swap';
 import * as swapUtils from '$lib/utils/swap.utils';
@@ -132,9 +133,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(setCustomToken).mockResolvedValue();
 			vi.mocked(loadCustomTokens).mockResolvedValue();
 
-			await expect(
-				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })
-			).resolves.not.toThrowError();
+			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).resolves.not.toThrow();
 
 			expect(swapArgs.progress).toHaveBeenCalledTimes(3);
 			expect(swapArgs.progress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
@@ -157,9 +156,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(withdraw).mockResolvedValue(1n);
 			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
 
-			await expect(
-				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })
-			).resolves.not.toThrowError();
+			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })).resolves.not.toThrow();
 
 			expect(hasSufficientIcrcAllowance).toHaveBeenCalled();
 			expect(approve).not.toHaveBeenCalled();
@@ -178,9 +175,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(withdraw).mockResolvedValue(1n);
 			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
 
-			await expect(
-				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })
-			).resolves.not.toThrowError();
+			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })).resolves.not.toThrow();
 
 			expect(hasSufficientIcrcAllowance).toHaveBeenCalled();
 			expect(approve).toHaveBeenCalled();
@@ -199,9 +194,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(withdraw).mockResolvedValue(1n);
 			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
 
-			await expect(
-				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })
-			).resolves.not.toThrowError();
+			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })).resolves.not.toThrow();
 
 			expect(hasSufficientIcrcAllowance).toHaveBeenCalled();
 			// Should still proceed with approval on error (safe fallback)
@@ -212,9 +205,7 @@ describe('icp-swap.services', () => {
 		it('Swap failed. Pool not found', async () => {
 			vi.mocked(getPoolCanister).mockRejectedValue(new Error('Swap failed. Pool not found.'));
 
-			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrowError(
-				en.swap.error.pool_not_found
-			);
+			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(en.swap.error.pool_not_found);
 		});
 
 		it('Swap failed. Deposit failed', async () => {
@@ -222,7 +213,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(sendIcrc).mockResolvedValue(1n);
 			vi.mocked(deposit).mockRejectedValue(new Error('fail'));
 
-			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrowError(en.swap.error.deposit_error);
+			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(en.swap.error.deposit_error);
 		});
 
 		it('Swap failed. Withdraw Success', async () => {
@@ -232,7 +223,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(swapIcp).mockRejectedValue(new Error('swap fail'));
 			vi.mocked(withdraw).mockResolvedValue(1n);
 
-			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrowError(
+			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(
 				en.swap.error.swap_failed_withdraw_success
 			);
 		});
@@ -381,6 +372,41 @@ describe('icp-swap.services', () => {
 					fee: ZERO
 				})
 			);
+		});
+	});
+
+	describe('icpSwapSupportedTokens', () => {
+		beforeEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('should return unique token addresses from all pools', async () => {
+			const mockPools: PoolData[] = [
+				{
+					...mockPool,
+					token0: { address: 'canister-a', standard: 'icrc' },
+					token1: { address: 'canister-b', standard: 'icrc' }
+				},
+				{
+					...mockPool,
+					token0: { address: 'canister-b', standard: 'icrc' },
+					token1: { address: 'canister-c', standard: 'icrc' }
+				}
+			];
+
+			vi.spyOn(factoryApi, 'getAllPools').mockResolvedValue(mockPools);
+
+			const result = await icpSwapSupportedTokens({ identity: mockIdentity });
+
+			expect(result).toEqual(new Set(['canister-a', 'canister-b', 'canister-c']));
+		});
+
+		it('should return an empty set when there are no pools', async () => {
+			vi.spyOn(factoryApi, 'getAllPools').mockResolvedValue([]);
+
+			const result = await icpSwapSupportedTokens({ identity: mockIdentity });
+
+			expect(result).toEqual(new Set());
 		});
 	});
 });

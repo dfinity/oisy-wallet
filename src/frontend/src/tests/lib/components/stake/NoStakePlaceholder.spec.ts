@@ -57,7 +57,11 @@ describe('NoStakePlaceholder', () => {
 		const expected = formatCurrency({
 			value: mockPotential,
 			currency: Currency.USD,
-			exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+			exchangeRate: {
+				currency: Currency.USD,
+				exchangeRateToUsd: 1,
+				exchangeRate24hChangeMultiplier: 1
+			},
 			language: Languages.ENGLISH
 		});
 
@@ -78,7 +82,11 @@ describe('NoStakePlaceholder', () => {
 		const expected = formatCurrency({
 			value: threshold,
 			currency: Currency.USD,
-			exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+			exchangeRate: {
+				currency: Currency.USD,
+				exchangeRateToUsd: 1,
+				exchangeRate24hChangeMultiplier: 1
+			},
 			language: Languages.ENGLISH
 		});
 

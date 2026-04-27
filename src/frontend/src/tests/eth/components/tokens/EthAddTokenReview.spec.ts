@@ -96,6 +96,7 @@ describe('EthAddTokenReview', () => {
 		} as unknown as InfuraErc721Provider;
 
 		const mockErc1155Provider = {
+			isInterfaceErc1155: vi.fn().mockResolvedValue(true),
 			metadata: mockErc1155Metadata,
 			provider: new InfuraErc1155Provider(ETHEREUM_NETWORK.providers.infura),
 			network: ETHEREUM_NETWORK
@@ -180,7 +181,54 @@ describe('EthAddTokenReview', () => {
 		});
 	});
 
-	it('should render an error if metadata for erc20 or erc721 does not contain a symbol', async () => {
+	it('should render an error for unrecognized standards', async () => {
+		const mockErc20Provider = {
+			isErc20: vi.fn().mockResolvedValue(false),
+			metadata: mockErc20Metadata,
+			provider: new InfuraErc20Provider(ETHEREUM_NETWORK.providers.infura),
+			network: ETHEREUM_NETWORK
+		} as unknown as InfuraErc20Provider;
+
+		const mockErc721Provider = {
+			isInterfaceErc721: vi.fn().mockResolvedValue(false),
+			metadata: mockErc721Metadata,
+			provider: new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura),
+			network: ETHEREUM_NETWORK
+		} as unknown as InfuraErc721Provider;
+
+		const mockErc1155Provider = {
+			isInterfaceErc1155: vi.fn().mockResolvedValue(false),
+			metadata: mockErc1155Metadata,
+			provider: new InfuraErc1155Provider(ETHEREUM_NETWORK.providers.infura),
+			network: ETHEREUM_NETWORK
+		} as unknown as InfuraErc1155Provider;
+
+		vi.spyOn(infuraErc20SpyProviders, 'infuraErc20Providers').mockReturnValue(mockErc20Provider);
+		vi.spyOn(infuraErc721SpyProviders, 'infuraErc721Providers').mockReturnValue(mockErc721Provider);
+		vi.spyOn(infuraErc1155SpyProviders, 'infuraErc1155Providers').mockReturnValue(
+			mockErc1155Provider
+		);
+
+		render(EthAddTokenReview, {
+			props: {
+				...baseProps,
+				contractAddress: mockEthAddress,
+				network: ETHEREUM_NETWORK
+			}
+		});
+
+		await vi.waitFor(() => {
+			expect(mockErc20Metadata).not.toHaveBeenCalled();
+			expect(mockErc721Metadata).not.toHaveBeenCalled();
+			expect(mockErc1155Metadata).not.toHaveBeenCalled();
+
+			expect(toastsError).toHaveBeenCalledWith({
+				msg: { text: en.tokens.error.unrecognised_erc_interface }
+			});
+		});
+	});
+
+	it('should render an error if metadata for erc20 or erc721 or erc1155 does not contain a symbol', async () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(true),
 			metadata: vi.fn().mockResolvedValue({ name: 'Test Token', decimals: 0 }),
@@ -205,7 +253,7 @@ describe('EthAddTokenReview', () => {
 		});
 	});
 
-	it('should render an error if metadata for erc20 or erc721 does not contain a name', async () => {
+	it('should render an error if metadata for erc20 or erc721 or erc1155 does not contain a name', async () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(true),
 			metadata: vi.fn().mockResolvedValue({ symbol: 'HSI', decimals: 0 }),

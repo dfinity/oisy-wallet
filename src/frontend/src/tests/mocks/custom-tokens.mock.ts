@@ -126,6 +126,45 @@ export const mockCustomTokensErc20: CustomToken[] = [
 	}
 ];
 
+export const mockCustomTokensErc4626: CustomToken[] = [
+	{
+		version: toNullable(1n),
+		enabled: true,
+		token: {
+			Erc4626: {
+				chain_id: ETHEREUM_NETWORK.chainId,
+				token_address: mockEthAddress
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	},
+	{
+		version: toNullable(2n),
+		enabled: true,
+		token: {
+			Erc4626: {
+				chain_id: BASE_NETWORK.chainId,
+				token_address: mockEthAddress2.toUpperCase()
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable(true)
+	},
+	{
+		version: toNullable(),
+		enabled: false,
+		token: {
+			Erc4626: {
+				chain_id: POLYGON_AMOY_NETWORK.chainId,
+				token_address: mockEthAddress3
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable(false)
+	}
+];
+
 export const mockCustomTokensErc721: CustomToken[] = [
 	{
 		version: toNullable(1n),

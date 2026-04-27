@@ -23,7 +23,7 @@
 		SEND_DESTINATION_WIZARD_STEP,
 		SEND_FORM_DESTINATION_NEXT_BUTTON
 	} from '$lib/constants/test-ids.constants';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import { allContacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -74,7 +74,10 @@
 		if (isNullish(selectedContact)) {
 			// If the next button is clicked and there is no contact selected,
 			// we manually look up the contact and select it if one exists
-			const contact = getContactForAddress({ addressString: destination, contactList: $contacts });
+			const contact = getContactForAddress({
+				addressString: destination,
+				contactList: $allContacts
+			});
 			if (nonNullish(contact)) {
 				selectedContact = contact;
 			}

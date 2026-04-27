@@ -10,10 +10,9 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { NftError } from '$lib/types/errors';
-import type { Nft, NftId } from '$lib/types/nft';
+import type { Nft } from '$lib/types/nft';
 import {
 	filterSortByCollection,
-	findNewNftIds,
 	findNft,
 	findNftsByNetwork,
 	findNftsByToken,
@@ -227,54 +226,13 @@ describe('nfts.utils', () => {
 		});
 	});
 
-	describe('findNewNftIds', () => {
-		it('should return new nft ids', () => {
-			const loadedNfts = [mockNft1, mockNft3];
-			const inventory = [mockNft1.id, mockNft2.id];
-
-			const result = findNewNftIds({
-				nfts: loadedNfts,
-				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
-				inventory
-			});
-
-			expect(result).toEqual([mockNft2.id]);
-		});
-
-		it('should return empty array if no new nft ids exist', () => {
-			const loadedNfts = [mockNft1, mockNft3];
-			const inventory = [mockNft1.id];
-
-			const result = findNewNftIds({
-				nfts: loadedNfts,
-				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
-				inventory
-			});
-
-			expect(result).toEqual([]);
-		});
-
-		it('should return empty array if inventory is empty', () => {
-			const loadedNfts = [mockNft1, mockNft3];
-			const inventory: NftId[] = [];
-
-			const result = findNewNftIds({
-				nfts: loadedNfts,
-				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
-				inventory
-			});
-
-			expect(result).toEqual([]);
-		});
-	});
-
 	describe('parseMetadataResourceUrl', () => {
 		const mockError = new NftError('123456', PEPE_TOKEN.address);
 
 		it('should raise an error if URL is not a parseable URL', () => {
 			const url = 'invalid-url';
 
-			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrowError(mockError);
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
 		});
 
 		it('should return the same URL if not IPFS protocol', () => {
@@ -324,7 +282,7 @@ describe('nfts.utils', () => {
 		it('should not allow URL with localhost', () => {
 			const url = 'http://localhost:3000/some-data';
 
-			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrowError(mockError);
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
 		});
 	});
 

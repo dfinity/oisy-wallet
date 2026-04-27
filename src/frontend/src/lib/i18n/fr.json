@@ -41,7 +41,12 @@
 			"more": "Plus",
 			"less": "Moins",
 			"ellipsis": "…",
-			"learn_more": "En savoir plus"
+			"learn_more": "En savoir plus",
+			"sorting": "Tri",
+			"unlimited": "",
+			"info": "",
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
@@ -57,11 +62,12 @@
 			"switch_currency": "Changer de devise",
 			"more": "Afficher tout le texte",
 			"less": "Afficher moins de texte",
-			"learn_more": "Suivre le lien pour en savoir plus"
+			"learn_more": "Suivre le lien pour en savoir plus",
+			"up_one_level": "Monter d'un niveau"
 		},
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
-			"standalone_mode": "Nous avons amélioré le fonctionnement de $oisy_short lorsqu'il est installé sur un écran d'accueil, comme c'est votre cas. Si vous rencontrez des problèmes pour connecter $oisy_short ou signer des transactions, veuillez supprimer $oisy_short de l'écran d'accueil et l'installer à nouveau. Sur iPhone, assurez-vous de désélectionner « Ouvrir en tant qu'application Web ».<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Lire la suite</a>",
+			"standalone_mode": "Des problèmes de connexion connus surviennent lorsqu'une application et $oisy_short sont tous deux installés sur l'écran d'accueil. Si vous rencontrez des problèmes de connexion à $oisy_short ou de signature de transactions, veuillez lancer l'application depuis un navigateur classique. Nous travaillons sur un correctif qui sera bientôt disponible. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">En savoir plus</a>",
 			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo."
 		}
 	},
@@ -73,10 +79,11 @@
 			"activity": "Activité",
 			"airdrops": "Récompenses",
 			"earning": "Gains",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Code source sur GitHub",
 			"view_on_explorer": "Voir sur l'explorateur",
 			"source_code": "Code source",
-			"changelog": "Journal des modifications",
 			"documentation": "Documentation",
 			"support": "Support",
 			"confirm_navigate": "Êtes-vous certain de vouloir quitter cette page ?",
@@ -95,8 +102,9 @@
 			"dapp_explorer": "Ouvrir l'explorateur d'applications",
 			"activity": "Ouvrir la vue d'activité",
 			"airdrops": "Ouvrir la vue des récompenses",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Votre adresse de portefeuille, les paramètres, la déconnexion et les liens externes",
-			"changelog": "Ouvrir le journal des modifications de $oisy_name sur GitHub pour consulter les dernières mises à jour",
 			"documentation": "Ouvrir la documentation de $oisy_name",
 			"support": "Ouvrir la section Support de la documentation de $oisy_name",
 			"open_twitter": "Ouvrir le fil X/Twitter de DFINITY",
@@ -118,13 +126,17 @@
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
+			"internet_identity": "",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
-			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
+			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
 			"social_login": "Accès instantané et privé + connexion via les réseaux sociaux"
 		},
 		"alt": {
-			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile"
+			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "Votre session a été verrouillée dans un autre onglet."
@@ -136,12 +148,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Pas d'Internet Identity.",
-			"invalid_pouh_credential": "Désolé, mais une erreur s'est produite lors de la validation du Certificat d'Humanité. Veuillez contacter l'émetteur et demander à nouveau le Certificat.",
-			"error_validating_pouh_credential_oisy": "Désolé, mais une erreur s'est produite lors de la validation du Certificat d'Humanité dans $oisy_short : $error",
-			"error_validating_pouh_credential": "Désolé, mais une erreur s'est produite lors de la validation du Certificat d'Humanité.",
-			"error_requesting_pouh_credential": "Désolé, mais une erreur s'est produite lors de la demande du Certificat d'Humanité.",
-			"missing_pouh_issuer_origin": "Désolé, mais une erreur s'est produite lors de la demande du Certificat d'Humanité. L'origine de l'émetteur est manquante.",
-			"no_pouh_credential": "Désolé, mais une erreur s'est produite lors de la demande du Certificat d'Humanité. Avez-vous un Certificat valide dans Decide AI ?",
 			"error_while_signing_in": "Quelque chose s'est mal passé lors de la connexion.",
 			"unexpected_issue_with_syncing": "Problème inattendu lors de la synchronisation du statut de votre authentification."
 		},
@@ -176,7 +182,6 @@
 			"title_part_1": "Déverrouillez pour continuer",
 			"title_part_2": "Vous avez précédemment verrouillé votre portefeuille pour le protéger. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
 			"unlock": "Ouvrir",
-			"unlock_with_legacy_login": "",
 			"logout": "Se déconnecter",
 			"logout_clear_cash_message": "La déconnexion effacera toutes les données mises en cache",
 			"learn_more": "En savoir plus"
@@ -206,15 +211,17 @@
 			"website": "Image de $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Réseaux sociaux",
-			"verifiable_credentials": "Identifiants Vérifiables",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Jeu",
-			"tools": "Outils",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "IA",
-			"nft": "NFT"
+			"defi": "DeFi",
+			"game": "Jeu",
+			"nft": "NFT",
+			"rwa": "",
+			"social_media": "Réseaux sociaux",
+			"staking": "Staking",
+			"tools": "Outils",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -347,7 +354,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "La première plateforme pour développer des applications qui s'écrivent toutes seules.",
-				"call_to_action": "Essayer Caffeine",
 				"description": "Caffeine est la première plateforme pour développer des applications qui s'écrivent toutes seules. Il suffit de parler à l'IA sur ordinateur ou mobile, et elle crée des applications et services pour vous – y compris celles qui se connectent à OISY Wallet. Découvrez l'avenir du développement d'applications avec la création assistée par IA.",
 				"carousel": {
 					"text": "Bonjour, internet auto-écrit",
@@ -404,6 +410,65 @@
 				"name": "Kamino",
 				"one_liner": "Kamino est le plus grand protocole d'emprunt et de prêt sur Solana, alimentant une part importante de l'activité DeFi du réseau.",
 				"description": "Kamino est une plateforme de finance décentralisée (DeFi) sur la blockchain Solana qui intègre la fourniture de liquidités, le prêt et le trading avec effet de levier dans une seule suite de produits. Elle simplifie ces stratégies DeFi, en particulier grâce à ses coffres de liquidité automatisés et son système Kamino Lend, et utilise une gestion de liquidité concentrée pour augmenter l'efficacité du capital pour ses utilisateurs."
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -441,7 +506,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Gardez un œil sur les prochains airdrops de tokens ! <a href=\"https://x.com/oisy\" target=\"_blank\">Suivez-nous sur X</a>, rejoignez notre <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, ou rejoignez notre <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> pour rester informé.",
-			"coming_soon": "L'épisode 6 de $oisy_short arrive bientôt",
+			"coming_soon": "Le prochain épisode de $oisy_short Sprinkles arrive bientôt",
 			"reward_banner": "Bannière de la campagne $campaignName"
 		},
 		"campaigns": {
@@ -544,6 +609,36 @@
 						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
 					}
 				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles : L'épisode 6 est en ligne 🎉",
+				"one_liner": "Gagnez des Sprinkles en étant actif, en parrainant d'autres utilisateurs et en utilisant OISY sur plusieurs chaînes. Vos actions augmentent vos récompenses, et les parrainages actifs les renforcent davantage.<br/>De plus, désormais plus de chaînes signifie de meilleures chances de gagner.",
+				"participate_title": "Gagnez des tokens pour votre activité et vos parrainages. Plus de chaînes signifie plus de chances.",
+				"description": "Restez actif pour vous qualifier : connectez-vous souvent, effectuez des actions dans votre portefeuille et détenez au moins 5 $.<br/>Chaque chaîne active améliore vos chances grâce à un Multiplicateur Multichaîne.<br/>Gagnez 10 % des amis qui se qualifient.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "Bienvenue sur $oisy_short !",
+					"subtitle": "Prêt(e) à gagner ?",
+					"description": "Vous êtes à 2 étapes de votre première récompense : Connectez-vous, détenez 5 $+ et effectuez 2 actions. C'est tout ce qu'il faut pour commencer à gagner des Sprinkles.<br><br>Vous en voulez plus ? Parrainez vos amis et obtenez un bonus chaque fois que l'un d'eux gagne des Sprinkles."
+				},
+				"win": {
+					"default": {
+						"title": "Vous avez été récompensé(e)",
+						"description": "Vos récompenses viennent d'arriver dans votre portefeuille.<br>N'oubliez pas de parrainer et de rester actif(ve) pour en gagner davantage",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Félicitations pour avoir gagné les plus gros OISY Sprinkles d'aujourd'hui !",
+						"description": "Vous venez de gagner notre meilleure récompense Sprinkles<br>Restez actif et continuez à parrainer pour gagner plus.",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Un petit merci",
+						"description": "L'un de vos filleuls vient de recevoir des Sprinkles.",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},
@@ -600,6 +695,7 @@
 			"no_infura_erc721_provider": "Pas de fournisseur Infura ERC721 pour le réseau $network",
 			"no_infura_erc1155_provider": "Pas de fournisseur Infura ERC1155 pour le réseau $network",
 			"no_infura_erc20_icp_provider": "Pas de fournisseur Infura ERC20 ICP pour le réseau $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Pas de réseau Solana pour le réseau $network",
 			"loading_address": "Erreur lors du chargement de l'adresse $symbol.",
 			"loading_balance": "Erreur lors du chargement du solde $symbol pour le réseau $network.",
@@ -618,8 +714,11 @@
 			"btc_withdrawal_statuses": "Erreur lors de la récupération des statuts de retrait BTC.",
 			"transaction_price": "Erreur lors du chargement de l'estimation du prix d'une transaction.",
 			"icrc_canisters": "Erreur lors du chargement des canisters ICRC.",
-			"icrc_canister_loading": "Le token avec le canister Ledger $ledgerCanisterId n'a pas pu être chargé car il ne répond pas actuellement.",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "Le token $tokenSymbol ne répond pas et ne peut pas être chargé pour le moment. Veuillez réessayer plus tard.",
+			"icrc_canister_loading_custom": "Le token avec le canister Ledger $ledgerCanisterId ne répond pas et ne peut être chargé pour le moment. Veuillez réessayer plus tard.",
 			"erc20_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC721.",
 			"erc1155_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC1155.",
 			"spl_custom_tokens": "Erreur lors du chargement des tokens personnalisés SPL.",
@@ -627,6 +726,7 @@
 			"icrc_custom_token": "Erreur lors du chargement du token personnalisé ICRC.",
 			"ext_custom_tokens": "Erreur lors du chargement des tokens personnalisés EXT.",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "Votre portefeuille nécessite des données initiales qui n'ont pas encore été chargées. Veuillez réessayer.",
 			"allow_signing": "Un problème est survenu lors de la configuration de votre portefeuille pour la signature. Vous avez été déconnecté. Si le problème persiste, contactez le support.",
 			"waiting_for_allowed_cycles_aborted": "Préparation du ledger de cycles abandonnée. Veuillez essayer de vous connecter plus tard",
@@ -662,11 +762,6 @@
 			"active_networks_description": "Sélectionnez les réseaux avec lesquels vous souhaitez travailler dans $oisy_name. Les tokens et transactions des réseaux inactifs ne s'afficheront pas et ne seront pas inclus dans votre solde disponible.",
 			"enable_network": "Activer le réseau",
 			"disable_network": "Désactiver le réseau",
-			"credentials_title": "Identifiants",
-			"pouh_credential": "Certificat d'Humanité",
-			"pouh_credential_description": "Le Certificat d'Humanité est une preuve d'humanité. Il est délivré par Decide AI.",
-			"present_pouh_credential": "Présenter",
-			"pouh_credential_verified": "Vérifié ✅",
 			"appearance": "Apparence",
 			"appearance_light": "Clair",
 			"appearance_dark": "Sombre",
@@ -677,7 +772,13 @@
 			"beta_features": "Fonctionnalités bêta",
 			"enable_beta_feature": "Activer la fonctionnalité bêta",
 			"disable_beta_feature": "Désactiver la fonctionnalité bêta",
-			"save_beta_feature_success": "Vos paramètres de fonctionnalité bêta ont été mis à jour."
+			"save_beta_feature_success": "Vos paramètres de fonctionnalité bêta ont été mis à jour.",
+			"hide_micro_transactions": "Masquer les transactions de très petites valeurs",
+			"hide_micro_transactions_description": "Les transactions de très petites valeurs sont généralement du spam et visent à tromper l'utilisateur pour qu'il copie l'adresse de l'expéditeur au lieu d'une adresse valide. Il est recommandé de les masquer dans les listes de transactions.",
+			"enable_hide_micro_transactions": "Activer le masquage des transactions de très petites valeurs",
+			"disable_hide_micro_transactions": "Désactiver le masquage des transactions de très petites valeurs",
+			"save_spam_filter_success": "Les paramètres de votre filtre anti-spam ont été mis à jour.",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "Basculer pour afficher ou masquer les testnets",
@@ -789,6 +890,7 @@
 	"send": {
 		"text": {
 			"send": "Envoyer",
+			"send_token": "",
 			"destination": "Destination",
 			"source": "Source",
 			"balance": "Solde",
@@ -877,24 +979,27 @@
 			"no_nft_selected": "Aucun NFT n'a été sélectionné pour l'envoi."
 		},
 		"error": {
-			"unexpected": "Quelque chose s'est mal passé lors de l'envoi de la transaction.",
+			"unexpected": "Une erreur s'est produite lors de l'envoi de la transaction.",
 			"destination_address_unknown": "L'adresse de destination ETH est inconnue",
 			"metamask_connected": "Impossible d'obtenir vos comptes. Votre Metamask est-il ouvert et déjà connecté ?",
 			"metamask_no_accounts": "Aucun compte Metamask trouvé.",
-			"metamask_switch_network": "Impossible de demander à Metamask de passer à l'ID de chaîne $chain_id. Votre Metamask utilise-t-il $network_name ?",
-			"erc20_data_undefined": "Les données de transaction ERC20 ne peuvent pas être indéfinies ou nulles.",
-			"data_undefined": "Les données de transaction ne peuvent pas être indéfinies ou nulles.",
-			"no_identity_calculate_fee": "Aucune identité fournie pour calculer les frais pour son principal.",
+			"metamask_switch_network": "Impossible de demander à Metamask de passer à la chain ID $chain_id. Votre Metamask utilise-t-il $network_name ?",
+			"erc20_data_undefined": "Les données de la transaction ERC20 ne peuvent pas être indéfinies ou nulles.",
+			"data_undefined": "Les données de la transaction ne peuvent pas être indéfinies ou nulles.",
+			"no_identity_calculate_fee": "Aucune identité fournie pour calculer les frais de son principal.",
 			"invalid_destination": "La destination est invalide. Veuillez réessayer avec une adresse de portefeuille ou une destination valide.",
 			"incompatible_token": "Le token est incompatible. Veuillez réessayer avec un token compatible.",
 			"no_btc_network_id": "Le réseau actuel ($networkId) n'est pas un réseau Bitcoin.",
 			"no_solana_network_id": "Le réseau actuel ($networkId) n'est pas un réseau Solana.",
 			"no_pending_bitcoin_transaction": "Une erreur s'est produite lors du chargement des transactions Bitcoin en attente. Veuillez réessayer plus tard.",
-			"unexpected_utxos_fee": "Quelque chose s'est mal passé lors du calcul des frais de transaction.",
-			"unable_to_retrieve_amount": "n/a (impossible de récupérer)",
-			"solana_transaction_expired": "Votre transaction d'envoi n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous l'avons mis à jour au dernier montant recommandé, veuillez donc essayer de l'envoyer à nouveau.",
-			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez patienter quelques secondes, puis vérifiez la liste des transactions de votre token si votre transaction a été créée correctement.",
-			"fee_calc_unsupported_standard": "Impossible de calculer les frais car la norme de token fournie n'est pas prise en charge."
+			"unexpected_utxos_fee": "Une erreur s'est produite lors du calcul des frais de transaction.",
+			"unable_to_retrieve_amount": "n/d (impossible à récupérer)",
+			"solana_transaction_expired": "Votre transaction n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous les avons mis à jour au montant recommandé le plus récent, veuillez donc réessayer.",
+			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez attendre quelques secondes, puis vérifier la liste des transactions de votre token pour voir si votre transaction a été créée correctement.",
+			"solana_insufficient_funds": "Le solde de votre token est insuffisant pour effectuer cette transaction. Votre solde a peut-être changé depuis son dernier affichage.",
+			"solana_insufficient_funds_for_fee": "Votre solde SOL est insuffisant pour couvrir les frais de transaction.",
+			"solana_insufficient_funds_for_rent": "Votre solde SOL est insuffisant pour couvrir le loyer requis pour la création du compte.",
+			"fee_calc_unsupported_standard": "Impossible de calculer les frais car le standard de token fourni n'est pas pris en charge."
 		}
 	},
 	"mint": {
@@ -941,7 +1046,14 @@
 			"pay_at_failure": "Échec du paiement à $receipt",
 			"try_again": "Réessayer",
 			"payment_confirmed": "Paiement confirmé",
-			"payment_failed": "Paiement échoué"
+			"payment_failed": "Paiement échoué",
+			"what_is_scan": "Qu'est-ce que le scanner",
+			"no_camera_permission": "Pour scanner les codes QR, vous devez autoriser l'accès à la caméra dans les paramètres de votre navigateur.",
+			"what_is_scan_description": "Le scanner $oisy_short peut lire une grande variété de codes QR et lancer immédiatement l'action appropriée. Scannez un code QR WalletConnect pour établir une nouvelle connexion, ou scannez le code de paiement dans tout magasin utilisant Open CryptoPay pour régler la facture avec $oisy_short Pay.",
+			"what_is_scan_title": "$oisy_short comprend tous les codes QR",
+			"learn_more_about_scan": "En savoir plus sur le scanner",
+			"learn_more_about_pay": "En savoir plus sur $oisy_short Pay",
+			"scanner": "Scanner"
 		},
 		"error": {
 			"code_link_is_not_valid": "Le code/lien n'est pas valide",
@@ -992,6 +1104,9 @@
 			"loading_cketh_helper": "Erreur lors du chargement de l'adresse du contrat d'aide ckETH. Aucun ID de canister minter n'a été initialisé.",
 			"unexpected": "Quelque chose s'est mal passé lors de la conversion des tokens.",
 			"unexpected_missing_data": "Quelque chose s'est mal passé lors de l'initiation d'une transaction de conversion."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "La conversion de l'USDC vers/depuis le ckUSDC est actuellement suspendue."
 		}
 	},
 	"swap": {
@@ -1036,7 +1151,10 @@
 			"network_cost": "Coût du réseau",
 			"gasless": "Sans gaz",
 			"swap_fees": "Frais d'échange",
-			"cross_chain_networks_info": "Vous déplacez des tokens du réseau <b>$sourceNetwork</b> vers le réseau <b>$destinationNetwork</b>"
+			"cross_chain_networks_info": "Vous déplacez des tokens du réseau <b>$sourceNetwork</b> vers le réseau <b>$destinationNetwork</b>",
+			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "Il n'y a actuellement aucun échange disponible pour échanger des tokens. Veuillez réessayer plus tard.",
@@ -1053,7 +1171,9 @@
 			"manually_withdraw_success": "Les tokens de votre précédent échange échoué ont été retirés avec succès. Vous pouvez réessayer l'échange ou changer de fournisseur d'échange.",
 			"manually_withdraw_failed": "Le retrait de vos fonds a échoué. <br> Veuillez réessayer ou suivez",
 			"swap_sucess_withdraw_failed": "L'échange est terminé, mais vos tokens n'ont pas pu être retirés automatiquement. Cliquez sur le bouton Retirer ci-dessous pour les retirer manuellement.<br> Ou suivez",
-			"swap_sucess_manually_withdraw_success": "Les tokens de votre précédent échange ont été retirés avec succès. Vous pouvez maintenant fermer cette fenêtre."
+			"swap_sucess_manually_withdraw_success": "Les tokens de votre précédent échange ont été retirés avec succès. Vous pouvez maintenant fermer cette fenêtre.",
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1114,7 +1234,16 @@
 			"hide_more_networks": "Masquer plus de réseaux",
 			"on_network": " sur $network",
 			"delete_token": "Supprimer le token",
-			"edit_token": "Modifier le token"
+			"edit_token": "Modifier le token",
+			"sort_by_value": "Valeur",
+			"sort_by_performance": "Performance du token",
+			"sort_by_symbol": "Symbole",
+			"hide_asset_types": "Masquer les types d'actifs",
+			"asset_type": "Type d'actif dans $oisy_name",
+			"asset_type_all": "Tous les types d'actifs",
+			"no_tokens_for_asset_type": "Il n'y a pas de $asset_type dans votre portefeuille",
+			"no_tokens_for_asset_type_zero_tokens": "Il n'y a pas de $asset_type dans le réseau sélectionné",
+			"no_tokens_for_asset_type_description": "Choisissez parmi <strong>$count tokens pris en charge</strong> pour personnaliser votre vue de portefeuille."
 		},
 		"details": {
 			"title": "Détails du token",
@@ -1231,6 +1360,7 @@
 			"unrecognised_erc_interface": "Interface ERC non reconnue.",
 			"no_metadata": "Aucune métadonnée n'a été récupérée.",
 			"unexpected": "Quelque chose s'est mal passé lors de l'enregistrement du token.",
+			"version_mismatch": "",
 			"unexpected_hiding": "Quelque chose s'est mal passé lors du masquage du token.",
 			"already_available": "Le token est déjà disponible.",
 			"not_toggleable": "Le token n'est pas basculable, il ne peut pas être masqué.",
@@ -1239,6 +1369,23 @@
 			"unexpected_undefined": "Le token est indéfini. C'est inattendu.",
 			"unexpected_error_on_token_delete": "Quelque chose s'est mal passé lors de la suppression du token.",
 			"unexpected_error_on_token_update": "Quelque chose s'est mal passé lors de la mise à jour du token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Catégorie",
+			"risk": "Risque"
+		},
+		"category": {
+			"crypto": "Cryptomonnaies",
+			"stablecoin": "Stablecoins",
+			"stock": "Actions",
+			"commodity": "Matières premières"
+		},
+		"risk": {
+			"low": "Risque faible",
+			"medium": "Risque moyen",
+			"high": "Risque élevé"
 		}
 	},
 	"nfts": {
@@ -1253,7 +1400,6 @@
 			"by_collection": "Grouper par collection",
 			"show_spam": "Afficher les spams",
 			"show_hidden": "Afficher les masqués",
-			"sorting": "Tri",
 			"recents_first": "Récents en premier",
 			"oldest_first": "Plus anciens en premier",
 			"collection_atoz": "Nom de collection A-Z",
@@ -1376,7 +1522,10 @@
 			"amount": "Montant",
 			"hex_data": "Données HEX",
 			"raw_copied": "Données brutes de la transaction copiées dans le presse-papiers.",
-			"sign_message": "Signer le message"
+			"sign_message": "Signer le message",
+			"connected_apps": "Applications connectées",
+			"no_connected_apps": "Aucune application n'est actuellement connectée.",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "ex: wc:a281567bb3e4..."
@@ -1469,8 +1618,6 @@
 		},
 		"label": {
 			"reimbursement": "Remboursement",
-			"twin_token_sent": "$twinToken envoyé",
-			"ck_token_sent": "$ckToken envoyé",
 			"twin_token_converted": "Converti depuis $twinToken",
 			"ck_token_converted": "Converti depuis $ckToken",
 			"sending_twin_token": "Envoi de $twinToken",
@@ -1688,15 +1835,6 @@
 			"title": "Scanner le code QR"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Préparation du signataire",
-			"description": "Vérification que vous n'êtes pas un robot",
-			"request_challenge": "En attente d'un nouveau défi",
-			"solve_challenge": "Résolution du défi",
-			"grant_cycles": "Activation de la signature"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1796,7 +1934,7 @@
 				"possessive": "nos "
 			},
 			"title": "",
-			"instruction": "En cliquant sur ce bouton, vous acceptez les $link",
+			"instruction": "En vous connectant, vous acceptez les $link",
 			"body": ""
 		},
 		"alt": {
@@ -1822,7 +1960,8 @@
 			"title": "Activité récente"
 		},
 		"info": {
-			"btc_transactions": "Les informations sur les transactions BTC sont obtenues auprès de tiers centraux et doivent être vérifiées indépendamment."
+			"btc_transactions": "Les informations sur les transactions BTC sont obtenues auprès de tiers centraux et doivent être vérifiées indépendamment.",
+			"hidden_micro_transactions": "<strong>OISY vous protège !</strong> Les transactions avec de très petites valeurs de jetons sont actuellement masquées. Pour les afficher, accédez aux <a href=\"/settings/\">Paramètres</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">En savoir plus</a>"
 		},
 		"warning": {
 			"no_index_canister": "Les transactions pour $token_list ne peuvent pas être affichées. Aucun canister Index disponible.",
@@ -1831,31 +1970,32 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Gains",
-			"tab_title": "Gagner",
+			"title": "Gagner",
+			"tab_title": "Gains en cours",
 			"earning_opportunities": "Opportunités de gain",
-			"header_title": "Bienvenue dans Earn !",
-			"header_description": "Faites fructifier votre portefeuille d'actifs numériques en allouant vos tokens à des opportunités de gain.",
-			"go_to_earn": "Aller à Earn"
+			"header_title": "Bienvenue dans Gagner !",
+			"header_description": "Développez votre portefeuille d'actifs numériques en allouant vos tokens à des opportunités de gain.",
+			"go_to_earn": "Aller à Gagner"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "Gagnez avec Gold",
-				"description": "Stakez des GLDT pour gagner des récompenses quotidiennes en tokens de gouvernance, débloquant des revenus passifs à partir de vos avoirs en or.",
-				"action": "Staker GLDT"
+			"harvest_autopilot": {
+				"title": "Harvest – Autopilot",
+				"description": "Efficacité de rendement maximale avec des vaults en Autopilot en un seul clic.",
+				"action": "Aller à l'Autopilot"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Utilisez OISY et GAGNEZ ! L'ép. 5 est en ligne 🎉",
+				"description": "Utilisez OISY et GAGNEZ ! L'épisode 6 est en direct 🎉",
 				"action": "Vérifier le statut"
 			}
 		},
 		"card_fields": {
 			"apy": "APY",
-			"currentStaked": "Staké",
-			"currentEarning": "Gains actuels",
-			"earningPotential": "Potentiel de gain supplémentaire",
+			"networks": "Réseaux",
+			"assets": "Actifs",
+			"currentStaked": "En staking",
+			"currentEarning": "Gain en cours",
+			"earningPotential": "Potentiel de gain",
 			"terms": "Conditions"
 		},
 		"terms": {
@@ -1867,16 +2007,37 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "Autopilot",
+			"live_apy": "APY actuel"
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Stakez des tokens GLDT pour gagner des récompenses adossées à de l'or physique",
-			"stake": "Staker $token_symbol",
+			"harvest_autopilot_page_description": "Efficacité de rendement maximale avec des vaults en Autopilot en un seul clic.",
+			"harvest_autopilot_vault_page_description": "L'Autopilot est propulsé par la technologie <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">IPOR auditée</a> Fusion Vault.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot est un service spécialisé \"configurer et oublier\" qui automatise vos positions DeFi avec un effort minimal.",
+			"harvest_autopilot_stake_terms": "Je confirme avoir lu et compris le produit, avoir lu les <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Divulgations de risques</a> et accepter les <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Conditions générales d'utilisation</a>.",
+			"my_positions": "Mes positions",
+			"available_autopilots": "Autopilots disponibles",
+			"vault_info": "Informations sur le vault",
+			"vault_address": "Adresse du vault",
+			"protocol": "Protocole",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "Valeur totale bloquée (TVL)",
+			"manager": "Gestionnaire",
+			"vault_description": "Ce pool est conçu comme un service de gestion de rendement \"configurer et oublier\" pour vos $asset_symbol. Il optimise automatiquement votre position DeFi avec un effort minimal de votre part en allouant dynamiquement le capital aux meilleures opportunités.",
+			"stake": "Staker",
 			"stake_now": "Staker maintenant",
 			"stake_amount": "Staker $amount $token_symbol",
 			"not_enough_to_stake": "Pas de $token_symbol à staker",
+			"estimated_received": "Reçu estimé",
+			"estimated_yearly_yield": "Rendement annuel estimé",
 			"unstake": "Unstaker",
 			"unstake_now": "Unstaker maintenant",
-			"unstaking": "Unstaking...",
+			"unstaking": "Unstaking en cours...",
 			"unstake_token": "Unstaker $token_symbol",
 			"enable_token_text": "Vous devez activer $token_symbol",
 			"enable_token_button": "Activer $token_symbol",
@@ -1884,23 +2045,25 @@
 			"executing_transaction": "Exécution de la transaction...",
 			"unsupported_token_staking": "Le staking pour le token sélectionné n'est pas pris en charge.",
 			"provider": "Conditions de staking fournies par $provider",
-			"earning_potential": "Potentiel de gain supplémentaire",
+			"earning_potential": "Potentiel de gain",
 			"earning_potential_hint": "Basé sur la valeur de vos actifs non investis et l'APY le plus élevé des opportunités de gain disponibles.",
-			"active_earning": "Gains actuels",
+			"active_earning": "Gain actif",
 			"active_earning_per_year": "$amount/an",
+			"active_earning_per_year_short": "$amount/an",
 			"unproductive_assets": "Disponible",
 			"invested_assets": "Alloué",
 			"visit_provider": "Visiter le site web",
 			"current_apy_label": "APY actuel",
+			"max_apy_label": "APY max.",
 			"stake_review_subtitle": "Vous stakez",
 			"unstake_review_subtitle": "Vous unstakez",
 			"delayed_dissolve": "Recevoir avec un délai",
 			"immediate_dissolve": "Recevoir immédiatement",
 			"included_token_fee": "Frais de réseau inclus",
 			"included_dissolve_fee": "Frais de déverrouillage inclus",
-			"delayed_dissolve_terms": "Lors du déverrouillage de $token du staking, les tokens sont verrouillés pendant $delay jours sans recevoir de récompenses supplémentaires, avant de pouvoir être retirés.",
-			"delayed_dissolve_info": "Lorsque vous commencez à déverrouiller votre staking $token, vous ne recevrez plus de nouvelles récompenses.",
-			"immediate_dissolve_terms": "Vous recevrez vos $token immédiatement mais des frais sont appliqués sur les tokens $token que vous déverrouillez.",
+			"delayed_dissolve_terms": "Lors du déverrouillage de $token du staking, les tokens sont bloqués pendant $delay jours sans recevoir de nouvelles récompenses avant de pouvoir être retirés.",
+			"delayed_dissolve_info": "Dès que vous commencez à déverrouiller votre stake $token, vous ne recevrez plus de nouvelles récompenses.",
+			"immediate_dissolve_terms": "Vous recevrez vos $token immédiatement, mais des frais seront prélevés sur les tokens $token que vous déverrouillez.",
 			"amount_to_receive": "Montant à recevoir",
 			"unclaimed_rewards": "Récompenses non réclamées",
 			"unlock_requests": "Demandes de déverrouillage",
@@ -1912,9 +2075,9 @@
 			"claim_rewards": "Réclamer les récompenses",
 			"claim_reward_short": "Réclamer",
 			"claim_now": "Réclamer maintenant",
-			"claiming": "Réclamation...",
-			"get_tokens_with_amount": "Obtenir jusqu'à $amount $token_symbol",
-			"get_tokens": "Obtenir plus de $token_symbol",
+			"claiming": "Réclamation en cours...",
+			"get_tokens_with_amount": "Obtenez jusqu'à $amount $token_symbol",
+			"get_asset_tokens": "Obtenir $token_symbol",
 			"reward_claimed": "Récompense réclamée",
 			"staked": "Staké",
 			"unstaked": "Unstaké",
@@ -1922,62 +2085,49 @@
 			"title_empty_2_usd": "/an",
 			"title_empty_2_apy": "par an",
 			"title_empty_3": "",
-			"description_empty": "Il semble que vous n'ayez pas encore staké de tokens",
+			"description_empty": "Il semble que vous n'ayez encore staké aucun token",
 			"full_history": "Afficher l'historique complet",
 			"recent_history": "Fermer l'historique complet",
-			"gldt_stake_carousel_slide_title": "Gagnez un APY avec le Staking Gold DAO",
-			"gldt_stake_carousel_slide_cta": "En savoir plus"
+			"harvest_autopilot_carousel_slide_title": "Gagnez dans OISY avec Harvest Autopilot Yield Farming",
+			"harvest_autopilot_carousel_slide_cta": "En savoir plus"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "Quelque chose s'est mal passé lors du retrait des tokens.",
-			"unexpected_error_on_unstake": "Quelque chose s'est mal passé lors de l'unstaking des tokens.",
-			"dissolvement_limit_reached": "Vous avez atteint le maximum de $limit demandes de déverrouillage actives. Complétez-en certaines avant d'en créer une nouvelle.<br/>Notez que vous pouvez toujours unstaker en utilisant l'option « immédiatement »."
-		},
-		"terms": {
-			"gldt": {
-				"item1_title": "APY actuel $apy%",
-				"item1_description": "Basé sur les dernières récompenses. L'APY effectif dépend du montant total de $token staké chaque jour.",
-				"item2_title_1": "Les récompenses de staking sont payées en ",
-				"item2_title_2": " tokens GOLDAO",
-				"item3_title": "Délai de déverrouillage de 1 semaine",
-				"item3_description": "Lors du déverrouillage de GLDT du staking, les tokens sont verrouillés pendant 1 semaine sans recevoir de récompenses supplémentaires, avant de pouvoir être retirés. Vous pouvez payer des frais de 5 % sur votre staking pour déverrouiller immédiatement.",
-				"item4_title": "Bonus d'ancienneté",
-				"item4_description": "Les stakings GLDT commencent à obtenir un bonus d'ancienneté dès le premier jour. Plus les stakings sont anciens, plus le bonus d'ancienneté est important, augmentant linéairement à 100 % par an.",
-				"item5_title": "Lorsque vous commencez à déverrouiller votre staking GLDT, vous ne recevrez plus de nouvelles récompenses"
-			}
+			"unexpected_error_on_withdraw": "Une erreur s'est produite lors du retrait des tokens.",
+			"unexpected_error_on_unstake": "Une erreur s'est produite lors du unstaking des tokens.",
+			"unexpected_error_on_stake": "Une erreur s'est produite lors du staking des tokens.",
+			"dissolvement_limit_reached": "Vous avez atteint le maximum de $limit demandes de déverrouillage actives. Complétez-en quelques-unes avant d'en créer une nouvelle.<br/>Notez que vous pouvez toujours unstaker en utilisant l'option \"immédiatement\"."
 		},
 		"info": {
-			"gldt": {
-				"title": "Qu'est-ce que GLDT",
-				"description": "GLDT signifie « Gold Token », étant un token fongible adossé à des NFT GLD. Les NFT GLD sont des NFT qui représentent la propriété irréfutable de lingots d'or physiques. 1 GLDT représente exactement 0,01 g d'or, et les NFT GLD peuvent être échangés à un ratio de 1 g pour 100 GLDT.",
-				"fact_1_title": "Adossé à de l'or réel",
-				"fact_1_description": "Chaque token GLDT est adossé à de l'or réel stocké dans des coffres sécurisés",
-				"fact_2_title": "Conditions flexibles",
-				"fact_2_description": "Pas de périodes de blocage, stakez et unstakez quand vous le souhaitez",
-				"fact_3_title": "Rendements stables",
-				"fact_3_description": "Gagnez $apy% APY avec un risque de volatilité minimal",
-				"fact_3_description_fallback": "Gagnez des récompenses constantes avec un risque de volatilité minimal"
+			"harvest_autopilot": {
+				"title": "Qu'est-ce que Harvest Autopilot",
+				"description": "Harvest Autopilot est une fonctionnalité spécialisée (et une gamme de produits spécifique) au sein de l'écosystème Harvest Finance, conçue pour automatiser et optimiser vos positions de finance décentralisée (DeFi) avec un effort minimal.",
+				"fact_1_title": "Allocation intelligente du rendement",
+				"fact_1_description": "Change automatiquement de protocole pour capturer l'APY actuel le plus élevé.",
+				"fact_2_title": "Composition passive",
+				"fact_2_description": "Les récompenses sont automatiquement récoltées et réinvesties pour maximiser votre croissance.",
+				"fact_3_title": "Partage des frais de gaz",
+				"fact_3_description": "Réduit vos dépenses en regroupant les transactions avec d'autres utilisateurs pour économiser sur le gaz."
 			}
 		},
 		"alt": {
-			"placeholder_image": "Pas encore de tokens stakés"
+			"placeholder_image": "Aucun token staké pour l'instant"
 		}
 	},
 	"get_token": {
 		"text": {
 			"title": "Obtenir $token",
-			"swap_to_token": "Échanger vers $token",
+			"swap_to_token": "Échanger contre $token",
 			"ready_to_swap": "Prêt à échanger",
-			"convert_assets": "Convertir des Actifs",
+			"convert_assets": "Convertir des actifs",
 			"convertible_assets": "Actifs convertibles",
 			"how_to_convert": "Comment convertir",
 			"get_more_token": "Obtenir plus de $token",
 			"receive_token": "Recevoir $token",
 			"receive_token_title": "Recevoir $token directement",
-			"receive_token_text": "Recevoir $token directement sur votre compte",
+			"receive_token_text": "Recevez $token directement sur votre compte",
 			"buy_assets": "Acheter des actifs",
 			"buy_assets_title": "Acheter des actifs convertibles",
-			"buy_assets_text": "Acheter plus d'actifs et convertir en $token"
+			"buy_assets_text": "Achetez plus d'actifs et convertissez-les en $token"
 		}
 	},
 	"temporal": {
@@ -1994,6 +2144,9 @@
 			"minute_plural": "minutes",
 			"second": "seconde",
 			"second_plural": "secondes"
+		},
+		"time_frame": {
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {

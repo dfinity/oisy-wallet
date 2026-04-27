@@ -1,5 +1,7 @@
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+import type { NonEmptyArray } from '$lib/types/utils';
 import {
 	filterAddressFromContact,
 	getContactForAddress,
@@ -23,7 +25,14 @@ import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
-import type { NonEmptyArray } from 'alchemy-sdk';
+import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
+import { Principal } from '@icp-sdk/core/principal';
+
+const mockPrincipal = Principal.fromText(mockPrincipalText);
+const mockDerivedAccountIdentifierHex = AccountIdentifier.fromPrincipal({
+	principal: mockPrincipal,
+	subAccount: undefined
+}).toHex();
 
 describe('contact.utils', () => {
 	describe('selectColorForName', () => {
@@ -195,6 +204,110 @@ describe('contact.utils', () => {
 			});
 
 			expect(result?.addresses?.[0]?.address).not.toEqual(mockEthAddress3);
+		});
+
+		describe('ICP account derivation fallback', () => {
+			const principalAddress: ContactAddressUi = {
+				address: mockPrincipalText,
+				addressType: 'Icrcv2'
+			};
+
+			const hexAccountAddress: ContactAddressUi = {
+				address: mockDerivedAccountIdentifierHex,
+				addressType: 'Icrcv2'
+			};
+
+			it('should find contact by hex account ID when contact has only a principal', () => {
+				const contactWithPrincipal: ContactUi = {
+					name: 'Principal Only',
+					id: BigInt(10),
+					updateTimestampNs: ZERO,
+					addresses: [principalAddress]
+				};
+
+				const result = getContactForAddress({
+					addressString: mockDerivedAccountIdentifierHex,
+					contactList: [contactWithPrincipal]
+				});
+
+				expect(result?.name).toBe('Principal Only');
+			});
+
+			it('should find contact by principal when contact has only a hex account ID', () => {
+				const contactWithHex: ContactUi = {
+					name: 'Hex Only',
+					id: BigInt(11),
+					updateTimestampNs: ZERO,
+					addresses: [hexAccountAddress]
+				};
+
+				const result = getContactForAddress({
+					addressString: mockPrincipalText,
+					contactList: [contactWithHex]
+				});
+
+				expect(result?.name).toBe('Hex Only');
+			});
+
+			it('should prefer direct match over derivation fallback', () => {
+				const contactWithExactHex: ContactUi = {
+					name: 'Exact Match',
+					id: BigInt(12),
+					updateTimestampNs: ZERO,
+					addresses: [hexAccountAddress]
+				};
+
+				const contactWithPrincipal: ContactUi = {
+					name: 'Derived Match',
+					id: BigInt(13),
+					updateTimestampNs: ZERO,
+					addresses: [principalAddress]
+				};
+
+				const result = getContactForAddress({
+					addressString: mockDerivedAccountIdentifierHex,
+					contactList: [contactWithExactHex, contactWithPrincipal]
+				});
+
+				expect(result?.name).toBe('Exact Match');
+			});
+
+			it('should not match non-ICP addresses through derivation', () => {
+				const contactWithBtc: ContactUi = {
+					name: 'BTC Contact',
+					id: BigInt(14),
+					updateTimestampNs: ZERO,
+					addresses: [
+						{
+							address: mockBtcAddress,
+							addressType: 'Btc'
+						}
+					]
+				};
+
+				const result = getContactForAddress({
+					addressString: mockDerivedAccountIdentifierHex,
+					contactList: [contactWithBtc]
+				});
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should handle case-insensitive hex comparison in derivation', () => {
+				const contactWithPrincipal: ContactUi = {
+					name: 'Case Test',
+					id: BigInt(15),
+					updateTimestampNs: ZERO,
+					addresses: [principalAddress]
+				};
+
+				const result = getContactForAddress({
+					addressString: mockDerivedAccountIdentifierHex.toUpperCase(),
+					contactList: [contactWithPrincipal]
+				});
+
+				expect(result?.name).toBe('Case Test');
+			});
 		});
 	});
 
@@ -379,6 +492,87 @@ describe('contact.utils', () => {
 			expect(
 				filterAddressFromContact({ contact: mockContact, address: mockSolAddress.toUpperCase() })
 			).toBeUndefined();
+		});
+
+		describe('ICP account derivation fallback', () => {
+			const principalAddress: ContactAddressUi = {
+				address: mockPrincipalText,
+				addressType: 'Icrcv2'
+			};
+
+			const hexAccountAddress: ContactAddressUi = {
+				address: mockDerivedAccountIdentifierHex,
+				addressType: 'Icrcv2'
+			};
+
+			it('should match hex input to principal contact address via derivation', () => {
+				const contact: ContactUi = {
+					name: 'Test',
+					id: BigInt(20),
+					updateTimestampNs: ZERO,
+					addresses: [principalAddress]
+				};
+
+				const result = filterAddressFromContact({
+					contact,
+					address: mockDerivedAccountIdentifierHex
+				});
+
+				expect(result).toStrictEqual(principalAddress);
+			});
+
+			it('should match principal input to hex contact address via derivation', () => {
+				const contact: ContactUi = {
+					name: 'Test',
+					id: BigInt(21),
+					updateTimestampNs: ZERO,
+					addresses: [hexAccountAddress]
+				};
+
+				const result = filterAddressFromContact({
+					contact,
+					address: mockPrincipalText
+				});
+
+				expect(result).toStrictEqual(hexAccountAddress);
+			});
+
+			it('should prefer direct match over derivation', () => {
+				const contact: ContactUi = {
+					name: 'Test',
+					id: BigInt(22),
+					updateTimestampNs: ZERO,
+					addresses: [hexAccountAddress, principalAddress]
+				};
+
+				const result = filterAddressFromContact({
+					contact,
+					address: mockDerivedAccountIdentifierHex
+				});
+
+				expect(result).toStrictEqual(hexAccountAddress);
+			});
+
+			it('should not apply derivation to non-Icrcv2 addresses', () => {
+				const contact: ContactUi = {
+					name: 'Test',
+					id: BigInt(23),
+					updateTimestampNs: ZERO,
+					addresses: [
+						{
+							address: mockBtcAddress,
+							addressType: 'Btc'
+						}
+					]
+				};
+
+				const result = filterAddressFromContact({
+					contact,
+					address: mockDerivedAccountIdentifierHex
+				});
+
+				expect(result).toBeUndefined();
+			});
 		});
 	});
 

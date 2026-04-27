@@ -1,6 +1,5 @@
-import { AddressSchema } from '$lib/schema/address.schema';
-
 import { isEthAddress } from '$eth/utils/account.utils';
+import { AddressSchema } from '$lib/schema/address.schema';
 
 export const EthAddressSchema = AddressSchema.refine((val) => isEthAddress(val));
 

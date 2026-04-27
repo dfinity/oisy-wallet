@@ -1,0 +1,61 @@
+<script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { format24hChangeInCurrency } from '$lib/utils/format.utils';
+
+	interface Props {
+		usdPriceChangePercentage24h: number | undefined;
+		background?: 'light' | 'dark';
+		timeFrame?: '24h';
+		fontSize?: 'sm' | 'xs';
+	}
+
+	let { usdPriceChangePercentage24h, background, timeFrame, fontSize = 'sm' }: Props = $props();
+
+	let parsedExchangeRateChange = $derived(
+		nonNullish(usdPriceChangePercentage24h)
+			? format24hChangeInCurrency({
+					usdChangePct: usdPriceChangePercentage24h,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
+	);
+
+	let { formattedAbs: formattedExchangeRateChange, sign: exchangeRateChangeSign } = $derived(
+		nonNullish(parsedExchangeRateChange)
+			? parsedExchangeRateChange
+			: { formattedAbs: undefined, sign: undefined }
+	);
+
+	let parsedTimeFrame = $derived(
+		nonNullish(timeFrame) ? $i18n.temporal.time_frame[`t_${timeFrame}`] : undefined
+	);
+</script>
+
+{#if nonNullish(parsedExchangeRateChange)}
+	<span
+		class={`px-1 text-xs${background === 'dark' ? ' bg-black/30' : ''}`}
+		class:bg-white={background === 'light'}
+		class:rounded={nonNullish(background)}
+		class:sm:text-sm={fontSize === 'sm'}
+		class:text-error-primary={exchangeRateChangeSign === 'negative'}
+		class:text-success-primary={exchangeRateChangeSign === 'positive'}
+		class:text-tertiary={exchangeRateChangeSign === 'zero'}
+	>
+		<span
+			style="clip-path: polygon(50% 100%, 0% 0%, 100% 0%); background: currentColor;"
+			class="mb-px inline-block h-[0.45em] w-[0.45em]"
+			class:-rotate-90={exchangeRateChangeSign === 'zero'}
+			class:rotate-180={exchangeRateChangeSign === 'positive'}
+		></span>
+		{formattedExchangeRateChange}
+		{#if nonNullish(parsedTimeFrame)}
+			<span class="text-[9px] sm:text-[11px]">{`(${parsedTimeFrame})`}</span>
+		{/if}
+	</span>
+{/if}

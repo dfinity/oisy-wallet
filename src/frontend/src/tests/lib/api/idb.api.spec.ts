@@ -27,7 +27,7 @@ describe('idb.api', () => {
 		it('should not fail if the browser does not support indexedDB.databases()', async () => {
 			vi.stubGlobal('indexedDB', {});
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			const indexedDBMock = {
 				databases: vi.fn(() => {
@@ -37,7 +37,7 @@ describe('idb.api', () => {
 
 			vi.stubGlobal('indexedDB', indexedDBMock);
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(indexedDBMock.databases).toHaveBeenCalledExactlyOnceWith();
 		});
@@ -45,7 +45,7 @@ describe('idb.api', () => {
 		it('should handle an empty list of databases', async () => {
 			mockDatabases.mockResolvedValueOnce([]);
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
@@ -55,7 +55,7 @@ describe('idb.api', () => {
 		it('should handle missing names in the database info', async () => {
 			mockDatabases.mockResolvedValueOnce([{ name: null }, { name: undefined }, { version: 123 }]);
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
@@ -65,7 +65,7 @@ describe('idb.api', () => {
 		it('should do nothing if there is no OISY-related database', async () => {
 			mockDatabases.mockResolvedValueOnce([{ name: 'other-db-1' }, { name: 'test-db' }]);
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
@@ -74,9 +74,9 @@ describe('idb.api', () => {
 
 		it('should delete only OISY-related databases', async () => {
 			mockDatabases.mockResolvedValueOnce([
-				{ name: 'oisy-btc-addresses' },
+				{ name: 'oisy-btc-transactions' },
 				{ name: 'other-db' },
-				{ name: 'oisy-eth-addresses' }
+				{ name: 'oisy-balances' }
 			]);
 
 			mockDeleteDatabase.mockImplementation(() => ({
@@ -88,19 +88,19 @@ describe('idb.api', () => {
 				}
 			}));
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-addresses');
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-eth-addresses');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
 		});
 
 		it('should handle gracefully a failure during a database deletion', async () => {
 			mockDatabases.mockResolvedValueOnce([
-				{ name: 'oisy-btc-addresses' },
-				{ name: 'oisy-eth-addresses' }
+				{ name: 'oisy-btc-transactions' },
+				{ name: 'oisy-balances' }
 			]);
 
 			mockDeleteDatabase
@@ -121,19 +121,19 @@ describe('idb.api', () => {
 					}
 				}));
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-addresses');
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-eth-addresses');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
 		});
 
 		it('should handle gracefully a blocked database deletion', async () => {
 			mockDatabases.mockResolvedValueOnce([
-				{ name: 'oisy-btc-addresses' },
-				{ name: 'oisy-eth-addresses' }
+				{ name: 'oisy-btc-transactions' },
+				{ name: 'oisy-balances' }
 			]);
 
 			mockDeleteDatabase
@@ -154,13 +154,13 @@ describe('idb.api', () => {
 					}
 				}));
 
-			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrowError();
+			await expect(deleteIdbAllOisyRelated()).resolves.not.toThrow();
 
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-addresses');
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-eth-addresses');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
 		});
 	});
 });

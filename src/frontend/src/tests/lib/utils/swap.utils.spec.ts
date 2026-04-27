@@ -2,19 +2,21 @@ import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
 } from '$declarations/kong_backend/kong_backend.did';
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
-	ICP_SWAP_PROVIDER,
-	KONG_SWAP_PROVIDER,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
-	SWAP_ETH_TOKEN_PLACEHOLDER,
-	VELORA_SWAP_PROVIDER
+	SWAP_ETH_TOKEN_PLACEHOLDER
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
 import {
@@ -26,8 +28,10 @@ import {
 } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import {
+	buildNearIntentsQuoteRequest,
 	calculateSlippage,
 	calculateValueDifference,
+	findNearIntentsAsset,
 	findSwapProvider,
 	formatReceiveOutMinimum,
 	geSwapEthTokenAddress,
@@ -39,11 +43,21 @@ import {
 	isSwapError,
 	mapIcpSwapResult,
 	mapKongSwapResult,
+	mapNearIntentsQuoteResult,
 	mapVeloraMarketSwapResult,
-	mapVeloraSwapResult
+	mapVeloraSwapResult,
+	resolveNearIntentsBlockchain,
+	resolveNearIntentsSwapAssets
 } from '$lib/utils/swap.utils';
+import { parseNetworkId } from '$lib/validation/network.validation';
+import type { SplToken } from '$sol/types/spl';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockNearIntentsQuoteResponse,
+	mockNearIntentsTokens
+} from '$tests/mocks/near-intents.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import {
 	mockVeloraBridgeSwapResponse,
@@ -184,9 +198,9 @@ describe('swap utils', () => {
 				destToken: mockDestToken
 			});
 
-			expect(result.provider).toBe(ICP_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.ICP_SWAP);
 
-			assert(result.provider === ICP_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.ICP_SWAP);
 
 			expect(result.receiveAmount).toBe(990n);
 			expect(result.receiveOutMinimum).toBe(
@@ -202,7 +216,7 @@ describe('swap utils', () => {
 				destToken: mockDestToken
 			});
 
-			assert(result.provider === ICP_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.ICP_SWAP);
 
 			expect(result.receiveAmount).toBe(990n);
 			expect(result.receiveOutMinimum).toBe(
@@ -217,7 +231,7 @@ describe('swap utils', () => {
 				destToken: mockDestToken
 			});
 
-			assert(result.provider === ICP_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.ICP_SWAP);
 
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({
@@ -234,7 +248,7 @@ describe('swap utils', () => {
 				destToken: mockDestToken
 			});
 
-			assert(result.provider === ICP_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.ICP_SWAP);
 
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({
@@ -295,9 +309,9 @@ describe('swap utils', () => {
 		it('should return mapped kong swap result', () => {
 			const result = mapKongSwapResult({ swap, tokens });
 
-			expect(result.provider).toBe(KONG_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.KONG_SWAP);
 
-			assert(result.provider === KONG_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.KONG_SWAP);
 
 			expect(result.slippage).toBe(0.3);
 			expect(result.receiveAmount).toBe(2000n);
@@ -399,7 +413,7 @@ describe('swap utils', () => {
 
 			const result = mapVeloraSwapResult(mockDeltaSwap);
 
-			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.VELORA);
 			expect(result.receiveAmount).toBe(900n);
 			expect(result.swapDetails).toBe(mockDeltaSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
@@ -412,7 +426,7 @@ describe('swap utils', () => {
 
 			const result = mapVeloraSwapResult(mockBridgeSwap);
 
-			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.VELORA);
 			expect(result.receiveAmount).toBe(800n);
 			expect(result.swapDetails).toBe(mockBridgeSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
@@ -447,7 +461,7 @@ describe('swap utils', () => {
 
 			const result = mapVeloraMarketSwapResult(mockOptimalRate);
 
-			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.VELORA);
 			expect(result.receiveAmount).toBe(950n);
 			expect(result.swapDetails).toBe(mockOptimalRate);
 			expect(result.type).toBe(VeloraSwapTypes.MARKET);
@@ -543,7 +557,7 @@ describe('swap utils', () => {
 					sourceToken,
 					destinationToken
 				})
-			).toThrowError('Unknown token address');
+			).toThrow('Unknown token address');
 		});
 	});
 
@@ -727,6 +741,324 @@ describe('swap utils', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('mapNearIntentsQuoteResult', () => {
+		it('should map quote response to SwapMappedResult', () => {
+			const result = mapNearIntentsQuoteResult(mockNearIntentsQuoteResponse);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: BigInt(Math.floor(Number(mockNearIntentsQuoteResponse.quote.amountOut))),
+				receiveOutMinimum: BigInt(
+					Math.floor(Number(mockNearIntentsQuoteResponse.quote.minAmountOut ?? '0'))
+				),
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+		});
+
+		it('should set receiveOutMinimum to undefined when minAmountOut is absent', () => {
+			const quoteWithoutMin = {
+				...mockNearIntentsQuoteResponse,
+				quote: { ...mockNearIntentsQuoteResponse.quote, minAmountOut: undefined }
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithoutMin);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: BigInt(Math.floor(Number(mockNearIntentsQuoteResponse.quote.amountOut))),
+				receiveOutMinimum: undefined,
+				swapDetails: quoteWithoutMin
+			});
+		});
+
+		it('should floor decimal amountOut and minAmountOut', () => {
+			const quoteWithDecimals = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000.7',
+					minAmountOut: '891000.9'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithDecimals);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000n,
+				receiveOutMinimum: 891000n,
+				swapDetails: quoteWithDecimals
+			});
+		});
+	});
+
+	describe('resolveNearIntentsBlockchain', () => {
+		it('should resolve Ethereum network to eth', () => {
+			expect(resolveNearIntentsBlockchain(ETHEREUM_NETWORK.id)).toBe('eth');
+		});
+
+		it('should resolve Arbitrum network to arb', () => {
+			expect(resolveNearIntentsBlockchain(ARBITRUM_MAINNET_NETWORK.id)).toBe('arb');
+		});
+
+		it('should resolve Solana mainnet network to sol', () => {
+			expect(resolveNearIntentsBlockchain(SOLANA_MAINNET_NETWORK.id)).toBe('sol');
+		});
+
+		it('should return undefined for unsupported network', () => {
+			expect(resolveNearIntentsBlockchain(parseNetworkId('UNSUPPORTED'))).toBeUndefined();
+		});
+	});
+
+	describe('findNearIntentsAsset', () => {
+		it('should find an ERC20 token by contract address', () => {
+			const token: Erc20Token = {
+				...mockValidErc20Token,
+				address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+			};
+
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token,
+				blockchain: 'eth'
+			});
+
+			expect(result).toStrictEqual(mockNearIntentsTokens[0]);
+		});
+
+		it('should find a native token by symbol', () => {
+			const token: Erc20Token = {
+				...mockValidErc20Token,
+				symbol: 'ETH',
+				address: '0x0000000000000000000000000000000000000000'
+			};
+
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token,
+				blockchain: 'eth'
+			});
+
+			expect(result).toStrictEqual(mockNearIntentsTokens[1]);
+		});
+
+		it('should return undefined when no matching token is found', () => {
+			const token: Erc20Token = {
+				...mockValidErc20Token,
+				address: '0xUnknownAddress'
+			};
+
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token,
+				blockchain: 'eth'
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when blockchain does not match', () => {
+			const token: Erc20Token = {
+				...mockValidErc20Token,
+				address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+			};
+
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token,
+				blockchain: 'arb'
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should find an SPL token by contract address', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: USDC_TOKEN,
+				blockchain: 'sol'
+			});
+
+			expect(result).toStrictEqual(mockNearIntentsTokens[5]);
+		});
+
+		it('should find native SOL token by symbol', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: SOLANA_TOKEN,
+				blockchain: 'sol'
+			});
+
+			expect(result).toStrictEqual(mockNearIntentsTokens[4]);
+		});
+	});
+
+	describe('resolveNearIntentsSwapAssets', () => {
+		const sourceToken: Erc20Token = {
+			...mockValidErc20Token,
+			network: ETHEREUM_NETWORK,
+			address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+		};
+
+		const destinationToken: Erc20Token = {
+			...mockValidErc20Token,
+			network: ARBITRUM_MAINNET_NETWORK,
+			address: '0xaf88d065e77c8cc2239327c5edb3a432268e5831'
+		};
+
+		it('should resolve both source and destination assets', () => {
+			const result = resolveNearIntentsSwapAssets({
+				nearTokens: mockNearIntentsTokens,
+				sourceToken,
+				destinationToken
+			});
+
+			expect(result).toStrictEqual({
+				srcAsset: mockNearIntentsTokens[0],
+				destAsset: mockNearIntentsTokens[2]
+			});
+		});
+
+		it('should return undefined when source blockchain is unsupported', () => {
+			const unsupportedSource: Erc20Token = {
+				...sourceToken,
+				network: { ...sourceToken.network, id: parseNetworkId('UNSUPPORTED') }
+			};
+
+			const result = resolveNearIntentsSwapAssets({
+				nearTokens: mockNearIntentsTokens,
+				sourceToken: unsupportedSource,
+				destinationToken
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when destination blockchain is unsupported', () => {
+			const unsupportedDest: Erc20Token = {
+				...destinationToken,
+				network: { ...destinationToken.network, id: parseNetworkId('UNSUPPORTED') }
+			};
+
+			const result = resolveNearIntentsSwapAssets({
+				nearTokens: mockNearIntentsTokens,
+				sourceToken,
+				destinationToken: unsupportedDest
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when source token is not found in NEAR tokens', () => {
+			const unknownSource: Erc20Token = {
+				...sourceToken,
+				address: '0xUnknownAddress'
+			};
+
+			const result = resolveNearIntentsSwapAssets({
+				nearTokens: mockNearIntentsTokens,
+				sourceToken: unknownSource,
+				destinationToken
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when destination token is not found in NEAR tokens', () => {
+			const unknownDest: Erc20Token = {
+				...destinationToken,
+				address: '0xUnknownAddress'
+			};
+
+			const result = resolveNearIntentsSwapAssets({
+				nearTokens: mockNearIntentsTokens,
+				sourceToken,
+				destinationToken: unknownDest
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should resolve cross-chain EVM to Solana swap assets', () => {
+			const solDestinationToken: SplToken = USDC_TOKEN;
+
+			const result = resolveNearIntentsSwapAssets({
+				nearTokens: mockNearIntentsTokens,
+				sourceToken,
+				destinationToken: solDestinationToken
+			});
+
+			expect(result).toStrictEqual({
+				srcAsset: mockNearIntentsTokens[0],
+				destAsset: mockNearIntentsTokens[5]
+			});
+		});
+	});
+
+	describe('buildNearIntentsQuoteRequest', () => {
+		const [srcAsset, , destAsset] = mockNearIntentsTokens;
+
+		it('should build a quote request with all required fields', () => {
+			const result = buildNearIntentsQuoteRequest({
+				slippageTolerance: 150,
+				srcAsset,
+				destAsset,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				deadlineMs: 180_000
+			});
+
+			expect(result).toStrictEqual({
+				dry: false,
+				swapType: 'EXACT_INPUT',
+				slippageTolerance: 150,
+				originAsset: srcAsset.assetId,
+				depositType: 'ORIGIN_CHAIN',
+				destinationAsset: destAsset.assetId,
+				amount: '1000000',
+				recipient: mockEthAddress,
+				recipientType: 'DESTINATION_CHAIN',
+				refundTo: mockEthAddress,
+				refundType: 'ORIGIN_CHAIN',
+				deadline: expect.any(String)
+			});
+		});
+
+		it('should use separate recipientAddress when provided', () => {
+			const recipientAddress = '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1';
+
+			const result = buildNearIntentsQuoteRequest({
+				slippageTolerance: 150,
+				srcAsset,
+				destAsset,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				recipientAddress,
+				deadlineMs: 180_000
+			});
+
+			expect(result.recipient).toBe(recipientAddress);
+			expect(result.refundTo).toBe(mockEthAddress);
+		});
+
+		it('should set deadline as ISO string in the future', () => {
+			const before = Date.now();
+
+			const result = buildNearIntentsQuoteRequest({
+				slippageTolerance: 100,
+				srcAsset,
+				destAsset,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				deadlineMs: 180_000
+			});
+
+			const deadlineTime = new Date(result.deadline).getTime();
+
+			expect(deadlineTime).toBeGreaterThanOrEqual(before + 180_000);
 		});
 	});
 });

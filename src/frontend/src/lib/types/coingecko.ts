@@ -56,11 +56,17 @@ export type CoingeckoSimplePrice = {
 	usd_24h_change?: number;
 	last_updated_at?: number;
 } & {
-	[K in Exclude<`${Currency}`, Currency.USD>]?: number;
+	[K in
+		| Exclude<`${Currency}`, Currency.USD>
+		| `${Exclude<Currency, Currency.USD>}_24h_change`]?: number;
 };
 
 export type CoingeckoSimpleTokenPrice = Omit<CoingeckoSimplePrice, 'usd_market_cap'> &
 	Required<Pick<CoingeckoSimplePrice, 'usd_market_cap'>>;
+
+export type CoingeckoSimpleErc4626TokenPrice = CoingeckoSimpleTokenPrice & {
+	assets_per_share: number;
+};
 
 export type CoingeckoResponse<T> = Record<CoingeckoCoinsId | LedgerCanisterIdText | EthAddress, T>;
 
@@ -68,6 +74,10 @@ export type CoingeckoSimplePriceResponse = CoingeckoResponse<CoingeckoSimplePric
 
 export type CoingeckoSimpleTokenPriceResponse = CoingeckoResponse<CoingeckoSimpleTokenPrice>;
 
+export type CoingeckoSimpleErc4626TokenPriceResponse =
+	CoingeckoResponse<CoingeckoSimpleErc4626TokenPrice>;
+
 export type CoingeckoPriceResponse =
 	| CoingeckoSimplePriceResponse
-	| CoingeckoSimpleTokenPriceResponse;
+	| CoingeckoSimpleTokenPriceResponse
+	| CoingeckoSimpleErc4626TokenPriceResponse;

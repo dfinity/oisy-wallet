@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SPX_TOKEN_GROUP } from '$env/tokens/groups/groups.spx.env';
 import spx from '$eth/assets/spx.png';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,11 +17,11 @@ export const SPX_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'SPX6900',
 	symbol: SPX_SYMBOL,
 	decimals: SPX_DECIMALS,
 	icon: spx,
 	address: '0xe0f63a424a4439cbe457d80e4f4b51ad25b2c56c',
-	exchange: 'erc20',
 	groupData: SPX_TOKEN_GROUP
 };

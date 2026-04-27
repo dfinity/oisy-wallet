@@ -1,6 +1,7 @@
 import type { EnvAdditionalIcrcTokens } from '$env/types/env-icrc-additional-token';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
-import type { IcInterface } from '$icp/types/ic-token';
+import type { IcTokenWithoutId } from '$icp/types/ic-token';
+import { mapEnvGroupData } from '$icp/utils/map-token-group.utils';
 import { LOCAL } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 import { decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -10,7 +11,7 @@ import { decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
  */
 export const mapIcrcData = (
 	icrcTokens: EnvAdditionalIcrcTokens
-): Record<EnvTokenSymbol, Omit<IcInterface, 'position'>> =>
+): Record<EnvTokenSymbol, IcTokenWithoutId> =>
 	Object.entries(icrcTokens).reduce(
 		(acc, [key, value]) => ({
 			...acc,
@@ -20,7 +21,8 @@ export const mapIcrcData = (
 						...value,
 						...(nonNullish(value.mintingAccount)
 							? { mintingAccount: decodeIcrcAccount(value.mintingAccount) }
-							: {})
+							: {}),
+						...mapEnvGroupData(value.groupDataId)
 					}
 				})
 		}),

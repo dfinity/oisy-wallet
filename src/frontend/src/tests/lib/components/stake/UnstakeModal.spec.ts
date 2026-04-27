@@ -1,46 +1,47 @@
-import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
-import {
-	GLDT_STAKE_CONTEXT_KEY,
-	initGldtStakeStore,
-	type GldtStakeContext
-} from '$icp/stores/gldt-stake.store';
+import { BAUTOPILOT_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc4626/tokens.bautopilot_usdc.env';
 import UnstakeModal from '$lib/components/stake/UnstakeModal.svelte';
-import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
+import type { Vault } from '$lib/types/vaults';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
+
+vi.mock('$eth/services/eth-listener.services', () => ({
+	initMinedTransactionsListener: vi.fn(() => ({
+		disconnect: vi.fn()
+	}))
+}));
 
 describe('UnstakeModal', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 	});
 
-	it('should display correct modal title after navigating between steps', async () => {
-		const { container, getByText, getByTestId } = render(UnstakeModal, {
+	it('should display unsupported staking message', () => {
+		const { container } = render(UnstakeModal, {
 			props: {
-				token: {
-					...mockValidIcrcToken,
-					symbol: 'GLDT',
-					ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
-				} as Token,
+				token: mockValidIcrcToken as Token,
 				totalStaked: 1000n
-			},
-			context: new Map<symbol, GldtStakeContext>([
-				[GLDT_STAKE_CONTEXT_KEY, { store: initGldtStakeStore() }]
-			])
+			}
 		});
 
-		const firstStepTitle = 'Unstake GLDT';
+		expect(container).toHaveTextContent(en.stake.text.unsupported_token_staking);
+	});
 
-		expect(container).toHaveTextContent(firstStepTitle);
+	it('should not display unsupported message when vault is harvest autopilot', () => {
+		const mockVault: Vault = {
+			token: { ...BAUTOPILOT_USDC_TOKEN, enabled: true },
+			apy: '5.5'
+		};
 
-		await fireEvent.click(getByTestId(STAKE_FORM_REVIEW_BUTTON));
+		const { container } = render(UnstakeModal, {
+			props: {
+				token: BAUTOPILOT_USDC_TOKEN as Token,
+				vault: mockVault,
+				totalStaked: 1000n
+			}
+		});
 
-		expect(container).toHaveTextContent(en.stake.text.review);
-
-		await fireEvent.click(getByText(en.core.text.back));
-
-		expect(container).toHaveTextContent(firstStepTitle);
+		expect(container).not.toHaveTextContent(en.stake.text.unsupported_token_staking);
 	});
 });

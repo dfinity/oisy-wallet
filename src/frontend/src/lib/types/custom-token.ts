@@ -46,7 +46,7 @@ export type SaveCustomToken = CustomTokenState &
 export type SaveCustomTokenWithKey = CustomTokenState &
 	(
 		| TokenVariant<'Icrc', IcrcSaveCustomToken>
-		| TokenVariant<'Erc20' | 'Erc721' | 'Erc1155', ErcSaveCustomToken>
+		| TokenVariant<'Erc20' | 'Erc721' | 'Erc1155' | 'Erc4626', ErcSaveCustomToken>
 		| TokenVariant<'SplDevnet' | 'SplMainnet', SplSaveCustomToken>
 		| TokenVariant<'ExtV2', ExtSaveCustomToken>
 		| TokenVariant<'Dip721', Dip721SaveCustomToken>
@@ -54,7 +54,7 @@ export type SaveCustomTokenWithKey = CustomTokenState &
 	);
 
 export type SaveCustomErcVariant = CustomTokenState &
-	TokenVariant<'Erc20' | 'Erc721' | 'Erc1155', ErcSaveCustomToken>;
+	TokenVariant<'Erc20' | 'Erc721' | 'Erc1155' | 'Erc4626', ErcSaveCustomToken>;
 export type SaveCustomErc721Variant = CustomTokenState & TokenVariant<'Erc721', ErcSaveCustomToken>;
 export type SaveCustomErc1155Variant = CustomTokenState &
 	TokenVariant<'Erc1155', ErcSaveCustomToken>;

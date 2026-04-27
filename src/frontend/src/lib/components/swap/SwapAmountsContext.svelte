@@ -6,7 +6,7 @@
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
 		SWAP_DEFAULT_SLIPPAGE_VALUE
 	} from '$lib/constants/swap.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { fetchSwapAmounts } from '$lib/services/swap.services';
@@ -45,6 +45,7 @@
 
 	let timer: NodeJS.Timeout | undefined;
 	let debounceTimer = $state<NodeJS.Timeout | undefined>();
+	let fetchGeneration = 0;
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
@@ -90,6 +91,8 @@
 			return;
 		}
 
+		const currentGeneration = fetchGeneration;
+
 		isSwapAmountsLoading = true;
 
 		try {
@@ -101,8 +104,13 @@
 				tokens: $tokens,
 				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
 				isSourceTokenIcrc2,
-				userEthAddress: $ethAddress
+				userEthAddress: $ethAddress,
+				userSolAddress: $solAddressMainnet
 			});
+
+			if (currentGeneration !== fetchGeneration) {
+				return;
+			}
 
 			if (swapAmounts.length === 0) {
 				store.setSwaps({
@@ -119,6 +127,10 @@
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (_err: unknown) {
+			if (currentGeneration !== fetchGeneration) {
+				return;
+			}
+
 			// if swapAmounts fails, it means no pool is currently available for the provided tokens
 			store.setSwaps({
 				swaps: [],
@@ -126,12 +138,17 @@
 				selectedProvider: undefined
 			});
 		} finally {
-			isSwapAmountsLoading = false;
+			if (currentGeneration === fetchGeneration) {
+				isSwapAmountsLoading = false;
+			}
 		}
 	};
 
 	$effect(() => {
 		if (pauseAmountUpdates || !enableAmountUpdates) {
+			fetchGeneration++;
+			isSwapAmountsLoading = false;
+			untrack(clearDebounceTimer);
 			clearTimer();
 		} else {
 			startTimer();
@@ -142,6 +159,7 @@
 		[amount, sourceToken, destinationToken, isSourceTokenIcrc2];
 
 		untrack(() => {
+			fetchGeneration++;
 			clearDebounceTimer();
 			debounceTimer = setTimeout(() => {
 				loadSwapAmounts(false);
@@ -150,6 +168,7 @@
 	});
 
 	onDestroy(() => {
+		fetchGeneration++;
 		clearTimer();
 		clearDebounceTimer();
 	});

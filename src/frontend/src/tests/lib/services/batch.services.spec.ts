@@ -60,7 +60,7 @@ describe('batch.services', () => {
 				for await (const _ of generator) {
 					// Do nothing
 				}
-			}).not.toThrowError();
+			}).not.toThrow();
 
 			expect(allSettledSpy).not.toHaveBeenCalled();
 

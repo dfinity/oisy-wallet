@@ -1,8 +1,6 @@
 <script lang="ts">
-	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
-	import ScannerModal from '$lib/components/scanner/ScannerModal.svelte';
+	import AnimatedScanIcon from '$lib/components/icons/animated/AnimatedScanIcon.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { modalUniversalScannerOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
@@ -13,14 +11,10 @@
 	ariaLabel={$i18n.scanner.text.scan_qr_code}
 	colorStyle="tertiary-alt"
 	link={false}
-	onclick={() => modalStore.openUniversalScanner(modalId)}
+	onclick={() => modalStore.openUniversalScanner({ id: modalId })}
 >
 	{#snippet icon()}
-		<IconScanLine size="24" />
+		<AnimatedScanIcon />
 	{/snippet}
 	{$i18n.scanner.text.scan_qr_code}
 </ButtonIcon>
-
-{#if $modalUniversalScannerOpen}
-	<ScannerModal />
-{/if}

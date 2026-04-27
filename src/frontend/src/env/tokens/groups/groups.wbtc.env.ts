@@ -1,4 +1,4 @@
-import wbtc from '$icp-eth/assets/wbtc.svg';
+import wbtc from '$eth/assets/wbtc.webp';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 

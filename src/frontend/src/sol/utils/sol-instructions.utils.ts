@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { getAccountInfo } from '$sol/api/solana.api';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
@@ -72,7 +73,7 @@ const mapTokenParsedInstruction = async ({
 	cumulativeBalances,
 	addressToToken
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
@@ -233,7 +234,7 @@ const mapToken2022ParsedInstruction = async ({
 	cumulativeBalances,
 	addressToToken
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
@@ -283,7 +284,7 @@ export const mapSolParsedInstruction = async ({
 	cumulativeBalances,
 	addressToToken
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	instruction: SolRpcInstruction;
 	network: SolanaNetworkType;
 	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
@@ -333,7 +334,7 @@ export const mapSolParsedInstruction = async ({
 	}
 
 	// It is useful to receive feedback when we are not able to map an instruction
-	console.warn(
+	consoleWarn(
 		`Could not map Solana instruction of type ${type} for program ${programAddress}`,
 		instruction
 	);
@@ -372,7 +373,7 @@ const parseSolInstruction = (
 		return parseSolAtaInstruction(instruction);
 	}
 
-	console.warn(`Could not parse Solana instruction for program ${programAddress}`);
+	consoleWarn(`Could not parse Solana instruction for program ${programAddress}`);
 
 	return instruction;
 };
@@ -410,7 +411,7 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		};
 	}
 
-	console.warn(`Could not map Solana System instruction of type ${instructionType}`);
+	consoleWarn(`Could not map Solana System instruction of type ${instructionType}`);
 
 	return { amount: undefined };
 };
@@ -478,7 +479,7 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		};
 	}
 
-	console.warn(`Could not map Solana Token instruction of type ${instructionType}`);
+	consoleWarn(`Could not map Solana Token instruction of type ${instructionType}`);
 
 	return { amount: undefined };
 };
@@ -550,7 +551,7 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		};
 	}
 
-	console.warn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
+	consoleWarn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
 
 	return { amount: undefined };
 };
@@ -576,7 +577,7 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 		return mapSolToken2022Instruction(parsedInstruction);
 	}
 
-	console.warn(`Could not map Solana instruction for program ${programAddress}`);
+	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);
 
 	return { amount: undefined };
 };

@@ -216,6 +216,28 @@ describe('btc-utxos.service', () => {
 			expect(result.utxos.length).toBeGreaterThan(0);
 		});
 
+		it('should return UtxoLocked error when all UTXOs are filtered out by confirmations', () => {
+			const unconfirmedUtxo: CkBtcMinterDid.Utxo = {
+				value: 500000n,
+				height: 0,
+				outpoint: {
+					txid: new Uint8Array([1, 2, 3, 4]),
+					vout: 0
+				}
+			};
+
+			const result = prepareBtcSend({
+				...defaultParams,
+				allUtxos: [unconfirmedUtxo]
+			});
+
+			expect(result).toEqual({
+				feeSatoshis: ZERO,
+				utxos: [],
+				error: BtcPrepareSendError.UtxoLocked
+			});
+		});
+
 		it('should handle insufficient balance for fee scenario', () => {
 			// Mock a scenario where there are UTXOs but insufficient balance for fee
 			const smallUtxo: CkBtcMinterDid.Utxo = {
@@ -272,7 +294,7 @@ describe('btc-utxos.service', () => {
 					identity: mockIdentity,
 					network: mockNetwork
 				})
-			).rejects.toThrowError('No fee percentiles available - cannot calculate transaction fee');
+			).rejects.toThrow('No fee percentiles available - cannot calculate transaction fee');
 		});
 
 		it('should throw error when fee percentiles is null', async () => {
@@ -285,7 +307,7 @@ describe('btc-utxos.service', () => {
 					identity: mockIdentity,
 					network: mockNetwork
 				})
-			).rejects.toThrowError('No fee percentiles available - cannot calculate transaction fee');
+			).rejects.toThrow('No fee percentiles available - cannot calculate transaction fee');
 		});
 
 		it('should return minimum fee rate when calculated fee is too low', async () => {
@@ -479,7 +501,7 @@ describe('btc-utxos.service', () => {
 					identity: mockIdentity,
 					network: mockNetwork
 				})
-			).rejects.toThrowError('Backend API error');
+			).rejects.toThrow('Backend API error');
 		});
 
 		it('should handle very small non-zero fee that rounds to zero', async () => {

@@ -10,6 +10,7 @@
 	import type { LogoSize } from '$lib/types/components';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { SwapProvidersConfig } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 
@@ -18,7 +19,7 @@
 		destinationToken: IcTokenToggleable;
 		logoSize?: LogoSize;
 		usdBalance: OptionAmount;
-		dapp?: OisyDappDescription;
+		dapp?: OisyDappDescription | SwapProvidersConfig;
 		isBestRate: boolean;
 		onClick: () => void;
 	}

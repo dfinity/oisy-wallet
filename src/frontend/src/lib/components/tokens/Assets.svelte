@@ -16,6 +16,7 @@
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
+	import TokensSortMenu from '$lib/components/tokens/TokensSortMenu.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
@@ -62,7 +63,7 @@
 						<TokensFilter>
 							{#snippet overflowableContent()}
 								<Tabs
-									styleClass="mt-2 mb-8"
+									styleClass="mt-2 mb-6"
 									tabVariant="menu"
 									tabs={[
 										{
@@ -93,6 +94,9 @@
 					</div>
 					{#if tab === TokenTypes.TOKENS}
 						<div class="flex">
+							<TokensSortMenu />
+						</div>
+						<div class="ml-1 flex">
 							<TokensMenu />
 						</div>
 					{:else if tab === TokenTypes.NFTS}
@@ -118,7 +122,7 @@
 			{/if}
 		</StickyHeader>
 
-		<div class="mt-12 mb-4 flex w-full justify-center sm:w-auto" in:fade>
+		<div class="mt-4 mb-4 flex w-full justify-center sm:mt-12 sm:w-auto" in:fade>
 			{#if activeTab === TokenTypes.TOKENS || activeTab === TokenTypes.NFTS}
 				<ManageTokensButton>
 					{#snippet label()}

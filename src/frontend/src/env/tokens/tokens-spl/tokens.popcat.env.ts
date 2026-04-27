@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import popcat from '$sol/assets/popcat.svg';
@@ -16,6 +17,7 @@ export const POPCAT_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Popcat',
 	symbol: POPCAT_SYMBOL,
 	decimals: POPCAT_DECIMALS,

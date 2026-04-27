@@ -1,8 +1,10 @@
+import { ICRC_SUGGESTED_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
+import { SPL_SUGGESTED_TOKENS } from '$env/tokens/tokens.spl.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
@@ -13,7 +15,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { StakeBalances } from '$lib/types/stake-balance';
-import type { RequiredTokenWithLinkedData, Token, TokenStandard } from '$lib/types/token';
+import type { RequiredTokenWithLinkedData, Token, TokenId, TokenStandard } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -21,7 +23,11 @@ import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+const ERC20_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(ERC20_SUGGESTED_TOKENS.map(({ id }) => id));
+const SPL_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(SPL_SUGGESTED_TOKENS.map(({ id }) => id));
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -46,7 +52,11 @@ export const getMaxTransactionAmount = ({
 }): string => {
 	const value =
 		(balance ?? ZERO) -
-		(tokenStandard.code !== 'erc20' && tokenStandard.code !== 'spl' ? fee : ZERO);
+		(tokenStandard.code !== 'erc20' &&
+		tokenStandard.code !== 'erc4626' &&
+		tokenStandard.code !== 'spl'
+			? fee
+			: ZERO);
 
 	return value <= ZERO
 		? ZERO.toString()
@@ -85,8 +95,10 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 	const isSuggestedToken =
 		(nonNullish(ledgerCanisterId) &&
 			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
-		(isTokenErc20(defaultToken) &&
-			ERC20_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id));
+		(nonNullish(ledgerCanisterId) &&
+			ICRC_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
+		(isTokenErc20(defaultToken) && ERC20_SUGGESTED_TOKEN_IDS.has(defaultToken.id)) ||
+		(isTokenSpl(defaultToken) && SPL_SUGGESTED_TOKEN_IDS.has(defaultToken.id));
 
 	return {
 		...defaultToken,
@@ -168,6 +180,8 @@ export const mapTokenUi = <T extends Token>({
 }): TokenUi<T> => {
 	const { staked, claimable } = $stakeBalances[token.id] ?? {};
 
+	const exchange = $exchanges?.[token.id];
+
 	return {
 		...token,
 		// There is a difference between undefined and null for the balance.
@@ -179,6 +193,9 @@ export const mapTokenUi = <T extends Token>({
 			$balances,
 			$exchanges
 		}),
+		usdPrice: exchange?.usd,
+		usdMarketCap: exchange?.usd_market_cap,
+		usdPriceChangePercentage24h: exchange?.usd_24h_change,
 		...(nonNullish(staked)
 			? {
 					stakeBalance: staked,
@@ -262,6 +279,15 @@ export const findTwinToken = ({
  */
 export const getTokenDisplaySymbol = (token: Token | CardData): string =>
 	token.oisySymbol?.oisySymbol ?? token.symbol;
+
+/**
+ * Gets the name to display for the given token.
+ *
+ * @param token - for which the name to display should be found
+ * @returns the name to display for the token
+ */
+export const getTokenDisplayName = (token: Token | CardData): string =>
+	token.oisyName?.oisyName ?? token.name;
 
 /**
  * Checks if a token is specifically defined as enabled/disabled, otherwise it defaults to true.

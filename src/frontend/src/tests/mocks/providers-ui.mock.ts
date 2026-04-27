@@ -1,27 +1,16 @@
-import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
-import type { IcToken } from '$icp/types/ic-token';
 import { stakeProvidersConfig } from '$lib/config/stake.config';
 import type { ProviderUi } from '$lib/types/provider-ui';
 import { StakeProvider } from '$lib/types/stake';
-import { parseTokenId } from '$lib/validation/token.validation';
-
-const mockGldtToken: IcToken = {
-	id: parseTokenId('GOLDAO'),
-	symbol: 'GLDT',
-	name: 'Gold DAO Token',
-	decimals: 8,
-	network: ICP_NETWORK,
-	standard: { code: 'icrc' },
-	ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
-	fee: 100n,
-	category: 'custom'
-};
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 
 export const mockProviderUi: ProviderUi = {
-	...stakeProvidersConfig[StakeProvider.GLDT],
+	...stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS],
+	card: {
+		...stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].card,
+		titles: ['mock.provider.title1', 'mock.provider.title2']
+	},
 	maxApy: 6.78,
 	totalEarningPerYear: 45.6,
 	totalPositionUsd: 123.45,
-	tokens: [mockGldtToken]
+	tokens: [mockValidErc20Token]
 };

@@ -2,8 +2,9 @@
 	import { themeStore } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
+	import FeatureCards from '$lib/components/auth/FeatureCards.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
-	import BgImg from '$lib/components/ui/BgImg.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -11,21 +12,21 @@
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 </script>
 
-<div class="flex grid w-full max-w-screen-2.5xl flex-1 grid-cols-1 gap-5 md:grid-cols-2 xl:m-auto">
-	<div class="flex h-full flex-col justify-center px-5 md:px-8">
+<div
+	class="mx-auto flex w-full max-w-screen-xl flex-1 flex-col items-center gap-8 px-5 md:gap-12 md:px-8"
+>
+	<div class="flex w-full max-w-screen-md flex-col items-center">
 		<HeroSignIn />
 	</div>
 
-	<div class="min-h-[85dvh] md:mt-8 md:min-h-[65dvh] 2.5xl:min-h-[75dvh]">
+	<div class="flex w-full justify-center">
 		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
-			<BgImg
-				{ariaLabel}
-				imageUrl={src}
-				shadow="none"
-				size="contain"
-				styleClass="min-h-[75dvh] 2.5xl:min-h-[85dvh] min-w-[1400px] bg-left absolute"
-			/>
+			<Img alt={ariaLabel} {src} styleClass="h-full w-full object-cover" />
 		{/await}
+	</div>
+
+	<div class="w-full sm:-mt-48">
+		<FeatureCards />
 	</div>
 </div>
 

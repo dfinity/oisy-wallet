@@ -2,8 +2,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
@@ -33,6 +33,7 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -100,10 +101,7 @@
 		const condition2 = !SUPPORTED_CROSS_SWAP_NETWORKS[$destinationToken.network.id]?.includes(
 			$sourceToken.network.id
 		);
-		const condition3 =
-			isDefaultEthereumToken($destinationToken) &&
-			$destinationToken.network.id !== $sourceToken.network.id;
-		return condition1 || condition2 || condition3;
+		return condition1 || condition2;
 	});
 
 	let invalid = $derived(
@@ -132,9 +130,20 @@
 
 	const onTokensSwitch = () => {
 		const tempAmount = receiveAmount;
+		const newSourceDecimals = $destinationToken?.decimals;
+
 		swapAmountsStore.reset();
 		amountSetToMax = false;
-		swapAmount = tempAmount;
+
+		swapAmount =
+			nonNullish(tempAmount) && nonNullish(newSourceDecimals)
+				? formatTokenBigintToNumber({
+						value: parseToken({ value: `${tempAmount}`, unitName: newSourceDecimals }),
+						unitName: newSourceDecimals,
+						displayDecimals: newSourceDecimals
+					})
+				: tempAmount;
+
 		switchTokens();
 	};
 </script>
@@ -254,6 +263,8 @@
 				{/snippet}
 			</TokenInputNetworkWrapper>
 		</div>
+
+		<SwapCrossChainInfo />
 
 		<SwapSlippage
 			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)

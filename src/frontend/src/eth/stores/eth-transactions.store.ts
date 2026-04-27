@@ -1,7 +1,7 @@
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import {
-	initTransactionsStore,
 	type CertifiedTransaction,
+	initTransactionsStore,
 	type TransactionsData
 } from '$lib/stores/transactions.store';
 import type { Transaction } from '$lib/types/transaction';

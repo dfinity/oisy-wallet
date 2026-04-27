@@ -10,7 +10,6 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TokenActionErrorType } from '$lib/types/token-action';
-import type { Option } from '$lib/types/utils';
 import {
 	assertAmount,
 	assertCkBtcAmount,
@@ -21,6 +20,7 @@ import {
 import { formatToken } from '$lib/utils/format.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 export const validateUserAmount = ({
 	userAmount,
@@ -38,7 +38,7 @@ export const validateUserAmount = ({
 	balanceForFee?: Balance;
 	fee?: bigint;
 	ethereumEstimateFee?: bigint;
-	minterInfo?: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
+	minterInfo?: Nullish<CkBtcMinterInfoData | CkEthMinterInfoData>;
 	isSwapFlow?: boolean;
 }): TokenActionErrorType => {
 	// We should align balance and userAmount to avoid issues caused by comparing formatted and unformatted BN

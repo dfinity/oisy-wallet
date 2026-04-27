@@ -6,6 +6,7 @@ import type {
 	SignBtcResponse
 } from '$declarations/signer/signer.did';
 import type { EthAddress } from '$eth/types/address';
+import { CanisterApi } from '$lib/api/canister.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -14,10 +15,9 @@ import type {
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
-import { Principal } from '@icp-sdk/core/principal';
+import { assertNonNullish } from '@dfinity/utils';
 
-let canister: SignerCanister | undefined = undefined;
+const signerApi = new CanisterApi<SignerCanister>();
 
 export const getBtcAddress = async ({
 	identity,
@@ -126,12 +126,9 @@ const signerCanister = async ({
 }: CanisterApiFunctionParams): Promise<SignerCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	if (isNullish(canister)) {
-		canister = await SignerCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return canister;
+	return await signerApi.getCanister({
+		identity,
+		canisterId,
+		create: SignerCanister.create
+	});
 };

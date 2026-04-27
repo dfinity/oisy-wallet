@@ -48,7 +48,7 @@ describe('load-user-profile.services', () => {
 				.mockResolvedValue({ Err: { NotFound: null } });
 			const createUserProfileSpy = vi
 				.spyOn(backendApi, 'createUserProfile')
-				.mockResolvedValue(mockProfile);
+				.mockResolvedValue({ Ok: mockProfile });
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
@@ -123,6 +123,40 @@ describe('load-user-profile.services', () => {
 			const result = await loadUserProfile({ identity: mockIdentity });
 
 			expect(result).toEqual({ success: false });
+		});
+
+		it('should handle unknown error from getUserProfile', async () => {
+			vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue({
+				Err: { InternalError: null } as never
+			});
+
+			const result = await loadUserProfile({ identity: mockIdentity });
+
+			expect(result).toEqual({ success: false });
+		});
+
+		it('should handle certified profile load failure gracefully', async () => {
+			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			let callCount = 0;
+			vi.spyOn(backendApi, 'getUserProfile').mockImplementation(({ certified }) => {
+				callCount++;
+
+				if (!certified) {
+					return Promise.resolve({ Ok: mockProfile });
+				}
+
+				return Promise.reject(new Error('Certified load failed'));
+			});
+
+			const result = await loadUserProfile({ identity: mockIdentity });
+
+			expect(result).toEqual({ success: true });
+			expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
+
+			await waitFor(() => expect(callCount).toBe(2));
+
+			consoleErrorSpy.mockRestore();
 		});
 	});
 });

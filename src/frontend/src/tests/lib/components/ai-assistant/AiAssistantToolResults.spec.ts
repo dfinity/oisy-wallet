@@ -115,6 +115,6 @@ describe('AiAssistantToolResults', () => {
 			}
 		});
 
-		expect(() => getByText(contacts[0].name)).toThrowError();
+		expect(() => getByText(contacts[0].name)).toThrow();
 	});
 });

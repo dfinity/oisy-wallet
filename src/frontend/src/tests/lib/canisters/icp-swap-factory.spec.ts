@@ -73,7 +73,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrowError(
+			await expect(result).rejects.toThrow(
 				new CanisterInternalError('Internal error: Failed to find pool')
 			);
 		});
@@ -87,7 +87,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrowError(mockResponseError);
+			await expect(result).rejects.toThrow(mockResponseError);
 		});
 
 		it('throws error for unexpected structure', async () => {
@@ -98,7 +98,57 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrowError();
+			await expect(result).rejects.toThrow();
+		});
+	});
+
+	describe('getPools', () => {
+		it('returns all pools successfully', async () => {
+			const poolData2: PoolData = {
+				...poolData,
+				key: 'token2_token3_3000',
+				token0: { address: 'ccccc-cc', standard: 'icrc1' },
+				token1: { address: 'ddddd-dd', standard: 'icrc1' }
+			};
+
+			service.getPools.mockResolvedValue({ ok: [poolData, poolData2] });
+
+			const { getPools } = await createFactory({ serviceOverride: service });
+
+			const result = await getPools();
+
+			expect(result).toEqual([poolData, poolData2]);
+			expect(service.getPools).toHaveBeenCalledOnce();
+		});
+
+		it('returns empty array when no pools exist', async () => {
+			service.getPools.mockResolvedValue({ ok: [] });
+
+			const { getPools } = await createFactory({ serviceOverride: service });
+
+			const result = await getPools();
+
+			expect(result).toEqual([]);
+		});
+
+		it('throws CanisterInternalError if result is error variant', async () => {
+			service.getPools.mockResolvedValue({ err: { InternalError: 'Failed to fetch pools' } });
+
+			const { getPools } = await createFactory({ serviceOverride: service });
+
+			await expect(getPools()).rejects.toThrow(
+				new CanisterInternalError('Internal error: Failed to fetch pools')
+			);
+		});
+
+		it('throws raw error if getPools method fails', async () => {
+			service.getPools.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { getPools } = await createFactory({ serviceOverride: service });
+
+			await expect(getPools()).rejects.toThrow(mockResponseError);
 		});
 	});
 });

@@ -5,6 +5,8 @@ export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
+export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
+export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
 export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
 export const NAVIGATION_MENU_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const NAVIGATION_MENU_DOC_BUTTON = 'navigation-documentation-button';
@@ -18,11 +20,13 @@ export const CURRENCY_SWITCHER_DROPDOWN_BUTTON = 'currency-switcher-dropdown-but
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
+export const LOGIN_BUTTON_GOOGLE = 'login-button-google';
+export const LOGIN_BUTTON_APPLE = 'login-button-apple';
+export const LOGIN_BUTTON_MICROSOFT = 'login-button-microsoft';
 export const LOCK_BUTTON = 'lock-button';
 export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
-export const POW_PROTECTOR_MODAL = 'pow-protector-modal';
 export const BUTTON_MODAL_CLOSE = 'close-modal';
 
 export const MODAL_TITLE = 'modal-title';
@@ -56,6 +60,9 @@ export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
 export const PAY_DIALOG = 'pay-dialog';
 export const PAY_DIALOG_PAY_BUTTON = 'pay-dialog-pay-button';
 export const PAY_DIALOG_BANNER = 'pay-dialog-banner';
+
+export const OISY_SCANNER_INFO = 'oisy-scanner-info';
+export const OISY_SCANNER_INFO_GOT_IT_BUTTON = 'oisy-scanner-info-got-it-button';
 
 export const RECEIVE_TOKENS_MODAL_OPEN_BUTTON = 'receive-tokens-modal-open-button';
 export const RECEIVE_TOKENS_MODAL_DONE_BUTTON = 'receive-tokens-modal-done-button';
@@ -188,6 +195,7 @@ export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button
 export const REWARDS_NETWORK_MULTIPLIER_IMAGE = 'reward-network-multiplier-image';
 
 export const EARNING_CARD = 'earning-card';
+export const EARNING_CARD_SKELETON = 'earning-card-skeleton';
 export const EARNING_NO_POSITION_PLACEHOLDER = 'earning-no-position-placeholder';
 export const EARNING_GOTO_BUTTON = 'earning-goto-button';
 
@@ -202,6 +210,7 @@ export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
 
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 export const TRANSACTIONS_DATE_GROUP_PREFIX = 'transactions-date-group-';
+export const TRANSACTION_CHILDREN_CONTAINER = 'transaction-children-container';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

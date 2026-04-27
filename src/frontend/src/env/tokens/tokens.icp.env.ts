@@ -6,12 +6,14 @@ import {
 	ICP_NETWORK,
 	ICP_PSEUDO_TESTNET_NETWORK
 } from '$env/networks/networks.icp.env';
+import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import icpLight from '$icp/assets/icp-light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import { buildIndexedIcTokens } from '$icp/utils/ic-tokens.utils';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -29,6 +31,7 @@ export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'alternativeN
 	network: ICP_NETWORK,
 	standard: { code: 'icp' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	exchangeCoinId: 'internet-computer',
 	name: 'Internet Computer',
 	symbol: ICP_SYMBOL,
@@ -41,7 +44,8 @@ export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'alternativeN
 	explorerUrl: ICP_EXPLORER_URL,
 	buy: {
 		onramperId: 'icp_icp'
-	}
+	},
+	groupData: ICP_TOKEN_GROUP
 };
 
 /**
@@ -58,6 +62,7 @@ export const TESTICP_TOKEN: RequiredToken<
 	network: ICP_PSEUDO_TESTNET_NETWORK,
 	standard: { code: 'icp' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	exchangeCoinId: 'internet-computer',
 	name: 'Test ICP',
 	symbol: TESTICP_SYMBOL,

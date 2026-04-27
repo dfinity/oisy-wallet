@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onMount, setContext, type Snippet, untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -13,17 +13,24 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkICPTestnet, selectedNetwork } from '$lib/derived/network.derived';
+	import { networks } from '$lib/derived/networks.derived';
+	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
+	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import type { CustomToken } from '$lib/types/custom-token';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token-ui';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	interface Props {
@@ -59,16 +66,33 @@
 		};
 	});
 
-	let allTokensSorted: Token[] = $derived(
-		nonNullish(exchangesStaticData)
-			? pinEnabledTokensAtTop(
-					sortTokens({
-						$tokens: $allTokens,
-						$exchanges: exchangesStaticData,
-						$tokensToPin
-					})
-				)
-			: []
+	let allTokensUi: TokenUi<CustomToken<Token>>[] = $derived(
+		$allTokens.reduce<TokenUi<CustomToken<Token>>[]>((acc, token) => {
+			if (isNullish(exchangesStaticData)) {
+				return acc;
+			}
+
+			acc.push(
+				mapTokenUi({
+					token,
+					$balances: $balancesStore,
+					$stakeBalances,
+					$exchanges: exchangesStaticData
+				})
+			);
+
+			return acc;
+		}, [])
+	);
+
+	let allTokensSorted: TokenUi<CustomToken<Token>>[] = $derived(
+		pinEnabledTokensAtTop(
+			sortTokens({
+				$tokens: allTokensUi,
+				$tokensToPin,
+				$networksToPin: $networks
+			})
+		)
 	);
 
 	let tokensInContext: Token[] = $state([]);
@@ -87,7 +111,8 @@
 			// TODO: This statement is not reactive. Check if it is intentional or not.
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally
-			filterNfts: isNftsPage
+			filterNfts: isNftsPage,
+			filterCategoryTag: $tokenCategoryFilter
 		})
 	);
 
@@ -199,12 +224,17 @@
 				disabled={$pseudoNetworkICPTestnet ||
 					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
 				onclick={onAddToken}
-				><IconPlus />
-				{isNftsPage
-					? $i18n.tokens.manage.text.import_nft
-					: $i18n.tokens.manage.text.import_token}</Button
+				styleClass="whitespace-nowrap"
 			>
-			<Button disabled={saveDisabled} onclick={save} testId={MANAGE_TOKENS_MODAL_SAVE}>
+				<IconPlus />
+				{isNftsPage ? $i18n.tokens.manage.text.import_nft : $i18n.tokens.manage.text.import_token}
+			</Button>
+			<Button
+				disabled={saveDisabled}
+				onclick={save}
+				styleClass="whitespace-nowrap"
+				testId={MANAGE_TOKENS_MODAL_SAVE}
+			>
 				{$i18n.core.text.save}
 			</Button>
 		{/snippet}

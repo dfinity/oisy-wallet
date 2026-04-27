@@ -1,7 +1,6 @@
-import type { OptionIdentity } from '$lib/types/identity';
-import type { Option } from '$lib/types/utils';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { CanisterOptions } from '@dfinity/utils';
-import { PrincipalTextSchema } from '@dfinity/zod-schemas';
+import { PrincipalTextSchema, type Nullish } from '@dfinity/zod-schemas';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 import type * as z from 'zod';
@@ -10,11 +9,11 @@ export const CanisterIdTextSchema = PrincipalTextSchema;
 
 export type CanisterIdText = z.infer<typeof CanisterIdTextSchema>;
 
-export type OptionCanisterIdText = Option<CanisterIdText>;
+export type OptionCanisterIdText = Nullish<CanisterIdText>;
 
 export type CanisterApiFunctionParams<T = unknown> = T & {
 	nullishIdentityErrorMessage?: string;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	canisterId?: CanisterIdText;
 };
 

@@ -1,6 +1,5 @@
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
-import type { Exchange } from '$lib/types/exchange';
 import type {
 	RequiredToken,
 	Token,
@@ -8,7 +7,7 @@ import type {
 	TokenMetadata,
 	TokenStandardCode
 } from '$lib/types/token';
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 type Erc20Standard = Extract<TokenStandardCode, 'erc20'>;
 
@@ -22,8 +21,8 @@ export type RequiredErc20Token = RequiredToken<Erc20Token>;
 export type RequiredAdditionalErc20Token = Omit<RequiredErc20Token, keyof TokenLinkedData>;
 
 export type Erc20ContractAddress = ContractAddress;
-export type Erc20Contract = Erc20ContractAddress & { exchange: Exchange } & TokenLinkedData;
+export type Erc20Contract = Erc20ContractAddress & TokenLinkedData;
 
 export type Erc20Metadata = TokenMetadata;
 
-export type OptionErc20Token = Option<Erc20Token>;
+export type OptionErc20Token = Nullish<Erc20Token>;

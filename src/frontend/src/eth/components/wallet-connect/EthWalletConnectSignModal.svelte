@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
+	import { onDestroy } from 'svelte';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
 	import {
@@ -58,6 +59,8 @@
 
 	const close = () => modalStore.close();
 
+	let closeTimeout: NodeJS.Timeout | undefined;
+
 	/**
 	 * WalletConnect
 	 */
@@ -86,15 +89,17 @@
 			progress: (step: ProgressStepsSign) => (signProgressStep = step)
 		});
 
-		setTimeout(() => close(), success ? 750 : 0);
+		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
 	};
+
+	onDestroy(() => clearTimeout(closeTimeout));
 </script>
 
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{#snippet title()}
-		<WalletConnectModalTitle
-			>{domainName ?? $i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
-		>
+		<WalletConnectModalTitle>
+			{domainName ?? $i18n.wallet_connect.text.sign_message}
+		</WalletConnectModalTitle>
 	{/snippet}
 
 	{#key currentStep?.name}

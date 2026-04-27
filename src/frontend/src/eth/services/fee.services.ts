@@ -15,6 +15,7 @@ import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { maxBigInt } from '$lib/utils/bigint.utils';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 
 export const getEthFeeData = ({
@@ -64,7 +65,7 @@ export const getErc20FeeData = async ({
 		// We silence the error on purpose.
 		// The queries above often produce errors on mainnet, even when all parameters are correctly set.
 		// Additionally, it's possible that the queries are executed with inaccurate parameters, such as when a user enters an incorrect address or an address that is not supported by the selected function (e.g., an ICP account identifier on the Ethereum network rather than for the burn contract).
-		console.warn(err);
+		consoleWarn(err);
 
 		return ERC20_FALLBACK_FEE;
 	}

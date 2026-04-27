@@ -1,45 +1,62 @@
 import type {
-	AddUserCredentialResult,
-	AllowSigningResponse,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
-	CreateChallengeResponse,
 	CustomToken,
+	ExchangeRate,
 	GetAllowedCyclesResponse,
-	PendingTransaction,
-	SelectedUtxosFeeResponse,
-	UserProfile
+	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
-	mapBtcPendingTransactionError,
+	mapBtcAddPendingTransactionError,
+	mapBtcGetPendingTransactionsError,
 	mapBtcSelectUserUtxosFeeError,
-	mapCreateChallengeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
+import { ZERO } from '$lib/constants/app.constants';
 import type {
-	AddUserCredentialParams,
+	AddPendingTransactionOutcome,
+	AddUserDismissedNotificationParams,
 	AddUserHiddenDappIdParams,
+	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateUserProfileResponse,
+	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
+	GetUserTransactionsParams,
+	GetUserTransactionsResponse,
+	SaveProviderAgreements,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SaveUserTransactionsParams,
+	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
+import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
+import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	fromNullable,
+	nonNullish,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
@@ -60,8 +77,8 @@ export class BackendCanister extends Canister<BackendService> {
 		return new BackendCanister(canisterId, service, certifiedService);
 	}
 
-	listCustomTokens = ({ certified }: QueryParams): Promise<CustomToken[]> => {
-		const { list_custom_tokens } = this.caller({ certified });
+	listCustomTokens = (): Promise<CustomToken[]> => {
+		const { list_custom_tokens } = this.caller({ certified: true });
 
 		return list_custom_tokens();
 	};
@@ -84,7 +101,7 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<UserProfile> => {
+	createUserProfile = (): Promise<CreateUserProfileResponse> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
 		return create_user_profile();
@@ -96,78 +113,105 @@ export class BackendCanister extends Canister<BackendService> {
 		return get_user_profile();
 	};
 
-	addUserCredential = ({
-		credentialJwt,
-		issuerCanisterId,
-		currentUserVersion,
-		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResult> => {
-		const { add_user_credential } = this.caller({ certified: true });
-
-		return add_user_credential({
-			credential_jwt: credentialJwt,
-			issuer_canister_id: issuerCanisterId,
-			current_user_version: toNullable(currentUserVersion),
-			credential_spec: credentialSpec
-		});
-	};
-
 	btcAddPendingTransaction = async ({
 		txId,
+		iiDelegationChain,
 		...rest
-	}: BtcAddPendingTransactionParams): Promise<boolean> => {
+	}: BtcAddPendingTransactionParams): Promise<AddPendingTransactionOutcome> => {
 		const { btc_add_pending_transaction } = this.caller({ certified: true });
 
 		const response = await btc_add_pending_transaction({
 			txid: txId,
+			ii_delegation_chain: iiDelegationChain,
 			...rest
 		});
 
 		if ('Ok' in response) {
-			return true;
+			return { response: true };
 		}
 
-		throw mapBtcPendingTransactionError(response.Err);
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: true,
+				rateLimitInfo: {
+					endpoint: 'btc_add_pending_transaction',
+					limiter: 'BTC_ADD_PENDING_TX_RATE_LIMITER'
+				}
+			};
+		}
+
+		throw mapBtcAddPendingTransactionError(response.Err);
 	};
 
-	// TODO: rename to plural
-	btcGetPendingTransaction = async ({
+	btcGetPendingTransactions = async ({
 		network,
-		address
-	}: BtcGetPendingTransactionParams): Promise<PendingTransaction[]> => {
+		address,
+		iiDelegationChain
+	}: BtcGetPendingTransactionParams): Promise<GetPendingTransactionsOutcome> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
 			network,
-			address
+			address,
+			ii_delegation_chain: iiDelegationChain
 		});
 
 		if ('Ok' in response) {
 			const {
 				Ok: { transactions }
 			} = response;
-			return transactions;
+			return { response: transactions };
 		}
 
-		throw mapBtcPendingTransactionError(response.Err);
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: [],
+				rateLimitInfo: {
+					endpoint: 'btc_get_pending_transactions',
+					limiter: 'BTC_GET_PENDING_TX_RATE_LIMITER'
+				}
+			};
+		}
+
+		throw mapBtcGetPendingTransactionsError(response.Err);
 	};
 
 	btcSelectUserUtxosFee = async ({
 		network,
 		minConfirmations,
-		amountSatoshis
-	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
+		amountSatoshis,
+		iiDelegationChain
+	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeOutcome> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
 			network,
 			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis
+			amount_satoshis: amountSatoshis,
+			ii_delegation_chain: iiDelegationChain
 		});
 
 		if ('Ok' in response) {
-			const { Ok } = response;
-			return Ok;
+			return { response: response.Ok };
+		}
+
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: {
+					fee_satoshis: ZERO,
+					utxos: []
+				},
+				rateLimitInfo: {
+					endpoint: 'btc_select_user_utxos_fee',
+					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
+				}
+			};
 		}
 
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
@@ -204,29 +248,38 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
+	allowSigning = async ({
+		iiDelegationChain
+	}: AllowSigningParams): Promise<AllowSigningOutcome> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await allow_signing(toNullable(request));
+		const response = await allow_signing(
+			toNullable({
+				ii_delegation_chain: iiDelegationChain
+			})
+		);
 
 		if ('Ok' in response) {
-			const { Ok } = response;
-			return Ok;
+			return { response: response.Ok };
+		}
+
+		if ('RateLimited' in response.Err || 'RateLimitedByGuard' in response.Err) {
+			return {
+				response: {
+					status: { Skipped: null },
+					allowed_cycles: ZERO
+				},
+				rateLimitInfo: {
+					endpoint: 'allow_signing',
+					limiter:
+						'RateLimitedByGuard' in response.Err
+							? 'ALLOW_SIGNING_GUARD_LIMITER'
+							: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
+			};
 		}
 
 		throw mapAllowSigningError(response.Err);
-	};
-
-	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
-		const { create_pow_challenge } = this.caller({ certified: true });
-
-		const result = await create_pow_challenge();
-		if ('Ok' in result) {
-			const { Ok } = result;
-			return Ok;
-		}
-
-		throw mapCreateChallengeError(result.Err);
 	};
 
 	addUserHiddenDappId = async ({
@@ -237,6 +290,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await add_user_hidden_dapp_id({
 			dapp_id: dappId,
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	addUserDismissedNotification = async ({
+		notifications,
+		currentUserVersion
+	}: AddUserDismissedNotificationParams): Promise<void> => {
+		const { add_user_dismissed_notification } = this.caller({ certified: true });
+
+		await add_user_dismissed_notification({
+			notifications,
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};
@@ -273,6 +338,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await update_user_agreements({
 			agreements: mapBackendUserAgreements(agreements),
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateProviderAgreements = async ({
+		providerAgreements,
+		currentUserVersion
+	}: SaveProviderAgreements): Promise<void> => {
+		const { update_provider_agreements } = this.caller({ certified: true });
+
+		await update_provider_agreements({
+			provider_agreements: mapBackendProviderAgreements(providerAgreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};
@@ -337,5 +414,111 @@ export class BackendCanister extends Canister<BackendService> {
 			experimental_features: mapUserExperimentalFeatures(experimentalFeatures),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	updateUserTransactionFilterSettings = async ({
+		hideMicroTransactions,
+		currentUserVersion
+	}: UpdateUserTransactionFilterSettings): Promise<void> => {
+		const { update_user_transaction_filter_settings } = this.caller({ certified: true });
+
+		await update_user_transaction_filter_settings({
+			filter: { hide_micro_transactions: hideMicroTransactions },
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
+		if (!nonNullish(rate)) {
+			return;
+		}
+
+		return {
+			usd: {
+				price: fromNullable(rate.usd.price),
+				price24hChangePct: fromNullable(rate.usd.price_24h_change_pct),
+				marketCap: fromNullable(rate.usd.market_cap),
+				timestampNs: rate.usd.timestamp_ns
+			}
+		};
+	};
+
+	getExchangeRate = async ({
+		token_id,
+		certified
+	}: { token_id: TokenId } & QueryParams): Promise<BackendExchangeRate | undefined> => {
+		const { get_exchange_rate } = this.caller({ certified });
+
+		const response = await get_exchange_rate(token_id);
+
+		return this.mapExchangeRate(fromNullable(response));
+	};
+
+	getExchangeRates = async ({
+		token_ids,
+		certified
+	}: { token_ids: TokenId[] } & QueryParams): Promise<Map<string, BackendExchangeRate>> => {
+		const { get_exchange_rates } = this.caller({ certified });
+
+		const results = await get_exchange_rates(token_ids);
+
+		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
+			const unwrapped = this.mapExchangeRate(fromNullable(rate));
+
+			const key = tokenIdKey(id);
+
+			if (nonNullish(unwrapped) && nonNullish(key)) {
+				acc.set(key, unwrapped);
+			}
+
+			return acc;
+		}, new Map());
+	};
+
+	getUserTransactions = async ({
+		tokenId,
+		start,
+		maxResults
+	}: GetUserTransactionsParams): Promise<GetUserTransactionsResponse> => {
+		const { get_user_transactions } = this.caller({ certified: false });
+
+		const response = await get_user_transactions({
+			token_id: tokenId,
+			start: toNullable(start),
+			max_results: maxResults
+		});
+
+		if ('Ok' in response) {
+			const { transactions, newest_block_index, oldest_block_index, total_stored, next_start } =
+				response.Ok;
+
+			return {
+				transactions,
+				newestBlockIndex: fromNullable(newest_block_index),
+				oldestBlockIndex: fromNullable(oldest_block_index),
+				totalStored: total_stored,
+				nextStart: fromNullable(next_start)
+			};
+		}
+
+		throw response.Err;
+	};
+
+	saveUserTransactions = async ({
+		tokenId,
+		transactions
+	}: SaveUserTransactionsParams): Promise<void> => {
+		const { save_user_transactions } = this.caller({ certified: true });
+
+		const response = await save_user_transactions({
+			token_id: tokenId,
+			transactions
+		});
+
+		if ('Ok' in response) {
+			return;
+		}
+
+		throw response.Err;
 	};
 }

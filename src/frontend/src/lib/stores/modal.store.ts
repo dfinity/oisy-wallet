@@ -9,11 +9,11 @@ import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
-import type { ClaimStakingRewardParams } from '$lib/types/stake';
+import type { UniversalScannerData } from '$lib/types/scanner';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
-import type { Option } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { writable, type Readable } from 'svelte/store';
@@ -66,17 +66,17 @@ export interface Modal<T> {
 		| 'auth-help'
 		| 'nft-image-consent'
 		| 'nft-fullscreen-display'
-		| 'gldt-stake'
-		| 'gldt-unstake'
-		| 'gldt-claim-staking-reward'
 		| 'get-token'
+		| 'harvest-stake'
+		| 'harvest-unstake'
 		| 'universal-scanner'
-		| 'pay-dialog';
+		| 'pay-dialog'
+		| 'wallet-connect-sessions';
 	data?: T;
 	id?: symbol;
 }
 
-export type ModalData<T> = Option<Modal<T>>;
+export type ModalData<T> = Nullish<Modal<T>>;
 
 interface SetWithDataParams<D> {
 	id: symbol;
@@ -138,12 +138,12 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	openNftImageConsent: (params: SetWithDataParams<NftCollection>) => void;
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
-	openGldtStake: (id: symbol) => void;
-	openGldtUnstake: (id: symbol) => void;
-	openGldtClaimStakingReward: (params: SetWithDataParams<ClaimStakingRewardParams>) => void;
-	openUniversalScanner: (id: symbol) => void;
+	openHarvestStake: (id: symbol) => void;
+	openHarvestUnstake: (id: symbol) => void;
+	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
+	openWalletConnectSessions: (id: symbol) => void;
 	close: () => void;
 }
 
@@ -247,14 +247,14 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openNftFullscreenDisplay: <(params: SetWithDataParams<Nft>) => void>(
 			setTypeWithData('nft-fullscreen-display')
 		),
-		openGldtStake: setType('gldt-stake'),
-		openGldtUnstake: setType('gldt-unstake'),
-		openGldtClaimStakingReward: <(params: SetWithDataParams<ClaimStakingRewardParams>) => void>(
-			setTypeWithData('gldt-claim-staking-reward')
+		openHarvestStake: setType('harvest-stake'),
+		openHarvestUnstake: setType('harvest-unstake'),
+		openUniversalScanner: <(params: SetWithOptionalDataParams<UniversalScannerData>) => void>(
+			setTypeWithData('universal-scanner')
 		),
-		openUniversalScanner: setType('universal-scanner'),
 		openPayDialog: setType('pay-dialog'),
 		openGetToken: setType('get-token'),
+		openWalletConnectSessions: setType('wallet-connect-sessions'),
 		close: () => set(null),
 		subscribe
 	};

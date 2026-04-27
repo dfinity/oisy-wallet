@@ -1,4 +1,5 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { Token } from '$lib/types/token';
@@ -28,6 +29,11 @@ export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
 	token: Token;
 };
 
+export type EthAllTransactionUiWithCmp = Extract<
+	AllTransactionUiWithCmp,
+	{ component: 'ethereum' }
+>;
+
 export type AllTransactionUiWithCmpNonEmptyList = NonEmptyArray<AllTransactionUiWithCmp>;
 
 export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
@@ -36,5 +42,5 @@ export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
 >;
 
 export type StakingTransactionsUiWithToken = AnyTransactionUiWithToken & {
-	isReward: boolean;
+	vaultToken?: Erc4626CustomToken;
 };

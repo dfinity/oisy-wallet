@@ -24,7 +24,7 @@ describe('decodeQrCode', () => {
 	const otherProps = {
 		expectedToken: token,
 		ethereumTokens: get(enabledEthereumTokens),
-		erc20Tokens: get(enabledErc20Tokens)
+		ercTokens: get(enabledErc20Tokens)
 	};
 
 	const mockDecodeQrCodeUrn = vi.mocked(decodeQrCodeUrn);

@@ -57,7 +57,7 @@ describe('eth-open-crypto-pay.services', () => {
 			tokenNetwork: 'Ethereum',
 			amount: '1.5',
 			minFee: 0
-		};
+		} as PayableToken;
 
 		beforeEach(() => {
 			vi.clearAllMocks();

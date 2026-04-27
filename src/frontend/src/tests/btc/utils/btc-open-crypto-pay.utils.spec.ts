@@ -19,14 +19,15 @@ describe('btc-open-crypto-pay.utils', () => {
 		const mockExchangeRate = 50000;
 		const mockBalance = 100000000n;
 
-		const createMockToken = (overrides?: Partial<PayableTokenWithFees>): PayableTokenWithFees => ({
-			...BTC_MAINNET_TOKEN,
-			amount: '0.001',
-			minFee: 0.00001,
-			fee: mockUtxosFee,
-			tokenNetwork: 'bitcoin',
-			...overrides
-		});
+		const createMockToken = (overrides?: Partial<PayableTokenWithFees>): PayableTokenWithFees =>
+			({
+				...BTC_MAINNET_TOKEN,
+				amount: '0.001',
+				minFee: 0.00001,
+				fee: mockUtxosFee,
+				tokenNetwork: 'bitcoin',
+				...overrides
+			}) as PayableTokenWithFees;
 
 		const createMockExchanges = (rate?: number): ExchangesData => ({
 			[BTC_MAINNET_TOKEN.id]: { usd: rate ?? mockExchangeRate }
@@ -132,17 +133,18 @@ describe('btc-open-crypto-pay.utils', () => {
 
 		const createMockToken = (
 			overrides?: Partial<PayableTokenWithConvertedAmount>
-		): PayableTokenWithConvertedAmount => ({
-			...BTC_MAINNET_TOKEN,
-			amount: '0.001',
-			minFee: 0.00001,
-			fee: mockUtxosFee,
-			amountInUSD: 50,
-			feeInUSD: 0.5,
-			sumInUSD: 50.5,
-			tokenNetwork: 'bitcoin',
-			...overrides
-		});
+		): PayableTokenWithConvertedAmount =>
+			({
+				...BTC_MAINNET_TOKEN,
+				amount: '0.001',
+				minFee: 0.00001,
+				fee: mockUtxosFee,
+				amountInUSD: 50,
+				feeInUSD: 0.5,
+				sumInUSD: 50.5,
+				tokenNetwork: 'bitcoin',
+				...overrides
+			}) as PayableTokenWithConvertedAmount;
 
 		const createMockDecodedData = (overrides?: Partial<DecodedUrn>): DecodedUrn => ({
 			destination: mockBtcAddress,
@@ -154,7 +156,7 @@ describe('btc-open-crypto-pay.utils', () => {
 		it('should throw error when token is not Bitcoin token', () => {
 			const token = createMockToken({
 				...ETHEREUM_TOKEN
-			});
+			} as Partial<PayableTokenWithConvertedAmount>);
 
 			expect(() =>
 				validateBtcTransfer({
@@ -162,7 +164,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when fee is undefined', () => {
@@ -174,7 +176,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when fee has error', () => {
@@ -188,7 +190,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when destination is undefined', () => {
@@ -200,7 +202,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when amount param is undefined', () => {
@@ -212,7 +214,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.data_is_incompleted);
+			).toThrow(en.pay.error.data_is_incompleted);
 		});
 
 		it('should throw error when destination is not a valid BTC address', () => {
@@ -224,7 +226,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: mockAmount,
 					token
 				})
-			).toThrowError(en.pay.error.recipient_address_is_not_valid);
+			).toThrow(en.pay.error.recipient_address_is_not_valid);
 		});
 
 		it('should throw error when amounts do not match', () => {
@@ -237,7 +239,7 @@ describe('btc-open-crypto-pay.utils', () => {
 					amount: differentAmount,
 					token
 				})
-			).toThrowError(en.pay.error.amount_does_not_match);
+			).toThrow(en.pay.error.amount_does_not_match);
 		});
 
 		it('should return validated data when all conditions are met', () => {

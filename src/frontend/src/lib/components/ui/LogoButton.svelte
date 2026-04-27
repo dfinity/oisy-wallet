@@ -15,7 +15,7 @@
 		condensed?: boolean;
 		styleClass?: string;
 		testId?: string;
-		logo: Snippet;
+		logo?: Snippet;
 		title?: Snippet;
 		subtitle?: Snippet;
 		titleEnd?: Snippet;
@@ -74,17 +74,27 @@
 						{/if}
 					</span>
 				{/if}
-				<span class="mr-2 flex">{@render logo()}</span>
+				{#if nonNullish(logo)}
+					<span class="mr-2 flex">{@render logo()}</span>
+				{/if}
 				<span class="flex min-w-0 flex-col text-left">
-					<span class="truncate text-nowrap">
+					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
-							<span class="text-lg font-bold text-primary">{@render title()}</span>
+							<span
+								class="text-lg font-bold text-nowrap text-primary"
+								class:min-w-0={isNullish(subtitle)}
+								class:truncate={isNullish(subtitle)}
+							>
+								{@render title()}
+							</span>
 						{/if}
 						{#if nonNullish(subtitle)}
 							{#if dividers}
 								<span class="text-tertiary"><Divider /></span>
 							{/if}
-							<span class="text-base text-tertiary">{@render subtitle()}</span>
+							<span class="truncate text-base text-nowrap text-tertiary">
+								{@render subtitle()}
+							</span>
 						{/if}
 					</span>
 					{#if nonNullish(description)}
@@ -95,15 +105,15 @@
 				</span>
 			</span>
 
-			<span class="flex items-center">
-				<span class="flex flex-col text-right">
+			<span class="flex items-center text-nowrap">
+				<span class="flex flex-col text-right text-nowrap">
 					{#if nonNullish(titleEnd)}
-						<span class="text-lg font-bold">
+						<span class="text-lg font-bold text-nowrap">
 							{@render titleEnd()}
 						</span>
 					{/if}
 					{#if nonNullish(descriptionEnd)}
-						<span class="text-sm text-tertiary">
+						<span class="text-sm text-nowrap text-tertiary">
 							{@render descriptionEnd()}
 						</span>
 					{/if}

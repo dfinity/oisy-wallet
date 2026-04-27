@@ -1,8 +1,12 @@
 import type {
 	Agreements,
+	DismissedNotification,
 	ExperimentalFeaturesSettings,
 	NetworksSettings,
+	NotificationSettings,
 	Settings,
+	TransactionFilterSettings,
+	TransactionSettings,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -39,4 +43,32 @@ export const userExperimentalFeaturesSettings: Readable<ExperimentalFeaturesSett
 export const userAgreementsData: Readable<Agreements | undefined> = derived(
 	[userProfile],
 	([$userProfile]) => fromNullishNullable($userProfile?.agreements)
+);
+
+export const userNotificationSettings: Readable<NotificationSettings | undefined> = derived(
+	[userSettings],
+	([$userSettings]) => fromNullishNullable($userSettings?.notifications)
+);
+
+export const userDismissedNotifications: Readable<DismissedNotification[]> = derived(
+	[userNotificationSettings],
+	([$userNotificationSettings]) => $userNotificationSettings?.dismissed_notifications ?? []
+);
+
+export const userTransactionSettings: Readable<TransactionSettings | undefined> = derived(
+	[userSettings],
+	([$userSettings]) => fromNullishNullable($userSettings?.transactions)
+);
+
+const DEFAULT_TRANSACTION_FILTER: TransactionFilterSettings = { hide_micro_transactions: true };
+
+export const userTransactionFilterSettings: Readable<TransactionFilterSettings> = derived(
+	[userTransactionSettings],
+	([$userTransactionSettings]) =>
+		fromNullishNullable($userTransactionSettings?.filter) ?? DEFAULT_TRANSACTION_FILTER
+);
+
+export const hideMicroTransactions: Readable<boolean> = derived(
+	[userTransactionFilterSettings],
+	([$userTransactionFilterSettings]) => $userTransactionFilterSettings.hide_micro_transactions
 );

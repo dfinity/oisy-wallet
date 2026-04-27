@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ARB_TOKEN_GROUP } from '$env/tokens/groups/groups.arb.env';
 import arb from '$eth/assets/arb.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,12 +17,12 @@ export const ARB_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Arbitrum',
 	symbol: ARB_SYMBOL,
 	decimals: ARB_DECIMALS,
 	icon: arb,
 	address: '0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1',
-	exchange: 'erc20',
 	groupData: ARB_TOKEN_GROUP,
 	buy: {
 		onramperId: 'arb_ethereum'

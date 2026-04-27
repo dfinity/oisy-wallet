@@ -7,7 +7,8 @@
 		"symbol": "BURN",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/egjwt-lqaaa-aaaak-qi2aa-cai.svg"
 	},
 	"AAA": {
 		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai",
@@ -17,18 +18,27 @@
 		"symbol": "AAA",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/l67es-4iaaa-aaaag-atvda-cai.svg"
 	},
 	"GLDT": {
 		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai",
 		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
 		"mintingAccount": "6f6ua-hqaaa-aaaar-qairq-cai",
+		"tags": [
+			{
+				"type": "category",
+				"value": "commodity"
+			}
+		],
+		"groupDataId": "GLDT",
 		"decimals": 8,
 		"name": "Gold Token",
 		"symbol": "GLDT",
 		"fee": {
 			"__bigint__": "10000000"
-		}
+		},
+		"icon": "/icons/icrc/6c7su-kiaaa-aaaar-qaira-cai.png"
 	},
 	"nICP": {
 		"ledgerCanisterId": "buwm7-7yaaa-aaaar-qagva-cai",
@@ -39,7 +49,8 @@
 		"symbol": "nICP",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/buwm7-7yaaa-aaaar-qagva-cai.svg"
 	},
 	"NAK": {
 		"ledgerCanisterId": "eig2s-waaaa-aaaam-qbg5a-cai",
@@ -50,29 +61,44 @@
 		"symbol": "NAK",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/eig2s-waaaa-aaaam-qbg5a-cai.jpg"
 	},
 	"VCHF": {
 		"ledgerCanisterId": "ly36x-wiaaa-aaaai-aqj7q-cai",
 		"indexCanisterId": "4cx56-naaaa-aaaai-aqkaa-cai",
 		"mintingAccount": "6csfo-tvgcf-7i47c-4ohs3-tdxbt-wr3dw-bstba-koumv-oiwcb-jnfu3-nqe",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
 		"decimals": 8,
 		"name": "VNX Franc",
 		"symbol": "VCHF",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/ly36x-wiaaa-aaaai-aqj7q-cai.png"
 	},
 	"VEUR": {
 		"ledgerCanisterId": "wu6g4-6qaaa-aaaan-qmrza-cai",
 		"indexCanisterId": "wi24n-jqaaa-aaaan-qmr3a-cai",
 		"mintingAccount": "6csfo-tvgcf-7i47c-4ohs3-tdxbt-wr3dw-bstba-koumv-oiwcb-jnfu3-nqe",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
 		"decimals": 8,
 		"name": "VNX Euro",
 		"symbol": "VEUR",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/wu6g4-6qaaa-aaaan-qmrza-cai.png"
 	},
 	"GHOSTNODE": {
 		"ledgerCanisterId": "sx3gz-hqaaa-aaaar-qaoca-cai",
@@ -87,12 +113,14 @@
 	"BOB": {
 		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
 		"mintingAccount": "6lnhz-oaaaa-aaaas-aabkq-cai",
+		"groupDataId": "BOB",
 		"decimals": 8,
 		"name": "BOB",
 		"symbol": "BOB",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png"
 	},
 	"ICONFUCIUS": {
 		"ledgerCanisterId": "5kijx-siaaa-aaaar-qaqda-cai",
@@ -163,27 +191,37 @@
 		"symbol": "TICRC1",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/3jkp5-oyaaa-aaaaj-azwqa-cai.png"
 	},
 	"TCYCLES": {
 		"ledgerCanisterId": "um5iw-rqaaa-aaaaq-qaaba-cai",
 		"indexCanisterId": "ul4oc-4iaaa-aaaaq-qaabq-cai",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
 		"decimals": 12,
 		"name": "Trillion Cycles",
 		"symbol": "TCYCLES",
 		"fee": {
 			"__bigint__": "100000000"
-		}
+		},
+		"icon": "/icons/icrc/um5iw-rqaaa-aaaaq-qaaba-cai.svg"
 	},
 	"BITTYICP": {
 		"ledgerCanisterId": "qroj6-lyaaa-aaaam-qeqta-cai",
+		"indexCanisterId": "qf26p-uqaaa-aaaam-ai5aa-cai",
 		"mintingAccount": "r7inp-6aaaa-aaaaa-aaabq-cai",
 		"decimals": 8,
 		"name": "BITTY ON ICP",
 		"symbol": "BITTYICP",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/qroj6-lyaaa-aaaam-qeqta-cai.jpg"
 	},
 	"EXE": {
 		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
@@ -194,7 +232,8 @@
 		"symbol": "EXE",
 		"fee": {
 			"__bigint__": "100000"
-		}
+		},
+		"icon": "/icons/icrc/rh2pm-ryaaa-aaaan-qeniq-cai.jpg"
 	},
 	"OHSHII": {
 		"ledgerCanisterId": "7rrmx-tyaaa-aaaal-qsraq-cai",
@@ -205,6 +244,45 @@
 		"symbol": "OHSHII",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/7rrmx-tyaaa-aaaal-qsraq-cai.png"
+	},
+	"USDC": {
+		"ledgerCanisterId": "53nhb-haaaa-aaaar-qbn5q-cai",
+		"indexCanisterId": "f4e7e-pqaaa-aaaar-qbpgq-cai",
+		"mintingAccount": "5okwm-giaaa-aaaar-qbn6a-cai",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
+		"groupDataId": "USDC",
+		"decimals": 6,
+		"name": "USDC",
+		"symbol": "USDC",
+		"fee": {
+			"__bigint__": "10000"
+		},
+		"icon": "/icons/icrc/53nhb-haaaa-aaaar-qbn5q-cai.svg"
+	},
+	"USDT": {
+		"ledgerCanisterId": "ij33n-oiaaa-aaaar-qbooa-cai",
+		"indexCanisterId": "fvhuy-zyaaa-aaaar-qbpha-cai",
+		"mintingAccount": "5okwm-giaaa-aaaar-qbn6a-cai",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
+		"groupDataId": "USDT",
+		"decimals": 6,
+		"name": "USDT",
+		"symbol": "USDT",
+		"fee": {
+			"__bigint__": "10000"
+		},
+		"icon": "/icons/icrc/ij33n-oiaaa-aaaar-qbooa-cai.svg"
 	}
 }

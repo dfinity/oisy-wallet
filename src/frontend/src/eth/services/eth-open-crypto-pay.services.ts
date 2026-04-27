@@ -190,7 +190,7 @@ export const payEth = async ({
 	const apiUrl = getPaymentUri({
 		callback,
 		quoteId,
-		network: token.network.pay?.openCryptoPay ?? token.network.name,
+		network: token.network.pay.openCryptoPay,
 		rawTransaction
 	});
 

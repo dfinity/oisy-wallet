@@ -12,9 +12,13 @@ import { CkEthMinterCanister, type CkEthMinterDid } from '@icp-sdk/canisters/cke
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn()
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('cketh-minter.api', () => {
 	const canisterMock = mock<CkEthMinterCanister>();
@@ -53,7 +57,7 @@ describe('cketh-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(withdrawEth({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(withdrawEth({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -90,7 +94,7 @@ describe('cketh-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(withdrawErc20({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(withdrawErc20({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -149,9 +153,7 @@ describe('cketh-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(
-				eip1559TransactionPrice({ ...params, identity: undefined })
-			).rejects.toThrowError();
+			await expect(eip1559TransactionPrice({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 });

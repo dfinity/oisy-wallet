@@ -23,6 +23,12 @@ import * as solanaApi from '$sol/api/solana.api';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { render } from '@testing-library/svelte';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 describe('AiAssistantReviewSendTokenTool', () => {
 	const mockContext = (token: Token) =>
 		new Map<symbol, SendContext | UtxosFeeContext>([

@@ -13,12 +13,14 @@
 
 <div class="flex w-full flex-col items-center">
 	{@render icon?.()}
+
 	{#if nonNullish(title)}
-		<span class="my-3 text-lg font-bold">
+		<span class="my-3 text-sm font-bold">
 			{@render title()}
 		</span>
 	{/if}
+
 	{#if nonNullish(description)}
-		<p class="text-tertiary">{@render description()}</p>
+		<p class="text-xs text-tertiary">{@render description()}</p>
 	{/if}
 </div>

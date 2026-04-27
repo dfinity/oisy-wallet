@@ -1,25 +1,56 @@
 const trackMock = vi.fn();
 const initMock = vi.fn();
 
+let mockLocal = false;
+let mockStaging = false;
+let mockBrowser = true;
+let mockPlausibleEnabled = true;
+let mockPlausibleDomain: string | null = 'test.com';
+let mockLoadTracker: () => { init: typeof initMock; track: typeof trackMock };
+
 vi.mock('$lib/services/analytics-wrapper', () => ({
-	loadPlausibleTracker: vi.fn(() => ({
-		init: initMock,
-		track: trackMock
-	}))
+	loadPlausibleTracker: vi.fn(() => mockLoadTracker())
 }));
 
 vi.mock('$app/environment', () => ({
-	browser: true
+	get browser() {
+		return mockBrowser;
+	}
 }));
 
 vi.mock('$env/plausible.env', () => ({
-	PLAUSIBLE_ENABLED: true,
-	PLAUSIBLE_DOMAIN: 'test.com'
+	get PLAUSIBLE_ENABLED() {
+		return mockPlausibleEnabled;
+	},
+	get PLAUSIBLE_DOMAIN() {
+		return mockPlausibleDomain;
+	}
 }));
+
+vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		get LOCAL() {
+			return mockLocal;
+		},
+		get STAGING() {
+			return mockStaging;
+		}
+	};
+});
 
 describe('plausible analytics service', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.resetModules();
+
+		mockLocal = false;
+		mockStaging = false;
+		mockBrowser = true;
+		mockPlausibleEnabled = true;
+		mockPlausibleDomain = 'test.com';
+		mockLoadTracker = () => ({ init: initMock, track: trackMock });
 	});
 
 	it('should initialize Plausible with correct config', async () => {
@@ -99,11 +130,7 @@ describe('plausible analytics service', () => {
 	});
 
 	it('should NOT initialize if browser is false', async () => {
-		vi.doMock('$app/environment', () => ({
-			browser: false
-		}));
-
-		vi.resetModules();
+		mockBrowser = false;
 
 		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
 
@@ -113,12 +140,7 @@ describe('plausible analytics service', () => {
 	});
 
 	it('should NOT track if not initialized', async () => {
-		vi.doMock('$env/plausible.env', () => ({
-			PLAUSIBLE_ENABLED: true,
-			PLAUSIBLE_DOMAIN: null
-		}));
-
-		vi.resetModules();
+		mockPlausibleDomain = null;
 
 		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
 
@@ -133,12 +155,7 @@ describe('plausible analytics service', () => {
 	});
 
 	it('should NOT initialize if PLAUSIBLE_ENABLED is false', async () => {
-		vi.doMock('$env/plausible.env', () => ({
-			PLAUSIBLE_ENABLED: false,
-			PLAUSIBLE_DOMAIN: 'test.com'
-		}));
-
-		vi.resetModules();
+		mockPlausibleEnabled = false;
 
 		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
 
@@ -148,12 +165,7 @@ describe('plausible analytics service', () => {
 	});
 
 	it('should NOT track if PLAUSIBLE_ENABLED is false', async () => {
-		vi.doMock('$env/plausible.env', () => ({
-			PLAUSIBLE_ENABLED: false,
-			PLAUSIBLE_DOMAIN: 'test.com'
-		}));
-
-		vi.resetModules();
+		mockPlausibleEnabled = false;
 
 		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
 
@@ -181,13 +193,9 @@ describe('plausible analytics service', () => {
 	it('should handle initialization errors gracefully', async () => {
 		const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-		vi.doMock('$lib/services/analytics-wrapper', () => ({
-			loadPlausibleTracker: vi.fn(() => {
-				throw new Error('Load failed');
-			})
-		}));
-
-		vi.resetModules();
+		mockLoadTracker = () => {
+			throw new Error('Load failed');
+		};
 
 		const { initPlausibleAnalytics, trackEvent } = await import('$lib/services/analytics.services');
 
@@ -210,14 +218,7 @@ describe('plausible analytics service', () => {
 			throw new Error('Init failed');
 		});
 
-		vi.doMock('$lib/services/analytics-wrapper', () => ({
-			loadPlausibleTracker: vi.fn(() => ({
-				init: failingInitMock,
-				track: trackMock
-			}))
-		}));
-
-		vi.resetModules();
+		mockLoadTracker = () => ({ init: failingInitMock, track: trackMock });
 
 		const { initPlausibleAnalytics, trackEvent } = await import('$lib/services/analytics.services');
 
@@ -231,5 +232,93 @@ describe('plausible analytics service', () => {
 		expect(trackMock).not.toHaveBeenCalled();
 
 		consoleWarnSpy.mockRestore();
+	});
+
+	it('should not throw when tracker.track throws', async () => {
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		trackMock.mockImplementationOnce(() => {
+			throw new Error('Track failed');
+		});
+
+		expect(() =>
+			trackEvent({
+				name: 'test_event',
+				metadata: { key: 'value' }
+			})
+		).not.toThrow();
+	});
+
+	it('should console.debug the error in LOCAL when tracker.track throws', async () => {
+		mockLocal = true;
+
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		const trackError = new Error('Track failed');
+		trackMock.mockImplementationOnce(() => {
+			throw trackError;
+		});
+
+		const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
+		});
+
+		expect(trackMock).toHaveBeenCalled();
+		expect(consoleDebugSpy).toHaveBeenCalledWith('[analytics]', trackError);
+
+		consoleDebugSpy.mockRestore();
+	});
+
+	it('should console.debug the error in STAGING when tracker.track throws', async () => {
+		mockStaging = true;
+
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		const trackError = new Error('Track failed');
+		trackMock.mockImplementationOnce(() => {
+			throw trackError;
+		});
+
+		const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
+		});
+
+		expect(trackMock).toHaveBeenCalled();
+		expect(consoleDebugSpy).toHaveBeenCalledWith('[analytics]', trackError);
+
+		consoleDebugSpy.mockRestore();
+	});
+
+	it('should not console.debug when tracker.track throws in production', async () => {
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		trackMock.mockImplementationOnce(() => {
+			throw new Error('Track failed');
+		});
+
+		const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
+		});
+
+		expect(consoleDebugSpy).not.toHaveBeenCalled();
+
+		consoleDebugSpy.mockRestore();
 	});
 });

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { type Snippet, untrack } from 'svelte';
-	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import { sortedEnabledNetworkTokenUiOrGroupUi } from '$lib/derived/network-tokens-ui.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
-	import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
+	import { filterTokenGroups } from '$lib/utils/token-group.utils';
 
 	interface Props {
 		tokens?: TokenUiOrGroupUi[];
@@ -14,13 +14,9 @@
 	// We start `tokens` as undefined to avoid showing an empty list before the first update.
 	let { tokens = $bindable(), children }: Props = $props();
 
-	let groupedTokens: TokenUiOrGroupUi[] = $derived(
-		groupTokensByTwin($combinedDerivedSortedFungibleNetworkTokensUi)
-	);
-
 	let sortedTokensOrGroups: TokenUiOrGroupUi[] = $derived(
 		filterTokenGroups({
-			groupedTokens,
+			groupedTokens: $sortedEnabledNetworkTokenUiOrGroupUi,
 			showZeroBalances: $showZeroBalances
 		})
 	);

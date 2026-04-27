@@ -22,6 +22,7 @@
 		destination?: Snippet;
 		fee: Snippet;
 		cancel: Snippet;
+		warningBanner?: Snippet;
 	}
 
 	let {
@@ -37,13 +38,16 @@
 		message,
 		destination,
 		fee,
-		cancel
+		cancel,
+		warningBanner
 	}: Props = $props();
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 </script>
 
 <ContentWithToolbar {testId}>
+	{@render warningBanner?.()}
+
 	<ConvertAmount
 		{destinationTokenFee}
 		{ethereumEstimateFee}

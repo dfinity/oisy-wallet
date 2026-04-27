@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
+	import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
+	import { encodeErc20Approve } from '$eth/services/approve.services';
+	import { encodeErc4626Redeem, encodeErc4626Withdraw } from '$eth/services/erc4626.services';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import {
 		getCkErc20FeeData,
@@ -15,6 +18,7 @@
 	} from '$eth/services/nft-transfer.services';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
+	import type { Erc4626ContractAddress } from '$eth/types/erc4626';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import { isCollectionErc721 } from '$eth/utils/erc721.utils';
@@ -43,6 +47,10 @@
 		destination?: string;
 		amount?: OptionAmount;
 		data?: string;
+		erc4626ContractAddress?: Erc4626ContractAddress;
+		erc4626Operation?: 'deposit' | 'withdraw' | 'redeem';
+		erc4626Shares?: bigint;
+		maxAmount?: bigint;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork?: Network;
 		nativeEthereumToken: Token;
@@ -57,6 +65,10 @@
 		destination = '',
 		amount,
 		data,
+		erc4626ContractAddress,
+		erc4626Operation = 'deposit',
+		erc4626Shares,
+		maxAmount,
 		sourceNetwork,
 		targetNetwork,
 		nativeEthereumToken,
@@ -78,7 +90,9 @@
 
 	const updateFeeData = async () => {
 		try {
-			if (isNullish($ethAddress)) {
+			// The debounce utility has no cancel support, so this callback can fire after the component
+			// is destroyed or after the swap store has been reset (`sendToken` becomes `undefined`).
+			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress)) {
 				return;
 			}
 
@@ -118,6 +132,81 @@
 				feeStore.setFee({
 					...feeData,
 					gas: maxBigInt(feeDataGas, estimatedGas)
+				});
+
+				return;
+			}
+
+			if (nonNullish(erc4626ContractAddress)) {
+				const parsedAmount = parseToken({
+					value: `${nonNullish(amount) && Number(amount) > 0 ? amount : '1'}`,
+					unitName: sendToken.decimals
+				});
+
+				if (erc4626Operation === 'redeem' && nonNullish(erc4626Shares)) {
+					const { to, data: encodedData } = encodeErc4626Redeem({
+						contractAddress: erc4626ContractAddress,
+						shares: erc4626Shares,
+						receiver: $ethAddress,
+						owner: $ethAddress
+					});
+
+					const estimatedGas = await safeEstimateGas({
+						from: $ethAddress,
+						to,
+						data: encodedData
+					});
+
+					feeStore.setFee({
+						...feeData,
+						gas: estimatedGas ?? ERC20_FALLBACK_FEE
+					});
+
+					return;
+				}
+
+				if (erc4626Operation === 'withdraw') {
+					// Withdraw gas can only be estimated for available positive erc4626 token balance.
+					// Therefore, we use maxAmount to cap the withdrawal amount.
+					const { to, data: encodedData } = encodeErc4626Withdraw({
+						contractAddress: erc4626ContractAddress,
+						assets: nonNullish(maxAmount) && parsedAmount > maxAmount ? maxAmount : parsedAmount,
+						receiver: $ethAddress,
+						owner: $ethAddress
+					});
+
+					const estimatedGas = await safeEstimateGas({
+						from: $ethAddress,
+						to,
+						data: encodedData
+					});
+
+					feeStore.setFee({
+						...feeData,
+						gas: estimatedGas ?? ERC20_FALLBACK_FEE
+					});
+
+					return;
+				}
+
+				const { to: approveTo, data: approveData } = encodeErc20Approve({
+					tokenAddress: (sendToken as Erc20Token).address,
+					spender: erc4626ContractAddress,
+					amount: parsedAmount
+				});
+
+				const approveGas = await safeEstimateGas({
+					from: $ethAddress,
+					to: approveTo,
+					data: approveData
+				});
+
+				// Deposit gas cannot be estimated before approval is on-chain, so we use a
+				// conservative fallback here. The actual deposit transaction re-estimates gas
+				// after the approval step succeeds (see depositErc4626 in erc4626.services.ts).
+				feeStore.setFee({
+					...feeData,
+					gas: (approveGas ?? ERC20_FALLBACK_FEE) + ERC20_FALLBACK_FEE
 				});
 
 				return;
@@ -196,7 +285,13 @@
 		}
 	};
 
-	const debounceUpdateFeeData = debounce(updateFeeData);
+	// Wrap the debounced function to prevent scheduling new calls after the component is destroyed.
+	const debouncedFn = debounce(updateFeeData);
+	const debounceUpdateFeeData = (...args: unknown[]) => {
+		if (!isDestroyed) {
+			debouncedFn(...args);
+		}
+	};
 
 	let listenerCallbackTimer = $state<NodeJS.Timeout | undefined>();
 

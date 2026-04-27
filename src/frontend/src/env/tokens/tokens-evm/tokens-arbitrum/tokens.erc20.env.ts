@@ -1,11 +1,17 @@
 import { ARBITRUM_MAINNET_ENABLED } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { ARB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.arb.env';
+import { BOB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.bob.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.bonk.env';
+import { CBBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.cbbtc.env';
+import { CHAT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.chat.env';
+import { GLDT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.gldt.env';
+import { ICP_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.icp.env';
 import {
 	ARB_SEPOLIA_USDC_TOKEN,
 	USDC_TOKEN
 } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
+import { WBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.wbtc.env';
 import { WETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.weth.env';
 import { ZCHF_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.zchf.env';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
@@ -17,7 +23,13 @@ const ARBITRUM_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
 	USDC_TOKEN,
 	USDT_TOKEN,
 	ARB_TOKEN,
+	BOB_TOKEN,
 	BONK_TOKEN,
+	CBBTC_TOKEN,
+	GLDT_TOKEN,
+	CHAT_TOKEN,
+	ICP_TOKEN,
+	WBTC_TOKEN,
 	WETH_TOKEN,
 	ZCHF_TOKEN
 ];

@@ -15,7 +15,7 @@ import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraErc20Provider implements Erc20Provider {
-	private readonly provider: InfuraProvider;
+	protected readonly provider: InfuraProvider;
 
 	constructor(private readonly network: Networkish) {
 		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);

@@ -1,9 +1,26 @@
+import { ICP_TOKEN as ICP_ETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.icp.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { ICP_TOKEN as ICP_ARB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.icp.env';
+import { USDC_TOKEN as USDC_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
+import { ICP_TOKEN as ICP_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.icp.env';
+import { USDC_TOKEN as USDC_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { USDC_TOKEN as USDC_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
+import { USDC_TOKEN as USDC_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdt.env';
+import * as tokensIcrcAdditionalEnv from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import {
+	IC_USDC_LEDGER_CANISTER_ID,
+	IC_USDT_LEDGER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { USDC_TOKEN as USDC_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import { USDT_TOKEN as USDT_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
@@ -19,6 +36,7 @@ import {
 	filterEnabledToken,
 	findTwinToken,
 	getMaxTransactionAmount,
+	getTokenDisplayName,
 	getTokenDisplaySymbol,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
@@ -109,6 +127,17 @@ describe('token.utils', () => {
 				fee,
 				tokenDecimals,
 				tokenStandard: { code: 'erc20' }
+			});
+
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
+		});
+
+		it('should return the untouched amount if the token is ERC4626', () => {
+			const result = getMaxTransactionAmount({
+				balance,
+				fee,
+				tokenDecimals,
+				tokenStandard: { code: 'erc4626' }
 			});
 
 			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
@@ -238,6 +267,9 @@ describe('token.utils', () => {
 			...ETHEREUM_TOKEN,
 			balance: bn3Bi,
 			usdBalance: Number(bn3Bi),
+			usdPrice: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd,
+			usdMarketCap: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd_market_cap,
+			usdPriceChangePercentage24h: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd_24h_change,
 			stakeBalance: 123n,
 			stakeUsdBalance: Number(123n),
 			claimableStakeBalance: 456n,
@@ -267,6 +299,9 @@ describe('token.utils', () => {
 			expect(result).toEqual({
 				...expected,
 				usdBalance: undefined,
+				usdPrice: undefined,
+				usdMarketCap: undefined,
+				usdPriceChangePercentage24h: undefined,
 				stakeUsdBalance: undefined,
 				claimableStakeBalanceUsd: undefined
 			});
@@ -434,6 +469,14 @@ describe('token.utils', () => {
 			).mockReturnValue([canisterId ?? '']);
 		};
 
+		const setupIcrcSuggestedTokenMock = (canisterId?: string) => {
+			vi.spyOn(
+				tokensIcrcAdditionalEnv,
+				'ICRC_SUGGESTED_LEDGER_CANISTER_IDS',
+				'get'
+			).mockReturnValue([canisterId ?? '']);
+		};
+
 		const dummyCkBTC = { ...mockValidIcToken, ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID };
 		const dummyCkETH = { ...mockValidIcToken, ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID };
 		const ckUSDCLedgerCanisterId = ckErc20Production.ckUSDC?.ledgerCanisterId;
@@ -526,14 +569,39 @@ describe('token.utils', () => {
 			ledgerCanisterId: ckErc20Production.ckUSDT?.ledgerCanisterId
 		};
 
+		const dummyIcUSDC = { ...mockValidIcToken, ledgerCanisterId: IC_USDC_LEDGER_CANISTER_ID };
+		const dummyIcUSDT = { ...mockValidIcToken, ledgerCanisterId: IC_USDT_LEDGER_CANISTER_ID };
+
 		describe.each([
 			{
 				description: 'Suggested ICRC token ckUSDT',
 				token: dummyCkUSDT,
 				setupMock: setupSuggestedTokenMock
 			},
+			{
+				description: 'Suggested native ICRC token USDC',
+				token: dummyIcUSDC,
+				setupMock: setupIcrcSuggestedTokenMock
+			},
+			{
+				description: 'Suggested native ICRC token USDT',
+				token: dummyIcUSDT,
+				setupMock: setupIcrcSuggestedTokenMock
+			},
 			{ description: 'Suggested ERC20 token USDC', token: USDC_TOKEN },
-			{ description: 'Suggested ERC20 token USDT', token: USDT_TOKEN }
+			{ description: 'Suggested ERC20 token USDT', token: USDT_TOKEN },
+			{ description: 'Suggested ERC20 token ICP on Ethereum', token: ICP_ETH_TOKEN },
+			{ description: 'Suggested ERC20 token ICP on Arbitrum', token: ICP_ARB_TOKEN },
+			{ description: 'Suggested ERC20 token ICP on Base', token: ICP_BASE_TOKEN },
+			{ description: 'Suggested ERC20 token USDC on Arbitrum', token: USDC_ARBITRUM_TOKEN },
+			{ description: 'Suggested ERC20 token USDT0 on Arbitrum', token: USDT_ARBITRUM_TOKEN },
+			{ description: 'Suggested ERC20 token USDC on Base', token: USDC_BASE_TOKEN },
+			{ description: 'Suggested ERC20 token USDC on BSC', token: USDC_BSC_TOKEN },
+			{ description: 'Suggested ERC20 token USDT on BSC', token: USDT_BSC_TOKEN },
+			{ description: 'Suggested ERC20 token USDC on Polygon', token: USDC_POLYGON_TOKEN },
+			{ description: 'Suggested ERC20 token USDT on Polygon', token: USDT_POLYGON_TOKEN },
+			{ description: 'Suggested SPL token USDC on Solana', token: USDC_SOL_TOKEN },
+			{ description: 'Suggested SPL token USDT on Solana', token: USDT_SOL_TOKEN }
 		])('$description - Suggested Tokens', ({ token, setupMock }) => {
 			if (setupMock) {
 				beforeEach(() => setupMock(token.ledgerCanisterId));
@@ -578,6 +646,25 @@ describe('token.utils', () => {
 			const result = getTokenDisplaySymbol(mockIcrcCustomToken);
 
 			expect(result).toBe(mockIcrcCustomToken.symbol);
+		});
+	});
+
+	describe('getTokenDisplayName', () => {
+		it('should return oisy name if exists', () => {
+			const oisyName = 'OISY Name';
+
+			const result = getTokenDisplayName({
+				...mockIcrcCustomToken,
+				oisyName: { oisyName }
+			});
+
+			expect(result).toBe(oisyName);
+		});
+
+		it('should return token name if oisy name does not exist', () => {
+			const result = getTokenDisplayName(mockIcrcCustomToken);
+
+			expect(result).toBe(mockIcrcCustomToken.name);
 		});
 	});
 

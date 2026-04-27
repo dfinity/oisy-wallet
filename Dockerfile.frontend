@@ -32,6 +32,9 @@ ARG network="staging"
 ENV ENV=$network
 ENV DFX_NETWORK=$network
 
+ARG signer_target=""
+ENV OISY_SIGNER_TARGET=$signer_target
+
 RUN echo $ENV
 RUN echo $DFX_NETWORK
 

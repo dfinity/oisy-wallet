@@ -12,7 +12,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import * as saveTokenServices from '$lib/services/save-custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -62,7 +62,7 @@ describe('NftImageConsentModal', () => {
 	const getCollectionUiSpy = vi.spyOn(nftsUtils, 'getNftCollectionUi');
 
 	vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(
-		readable(mockIdentity as unknown as OptionIdentity)
+		readable(mockIdentity as unknown as NullishIdentity)
 	);
 
 	beforeAll(() => {

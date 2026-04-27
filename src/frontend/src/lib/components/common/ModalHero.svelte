@@ -35,7 +35,7 @@
 	{/if}
 
 	{#if nonNullish(title)}
-		<div class="text-2xl font-bold">
+		<div class="text-center text-2xl font-bold">
 			{@render title()}
 		</div>
 	{/if}

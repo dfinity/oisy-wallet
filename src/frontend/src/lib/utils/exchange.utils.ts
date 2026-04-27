@@ -5,7 +5,10 @@ import type {
 	CoingeckoSimpleTokenPrice,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
+import type { ExchangesData } from '$lib/types/exchange';
+import type { IcpSwapToken } from '$lib/types/icpswap';
 import type { KongSwapToken, KongSwapTokenMetrics } from '$lib/types/kongswap';
+import type { TokenId } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -28,6 +31,34 @@ export const usdValue = ({
 			) * exchangeRate
 		: Number(ZERO);
 
+const ICPSWAP_MIN_TVL_USD = 10;
+
+export const formatIcpSwapToCoingeckoPrices = (
+	tokens: IcpSwapToken[]
+): CoingeckoSimpleTokenPriceResponse =>
+	tokens.reduce<CoingeckoSimpleTokenPriceResponse>((acc, token) => {
+		const price = Number(token.price);
+
+		if (isNullish(token) || isNaN(price) || price === 0) {
+			return acc;
+		}
+
+		const tvl = Number(token.tvlUSD);
+
+		if (isNaN(tvl) || tvl <= ICPSWAP_MIN_TVL_USD) {
+			return acc;
+		}
+
+		acc[token.tokenLedgerId.toLowerCase()] = {
+			usd: price,
+			usd_market_cap: 0,
+			usd_24h_vol: Number(token.volumeUSD24H),
+			usd_24h_change: Number(token.priceChange24H)
+		};
+
+		return acc;
+	}, {});
+
 export const formatKongSwapToCoingeckoPrices = (
 	tokens: KongSwapToken[]
 ): CoingeckoSimpleTokenPriceResponse =>
@@ -37,6 +68,7 @@ export const formatKongSwapToCoingeckoPrices = (
 		}
 
 		acc[token.canister_id.toLowerCase()] = mapMetricsToCoingeckoPrice(metrics);
+
 		return acc;
 	}, {});
 
@@ -59,8 +91,37 @@ export const findMissingLedgerCanisterIds = ({
 	coingeckoResponse
 }: {
 	allLedgerCanisterIds: LedgerCanisterIdText[];
-	coingeckoResponse: CoingeckoSimpleTokenPriceResponse | null;
+	coingeckoResponse: CoingeckoSimpleTokenPriceResponse;
 }): LedgerCanisterIdText[] => {
-	const found = new Set(Object.keys(coingeckoResponse ?? {}));
+	const found = new Set(Object.keys(coingeckoResponse));
 	return allLedgerCanisterIds.filter((id) => !found.has(id.toLowerCase()));
+};
+
+/**
+ * Compares two ExchangesData records by TokenId keys (stored as JS symbol property keys) and usd price.
+ * Uses Object.getOwnPropertySymbols since TokenId keys are JS symbols.
+ */
+// eslint-disable-next-line local-rules/prefer-object-params
+export const exchangesDataEqual = (a: ExchangesData, b: ExchangesData): boolean => {
+	const keysA = Object.getOwnPropertySymbols(a);
+	const keysB = Object.getOwnPropertySymbols(b);
+
+	if (keysA.length !== keysB.length) {
+		return false;
+	}
+
+	return keysA.every((k) => {
+		const va = a[k as TokenId];
+		const vb = b[k as TokenId];
+
+		if (va === vb) {
+			return true;
+		}
+
+		if (va === undefined || vb === undefined) {
+			return false;
+		}
+
+		return va.usd === vb.usd;
+	});
 };

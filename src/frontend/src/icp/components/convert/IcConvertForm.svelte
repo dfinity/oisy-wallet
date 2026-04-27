@@ -6,7 +6,11 @@
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
-	import { ckEthereumNativeToken, ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumNativeToken,
+		ckUsdcConversionDisabled,
+		ckEthereumNativeTokenId
+	} from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import DestinationValue from '$lib/components/address/DestinationValue.svelte';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
@@ -64,7 +68,8 @@
 			$unknownMinimumAmount ||
 			$minterInfoNotCertified ||
 			invalidAmount(sendAmount) ||
-			isNullishOrEmpty(destinationProp)
+			isNullishOrEmpty(destinationProp) ||
+			$ckUsdcConversionDisabled
 	);
 
 	let isCkBtc = $derived(isTokenCkBtcLedger($sourceToken));
@@ -143,6 +148,14 @@
 					{errorMessage ?? infoMessage}
 				</MessageBox>
 			</div>
+		{/if}
+	{/snippet}
+
+	{#snippet warningBanner()}
+		{#if $ckUsdcConversionDisabled}
+			<MessageBox level="warning">
+				{$i18n.convert.warning.ckusdc_conversion_currently_suspended}
+			</MessageBox>
 		{/if}
 	{/snippet}
 

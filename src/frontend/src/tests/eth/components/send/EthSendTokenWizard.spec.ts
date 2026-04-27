@@ -31,6 +31,12 @@ import { fireEvent, render } from '@testing-library/svelte';
 import type { TransactionResponse } from 'ethers/providers';
 import { readable, writable, type Writable } from 'svelte/store';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 describe('EthSendTokenWizard.spec', () => {
 	const fromAddr = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 	const destination = '0x1111111111111111111111111111111111111111';
