@@ -1,4 +1,6 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+import { BNB_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import { POL_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -89,6 +91,8 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
 		TESTICP_TOKEN,
+		BNB_MAINNET_TOKEN,
+		POL_MAINNET_TOKEN,
 		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens,
 		...$enabledEvmTokens
