@@ -8,7 +8,6 @@ import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as navDerived from '$lib/derived/nav.derived';
 import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { ExchangesData } from '$lib/types/exchange';
 import type { Vault } from '$lib/types/vaults';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';

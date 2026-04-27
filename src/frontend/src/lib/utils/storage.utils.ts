@@ -22,7 +22,7 @@ export const del = ({ key }: { key: string }) => {
 
 export const get = <T>({ key }: { key: string }): T | undefined => {
 	try {
-		const { [key]: value } = browser ? localStorage : ({ [key]: undefined });
+		const { [key]: value } = browser ? localStorage : { [key]: undefined };
 		return nonNullish(value) ? JSON.parse(value) : undefined;
 	} catch (err: unknown) {
 		// We use the local storage for the operational part of the app but, not crucial

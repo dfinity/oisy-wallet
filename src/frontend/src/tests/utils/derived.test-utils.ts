@@ -20,7 +20,7 @@ const isReadable = (value: unknown): value is Readable<unknown> =>
 	typeof value === 'object' &&
 	value !== null &&
 	'subscribe' in value &&
-	typeof (value).subscribe === 'function';
+	typeof value.subscribe === 'function';
 
 const derivedList: Record<string, Readable<unknown>> = {};
 

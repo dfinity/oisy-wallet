@@ -1,6 +1,5 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import GetTokenWizardStep from '$lib/components/get-token/GetTokenWizardStep.svelte';
 import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';

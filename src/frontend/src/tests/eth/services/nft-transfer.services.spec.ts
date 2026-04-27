@@ -1,7 +1,6 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
-import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as providersMod from '$eth/providers/infura.providers';
 import {
 	encodeErc1155SafeTransfer,

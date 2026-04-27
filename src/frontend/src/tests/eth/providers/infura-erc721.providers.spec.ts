@@ -66,8 +66,7 @@ describe('infura-erc721.providers', () => {
 				mockSymbol.mockResolvedValue('mock-symbol');
 
 				mockContract.prototype.name = mockName;
-				mockContract.prototype.symbol =
-					mockSymbol;
+				mockContract.prototype.symbol = mockSymbol;
 			});
 
 			it('should return the fetched metadata', async () => {
@@ -149,8 +148,7 @@ describe('infura-erc721.providers', () => {
 					json: () => Promise.resolve(mockMetadata)
 				});
 
-				mockContract.prototype.tokenURI =
-					mockTokenUri;
+				mockContract.prototype.tokenURI = mockTokenUri;
 			});
 
 			it('should return nft metadata for token id', async () => {

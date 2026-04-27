@@ -220,9 +220,9 @@ describe('sol-instructions-token-2022.utils', () => {
 		it('should raise an error if the instruction is missing the accounts', () => {
 			const { accounts: _, ...withoutAccounts } = mockInstruction;
 
-			expect(() =>
-				parseSolToken2022Instruction(withoutAccounts)
-			).toThrow('The instruction does not have any accounts');
+			expect(() => parseSolToken2022Instruction(withoutAccounts)).toThrow(
+				'The instruction does not have any accounts'
+			);
 		});
 
 		it('should parse an InitializeMint instruction', () => {

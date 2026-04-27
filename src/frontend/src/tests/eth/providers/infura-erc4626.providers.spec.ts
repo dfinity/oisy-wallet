@@ -62,8 +62,7 @@ describe('infura-erc4626.providers', () => {
 				mockTotalAssets.mockResolvedValue(1000000n);
 
 				mockContract.prototype.asset = mockAsset;
-				mockContract.prototype.totalAssets =
-					mockTotalAssets;
+				mockContract.prototype.totalAssets = mockTotalAssets;
 			});
 
 			it('should return true when contract implements ERC4626', async () => {
@@ -173,8 +172,7 @@ describe('infura-erc4626.providers', () => {
 
 				mockConvertToAssets.mockResolvedValue(mockAssetsResult);
 
-				mockContract.prototype.convertToAssets =
-					mockConvertToAssets;
+				mockContract.prototype.convertToAssets = mockConvertToAssets;
 			});
 
 			it('should return the converted assets amount', async () => {

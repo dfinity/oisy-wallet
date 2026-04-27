@@ -6,7 +6,6 @@ import { currentLanguage } from '$lib/derived/i18n.derived';
 import { Languages } from '$lib/enums/languages';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
-import type { TrackEventParams } from '$lib/types/analytics';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 

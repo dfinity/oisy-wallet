@@ -28,7 +28,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import type { WizardStep } from '@dfinity/gix-components';
 import { fireEvent, render } from '@testing-library/svelte';
-import type { TransactionResponse } from 'ethers/providers';
 import { readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({

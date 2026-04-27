@@ -168,8 +168,7 @@ describe('infura-erc1155.providers', () => {
 				mockSupportsInterface.mockResolvedValue(true);
 				mockUri.mockResolvedValue(mockMetadataUrl);
 
-				mockContract.prototype.supportsInterface =
-					mockSupportsInterface;
+				mockContract.prototype.supportsInterface = mockSupportsInterface;
 				mockContract.prototype.uri = mockUri;
 			});
 
@@ -281,8 +280,7 @@ describe('infura-erc1155.providers', () => {
 
 				mockBalanceOf.mockResolvedValue(mockBalance);
 
-				mockContract.prototype.balanceOf =
-					mockBalanceOf;
+				mockContract.prototype.balanceOf = mockBalanceOf;
 			});
 
 			it('should return the balance of the token ID for a specific wallet', async () => {

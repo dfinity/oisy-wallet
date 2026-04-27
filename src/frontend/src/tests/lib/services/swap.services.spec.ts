@@ -1,4 +1,3 @@
-import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
@@ -790,9 +789,7 @@ describe('swap.services', () => {
 				delta: mockDeltaContract
 			};
 
-			vi.mocked(constructSimpleSDK).mockReturnValue(
-				mockSdk
-			);
+			vi.mocked(constructSimpleSDK).mockReturnValue(mockSdk);
 			mockDeltaContractGetDeltaContract.mockResolvedValue(mockDeltaContract);
 			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
 				data: { order: 'mock-order-data' }
@@ -980,9 +977,7 @@ describe('swap.services', () => {
 				swap: mockSwap
 			};
 
-			vi.mocked(constructSimpleSDK).mockReturnValue(
-				mockSdk
-			);
+			vi.mocked(constructSimpleSDK).mockReturnValue(mockSdk);
 			mockSwapGetSpender.mockResolvedValue('0xTokenTransferProxy');
 			mockSwapBuildTx.mockResolvedValue({
 				to: '0xSwapContract',

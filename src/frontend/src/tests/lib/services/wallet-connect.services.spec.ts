@@ -5,7 +5,6 @@ import {
 } from '$lib/services/wallet-connect.services';
 import { busy } from '$lib/stores/busy.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { getSdkError } from '@walletconnect/utils';

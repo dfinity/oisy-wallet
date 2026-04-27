@@ -6,7 +6,6 @@ import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
 import { ADDITIONAL_ERC20_TOKENS, ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
-import type { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
 import * as infuraProvidersModule from '$eth/providers/infura-erc20.providers';
 import { loadCustomTokens, loadErc20Tokens } from '$eth/services/erc20.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
