@@ -137,13 +137,10 @@
 			? ('dark' as const)
 			: ('light' as const);
 	});
-
 </script>
 
 <div
 	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5"
-	class:text-primary={isIcpHero}
-	class:text-primary-inverted={!isIcpHero}
 	class:bg-center={isVeurToken}
 	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
 	class:bg-gradient-to-r={isGradientToRight}
@@ -166,6 +163,8 @@
 	class:from-polygon-0={$networkPolygon}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:from-trump-0={isTrumpToken}
+	class:text-primary={isIcpHero}
+	class:text-primary-inverted={!isIcpHero}
 	class:to-arbitrum-100={$networkArbitrum}
 	class:to-base-100={$networkBase}
 	class:to-bsc-100={$networkBsc}
