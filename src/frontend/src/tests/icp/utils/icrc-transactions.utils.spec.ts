@@ -1,5 +1,5 @@
-import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { IcrcTransaction } from '$icp/types/ic-transaction';
+import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import {
 	createMockIcrcBurnTransaction,
 	createMockIcrcMintTransaction,
