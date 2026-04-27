@@ -81,10 +81,17 @@ export const loadUserProfile = async ({
 	try {
 		let profile = await queryUnsafeProfile({ identity });
 		if (isNullish(profile)) {
-			profile = await createUserProfile({
+			const response = await createUserProfile({
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
+			if ('Err' in response) {
+				if ('SignupsClosed' in response.Err) {
+					throw new SignupsClosedError();
+				}
+				throw new Error('Unknown error');
+			}
+			profile = response.Ok;
 			userProfileStore.set({ certified: true, profile });
 		} else {
 			// We set the store before the call to load the certified profile.

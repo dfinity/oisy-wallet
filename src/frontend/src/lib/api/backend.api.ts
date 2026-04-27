@@ -3,8 +3,7 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	TokenId,
-	UserProfile
+	TokenId
 } from '$declarations/backend/backend.did';
 import { CanisterApi } from '$lib/api/canister.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -20,6 +19,7 @@ import type {
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	CreateContactParams,
+	CreateUserProfileResponse,
 	DeleteContactParams,
 	GetContactParams,
 	GetPendingTransactionsOutcome,
@@ -83,7 +83,7 @@ export const removeCustomToken = async ({
 
 export const createUserProfile = async ({
 	identity
-}: CanisterApiFunctionParams): Promise<UserProfile> => {
+}: CanisterApiFunctionParams): Promise<CreateUserProfileResponse> => {
 	const { createUserProfile } = await backendCanister({ identity });
 
 	return createUserProfile();

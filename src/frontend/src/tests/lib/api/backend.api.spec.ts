@@ -26,6 +26,7 @@ import type {
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
+	CreateUserProfileResponse,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
 	SaveUserTransactionsParams,
@@ -199,15 +200,27 @@ describe('backend.api', () => {
 			...baseParams
 		};
 
+		const mockResponse: CreateUserProfileResponse = { Ok: mockUserProfile };
+
 		beforeEach(() => {
-			backendCanisterMock.createUserProfile.mockResolvedValue(mockUserProfile);
+			backendCanisterMock.createUserProfile.mockResolvedValue(mockResponse);
 		});
 
 		it('should successfully call createUserProfile endpoint', async () => {
 			const result = await createUserProfile(mockParams);
 
-			expect(result).toEqual(mockUserProfile);
+			expect(result).toEqual(mockResponse);
 			expect(backendCanisterMock.createUserProfile).toHaveBeenCalledOnce();
+		});
+
+		it('should return the backend error', async () => {
+			const mockErrResponse: CreateUserProfileResponse = { Err: { SignupsClosed: null } };
+
+			backendCanisterMock.createUserProfile.mockResolvedValue(mockErrResponse);
+
+			const result = await createUserProfile(mockParams);
+
+			expect(result).toEqual(mockErrResponse);
 		});
 
 		it('should throw an error if identity is undefined', async () => {

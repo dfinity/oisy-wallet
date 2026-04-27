@@ -18,7 +18,12 @@ BACKEND_CANDID_FILE="$(jq -re .canisters.backend.candid dfx.json)"
 
 has_result_types() {
   : Determining whether the backend canister contains generic Result types...
-  git grep -w Result "$BACKEND_CANDID_FILE" || git grep -E 'Result_[0-9]' "$BACKEND_CANDID_FILE"
+  # Strip `//` line comments before checking. Since candid >=0.10.25, Rust doc
+  # comments on exported types are preserved in the generated `.did`, which
+  # would otherwise cause false positives on the word "Result" in prose.
+  local stripped
+  stripped="$(sed 's|//.*||' "$BACKEND_CANDID_FILE")"
+  grep -w Result <<<"$stripped" || grep -E 'Result_[0-9]' <<<"$stripped"
 }
 
 check_result_types() {

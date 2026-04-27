@@ -125,6 +125,23 @@ pub(crate) fn read_new_user_signups_allowed() -> bool {
     read_config(|c| c.new_user_signups_allowed.unwrap_or(true))
 }
 
+/// Sets the "new user sign-ups allowed" flag, preserving all other `Config` fields.
+///
+/// # Panics
+/// - If the `STATE.config` is not initialized.
+pub(crate) fn set_new_user_signups_allowed(allowed: bool) {
+    mutate_state(|state| {
+        let mut config = state
+            .config
+            .get()
+            .as_ref()
+            .map(|Candid(c)| c.clone())
+            .expect("config is not initialized");
+        config.new_user_signups_allowed = Some(allowed);
+        state.config.set(Some(Candid(config)));
+    });
+}
+
 pub(crate) fn with_api_keys<R>(f: impl FnOnce(&ApiKeys) -> R) -> R {
     read_state(|state| {
         let default = ApiKeys::default();

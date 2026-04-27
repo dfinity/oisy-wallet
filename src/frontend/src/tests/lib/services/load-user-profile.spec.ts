@@ -49,7 +49,7 @@ describe('load-user-profile.services', () => {
 				.mockResolvedValue({ Err: { NotFound: null } });
 			const createUserProfileSpy = vi
 				.spyOn(backendApi, 'createUserProfile')
-				.mockResolvedValue(mockProfile);
+				.mockResolvedValue({ Ok: mockProfile });
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
