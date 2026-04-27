@@ -33,7 +33,7 @@ const domain_for_dfx_network = (dfx_network) => {
 	// "" (not unset). Empty/unknown values must fall back to the default `frontend` map,
 	// otherwise `OISY_DOMAINS[""]` is undefined and the prod URL becomes `https://ic.oisy.com`.
 	const domainsKey =
-		notEmptyString(signerTarget) && signerTarget in SIGNER_TARGET_MAP
+		notEmptyString(signerTarget) && Object.hasOwn(SIGNER_TARGET_MAP, signerTarget)
 			? SIGNER_TARGET_MAP[signerTarget]
 			: 'frontend';
 	const map = OISY_DOMAINS[domainsKey];
