@@ -116,6 +116,12 @@
 			});
 		}
 	};
+
+	let hasBanners = $derived(
+		undismissedNoCanister.length > 0 ||
+			tokensWithUnavailableCanister.length > 0 ||
+			!btcBannerDismissed
+	);
 </script>
 
 <div class="flex flex-col gap-5">
@@ -130,29 +136,31 @@
 		</span>
 	{/if}
 
-	<div class="flex flex-col">
-		{#if undismissedNoCanister.length > 0}
-			<MessageBox level="warning" onDismiss={dismissNoCanisterWarning}>
-				{replacePlaceholders($i18n.activity.warning.no_index_canister, {
-					$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
-				})}
-			</MessageBox>
-		{/if}
+	{#if hasBanners}
+		<div class="flex flex-col">
+			{#if undismissedNoCanister.length > 0}
+				<MessageBox level="warning" onDismiss={dismissNoCanisterWarning}>
+					{replacePlaceholders($i18n.activity.warning.no_index_canister, {
+						$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
+					})}
+				</MessageBox>
+			{/if}
 
-		{#if tokensWithUnavailableCanister.length > 0}
-			<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
-				{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
-					$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
-				})}
-			</MessageBox>
-		{/if}
+			{#if tokensWithUnavailableCanister.length > 0}
+				<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+					{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
+						$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
+					})}
+				</MessageBox>
+			{/if}
 
-		{#if !btcBannerDismissed}
-			<MessageBox level="plain" onDismiss={dismissBtcBanner}>
-				{$i18n.activity.info.btc_transactions}
-			</MessageBox>
-		{/if}
-	</div>
+			{#if !btcBannerDismissed}
+				<MessageBox level="plain" onDismiss={dismissBtcBanner}>
+					{$i18n.activity.info.btc_transactions}
+				</MessageBox>
+			{/if}
+		</div>
+	{/if}
 
 	<HiddenMicroTransactionsInfoBox />
 
