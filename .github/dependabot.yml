@@ -61,3 +61,9 @@ updates:
           - 'vitest'
           - 'vitest-mock-extended'
           - '@vitest/coverage-v8'
+      vite-group:
+        patterns:
+          - 'vite'
+          - '@sveltejs/vite-plugin-svelte'
+          - '@sveltejs/kit'
+          - '@sveltejs/adapter-static'
