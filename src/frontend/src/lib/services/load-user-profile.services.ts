@@ -3,7 +3,7 @@ import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { UserProfileNotFoundError } from '$lib/types/errors';
+import { SignupsClosedError, UserProfileNotFoundError } from '$lib/types/errors';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
@@ -79,10 +79,17 @@ export const loadUserProfile = async ({
 	try {
 		let profile = await queryUnsafeProfile({ identity });
 		if (isNullish(profile)) {
-			profile = await createUserProfile({
+			const response = await createUserProfile({
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
+			if ('Err' in response) {
+				if ('SignupsClosed' in response.Err) {
+					throw new SignupsClosedError();
+				}
+				throw new Error('Unknown error');
+			}
+			profile = response.Ok;
 			userProfileStore.set({ certified: true, profile });
 		} else {
 			// We set the store before the call to load the certified profile.

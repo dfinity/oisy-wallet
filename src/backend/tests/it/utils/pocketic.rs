@@ -9,7 +9,7 @@ pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{PocketIc, PocketIcBuilder};
 use shared::types::{
     backend_config::{Arg, InitArg},
-    user_profile::{HasUserProfileResponse, OisyUser, UserProfile},
+    user_profile::{CreateUserProfileError, HasUserProfileResponse, OisyUser, UserProfile},
 };
 
 use super::mock::{CONTROLLER, FRONTEND_DERIVATION_ORIGIN, II_CANISTER_ID, SIGNER_CANISTER_ID};
@@ -521,7 +521,11 @@ impl PicBackend {
         for i in range {
             self.pic.advance_time(Duration::new(10, 0));
             let caller = Principal::self_authenticating(i.to_string());
-            let response = self.update::<UserProfile>(caller, "create_user_profile", ());
+            let response = self.update::<Result<UserProfile, CreateUserProfileError>>(
+                caller,
+                "create_user_profile",
+                (),
+            );
             let timestamp = self.pic.get_time();
             let timestamp_nanos = timestamp.as_nanos_since_unix_epoch();
             let expected_user = OisyUser {
@@ -530,6 +534,7 @@ impl PicBackend {
             };
             expected_users.push(expected_user);
             assert!(response.is_ok());
+            assert!(response.unwrap().is_ok());
         }
         expected_users
     }
@@ -557,10 +562,18 @@ impl PicBackend {
             return;
         }
 
-        let response = self.update::<UserProfile>(caller, "create_user_profile", ());
+        let response = self.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
         assert!(
             response.is_ok(),
             "Failed to create user profile for caller {caller}: {response:?}"
+        );
+        assert!(
+            response.as_ref().unwrap().is_ok(),
+            "create_user_profile rejected for caller {caller}: {response:?}"
         );
     }
 }

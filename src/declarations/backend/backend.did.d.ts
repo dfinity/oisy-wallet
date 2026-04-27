@@ -532,6 +532,27 @@ export type CreateContactResult =
 			 */
 			Err: ContactError;
 	  };
+export type CreateUserProfileError = {
+	/**
+	 * Sign-ups of new users are currently disabled on the backend. Callers that already have a
+	 * profile are unaffected; this variant is only returned for principals without an existing
+	 * profile.
+	 */
+	SignupsClosed: null;
+};
+export type CreateUserProfileResult =
+	| {
+			/**
+			 * The user's profile was created (or already existed) and is returned.
+			 */
+			Ok: UserProfile;
+	  }
+	| {
+			/**
+			 * The profile could not be created due to an error.
+			 */
+			Err: CreateUserProfileError;
+	  };
 /**
  * User preferences for any token
  */
@@ -1625,8 +1646,13 @@ export interface _SERVICE {
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.
+	 *
+	 * # Errors
+	 * - Returns `Err(SignupsClosed)` when sign-ups of new users are disabled on the backend and the
+	 * caller does not already have a profile. Existing users are unaffected and still receive
+	 * `Ok(profile)` for idempotent calls.
 	 */
-	create_user_profile: ActorMethod<[], UserProfile>;
+	create_user_profile: ActorMethod<[], CreateUserProfileResult>;
 	/**
 	 * Deletes a contact for the caller.
 	 *
