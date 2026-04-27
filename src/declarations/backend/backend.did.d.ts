@@ -519,9 +519,6 @@ export interface CreateContactRequest {
 	name: string;
 	image: [] | [ContactImage];
 }
-export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export type CreateUserProfileError = { SignupsClosed: null };
-export type CreateUserProfileResult = { Ok: UserProfile } | { Err: CreateUserProfileError };
 export type CreateContactResult =
 	| {
 			/**

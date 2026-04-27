@@ -315,7 +315,6 @@ type Config = record {
 	// A list of allowed callers to restrict access to endpoints that do not particularly check or
 	// use the `msg_caller()`
 	allowed_callers : vec principal;
-	ic_root_key_raw : opt blob;
 	// Root of trust for checking canister signatures.
 	ic_root_key_raw : opt blob;
 	// Whether sign-ups of new users (i.e. new user profiles) are allowed.
@@ -349,12 +348,6 @@ type ContactError = variant {
 };
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
 type CreateContactRequest = record { name : text; image : opt ContactImage };
-type CreateContactResult = variant { Ok : Contact; Err : ContactError };
-type CreateUserProfileError = variant { SignupsClosed };
-type CreateUserProfileResult = variant {
-	Ok : UserProfile;
-	Err : CreateUserProfileError
-};
 type CreateContactResult = variant {
 	// The contact was retrieved successfully.
 	Ok : Contact;
@@ -619,8 +612,6 @@ type InitArg = record {
 	// A list of allowed callers to restrict access to endpoints that do not particularly check or
 	// use the `msg_caller()`
 	allowed_callers : vec principal;
-	ic_root_key_der : opt blob;
-	new_user_signups_allowed : opt bool
 	// Root of trust for checking canister signatures.
 	ic_root_key_der : opt blob;
 	// Whether sign-ups of new users (i.e. new user profiles) are allowed.
