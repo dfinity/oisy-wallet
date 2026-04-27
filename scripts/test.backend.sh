@@ -1,6 +1,11 @@
 #!/bin/bash
 
-POCKET_IC_SERVER_VERSION=12.0.0
+POCKET_IC_SERVER_VERSION="$(cargo metadata --locked --format-version 1 |
+  jq -r '[.packages[] | select(.name=="pocket-ic") | .version] | first')"
+if [ -z "${POCKET_IC_SERVER_VERSION}" ] || [ "${POCKET_IC_SERVER_VERSION}" = "null" ]; then
+  echo "Failed to determine pocket-ic version from Cargo metadata." >&2
+  exit 1
+fi
 BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCOIN_CANISTER_WASM="ic-btc-canister.wasm.gz"
 CYCLES_LEDGER_CANISTER_URL="$(jq -re .canisters.cycles_ledger.wasm dfx.json)"
