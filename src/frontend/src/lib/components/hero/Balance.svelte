@@ -62,7 +62,7 @@
 					withToast: false,
 					source: 'Hero - Double click on the Balance'
 				})}
-			styleClass="bg-transparent p-0 text-xl font-medium"
+			styleClass="bg-transparent p-0 text-xl font-medium !text-current hover:!text-current active:!text-current focus-visible:!text-current"
 			transparent
 		>
 			{#if !$isPrivacyMode}
