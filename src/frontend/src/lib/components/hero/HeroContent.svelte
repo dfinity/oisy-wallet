@@ -6,6 +6,7 @@
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+	import { isTokenIcp } from '$icp/utils/icrc.utils';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
 		isVCHFToken as isVCHFTokenUtil,
@@ -36,7 +37,6 @@
 		networkBsc,
 		networkEthereum,
 		networkPolygon,
-		networkICP,
 		networkSolana,
 		pseudoNetworkChainFusion,
 		networkArbitrum,
@@ -120,7 +120,7 @@
 
 	let isVeurToken = $derived(nonNullish($pageToken) && isVEURTokenUtil($pageToken));
 
-	let isIcpHero = $derived($networkICP && !isGLDTToken);
+	let isIcpHero = $derived(nonNullish($pageToken) && isTokenIcp($pageToken));
 
 	let isDarkTheme = $derived($themeStore === Theme.DARK);
 
@@ -195,7 +195,7 @@
 
 								<div class="flex items-center justify-start gap-1">
 									<NetworkLogo
-										alwaysInverted
+										alwaysInverted={!isIcpHero}
 										network={pageTokenUi.network}
 										size="xxs"
 										transparent
