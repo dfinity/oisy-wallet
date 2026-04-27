@@ -86,16 +86,22 @@ export const tokens: Readable<Token[]> = derivedMemo(
 
 export const tokensToPin: Readable<TokenToPin[]> = derived(
 	[enabledEvmTokens],
-	([$enabledEvmTokens]) => [
-		BTC_MAINNET_TOKEN,
-		ETHEREUM_TOKEN,
-		ICP_TOKEN,
-		TESTICP_TOKEN,
-		BNB_MAINNET_TOKEN,
-		POL_MAINNET_TOKEN,
-		SOLANA_TOKEN,
-		...$enabledEvmTokens
-	]
+	([$enabledEvmTokens]) => {
+		// Native EVM tokens (e.g. BNB, POL) also appear inside `$enabledEvmTokens`.
+		// Dedupe by id so the explicit pin order above wins over the later occurrence,
+		// which would otherwise overwrite the pin index in the comparator's Map.
+		const seen = new Set<TokenToPin['id']>();
+		return [
+			BTC_MAINNET_TOKEN,
+			ETHEREUM_TOKEN,
+			ICP_TOKEN,
+			TESTICP_TOKEN,
+			BNB_MAINNET_TOKEN,
+			POL_MAINNET_TOKEN,
+			SOLANA_TOKEN,
+			...$enabledEvmTokens
+		].filter(({ id }) => (seen.has(id) ? false : (seen.add(id), true)));
+	}
 );
 
 /**
