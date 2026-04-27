@@ -48,8 +48,8 @@ describe('auth.store', () => {
 				// `safeCreateAuthClient`, which would otherwise need to be mocked
 				// as well.
 				isAuthenticated: vi.fn(() => true),
-				logout: vi.fn(async () => undefined),
-				getIdentity: vi.fn(async () => mockIdentity)
+				logout: vi.fn(() => Promise.resolve()),
+				getIdentity: vi.fn(() => Promise.resolve(mockIdentity))
 			}) as unknown as AuthClient;
 
 		beforeEach(() => {
@@ -60,7 +60,7 @@ describe('auth.store', () => {
 			// doesn't throw `AuthClientNotInitializedError` before reaching the
 			// code path under test.
 			vi.spyOn(provider, 'createAuthClient').mockResolvedValue(
-				buildClient(async () => mockIdentity)
+				buildClient(() => Promise.resolve(mockIdentity))
 			);
 		});
 
@@ -75,19 +75,18 @@ describe('auth.store', () => {
 			const openSpy = vi.spyOn(window, 'open').mockReturnValue(signerWindow);
 
 			vi.spyOn(provider, 'createAuthClientForSignIn').mockReturnValue(
-				buildClient(async () => mockIdentity)
+				buildClient(() => Promise.resolve(mockIdentity))
 			);
 
 			await authStore.signIn({ domain: InternetIdentityDomain.VERSION_2_0 });
 
-			expect(openSpy).toHaveBeenCalledOnce();
-			const [url, name, features] = openSpy.mock.calls[0];
-
-			expect(url).toBe('');
 			// Window name follows `<origin>-signer-window`, the convention
 			// `PostMessageTransport` uses internally so it reuses our window.
-			expect(name).toMatch(/^https?:\/\/[^/]+-signer-window$/);
-			expect(features).toBeUndefined();
+			expect(openSpy).toHaveBeenCalledExactlyOnceWith(
+				'',
+				expect.stringMatching(/^https?:\/\/[^/]+-signer-window$/),
+				undefined
+			);
 			expect(get(authStore).identity).toBe(mockIdentity);
 		});
 
@@ -130,7 +129,7 @@ describe('auth.store', () => {
 			vi.spyOn(window, 'open').mockReturnValue(null);
 
 			vi.spyOn(provider, 'createAuthClientForSignIn').mockReturnValue(
-				buildClient(async () => mockIdentity)
+				buildClient(() => Promise.resolve(mockIdentity))
 			);
 
 			await authStore.signIn({ domain: InternetIdentityDomain.VERSION_2_0 });
