@@ -104,16 +104,14 @@ describe('auth.store', () => {
 			);
 
 			let caught: unknown;
-			const settled = authStore
-				.signIn({ domain: InternetIdentityDomain.VERSION_2_0 })
-				.then(
-					() => {
-						caught = 'resolved';
-					},
-					(err: unknown) => {
-						caught = err;
-					}
-				);
+			const settled = authStore.signIn({ domain: InternetIdentityDomain.VERSION_2_0 }).then(
+				() => {
+					caught = 'resolved';
+				},
+				(err: unknown) => {
+					caught = err;
+				}
+			);
 
 			(signerWindow as unknown as { closed: boolean }).closed = true;
 
