@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, type Snippet, untrack } from 'svelte';
+	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
 	import { queryEstimateFee } from '$icp/services/ckbtc.services';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
@@ -25,7 +25,15 @@
 
 	const { store } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 
+	let isDestroyed = $state(false);
+
 	const loadEstimatedFee = async () => {
+		// The debounce utility has no cancel support, so this callback can fire after the component
+		// is destroyed (e.g. between test runs), which would trigger an unmocked canister call.
+		if (isDestroyed) {
+			return;
+		}
+
 		if (!ckBTC) {
 			return;
 		}
@@ -69,12 +77,21 @@
 		});
 	};
 
-	const debounceEstimateFee = debounce(loadEstimatedFee);
+	const debouncedFn = debounce(loadEstimatedFee);
+	const debounceEstimateFee = (...args: unknown[]) => {
+		if (!isDestroyed) {
+			debouncedFn(...args);
+		}
+	};
 
 	$effect(() => {
 		[amount, networkId, token];
 
 		untrack(() => debounceEstimateFee());
+	});
+
+	onDestroy(() => {
+		isDestroyed = true;
 	});
 </script>
 
