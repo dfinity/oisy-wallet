@@ -1,6 +1,16 @@
 #!/bin/bash
 
-POCKET_IC_SERVER_VERSION=12.0.0
+# Derive the PocketIC server version from the pocket-ic crate pinned in Cargo.lock,
+# so the downloaded server binary always matches the client crate. This avoids a
+# class of CI breakage where a Dependabot bump of the `pocket-ic` crate (e.g. #12586)
+# leaves the server version hard-coded here and every backend test panics with
+# "Incompatible PocketIC server version".
+POCKET_IC_SERVER_VERSION="$(cargo metadata --locked --format-version 1 |
+  jq -r '[.packages[] | select(.name=="pocket-ic") | .version] | first')"
+if [ -z "${POCKET_IC_SERVER_VERSION}" ] || [ "${POCKET_IC_SERVER_VERSION}" = "null" ]; then
+  echo "Failed to determine pocket-ic version from Cargo metadata." >&2
+  exit 1
+fi
 BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCOIN_CANISTER_WASM="ic-btc-canister.wasm.gz"
 CYCLES_LEDGER_CANISTER_URL="$(jq -re .canisters.cycles_ledger.wasm dfx.json)"
