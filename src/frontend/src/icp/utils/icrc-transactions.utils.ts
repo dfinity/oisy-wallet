@@ -19,6 +19,8 @@ import {
 	type IcrcIndexDid
 } from '@icp-sdk/canisters/ledger/icrc';
 
+const TEXT_DECODER = new TextDecoder();
+
 export const mapTransactionIcrcToSelf = (tx: IcrcIndexDid.TransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;
 	const { transfer: t } = transaction;
@@ -130,7 +132,7 @@ export const mapIcrcTransaction = ({
 		: undefined;
 
 	const memoBytes = fromNullable(data.memo);
-	const memoText = nonNullish(memoBytes) ? new TextDecoder().decode(memoBytes) : undefined;
+	const memoText = nonNullish(memoBytes) ? TEXT_DECODER.decode(memoBytes) : undefined;
 	const memoField = nonNullish(memoText) && memoText.trim() !== '' ? { memo: memoText } : {};
 
 	return {
