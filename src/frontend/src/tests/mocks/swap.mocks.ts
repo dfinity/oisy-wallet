@@ -53,3 +53,10 @@ export const mockNearIntentsProvider: SwapMappedResult = {
 	swapDetails: mockNearIntentsQuoteResponse as NearIntentsQuoteResponse,
 	type: undefined
 };
+
+export const mockOneSecProvider: SwapMappedResult = {
+	provider: SwapProvider.ONE_SEC,
+	receiveAmount: 880000000n,
+	swapDetails: { transferFeeInUnits: 1000n, protocolFeeInPercent: 0.1 },
+	type: undefined
+};
