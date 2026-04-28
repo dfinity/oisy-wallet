@@ -878,6 +878,8 @@ interface I18nSwap {
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
 		near_intents_tos: string;
+		onesec_transfer_fee: string;
+		onesec_protocol_fee: string;
 		value_difference_error_confirmation: string;
 	};
 	error: {
