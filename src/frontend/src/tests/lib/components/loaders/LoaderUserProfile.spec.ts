@@ -36,12 +36,10 @@ describe('LoaderUserProfile', () => {
 	});
 
 	it('should re-load user profile on event', () => {
-		const spy = vi
-			.spyOn(loadUserServices, 'loadUserProfile')
-			.mockImplementationOnce(async () => {
-				await Promise.resolve();
-				return { success: true };
-			});
+		const spy = vi.spyOn(loadUserServices, 'loadUserProfile').mockImplementationOnce(async () => {
+			await Promise.resolve();
+			return { success: true };
+		});
 
 		render(LoaderUserProfile, { children: mockSnippet });
 
@@ -73,7 +71,7 @@ describe('LoaderUserProfile', () => {
 
 			const infoSignOutSpy = vi
 				.spyOn(authServices, 'infoSignOut')
-				.mockImplementation(() => Promise.resolve());
+				.mockResolvedValue(undefined);
 
 			render(LoaderUserProfile, { children: mockSnippet });
 
@@ -97,7 +95,7 @@ describe('LoaderUserProfile', () => {
 
 			const infoSignOutSpy = vi
 				.spyOn(authServices, 'infoSignOut')
-				.mockImplementation(() => Promise.resolve());
+				.mockResolvedValue(undefined);
 
 			render(LoaderUserProfile, { children: mockSnippet });
 

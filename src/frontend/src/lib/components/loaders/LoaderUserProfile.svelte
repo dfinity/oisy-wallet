@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { get } from 'svelte/store';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userProfileLoaded } from '$lib/derived/user-profile.derived';
 	import { infoSignOut } from '$lib/services/auth.services';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
-	import { get } from 'svelte/store';
 
 	interface Props {
 		children: Snippet;
