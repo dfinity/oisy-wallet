@@ -27,9 +27,10 @@
 		ariaLabel={$i18n.core.alt.learn_more}
 		href={OISY_SIGNER_CONNECT_DOCS_URL}
 		iconVisible={false}
-		inline={true}
-		styleClass="font-semibold ml-1"
-	>{$i18n.core.text.learn_more}</ExternalLink>
+		styleClass="font-semibold"
+	>
+		{$i18n.core.text.learn_more}
+	</ExternalLink>
 </p>
 
 <ButtonAuthenticateWithHelp asPopup fullWidth helpAlignment="center" needHelpLink={false} />
