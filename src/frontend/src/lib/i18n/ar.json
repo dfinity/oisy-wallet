@@ -1846,7 +1846,7 @@
 				"open_or_create": "قم بتوصيل أو إنشاء محفظتك للتفاعل بأمان مع التطبيق اللامركزي.",
 				"connect_your_wallet": "اتصل بمحفظة $oisy_name الخاصة بك",
 				"oisy_protects_you": "OISY يحميك:",
-				"oisy_protects_you_description": "لا يمكن للتطبيق اللامركزي الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة!"
+				"oisy_protects_you_description": "لا يمكن للتطبيق اللامركزي الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة!<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#securely-connect-oisy-to-other-applications\" target=\"_blank\" rel=\"noopener noreferrer\">تعرف على المزيد</a>"
 			}
 		},
 		"idle": {

@@ -1846,7 +1846,7 @@
 				"open_or_create": "Połącz lub utwórz swój portfel, aby bezpiecznie korzystać z dApp.",
 				"connect_your_wallet": "Połącz swój $oisy_name",
 				"oisy_protects_you": "OISY cię chroni:",
-				"oisy_protects_you_description": "dApp nie może bezpośrednio uzyskać dostępu do Twoich środków, a każda transakcja musi zostać przez Ciebie zatwierdzona!"
+				"oisy_protects_you_description": "dApp nie może bezpośrednio uzyskać dostępu do Twoich środków, a każda transakcja musi zostać przez Ciebie zatwierdzona!<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#securely-connect-oisy-to-other-applications\" target=\"_blank\" rel=\"noopener noreferrer\">Dowiedz się więcej</a>"
 			}
 		},
 		"idle": {

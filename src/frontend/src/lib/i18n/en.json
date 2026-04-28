@@ -1846,7 +1846,7 @@
 				"open_or_create": "Connect or create your wallet to securely interact with the dApp.",
 				"connect_your_wallet": "Connect your $oisy_name",
 				"oisy_protects_you": "OISY protects you:",
-				"oisy_protects_you_description": "The dApp can't directly access your funds, and each transaction has to be confirmed by you!"
+				"oisy_protects_you_description": "The dApp can't directly access your funds, and each transaction has to be confirmed by you!<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#securely-connect-oisy-to-other-applications\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>"
 			}
 		},
 		"idle": {

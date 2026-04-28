@@ -1846,7 +1846,7 @@
 				"open_or_create": "Kết nối hoặc tạo ví của bạn để tương tác an toàn với dApp.",
 				"connect_your_wallet": "Kết nối ví $oisy_name của bạn",
 				"oisy_protects_you": "OISY bảo vệ bạn:",
-				"oisy_protects_you_description": "dApp không thể trực tiếp truy cập vào quỹ của bạn, và mỗi giao dịch phải được bạn xác nhận!"
+				"oisy_protects_you_description": "dApp không thể trực tiếp truy cập vào quỹ của bạn, và mỗi giao dịch phải được bạn xác nhận!<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#securely-connect-oisy-to-other-applications\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
 			}
 		},
 		"idle": {

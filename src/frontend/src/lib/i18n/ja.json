@@ -1846,7 +1846,7 @@
 				"open_or_create": "dAppと安全にやり取りするために、ウォレットを接続または作成してください。",
 				"connect_your_wallet": "あなたの$oisy_nameに接続する",
 				"oisy_protects_you": "OISYがあなたを守ります：",
-				"oisy_protects_you_description": "dAppはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です！"
+				"oisy_protects_you_description": "dAppはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です！<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#securely-connect-oisy-to-other-applications\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
 			}
 		},
 		"idle": {

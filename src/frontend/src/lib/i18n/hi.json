@@ -1846,7 +1846,7 @@
 				"open_or_create": "dApp के साथ सुरक्षित रूप से इंटरैक्ट करने के लिए अपना वॉलेट कनेक्ट करें या बनाएं।",
 				"connect_your_wallet": "अपने $oisy_name से कनेक्ट करें",
 				"oisy_protects_you": "OISY आपकी सुरक्षा करता है:",
-				"oisy_protects_you_description": "dApp आपके फंड तक सीधे नहीं पहुंच सकता, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए!"
+				"oisy_protects_you_description": "dApp आपके फंड तक सीधे नहीं पहुंच सकता, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए!<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#securely-connect-oisy-to-other-applications\" target=\"_blank\" rel=\"noopener noreferrer\">अधिक जानें</a>"
 			}
 		},
 		"idle": {
