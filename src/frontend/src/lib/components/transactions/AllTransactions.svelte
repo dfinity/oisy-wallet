@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import type { DismissedNotification } from '$declarations/backend/backend.did';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
-	import HiddenMicroTransactionsInfoBox from '$lib/components/transactions/HiddenMicroTransactionsInfoBox.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
@@ -13,11 +13,13 @@
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
+		hideMicroTransactions,
 		userDismissedNotifications,
 		userProfileVersion
 	} from '$lib/derived/user-profile.derived';
 	import { dismissNotifications } from '$lib/services/notification.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { hiddenMicroTransactionsResetStore } from '$lib/stores/settings.store';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
@@ -117,7 +119,47 @@
 		}
 	};
 
-	let hiddenMicroTransactionsVisible = $state(false);
+	let hiddenMicroTransactionsBackendDismissed = $derived(
+		isSimpleNotificationDismissed({
+			kind: 'HiddenMicroTransactions',
+			dismissedNotifications: allDismissedNotifications
+		})
+	);
+
+	// When the user toggles the "hide micro transactions" feature, we re-show the
+	// info box even if the backend still has the notification stored as dismissed. The override
+	// is cleared as soon as the user dismisses the info box again.
+	let hiddenMicroTransactionsDismissed = $derived(
+		hiddenMicroTransactionsBackendDismissed && !$hiddenMicroTransactionsResetStore.enabled
+	);
+
+	let hiddenMicroTransactionsVisible = $derived(
+		$hideMicroTransactions && !hiddenMicroTransactionsDismissed
+	);
+
+	const dismissHiddenMicroTransactionsBanner = () => {
+		const notifications: DismissedNotification[] = [
+			{
+				Simple: {
+					kind: { HiddenMicroTransactions: null },
+					version: NOTIFICATION_VERSIONS.HiddenMicroTransactions
+				}
+			}
+		];
+
+		temporaryDismissedNotifications = [...temporaryDismissedNotifications, ...notifications];
+
+		hiddenMicroTransactionsResetStore.set({
+			key: 'hidden-micro-transactions-reset',
+			value: { enabled: false }
+		});
+
+		dismissNotifications({
+			notifications,
+			identity: $authIdentity,
+			currentUserVersion: $userProfileVersion
+		});
+	};
 
 	let hasBanners = $derived(
 		undismissedNoCanister.length > 0 ||
@@ -162,10 +204,14 @@
 					{$i18n.activity.info.btc_transactions}
 				</MessageBox>
 			{/if}
+
+			{#if hiddenMicroTransactionsVisible}
+				<MessageBox level="plain" onDismiss={dismissHiddenMicroTransactionsBanner}>
+					<Html text={$i18n.activity.info.hidden_micro_transactions} />
+				</MessageBox>
+			{/if}
 		</div>
 	{/if}
-
-	<HiddenMicroTransactionsInfoBox bind:visible={hiddenMicroTransactionsVisible} />
 
 	<AllTransactionsList />
 </div>
