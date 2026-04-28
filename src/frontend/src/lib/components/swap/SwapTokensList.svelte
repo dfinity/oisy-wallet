@@ -19,6 +19,7 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import type { TokenUi } from '$lib/types/token-ui';
@@ -28,19 +29,20 @@
 	import { sortTokens } from '$lib/utils/tokens.utils';
 
 	interface Props {
+		side?: SwapSelectTokenType;
 		onSelectToken: (token: Token) => void;
 		onSelectNetworkFilter: () => void;
 		onCloseTokensList: () => void;
 	}
 
-	let { onSelectToken, onSelectNetworkFilter, onCloseTokensList }: Props = $props();
+	let { side, onSelectToken, onSelectNetworkFilter, onCloseTokensList }: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
 	let compatibleTokenIds = $derived(
-		nonNullish($sourceToken)
+		side === 'destination' && nonNullish($sourceToken)
 			? oneSecCompatibleDestinations({
 					sourceToken: $sourceToken,
 					networkIds: ONESEC_EVM_NETWORK_IDS

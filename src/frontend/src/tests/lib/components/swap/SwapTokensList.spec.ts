@@ -29,6 +29,8 @@ describe('SwapTokensList', () => {
 		onCloseTokensList: () => {}
 	};
 
+	const destinationProps = { ...props, side: 'destination' as const };
+
 	const mockContext = (sourceToken?: Token) => {
 		const result = new Map();
 
@@ -57,13 +59,22 @@ describe('SwapTokensList', () => {
 	});
 
 	it('does not call oneSecCompatibleDestinations when sourceToken is nullish', () => {
-		render(SwapTokensList, { props, context: mockContext() });
+		render(SwapTokensList, { props: destinationProps, context: mockContext() });
+
+		expect(oneSecSwapUtils.oneSecCompatibleDestinations).not.toHaveBeenCalled();
+	});
+
+	it('does not call oneSecCompatibleDestinations when side is source', () => {
+		render(SwapTokensList, {
+			props: { ...props, side: 'source' },
+			context: mockContext(mockValidIcToken)
+		});
 
 		expect(oneSecSwapUtils.oneSecCompatibleDestinations).not.toHaveBeenCalled();
 	});
 
 	it('calls oneSecCompatibleDestinations with ICP sourceToken and ONESEC_EVM_NETWORK_IDS', () => {
-		render(SwapTokensList, { props, context: mockContext(mockValidIcToken) });
+		render(SwapTokensList, { props: destinationProps, context: mockContext(mockValidIcToken) });
 
 		expect(oneSecSwapUtils.oneSecCompatibleDestinations).toHaveBeenCalledWith({
 			sourceToken: mockValidIcToken,
@@ -72,7 +83,7 @@ describe('SwapTokensList', () => {
 	});
 
 	it('calls oneSecCompatibleDestinations with EVM sourceToken and ONESEC_EVM_NETWORK_IDS', () => {
-		render(SwapTokensList, { props, context: mockContext(mockValidErc20Token) });
+		render(SwapTokensList, { props: destinationProps, context: mockContext(mockValidErc20Token) });
 
 		expect(oneSecSwapUtils.oneSecCompatibleDestinations).toHaveBeenCalledWith({
 			sourceToken: mockValidErc20Token,
