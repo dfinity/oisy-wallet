@@ -3,7 +3,7 @@
 	import SeasonalOisyLogoLarge from '$lib/components/core/SeasonalOisyLogoLarge.svelte';
 </script>
 
-<div class="1.5xs:mr-3">
+<div class="mr-3">
 	<SeasonalIconAstronautHelmet />
 </div>
 
