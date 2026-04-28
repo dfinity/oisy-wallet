@@ -805,6 +805,9 @@ export const swapService = {
 	},
 	[SwapProvider.NEAR_INTENTS]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	[SwapProvider.ONE_SEC]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
 	}
 };
 
