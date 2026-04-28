@@ -1447,7 +1447,7 @@ interface I18nAddress {
 }
 
 interface I18nSigner {
-	sign_in: { text: { connect_your_wallet: string; open_or_create: string } };
+	sign_in: { text: { open_or_create: string; connect_your_wallet: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
 	permissions: {
 		text: {
