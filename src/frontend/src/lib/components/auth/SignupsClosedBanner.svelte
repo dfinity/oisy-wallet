@@ -17,7 +17,7 @@
 			});
 
 			signupsClosed = !allowed;
-		} catch (err: unknown) {
+		} catch (_: unknown) {
 			// Intentionally silent: if the query fails we simply do not show the banner.
 		}
 	});
