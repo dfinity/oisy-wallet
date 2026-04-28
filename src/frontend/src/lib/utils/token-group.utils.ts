@@ -58,12 +58,46 @@ const hasPriceAndPerformance = ({
 }: Pick<TokenFinancialData, 'usdPrice' | 'usdPriceChangePercentage24h'>): boolean =>
 	nonNullish(usdPrice) && nonNullish(usdPriceChangePercentage24h);
 
-// Picks the price, market cap and 24h performance for a group from the first token (in
-// `tokens` order) that has both `usdPrice` and `usdPriceChangePercentage24h`. This ensures
-// the displayed price and performance always describe the same token, instead of being
-// silently mixed across constituents when one of them is missing data.
-const pickGroupPriceFields = (tokens: readonly GroupPriceFields[]): Partial<GroupPriceFields> => {
-	const source = tokens.find(hasPriceAndPerformance);
+const isCkToken = (token: TokenUi): boolean => nonNullish(token.oisyName?.prefix);
+
+const inGroupCollator = new Intl.Collator(undefined, { sensitivity: 'base' });
+
+/**
+ * Comparator that mirrors the order in which tokens are displayed within a `TokenUiGroup`:
+ * highest USD balance first, then `neverCollapseInTokenGroup` tokens, then ck-tokens, then
+ * network name (case-insensitive).
+ */
+// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
+export const compareTokensInGroup = (a: TokenUi, b: TokenUi): number => {
+	// Highest balance first
+	const usdBalanceDiff = (b.usdBalance ?? 0) - (a.usdBalance ?? 0);
+	if (usdBalanceDiff !== 0) {
+		return usdBalanceDiff;
+	}
+
+	// If same balance, order by neverCollapseInTokenGroup > CK > others
+	const aShow = a.neverCollapseInTokenGroup ?? false;
+	const bShow = b.neverCollapseInTokenGroup ?? false;
+	if (aShow !== bShow) {
+		return aShow ? -1 : 1;
+	}
+
+	const aCk = isCkToken(a);
+	const bCk = isCkToken(b);
+	if (aCk !== bCk) {
+		return aCk ? -1 : 1;
+	}
+
+	return inGroupCollator.compare(a.network.name, b.network.name);
+};
+
+// Picks the price, market cap and 24h performance for a group from the first token — in the
+// same order they are displayed inside the group — that has both `usdPrice` and
+// `usdPriceChangePercentage24h`. This ensures the displayed price and performance always
+// describe the same token, and that they describe the token shown first in the group rather
+// than whichever constituent happens to come first in the input list.
+const pickGroupPriceFields = (tokens: readonly TokenUi[]): Partial<GroupPriceFields> => {
+	const source = [...tokens].sort(compareTokensInGroup).find(hasPriceAndPerformance);
 	return isNullish(source)
 		? {}
 		: {
