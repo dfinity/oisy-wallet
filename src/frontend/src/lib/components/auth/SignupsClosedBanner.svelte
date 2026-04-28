@@ -5,7 +5,6 @@
 	import InfoBanner from '$lib/components/ui/InfoBanner.svelte';
 	import { SIGNUPS_CLOSED_BANNER_TEST_ID } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { consoleError } from '$lib/utils/console.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let signupsClosed = $state(false);
@@ -16,10 +15,10 @@
 				identity: new AnonymousIdentity(),
 				certified: false
 			});
+
 			signupsClosed = !allowed;
 		} catch (err: unknown) {
 			// Intentionally silent: if the query fails we simply do not show the banner.
-			consoleError('Failed to query new_user_signups_allowed', err);
 		}
 	});
 </script>

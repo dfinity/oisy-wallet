@@ -18,6 +18,7 @@
 >
 	<div class="flex w-full max-w-screen-md flex-col items-center">
 		<SignupsClosedBanner />
+
 		<HeroSignIn />
 	</div>
 
