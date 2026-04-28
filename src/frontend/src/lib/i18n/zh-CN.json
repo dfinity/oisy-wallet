@@ -144,6 +144,9 @@
 		"info": {
 			"signups_closed": ""
 		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "你尚未登录。请先登录以继续。",
 			"session_expired": "由于会话已过期，你已被登出。",

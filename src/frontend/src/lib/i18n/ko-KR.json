@@ -144,6 +144,9 @@
 		"info": {
 			"signups_closed": ""
 		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "로그인되어 있지 않습니다. 계속하려면 로그인해 주세요.",
 			"session_expired": "세션이 만료되어 로그아웃되었습니다.",

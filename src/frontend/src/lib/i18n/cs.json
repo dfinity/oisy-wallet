@@ -144,6 +144,9 @@
 		"info": {
 			"signups_closed": ""
 		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
 			"session_expired": "Byli jste odhlášeni, protože vaše relace vypršela.",
