@@ -1838,8 +1838,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"open_or_create": "既存のウォレットにログインするか、新規作成して、安全にdAppに接続し、資産の管理を始めましょう。",
-				"connect_your_wallet": "あなたの$oisy_nameに接続する"
+				"open_or_create": "dAppと安全にやり取りするために、ウォレットを接続または作成してください。",
+				"connect_your_wallet": "あなたの$oisy_nameに接続する",
+				"oisy_protects_you": "OISYがあなたを守ります：",
+				"oisy_protects_you_description": "dAppはあなたの資金に直接アクセスできません。すべてのトランザクションはあなたの確認が必要です！"
 			}
 		},
 		"idle": {

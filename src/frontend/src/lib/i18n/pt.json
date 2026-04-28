@@ -1838,8 +1838,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"open_or_create": "Abra ou crie sua carteira para se conectar com segurança ao dApp e começar a gerir seus ativos.",
-				"connect_your_wallet": "Conecte sua carteira $oisy_name"
+				"open_or_create": "Conecte ou crie sua carteira para interagir com segurança com o dApp.",
+				"connect_your_wallet": "Conecte sua carteira $oisy_name",
+				"oisy_protects_you": "OISY protege você:",
+				"oisy_protects_you_description": "O dApp não pode acessar seus fundos diretamente. Cada transação precisa ser confirmada por você!"
 			}
 		},
 		"idle": {

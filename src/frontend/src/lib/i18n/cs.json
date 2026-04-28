@@ -1838,8 +1838,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"open_or_create": "Otevřete nebo vytvořte svou peněženku, abyste se bezpečně připojili k dApp a začali spravovat svá digitální aktiva.",
-				"connect_your_wallet": "Připojte svou peněženku $oisy_name"
+				"open_or_create": "Připojte nebo vytvořte svou peněženku pro bezpečnou interakci s dApp.",
+				"connect_your_wallet": "Připojte svou peněženku $oisy_name",
+				"oisy_protects_you": "OISY vás chrání:",
+				"oisy_protects_you_description": "dApp nemůže přímo přistupovat k vašim prostředkům. Každá transakce musí být potvrzena vámi!"
 			}
 		},
 		"idle": {
