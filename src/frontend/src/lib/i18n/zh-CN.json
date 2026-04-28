@@ -141,6 +141,9 @@
 		"message": {
 			"session_locked": "你的会话已在另一个标签页中被锁定。"
 		},
+		"info": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "你尚未登录。请先登录以继续。",
 			"session_expired": "由于会话已过期，你已被登出。",
@@ -1154,6 +1157,8 @@
 			"cross_chain_networks_info": "跨链网络信息",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

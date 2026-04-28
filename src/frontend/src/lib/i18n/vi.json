@@ -141,6 +141,9 @@
 		"message": {
 			"session_locked": ""
 		},
+		"info": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
 			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn.",
@@ -1154,6 +1157,8 @@
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

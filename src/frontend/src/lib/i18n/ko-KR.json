@@ -141,6 +141,9 @@
 		"message": {
 			"session_locked": "다른 탭에서 세션이 잠겼습니다."
 		},
+		"info": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "로그인되어 있지 않습니다. 계속하려면 로그인해 주세요.",
 			"session_expired": "세션이 만료되어 로그아웃되었습니다.",
@@ -1154,6 +1157,8 @@
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

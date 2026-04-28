@@ -135,6 +135,7 @@ interface I18nAuth {
 		sign_in_with_microsoft: string;
 	};
 	message: { session_locked: string };
+	info: { signups_closed: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
@@ -877,6 +878,8 @@ interface I18nSwap {
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
 		near_intents_tos: string;
+		onesec_transfer_fee: string;
+		onesec_protocol_fee: string;
 		value_difference_error_confirmation: string;
 	};
 	error: {

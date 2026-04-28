@@ -141,6 +141,9 @@
 		"message": {
 			"session_locked": "Tu sesión fue bloqueada."
 		},
+		"info": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "No has iniciado sesión. Por favor, inicia sesión para continuar.",
 			"session_expired": "Has sido desconectado porque tu sesión ha expirado.",
@@ -1154,6 +1157,8 @@
 			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {

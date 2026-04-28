@@ -141,6 +141,9 @@
 		"message": {
 			"session_locked": ""
 		},
+		"info": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
 			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
@@ -1154,6 +1157,8 @@
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
