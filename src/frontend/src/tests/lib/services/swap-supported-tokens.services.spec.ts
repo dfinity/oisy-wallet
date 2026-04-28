@@ -4,6 +4,7 @@ import { get } from 'svelte/store';
 
 const mockKongSupportedTokens = vi.fn();
 const mockIcpSwapSupportedTokens = vi.fn();
+const mockIcpBridgeSupportedTokens = vi.fn();
 const mockEvmGetQuote = vi.fn();
 const mockEvmGetSupportedTokens = vi.fn();
 const mockSolGetQuote = vi.fn();
@@ -24,6 +25,17 @@ vi.mock('$lib/providers/swap.providers', () => ({
 			mapQuoteResult: vi.fn(),
 			isEnabled: true,
 			getSupportedTokens: mockIcpSwapSupportedTokens
+		}
+	]
+}));
+
+vi.mock('$lib/providers/icp-bridge-swap.providers', () => ({
+	icpBridgeProviders: [
+		{
+			key: 'oneSec',
+			getQuote: vi.fn(),
+			isEnabled: true,
+			getSupportedTokens: mockIcpBridgeSupportedTokens
 		}
 	]
 }));
@@ -64,6 +76,7 @@ describe('swap-supported-tokens.services', () => {
 	it('should load and store supported tokens from all provider groups', async () => {
 		mockKongSupportedTokens.mockResolvedValue(new Set(['canister-a', 'canister-b']));
 		mockIcpSwapSupportedTokens.mockResolvedValue(new Set(['canister-b', 'canister-c']));
+		mockIcpBridgeSupportedTokens.mockResolvedValue(new Set(['canister-c', 'canister-d']));
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set(['0xabc', '0xdef']));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
 
@@ -75,10 +88,10 @@ describe('swap-supported-tokens.services', () => {
 
 		expect(stored).toBeDefined();
 
-		// ICP: both Kong and ICP Swap have lists → 'all'
+		// ICP: Kong, ICP Swap and OneSec all have lists → 'all'
 		expect(stored?.icp.coverage).toBe('all');
 		expect(stored?.icp.supportedTokenIds).toEqual(
-			new Set(['canister-a', 'canister-b', 'canister-c'])
+			new Set(['canister-a', 'canister-b', 'canister-c', 'canister-d'])
 		);
 
 		// EVM: Velora has no list, NEAR Intents does → 'some'
@@ -93,6 +106,7 @@ describe('swap-supported-tokens.services', () => {
 	it('should handle provider getSupportedTokens failures gracefully', async () => {
 		mockKongSupportedTokens.mockResolvedValue(new Set(['canister-a']));
 		mockIcpSwapSupportedTokens.mockRejectedValue(new Error('ICP Swap API error'));
+		mockIcpBridgeSupportedTokens.mockRejectedValue(new Error('OneSec API error'));
 		mockEvmGetSupportedTokens.mockRejectedValue(new Error('NEAR Intents API error'));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
 
@@ -120,6 +134,7 @@ describe('swap-supported-tokens.services', () => {
 	it('should union token IDs across multiple providers in the same group', async () => {
 		mockKongSupportedTokens.mockResolvedValue(new Set(['id-1', 'id-2', 'id-shared']));
 		mockIcpSwapSupportedTokens.mockResolvedValue(new Set(['id-3', 'id-shared']));
+		mockIcpBridgeSupportedTokens.mockResolvedValue(new Set(['id-4', 'id-shared']));
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set());
 		mockSolGetSupportedTokens.mockResolvedValue(new Set());
 
@@ -129,6 +144,8 @@ describe('swap-supported-tokens.services', () => {
 
 		const stored = get(swapSupportedTokensStore);
 
-		expect(stored?.icp.supportedTokenIds).toEqual(new Set(['id-1', 'id-2', 'id-3', 'id-shared']));
+		expect(stored?.icp.supportedTokenIds).toEqual(
+			new Set(['id-1', 'id-2', 'id-3', 'id-4', 'id-shared'])
+		);
 	});
 });
