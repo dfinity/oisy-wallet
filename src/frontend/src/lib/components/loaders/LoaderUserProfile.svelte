@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { get } from 'svelte/store';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userProfileLoaded } from '$lib/derived/user-profile.derived';
 	import { infoSignOut } from '$lib/services/auth.services';
