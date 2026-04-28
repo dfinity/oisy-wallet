@@ -28,7 +28,6 @@
 		ariaLabel={$i18n.core.alt.learn_more}
 		href={OISY_SIGNER_CONNECT_DOCS_URL}
 		iconVisible={false}
-		inline={true}
 		styleClass="ml-[1.25em]"
 	>
 		{$i18n.core.text.learn_more}
