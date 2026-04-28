@@ -99,6 +99,7 @@ export const initLoader = async ({
 
 			return;
 		}
+		
 		await signOut({});
 		return;
 	}
