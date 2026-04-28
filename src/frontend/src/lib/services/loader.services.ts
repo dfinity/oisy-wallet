@@ -93,16 +93,19 @@ export const initLoader = async ({
 
 	if (!userProfileSuccess) {
 		const signupsClosed = userProfileError === 'signups-closed';
+		
 		if (signupsClosed) {
 			toastsShow({
 				text: get(i18n).auth.info.signups_closed,
 				level: 'info'
 			});
 		}
+		
 		await signOut({
 			resetUrl: signupsClosed,
 			source: signupsClosed ? 'signups-closed' : ''
 		});
+		
 		return;
 	}
 
