@@ -816,12 +816,12 @@ export const fetchNearIntentsSolSwap = async ({
 
 export const fetchOneSecEvmToIcpSwap = async (params: OneSecEvmToIcpParams): Promise<void> => {
 	await executeOneSecEvmToIcpBridge(params);
+	params.progress(ProgressStepsSwap.UPDATE_UI);
 
 	await enableSwapDestinationToken({
 		destinationToken: params.destinationToken,
 		identity: params.identity
 	});
-	params.progress(ProgressStepsSwap.UPDATE_UI);
 	await waitAndTriggerWallet();
 };
 
