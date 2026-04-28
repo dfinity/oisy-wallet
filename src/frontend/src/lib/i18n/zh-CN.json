@@ -1846,7 +1846,7 @@
 				"open_or_create": "连接或创建你的钱包，与 dApp 安全交互。",
 				"connect_your_wallet": "连接你的 $oisy_name",
 				"oisy_protects_you": "OISY 保护您：",
-				"oisy_protects_you_description": "dApp 无法直接访问您的资金，每笔交易都需要您确认！<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#securely-connect-oisy-to-other-applications\" target=\"_blank\" rel=\"noopener noreferrer\">了解更多</a>"
+				"oisy_protects_you_description": "dApp 无法直接访问您的资金，每笔交易都需要您确认！"
 			}
 		},
 		"idle": {
