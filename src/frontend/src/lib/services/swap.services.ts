@@ -43,6 +43,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
+import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -50,6 +51,10 @@ import {
 	pollNearIntentsStatus,
 	submitNearIntentsDepositTx
 } from '$lib/services/near-intents.services';
+import {
+	executeOneSecEvmToIcpBridge,
+	executeOneSecIcpToEvmBridge
+} from '$lib/services/onesec-swap.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { throwSwapError } from '$lib/services/swap-errors.services';
 import { autoLoadSingleToken } from '$lib/services/token.services';
@@ -68,10 +73,13 @@ import {
 	type EvmQuoteParams,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
+	type IcpBridgeQuoteParams,
 	type IcpSwapManualWithdrawParams,
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
 	type NearIntentsQuoteParams,
+	type OneSecEvmToIcpParams,
+	type OneSecIcpToEvmParams,
 	type SwapMappedResult,
 	type SwapNearIntentsEvmParams,
 	type SwapNearIntentsSolParams,
@@ -319,6 +327,16 @@ export const fetchSwapAmounts = async ({
 	});
 
 	if (isNetworkIdICP(sourceToken.network.id)) {
+		if (!isNetworkIdICP(destinationToken.network.id)) {
+			return await fetchSwapAmountsICPBridge({
+				sourceToken,
+				destinationToken,
+				amount: sourceAmount,
+				userEthAddress,
+				slippage
+			});
+		}
+
 		return await fetchSwapAmountsICP({
 			identity,
 			sourceToken,
@@ -796,6 +814,28 @@ export const fetchNearIntentsSolSwap = async ({
 	});
 };
 
+export const fetchOneSecEvmToIcpSwap = async (params: OneSecEvmToIcpParams): Promise<void> => {
+	await executeOneSecEvmToIcpBridge(params);
+
+	await enableSwapDestinationToken({
+		destinationToken: params.destinationToken,
+		identity: params.identity
+	});
+	params.progress(ProgressStepsSwap.UPDATE_UI);
+	await waitAndTriggerWallet();
+};
+
+export const fetchOneSecIcpToEvmSwap = async (params: OneSecIcpToEvmParams): Promise<void> => {
+	await executeOneSecIcpToEvmBridge(params);
+
+	await enableSwapDestinationToken({
+		destinationToken: params.destinationToken,
+		identity: params.identity
+	});
+	params.progress(ProgressStepsSwap.UPDATE_UI);
+	await waitAndTriggerWallet();
+};
+
 export const swapService = {
 	[SwapProvider.ICP_SWAP]: fetchIcpSwap,
 	[SwapProvider.KONG_SWAP]: fetchKongSwap,
@@ -901,6 +941,34 @@ export const performManualWithdraw = async ({
 			swapSucceded: withdrawDestinationTokens
 		};
 	}
+};
+
+const fetchSwapAmountsICPBridge = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userEthAddress,
+	slippage
+}: IcpBridgeQuoteParams): Promise<SwapMappedResult[]> => {
+	const enabledProviders = icpBridgeProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ sourceToken, destinationToken, amount, userEthAddress, slippage })
+		)
+	);
+
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		return acc;
+	}, []);
+
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
 };
 
 // This wrapper keeps the return type uniform (array of SwapMappedResult),
