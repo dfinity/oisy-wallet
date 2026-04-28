@@ -99,6 +99,30 @@ describe('LoaderUserProfile', () => {
 
 			expect(infoSignOutSpy).not.toHaveBeenCalled();
 		});
+
+		it('should sign the user out only once when load is re-triggered', async () => {
+			vi.spyOn(loadUserServices, 'loadUserProfile').mockResolvedValue({
+				success: false,
+				err: 'signups-closed'
+			});
+
+			const infoSignOutSpy = vi.spyOn(authServices, 'infoSignOut').mockResolvedValue(undefined);
+
+			render(LoaderUserProfile, { children: mockSnippet });
+
+			await waitFor(() => {
+				expect(infoSignOutSpy).toHaveBeenCalledOnce();
+			});
+
+			emit({ message: 'oisyRefreshUserProfile' });
+			emit({ message: 'oisyRefreshUserProfile' });
+
+			await waitFor(() => {
+				expect(loadUserServices.loadUserProfile).toHaveBeenCalledTimes(3);
+			});
+
+			expect(infoSignOutSpy).toHaveBeenCalledOnce();
+		});
 	});
 
 	describe('when identity is nullish', () => {

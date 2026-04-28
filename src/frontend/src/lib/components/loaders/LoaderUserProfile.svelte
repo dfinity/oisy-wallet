@@ -14,6 +14,11 @@
 
 	let { children }: Props = $props();
 
+	// Guards against concurrent sign-out flows. `load` can be re-entered via
+	// the `$authIdentity` `$effect` and the `oisyRefreshUserProfile` window
+	// event, and we want `infoSignOut` to fire at most once.
+	let signingOut = false;
+
 	const load = async ({ reload = false }: { reload?: boolean }) => {
 		if (isNullish($authIdentity)) {
 			userProfileStore.reset();
@@ -29,7 +34,8 @@
 		// `initLoader` (which lives below the gate).
 		const { success, err } = await loadUserProfile({ identity: $authIdentity, reload });
 
-		if (!success && err === 'signups-closed') {
+		if (!success && err === 'signups-closed' && !signingOut) {
+			signingOut = true;
 			await infoSignOut({
 				text: $i18n.auth.info.signups_closed,
 				source: 'signups-closed'
