@@ -61,13 +61,15 @@ export const loadCertifiedUserProfile = async ({
 	}
 };
 
+export type LoadUserProfileFailureReason = 'signups-closed' | 'unknown';
+
 export const loadUserProfile = async ({
 	identity,
 	reload = true
 }: {
 	identity: NullishIdentity;
 	reload?: boolean;
-}): Promise<ResultSuccess> => {
+}): Promise<ResultSuccess<LoadUserProfileFailureReason>> => {
 	// We just want to verify that the store is empty, without being interested in the data.
 	// So we fetch it imperatively, instead of passing as parameter.
 	// If it is not empty, and we don't want to reload, we can return early.
@@ -99,12 +101,18 @@ export const loadUserProfile = async ({
 			loadCertifiedUserProfile({ identity });
 		}
 	} catch (err: unknown) {
+		if (err instanceof SignupsClosedError) {
+			// Caller decides how to surface this (info toast + sign-out); don't show a generic
+			// error toast here.
+			return { success: false, err: 'signups-closed' };
+		}
+
 		const { settings } = get(i18n);
 		toastsError({
 			msg: { text: settings.error.loading_profile },
 			err
 		});
-		return { success: false };
+		return { success: false, err: 'unknown' };
 	}
 
 	return { success: true };
