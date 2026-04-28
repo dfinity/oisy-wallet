@@ -141,6 +141,9 @@
 		"message": {
 			"session_locked": ""
 		},
+		"info": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
 			"session_expired": "Você foi desconectado porque sua sessão expirou.",

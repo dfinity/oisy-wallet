@@ -135,6 +135,7 @@ interface I18nAuth {
 		sign_in_with_microsoft: string;
 	};
 	message: { session_locked: string };
+	info: { signups_closed: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;

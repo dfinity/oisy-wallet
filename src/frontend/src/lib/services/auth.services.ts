@@ -139,6 +139,25 @@ export const errorSignOut = (text: string): Promise<void> => {
 	});
 };
 
+export const infoSignOut = ({
+	text,
+	source = ''
+}: {
+	text: string;
+	source?: string;
+}): Promise<void> => {
+	trackSignOut({
+		name: TRACK_SIGN_OUT_SUCCESS,
+		meta: { reason: 'info', text, source }
+	});
+	return logout({
+		msg: {
+			text,
+			level: 'info'
+		}
+	});
+};
+
 export const warnSignOut = (text: string): Promise<void> => {
 	trackSignOut({
 		name: TRACK_SIGN_OUT_WITH_WARNING,
