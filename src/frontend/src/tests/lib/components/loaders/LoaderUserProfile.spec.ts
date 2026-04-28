@@ -69,9 +69,7 @@ describe('LoaderUserProfile', () => {
 				.spyOn(loadUserServices, 'loadUserProfile')
 				.mockResolvedValue({ success: false, err: 'signups-closed' });
 
-			const infoSignOutSpy = vi
-				.spyOn(authServices, 'infoSignOut')
-				.mockResolvedValue(undefined);
+			const infoSignOutSpy = vi.spyOn(authServices, 'infoSignOut').mockResolvedValue(undefined);
 
 			render(LoaderUserProfile, { children: mockSnippet });
 
@@ -93,9 +91,7 @@ describe('LoaderUserProfile', () => {
 				err: 'unknown'
 			});
 
-			const infoSignOutSpy = vi
-				.spyOn(authServices, 'infoSignOut')
-				.mockResolvedValue(undefined);
+			const infoSignOutSpy = vi.spyOn(authServices, 'infoSignOut').mockResolvedValue(undefined);
 
 			render(LoaderUserProfile, { children: mockSnippet });
 

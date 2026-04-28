@@ -31,7 +31,7 @@
 
 		if (!success && err === 'signups-closed') {
 			await infoSignOut({
-				text: ($i18n).auth.info.signups_closed,
+				text: $i18n.auth.info.signups_closed,
 				source: 'signups-closed'
 			});
 		}
