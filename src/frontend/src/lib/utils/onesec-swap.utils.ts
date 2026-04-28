@@ -1,6 +1,5 @@
 import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isIcToken } from '$icp/validation/ic-token.validation';
@@ -15,16 +14,14 @@ export interface IcpLedgerEntry {
 	config: TokenConfig;
 }
 
-const buildIcpLedgerMap = (): Record<string, IcpLedgerEntry> => {
-	const map: Record<string, IcpLedgerEntry> = {};
-	for (const [token, config] of DEFAULT_CONFIG.tokens) {
+const buildIcpLedgerMap = (): Record<string, IcpLedgerEntry> =>
+	[...DEFAULT_CONFIG.tokens].reduce<Record<string, IcpLedgerEntry>>((map, [token, config]) => {
 		const ledger = config.ledgerMainnet ?? config.ledger;
 		if (nonNullish(ledger)) {
 			map[ledger] = { token, config };
 		}
-	}
-	return map;
-};
+		return map;
+	}, {});
 
 export const ICP_LEDGER_TO_TOKEN = buildIcpLedgerMap();
 
@@ -53,17 +50,12 @@ const getEvmAddressForNetwork = ({
 }: {
 	config: TokenConfig;
 	networkId: NetworkId;
-}): string | undefined => {
-	let address = config.erc20Mainnet ?? config.erc20;
-	if (networkId === ARBITRUM_MAINNET_NETWORK_ID) {
-		address = config.erc20MainnetArbitrum ?? address;
-	} else if (networkId === BASE_NETWORK_ID) {
-		address = config.erc20MainnetBase ?? address;
-	} else if (networkId === ETHEREUM_NETWORK_ID) {
-		address = config.erc20MainnetEthereum ?? address;
-	}
-	return address;
-};
+}): string | undefined =>
+	networkId === ARBITRUM_MAINNET_NETWORK_ID
+		? config.erc20MainnetArbitrum
+		: networkId === BASE_NETWORK_ID
+			? config.erc20MainnetBase
+			: (config.erc20MainnetEthereum ?? config.erc20Mainnet ?? config.erc20);
 
 /**
  * Returns ICP ledger canister IDs of tokens supported by OneSec on the ICP side.
