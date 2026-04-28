@@ -306,4 +306,121 @@ describe('filterSwapTokens', () => {
 			expect(result).not.toContain(erc20Inactive);
 		});
 	});
+
+	describe('compatibleTokenIds', () => {
+		const supportedData: SwapSupportedTokensData = {
+			icp: {
+				coverage: 'all',
+				supportedTokenIds: new Set([
+					icpTokenActive.ledgerCanisterId,
+					icpTokenInactive.ledgerCanisterId
+				])
+			},
+			evm: {
+				coverage: 'all',
+				supportedTokenIds: new Set([
+					erc20Active.address.toLowerCase(),
+					erc20Inactive.address.toLowerCase()
+				])
+			},
+			sol: { coverage: 'all', supportedTokenIds: new Set([splActive.address]) }
+		};
+
+		it('includes token when it passes the category filter', () => {
+			const result = filterSwapTokens({
+				tokens: [erc20Active],
+				supportedData,
+				compatibleTokenIds: { evm: new Set([erc20Active.address.toLowerCase()]) }
+			});
+
+			expect(result).toContain(erc20Active);
+		});
+
+		it('excludes token when it does not pass the category filter', () => {
+			const result = filterSwapTokens({
+				tokens: [erc20Inactive],
+				supportedData,
+				compatibleTokenIds: { evm: new Set([erc20Active.address.toLowerCase()]) }
+			});
+
+			expect(result).not.toContain(erc20Inactive);
+		});
+
+		it('does not restrict categories absent from the map', () => {
+			const result = filterSwapTokens({
+				tokens: [icpTokenActive, icpTokenInactive, erc20Active],
+				supportedData,
+				compatibleTokenIds: { evm: new Set([erc20Active.address.toLowerCase()]) }
+			});
+
+			// EVM filtered
+			expect(result).toContain(erc20Active);
+			// ICP not filtered — passes through on coverage rules
+			expect(result).toContain(icpTokenActive);
+			expect(result).toContain(icpTokenInactive);
+		});
+
+		it('filters out all tokens in a category when the filter set is empty', () => {
+			const result = filterSwapTokens({
+				tokens: [erc20Active, erc20Inactive],
+				supportedData,
+				compatibleTokenIds: { evm: new Set() }
+			});
+
+			expect(result).not.toContain(erc20Active);
+			expect(result).not.toContain(erc20Inactive);
+		});
+
+		it('behaves like no filter when compatibleTokenIds is an empty map', () => {
+			const result = filterSwapTokens({
+				tokens: [icpTokenActive, icpTokenInactive, erc20Active],
+				supportedData,
+				compatibleTokenIds: {}
+			});
+
+			expect(result).toContain(icpTokenActive);
+			expect(result).toContain(icpTokenInactive);
+			expect(result).toContain(erc20Active);
+		});
+
+		it('applies independent filters per category simultaneously', () => {
+			const result = filterSwapTokens({
+				tokens: [icpTokenActive, icpTokenInactive, erc20Active, erc20Inactive, splActive],
+				supportedData,
+				compatibleTokenIds: {
+					icp: new Set([icpTokenActive.ledgerCanisterId]),
+					evm: new Set([erc20Inactive.address.toLowerCase()])
+				}
+			});
+
+			// ICP: only icpTokenActive passes the category filter
+			expect(result).toContain(icpTokenActive);
+			expect(result).not.toContain(icpTokenInactive);
+
+			// EVM: only erc20Inactive passes the category filter
+			expect(result).not.toContain(erc20Active);
+			expect(result).toContain(erc20Inactive);
+
+			// SOL: no category filter → passes through on coverage rules
+			expect(result).toContain(splActive);
+		});
+
+		it('coverage still gates tokens before compatibleTokenIds is applied', () => {
+			const noCoverageData: SwapSupportedTokensData = {
+				icp: { coverage: 'none', supportedTokenIds: new Set() },
+				evm: { coverage: 'none', supportedTokenIds: new Set() },
+				sol: { coverage: 'none', supportedTokenIds: new Set() }
+			};
+
+			const result = filterSwapTokens({
+				tokens: [erc20Active, erc20Inactive],
+				supportedData: noCoverageData,
+				compatibleTokenIds: { evm: new Set([erc20Inactive.address.toLowerCase()]) }
+			});
+
+			// coverage=none returns enabled-only regardless of compatibleTokenIds
+			expect(result).toContain(erc20Active);
+			expect(result).not.toContain(erc20Inactive);
+		});
+	});
 });
