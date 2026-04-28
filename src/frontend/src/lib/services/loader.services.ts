@@ -96,6 +96,7 @@ export const initLoader = async ({
 				text: get(i18n).auth.info.signups_closed,
 				source: 'signups-closed'
 			});
+
 			return;
 		}
 		await signOut({});
