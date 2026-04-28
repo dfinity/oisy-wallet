@@ -1,11 +1,12 @@
 import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
+import * as authServices from '$lib/services/auth.services';
 import * as loadUserServices from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { emit } from '$lib/utils/events.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('LoaderUserProfile', () => {
@@ -35,7 +36,12 @@ describe('LoaderUserProfile', () => {
 	});
 
 	it('should re-load user profile on event', () => {
-		const spy = vi.spyOn(loadUserServices, 'loadUserProfile').mockImplementationOnce(vi.fn());
+		const spy = vi
+			.spyOn(loadUserServices, 'loadUserProfile')
+			.mockImplementationOnce(async () => {
+				await Promise.resolve();
+				return { success: true };
+			});
 
 		render(LoaderUserProfile, { children: mockSnippet });
 
@@ -56,6 +62,48 @@ describe('LoaderUserProfile', () => {
 		expect(get(userProfileStore)).toEqual({
 			certified: true,
 			profile: { ...mockUserProfile, version: [2n] }
+		});
+	});
+
+	describe('when signups are closed', () => {
+		it('should sign the user out via infoSignOut', async () => {
+			const loadSpy = vi
+				.spyOn(loadUserServices, 'loadUserProfile')
+				.mockResolvedValue({ success: false, err: 'signups-closed' });
+
+			const infoSignOutSpy = vi
+				.spyOn(authServices, 'infoSignOut')
+				.mockImplementation(() => Promise.resolve());
+
+			render(LoaderUserProfile, { children: mockSnippet });
+
+			expect(loadSpy).toHaveBeenCalledOnce();
+
+			await waitFor(() => {
+				expect(infoSignOutSpy).toHaveBeenCalledExactlyOnceWith({
+					text: expect.stringMatching(/sign-?ups/i),
+					source: 'signups-closed'
+				});
+			});
+
+			expect(get(userProfileStore)).toBeNull();
+		});
+
+		it('should not sign the user out when loadUserProfile fails for an unknown reason', async () => {
+			vi.spyOn(loadUserServices, 'loadUserProfile').mockResolvedValue({
+				success: false,
+				err: 'unknown'
+			});
+
+			const infoSignOutSpy = vi
+				.spyOn(authServices, 'infoSignOut')
+				.mockImplementation(() => Promise.resolve());
+
+			render(LoaderUserProfile, { children: mockSnippet });
+
+			await Promise.resolve();
+
+			expect(infoSignOutSpy).not.toHaveBeenCalled();
 		});
 	});
 
