@@ -102,20 +102,16 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<CreateUserProfileResponse> => {
+	createUserProfile = async (): Promise<CreateUserProfileResponse> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
 		const response = await create_user_profile();
 
-		if ('Ok' in response) {
-			return response.Ok;
-		}
-
-		if ('SignupsClosed' in response.Err) {
+		if ('Err' in response && 'SignupsClosed' in response.Err) {
 			throw new SignupsClosedError();
 		}
 
-		throw response.Err;
+		return response;
 	};
 
 	getUserProfile = ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {

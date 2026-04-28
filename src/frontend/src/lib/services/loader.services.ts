@@ -11,11 +11,10 @@ import {
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
-import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
+import { errorSignOut, infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsShow } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -93,15 +92,15 @@ export const initLoader = async ({
 
 	if (!userProfileSuccess) {
 		if (userProfileError === 'signups-closed') {
-			toastsShow({
+			await infoSignOut({
 				text: get(i18n).auth.info.signups_closed,
-				level: 'info'
+				source: 'signups-closed'
 			});
+
+			return;
 		}
-		await signOut({
-			resetUrl: userProfileError === 'signups-closed',
-			source: userProfileError === 'signups-closed' ? 'signups-closed' : ''
-		});
+
+		await signOut({});
 		return;
 	}
 

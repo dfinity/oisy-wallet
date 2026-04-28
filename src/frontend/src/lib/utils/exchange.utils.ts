@@ -31,7 +31,7 @@ export const usdValue = ({
 			) * exchangeRate
 		: Number(ZERO);
 
-const ICPSWAP_MIN_TVL_USD = 10;
+const ICPSWAP_MIN_TVL_USD = 500;
 
 export const formatIcpSwapToCoingeckoPrices = (
 	tokens: IcpSwapToken[]
