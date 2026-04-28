@@ -827,12 +827,12 @@ export const fetchOneSecEvmToIcpSwap = async (params: OneSecEvmToIcpParams): Pro
 
 export const fetchOneSecIcpToEvmSwap = async (params: OneSecIcpToEvmParams): Promise<void> => {
 	await executeOneSecIcpToEvmBridge(params);
+	params.progress(ProgressStepsSwap.UPDATE_UI);
 
 	await enableSwapDestinationToken({
 		destinationToken: params.destinationToken,
 		identity: params.identity
 	});
-	params.progress(ProgressStepsSwap.UPDATE_UI);
 	await waitAndTriggerWallet();
 };
 
