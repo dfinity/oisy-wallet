@@ -14,6 +14,12 @@
 	import { hiddenMicroTransactionsResetStore } from '$lib/stores/settings.store';
 	import { isSimpleNotificationDismissed } from '$lib/utils/notification.utils';
 
+	interface Props {
+		visible?: boolean;
+	}
+
+	let { visible = $bindable(false) }: Props = $props();
+
 	let temporaryDismissedNotifications = $state<DismissedNotification[]>([]);
 
 	let allDismissedNotifications = $derived([
@@ -33,7 +39,9 @@
 	// is cleared as soon as the user dismisses the info box again.
 	let dismissed = $derived(backendDismissed && !$hiddenMicroTransactionsResetStore.enabled);
 
-	let visible = $derived($hideMicroTransactions && !dismissed);
+	$effect(() => {
+		visible = $hideMicroTransactions && !dismissed;
+	});
 
 	const dismiss = () => {
 		const notifications: DismissedNotification[] = [

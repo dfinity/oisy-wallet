@@ -117,10 +117,13 @@
 		}
 	};
 
+	let hiddenMicroTransactionsVisible = $state(false);
+
 	let hasBanners = $derived(
 		undismissedNoCanister.length > 0 ||
 			tokensWithUnavailableCanister.length > 0 ||
-			!btcBannerDismissed
+			!btcBannerDismissed ||
+			hiddenMicroTransactionsVisible
 	);
 </script>
 
@@ -162,7 +165,7 @@
 		</div>
 	{/if}
 
-	<HiddenMicroTransactionsInfoBox />
+	<HiddenMicroTransactionsInfoBox bind:visible={hiddenMicroTransactionsVisible} />
 
 	<AllTransactionsList />
 </div>
