@@ -1843,10 +1843,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"open_or_create": "Connetti o crea il tuo wallet per interagire in sicurezza con la dApp.",
+				"open_or_create": "Apri o crea il tuo wallet per interagire in sicurezza con l'applicazione.",
 				"connect_your_wallet": "Connetti il tuo wallet $oisy_name",
 				"oisy_protects_you": "OISY ti protegge!",
-				"oisy_protects_you_description": "La dApp non può accedere direttamente ai tuoi fondi, e ogni transazione deve essere confermata da te!"
+				"oisy_protects_you_description": "Le applicazioni non possono accedere direttamente ai tuoi fondi, e ogni transazione deve essere confermata da te!"
 			}
 		},
 		"idle": {

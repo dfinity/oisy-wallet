@@ -1843,10 +1843,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"open_or_create": "Verbinde oder erstelle deine Wallet, um sicher mit der dApp zu interagieren.",
+				"open_or_create": "Öffne oder erstelle deine Wallet, um sicher mit der Anwendung zu interagieren.",
 				"connect_your_wallet": "Verbinde dein $oisy_name",
 				"oisy_protects_you": "OISY schützt dich!",
-				"oisy_protects_you_description": "Die dApp kann nicht direkt auf deine Gelder zugreifen, und jede Transaktion muss von dir bestätigt werden!"
+				"oisy_protects_you_description": "Anwendungen können nicht direkt auf deine Gelder zugreifen, und jede Transaktion muss von dir bestätigt werden!"
 			}
 		},
 		"idle": {
