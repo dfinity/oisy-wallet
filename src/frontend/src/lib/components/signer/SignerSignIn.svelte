@@ -18,7 +18,7 @@
 
 <p class="mb-12 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
 
-<ButtonAuthenticateWithHelp asPopup fullWidth needHelpLink={false} />
+<ButtonAuthenticateWithHelp asPopup fullWidth needHelpLink={false} helpAlignment="center" />
 
 {#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
 	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
