@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import { ONESEC_EVM_NETWORK_IDS } from '$lib/constants/swap.constants';
 	import { allCrossChainSwapTokens, allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networks } from '$lib/derived/networks.derived';
@@ -20,6 +22,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import type { TokenUi } from '$lib/types/token-ui';
+	import { oneSecCompatibleDestinations } from '$lib/utils/onesec-swap.utils';
 	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { sortTokens } from '$lib/utils/tokens.utils';
@@ -36,6 +39,15 @@
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
+	let compatibleTokenIds = $derived(
+		nonNullish($sourceToken)
+			? oneSecCompatibleDestinations({
+					sourceToken: $sourceToken,
+					networkIds: ONESEC_EVM_NETWORK_IDS
+				})
+			: undefined
+	);
+
 	let allSwapTokens: TokenToggleable<Token>[] = $derived(
 		filterSwapTokens({
 			tokens: [
@@ -43,7 +55,8 @@
 				...$allSortedIcrcTokens,
 				...$allCrossChainSwapTokens
 			],
-			supportedData: $swapSupportedTokensStore
+			supportedData: $swapSupportedTokensStore,
+			compatibleTokenIds
 		})
 	);
 
