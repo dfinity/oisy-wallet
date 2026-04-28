@@ -129,7 +129,7 @@
 			"internet_identity": "Internet Identity",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
-			"advanced_cryptography": "Secured by advanced cryptography - 100%\u00A0onchain",
+			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
 			"social_login": "Instant and private access + social login"
 		},
 		"alt": {
@@ -489,7 +489,7 @@
 			"open_wallet": "Take me to the wallet",
 			"carousel_slide_title": "$oisy_short Sprinkles Episode 6 is now Live!",
 			"carousel_slide_cta": "Learn more",
-			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
+			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! 🎉",
 			"youre_eligible": "You're eligible!",
 			"not_eligible": "Not eligible",
 			"ongoing": "Ongoing",
@@ -1838,8 +1838,8 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Access your $oisy_name",
-				"open_or_create": "Open or create your wallet to securely connect to the dApp and start managing your assets."
+				"open_or_create": "Open or create your wallet to securely connect to the dApp and start managing your assets.",
+				"connect_your_wallet": "Connect your $oisy_name"
 			}
 		},
 		"idle": {
@@ -1985,7 +1985,7 @@
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Use OISY and EARN! Ep. 6 is live \uD83C\uDF89",
+				"description": "Use OISY and EARN! Ep. 6 is live 🎉",
 				"action": "Check status"
 			}
 		},
@@ -2152,7 +2152,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short AI Assistant",
-			"welcome_message": "Hello there! \uD83D\uDC4B I'm your personal AI concierge. How can I help you?",
+			"welcome_message": "Hello there! 👋 I'm your personal AI concierge. How can I help you?",
 			"action_button_contacts_title": "Show contacts",
 			"action_button_contacts_subtitle": "Display your saved contacts",
 			"action_button_contacts_prompt": "Show me my contacts.",

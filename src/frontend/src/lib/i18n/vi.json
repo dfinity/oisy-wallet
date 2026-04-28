@@ -1838,8 +1838,8 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Truy cập ví $oisy_name của bạn",
-				"open_or_create": "Mở hoặc tạo ví của bạn để kết nối an toàn với dApp và bắt đầu quản lý tài sản của bạn."
+				"open_or_create": "Mở hoặc tạo ví của bạn để kết nối an toàn với dApp và bắt đầu quản lý tài sản của bạn.",
+				"connect_your_wallet": "Kết nối ví $oisy_name của bạn"
 			}
 		},
 		"idle": {

@@ -1838,8 +1838,8 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "$oisy_name에 접근",
-				"open_or_create": "지갑을 열거나 만들어 dApp에 안전하게 연결하고 자산 관리를 시작하세요."
+				"open_or_create": "지갑을 열거나 만들어 dApp에 안전하게 연결하고 자산 관리를 시작하세요.",
+				"connect_your_wallet": "$oisy_name에 연결"
 			}
 		},
 		"idle": {

@@ -1838,8 +1838,8 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Accedi al tuo wallet $oisy_name",
-				"open_or_create": "Apri o crea il tuo wallet per connetterti in sicurezza alla dApp e iniziare a gestire i tuoi asset."
+				"open_or_create": "Apri o crea il tuo wallet per connetterti in sicurezza alla dApp e iniziare a gestire i tuoi asset.",
+				"connect_your_wallet": "Connetti il tuo wallet $oisy_name"
 			}
 		},
 		"idle": {

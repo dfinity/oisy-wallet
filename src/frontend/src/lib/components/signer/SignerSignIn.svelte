@@ -13,7 +13,7 @@
 </div>
 
 <h2 class="mt-9 mb-2 text-center">
-	{replaceOisyPlaceholders($i18n.signer.sign_in.text.access_your_wallet)}
+	{replaceOisyPlaceholders($i18n.signer.sign_in.text.connect_your_wallet)}
 </h2>
 
 <p class="mb-12 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
