@@ -8,11 +8,10 @@ import { ZERO } from '$lib/constants/app.constants';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
-import { nullishSignOut, signOut } from '$lib/services/auth.services';
+import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
-import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { AllowSigningOutcome } from '$lib/types/api';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -138,6 +137,7 @@ describe('loader.services', () => {
 			vi.resetAllMocks();
 
 			vi.spyOn(authServices, 'signOut').mockImplementation(vi.fn());
+			vi.spyOn(authServices, 'infoSignOut').mockImplementation(vi.fn());
 			vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
 			vi.spyOn(api, 'allowSigning').mockResolvedValue(mockExecutedOutcome);
 
@@ -168,8 +168,7 @@ describe('loader.services', () => {
 			expect(signOut).toHaveBeenCalledOnce();
 		});
 
-		it('should show an info toast and sign out when signups are closed', async () => {
-			const toastsShowSpy = vi.spyOn(toastsStore, 'toastsShow');
+		it('should sign out via infoSignOut when signups are closed', async () => {
 			vi.mocked(loadUserProfile).mockResolvedValueOnce({
 				success: false,
 				err: 'signups-closed'
@@ -177,14 +176,11 @@ describe('loader.services', () => {
 
 			await initLoader(mockParams);
 
-			expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
+			expect(infoSignOut).toHaveBeenCalledExactlyOnceWith({
 				text: expect.stringMatching(/sign-?ups/i),
-				level: 'info'
-			});
-			expect(signOut).toHaveBeenCalledExactlyOnceWith({
-				resetUrl: true,
 				source: 'signups-closed'
 			});
+			expect(signOut).not.toHaveBeenCalled();
 		});
 
 		it('should load addresses from the backend', async () => {
