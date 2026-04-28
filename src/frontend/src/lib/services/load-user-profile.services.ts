@@ -102,8 +102,6 @@ export const loadUserProfile = async ({
 		}
 	} catch (err: unknown) {
 		if (err instanceof SignupsClosedError) {
-			// Caller decides how to surface this (info toast + sign-out); don't show a generic
-			// error toast here.
 			return { success: false, err: 'signups-closed' };
 		}
 
