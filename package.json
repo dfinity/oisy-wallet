@@ -81,7 +81,7 @@
 		"@icp-sdk/core": "^4.2.1",
 		"@metamask/detect-provider": "^2.0.0",
 		"@plausible-analytics/tracker": "^0.4.4",
-		"@reown/walletkit": "^1.5.3",
+		"@reown/walletkit": "^1.5.5",
 		"@solana-program/compute-budget": "^0.15.0",
 		"@solana-program/system": "^0.12.0",
 		"@solana-program/token": "^0.12.0",
