@@ -365,19 +365,27 @@ describe('token-group.utils', () => {
 			expect(result.usdPriceChangePercentage24h).toBe(tokenWithPrice.usdPriceChangePercentage24h);
 		});
 
-		it('should keep existing group price when it already has one', () => {
-			const groupWithPrice: TokenUiGroup = {
-				id: ETH_TOKEN_GROUP.id,
-				decimals: BASE_ETH_TOKEN.decimals,
+		it('should keep the existing group price when its first token already has both price and performance', () => {
+			const firstToken = {
+				...BASE_ETH_TOKEN,
 				groupData: ETH_TOKEN_GROUP,
-				tokens: [
-					{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn1Bi, usdBalance: 100 }
-				],
 				balance: bn1Bi,
 				usdBalance: 100,
 				usdPrice: 1500,
 				usdMarketCap: 180000000000,
 				usdPriceChangePercentage24h: 1.0
+			};
+
+			const groupWithPrice: TokenUiGroup = {
+				id: ETH_TOKEN_GROUP.id,
+				decimals: BASE_ETH_TOKEN.decimals,
+				groupData: ETH_TOKEN_GROUP,
+				tokens: [firstToken],
+				balance: bn1Bi,
+				usdBalance: 100,
+				usdPrice: firstToken.usdPrice,
+				usdMarketCap: firstToken.usdMarketCap,
+				usdPriceChangePercentage24h: firstToken.usdPriceChangePercentage24h
 			};
 
 			const tokenWithDifferentPrice = {
@@ -395,9 +403,54 @@ describe('token-group.utils', () => {
 				tokenGroup: groupWithPrice
 			});
 
-			expect(result.usdPrice).toBe(groupWithPrice.usdPrice);
-			expect(result.usdMarketCap).toBe(groupWithPrice.usdMarketCap);
-			expect(result.usdPriceChangePercentage24h).toBe(groupWithPrice.usdPriceChangePercentage24h);
+			expect(result.usdPrice).toBe(firstToken.usdPrice);
+			expect(result.usdMarketCap).toBe(firstToken.usdMarketCap);
+			expect(result.usdPriceChangePercentage24h).toBe(firstToken.usdPriceChangePercentage24h);
+		});
+
+		it('should skip the first token and use the next one with both price and performance available', () => {
+			const firstTokenWithoutPerformance = {
+				...BASE_ETH_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn1Bi,
+				usdBalance: 100,
+				usdPrice: 1500,
+				usdMarketCap: 180000000000,
+				usdPriceChangePercentage24h: undefined
+			};
+
+			const groupWithPartialPrice: TokenUiGroup = {
+				id: ETH_TOKEN_GROUP.id,
+				decimals: BASE_ETH_TOKEN.decimals,
+				groupData: ETH_TOKEN_GROUP,
+				tokens: [firstTokenWithoutPerformance],
+				balance: bn1Bi,
+				usdBalance: 100,
+				usdPrice: firstTokenWithoutPerformance.usdPrice,
+				usdMarketCap: firstTokenWithoutPerformance.usdMarketCap,
+				usdPriceChangePercentage24h: undefined
+			};
+
+			const secondTokenWithBoth = {
+				...ETHEREUM_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn2Bi,
+				usdBalance: 200,
+				usdPrice: 2000,
+				usdMarketCap: 240000000000,
+				usdPriceChangePercentage24h: -0.5
+			};
+
+			const result = updateTokenGroup({
+				token: secondTokenWithBoth,
+				tokenGroup: groupWithPartialPrice
+			});
+
+			expect(result.usdPrice).toBe(secondTokenWithBoth.usdPrice);
+			expect(result.usdMarketCap).toBe(secondTokenWithBoth.usdMarketCap);
+			expect(result.usdPriceChangePercentage24h).toBe(
+				secondTokenWithBoth.usdPriceChangePercentage24h
+			);
 		});
 	});
 
@@ -689,6 +742,64 @@ describe('token-group.utils', () => {
 				usdMarketCap: mockToken.usdMarketCap,
 				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
+		});
+
+		it('should source price and performance from the first token that has both, not mix them across tokens', () => {
+			const firstWithoutPerformance = {
+				...mockTwinToken1,
+				usdPrice: 0.99,
+				usdMarketCap: undefined,
+				usdPriceChangePercentage24h: undefined
+			};
+			const secondWithBoth = {
+				...mockTwinToken2,
+				usdPrice: 1.01,
+				usdMarketCap: 50000000000,
+				usdPriceChangePercentage24h: 0.2
+			};
+
+			const tokens = [firstWithoutPerformance, secondWithBoth];
+
+			const result = groupTokens(tokens);
+
+			expect(result).toHaveLength(1);
+
+			assert('group' in result[0]);
+
+			const [{ group }] = result;
+
+			expect(group.usdPrice).toBe(secondWithBoth.usdPrice);
+			expect(group.usdMarketCap).toBe(secondWithBoth.usdMarketCap);
+			expect(group.usdPriceChangePercentage24h).toBe(secondWithBoth.usdPriceChangePercentage24h);
+		});
+
+		it('should use the first token with both price and performance even if a later token also has both', () => {
+			const firstWithBoth = {
+				...mockTwinToken1,
+				usdPrice: 0.99,
+				usdMarketCap: 40000000000,
+				usdPriceChangePercentage24h: 0.1
+			};
+			const secondWithBoth = {
+				...mockTwinToken2,
+				usdPrice: 1.01,
+				usdMarketCap: 50000000000,
+				usdPriceChangePercentage24h: 0.2
+			};
+
+			const tokens = [firstWithBoth, secondWithBoth];
+
+			const result = groupTokens(tokens);
+
+			expect(result).toHaveLength(1);
+
+			assert('group' in result[0]);
+
+			const [{ group }] = result;
+
+			expect(group.usdPrice).toBe(firstWithBoth.usdPrice);
+			expect(group.usdMarketCap).toBe(firstWithBoth.usdMarketCap);
+			expect(group.usdPriceChangePercentage24h).toBe(firstWithBoth.usdPriceChangePercentage24h);
 		});
 	});
 

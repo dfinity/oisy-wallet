@@ -1,5 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { TokenId } from '$lib/types/token';
+import type { TokenFinancialData, TokenId } from '$lib/types/token';
 import type { TokenGroupId } from '$lib/types/token-group';
 import type { TokenUi, TokenUiGroupable } from '$lib/types/token-ui';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -47,6 +47,32 @@ export const filterTokenGroups = ({
 					: hasBalance(tokenOrGroup.token)
 			);
 
+type GroupPriceFields = Pick<
+	TokenFinancialData,
+	'usdPrice' | 'usdMarketCap' | 'usdPriceChangePercentage24h'
+>;
+
+const hasPriceAndPerformance = ({
+	usdPrice,
+	usdPriceChangePercentage24h
+}: Pick<TokenFinancialData, 'usdPrice' | 'usdPriceChangePercentage24h'>): boolean =>
+	nonNullish(usdPrice) && nonNullish(usdPriceChangePercentage24h);
+
+// Picks the price, market cap and 24h performance for a group from the first token (in
+// `tokens` order) that has both `usdPrice` and `usdPriceChangePercentage24h`. This ensures
+// the displayed price and performance always describe the same token, instead of being
+// silently mixed across constituents when one of them is missing data.
+const pickGroupPriceFields = (tokens: readonly GroupPriceFields[]): Partial<GroupPriceFields> => {
+	const source = tokens.find(hasPriceAndPerformance);
+	return isNullish(source)
+		? {}
+		: {
+				usdPrice: source.usdPrice,
+				usdMarketCap: source.usdMarketCap,
+				usdPriceChangePercentage24h: source.usdPriceChangePercentage24h
+			};
+};
+
 const mapNewTokenGroup = (token: TokenUiGroupable): TokenUiGroup => ({
 	id: token.groupData.id,
 	decimals: token.decimals,
@@ -54,9 +80,7 @@ const mapNewTokenGroup = (token: TokenUiGroupable): TokenUiGroup => ({
 	tokens: [token],
 	balance: token.balance,
 	usdBalance: token.usdBalance,
-	usdPrice: token.usdPrice,
-	usdMarketCap: token.usdMarketCap,
-	usdPriceChangePercentage24h: token.usdPriceChangePercentage24h
+	...pickGroupPriceFields([token])
 });
 
 interface GroupTokenParams {
@@ -100,16 +124,7 @@ export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams):
 			)
 		),
 		usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance]),
-		...(nonNullish(tokenGroup.usdPrice ?? token.usdPrice) && {
-			usdPrice: tokenGroup.usdPrice ?? token.usdPrice
-		}),
-		...(nonNullish(tokenGroup.usdMarketCap ?? token.usdMarketCap) && {
-			usdMarketCap: tokenGroup.usdMarketCap ?? token.usdMarketCap
-		}),
-		...(nonNullish(tokenGroup.usdPriceChangePercentage24h ?? token.usdPriceChangePercentage24h) && {
-			usdPriceChangePercentage24h:
-				tokenGroup.usdPriceChangePercentage24h ?? token.usdPriceChangePercentage24h
-		})
+		...pickGroupPriceFields(newTokens)
 	};
 };
 
