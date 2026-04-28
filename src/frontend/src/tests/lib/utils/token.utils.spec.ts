@@ -11,11 +11,6 @@ import { USDC_TOKEN as USDC_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/
 import { USDT_TOKEN as USDT_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
 import { USDC_TOKEN as USDC_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN as USDT_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdt.env';
-import * as tokensIcrcAdditionalEnv from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
-import {
-	IC_USDC_LEDGER_CANISTER_ID,
-	IC_USDT_LEDGER_CANISTER_ID
-} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
@@ -469,14 +464,6 @@ describe('token.utils', () => {
 			).mockReturnValue([canisterId ?? '']);
 		};
 
-		const setupIcrcSuggestedTokenMock = (canisterId?: string) => {
-			vi.spyOn(
-				tokensIcrcAdditionalEnv,
-				'ICRC_SUGGESTED_LEDGER_CANISTER_IDS',
-				'get'
-			).mockReturnValue([canisterId ?? '']);
-		};
-
 		const dummyCkBTC = { ...mockValidIcToken, ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID };
 		const dummyCkETH = { ...mockValidIcToken, ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID };
 		const ckUSDCLedgerCanisterId = ckErc20Production.ckUSDC?.ledgerCanisterId;
@@ -569,24 +556,11 @@ describe('token.utils', () => {
 			ledgerCanisterId: ckErc20Production.ckUSDT?.ledgerCanisterId
 		};
 
-		const dummyIcUSDC = { ...mockValidIcToken, ledgerCanisterId: IC_USDC_LEDGER_CANISTER_ID };
-		const dummyIcUSDT = { ...mockValidIcToken, ledgerCanisterId: IC_USDT_LEDGER_CANISTER_ID };
-
 		describe.each([
 			{
 				description: 'Suggested ICRC token ckUSDT',
 				token: dummyCkUSDT,
 				setupMock: setupSuggestedTokenMock
-			},
-			{
-				description: 'Suggested native ICRC token USDC',
-				token: dummyIcUSDC,
-				setupMock: setupIcrcSuggestedTokenMock
-			},
-			{
-				description: 'Suggested native ICRC token USDT',
-				token: dummyIcUSDT,
-				setupMock: setupIcrcSuggestedTokenMock
 			},
 			{ description: 'Suggested ERC20 token USDC', token: USDC_TOKEN },
 			{ description: 'Suggested ERC20 token USDT', token: USDT_TOKEN },
