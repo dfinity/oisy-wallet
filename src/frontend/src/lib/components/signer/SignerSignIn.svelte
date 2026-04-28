@@ -25,10 +25,10 @@
 	{$i18n.signer.sign_in.text.oisy_protects_you_description}
 	<ExternalLink
 		ariaLabel={$i18n.core.alt.learn_more}
-		href={OISY_SIGNER_CONNECT_DOCS_URL}
 		color="blue"
-		styleClass="mt-2 justify-center"
-	>{$i18n.core.text.learn_more}</ExternalLink>
+		href={OISY_SIGNER_CONNECT_DOCS_URL}
+		styleClass="mt-2 justify-center">{$i18n.core.text.learn_more}</ExternalLink
+	>
 </p>
 
 <ButtonAuthenticateWithHelp asPopup fullWidth helpAlignment="center" needHelpLink={false} />
