@@ -1849,7 +1849,7 @@
 				"open_or_create": "Otevřete nebo vytvořte svou peněženku pro bezpečnou interakci s aplikací.",
 				"connect_your_wallet": "Připojte svou peněženku $oisy_name",
 				"oisy_protects_you": "OISY vás chrání!",
-				"oisy_protects_you_description": "Aplikace nemohou přímo přistupovat k vašim prostředkům, a každá transakce musí být potvrzena vámi!"
+				"oisy_protects_you_description": "Aplikace nemohou přímo přistupovat k vašim prostředkům, a každá transakce musí být potvrzena vámi."
 			}
 		},
 		"idle": {

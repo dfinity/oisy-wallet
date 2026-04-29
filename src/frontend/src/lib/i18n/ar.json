@@ -1849,7 +1849,7 @@
 				"open_or_create": "افتح أو أنشئ محفظتك للتفاعل بأمان مع التطبيق.",
 				"connect_your_wallet": "اتصل بمحفظة $oisy_name الخاصة بك",
 				"oisy_protects_you": "OISY يحميك!",
-				"oisy_protects_you_description": "لا يمكن للتطبيقات الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة!"
+				"oisy_protects_you_description": "لا يمكن للتطبيقات الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة."
 			}
 		},
 		"idle": {

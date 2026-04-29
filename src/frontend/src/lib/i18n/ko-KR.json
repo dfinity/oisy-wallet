@@ -164,7 +164,7 @@
 				"login_page_looks_different": "로그인 페이지가 왜 다르게 보이나요?",
 				"use_identity_number": "인터넷 아이덴티티 번호를 사용하고 싶습니다",
 				"feedback_text": "여러분의 피드백은 $oisy_short을 더 좋게 만드는 데 도움이 됩니다.",
-				"thanks_text": "감사합니다!",
+				"thanks_text": "감사합니다.",
 				"useful_links": "유용한 링크",
 				"identity_new_identity": "$oisy_short 지갑은 인터넷 아이덴티티 도메인을 <span class=\"font-bold\">identity.internetcomputer.org</span>로 전환합니다",
 				"switch_to_new_internet_identity": "$oisy_name이 인터넷 아이덴티티 2.0으로 전환합니다",

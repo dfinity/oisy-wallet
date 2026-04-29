@@ -1849,7 +1849,7 @@
 				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
 				"connect_your_wallet": "あなたの$oisy_nameに接続する",
 				"oisy_protects_you": "OISYがあなたを守ります！",
-				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です！"
+				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},
 		"idle": {

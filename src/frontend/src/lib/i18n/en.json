@@ -164,7 +164,7 @@
 				"login_page_looks_different": "Why does the login page look different?",
 				"use_identity_number": "I want to use my Internet Identity number",
 				"feedback_text": "Your feedback helps us to make $oisy_short better.",
-				"thanks_text": "Thank you!",
+				"thanks_text": "Thank you.",
 				"useful_links": "Useful links",
 				"identity_new_identity": "$oisy_short Wallet switches the Internet Identity domain to: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name switches to Internet Identity 2.0",
@@ -1849,7 +1849,7 @@
 				"open_or_create": "Open or create your wallet to securely interact with the application.",
 				"connect_your_wallet": "Connect your $oisy_name",
 				"oisy_protects_you": "OISY protects you!",
-				"oisy_protects_you_description": "Applications can't directly access your funds, and each transaction has to be confirmed by you!"
+				"oisy_protects_you_description": "Applications can't directly access your funds, and each transaction has to be confirmed by you."
 			}
 		},
 		"idle": {
