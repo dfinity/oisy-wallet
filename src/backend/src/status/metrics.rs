@@ -61,9 +61,7 @@ pub fn evaluate_all(now: Timestamp) -> StatusResponse {
 mod tests {
     use pretty_assertions::assert_eq;
 
-    use super::{
-        classify_signups, SIGNUPS_CRITICAL_THRESHOLD, SIGNUPS_WARN_THRESHOLD,
-    };
+    use super::{classify_signups, SIGNUPS_CRITICAL_THRESHOLD, SIGNUPS_WARN_THRESHOLD};
     use crate::status::HealthStatus;
 
     #[test]

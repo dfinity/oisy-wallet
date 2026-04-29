@@ -32,7 +32,11 @@ fn make_request(url: &str) -> HttpRequest {
 
 fn fetch_status<P: PicCanisterTrait>(pic_setup: &P) -> (HttpResponse, Value) {
     let response: HttpResponse = pic_setup
-        .query(Principal::anonymous(), "http_request", make_request("/status"))
+        .query(
+            Principal::anonymous(),
+            "http_request",
+            make_request("/status"),
+        )
         .expect("/status should always return Ok");
     let body: Value =
         serde_json::from_slice(response.body.as_ref()).expect("response body must be JSON");
