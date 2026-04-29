@@ -8,6 +8,7 @@
 use std::collections::BTreeMap;
 
 use ic_cdk::api::time;
+use serde::Serialize;
 use serde_bytes::ByteBuf;
 use shared::http::HttpResponse;
 
@@ -44,7 +45,7 @@ pub fn handle() -> HttpResponse {
 ///
 /// `Ord` is derived such that `Ok < Warn < Critical`, allowing the top-level rollup to be computed
 /// as the maximum across child metrics.
-#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd, serde::Serialize)]
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum HealthStatus {
     Ok,
@@ -53,13 +54,13 @@ pub enum HealthStatus {
 }
 
 /// One metric entry in the public response. Intentionally minimal: no counts, no messages.
-#[derive(Clone, Copy, Debug, serde::Serialize)]
+#[derive(Clone, Copy, Debug, Serialize)]
 pub struct MetricEntry {
     pub status: HealthStatus,
 }
 
 /// Top-level `/status` response payload.
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct StatusResponse {
     pub status: HealthStatus,
     pub version: u32,
