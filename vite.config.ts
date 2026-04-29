@@ -88,13 +88,6 @@ const config: UserConfig = {
 			'/api': 'http://localhost:4943'
 		}
 	},
-	optimizeDeps: {
-		esbuildOptions: {
-			define: {
-				global: 'globalThis'
-			}
-		}
-	},
 	worker: {
 		format: 'es'
 	}
