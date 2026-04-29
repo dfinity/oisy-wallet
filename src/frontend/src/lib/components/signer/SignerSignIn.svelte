@@ -23,7 +23,7 @@
 
 <p class="mb-12 text-center">
 	<strong class="inline-flex items-center gap-1"
-		><IconShieldCheck size="16" />{$i18n.signer.sign_in.text.oisy_protects_you}</strong
+		><span class="text-success-primary"><IconShieldCheck size="16" /></span>{$i18n.signer.sign_in.text.oisy_protects_you}</strong
 	>
 	{$i18n.signer.sign_in.text.oisy_protects_you_description}
 	<ExternalLink
