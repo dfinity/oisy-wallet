@@ -2,8 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
-	import SignerAnimatedAstronaut from '$lib/components/signer/SignerAnimatedAstronaut.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import SignerAnimatedAstronaut from '$lib/components/signer/SignerAnimatedAstronaut.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_SIGNER_CONNECT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
@@ -22,7 +22,9 @@
 <p class="mb-4 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
 
 <p class="mb-12 text-center">
-	<strong class="inline-flex items-center gap-1"><IconShieldCheck size="16" />{$i18n.signer.sign_in.text.oisy_protects_you}</strong>
+	<strong class="inline-flex items-center gap-1"
+		><IconShieldCheck size="16" />{$i18n.signer.sign_in.text.oisy_protects_you}</strong
+	>
 	{$i18n.signer.sign_in.text.oisy_protects_you_description}
 	<ExternalLink
 		ariaLabel={$i18n.core.alt.learn_more}
