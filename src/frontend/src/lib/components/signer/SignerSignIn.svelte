@@ -23,7 +23,7 @@
 
 <p class="mb-12 text-center">
 	<strong
-		><span class="mr-1 inline-block align-middle text-success-primary"
+		><span class="relative -top-px mr-1 inline-block align-middle text-success-primary"
 			><IconShieldCheck size="16" /></span
 		>{$i18n.signer.sign_in.text.oisy_protects_you}</strong
 	>
