@@ -1154,6 +1154,7 @@
 			"select_token": "トークンを選択",
 			"select_network_filter": "ネットワークを選択",
 			"withdrawing": "出金中...",
+			"bridging": "",
 			"network_cost": "ネットワークコスト",
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",

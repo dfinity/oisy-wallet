@@ -454,6 +454,7 @@
 					sendWithApproval={isApproveNeeded}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
+					swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
 				/>
 			{/if}
 		{/key}
