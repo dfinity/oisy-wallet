@@ -1154,7 +1154,7 @@
 			"select_token": "Wybierz token",
 			"select_network_filter": "Wybierz sieć",
 			"withdrawing": "Wypłacanie...",
-			"bridging": "",
+			"bridging": "Trwa bridging... (Prosimy o cierpliwość, może to potrwać do minuty.)",
 			"network_cost": "Koszt sieci",
 			"gasless": "Bez gazu",
 			"swap_fees": "Opłaty za wymianę",
