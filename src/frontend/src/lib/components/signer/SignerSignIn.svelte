@@ -22,9 +22,10 @@
 <p class="mb-4 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
 
 <p class="mb-12 text-center">
-	<strong class="inline-flex items-center gap-1"
-		><span class="text-success-primary"><IconShieldCheck size="16" /></span>{$i18n.signer.sign_in
-			.text.oisy_protects_you}</strong
+	<strong
+		><span class="mr-1 inline-block align-middle text-success-primary"
+			><IconShieldCheck size="16" /></span
+		>{$i18n.signer.sign_in.text.oisy_protects_you}</strong
 	>
 	{$i18n.signer.sign_in.text.oisy_protects_you_description}
 	<ExternalLink
