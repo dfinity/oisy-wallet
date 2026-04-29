@@ -144,6 +144,9 @@
 		"info": {
 			"signups_closed": ""
 		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
 			"session_expired": "تم تسجيل خروجك لانتهاء صلاحية جلستك.",

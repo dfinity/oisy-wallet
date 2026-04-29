@@ -144,6 +144,9 @@
 		"info": {
 			"signups_closed": ""
 		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
 			"session_expired": "Deine Sitzung ist abgelaufen, du wurdest abgemeldet.",
