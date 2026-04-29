@@ -1154,6 +1154,7 @@
 			"select_token": "Selecionar token",
 			"select_network_filter": "Selecionar rede",
 			"withdrawing": "A retirar...",
+			"bridging": "",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",

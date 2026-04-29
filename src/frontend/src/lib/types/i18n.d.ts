@@ -873,6 +873,7 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
+		bridging: string;
 		network_cost: string;
 		gasless: string;
 		swap_fees: string;
