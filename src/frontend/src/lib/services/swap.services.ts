@@ -1243,7 +1243,11 @@ const isExecutedDeltaAuction = ({
 		return false;
 	}
 
-	if (waitForCrosschain && auction.order.bridge.destinationChainId !== 0) {
+	if (
+		waitForCrosschain &&
+		'bridge' in auction.order &&
+		auction.order.bridge.destinationChainId !== 0
+	) {
 		return auction.bridgeStatus === 'filled';
 	}
 
