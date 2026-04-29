@@ -80,16 +80,17 @@ Key facts:
 
 ### New Features
 
-- Integration to 1Sec to offer bridging several tokens from ICP to Ethereum, Base, abd Arbitrum, or vice versa.
+- Integration to 1Sec to offer bridging several tokens from ICP to Ethereum, Base, and Arbitrum, or vice versa.
 - Allow to quickly sign up or sign in with Google, Apple, or Mirosoft accounts.
 - Micro transaction filter that filters out small value transactions from the user's activity list.
 
 ### Improvements
 
+- Improved layout on the signer login page
 
 ### Bug Fixes
 
-
+-
 
 ## Most recent Features and Improvements
 
