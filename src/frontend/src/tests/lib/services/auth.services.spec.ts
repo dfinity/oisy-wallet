@@ -9,6 +9,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import {
 	errorSignOut,
 	idleSignOut,
+	infoSignOut,
 	lockSession,
 	nullishSignOut,
 	signOut,
@@ -412,6 +413,42 @@ describe('auth.services', () => {
 				'',
 				new URL(
 					`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=warn&${PARAM_DELETE_IDB_CACHE}=true`
+				)
+			);
+		});
+	});
+
+	describe('infoSignOut', () => {
+		const mockText = 'New sign-ups are currently restricted.';
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should track the sign out event with the provided source', async () => {
+			await infoSignOut({ text: mockText, source: 'signups-closed' });
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_SIGN_OUT_SUCCESS,
+				metadata: {
+					reason: 'info',
+					level: '',
+					text: mockText,
+					source: 'signups-closed',
+					resetUrl: 'false',
+					clearStorages: 'true'
+				}
+			});
+		});
+
+		it('should append the message to the reload URL with level=info', async () => {
+			await infoSignOut({ text: mockText });
+
+			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
+				{},
+				'',
+				new URL(
+					`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=info&${PARAM_DELETE_IDB_CACHE}=true`
 				)
 			);
 		});

@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": "Votre session a été verrouillée dans un autre onglet."
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Vous n'êtes pas connecté. Veuillez vous connecter pour continuer.",
 			"session_expired": "Vous avez été déconnecté car votre session a expiré.",
@@ -1154,6 +1160,8 @@
 			"cross_chain_networks_info": "Vous déplacez des tokens du réseau <b>$sourceNetwork</b> vers le réseau <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Accéder à votre $oisy_name",
-				"open_or_create": "Ouvrez ou créez votre portefeuille pour vous connecter en toute sécurité à la dApp et commencer à gérer vos actifs."
+				"open_or_create": "Ouvrez ou créez votre portefeuille pour interagir en toute sécurité avec l'application.",
+				"connect_your_wallet": "Connectez votre $oisy_name",
+				"oisy_protects_you": "OISY vous protège!",
+				"oisy_protects_you_description": "Les applications ne peuvent pas accéder directement à vos fonds, et chaque transaction doit être confirmée par vous."
 			}
 		},
 		"idle": {

@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": "Vaše relace byla uzamčena v jiné kartě."
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
 			"session_expired": "Byli jste odhlášeni, protože vaše relace vypršela.",
@@ -1154,6 +1160,8 @@
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Přístup k vaší peněžence $oisy_name",
-				"open_or_create": "Otevřete nebo vytvořte svou peněženku, abyste se bezpečně připojili k dApp a začali spravovat svá digitální aktiva."
+				"open_or_create": "Otevřete nebo vytvořte svou peněženku pro bezpečnou interakci s aplikací.",
+				"connect_your_wallet": "Připojte svou peněženku $oisy_name",
+				"oisy_protects_you": "OISY vás chrání!",
+				"oisy_protects_you_description": "Aplikace nemohou přímo přistupovat k vašim prostředkům, a každá transakce musí být potvrzena vámi."
 			}
 		},
 		"idle": {

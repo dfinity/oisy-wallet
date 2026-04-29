@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": ""
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
 			"session_expired": "Você foi desconectado porque sua sessão expirou.",
@@ -1154,6 +1160,8 @@
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Acesse sua carteira $oisy_name",
-				"open_or_create": "Abra ou crie sua carteira para se conectar com segurança ao dApp e começar a gerir seus ativos."
+				"open_or_create": "Abra ou crie sua carteira para interagir com segurança com a aplicação.",
+				"connect_your_wallet": "Conecte sua carteira $oisy_name",
+				"oisy_protects_you": "OISY protege você.",
+				"oisy_protects_you_description": "Os aplicativos não podem acessar seus fundos diretamente, e cada transação precisa ser confirmada por você!"
 			}
 		},
 		"idle": {

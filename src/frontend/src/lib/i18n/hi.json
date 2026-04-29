@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": ""
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
 			"session_expired": "आपकी सत्र अवधि समाप्त होने के कारण आपको लॉग आउट कर दिया गया है।",
@@ -1154,6 +1160,8 @@
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "अपने $oisy_name तक पहुंचें",
-				"open_or_create": "dApp से सुरक्षित रूप से कनेक्ट होने और अपनी संपत्तियों का प्रबंधन शुरू करने के लिए अपना वॉलेट खोलें या बनाएँ।"
+				"open_or_create": "एप्लिकेशन के साथ सुरक्षित रूप से इंटरैक्ट करने के लिए अपना वॉलेट खोलें या बनाएं।",
+				"connect_your_wallet": "अपने $oisy_name से कनेक्ट करें",
+				"oisy_protects_you": "OISY आपकी सुरक्षा करता है!",
+				"oisy_protects_you_description": "एप्लिकेशन आपके फंड तक सीधे नहीं पहुंच सकते, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए."
 			}
 		},
 		"idle": {

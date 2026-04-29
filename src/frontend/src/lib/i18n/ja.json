@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": "別のタブで操作が行われたため、このセッションはロックされました。"
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
 			"session_expired": "セッションの有効期限が切れました。ログアウトされました。",
@@ -1154,6 +1160,8 @@
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "あなたの$oisy_nameにアクセス",
-				"open_or_create": "既存のウォレットにログインするか、新規作成して、安全にdAppに接続し、資産の管理を始めましょう。"
+				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
+				"connect_your_wallet": "あなたの$oisy_nameに接続する",
+				"oisy_protects_you": "OISYがあなたを守ります！",
+				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},
 		"idle": {

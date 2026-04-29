@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": ""
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Nie jesteś zalogowany. Zaloguj się, aby kontynuować.",
 			"session_expired": "Zostałeś wylogowany, ponieważ Twoja sesja wygasła.",
@@ -1154,6 +1160,8 @@
 			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Uzyskaj dostęp do swojego $oisy_name",
-				"open_or_create": "Otwórz lub utwórz swój portfel, aby bezpiecznie połączyć się z dApp i zacząć zarządzać swoimi aktywami."
+				"open_or_create": "Otwórz lub utwórz swój portfel, aby bezpiecznie korzystać z aplikacji.",
+				"connect_your_wallet": "Połącz swój $oisy_name",
+				"oisy_protects_you": "OISY cię chroni!",
+				"oisy_protects_you_description": "Aplikacje nie mogą bezpośrednio uzyskać dostępu do Twoich środków, a każda transakcja musi zostać przez Ciebie zatwierdzona."
 			}
 		},
 		"idle": {

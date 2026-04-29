@@ -141,10 +141,6 @@
 	},
 	"type": "module",
 	"overrides": {
-		"@ethersproject/providers": {
-			"ws": "^7.5.10"
-		},
-		"elliptic": "^6.6.1",
 		"cookie": "^0.7.0",
 		"@icp-sdk/core": "^4.2.1",
 		"@dfinity/utils": "^4.0.3"

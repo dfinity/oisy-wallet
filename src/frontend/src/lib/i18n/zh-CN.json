@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": "你的会话已在另一个标签页中被锁定。"
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "你尚未登录。请先登录以继续。",
 			"session_expired": "由于会话已过期，你已被登出。",
@@ -1154,6 +1160,8 @@
 			"cross_chain_networks_info": "跨链网络信息",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "访问你的 $oisy_name",
-				"open_or_create": "打开或创建你的钱包，以安全连接 dApp 并开始管理你的资产。"
+				"open_or_create": "打开或创建你的钱包，与应用程序安全交互。",
+				"connect_your_wallet": "连接你的 $oisy_name",
+				"oisy_protects_you": "OISY 保护您！",
+				"oisy_protects_you_description": "应用程序无法直接访问您的资金，每笔交易都需要您确认。"
 			}
 		},
 		"idle": {

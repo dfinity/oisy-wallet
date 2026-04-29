@@ -10,6 +10,7 @@ use shared::{
 
 use crate::{
     state::{read_config, read_state},
+    status,
     types::StoredPrincipal,
     utils::guards::caller_is_allowed,
 };
@@ -34,6 +35,7 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
 
     match path {
         "/metrics" => get_metrics(),
+        "/status" => status::handle(),
         _ => HttpResponse {
             status_code: 404,
             headers: vec![],

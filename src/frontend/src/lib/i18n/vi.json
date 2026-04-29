@@ -141,6 +141,12 @@
 		"message": {
 			"session_locked": ""
 		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
+		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
 			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn.",
@@ -1154,6 +1160,8 @@
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Truy cập ví $oisy_name của bạn",
-				"open_or_create": "Mở hoặc tạo ví của bạn để kết nối an toàn với dApp và bắt đầu quản lý tài sản của bạn."
+				"open_or_create": "Mở hoặc tạo ví của bạn để tương tác an toàn với ứng dụng.",
+				"connect_your_wallet": "Kết nối ví $oisy_name của bạn",
+				"oisy_protects_you": "OISY bảo vệ bạn!",
+				"oisy_protects_you_description": "Các ứng dụng không thể trực tiếp truy cập vào quỹ của bạn, và mỗi giao dịch phải được bạn xác nhận."
 			}
 		},
 		"idle": {
