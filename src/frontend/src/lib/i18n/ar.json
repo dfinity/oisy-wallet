@@ -1846,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "الوصول إلى محفظة $oisy_name الخاصة بك",
-				"open_or_create": "افتح أو أنشئ محفظتك للاتصال بأمان بالتطبيق اللامركزي وبدء إدارة أصولك."
+				"open_or_create": "افتح أو أنشئ محفظتك للتفاعل بأمان مع التطبيق.",
+				"connect_your_wallet": "اتصل بمحفظة $oisy_name الخاصة بك",
+				"oisy_protects_you": "OISY يحميك!",
+				"oisy_protects_you_description": "لا يمكن للتطبيقات الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة."
 			}
 		},
 		"idle": {

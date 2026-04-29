@@ -1846,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Uzyskaj dostęp do swojego $oisy_name",
-				"open_or_create": "Otwórz lub utwórz swój portfel, aby bezpiecznie połączyć się z dApp i zacząć zarządzać swoimi aktywami."
+				"open_or_create": "Otwórz lub utwórz swój portfel, aby bezpiecznie korzystać z aplikacji.",
+				"connect_your_wallet": "Połącz swój $oisy_name",
+				"oisy_protects_you": "OISY cię chroni!",
+				"oisy_protects_you_description": "Aplikacje nie mogą bezpośrednio uzyskać dostępu do Twoich środków, a każda transakcja musi zostać przez Ciebie zatwierdzona."
 			}
 		},
 		"idle": {

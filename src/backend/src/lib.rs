@@ -56,6 +56,7 @@ mod delegation;
 mod exchange;
 mod signer;
 mod state;
+mod status;
 mod token;
 mod transactions;
 mod types;
