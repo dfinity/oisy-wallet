@@ -1154,7 +1154,7 @@
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
 			"withdrawing": "正在取款",
-			"bridging": "",
+			"bridging": "正在跨链桥接... (请耐心等待，这可能需要最多一分钟。)",
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
