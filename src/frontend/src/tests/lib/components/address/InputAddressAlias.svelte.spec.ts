@@ -108,7 +108,7 @@ describe('AddressFormTestHost', () => {
 	});
 
 	it('should trim whitespace from label input', async () => {
-		const address: Partial<ContactAddressUi> = {};
+		const address: Partial<ContactAddressUi> = $state({});
 		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
@@ -135,7 +135,7 @@ describe('AddressFormTestHost', () => {
 	});
 
 	it('should handle empty string label', async () => {
-		const address: Partial<ContactAddressUi> = { label: 'initial' };
+		const address: Partial<ContactAddressUi> = $state({ label: 'initial' });
 		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
@@ -157,7 +157,7 @@ describe('AddressFormTestHost', () => {
 	});
 
 	it('should update isValid when address is invalid or valid', async () => {
-		const address: Partial<ContactAddressUi> = {};
+		const address: Partial<ContactAddressUi> = $state({});
 
 		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
@@ -181,9 +181,9 @@ describe('AddressFormTestHost', () => {
 	});
 
 	it('should maintain address type when address is updated', async () => {
-		const address: Partial<ContactAddressUi> = {
+		const address: Partial<ContactAddressUi> = $state({
 			addressType: 'Btc'
-		};
+		});
 
 		const { component, getByTestId } = render(InputAddressAliasTestHost, {
 			props: {
@@ -204,7 +204,7 @@ describe('AddressFormTestHost', () => {
 	});
 
 	it('should show error when label exceeds 50 characters', async () => {
-		const address: Partial<ContactAddressUi> = {};
+		const address: Partial<ContactAddressUi> = $state({});
 		const { getByTestId, getByText, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,

@@ -108,13 +108,15 @@ describe('InputAddress', () => {
 		// Initially, border color should be inherit
 		const initialDiv = container.querySelector('div');
 
-		expect(initialDiv).toHaveStyle('--input-custom-border-color: inherit');
+		expect(initialDiv?.getAttribute('style')).toContain('--input-custom-border-color: inherit');
 
 		// Enter an invalid BTC address
 		await fireEvent.input(input, { target: { value: INVALID_BTC_ADDRESS } });
 
 		// Border color should be error color
-		expect(initialDiv).toHaveStyle('--input-custom-border-color: var(--color-border-error-solid)');
+		expect(initialDiv?.getAttribute('style')).toContain(
+			'--input-custom-border-color: var(--color-border-error-solid)'
+		);
 
 		// Enter a valid BTC address
 		await fireEvent.input(input, {
@@ -122,7 +124,7 @@ describe('InputAddress', () => {
 		});
 
 		// Border color should be success color
-		expect(initialDiv).toHaveStyle(
+		expect(initialDiv?.getAttribute('style')).toContain(
 			'--input-custom-border-color: var(--color-border-success-solid)'
 		);
 	});
