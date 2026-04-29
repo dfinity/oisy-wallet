@@ -1154,7 +1154,7 @@
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
 			"withdrawing": "Withdrawing...",
-			"bridging": "Bridging... (please be patient, this can take up to a minute)",
+			"bridging": "Bridging... (Please be patient, this can take up to a minute.)",
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
