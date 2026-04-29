@@ -13,10 +13,10 @@ use crate::{
 /// Window over which signups are counted, in nanoseconds (30 minutes).
 pub(crate) const SIGNUPS_WINDOW_NS: u64 = 30 * 60 * 1_000_000_000;
 
-/// Number of signups in [`SIGNUPS_WINDOW_NS`] above which the status is `warn`.
+/// Number of signups in [`SIGNUPS_WINDOW_NS`] at or above which the status is `warn`.
 pub(crate) const SIGNUPS_WARN_THRESHOLD: u64 = 50;
 
-/// Number of signups in [`SIGNUPS_WINDOW_NS`] above which the status is `critical`.
+/// Number of signups in [`SIGNUPS_WINDOW_NS`] at or above which the status is `critical`.
 pub(crate) const SIGNUPS_CRITICAL_THRESHOLD: u64 = 200;
 
 /// Pure thresholding helper, exposed so it can be unit-tested without touching state.
@@ -31,6 +31,9 @@ fn classify_signups(count: u64) -> HealthStatus {
 }
 
 /// Counts profiles whose `created_timestamp` falls within `[now - SIGNUPS_WINDOW_NS, now]`.
+///
+/// Only the lower bound is enforced explicitly: `created_timestamp` is always set by the canister
+/// via [`ic_cdk::api::time`], so timestamps are never in the future relative to `now`.
 ///
 /// Iterates the full `user_profile` map. The cost is acceptable because the caller memoizes the
 /// result (see [`crate::status::cache`]) so this runs at most once per minute per replica.

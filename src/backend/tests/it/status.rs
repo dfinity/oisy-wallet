@@ -18,8 +18,16 @@ use crate::utils::pocketic::{BackendBuilder, PicCanisterTrait};
 /// independent of the canister-internal module.
 const CACHE_TTL_SECS: u64 = 60;
 
-/// Mirror of `crate::status::metrics::SIGNUPS_WARN_THRESHOLD`.
-const SIGNUPS_WARN_THRESHOLD: u8 = 50;
+/// Mirror of `crate::status::metrics::SIGNUPS_WARN_THRESHOLD`. Kept as `u64` to match the
+/// canister-side type; narrowed to `u8` at the call site below since `create_users` takes a
+/// `RangeBounds<u8>`. The `try_from` will trip if the threshold is ever bumped past `u8::MAX`,
+/// which is exactly the signal we want to retune this test rather than silently truncate.
+const SIGNUPS_WARN_THRESHOLD: u64 = 50;
+
+fn signups_warn_threshold_u8() -> u8 {
+    u8::try_from(SIGNUPS_WARN_THRESHOLD)
+        .expect("SIGNUPS_WARN_THRESHOLD must fit into u8 for create_users")
+}
 
 fn make_request(url: &str) -> HttpRequest {
     HttpRequest {
@@ -116,7 +124,7 @@ fn status_endpoint_flips_to_warn_when_signups_exceed_threshold() {
     // Cross the warn threshold. `create_users` advances pocket-ic time by 10s per user, so
     // creating WARN users moves time forward by ~500s — well past the 60s cache TTL, naturally
     // invalidating the previous cached response.
-    let _ = pic_setup.create_users(1..=SIGNUPS_WARN_THRESHOLD);
+    let _ = pic_setup.create_users(1..=signups_warn_threshold_u8());
 
     let (_, body) = fetch_status(&pic_setup);
     assert_eq!(

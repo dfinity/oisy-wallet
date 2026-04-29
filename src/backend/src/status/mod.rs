@@ -29,9 +29,12 @@ pub fn handle() -> HttpResponse {
 
     let body = serde_json::to_vec(&response).unwrap_or_else(|_| {
         // Serialization of a fixed-shape struct with primitive fields cannot realistically fail,
-        // but if it ever does we fall back to a static safe payload rather than panicking in a
-        // public unauthenticated query.
-        br#"{"status":"critical","version":1,"metrics":{}}"#.to_vec()
+        // but if it ever does we fall back to a safe payload that preserves the documented schema
+        // rather than panicking in a public unauthenticated query.
+        format!(
+            r#"{{"status":"critical","version":{STATUS_RESPONSE_VERSION},"timestamp_ns":{now},"metrics":{{}}}}"#
+        )
+        .into_bytes()
     });
 
     HttpResponse {
