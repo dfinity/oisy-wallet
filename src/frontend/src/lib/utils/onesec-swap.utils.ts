@@ -52,9 +52,9 @@ const getEvmAddressForNetwork = ({
 	networkId: NetworkId;
 }): string | undefined =>
 	networkId === ARBITRUM_MAINNET_NETWORK_ID
-		? config.erc20MainnetArbitrum
+		? (config.erc20MainnetArbitrum ?? config.erc20Mainnet ?? config.erc20)
 		: networkId === BASE_NETWORK_ID
-			? config.erc20MainnetBase
+			? (config.erc20MainnetBase ?? config.erc20Mainnet ?? config.erc20)
 			: (config.erc20MainnetEthereum ?? config.erc20Mainnet ?? config.erc20);
 
 /**
