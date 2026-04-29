@@ -1846,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "あなたの$oisy_nameにアクセス",
-				"open_or_create": "既存のウォレットにログインするか、新規作成して、安全にdAppに接続し、資産の管理を始めましょう。"
+				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
+				"connect_your_wallet": "あなたの$oisy_nameに接続する",
+				"oisy_protects_you": "OISYがあなたを守ります！",
+				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},
 		"idle": {

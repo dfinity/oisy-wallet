@@ -41,7 +41,7 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "Aprender mas",
+			"learn_more": "Aprender más",
 			"sorting": "Ordenar",
 			"unlimited": "",
 			"info": "",
@@ -1846,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Accede a tu $oisy_name",
-				"open_or_create": "Abre o crea tu billetera para conectarte de forma segura a la dApp y empezar a gestionar tus activos."
+				"open_or_create": "Abre o crea tu wallet para interactuar de forma segura con la aplicación.",
+				"connect_your_wallet": "Conecta tu $oisy_name",
+				"oisy_protects_you": "OISY te protege!",
+				"oisy_protects_you_description": "Las aplicaciones no pueden acceder directamente a tus fondos, y cada transacción tiene que ser confirmada por ti."
 			}
 		},
 		"idle": {

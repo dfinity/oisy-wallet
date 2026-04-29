@@ -1846,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Truy cập ví $oisy_name của bạn",
-				"open_or_create": "Mở hoặc tạo ví của bạn để kết nối an toàn với dApp và bắt đầu quản lý tài sản của bạn."
+				"open_or_create": "Mở hoặc tạo ví của bạn để tương tác an toàn với ứng dụng.",
+				"connect_your_wallet": "Kết nối ví $oisy_name của bạn",
+				"oisy_protects_you": "OISY bảo vệ bạn!",
+				"oisy_protects_you_description": "Các ứng dụng không thể trực tiếp truy cập vào quỹ của bạn, và mỗi giao dịch phải được bạn xác nhận."
 			}
 		},
 		"idle": {

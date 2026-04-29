@@ -1846,8 +1846,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "访问你的 $oisy_name",
-				"open_or_create": "打开或创建你的钱包，以安全连接 dApp 并开始管理你的资产。"
+				"open_or_create": "打开或创建你的钱包，与应用程序安全交互。",
+				"connect_your_wallet": "连接你的 $oisy_name",
+				"oisy_protects_you": "OISY 保护您！",
+				"oisy_protects_you_description": "应用程序无法直接访问您的资金，每笔交易都需要您确认。"
 			}
 		},
 		"idle": {
