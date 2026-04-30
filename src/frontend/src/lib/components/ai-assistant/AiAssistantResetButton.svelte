@@ -11,6 +11,7 @@
 </script>
 
 <button
+	type="button"
 	class="transition-colors"
 	class:hover:text-primary={!loading}
 	class:text-tertiary={!loading}
