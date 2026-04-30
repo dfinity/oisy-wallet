@@ -11,7 +11,6 @@
 </script>
 
 <button
-	type="button"
 	class="transition-colors"
 	class:hover:text-primary={!loading}
 	class:text-tertiary={!loading}
@@ -19,6 +18,7 @@
 	aria-label={$i18n.ai_assistant.text.reset_chat_history}
 	disabled={loading}
 	onclick={aiAssistantStore.resetChatHistory}
+	type="button"
 >
 	<IconRepeat size="18" />
 </button>
