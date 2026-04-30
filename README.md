@@ -14,6 +14,24 @@
 
 ---
 
+## Table of contents
+
+- [What is the OISY wallet](#what-is-the-oisy-wallet)
+- [Features](#features)
+- [ICP building blocks used](#icp-building-blocks-used)
+- [Submit your dApp](#submit-your-dapp)
+- [Status](#status)
+- [Build and run yourself](#build-and-run-yourself)
+  - [Prerequisites](#prerequisites)
+  - [Start the local replica](#start-the-local-replica)
+  - [Run OISY locally](#run-oisy-locally)
+  - [Local development](#local-development)
+  - [Frontend](#frontend)
+- [Ops](#ops)
+  - [Disable new sign-ups](#disable-new-sign-ups)
+- [Dependencies](#dependencies)
+  - [Iconly Pro](#iconly-pro)
+
 ## What is the OISY wallet
 
 OISY is a new browser-based, network-custodial and multi-chain wallet powered by Internet Computer's [chain fusion](https://internetcomputer.org/chainfusion) technology.
