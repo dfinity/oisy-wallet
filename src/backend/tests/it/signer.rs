@@ -596,8 +596,8 @@ fn test_get_allowed_cycles_rate_limited_after_exceeding_limit() {
     for i in 0..10 {
         let result = call_get_allowed_cycles(&pic_setup, caller);
         assert!(
-            !matches!(result, Err(GetAllowedCyclesError::RateLimited(_))),
-            "call {i} should not be rate-limited: {result:?}",
+            result.is_ok(),
+            "call {i} within the rate-limit window should succeed: {result:?}",
         );
     }
 
@@ -690,18 +690,13 @@ fn test_top_up_cycles_ledger_rate_limited_after_exceeding_limit() {
     let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
     let caller = controller();
 
-    // 5 calls within the window should not be rate-limited.
+    // 5 calls within the window should succeed (rate limit: 5/min).
     for i in 0..5 {
         let result =
             pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
         assert!(
-            !matches!(
-                result,
-                Ok(TopUpCyclesLedgerResult::Err(
-                    TopUpCyclesLedgerError::RateLimited(_)
-                ))
-            ),
-            "call {i} should not be rate-limited: {result:?}",
+            matches!(result, Ok(TopUpCyclesLedgerResult::Ok(_))),
+            "call {i} within the rate-limit window should succeed: {result:?}",
         );
     }
 
