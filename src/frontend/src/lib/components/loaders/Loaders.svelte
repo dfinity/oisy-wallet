@@ -60,9 +60,9 @@
 
 		{@render children()}
 	</Loader>
-</LoaderUserProfile>
 
-<Guards />
+	<Guards />
+</LoaderUserProfile>
 
 <WalletConnectListener />
 

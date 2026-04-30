@@ -11,6 +11,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
 		SETTINGS_ADDRESS_LABEL
@@ -24,6 +25,7 @@
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { hiddenMicroTransactionsResetStore } from '$lib/stores/settings.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { emit } from '$lib/utils/events.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -48,6 +50,14 @@
 				identity: $authIdentity,
 				hideMicroTransactions: !$hideMicroTransactions,
 				currentUserVersion: $userProfileVersion
+			});
+
+			// Reset the local override so the `HiddenMicroTransactionsInfoBox` reappears after the
+			// user switches the feature. The backend keeps the dismissed notification,
+			// but this flag overrides it until the user dismisses the info box again.
+			hiddenMicroTransactionsResetStore.set({
+				key: 'hidden-micro-transactions-reset',
+				value: { enabled: true }
 			});
 
 			emit({ message: 'oisyRefreshUserProfile' });
@@ -127,7 +137,7 @@
 
 				<ExternalLink
 					ariaLabel={$i18n.settings.text.learn_more}
-					href="https://support.oisy.com/hc/hidden-transactions"
+					href={OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL}
 					iconVisible={false}>{$i18n.settings.text.learn_more}</ExternalLink
 				>
 			</span>

@@ -28,12 +28,12 @@ use shared::{
             AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            DeleteContactResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
-            SaveUserTransactionsResult, SetUserShowTestnetsResult, UpdateContactResult,
-            UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
-            UpdateTransactionFilterSettingsResult, UpdateUserAgreementsResult,
-            UpdateUserNetworkSettingsResult,
+            CreateUserProfileResult, DeleteContactResult, GetAgreementHistoryResult,
+            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
+            GetUserTransactionsResult, SaveUserTransactionsResult, SetUserShowTestnetsResult,
+            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
+            UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
+            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -41,7 +41,7 @@ use shared::{
         },
         token_id::TokenId,
         transaction_settings::UpdateTransactionFilterSettingsRequest,
-        user_profile::{HasUserProfileResponse, UserProfile},
+        user_profile::HasUserProfileResponse,
         user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
         Stats, Timestamp,
     },
@@ -56,6 +56,7 @@ mod delegation;
 mod exchange;
 mod signer;
 mod state;
+mod status;
 mod token;
 mod transactions;
 mod types;

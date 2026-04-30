@@ -46,7 +46,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Restore Prettier Cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: ./node_modules/.cache/prettier/.prettier-cache
           key: ${{ runner.os }}-prettier-cache-format-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && format('main-{0}', github.sha) || github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
@@ -54,7 +54,7 @@ jobs:
             ${{ runner.os }}-prettier-cache-format-main-
             ${{ runner.os }}-prettier-cache-format-
       - name: Restore ESLint Cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .eslintcache
           key: ${{ runner.os }}-eslint-cache-format-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && format('main-{0}', github.sha) || github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
@@ -96,7 +96,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Restore Prettier Cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: ./node_modules/.cache/prettier/.prettier-cache
           key: ${{ runner.os }}-prettier-cache-lint-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && format('main-{0}', github.sha) || github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
@@ -104,7 +104,7 @@ jobs:
             ${{ runner.os }}-prettier-cache-lint-main-
             ${{ runner.os }}-prettier-cache-lint-
       - name: Restore ESLint Cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .eslintcache
           key: ${{ runner.os }}-eslint-cache-lint-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && format('main-{0}', github.sha) || github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}

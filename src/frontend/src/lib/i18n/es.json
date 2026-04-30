@@ -41,7 +41,7 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "Aprender mas",
+			"learn_more": "Aprender más",
 			"sorting": "Ordenar",
 			"unlimited": "",
 			"info": "",
@@ -126,16 +126,26 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
+			"internet_identity": "",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena",
 			"social_login": "Acceso instantáneo y privado + inicio de sesión social"
 		},
 		"alt": {
-			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil"
+			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "Tu sesión fue bloqueada."
+		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
 		},
 		"warning": {
 			"not_signed_in": "No has iniciado sesión. Por favor, inicia sesión para continuar.",
@@ -769,11 +779,11 @@
 			"enable_beta_feature": "Habilitar función beta",
 			"disable_beta_feature": "Deshabilitar función beta",
 			"save_beta_feature_success": "Tus configuraciones de funciones beta han sido actualizadas.",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "Ocultar transacciones con valores muy pequeños",
+			"hide_micro_transactions_description": "Las transacciones con valores muy pequeños suelen ser spam y tienen la intención de engañar al usuario para que copie la dirección del remitente en lugar de una válida. Se recomienda ocultarlas en las listas de transacciones.",
+			"enable_hide_micro_transactions": "Habilitar la ocultación de transacciones con valores muy pequeños",
+			"disable_hide_micro_transactions": "Deshabilitar la ocultación de transacciones con valores muy pequeños",
+			"save_spam_filter_success": "La configuración de tu filtro de spam se ha actualizado.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1144,12 +1154,15 @@
 			"select_token": "Seleccionar token",
 			"select_network_filter": "Seleccionar red",
 			"withdrawing": "Retirando...",
+			"bridging": "Realizando el bridge... (Por favor, ten paciencia, esto puede tardar hasta un minuto.)",
 			"network_cost": "Costo de red",
 			"gasless": "Sin gas",
 			"swap_fees": "Comisiones de Intercambio",
 			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1519,8 +1532,8 @@
 			"hex_data": "Datos HEX",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Aplicaciones conectadas",
+			"no_connected_apps": "Actualmente no hay aplicaciones conectadas.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1834,8 +1847,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Accede a tu $oisy_name",
-				"open_or_create": "Abre o crea tu billetera para conectarte de forma segura a la dApp y empezar a gestionar tus activos."
+				"open_or_create": "Abre o crea tu wallet para interactuar de forma segura con la aplicación.",
+				"connect_your_wallet": "Conecta tu $oisy_name",
+				"oisy_protects_you": "OISY te protege!",
+				"oisy_protects_you_description": "Las aplicaciones no pueden acceder directamente a tus fondos, y cada transacción tiene que ser confirmada por ti."
 			}
 		},
 		"idle": {
@@ -1930,7 +1945,7 @@
 				"possessive": "nuestros "
 			},
 			"title": "",
-			"instruction": "Al hacer clic en este botón, aceptas los $link",
+			"instruction": "Al iniciar sesión, aceptas los $link",
 			"body": ""
 		},
 		"alt": {
@@ -1956,8 +1971,8 @@
 			"title": ""
 		},
 		"info": {
-			"btc_transactions": "",
-			"hidden_micro_transactions": ""
+			"btc_transactions": "La información de las transacciones de BTC se obtiene de terceros centralizados y debe verificarse de forma independiente.",
+			"hidden_micro_transactions": "<strong>¡OISY te protege!</strong> Las transacciones con valores de token muy pequeños están actualmente ocultas. Para mostrarlas, ve a <a href=\"/settings/\">Configuración</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Más información</a>"
 		},
 		"warning": {
 			"no_index_canister": "",

@@ -122,13 +122,21 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
+		internet_identity: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
 		social_login: string;
 	};
-	alt: { preview: string };
+	alt: {
+		preview: string;
+		sign_in_with_google: string;
+		sign_in_with_apple: string;
+		sign_in_with_microsoft: string;
+	};
 	message: { session_locked: string };
+	info: { signups_closed: string };
+	banner: { signups_closed: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
@@ -865,12 +873,15 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
+		bridging: string;
 		network_cost: string;
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
 		near_intents_tos: string;
+		onesec_transfer_fee: string;
+		onesec_protocol_fee: string;
 		value_difference_error_confirmation: string;
 	};
 	error: {
@@ -1441,7 +1452,14 @@ interface I18nAddress {
 }
 
 interface I18nSigner {
-	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
+	sign_in: {
+		text: {
+			open_or_create: string;
+			connect_your_wallet: string;
+			oisy_protects_you: string;
+			oisy_protects_you_description: string;
+		};
+	};
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
 	permissions: {
 		text: {

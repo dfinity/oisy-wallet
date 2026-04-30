@@ -9,6 +9,14 @@ Additionally, we need to explicitly set the base path in order to avoid issues w
 @import 'tailwindcss' source("../../../../../src");
 @config '../../../../../tailwind.config.ts';
 
+/*
+Custom max-height variant (~1090px).
+Defined here instead of in the `screens` config because Tailwind v4 treats
+any entry in `screens` as a width breakpoint for the `container` utility,
+which breaks raw media queries like `(max-height: 68rem)`.
+*/
+@custom-variant h-md (@media (max-height: 68rem)); // ~1090px
+
 @layer base {
 	::view-transition-old(header),
 	::view-transition-new(header) {

@@ -5,8 +5,7 @@ import type {
 	CustomToken,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
-	TokenId,
-	UserProfile
+	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
@@ -29,6 +28,7 @@ import type {
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
@@ -43,6 +43,7 @@ import type {
 	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { SignupsClosedError } from '$lib/types/errors';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
 import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
@@ -101,16 +102,28 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<UserProfile> => {
+	createUserProfile = async (): Promise<CreateUserProfileResponse> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
-		return create_user_profile();
+		const response = await create_user_profile();
+
+		if ('Err' in response && 'SignupsClosed' in response.Err) {
+			throw new SignupsClosedError();
+		}
+
+		return response;
 	};
 
 	getUserProfile = ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
 		const { get_user_profile } = this.caller({ certified });
 
 		return get_user_profile();
+	};
+
+	newUserSignupsAllowed = ({ certified }: QueryParams): Promise<boolean> => {
+		const { new_user_signups_allowed } = this.caller({ certified });
+
+		return new_user_signups_allowed();
 	};
 
 	btcAddPendingTransaction = async ({

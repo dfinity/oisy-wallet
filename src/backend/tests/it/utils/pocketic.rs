@@ -9,7 +9,7 @@ pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{PocketIc, PocketIcBuilder};
 use shared::types::{
     backend_config::{Arg, InitArg},
-    user_profile::{OisyUser, UserProfile},
+    user_profile::{CreateUserProfileError, HasUserProfileResponse, OisyUser, UserProfile},
 };
 
 use super::mock::{CONTROLLER, FRONTEND_DERIVATION_ORIGIN, II_CANISTER_ID, SIGNER_CANISTER_ID};
@@ -413,6 +413,7 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
         ),
         derivation_origin: Some(FRONTEND_DERIVATION_ORIGIN.to_string()),
         ii_canister_id: Some(ii_canister_id),
+        new_user_signups_allowed: None,
     });
 
     let mut builder = BackendBuilder::default().with_arg(encode_one(backend_init).unwrap());
@@ -485,6 +486,7 @@ fn init_arg_with_ecdsa_key(ecdsa_key_name: &str) -> Arg {
         ),
         derivation_origin: Some(FRONTEND_DERIVATION_ORIGIN.to_string()),
         ii_canister_id: Some(Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id")),
+        new_user_signups_allowed: None,
     })
 }
 
@@ -519,7 +521,11 @@ impl PicBackend {
         for i in range {
             self.pic.advance_time(Duration::new(10, 0));
             let caller = Principal::self_authenticating(i.to_string());
-            let response = self.update::<UserProfile>(caller, "create_user_profile", ());
+            let response = self.update::<Result<UserProfile, CreateUserProfileError>>(
+                caller,
+                "create_user_profile",
+                (),
+            );
             let timestamp = self.pic.get_time();
             let timestamp_nanos = timestamp.as_nanos_since_unix_epoch();
             let expected_user = OisyUser {
@@ -528,7 +534,46 @@ impl PicBackend {
             };
             expected_users.push(expected_user);
             assert!(response.is_ok());
+            assert!(response.unwrap().is_ok());
         }
         expected_users
+    }
+
+    /// Test helper that ensures the given `caller` has a user profile created.
+    ///
+    /// Most guarded update endpoints require the caller to already have a user
+    /// profile, so tests that exercise such endpoints as an authenticated user
+    /// must first call `create_user_profile`.
+    ///
+    /// This helper is idempotent and designed to be safe to call repeatedly:
+    /// it first issues a `has_user_profile` query and only invokes the
+    /// `create_user_profile` update when the profile does not yet exist. This
+    /// avoids the side effects of `create_user_profile` (notably
+    /// `spawn_allow_signing_if_below_limit`, which consumes per-caller
+    /// rate-limit entries and spawns an inter-canister call) on repeated
+    /// invocations.
+    pub fn ensure_user_profile(&self, caller: Principal) {
+        let exists = self
+            .query::<HasUserProfileResponse>(caller, "has_user_profile", ())
+            .expect("Failed to query has_user_profile")
+            .has_user_profile;
+
+        if exists {
+            return;
+        }
+
+        let response = self.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
+        assert!(
+            response.is_ok(),
+            "Failed to create user profile for caller {caller}: {response:?}"
+        );
+        assert!(
+            response.as_ref().unwrap().is_ok(),
+            "create_user_profile rejected for caller {caller}: {response:?}"
+        );
     }
 }
