@@ -143,10 +143,10 @@
 			"session_locked": "你的会话已在另一个标签页中被锁定。"
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "新用户注册目前受到限制，请稍后再试。"
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "目前，新用户注册暂不可用。现有用户可以正常使用 $oisy_short。"
 		},
 		"warning": {
 			"not_signed_in": "你尚未登录。请先登录以继续。",

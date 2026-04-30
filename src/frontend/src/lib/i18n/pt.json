@@ -143,10 +143,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Os novos cadastros estão temporariamente restritos. Por favor, tente novamente mais tarde."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "No momento, o cadastro de novos usuários não é possível. Os usuários existentes podem usar o $oisy_short normalmente."
 		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",

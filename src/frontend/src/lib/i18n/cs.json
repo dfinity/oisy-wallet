@@ -143,10 +143,10 @@
 			"session_locked": "Vaše relace byla uzamčena v jiné kartě."
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Nové registrace jsou momentálně omezeny. Zkuste to prosím znovu později."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "V současné době není registrace nových uživatelů možná. Stávající uživatelé mohou $oisy_short používat normálně."
 		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",

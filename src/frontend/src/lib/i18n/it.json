@@ -143,10 +143,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Le nuove registrazioni sono attualmente limitate. Riprova più tardi."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "Al momento le registrazioni di nuovi utenti non sono possibili. Gli utenti esistenti possono usare $oisy_short normalmente."
 		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",

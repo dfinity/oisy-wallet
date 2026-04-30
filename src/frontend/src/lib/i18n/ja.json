@@ -143,10 +143,10 @@
 			"session_locked": "別のタブで操作が行われたため、このセッションはロックされました。"
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "現在、新規登録は制限されています。後でもう一度お試しください。"
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "現在、新規ユーザーの登録はできません。既存のユーザーは引き続き $oisy_short を通常どおりご利用いただけます。"
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",

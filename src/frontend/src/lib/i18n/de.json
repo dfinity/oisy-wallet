@@ -143,10 +143,10 @@
 			"session_locked": "Deine Session wurde in einem anderem Browsertab gesperrt."
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Neue Anmeldungen sind derzeit eingeschränkt. Bitte versuche es später erneut."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "Derzeit sind Anmeldungen neuer Nutzer nicht möglich. Bestehende Nutzer können $oisy_short normal verwenden."
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
