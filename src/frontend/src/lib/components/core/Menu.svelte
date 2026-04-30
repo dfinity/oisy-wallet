@@ -285,7 +285,9 @@
 
 	<Hr />
 
-	<div class="mt-4 flex justify-center gap-2 text-xs text-nowrap text-tertiary">
+	<div
+		class="mt-4 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
+	>
 		<TermsOfUseLink />
 		<PrivacyPolicyLink />
 		<LicenseAgreementLink />
