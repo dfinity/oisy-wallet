@@ -239,6 +239,7 @@
 			onCloseTokensList={closeTokenList}
 			onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
 			onSelectToken={selectToken}
+			side={selectTokenType}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
 		<ModalNetworksFilter

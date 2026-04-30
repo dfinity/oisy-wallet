@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Vaše Digitální Aktiva",
 			"title_part_2": "Soukromá a Bezpečná",
+			"description": "Otevřete svou peněženku nebo si ji vytvořte během několika sekund",
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
@@ -130,7 +131,7 @@
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
-			"social_login": "Okamžitý a soukromý přístup + přihlášení přes sociální sítě"
+			"move_swap_grow": "Přesouvejte, směňujte a zhodnocujte svá aktiva napříč sítěmi"
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu",
@@ -140,6 +141,12 @@
 		},
 		"message": {
 			"session_locked": "Vaše relace byla uzamčena v jiné kartě."
+		},
+		"info": {
+			"signups_closed": "Nové registrace jsou momentálně omezeny. Zkuste to prosím znovu později."
+		},
+		"banner": {
+			"signups_closed": "V současné době není registrace nových uživatelů možná. Stávající uživatelé mohou $oisy_short používat normálně."
 		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
@@ -1148,12 +1155,15 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
+			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až minutu.)",
 			"network_cost": "Náklady sítě",
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1848,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Přístup k vaší peněžence $oisy_name",
-				"open_or_create": "Otevřete nebo vytvořte svou peněženku, abyste se bezpečně připojili k dApp a začali spravovat svá digitální aktiva."
+				"open_or_create": "Otevřete nebo vytvořte svou peněženku pro bezpečnou interakci s aplikací.",
+				"connect_your_wallet": "Připojte svou peněženku $oisy_name",
+				"oisy_protects_you": "OISY vás chrání!",
+				"oisy_protects_you_description": "Aplikace nemohou přímo přistupovat k vašim prostředkům, a každá transakce musí být potvrzena vámi."
 			}
 		},
 		"idle": {

@@ -72,7 +72,7 @@ describe('exchange.utils', () => {
 		it('skips token where tvlUSD is exactly at the threshold', () => {
 			const mock = createMockIcpSwapToken({
 				price: '1.230000000000000000',
-				tvlUSD: '10.000000000000000000'
+				tvlUSD: '500.000000000000000000'
 			});
 			const result = formatIcpSwapToCoingeckoPrices([mock]);
 
@@ -83,7 +83,7 @@ describe('exchange.utils', () => {
 			const mock = createMockIcpSwapToken({
 				tokenLedgerId: MOCK_CANISTER_ID_1,
 				price: '1.230000000000000000',
-				tvlUSD: '10.010000000000000000'
+				tvlUSD: '500.010000000000000000'
 			});
 			const result = formatIcpSwapToCoingeckoPrices([mock]);
 

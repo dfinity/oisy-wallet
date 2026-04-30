@@ -1,4 +1,5 @@
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
+import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import {
@@ -80,10 +81,12 @@ export const loadSwapSupportedTokens = async ({
 }: {
 	identity: Identity;
 }): Promise<void> => {
-	const enabledIcpProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
+	const enabledIcpProviders = [
+		...swapProviders.filter(({ isEnabled }) => isEnabled),
+		...icpBridgeProviders.filter(({ isEnabled }) => isEnabled)
+	];
 	const enabledEvmProviders = evmSwapProviders.filter(({ isEnabled }) => isEnabled);
 	const enabledSolProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
-
 	const [icp, evm, sol] = await Promise.all([
 		collectSupportedTokens({
 			totalEnabled: enabledIcpProviders.length,

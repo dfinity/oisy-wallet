@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "나의 디지털 자산",
 			"title_part_2": "안전하고 프라이빗하게",
+			"description": "지갑을 열거나 몇 초 만에 새로 만들 수 있습니다",
 			"logout": "로그아웃",
 			"lock": "잠금",
 			"authenticate": "열기 또는 만들기",
@@ -130,7 +131,7 @@
 			"asset_types": "비트코인, 솔라나, 이더리움, ICP 등 다양한 자산 관리",
 			"instant_and_private": "개인정보 보호가 기본인 내장 AI 어시스턴트",
 			"advanced_cryptography": "고급 암호화 기술로 보호 - 100% 온체인",
-			"social_login": "즉각적이고 프라이빗한 액세스 + 소셜 로그인"
+			"move_swap_grow": "네트워크 전반에서 자산을 이동, 스왑하고 성장시키세요"
 		},
 		"alt": {
 			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기",
@@ -140,6 +141,12 @@
 		},
 		"message": {
 			"session_locked": "다른 탭에서 세션이 잠겼습니다."
+		},
+		"info": {
+			"signups_closed": "현재 신규 가입이 제한되어 있습니다. 나중에 다시 시도해 주세요."
+		},
+		"banner": {
+			"signups_closed": "현재 신규 사용자 가입이 불가능합니다. 기존 사용자는 $oisy_short를 정상적으로 이용할 수 있습니다."
 		},
 		"warning": {
 			"not_signed_in": "로그인되어 있지 않습니다. 계속하려면 로그인해 주세요.",
@@ -158,7 +165,7 @@
 				"login_page_looks_different": "로그인 페이지가 왜 다르게 보이나요?",
 				"use_identity_number": "인터넷 아이덴티티 번호를 사용하고 싶습니다",
 				"feedback_text": "여러분의 피드백은 $oisy_short을 더 좋게 만드는 데 도움이 됩니다.",
-				"thanks_text": "감사합니다!",
+				"thanks_text": "감사합니다.",
 				"useful_links": "유용한 링크",
 				"identity_new_identity": "$oisy_short 지갑은 인터넷 아이덴티티 도메인을 <span class=\"font-bold\">identity.internetcomputer.org</span>로 전환합니다",
 				"switch_to_new_internet_identity": "$oisy_name이 인터넷 아이덴티티 2.0으로 전환합니다",
@@ -1148,12 +1155,15 @@
 			"select_token": "토큰 선택",
 			"select_network_filter": "네트워크 선택",
 			"withdrawing": "출금 중...",
+			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 1분 정도 소요될 수 있습니다.)",
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1848,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "$oisy_name에 접근",
-				"open_or_create": "지갑을 열거나 만들어 dApp에 안전하게 연결하고 자산 관리를 시작하세요."
+				"open_or_create": "애플리케이션과 안전하게 상호작용하려면 지갑을 열거나 생성하세요.",
+				"connect_your_wallet": "$oisy_name에 연결",
+				"oisy_protects_you": "OISY가 당신을 보호합니다!",
+				"oisy_protects_you_description": "애플리케이션은 귀하의 자금에 직접 접근할 수 없으며, 모든 거래는 귀하의 확인이 필요합니다!"
 			}
 		},
 		"idle": {

@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "您的数字资产",
 			"title_part_2": "私密且安全",
+			"description": "打开您的钱包，或在几秒钟内创建一个",
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
@@ -130,7 +131,7 @@
 			"asset_types": "跨 Bitcoin、Solana、Ethereum、ICP 等管理资产",
 			"instant_and_private": "内置 AI 助手，隐私保护为默认标准",
 			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
-			"social_login": "即时私密访问 + 社交登录"
+			"move_swap_grow": "跨网络移动、兑换并增值您的资产"
 		},
 		"alt": {
 			"preview": "登录后 $oisy_name 的预览效果，适用于桌面端和移动端",
@@ -140,6 +141,12 @@
 		},
 		"message": {
 			"session_locked": "你的会话已在另一个标签页中被锁定。"
+		},
+		"info": {
+			"signups_closed": "新用户注册目前受到限制，请稍后再试。"
+		},
+		"banner": {
+			"signups_closed": "目前，新用户注册暂不可用。现有用户可以正常使用 $oisy_short。"
 		},
 		"warning": {
 			"not_signed_in": "你尚未登录。请先登录以继续。",
@@ -1148,12 +1155,15 @@
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
 			"withdrawing": "正在取款",
+			"bridging": "正在跨链桥接... (请耐心等待，这可能需要最多一分钟。)",
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
 			"cross_chain_networks_info": "跨链网络信息",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1848,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "访问你的 $oisy_name",
-				"open_or_create": "打开或创建你的钱包，以安全连接 dApp 并开始管理你的资产。"
+				"open_or_create": "打开或创建你的钱包，与应用程序安全交互。",
+				"connect_your_wallet": "连接你的 $oisy_name",
+				"oisy_protects_you": "OISY 保护您！",
+				"oisy_protects_you_description": "应用程序无法直接访问您的资金，每笔交易都需要您确认。"
 			}
 		},
 		"idle": {

@@ -41,7 +41,7 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "Aprender mas",
+			"learn_more": "Aprender más",
 			"sorting": "Ordenar",
 			"unlimited": "",
 			"info": "",
@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Tus Activos Digitales",
 			"title_part_2": "Privados y Seguros",
+			"description": "Abre tu billetera o crea una en segundos",
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
@@ -130,7 +131,7 @@
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena",
-			"social_login": "Acceso instantáneo y privado + inicio de sesión social"
+			"move_swap_grow": "Mueve, intercambia y haz crecer tus activos entre redes"
 		},
 		"alt": {
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil",
@@ -140,6 +141,12 @@
 		},
 		"message": {
 			"session_locked": "Tu sesión fue bloqueada."
+		},
+		"info": {
+			"signups_closed": "Los nuevos registros están restringidos actualmente. Por favor, inténtalo de nuevo más tarde."
+		},
+		"banner": {
+			"signups_closed": "Actualmente, el registro de nuevos usuarios no es posible. Los usuarios existentes pueden usar $oisy_short con normalidad."
 		},
 		"warning": {
 			"not_signed_in": "No has iniciado sesión. Por favor, inicia sesión para continuar.",
@@ -1148,12 +1155,15 @@
 			"select_token": "Seleccionar token",
 			"select_network_filter": "Seleccionar red",
 			"withdrawing": "Retirando...",
+			"bridging": "Realizando el bridge... (Por favor, ten paciencia, esto puede tardar hasta un minuto.)",
 			"network_cost": "Costo de red",
 			"gasless": "Sin gas",
 			"swap_fees": "Comisiones de Intercambio",
 			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1848,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Accede a tu $oisy_name",
-				"open_or_create": "Abre o crea tu billetera para conectarte de forma segura a la dApp y empezar a gestionar tus activos."
+				"open_or_create": "Abre o crea tu wallet para interactuar de forma segura con la aplicación.",
+				"connect_your_wallet": "Conecta tu $oisy_name",
+				"oisy_protects_you": "OISY te protege!",
+				"oisy_protects_you_description": "Las aplicaciones no pueden acceder directamente a tus fondos, y cada transacción tiene que ser confirmada por ti."
 			}
 		},
 		"idle": {

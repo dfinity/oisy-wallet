@@ -13,6 +13,7 @@
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
+		hiddenMicroTransactionsBannerVisible,
 		userDismissedNotifications,
 		userProfileVersion
 	} from '$lib/derived/user-profile.derived';
@@ -120,7 +121,8 @@
 	let hasBanners = $derived(
 		undismissedNoCanister.length > 0 ||
 			tokensWithUnavailableCanister.length > 0 ||
-			!btcBannerDismissed
+			!btcBannerDismissed ||
+			$hiddenMicroTransactionsBannerVisible
 	);
 </script>
 
@@ -159,10 +161,10 @@
 					{$i18n.activity.info.btc_transactions}
 				</MessageBox>
 			{/if}
+
+			<HiddenMicroTransactionsInfoBox />
 		</div>
 	{/if}
-
-	<HiddenMicroTransactionsInfoBox />
 
 	<AllTransactionsList />
 </div>

@@ -88,7 +88,7 @@ describe('ConvertAmountSource', () => {
 	it('should update sendAmount value if max button was clicked and total fee got updated', async () => {
 		const testProps = $state(props);
 
-		const { getByTestId, rerender } = render(ConvertAmountSource, {
+		const { getByTestId } = render(ConvertAmountSource, {
 			props: testProps,
 			context: mockContext()
 		});
@@ -97,9 +97,7 @@ describe('ConvertAmountSource', () => {
 
 		expect(testProps.sendAmount).toBe(maxButtonValue);
 
-		await rerender({
-			totalFee: 9000n
-		});
+		testProps.totalFee = 9000n;
 
 		// wait for debounced setMax to be completed
 		await new Promise((resolve) => setTimeout(resolve, 1000));

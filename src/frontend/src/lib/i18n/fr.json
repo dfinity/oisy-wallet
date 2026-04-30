@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Vos Actifs Numériques",
 			"title_part_2": "Privés et Sécurisés",
+			"description": "Ouvrez votre portefeuille ou créez-en un en quelques secondes",
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
@@ -130,7 +131,7 @@
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
 			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
-			"social_login": "Accès instantané et privé + connexion via les réseaux sociaux"
+			"move_swap_grow": "Déplacez, échangez et faites fructifier vos actifs entre les réseaux"
 		},
 		"alt": {
 			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile",
@@ -140,6 +141,12 @@
 		},
 		"message": {
 			"session_locked": "Votre session a été verrouillée dans un autre onglet."
+		},
+		"info": {
+			"signups_closed": "Les nouvelles inscriptions sont actuellement restreintes. Veuillez réessayer ultérieurement."
+		},
+		"banner": {
+			"signups_closed": "Actuellement, les inscriptions de nouveaux utilisateurs ne sont pas possibles. Les utilisateurs existants peuvent utiliser $oisy_short normalement."
 		},
 		"warning": {
 			"not_signed_in": "Vous n'êtes pas connecté. Veuillez vous connecter pour continuer.",
@@ -1148,12 +1155,15 @@
 			"select_token": "Sélectionner le token",
 			"select_network_filter": "Sélectionner le réseau",
 			"withdrawing": "Retrait en cours...",
+			"bridging": "Bridge en cours... (Veuillez patienter, cela peut prendre jusqu'à une minute.)",
 			"network_cost": "Coût du réseau",
 			"gasless": "Sans gaz",
 			"swap_fees": "Frais d'échange",
 			"cross_chain_networks_info": "Vous déplacez des tokens du réseau <b>$sourceNetwork</b> vers le réseau <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1848,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Accéder à votre $oisy_name",
-				"open_or_create": "Ouvrez ou créez votre portefeuille pour vous connecter en toute sécurité à la dApp et commencer à gérer vos actifs."
+				"open_or_create": "Ouvrez ou créez votre portefeuille pour interagir en toute sécurité avec l'application.",
+				"connect_your_wallet": "Connectez votre $oisy_name",
+				"oisy_protects_you": "OISY vous protège!",
+				"oisy_protects_you_description": "Les applications ne peuvent pas accéder directement à vos fonds, et chaque transaction doit être confirmée par vous."
 			}
 		},
 		"idle": {

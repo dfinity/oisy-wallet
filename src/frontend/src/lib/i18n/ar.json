@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"description": "افتح محفظتك أو أنشئ واحدة خلال ثوانٍ",
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
@@ -130,7 +131,7 @@
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
-			"social_login": ""
+			"move_swap_grow": "انقل أصولك وبدّلها ونمِّها عبر الشبكات"
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال",
@@ -140,6 +141,12 @@
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": "التسجيلات الجديدة مقيّدة حاليًا. يرجى المحاولة مرة أخرى لاحقًا."
+		},
+		"banner": {
+			"signups_closed": "لا يمكن حاليًا تسجيل مستخدمين جدد. يمكن للمستخدمين الحاليين استخدام $oisy_short بشكل طبيعي."
 		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
@@ -1148,12 +1155,15 @@
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
 			"withdrawing": "",
+			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقة واحدة.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1848,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "الوصول إلى محفظة $oisy_name الخاصة بك",
-				"open_or_create": "افتح أو أنشئ محفظتك للاتصال بأمان بالتطبيق اللامركزي وبدء إدارة أصولك."
+				"open_or_create": "افتح أو أنشئ محفظتك للتفاعل بأمان مع التطبيق.",
+				"connect_your_wallet": "اتصل بمحفظة $oisy_name الخاصة بك",
+				"oisy_protects_you": "OISY يحميك!",
+				"oisy_protects_you_description": "لا يمكن للتطبيقات الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة."
 			}
 		},
 		"idle": {

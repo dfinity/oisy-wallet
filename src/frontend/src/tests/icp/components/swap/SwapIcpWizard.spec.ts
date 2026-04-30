@@ -1,6 +1,7 @@
 import SwapIcpWizard from '$icp/components/swap/SwapIcpWizard.svelte';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
+import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
@@ -8,8 +9,10 @@ import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockSwapProviders } from '$tests/mocks/swap.mocks';
+import { mockOneSecProvider, mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
@@ -22,8 +25,10 @@ vi.mock('$icp/api/icrc-ledger.api', () => ({
 }));
 
 const mockSwapFn = vi.fn();
+const mockOneSecFn = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
+	fetchOneSecIcpToEvmSwap: (...args: unknown[]) => mockOneSecFn(...args),
 	swapService: {
 		icpSwap: (...args: unknown[]) => mockSwapFn(...args)
 	}
@@ -233,6 +238,108 @@ describe('SwapIcpWizard', () => {
 			await fireEvent.click(getByRole('checkbox'));
 
 			expect(swapButton).toBeEnabled();
+		});
+
+		describe('OneSec ICP→EVM swap', () => {
+			const setOneSecContext = ({
+				destinationToken = mockValidErc20Token
+			}: { destinationToken?: object } = {}) => {
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...(mockContext.get(SWAP_CONTEXT_KEY) as object),
+					destinationToken: readable(destinationToken)
+				});
+
+				const oneSecAmountsStore = initSwapAmountsStore();
+				oneSecAmountsStore.setSwaps({
+					swaps: [mockOneSecProvider],
+					amountForSwap: 1,
+					selectedProvider: mockOneSecProvider
+				});
+				mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: oneSecAmountsStore });
+			};
+
+			beforeEach(() => {
+				mockOneSecFn.mockResolvedValue(undefined);
+				vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+				setOneSecContext();
+			});
+
+			it('calls fetchOneSecIcpToEvmSwap and then onClose on success', async () => {
+				const { getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+				const valueDifferenceCheckbox = queryByRole('checkbox');
+				if (valueDifferenceCheckbox) {
+					await fireEvent.click(valueDifferenceCheckbox);
+				}
+
+				await fireEvent.click(getByText('Swap now'));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(mockOneSecFn).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						sourceToken: mockToken,
+						destinationToken: mockValidErc20Token,
+						swapAmount: BASE_PROPS.swapAmount,
+						userEthAddress: mockEthAddress
+					})
+				);
+				expect(BASE_PROPS.onClose).toHaveBeenCalledOnce();
+				expect(BASE_PROPS.onBack).not.toHaveBeenCalled();
+			});
+
+			it('calls onBack and shows error toast when swap throws', async () => {
+				mockOneSecFn.mockRejectedValue(new Error('Bridge error'));
+
+				const { getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+				const valueDifferenceCheckbox = queryByRole('checkbox');
+				if (valueDifferenceCheckbox) {
+					await fireEvent.click(valueDifferenceCheckbox);
+				}
+
+				await fireEvent.click(getByText('Swap now'));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+				expect(BASE_PROPS.onClose).not.toHaveBeenCalled();
+				expect(toasts.toastsError).toHaveBeenCalled();
+			});
+
+			it('shows error toast and calls onBack when destination is not ERC20', async () => {
+				setOneSecContext({ destinationToken: mockValidIcCkToken });
+
+				const { getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+				const valueDifferenceCheckbox = queryByRole('checkbox');
+				if (valueDifferenceCheckbox) {
+					await fireEvent.click(valueDifferenceCheckbox);
+				}
+
+				await fireEvent.click(getByText('Swap now'));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(mockOneSecFn).not.toHaveBeenCalled();
+				expect(toasts.toastsError).toHaveBeenCalled();
+				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+			});
+
+			it('shows error toast and calls onBack when ethAddress is nullish', async () => {
+				vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(undefined));
+
+				const { getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+				const valueDifferenceCheckbox = queryByRole('checkbox');
+				if (valueDifferenceCheckbox) {
+					await fireEvent.click(valueDifferenceCheckbox);
+				}
+
+				await fireEvent.click(getByText('Swap now'));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(mockOneSecFn).not.toHaveBeenCalled();
+				expect(toasts.toastsError).toHaveBeenCalled();
+				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+			});
 		});
 	});
 });

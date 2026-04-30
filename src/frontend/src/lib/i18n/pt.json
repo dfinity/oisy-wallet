@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Seus Ativos Digitais",
 			"title_part_2": "Privados e Seguros",
+			"description": "Abra sua carteira ou crie uma em segundos",
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
@@ -130,7 +131,7 @@
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
 			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
-			"social_login": "Acesso instantâneo e privado + login social"
+			"move_swap_grow": "Mova, troque e aumente seus ativos entre redes"
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular",
@@ -140,6 +141,12 @@
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": "Os novos cadastros estão temporariamente restritos. Por favor, tente novamente mais tarde."
+		},
+		"banner": {
+			"signups_closed": "No momento, o cadastro de novos usuários não é possível. Os usuários existentes podem usar o $oisy_short normalmente."
 		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
@@ -1148,12 +1155,15 @@
 			"select_token": "Selecionar token",
 			"select_network_filter": "Selecionar rede",
 			"withdrawing": "A retirar...",
+			"bridging": "Realizando o bridge... (Por favor, tenha paciência, isso pode levar até um minuto.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1838,8 +1848,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Acesse sua carteira $oisy_name",
-				"open_or_create": "Abra ou crie sua carteira para se conectar com segurança ao dApp e começar a gerir seus ativos."
+				"open_or_create": "Abra ou crie sua carteira para interagir com segurança com a aplicação.",
+				"connect_your_wallet": "Conecte sua carteira $oisy_name",
+				"oisy_protects_you": "OISY protege você.",
+				"oisy_protects_you_description": "Os aplicativos não podem acessar seus fundos diretamente, e cada transação precisa ser confirmada por você!"
 			}
 		},
 		"idle": {
