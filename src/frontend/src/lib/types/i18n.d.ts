@@ -119,6 +119,7 @@ interface I18nAuth {
 	text: {
 		title_part_1: string;
 		title_part_2: string;
+		description: string;
 		logout: string;
 		lock: string;
 		authenticate: string;
@@ -127,7 +128,7 @@ interface I18nAuth {
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
-		social_login: string;
+		move_swap_grow: string;
 	};
 	alt: {
 		preview: string;

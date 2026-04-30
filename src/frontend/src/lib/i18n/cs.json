@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Vaše Digitální Aktiva",
 			"title_part_2": "Soukromá a Bezpečná",
+			"description": "Otevřete svou peněženku nebo si ji vytvořte během několika sekund",
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
@@ -131,7 +132,7 @@
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
-			"social_login": "Okamžitý a soukromý přístup + přihlášení přes sociální sítě"
+			"move_swap_grow": "Přesouvejte, směňujte a zhodnocujte svá aktiva napříč sítěmi"
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu",
@@ -143,10 +144,10 @@
 			"session_locked": "Vaše relace byla uzamčena v jiné kartě."
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Nové registrace jsou momentálně omezeny. Zkuste to prosím znovu později."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "V současné době není registrace nových uživatelů možná. Stávající uživatelé mohou $oisy_short používat normálně."
 		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
@@ -1155,7 +1156,7 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
-			"bridging": "",
+			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až minutu.)",
 			"network_cost": "Náklady sítě",
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",

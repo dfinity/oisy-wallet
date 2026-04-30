@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "I Tuoi Asset Digitali",
 			"title_part_2": "Privato e Sicuro",
+			"description": "Apri il tuo wallet o creane uno in pochi secondi",
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
@@ -131,7 +132,7 @@
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
 			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain",
-			"social_login": "Accesso immediato e privato + login social"
+			"move_swap_grow": "Sposta, scambia e fai crescere i tuoi asset tra le reti"
 		},
 		"alt": {
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile",
@@ -143,10 +144,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Le nuove registrazioni sono attualmente limitate. Riprova più tardi."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "Al momento le registrazioni di nuovi utenti non sono possibili. Gli utenti esistenti possono usare $oisy_short normalmente."
 		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
@@ -1155,7 +1156,7 @@
 			"select_token": "Seleziona il token",
 			"select_network_filter": "Seleziona la rete",
 			"withdrawing": "",
-			"bridging": "",
+			"bridging": "Bridge in corso... (Per favore sii paziente, questo può richiedere fino a un minuto.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",

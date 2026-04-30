@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "나의 디지털 자산",
 			"title_part_2": "안전하고 프라이빗하게",
+			"description": "지갑을 열거나 몇 초 만에 새로 만들 수 있습니다",
 			"logout": "로그아웃",
 			"lock": "잠금",
 			"authenticate": "열기 또는 만들기",
@@ -131,7 +132,7 @@
 			"asset_types": "비트코인, 솔라나, 이더리움, ICP 등 다양한 자산 관리",
 			"instant_and_private": "개인정보 보호가 기본인 내장 AI 어시스턴트",
 			"advanced_cryptography": "고급 암호화 기술로 보호 - 100% 온체인",
-			"social_login": "즉각적이고 프라이빗한 액세스 + 소셜 로그인"
+			"move_swap_grow": "네트워크 전반에서 자산을 이동, 스왑하고 성장시키세요"
 		},
 		"alt": {
 			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기",
@@ -143,10 +144,10 @@
 			"session_locked": "다른 탭에서 세션이 잠겼습니다."
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "현재 신규 가입이 제한되어 있습니다. 나중에 다시 시도해 주세요."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "현재 신규 사용자 가입이 불가능합니다. 기존 사용자는 $oisy_short를 정상적으로 이용할 수 있습니다."
 		},
 		"warning": {
 			"not_signed_in": "로그인되어 있지 않습니다. 계속하려면 로그인해 주세요.",
@@ -1155,7 +1156,7 @@
 			"select_token": "토큰 선택",
 			"select_network_filter": "네트워크 선택",
 			"withdrawing": "출금 중...",
-			"bridging": "",
+			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 1분 정도 소요될 수 있습니다.)",
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
