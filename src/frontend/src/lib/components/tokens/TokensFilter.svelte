@@ -6,7 +6,12 @@
 	import { TOKEN_LIST_FILTER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
-	import { isTokensPath, isTransactionsPath } from '$lib/utils/nav.utils';
+	import {
+		isEarningPath,
+		isNftsPath,
+		isTokensPath,
+		isTransactionsPath
+	} from '$lib/utils/nav.utils';
 
 	interface Props {
 		overflowableContent?: Snippet;
@@ -16,10 +21,17 @@
 
 	let inputValue = $derived($tokenListStore.filter);
 
-	// reset search if not coming from home (switching networks) or transactions page
+	// Persist the filter when switching between asset tabs (Tokens, NFTs, Earning) or returning from transactions.
+	// Reset it when navigating from any other page (e.g. Settings, Activity).
 	afterNavigate(({ from }) => {
-		const previousRoute = `${from?.route?.id}/`;
-		if (!isTokensPath(previousRoute) && !isTransactionsPath(previousRoute)) {
+		const previousRoute = from?.route?.id ?? null;
+
+		if (
+			!isTokensPath(previousRoute) &&
+			!isNftsPath(previousRoute) &&
+			!isEarningPath(previousRoute) &&
+			!isTransactionsPath(previousRoute)
+		) {
 			tokenListStore.set({ filter: '' });
 		}
 	});

@@ -19,8 +19,6 @@ export const IS_SIGNER_DOMAIN = nonNullish(SIGNER_TARGET);
 
 export const TEST = parseBoolEnvVar(import.meta.env.TEST);
 
-const MAINNET_DOMAIN = 'icp0.io';
-
 export const REPLICA_HOST = LOCAL ? 'http://localhost:4943/' : 'https://icp-api.io';
 
 export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
@@ -30,25 +28,6 @@ export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
 	: 'https://identity.internetcomputer.org';
-
-export const POUH_ISSUER_CANISTER_ID = LOCAL
-	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_POUH_ISSUER_CANISTER_ID
-		: BETA
-			? import.meta.env.VITE_BETA_POUH_ISSUER_CANISTER_ID
-			: PROD
-				? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
-				: undefined;
-
-export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
-	? LOCAL
-		? `http://${POUH_ISSUER_CANISTER_ID}.localhost:4943`
-		: STAGING
-			? `https://${POUH_ISSUER_CANISTER_ID}.${MAINNET_DOMAIN}`
-			: // BETA and PROD
-				'https://id.decideai.xyz'
-	: undefined;
 
 export const BACKEND_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_BACKEND_CANISTER_ID
@@ -146,9 +125,6 @@ export const AUTH_POPUP_WIDTH = 576;
 // we need to temporarily increase the height so II 2.0 in "guided mode" fits the popup
 // TODO: revert to 625 after II provides a fix on their end
 export const AUTH_POPUP_HEIGHT = 826;
-export const VC_POPUP_WIDTH = AUTH_POPUP_WIDTH;
-// Screen to allow credential presentation is longer than the authentication screen.
-export const VC_POPUP_HEIGHT = 900;
 
 // Workers
 export const AUTH_TIMER_INTERVAL = 1_000;

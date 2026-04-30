@@ -284,6 +284,29 @@ const confirmSignedTransaction = async ({
 	});
 };
 
+const withComputeUnitPrice = async ({
+	transactionMessage,
+	rpc,
+	prioritizationFee
+}: {
+	transactionMessage: SolTransactionMessage;
+	rpc: Rpc<SolanaRpcApi>;
+	prioritizationFee: bigint;
+}): Promise<SolTransactionMessage> => {
+	if (prioritizationFee <= ZERO) {
+		return transactionMessage;
+	}
+
+	const computeUnitsEstimate = await estimateComputeUnitLimitFactory({ rpc })(transactionMessage);
+
+	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
+
+	return prependTransactionMessageInstruction(
+		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
+		transactionMessage
+	);
+};
+
 /**
  * Send SOL or SPL tokens from one address to another.
  *
@@ -340,25 +363,15 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
-	const getComputeUnitEstimateForTransactionMessage = estimateComputeUnitLimitFactory({
-		rpc
+	const transactionMessageToSign = await withComputeUnitPrice({
+		transactionMessage,
+		rpc,
+		prioritizationFee
 	});
-
-	const computeUnitsEstimate =
-		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
-
-	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
-
-	const transactionMessageWithComputeUnitPrice = prependTransactionMessageInstruction(
-		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
-		transactionMessage
-	);
 
 	progress?.(ProgressStepsSendSol.SIGN);
 
-	const { signedTransaction, signature } = await signTransaction(
-		prioritizationFee > ZERO ? transactionMessageWithComputeUnitPrice : transactionMessage
-	);
+	const { signedTransaction, signature } = await signTransaction(transactionMessageToSign);
 
 	progress?.(ProgressStepsSendSol.SEND);
 

@@ -25,8 +25,13 @@
 	import { consoleError } from '$lib/utils/console.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
+	interface Props {
+		loading?: boolean;
+	}
+
+	let { loading = $bindable(false) }: Props = $props();
+
 	let userInput = $state('');
-	let loading = $state(false);
 	let disabled = $derived(loading || isNullishOrEmpty(userInput));
 	let messagesContainer: HTMLDivElement | undefined;
 	let shouldScrollMessagesContainer = $state(true);
@@ -43,6 +48,7 @@
 			return;
 		}
 
+		// 10 - a small tolerance in scroll measurements
 		shouldScrollMessagesContainer =
 			messagesContainer.scrollTop + messagesContainer.clientHeight >=
 			messagesContainer.scrollHeight - 10;
@@ -61,7 +67,7 @@
 		}
 	});
 
-	export const sendMessage = async ({
+	const sendMessage = async ({
 		messageText,
 		context
 	}: {

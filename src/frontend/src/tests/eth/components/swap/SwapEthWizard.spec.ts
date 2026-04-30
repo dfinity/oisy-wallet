@@ -24,10 +24,14 @@ import {
 	type SwapMappedResult,
 	type VeloraSwapDetails
 } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import en from '$tests/mocks/i18n.mock';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockNearIntentsProvider,
+	mockOneSecProvider,
 	mockSwapProviders,
 	mockVeloraDeltaProvider,
 	mockVeloraMarketProvider
@@ -52,11 +56,23 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 const mockFetchNearIntentsEvmSwap = vi.fn();
 const mockFetchVeloraDeltaSwap = vi.fn();
 const mockFetchVeloraMarketSwap = vi.fn();
+const mockFetchOneSecEvmToIcpSwap = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
 	fetchNearIntentsEvmSwap: (...args: unknown[]) => mockFetchNearIntentsEvmSwap(...args),
 	fetchVeloraDeltaSwap: (...args: unknown[]) => mockFetchVeloraDeltaSwap(...args),
-	fetchVeloraMarketSwap: (...args: unknown[]) => mockFetchVeloraMarketSwap(...args)
+	fetchVeloraMarketSwap: (...args: unknown[]) => mockFetchVeloraMarketSwap(...args),
+	fetchOneSecEvmToIcpSwap: (...args: unknown[]) => mockFetchOneSecEvmToIcpSwap(...args)
+}));
+
+const mockAcceptProviderAgreement = vi.fn();
+
+vi.mock('$lib/services/provider-agreements.services', () => ({
+	acceptProviderAgreement: (...args: unknown[]) => mockAcceptProviderAgreement(...args)
+}));
+
+vi.mock('$env/rest/near-intents.env', () => ({
+	NEAR_INTENTS_SWAP_ENABLED: true
 }));
 
 const mockToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK, enabled: true };
@@ -481,6 +497,388 @@ describe('SwapEthWizard', () => {
 			await fireEvent.click(getByRole('checkbox'));
 
 			expect(swapButton).toBeEnabled();
+		});
+	});
+
+	describe('Near Intents swap with provider agreement', () => {
+		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
+		const nearIntentsSwapProviders: SwapMappedResult[] = [mockNearIntentsProvider];
+
+		let feeState: Writable<FeeStoreData>;
+		let feeStore: EthFeeStore;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			feeState = writable({
+				gas: 100n,
+				maxFeePerGas: 2_000_000n,
+				maxPriorityFeePerGas: 1_000_000n
+			});
+			feeStore = {
+				subscribe: feeState.subscribe,
+				setFee: vi.fn((partial) => {
+					feeState.update((cur) => ({ ...cur, ...partial }));
+				})
+			};
+
+			vi.spyOn(feeStoreMod, 'initEthFeeStore').mockReturnValue(feeStore);
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(undefined),
+				minGasFee: readable(undefined)
+			}));
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+			mockAcceptProviderAgreement.mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const createNearIntentsExecutionContext = () => {
+			const executionSwapAmountsStore = initSwapAmountsStore();
+			executionSwapAmountsStore.setSwaps({
+				swaps: nearIntentsSwapProviders,
+				amountForSwap: 1,
+				selectedProvider: nearIntentsSwapProviders[0]
+			});
+
+			const ctx = new Map();
+
+			ctx.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable(mockToken),
+				destinationToken: readable(mockDestToken),
+				failedSwapError: writable(undefined),
+				sourceTokenExchangeRate: readable(10),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				destinationTokenExchangeRate: readable(20),
+				isSourceTokenIcrc2: readable(false),
+				isSourceTokenPermitSupported: readable(false),
+				setSourceToken: () => {},
+				setDestinationToken: () => {},
+				setIsTokenPermitSupported: () => {},
+				switchTokens: () => {}
+			});
+
+			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: executionSwapAmountsStore });
+
+			ctx.set(
+				feeStoreMod.ETH_FEE_CONTEXT_KEY,
+				feeStoreMod.initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+				})
+			);
+
+			return ctx;
+		};
+
+		const renderNearIntentsExecution = () => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+			const onStartTriggerAmount = vi.fn();
+
+			const result = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount,
+					onStopTriggerAmount: vi.fn()
+				},
+				context: createNearIntentsExecutionContext()
+			});
+
+			return { ...result, onClose, onBack, onStartTriggerAmount };
+		};
+
+		it('calls acceptProviderAgreement before Near Intents swap', async () => {
+			const { getByText, queryByRole } = renderNearIntentsExecution();
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockAcceptProviderAgreement).toHaveBeenCalledOnce();
+			expect(mockFetchNearIntentsEvmSwap).toHaveBeenCalledOnce();
+		});
+
+		it('aborts swap and calls onBack when acceptProviderAgreement fails', async () => {
+			mockAcceptProviderAgreement.mockRejectedValueOnce(new Error('Agreement save failed'));
+
+			const { getByText, onBack, onStartTriggerAmount, queryByRole } = renderNearIntentsExecution();
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockFetchNearIntentsEvmSwap).not.toHaveBeenCalled();
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({
+					msg: { text: en.swap.error.cannot_save_provider_agreement }
+				})
+			);
+		});
+
+		it('does not call acceptProviderAgreement for non-Near Intents swap', async () => {
+			const veloraSwapProviders: SwapMappedResult[] = [
+				{
+					provider: SwapProvider.VELORA,
+					receiveAmount: 1000000000n,
+					type: VeloraSwapTypes.MARKET,
+					swapDetails: {} as VeloraSwapDetails
+				}
+			];
+
+			const executionSwapAmountsStore = initSwapAmountsStore();
+			executionSwapAmountsStore.setSwaps({
+				swaps: veloraSwapProviders,
+				amountForSwap: 1,
+				selectedProvider: veloraSwapProviders[0]
+			});
+
+			const ctx = new Map();
+
+			ctx.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable(mockToken),
+				destinationToken: readable(mockDestToken),
+				failedSwapError: writable(undefined),
+				sourceTokenExchangeRate: readable(10),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				destinationTokenExchangeRate: readable(20),
+				isSourceTokenIcrc2: readable(false),
+				isSourceTokenPermitSupported: readable(false),
+				setSourceToken: () => {},
+				setDestinationToken: () => {},
+				setIsTokenPermitSupported: () => {},
+				switchTokens: () => {}
+			});
+
+			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: executionSwapAmountsStore });
+
+			ctx.set(
+				feeStoreMod.ETH_FEE_CONTEXT_KEY,
+				feeStoreMod.initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+				})
+			);
+
+			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockResolvedValue(undefined);
+
+			const { getByText, queryByRole } = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' }
+				},
+				context: ctx
+			});
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockAcceptProviderAgreement).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('OneSec EVM→ICP swap', () => {
+		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+		const mockIcDestToken = { ...mockValidIcToken, enabled: true };
+
+		const oneSecSwapProviders: SwapMappedResult[] = [mockOneSecProvider];
+
+		let feeState: Writable<FeeStoreData>;
+		let feeStore: EthFeeStore;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			feeState = writable({
+				gas: 100n,
+				maxFeePerGas: 2_000_000n,
+				maxPriorityFeePerGas: 1_000_000n
+			});
+			feeStore = {
+				subscribe: feeState.subscribe,
+				setFee: vi.fn((partial) => {
+					feeState.update((cur) => ({ ...cur, ...partial }));
+				})
+			};
+
+			vi.spyOn(feeStoreMod, 'initEthFeeStore').mockReturnValue(feeStore);
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(undefined),
+				minGasFee: readable(undefined)
+			}));
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+			mockFetchOneSecEvmToIcpSwap.mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const createOneSecExecutionContext = (destinationToken: Token = mockIcDestToken) => {
+			const executionSwapAmountsStore = initSwapAmountsStore();
+			executionSwapAmountsStore.setSwaps({
+				swaps: oneSecSwapProviders,
+				amountForSwap: 1,
+				selectedProvider: oneSecSwapProviders[0]
+			});
+
+			const ctx = new Map();
+
+			ctx.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable(mockToken),
+				destinationToken: readable(destinationToken),
+				failedSwapError: writable(undefined),
+				sourceTokenExchangeRate: readable(10),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				destinationTokenExchangeRate: readable(20),
+				isSourceTokenIcrc2: readable(false),
+				isSourceTokenPermitSupported: readable(false),
+				setSourceToken: () => {},
+				setDestinationToken: () => {},
+				setIsTokenPermitSupported: () => {},
+				switchTokens: () => {}
+			});
+
+			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: executionSwapAmountsStore });
+
+			ctx.set(
+				feeStoreMod.ETH_FEE_CONTEXT_KEY,
+				feeStoreMod.initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+				})
+			);
+
+			return ctx;
+		};
+
+		it('calls fetchOneSecEvmToIcpSwap and closes on success', async () => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+
+			const { getByText, queryByRole } = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount: vi.fn(),
+					onStopTriggerAmount: vi.fn()
+				},
+				context: createOneSecExecutionContext()
+			});
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockFetchOneSecEvmToIcpSwap).toHaveBeenCalledOnce();
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it('calls onBack when fetchOneSecEvmToIcpSwap fails', async () => {
+			mockFetchOneSecEvmToIcpSwap.mockRejectedValueOnce(new Error('Bridge failed'));
+
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+
+			const { getByText, queryByRole } = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount: vi.fn(),
+					onStopTriggerAmount: vi.fn()
+				},
+				context: createOneSecExecutionContext()
+			});
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalled();
+		});
+
+		it('shows error and calls onBack when destination is not an ICP token', async () => {
+			const onBack = vi.fn();
+			const onStartTriggerAmount = vi.fn();
+
+			const { getByText, queryByRole } = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount,
+					onStopTriggerAmount: vi.fn()
+				},
+				context: createOneSecExecutionContext(mockDestToken)
+			});
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockFetchOneSecEvmToIcpSwap).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalled();
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
 		});
 	});
 });

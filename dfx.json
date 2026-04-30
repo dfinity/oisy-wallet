@@ -235,29 +235,6 @@
 				}
 			}
 		},
-		"pouh_issuer": {
-			"type": "custom",
-			"candid": "https://github.com/dfinity/verifiable-credentials-sdk/releases/download/release-2024-07-01/dummy_issuer.did",
-			"wasm": "https://github.com/dfinity/verifiable-credentials-sdk/releases/download/release-2024-07-01/dummy_issuer.wasm.gz",
-			"shrink": false,
-			"specified_id": "qbw6f-caaaa-aaaah-qdcwa-cai",
-			"remote": {
-				"id": {
-					"test_be_1": "qbw6f-caaaa-aaaah-qdcwa-cai",
-					"test_fe_1": "qbw6f-caaaa-aaaah-qdcwa-cai",
-					"test_fe_2": "qbw6f-caaaa-aaaah-qdcwa-cai",
-					"test_fe_3": "qbw6f-caaaa-aaaah-qdcwa-cai",
-					"test_fe_4": "qbw6f-caaaa-aaaah-qdcwa-cai",
-					"test_fe_5": "qbw6f-caaaa-aaaah-qdcwa-cai",
-					"test_fe_6": "qbw6f-caaaa-aaaah-qdcwa-cai",
-					"audit": "qbw6f-caaaa-aaaah-qdcwa-cai",
-					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai",
-					"beta": "qgxyr-pyaaa-aaaah-qdcwq-cai",
-					"ic": "qgxyr-pyaaa-aaaah-qdcwq-cai",
-					"e2e": "qgxyr-pyaaa-aaaah-qdcwq-cai"
-				}
-			}
-		},
 		"sol_rpc": {
 			"type": "custom",
 			"build": "scripts/build.sol_rpc.sh",

@@ -138,11 +138,9 @@ export const defineViteReplacements = (): {
 	const network = process.env.DFX_NETWORK ?? 'local';
 
 	const signerTarget = process.env.OISY_SIGNER_TARGET;
-	const signerCanisterKey =
-		signerTarget && signerTarget in SIGNER_TARGET_MAP ? SIGNER_TARGET_MAP[signerTarget] : undefined;
 
 	const version =
-		(signerCanisterKey && (SIGNER_VERSIONS as Record<string, string>)[signerCanisterKey]) ??
+		(signerTarget === 'legacy_signer' ? SIGNER_VERSIONS['legacy_signer_frontend'] : undefined) ??
 		packageVersion;
 
 	const isTestFe = network.startsWith('test_fe_');

@@ -45,7 +45,8 @@
 			"sorting": "Sắp xếp",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -61,11 +62,12 @@
 			"switch_currency": "Chuyển đổi tiền tệ",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up_one_level": "Đi lên một cấp"
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
-			"standalone_mode": "",
+			"standalone_mode": "Có các sự cố kết nối đã biết khi cả ứng dụng và $oisy_short đều được cài đặt trên màn hình chính. Nếu gặp sự cố khi kết nối $oisy_short hoặc ký giao dịch, vui lòng khởi động ứng dụng từ trình duyệt thông thường. Chúng tôi đang khắc phục sự cố này và sẽ sớm được giải quyết. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Đọc thêm</a>",
 			"video_not_supported": ""
 		}
 	},
@@ -77,6 +79,8 @@
 			"activity": "Hoạt động",
 			"airdrops": "Phần thưởng",
 			"earning": "Kiếm tiền",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Mã nguồn trên GitHub",
 			"view_on_explorer": "Xem trên trình khám phá",
 			"source_code": "Mã nguồn",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "Mở trình khám phá ứng dụng",
 			"activity": "Mở chế độ xem hoạt động",
 			"airdrops": "Mở chế độ xem Phần thưởng",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
 			"documentation": "Mở tài liệu $oisy_name",
 			"support": "Mở phần Hỗ trợ trong tài liệu $oisy_name",
@@ -120,16 +126,26 @@
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
+			"internet_identity": "",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
-			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
+			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
 			"social_login": "Truy cập tức thì và riêng tư + đăng nhập bằng tài khoản mạng xã hội"
 		},
 		"alt": {
-			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
+			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
@@ -138,12 +154,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Không có Internet Identity.",
-			"invalid_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng. Vui lòng liên hệ với nhà phát hành và yêu cầu lại thông tin xác thực.",
-			"error_validating_pouh_credential_oisy": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng trong $oisy_short: $error",
-			"error_validating_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi xác thực người dùng.",
-			"error_requesting_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi yêu xác thực người dùng.",
-			"missing_pouh_issuer_origin": "Xin lỗi, đã xảy ra lỗi trong khi yêu cầu thông tin xác thực người dùng. Thiếu nguồn gốc nhà phát hành.",
-			"no_pouh_credential": "Xin lỗi, đã xảy ra lỗi trong khi yêu cầu xác thực người dùng. Bạn có thông tin xác thực hợp lệ trong Decide AI không?",
 			"error_while_signing_in": "Đã xảy ra lỗi trong khi đăng nhập.",
 			"unexpected_issue_with_syncing": "Sự cố không mong muốn trong khi đồng bộ hóa trạng thái xác thực của bạn."
 		},
@@ -440,6 +450,31 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -583,7 +618,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Tập 6",
+				"card_title": "OISY Sprinkles: Tập 6 đã ra mắt 🎉",
 				"one_liner": "Kiếm Sprinkles khi hoạt động tích cực, giới thiệu người khác và sử dụng OISY trên nhiều chuỗi. Hành động của bạn tăng phần thưởng, và các lượt giới thiệu tích cực giúp tăng thêm.<br/>Hơn nữa, nhiều chuỗi hơn đồng nghĩa với cơ hội thắng cao hơn.",
 				"participate_title": "Kiếm token nhờ hoạt động và giới thiệu. Nhiều chuỗi hơn nghĩa là nhiều cơ hội hơn.",
 				"description": "Duy trì hoạt động để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các thao tác ví và giữ ít nhất 5 $.<br/>Mỗi chuỗi hoạt động tăng cơ hội của bạn với Hệ số Đa chuỗi.<br/>Kiếm 10% từ bạn bè đủ điều kiện.",
@@ -600,8 +635,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Bạn đã thắng phần thưởng drop hàng tuần",
-						"description": "Bạn vừa nhận được một trong các gói thưởng hàng tuần của chúng tôi.<br>Duy trì hoạt động và tiếp tục giới thiệu để giành thêm",
+						"title": "Chúc mừng bạn đã kiếm được OISY Sprinkles lớn nhất hôm nay!",
+						"description": "Bạn vừa kiếm được Phần thưởng Sprinkles cao nhất của chúng tôi<br>Hãy duy trì hoạt động và tiếp tục giới thiệu để giành được nhiều hơn.",
 						"share_href": ""
 					},
 					"referral": {
@@ -733,11 +768,6 @@
 			"active_networks_description": "Chọn mạng bạn muốn làm việc trong $oisy_name. Token và giao dịch từ các mạng không hoạt động sẽ không hiển thị hoặc không được bao gồm trong số dư khả dụng của bạn.",
 			"enable_network": "Bật mạng",
 			"disable_network": "Tắt mạng",
-			"credentials_title": "Thông tin xác thực",
-			"pouh_credential": "Thông tin xác thực người dùng",
-			"pouh_credential_description": "Thông tin xác thực người dùng thật. Nó được phát hành bởi Decide AI.",
-			"present_pouh_credential": "Xuất trình",
-			"pouh_credential_verified": "Đã xác minh ✅",
 			"appearance": "Giao diện",
 			"appearance_light": "Sáng",
 			"appearance_dark": "Tối",
@@ -748,7 +778,13 @@
 			"beta_features": "Tính năng Beta",
 			"enable_beta_feature": "Bật tính tăng beta",
 			"disable_beta_feature": "Tắt tính năng beta",
-			"save_beta_feature_success": "Tính năng beta của bạn đã được cập nhật"
+			"save_beta_feature_success": "Tính năng beta của bạn đã được cập nhật",
+			"hide_micro_transactions": "Ẩn các giao dịch có giá trị rất nhỏ",
+			"hide_micro_transactions_description": "Các giao dịch có giá trị rất nhỏ thường là spam và nhằm mục đích lừa người dùng sao chép địa chỉ người gửi thay vì địa chỉ hợp lệ. Khuyến nghị ẩn chúng trong danh sách giao dịch.",
+			"enable_hide_micro_transactions": "Bật ẩn các giao dịch có giá trị rất nhỏ",
+			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
+			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
@@ -949,23 +985,26 @@
 			"no_nft_selected": "Không NFT đã được chọn để gửi"
 		},
 		"error": {
-			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
-			"destination_address_unknown": "Địa chỉ ví ETH không xác định",
+			"unexpected": "Đã xảy ra lỗi khi gửi giao dịch.",
+			"destination_address_unknown": "Địa chỉ đích ETH không xác định",
 			"metamask_connected": "Không thể lấy tài khoản của bạn. Metamask của bạn có đang mở và đã kết nối chưa?",
 			"metamask_no_accounts": "Không tìm thấy tài khoản Metamask nào.",
-			"metamask_switch_network": "Không thể yêu cầu Metamask chuyển sang ID chuỗi $chain_id. Metamask của bạn có đang sử dụng $network_name không?",
-			"erc20_data_undefined": "Dữ liệu giao dịch Erc20 không được không xác định hoặc null.",
-			"data_undefined": "Dữ liệu giao dịch không được không xác định hoặc null.",
-			"no_identity_calculate_fee": "Không có danh tính nào được cung cấp để tính phí cho principal.",
-			"invalid_destination": "Ví không hợp lệ. Vui lòng thử lại với một địa chỉ ví hợp lệ.",
-			"incompatible_token": "Token không tương thích. Vui lòng thử lại với một token tương thích.",
+			"metamask_switch_network": "Không thể yêu cầu Metamask chuyển sang chain ID $chain_id. Metamask của bạn có đang sử dụng $network_name không?",
+			"erc20_data_undefined": "Dữ liệu giao dịch ERC20 không thể là undefined hoặc null.",
+			"data_undefined": "Dữ liệu giao dịch không thể là undefined hoặc null.",
+			"no_identity_calculate_fee": "Không có danh tính nào được cung cấp để tính phí cho principal của nó.",
+			"invalid_destination": "Địa chỉ đích không hợp lệ. Vui lòng thử lại với địa chỉ ví hoặc địa chỉ đích hợp lệ.",
+			"incompatible_token": "Token không tương thích. Vui lòng thử lại với token tương thích.",
 			"no_btc_network_id": "Mạng hiện tại ($networkId) không phải là mạng Bitcoin.",
 			"no_solana_network_id": "Mạng hiện tại ($networkId) không phải là mạng Solana.",
 			"no_pending_bitcoin_transaction": "Đã xảy ra lỗi khi tải các giao dịch Bitcoin đang chờ xử lý. Vui lòng thử lại sau.",
-			"unexpected_utxos_fee": "Đã xảy ra lỗi trong khi tính phí giao dịch.",
-			"unable_to_retrieve_amount": "không có (không thể truy xuất)",
-			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
-			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
+			"unexpected_utxos_fee": "Đã xảy ra lỗi khi tính phí giao dịch.",
+			"unable_to_retrieve_amount": "n/a (không thể lấy được)",
+			"solana_transaction_expired": "Giao dịch của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể là do phí ưu tiên được cung cấp không đủ. Chúng tôi đã cập nhật lên số tiền được khuyến nghị mới nhất, vì vậy vui lòng thử lại.",
+			"solana_confirmation_failed": "Chúng tôi không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây rồi kiểm tra danh sách giao dịch của token để xem giao dịch của bạn có được tạo chính xác không.",
+			"solana_insufficient_funds": "Số dư token của bạn không đủ để hoàn tất giao dịch này. Số dư của bạn có thể đã thay đổi kể từ lần hiển thị cuối cùng.",
+			"solana_insufficient_funds_for_fee": "Số dư SOL của bạn không đủ để trang trải phí giao dịch.",
+			"solana_insufficient_funds_for_rent": "Số dư SOL của bạn không đủ để trang trải khoản thuê cần thiết cho việc tạo tài khoản.",
 			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
 		}
 	},
@@ -985,39 +1024,46 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "",
-			"pay_to": "",
-			"powered_by": "",
-			"recipient": "",
-			"name": "",
-			"address": "",
-			"country": "",
-			"phone_number": "",
-			"email_address": "",
-			"website": "",
-			"enter_manually": "",
-			"url_or_code": "",
-			"enter_or_paste_code": "",
-			"scan": "",
-			"pay": "",
-			"pay_amount": "",
-			"go_to_assets": "",
-			"supported_tokens": "",
-			"no_supported_tokens": "",
-			"pay_with": "",
-			"select_token": "",
-			"select_different_token": "",
-			"tokens_available": "",
-			"select_token_to_pay": "",
-			"pay_at_successful": "",
-			"pay_at_failure": "",
-			"try_again": "",
-			"payment_confirmed": "",
-			"payment_failed": ""
+			"scan_qr_code": "Quét mã QR",
+			"pay_to": "Thanh toán cho $receipt",
+			"powered_by": "Được cung cấp bởi",
+			"recipient": "Người nhận",
+			"name": "Tên",
+			"address": "Địa chỉ",
+			"country": "Quốc gia",
+			"phone_number": "Số điện thoại",
+			"email_address": "Địa chỉ email",
+			"website": "Trang web",
+			"enter_manually": "Nhập thủ công",
+			"url_or_code": "URL hoặc mã",
+			"enter_or_paste_code": "Nhập hoặc dán mã",
+			"scan": "Quét",
+			"pay": "Thanh toán",
+			"pay_amount": "Thanh toán $amount",
+			"go_to_assets": "Đi đến Tài sản",
+			"supported_tokens": "Open CryptoPay hỗ trợ các token sau: ETH, USDC, USDT, POL, ARB, WBTC, XMR, dEURO, ZCHF, v.v.",
+			"no_supported_tokens": "Bạn không có token được hỗ trợ",
+			"pay_with": "Thanh toán bằng",
+			"select_token": "Chọn token",
+			"select_different_token": "Chọn token khác",
+			"tokens_available": "$amount token khả dụng",
+			"select_token_to_pay": "Chọn token để thanh toán",
+			"pay_at_successful": "Đã thanh toán tại $receipt",
+			"pay_at_failure": "Thanh toán thất bại tại $receipt",
+			"try_again": "Thử lại",
+			"payment_confirmed": "Thanh toán đã được xác nhận",
+			"payment_failed": "Thanh toán thất bại",
+			"what_is_scan": "Máy quét là gì",
+			"no_camera_permission": "Để quét mã QR, bạn cần cho phép truy cập camera trong cài đặt trang web của trình duyệt.",
+			"what_is_scan_description": "Máy quét $oisy_short có thể đọc nhiều loại mã QR và thực hiện hành động phù hợp ngay lập tức. Quét mã QR WalletConnect để thiết lập kết nối mới, hoặc quét mã thanh toán tại bất kỳ cửa hàng nào sử dụng Open CryptoPay để thanh toán hóa đơn bằng $oisy_short Pay.",
+			"what_is_scan_title": "$oisy_short hiểu mọi mã QR",
+			"learn_more_about_scan": "Tìm hiểu thêm về máy quét",
+			"learn_more_about_pay": "Tìm hiểu thêm về $oisy_short Pay",
+			"scanner": "Máy quét"
 		},
 		"error": {
-			"code_link_is_not_valid": "",
-			"data_is_incompleted": ""
+			"code_link_is_not_valid": "Mã/liên kết không hợp lệ",
+			"data_is_incompleted": "Dữ liệu nhận được không đầy đủ. Thiếu một số thông tin bắt buộc."
 		}
 	},
 	"convert": {
@@ -1108,12 +1154,15 @@
 			"select_token": "Chọn token",
 			"select_network_filter": "Chọn mạng",
 			"withdrawing": "Đang rút...",
+			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến một phút.)",
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1132,7 +1181,8 @@
 			"manually_withdraw_failed": "Rút tiền của bạn không thành công.<br> Vui lòng thử lại hoặc làm theo",
 			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
 			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1481,7 +1531,10 @@
 			"amount": "",
 			"hex_data": "Dữ liệu HEX",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
-			"sign_message": "Ký Tin Nhắn"
+			"sign_message": "Ký Tin Nhắn",
+			"connected_apps": "Ứng dụng đã kết nối",
+			"no_connected_apps": "Hiện không có ứng dụng nào được kết nối.",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "ví dụ: wc:a281567bb3e4..."
@@ -1794,8 +1847,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Truy cập ví $oisy_name của bạn",
-				"open_or_create": "Mở hoặc tạo ví của bạn để kết nối an toàn với dApp và bắt đầu quản lý tài sản của bạn."
+				"open_or_create": "Mở hoặc tạo ví của bạn để tương tác an toàn với ứng dụng.",
+				"connect_your_wallet": "Kết nối ví $oisy_name của bạn",
+				"oisy_protects_you": "OISY bảo vệ bạn!",
+				"oisy_protects_you_description": "Các ứng dụng không thể trực tiếp truy cập vào quỹ của bạn, và mỗi giao dịch phải được bạn xác nhận."
 			}
 		},
 		"idle": {
@@ -1890,7 +1945,7 @@
 				"possessive": ""
 			},
 			"title": "",
-			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
+			"instruction": "Bằng cách đăng nhập, bạn đồng ý với $link",
 			"body": ""
 		},
 		"alt": {
@@ -1916,7 +1971,8 @@
 			"title": "Hoạt động gần đây"
 		},
 		"info": {
-			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập."
+			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
+			"hidden_micro_transactions": "<strong>OISY bảo vệ bạn!</strong> Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
 		},
 		"warning": {
 			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",

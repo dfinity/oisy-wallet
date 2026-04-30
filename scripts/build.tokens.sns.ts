@@ -196,36 +196,52 @@ const mapDeprecatedSnsMetadata = ({
 	...rest
 });
 
-const readExistingTags = (): Record<CanisterIdText, EnvSnsTokenWithIcon['tags']> => {
+interface ExistingCuratedData {
+	tags: Record<CanisterIdText, EnvSnsTokenWithIcon['tags']>;
+	groupDataIds: Record<CanisterIdText, string>;
+}
+
+const readExistingCuratedData = (): ExistingCuratedData => {
 	if (!existsSync(SNS_JSON_FILE)) {
-		return {};
+		return {
+			tags: {},
+			groupDataIds: {}
+		};
 	}
 
 	try {
-		const existing: { ledgerCanisterId: string; tags?: EnvSnsTokenWithIcon['tags'] }[] = JSON.parse(
-			readFileSync(SNS_JSON_FILE, 'utf8')
-		);
+		const existing: {
+			ledgerCanisterId: string;
+			tags?: EnvSnsTokenWithIcon['tags'];
+			groupDataId?: string;
+		}[] = JSON.parse(readFileSync(SNS_JSON_FILE, 'utf8'));
 
-		return existing.reduce<Record<CanisterIdText, EnvSnsTokenWithIcon['tags']>>(
-			(acc, { ledgerCanisterId, tags }) => {
+		return existing.reduce<ExistingCuratedData>(
+			(acc, { ledgerCanisterId, tags, groupDataId }) => {
 				if (nonNullish(tags)) {
-					acc[ledgerCanisterId] = tags;
+					acc.tags[ledgerCanisterId] = tags;
+				}
+				if (nonNullish(groupDataId)) {
+					acc.groupDataIds[ledgerCanisterId] = groupDataId;
 				}
 				return acc;
 			},
-			{}
+			{
+				tags: {},
+				groupDataIds: {}
+			}
 		);
 	} catch (err: unknown) {
 		console.error(
-			`Failed to read or parse existing SNS tags from "${SNS_JSON_FILE}". Aborting to avoid overwriting manual tags.`,
+			`Failed to read or parse existing SNS curated data from "${SNS_JSON_FILE}". Aborting to avoid overwriting manual data.`,
 			err
 		);
-		throw err instanceof Error ? err : new Error('Failed to read existing SNS tags');
+		throw err instanceof Error ? err : new Error('Failed to read existing SNS curated data');
 	}
 };
 
 const findSnses = async () => {
-	const existingTags = readExistingTags();
+	const { tags: existingTags, groupDataIds: existingGroupDataIds } = readExistingCuratedData();
 
 	const data = await querySnsAggregator();
 
@@ -249,6 +265,9 @@ const findSnses = async () => {
 						metadata,
 						...(nonNullish(existingTags[ledgerCanisterId]) && {
 							tags: existingTags[ledgerCanisterId]
+						}),
+						...(nonNullish(existingGroupDataIds[ledgerCanisterId]) && {
+							groupDataId: existingGroupDataIds[ledgerCanisterId]
 						})
 					}
 				],

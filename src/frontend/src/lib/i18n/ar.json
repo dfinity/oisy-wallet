@@ -45,7 +45,8 @@
 			"sorting": "",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -61,7 +62,8 @@
 			"switch_currency": "تبديل العملة",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up_one_level": "انتقل مستوى للأعلى"
 		},
 		"warning": {
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
@@ -77,6 +79,8 @@
 			"activity": "النشاط",
 			"airdrops": "المكافآت",
 			"earning": "الكسب والمكافآت",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "الرمز المصدري على GitHub",
 			"view_on_explorer": "عرض على المستكشف",
 			"source_code": "الرمز المصدري",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "افتح مستكشف التطبيقات",
 			"activity": "افتح عرض النشاط",
 			"airdrops": "افتح عرض المكافآت",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
 			"documentation": "افتح وثائق $oisy_name",
 			"support": "افتح قسم الدعم في وثائق $oisy_name",
@@ -120,16 +126,26 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
+			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
 			"social_login": ""
 		},
 		"alt": {
-			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
+			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
 		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
@@ -138,12 +154,6 @@
 		},
 		"error": {
 			"no_internet_identity": "لا توجد هوية إنترنت.",
-			"invalid_pouh_credential": "عذرًا، حدث خطأ أثناء التحقق من صحة اعتماد الإنسانية. يرجى الاتصال بالجهة المصدرة وطلب الاعتماد مرة أخرى.",
-			"error_validating_pouh_credential_oisy": "عذرًا، حدث خطأ أثناء التحقق من صحة اعتماد الإنسانية في $oisy_short: $error",
-			"error_validating_pouh_credential": "عذرًا، حدث خطأ أثناء التحقق من صحة اعتماد الإنسانية.",
-			"error_requesting_pouh_credential": "عذرًا، حدث خطأ أثناء طلب اعتماد الإنسانية.",
-			"missing_pouh_issuer_origin": "عذرًا، حدث خطأ أثناء طلب اعتماد الإنسانية. أصل الجهة المصدرة مفقود.",
-			"no_pouh_credential": "عذرًا، حدث خطأ أثناء طلب اعتماد الإنسانية. هل لديك اعتماد صالح في Decide AI؟",
 			"error_while_signing_in": "حدث خطأ ما أثناء تسجيل الدخول.",
 			"unexpected_issue_with_syncing": "مشكلة غير متوقعة أثناء مزامنة حالة المصادقة الخاصة بك."
 		},
@@ -440,6 +450,31 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -733,11 +768,6 @@
 			"active_networks_description": "حدد الشبكات التي تريد العمل بها في $oisy_name. لن تظهر التوكنات والمعاملات من الشبكات غير النشطة أو تُدرج في رصيدك المتاح.",
 			"enable_network": "تمكين الشبكة",
 			"disable_network": "تعطيل الشبكة",
-			"credentials_title": "بيانات الاعتماد",
-			"pouh_credential": "اعتماد الإنسانية",
-			"pouh_credential_description": "اعتماد الإنسانية هو إثبات للإنسانية. يتم إصداره بواسطة Decide AI.",
-			"present_pouh_credential": "تقديم",
-			"pouh_credential_verified": "تم التحقق ✅",
 			"appearance": "المظهر",
 			"appearance_light": "فاتح",
 			"appearance_dark": "داكن",
@@ -748,7 +778,13 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": ""
+			"save_beta_feature_success": "تم تحديث إعدادات ميزة النسخة التجريبية الخاصة بك.",
+			"hide_micro_transactions": "إخفاء المعاملات ذات القيم الصغيرة جدًا",
+			"hide_micro_transactions_description": "عادةً ما تكون المعاملات ذات القيم الصغيرة جدًا بريدًا عشوائيًا وتهدف إلى خداع المستخدم لنسخ عنوان المُرسِل بدلاً من عنوان صالح. يُوصى بإخفائها في قوائم المعاملات.",
+			"enable_hide_micro_transactions": "تمكين إخفاء المعاملات ذات القيم الصغيرة جدًا",
+			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
+			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "تبديل لإظهار أو إخفاء شبكات الاختبار",
@@ -964,8 +1000,11 @@
 			"no_pending_bitcoin_transaction": "حدث خطأ أثناء تحميل معاملات البيتكوين المعلقة. يرجى المحاولة مرة أخرى لاحقًا.",
 			"unexpected_utxos_fee": "حدث خطأ ما أثناء حساب رسوم المعاملة.",
 			"unable_to_retrieve_amount": "غير متاح (لا يمكن استرداده)",
-			"solana_transaction_expired": "لم تتم معالجة معاملة الإرسال الخاصة بك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى محاولة إرسالها مرة أخرى.",
+			"solana_transaction_expired": "لم تتم معالجة معاملتك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى المحاولة مرة أخرى.",
 			"solana_confirmation_failed": "لم نتلق تأكيدًا للمعاملة التي أنشأتها للتو. يرجى الانتظار بضع ثوانٍ ثم التحقق من قائمة معاملات التوكن الخاصة بك إذا تم إنشاء معاملتك بشكل صحيح.",
+			"solana_insufficient_funds": "",
+			"solana_insufficient_funds_for_fee": "",
+			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": ""
 		}
 	},
@@ -985,39 +1024,46 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "",
-			"pay_to": "",
-			"powered_by": "",
-			"recipient": "",
-			"name": "",
-			"address": "",
-			"country": "",
-			"phone_number": "",
-			"email_address": "",
-			"website": "",
-			"enter_manually": "",
-			"url_or_code": "",
-			"enter_or_paste_code": "",
-			"scan": "",
-			"pay": "",
-			"pay_amount": "",
-			"go_to_assets": "",
-			"supported_tokens": "",
-			"no_supported_tokens": "",
-			"pay_with": "",
-			"select_token": "",
-			"select_different_token": "",
-			"tokens_available": "",
-			"select_token_to_pay": "",
-			"pay_at_successful": "",
-			"pay_at_failure": "",
-			"try_again": "",
-			"payment_confirmed": "",
-			"payment_failed": ""
+			"scan_qr_code": "مسح رمز QR",
+			"pay_to": "الدفع إلى $receipt",
+			"powered_by": "مدعوم من",
+			"recipient": "المستلم",
+			"name": "الاسم",
+			"address": "العنوان",
+			"country": "البلد",
+			"phone_number": "رقم الهاتف",
+			"email_address": "عنوان البريد الإلكتروني",
+			"website": "الموقع الإلكتروني",
+			"enter_manually": "الإدخال يدوياً",
+			"url_or_code": "عنوان URL أو الرمز",
+			"enter_or_paste_code": "أدخل أو الصق الرمز",
+			"scan": "مسح",
+			"pay": "دفع",
+			"pay_amount": "دفع $amount",
+			"go_to_assets": "الانتقال إلى الأصول",
+			"supported_tokens": "يدعم Open CryptoPay الرموز التالية: ETH، USDC، USDT، POL، ARB، WBTC، XMR، dEURO، ZCHF، وغيرها.",
+			"no_supported_tokens": "لا تملك أي رموز مدعومة",
+			"pay_with": "الدفع باستخدام",
+			"select_token": "اختر الرمز",
+			"select_different_token": "اختر رمزاً آخر",
+			"tokens_available": "$amount رموز متاحة",
+			"select_token_to_pay": "اختر الرمز للدفع",
+			"pay_at_successful": "تم الدفع في $receipt",
+			"pay_at_failure": "فشل الدفع في $receipt",
+			"try_again": "حاول مرة أخرى",
+			"payment_confirmed": "تم تأكيد الدفع",
+			"payment_failed": "فشل الدفع",
+			"what_is_scan": "ما هو الماسح الضوئي",
+			"no_camera_permission": "لمسح رموز QR، تحتاج إلى السماح بالوصول إلى الكاميرا في إعدادات الموقع في متصفحك.",
+			"what_is_scan_description": "يمكن لماسح $oisy_short قراءة مجموعة متنوعة من رموز QR وبدء الإجراء الصحيح على الفور. امسح رمز QR الخاص بـ WalletConnect لإنشاء اتصال جديد، أو امسح رمز الدفع في أي متجر يستخدم Open CryptoPay لتسوية الفاتورة باستخدام $oisy_short Pay.",
+			"what_is_scan_title": "$oisy_short يفهم أي رمز QR",
+			"learn_more_about_scan": "معرفة المزيد عن الماسح الضوئي",
+			"learn_more_about_pay": "معرفة المزيد عن $oisy_short Pay",
+			"scanner": "الماسح الضوئي"
 		},
 		"error": {
-			"code_link_is_not_valid": "",
-			"data_is_incompleted": ""
+			"code_link_is_not_valid": "الرمز/الرابط غير صالح",
+			"data_is_incompleted": "البيانات المستلمة غير مكتملة. بعض التفاصيل المطلوبة مفقودة."
 		}
 	},
 	"convert": {
@@ -1108,12 +1154,15 @@
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
 			"withdrawing": "",
+			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقة واحدة.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1132,7 +1181,8 @@
 			"manually_withdraw_failed": "",
 			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": "",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1481,7 +1531,10 @@
 			"amount": "",
 			"hex_data": "بيانات HEX",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
-			"sign_message": "توقيع الرسالة"
+			"sign_message": "توقيع الرسالة",
+			"connected_apps": "التطبيقات المتصلة",
+			"no_connected_apps": "لا توجد تطبيقات متصلة حاليًا.",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "على سبيل المثال: wc:a281567bb3e4..."
@@ -1794,8 +1847,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "الوصول إلى محفظة $oisy_name الخاصة بك",
-				"open_or_create": "افتح أو أنشئ محفظتك للاتصال بأمان بالتطبيق اللامركزي وبدء إدارة أصولك."
+				"open_or_create": "افتح أو أنشئ محفظتك للتفاعل بأمان مع التطبيق.",
+				"connect_your_wallet": "اتصل بمحفظة $oisy_name الخاصة بك",
+				"oisy_protects_you": "OISY يحميك!",
+				"oisy_protects_you_description": "لا يمكن للتطبيقات الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة."
 			}
 		},
 		"idle": {
@@ -1916,7 +1971,8 @@
 			"title": "النشاط الأخير"
 		},
 		"info": {
-			"btc_transactions": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل."
+			"btc_transactions": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
+			"hidden_micro_transactions": "<strong>OISY يحميك!</strong> المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">معرفة المزيد</a>"
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",

@@ -115,6 +115,7 @@ export const mapIcrcToken = ({
 			deprecated: customTokenSymbol.deprecated
 		}),
 		tags: customTokenSymbol?.tags ?? twinTokenTags ?? DEFAULT_TOKEN_TAGS,
+		...(nonNullish(customTokenSymbol?.groupData) && { groupData: customTokenSymbol.groupData }),
 		ledgerCanisterId,
 		...metadataToken,
 		...rest,

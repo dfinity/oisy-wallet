@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import SwapNearIntentsTos from '$lib/components/swap/SwapNearIntentsTos.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -57,4 +59,8 @@
 			})}
 		{/snippet}
 	</ModalValue>
+{/if}
+
+{#if $hasAcknowledgedNearIntentsSwap}
+	<SwapNearIntentsTos />
 {/if}

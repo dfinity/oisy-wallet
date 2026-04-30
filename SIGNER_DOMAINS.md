@@ -57,7 +57,19 @@ dfx deploy signer_frontend --network <network>
 dfx deploy legacy_signer_frontend --network <network>
 ```
 
-**Production (IC):** Upgrades to `frontend`, `signer_frontend`, and `legacy_signer_frontend` on the IC network go through the same **Orbit-controlled** workflow as the main wallet (station approval, `dfx-oisy` / `dfx-orbit` requests), not a one-off `dfx deploy` from a developer laptop. See [Deployment → IC](HACKING.md#ic) in HACKING.md.
+**Production (IC):** Upgrades to `frontend`, `signer_frontend`, and `legacy_signer_frontend` on the IC network go through the **Orbit-controlled** workflow (station approval, `dfx-orbit` requests), not a one-off `dfx deploy` from a developer laptop. Each target has its own reproducible Docker build script and orbit upload command:
+
+```bash
+# Signer frontend
+./scripts/docker-build.signer-frontend
+dfx-orbit request asset upload signer_frontend --files target/signer_frontend
+
+# Legacy signer frontend
+./scripts/docker-build.legacy-signer-frontend
+dfx-orbit request asset upload legacy_signer_frontend --files target/legacy_signer_frontend
+```
+
+Verification scripts for reviewers are at `scripts/dfx-orbit.validate.signer-frontend.sh` and `scripts/dfx-orbit.validate.legacy-signer-frontend.sh`. See [Deployment → IC](HACKING.md#ic) in HACKING.md for the full workflow including the main frontend.
 
 The `OISY_SIGNER_TARGET` env var is baked into each canister's `build` command in `dfx.json`, so deployers never need to set it manually. The canister name determines the build target.
 
@@ -68,7 +80,7 @@ When set, this env var affects the build in several ways:
 | Aspect                   | Default (unset)     | `signer`                     | `legacy_signer`                  |
 | ------------------------ | ------------------- | ---------------------------- | -------------------------------- |
 | `VITE_OISY_DOMAIN`       | `https://oisy.com`  | `https://signer.oisy.com`    | `https://legacy-signer.oisy.com` |
-| `VITE_APP_VERSION`       | from `package.json` | from `signer-versions.json`  | from `signer-versions.json`      |
+| `VITE_APP_VERSION`       | from `package.json` | from `package.json`          | from `signer-versions.json`      |
 | `.well-known/ic-domains` | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`         |
 | `AUTH_DERIVATION_ORIGIN` | (varies)            | Canonical origin \*          | Canonical origin \*              |
 | Plausible domain         | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`         |
@@ -79,16 +91,38 @@ When set, this env var affects the build in several ways:
 
 ### Versioning
 
-The signer frontends have their own version numbers, independent of the main wallet's `package.json` version. These are stored in `signer-versions.json`:
+The **signer** (`signer_frontend`) shares the same version as the main OISY wallet, read from `package.json`. It is released, deployed, and versioned hand-in-hand with OISY.
 
-```json
-{
-	"signer_frontend": "1.0.0",
-	"legacy_signer_frontend": "1.0.0"
-}
-```
+The **legacy signer** (`legacy_signer_frontend`) has its own independent version, stored in `signer-versions.json`.
 
-When `OISY_SIGNER_TARGET` is set, both `vite.utils.ts` and `svelte.config.js` read the version from this file instead of `package.json`. This allows each signer to be released independently -- particularly important when `legacy-signer` is frozen at v4 while `signer` advances with v5.
+When `OISY_SIGNER_TARGET=legacy_signer` is set, both `vite.utils.ts` and `svelte.config.js` read the version from `signer-versions.json`. For all other targets (including `signer`), the version falls through to `package.json`.
+
+This means:
+
+- **Signer** version advances automatically whenever the OISY wallet version is bumped (via the existing _Version Bump and Release Branch Creation_ workflow).
+- **Legacy signer** version is bumped independently via the _Legacy Signer Version Bump_ workflow. At some point the legacy signer will be frozen to a snapshot of `main` and only receive hotfixes.
+
+### Tagging convention
+
+Git tags use a scoped prefix to distinguish releases:
+
+| Target             | Tag format                | Example                |
+| ------------------ | ------------------------- | ---------------------- |
+| Main OISY + Signer | `v<semver>`               | `v2.0.3`               |
+| Legacy Signer      | `legacy-signer/v<semver>` | `legacy-signer/v1.0.1` |
+
+The slash-scoped format keeps tags filterable (`git tag -l 'legacy-signer/*'`) and avoids collisions with the main `v*` tags.
+
+**Release pipelines:**
+
+| Step              | Main OISY + Signer                                              | Legacy Signer                                                   |
+| ----------------- | --------------------------------------------------------------- | --------------------------------------------------------------- |
+| Version bump      | _Version Bump and Release Branch Creation_ (`bump-version.yml`) | _Legacy Signer Version Bump_ (`bump-legacy-signer-version.yml`) |
+| PR branch         | `chore(release)/v2.0.3`                                         | `chore(release)/legacy-signer-v1.0.1`                           |
+| Auto-tag on merge | `tag-release.yml` → `v2.0.3`                                    | `tag-legacy-signer-release.yml` → `legacy-signer/v1.0.1`        |
+| Beta deploy       | `deploy-to-environment.yml` (all canisters)                     | `deploy-to-environment.yml` (`legacy_signer_frontend` only)     |
+| Release notes     | `release-notes.yml` on `v*` push                                | N/A                                                             |
+| Production (IC)   | Orbit workflow                                                  | Orbit workflow                                                  |
 
 ### Canister definitions
 
@@ -129,15 +163,20 @@ Each signer domain reports to Plausible under its own domain name. This means yo
 
 ## Key Files
 
-| File                                              | Purpose                                                |
-| ------------------------------------------------- | ------------------------------------------------------ |
-| `signer-versions.json`                            | Independent version numbers for signer frontends       |
-| `scripts/domains.json`                            | Domain-to-URL mapping per canister + network           |
-| `dfx.json`                                        | Canister definitions and network config                |
-| `canister_ids.json`                               | Canister IDs per network                               |
-| `vite.utils.ts`                                   | Build-time domain resolution + globals                 |
-| `scripts/build.utils.mjs`                         | Post-process domain resolution                         |
-| `src/frontend/src/hooks.ts`                       | SvelteKit reroute hook (signer -> `/sign`)             |
-| `src/frontend/src/lib/constants/app.constants.ts` | `SIGNER_TARGET`, `IS_SIGNER_DOMAIN`, derivation origin |
-| `src/frontend/src/env/plausible.env.ts`           | Plausible domain per signer target                     |
-| `.env.production` / `.env.staging` / `.env.beta`  | `VITE_AUTH_ALTERNATIVE_ORIGINS` with signer domains    |
+| File                                                   | Purpose                                                 |
+| ------------------------------------------------------ | ------------------------------------------------------- |
+| `signer-versions.json`                                 | Independent version number for legacy signer frontend   |
+| `scripts/domains.json`                                 | Domain-to-URL mapping per canister + network            |
+| `dfx.json`                                             | Canister definitions and network config                 |
+| `canister_ids.json`                                    | Canister IDs per network                                |
+| `vite.utils.ts`                                        | Build-time domain resolution + globals                  |
+| `scripts/build.utils.mjs`                              | Post-process domain resolution                          |
+| `scripts/docker-build.signer-frontend`                 | Reproducible Docker build for signer frontend           |
+| `scripts/docker-build.legacy-signer-frontend`          | Reproducible Docker build for legacy signer frontend    |
+| `scripts/dfx-orbit.validate.signer-frontend.sh`        | Orbit verification for signer frontend proposals        |
+| `scripts/dfx-orbit.validate.legacy-signer-frontend.sh` | Orbit verification for legacy signer frontend proposals |
+| `src/frontend/src/hooks.ts`                            | SvelteKit reroute hook (signer -> `/sign`)              |
+| `src/frontend/src/lib/constants/app.constants.ts`      | `SIGNER_TARGET`, `IS_SIGNER_DOMAIN`, derivation origin  |
+| `src/frontend/src/env/plausible.env.ts`                | Plausible domain per signer target                      |
+| `.env.production` / `.env.staging` / `.env.beta`       | `VITE_AUTH_ALTERNATIVE_ORIGINS` with signer domains     |
+| `.github/workflows/bump-legacy-signer-version.yml`     | Workflow to independently bump legacy signer version    |

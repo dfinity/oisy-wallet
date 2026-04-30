@@ -7,6 +7,8 @@
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+
+	let loading = $state(false);
 </script>
 
 <div
@@ -19,7 +21,7 @@
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
 
 		<div class="mr-2">
-			<AiAssistantResetButton />
+			<AiAssistantResetButton {loading} />
 		</div>
 
 		<button
@@ -31,5 +33,5 @@
 		</button>
 	</div>
 
-	<AiAssistantChat />
+	<AiAssistantChat bind:loading />
 </div>

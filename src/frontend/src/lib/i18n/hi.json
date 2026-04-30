@@ -45,7 +45,8 @@
 			"sorting": "छँटाई",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -61,11 +62,12 @@
 			"switch_currency": "मुद्रा बदलें",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up_one_level": "एक स्तर ऊपर जाएं"
 		},
 		"warning": {
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
-			"standalone_mode": "",
+			"standalone_mode": "जब किसी ऐप और $oisy_short दोनों को होम स्क्रीन पर इंस्टॉल किया गया हो, तो कनेक्शन संबंधी ज्ञात समस्याएं हो सकती हैं। यदि आपको $oisy_short से कनेक्ट करने या ट्रांज़ैक्शन साइन करने में समस्या आती है, तो कृपया ऐप को एक सामान्य ब्राउज़र से खोलें। हम एक समाधान पर काम कर रहे हैं जो जल्द ही उपलब्ध होगा। <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">अधिक पढ़ें</a>",
 			"video_not_supported": ""
 		}
 	},
@@ -77,6 +79,8 @@
 			"activity": "गतिविधि",
 			"airdrops": "पुरस्कार",
 			"earning": "कमाएँ और पुरस्कार",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "GitHub पर स्रोत कोड",
 			"view_on_explorer": "एक्सप्लोरर पर देखें",
 			"source_code": "स्रोत कोड",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "ऐप एक्सप्लोरर खोलें",
 			"activity": "गतिविधि दृश्य खोलें",
 			"airdrops": "पुरस्कार दृश्य खोलें",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "आपका वॉलेट पता, सेटिंग्स, साइन-आउट और बाहरी लिंक",
 			"documentation": "$oisy_name दस्तावेज़ खोलें",
 			"support": "$oisy_name दस्तावेज़ों का समर्थन अनुभाग खोलें",
@@ -120,16 +126,26 @@
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
 			"social_login": ""
 		},
 		"alt": {
-			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
+			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
 		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
@@ -138,12 +154,6 @@
 		},
 		"error": {
 			"no_internet_identity": "कोई इंटरनेट पहचान नहीं।",
-			"invalid_pouh_credential": "क्षमा करें, लेकिन मानवता क्रेडेंशियल को सत्यापित करते समय एक त्रुटि हुई। कृपया जारीकर्ता से संपर्क करें और क्रेडेंशियल फिर से अनुरोध करें।",
-			"error_validating_pouh_credential_oisy": "क्षमा करें, लेकिन $oisy_short में मानवता क्रेडेंशियल को सत्यापित करते समय एक त्रुटि हुई: $error",
-			"error_validating_pouh_credential": "क्षमा करें, लेकिन मानवता क्रेडेंशियल को सत्यापित करते समय एक त्रुटि हुई।",
-			"error_requesting_pouh_credential": "क्षमा करें, लेकिन मानवता क्रेडेंशियल का अनुरोध करते समय एक त्रुटि हुई।",
-			"missing_pouh_issuer_origin": "क्षमा करें, लेकिन मानवता क्रेडेंशियल का अनुरोध करते समय एक त्रुटि हुई। जारीकर्ता का मूल गायब है।",
-			"no_pouh_credential": "क्षमा करें, लेकिन मानवता क्रेडेंशियल का अनुरोध करते समय एक त्रुटि हुई। क्या आपके पास Decide AI में एक वैध क्रेडेंशियल है?",
 			"error_while_signing_in": "साइन-इन करते समय कुछ गलत हो गया।",
 			"unexpected_issue_with_syncing": "आपकी प्रमाणीकरण की स्थिति को सिंक्रनाइज़ करते समय अप्रत्याशित समस्या।"
 		},
@@ -440,6 +450,31 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -583,7 +618,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: एपिसोड 6",
+				"card_title": "OISY Sprinkles: एपिसोड 6 अब लाइव है 🎉",
 				"one_liner": "सक्रिय रहने, दूसरों को रेफर करने और OISY को कई चेन पर उपयोग करने के लिए Sprinkles कमाएं। आपके कार्य आपके पुरस्कार बढ़ाते हैं, और सक्रिय रेफरल उन्हें और बढ़ाते हैं।<br/>साथ ही, अब अधिक चेन का मतलब है जीतने के बेहतर अवसर।",
 				"participate_title": "गतिविधि और रेफरल के लिए टोकन कमाएं। अधिक चेन का मतलब है अधिक अवसर।",
 				"description": "योग्य बनने के लिए सक्रिय रहें: अक्सर लॉग इन करें, वॉलेट क्रियाएं पूरी करें और कम से कम 5 $ रखें।<br/>हर सक्रिय चेन मल्टीचेन मल्टीप्लायर के साथ आपकी संभावनाएं बढ़ाती है।<br/>योग्य दोस्तों से 10% कमाएं।",
@@ -600,8 +635,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "आपने साप्ताहिक बोनस ड्रॉप जीता",
-						"description": "आपने हमारे साप्ताहिक बोनस ड्रॉप में से एक जीता है।<br>अधिक जीतने के लिए सक्रिय रहें और रेफर करते रहें",
+						"title": "आज के सबसे बड़े OISY स्प्रिंकल्स कमाने के लिए बधाई!",
+						"description": "आपने अभी हमारा शीर्ष स्प्रिंकल्स पुरस्कार अर्जित किया है<br>सक्रिय रहें, और अधिक जीतने के लिए रेफर करते रहें।",
 						"share_href": ""
 					},
 					"referral": {
@@ -733,11 +768,6 @@
 			"active_networks_description": "उन नेटवर्कों का चयन करें जिनके साथ आप $oisy_name में काम करना चाहते हैं। निष्क्रिय नेटवर्कों से टोकन और लेनदेन आपके उपलब्ध बैलेंस में नहीं दिखेंगे या शामिल नहीं होंगे।",
 			"enable_network": "नेटवर्क सक्षम करें",
 			"disable_network": "नेटवर्क अक्षम करें",
-			"credentials_title": "क्रेडेंशियल",
-			"pouh_credential": "मानवता क्रेडेंशियल",
-			"pouh_credential_description": "मानवता क्रेडेंशियल मानवता का एक प्रमाण है। इसे Decide AI द्वारा जारी किया जाता है।",
-			"present_pouh_credential": "प्रस्तुत करें",
-			"pouh_credential_verified": "सत्यापित ✅",
 			"appearance": "दिखावट",
 			"appearance_light": "लाइट",
 			"appearance_dark": "डार्क",
@@ -748,7 +778,13 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": ""
+			"save_beta_feature_success": "आपकी बीटा फ़ीचर सेटिंग्स अपडेट कर दी गई हैं।",
+			"hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन छिपाएं",
+			"hide_micro_transactions_description": "बहुत छोटे मूल्यों वाले लेनदेन आमतौर पर स्पैम होते हैं और उपयोगकर्ता को वैध पते के बजाय प्रेषक के पते को कॉपी करने के लिए धोखा देने का इरादा रखते हैं। इन्हें लेनदेन सूचियों में छिपाने की अनुशंसा की जाती है।",
+			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
+			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
+			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "परीक्षण नेटवर्क दिखाने या छिपाने के लिए टॉगल करें",
@@ -951,22 +987,25 @@
 		"error": {
 			"unexpected": "लेनदेन भेजते समय कुछ गलत हो गया।",
 			"destination_address_unknown": "ETH गंतव्य पता अज्ञात है",
-			"metamask_connected": "आपके खाते प्राप्त नहीं कर सकते। क्या आपका मेटामास्क खुला और पहले से ही जुड़ा हुआ है?",
-			"metamask_no_accounts": "कोई मेटामास्क खाते नहीं मिले।",
-			"metamask_switch_network": "मेटामास्क को चेन आईडी $chain_id पर स्विच करने का अनुरोध नहीं कर सकता। क्या आपका मेटामास्क $network_name का उपयोग कर रहा है?",
-			"erc20_data_undefined": "ERC20 लेनदेन डेटा अपरिभाषित या शून्य नहीं हो सकता है।",
-			"data_undefined": "लेनदेन डेटा अपरिभाषित या शून्य नहीं हो सकता है।",
-			"no_identity_calculate_fee": "अपने प्रिंसिपल के लिए शुल्क की गणना करने के लिए कोई पहचान प्रदान नहीं की गई।",
-			"invalid_destination": "गंतव्य अमान्य है। कृपया एक वैध वॉलेट पता या गंतव्य के साथ पुनः प्रयास करें।",
+			"metamask_connected": "आपके खाते प्राप्त नहीं किए जा सकते। क्या आपका Metamask खुला और पहले से जुड़ा हुआ है?",
+			"metamask_no_accounts": "कोई Metamask खाता नहीं मिला।",
+			"metamask_switch_network": "Metamask को chain ID $chain_id पर स्विच करने का अनुरोध नहीं किया जा सकता। क्या आपका Metamask $network_name का उपयोग कर रहा है?",
+			"erc20_data_undefined": "ERC20 लेनदेन डेटा अपरिभाषित या null नहीं हो सकता।",
+			"data_undefined": "लेनदेन डेटा अपरिभाषित या null नहीं हो सकता।",
+			"no_identity_calculate_fee": "इसके principal के लिए शुल्क की गणना करने हेतु कोई पहचान प्रदान नहीं की गई।",
+			"invalid_destination": "गंतव्य अमान्य है। कृपया एक वैध वॉलेट पते या गंतव्य के साथ पुनः प्रयास करें।",
 			"incompatible_token": "टोकन असंगत है। कृपया एक संगत टोकन के साथ पुनः प्रयास करें।",
-			"no_btc_network_id": "वर्तमान नेटवर्क ($networkId) बिटकॉइन नेटवर्क नहीं है।",
-			"no_solana_network_id": "वर्तमान नेटवर्क ($networkId) सोलाना नेटवर्क नहीं है।",
-			"no_pending_bitcoin_transaction": "लंबित बिटकॉइन लेनदेन लोड करते समय एक त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।",
+			"no_btc_network_id": "वर्तमान नेटवर्क ($networkId) Bitcoin नेटवर्क नहीं है।",
+			"no_solana_network_id": "वर्तमान नेटवर्क ($networkId) Solana नेटवर्क नहीं है।",
+			"no_pending_bitcoin_transaction": "लंबित Bitcoin लेनदेन लोड करते समय एक त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।",
 			"unexpected_utxos_fee": "लेनदेन शुल्क की गणना करते समय कुछ गलत हो गया।",
-			"unable_to_retrieve_amount": "लागू नहीं है (पुनः प्राप्त करने में असमर्थ)",
-			"solana_transaction_expired": "आपका लेनदेन सोलाना नेटवर्क द्वारा संसाधित नहीं किया गया था और समाप्त हो गया था, सबसे अधिक संभावना है क्योंकि प्रदान किया गया प्राथमिकता शुल्क पर्याप्त नहीं था। हमने इसे नवीनतम अनुशंसित राशि में अपडेट कर दिया है, इसलिए कृपया इसे फिर से भेजने का प्रयास करें।",
-			"solana_confirmation_failed": "हमें आपके द्वारा अभी बनाए गए लेनदेन के लिए कोई पुष्टि नहीं मिली। कृपया कुछ सेकंड प्रतीक्षा करें और फिर अपनी टोकन की लेनदेन सूची जांचें कि क्या आपका लेनदेन सही ढंग से बनाया गया था।",
-			"fee_calc_unsupported_standard": ""
+			"unable_to_retrieve_amount": "n/a (प्राप्त करने में असमर्थ)",
+			"solana_transaction_expired": "आपका लेनदेन Solana नेटवर्क द्वारा संसाधित नहीं किया गया और समाप्त हो गया, सबसे अधिक संभावना है क्योंकि प्रदान की गई प्राथमिकता शुल्क पर्याप्त नहीं थी। हमने इसे नवीनतम अनुशंसित राशि पर अपडेट कर दिया है, इसलिए कृपया पुनः प्रयास करें।",
+			"solana_confirmation_failed": "हमें आपके द्वारा अभी बनाए गए लेनदेन की कोई पुष्टि प्राप्त नहीं हुई। कृपया कुछ सेकंड प्रतीक्षा करें और फिर अपने टोकन की लेनदेन सूची जांचें कि आपका लेनदेन सही तरीके से बनाया गया था या नहीं।",
+			"solana_insufficient_funds": "इस लेनदेन को पूरा करने के लिए आपके टोकन का बैलेंस पर्याप्त नहीं है। आपका बैलेंस अंतिम बार प्रदर्शित होने के बाद से बदल सकता है।",
+			"solana_insufficient_funds_for_fee": "लेनदेन शुल्क को कवर करने के लिए आपका SOL बैलेंस पर्याप्त नहीं है।",
+			"solana_insufficient_funds_for_rent": "खाता निर्माण के लिए आवश्यक किराए को कवर करने के लिए आपका SOL बैलेंस पर्याप्त नहीं है।",
+			"fee_calc_unsupported_standard": "शुल्क की गणना नहीं की जा सकी क्योंकि प्रदान किया गया टोकन मानक समर्थित नहीं है।"
 		}
 	},
 	"mint": {
@@ -985,39 +1024,46 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "",
-			"pay_to": "",
-			"powered_by": "",
-			"recipient": "",
-			"name": "",
-			"address": "",
-			"country": "",
-			"phone_number": "",
-			"email_address": "",
-			"website": "",
-			"enter_manually": "",
-			"url_or_code": "",
-			"enter_or_paste_code": "",
-			"scan": "",
-			"pay": "",
-			"pay_amount": "",
-			"go_to_assets": "",
-			"supported_tokens": "",
-			"no_supported_tokens": "",
-			"pay_with": "",
-			"select_token": "",
-			"select_different_token": "",
-			"tokens_available": "",
-			"select_token_to_pay": "",
-			"pay_at_successful": "",
-			"pay_at_failure": "",
-			"try_again": "",
-			"payment_confirmed": "",
-			"payment_failed": ""
+			"scan_qr_code": "QR कोड स्कैन करें",
+			"pay_to": "$receipt को भुगतान करें",
+			"powered_by": "द्वारा संचालित",
+			"recipient": "प्राप्तकर्ता",
+			"name": "नाम",
+			"address": "पता",
+			"country": "देश",
+			"phone_number": "फ़ोन नंबर",
+			"email_address": "ईमेल पता",
+			"website": "वेबसाइट",
+			"enter_manually": "मैन्युअल रूप से दर्ज करें",
+			"url_or_code": "URL या कोड",
+			"enter_or_paste_code": "कोड दर्ज करें या पेस्ट करें",
+			"scan": "स्कैन",
+			"pay": "भुगतान करें",
+			"pay_amount": "$amount का भुगतान करें",
+			"go_to_assets": "एसेट पर जाएं",
+			"supported_tokens": "Open CryptoPay निम्नलिखित टोकन का समर्थन करता है: ETH, USDC, USDT, POL, ARB, WBTC, XMR, dEURO, ZCHF, आदि।",
+			"no_supported_tokens": "आपके पास कोई समर्थित टोकन नहीं है",
+			"pay_with": "इससे भुगतान करें",
+			"select_token": "टोकन चुनें",
+			"select_different_token": "दूसरा टोकन चुनें",
+			"tokens_available": "$amount टोकन उपलब्ध",
+			"select_token_to_pay": "भुगतान के लिए टोकन चुनें",
+			"pay_at_successful": "$receipt पर भुगतान किया गया",
+			"pay_at_failure": "$receipt पर भुगतान विफल",
+			"try_again": "पुनः प्रयास करें",
+			"payment_confirmed": "भुगतान की पुष्टि हो गई",
+			"payment_failed": "भुगतान विफल",
+			"what_is_scan": "स्कैनर क्या है",
+			"no_camera_permission": "QR कोड स्कैन करने के लिए, आपको अपने ब्राउज़र की साइट सेटिंग में कैमरा एक्सेस की अनुमति देनी होगी।",
+			"what_is_scan_description": "$oisy_short स्कैनर विभिन्न प्रकार के QR कोड पढ़ सकता है और तुरंत सही कार्रवाई शुरू कर सकता है। नया कनेक्शन स्थापित करने के लिए WalletConnect QR कोड स्कैन करें, या Open CryptoPay का उपयोग करने वाली किसी भी दुकान में चेकआउट कोड स्कैन करके $oisy_short Pay से बिल का भुगतान करें।",
+			"what_is_scan_title": "$oisy_short किसी भी QR कोड को समझता है",
+			"learn_more_about_scan": "स्कैनर के बारे में और जानें",
+			"learn_more_about_pay": "$oisy_short Pay के बारे में और जानें",
+			"scanner": "स्कैनर"
 		},
 		"error": {
-			"code_link_is_not_valid": "",
-			"data_is_incompleted": ""
+			"code_link_is_not_valid": "कोड/लिंक मान्य नहीं है",
+			"data_is_incompleted": "प्राप्त डेटा अपूर्ण है। कुछ आवश्यक विवरण गायब हैं।"
 		}
 	},
 	"convert": {
@@ -1108,12 +1154,15 @@
 			"select_token": "टोकन चुनें",
 			"select_network_filter": "नेटवर्क चुनें",
 			"withdrawing": "निकासी कर रहा है...",
+			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें एक मिनट तक का समय लग सकता है।)",
 			"network_cost": "नेटवर्क लागत",
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1132,7 +1181,8 @@
 			"manually_withdraw_failed": "आपके फंड निकालने में विफल रहा। <br> कृपया पुनः प्रयास करें या अनुसरण करें",
 			"swap_sucess_withdraw_failed": "स्वैप पूरा हो गया, लेकिन आपके टोकन स्वचालित रूप से वापस नहीं लिए जा सके। उन्हें मैन्युअल रूप से वापस लेने के लिए नीचे दिए गए निकालें बटन पर क्लिक करें।<br> या अनुसरण करें",
 			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1481,7 +1531,10 @@
 			"amount": "",
 			"hex_data": "हेक्स डेटा",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
-			"sign_message": "संदेश पर हस्ताक्षर करें"
+			"sign_message": "संदेश पर हस्ताक्षर करें",
+			"connected_apps": "जुड़े हुए ऐप्स",
+			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "उदाहरण के लिए wc:a281567bb3e4..."
@@ -1794,8 +1847,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "अपने $oisy_name तक पहुंचें",
-				"open_or_create": "dApp से सुरक्षित रूप से कनेक्ट होने और अपनी संपत्तियों का प्रबंधन शुरू करने के लिए अपना वॉलेट खोलें या बनाएँ।"
+				"open_or_create": "एप्लिकेशन के साथ सुरक्षित रूप से इंटरैक्ट करने के लिए अपना वॉलेट खोलें या बनाएं।",
+				"connect_your_wallet": "अपने $oisy_name से कनेक्ट करें",
+				"oisy_protects_you": "OISY आपकी सुरक्षा करता है!",
+				"oisy_protects_you_description": "एप्लिकेशन आपके फंड तक सीधे नहीं पहुंच सकते, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए."
 			}
 		},
 		"idle": {
@@ -1916,7 +1971,8 @@
 			"title": "हाल की गतिविधि"
 		},
 		"info": {
-			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।"
+			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
+			"hidden_micro_transactions": "<strong>OISY आपकी रक्षा करता है!</strong> बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",

@@ -7,6 +7,7 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
+import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 import type { NetworkId } from '$lib/types/network';
 import { SwapProvider, type SwapProvidersConfig } from '$lib/types/swap';
 
@@ -65,6 +66,15 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 					logo: '/images/dapps/near-intents-logo.svg'
 				}
 			}
+		: {}),
+	...(ONESEC_SWAP_ENABLED
+		? {
+				[SwapProvider.ONE_SEC]: {
+					website: 'https://1sec.to/',
+					name: '1Sec',
+					logo: '/images/dapps/onesec-logo.svg'
+				}
+			}
 		: {})
 };
 
@@ -80,12 +90,26 @@ const SUPPORTED_CROSS_SWAP_NETWORK_IDS = [
 	...SUPPORTED_CROSS_SWAP_SOL_NETWORK_IDS
 ];
 
+// EVM networks supported by OneSec for ICP bridging
+export const ONESEC_EVM_NETWORK_IDS = [
+	ETHEREUM_NETWORK_ID,
+	BASE_NETWORK_ID,
+	ARBITRUM_MAINNET_NETWORK_ID
+];
+
+// For OneSec-supporting EVM chains, also allow ICP as a swap destination
+const SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP = ONESEC_SWAP_ENABLED
+	? [ICP_NETWORK_ID, ...SUPPORTED_CROSS_SWAP_NETWORK_IDS]
+	: SUPPORTED_CROSS_SWAP_NETWORK_IDS;
+
 export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
-	[ICP_NETWORK_ID]: [ICP_NETWORK_ID],
-	[ETHEREUM_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	[ARBITRUM_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+	[ICP_NETWORK_ID]: ONESEC_SWAP_ENABLED
+		? [ICP_NETWORK_ID, ...ONESEC_EVM_NETWORK_IDS]
+		: [ICP_NETWORK_ID],
+	[ETHEREUM_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP,
+	[ARBITRUM_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP,
 	[BSC_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
 	[POLYGON_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	[BASE_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+	[BASE_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP,
 	[SOLANA_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS
 };

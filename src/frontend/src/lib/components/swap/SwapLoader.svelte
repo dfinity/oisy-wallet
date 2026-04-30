@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -9,10 +9,12 @@
 	} from '$icp/services/icrc.services';
 	import { allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { loadSwapSupportedTokens } from '$lib/services/swap-supported-tokens.services';
 	import { loadKongSwapTokens as loadKongSwapTokensService } from '$lib/services/swap.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
+	import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
 
@@ -47,6 +49,18 @@
 		}
 	};
 
+	const loadSupportedTokens = async (): Promise<void> => {
+		if (isNullish($authIdentity) || nonNullish($swapSupportedTokensStore)) {
+			return;
+		}
+
+		try {
+			await loadSwapSupportedTokens({ identity: $authIdentity });
+		} catch (_err: unknown) {
+			consoleWarn('Failed to load swap supported tokens.');
+		}
+	};
+
 	const preloadSwapData = async (onSwapReady: () => void) => {
 		if (isNullish($authIdentity)) {
 			return;
@@ -65,13 +79,16 @@
 
 		onSwapReady();
 
-		await loadDisabledIcrcTokensBalances({
-			identity: $authIdentity,
-			disabledIcrcTokens: $allSortedIcrcTokens
-		});
-		await loadDisabledIcrcTokensExchanges({
-			disabledIcrcTokens: $allSortedIcrcTokens
-		});
+		await Promise.all([
+			loadSupportedTokens(),
+			loadDisabledIcrcTokensBalances({
+				identity: $authIdentity,
+				disabledIcrcTokens: $allSortedIcrcTokens
+			}),
+			loadDisabledIcrcTokensExchanges({
+				disabledIcrcTokens: $allSortedIcrcTokens
+			})
+		]);
 	};
 </script>
 

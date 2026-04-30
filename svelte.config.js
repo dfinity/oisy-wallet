@@ -1,4 +1,4 @@
-import { nonNullish } from '@dfinity/utils';
+import { notEmptyString } from '@dfinity/utils';
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { readFileSync } from 'node:fs';
@@ -12,16 +12,11 @@ const signerVersionsFile = fileURLToPath(new URL('signer-versions.json', import.
 
 const signerVersions = JSON.parse(readFileSync(signerVersionsFile, 'utf8'));
 
-const SIGNER_TARGET_TO_KEY = {
-	signer: 'signer_frontend',
-	legacy_signer: 'legacy_signer_frontend'
-};
-
 const signerTarget = process.env.OISY_SIGNER_TARGET;
 
-const signerKey = signerTarget && SIGNER_TARGET_TO_KEY[signerTarget];
-
-const version = (signerKey && signerVersions[signerKey]) ?? packageVersion;
+const version =
+	(signerTarget === 'legacy_signer' ? signerVersions['legacy_signer_frontend'] : undefined) ??
+	packageVersion;
 
 const isAiApp = process.env.OISY_APP === 'ai';
 const appRoot = isAiApp ? 'src/ai-frontend' : 'src/frontend';
@@ -39,7 +34,7 @@ const config = {
 			...(isAiApp ? { pages: 'build-ai', assets: 'build-ai' } : {})
 		}),
 		prerender: {
-			...(nonNullish(signerTarget) && { handleUnseenRoutes: 'ignore' })
+			...(notEmptyString(signerTarget) && { handleUnseenRoutes: 'ignore' })
 		},
 		files: {
 			assets: filesPath('static'),
