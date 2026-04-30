@@ -142,10 +142,10 @@
 			"session_locked": "Tu sesión fue bloqueada."
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Los nuevos registros están restringidos actualmente. Por favor, inténtalo de nuevo más tarde."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "Actualmente, el registro de nuevos usuarios no es posible. Los usuarios existentes pueden usar $oisy_short con normalidad."
 		},
 		"warning": {
 			"not_signed_in": "No has iniciado sesión. Por favor, inicia sesión para continuar.",

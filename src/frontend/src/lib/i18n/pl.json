@@ -142,10 +142,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Nowe rejestracje są obecnie ograniczone. Spróbuj ponownie później."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "Rejestracja nowych użytkowników jest obecnie niemożliwa. Istniejący użytkownicy mogą korzystać z $oisy_short normalnie."
 		},
 		"warning": {
 			"not_signed_in": "Nie jesteś zalogowany. Zaloguj się, aby kontynuować.",

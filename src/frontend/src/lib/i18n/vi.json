@@ -142,10 +142,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Đăng ký mới hiện đang bị hạn chế. Vui lòng thử lại sau."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "Hiện tại, việc đăng ký người dùng mới không thể thực hiện được. Người dùng hiện tại có thể sử dụng $oisy_short bình thường."
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
