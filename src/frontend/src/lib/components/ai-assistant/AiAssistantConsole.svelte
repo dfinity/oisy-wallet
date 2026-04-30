@@ -3,26 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import AiAssistantChat from '$lib/components/ai-assistant/AiAssistantChat.svelte';
 	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
-	import IconRepeat from '$lib/components/icons/IconRepeat.svelte';
-	import AiAssistantActionButton from '$lib/components/ai-assistant/AiAssistantActionButton.svelte';
-	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
-	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
 	import AiAssistantResetButton from '$lib/components/ai-assistant/AiAssistantResetButton.svelte';
-	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
-	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
-	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
-	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
-	import {
-		AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
-		AI_ASSISTANT_MESSAGE_SENT
-	} from '$lib/constants/analytics.constants';
-	import {
-		aiAssistantLlmMessages,
-		aiAssistantChatMessages
-	} from '$lib/derived/ai-assistant.derived';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { askLlm } from '$lib/services/ai-assistant.services';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
