@@ -247,7 +247,6 @@ type BtcGetFeePercentilesResult = variant {
 	// The fee was not selected due to an error.
 	Err : SelectedUtxosFeeError
 };
-// Errors that can occur when retrieving pending Bitcoin transactions.
 type BtcGetPendingTransactionsError = variant {
 	// The provided II delegation chain is missing or failed verification.
 	InvalidDelegationChain : record { msg : text };
@@ -453,8 +452,9 @@ type GetAgreementHistoryResult = variant {
 	Ok : vec AgreementHistoryEntry;
 	Err : GetAgreementHistoryError
 };
-// Types related to topping up the cycles ledger account for use with the signer.
+// Errors that can occur when retrieving the allowed cycles from the cycles ledger.
 type GetAllowedCyclesError = variant {
+	// The caller has exceeded the call rate limit.
 	RateLimited : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
@@ -849,6 +849,7 @@ type TopUpCyclesLedgerError = variant {
 		min : nat8;
 		percentage : nat8
 	};
+	// The caller has exceeded the call rate limit.
 	RateLimited : RateLimitError;
 	CouldNotGetBalanceFromCyclesLedger;
 	CouldNotTopUpCyclesLedger : record { tried_to_send : nat; available : nat }
