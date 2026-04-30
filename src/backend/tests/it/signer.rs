@@ -591,6 +591,7 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
 fn test_get_allowed_cycles_rate_limited_after_exceeding_limit() {
     let pic_setup = setup_with_cycles_ledger();
     let caller = Principal::from_text(USER_1).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // 10 calls within the window should succeed (rate limit: 10/min).
     for i in 0..10 {
@@ -626,6 +627,7 @@ fn test_get_allowed_cycles_rate_limited_after_exceeding_limit() {
 fn test_get_allowed_cycles_rate_limit_resets_after_window() {
     let pic_setup = setup_with_cycles_ledger();
     let caller = Principal::from_text(USER_1).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Exhaust the rate limit.
     for _ in 0..10 {
@@ -658,6 +660,8 @@ fn test_get_allowed_cycles_rate_limit_is_per_caller() {
     let pic_setup = setup_with_cycles_ledger();
     let caller_a = Principal::from_text(USER_1).unwrap();
     let caller_b = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller_a);
+    pic_setup.ensure_user_profile(caller_b);
 
     // Exhaust caller_a's rate limit.
     for _ in 0..10 {
@@ -690,10 +694,22 @@ fn test_top_up_cycles_ledger_rate_limited_after_exceeding_limit() {
     let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
     let caller = controller();
 
+    // Use a threshold of 0 so the cycles-ledger balance is always considered
+    // sufficient and no cycles are actually spent on the inter-canister
+    // deposit call. This keeps the canister's cycle balance stable across
+    // the burst, isolating the test to the rate-limit behaviour.
+    let request = TopUpCyclesLedgerRequest {
+        threshold: Some(Nat::from(0u64)),
+        percentage: None,
+    };
+
     // 5 calls within the window should succeed (rate limit: 5/min).
     for i in 0..5 {
-        let result =
-            pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
+        let result = pic_setup.update::<TopUpCyclesLedgerResult>(
+            caller,
+            "top_up_cycles_ledger",
+            Some(request.clone()),
+        );
         assert!(
             matches!(result, Ok(TopUpCyclesLedgerResult::Ok(_))),
             "call {i} within the rate-limit window should succeed: {result:?}",
@@ -701,7 +717,11 @@ fn test_top_up_cycles_ledger_rate_limited_after_exceeding_limit() {
     }
 
     // The 6th call must be rate-limited.
-    let result = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
+    let result = pic_setup.update::<TopUpCyclesLedgerResult>(
+        caller,
+        "top_up_cycles_ledger",
+        Some(request.clone()),
+    );
     match result {
         Ok(TopUpCyclesLedgerResult::Err(TopUpCyclesLedgerError::RateLimited(ref e))) => {
             assert_eq!(e.max_calls, 5, "rate limit should allow 5 calls");
