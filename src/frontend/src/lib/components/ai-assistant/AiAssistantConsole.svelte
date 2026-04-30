@@ -5,8 +5,8 @@
 	import AiAssistantActionButton from '$lib/components/ai-assistant/AiAssistantActionButton.svelte';
 	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
 	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
+	import AiAssistantResetButton from '$lib/components/ai-assistant/AiAssistantResetButton.svelte';
 	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
-	import IconRepeat from '$lib/components/icons/IconRepeat.svelte';
 	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
@@ -156,17 +156,7 @@
 
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
 
-		<button
-			class="mr-2 transition-colors"
-			class:hover:text-primary={!loading}
-			class:text-tertiary={!loading}
-			class:text-tertiary-inverted={loading}
-			aria-label={$i18n.ai_assistant.text.reset_chat_history}
-			disabled={loading}
-			onclick={aiAssistantStore.resetChatHistory}
-		>
-			<IconRepeat size="18" />
-		</button>
+		<AiAssistantResetButton {loading} />
 
 		<button
 			class="text-tertiary transition-colors hover:text-primary"
