@@ -7,7 +7,10 @@ use shared::types::{
     },
 };
 
-use crate::{contacts, utils::guards::caller_is_not_anonymous};
+use crate::{
+    contacts,
+    utils::guards::{caller_is_not_anonymous, caller_is_registered_user},
+};
 
 /// Creates a new contact for the caller.
 ///
@@ -17,7 +20,7 @@ use crate::{contacts, utils::guards::caller_is_not_anonymous};
 /// # Returns
 /// The created contact on success.
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
     let result = contacts::create_contact(request).await;
@@ -28,7 +31,7 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
     let result = contacts::update_contact(request);
@@ -42,7 +45,7 @@ pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
 ///
 /// # Notes
 /// This operation is idempotent - it will return OK if the contact has already been deleted.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
     let result = contacts::delete_contact(contact_id);

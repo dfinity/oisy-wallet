@@ -7,7 +7,7 @@ import type {
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Resolves the provider-group info and the token identifier used for matching
@@ -21,25 +21,27 @@ const resolveSwapTokenLookup = ({
 }: {
 	token: Token;
 	supportedData: SwapSupportedTokensData;
-}): { info: SwapSupportedTokensInfo; identifier: string } | undefined => {
+}):
+	| { info: SwapSupportedTokensInfo; identifier: string; category: 'icp' | 'evm' | 'sol' }
+	| undefined => {
 	if (isIcToken(token)) {
-		return { info: supportedData.icp, identifier: token.ledgerCanisterId };
+		return { info: supportedData.icp, identifier: token.ledgerCanisterId, category: 'icp' };
 	}
 
 	if (isTokenErcFungible(token)) {
-		return { info: supportedData.evm, identifier: token.address.toLowerCase() };
+		return { info: supportedData.evm, identifier: token.address.toLowerCase(), category: 'evm' };
 	}
 
 	if (isTokenSpl(token)) {
-		return { info: supportedData.sol, identifier: token.address };
+		return { info: supportedData.sol, identifier: token.address, category: 'sol' };
 	}
 
 	if (token.standard.code === 'ethereum') {
-		return { info: supportedData.evm, identifier: token.symbol.toLowerCase() };
+		return { info: supportedData.evm, identifier: token.symbol.toLowerCase(), category: 'evm' };
 	}
 
 	if (token.standard.code === 'solana') {
-		return { info: supportedData.sol, identifier: token.symbol.toLowerCase() };
+		return { info: supportedData.sol, identifier: token.symbol.toLowerCase(), category: 'sol' };
 	}
 };
 
@@ -55,13 +57,19 @@ const resolveSwapTokenLookup = ({
  * - S  = union of supported tokens across providers that expose a list
  * - A  = active (enabled) tokens
  * - I  = inactive (disabled) tokens
+ *
+ * The optional `compatibleTokenIds` parameter narrows destinations on a per-category basis.
+ * Only categories present in the map are filtered; others pass through unchanged.
+ * This lets cross-chain providers restrict EVM destinations without hiding same-chain ICP tokens.
  */
 export const filterSwapTokens = <T extends Token>({
 	tokens,
-	supportedData
+	supportedData,
+	compatibleTokenIds
 }: {
 	tokens: TokenToggleable<T>[];
 	supportedData: SwapSupportedTokensData | undefined;
+	compatibleTokenIds?: Partial<Record<'icp' | 'evm' | 'sol', Set<string>>>;
 }): TokenToggleable<T>[] => {
 	if (isNullish(supportedData)) {
 		return tokens;
@@ -74,7 +82,7 @@ export const filterSwapTokens = <T extends Token>({
 			return token.enabled;
 		}
 
-		const { info, identifier } = lookup;
+		const { info, identifier, category } = lookup;
 
 		if (isNullish(info)) {
 			return token.enabled;
@@ -87,11 +95,19 @@ export const filterSwapTokens = <T extends Token>({
 		}
 
 		const isSupported = supportedTokenIds.has(identifier);
+		const passesCoverage = coverage === 'all' ? isSupported : token.enabled || isSupported;
 
-		if (coverage === 'all') {
-			return isSupported;
+		if (!passesCoverage) {
+			return false;
 		}
 
-		return token.enabled || isSupported;
+		if (nonNullish(compatibleTokenIds)) {
+			const categoryFilter = compatibleTokenIds[category];
+			if (nonNullish(categoryFilter)) {
+				return categoryFilter.has(identifier);
+			}
+		}
+
+		return true;
 	});
 };

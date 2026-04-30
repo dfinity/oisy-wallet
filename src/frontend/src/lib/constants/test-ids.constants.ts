@@ -20,6 +20,9 @@ export const CURRENCY_SWITCHER_DROPDOWN_BUTTON = 'currency-switcher-dropdown-but
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
+export const LOGIN_BUTTON_GOOGLE = 'login-button-google';
+export const LOGIN_BUTTON_APPLE = 'login-button-apple';
+export const LOGIN_BUTTON_MICROSOFT = 'login-button-microsoft';
 export const LOCK_BUTTON = 'lock-button';
 export const MAX_BUTTON = 'max-button';
 
@@ -334,6 +337,9 @@ export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-with
 // PWA
 export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
 export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-button';
+
+// Signups closed
+export const SIGNUPS_CLOSED_BANNER_TEST_ID = 'signups-closed-banner';
 
 // OpenCryptoPay
 export const OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON = 'open-crypto-pay-enter-manually-button';

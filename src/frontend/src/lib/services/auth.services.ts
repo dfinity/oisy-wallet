@@ -48,7 +48,8 @@ export const signIn = async (
 	busy.show();
 
 	const trackingMetadata = {
-		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0
+		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0,
+		...(nonNullish(params.openIdProvider) ? { openid_provider: params.openIdProvider } : {})
 	};
 
 	try {
@@ -134,6 +135,25 @@ export const errorSignOut = (text: string): Promise<void> => {
 		msg: {
 			text,
 			level: 'error'
+		}
+	});
+};
+
+export const infoSignOut = ({
+	text,
+	source = ''
+}: {
+	text: string;
+	source?: string;
+}): Promise<void> => {
+	trackSignOut({
+		name: TRACK_SIGN_OUT_SUCCESS,
+		meta: { reason: 'info', text, source }
+	});
+	return logout({
+		msg: {
+			text,
+			level: 'info'
 		}
 	});
 };

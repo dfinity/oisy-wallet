@@ -2,6 +2,7 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
 	import { isIcrcTokenSupportIcrc2 } from '$icp/services/icrc.services';
@@ -19,11 +20,12 @@
 		TRACK_COUNT_SWAP_ERROR,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { swapService } from '$lib/services/swap.services';
+	import { fetchOneSecIcpToEvmSwap, swapService } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -152,34 +154,56 @@
 		};
 
 		const sourceLedgerCanisterId = ($sourceToken as IcToken).ledgerCanisterId;
-		const destinationLedgerCanisterId = ($destinationToken as IcToken).ledgerCanisterId;
+		const destinationLedgerCanisterId = isIcToken($destinationToken)
+			? $destinationToken.ledgerCanisterId
+			: '';
 
 		onNext();
 
 		try {
 			clearFailedProgressStep();
 
-			await swapService[$swapAmountsStore.selectedProvider.provider]({
-				identity: $authIdentity,
-				progress,
-				sourceToken: $sourceToken as IcTokenToggleable,
-				destinationToken: $destinationToken as IcTokenToggleable,
-				swapAmount,
-				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
-				slippageValue,
-				sourceTokenFee,
-				isSourceTokenIcrc2: $isSourceTokenIcrc2,
-				setFailedProgressStep,
-				tryToWithdraw:
-					nonNullish($failedSwapError?.errorType) &&
-					($failedSwapError?.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED ||
-						$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
-						$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED),
-				withdrawDestinationTokens:
-					nonNullish($failedSwapError?.errorType) &&
-					($failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
-						$failedSwapError?.swapSucceded)
-			});
+			if ($swapAmountsStore.selectedProvider.provider === SwapProvider.ONE_SEC) {
+				if (!isTokenErc20($destinationToken) || isNullish($ethAddress)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+					onBack();
+					return;
+				}
+
+				await fetchOneSecIcpToEvmSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as IcToken,
+					destinationToken: $destinationToken,
+					swapAmount,
+					userEthAddress: $ethAddress,
+					setFailedProgressStep
+				});
+			} else {
+				await swapService[$swapAmountsStore.selectedProvider.provider]({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as IcTokenToggleable,
+					destinationToken: $destinationToken as IcTokenToggleable,
+					swapAmount,
+					receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
+					slippageValue,
+					sourceTokenFee,
+					isSourceTokenIcrc2: $isSourceTokenIcrc2,
+					setFailedProgressStep,
+					tryToWithdraw:
+						nonNullish($failedSwapError?.errorType) &&
+						($failedSwapError?.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED ||
+							$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
+							$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED),
+					withdrawDestinationTokens:
+						nonNullish($failedSwapError?.errorType) &&
+						($failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
+							$failedSwapError?.swapSucceded)
+				});
+			}
 
 			progress(ProgressStepsSwap.DONE);
 
@@ -274,6 +298,7 @@
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				{swapProgressStep}
+				swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}
 				bind:failedSteps={swapFailedProgressSteps}

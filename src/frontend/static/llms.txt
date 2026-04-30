@@ -76,7 +76,23 @@ Key facts:
 
 - [Release Notes](https://docs.oisy.com/introduction/whats-new): Version history and release notes.
 
-## Latest Release (v2.0.0)
+## Latest Release (v2.0.5)
+
+### New Features
+
+- Integration to 1Sec to offer bridging several tokens from ICP to Ethereum, Base, and Arbitrum, or vice versa.
+- Allow to quickly sign up or sign in with Google, Apple, or Microsoft accounts.
+- Micro transaction filter that filters out small value transactions from the user's activity list.
+
+### Improvements
+
+- Improved layout on the signer login page
+
+### Bug Fixes
+
+-
+
+## Most recent Features and Improvements
 
 ### New Features
 
@@ -89,10 +105,6 @@ Key facts:
 - Move the help menu into the user menu to get more space available on the header row.
 - Keep the text based token filter when switching between Tokens, NFTs and Earning.
 - Use ICPSwap as fallback price source if we don't get a price for an icrc token.
-
-### Bug Fixes
-
-- Fixed a bug that caused some icrc tokens to fail loading the latest balance
 
 
 ## For Developers

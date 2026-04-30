@@ -3,9 +3,11 @@
 	import { getContext } from 'svelte';
 	import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
+	import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
 	import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.svelte';
+	import SwapDetailsOneSec from '$lib/components/swap/SwapDetailsOneSec.svelte';
 	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -113,6 +115,8 @@
 				<SwapDetailsVelora provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED}
 				<SwapDetailsNearIntents provider={selectedProvider} {slippageValue} />
+			{:else if selectedProvider.provider === SwapProvider.ONE_SEC && ONESEC_SWAP_ENABLED}
+				<SwapDetailsOneSec provider={selectedProvider} />
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}

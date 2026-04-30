@@ -126,16 +126,26 @@
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
+			"internet_identity": "",
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
-			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
+			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
 			"social_login": "Einfacher und sicherer Zugriff via Social Login"
 		},
 		"alt": {
-			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil"
+			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "Deine Session wurde in einem anderem Browsertab gesperrt."
+		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
@@ -768,12 +778,12 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": "",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"save_beta_feature_success": "Ihre Beta-Funktions-Einstellungen wurden aktualisiert.",
+			"hide_micro_transactions": "Transaktionen mit sehr kleinen Werten ausblenden",
+			"hide_micro_transactions_description": "Transaktionen mit sehr kleinen Werten sind typischerweise Spam und sollen Benutzer dazu verleiten, die Adresse des Absenders anstelle einer gültigen Adresse zu kopieren. Es wird empfohlen, sie in Transaktionslisten auszublenden.",
+			"enable_hide_micro_transactions": "Ausblenden von Transaktionen mit sehr kleinen Werten aktivieren",
+			"disable_hide_micro_transactions": "Ausblenden von Transaktionen mit sehr kleinen Werten deaktivieren",
+			"save_spam_filter_success": "Ihre Spam-Filter-Einstellungen wurden aktualisiert.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1144,12 +1154,15 @@
 			"select_token": "Token auswählen",
 			"select_network_filter": "Netzwerk auswählen",
 			"withdrawing": "Abheben...",
+			"bridging": "Bridge-Vorgang läuft... (Bitte haben Sie Geduld, dies kann bis zu einer Minute dauern.)",
 			"network_cost": "Netzwerk Kosten",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Gebühren",
 			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1519,8 +1532,8 @@
 			"hex_data": "HEX-Daten",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
 			"sign_message": "Nachricht signieren",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Verbundene Apps",
+			"no_connected_apps": "Derzeit sind keine Apps verbunden.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1834,8 +1847,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Greife auf dein $oisy_name zu",
-				"open_or_create": "Öffne oder erstelle deine Wallet, um Dich sicher mit der dApp zu verbinden und dein Vermögen zu verwalten."
+				"open_or_create": "Öffne oder erstelle deine Wallet, um sicher mit der Anwendung zu interagieren.",
+				"connect_your_wallet": "Verbinde dein $oisy_name",
+				"oisy_protects_you": "OISY schützt dich!",
+				"oisy_protects_you_description": "Anwendungen können nicht direkt auf deine Gelder zugreifen, und jede Transaktion muss von dir bestätigt werden."
 			}
 		},
 		"idle": {
@@ -1930,7 +1945,7 @@
 				"possessive": "unsere "
 			},
 			"title": "",
-			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
+			"instruction": "Durch das Anmelden stimmst du den $link zu",
 			"body": ""
 		},
 		"alt": {
@@ -1957,7 +1972,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC-Transaktionsinformationen stammen von zentralen Drittanbietern und sollten eigenständig überprüft werden.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "<strong>OISY schützt dich!</strong> Transaktionen mit sehr kleinen Token-Werten sind derzeit ausgeblendet. Um sie anzuzeigen, gehe zu <a href=\"/settings/\">Einstellungen</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Mehr erfahren</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transaktionen für $token_list können nicht angezeigt werden. Kein Index-Canister verfügbar.",

@@ -10,6 +10,7 @@ import {
 	getUserProfile,
 	getUserTransactions,
 	listCustomTokens,
+	newUserSignupsAllowed,
 	removeCustomToken,
 	saveUserTransactions,
 	setCustomToken,
@@ -25,6 +26,7 @@ import type {
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
+	CreateUserProfileResponse,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
 	SaveUserTransactionsParams,
@@ -198,15 +200,27 @@ describe('backend.api', () => {
 			...baseParams
 		};
 
+		const mockResponse: CreateUserProfileResponse = { Ok: mockUserProfile };
+
 		beforeEach(() => {
-			backendCanisterMock.createUserProfile.mockResolvedValue(mockUserProfile);
+			backendCanisterMock.createUserProfile.mockResolvedValue(mockResponse);
 		});
 
 		it('should successfully call createUserProfile endpoint', async () => {
 			const result = await createUserProfile(mockParams);
 
-			expect(result).toEqual(mockUserProfile);
+			expect(result).toEqual(mockResponse);
 			expect(backendCanisterMock.createUserProfile).toHaveBeenCalledOnce();
+		});
+
+		it('should return the backend error', async () => {
+			const mockErrResponse: CreateUserProfileResponse = { Err: { SignupsClosed: null } };
+
+			backendCanisterMock.createUserProfile.mockResolvedValue(mockErrResponse);
+
+			const result = await createUserProfile(mockParams);
+
+			expect(result).toEqual(mockErrResponse);
 		});
 
 		it('should throw an error if identity is undefined', async () => {
@@ -261,6 +275,38 @@ describe('backend.api', () => {
 			});
 
 			await expect(getUserProfile(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('newUserSignupsAllowed', () => {
+		const mockParams: CanisterApiFunctionParams<QueryParams> = {
+			...baseParams,
+			certified
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.newUserSignupsAllowed.mockResolvedValue(true);
+		});
+
+		it('should successfully call newUserSignupsAllowed endpoint', async () => {
+			const result = await newUserSignupsAllowed(mockParams);
+
+			expect(result).toBeTruthy();
+			expect(backendCanisterMock.newUserSignupsAllowed).toHaveBeenCalledExactlyOnceWith({
+				certified
+			});
+		});
+
+		it('should return false when signups are closed', async () => {
+			backendCanisterMock.newUserSignupsAllowed.mockResolvedValue(false);
+
+			const result = await newUserSignupsAllowed(mockParams);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(newUserSignupsAllowed({ ...mockParams, identity: undefined })).rejects.toThrow();
 		});
 	});
 

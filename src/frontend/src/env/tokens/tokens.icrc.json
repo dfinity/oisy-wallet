@@ -213,6 +213,7 @@
 	},
 	"BITTYICP": {
 		"ledgerCanisterId": "qroj6-lyaaa-aaaam-qeqta-cai",
+		"indexCanisterId": "qf26p-uqaaa-aaaam-ai5aa-cai",
 		"mintingAccount": "r7inp-6aaaa-aaaaa-aaabq-cai",
 		"decimals": 8,
 		"name": "BITTY ON ICP",

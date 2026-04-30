@@ -17,7 +17,7 @@ describe('BgImg', () => {
 		expect(el).toBeInTheDocument();
 		expect(el).toHaveStyle(`background-image: url(${IMG})`);
 		// default shadow is "inset"
-		expect(el).toHaveStyle('box-shadow: inset 0px 0px 5px 1px #0000000D');
+		expect(el).toHaveStyle('box-shadow: inset 0px 0px 5px 1px #0000000d');
 	});
 
 	it('applies correct size classes (cover / contain / auto)', async () => {
@@ -132,7 +132,7 @@ describe('BgImg', () => {
 
 		const el = getByLabelText('no-shadow');
 
-		expect(el).not.toHaveStyle('box-shadow: inset 0px 0px 5px 1px #0000000D');
+		expect(el).not.toHaveStyle('box-shadow: inset 0px 0px 5px 1px #0000000d');
 	});
 
 	it('merges custom classes with base classes', () => {

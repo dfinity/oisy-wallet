@@ -126,16 +126,26 @@
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
+			"internet_identity": "",
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
-			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
+			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
 			"social_login": "Okamžitý a soukromý přístup + přihlášení přes sociální sítě"
 		},
 		"alt": {
-			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
+			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "Vaše relace byla uzamčena v jiné kartě."
+		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
 		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
@@ -769,11 +779,11 @@
 			"enable_beta_feature": "Povolit beta funkci",
 			"disable_beta_feature": "Zakázat beta funkci",
 			"save_beta_feature_success": "Vaše nastavení beta funkcí bylo aktualizováno.",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "Skrýt transakce s velmi malými hodnotami",
+			"hide_micro_transactions_description": "Transakce s velmi malými hodnotami jsou obvykle spam a mají za cíl uživatele oklamat, aby zkopíroval adresu odesílatele místo platné adresy. Doporučujeme je v seznamech transakcí skrýt.",
+			"enable_hide_micro_transactions": "Povolit skrývání transakcí s velmi malými hodnotami",
+			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
+			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1144,12 +1154,15 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
+			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až minutu.)",
 			"network_cost": "Náklady sítě",
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1519,8 +1532,8 @@
 			"hex_data": "HEX data",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "Připojené aplikace",
+			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1834,8 +1847,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Přístup k vaší peněžence $oisy_name",
-				"open_or_create": "Otevřete nebo vytvořte svou peněženku, abyste se bezpečně připojili k dApp a začali spravovat svá digitální aktiva."
+				"open_or_create": "Otevřete nebo vytvořte svou peněženku pro bezpečnou interakci s aplikací.",
+				"connect_your_wallet": "Připojte svou peněženku $oisy_name",
+				"oisy_protects_you": "OISY vás chrání!",
+				"oisy_protects_you_description": "Aplikace nemohou přímo přistupovat k vašim prostředkům, a každá transakce musí být potvrzena vámi."
 			}
 		},
 		"idle": {
@@ -1930,7 +1945,7 @@
 				"possessive": "naše "
 			},
 			"title": "",
-			"instruction": "Kliknutím na toto tlačítko souhlasíte s $link",
+			"instruction": "Přihlášením souhlasíte s $link",
 			"body": ""
 		},
 		"alt": {
@@ -1957,7 +1972,7 @@
 		},
 		"info": {
 			"btc_transactions": "Informace o transakcích BTC jsou získány od centrálních třetích stran a měly by být nezávisle ověřeny.",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "<strong>OISY vás chrání!</strong> Transakce s velmi malými hodnotami tokenů jsou aktuálně skryty. Chcete-li je zobrazit, přejděte do <a href=\"/settings/\">Nastavení</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Zjistit více</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transakce pro $token_list nelze zobrazit. Není k dispozici žádný indexový kanystr.",

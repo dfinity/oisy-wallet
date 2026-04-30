@@ -126,16 +126,26 @@
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
 			"social_login": ""
 		},
 		"alt": {
-			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
+			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
 		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
@@ -768,12 +778,12 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": "",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"save_beta_feature_success": "आपकी बीटा फ़ीचर सेटिंग्स अपडेट कर दी गई हैं।",
+			"hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन छिपाएं",
+			"hide_micro_transactions_description": "बहुत छोटे मूल्यों वाले लेनदेन आमतौर पर स्पैम होते हैं और उपयोगकर्ता को वैध पते के बजाय प्रेषक के पते को कॉपी करने के लिए धोखा देने का इरादा रखते हैं। इन्हें लेनदेन सूचियों में छिपाने की अनुशंसा की जाती है।",
+			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
+			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
+			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1144,12 +1154,15 @@
 			"select_token": "टोकन चुनें",
 			"select_network_filter": "नेटवर्क चुनें",
 			"withdrawing": "निकासी कर रहा है...",
+			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें एक मिनट तक का समय लग सकता है।)",
 			"network_cost": "नेटवर्क लागत",
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1519,8 +1532,8 @@
 			"hex_data": "हेक्स डेटा",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "जुड़े हुए ऐप्स",
+			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1834,8 +1847,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "अपने $oisy_name तक पहुंचें",
-				"open_or_create": "dApp से सुरक्षित रूप से कनेक्ट होने और अपनी संपत्तियों का प्रबंधन शुरू करने के लिए अपना वॉलेट खोलें या बनाएँ।"
+				"open_or_create": "एप्लिकेशन के साथ सुरक्षित रूप से इंटरैक्ट करने के लिए अपना वॉलेट खोलें या बनाएं।",
+				"connect_your_wallet": "अपने $oisy_name से कनेक्ट करें",
+				"oisy_protects_you": "OISY आपकी सुरक्षा करता है!",
+				"oisy_protects_you_description": "एप्लिकेशन आपके फंड तक सीधे नहीं पहुंच सकते, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए."
 			}
 		},
 		"idle": {
@@ -1957,7 +1972,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "<strong>OISY आपकी रक्षा करता है!</strong> बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",

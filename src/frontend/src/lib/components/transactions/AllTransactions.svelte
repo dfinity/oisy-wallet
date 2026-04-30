@@ -13,6 +13,7 @@
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
+		hiddenMicroTransactionsBannerVisible,
 		userDismissedNotifications,
 		userProfileVersion
 	} from '$lib/derived/user-profile.derived';
@@ -116,6 +117,13 @@
 			});
 		}
 	};
+
+	let hasBanners = $derived(
+		undismissedNoCanister.length > 0 ||
+			tokensWithUnavailableCanister.length > 0 ||
+			!btcBannerDismissed ||
+			$hiddenMicroTransactionsBannerVisible
+	);
 </script>
 
 <div class="flex flex-col gap-5">
@@ -130,29 +138,33 @@
 		</span>
 	{/if}
 
-	{#if undismissedNoCanister.length > 0}
-		<MessageBox level="warning" onDismiss={dismissNoCanisterWarning}>
-			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
-				$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
-			})}
-		</MessageBox>
-	{/if}
+	{#if hasBanners}
+		<div class="flex flex-col">
+			{#if undismissedNoCanister.length > 0}
+				<MessageBox level="warning" onDismiss={dismissNoCanisterWarning}>
+					{replacePlaceholders($i18n.activity.warning.no_index_canister, {
+						$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
+					})}
+				</MessageBox>
+			{/if}
 
-	{#if tokensWithUnavailableCanister.length > 0}
-		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
-			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
-				$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
-			})}
-		</MessageBox>
-	{/if}
+			{#if tokensWithUnavailableCanister.length > 0}
+				<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+					{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
+						$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
+					})}
+				</MessageBox>
+			{/if}
 
-	{#if !btcBannerDismissed}
-		<MessageBox level="plain" onDismiss={dismissBtcBanner}>
-			{$i18n.activity.info.btc_transactions}
-		</MessageBox>
-	{/if}
+			{#if !btcBannerDismissed}
+				<MessageBox level="plain" onDismiss={dismissBtcBanner}>
+					{$i18n.activity.info.btc_transactions}
+				</MessageBox>
+			{/if}
 
-	<HiddenMicroTransactionsInfoBox />
+			<HiddenMicroTransactionsInfoBox />
+		</div>
+	{/if}
 
 	<AllTransactionsList />
 </div>

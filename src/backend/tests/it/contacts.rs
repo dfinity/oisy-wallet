@@ -25,6 +25,7 @@ pub fn call_create_contact(
     caller: Principal,
     name: String,
 ) -> Result<Contact, ContactError> {
+    pic_setup.ensure_user_profile(caller);
     let request = CreateContactRequest { name, image: None };
     let wrapped_result =
         pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
@@ -53,6 +54,7 @@ pub fn call_update_contact(
     caller: Principal,
     contact: Contact,
 ) -> Result<Contact, ContactError> {
+    pic_setup.ensure_user_profile(caller);
     let request = UpdateContactRequest {
         id: contact.id,
         name: contact.name,
@@ -116,6 +118,37 @@ fn test_create_contact_requires_authenticated_user() {
         "Error should indicate unauthorized anonymous caller"
     );
 }
+
+/// Sanity check for the `caller_is_registered_user` guard on
+/// `create_contact`: a non-anonymous caller that has not created a user
+/// profile must be rejected by the guard before any endpoint logic runs.
+#[test]
+fn test_create_contact_requires_registered_user() {
+    let pic_setup = setup();
+    // Non-anonymous caller, but no user profile has been created.
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let request = CreateContactRequest {
+        name: "Test Contact".to_string(),
+        image: None,
+    };
+    let result =
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
+
+    assert!(
+        result.is_err(),
+        "Caller without a user profile should not be able to create contacts"
+    );
+    assert!(
+        result
+            .clone()
+            .unwrap_err()
+            .contains("Caller has no user profile"),
+        "Error should indicate the caller has no user profile, got: {:?}",
+        result.unwrap_err()
+    );
+}
+
 #[test]
 fn test_create_contact_should_succeed_with_valid_name() {
     let pic_setup = setup();
@@ -166,6 +199,7 @@ fn test_create_contact_should_fail_when_limit_reached() {
 fn test_create_contact_should_fail_with_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Test empty string
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
@@ -197,6 +231,7 @@ fn test_create_contact_should_fail_with_whitespace_name() {
 fn test_create_contact_should_fail_with_leading_and_trailing_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Create a contact with a name that has leading whitespace
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(

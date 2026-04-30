@@ -126,16 +126,26 @@
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "ログイン/新規作成",
+			"internet_identity": "",
 			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
 			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
 			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで",
 			"social_login": "即時かつプライベートなアクセス + ソーシャルログイン"
 		},
 		"alt": {
-			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
+			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "別のタブで操作が行われたため、このセッションはロックされました。"
+		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
@@ -769,11 +779,11 @@
 			"enable_beta_feature": "ベータ機能を有効化",
 			"disable_beta_feature": "ベータ機能を無効化",
 			"save_beta_feature_success": "ベータ機能の設定が保存されました。",
-			"hide_micro_transactions": "",
-			"hide_micro_transactions_description": "",
-			"enable_hide_micro_transactions": "",
-			"disable_hide_micro_transactions": "",
-			"save_spam_filter_success": "",
+			"hide_micro_transactions": "非常に小さな価値のトランザクションを非表示にする",
+			"hide_micro_transactions_description": "非常に小さな価値のトランザクションは通常スパムであり、ユーザーを騙して有効なアドレスではなく送信者のアドレスをコピーさせることを目的としています。トランザクション一覧で非表示にすることを推奨します。",
+			"enable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を有効にする",
+			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
+			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
 			"learn_more": ""
 		},
 		"alt": {
@@ -1144,12 +1154,15 @@
 			"select_token": "トークンを選択",
 			"select_network_filter": "ネットワークを選択",
 			"withdrawing": "出金中...",
+			"bridging": "ブリッジ中... (しばらくお待ちください。最大1分かかる場合があります。)",
 			"network_cost": "ネットワークコスト",
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1519,8 +1532,8 @@
 			"hex_data": "HEXデータ",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
-			"connected_apps": "",
-			"no_connected_apps": "",
+			"connected_apps": "接続済みアプリ",
+			"no_connected_apps": "現在接続されているアプリはありません。",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1834,8 +1847,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "あなたの$oisy_nameにアクセス",
-				"open_or_create": "既存のウォレットにログインするか、新規作成して、安全にdAppに接続し、資産の管理を始めましょう。"
+				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
+				"connect_your_wallet": "あなたの$oisy_nameに接続する",
+				"oisy_protects_you": "OISYがあなたを守ります！",
+				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},
 		"idle": {
@@ -1930,7 +1945,7 @@
 				"possessive": "当財団の"
 			},
 			"title": "",
-			"instruction": "このボタンをクリックすると、以下に同意したことになります。$link",
+			"instruction": "サインインすることで、以下に同意したことになります。$link",
 			"body": ""
 		},
 		"alt": {
@@ -1957,7 +1972,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。",
-			"hidden_micro_transactions": ""
+			"hidden_micro_transactions": "<strong>OISYはあなたを守ります！</strong>非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",
