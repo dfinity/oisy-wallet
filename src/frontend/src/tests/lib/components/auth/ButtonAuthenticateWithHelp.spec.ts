@@ -1,14 +1,42 @@
 import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
-import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
+import type * as AppConstants from '$lib/constants/app.constants';
+import {
+	AUTH_SIGNING_IN_HELP_LINK,
+	LOGIN_BUTTON,
+	LOGIN_BUTTON_APPLE,
+	LOGIN_BUTTON_GOOGLE,
+	LOGIN_BUTTON_MICROSOFT
+} from '$lib/constants/test-ids.constants';
 import * as auth from '$lib/services/auth.services';
 import { authLocked } from '$lib/stores/locked.store';
 import { modalStore } from '$lib/stores/modal.store';
-import { InternetIdentityDomain } from '$lib/types/auth';
+import { tokenCategoryFilterStore, tokensSortStore } from '$lib/stores/settings.store';
+import { InternetIdentityDomain, type OpenIdProvider } from '$lib/types/auth';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+// Mutable override for `INTERNET_IDENTITY_CANISTER_ID` so individual tests can
+// exercise both code paths of the component:
+// - defined (local dev): One-Click OpenID buttons are hidden because the local
+//   II replica does not handle the `?openid=...` query param.
+// - undefined (mainnet): One-Click OpenID buttons are rendered.
+const hoisted = vi.hoisted(() => ({
+	internetIdentityCanisterId: undefined as string | undefined
+}));
+
+vi.mock('$lib/constants/app.constants', async (importOriginal) => {
+	const actual = await importOriginal<typeof AppConstants>();
+
+	return {
+		...actual,
+		get INTERNET_IDENTITY_CANISTER_ID() {
+			return hoisted.internetIdentityCanisterId;
+		}
+	};
+});
+
 describe('ButtonAuthenticateWithHelp', () => {
-	const signInButtonSelector = `button[data-tid="login-button"]`;
+	const signInButtonSelector = `button[data-tid="${LOGIN_BUTTON}"]`;
 	const SigningInHelpLinkSpanSelector = `span[data-tid="${AUTH_SIGNING_IN_HELP_LINK}"]`;
 
 	beforeEach(() => {
@@ -16,93 +44,249 @@ describe('ButtonAuthenticateWithHelp', () => {
 		modalStore.close();
 	});
 
-	it('should render sign in button', () => {
-		const { container } = render(ButtonAuthenticateWithHelp);
+	describe('with Internet Identity canister id defined (local dev)', () => {
+		beforeEach(() => {
+			hoisted.internetIdentityCanisterId = 'rdmx6-jaaaa-aaaaa-aaadq-cai';
+		});
 
-		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+		it('should render sign in button', () => {
+			const { container } = render(ButtonAuthenticateWithHelp);
 
-		expect(signInButton).toBeInTheDocument();
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
-		const SigningInHelpLinkSpan: HTMLSpanElement | null = container.querySelector(
-			SigningInHelpLinkSpanSelector
+			expect(signInButton).toBeInTheDocument();
+
+			const SigningInHelpLinkSpan: HTMLSpanElement | null = container.querySelector(
+				SigningInHelpLinkSpanSelector
+			);
+
+			expect(SigningInHelpLinkSpan).toBeInTheDocument();
+		});
+
+		it('should open auth help modal on failed sign in', async () => {
+			const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+
+			const { container } = render(ButtonAuthenticateWithHelp);
+
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+			expect(signInButton).toBeInTheDocument();
+
+			await waitFor(() => signInButton?.click());
+
+			expect(authSpy).toHaveBeenCalledOnce();
+
+			expect(get(modalStore)?.type).toBe('auth-help');
+		});
+
+		it('should call sign in with the correct domain', async () => {
+			const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+
+			const { container } = render(ButtonAuthenticateWithHelp);
+
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+			expect(signInButton).toBeInTheDocument();
+
+			await waitFor(() => signInButton?.click());
+
+			expect(authSpy).toHaveBeenCalledExactlyOnceWith({
+				domain: InternetIdentityDomain.VERSION_2_0,
+				asPopup: false
+			});
+		});
+
+		it('should call sign in as pop-up', async () => {
+			const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+
+			const { container } = render(ButtonAuthenticateWithHelp, {
+				props: {
+					asPopup: true
+				}
+			});
+
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+			expect(signInButton).toBeInTheDocument();
+
+			await waitFor(() => signInButton?.click());
+
+			expect(authSpy).toHaveBeenCalledExactlyOnceWith({
+				domain: InternetIdentityDomain.VERSION_2_0,
+				asPopup: true
+			});
+		});
+
+		it('should set the lock store to false on successful sign in', async () => {
+			const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'ok' });
+
+			vi.spyOn(authLocked, 'unlock').mockImplementationOnce(vi.fn());
+
+			const { container } = render(ButtonAuthenticateWithHelp);
+
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+			expect(signInButton).toBeInTheDocument();
+
+			await waitFor(() => signInButton?.click());
+
+			expect(authSpy).toHaveBeenCalledOnce();
+
+			expect(get(modalStore)?.type).toBeUndefined();
+
+			expect(authLocked.unlock).toHaveBeenCalledExactlyOnceWith({
+				source: 'login from landing page'
+			});
+		});
+
+		it('should reset tokens sort and token category filter stores on successful sign in', async () => {
+			vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'ok' });
+			vi.spyOn(authLocked, 'unlock').mockImplementationOnce(vi.fn());
+
+			const tokensSortResetSpy = vi.spyOn(tokensSortStore, 'reset');
+			const tokenCategoryFilterResetSpy = vi.spyOn(tokenCategoryFilterStore, 'reset');
+
+			const { container } = render(ButtonAuthenticateWithHelp);
+
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+			expect(signInButton).toBeInTheDocument();
+
+			await waitFor(() => signInButton?.click());
+
+			expect(tokensSortResetSpy).toHaveBeenCalledExactlyOnceWith({ key: 'tokens-sort' });
+			expect(tokenCategoryFilterResetSpy).toHaveBeenCalledExactlyOnceWith({
+				key: 'token-category-filter'
+			});
+		});
+
+		it('should not reset stores on failed sign in', async () => {
+			vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+
+			const tokensSortResetSpy = vi.spyOn(tokensSortStore, 'reset');
+			const tokenCategoryFilterResetSpy = vi.spyOn(tokenCategoryFilterStore, 'reset');
+
+			const { container } = render(ButtonAuthenticateWithHelp);
+
+			const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+			expect(signInButton).toBeInTheDocument();
+
+			await waitFor(() => signInButton?.click());
+
+			expect(tokensSortResetSpy).not.toHaveBeenCalled();
+			expect(tokenCategoryFilterResetSpy).not.toHaveBeenCalled();
+		});
+
+		// In local dev the component must hide the One-Click OpenID buttons to
+		// protect us from accidentally exposing them on a local II replica,
+		// which doesn't handle the `?openid=...` query param.
+		it.each([LOGIN_BUTTON_GOOGLE, LOGIN_BUTTON_APPLE, LOGIN_BUTTON_MICROSOFT])(
+			'should not render the %s button in local dev',
+			(testId) => {
+				const { container } = render(ButtonAuthenticateWithHelp);
+
+				expect(
+					container.querySelector<HTMLButtonElement>(`button[data-tid="${testId}"]`)
+				).not.toBeInTheDocument();
+			}
+		);
+	});
+
+	describe('with Internet Identity canister id undefined (mainnet / One-Click OpenID)', () => {
+		const openIdCases: Array<{ provider: OpenIdProvider; testId: string }> = [
+			{ provider: 'google', testId: LOGIN_BUTTON_GOOGLE },
+			{ provider: 'apple', testId: LOGIN_BUTTON_APPLE },
+			{ provider: 'microsoft', testId: LOGIN_BUTTON_MICROSOFT }
+		];
+
+		beforeEach(() => {
+			hoisted.internetIdentityCanisterId = undefined;
+		});
+
+		it('should still render the Internet Identity button', () => {
+			const { container } = render(ButtonAuthenticateWithHelp);
+
+			expect(
+				container.querySelector<HTMLButtonElement>(`button[data-tid="${LOGIN_BUTTON}"]`)
+			).toBeInTheDocument();
+		});
+
+		it('should render all three OpenID provider buttons', () => {
+			const { container } = render(ButtonAuthenticateWithHelp);
+
+			openIdCases.forEach(({ testId }) => {
+				expect(
+					container.querySelector<HTMLButtonElement>(`button[data-tid="${testId}"]`)
+				).toBeInTheDocument();
+			});
+		});
+
+		it.each(openIdCases)(
+			'should call signIn with openIdProvider "$provider" when that button is clicked',
+			async ({ provider, testId }) => {
+				const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+
+				const { container } = render(ButtonAuthenticateWithHelp);
+
+				container.querySelector<HTMLButtonElement>(`button[data-tid="${testId}"]`)?.click();
+
+				await waitFor(() => {
+					expect(authSpy).toHaveBeenCalledExactlyOnceWith({
+						domain: InternetIdentityDomain.VERSION_2_0,
+						asPopup: false,
+						openIdProvider: provider
+					});
+				});
+			}
 		);
 
-		expect(SigningInHelpLinkSpan).toBeInTheDocument();
-	});
+		it.each(openIdCases)(
+			'should forward asPopup alongside openIdProvider "$provider"',
+			async ({ provider, testId }) => {
+				const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
 
-	it('should open auth help modal on failed sign in', async () => {
-		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+				const { container } = render(ButtonAuthenticateWithHelp, { props: { asPopup: true } });
 
-		const { container } = render(ButtonAuthenticateWithHelp);
+				container.querySelector<HTMLButtonElement>(`button[data-tid="${testId}"]`)?.click();
 
-		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
-
-		expect(signInButton).toBeInTheDocument();
-
-		await waitFor(() => signInButton?.click());
-
-		expect(authSpy).toHaveBeenCalledOnce();
-
-		expect(get(modalStore)?.type).toBe('auth-help');
-	});
-
-	it('should call sign in with the correct domain', async () => {
-		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
-
-		const { container } = render(ButtonAuthenticateWithHelp);
-
-		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
-
-		expect(signInButton).toBeInTheDocument();
-
-		await waitFor(() => signInButton?.click());
-
-		expect(authSpy).toHaveBeenCalledExactlyOnceWith({
-			domain: InternetIdentityDomain.VERSION_2_0,
-			asPopup: false
-		});
-	});
-
-	it('should call sign in as pop-up', async () => {
-		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
-
-		const { container } = render(ButtonAuthenticateWithHelp, {
-			props: {
-				asPopup: true
+				await waitFor(() => {
+					expect(authSpy).toHaveBeenCalledExactlyOnceWith({
+						domain: InternetIdentityDomain.VERSION_2_0,
+						asPopup: true,
+						openIdProvider: provider
+					});
+				});
 			}
+		);
+
+		it('should not pass openIdProvider when the primary Internet Identity button is clicked', async () => {
+			const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+
+			const { container } = render(ButtonAuthenticateWithHelp);
+
+			container.querySelector<HTMLButtonElement>(`button[data-tid="${LOGIN_BUTTON}"]`)?.click();
+
+			await waitFor(() => {
+				expect(authSpy).toHaveBeenCalledExactlyOnceWith({
+					domain: InternetIdentityDomain.VERSION_2_0,
+					asPopup: false
+				});
+			});
 		});
 
-		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+		it('should open the auth help modal when an OpenID sign-in fails', async () => {
+			vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'error' });
 
-		expect(signInButton).toBeInTheDocument();
+			const { container } = render(ButtonAuthenticateWithHelp);
 
-		await waitFor(() => signInButton?.click());
+			container
+				.querySelector<HTMLButtonElement>(`button[data-tid="${LOGIN_BUTTON_GOOGLE}"]`)
+				?.click();
 
-		expect(authSpy).toHaveBeenCalledExactlyOnceWith({
-			domain: InternetIdentityDomain.VERSION_2_0,
-			asPopup: true
-		});
-	});
-
-	it('should set the lock store to false on successful sign in', async () => {
-		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'ok' });
-
-		vi.spyOn(authLocked, 'unlock').mockImplementationOnce(vi.fn());
-
-		const { container } = render(ButtonAuthenticateWithHelp);
-
-		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
-
-		expect(signInButton).toBeInTheDocument();
-
-		await waitFor(() => signInButton?.click());
-
-		expect(authSpy).toHaveBeenCalledOnce();
-
-		expect(get(modalStore)?.type).toBeUndefined();
-
-		expect(authLocked.unlock).toHaveBeenCalledExactlyOnceWith({
-			source: 'login from landing page'
+			await waitFor(() => {
+				expect(get(modalStore)?.type).toBe('auth-help');
+			});
 		});
 	});
 });

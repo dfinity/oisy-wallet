@@ -7,26 +7,44 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Vault } from '$lib/types/vaults';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		amount: OptionAmount;
+		estimatedSharesToReceive?: OptionAmount;
 		vault: Vault;
 	}
 
-	let { vault, amount }: Props = $props();
+	let { vault, amount, estimatedSharesToReceive = $bindable() }: Props = $props();
 
-	let exchange = $derived($exchanges?.[vault.token.id]);
+	let {
+		token: { id, symbol, decimals, usdPrice },
+		apy
+	} = $derived(vault);
+
+	let exchange = $derived($exchanges?.[id]);
 
 	let assetsPerShare = $derived(
 		nonNullish(exchange) && 'assets_per_share' in exchange ? exchange.assets_per_share : undefined
 	);
 
-	let sharesToReceive = $derived(
-		nonNullish(amount) && nonNullish(assetsPerShare) ? Number(amount) / assetsPerShare : undefined
-	);
+	$effect(() => {
+		if (nonNullish(amount) && nonNullish(assetsPerShare)) {
+			const rawShares = Number(amount) / assetsPerShare;
+			const sharesBigInt = BigInt(Math.round(rawShares * 10 ** decimals));
+
+			estimatedSharesToReceive = formatToken({
+				value: sharesBigInt,
+				unitName: decimals,
+				displayDecimals: decimals
+			});
+		} else {
+			estimatedSharesToReceive = undefined;
+		}
+	});
 </script>
 
-{#if nonNullish(sharesToReceive) && nonNullish(vault.apy)}
+{#if nonNullish(estimatedSharesToReceive) && nonNullish(vault.apy)}
 	<ModalValue>
 		{#snippet label()}
 			{$i18n.stake.text.estimated_yearly_yield}
@@ -34,17 +52,13 @@
 
 		{#snippet mainValue()}
 			<ConvertAmountExchange
-				amount={(sharesToReceive * Number(vault.apy)) / 100}
-				exchangeRate={vault.token.usdPrice}
+				amount={(Number(estimatedSharesToReceive ?? 0) * Number(apy)) / 100}
+				exchangeRate={usdPrice}
 			/>
 		{/snippet}
 	</ModalValue>
 
-	<ConvertAmountDisplay
-		amount={sharesToReceive}
-		exchangeRate={vault.token.usdPrice}
-		symbol={vault.token.symbol}
-	>
+	<ConvertAmountDisplay amount={estimatedSharesToReceive} exchangeRate={usdPrice} {symbol}>
 		{#snippet label()}
 			{$i18n.stake.text.estimated_received}
 		{/snippet}

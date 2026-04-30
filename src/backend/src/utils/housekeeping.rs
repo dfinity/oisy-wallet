@@ -4,45 +4,13 @@ use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
-use super::rate_limiter;
+use super::rate_limiter::ALLOW_SIGNING_RATE_LIMITER;
 use crate::{api, signer, types::StoredPrincipal};
 
 thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
     static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
     static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
-
-    /// High-frequency guard rate limiter checked **before** any inter-canister
-    /// call.  Designed to cheaply reject rapid-fire requests that would otherwise
-    /// drain cycles through the allowance check.
-    ///
-    /// Limit: 10 calls per caller per minute.
-    pub(crate) static ALLOW_SIGNING_GUARD_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
-
-    /// Rate-limits `allow_signing`: max 3 calls per caller per hour.
-    pub(crate) static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(3, 60 * 60 * 1_000_000_000);
-
-    /// Rate-limits `get_allowed_cycles`: max 10 calls per caller per minute.
-    pub(crate) static GET_ALLOWED_CYCLES_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
-
-    /// Rate-limits `top_up_cycles_ledger`: max 5 calls per caller per minute.
-    pub(crate) static TOP_UP_CYCLES_LEDGER_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(5, 60 * 1_000_000_000);
-
-    /// Rate-limits `btc_select_user_utxos_fee`: max 10 calls per caller per minute.
-    pub(crate) static BTC_SELECT_UTXOS_FEE_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
-
-    /// Rate-limits `btc_add_pending_transaction`: max 10 calls per caller per minute.
-    pub(crate) static BTC_ADD_PENDING_TX_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
-
-    /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
-    pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(15, 60 * 1_000_000_000);
 }
 
 /// 2 hours in nanoseconds — if a housekeeping run has been in progress for
@@ -142,7 +110,7 @@ pub(crate) fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincip
     }
 
     ic_cdk::futures::spawn(async move {
-        if let Err(e) = signer::allow_signing(None).await {
+        if let Err(e) = signer::allow_signing().await {
             ic_cdk::println!(
                 "Error enabling signing for user {}: {:?}",
                 stored_principal.0,
@@ -161,7 +129,7 @@ pub(crate) fn start_periodic_housekeeping_timers() {
     set_timer(immediate, spawn_housekeeping_if_idle);
 
     // Then periodically:
-    let hour = Duration::from_secs(60 * 60);
+    let hour = Duration::from_hours(1);
     let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
 }
 
@@ -183,7 +151,11 @@ async fn hourly_housekeeping_tasks() {
 mod tests {
     use pretty_assertions::assert_eq;
 
-    use super::*;
+    use super::{
+        is_housekeeping_in_progress, release_allow_signing_slot, try_acquire_allow_signing_slot,
+        ALLOW_SIGNING_IN_PROGRESS, HOUSEKEEPING_STARTED_AT, HOUSEKEEPING_TIMEOUT_NS,
+        MAX_CONCURRENT_ALLOW_SIGNING,
+    };
 
     fn reset_housekeeping() {
         HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = None);

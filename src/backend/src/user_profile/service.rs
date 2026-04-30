@@ -1,21 +1,25 @@
-use std::result::Result;
+use std::{collections::BTreeMap, result::Result};
 
 use ic_cdk::api::time;
 use shared::types::{
-    agreement::{UpdateAgreementsError, UserAgreements},
+    agreement::{
+        AgreementHistoryEntry, AgreementType, ProviderAgreementType, UpdateAgreementsError,
+        UserAgreement, UserAgreements,
+    },
     dapp::AddDappSettingsError,
     experimental_feature::{
         ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
     },
     network::{NetworkSettingsMap, SetTestnetsSettingsError, UpdateNetworksSettingsError},
-    user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
-    verifiable_credential::CredentialType,
-    Version,
+    notification::{AddDismissedNotificationError, DismissedNotification},
+    transaction_settings::{TransactionFilterSettings, UpdateTransactionFilterSettingsError},
+    user_profile::{GetUserProfileError, StoredUserProfile},
+    Timestamp, Version,
 };
 
 use crate::{
     state::{read_state, State},
-    types::StoredPrincipal,
+    types::{AgreementHistoryMap, Candid, StoredPrincipal},
     user_profile::model::UserProfileModel,
 };
 
@@ -45,28 +49,6 @@ pub fn create_profile(
         let default_profile = StoredUserProfile::from_timestamp(now);
         user_profile_model.store_new(principal, now, &default_profile);
         default_profile
-    }
-}
-
-pub fn add_credential(
-    principal: StoredPrincipal,
-    profile_version: Option<Version>,
-    credential_type: &CredentialType,
-    issuer: String,
-    user_profile_model: &mut UserProfileModel,
-) -> Result<(), AddUserCredentialError> {
-    if let Ok(user_profile) = find_profile(principal, user_profile_model) {
-        let now = time();
-        if let Ok(new_profile) =
-            user_profile.add_credential(profile_version, now, credential_type, issuer)
-        {
-            user_profile_model.store_new(principal, now, &new_profile);
-            Ok(())
-        } else {
-            Err(AddUserCredentialError::VersionMismatch)
-        }
-    } else {
-        Err(AddUserCredentialError::UserNotFound)
     }
 }
 
@@ -152,7 +134,58 @@ pub fn add_hidden_dapp_id(
     Ok(())
 }
 
-/// Updates the user's agreements, merging with any existing agreements.
+/// Adds one or more dismissed notifications to the user's profile.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `notifications` - The typed notifications to dismiss.
+/// * `user_profile_model` - The user profile model.
+///
+/// # Returns
+/// - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+///   present.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn add_dismissed_notifications(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    notifications: Vec<DismissedNotification>,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), AddDismissedNotificationError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| AddDismissedNotificationError::UserNotFound)?;
+    let now = time();
+    let new_profile =
+        user_profile.add_dismissed_notifications(profile_version, now, notifications)?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
+}
+
+/// Builds history entries for agreements that were actually changed.
+fn collect_history_entries(request: &UserAgreements, now: Timestamp) -> Vec<AgreementHistoryEntry> {
+    [
+        (AgreementType::LicenseAgreement, &request.license_agreement),
+        (AgreementType::TermsOfUse, &request.terms_of_use),
+        (AgreementType::PrivacyPolicy, &request.privacy_policy),
+    ]
+    .into_iter()
+    .filter_map(|(agreement_type, agreement)| {
+        agreement.accepted.map(|accepted| AgreementHistoryEntry {
+            agreement_type,
+            accepted,
+            timestamp_ns: now,
+            text_sha256: agreement.text_sha256.clone(),
+            last_updated_at_ms: agreement.last_updated_at_ms,
+        })
+    })
+    .collect()
+}
+
+/// Updates the user's agreements, merging with any existing agreements, and appends an audit-trail
+/// entry for every agreement that was actually changed.
+///
 /// Only fields provided in `agreements` (i.e., where `accepted` is `Some(_)`) will be updated.
 /// If an agreement is newly accepted (`Some(true)`), `last_accepted_at_ns` is set to `now`.
 ///
@@ -161,6 +194,7 @@ pub fn add_hidden_dapp_id(
 /// * `profile_version` - The version of the user's profile.
 /// * `agreements` - The (partial) agreements to merge.
 /// * `user_profile_model` - The user profile model.
+/// * `agreement_history` - Stable map storing per-user agreement audit trail.
 ///
 /// # Returns
 /// - Returns `Ok(())` if the agreements were successfully updated or no change was needed.
@@ -170,14 +204,90 @@ pub fn add_hidden_dapp_id(
 pub fn update_agreements(
     principal: StoredPrincipal,
     profile_version: Option<Version>,
-    agreements: UserAgreements,
+    agreements: &UserAgreements,
     user_profile_model: &mut UserProfileModel,
+    agreement_history: &mut AgreementHistoryMap,
 ) -> Result<(), UpdateAgreementsError> {
     let user_profile = find_profile(principal, user_profile_model)
         .map_err(|_| UpdateAgreementsError::UserNotFound)?;
     let now = time();
-    let new_profile = user_profile.with_agreements(profile_version, now, agreements)?;
+    let new_profile = user_profile.with_agreements(profile_version, now, agreements.clone())?;
+
     user_profile_model.store_new(principal, now, &new_profile);
+
+    if new_profile.version != user_profile.version {
+        let new_entries = collect_history_entries(agreements, now);
+        if !new_entries.is_empty() {
+            let mut history = agreement_history.get(&principal).unwrap_or_default().0;
+            history.extend(new_entries);
+            agreement_history.insert(principal, Candid(history));
+        }
+    }
+
+    Ok(())
+}
+
+/// Builds history entries for provider agreements that were actually changed.
+fn collect_provider_history_entries(
+    request: &BTreeMap<ProviderAgreementType, UserAgreement>,
+    now: Timestamp,
+) -> Vec<AgreementHistoryEntry> {
+    request
+        .iter()
+        .filter_map(|(provider_type, agreement)| {
+            agreement.accepted.map(|accepted| AgreementHistoryEntry {
+                agreement_type: AgreementType::Provider(provider_type.clone()),
+                accepted,
+                timestamp_ns: now,
+                text_sha256: agreement.text_sha256.clone(),
+                last_updated_at_ms: agreement.last_updated_at_ms,
+            })
+        })
+        .collect()
+}
+
+/// Updates the user's provider agreements, merging with any existing ones, and records an
+/// audit-trail entry for every provider agreement that was actually changed.
+///
+/// Only entries where `accepted` is `Some(_)` are applied. If `Some(true)`,
+/// `last_accepted_at_ns` is set to `now`.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `provider_agreements` - The provider agreements to merge.
+/// * `user_profile_model` - The user profile model.
+/// * `agreement_history` - Stable map storing per-user agreement audit trail.
+///
+/// # Returns
+/// - Returns `Ok(())` if the provider agreements were successfully updated or no change was needed.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn update_provider_agreements(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    provider_agreements: &BTreeMap<ProviderAgreementType, UserAgreement>,
+    user_profile_model: &mut UserProfileModel,
+    agreement_history: &mut AgreementHistoryMap,
+) -> Result<(), UpdateAgreementsError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| UpdateAgreementsError::UserNotFound)?;
+    let now = time();
+    let new_profile =
+        user_profile.with_provider_agreements(profile_version, now, provider_agreements.clone())?;
+
+    user_profile_model.store_new(principal, now, &new_profile);
+
+    if new_profile.version != user_profile.version {
+        let new_entries = collect_provider_history_entries(provider_agreements, now);
+        if !new_entries.is_empty() {
+            let mut history = agreement_history.get(&principal).unwrap_or_default().0;
+            history.extend(new_entries);
+            agreement_history.insert(principal, Candid(history));
+        }
+    }
+
     Ok(())
 }
 
@@ -208,6 +318,34 @@ pub fn update_experimental_feature_settings(
         now,
         experimental_features,
     )?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
+}
+
+/// Updates the user's transaction filter settings.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `filter` - The new transaction filter settings.
+/// * `user_profile_model` - The user profile model.
+///
+/// # Returns
+/// - Returns `Ok(())` if the settings were successfully updated.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn update_transaction_filter_settings(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    filter: TransactionFilterSettings,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), UpdateTransactionFilterSettingsError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| UpdateTransactionFilterSettingsError::UserNotFound)?;
+    let now = time();
+    let new_profile =
+        user_profile.with_transaction_filter_settings(profile_version, now, filter)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }

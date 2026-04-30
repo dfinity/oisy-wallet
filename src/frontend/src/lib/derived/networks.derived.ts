@@ -33,8 +33,9 @@ export const networks: Readable<Network[]> = derived(
 		...$enabledEthereumNetworks,
 		ICP_NETWORK,
 		ICP_PSEUDO_TESTNET_NETWORK,
-		...$enabledSolanaNetworks,
-		...$enabledEvmNetworks
+		...[...$enabledSolanaNetworks, ...$enabledEvmNetworks].sort((a, b) =>
+			a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+		)
 	]
 );
 

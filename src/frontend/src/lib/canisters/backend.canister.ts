@@ -1,11 +1,11 @@
 import type {
-	AddUserCredentialResult,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
+	ExchangeRate,
 	GetAllowedCyclesResponse,
-	UserProfile
+	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
@@ -20,26 +20,44 @@ import {
 import { ZERO } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
-	AddUserCredentialParams,
+	AddUserDismissedNotificationParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
+	GetUserTransactionsParams,
+	GetUserTransactionsResponse,
+	SaveProviderAgreements,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { SignupsClosedError } from '$lib/types/errors';
+import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
+import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
+import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	fromNullable,
+	nonNullish,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
@@ -84,10 +102,16 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<UserProfile> => {
+	createUserProfile = async (): Promise<CreateUserProfileResponse> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
-		return create_user_profile();
+		const response = await create_user_profile();
+
+		if ('Err' in response && 'SignupsClosed' in response.Err) {
+			throw new SignupsClosedError();
+		}
+
+		return response;
 	};
 
 	getUserProfile = ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
@@ -96,20 +120,10 @@ export class BackendCanister extends Canister<BackendService> {
 		return get_user_profile();
 	};
 
-	addUserCredential = ({
-		credentialJwt,
-		issuerCanisterId,
-		currentUserVersion,
-		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResult> => {
-		const { add_user_credential } = this.caller({ certified: true });
+	newUserSignupsAllowed = ({ certified }: QueryParams): Promise<boolean> => {
+		const { new_user_signups_allowed } = this.caller({ certified });
 
-		return add_user_credential({
-			credential_jwt: credentialJwt,
-			issuer_canister_id: issuerCanisterId,
-			current_user_version: toNullable(currentUserVersion),
-			credential_spec: credentialSpec
-		});
+		return new_user_signups_allowed();
 	};
 
 	btcAddPendingTransaction = async ({
@@ -146,13 +160,15 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcGetPendingTransactions = async ({
 		network,
-		address
+		address,
+		iiDelegationChain
 	}: BtcGetPendingTransactionParams): Promise<GetPendingTransactionsOutcome> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
 			network,
-			address
+			address,
+			ii_delegation_chain: iiDelegationChain
 		});
 
 		if ('Ok' in response) {
@@ -180,14 +196,16 @@ export class BackendCanister extends Canister<BackendService> {
 	btcSelectUserUtxosFee = async ({
 		network,
 		minConfirmations,
-		amountSatoshis
+		amountSatoshis,
+		iiDelegationChain
 	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeOutcome> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
 			network,
 			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis
+			amount_satoshis: amountSatoshis,
+			ii_delegation_chain: iiDelegationChain
 		});
 
 		if ('Ok' in response) {
@@ -243,22 +261,25 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async (): Promise<AllowSigningOutcome> => {
+	allowSigning = async ({
+		iiDelegationChain
+	}: AllowSigningParams): Promise<AllowSigningOutcome> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await allow_signing();
+		const response = await allow_signing(
+			toNullable({
+				ii_delegation_chain: iiDelegationChain
+			})
+		);
 
 		if ('Ok' in response) {
 			return { response: response.Ok };
 		}
 
-		// In case of rate limit reached, we ignore the error and let the user continue (for now).
-		// TODO: improve placeholder with significant data, for now we do not use them
 		if ('RateLimited' in response.Err || 'RateLimitedByGuard' in response.Err) {
 			return {
 				response: {
 					status: { Skipped: null },
-					challenge_completion: toNullable(),
 					allowed_cycles: ZERO
 				},
 				rateLimitInfo: {
@@ -282,6 +303,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await add_user_hidden_dapp_id({
 			dapp_id: dappId,
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	addUserDismissedNotification = async ({
+		notifications,
+		currentUserVersion
+	}: AddUserDismissedNotificationParams): Promise<void> => {
+		const { add_user_dismissed_notification } = this.caller({ certified: true });
+
+		await add_user_dismissed_notification({
+			notifications,
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};
@@ -318,6 +351,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await update_user_agreements({
 			agreements: mapBackendUserAgreements(agreements),
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateProviderAgreements = async ({
+		providerAgreements,
+		currentUserVersion
+	}: SaveProviderAgreements): Promise<void> => {
+		const { update_provider_agreements } = this.caller({ certified: true });
+
+		await update_provider_agreements({
+			provider_agreements: mapBackendProviderAgreements(providerAgreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};
@@ -382,5 +427,111 @@ export class BackendCanister extends Canister<BackendService> {
 			experimental_features: mapUserExperimentalFeatures(experimentalFeatures),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	updateUserTransactionFilterSettings = async ({
+		hideMicroTransactions,
+		currentUserVersion
+	}: UpdateUserTransactionFilterSettings): Promise<void> => {
+		const { update_user_transaction_filter_settings } = this.caller({ certified: true });
+
+		await update_user_transaction_filter_settings({
+			filter: { hide_micro_transactions: hideMicroTransactions },
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
+		if (!nonNullish(rate)) {
+			return;
+		}
+
+		return {
+			usd: {
+				price: fromNullable(rate.usd.price),
+				price24hChangePct: fromNullable(rate.usd.price_24h_change_pct),
+				marketCap: fromNullable(rate.usd.market_cap),
+				timestampNs: rate.usd.timestamp_ns
+			}
+		};
+	};
+
+	getExchangeRate = async ({
+		token_id,
+		certified
+	}: { token_id: TokenId } & QueryParams): Promise<BackendExchangeRate | undefined> => {
+		const { get_exchange_rate } = this.caller({ certified });
+
+		const response = await get_exchange_rate(token_id);
+
+		return this.mapExchangeRate(fromNullable(response));
+	};
+
+	getExchangeRates = async ({
+		token_ids,
+		certified
+	}: { token_ids: TokenId[] } & QueryParams): Promise<Map<string, BackendExchangeRate>> => {
+		const { get_exchange_rates } = this.caller({ certified });
+
+		const results = await get_exchange_rates(token_ids);
+
+		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
+			const unwrapped = this.mapExchangeRate(fromNullable(rate));
+
+			const key = tokenIdKey(id);
+
+			if (nonNullish(unwrapped) && nonNullish(key)) {
+				acc.set(key, unwrapped);
+			}
+
+			return acc;
+		}, new Map());
+	};
+
+	getUserTransactions = async ({
+		tokenId,
+		start,
+		maxResults
+	}: GetUserTransactionsParams): Promise<GetUserTransactionsResponse> => {
+		const { get_user_transactions } = this.caller({ certified: false });
+
+		const response = await get_user_transactions({
+			token_id: tokenId,
+			start: toNullable(start),
+			max_results: maxResults
+		});
+
+		if ('Ok' in response) {
+			const { transactions, newest_block_index, oldest_block_index, total_stored, next_start } =
+				response.Ok;
+
+			return {
+				transactions,
+				newestBlockIndex: fromNullable(newest_block_index),
+				oldestBlockIndex: fromNullable(oldest_block_index),
+				totalStored: total_stored,
+				nextStart: fromNullable(next_start)
+			};
+		}
+
+		throw response.Err;
+	};
+
+	saveUserTransactions = async ({
+		tokenId,
+		transactions
+	}: SaveUserTransactionsParams): Promise<void> => {
+		const { save_user_transactions } = this.caller({ certified: true });
+
+		const response = await save_user_transactions({
+			token_id: tokenId,
+			transactions
+		});
+
+		if ('Ok' in response) {
+			return;
+		}
+
+		throw response.Err;
 	};
 }

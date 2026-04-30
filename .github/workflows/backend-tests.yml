@@ -69,7 +69,7 @@ jobs:
         id: changes
         uses: ./.github/actions/check-backend-changes
 
-      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         if: steps.changes.outputs.backend == 'true'
         with:
           path: |
@@ -80,7 +80,7 @@ jobs:
 
       - name: Download backend.wasm.gz
         if: steps.changes.outputs.backend == 'true'
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: backend.wasm.gz
           path: .
@@ -120,7 +120,7 @@ jobs:
         # until deployment to production.  As it is, any PRs that change the backend candid
         # will still need to be announced as a breaking change, but that is probably acceptable,
         # and it makes it clear if the API is revised to no longer be breaking.
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: api-changes
         with:
           filters: |
@@ -149,7 +149,7 @@ jobs:
         if: (steps.changes.outputs.backend == 'true') && (steps.api-changes.outputs.api == 'true') && !((steps.conventional-commit.outputs.BREAKING_DESCRIPTION == 'true') && (steps.conventional-commit.outputs.BREAKING_TITLE == 'true'))
         run: echo "EXPECT_NO_BREAKING_CHANGES=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
         with:
           path: |
@@ -164,7 +164,7 @@ jobs:
 
       - name: Download backend.wasm.gz
         if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: backend.wasm.gz
           path: .

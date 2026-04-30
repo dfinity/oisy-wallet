@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use candid::{CandidType, Deserialize};
 
 use crate::{
@@ -6,6 +8,58 @@ use crate::{
 };
 
 pub const SHA256_HEX_LENGTH: usize = 64;
+
+/// Which external provider the agreement belongs to.
+///
+/// Add a new variant and redeploy the canister when onboarding a new provider.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub enum ProviderAgreementProvider {
+    NearIntents,
+}
+
+/// The feature/context within a provider that the agreement covers.
+///
+/// A single provider may require separate acknowledgements for different scopes
+/// (e.g., swap, bridge, staking).
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub enum ProviderAgreementScope {
+    Swap,
+}
+
+/// Composite key identifying a specific provider agreement.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct ProviderAgreementType {
+    pub provider: ProviderAgreementProvider,
+    pub scope: ProviderAgreementScope,
+}
+
+/// Identifies which agreement a history entry refers to.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum AgreementType {
+    LicenseAgreement,
+    TermsOfUse,
+    PrivacyPolicy,
+    Provider(ProviderAgreementType),
+}
+
+/// A single audit-trail entry recording that a user accepted (or rejected) a specific agreement
+/// version at a point in time.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct AgreementHistoryEntry {
+    pub agreement_type: AgreementType,
+    pub accepted: bool,
+    /// Canister timestamp (nanos since epoch) when this action was recorded.
+    pub timestamp_ns: Timestamp,
+    /// SHA256 hash of the agreement text the user was shown, if provided.
+    pub text_sha256: Option<String>,
+    /// Document-version timestamp (millis since epoch) of the agreement the user acted on.
+    pub last_updated_at_ms: Option<Timestamp>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetAgreementHistoryError {
+    UserNotFound,
+}
 
 /// Per-agreement status/metadata.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
@@ -55,10 +109,16 @@ impl Validate for UserAgreements {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct Agreements {
     pub agreements: UserAgreements,
+    pub provider_agreements: Option<BTreeMap<ProviderAgreementType, UserAgreement>>,
 }
 impl Validate for Agreements {
     fn validate(&self) -> Result<(), candid::Error> {
         self.agreements.validate()?;
+        if let Some(ref provider) = self.provider_agreements {
+            for agreement in provider.values() {
+                agreement.validate()?;
+            }
+        }
         Ok(())
     }
 }
@@ -74,4 +134,11 @@ pub enum UpdateAgreementsError {
 pub struct UpdateUserAgreementsRequest {
     pub current_user_version: Option<Version>,
     pub agreements: UserAgreements,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct UpdateProviderAgreementsRequest {
+    pub current_user_version: Option<Version>,
+    pub provider_agreements: BTreeMap<ProviderAgreementType, UserAgreement>,
 }

@@ -7,9 +7,11 @@ import {
 	NAVIGATION_MENU_BUTTON,
 	NAVIGATION_MENU_DOC_BUTTON,
 	NAVIGATION_MENU_GOLD_BUTTON,
+	NAVIGATION_MENU_PAY_BUTTON,
 	NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
 	NAVIGATION_MENU_RECEIVE_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
+	NAVIGATION_MENU_SCANNER_BUTTON,
 	NAVIGATION_MENU_SUPPORT_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON,
 	NAVIGATION_MENU_WHY_OISY_BUTTON
@@ -30,6 +32,8 @@ describe('Menu', () => {
 	const menuItemVipButtonSelector = `button[data-tid="${NAVIGATION_MENU_VIP_BUTTON}"]`;
 	const menuItemGoldButtonSelector = `button[data-tid="${NAVIGATION_MENU_GOLD_BUTTON}"]`;
 	const menuItemAddressBookSelector = `button[data-tid="${NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}"]`;
+	const menuItemScannerButtonSelector = `button[data-tid="${NAVIGATION_MENU_SCANNER_BUTTON}"]`;
+	const menuItemPayButtonSelector = `button[data-tid="${NAVIGATION_MENU_PAY_BUTTON}"]`;
 	const menuItemReferralButtonSelector = `button[data-tid="${NAVIGATION_MENU_REFERRAL_BUTTON}"]`;
 	const menuItemWhyOisyButtonSelector = `button[data-tid="${NAVIGATION_MENU_WHY_OISY_BUTTON}"]`;
 	const menuItemDocButtonSelector = `a[data-tid="${NAVIGATION_MENU_DOC_BUTTON}"]`;
@@ -120,6 +124,48 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemGoldButtonSelector, shouldExist: false });
 	});
 
+	it('renders the scanner button in the menu', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemScannerButtonSelector });
+	});
+
+	it('renders the pay button in the menu', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemPayButtonSelector });
+	});
+
+	it('should open the universal scanner modal', async () => {
+		const openUniversalScannerSpy = vi.spyOn(modalStore, 'openUniversalScanner');
+
+		await openMenu();
+		await waitForElement({ selector: menuItemScannerButtonSelector });
+
+		const button: HTMLButtonElement | null = container.querySelector(menuItemScannerButtonSelector);
+
+		assertNonNullish(button);
+
+		button.click();
+
+		expect(openUniversalScannerSpy).toHaveBeenCalledExactlyOnceWith({
+			id: expect.any(Symbol)
+		});
+	});
+
+	it('should open the pay dialog modal', async () => {
+		const openPayDialogSpy = vi.spyOn(modalStore, 'openPayDialog');
+
+		await openMenu();
+		await waitForElement({ selector: menuItemPayButtonSelector });
+
+		const button: HTMLButtonElement | null = container.querySelector(menuItemPayButtonSelector);
+
+		assertNonNullish(button);
+
+		button.click();
+
+		expect(openPayDialogSpy).toHaveBeenCalledExactlyOnceWith(expect.any(Symbol));
+	});
+
 	it('renders the address book button in the menu', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemAddressBookSelector });
@@ -128,6 +174,11 @@ describe('Menu', () => {
 	it('always renders the referral button', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemReferralButtonSelector });
+	});
+
+	it('renders the support button in the menu', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemSupportButtonSelector });
 	});
 
 	it('should render the logged out version if not signed in', async () => {

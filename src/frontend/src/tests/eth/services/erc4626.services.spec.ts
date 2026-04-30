@@ -13,6 +13,8 @@ import {
 	depositErc4626,
 	loadCustomErc4626Tokens,
 	loadErc4626Tokens,
+	redeemErc4626,
+	toggleErc4626Token,
 	withdrawErc4626
 } from '$eth/services/erc4626.services';
 import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
@@ -24,6 +26,7 @@ import * as signerApiModule from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
 import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Vault } from '$lib/types/vaults';
@@ -63,6 +66,10 @@ vi.mock('ethers/contract', () => {
 
 vi.mock('$lib/api/signer.api', () => ({
 	signTransaction: vi.fn()
+}));
+
+vi.mock('$lib/services/save-custom-tokens.services', () => ({
+	saveCustomTokens: vi.fn()
 }));
 
 vi.mock('$lib/utils/wallet.utils', () => ({
@@ -727,6 +734,128 @@ describe('erc4626.services', () => {
 				});
 
 				expect(infuraProvidersModule.infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
+			});
+		});
+
+		describe('redeemErc4626', () => {
+			const mockShares = 500_000n;
+
+			it('should get nonce, sign and send transaction', async () => {
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(getTransactionCountSpy).toHaveBeenCalledOnce();
+				expect(signTransaction).toHaveBeenCalledOnce();
+				expect(sendTransactionSpy).toHaveBeenCalledOnce();
+			});
+
+			it('should call progress callbacks in order', async () => {
+				const progress = vi.fn();
+
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
+					from: mockFrom,
+					progress,
+					...mockFeeData
+				});
+
+				expect(progress).toHaveBeenCalledTimes(2);
+				expect(progress).toHaveBeenNthCalledWith(1, ProgressStepsUnstake.UNSTAKE);
+				expect(progress).toHaveBeenNthCalledWith(2, ProgressStepsUnstake.UPDATE_UI);
+			});
+
+			it('should send transaction to the vault contract address', async () => {
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(signTransaction).toHaveBeenCalledWith(
+					expect.objectContaining({
+						transaction: expect.objectContaining({
+							to: mockVault.token.address
+						})
+					})
+				);
+			});
+
+			it('should use the nonce from getTransactionCount', async () => {
+				getTransactionCountSpy.mockResolvedValue(42);
+
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(signTransaction).toHaveBeenCalledWith(
+					expect.objectContaining({
+						transaction: expect.objectContaining({
+							nonce: 42n
+						})
+					})
+				);
+			});
+
+			it('should call infuraProviders with the correct network', async () => {
+				await redeemErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					shares: mockShares,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(infuraProvidersModule.infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
+			});
+		});
+
+		describe('toggleErc4626Token', () => {
+			beforeEach(() => {
+				vi.mocked(saveCustomTokens).mockResolvedValue(undefined);
+			});
+
+			it('should call saveCustomTokens with the provided enabled value and correct token data', async () => {
+				await toggleErc4626Token({
+					token: mockVaultToken,
+					identity: mockIdentity,
+					enabled: true
+				});
+
+				expect(saveCustomTokens).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					tokens: [
+						{
+							enabled: true,
+							version: undefined,
+							address: mockVaultToken.address,
+							chainId: mockVaultToken.network.chainId,
+							networkKey: 'Erc4626'
+						}
+					]
+				});
+			});
+
+			it('should not call saveCustomTokens when identity is nullish', async () => {
+				await toggleErc4626Token({
+					token: mockVaultToken,
+					identity: undefined,
+					enabled: true
+				});
+
+				expect(saveCustomTokens).not.toHaveBeenCalled();
 			});
 		});
 	});

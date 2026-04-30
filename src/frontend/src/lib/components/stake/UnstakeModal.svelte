@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import type { Erc20Token } from '$eth/types/erc20';
+	import { getHarvestAutopilotBaseTrackingMetadata } from '$eth/utils/harvest-autopilots.utils';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import UnstakeWizard from '$lib/components/stake/UnstakeWizard.svelte';
 	import { unstakeWizardSteps } from '$lib/config/stake.config';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { ProgressStepsUnstake } from '$lib/enums/progress-steps';
 	import { WizardStepsUnstake } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -40,6 +45,20 @@
 
 	const close = () =>
 		closeModal(() => {
+			if (unstakeProgressStep !== ProgressStepsUnstake.DONE && nonNullish(vault)) {
+				trackEvent({
+					name: PLAUSIBLE_EVENTS.UNSTAKE,
+					metadata: {
+						...getHarvestAutopilotBaseTrackingMetadata({
+							assetToken: token as Erc20Token,
+							vaultToken: vault.token
+						}),
+						source_detail1: currentStep?.name === WizardStepsUnstake.REVIEW ? 'review' : 'form',
+						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+					}
+				});
+			}
+
 			reset();
 		});
 </script>

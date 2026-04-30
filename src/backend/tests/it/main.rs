@@ -6,6 +6,7 @@ mod custom_token;
 mod settings;
 mod signer;
 mod stats;
-mod user_credentials;
+mod status;
+mod transactions;
 mod user_profile;
 mod utils;

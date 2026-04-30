@@ -1,0 +1,70 @@
+name: Legacy Signer Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type (major, minor, patch)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+permissions: {}
+
+jobs:
+  bump_legacy_signer_version:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Bump legacy signer version
+        id: bump_version
+        run: |
+          node -e "
+            const fs = require('fs');
+            const semver = require('semver');
+            const path = 'signer-versions.json';
+            const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const bumped = semver.inc(data.legacy_signer_frontend, process.env.VERSION_BUMP);
+            if (!bumped) {
+              console.error('Failed to bump version');
+              process.exit(1);
+            }
+            data.legacy_signer_frontend = bumped;
+            fs.writeFileSync(path, JSON.stringify(data, null, '\t') + '\n');
+            console.log('Bumped legacy signer to version: ' + bumped);
+          "
+          new_version=$(node -p "require('./signer-versions.json').legacy_signer_frontend")
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+        env:
+          VERSION_BUMP: ${{ github.event.inputs.version_bump }}
+
+      - name: Create Pull Request
+        uses: ./.github/actions/create-pr
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: 'chore(release)/legacy-signer-v${{ steps.bump_version.outputs.new_version }}'
+          title: 'chore(release): legacy signer v${{ steps.bump_version.outputs.new_version }}'
+          body: |
+            This PR bumps the legacy signer frontend version to v${{ steps.bump_version.outputs.new_version }}.

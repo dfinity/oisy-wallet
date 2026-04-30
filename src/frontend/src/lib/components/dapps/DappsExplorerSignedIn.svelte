@@ -18,9 +18,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 
+	const enabledDappDescriptions = dAppDescriptions.filter(({ disabled }) => !disabled);
+
 	// For the moment only the first featured dapp is highlighted
 	const selectFirstFeaturedDapp = (): FeaturedOisyDappDescription | undefined =>
-		dAppDescriptions.find(
+		enabledDappDescriptions.find(
 			({ featured, screenshots }) => featured && nonNullish(screenshots) && screenshots.length
 		) as FeaturedOisyDappDescription | undefined;
 
@@ -30,12 +32,16 @@
 
 	let uniqueTags = $state(
 		new Set(
-			dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB))
+			enabledDappDescriptions
+				.flatMap((dapp) => dapp.tags)
+				.sort((tagA, tagB) => tagA.localeCompare(tagB))
 		)
 	);
 
 	let filteredDapps = $derived(
-		dAppDescriptions.filter(({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag))
+		enabledDappDescriptions.filter(
+			({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag)
+		)
 	);
 
 	const modalId = Symbol();

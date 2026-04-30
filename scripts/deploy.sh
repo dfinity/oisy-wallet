@@ -16,12 +16,10 @@ dfx deploy cketh_index
 dfx deploy ckusdc_ledger
 dfx deploy ckusdc_index
 
-dfx deploy kong_backend
 dfx deploy icp_swap_factory
 dfx deploy icp_swap_pool
 
 dfx deploy internet_identity
-dfx deploy pouh_issuer
 dfx deploy cycles_ledger
 dfx deploy cycles_depositor
 dfx deploy rewards

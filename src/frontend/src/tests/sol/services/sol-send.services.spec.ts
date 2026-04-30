@@ -383,6 +383,25 @@ describe('sol-send.services', () => {
 			);
 		});
 
+		it('should not estimate compute units when prioritization fee is zero', async () => {
+			await sendSol({
+				...mockParams,
+				token: SOLANA_TOKEN
+			});
+
+			expect(estimateComputeUnitLimitFactory).not.toHaveBeenCalled();
+		});
+
+		it('should estimate compute units and set price when prioritization fee is positive', async () => {
+			await sendSol({
+				...mockParams,
+				prioritizationFee: 100_000n,
+				token: SOLANA_TOKEN
+			});
+
+			expect(estimateComputeUnitLimitFactory).toHaveBeenCalledOnce();
+		});
+
 		it('should throw an error if network is invalid', async () => {
 			await expect(
 				sendSol({

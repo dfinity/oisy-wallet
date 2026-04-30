@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, fmt};
+use std::collections::BTreeMap;
 
 use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
@@ -6,7 +6,9 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        agreement::{Agreements, UpdateAgreementsError, UserAgreements},
+        agreement::{
+            Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
+        },
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -25,12 +27,16 @@ use crate::{
             NetworkSettingsMap, NetworksSettings, SetTestnetsSettingsError,
             UpdateNetworksSettingsError,
         },
+        notification::{
+            AddDismissedNotificationError, DismissedNotification, NotificationSettings,
+            MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH,
+        },
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
-        user_profile::{
-            AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
+        transaction_settings::{
+            TransactionFilterSettings, TransactionSettings, UpdateTransactionFilterSettingsError,
         },
-        verifiable_credential::CredentialType,
+        user_profile::{OisyUser, StoredUserProfile, UserProfile},
         Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },
     validate::{validate_on_deserialize, Validate},
@@ -161,10 +167,11 @@ impl From<InitArg> for Config {
         let InitArg {
             ecdsa_key_name,
             allowed_callers,
-            supported_credentials,
             ic_root_key_der,
             cfs_canister_id,
             derivation_origin,
+            ii_canister_id,
+            new_user_signups_allowed,
         } = arg;
         let ic_root_key_raw = match extract_raw_root_pk_from_der(
             &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
@@ -176,9 +183,10 @@ impl From<InitArg> for Config {
             ecdsa_key_name,
             allowed_callers,
             cfs_canister_id,
-            supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),
             derivation_origin,
+            ii_canister_id,
+            new_user_signups_allowed,
         }
     }
 }
@@ -198,14 +206,6 @@ impl TokenVersion for CustomToken {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
-    }
-}
-
-impl fmt::Display for CredentialType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            CredentialType::ProofOfUniqueness => write!(f, "ProofOfUniqueness"),
-        }
     }
 }
 
@@ -238,43 +238,19 @@ impl StoredUserProfile {
                 },
             },
             experimental_features: ExperimentalFeaturesSettings::default(),
+            notifications: None,
+            transactions: Some(TransactionSettings {
+                filter: Some(TransactionFilterSettings::default()),
+            }),
         };
         let agreements = Agreements::default();
-        let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
             settings: Some(settings),
             agreements: Some(agreements),
-            credentials,
             created_timestamp: now,
             updated_timestamp: now,
             version: None,
         }
-    }
-
-    /// # Errors
-    ///
-    /// Will return Err if there is a version mismatch.
-    pub fn add_credential(
-        &self,
-        profile_version: Option<Version>,
-        now: Timestamp,
-        credential_type: &CredentialType,
-        issuer: String,
-    ) -> Result<StoredUserProfile, AddUserCredentialError> {
-        if profile_version != self.version {
-            return Err(AddUserCredentialError::VersionMismatch);
-        }
-        let mut new_profile = self.with_incremented_version();
-        let user_credential = UserCredential {
-            credential_type: credential_type.clone(),
-            verified_date_timestamp: Some(now),
-            issuer,
-        };
-        let mut new_credentials = new_profile.credentials.clone();
-        new_credentials.insert(credential_type.clone(), user_credential);
-        new_profile.credentials = new_credentials;
-        new_profile.updated_timestamp = now;
-        Ok(new_profile)
     }
 
     /// Returns a copy with networks map set to the specified value.
@@ -394,6 +370,46 @@ impl StoredUserProfile {
         Ok(new_profile)
     }
 
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or the set would exceed its capacity.
+    pub fn add_dismissed_notifications(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        notifications: Vec<DismissedNotification>,
+    ) -> Result<StoredUserProfile, AddDismissedNotificationError> {
+        if profile_version != self.version {
+            return Err(AddDismissedNotificationError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+        let mut dismissed = settings
+            .notifications
+            .unwrap_or_default()
+            .dismissed_notifications;
+
+        let old_len = dismissed.len();
+        dismissed.extend(notifications);
+
+        if dismissed.len() == old_len {
+            return Ok(self.clone());
+        }
+
+        if dismissed.len() > MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH {
+            return Err(AddDismissedNotificationError::MaxDismissedNotifications);
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_settings = new_profile.settings.clone().unwrap_or_default();
+        new_settings.notifications = Some(NotificationSettings {
+            dismissed_notifications: dismissed,
+        });
+        new_profile.settings = Some(new_settings);
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
     /// Returns a copy with the specified user agreements updated.
     ///
     /// # Errors
@@ -448,6 +464,60 @@ impl StoredUserProfile {
         Ok(new_profile)
     }
 
+    /// Returns a copy with the specified provider agreements updated.
+    ///
+    /// Only entries where `accepted` is `Some(_)` are applied. Existing provider agreements not
+    /// present in the request are left unchanged.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_provider_agreements(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        provider_agreements: BTreeMap<ProviderAgreementType, UserAgreement>,
+    ) -> Result<StoredUserProfile, UpdateAgreementsError> {
+        if profile_version != self.version {
+            return Err(UpdateAgreementsError::VersionMismatch);
+        }
+
+        let current = self
+            .agreements
+            .clone()
+            .unwrap_or_default()
+            .provider_agreements
+            .unwrap_or_default();
+
+        let mut merged = current.clone();
+
+        for (provider_type, agreement) in provider_agreements {
+            if agreement.accepted.is_some() {
+                merged.insert(provider_type.clone(), agreement.clone());
+            }
+        }
+
+        if current == merged {
+            return Ok(self.clone());
+        }
+
+        for agreement in merged.values_mut() {
+            if matches!(agreement.accepted, Some(true)) {
+                agreement.last_accepted_at_ns = Some(now);
+            }
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.agreements = {
+            let mut agreements = new_profile.agreements.unwrap_or_default();
+            agreements.provider_agreements = Some(merged);
+            Some(agreements)
+        };
+        new_profile.updated_timestamp = now;
+
+        Ok(new_profile)
+    }
+
     /// Returns a copy with experimental features settings map set to the specified value.
     ///
     /// # Errors
@@ -484,6 +554,44 @@ impl StoredUserProfile {
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
+
+    /// Returns a copy with the transaction filter settings updated.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_transaction_filter_settings(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        filter: TransactionFilterSettings,
+    ) -> Result<StoredUserProfile, UpdateTransactionFilterSettingsError> {
+        if profile_version != self.version {
+            return Err(UpdateTransactionFilterSettingsError::VersionMismatch);
+        }
+
+        let transactions = self
+            .settings
+            .clone()
+            .unwrap_or_default()
+            .transactions
+            .unwrap_or_default();
+
+        if transactions.filter.as_ref() == Some(&filter) {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            let mut transactions = settings.transactions.unwrap_or_default();
+            transactions.filter = Some(filter);
+            settings.transactions = Some(transactions);
+            Some(settings)
+        };
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
 }
 
 impl From<&StoredUserProfile> for UserProfile {
@@ -492,7 +600,6 @@ impl From<&StoredUserProfile> for UserProfile {
             created_timestamp,
             updated_timestamp,
             version,
-            credentials,
             settings,
             agreements,
         } = user;
@@ -500,7 +607,6 @@ impl From<&StoredUserProfile> for UserProfile {
             created_timestamp: *created_timestamp,
             updated_timestamp: *updated_timestamp,
             version: *version,
-            credentials: credentials.clone().into_values().collect(),
             settings: settings.clone(),
             agreements: agreements.clone(),
         }
@@ -512,9 +618,6 @@ impl OisyUser {
     pub fn from_profile(user: &StoredUserProfile, principal: Principal) -> OisyUser {
         OisyUser {
             principal,
-            pouh_verified: user
-                .credentials
-                .contains_key(&CredentialType::ProofOfUniqueness),
             updated_timestamp: user.updated_timestamp,
         }
     }

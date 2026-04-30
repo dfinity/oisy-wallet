@@ -66,15 +66,21 @@ const findDuplicateEthNativeTransactions = (
 				groupsByNetworkAndHash.set(networkId, new Map());
 			}
 
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			const networkMap = groupsByNetworkAndHash.get(networkId)!;
+			const networkMap = groupsByNetworkAndHash.get(networkId);
 
-			if (!networkMap.has(hash)) {
-				networkMap.set(hash, []);
+			if (isNullish(networkMap)) {
+				const newNetworkMap = new Map<string, EthAllTransactionUiWithCmp[]>();
+
+				newNetworkMap.set(hash, [tx]);
+
+				groupsByNetworkAndHash.set(networkId, newNetworkMap);
+			} else {
+				if (!networkMap.has(hash)) {
+					networkMap.set(hash, []);
+				}
+
+				networkMap.get(hash)?.push(tx);
 			}
-
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			networkMap.get(hash)!.push(tx);
 		}
 	}
 

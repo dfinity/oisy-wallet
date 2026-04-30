@@ -2,12 +2,14 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import { formatToken } from '$lib/utils/format.utils';
+import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { bn1Bi } from '$tests/mocks/balances.mock';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -102,5 +104,35 @@ describe('IcTransaction', () => {
 				})
 			})} ${getTokenDisplaySymbol(ICP_TOKEN)}`
 		);
+	});
+
+	it('should show minting account as "from" for mint transactions', () => {
+		assertNonNullish(mockValidIcToken.mintingAccount);
+
+		const mintingAddress = encodeIcrcAccount(mockValidIcToken.mintingAccount);
+
+		const { container } = render(IcTransaction, {
+			props: {
+				transaction: { ...mockTrx, type: 'mint', incoming: true },
+				token: mockValidIcToken
+			}
+		});
+
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: mintingAddress }));
+	});
+
+	it('should show minting account as "to" for burn transactions', () => {
+		assertNonNullish(mockValidIcToken.mintingAccount);
+
+		const mintingAddress = encodeIcrcAccount(mockValidIcToken.mintingAccount);
+
+		const { container } = render(IcTransaction, {
+			props: {
+				transaction: { ...mockTrx, type: 'burn', incoming: false },
+				token: mockValidIcToken
+			}
+		});
+
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: mintingAddress }));
 	});
 });

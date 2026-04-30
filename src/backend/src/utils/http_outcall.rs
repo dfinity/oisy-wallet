@@ -1,14 +1,34 @@
 use candid::Nat;
-use ic_cdk::management_canister::{
-    http_request, HttpHeader, HttpMethod, HttpRequestArgs, HttpRequestResult,
+use ic_cdk::{
+    management_canister::{
+        http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
+        HttpRequestResult, TransformArgs,
+    },
+    query,
 };
 
 const USER_AGENT: &str = "OisyWalletBackend";
 
+/// Strips volatile HTTP headers so that IC replicas can reach consensus.
+///
+/// Each replica makes the same HTTP request independently and the raw
+/// responses must match for consensus. Headers like `Date`, `X-Request-Id`,
+/// `CF-Ray`, etc. differ across replicas, causing consensus failure.
+/// This transform keeps only status + body.
+#[query]
+fn http_request_transform(args: TransformArgs) -> HttpRequestResult {
+    HttpRequestResult {
+        status: args.response.status,
+        headers: vec![],
+        body: args.response.body,
+    }
+}
+
 /// Builds an [`HttpRequestArgs`] with the given parameters.
 ///
 /// Always includes a `User-Agent` header. Any `extra_headers` are appended
-/// after it.
+/// after it. Does **not** set `transform`; the public entry points [`get`]
+/// and [`post`] attach [`http_request_transform`] before dispatching.
 fn build_request(
     url: &str,
     method: HttpMethod,
@@ -50,8 +70,8 @@ fn validate_response(response: HttpRequestResult) -> Result<HttpRequestResult, S
 }
 
 /// Sends the request via the management canister and validates the response.
-async fn execute(request: &HttpRequestArgs) -> Result<HttpRequestResult, String> {
-    match http_request(request).await {
+async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> {
+    match http_request(&request).await {
         Ok(response) => validate_response(response),
         Err(err) => Err(format!("HTTP request failed: {err}")),
     }
@@ -60,7 +80,8 @@ async fn execute(request: &HttpRequestArgs) -> Result<HttpRequestResult, String>
 /// Performs an HTTP GET outcall.
 ///
 /// Sends a GET request to `url` with a `User-Agent` header and validates
-/// that the response status is in the 2xx range.
+/// that the response status is in the 2xx range. Attaches
+/// [`http_request_transform`] so IC replicas can reach consensus.
 ///
 /// # Arguments
 /// * `url` - The URL to fetch.
@@ -72,16 +93,22 @@ pub(crate) async fn get(
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
 ) -> Result<HttpRequestResult, String> {
-    let request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
+    let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
 
-    execute(&request).await
+    request.transform = Some(transform_context_from_query(
+        "http_request_transform".to_string(),
+        vec![],
+    ));
+
+    execute(request).await
 }
 
 /// Performs an HTTP POST outcall with a JSON body.
 ///
 /// Sends a POST request to `url` with the given `body` and a
 /// `Content-Type: application/json` header, then validates that the
-/// response status is in the 2xx range.
+/// response status is in the 2xx range. Attaches
+/// [`http_request_transform`] so IC replicas can reach consensus.
 ///
 /// # Idempotency
 ///
@@ -125,7 +152,7 @@ pub(crate) async fn post(
 
     post_headers.extend(headers);
 
-    let request = build_request(
+    let mut request = build_request(
         url,
         HttpMethod::POST,
         Some(body),
@@ -133,14 +160,21 @@ pub(crate) async fn post(
         max_response_bytes,
     );
 
-    execute(&request).await
+    request.transform = Some(transform_context_from_query(
+        "http_request_transform".to_string(),
+        vec![],
+    ));
+
+    execute(request).await
 }
 
 #[cfg(test)]
 mod tests {
+    use candid::Nat;
+    use ic_cdk::management_canister::{HttpHeader, HttpMethod, HttpRequestResult};
     use pretty_assertions::assert_eq;
 
-    use super::*;
+    use super::{build_request, validate_response, USER_AGENT};
 
     #[test]
     fn test_build_request_sets_url() {

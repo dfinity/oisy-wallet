@@ -1,8 +1,8 @@
 import type { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 
 export interface CkBtcUpdateBalanceParams {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	progress: (step: ProgressStepsUpdateBalanceCkBtc) => void;
 }
 

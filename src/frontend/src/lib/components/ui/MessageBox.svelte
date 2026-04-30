@@ -10,15 +10,26 @@
 
 	interface Props {
 		children: Snippet;
+		icon?: Snippet;
 		level?: 'plain' | 'info' | 'warning' | 'error' | 'success';
 		closableKey?: HideInfoKey;
 		styleClass?: string;
 		testId?: string;
+		onDismiss?: () => void;
 	}
 
-	let { children, level = 'info', closableKey, styleClass, testId }: Props = $props();
+	let {
+		children,
+		icon,
+		level = 'info',
+		closableKey,
+		styleClass,
+		testId,
+		onDismiss
+	}: Props = $props();
 
-	const closable = $derived(nonNullish(closableKey));
+	const closable = $derived(nonNullish(onDismiss) || nonNullish(closableKey));
+
 	// TODO: check if there is a better way to handle this svelte-ignore
 	// eslint-disable-next-line svelte/no-unused-svelte-ignore
 	// svelte-ignore state_referenced_locally -- we want to get only the initial value
@@ -27,11 +38,11 @@
 	const close = () => {
 		visible = false;
 
-		if (isNullish(closableKey)) {
-			return;
+		if (nonNullish(closableKey)) {
+			saveHideInfo(closableKey);
 		}
 
-		saveHideInfo(closableKey);
+		onDismiss?.();
 	};
 </script>
 
@@ -46,15 +57,19 @@
 		data-tid={testId}
 		transition:slide={SLIDE_EASING}
 	>
-		<div
-			class="min-w-5 py-0 sm:py-0.5"
-			class:text-brand-primary={level === 'plain' || level === 'info'}
-			class:text-error-secondary={level === 'error'}
-			class:text-success-secondary={level === 'success'}
-			class:text-warning-primary={level === 'warning'}
-		>
-			<IconInfo />
-		</div>
+		{#if nonNullish(icon)}
+			{@render icon()}
+		{:else}
+			<div
+				class="min-w-5 py-0 sm:py-0.5"
+				class:text-brand-primary={level === 'plain' || level === 'info'}
+				class:text-error-secondary={level === 'error'}
+				class:text-success-secondary={level === 'success'}
+				class:text-warning-primary={level === 'warning'}
+			>
+				<IconInfo />
+			</div>
+		{/if}
 		<div
 			class:text-error-secondary={level === 'error'}
 			class:text-primary={level === 'plain' || level === 'info' || level === 'warning'}

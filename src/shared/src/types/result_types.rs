@@ -1,5 +1,4 @@
 use candid::{CandidType, Deserialize};
-use serde::Serialize;
 
 use super::{
     bitcoin::{
@@ -7,57 +6,21 @@ use super::{
         BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
     dapp::AddDappSettingsError,
-    pow::{CreateChallengeError, CreateChallengeResponse},
+    notification::AddDismissedNotificationError,
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
-    user_profile::{GetUserProfileError, UserProfile},
+    user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
 };
 use crate::types::{
-    agreement::UpdateAgreementsError,
+    agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
-    user_profile::AddUserCredentialError,
+    transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
-
-#[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum AddUserCredentialResult {
-    /// The user's credential was added successfully.
-    Ok(()),
-    /// The user's credential was not added due to an error.
-    Err(AddUserCredentialError),
-}
-impl AddUserCredentialResult {
-    #[must_use]
-    pub fn is_err(&self) -> bool {
-        matches!(self, Self::Err(_))
-    }
-
-    /// Returns the contained `AddUserCredentialError` if the result is an `Err`.
-    ///
-    /// # Panics
-    /// - If the result is `Ok`.
-    #[must_use]
-    pub fn unwrap_err(self) -> AddUserCredentialError {
-        match self {
-            Self::Err(err) => err,
-            Self::Ok(()) => {
-                panic!("Called `AddUserCredentialResult.unwrap_err()` on an `Ok` value")
-            }
-        }
-    }
-}
-impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
-    fn from(result: Result<(), AddUserCredentialError>) -> Self {
-        match result {
-            Ok(()) => AddUserCredentialResult::Ok(()),
-            Err(err) => AddUserCredentialResult::Err(err),
-        }
-    }
-}
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum CreateContactResult {
@@ -190,6 +153,22 @@ impl From<Result<UserProfile, GetUserProfileError>> for GetUserProfileResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreateUserProfileResult {
+    /// The user's profile was created (or already existed) and is returned.
+    Ok(Box<UserProfile>),
+    /// The profile could not be created due to an error.
+    Err(CreateUserProfileError),
+}
+impl From<Result<UserProfile, CreateUserProfileError>> for CreateUserProfileResult {
+    fn from(result: Result<UserProfile, CreateUserProfileError>) -> Self {
+        match result {
+            Ok(profile) => CreateUserProfileResult::Ok(Box::new(profile)),
+            Err(err) => CreateUserProfileResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum GetAllowedCyclesResult {
     /// The allowed cycles were retrieved successfully.
     Ok(GetAllowedCyclesResponse),
@@ -201,22 +180,6 @@ impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowe
         match result {
             Ok(response) => GetAllowedCyclesResult::Ok(response),
             Err(err) => GetAllowedCyclesResult::Err(err),
-        }
-    }
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum CreatePowChallengeResult {
-    /// The pow challenge was created successfully.
-    Ok(CreateChallengeResponse),
-    /// The pow challenge was not created due to an error.
-    Err(CreateChallengeError),
-}
-impl From<Result<CreateChallengeResponse, CreateChallengeError>> for CreatePowChallengeResult {
-    fn from(result: Result<CreateChallengeResponse, CreateChallengeError>) -> Self {
-        match result {
-            Ok(response) => CreatePowChallengeResult::Ok(response),
-            Err(err) => CreatePowChallengeResult::Err(err),
         }
     }
 }
@@ -324,6 +287,20 @@ impl From<Result<(), AddDappSettingsError>> for AddUserHiddenDappIdResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum AddUserDismissedNotificationResult {
+    Ok(()),
+    Err(AddDismissedNotificationError),
+}
+impl From<Result<(), AddDismissedNotificationError>> for AddUserDismissedNotificationResult {
+    fn from(result: Result<(), AddDismissedNotificationError>) -> Self {
+        match result {
+            Ok(()) => AddUserDismissedNotificationResult::Ok(()),
+            Err(err) => AddUserDismissedNotificationResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum UpdateUserAgreementsResult {
     /// The user's agreements were updated successfully.
     Ok(()),
@@ -335,6 +312,22 @@ impl From<Result<(), UpdateAgreementsError>> for UpdateUserAgreementsResult {
         match result {
             Ok(()) => UpdateUserAgreementsResult::Ok(()),
             Err(err) => UpdateUserAgreementsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateProviderAgreementsResult {
+    /// The user's provider agreements were updated successfully.
+    Ok(()),
+    /// The user's provider agreements were not updated due to an error.
+    Err(UpdateAgreementsError),
+}
+impl From<Result<(), UpdateAgreementsError>> for UpdateProviderAgreementsResult {
+    fn from(result: Result<(), UpdateAgreementsError>) -> Self {
+        match result {
+            Ok(()) => UpdateProviderAgreementsResult::Ok(()),
+            Err(err) => UpdateProviderAgreementsResult::Err(err),
         }
     }
 }
@@ -358,6 +351,22 @@ impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateTransactionFilterSettingsResult {
+    Ok(()),
+    Err(UpdateTransactionFilterSettingsError),
+}
+impl From<Result<(), UpdateTransactionFilterSettingsError>>
+    for UpdateTransactionFilterSettingsResult
+{
+    fn from(result: Result<(), UpdateTransactionFilterSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateTransactionFilterSettingsResult::Ok(()),
+            Err(err) => UpdateTransactionFilterSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum GetUserTransactionsResult {
     Ok(GetUserTransactionsResponse),
     Err(UserTransactionError),
@@ -367,6 +376,36 @@ impl From<Result<GetUserTransactionsResponse, UserTransactionError>> for GetUser
         match result {
             Ok(response) => GetUserTransactionsResult::Ok(response),
             Err(err) => GetUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SaveUserTransactionsResult {
+    Ok(()),
+    Err(UserTransactionError),
+}
+impl From<Result<(), UserTransactionError>> for SaveUserTransactionsResult {
+    fn from(result: Result<(), UserTransactionError>) -> Self {
+        match result {
+            Ok(()) => SaveUserTransactionsResult::Ok(()),
+            Err(err) => SaveUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetAgreementHistoryResult {
+    Ok(Vec<AgreementHistoryEntry>),
+    Err(GetAgreementHistoryError),
+}
+impl From<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>
+    for GetAgreementHistoryResult
+{
+    fn from(result: Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>) -> Self {
+        match result {
+            Ok(entries) => GetAgreementHistoryResult::Ok(entries),
+            Err(err) => GetAgreementHistoryResult::Err(err),
         }
     }
 }

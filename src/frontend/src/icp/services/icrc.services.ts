@@ -45,7 +45,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -61,7 +61,11 @@ import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
-export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
+export const loadIcrcTokens = async ({
+	identity
+}: {
+	identity: NullishIdentity;
+}): Promise<void> => {
 	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
@@ -154,7 +158,7 @@ const loadCustomIcrcTokensData = async ({
 }: {
 	tokens: CustomToken[];
 	certified: boolean;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = {
 		...SUPPORTED_ICP_TOKENS_INDEXED,
@@ -290,8 +294,7 @@ const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
 	});
 
 	toastsError({
-		msg: { text: get(i18n).init.error.icrc_canisters },
-		err
+		msg: { text: get(i18n).init.error.load_token_list }
 	});
 };
 
@@ -453,7 +456,7 @@ export const isIcrcTokenSupportIcrc2 = async ({
 	identity,
 	ledgerCanisterId
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	ledgerCanisterId: CanisterIdText;
 }) => {
 	const supportedStandards = await icrc1SupportedStandards({

@@ -6,7 +6,7 @@ import { mapIcrcToken } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertExistingTokens } from '$lib/utils/tokens.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -23,7 +23,7 @@ export const loadAndAssertAddCustomToken = async ({
 	ledgerCanisterId,
 	indexCanisterId
 }: Partial<IcCanisters> & {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	icrcTokens: IcToken[];
 }): Promise<{
 	result: 'success' | 'error';

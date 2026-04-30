@@ -1,6 +1,7 @@
 import {
 	errorDetailToString,
 	formatIcCallError,
+	isVersionMismatchError,
 	mapIcErrorMetadata,
 	parseIcErrorMessage,
 	replaceErrorFields,
@@ -824,6 +825,79 @@ Call context:
 
 			expect(result).toContain('"0":1');
 			expect(result).not.toContain('bytes');
+		});
+
+		it('should handle HTTP details text without JSON braces', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: no json here at all'
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpStatus: true } });
+
+			expect(result).toContain('Canister ID: abc-cai');
+			expect(result).not.toContain('HTTP:');
+		});
+
+		it('should handle missing canister ID and method name in call context', () => {
+			const err = new Error('Some error\nCall context:\n  Something else');
+
+			const result = formatIcCallError({ err }) as string;
+
+			expect(result).toBeDefined();
+			expect(result).not.toContain('Canister ID:');
+			expect(result).not.toContain('Method name:');
+		});
+
+		it('should show "unknown" when HTTP status is missing from details', () => {
+			const err = new Error(
+				'Some error\nCall context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {"ok":false}'
+			);
+
+			const result = formatIcCallError({ err, options: { showHttpStatus: true } });
+
+			expect(result).toContain('HTTP: unknown');
+		});
+	});
+
+	describe('isVersionMismatchError', () => {
+		it('should return true for an Error with "Version mismatch" in the message', () => {
+			expect(
+				isVersionMismatchError(
+					new Error('Version mismatch, token update not allowed. Existing token: ...')
+				)
+			).toBeTruthy();
+		});
+
+		it('should return true for an IC agent error containing "Version mismatch"', () => {
+			expect(
+				isVersionMismatchError(
+					new Error(
+						'AgentError: Call failed:\n  Reject message: "Version mismatch, token update not allowed"'
+					)
+				)
+			).toBeTruthy();
+		});
+
+		it('should return false for an Error without "Version mismatch"', () => {
+			expect(isVersionMismatchError(new Error('Some other error'))).toBeFalsy();
+		});
+
+		it('should return false for a string', () => {
+			expect(isVersionMismatchError('Version mismatch')).toBeFalsy();
+		});
+
+		it('should return false for null', () => {
+			expect(isVersionMismatchError(null)).toBeFalsy();
+		});
+
+		it('should return false for undefined', () => {
+			expect(isVersionMismatchError(undefined)).toBeFalsy();
 		});
 	});
 });

@@ -11,17 +11,26 @@
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
+	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
+	import IconPay from '$lib/components/icons/IconPay.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
+	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import IconMaximize from '$lib/components/icons/lucide/IconMaximize.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
+	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
+	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
@@ -29,6 +38,8 @@
 		NAVIGATION_MENU_REFERRAL_BUTTON,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 		NAVIGATION_MENU_GOLD_BUTTON,
+		NAVIGATION_MENU_SCANNER_BUTTON,
+		NAVIGATION_MENU_PAY_BUTTON,
 		NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
 		NAVIGATION_MENU_SUPPORT_BUTTON,
 		NAVIGATION_MENU_DOC_BUTTON
@@ -39,6 +50,7 @@
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -80,6 +92,8 @@
 
 	const addressModalId = Symbol();
 	const referralModalId = Symbol();
+	const universalScannerModalId = Symbol();
+	const payDialogModalId = Symbol();
 	const goldModalId = Symbol();
 	const vipModalId = Symbol();
 </script>
@@ -142,15 +156,6 @@
 			</ButtonMenu>
 
 			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.refer_a_friend}
-				onclick={() => modalStore.openReferralCode(referralModalId)}
-				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-			>
-				<IconShare size="20" />
-				{$i18n.navigation.text.refer_a_friend}
-			</ButtonMenu>
-
-			<ButtonMenu
 				ariaLabel={$isPrivacyMode
 					? $i18n.navigation.alt.show_balances
 					: $i18n.navigation.alt.hide_balances}
@@ -166,6 +171,69 @@
 					{$i18n.navigation.text.hide_balances}
 				{/if}
 			</ButtonMenu>
+
+			<Hr />
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.text.wallet_connect}
+				onclick={() => modalStore.openUniversalScanner({ id: universalScannerModalId })}
+				styleClass="group"
+				testId={NAVIGATION_MENU_SCANNER_BUTTON}
+			>
+				<IconMaximize />
+
+				<span class="flex w-full items-center justify-between">
+					{$i18n.navigation.text.wallet_connect}
+
+					<span
+						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
+					>
+						<IconWalletConnect />
+					</span>
+				</span>
+			</ButtonMenu>
+
+			<ButtonMenu
+				ariaLabel={replaceOisyPlaceholders($i18n.navigation.text.pay)}
+				onclick={() => modalStore.openPayDialog(payDialogModalId)}
+				styleClass="group"
+				testId={NAVIGATION_MENU_PAY_BUTTON}
+			>
+				<IconMaximize />
+
+				<span class="flex w-full items-center justify-between">
+					{replaceOisyPlaceholders($i18n.navigation.text.pay)}
+
+					<span
+						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
+					>
+						<IconPay />
+					</span>
+				</span>
+			</ButtonMenu>
+
+			<Hr />
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.refer_a_friend}
+				onclick={() => modalStore.openReferralCode(referralModalId)}
+				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
+			>
+				<IconShare size="20" />
+				{$i18n.navigation.text.refer_a_friend}
+			</ButtonMenu>
+
+			<ExternalLink
+				ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.support)}
+				asMenuItem
+				asMenuItemCondensed
+				href={OISY_SUPPORT_URL}
+				iconVisible={false}
+				testId={NAVIGATION_MENU_SUPPORT_BUTTON}
+			>
+				<IconHelpCircle />
+				{$i18n.navigation.text.support}
+			</ExternalLink>
 
 			<Hr />
 
@@ -210,8 +278,16 @@
 	{#if $authSignedIn}
 		<Hr />
 
-		<div class="flex max-w-80 flex-col pt-3">
+		<div class="my-4 flex max-w-80 flex-col">
 			<LockOrSignOut onHidePopover={hidePopover} />
 		</div>
 	{/if}
+
+	<Hr />
+
+	<div class="mt-4 flex justify-center gap-2 text-xs text-nowrap text-tertiary">
+		<TermsOfUseLink />
+		<PrivacyPolicyLink />
+		<LicenseAgreementLink />
+	</div>
 </Popover>

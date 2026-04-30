@@ -5,7 +5,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIcrcAccount, mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
@@ -270,7 +270,7 @@ describe('ic-add-custom-tokens.service', () => {
 			const expectedBalance = 100n;
 
 			type LoadAndAssertAddCustomTokenParams = Partial<IcCanisters> & {
-				identity: OptionIdentity;
+				identity: NullishIdentity;
 				icrcTokens: IcToken[];
 			};
 

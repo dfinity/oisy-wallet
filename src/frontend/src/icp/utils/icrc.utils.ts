@@ -8,6 +8,7 @@ import {
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type {
 	IcCkInterface,
+	IcCkMetadata,
 	IcFee,
 	IcInterface,
 	IcToken,
@@ -15,19 +16,22 @@ import type {
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { mapTokenMetadata, type IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 
-export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
-	metadata: IcrcTokenMetadataResponse;
-	category: TokenCategory;
-	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
-};
+export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> &
+	Partial<IcCkMetadata> & {
+		metadata: IcrcTokenMetadataResponse;
+		category: TokenCategory;
+		icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
+	};
 
 export const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
 	[BITCAT_LEDGER_CANISTER_ID]: 'BITCAT',
@@ -87,6 +91,14 @@ export const mapIcrcToken = ({
 
 	const customTokenSymbol = icrcCustomTokens?.[ledgerCanisterId];
 
+	const twinTokenTags = rest.twinToken?.tags;
+
+	const mintingAccount =
+		rest.mintingAccount ??
+		(nonNullish(rest.minterCanisterId)
+			? getIcrcAccount(Principal.fromText(rest.minterCanisterId))
+			: undefined);
+
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
@@ -102,10 +114,12 @@ export const mapIcrcToken = ({
 		...(nonNullish(customTokenSymbol?.deprecated) && {
 			deprecated: customTokenSymbol.deprecated
 		}),
-		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+		tags: customTokenSymbol?.tags ?? twinTokenTags ?? DEFAULT_TOKEN_TAGS,
+		...(nonNullish(customTokenSymbol?.groupData) && { groupData: customTokenSymbol.groupData }),
 		ledgerCanisterId,
 		...metadataToken,
-		...rest
+		...rest,
+		...(nonNullish(mintingAccount) && { mintingAccount })
 	};
 };
 

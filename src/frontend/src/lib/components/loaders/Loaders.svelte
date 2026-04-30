@@ -6,13 +6,13 @@
 	import CkMinterInfoLoader from '$icp/components/loaders/CkMinterInfoLoader.svelte';
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
 	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
-	import StakeContext from '$lib/components/earning/StakeContext.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Guards from '$lib/components/guard/Guards.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 	import LoaderHarvest from '$lib/components/loaders/LoaderHarvest.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
+	import LoaderSwapTokens from '$lib/components/loaders/LoaderSwapTokens.svelte';
 	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
@@ -56,13 +56,13 @@
 
 		<LoaderHarvest />
 
-		<StakeContext>
-			{@render children()}
-		</StakeContext>
-	</Loader>
-</LoaderUserProfile>
+		<LoaderSwapTokens />
 
-<Guards />
+		{@render children()}
+	</Loader>
+
+	<Guards />
+</LoaderUserProfile>
 
 <WalletConnectListener />
 

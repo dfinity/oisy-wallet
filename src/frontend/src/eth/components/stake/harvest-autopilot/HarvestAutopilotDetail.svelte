@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import HarvestAutopilotVaultInfo from '$eth/components/stake/harvest-autopilot/HarvestAutopilotVaultInfo.svelte';
@@ -11,7 +11,10 @@
 		harvestAutopilots
 	} from '$eth/derived/harvest-autopilots.derived';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-	import { getHarvestAutopilotVaultTransactions } from '$eth/utils/harvest-autopilots.utils';
+	import {
+		getHarvestAutopilotBaseTrackingMetadata,
+		getHarvestAutopilotVaultTransactions
+	} from '$eth/utils/harvest-autopilots.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import EarningPositionCard from '$lib/components/earning/EarningPositionCard.svelte';
@@ -27,7 +30,6 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
@@ -36,15 +38,20 @@
 		modalHarvestUnstake
 	} from '$lib/derived/modal.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
-	import { networkId } from '$lib/derived/network.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { networkUrl } from '$lib/utils/nav.utils';
+	import { back } from '$lib/utils/nav.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
@@ -132,10 +139,64 @@
 				})
 			: ZERO
 	);
+
+	const onStakeModalOpen = (id: symbol) => {
+		if (nonNullish(vault) && nonNullish(assetToken)) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.OPEN_MODAL,
+				metadata: {
+					...getHarvestAutopilotBaseTrackingMetadata({
+						assetToken,
+						vaultToken: vault.token
+					}),
+					event_type: PLAUSIBLE_EVENTS.STAKE
+				}
+			});
+		}
+
+		modalStore.openHarvestStake(id);
+	};
+
+	const onUnstakeModalOpen = (id: symbol) => {
+		if (nonNullish(vault) && nonNullish(assetToken)) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.OPEN_MODAL,
+				metadata: {
+					...getHarvestAutopilotBaseTrackingMetadata({
+						assetToken,
+						vaultToken: vault.token
+					}),
+					event_type: PLAUSIBLE_EVENTS.UNSTAKE
+				}
+			});
+		}
+
+		modalStore.openHarvestUnstake(id);
+	};
+
+	let tracked = $state(false);
+	$effect(() => {
+		if (!tracked && nonNullish(vault) && nonNullish(assetToken)) {
+			tracked = true;
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+				metadata: {
+					...getHarvestAutopilotBaseTrackingMetadata({
+						vaultToken: vault.token,
+						assetToken
+					}),
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.EARN,
+					event_value: PLAUSIBLE_EVENT_VALUES.HARVEST_AUTOPILOT_DETAIL_PAGE
+				}
+			});
+		}
+	});
 </script>
 
 <div class="flex flex-col gap-6 pb-6">
 	<StakeProviderContainer
+		apyLabel={$i18n.vaults.text.live_apy}
 		logo={vault?.token.assetIcon ?? vault?.token.icon}
 		maxApy={nonNullish(vault?.apy) ? Number(vault.apy) : 0}
 		pageDescription={$i18n.stake.text.harvest_autopilot_vault_page_description}
@@ -147,15 +208,7 @@
 					ariaLabel="icon"
 					colorStyle="tertiary"
 					link={false}
-					onclick={() =>
-						goto(
-							networkUrl({
-								path: AppPath.EarnAutopilot,
-								networkId: $networkId,
-								usePreviousRoute: true,
-								fromRoute
-							})
-						)}
+					onclick={() => back({ pop: nonNullish(fromRoute) })}
 				>
 					{#snippet icon()}
 						<IconBackArrow />
@@ -193,7 +246,7 @@
 							</ButtonWithModal>
 
 							{#if nonNullish(vault) && assetTokenBalance > ZERO}
-								<ButtonWithModal isOpen={$modalHarvestStake} onOpen={modalStore.openHarvestStake}>
+								<ButtonWithModal isOpen={$modalHarvestStake} onOpen={onStakeModalOpen}>
 									{#snippet button(onclick)}
 										<Button colorStyle="success" fullWidth {onclick}>
 											{$i18n.stake.text.stake}
@@ -212,7 +265,7 @@
 				<EarningPositionCard {earningPositionsUsd} {earningYearlyAmountUsd}>
 					{#snippet buttons()}
 						{#if nonNullish(assetToken) && nonNullish(vault) && totalStakedAssetsBalance > ZERO}
-							<ButtonWithModal isOpen={$modalHarvestUnstake} onOpen={modalStore.openHarvestUnstake}>
+							<ButtonWithModal isOpen={$modalHarvestUnstake} onOpen={onUnstakeModalOpen}>
 								{#snippet button(onclick)}
 									<Button fullWidth {onclick}>
 										{$i18n.stake.text.unstake}

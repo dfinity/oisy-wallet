@@ -29,7 +29,8 @@
 			},
 			"alternativeName": "OpenChat",
 			"url": "https://oc.app"
-		}
+		},
+		"groupDataId": "CHAT"
 	},
 	{
 		"ledgerCanisterId": "73mez-iiaaa-aaaaq-aaasq-cai",
@@ -442,7 +443,7 @@
 				"__bigint__": "5000000000"
 			},
 			"alternativeName": "PHASMA",
-			"url": "https://phasma-lm0.caffeine.xyz"
+			"url": "https://phasma.biz"
 		}
 	},
 	{
@@ -505,7 +506,7 @@
 			"fee": {
 				"__bigint__": "500000000"
 			},
-			"alternativeName": "Alice Strategy",
+			"alternativeName": "ALICE",
 			"url": "https://alice.fun/"
 		}
 	},

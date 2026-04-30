@@ -45,7 +45,8 @@
 			"sorting": "정렬",
 			"unlimited": "무제한 $items",
 			"info": "정보",
-			"asset": "자산"
+			"asset": "자산",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "테스트 목적으로만 사용하세요!",
@@ -61,11 +62,12 @@
 			"switch_currency": "통화 전환",
 			"more": "전체 텍스트 보기",
 			"less": "텍스트 접기",
-			"learn_more": "링크를 따라 자세히 알아보기"
+			"learn_more": "링크를 따라 자세히 알아보기",
+			"up_one_level": "한 단계 위로 이동"
 		},
 		"warning": {
 			"do_not_close": "거래가 완료될 때까지 이 탭을 닫지 마세요",
-			"standalone_mode": "홈&nbsp;화면에 설치된 경우 $oisy_short의 작동 방식을 개선했습니다. $oisy_short 연결 또는 트랜잭션 서명에 문제가 발생하면 홈&nbsp;화면에서 $oisy_short를 제거하고 다시 설치하세요. iPhone의 경우 '웹 앱으로 열기'를 선택 해제했는지 확인하세요.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">자세히 읽기</a>",
+			"standalone_mode": "앱과 $oisy_short 모두 홈 화면에 설치된 경우 알려진 연결 문제가 발생할 수 있습니다. $oisy_short 연결 또는 트랜잭션 서명에 문제가 발생하면 일반 브라우저에서 앱을 실행해 주세요. 현재 수정 작업 중이며 곧 해결될 예정입니다. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">자세히 알아보기</a>",
 			"video_not_supported": "브라우저가 동영상 재생을 지원하지 않습니다."
 		}
 	},
@@ -77,10 +79,11 @@
 			"activity": "활동",
 			"airdrops": "리워드",
 			"earning": "수익",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "GitHub 소스 코드",
 			"view_on_explorer": "탐색기에서 보기",
 			"source_code": "소스 코드",
-			"changelog": "변경 로그",
 			"documentation": "문서",
 			"support": "지원",
 			"confirm_navigate": "정말로 이 페이지를 떠나시겠습니까?",
@@ -99,8 +102,9 @@
 			"dapp_explorer": "앱 탐색기 열기",
 			"activity": "활동 보기 열기",
 			"airdrops": "리워드 보기 열기",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
-			"changelog": "GitHub에서 $oisy_name의 변경 로그를 열어 최신 업데이트를 확인하세요",
 			"documentation": "$oisy_name 문서 열기",
 			"support": "$oisy_name 문서의 지원 섹션 열기",
 			"open_twitter": "DFINITY X/트위터 피드 열기",
@@ -122,16 +126,26 @@
 			"logout": "로그아웃",
 			"lock": "잠금",
 			"authenticate": "열기 또는 만들기",
+			"internet_identity": "",
 			"asset_types": "비트코인, 솔라나, 이더리움, ICP 등 다양한 자산 관리",
 			"instant_and_private": "개인정보 보호가 기본인 내장 AI 어시스턴트",
-			"advanced_cryptography": "고급 암호화 기술로 보호 - 100% 온체인",
+			"advanced_cryptography": "고급 암호화 기술로 보호 - 100% 온체인",
 			"social_login": "즉각적이고 프라이빗한 액세스 + 소셜 로그인"
 		},
 		"alt": {
-			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기"
+			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "다른 탭에서 세션이 잠겼습니다."
+		},
+		"info": {
+			"signups_closed": ""
+		},
+		"banner": {
+			"signups_closed": ""
 		},
 		"warning": {
 			"not_signed_in": "로그인되어 있지 않습니다. 계속하려면 로그인해 주세요.",
@@ -140,12 +154,6 @@
 		},
 		"error": {
 			"no_internet_identity": "인터넷 아이덴티티가 없습니다.",
-			"invalid_pouh_credential": "죄송합니다. 인류 자격 증명을 검증하는 중 오류가 발생했습니다. 발급자에게 문의하여 자격 증명을 다시 요청해 주세요.",
-			"error_validating_pouh_credential_oisy": "죄송합니다. $oisy_short에서 인류 자격 증명을 검증하는 중 오류가 발생했습니다: $error",
-			"error_validating_pouh_credential": "죄송합니다. 인류 자격 증명을 검증하는 중 오류가 발생했습니다.",
-			"error_requesting_pouh_credential": "죄송합니다. 인류 자격 증명을 요청하는 중 오류가 발생했습니다.",
-			"missing_pouh_issuer_origin": "죄송합니다. 인류 자격 증명을 요청하는 중 오류가 발생했습니다. 발급자 출처가 없습니다.",
-			"no_pouh_credential": "죄송합니다. 인류 자격 증명을 요청하는 중 오류가 발생했습니다. Decide AI에 유효한 자격 증명이 있으신가요?",
 			"error_while_signing_in": "로그인 중 문제가 발생했습니다.",
 			"unexpected_issue_with_syncing": "인증 상태를 동기화하는 중 예기치 않은 문제가 발생했습니다."
 		},
@@ -156,7 +164,7 @@
 				"login_page_looks_different": "로그인 페이지가 왜 다르게 보이나요?",
 				"use_identity_number": "인터넷 아이덴티티 번호를 사용하고 싶습니다",
 				"feedback_text": "여러분의 피드백은 $oisy_short을 더 좋게 만드는 데 도움이 됩니다.",
-				"thanks_text": "감사합니다!",
+				"thanks_text": "감사합니다.",
 				"useful_links": "유용한 링크",
 				"identity_new_identity": "$oisy_short 지갑은 인터넷 아이덴티티 도메인을 <span class=\"font-bold\">identity.internetcomputer.org</span>로 전환합니다",
 				"switch_to_new_internet_identity": "$oisy_name이 인터넷 아이덴티티 2.0으로 전환합니다",
@@ -437,6 +445,35 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
 				"description": ""
 			}
 		}
@@ -475,7 +512,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "예정된 토큰 드롭을 주목하세요! <a href=\"https://x.com/oisy\" target=\"_blank\">X에서 팔로우</a>하거나, <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>에 참여하거나, <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>에서 최신 소식을 받아보세요.",
-			"coming_soon": "$oisy_short 에피소드 6이 곧 출시됩니다",
+			"coming_soon": "다음 $oisy_short Sprinkles 에피소드가 곧 찾아옵니다",
 			"reward_banner": "$campaignName 캠페인 배너"
 		},
 		"campaigns": {
@@ -578,6 +615,36 @@
 						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
 					}
 				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: 에피소드 6 공개 🎉",
+				"one_liner": "활동하고, 다른 사람을 추천하고, 여러 체인에서 OISY를 사용하여 Sprinkles를 획득하세요. 당신의 행동이 보상을 늘리고, 활성 추천이 보상을 더욱 높입니다.<br/>이제 더 많은 체인은 더 높은 당첨 가능성을 의미합니다.",
+				"participate_title": "활동과 추천으로 토큰을 획득하세요. 체인이 많을수록 기회도 늘어납니다.",
+				"description": "자격을 얻으려면 활발하게 활동하세요: 자주 로그인하고, 지갑 작업을 완료하고, 최소 5 $를 보유하세요.<br/>활성화된 각 체인은 멀티체인 배수로 당첨 확률을 높입니다.<br/>자격을 갖춘 친구로부터 10%를 획득하세요.",
+				"campaign_href": "",
+				"welcome": {
+					"title": "$oisy_short에 오신 것을 환영합니다!",
+					"subtitle": "획득할 준비가 되셨나요?",
+					"description": "첫 번째 보상까지 2단계 남았습니다: 로그인하고, 5 $+ 보유하고, 2가지 작업을 완료하세요. Sprinkles를 획득하기 위해 필요한 것은 그것뿐입니다.<br><br>더 원하시나요? 친구를 추천하고 친구가 Sprinkles를 획득할 때마다 보너스를 받으세요."
+				},
+				"win": {
+					"default": {
+						"title": "보상을 받으셨습니다",
+						"description": "보상이 지갑에 도착했습니다.<br>더 많이 획득하려면 추천하고 활발하게 활동하는 것을 잊지 마세요",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "오늘 가장 큰 OISY 스프링클 획득을 축하합니다!",
+						"description": "최고의 스프링클 보상을 획득하셨습니다<br>더 많이 받으려면 활동을 유지하고 계속 추천하세요",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "작은 감사의 표시입니다",
+						"description": "추천하신 사용자 중 한 명이 방금 Sprinkles를 받았습니다.",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},
@@ -653,6 +720,7 @@
 			"btc_withdrawal_statuses": "BTC 출금 상태를 가져오는 중 오류가 발생했습니다.",
 			"transaction_price": "트랜잭션 가격 추정치를 불러오는 중 오류가 발생했습니다.",
 			"icrc_canisters": "ICRC 캐니스터를 불러오는 중 오류가 발생했습니다.",
+			"load_token_list": "",
 			"icrc_canister_loading_curated": "$tokenSymbol 토큰이 응답하지 않아 현재 불러올 수 없습니다. 나중에 다시 시도해 주세요.",
 			"icrc_canister_loading_custom": "원장 캐니스터 $ledgerCanisterId 의 토큰이 응답하지 않아 현재 불러올 수 없습니다. 나중에 다시 시도해 주세요.",
 			"erc20_custom_tokens": "ERC20 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
@@ -700,11 +768,6 @@
 			"active_networks_description": "$oisy_name에서 사용할 네트워크를 선택하세요. 비활성 네트워크의 토큰과 트랜잭션은 표시되지 않으며 사용 가능한 잔액에 포함되지 않습니다.",
 			"enable_network": "네트워크 활성화",
 			"disable_network": "네트워크 비활성화",
-			"credentials_title": "자격 증명",
-			"pouh_credential": "인류 자격 증명",
-			"pouh_credential_description": "인류 자격 증명은 인간임을 증명하는 것으로, Decide AI에서 발급합니다.",
-			"present_pouh_credential": "제출",
-			"pouh_credential_verified": "인증됨 ✅",
 			"appearance": "외관",
 			"appearance_light": "라이트",
 			"appearance_dark": "다크",
@@ -715,7 +778,13 @@
 			"beta_features": "베타 기능",
 			"enable_beta_feature": "베타 기능 활성화",
 			"disable_beta_feature": "베타 기능 비활성화",
-			"save_beta_feature_success": "베타 기능 설정이 업데이트되었습니다."
+			"save_beta_feature_success": "베타 기능 설정이 업데이트되었습니다.",
+			"hide_micro_transactions": "매우 작은 가치의 거래 숨기기",
+			"hide_micro_transactions_description": "매우 작은 가치의 거래는 일반적으로 스팸이며 사용자가 유효한 주소 대신 발신자 주소를 복사하도록 속이려는 의도를 가지고 있습니다. 거래 목록에서 숨기는 것을 권장합니다.",
+			"enable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 활성화",
+			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
+			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "테스트넷 표시 또는 숨기기 토글",
@@ -916,23 +985,26 @@
 			"no_nft_selected": "전송할 NFT가 선택되지 않았습니다."
 		},
 		"error": {
-			"unexpected": "트랜잭션을 전송하는 중 문제가 발생했습니다.",
+			"unexpected": "트랜잭션을 전송하는 중에 오류가 발생했습니다.",
 			"destination_address_unknown": "ETH 수신 주소를 알 수 없습니다",
-			"metamask_connected": "계정을 가져올 수 없습니다. Metamask가 열려 있고 이미 연결되어 있나요?",
+			"metamask_connected": "계정을 가져올 수 없습니다. Metamask가 열려 있고 이미 연결되어 있습니까?",
 			"metamask_no_accounts": "Metamask 계정을 찾을 수 없습니다.",
-			"metamask_switch_network": "Metamask가 체인 ID $chain_id로 전환을 요청할 수 없습니다. Metamask가 $network_name을 사용하고 있나요?",
+			"metamask_switch_network": "Metamask에 체인 ID $chain_id로 전환을 요청할 수 없습니다. Metamask가 $network_name을 사용하고 있습니까?",
 			"erc20_data_undefined": "ERC20 트랜잭션 데이터는 undefined 또는 null일 수 없습니다.",
 			"data_undefined": "트랜잭션 데이터는 undefined 또는 null일 수 없습니다.",
-			"no_identity_calculate_fee": "프린시팔에 대한 수수료를 계산하기 위한 아이덴티티가 제공되지 않았습니다.",
-			"invalid_destination": "수신처가 유효하지 않습니다. 유효한 지갑 주소 또는 수신처로 다시 시도해 주세요.",
+			"no_identity_calculate_fee": "principal의 수수료를 계산하기 위한 신원이 제공되지 않았습니다.",
+			"invalid_destination": "수신 주소가 유효하지 않습니다. 유효한 지갑 주소 또는 수신 주소로 다시 시도해 주세요.",
 			"incompatible_token": "토큰이 호환되지 않습니다. 호환 가능한 토큰으로 다시 시도해 주세요.",
-			"no_btc_network_id": "현재 네트워크 ($networkId)는 비트코인 네트워크가 아닙니다.",
-			"no_solana_network_id": "현재 네트워크 ($networkId)는 솔라나 네트워크가 아닙니다.",
-			"no_pending_bitcoin_transaction": "대기 중인 비트코인 트랜잭션을 불러오는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
-			"unexpected_utxos_fee": "트랜잭션 수수료를 계산하는 중 문제가 발생했습니다.",
-			"unable_to_retrieve_amount": "N/A (가져올 수 없음)",
-			"solana_transaction_expired": "전송 트랜잭션이 솔라나 네트워크에서 처리되지 않고 만료되었습니다. 제공된 우선 수수료가 충분하지 않았을 가능성이 높습니다. 최신 권장 금액으로 업데이트되었으니 다시 전송해 주세요.",
-			"solana_confirmation_failed": "방금 생성한 트랜잭션에 대한 확인을 받지 못했습니다. 몇 초 후에 토큰의 트랜잭션 목록에서 트랜잭션이 올바르게 생성되었는지 확인해 주세요.",
+			"no_btc_network_id": "현재 네트워크($networkId)는 Bitcoin 네트워크가 아닙니다.",
+			"no_solana_network_id": "현재 네트워크($networkId)는 Solana 네트워크가 아닙니다.",
+			"no_pending_bitcoin_transaction": "보류 중인 Bitcoin 트랜잭션을 불러오는 중에 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
+			"unexpected_utxos_fee": "트랜잭션 수수료를 계산하는 중에 오류가 발생했습니다.",
+			"unable_to_retrieve_amount": "n/a (가져올 수 없음)",
+			"solana_transaction_expired": "귀하의 트랜잭션은 Solana 네트워크에서 처리되지 않고 만료되었습니다. 제공된 우선순위 수수료가 충분하지 않았기 때문일 가능성이 높습니다. 최신 권장 금액으로 업데이트했으니 다시 시도해 주세요.",
+			"solana_confirmation_failed": "방금 생성하신 트랜잭션에 대한 확인을 받지 못했습니다. 몇 초 기다린 후 토큰의 트랜잭션 목록에서 트랜잭션이 올바르게 생성되었는지 확인해 주세요.",
+			"solana_insufficient_funds": "이 트랜잭션을 완료하기에 토큰 잔액이 부족합니다. 잔액이 마지막으로 표시된 이후 변경되었을 수 있습니다.",
+			"solana_insufficient_funds_for_fee": "트랜잭션 수수료를 충당하기에 SOL 잔액이 부족합니다.",
+			"solana_insufficient_funds_for_rent": "계정 생성에 필요한 렌트를 충당하기에 SOL 잔액이 부족합니다.",
 			"fee_calc_unsupported_standard": "제공된 토큰 표준이 지원되지 않아 수수료를 계산할 수 없습니다."
 		}
 	},
@@ -980,7 +1052,14 @@
 			"pay_at_failure": "$receipt에서 결제 실패",
 			"try_again": "다시 시도",
 			"payment_confirmed": "결제 확인됨",
-			"payment_failed": "결제 실패"
+			"payment_failed": "결제 실패",
+			"what_is_scan": "스캐너란",
+			"no_camera_permission": "QR 코드를 스캔하려면 브라우저의 사이트 설정에서 카메라 접근을 허용해야 합니다.",
+			"what_is_scan_description": "$oisy_short 스캐너는 다양한 QR 코드를 읽고 즉시 적절한 작업을 수행할 수 있습니다. WalletConnect QR 코드를 스캔하여 새 연결을 설정하거나, Open CryptoPay를 사용하는 매장에서 결제 코드를 스캔하여 $oisy_short Pay로 결제할 수 있습니다.",
+			"what_is_scan_title": "$oisy_short는 모든 QR 코드를 인식합니다",
+			"learn_more_about_scan": "스캐너에 대해 자세히 알아보기",
+			"learn_more_about_pay": "$oisy_short Pay에 대해 자세히 알아보기",
+			"scanner": "스캐너"
 		},
 		"error": {
 			"code_link_is_not_valid": "코드/링크가 유효하지 않습니다",
@@ -1031,6 +1110,9 @@
 			"loading_cketh_helper": "ckETH 헬퍼 컨트랙트 주소를 불러오는 중 오류가 발생했습니다. 민터 캐니스터 ID가 초기화되지 않았습니다.",
 			"unexpected": "토큰 전환 중 문제가 발생했습니다.",
 			"unexpected_missing_data": "전환 트랜잭션을 시작하는 중 문제가 발생했습니다."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "USDC와 ckUSDC 간의 전환이 현재 중단되었습니다."
 		}
 	},
 	"swap": {
@@ -1072,10 +1154,16 @@
 			"select_token": "토큰 선택",
 			"select_network_filter": "네트워크 선택",
 			"withdrawing": "출금 중...",
+			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 1분 정도 소요될 수 있습니다.)",
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
-			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다"
+			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
+			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",
@@ -1092,7 +1180,9 @@
 			"manually_withdraw_success": "이전에 실패한 스왑의 토큰이 성공적으로 출금되었습니다. 스왑을 다시 시도하거나 스왑 제공자를 변경할 수 있습니다.",
 			"manually_withdraw_failed": "자금 출금에 실패했습니다. <br> 다시 시도하거나 다음을 따르세요",
 			"swap_sucess_withdraw_failed": "스왑은 완료되었으나 토큰을 자동으로 출금할 수 없습니다. 아래 출금 버튼을 클릭하여 수동으로 출금하세요.<br> 또는 다음을 따르세요",
-			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다."
+			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다.",
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1157,7 +1247,12 @@
 			"sort_by_value": "가치",
 			"sort_by_performance": "토큰 성과",
 			"sort_by_symbol": "심볼",
-			"hide_asset_types": ""
+			"hide_asset_types": "자산 유형 숨기기",
+			"asset_type": "$oisy_name의 자산 유형",
+			"asset_type_all": "모든 자산 유형",
+			"no_tokens_for_asset_type": "지갑에 $asset_type 자산이 없습니다",
+			"no_tokens_for_asset_type_zero_tokens": "선택한 네트워크에 $asset_type이(가) 없습니다",
+			"no_tokens_for_asset_type_description": "<strong>$count개의 지원 토큰</strong> 중에서 선택하여 포트폴리오 보기를 맞춤 설정하세요."
 		},
 		"details": {
 			"title": "토큰 상세 정보",
@@ -1274,6 +1369,7 @@
 			"unrecognised_erc_interface": "인식되지 않는 ERC 인터페이스입니다.",
 			"no_metadata": "가져온 메타데이터가 없습니다.",
 			"unexpected": "토큰을 저장하는 중 문제가 발생했습니다.",
+			"version_mismatch": "",
 			"unexpected_hiding": "토큰을 숨기는 중 문제가 발생했습니다.",
 			"already_available": "토큰이 이미 사용 가능합니다.",
 			"not_toggleable": "이 토큰은 전환할 수 없어 숨길 수 없습니다.",
@@ -1282,6 +1378,23 @@
 			"unexpected_undefined": "토큰이 정의되지 않았습니다. 이는 예상치 못한 상황입니다.",
 			"unexpected_error_on_token_delete": "토큰을 제거하는 중 문제가 발생했습니다.",
 			"unexpected_error_on_token_update": "토큰을 업데이트하는 중 문제가 발생했습니다."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "카테고리",
+			"risk": "위험도"
+		},
+		"category": {
+			"crypto": "암호화폐",
+			"stablecoin": "스테이블코인",
+			"stock": "주식",
+			"commodity": "원자재"
+		},
+		"risk": {
+			"low": "낮은 위험",
+			"medium": "중간 위험",
+			"high": "높은 위험"
 		}
 	},
 	"nfts": {
@@ -1418,7 +1531,10 @@
 			"amount": "금액",
 			"hex_data": "HEX 데이터",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
-			"sign_message": "메시지 서명"
+			"sign_message": "메시지 서명",
+			"connected_apps": "연결된 앱",
+			"no_connected_apps": "현재 연결된 앱이 없습니다.",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "예: wc:a281567bb3e4..."
@@ -1731,8 +1847,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "$oisy_name에 접근",
-				"open_or_create": "지갑을 열거나 만들어 dApp에 안전하게 연결하고 자산 관리를 시작하세요."
+				"open_or_create": "애플리케이션과 안전하게 상호작용하려면 지갑을 열거나 생성하세요.",
+				"connect_your_wallet": "$oisy_name에 연결",
+				"oisy_protects_you": "OISY가 당신을 보호합니다!",
+				"oisy_protects_you_description": "애플리케이션은 귀하의 자금에 직접 접근할 수 없으며, 모든 거래는 귀하의 확인이 필요합니다!"
 			}
 		},
 		"idle": {
@@ -1827,7 +1945,7 @@
 				"possessive": "당사 "
 			},
 			"title": "",
-			"instruction": "이 버튼을 클릭하면 $link에 동의하는 것으로 간주합니다",
+			"instruction": "로그인하면 $link에 동의하는 것으로 간주합니다",
 			"body": ""
 		},
 		"alt": {
@@ -1853,7 +1971,8 @@
 			"title": "최근 활동"
 		},
 		"info": {
-			"btc_transactions": "BTC 거래 정보는 중앙 집중식 제3자로부터 제공되므로 독립적으로 검증해야 합니다."
+			"btc_transactions": "BTC 거래 정보는 중앙 집중식 제3자로부터 제공되므로 독립적으로 검증해야 합니다.",
+			"hidden_micro_transactions": "<strong>OISY가 당신을 보호합니다!</strong> 매우 작은 토큰 가치의 거래가 현재 숨겨져 있습니다. 표시하려면 <a href=\"/settings/\">설정</a>으로 이동하세요.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">자세히 알아보기</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 사용 가능한 인덱스 캐니스터가 없습니다.",
@@ -1862,8 +1981,8 @@
 	},
 	"earning": {
 		"text": {
-			"title": "수익",
-			"tab_title": "수익 창출",
+			"title": "수익 창출",
+			"tab_title": "수익 창출 중",
 			"earning_opportunities": "수익 창출 기회",
 			"header_title": "수익 창출에 오신 것을 환영합니다!",
 			"header_description": "토큰을 수익 창출 기회에 할당하여 디지털 자산 포트폴리오를 늘리세요.",
@@ -1871,13 +1990,13 @@
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "하베스트 - 자동 운용",
-				"description": "원클릭 자동 운용 볼트로 최대 수익 효율 실현.",
-				"action": "자동 운용으로 이동"
+				"title": "Harvest – Autopilot",
+				"description": "원클릭 Autopilot vault로 최대 수익 효율을 실현하세요.",
+				"action": "Autopilot으로 이동"
 			},
 			"sprinkles": {
-				"title": "OISY 스프링클",
-				"description": "OISY를 사용하고 수익을 얻으세요! Ep. 5가 공개되었습니다 🎉",
+				"title": "OISY Sprinkles",
+				"description": "OISY를 사용하고 수익을 창출하세요! 에피소드 6 공개 중 🎉",
 				"action": "상태 확인"
 			}
 		},
@@ -1885,7 +2004,7 @@
 			"apy": "APY",
 			"networks": "네트워크",
 			"assets": "자산",
-			"currentStaked": "스테이킹됨",
+			"currentStaked": "스테이킹 중",
 			"currentEarning": "현재 수익 중",
 			"earningPotential": "수익 잠재력",
 			"terms": "조건"
@@ -1895,54 +2014,54 @@
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": "Gold DAO로 수익 얻기"
+				"cardTitle": "Gold DAO로 수익 창출"
 			}
 		}
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "자동 운용",
-			"live_apy": "실시간 APY"
+			"autopilot": "Autopilot",
+			"live_apy": "현재 APY"
 		}
 	},
 	"stake": {
 		"text": {
-			"harvest_autopilot_page_description": "원클릭 자동 운용 볼트로 최대 수익 효율 실현.",
-			"harvest_autopilot_vault_page_description": "자동 운용은 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">감사 완료된 IPOR</a> Fusion Vault 기술을 기반으로 합니다.",
-			"harvest_autopilot_provider_description": "",
-			"harvest_autopilot_stake_terms": "",
+			"harvest_autopilot_page_description": "원클릭 Autopilot vault로 최대 수익 효율을 실현하세요.",
+			"harvest_autopilot_vault_page_description": "Autopilot은 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">검증된 IPOR</a> Fusion Vault 기술로 구동됩니다.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot은 최소한의 노력으로 DeFi 포지션을 자동화하는 전문적인 \"설정 후 잊어버리기\" 서비스입니다.",
+			"harvest_autopilot_stake_terms": "본 제품을 읽고 이해했으며, <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">위험 공시</a>를 읽었고, <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">이용약관</a>에 동의함을 확인합니다.",
 			"my_positions": "내 포지션",
-			"available_autopilots": "사용 가능한 자동 운용",
-			"vault_info": "볼트 정보",
-			"vault_address": "볼트 주소",
+			"available_autopilots": "이용 가능한 Autopilot",
+			"vault_info": "Vault 정보",
+			"vault_address": "Vault 주소",
 			"protocol": "프로토콜",
-			"harvest": "하베스트",
-			"autopilot": "자동 운용",
-			"total_value_locked": "총 예치 가치 (TVL)",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "총 예치 금액 (TVL)",
 			"manager": "매니저",
-			"vault_description": "이 풀은 $asset_symbol 보유 자산에 대한 '설정 후 방치' 수익 관리 서비스로 설계되었습니다. 최적의 기회에 자본을 동적으로 할당하여 최소한의 노력으로 DeFi 포지션을 자동으로 최적화합니다.",
-			"stake": "$token_symbol 스테이킹",
+			"vault_description": "이 풀은 $asset_symbol 보유자를 위한 \"설정 후 잊어버리기\" 수익 관리 서비스로 설계되었습니다. 최적의 기회에 자본을 동적으로 배분하여 최소한의 노력으로 DeFi 포지션을 자동으로 최적화합니다.",
+			"stake": "스테이킹",
 			"stake_now": "지금 스테이킹",
 			"stake_amount": "$amount $token_symbol 스테이킹",
 			"not_enough_to_stake": "스테이킹할 $token_symbol이 없습니다",
-			"estimated_received": "",
-			"estimated_yearly_yield": "",
+			"estimated_received": "예상 수령액",
+			"estimated_yearly_yield": "예상 연간 수익",
 			"unstake": "언스테이킹",
 			"unstake_now": "지금 언스테이킹",
 			"unstaking": "언스테이킹 중...",
 			"unstake_token": "$token_symbol 언스테이킹",
 			"enable_token_text": "$token_symbol을 활성화해야 합니다",
 			"enable_token_button": "$token_symbol 활성화",
-			"review": "거래 검토",
-			"executing_transaction": "거래 실행 중...",
-			"unsupported_token_staking": "선택한 토큰에 대한 스테이킹은 지원되지 않습니다.",
-			"provider": "$provider가 제공하는 스테이킹 조건",
+			"review": "트랜잭션 검토",
+			"executing_transaction": "트랜잭션 실행 중...",
+			"unsupported_token_staking": "선택한 토큰의 스테이킹은 지원되지 않습니다.",
+			"provider": "스테이킹 조건은 $provider가 제공합니다",
 			"earning_potential": "수익 잠재력",
-			"earning_potential_hint": "투자되지 않은 자산의 가치와 사용 가능한 수익 기회의 최고 APY를 기반으로 합니다.",
+			"earning_potential_hint": "투자되지 않은 자산의 가치와 이용 가능한 수익 창출 기회의 최고 APY를 기반으로 합니다.",
 			"active_earning": "활성 수익",
 			"active_earning_per_year": "$amount/년",
 			"active_earning_per_year_short": "$amount/년",
-			"unproductive_assets": "사용 가능",
+			"unproductive_assets": "이용 가능",
 			"invested_assets": "할당됨",
 			"visit_provider": "웹사이트 방문",
 			"current_apy_label": "현재 APY",
@@ -1951,11 +2070,11 @@
 			"unstake_review_subtitle": "언스테이킹 금액",
 			"delayed_dissolve": "지연 수령",
 			"immediate_dissolve": "즉시 수령",
-			"included_token_fee": "포함된 네트워크 수수료",
-			"included_dissolve_fee": "포함된 잠금 해제 수수료",
-			"delayed_dissolve_terms": "$token을 스테이킹에서 잠금 해제할 때, 토큰은 추가 보상 없이 $delay일 동안 잠기며 이후 출금 가능합니다.",
-			"delayed_dissolve_info": "$token 스테이크 잠금 해제를 시작하면 새로운 보상을 더 이상 받지 못합니다.",
-			"immediate_dissolve_terms": "$token을 즉시 수령하지만 잠금 해제하는 $token 토큰에 대해 수수료가 부과됩니다.",
+			"included_token_fee": "네트워크 수수료 포함",
+			"included_dissolve_fee": "잠금 해제 수수료 포함",
+			"delayed_dissolve_terms": "$token을 스테이킹에서 잠금 해제할 때, 토큰은 인출 가능해지기 전까지 $delay일 동안 추가 보상 없이 잠깁니다.",
+			"delayed_dissolve_info": "$token 스테이크 잠금 해제를 시작하면 새로운 보상을 받을 수 없게 됩니다.",
+			"immediate_dissolve_terms": "$token을 즉시 받을 수 있지만, 잠금 해제하는 $token 토큰에 수수료가 부과됩니다.",
 			"amount_to_receive": "수령 금액",
 			"unclaimed_rewards": "미청구 보상",
 			"unlock_requests": "잠금 해제 요청",
@@ -1973,32 +2092,32 @@
 			"reward_claimed": "보상 청구 완료",
 			"staked": "스테이킹됨",
 			"unstaked": "언스테이킹됨",
-			"title_empty_1": "최대",
-			"title_empty_2_usd": "/년 수익",
+			"title_empty_1": "연간 최대",
+			"title_empty_2_usd": "/년 수익 창출",
 			"title_empty_2_apy": "연간",
 			"title_empty_3": "",
 			"description_empty": "아직 스테이킹한 토큰이 없는 것 같습니다",
-			"full_history": "전체 기록 보기",
-			"recent_history": "전체 기록 닫기",
-			"gldt_stake_carousel_slide_title": "Gold DAO 스테이킹으로 APY 수익 창출",
-			"gldt_stake_carousel_slide_cta": "자세히 알아보기"
+			"full_history": "전체 내역 보기",
+			"recent_history": "전체 내역 닫기",
+			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield Farming으로 OISY에서 수익 창출",
+			"harvest_autopilot_carousel_slide_cta": "자세히 알아보기"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "토큰 출금 중 문제가 발생했습니다.",
-			"unexpected_error_on_unstake": "토큰 언스테이킹 중 문제가 발생했습니다.",
-			"unexpected_error_on_stake": "",
-			"dissolvement_limit_reached": "활성 잠금 해제 요청의 최대 $limit개에 도달했습니다. 새 요청을 만들기 전에 일부를 완료하세요.<br/>참고로 '즉시' 옵션을 사용하여 언제든지 언스테이킹할 수 있습니다."
+			"unexpected_error_on_withdraw": "토큰 출금 중 오류가 발생했습니다.",
+			"unexpected_error_on_unstake": "토큰 언스테이킹 중 오류가 발생했습니다.",
+			"unexpected_error_on_stake": "토큰 스테이킹 중 오류가 발생했습니다.",
+			"dissolvement_limit_reached": "활성 잠금 해제 요청의 최대 $limit개에 도달했습니다. 새 요청을 만들기 전에 일부를 완료하세요.<br/>\"즉시\" 옵션을 사용하여 언제든지 언스테이킹할 수 있습니다."
 		},
 		"info": {
 			"harvest_autopilot": {
-				"title": "하베스트 자동 운용이란",
-				"description": "하베스트 자동 운용은 최소한의 노력으로 탈중앙화 금융(DeFi) 포지션을 자동화하고 최적화하기 위해 설계된 하베스트 파이낸스 생태계 내의 전문 기능(및 특정 제품 라인)입니다.",
-				"fact_1_title": "스마트 수익 할당",
+				"title": "Harvest Autopilot이란",
+				"description": "Harvest Autopilot은 Harvest Finance 생태계 내의 전문 기능(및 특정 제품 라인)으로, 최소한의 노력으로 탈중앙화 금융(DeFi) 포지션을 자동화하고 최적화하도록 설계되었습니다.",
+				"fact_1_title": "스마트 수익 배분",
 				"fact_1_description": "최고의 실시간 APY를 포착하기 위해 자동으로 프로토콜을 전환합니다.",
-				"fact_2_title": "수동적 복리 운용",
+				"fact_2_title": "수동적 복리",
 				"fact_2_description": "보상이 자동으로 수확되고 재투자되어 성장을 극대화합니다.",
-				"fact_3_title": "가스비 분담",
-				"fact_3_description": "다른 사용자와 거래를 묶어 가스비를 절약하여 비용을 낮춥니다."
+				"fact_3_title": "가스 비용 분담",
+				"fact_3_description": "다른 사용자와 트랜잭션을 묶어 가스를 절약하여 비용을 절감합니다."
 			}
 		},
 		"alt": {
@@ -2016,10 +2135,10 @@
 			"get_more_token": "$token 더 받기",
 			"receive_token": "$token 수령",
 			"receive_token_title": "$token 직접 수령",
-			"receive_token_text": "내 계정으로 $token을 직접 수령하세요",
+			"receive_token_text": "$token을 계정으로 직접 수령",
 			"buy_assets": "자산 구매",
 			"buy_assets_title": "변환 가능한 자산 구매",
-			"buy_assets_text": "더 많은 자산을 구매하여 $token으로 변환하세요"
+			"buy_assets_text": "더 많은 자산을 구매하고 $token으로 변환"
 		}
 	},
 	"temporal": {
@@ -2038,7 +2157,7 @@
 			"second_plural": "초"
 		},
 		"time_frame": {
-			"t_24h": "24시간"
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {

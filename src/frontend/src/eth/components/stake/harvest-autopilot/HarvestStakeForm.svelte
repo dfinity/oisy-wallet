@@ -18,12 +18,19 @@
 
 	interface Props {
 		amount: OptionAmount;
+		estimatedSharesToReceive?: OptionAmount;
 		vault: Vault;
 		onClose: () => void;
 		onNext: () => void;
 	}
 
-	let { amount = $bindable(), vault, onNext, onClose }: Props = $props();
+	let {
+		amount = $bindable(),
+		estimatedSharesToReceive = $bindable(),
+		vault,
+		onNext,
+		onClose
+	}: Props = $props();
 
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 	const { maxGasFee, feeTokenIdStore } = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
@@ -77,7 +84,7 @@
 	{#snippet content()}
 		<HarvestStakeFees />
 
-		<HarvestStakeEstimations {amount} {vault} />
+		<HarvestStakeEstimations {amount} {vault} bind:estimatedSharesToReceive />
 
 		<HarvestStakeAgreement bind:checked={agreementChecked} />
 

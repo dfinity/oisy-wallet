@@ -73,8 +73,8 @@ describe('asserts-amount.utils', () => {
 
 	describe('assertCkBtcAmount', () => {
 		const params = {
-			userAmount: 1000n,
-			balance: 2000n,
+			userAmount: 100_000n,
+			balance: 200_000n,
 			fee: 100n,
 			minterInfo: { data: mockCkBtcMinterInfo, certified: true }
 		};
@@ -83,7 +83,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertCkBtcAmount({
 					...params,
-					balance: 900n
+					balance: 90_000n
 				})
 			).toBe('insufficient-funds');
 		});
@@ -92,7 +92,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertCkBtcAmount({
 					...params,
-					balance: 1050n
+					balance: 100_050n
 				})
 			).toBe('insufficient-funds-for-fee');
 		});
@@ -114,7 +114,7 @@ describe('asserts-amount.utils', () => {
 						...params.minterInfo,
 						data: {
 							...params.minterInfo.data,
-							retrieve_btc_min_amount: 5000n
+							retrieve_btc_min_amount: 500_000n
 						} as CkBtcMinterDid.MinterInfo
 					}
 				})
@@ -198,6 +198,37 @@ describe('asserts-amount.utils', () => {
 					}
 				})
 			).toBe('minimum-amount-not-reached');
+		});
+
+		it('should return amount-less-than-ledger-fee when userAmount is below fee', () => {
+			expect(
+				assertCkEthAmount({
+					...params,
+					userAmount: 50n,
+					minterInfo: {
+						...params.minterInfo,
+						data: {
+							...params.minterInfo.data,
+							minimum_withdrawal_amount: [10n]
+						} as CkEthMinterDid.MinterInfo
+					}
+				})
+			).toBe('amount-less-than-ledger-fee');
+		});
+
+		it('should treat empty minimum_withdrawal_amount as zero', () => {
+			expect(
+				assertCkEthAmount({
+					...params,
+					minterInfo: {
+						...params.minterInfo,
+						data: {
+							...params.minterInfo.data,
+							minimum_withdrawal_amount: []
+						} as unknown as CkEthMinterDid.MinterInfo
+					}
+				})
+			).toBeUndefined();
 		});
 
 		it('should return minter info not certified error', () => {

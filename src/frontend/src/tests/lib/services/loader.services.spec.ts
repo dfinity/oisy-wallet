@@ -8,7 +8,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
-import { nullishSignOut, signOut } from '$lib/services/auth.services';
+import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
@@ -40,11 +40,11 @@ vi.mock('$lib/services/analytics.services', () => ({
 
 describe('loader.services', () => {
 	const mockExecutedOutcome: AllowSigningOutcome = {
-		response: { status: { Executed: null }, challenge_completion: [], allowed_cycles: 100n }
+		response: { status: { Executed: null }, allowed_cycles: 100n }
 	};
 
 	const mockRateLimitedOutcome: AllowSigningOutcome = {
-		response: { status: { Skipped: null }, challenge_completion: [], allowed_cycles: ZERO },
+		response: { status: { Skipped: null }, allowed_cycles: ZERO },
 		rateLimitInfo: { endpoint: 'allow_signing', limiter: 'ALLOW_SIGNING_RATE_LIMITER' }
 	};
 
@@ -137,6 +137,7 @@ describe('loader.services', () => {
 			vi.resetAllMocks();
 
 			vi.spyOn(authServices, 'signOut').mockImplementation(vi.fn());
+			vi.spyOn(authServices, 'infoSignOut').mockImplementation(vi.fn());
 			vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
 			vi.spyOn(api, 'allowSigning').mockResolvedValue(mockExecutedOutcome);
 
@@ -160,18 +161,36 @@ describe('loader.services', () => {
 		});
 
 		it('should sign out if the user profile is not loaded', async () => {
-			vi.mocked(loadUserProfile).mockResolvedValueOnce({ success: false });
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({ success: false, err: 'unknown' });
 
 			await initLoader(mockParams);
 
 			expect(signOut).toHaveBeenCalledOnce();
 		});
 
+		it('should sign out via infoSignOut when signups are closed', async () => {
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: false,
+				err: 'signups-closed'
+			});
+
+			await initLoader(mockParams);
+
+			expect(infoSignOut).toHaveBeenCalledExactlyOnceWith({
+				text: expect.stringMatching(/sign-?ups/i),
+				source: 'signups-closed'
+			});
+			expect(signOut).not.toHaveBeenCalled();
+		});
+
 		it('should load addresses from the backend', async () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [
@@ -208,7 +227,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_MAINNET_NETWORK_ID]);
@@ -239,7 +261,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [ETHEREUM_NETWORK_ID]);
@@ -251,7 +276,10 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				iiDelegationChain: []
+			});
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, []);

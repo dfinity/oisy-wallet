@@ -2,6 +2,7 @@ import type { MinterInfoParams } from '$icp/types/ck';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { createQueryAndUpdateWithWarmup } from '$lib/services/query.services';
 import type {
+	PostMessageCommon,
 	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse
@@ -30,6 +31,8 @@ export class CkMinterInfoScheduler<
 		return this._queryAndUpdateWithWarmup;
 	}
 
+	private ref: PostMessageCommon['ref'] | undefined;
+
 	private timer = new SchedulerTimer('syncCkMinterInfoStatus');
 
 	constructor(
@@ -42,6 +45,8 @@ export class CkMinterInfoScheduler<
 	}
 
 	async start(data: PostMessageDataRequestIcCk | undefined) {
+		this.ref = data?.minterCanisterId;
+
 		await this.timer.start<PostMessageDataRequestIcCk>({
 			interval: this.interval,
 			job: this.syncStatuses,
@@ -86,12 +91,17 @@ export class CkMinterInfoScheduler<
 	};
 
 	private syncMinterInfo = ({ response, certified }: { response: T; certified: boolean }) => {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		const data: CertifiedData<T> = {
 			certified,
 			data: response
 		};
 
 		this.timer.postMsg<PostMessageJsonDataResponse>({
+			ref: this.ref,
 			msg: 'syncCkMinterInfo',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)
@@ -100,7 +110,12 @@ export class CkMinterInfoScheduler<
 	};
 
 	private postMessageWalletError(error: unknown) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseError>({
+			ref: this.ref,
 			msg: 'syncCkMinterInfoError',
 			data: {
 				error

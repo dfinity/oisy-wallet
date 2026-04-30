@@ -13,7 +13,7 @@ import type {
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSend as ProgressStepsSendEnum } from '$lib/enums/progress-steps';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { Interface } from 'ethers/abi';
 import type { TransactionResponse } from 'ethers/providers';
@@ -95,7 +95,7 @@ const signWithIdentity = ({
 	identity,
 	transaction
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	transaction: EthSignTransactionRequest;
 }): Promise<string> => signTransaction({ identity, transaction });
 

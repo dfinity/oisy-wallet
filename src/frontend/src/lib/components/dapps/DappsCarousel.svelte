@@ -61,16 +61,16 @@
 			: undefined
 	);
 
-	let gldtStakePageSlide = $derived(
+	let harvestAutopilotSlide = $derived(
 		EARNING_ENABLED
 			? ({
-					id: stakeProvidersConfig[StakeProvider.GLDT].name,
+					id: stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].name,
 					carousel: {
-						text: $i18n.stake.text.gldt_stake_carousel_slide_title,
-						callToAction: $i18n.stake.text.gldt_stake_carousel_slide_cta
+						text: $i18n.stake.text.harvest_autopilot_carousel_slide_title,
+						callToAction: $i18n.stake.text.harvest_autopilot_carousel_slide_cta
 					},
-					logo: stakeProvidersConfig[StakeProvider.GLDT].logo,
-					name: stakeProvidersConfig[StakeProvider.GLDT].name
+					logo: stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].logo,
+					name: stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].name
 				} as CarouselSlideOisyDappDescription)
 			: undefined
 	);
@@ -86,7 +86,7 @@
 		filterCarouselDapps({
 			dAppDescriptions: [
 				...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
-				...(nonNullish(gldtStakePageSlide) ? [gldtStakePageSlide] : []),
+				...(nonNullish(harvestAutopilotSlide) ? [harvestAutopilotSlide] : []),
 				...dAppDescriptions
 			],
 			hiddenDappsIds
@@ -144,9 +144,9 @@
 						: undefined}
 					{dappsCarouselSlide}
 					onCloseCarouselSlide={closeSlide}
-					pagePath={nonNullish(gldtStakePageSlide) &&
-					gldtStakePageSlide.id === dappsCarouselSlide.id
-						? AppPath.EarnGold
+					pagePath={nonNullish(harvestAutopilotSlide) &&
+					harvestAutopilotSlide.id === dappsCarouselSlide.id
+						? AppPath.Earn
 						: undefined}
 				/>
 			{/each}

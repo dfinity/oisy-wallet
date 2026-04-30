@@ -8,15 +8,15 @@ use shared::types::{
 
 use crate::{
     state::memory::{
-        API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID,
-        CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID,
+        AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID,
+        CONFIG_MEMORY_ID, CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER,
         TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
         USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
         maps::{
-            ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap,
-            ExchangeRateMap, PowChallengeMap, TokenActivityMap, UserProfileMap,
+            AgreementHistoryMap, ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell,
+            ContactMap, CustomTokenMap, ExchangeRateMap, TokenActivityMap, UserProfileMap,
             UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
@@ -37,10 +37,6 @@ pub(crate) struct State {
     pub(crate) custom_token: CustomTokenMap,
     pub(crate) user_profile: UserProfileMap,
     pub(crate) user_profile_updated: UserProfileUpdatedMap,
-    // Not used any more, but we keep it for now to avoid breaking changes and data migration. Will
-    // be removed in the future.
-    #[expect(dead_code)]
-    pub(crate) pow_challenge: PowChallengeMap,
     pub(crate) contact: ContactMap,
     pub(crate) btc_user_pending_transactions: BtcUserPendingTransactionsMap,
     // TODO: implement a periodic cleanup of old entries
@@ -48,6 +44,8 @@ pub(crate) struct State {
     pub(crate) token_activity: TokenActivityMap,
     pub(crate) exchange_rates: ExchangeRateMap,
     pub(crate) user_transactions: UserTransactionsMap,
+    /// Per-user audit trail of agreement consent/rejection events.
+    pub(crate) agreement_history: AgreementHistoryMap,
 }
 
 impl From<&State> for Stats {
@@ -60,6 +58,7 @@ impl From<&State> for Stats {
             token_activity_count: state.token_activity.len(),
             exchange_rates_count: state.exchange_rates.len(),
             user_transactions_count: state.user_transactions.len(),
+            agreement_history_count: state.agreement_history.len(),
         }
     }
 }
@@ -74,7 +73,6 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
-            pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
             btc_user_pending_transactions: BtcUserPendingTransactionsMap::init(
                 mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
@@ -82,6 +80,7 @@ thread_local! {
             token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
             exchange_rates: ExchangeRateMap::init(mm.borrow().get(EXCHANGE_RATE_MEMORY_ID)),
             user_transactions: UserTransactionsMap::init(mm.borrow().get(USER_TRANSACTIONS_MEMORY_ID)),
+            agreement_history: AgreementHistoryMap::init(mm.borrow().get(AGREEMENT_HISTORY_MEMORY_ID)),
         })
     );
 }
@@ -111,6 +110,34 @@ pub(crate) fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
 pub(crate) fn set_config(arg: InitArg) {
     let config = Config::from(arg);
     mutate_state(|state| {
+        state.config.set(Some(Candid(config)));
+    });
+}
+
+/// Returns whether sign-ups of new users are currently allowed.
+///
+/// An unset (`None`) flag is treated as "allowed" to preserve the behaviour of canisters whose
+/// config was persisted before this field existed.
+///
+/// # Panics
+/// - If the `STATE.config` is not initialized.
+pub(crate) fn read_new_user_signups_allowed() -> bool {
+    read_config(|c| c.new_user_signups_allowed.unwrap_or(true))
+}
+
+/// Sets the "new user sign-ups allowed" flag, preserving all other `Config` fields.
+///
+/// # Panics
+/// - If the `STATE.config` is not initialized.
+pub(crate) fn set_new_user_signups_allowed(allowed: bool) {
+    mutate_state(|state| {
+        let mut config = state
+            .config
+            .get()
+            .as_ref()
+            .map(|Candid(c)| c.clone())
+            .expect("config is not initialized");
+        config.new_user_signups_allowed = Some(allowed);
         state.config.set(Some(Candid(config)));
     });
 }

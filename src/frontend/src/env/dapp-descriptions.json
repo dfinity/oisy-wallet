@@ -19,6 +19,22 @@
 		}
 	},
 	{
+		"id": "icpswap",
+		"name": "dapps.descriptions.icpswap.name",
+		"oneLiner": "dapps.descriptions.icpswap.one_liner",
+		"callToAction": "dapps.descriptions.icpswap.call_to_action",
+		"website": "https://icpswap.com",
+		"twitter": "https://x.com/ICPSwap",
+		"telegram": "https://t.me/ICPSwap_Official",
+		"github": "https://github.com/ICPSwap-Labs/icpswap-frontend",
+		"tags": ["dapps.categories.defi", "dapps.categories.ab_icp"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "dapps.descriptions.icpswap.description",
+		"logo": "/images/dapps/icp-swap-logo.svg",
+		"screenshots": ["/images/dapps/icp-swap.webp"]
+	},
+	{
 		"id": "kongswap",
 		"name": "dapps.descriptions.kongswap.name",
 		"oneLiner": "dapps.descriptions.kongswap.one_liner",
@@ -34,10 +50,7 @@
 		"stats": "",
 		"logo": "/images/dapps/kong-swap-logo.svg",
 		"screenshots": ["/images/dapps/kong-swap.webp"],
-		"carousel": {
-			"text": "dapps.descriptions.kongswap.carousel.text",
-			"callToAction": "dapps.descriptions.kongswap.carousel.call_to_action"
-		}
+		"disabled": true
 	},
 	{
 		"id": "liquidium",
@@ -53,7 +66,56 @@
 		"usesInternetIdentity": false,
 		"stats": "",
 		"logo": "/images/dapps/liquidium-logo.webp",
-		"screenshots": ["/images/dapps/liquidium-screenshot.webp"]
+		"screenshots": ["/images/dapps/liquidium-screenshot.webp"],
+		"carousel": {
+			"text": "dapps.descriptions.liquidium.carousel.text",
+			"callToAction": "dapps.descriptions.liquidium.carousel.call_to_action"
+		}
+	},
+	{
+		"id": "icexplorer",
+		"name": "dapps.descriptions.icexplorer.name",
+		"oneLiner": "dapps.descriptions.icexplorer.one_liner",
+		"website": "https://www.icexplorer.io/",
+		"twitter": "https://x.com/ICExplorer_io",
+		"openChat": "https://oc.app/community/m7w7t-haaaa-aaaac-ahdpa-cai/?ref=sdqdc-qaaaa-aaaac-ahnma-cai",
+		"github": "https://github.com/Token-Explorer-Hi/ic-explorer-docs",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.defi", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.icexplorer.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/icexplorer-logo.webp",
+		"screenshots": ["/images/dapps/icexplorer-screenshot.webp"]
+	},
+	{
+		"id": "icpindex",
+		"name": "dapps.descriptions.icpindex.name",
+		"oneLiner": "dapps.descriptions.icpindex.one_liner",
+		"website": "https://icpindex.app",
+		"twitter": "https://x.com/icpindex",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.defi", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.icpindex.description",
+		"usesInternetIdentity": true,
+		"stats": "",
+		"logo": "/images/dapps/icpindex-logo.webp",
+		"screenshots": ["/images/dapps/icpindex-screenshot.webp"],
+		"carousel": {
+			"text": "dapps.descriptions.icpindex.carousel.text",
+			"callToAction": "dapps.descriptions.icpindex.carousel.call_to_action"
+		}
+	},
+	{
+		"id": "icpixel",
+		"name": "dapps.descriptions.icpixel.name",
+		"oneLiner": "dapps.descriptions.icpixel.one_liner",
+		"website": "https://icpixel.org/",
+		"twitter": "https://twitter.com/ICPixelEditor",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.tools", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.icpixel.description",
+		"usesInternetIdentity": true,
+		"stats": "",
+		"logo": "/images/dapps/icpixel-logo.webp",
+		"screenshots": ["/images/dapps/icpixel-screenshot.webp"]
 	},
 	{
 		"id": "openchat",
@@ -74,6 +136,21 @@
 			"text": "dapps.descriptions.openchat.carousel.text",
 			"callToAction": "dapps.descriptions.openchat.carousel.call_to_action"
 		}
+	},
+	{
+		"id": "motoko-tokyo",
+		"name": "dapps.descriptions.motoko_tokyo.name",
+		"oneLiner": "dapps.descriptions.motoko_tokyo.one_liner",
+		"callToAction": "dapps.descriptions.motoko_tokyo.call_to_action",
+		"website": "https://motokotokyogame.net/",
+		"twitter": "https://x.com/NightscrollerEX",
+		"discord": "https://discord.gg/d3WnbPPkes",
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.game", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.motoko_tokyo.description",
+		"usesInternetIdentity": true,
+		"stats": "",
+		"logo": "/images/dapps/motoko-tokyo-logo.webp",
+		"screenshots": ["/images/dapps/motoko-tokyo-screenshot.webp"]
 	},
 	{
 		"id": "icpanda-message",
@@ -104,22 +181,6 @@
 		"logo": "/images/dapps/decide-ai-logo.svg",
 		"github": "https://github.com/modclub-app",
 		"screenshots": ["/images/dapps/decide-ai.webp"]
-	},
-	{
-		"id": "icpswap",
-		"name": "dapps.descriptions.icpswap.name",
-		"oneLiner": "dapps.descriptions.icpswap.one_liner",
-		"callToAction": "dapps.descriptions.icpswap.call_to_action",
-		"website": "https://icpswap.com",
-		"twitter": "https://x.com/ICPSwap",
-		"telegram": "https://t.me/ICPSwap_Official",
-		"github": " https://github.com/ICPSwap-Labs/icpswap-frontend",
-		"tags": ["dapps.categories.defi", "dapps.categories.ab_icp"],
-		"stats": "",
-		"usesInternetIdentity": true,
-		"description": "dapps.descriptions.icpswap.description",
-		"logo": "/images/dapps/icp-swap-logo.svg",
-		"screenshots": ["/images/dapps/icp-swap.webp"]
 	},
 	{
 		"id": "nnsdapp",
@@ -501,7 +562,7 @@
 		"website": "https://www.helium.com/",
 		"github": "https://github.com/helium",
 		"twitter": "https://twitter.com/helium",
-		"tags": ["dapps.categories.tools", "dapps.categories.aa_new"],
+		"tags": ["dapps.categories.tools"],
 		"description": "dapps.descriptions.helium.description",
 		"usesInternetIdentity": false,
 		"display": "Large",
@@ -516,7 +577,7 @@
 		"website": "https://app.sanctum.so/",
 		"twitter": "https://x.com/sanctumso",
 		"discord": "https://discord.com/invite/sanctumso",
-		"tags": ["dapps.categories.defi", "dapps.categories.aa_new"],
+		"tags": ["dapps.categories.defi"],
 		"description": "dapps.descriptions.sanctum.description",
 		"usesInternetIdentity": false,
 		"stats": "",
@@ -530,7 +591,7 @@
 		"website": "https://app.sphere.finance/",
 		"twitter": "https://x.com/SphereDeFi",
 		"discord": "https://discord.com/invite/spheredefi",
-		"tags": ["dapps.categories.defi", "dapps.categories.aa_new"],
+		"tags": ["dapps.categories.defi"],
 		"stats": "",
 		"usesInternetIdentity": false,
 		"description": "dapps.descriptions.sphere_finance.description",
@@ -545,7 +606,7 @@
 		"twitter": "https://twitter.com/BinaryxPlatform",
 		"discord": "https://discord.com/invite/f4mTchBKC8",
 		"telegram": "https://t.me/+2IWJ9yBYPcliZjg6",
-		"tags": ["dapps.categories.rwa", "dapps.categories.aa_new"],
+		"tags": ["dapps.categories.rwa"],
 		"description": "dapps.descriptions.binaryx.description",
 		"usesInternetIdentity": false,
 		"stats": "",
@@ -558,7 +619,7 @@
 		"oneLiner": "dapps.descriptions.parcl.one_liner",
 		"website": "https://parcl.co/",
 		"twitter": "https://x.com/ParclLabs",
-		"tags": ["dapps.categories.rwa", "dapps.categories.aa_new"],
+		"tags": ["dapps.categories.rwa"],
 		"description": "dapps.descriptions.parcl.description",
 		"usesInternetIdentity": false,
 		"stats": "",

@@ -4,9 +4,9 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    api_keys::ApiKeys, backend_config::Config, bitcoin::StoredPendingTransaction,
-    contact::StoredContacts, custom_token::CustomToken, exchange::ExchangeRate,
-    pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile,
+    agreement::AgreementHistoryEntry, api_keys::ApiKeys, backend_config::Config,
+    bitcoin::StoredPendingTransaction, contact::StoredContacts, custom_token::CustomToken,
+    exchange::ExchangeRate, token::UserToken, user_profile::StoredUserProfile,
     user_transaction::UserTransaction, Timestamp,
 };
 
@@ -29,8 +29,6 @@ pub type UserProfileMap =
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
 
-pub type PowChallengeMap = StableBTreeMap<StoredPrincipal, Candid<StoredChallenge>, VMem>;
-
 // Define a new type for the contact storage
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
 
@@ -47,3 +45,7 @@ pub type ExchangeRateMap = StableBTreeMap<StoredTokenId, Candid<ExchangeRate>, V
 /// Key: (user principal, token identifier), Value: sorted Vec of finalized transactions.
 pub type UserTransactionsMap =
     StableBTreeMap<UserTransactionKey, Candid<Vec<UserTransaction>>, VMem>;
+
+/// Per-user audit trail of agreement consent/rejection events.
+pub type AgreementHistoryMap =
+    StableBTreeMap<StoredPrincipal, Candid<Vec<AgreementHistoryEntry>>, VMem>;

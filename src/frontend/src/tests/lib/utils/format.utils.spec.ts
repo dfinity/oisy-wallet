@@ -220,6 +220,125 @@ describe('format.utils', () => {
 				})
 			).toBe('111111.9999999999999999999999999876');
 		});
+
+		describe('large decimals', () => {
+			it('should format 1.0 with 30 decimals', () => {
+				const oneUnit = 10n ** 30n;
+
+				expect(formatToken({ value: oneUnit, unitName: 30 })).toBe('1');
+			});
+
+			it('should format 1.0 with 30 decimals and trailing zeros', () => {
+				const oneUnit = 10n ** 30n;
+
+				expect(formatToken({ value: oneUnit, unitName: 30, trailingZeros: true })).toBe('1.0000');
+			});
+
+			it('should format a fractional value with 30 decimals showing full precision', () => {
+				expect(
+					formatToken({
+						value: 123456789012345678901234567891n,
+						unitName: 30,
+						displayDecimals: 30
+					})
+				).toBe('0.123456789012345678901234567891');
+			});
+
+			it('should format 1.0 with 50 decimals', () => {
+				const oneUnit = 10n ** 50n;
+
+				expect(formatToken({ value: oneUnit, unitName: 50 })).toBe('1');
+			});
+
+			it('should format a fractional value with 50 decimals showing full precision', () => {
+				const value = 10n ** 50n - 1n;
+
+				expect(formatToken({ value, unitName: 50, displayDecimals: 50 })).toBe(
+					'0.99999999999999999999999999999999999999999999999999'
+				);
+			});
+
+			it('should format the smallest unit with 50 decimals', () => {
+				expect(formatToken({ value: 1n, unitName: 50, displayDecimals: 50 })).toBe(
+					'0.00000000000000000000000000000000000000000000000001'
+				);
+			});
+
+			it('should show < 0.00000001 for tiny values with 50 decimals without explicit displayDecimals', () => {
+				expect(formatToken({ value: 1n, unitName: 50 })).toBe('< 0.00000001');
+			});
+
+			it('should format a large integer part with 50 decimals', () => {
+				const value = 999999n * 10n ** 50n + 10n ** 50n / 2n;
+
+				expect(formatToken({ value, unitName: 50 })).toBe('999999.5');
+			});
+
+			it('should format with 77 decimals near the ethers limit', () => {
+				const oneUnit = 10n ** 77n;
+
+				expect(formatToken({ value: oneUnit, unitName: 77 })).toBe('1');
+				expect(formatToken({ value: oneUnit, unitName: 77, trailingZeros: true })).toBe('1.0000');
+			});
+
+			it('should format with the maximum 80 decimals', () => {
+				const oneUnit = 10n ** 80n;
+
+				expect(formatToken({ value: oneUnit, unitName: 80 })).toBe('1');
+			});
+
+			it('should format the smallest unit with 80 decimals showing full precision', () => {
+				expect(formatToken({ value: 1n, unitName: 80, displayDecimals: 80 })).toBe(
+					`0.${'0'.repeat(79)}1`
+				);
+			});
+
+			it('should format zero with large decimals', () => {
+				expect(formatToken({ value: ZERO, unitName: 50 })).toBe('0');
+				expect(formatToken({ value: ZERO, unitName: 80, trailingZeros: true })).toBe('0.0000');
+			});
+
+			it('should format with 50 decimals and custom displayDecimals', () => {
+				const value = 123n * 10n ** 47n;
+
+				expect(formatToken({ value, unitName: 50, displayDecimals: 6 })).toBe('0.123');
+				expect(formatToken({ value, unitName: 50, displayDecimals: 6, trailingZeros: true })).toBe(
+					'0.123000'
+				);
+			});
+
+			it('should round correctly with large decimals', () => {
+				const value = 15555n * 10n ** 46n;
+
+				expect(formatToken({ value, unitName: 50, displayDecimals: 3 })).toBe('1.556');
+				expect(formatToken({ value, unitName: 50, displayDecimals: 2 })).toBe('1.56');
+				expect(formatToken({ value, unitName: 50, displayDecimals: 1 })).toBe('1.6');
+			});
+
+			it('should handle negative values with large decimals', () => {
+				const oneUnit = -(10n ** 50n);
+
+				expect(formatToken({ value: oneUnit, unitName: 50, showPlusSign: true })).toBe('-1');
+			});
+
+			it('should handle positive values with plus sign and large decimals', () => {
+				const oneUnit = 10n ** 50n;
+
+				expect(formatToken({ value: oneUnit, unitName: 50, showPlusSign: true })).toBe('+1');
+			});
+
+			it('should handle unitName passed as a string with large decimals', () => {
+				const oneUnit = 10n ** 50n;
+
+				expect(formatToken({ value: oneUnit, unitName: '50' })).toBe('1');
+			});
+
+			it('should handle unitName passed as a bigint with large decimals', () => {
+				const oneUnit = 10n ** 50n;
+
+				expect(formatToken({ value: oneUnit, unitName: 50n })).toBe('1');
+			});
+		});
 	});
 
 	describe('shortenWithMiddleEllipsis', () => {
@@ -1499,6 +1618,21 @@ describe('format.utils', () => {
 				).toBe(expected);
 			}
 		);
+
+		it('should return undefined when currency does not match exchange rate currency', () => {
+			expect(
+				formatCurrencyAsNumber({
+					value: 100,
+					currency: Currency.EUR,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH
+				})
+			).toBeUndefined();
+		});
 	});
 
 	describe('formatStakeApyNumber', () => {

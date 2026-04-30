@@ -32,7 +32,7 @@ pub const MAX_UTXOS_LEN: usize = 128;
 pub const FEE_PERCENTILES_INITIAL_DELAY: Duration = Duration::from_secs(10);
 
 /// Timer interval for updating fee percentiles cache (1 minute)
-pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_secs(60);
+pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_mins(1);
 
 /// Safety timeout: if an update has been "in progress" for longer than this,
 /// assume it was lost to a trap and allow a new one. Set to 5× the update interval.
@@ -54,6 +54,7 @@ pub struct SelectedUtxosFeeRequest {
     pub amount_satoshis: u64,
     pub network: BitcoinNetwork,
     pub min_confirmations: Option<u32>,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -71,6 +72,10 @@ pub enum SelectedUtxosFeeError {
     PendingTransactions,
     /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain {
+        msg: String,
+    },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -105,6 +110,7 @@ pub enum BtcAddPendingTransactionError {
 pub struct BtcGetPendingTransactionsRequest {
     pub address: String,
     pub network: BitcoinNetwork,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -134,4 +140,8 @@ pub enum BtcGetPendingTransactionsError {
     },
     /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain {
+        msg: String,
+    },
 }

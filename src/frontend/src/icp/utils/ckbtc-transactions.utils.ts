@@ -16,7 +16,7 @@ import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/c
 import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
@@ -31,7 +31,7 @@ export const mapCkBTCTransaction = ({
 	env
 }: {
 	transaction: IcrcTransaction;
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 } & Pick<IcToken, 'ledgerCanisterId'> &
 	Partial<Pick<Network, 'env'>>): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });

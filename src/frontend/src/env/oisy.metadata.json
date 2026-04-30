@@ -10,6 +10,8 @@
 	"OISY_SUPPORT_URL": "https://docs.oisy.com/using-oisy-wallet/support",
 	"OISY_REWARDS_URL": "https://docs.oisy.com/rewards",
 	"OISY_REFERRAL_URL": "https://docs.oisy.com/rewards",
+	"OISY_EARN_URL": "https://docs.oisy.com/using-oisy-wallet/earn",
+	"OISY_EARN_HARVEST_AUTOPILOT_URL": "https://docs.oisy.com/using-oisy-wallet/earn/harvest-autopilot",
 	"OISY_WELCOME_TWITTER_URL": "https://x.com/intent/post?text=Just%20set%20up%20my%20%40OISY%20wallet%20and%20am%20now%20eligible%20for%20Sprinkles.%0AUp%20to%20%24200%20is%20on%20the%20table%20from%20the%20most%20rewarding%20wallet%20in%20web3.%0AOISY.com",
 	"OISY_INTERNET_IDENTITY_URL": "https://docs.oisy.com/introduction/internet-identity",
 	"OISY_FIND_INTERNET_IDENTITY_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/find-your-internet-identity",
@@ -17,8 +19,12 @@
 	"OISY_INTERNET_IDENTITY_HELP_CENTER_URL": "https://identitysupport.dfinity.org/hc/en-us/articles/39593373981588-Internet-Identity-2-0",
 	"OISY_ACCESS_CONTROL_URL": "https://docs.oisy.com/security/asset-control-recovery-and-governance-in-oisy-wallet",
 	"OISY_NFT_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/nfts",
-	"OISY_HOW_TO_CONVERT_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/",
+	"OISY_HOW_TO_CONVERT_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#convert-assets-from-to-the-icp-network",
+	"OISY_SIGNER_CONNECT_DOCS_URL": "https://docs.oisy.com/introduction/oisy-keeps-you-protected#securely-connect-oisy-to-other-applications",
 	"OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/support/oisy-wallet-switches-to-internet-identity-2.0",
 	"OISY_LOGGING_INTO_OISY_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/logging-into-oisy",
-	"OISY_CREATING_A_WALLET_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/creating-a-wallet"
+	"OISY_CREATING_A_WALLET_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/creating-a-wallet",
+	"OISY_SCAN_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/universal-scanner",
+	"OISY_PAY_URL": "https://docs.oisy.com/using-oisy-wallet/oisy-pay",
+	"OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL": "https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions"
 }

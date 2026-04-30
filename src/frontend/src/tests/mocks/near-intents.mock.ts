@@ -41,6 +41,24 @@ export const mockNearIntentsTokens: NearIntentsToken[] = [
 		price: 1.1,
 		priceUpdatedAt: '2026-03-16T00:00:00.000Z',
 		contractAddress: null
+	},
+	{
+		assetId: 'nep141:sol.omft.near',
+		decimals: 9,
+		blockchain: 'sol',
+		symbol: 'SOL',
+		price: 135.42,
+		priceUpdatedAt: '2026-03-16T00:00:00.000Z',
+		contractAddress: null
+	},
+	{
+		assetId: 'nep141:sol-EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v.omft.near',
+		decimals: 6,
+		blockchain: 'sol',
+		symbol: 'USDC',
+		price: 1.0,
+		priceUpdatedAt: '2026-03-16T00:00:00.000Z',
+		contractAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 	}
 ];
 
@@ -65,7 +83,7 @@ export const mockNearIntentsQuoteResponse: NearIntentsQuoteResponse = {
 	timestamp: '2026-03-16T00:00:00.000Z',
 	signature: 'mock-signature',
 	quoteRequest: {
-		dry: true,
+		dry: false,
 		swapType: 'EXACT_INPUT',
 		slippageTolerance: 100,
 		originAsset: 'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
@@ -95,5 +113,19 @@ export const mockNearIntentsStatusSuccess: NearIntentsStatusResponse = {
 		destinationChainTxHashes: [
 			{ hash: '0xDestTxHash', explorerUrl: 'https://arbiscan.io/tx/0x...' }
 		]
+	}
+};
+
+export const mockNearIntentsStatusPending: NearIntentsStatusResponse = {
+	...mockNearIntentsStatusSuccess,
+	status: 'PENDING_DEPOSIT',
+	swapDetails: {}
+};
+
+export const mockNearIntentsStatusFailed: NearIntentsStatusResponse = {
+	...mockNearIntentsStatusSuccess,
+	status: 'FAILED',
+	swapDetails: {
+		refundReason: 'Swap execution failed'
 	}
 };

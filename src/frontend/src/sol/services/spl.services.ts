@@ -1,12 +1,12 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleWarn } from '$lib/utils/console.utils';
@@ -25,7 +25,7 @@ import { fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/ut
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
-export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
+export const loadSplTokens = async ({ identity }: { identity: NullishIdentity }): Promise<void> => {
 	await Promise.all([loadDefaultSplTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
@@ -115,7 +115,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
 					standard: { code: 'spl' as const },
 					category: 'custom' as const,
-					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+					tags: DEFAULT_TOKEN_TAGS,
 					enabled,
 					version,
 					allowExternalContentSource

@@ -1,11 +1,12 @@
 //! Types related to the signer & topping up the cycles ledger account for use with the signer.
 
-use candid::{Nat, Principal};
+use std::fmt::Debug;
+
+use candid::{CandidType, Deserialize, Nat, Principal};
 use ic_cycles_ledger_client::ApproveError;
 use serde::Serialize;
 
-use super::{CandidType, Debug, Deserialize};
-use crate::types::pow::{AllowSigningStatus, ChallengeCompletion};
+use crate::types::pow::AllowSigningStatus;
 
 /// Errors that can occur when retrieving the allowed cycles from the cycles ledger.
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -34,18 +35,21 @@ pub enum AllowSigningError {
     /// The caller hit the high-frequency guard rate limit designed to prevent
     /// cycle-draining attacks before any inter-canister call is made.
     RateLimitedByGuard(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain {
+        msg: String,
+    },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct AllowSigningRequest {
-    pub nonce: u64,
+    pub ii_delegation_chain: Option<super::delegation::IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct AllowSigningResponse {
     pub status: AllowSigningStatus,
     pub allowed_cycles: Nat,
-    pub challenge_completion: Option<ChallengeCompletion>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -54,12 +58,12 @@ pub struct GetAllowedCyclesResponse {
 }
 
 pub mod topup {
-    use candid::Nat;
+    use std::fmt::Debug;
+
+    use candid::{CandidType, Deserialize, Nat};
     use serde::Serialize;
 
-    use super::{CandidType, Debug, Deserialize};
     use crate::types::signer::RateLimitError;
-
     /// A request to top up the cycles ledger.
     #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq, Default)]
     pub struct TopUpCyclesLedgerRequest {

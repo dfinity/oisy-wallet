@@ -22,6 +22,7 @@ import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { assertNever } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 const parseErcIdentifier = (token: SaveCustomErcVariant) => `${token.address}#${token.chainId}`;
@@ -84,27 +85,8 @@ const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 	assertNever(token.networkKey, `Unexpected networkKey: ${token.networkKey}`);
 };
 
-export const saveCustomTokens = async ({
-	progress,
-	identity,
-	tokens
-}: SaveTokensParams<SaveCustomTokenWithKey>) => {
-	progress?.(ProgressStepsAddToken.SAVE);
-
-	await setManyCustomTokens({
-		identity,
-		tokens: tokens.map(toCustomToken),
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-	});
-
-	progress?.(ProgressStepsAddToken.UPDATE_UI);
-
-	// Hide tokens that have been disabled
-	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
-	disabledTokens.forEach(hideTokenByKey);
-
-	// Reload all custom tokens for simplicity reason.
-	await Promise.all([
+const reloadAllCustomTokens = ({ identity }: { identity: Identity }) =>
+	Promise.all([
 		loadCustomErc20Tokens({ identity }),
 		loadCustomErc4626Tokens({ identity }),
 		loadCustomErc721Tokens({ identity }),
@@ -115,4 +97,31 @@ export const saveCustomTokens = async ({
 		loadCustomIcPunksTokens({ identity }),
 		loadCustomSplTokens({ identity })
 	]);
+
+export const saveCustomTokens = async ({
+	progress,
+	identity,
+	tokens
+}: SaveTokensParams<SaveCustomTokenWithKey>) => {
+	progress?.(ProgressStepsAddToken.SAVE);
+
+	const save = async () => {
+		await setManyCustomTokens({
+			identity,
+			tokens: tokens.map(toCustomToken),
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
+
+		progress?.(ProgressStepsAddToken.UPDATE_UI);
+
+		// Hide tokens that have been disabled
+		const disabledTokens = tokens.filter(({ enabled }) => !enabled);
+		disabledTokens.forEach(hideTokenByKey);
+	};
+
+	try {
+		await save();
+	} finally {
+		await reloadAllCustomTokens({ identity });
+	}
 };

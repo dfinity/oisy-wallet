@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/kit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
@@ -50,6 +49,7 @@
 		initFeeContext,
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
+	import { mapSolanaErrorMsg } from '$sol/utils/sol-error.utils';
 
 	interface Props {
 		currentStep?: WizardStep;
@@ -220,12 +220,8 @@
 				return;
 			}
 
-			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)
-				? $i18n.send.error.solana_transaction_expired
-				: $i18n.send.error.unexpected;
-
 			toastsError({
-				msg: { text: errorMsg },
+				msg: { text: mapSolanaErrorMsg(err) ?? $i18n.send.error.unexpected },
 				err
 			});
 
@@ -234,7 +230,11 @@
 	};
 </script>
 
-<SolFeeContext {destination} observe={currentStep?.name !== WizardStepsSend.SENDING}>
+<SolFeeContext
+	{destination}
+	observe={currentStep?.name !== WizardStepsSend.SENDING}
+	token={$sendToken}
+>
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
 			<SolSendReview {amount} {destination} {network} {onBack} onSend={send} {selectedContact} />

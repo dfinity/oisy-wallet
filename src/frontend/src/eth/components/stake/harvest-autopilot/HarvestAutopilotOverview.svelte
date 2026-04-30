@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
+	import { onMount } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { EarningCardFields } from '$env/types/env.earning-cards';
@@ -18,11 +19,16 @@
 	import { stakeProvidersConfig } from '$lib/config/stake.config';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { earningData } from '$lib/derived/earning.derived';
-	import { networkId } from '$lib/derived/network.derived';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { StakeProvider } from '$lib/types/stake';
 	import type { Vault } from '$lib/types/vaults';
-	import { networkUrl } from '$lib/utils/nav.utils';
+	import { back } from '$lib/utils/nav.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -51,6 +57,16 @@
 	let otherAutopilotsSorted = $derived(
 		otherAutopilots.sort((a, b) => (a.token.name ?? '').localeCompare(b.token.name ?? ''))
 	);
+
+	onMount(() => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.EARN,
+				event_value: PLAUSIBLE_EVENT_VALUES.HARVEST_AUTOPILOTS_PAGE
+			}
+		});
+	});
 </script>
 
 <div class="flex flex-col gap-6 pb-6">
@@ -66,15 +82,7 @@
 					ariaLabel="icon"
 					colorStyle="tertiary"
 					link={false}
-					onclick={() =>
-						goto(
-							networkUrl({
-								path: AppPath.Earn,
-								networkId: $networkId,
-								usePreviousRoute: true,
-								fromRoute
-							})
-						)}
+					onclick={() => back({ pop: nonNullish(fromRoute) })}
 				>
 					{#snippet icon()}
 						<IconBackArrow />

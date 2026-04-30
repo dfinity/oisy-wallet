@@ -7,38 +7,52 @@ import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { i18n } from '$lib/stores/i18n.store';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const processTransactionSent = async ({
+	identity,
 	token,
 	transaction
 }: {
+	identity: NullishIdentity;
 	token: Token;
 	transaction: TransactionResponse;
 }) => {
 	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {
-		await processEthTransaction({ hash: transaction.hash, token });
+		await processEthTransaction({ identity, hash: transaction.hash, token });
 		return;
 	}
 
 	// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
 	const value = decodeErc20AbiDataValue({ data: transaction.data });
 
-	await processErc20Transaction({ hash: transaction.hash, value, token, type: 'pending' });
+	await processErc20Transaction({
+		identity,
+		hash: transaction.hash,
+		value,
+		token,
+		type: 'pending'
+	});
 };
 
-export const processEthTransaction = async (params: { hash: string; token: Token }) =>
-	await processPendingTransaction(params);
+export const processEthTransaction = async (params: {
+	identity: NullishIdentity;
+	hash: string;
+	token: Token;
+}) => await processPendingTransaction(params);
 
 export const processErc20Transaction = async ({
 	type,
 	...rest
 }: {
+	identity: NullishIdentity;
 	hash: string;
 	value: bigint;
 	token: Token;
@@ -53,10 +67,12 @@ export const processErc20Transaction = async ({
 };
 
 const processPendingTransaction = async ({
+	identity,
 	hash,
 	token,
 	value
 }: {
+	identity: NullishIdentity;
 	hash: string;
 	token: Token;
 	value?: bigint;
@@ -104,22 +120,27 @@ const processPendingTransaction = async ({
 
 	await wait(hash);
 
-	await processMinedTransaction({ token });
+	await processMinedTransaction({ identity, token });
 };
 
 // At some point in the past, we were fetching the transactions from the provider. But, with ERC20 transactions,
 // we noticed that, even if the transaction is mined, the source or the destination address is not
 // the real address, but the token address. That gave wrong data in the UI.
 // So, we decided to call the service that reloads all transactions.
-const processMinedTransaction = async ({ token }: { token: Token }) => {
-	const {
-		id: tokenId,
-		network: { id: networkId },
-		standard
-	} = token;
+const processMinedTransaction = async ({
+	identity,
+	token
+}: {
+	identity: NullishIdentity;
+	token: Token;
+}) => {
+	const { id: tokenId, standard, network } = token;
 
-	// Reload transactions as a transaction has been mined
-	await reloadEthereumTransactions({ tokenId, networkId, standard });
+	assertIsNetworkEthereum(network);
+
+	const { id: networkId, chainId } = network;
+
+	await reloadEthereumTransactions({ identity, tokenId, networkId, chainId, standard });
 
 	// Reload balance as a transaction has been mined
 	await reloadEthereumBalance(token);

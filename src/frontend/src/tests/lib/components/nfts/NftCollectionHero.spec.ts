@@ -8,13 +8,21 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { extractMediaUrls } from '$lib/services/url.services';
+import { i18n } from '$lib/stores/i18n.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftCollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
+
+const mockGoto = vi.fn();
+
+vi.mock('$app/navigation', () => ({
+	goto: (...args: unknown[]) => mockGoto(...args)
+}));
 
 vi.mock('$lib/services/url.services', () => ({
 	extractMediaUrls: vi.fn()
@@ -41,6 +49,37 @@ describe('NftCollectionHero', () => {
 		vi.mocked(extractMediaUrls).mockResolvedValue([]);
 
 		userSelectedNetworkStore.set(undefined);
+	});
+
+	it('should navigate to the assets page when the close button is clicked', async () => {
+		const { getByLabelText } = render(NftCollectionHero, {
+			props: {
+				nfts: mockNftCollectionUi.nfts,
+				token: mockToken
+			}
+		});
+
+		const closeButton = getByLabelText(get(i18n).core.text.close);
+
+		await fireEvent.click(closeButton);
+
+		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/nfts'));
+		expect(mockGoto).not.toHaveBeenCalledWith(expect.stringContaining('collection='));
+	});
+
+	it('should navigate one level up when the back arrow button is clicked', async () => {
+		const { getByLabelText } = render(NftCollectionHero, {
+			props: {
+				nfts: mockNftCollectionUi.nfts,
+				token: mockToken
+			}
+		});
+
+		const backButton = getByLabelText(get(i18n).core.alt.up_one_level);
+
+		await fireEvent.click(backButton);
+
+		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/nfts'));
 	});
 
 	it('should render the collection data', async () => {

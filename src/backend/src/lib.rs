@@ -1,10 +1,16 @@
+#![warn(clippy::wildcard_imports)]
+
 use candid::Principal;
-use ic_cdk::{export_candid, init, post_upgrade};
+use ic_cdk::{
+    export_candid, init,
+    management_canister::{HttpRequestResult, TransformArgs},
+    post_upgrade,
+};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
     types::{
-        agreement::UpdateUserAgreementsRequest,
+        agreement::{UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest},
         api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
@@ -17,18 +23,26 @@ use shared::{
         exchange::ExchangeRate,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
+        notification::AddDismissedNotificationRequest,
         result_types::{
-            AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
+            AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
-            UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
-            UpdateUserNetworkSettingsResult,
+            CreateUserProfileResult, DeleteContactResult, GetAgreementHistoryResult,
+            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
+            GetUserTransactionsResult, SaveUserTransactionsResult, SetUserShowTestnetsResult,
+            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
+            UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
+            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
-        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        signer::{
+            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+            AllowSigningRequest,
+        },
         token_id::TokenId,
-        user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
+        transaction_settings::UpdateTransactionFilterSettingsRequest,
+        user_profile::HasUserProfileResponse,
+        user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
         Stats, Timestamp,
     },
 };
@@ -38,10 +52,13 @@ use crate::state::{read_state, set_config};
 mod api;
 mod bitcoin;
 mod contacts;
+mod delegation;
 mod exchange;
 mod signer;
 mod state;
+mod status;
 mod token;
+mod transactions;
 mod types;
 mod user_profile;
 mod utils;

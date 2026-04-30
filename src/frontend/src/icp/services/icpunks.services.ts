@@ -12,12 +12,12 @@ import { collectionMetadata } from '$icp/api/icpunks.api';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icPunksDefaultTokensStore } from '$icp/stores/icpunks-default-tokens.store';
 import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -32,7 +32,7 @@ import { get } from 'svelte/store';
 export const loadIcPunksTokens = async ({
 	identity
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): Promise<void> => {
 	await Promise.all([loadDefaultIcPunksTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
@@ -103,7 +103,7 @@ const mapIcPunksCustomToken = async ({
 		symbol,
 		standard: { code: 'icpunks' as const },
 		category: 'custom' as const,
-		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+		tags: DEFAULT_TOKEN_TAGS,
 		enabled,
 		version,
 		...(nonNullish(mappedSection) && {

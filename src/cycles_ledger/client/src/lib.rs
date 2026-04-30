@@ -1,6 +1,11 @@
 // This is an experimental feature to generate Rust binding from Candid.
 // You may want to manually adjust some of the types.
-#![allow(dead_code, unused_imports, clippy::missing_errors_doc)]
+#![allow(
+    dead_code,
+    unused_imports,
+    clippy::missing_errors_doc,
+    clippy::wildcard_imports
+)]
 use candid::{self, CandidType, Deserialize, Principal};
 use ic_cdk::call::{Call, CallResult as Result};
 pub use ic_cycles_ledger_types::*;

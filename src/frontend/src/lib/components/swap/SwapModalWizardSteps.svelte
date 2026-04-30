@@ -2,7 +2,6 @@
 	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
@@ -151,9 +150,7 @@
 		}
 
 		// source selected (constraints apply)
-		const allowedIds = isDefaultEthereumToken($sourceToken)
-			? [$sourceToken.network.id]
-			: SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id];
+		const allowedIds = SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id];
 
 		setNetworksMode({ enabled: false, allowedIds });
 
@@ -191,10 +188,6 @@
 		source: Token;
 		destination: Token;
 	}): boolean => {
-		if (isDefaultEthereumToken(source)) {
-			return source.network.id === destination.network.id;
-		}
-
 		const allowed = SUPPORTED_CROSS_SWAP_NETWORKS[source.network.id];
 
 		return isNullish(allowed) ? true : allowed.includes(destination.network.id);
@@ -222,7 +215,8 @@
 	};
 
 	const selectProvider = (detail: SwapMappedResult) => {
-		swapAmountsStore.setSelectedProvider(detail);
+		swapAmountsStore.setManualProvider(detail);
+
 		goToStep(WizardStepsSwap.SWAP);
 	};
 
@@ -245,6 +239,7 @@
 			onCloseTokensList={closeTokenList}
 			onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
 			onSelectToken={selectToken}
+			side={selectTokenType}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
 		<ModalNetworksFilter

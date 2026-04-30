@@ -1,16 +1,22 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED } from '$env/user-transactions.env';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { retryWithDelay } from '$lib/services/rest.services';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type {
 	PostMessageCommon,
 	PostMessageDataRequestSol,
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
+import { consoleError } from '$lib/utils/console.utils';
 import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
+import {
+	loadSolUserTransactions,
+	saveSolFinalizedTransactions
+} from '$sol/services/sol-user-transactions.services';
 import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolAddress } from '$sol/types/address';
@@ -18,11 +24,12 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 
 interface LoadSolWalletParams {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
 	tokenAddress?: SplTokenAddress;
@@ -54,9 +61,18 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}
 
 	protected setRef(data: PostMessageDataRequestSol | undefined) {
-		this.#ref = nonNullish(data)
+		const newRef = nonNullish(data)
 			? `${data.tokenAddress ?? SOLANA_TOKEN.symbol}-${data.solanaNetwork}`
 			: undefined;
+
+		if (this.#ref !== newRef) {
+			this.store = {
+				balance: undefined,
+				transactions: {}
+			};
+		}
+
+		this.#ref = newRef;
 	}
 
 	async start(data: PostMessageDataRequestSol | undefined) {
@@ -70,6 +86,8 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}
 
 	async trigger(data: PostMessageDataRequestSol | undefined) {
+		this.setRef(data);
+
 		await this.timer.trigger<PostMessageDataRequestSol>({
 			job: this.syncWallet,
 			data
@@ -95,20 +113,68 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	});
 
 	private loadTransactions = async ({
+		identity,
 		solanaNetwork: network,
-		...rest
+		address,
+		tokenAddress,
+		tokenOwnerAddress
 	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
-		const transactions = await getSolTransactions({
+		const isInitialSync = Object.keys(this.store.transactions).length === 0;
+
+		let storedTransactions: SolCertifiedTransaction[] = [];
+
+		if (isInitialSync && USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED) {
+			try {
+				const backendTokenId = solBackendTokenId({ network, tokenAddress });
+
+				const stored = await loadSolUserTransactions({
+					identity,
+					tokenId: backendTokenId,
+					address
+				});
+
+				if (nonNullish(stored) && stored.transactions.length > 0) {
+					storedTransactions = stored.transactions.map((transaction) => ({
+						data: transaction,
+						certified: false
+					}));
+
+					for (const tx of storedTransactions) {
+						this.store.transactions[tx.data.id] = tx;
+					}
+				}
+			} catch (_: unknown) {
+				// Backend load failure is non-critical; fall through to RPC
+			}
+		}
+
+		const rpcTransactions = await getSolTransactions({
 			network,
-			...rest
+			identity,
+			address,
+			tokenAddress,
+			tokenOwnerAddress
 		});
 
-		const transactionsUi = transactions.map((transaction) => ({
+		const rpcCertified = rpcTransactions.map((transaction) => ({
 			data: transaction,
 			certified: false
 		}));
 
-		return transactionsUi.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
+		const newRpcTransactions = rpcCertified.filter(({ data: { id } }) =>
+			isNullish(this.store.transactions[`${id}`])
+		);
+
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newRpcTransactions.length > 0) {
+			const backendTokenId = solBackendTokenId({ network, tokenAddress });
+			saveSolFinalizedTransactions({
+				identity,
+				tokenId: backendTokenId,
+				transactions: newRpcTransactions.map(({ data }) => data)
+			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
+		}
+
+		return [...newRpcTransactions, ...storedTransactions];
 	};
 
 	private loadAndSyncWalletData = async ({

@@ -9,6 +9,7 @@ import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
+import type { UniversalScannerData } from '$lib/types/scanner';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -69,7 +70,8 @@ export interface Modal<T> {
 		| 'harvest-stake'
 		| 'harvest-unstake'
 		| 'universal-scanner'
-		| 'pay-dialog';
+		| 'pay-dialog'
+		| 'wallet-connect-sessions';
 	data?: T;
 	id?: symbol;
 }
@@ -138,9 +140,10 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
 	openHarvestStake: (id: symbol) => void;
 	openHarvestUnstake: (id: symbol) => void;
-	openUniversalScanner: (id: symbol) => void;
+	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
+	openWalletConnectSessions: (id: symbol) => void;
 	close: () => void;
 }
 
@@ -246,9 +249,12 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openHarvestStake: setType('harvest-stake'),
 		openHarvestUnstake: setType('harvest-unstake'),
-		openUniversalScanner: setType('universal-scanner'),
+		openUniversalScanner: <(params: SetWithOptionalDataParams<UniversalScannerData>) => void>(
+			setTypeWithData('universal-scanner')
+		),
 		openPayDialog: setType('pay-dialog'),
 		openGetToken: setType('get-token'),
+		openWalletConnectSessions: setType('wallet-connect-sessions'),
 		close: () => set(null),
 		subscribe
 	};
