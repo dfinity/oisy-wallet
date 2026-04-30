@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "あなたのデジタル資産を",
 			"title_part_2": "プライベートで、安全に。",
+			"description": "ウォレットを開くか、数秒で作成できます",
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "ログイン/新規作成",
@@ -130,7 +131,7 @@
 			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
 			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
 			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで",
-			"social_login": "即時かつプライベートなアクセス + ソーシャルログイン"
+			"move_swap_grow": "ネットワークをまたいで資産を移動・スワップ・成長"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー",
