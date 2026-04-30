@@ -132,6 +132,41 @@ The frontend is written entirely in Svelte. You can serve the frontend in develo
 npm run dev
 ```
 
+## Ops
+
+### Disable new sign-ups
+
+The backend exposes a runtime switch that pauses the creation of new user profiles without requiring a canister upgrade.
+
+#### How it works
+
+- The backend `Config` carries a `new_user_signups_allowed` flag, exposed publicly via the `new_user_signups_allowed : () -> (bool) query` endpoint.
+- A controller-only update endpoint, `set_new_user_signups_allowed : (bool) -> ()`, flips the flag at runtime. It reads the current `Config`, mutates only this field, and writes it back, preserving every other config field.
+- When the flag is `false`, `create_user_profile` returns `Err(CreateUserProfileError::SignupsClosed)` for any caller that does not already have a profile.
+
+To pause new sign-ups (call from a controller principal):
+
+```
+dfx canister call backend set_new_user_signups_allowed '(false)'
+```
+
+To resume new sign-ups:
+
+```
+dfx canister call backend set_new_user_signups_allowed '(true)'
+```
+
+#### Scope
+
+- Affects the `backend` canister only, specifically the `create_user_profile` flow.
+- The flag is read by the frontend (landing page banner, post-login toast and sign-out) so the UI reflects the current state.
+- All other backend endpoints, configuration and stored data are untouched.
+
+#### Consequences
+
+- **New users (no existing profile):** sign-up is rejected with `SignupsClosed`. They cannot create a profile or use the wallet until the flag is flipped back to `true`.
+- **Existing users (profile already created):** unaffected. They can keep signing in and using the wallet exactly as before.
+
 ## Dependencies
 
 [//]: # 'TODO: Add fonts that are bought and owned by DFINITY too.'
