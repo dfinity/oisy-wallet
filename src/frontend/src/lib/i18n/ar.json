@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"description": "افتح محفظتك أو أنشئ واحدة خلال ثوانٍ",
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
@@ -130,7 +131,7 @@
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
-			"social_login": ""
+			"move_swap_grow": "انقل أصولك وبدّلها ونمِّها عبر الشبكات"
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال",
@@ -1154,7 +1155,7 @@
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
 			"withdrawing": "",
-			"bridging": "",
+			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقة واحدة.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",

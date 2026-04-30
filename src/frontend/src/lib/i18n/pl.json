@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Twoje cyfrowe aktywa",
 			"title_part_2": "Prywatne i bezpieczne",
+			"description": "Otwórz swój portfel lub utwórz nowy w kilka sekund",
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
@@ -130,7 +131,7 @@
 			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
 			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
 			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
-			"social_login": "Natychmiastowy i prywatny dostęp + logowanie społecznościowe"
+			"move_swap_grow": "Przenoś, wymieniaj i pomnażaj swoje aktywa między sieciami"
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie",
@@ -1154,7 +1155,7 @@
 			"select_token": "Wybierz token",
 			"select_network_filter": "Wybierz sieć",
 			"withdrawing": "Wypłacanie...",
-			"bridging": "",
+			"bridging": "Trwa bridging... (Prosimy o cierpliwość, może to potrwać do minuty.)",
 			"network_cost": "Koszt sieci",
 			"gasless": "Bez gazu",
 			"swap_fees": "Opłaty za wymianę",

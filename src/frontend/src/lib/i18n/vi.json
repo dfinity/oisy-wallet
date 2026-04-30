@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Tài sản số của bạn",
 			"title_part_2": "Riêng tư và An toàn",
+			"description": "Mở ví của bạn hoặc tạo ví mới chỉ trong vài giây",
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
@@ -130,7 +131,7 @@
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
 			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
-			"social_login": "Truy cập tức thì và riêng tư + đăng nhập bằng tài khoản mạng xã hội"
+			"move_swap_grow": "Di chuyển, hoán đổi và tăng trưởng tài sản của bạn trên nhiều mạng"
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động",
@@ -1154,7 +1155,7 @@
 			"select_token": "Chọn token",
 			"select_network_filter": "Chọn mạng",
 			"withdrawing": "Đang rút...",
-			"bridging": "",
+			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến một phút.)",
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",

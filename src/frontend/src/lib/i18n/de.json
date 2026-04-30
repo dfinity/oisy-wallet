@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Dein Digitales Vermögen",
 			"title_part_2": "Vertraulich und Sicher",
+			"description": "Öffne deine Wallet oder erstelle in Sekunden eine neue",
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
@@ -130,7 +131,7 @@
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
 			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
-			"social_login": "Einfacher und sicherer Zugriff via Social Login"
+			"move_swap_grow": "Verschiebe, tausche und vermehre deine Assets netzwerkübergreifend"
 		},
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil",
@@ -1154,7 +1155,7 @@
 			"select_token": "Token auswählen",
 			"select_network_filter": "Netzwerk auswählen",
 			"withdrawing": "Abheben...",
-			"bridging": "",
+			"bridging": "Bridge-Vorgang läuft... (Bitte haben Sie Geduld, dies kann bis zu einer Minute dauern.)",
 			"network_cost": "Netzwerk Kosten",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Gebühren",
