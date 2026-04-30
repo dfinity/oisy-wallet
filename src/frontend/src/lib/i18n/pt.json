@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Seus Ativos Digitais",
 			"title_part_2": "Privados e Seguros",
+			"description": "Abra sua carteira ou crie uma em segundos",
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
@@ -130,7 +131,7 @@
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
 			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
-			"social_login": "Acesso instantâneo e privado + login social"
+			"move_swap_grow": "Mova, troque e aumente seus ativos entre redes"
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular",

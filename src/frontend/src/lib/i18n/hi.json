@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"description": "अपना वॉलेट खोलें या कुछ ही सेकंड में नया बनाएँ",
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
@@ -130,7 +131,7 @@
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
-			"social_login": ""
+			"move_swap_grow": "नेटवर्कों पर अपनी संपत्तियाँ मूव, स्वैप और बढ़ाएँ"
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर",

@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "Vaše Digitální Aktiva",
 			"title_part_2": "Soukromá a Bezpečná",
+			"description": "Otevřete svou peněženku nebo si ji vytvořte během několika sekund",
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
@@ -130,7 +131,7 @@
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
-			"social_login": "Okamžitý a soukromý přístup + přihlášení přes sociální sítě"
+			"move_swap_grow": "Přesouvejte, směňujte a zhodnocujte svá aktiva napříč sítěmi"
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu",

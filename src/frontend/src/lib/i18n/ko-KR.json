@@ -123,6 +123,7 @@
 		"text": {
 			"title_part_1": "나의 디지털 자산",
 			"title_part_2": "안전하고 프라이빗하게",
+			"description": "지갑을 열거나 몇 초 만에 새로 만들 수 있습니다",
 			"logout": "로그아웃",
 			"lock": "잠금",
 			"authenticate": "열기 또는 만들기",
@@ -130,7 +131,7 @@
 			"asset_types": "비트코인, 솔라나, 이더리움, ICP 등 다양한 자산 관리",
 			"instant_and_private": "개인정보 보호가 기본인 내장 AI 어시스턴트",
 			"advanced_cryptography": "고급 암호화 기술로 보호 - 100% 온체인",
-			"social_login": "즉각적이고 프라이빗한 액세스 + 소셜 로그인"
+			"move_swap_grow": "네트워크 전반에서 자산을 이동, 스왑하고 성장시키세요"
 		},
 		"alt": {
 			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기",
