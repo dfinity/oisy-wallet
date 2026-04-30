@@ -127,7 +127,7 @@
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
-			"sign_in_or_sign_up": "",
+			"sign_in_or_sign_up": "Accedi o registrati",
 			"internet_identity": "",
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
