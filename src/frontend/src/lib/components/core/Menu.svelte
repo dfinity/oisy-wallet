@@ -120,9 +120,9 @@
 		role="none"
 	>
 		{#if $authNotSignedIn}
-			<h2 class="mb-2 text-center text-base font-semibold">
+			<div class="mb-2 text-center text-base font-semibold">
 				{$i18n.auth.text.sign_in_or_sign_up}
-			</h2>
+			</div>
 			<span class="mb-2 text-center">
 				<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
 			</span>
