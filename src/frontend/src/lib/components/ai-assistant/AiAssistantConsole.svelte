@@ -157,7 +157,7 @@
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
 
 		<div class="mr-2">
-			<AiAssistantResetButton />
+			<AiAssistantResetButton {loading} />
 		</div>
 
 		<button
