@@ -2,8 +2,8 @@
 	import { IconClose } from '@dfinity/gix-components';
 	import { fade } from 'svelte/transition';
 	import AiAssistantChat from '$lib/components/ai-assistant/AiAssistantChat.svelte';
-	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
 	import AiAssistantResetButton from '$lib/components/ai-assistant/AiAssistantResetButton.svelte';
+	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
