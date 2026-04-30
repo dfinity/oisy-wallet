@@ -122,6 +122,7 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
+		sign_in_or_sign_up: string;
 		internet_identity: string;
 		asset_types: string;
 		instant_and_private: string;

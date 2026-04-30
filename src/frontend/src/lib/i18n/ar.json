@@ -126,6 +126,7 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
+			"sign_in_or_sign_up": "",
 			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",

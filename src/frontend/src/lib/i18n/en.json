@@ -126,6 +126,7 @@
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
+			"sign_in_or_sign_up": "Log in or sign up",
 			"internet_identity": "Internet Identity",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
