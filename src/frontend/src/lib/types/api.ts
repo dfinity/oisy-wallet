@@ -4,7 +4,8 @@ import type {
 	TokenId as BackendTokenId,
 	Network as BitcoinNetwork,
 	Contact,
-	CredentialSpec,
+	CreateUserProfileError,
+	DismissedNotification,
 	GetUserProfileError,
 	IIDelegationChain,
 	PendingTransaction,
@@ -26,18 +27,14 @@ import type { Token } from '$lib/types/token';
 import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';
 import type { UserNetworks } from '$lib/types/user-networks';
+import type { UserProviderAgreements } from '$lib/types/user-provider-agreements';
 import type { Nullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface AddUserCredentialParams {
-	credentialJwt: string;
-	issuerCanisterId: Principal;
-	currentUserVersion?: bigint;
-	credentialSpec: CredentialSpec;
-}
-
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
+
+export type CreateUserProfileResponse = { Ok: UserProfile } | { Err: CreateUserProfileError };
 
 export interface RateLimitInfo {
 	endpoint: string;
@@ -107,6 +104,11 @@ export interface AddUserHiddenDappIdParams {
 	currentUserVersion?: bigint;
 }
 
+export interface AddUserDismissedNotificationParams {
+	notifications: DismissedNotification[];
+	currentUserVersion?: bigint;
+}
+
 export interface SaveUserNetworksSettings {
 	networks: UserNetworks;
 	currentUserVersion?: bigint;
@@ -114,6 +116,11 @@ export interface SaveUserNetworksSettings {
 
 export interface SaveUserAgreements {
 	agreements: Partial<UserAgreements>;
+	currentUserVersion?: bigint;
+}
+
+export interface SaveProviderAgreements {
+	providerAgreements: UserProviderAgreements;
 	currentUserVersion?: bigint;
 }
 
@@ -210,6 +217,11 @@ export interface DeleteContactParams {
 
 export interface UpdateUserExperimentalFeatureSettings {
 	experimentalFeatures: UserExperimentalFeatures;
+	currentUserVersion?: bigint;
+}
+
+export interface UpdateUserTransactionFilterSettings {
+	hideMicroTransactions: boolean;
 	currentUserVersion?: bigint;
 }
 

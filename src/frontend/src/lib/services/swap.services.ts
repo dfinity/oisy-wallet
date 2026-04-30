@@ -1,10 +1,12 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
+import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
+import { isTokenErc } from '$eth/utils/erc.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
@@ -41,6 +43,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
+import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -48,6 +51,10 @@ import {
 	pollNearIntentsStatus,
 	submitNearIntentsDepositTx
 } from '$lib/services/near-intents.services';
+import {
+	executeOneSecEvmToIcpBridge,
+	executeOneSecIcpToEvmBridge
+} from '$lib/services/onesec-swap.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { throwSwapError } from '$lib/services/swap-errors.services';
 import { autoLoadSingleToken } from '$lib/services/token.services';
@@ -56,6 +63,7 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import type { Amount } from '$lib/types/send';
 import {
@@ -65,10 +73,13 @@ import {
 	type EvmQuoteParams,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
+	type IcpBridgeQuoteParams,
 	type IcpSwapManualWithdrawParams,
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
 	type NearIntentsQuoteParams,
+	type OneSecEvmToIcpParams,
+	type OneSecIcpToEvmParams,
 	type SwapMappedResult,
 	type SwapNearIntentsEvmParams,
 	type SwapNearIntentsSolParams,
@@ -79,15 +90,19 @@ import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+import { isNetworkIdICP, isNetworkIdSOLDevnet, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
 	geSwapEthTokenAddress,
-	getWithdrawableToken
+	getWithdrawableToken,
+	isKongSupportedIcToken
 } from '$lib/utils/swap.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { sendSol } from '$sol/services/sol-send.services';
+import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -123,6 +138,53 @@ const checkNeedsApproval = async ({
 		return !isAllowanceSufficient;
 	} catch (_: unknown) {
 		return true;
+	}
+};
+
+const enableSwapDestinationToken = async ({
+	destinationToken,
+	identity
+}: {
+	destinationToken: Token;
+	identity: Identity;
+}): Promise<void> => {
+	if (!isTokenToggleable(destinationToken) || destinationToken.enabled) {
+		return;
+	}
+
+	try {
+		if (isTokenErc(destinationToken)) {
+			await setCustomToken({
+				token: toCustomToken({
+					...destinationToken,
+					enabled: true,
+					chainId: destinationToken.network.chainId,
+					networkKey: 'Erc20'
+				} as SaveCustomTokenWithKey),
+				identity,
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			});
+
+			await loadCustomErc20Tokens({ identity });
+
+			return;
+		}
+
+		if (isTokenSpl(destinationToken)) {
+			await setCustomToken({
+				token: toCustomToken({
+					...destinationToken,
+					enabled: true,
+					networkKey: isNetworkIdSOLDevnet(destinationToken.network.id) ? 'SplDevnet' : 'SplMainnet'
+				} as SaveCustomTokenWithKey),
+				identity,
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			});
+
+			await loadCustomSplTokens({ identity });
+		}
+	} catch (_: unknown) {
+		// Auto-enabling the token is just a good-to-have extra, not necessary for the continuity of the user flow
 	}
 };
 
@@ -236,7 +298,7 @@ export const loadKongSwapTokens = async ({
 		if (result.status === 'fulfilled') {
 			return result.value.reduce<KongSwapTokensStoreData>(
 				(innerAcc, kongToken) =>
-					'IC' in kongToken && !kongToken.IC.is_removed && kongToken.IC.chain === 'IC'
+					isKongSupportedIcToken(kongToken)
 						? { ...innerAcc, [kongToken.IC.symbol]: kongToken.IC }
 						: innerAcc,
 				acc
@@ -265,6 +327,16 @@ export const fetchSwapAmounts = async ({
 	});
 
 	if (isNetworkIdICP(sourceToken.network.id)) {
+		if (!isNetworkIdICP(destinationToken.network.id)) {
+			return await fetchSwapAmountsICPBridge({
+				sourceToken,
+				destinationToken,
+				amount: sourceAmount,
+				userEthAddress,
+				slippage
+			});
+		}
+
 		return await fetchSwapAmountsICP({
 			identity,
 			sourceToken,
@@ -638,13 +710,15 @@ const executeNearIntentsSwap = async ({
 	sourceToken,
 	swapAmount,
 	swapDetails,
-	sendTransaction
+	sendTransaction,
+	enableDestinationToken
 }: {
 	progress: (step: ProgressStepsSwap) => void;
 	sourceToken: Token;
 	swapAmount: Amount;
 	swapDetails: NearIntentsQuoteResponse;
 	sendTransaction: (params: { amount: bigint; depositAddress: string }) => Promise<string>;
+	enableDestinationToken?: () => Promise<void>;
 }): Promise<void> => {
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
@@ -672,6 +746,8 @@ const executeNearIntentsSwap = async ({
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
+	await enableDestinationToken?.();
+
 	await waitAndTriggerWallet();
 };
 
@@ -679,6 +755,7 @@ export const fetchNearIntentsEvmSwap = async ({
 	identity,
 	progress,
 	sourceToken,
+	destinationToken,
 	swapAmount,
 	sourceNetwork,
 	userAddress,
@@ -705,7 +782,8 @@ export const fetchNearIntentsEvmSwap = async ({
 				maxPriorityFeePerGas
 			});
 			return hash;
-		}
+		},
+		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
 	});
 };
 
@@ -713,6 +791,7 @@ export const fetchNearIntentsSolSwap = async ({
 	identity,
 	progress,
 	sourceToken,
+	destinationToken,
 	swapAmount,
 	userAddress,
 	swapDetails
@@ -730,8 +809,31 @@ export const fetchNearIntentsSolSwap = async ({
 				destination: depositAddress,
 				source: userAddress,
 				prioritizationFee: ZERO
-			})
+			}),
+		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
 	});
+};
+
+export const fetchOneSecEvmToIcpSwap = async (params: OneSecEvmToIcpParams): Promise<void> => {
+	await executeOneSecEvmToIcpBridge(params);
+	params.progress(ProgressStepsSwap.UPDATE_UI);
+
+	await enableSwapDestinationToken({
+		destinationToken: params.destinationToken,
+		identity: params.identity
+	});
+	await waitAndTriggerWallet();
+};
+
+export const fetchOneSecIcpToEvmSwap = async (params: OneSecIcpToEvmParams): Promise<void> => {
+	await executeOneSecIcpToEvmBridge(params);
+	params.progress(ProgressStepsSwap.UPDATE_UI);
+
+	await enableSwapDestinationToken({
+		destinationToken: params.destinationToken,
+		identity: params.identity
+	});
+	await waitAndTriggerWallet();
 };
 
 export const swapService = {
@@ -742,6 +844,9 @@ export const swapService = {
 		throw new Error(get(i18n).swap.error.unexpected);
 	},
 	[SwapProvider.NEAR_INTENTS]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	[SwapProvider.ONE_SEC]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
 	}
 };
@@ -836,6 +941,34 @@ export const performManualWithdraw = async ({
 			swapSucceded: withdrawDestinationTokens
 		};
 	}
+};
+
+const fetchSwapAmountsICPBridge = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userEthAddress,
+	slippage
+}: IcpBridgeQuoteParams): Promise<SwapMappedResult[]> => {
+	const enabledProviders = icpBridgeProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ sourceToken, destinationToken, amount, userEthAddress, slippage })
+		)
+	);
+
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		return acc;
+	}, []);
+
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
 };
 
 // This wrapper keeps the return type uniform (array of SwapMappedResult),
@@ -1075,6 +1208,8 @@ export const fetchVeloraDeltaSwap = async ({
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
+	await enableSwapDestinationToken({ destinationToken, identity });
+
 	await waitAndTriggerWallet();
 };
 
@@ -1108,7 +1243,11 @@ const isExecutedDeltaAuction = ({
 		return false;
 	}
 
-	if (waitForCrosschain && auction.order.bridge.destinationChainId !== 0) {
+	if (
+		waitForCrosschain &&
+		'bridge' in auction.order &&
+		auction.order.bridge.destinationChainId !== 0
+	) {
 		return auction.bridgeStatus === 'filled';
 	}
 
@@ -1198,6 +1337,8 @@ export const fetchVeloraMarketSwap = async ({
 	});
 
 	progress(ProgressStepsSwap.UPDATE_UI);
+
+	await enableSwapDestinationToken({ destinationToken, identity });
 
 	await waitAndTriggerWallet();
 };

@@ -1,3 +1,4 @@
+import { notEmptyString } from '@dfinity/utils';
 import { join } from 'node:path';
 import OISY_DOMAINS from './domains.json' with { type: 'json' };
 import { findFiles } from './utils.mjs';
@@ -27,7 +28,14 @@ const SIGNER_TARGET_MAP = {
 
 const domain_for_dfx_network = (dfx_network) => {
 	const signerTarget = process.env.OISY_SIGNER_TARGET;
-	const domainsKey = (signerTarget && SIGNER_TARGET_MAP[signerTarget]) ?? 'frontend';
+	// Note: when the Docker build is invoked without a `signer_target` build arg, the
+	// default ARG resolves to an empty string and `OISY_SIGNER_TARGET` is exported as
+	// "" (not unset). Empty/unknown values must fall back to the default `frontend` map,
+	// otherwise `OISY_DOMAINS[""]` is undefined and the prod URL becomes `https://ic.oisy.com`.
+	const domainsKey =
+		notEmptyString(signerTarget) && Object.hasOwn(SIGNER_TARGET_MAP, signerTarget)
+			? SIGNER_TARGET_MAP[signerTarget]
+			: 'frontend';
 	const map = OISY_DOMAINS[domainsKey];
 
 	return map?.[dfx_network] ?? `https://${dfx_network}.oisy.com`;

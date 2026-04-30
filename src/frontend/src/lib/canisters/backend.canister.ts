@@ -1,13 +1,11 @@
 import type {
-	AddUserCredentialResult,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
-	TokenId,
-	UserProfile
+	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
@@ -22,7 +20,7 @@ import {
 import { ZERO } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
-	AddUserCredentialParams,
+	AddUserDismissedNotificationParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
 	AllowSigningParams,
@@ -30,20 +28,25 @@ import type {
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
 	GetUserTransactionsResponse,
+	SaveProviderAgreements,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { SignupsClosedError } from '$lib/types/errors';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
+import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
 import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
@@ -99,10 +102,16 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<UserProfile> => {
+	createUserProfile = async (): Promise<CreateUserProfileResponse> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
-		return create_user_profile();
+		const response = await create_user_profile();
+
+		if ('Err' in response && 'SignupsClosed' in response.Err) {
+			throw new SignupsClosedError();
+		}
+
+		return response;
 	};
 
 	getUserProfile = ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
@@ -111,20 +120,10 @@ export class BackendCanister extends Canister<BackendService> {
 		return get_user_profile();
 	};
 
-	addUserCredential = ({
-		credentialJwt,
-		issuerCanisterId,
-		currentUserVersion,
-		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResult> => {
-		const { add_user_credential } = this.caller({ certified: true });
+	newUserSignupsAllowed = ({ certified }: QueryParams): Promise<boolean> => {
+		const { new_user_signups_allowed } = this.caller({ certified });
 
-		return add_user_credential({
-			credential_jwt: credentialJwt,
-			issuer_canister_id: issuerCanisterId,
-			current_user_version: toNullable(currentUserVersion),
-			credential_spec: credentialSpec
-		});
+		return new_user_signups_allowed();
 	};
 
 	btcAddPendingTransaction = async ({
@@ -308,6 +307,18 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
+	addUserDismissedNotification = async ({
+		notifications,
+		currentUserVersion
+	}: AddUserDismissedNotificationParams): Promise<void> => {
+		const { add_user_dismissed_notification } = this.caller({ certified: true });
+
+		await add_user_dismissed_notification({
+			notifications,
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
 	setUserShowTestnets = async ({
 		showTestnets,
 		currentUserVersion
@@ -340,6 +351,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await update_user_agreements({
 			agreements: mapBackendUserAgreements(agreements),
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateProviderAgreements = async ({
+		providerAgreements,
+		currentUserVersion
+	}: SaveProviderAgreements): Promise<void> => {
+		const { update_provider_agreements } = this.caller({ certified: true });
+
+		await update_provider_agreements({
+			provider_agreements: mapBackendProviderAgreements(providerAgreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};
@@ -402,6 +425,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await update_user_experimental_feature_settings({
 			experimental_features: mapUserExperimentalFeatures(experimentalFeatures),
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateUserTransactionFilterSettings = async ({
+		hideMicroTransactions,
+		currentUserVersion
+	}: UpdateUserTransactionFilterSettings): Promise<void> => {
+		const { update_user_transaction_filter_settings } = this.caller({ certified: true });
+
+		await update_user_transaction_filter_settings({
+			filter: { hide_micro_transactions: hideMicroTransactions },
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};

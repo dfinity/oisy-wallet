@@ -2,12 +2,14 @@ import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
+import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+import { setCustomToken } from '$lib/api/backend.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -16,9 +18,12 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
+import * as oneSecSwapServices from '$lib/services/onesec-swap.services';
 import {
 	fetchNearIntentsEvmSwap,
 	fetchNearIntentsSolSwap,
+	fetchOneSecEvmToIcpSwap,
+	fetchOneSecIcpToEvmSwap,
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
 	fetchSwapAmountsSOL,
@@ -37,7 +42,9 @@ import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
+import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -61,7 +68,8 @@ vi.mock('$lib/api/kong_backend.api', () => ({
 }));
 
 vi.mock('$lib/services/icp-swap.services', () => ({
-	icpSwapAmounts: vi.fn()
+	icpSwapAmounts: vi.fn(),
+	icpSwapSupportedTokens: vi.fn()
 }));
 
 vi.mock('$lib/api/icp-swap-pool.api', () => ({
@@ -76,6 +84,7 @@ vi.mock('$lib/services/analytics.services', () => ({
 
 const mockVeloraGetQuote = vi.hoisted(() => vi.fn());
 const mockSolGetQuote = vi.hoisted(() => vi.fn());
+const mockIcpBridgeGetQuote = vi.hoisted(() => vi.fn());
 
 vi.mock('$lib/providers/evm-swap.providers', () => ({
 	evmSwapProviders: [
@@ -95,6 +104,21 @@ vi.mock('$lib/providers/sol-swap.providers', () => ({
 			isEnabled: true
 		}
 	]
+}));
+
+vi.mock('$lib/providers/icp-bridge-swap.providers', () => ({
+	icpBridgeProviders: [
+		{
+			key: 'one_sec',
+			getQuote: mockIcpBridgeGetQuote,
+			isEnabled: true
+		}
+	]
+}));
+
+vi.mock('$lib/services/onesec-swap.services', () => ({
+	executeOneSecEvmToIcpBridge: vi.fn(),
+	executeOneSecIcpToEvmBridge: vi.fn()
 }));
 
 vi.mock('$lib/services/near-intents.services', () => ({
@@ -148,6 +172,18 @@ vi.mock('$lib/utils/swap.utils', async (importOriginal) => {
 
 vi.mock('$eth/services/eip2612-permit.services', () => ({
 	createPermit: vi.fn()
+}));
+
+vi.mock('$lib/api/backend.api', () => ({
+	setCustomToken: vi.fn()
+}));
+
+vi.mock('$eth/services/erc20.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$sol/services/spl.services', () => ({
+	loadCustomTokens: vi.fn()
 }));
 
 vi.mock('$env/rest/kongswap.env', () => ({
@@ -404,6 +440,102 @@ describe('swap.services', () => {
 			});
 
 			expect(mockVeloraGetQuote).toHaveBeenCalled();
+		});
+
+		describe('with ICP source and non-ICP destination', () => {
+			const icpSource = mockValidIcToken as IcToken;
+			const evmDest = { ...mockValidErc20Token, network: ETHEREUM_NETWORK } as Erc20Token;
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+			});
+
+			it('routes to fetchSwapAmountsICPBridge and calls icpBridgeProviders', async () => {
+				mockIcpBridgeGetQuote.mockResolvedValue({
+					provider: SwapProvider.ONE_SEC,
+					receiveAmount: 500n,
+					swapDetails: { transferFeeInUnits: 1000n, protocolFeeInPercent: 0.1 }
+				});
+
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: icpSource,
+					destinationToken: evmDest,
+					amount: 1000,
+					tokens: [icpSource, evmDest],
+					slippage: 0.5,
+					isSourceTokenIcrc2: true,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined
+				});
+
+				expect(mockIcpBridgeGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({
+						sourceToken: icpSource,
+						destinationToken: evmDest,
+						userEthAddress: mockEthAddress
+					})
+				);
+				expect(result).toHaveLength(1);
+				expect(result[0].provider).toBe(SwapProvider.ONE_SEC);
+			});
+
+			it('does NOT call icpBridgeProviders when both source and destination are ICP', async () => {
+				vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue({
+					receive_amount: 100n,
+					slippage: 0.5
+				} as SwapAmountsReply);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: icpSource,
+					destinationToken: mockValidIcrcToken as IcToken,
+					amount: 1000,
+					tokens: [icpSource, mockValidIcrcToken as IcToken],
+					slippage: 0.5,
+					isSourceTokenIcrc2: false,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined
+				});
+
+				expect(mockIcpBridgeGetQuote).not.toHaveBeenCalled();
+			});
+
+			it('returns [] when all ICP bridge providers return undefined', async () => {
+				mockIcpBridgeGetQuote.mockResolvedValue(undefined);
+
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: icpSource,
+					destinationToken: evmDest,
+					amount: 1000,
+					tokens: [icpSource, evmDest],
+					slippage: 0.5,
+					isSourceTokenIcrc2: true,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+			});
+
+			it('skips a provider whose quote rejects and returns remaining results', async () => {
+				mockIcpBridgeGetQuote.mockRejectedValue(new Error('OneSec error'));
+
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: icpSource,
+					destinationToken: evmDest,
+					amount: 1000,
+					tokens: [icpSource, evmDest],
+					slippage: 0.5,
+					isSourceTokenIcrc2: true,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+			});
 		});
 
 		describe('with Solana tokens', () => {
@@ -715,7 +847,8 @@ describe('swap.services', () => {
 		const mockDestinationToken = {
 			...mockValidErc20Token,
 			address: '0xDestinationToken',
-			decimals: 6
+			decimals: 6,
+			enabled: true
 		};
 
 		const mockSwapAmount = '1000000000000000000'; // 1 ETH
@@ -902,7 +1035,8 @@ describe('swap.services', () => {
 		const mockDestinationToken = {
 			...mockValidErc20Token,
 			address: '0xDestinationToken',
-			decimals: 6
+			decimals: 6,
+			enabled: true
 		};
 
 		const mockSwapAmount = '1000000000000000000';
@@ -1412,6 +1546,32 @@ describe('swap.services', () => {
 			exchangeStore.reset();
 		});
 
+		it('returns undefined without calling the SDK when userAddress is nullish', async () => {
+			const result = await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress: null,
+				slippage
+			});
+
+			expect(result).toBeUndefined();
+			expect(constructSimpleSDK).not.toHaveBeenCalled();
+		});
+
+		it('returns undefined without calling the SDK when destination is not an EVM network', async () => {
+			const result = await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken: mockValidIcToken as unknown as Erc20Token,
+				amount,
+				userAddress,
+				slippage
+			});
+
+			expect(result).toBeUndefined();
+			expect(constructSimpleSDK).not.toHaveBeenCalled();
+		});
+
 		it('should track SWAP_OFFER with delta event type on successful delta quote', async () => {
 			mockGetQuote.mockResolvedValue({
 				delta: {
@@ -1701,6 +1861,200 @@ describe('swap.services', () => {
 		});
 	});
 
+	describe('enableSwapDestinationToken via fetchNearIntentsEvmSwap', () => {
+		const sourceToken = {
+			...mockValidErc20Token,
+			decimals: 6,
+			address: '0xUSDC'
+		};
+
+		const mockProgress = vi.fn();
+
+		const baseParams = {
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken,
+			swapAmount: '1',
+			receiveAmount: 900000n,
+			slippageValue: '1',
+			sourceNetwork: ETHEREUM_NETWORK,
+			userAddress: mockEthAddress,
+			gas: 21000n,
+			maxFeePerGas: 20000000000n,
+			maxPriorityFeePerGas: 2000000000n,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+		});
+
+		it('should not call setCustomToken when ERC20 destination token is toggleable and already enabled', async () => {
+			const destinationToken = {
+				...mockValidErc20Token,
+				decimals: 6,
+				address: '0xARB_USDC',
+				enabled: true
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+
+		it('should not call setCustomToken when ERC20 destination token is not toggleable', async () => {
+			const destinationToken = {
+				...mockValidErc20Token,
+				decimals: 6,
+				address: '0xARB_USDC'
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+
+		it('should call setCustomToken and loadCustomErc20Tokens when ERC20 destination token is toggleable and disabled', async () => {
+			const destinationToken = {
+				...mockValidErc20Token,
+				decimals: 6,
+				address: '0xARB_USDC',
+				enabled: false
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
+		});
+
+		it('should silently catch errors from setCustomToken without breaking the swap flow', async () => {
+			const destinationToken = {
+				...mockValidErc20Token,
+				decimals: 6,
+				address: '0xARB_USDC',
+				enabled: false
+			};
+
+			vi.mocked(setCustomToken).mockRejectedValueOnce(new Error('Backend error'));
+
+			await expect(
+				fetchNearIntentsEvmSwap({ ...baseParams, destinationToken })
+			).resolves.not.toThrow();
+		});
+
+		it('should call setCustomToken and loadCustomErc20Tokens when ERC4626 destination token is toggleable and disabled', async () => {
+			const destinationToken = {
+				...mockValidErc4626Token,
+				enabled: false
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
+		});
+
+		it('should not call setCustomToken when ERC4626 destination token is toggleable and already enabled', async () => {
+			const destinationToken = {
+				...mockValidErc4626Token,
+				enabled: true
+			};
+
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+
+		it('should not call setCustomToken when ERC4626 destination token is not toggleable', async () => {
+			await fetchNearIntentsEvmSwap({ ...baseParams, destinationToken: mockValidErc4626Token });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('enableSwapDestinationToken via fetchNearIntentsSolSwap', () => {
+		const sourceToken = mockValidSplToken;
+		const mockProgress = vi.fn();
+
+		const baseParams = {
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken,
+			swapAmount: '1',
+			userAddress: mockSolAddress,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(sendSol).mockResolvedValue(mockSolSignature());
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+		});
+
+		it('should not call setCustomToken when SPL destination token is toggleable and already enabled', async () => {
+			const destinationToken = { ...mockValidSplToken, symbol: 'DEST', enabled: true };
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomSplTokens).not.toHaveBeenCalled();
+		});
+
+		it('should not call setCustomToken when SPL destination token is not toggleable', async () => {
+			const destinationToken = { ...mockValidSplToken, symbol: 'DEST' };
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomSplTokens).not.toHaveBeenCalled();
+		});
+
+		it('should call setCustomToken and loadCustomSplTokens when SPL destination token is toggleable and disabled', async () => {
+			const destinationToken = { ...mockValidSplToken, symbol: 'DEST', enabled: false };
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomSplTokens).toHaveBeenCalledOnce();
+		});
+
+		it('should call setCustomToken and loadCustomErc20Tokens when ERC4626 destination token is toggleable and disabled', async () => {
+			const destinationToken = {
+				...mockValidErc4626Token,
+				enabled: false
+			};
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
+			expect(loadCustomSplTokens).not.toHaveBeenCalled();
+		});
+
+		it('should not call setCustomToken when ERC4626 destination token is toggleable and already enabled', async () => {
+			const destinationToken = {
+				...mockValidErc4626Token,
+				enabled: true
+			};
+
+			await fetchNearIntentsSolSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+	});
+
 	describe('fetchNearIntentsEvmSwap', () => {
 		const sourceToken = {
 			...mockValidErc20Token,
@@ -1711,7 +2065,8 @@ describe('swap.services', () => {
 		const destinationToken = {
 			...mockValidErc20Token,
 			decimals: 6,
-			address: '0xARB_USDC'
+			address: '0xARB_USDC',
+			enabled: true
 		};
 
 		const mockProgress = vi.fn();
@@ -1816,6 +2171,7 @@ describe('swap.services', () => {
 
 	describe('fetchNearIntentsSolSwap', () => {
 		const sourceToken = mockValidSplToken;
+		const destinationToken = { ...mockValidSplToken, symbol: 'DEST', enabled: true };
 		const mockProgress = vi.fn();
 		const solTxSignature = mockSolSignature();
 		const { depositAddress } = mockNearIntentsQuoteResponse.quote;
@@ -1833,6 +2189,7 @@ describe('swap.services', () => {
 				identity: mockIdentity,
 				progress: mockProgress,
 				sourceToken,
+				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				swapDetails: mockNearIntentsQuoteResponse
@@ -1860,6 +2217,7 @@ describe('swap.services', () => {
 				identity: mockIdentity,
 				progress: mockProgress,
 				sourceToken,
+				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				swapDetails: mockNearIntentsQuoteResponse
@@ -1881,6 +2239,7 @@ describe('swap.services', () => {
 				identity: mockIdentity,
 				progress: mockProgress,
 				sourceToken,
+				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				swapDetails: quoteWithMemo
@@ -1895,6 +2254,135 @@ describe('swap.services', () => {
 				depositAddress,
 				depositMemo: 'sol-memo-123'
 			});
+		});
+	});
+
+	describe('fetchOneSecIcpToEvmSwap', () => {
+		const sourceToken = mockValidIcToken as IcToken;
+		const mockProgress = vi.fn();
+
+		const baseParams = {
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken,
+			swapAmount: '1',
+			userEthAddress: mockEthAddress
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.mocked(oneSecSwapServices.executeOneSecIcpToEvmBridge).mockResolvedValue(undefined);
+		});
+
+		it('should call executeOneSecIcpToEvmBridge with the provided params', async () => {
+			const destinationToken = { ...mockValidErc20Token, enabled: true } as Erc20Token;
+
+			await fetchOneSecIcpToEvmSwap({ ...baseParams, destinationToken });
+
+			expect(oneSecSwapServices.executeOneSecIcpToEvmBridge).toHaveBeenCalledWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					sourceToken,
+					destinationToken,
+					swapAmount: '1',
+					userEthAddress: mockEthAddress
+				})
+			);
+		});
+
+		it('should call progress with UPDATE_UI after the bridge executes', async () => {
+			const destinationToken = { ...mockValidErc20Token, enabled: true } as Erc20Token;
+
+			await fetchOneSecIcpToEvmSwap({ ...baseParams, destinationToken });
+
+			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('should call setCustomToken and loadCustomErc20Tokens when ERC20 destination is disabled', async () => {
+			const destinationToken = { ...mockValidErc20Token, enabled: false } as Erc20Token;
+
+			await fetchOneSecIcpToEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
+		});
+
+		it('should not call setCustomToken when ERC20 destination is already enabled', async () => {
+			const destinationToken = { ...mockValidErc20Token, enabled: true } as Erc20Token;
+
+			await fetchOneSecIcpToEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+
+		it('should propagate errors thrown by executeOneSecIcpToEvmBridge', async () => {
+			const destinationToken = { ...mockValidErc20Token, enabled: true } as Erc20Token;
+			vi.mocked(oneSecSwapServices.executeOneSecIcpToEvmBridge).mockRejectedValue(
+				new Error('Bridge failed')
+			);
+
+			await expect(fetchOneSecIcpToEvmSwap({ ...baseParams, destinationToken })).rejects.toThrow(
+				'Bridge failed'
+			);
+		});
+	});
+
+	describe('fetchOneSecEvmToIcpSwap', () => {
+		const sourceToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK } as Erc20Token;
+		const destinationToken = mockValidIcToken as IcToken;
+		const mockProgress = vi.fn();
+
+		const baseParams = {
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken,
+			destinationToken,
+			swapAmount: '1',
+			userEthAddress: mockEthAddress,
+			gas: 21000n,
+			maxFeePerGas: 20000000000n,
+			maxPriorityFeePerGas: 2000000000n
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.mocked(oneSecSwapServices.executeOneSecEvmToIcpBridge).mockResolvedValue(undefined);
+		});
+
+		it('should call executeOneSecEvmToIcpBridge with the provided params', async () => {
+			await fetchOneSecEvmToIcpSwap(baseParams);
+
+			expect(oneSecSwapServices.executeOneSecEvmToIcpBridge).toHaveBeenCalledWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					sourceToken,
+					destinationToken,
+					swapAmount: '1',
+					userEthAddress: mockEthAddress
+				})
+			);
+		});
+
+		it('should call progress with UPDATE_UI after the bridge executes', async () => {
+			await fetchOneSecEvmToIcpSwap(baseParams);
+
+			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('should not call setCustomToken for an ICP destination token', async () => {
+			await fetchOneSecEvmToIcpSwap(baseParams);
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+
+		it('should propagate errors thrown by executeOneSecEvmToIcpBridge', async () => {
+			vi.mocked(oneSecSwapServices.executeOneSecEvmToIcpBridge).mockRejectedValue(
+				new Error('EVM bridge failed')
+			);
+
+			await expect(fetchOneSecEvmToIcpSwap(baseParams)).rejects.toThrow('EVM bridge failed');
 		});
 	});
 });

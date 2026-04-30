@@ -1,18 +1,16 @@
 import type {
-	AddUserCredentialResult,
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	TokenId,
-	UserProfile
+	TokenId
 } from '$declarations/backend/backend.did';
 import { CanisterApi } from '$lib/api/canister.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	AddPendingTransactionOutcome,
-	AddUserCredentialParams,
+	AddUserDismissedNotificationParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
 	AllowSigningParams,
@@ -21,19 +19,22 @@ import type {
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	CreateContactParams,
+	CreateUserProfileResponse,
 	DeleteContactParams,
 	GetContactParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
 	GetUserTransactionsResponse,
+	SaveProviderAgreements,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
-	UpdateUserExperimentalFeatureSettings
+	UpdateUserExperimentalFeatureSettings,
+	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
@@ -82,7 +83,7 @@ export const removeCustomToken = async ({
 
 export const createUserProfile = async ({
 	identity
-}: CanisterApiFunctionParams): Promise<UserProfile> => {
+}: CanisterApiFunctionParams): Promise<CreateUserProfileResponse> => {
 	const { createUserProfile } = await backendCanister({ identity });
 
 	return createUserProfile();
@@ -97,13 +98,13 @@ export const getUserProfile = async ({
 	return getUserProfile({ certified });
 };
 
-export const addUserCredential = async ({
+export const newUserSignupsAllowed = async ({
 	identity,
-	...params
-}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResult> => {
-	const { addUserCredential } = await backendCanister({ identity });
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<boolean> => {
+	const { newUserSignupsAllowed } = await backendCanister({ identity });
 
-	return addUserCredential(params);
+	return newUserSignupsAllowed({ certified });
 };
 
 export const addPendingBtcTransaction = async ({
@@ -168,6 +169,15 @@ export const addUserHiddenDappId = async ({
 	return addUserHiddenDappId(params);
 };
 
+export const addUserDismissedNotification = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<AddUserDismissedNotificationParams>): Promise<void> => {
+	const { addUserDismissedNotification } = await backendCanister({ identity });
+
+	return addUserDismissedNotification(params);
+};
+
 export const setUserShowTestnets = async ({
 	identity,
 	...params
@@ -193,6 +203,15 @@ export const updateUserAgreements = async ({
 	const { updateUserAgreements } = await backendCanister({ identity });
 
 	return updateUserAgreements(params);
+};
+
+export const updateProviderAgreements = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveProviderAgreements>): Promise<void> => {
+	const { updateProviderAgreements } = await backendCanister({ identity });
+
+	return updateProviderAgreements(params);
 };
 
 export const getContact = async ({
@@ -241,6 +260,15 @@ export const updateUserExperimentalFeatureSettings = async ({
 	const { updateUserExperimentalFeatureSettings } = await backendCanister({ identity });
 
 	return updateUserExperimentalFeatureSettings(params);
+};
+
+export const updateUserTransactionFilterSettings = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<UpdateUserTransactionFilterSettings>): Promise<void> => {
+	const { updateUserTransactionFilterSettings } = await backendCanister({ identity });
+
+	return updateUserTransactionFilterSettings(params);
 };
 
 export const getExchangeRate = async ({

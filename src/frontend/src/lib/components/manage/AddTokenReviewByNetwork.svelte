@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
@@ -63,7 +62,7 @@
 	const addIcrcToken = async () => {
 		if (isNullish(ledgerCanisterId)) {
 			toastsError({
-				msg: { text: get(i18n).tokens.import.error.missing_ledger_id }
+				msg: { text: $i18n.tokens.import.error.missing_ledger_id }
 			});
 			return;
 		}
@@ -81,7 +80,7 @@
 	const addExtToken = async () => {
 		if (isNullish(extCanisterId)) {
 			toastsError({
-				msg: { text: get(i18n).tokens.import.error.missing_canister_id }
+				msg: { text: $i18n.tokens.import.error.missing_canister_id }
 			});
 			return;
 		}
@@ -98,7 +97,7 @@
 	const addIcPunksToken = async () => {
 		if (isNullish(icPunksCanisterId)) {
 			toastsError({
-				msg: { text: get(i18n).tokens.import.error.missing_canister_id }
+				msg: { text: $i18n.tokens.import.error.missing_canister_id }
 			});
 			return;
 		}

@@ -166,62 +166,88 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 
 type EnvTokenTags = EnvCkErc20TokensWithMetadata[string]['tags'];
 type EnvTagsRecord = Record<string, Record<string, EnvTokenTags>>;
+type EnvGroupDataIdRecord = Record<string, Record<string, string>>;
 
-const readExistingCkErc20Tags = (): EnvTagsRecord => {
+interface EnvCuratedData {
+	tags: EnvTagsRecord;
+	groupDataIds: EnvGroupDataIdRecord;
+}
+
+const readExistingCkErc20CuratedData = (): EnvCuratedData => {
 	if (!existsSync(CK_ERC20_JSON_FILE)) {
-		return {};
+		return {
+			tags: {},
+			groupDataIds: {}
+		};
 	}
 
 	try {
 		const existing = JSON.parse(readFileSync(CK_ERC20_JSON_FILE, 'utf8'), jsonReviver) as Record<
 			string,
-			Record<string, { tags?: EnvTokenTags }>
+			Record<string, { tags?: EnvTokenTags; groupDataId?: string }>
 		>;
 
-		return Object.entries(existing).reduce<EnvTagsRecord>((envAcc, [env, tokens]) => {
-			const envTags = Object.entries(tokens).reduce<Record<string, EnvTokenTags>>(
-				(acc, [symbol, data]) => {
+		return Object.entries(existing).reduce<EnvCuratedData>(
+			(envAcc, [env, tokens]) => {
+				const envTags: Record<string, EnvTokenTags> = {};
+				const envGroupDataIds: Record<string, string> = {};
+
+				Object.entries(tokens).forEach(([symbol, data]) => {
 					if (nonNullish(data?.tags)) {
-						acc[symbol] = data.tags;
+						envTags[symbol] = data.tags;
 					}
-					return acc;
-				},
-				{}
-			);
+					if (nonNullish(data?.groupDataId)) {
+						envGroupDataIds[symbol] = data.groupDataId;
+					}
+				});
 
-			if (Object.keys(envTags).length > 0) {
-				envAcc[env] = envTags;
+				if (Object.keys(envTags).length > 0) {
+					envAcc.tags[env] = envTags;
+				}
+
+				if (Object.keys(envGroupDataIds).length > 0) {
+					envAcc.groupDataIds[env] = envGroupDataIds;
+				}
+
+				return envAcc;
+			},
+			{
+				tags: {},
+				groupDataIds: {}
 			}
-
-			return envAcc;
-		}, {});
+		);
 	} catch (err: unknown) {
 		console.error(
-			`Failed to parse existing CK ERC20 tags from ${CK_ERC20_JSON_FILE}. Aborting to avoid losing curated tags.`,
+			`Failed to parse existing CK ERC20 curated data from ${CK_ERC20_JSON_FILE}. Aborting to avoid losing curated data.`,
 			err
 		);
 		throw err;
 	}
 };
 
-const mergeTags = ({
+const mergeCuratedData = ({
 	tokens,
-	envTags
+	envTags,
+	envGroupDataIds
 }: {
 	tokens: EnvCkErc20TokensWithMetadata;
 	envTags: Record<string, EnvTokenTags> | undefined;
+	envGroupDataIds: Record<string, string> | undefined;
 }): EnvCkErc20TokensWithMetadata =>
-	isNullish(envTags)
-		? tokens
-		: Object.fromEntries(
-				Object.entries(tokens).map(([symbol, data]) => [
-					symbol,
-					nonNullish(envTags[symbol]) ? { ...data, tags: envTags[symbol] } : data
-				])
-			);
+	Object.fromEntries(
+		Object.entries(tokens).map(([symbol, data]) => [
+			symbol,
+			{
+				...data,
+				...(nonNullish(envTags?.[symbol]) && { tags: envTags[symbol] }),
+				...(nonNullish(envGroupDataIds?.[symbol]) && { groupDataId: envGroupDataIds[symbol] })
+			}
+		])
+	);
 
 const findCkErc20 = async () => {
-	const existingTags = readExistingCkErc20Tags();
+	const { tags: existingTags, groupDataIds: existingGroupDataIds } =
+		readExistingCkErc20CuratedData();
 
 	const [
 		{ tokens: staging, icons: stagingIcons },
@@ -231,8 +257,16 @@ const findCkErc20 = async () => {
 	);
 
 	const tokens: EnvTokensCkErc20 = {
-		production: mergeTags({ tokens: production, envTags: existingTags['production'] }),
-		staging: mergeTags({ tokens: staging, envTags: existingTags['staging'] })
+		production: mergeCuratedData({
+			tokens: production,
+			envTags: existingTags['production'],
+			envGroupDataIds: existingGroupDataIds['production']
+		}),
+		staging: mergeCuratedData({
+			tokens: staging,
+			envTags: existingTags['staging'],
+			envGroupDataIds: existingGroupDataIds['staging']
+		})
 	};
 
 	writeFileSync(CK_ERC20_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));

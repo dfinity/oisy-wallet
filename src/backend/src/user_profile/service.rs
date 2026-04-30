@@ -11,8 +11,9 @@ use shared::types::{
         ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
     },
     network::{NetworkSettingsMap, SetTestnetsSettingsError, UpdateNetworksSettingsError},
-    user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
-    verifiable_credential::CredentialType,
+    notification::{AddDismissedNotificationError, DismissedNotification},
+    transaction_settings::{TransactionFilterSettings, UpdateTransactionFilterSettingsError},
+    user_profile::{GetUserProfileError, StoredUserProfile},
     Timestamp, Version,
 };
 
@@ -48,28 +49,6 @@ pub fn create_profile(
         let default_profile = StoredUserProfile::from_timestamp(now);
         user_profile_model.store_new(principal, now, &default_profile);
         default_profile
-    }
-}
-
-pub fn add_credential(
-    principal: StoredPrincipal,
-    profile_version: Option<Version>,
-    credential_type: &CredentialType,
-    issuer: String,
-    user_profile_model: &mut UserProfileModel,
-) -> Result<(), AddUserCredentialError> {
-    if let Ok(user_profile) = find_profile(principal, user_profile_model) {
-        let now = time();
-        if let Ok(new_profile) =
-            user_profile.add_credential(profile_version, now, credential_type, issuer)
-        {
-            user_profile_model.store_new(principal, now, &new_profile);
-            Ok(())
-        } else {
-            Err(AddUserCredentialError::VersionMismatch)
-        }
-    } else {
-        Err(AddUserCredentialError::UserNotFound)
     }
 }
 
@@ -151,6 +130,35 @@ pub fn add_hidden_dapp_id(
         .map_err(|_| AddDappSettingsError::UserNotFound)?;
     let now = time();
     let new_profile = user_profile.add_hidden_dapp_id(profile_version, now, dapp_id)?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
+}
+
+/// Adds one or more dismissed notifications to the user's profile.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `notifications` - The typed notifications to dismiss.
+/// * `user_profile_model` - The user profile model.
+///
+/// # Returns
+/// - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+///   present.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn add_dismissed_notifications(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    notifications: Vec<DismissedNotification>,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), AddDismissedNotificationError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| AddDismissedNotificationError::UserNotFound)?;
+    let now = time();
+    let new_profile =
+        user_profile.add_dismissed_notifications(profile_version, now, notifications)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }
@@ -310,6 +318,34 @@ pub fn update_experimental_feature_settings(
         now,
         experimental_features,
     )?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
+}
+
+/// Updates the user's transaction filter settings.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `filter` - The new transaction filter settings.
+/// * `user_profile_model` - The user profile model.
+///
+/// # Returns
+/// - Returns `Ok(())` if the settings were successfully updated.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn update_transaction_filter_settings(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    filter: TransactionFilterSettings,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), UpdateTransactionFilterSettingsError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| UpdateTransactionFilterSettingsError::UserNotFound)?;
+    let now = time();
+    let new_profile =
+        user_profile.with_transaction_filter_settings(profile_version, now, filter)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }

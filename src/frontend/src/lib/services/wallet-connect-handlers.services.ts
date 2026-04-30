@@ -5,7 +5,7 @@ import {
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
-import { modalWalletConnect } from '$lib/derived/modal.derived';
+import { modalUniversalScannerOpen, modalWalletConnect } from '$lib/derived/modal.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -59,7 +59,7 @@ export const onSessionRequest = async ({
 	}
 
 	// Another modal, like Send or Receive, is already in progress
-	if (nonNullish(get(modalStore)) && !get(modalWalletConnect)) {
+	if (nonNullish(get(modalStore)) && !get(modalWalletConnect) && !get(modalUniversalScannerOpen)) {
 		toastsError({
 			msg: {
 				text: get(i18n).wallet_connect.error.skipping_request

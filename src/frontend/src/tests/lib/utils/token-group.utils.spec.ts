@@ -332,6 +332,73 @@ describe('token-group.utils', () => {
 				usdBalance: anotherToken.usdBalance + thirdToken.usdBalance + token.usdBalance
 			});
 		});
+
+		it('should use price from the first token that has one when group has no price', () => {
+			const tokenWithPrice = {
+				...ETHEREUM_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn1Bi,
+				usdBalance: 100,
+				usdPrice: 2000,
+				usdMarketCap: 240000000000,
+				usdPriceChangePercentage24h: -0.5
+			};
+
+			const groupWithoutPrice: TokenUiGroup = {
+				id: ETH_TOKEN_GROUP.id,
+				decimals: BASE_ETH_TOKEN.decimals,
+				groupData: ETH_TOKEN_GROUP,
+				tokens: [
+					{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn2Bi, usdBalance: 200 }
+				],
+				balance: bn2Bi,
+				usdBalance: 200,
+				usdPrice: undefined,
+				usdMarketCap: undefined,
+				usdPriceChangePercentage24h: undefined
+			};
+
+			const result = updateTokenGroup({ token: tokenWithPrice, tokenGroup: groupWithoutPrice });
+
+			expect(result.usdPrice).toBe(tokenWithPrice.usdPrice);
+			expect(result.usdMarketCap).toBe(tokenWithPrice.usdMarketCap);
+			expect(result.usdPriceChangePercentage24h).toBe(tokenWithPrice.usdPriceChangePercentage24h);
+		});
+
+		it('should keep existing group price when it already has one', () => {
+			const groupWithPrice: TokenUiGroup = {
+				id: ETH_TOKEN_GROUP.id,
+				decimals: BASE_ETH_TOKEN.decimals,
+				groupData: ETH_TOKEN_GROUP,
+				tokens: [
+					{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn1Bi, usdBalance: 100 }
+				],
+				balance: bn1Bi,
+				usdBalance: 100,
+				usdPrice: 1500,
+				usdMarketCap: 180000000000,
+				usdPriceChangePercentage24h: 1.0
+			};
+
+			const tokenWithDifferentPrice = {
+				...ETHEREUM_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn2Bi,
+				usdBalance: 200,
+				usdPrice: 2000,
+				usdMarketCap: 240000000000,
+				usdPriceChangePercentage24h: -0.5
+			};
+
+			const result = updateTokenGroup({
+				token: tokenWithDifferentPrice,
+				tokenGroup: groupWithPrice
+			});
+
+			expect(result.usdPrice).toBe(groupWithPrice.usdPrice);
+			expect(result.usdMarketCap).toBe(groupWithPrice.usdMarketCap);
+			expect(result.usdPriceChangePercentage24h).toBe(groupWithPrice.usdPriceChangePercentage24h);
+		});
 	});
 
 	describe('groupSecondaryToken', () => {

@@ -10,6 +10,7 @@ import type {
 	UserAgreement,
 	UserProfile
 } from '$declarations/backend/backend.did';
+import type { UserProviderAgreements } from '$lib/types/user-provider-agreements';
 import { toNullable } from '@dfinity/utils';
 
 export const mockUserNetworksMap: Array<[NetworkSettingsFor, NetworkSettings]> = [
@@ -37,7 +38,9 @@ export const mockDappSettings: DappSettings = { dapp_carousel: { hidden_dapp_ids
 export const mockUserSettings: Settings = {
 	networks: mockNetworksSettings,
 	dapp: mockDappSettings,
-	experimental_features: mockExperimentalFeaturesSettings
+	experimental_features: mockExperimentalFeaturesSettings,
+	notifications: [],
+	transactions: [{ filter: [{ hide_micro_transactions: true }] }]
 };
 
 const mockUserAgreement: UserAgreement = {
@@ -55,6 +58,24 @@ export const mockProviderAgreementType: ProviderAgreementType = {
 export const mockProviderAgreements: Array<[ProviderAgreementType, UserAgreement]> = [
 	[mockProviderAgreementType, mockUserAgreement]
 ];
+
+export const mockUserProviderAgreements: UserProviderAgreements = {
+	'NearIntents-Swap': {
+		accepted: undefined,
+		lastAcceptedTimestamp: undefined,
+		lastUpdatedTimestamp: undefined,
+		textSha256: undefined
+	}
+};
+
+export const mockDefinedUserProviderAgreements: UserProviderAgreements = {
+	'NearIntents-Swap': {
+		accepted: true,
+		lastAcceptedTimestamp: 1677628801n,
+		lastUpdatedTimestamp: 1677628800n,
+		textSha256: 'abc123def456'
+	}
+};
 
 export const mockUserAgreements: Agreements = {
 	agreements: {
@@ -92,7 +113,6 @@ export const mockDefinedUserAgreements: Agreements = {
 export const mockUserProfileVersion = 1n;
 
 export const mockUserProfile: UserProfile = {
-	credentials: [],
 	version: toNullable(mockUserProfileVersion),
 	settings: toNullable(mockUserSettings),
 	agreements: toNullable(mockUserAgreements),

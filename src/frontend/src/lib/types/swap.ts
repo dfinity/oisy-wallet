@@ -1,5 +1,6 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
+import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStep } from '$eth/types/send';
@@ -29,7 +30,8 @@ export enum SwapProvider {
 	ICP_SWAP = 'icpSwap',
 	KONG_SWAP = 'kongSwap',
 	VELORA = 'velora',
-	NEAR_INTENTS = 'nearIntents'
+	NEAR_INTENTS = 'nearIntents',
+	ONE_SEC = 'oneSec'
 }
 
 export enum VeloraSwapTypes {
@@ -101,6 +103,13 @@ export type SwapMappedResult =
 			receiveOutMinimum?: bigint;
 			swapDetails: NearIntentsQuoteResponse;
 			type?: string;
+	  }
+	| {
+			provider: SwapProvider.ONE_SEC;
+			receiveAmount: bigint;
+			receiveOutMinimum?: bigint;
+			swapDetails: OneSecSwapDetails;
+			type?: string;
 	  };
 
 interface KongQuoteParams {
@@ -125,6 +134,7 @@ interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> 
 	getQuote: (params: SwapQuoteParams) => Promise<QuoteResult>;
 	mapQuoteResult: (params: QuoteMapParams) => SwapMappedResult;
 	isEnabled: boolean;
+	getSupportedTokens?: (params: { identity: Identity }) => Promise<Set<string>>;
 }
 
 type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsReply, KongQuoteParams>;
@@ -137,12 +147,14 @@ export interface EvmSwapProviderConfig {
 	key: SwapProvider;
 	getQuote: (params: EvmQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
 }
 
 export interface SolSwapProviderConfig {
 	key: SwapProvider;
 	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
 }
 
 export interface SwapParams {
@@ -201,7 +213,7 @@ export interface GetQuoteParams extends QuoteParams<'all'> {
 
 export interface EvmQuoteParams {
 	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
+	destinationToken: Erc20Token | IcToken;
 	amount: bigint;
 	userAddress: OptionEthAddress;
 	slippage: Slippage;
@@ -222,6 +234,46 @@ export interface GetWithdrawableTokenParams {
 	destinationToken: IcTokenToggleable;
 }
 
+export interface OneSecSwapDetails {
+	transferFeeInUnits: bigint;
+	protocolFeeInPercent: number;
+}
+
+export interface OneSecIcpToEvmParams {
+	identity: Identity;
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: IcToken;
+	destinationToken: Erc20Token;
+	swapAmount: Amount;
+	userEthAddress: EthAddress;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+}
+
+export interface OneSecEvmToIcpParams extends RequiredTransactionFeeData {
+	identity: Identity;
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: Erc20Token;
+	destinationToken: IcToken;
+	swapAmount: Amount;
+	userEthAddress: EthAddress;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+}
+
+export interface IcpBridgeQuoteParams {
+	sourceToken: Token;
+	destinationToken: Token;
+	amount: bigint;
+	userEthAddress: OptionEthAddress;
+	slippage: Slippage;
+}
+
+export interface IcpBridgeSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: IcpBridgeQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
+}
+
 export interface SwapProvidersConfig {
 	name: string;
 	logo: string;
@@ -231,8 +283,8 @@ export interface SwapProvidersConfig {
 export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
-	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
+	sourceToken: ErcFungibleToken;
+	destinationToken: ErcFungibleToken;
 	swapAmount: Amount;
 	receiveAmount: bigint;
 	slippageValue: Amount;
@@ -253,8 +305,8 @@ interface SwapNearIntentsParams {
 
 export interface SwapNearIntentsEvmParams
 	extends SwapNearIntentsParams, RequiredTransactionFeeData {
-	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
+	sourceToken: ErcFungibleToken;
+	destinationToken: ErcFungibleToken;
 	receiveAmount: bigint;
 	slippageValue: Amount;
 	sourceNetwork: EthereumNetwork;
@@ -262,6 +314,7 @@ export interface SwapNearIntentsEvmParams
 }
 
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
+	destinationToken: Token;
 	userAddress: SolAddress;
 }
 

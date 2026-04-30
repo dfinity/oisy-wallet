@@ -7,43 +7,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 export const idlFactory = ({ IDL }) => {
-	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
-	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Principal,
-		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Principal,
-		ii_origin: IDL.Text,
-		credential_type: CredentialType
-	});
 	const InitArg = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
+		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
-		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
-	const ArgumentValue = IDL.Variant({ Int: IDL.Int32, String: IDL.Text });
-	const CredentialSpec = IDL.Record({
-		arguments: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, ArgumentValue))),
-		credential_type: IDL.Text
+	const QualifiedNotificationKind = IDL.Variant({
+		NoIndexCanister: IDL.Null,
+		UnavailableIndexCanister: IDL.Null
 	});
-	const AddUserCredentialRequest = IDL.Record({
-		credential_jwt: IDL.Text,
-		issuer_canister_id: IDL.Principal,
-		current_user_version: IDL.Opt(IDL.Nat64),
-		credential_spec: CredentialSpec
+	const SimpleNotificationKind = IDL.Variant({
+		BtcActivityInfo: IDL.Null,
+		HiddenMicroTransactions: IDL.Null
 	});
-	const AddUserCredentialError = IDL.Variant({
-		InvalidCredential: IDL.Null,
+	const DismissedNotification = IDL.Variant({
+		Qualified: IDL.Record({
+			kind: QualifiedNotificationKind,
+			version: IDL.Nat32,
+			qualifier: IDL.Text
+		}),
+		Simple: IDL.Record({
+			kind: SimpleNotificationKind,
+			version: IDL.Nat32
+		})
+	});
+	const AddDismissedNotificationRequest = IDL.Record({
+		notifications: IDL.Vec(DismissedNotification),
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
+	const AddDismissedNotificationError = IDL.Variant({
+		TooManyNotifications: IDL.Null,
 		VersionMismatch: IDL.Null,
-		ConfigurationError: IDL.Null,
+		MaxDismissedNotifications: IDL.Null,
 		UserNotFound: IDL.Null
 	});
-	const AddUserCredentialResult = IDL.Variant({
+	const AddUserDismissedNotificationResult = IDL.Variant({
 		Ok: IDL.Null,
-		Err: AddUserCredentialError
+		Err: AddDismissedNotificationError
 	});
 	const AddHiddenDappIdRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
@@ -199,11 +204,12 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Config = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
+		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
-		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
 	const ImageMimeType = IDL.Variant({
 		'image/gif': IDL.Null,
@@ -288,11 +294,6 @@ export const idlFactory = ({ IDL }) => {
 		agreements: UserAgreements,
 		provider_agreements: IDL.Opt(IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement)))
 	});
-	const UserCredential = IDL.Record({
-		issuer: IDL.Text,
-		verified_date_timestamp: IDL.Opt(IDL.Nat64),
-		credential_type: CredentialType
-	});
 	const NetworkSettingsFor = IDL.Variant({
 		ArbitrumMainnet: IDL.Null,
 		InternetComputer: IDL.Null,
@@ -321,6 +322,9 @@ export const idlFactory = ({ IDL }) => {
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		testnets: TestnetsSettings
 	});
+	const NotificationSettings = IDL.Record({
+		dismissed_notifications: IDL.Vec(DismissedNotification)
+	});
 	const DappCarouselSettings = IDL.Record({
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});
@@ -334,18 +338,30 @@ export const idlFactory = ({ IDL }) => {
 			IDL.Tuple(ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings)
 		)
 	});
+	const TransactionFilterSettings = IDL.Record({
+		hide_micro_transactions: IDL.Bool
+	});
+	const TransactionSettings = IDL.Record({
+		filter: IDL.Opt(TransactionFilterSettings)
+	});
 	const Settings = IDL.Record({
 		networks: NetworksSettings,
+		notifications: IDL.Opt(NotificationSettings),
 		dapp: DappSettings,
-		experimental_features: ExperimentalFeaturesSettings
+		experimental_features: ExperimentalFeaturesSettings,
+		transactions: IDL.Opt(TransactionSettings)
 	});
 	const UserProfile = IDL.Record({
 		agreements: IDL.Opt(Agreements),
-		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
 		settings: IDL.Opt(Settings),
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
+	});
+	const CreateUserProfileError = IDL.Variant({ SignupsClosed: IDL.Null });
+	const CreateUserProfileResult = IDL.Variant({
+		Ok: UserProfile,
+		Err: CreateUserProfileError
 	});
 	const DeleteContactResult = IDL.Variant({
 		Ok: IDL.Nat64,
@@ -361,6 +377,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: GetAllowedCyclesError
 	});
 	const ApiKeys = IDL.Record({
+		exchange_rate_enabled: IDL.Opt(IDL.Bool),
 		alchemy_api_key: IDL.Opt(IDL.Text),
 		etherscan_api_key: IDL.Opt(IDL.Text),
 		coingecko_api_key: IDL.Opt(IDL.Text),
@@ -637,9 +654,17 @@ export const idlFactory = ({ IDL }) => {
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
+	const UpdateTransactionFilterSettingsRequest = IDL.Record({
+		filter: TransactionFilterSettings,
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
 
 	return IDL.Service({
-		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
+		add_user_dismissed_notification: IDL.Func(
+			[AddDismissedNotificationRequest],
+			[AddUserDismissedNotificationResult],
+			[]
+		),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [AddUserHiddenDappIdResult], []),
 		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
 		btc_add_pending_transaction: IDL.Func(
@@ -663,7 +688,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		config: IDL.Func([], [Config]),
 		create_contact: IDL.Func([CreateContactRequest], [CreateContactResult], []),
-		create_user_profile: IDL.Func([], [UserProfile], []),
+		create_user_profile: IDL.Func([], [CreateUserProfileResult], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
 		get_account_creation_timestamps: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))]),
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
@@ -683,6 +708,7 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
+		new_user_signups_allowed: IDL.Func([], [IDL.Bool]),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
 			[SaveUserTransactionsRequest],
@@ -692,6 +718,7 @@ export const idlFactory = ({ IDL }) => {
 		set_api_keys: IDL.Func([ApiKeys], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
+		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
 		stats: IDL.Func([], [Stats]),
 		top_up_cycles_ledger: IDL.Func(
@@ -719,26 +746,24 @@ export const idlFactory = ({ IDL }) => {
 			[SaveNetworksSettingsRequest],
 			[SetUserShowTestnetsResult],
 			[]
+		),
+		update_user_transaction_filter_settings: IDL.Func(
+			[UpdateTransactionFilterSettingsRequest],
+			[SetUserShowTestnetsResult],
+			[]
 		)
 	});
 };
 
 export const init = ({ IDL }) => {
-	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
-	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Principal,
-		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Principal,
-		ii_origin: IDL.Text,
-		credential_type: CredentialType
-	});
 	const InitArg = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
+		ii_canister_id: IDL.Opt(IDL.Principal),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
-		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
-		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 

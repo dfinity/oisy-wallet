@@ -20,7 +20,6 @@ dfx deploy icp_swap_factory
 dfx deploy icp_swap_pool
 
 dfx deploy internet_identity
-dfx deploy pouh_issuer
 dfx deploy cycles_ledger
 dfx deploy cycles_depositor
 dfx deploy rewards
