@@ -31,7 +31,7 @@
 	let { codeType = QrCodeType.VIP }: Props = $props();
 
 	let counter = $state(CODE_REGENERATE_INTERVAL_IN_SECONDS);
-	let countdown: NodeJS.Timeout | undefined = $state();
+	let countdown: NodeJS.Timeout | undefined;
 	const maxRetriesToGetRewardCode = 3;
 	let retriesToGetRewardCode = $state(0);
 
@@ -49,14 +49,26 @@
 		}
 	};
 
+	// Recursive `setTimeout` pattern (instead of `setInterval`) to serialize async ticks
+	// and avoid overlapping executions when the callback awaits (e.g. `regenerateCode`).
+	// The `countdown === id` check is what guarantees a single active timer:
+	// if `regenerateCode` or `stopCountdown` reassigns/clears `countdown` during the await,
+	// this callback will not reschedule on top of it.
 	const scheduleNext = (): void => {
-		countdown = setTimeout(async () => {
+		if (nonNullish(countdown)) {
+			return;
+		}
+
+		const id: NodeJS.Timeout = setTimeout(async () => {
 			await intervalFunction();
 
-			if (nonNullish(countdown)) {
+			if (countdown === id) {
+				countdown = undefined;
 				scheduleNext();
 			}
 		}, 1000);
+
+		countdown = id;
 	};
 
 	const stopCountdown = () => {
@@ -79,7 +91,7 @@
 	const intervalFunction = async () => {
 		counter--;
 
-		if (counter <= 0) {
+		if (counter === 0) {
 			await regenerateCode();
 		}
 	};
@@ -87,9 +99,14 @@
 	const onVisibilityChange = () => {
 		if (document.hidden) {
 			stopCountdown();
-		} else {
-			scheduleNext();
+			return;
 		}
+
+		if (retriesToGetRewardCode >= maxRetriesToGetRewardCode) {
+			return;
+		}
+
+		scheduleNext();
 	};
 
 	onMount(regenerateCode);
@@ -98,7 +115,7 @@
 	const qrCodeUrl = $derived(`${window.location.origin}/?code=${code}`);
 </script>
 
-<svelte:window onvisibilitychange={onVisibilityChange} />
+<svelte:document onvisibilitychange={onVisibilityChange} />
 
 <Modal onClose={modalStore.close}>
 	{#snippet title()}
