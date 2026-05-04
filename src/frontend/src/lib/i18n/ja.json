@@ -45,7 +45,8 @@
 			"sorting": "並べ替え",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -61,11 +62,12 @@
 			"switch_currency": "通貨を切り替え",
 			"more": "全文表示",
 			"less": "省略表示",
-			"learn_more": "詳細を見る"
+			"learn_more": "詳細を見る",
+			"up_one_level": "一つ上のレベルへ移動"
 		},
 		"warning": {
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",
-			"standalone_mode": "$oisy_short をホーム画面にインストールした状態での動作を改善しました（現在ご利用の状態です）。$oisy_short への接続やトランザクションの署名で問題が発生する場合は、いったん ホーム画面から $oisy_short を削除し、再度インストールしてください。iPhone の場合は、「Webアプリとして開く（Open as Web App）」のチェックを外していることを必ず確認してください。<a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">詳しく読む</a>",
+			"standalone_mode": "アプリと $oisy_short の両方がホーム画面にインストールされている場合、接続に関する既知の問題が発生することがあります。$oisy_short への接続やトランザクションの署名に問題が生じた場合は、通常のブラウザからアプリを起動してください。現在修正に取り組んでおり、近日中に解決される予定です。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">詳細を見る</a>",
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。"
 		}
 	},
@@ -77,6 +79,8 @@
 			"activity": "履歴",
 			"airdrops": "エアドロップ",
 			"earning": "収益",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "GitHub上のソースコード",
 			"view_on_explorer": "エクスプローラーで確認",
 			"source_code": "ソースコード",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "Dapp一覧を表示",
 			"activity": "トランザクション履歴を表示",
 			"airdrops": "エアドロップ報酬を表示",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
 			"documentation": "$oisy_nameドキュメントを開く",
 			"support": "$oisy_nameドキュメントのサポートページを開く",
@@ -117,19 +123,31 @@
 		"text": {
 			"title_part_1": "あなたのデジタル資産を",
 			"title_part_2": "プライベートで、安全に。",
+			"description": "ウォレットを開くか、数秒で作成できます",
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "ログイン/新規作成",
+			"sign_in_or_sign_up": "ログインまたは新規登録",
+			"internet_identity": "",
 			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
 			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
 			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで",
-			"social_login": "即時かつプライベートなアクセス + ソーシャルログイン"
+			"move_swap_grow": "ネットワークをまたいで資産を移動・スワップ・成長"
 		},
 		"alt": {
-			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
+			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "別のタブで操作が行われたため、このセッションはロックされました。"
+		},
+		"info": {
+			"signups_closed": "現在、新規登録は制限されています。後でもう一度お試しください。"
+		},
+		"banner": {
+			"signups_closed": "現在、新規ユーザーの登録はできません。既存のユーザーは引き続き $oisy_short を通常どおりご利用いただけます。"
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
@@ -138,12 +156,6 @@
 		},
 		"error": {
 			"no_internet_identity": "internet identityが見つかりません。",
-			"invalid_pouh_credential": "Humanity Credentialの検証中にエラーが発生しました。発行元に再発行を依頼してください。",
-			"error_validating_pouh_credential_oisy": "$oisy_shortでHumanity Credentialを検証中にエラーが発生しました。: $error",
-			"error_validating_pouh_credential": "Humanity Credentialの検証中にエラーが発生しました。",
-			"error_requesting_pouh_credential": "Humanity Credentialを要求する際にエラーが発生しました。",
-			"missing_pouh_issuer_origin": "Humanity Credentialを要求する際にエラーが発生しました。発行元が不明です。",
-			"no_pouh_credential": "Humanity Credentialを要求する際にエラーが発生しました。Decide AIに有効なCredentialをお持ちですか？",
 			"error_while_signing_in": "サインイン処理中に問題が発生しました。",
 			"unexpected_issue_with_syncing": "認証状態の同期中に予期せぬ問題が発生しました。"
 		},
@@ -440,6 +452,31 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -583,7 +620,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: エピソード6",
+				"card_title": "OISY Sprinkles: エピソード6が公開されました 🎉",
 				"one_liner": "アクティブであること、他のユーザーを招待すること、複数のチェーンでOISYを使用することでSprinklesを獲得できます。あなたの行動が報酬を増やし、アクティブな紹介がさらに報酬を高めます。<br/>さらに、チェーンが増えるほど当選チャンスも広がります。",
 				"participate_title": "アクティビティと紹介でトークンを獲得。チェーンが多いほど、チャンスも増えます。",
 				"description": "資格を得るためにアクティブを維持しましょう：頻繁にログインし、ウォレットアクションを完了し、少なくとも5 $を保有してください。<br/>アクティブな各チェーンはマルチチェーン乗数であなたのオッズを高めます。<br/>資格を得た友達から10%を獲得できます。",
@@ -600,8 +637,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "週間ボーナスドロップを獲得しました",
-						"description": "週間ボーナスドロップの1つを獲得しました。<br>さらに獲得するためにアクティブを維持し、招待を続けましょう",
+						"title": "本日のOISY最大Sprinkles獲得おめでとうございます！",
+						"description": "トップのSprinkles報酬を獲得しました<br>アクティブに活動し、紹介を続けてさらに勝ちましょう。",
 						"share_href": ""
 					},
 					"referral": {
@@ -733,11 +770,6 @@
 			"active_networks_description": "$oisy_nameで操作したいネットワークを選択してください。非アクティブなネットワークのトークンとトランザクションは表示されず、利用可能な残高にも含まれません",
 			"enable_network": "ネットワークを有効化",
 			"disable_network": "ネットワークを無効化",
-			"credentials_title": "認証情報",
-			"pouh_credential": "人間の認証情報",
-			"pouh_credential_description": "人間の認証情報は、人間であることの証明です。Decide AIによって発行されます。",
-			"present_pouh_credential": "提示する",
-			"pouh_credential_verified": "認証済み✅",
 			"appearance": "外観モード",
 			"appearance_light": "ライト",
 			"appearance_dark": "ダーク",
@@ -748,7 +780,13 @@
 			"beta_features": "ベータ機能",
 			"enable_beta_feature": "ベータ機能を有効化",
 			"disable_beta_feature": "ベータ機能を無効化",
-			"save_beta_feature_success": "ベータ機能の設定が保存されました。"
+			"save_beta_feature_success": "ベータ機能の設定が保存されました。",
+			"hide_micro_transactions": "非常に小さな価値のトランザクションを非表示にする",
+			"hide_micro_transactions_description": "非常に小さな価値のトランザクションは通常スパムであり、ユーザーを騙して有効なアドレスではなく送信者のアドレスをコピーさせることを目的としています。トランザクション一覧で非表示にすることを推奨します。",
+			"enable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を有効にする",
+			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
+			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "テストネットの表示/非表示を切り替え",
@@ -949,24 +987,27 @@
 			"no_nft_selected": "送信するNFTが選択されていません。"
 		},
 		"error": {
-			"unexpected": "トランザクションの送信中に問題が発生しました。",
-			"destination_address_unknown": "ETHの送信先アドレスが不明です。",
-			"metamask_connected": "アカウントを取得できません。Metamaskは起動、接続されていますか？",
-			"metamask_no_accounts": "Metamaskアカウントが見つかりません。",
-			"metamask_switch_network": "MetamaskにチェーンID $chain_idへの切り替えを要求できません。現在$network_nameを使用していますか？",
-			"erc20_data_undefined": "ERC20トランザクションのデータが未定義または null です。",
-			"data_undefined": "トランザクションデータが未定義または null です。",
-			"no_identity_calculate_fee": "手数料計算に必要なIDが指定されていません。",
+			"unexpected": "トランザクションの送信中にエラーが発生しました。",
+			"destination_address_unknown": "ETH送信先アドレスが不明です",
+			"metamask_connected": "アカウントを取得できません。Metamaskは開いており、すでに接続されていますか？",
+			"metamask_no_accounts": "Metamaskのアカウントが見つかりません。",
+			"metamask_switch_network": "MetamaskにチェーンID $chain_id への切り替えを要求できません。お使いのMetamaskは $network_name を使用していますか？",
+			"erc20_data_undefined": "ERC20トランザクションデータは未定義またはnullにできません。",
+			"data_undefined": "トランザクションデータは未定義またはnullにできません。",
+			"no_identity_calculate_fee": "principalの手数料を計算するための識別情報が提供されていません。",
 			"invalid_destination": "送信先が無効です。有効なウォレットアドレスまたは送信先で再度お試しください。",
-			"incompatible_token": "トークンが非対応です。互換性のあるトークンで再度お試しください。",
+			"incompatible_token": "トークンに互換性がありません。互換性のあるトークンで再度お試しください。",
 			"no_btc_network_id": "現在のネットワーク（$networkId）はBitcoinネットワークではありません。",
 			"no_solana_network_id": "現在のネットワーク（$networkId）はSolanaネットワークではありません。",
-			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後でもう一度お試しください。",
-			"unexpected_utxos_fee": "トランザクション手数料の計算中に問題が発生しました。",
-			"unable_to_retrieve_amount": "該当なし（取得できませんでした）",
-			"solana_transaction_expired": "あなたの送信トランザクションはSolanaネットワークによって処理されず、期限切れになりました。これはおそらく提供された優先手数料が不足していたためです。最新の推奨金額に更新しましたので、もう一度送信を試みてください。",
-			"solana_confirmation_failed": "作成したトランザクションの確認を受信できませんでした。数秒待ってから、トークンのトランザクションリストでトランザクションが正しく作成されたかどうかを確認してください。",
-			"fee_calc_unsupported_standard": "指定されたトークン規格がサポートされていないため、手数料を計算できませんでした。"
+			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後ほど再度お試しください。",
+			"unexpected_utxos_fee": "トランザクション手数料の計算中にエラーが発生しました。",
+			"unable_to_retrieve_amount": "n/a（取得できません）",
+			"solana_transaction_expired": "お客様のトランザクションはSolanaネットワークで処理されず、期限切れになりました。これは、提供された優先手数料が不十分だったためと考えられます。最新の推奨額に更新しましたので、再度お試しください。",
+			"solana_confirmation_failed": "作成されたトランザクションの確認を受信できませんでした。数秒お待ちいただいた後、トークンのトランザクション一覧でトランザクションが正しく作成されたかご確認ください。",
+			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",
+			"solana_insufficient_funds_for_fee": "トランザクション手数料を賄うためのSOL残高が不足しています。",
+			"solana_insufficient_funds_for_rent": "アカウント作成に必要なレントを賄うためのSOL残高が不足しています。",
+			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。"
 		}
 	},
 	"mint": {
@@ -1013,11 +1054,18 @@
 			"pay_at_failure": "$receiptへの支払いに失敗しました。",
 			"try_again": "再試行",
 			"payment_confirmed": "支払い確認完了",
-			"payment_failed": "支払い失敗"
+			"payment_failed": "支払い失敗",
+			"what_is_scan": "スキャナーとは",
+			"no_camera_permission": "QRコードをスキャンするには、ブラウザのサイト設定でカメラへのアクセスを許可する必要があります。",
+			"what_is_scan_description": "$oisy_shortスキャナーはさまざまなQRコードを読み取り、適切なアクションを即座に実行します。WalletConnect QRコードをスキャンして新しい接続を確立したり、Open CryptoPayを利用している店舗のチェックアウトコードをスキャンして$oisy_short Payで支払いを行えます。",
+			"what_is_scan_title": "$oisy_shortはあらゆるQRコードに対応",
+			"learn_more_about_scan": "スキャナーについて詳しく",
+			"learn_more_about_pay": "$oisy_short Payについて詳しく",
+			"scanner": "スキャナー"
 		},
 		"error": {
-			"code_link_is_not_valid": "",
-			"data_is_incompleted": ""
+			"code_link_is_not_valid": "コード/リンクが無効です",
+			"data_is_incompleted": "受信したデータが不完全です。必要な情報の一部が欠けています。"
 		}
 	},
 	"convert": {
@@ -1108,12 +1156,15 @@
 			"select_token": "トークンを選択",
 			"select_network_filter": "ネットワークを選択",
 			"withdrawing": "出金中...",
+			"bridging": "ブリッジ中... (しばらくお待ちください。最大1分かかる場合があります。)",
 			"network_cost": "ネットワークコスト",
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1132,7 +1183,8 @@
 			"manually_withdraw_failed": "資金の出金に失敗しました。<br>再度お試しいただくか、以下に従ってください。",
 			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください。",
 			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1481,7 +1533,10 @@
 			"amount": "数量",
 			"hex_data": "HEXデータ",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
-			"sign_message": "メッセージに署名"
+			"sign_message": "メッセージに署名",
+			"connected_apps": "接続済みアプリ",
+			"no_connected_apps": "現在接続されているアプリはありません。",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "例: wc:a281567bb3e4..."
@@ -1794,8 +1849,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "あなたの$oisy_nameにアクセス",
-				"open_or_create": "既存のウォレットにログインするか、新規作成して、安全にdAppに接続し、資産の管理を始めましょう。"
+				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
+				"connect_your_wallet": "あなたの$oisy_nameに接続する",
+				"oisy_protects_you": "OISYがあなたを守ります！",
+				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},
 		"idle": {
@@ -1890,7 +1947,7 @@
 				"possessive": "当財団の"
 			},
 			"title": "",
-			"instruction": "このボタンをクリックすると、以下に同意したことになります。$link",
+			"instruction": "サインインすることで、以下に同意したことになります。$link",
 			"body": ""
 		},
 		"alt": {
@@ -1916,7 +1973,8 @@
 			"title": "最近のアクティビティ"
 		},
 		"info": {
-			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。"
+			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。",
+			"hidden_micro_transactions": "<strong>OISYはあなたを守ります！</strong>非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",

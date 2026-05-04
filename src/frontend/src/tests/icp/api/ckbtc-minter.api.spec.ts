@@ -105,7 +105,8 @@ describe('ckbtc-minter.api', () => {
 		const expected: CkBtcMinterDid.MinterInfo = {
 			retrieve_btc_min_amount: 123n,
 			min_confirmations: 111,
-			kyt_fee: 456n
+			kyt_fee: 456n,
+			deposit_btc_min_amount: []
 		};
 
 		beforeEach(() => {

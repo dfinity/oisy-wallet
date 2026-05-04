@@ -12,11 +12,7 @@ import type {
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
-import type {
-	AddUserCredentialParams,
-	BtcAddPendingTransactionParams,
-	BtcSelectUserUtxosFeeParams
-} from '$lib/types/api';
+import type { BtcAddPendingTransactionParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
@@ -70,22 +66,6 @@ describe('backend.canister', () => {
 		certified: false
 	};
 
-	const addUserCredentialParams = {
-		credentialJwt: 'test-credential-jwt',
-		issuerCanisterId: mockPrincipal,
-		currentUserVersion: ZERO,
-		credentialSpec: {
-			arguments: [],
-			credential_type: ''
-		}
-	} as AddUserCredentialParams;
-	const addUserCredentialEndpointParams = {
-		credential_jwt: addUserCredentialParams.credentialJwt,
-		issuer_canister_id: addUserCredentialParams.issuerCanisterId,
-		current_user_version: toNullable(addUserCredentialParams.currentUserVersion),
-		credential_spec: addUserCredentialParams.credentialSpec
-	};
-
 	const btcAddPendingTransactionParams: BtcAddPendingTransactionParams = {
 		txId: Uint8Array.from([1, 2, 3]),
 		network: { testnet: null },
@@ -136,13 +116,6 @@ describe('backend.canister', () => {
 	};
 
 	const mockedUserProfile = {
-		credentials: [
-			{
-				issuer: 'test-issuer',
-				verified_date_timestamp: [],
-				credential_type: { ProofOfUniqueness: null }
-			}
-		],
 		version: [],
 		created_timestamp: 1n,
 		updated_timestamp: 1n
@@ -246,7 +219,8 @@ describe('backend.canister', () => {
 	});
 
 	it('creates user profile', async () => {
-		service.create_user_profile.mockResolvedValue(mockedUserProfile);
+		const response = { Ok: mockedUserProfile };
+		service.create_user_profile.mockResolvedValue(response);
 
 		const { createUserProfile } = await createBackendCanister({
 			serviceOverride: service
@@ -254,7 +228,19 @@ describe('backend.canister', () => {
 
 		const res = await createUserProfile();
 
-		expect(res).toEqual(mockedUserProfile);
+		expect(res).toEqual(response);
+	});
+
+	it('should throw SignupsClosedError when backend returns SignupsClosed', async () => {
+		service.create_user_profile.mockResolvedValue({ Err: { SignupsClosed: null } });
+
+		const { createUserProfile } = await createBackendCanister({
+			serviceOverride: service
+		});
+
+		const { SignupsClosedError } = await import('$lib/types/errors');
+
+		await expect(createUserProfile()).rejects.toThrow(SignupsClosedError);
 	});
 
 	it('should throw an error if create_user_profile throws', async () => {
@@ -309,50 +295,6 @@ describe('backend.canister', () => {
 		});
 
 		const res = getUserProfile(queryParams);
-
-		await expect(res).rejects.toThrow(mockResponseError);
-	});
-
-	it('adds user credentials with success response', async () => {
-		const response = { Ok: null };
-
-		service.add_user_credential.mockResolvedValue(response);
-
-		const { addUserCredential } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await addUserCredential(addUserCredentialParams);
-
-		expect(service.add_user_credential).toHaveBeenCalledWith(addUserCredentialEndpointParams);
-		expect(res).toEqual(response);
-	});
-
-	it('adds user credentials with error response', async () => {
-		const response = { Err: { InvalidCredential: null } };
-		service.add_user_credential.mockResolvedValue(response);
-
-		const { addUserCredential } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await addUserCredential(addUserCredentialParams);
-
-		expect(service.add_user_credential).toHaveBeenCalledWith(addUserCredentialEndpointParams);
-		expect(res).toEqual(response);
-	});
-
-	it('should throw an error if add_user_credential throws', async () => {
-		service.add_user_credential.mockImplementation(async () => {
-			await Promise.resolve();
-			throw mockResponseError;
-		});
-
-		const { addUserCredential } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = addUserCredential(addUserCredentialParams);
 
 		await expect(res).rejects.toThrow(mockResponseError);
 	});
@@ -1033,6 +975,76 @@ describe('backend.canister', () => {
 		});
 	});
 
+	describe('addUserDismissedNotification', () => {
+		it('should add user dismissed notifications', async () => {
+			const response = { Ok: null };
+
+			service.add_user_dismissed_notification.mockResolvedValue(response);
+
+			const { addUserDismissedNotification } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await addUserDismissedNotification({
+				notifications: [
+					{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } },
+					{ Qualified: { kind: { NoIndexCanister: null }, qualifier: 'ETH', version: 1 } }
+				]
+			});
+
+			expect(service.add_user_dismissed_notification).toHaveBeenCalledWith({
+				notifications: [
+					{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } },
+					{ Qualified: { kind: { NoIndexCanister: null }, qualifier: 'ETH', version: 1 } }
+				],
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should pass current_user_version when provided', async () => {
+			const response = { Ok: null };
+
+			service.add_user_dismissed_notification.mockResolvedValue(response);
+
+			const { addUserDismissedNotification } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await addUserDismissedNotification({
+				notifications: [
+					{ Qualified: { kind: { UnavailableIndexCanister: null }, qualifier: 'BTC', version: 1 } }
+				],
+				currentUserVersion: 3n
+			});
+
+			expect(service.add_user_dismissed_notification).toHaveBeenCalledWith({
+				notifications: [
+					{ Qualified: { kind: { UnavailableIndexCanister: null }, qualifier: 'BTC', version: 1 } }
+				],
+				current_user_version: [3n]
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if add_user_dismissed_notification throws', async () => {
+			service.add_user_dismissed_notification.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { addUserDismissedNotification } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = addUserDismissedNotification({
+				notifications: [{ Simple: { kind: { BtcActivityInfo: null }, version: 1 } }]
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
 	describe('setUserShowTestnets', () => {
 		it('should set user show testnets', async () => {
 			const response = { Ok: null };
@@ -1144,6 +1156,66 @@ describe('backend.canister', () => {
 
 			const res = updateUserExperimentalFeatureSettings({
 				experimentalFeatures: mockUserExperimentalFeatures
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('updateUserTransactionFilterSettings', () => {
+		it('should update user transaction filter settings', async () => {
+			const response = { Ok: null };
+
+			service.update_user_transaction_filter_settings.mockResolvedValue(response);
+
+			const { updateUserTransactionFilterSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateUserTransactionFilterSettings({
+				hideMicroTransactions: true
+			});
+
+			expect(service.update_user_transaction_filter_settings).toHaveBeenCalledWith({
+				filter: { hide_micro_transactions: true },
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should update user transaction filter settings with current user version', async () => {
+			const response = { Ok: null };
+
+			service.update_user_transaction_filter_settings.mockResolvedValue(response);
+
+			const { updateUserTransactionFilterSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateUserTransactionFilterSettings({
+				hideMicroTransactions: false,
+				currentUserVersion: 1n
+			});
+
+			expect(service.update_user_transaction_filter_settings).toHaveBeenCalledWith({
+				filter: { hide_micro_transactions: false },
+				current_user_version: [1n]
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if update_user_transaction_filter_settings throws', async () => {
+			service.update_user_transaction_filter_settings.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateUserTransactionFilterSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateUserTransactionFilterSettings({
+				hideMicroTransactions: true
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);

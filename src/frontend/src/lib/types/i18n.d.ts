@@ -49,6 +49,7 @@ interface I18nCore {
 		unlimited: string;
 		info: string;
 		asset: string;
+		got_it: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -62,6 +63,7 @@ interface I18nCore {
 		more: string;
 		less: string;
 		learn_more: string;
+		up_one_level: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
@@ -74,6 +76,8 @@ interface I18nNavigation {
 		activity: string;
 		airdrops: string;
 		earning: string;
+		pay: string;
+		wallet_connect: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -95,6 +99,8 @@ interface I18nNavigation {
 		dapp_explorer: string;
 		activity: string;
 		airdrops: string;
+		pay: string;
+		wallet_connect: string;
 		menu: string;
 		documentation: string;
 		support: string;
@@ -113,25 +119,29 @@ interface I18nAuth {
 	text: {
 		title_part_1: string;
 		title_part_2: string;
+		description: string;
 		logout: string;
 		lock: string;
 		authenticate: string;
+		sign_in_or_sign_up: string;
+		internet_identity: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
-		social_login: string;
+		move_swap_grow: string;
 	};
-	alt: { preview: string };
+	alt: {
+		preview: string;
+		sign_in_with_google: string;
+		sign_in_with_apple: string;
+		sign_in_with_microsoft: string;
+	};
 	message: { session_locked: string };
+	info: { signups_closed: string };
+	banner: { signups_closed: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
-		invalid_pouh_credential: string;
-		error_validating_pouh_credential_oisy: string;
-		error_validating_pouh_credential: string;
-		error_requesting_pouh_credential: string;
-		missing_pouh_issuer_origin: string;
-		no_pouh_credential: string;
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
 	};
@@ -284,6 +294,15 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
+		icpindex: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		icexplorer: { name: string; one_liner: string; description: string };
+		icpixel: { name: string; one_liner: string; description: string };
+		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
 	};
 }
 
@@ -493,11 +512,6 @@ interface I18nSettings {
 		active_networks_description: string;
 		enable_network: string;
 		disable_network: string;
-		credentials_title: string;
-		pouh_credential: string;
-		pouh_credential_description: string;
-		present_pouh_credential: string;
-		pouh_credential_verified: string;
 		appearance: string;
 		appearance_light: string;
 		appearance_dark: string;
@@ -509,6 +523,12 @@ interface I18nSettings {
 		enable_beta_feature: string;
 		disable_beta_feature: string;
 		save_beta_feature_success: string;
+		hide_micro_transactions: string;
+		hide_micro_transactions_description: string;
+		enable_hide_micro_transactions: string;
+		disable_hide_micro_transactions: string;
+		save_spam_filter_success: string;
+		learn_more: string;
 	};
 	alt: {
 		testnets_toggle: string;
@@ -717,6 +737,9 @@ interface I18nSend {
 		unable_to_retrieve_amount: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
+		solana_insufficient_funds: string;
+		solana_insufficient_funds_for_fee: string;
+		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
 	};
 }
@@ -760,6 +783,13 @@ interface I18nScanner {
 		try_again: string;
 		payment_confirmed: string;
 		payment_failed: string;
+		what_is_scan: string;
+		no_camera_permission: string;
+		what_is_scan_description: string;
+		what_is_scan_title: string;
+		learn_more_about_scan: string;
+		learn_more_about_pay: string;
+		scanner: string;
 	};
 	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
@@ -845,12 +875,15 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
+		bridging: string;
 		network_cost: string;
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
 		near_intents_tos: string;
+		onesec_transfer_fee: string;
+		onesec_protocol_fee: string;
 		value_difference_error_confirmation: string;
 	};
 	error: {
@@ -870,6 +903,7 @@ interface I18nSwap {
 		swap_sucess_withdraw_failed: string;
 		swap_sucess_manually_withdraw_success: string;
 		swap_completed_close_failed: string;
+		cannot_save_provider_agreement: string;
 	};
 }
 
@@ -1175,6 +1209,9 @@ interface I18nWallet_connect {
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
+		connected_apps: string;
+		no_connected_apps: string;
+		wallet_connect: string;
 	};
 	alt: { connect_input: string };
 	domain: {
@@ -1417,7 +1454,14 @@ interface I18nAddress {
 }
 
 interface I18nSigner {
-	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
+	sign_in: {
+		text: {
+			open_or_create: string;
+			connect_your_wallet: string;
+			oisy_protects_you: string;
+			oisy_protects_you_description: string;
+		};
+	};
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
 	permissions: {
 		text: {
@@ -1489,7 +1533,7 @@ interface I18nPrivacy_policy {
 
 interface I18nActivity {
 	text: { title: string };
-	info: { btc_transactions: string };
+	info: { btc_transactions: string; hidden_micro_transactions: string };
 	warning: { no_index_canister: string; unavailable_index_canister: string };
 }
 

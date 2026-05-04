@@ -32,7 +32,7 @@ pub const MAX_UTXOS_LEN: usize = 128;
 pub const FEE_PERCENTILES_INITIAL_DELAY: Duration = Duration::from_secs(10);
 
 /// Timer interval for updating fee percentiles cache (1 minute)
-pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_secs(60);
+pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_mins(1);
 
 /// Safety timeout: if an update has been "in progress" for longer than this,
 /// assume it was lost to a trap and allow a new one. Set to 5× the update interval.
@@ -133,7 +133,6 @@ pub struct BtcGetPendingTransactionsReponse {
     pub transactions: Vec<PendingTransaction>,
 }
 
-/// Errors that can occur when retrieving pending Bitcoin transactions.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetPendingTransactionsError {
     InternalError {

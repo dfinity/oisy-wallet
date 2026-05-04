@@ -7,16 +7,20 @@ use shared::types::{
     pow::AllowSigningStatus,
     result_types::{AllowSigningResult, GetAllowedCyclesResult},
     signer::{
-        topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-        AllowSigningError, AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
+        topup::{TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        AllowSigningError, AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
+        GetAllowedCyclesResponse,
     },
 };
 
 use crate::{
     delegation, signer,
     utils::{
-        guards::{caller_is_controller, caller_is_not_anonymous},
-        rate_limiter::{self, ALLOW_SIGNING_GUARD_LIMITER, ALLOW_SIGNING_RATE_LIMITER},
+        guards::{caller_is_controller, caller_is_registered_user},
+        rate_limiter::{
+            self, ALLOW_SIGNING_GUARD_LIMITER, ALLOW_SIGNING_RATE_LIMITER,
+            GET_ALLOWED_CYCLES_RATE_LIMITER, TOP_UP_CYCLES_LEDGER_RATE_LIMITER,
+        },
     },
 };
 
@@ -28,11 +32,17 @@ use crate::{
 pub async fn top_up_cycles_ledger(
     request: Option<TopUpCyclesLedgerRequest>,
 ) -> TopUpCyclesLedgerResult {
+    if let Err(e) = TOP_UP_CYCLES_LEDGER_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller)
+    {
+        return TopUpCyclesLedgerResult::Err(TopUpCyclesLedgerError::RateLimited(e));
+    }
+
     signer::top_up_cycles_ledger(request.unwrap_or_default()).await
 }
 
 /// Retrieves the amount of cycles that the signer canister is allowed to spend
-/// on behalf of the current user
+/// on behalf of the current user.
+///
 /// # Returns
 /// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
 /// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong
@@ -40,9 +50,14 @@ pub async fn top_up_cycles_ledger(
 /// # Errors
 /// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 /// - `Other`: If another error occurred during the operation
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
+    if let Err(e) = GET_ALLOWED_CYCLES_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller) {
+        return GetAllowedCyclesResult::Err(GetAllowedCyclesError::RateLimited(e));
+    }
+
     let allowed_cycles = signer::get_allowed_cycles().await;
+
     match allowed_cycles {
         Ok(allowed_cycles) => Ok(GetAllowedCyclesResponse { allowed_cycles }).into(),
         Err(err) => GetAllowedCyclesResult::Err(err),
@@ -68,7 +83,7 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_registered_user")]
 pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
     async fn inner(
         request: Option<AllowSigningRequest>,

@@ -19,6 +19,7 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -29,11 +30,15 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { userProfileVersion } from '$lib/derived/user-profile.derived';
+	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import {
 		fetchNearIntentsEvmSwap,
+		fetchOneSecEvmToIcpSwap,
 		fetchVeloraDeltaSwap,
 		fetchVeloraMarketSwap
 	} from '$lib/services/swap.services';
@@ -267,6 +272,29 @@
 			};
 
 			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED) {
+				if (!$hasAcknowledgedNearIntentsSwap) {
+					// To be conservative on the legal side, we only allow the swap if persisting
+					// the provider agreement succeeds. If it fails we abort, since the user must
+					// explicitly accept the ToS before funds move through a third-party provider.
+					try {
+						await acceptProviderAgreement({
+							identity: $authIdentity,
+							currentUserVersion: $userProfileVersion
+						});
+					} catch (err) {
+						toastsError({
+							msg: { text: $i18n.swap.error.cannot_save_provider_agreement },
+							err
+						});
+
+						onBack();
+
+						onStartTriggerAmount();
+
+						return;
+					}
+				}
+
 				const params = {
 					...baseParams,
 					destinationToken: $destinationToken as Erc20Token,
@@ -302,6 +330,29 @@
 				} else {
 					await fetchVeloraMarketSwap(params);
 				}
+			} else if (selectedProvider?.provider === SwapProvider.ONE_SEC) {
+				if (!isIcToken($destinationToken) || isNullish($ethAddress)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				await fetchOneSecEvmToIcpSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as Erc20Token,
+					destinationToken: $destinationToken,
+					swapAmount,
+					userEthAddress: $ethAddress,
+					gas,
+					maxFeePerGas,
+					maxPriorityFeePerGas
+				});
 			} else {
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected }
@@ -403,6 +454,7 @@
 					sendWithApproval={isApproveNeeded}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
+					swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
 				/>
 			{/if}
 		{/key}

@@ -16,6 +16,7 @@ pub mod delegation;
 pub mod exchange;
 pub mod experimental_feature;
 pub mod network;
+pub mod notification;
 pub mod number;
 pub mod pow;
 pub mod result_types;
@@ -25,9 +26,9 @@ pub mod token;
 pub mod token_id;
 pub mod token_standard;
 pub mod transaction;
+pub mod transaction_settings;
 pub mod user_profile;
 pub mod user_transaction;
-pub mod verifiable_credential;
 
 #[cfg(test)]
 mod tests;

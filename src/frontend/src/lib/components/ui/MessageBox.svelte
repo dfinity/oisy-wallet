@@ -15,11 +15,21 @@
 		closableKey?: HideInfoKey;
 		styleClass?: string;
 		testId?: string;
+		onDismiss?: () => void;
 	}
 
-	let { children, icon, level = 'info', closableKey, styleClass, testId }: Props = $props();
+	let {
+		children,
+		icon,
+		level = 'info',
+		closableKey,
+		styleClass,
+		testId,
+		onDismiss
+	}: Props = $props();
 
-	const closable = $derived(nonNullish(closableKey));
+	const closable = $derived(nonNullish(onDismiss) || nonNullish(closableKey));
+
 	// TODO: check if there is a better way to handle this svelte-ignore
 	// eslint-disable-next-line svelte/no-unused-svelte-ignore
 	// svelte-ignore state_referenced_locally -- we want to get only the initial value
@@ -28,11 +38,11 @@
 	const close = () => {
 		visible = false;
 
-		if (isNullish(closableKey)) {
-			return;
+		if (nonNullish(closableKey)) {
+			saveHideInfo(closableKey);
 		}
 
-		saveHideInfo(closableKey);
+		onDismiss?.();
 	};
 </script>
 

@@ -43,7 +43,8 @@ describe('ckbtc.services', () => {
 	const mockMinterInfo: CkBtcMinterDid.MinterInfo = {
 		kyt_fee: 100n,
 		retrieve_btc_min_amount: 10_000n,
-		min_confirmations: 6
+		min_confirmations: 6,
+		deposit_btc_min_amount: []
 	};
 
 	beforeEach(() => {

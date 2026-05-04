@@ -23,14 +23,16 @@ use shared::{
         exchange::ExchangeRate,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
+        notification::AddDismissedNotificationRequest,
         result_types::{
-            AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
+            AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            DeleteContactResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
-            SaveUserTransactionsResult, SetUserShowTestnetsResult, UpdateContactResult,
-            UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
+            CreateUserProfileResult, DeleteContactResult, GetAgreementHistoryResult,
+            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
+            GetUserTransactionsResult, SaveUserTransactionsResult, SetUserShowTestnetsResult,
+            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
+            UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
             UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
@@ -38,7 +40,8 @@ use shared::{
             AllowSigningRequest,
         },
         token_id::TokenId,
-        user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
+        transaction_settings::UpdateTransactionFilterSettingsRequest,
+        user_profile::HasUserProfileResponse,
         user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
         Stats, Timestamp,
     },
@@ -53,6 +56,7 @@ mod delegation;
 mod exchange;
 mod signer;
 mod state;
+mod status;
 mod token;
 mod transactions;
 mod types;

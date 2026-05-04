@@ -9,7 +9,9 @@ import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
 import { ARMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.armon.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.biduon.env';
+import { BOB_TOKEN } from '$env/tokens/tokens-erc20/tokens.bob.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.cbbtc.env';
+import { CHAT_TOKEN } from '$env/tokens/tokens-erc20/tokens.chat.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.copxon.env';
 import { DAI_TOKEN } from '$env/tokens/tokens-erc20/tokens.dai.env';
 import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
@@ -17,7 +19,9 @@ import { EEMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.eemon.env';
 import { EFAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.efaon.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { FLOKI_TOKEN } from '$env/tokens/tokens-erc20/tokens.floki.env';
+import { GLDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.gldt.env';
 import { IAUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.iauon.env';
+import { ICP_TOKEN } from '$env/tokens/tokens-erc20/tokens.icp.env';
 import { IVVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.ivvon.env';
 import { JASMY_TOKEN } from '$env/tokens/tokens-erc20/tokens.jasmy.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
@@ -41,6 +45,15 @@ import { WETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.weth.env';
 import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import { ZCHF_TOKEN } from '$env/tokens/tokens-erc20/tokens.zchf.env';
+import { ICP_TOKEN as ICP_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.icp.env';
+import { USDC_TOKEN as USDC_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
+import { ICP_TOKEN as ICP_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.icp.env';
+import { USDC_TOKEN as USDC_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { USDC_TOKEN as USDC_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
+import { USDC_TOKEN as USDC_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdt.env';
 import type {
 	Erc20Contract,
 	RequiredAdditionalErc20Token,
@@ -73,13 +86,17 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ARMON_TOKEN,
 	BABAON_TOKEN,
 	BIDUON_TOKEN,
+	BOB_TOKEN,
 	CBBTC_TOKEN,
+	CHAT_TOKEN,
 	COPXON_TOKEN,
 	DAI_TOKEN,
 	DMAIL_TOKEN,
 	EEMON_TOKEN,
 	EFAON_TOKEN,
 	FLOKI_TOKEN,
+	GLDT_TOKEN,
+	ICP_TOKEN,
 	IAUON_TOKEN,
 	IVVON_TOKEN,
 	JASMY_TOKEN,
@@ -132,4 +149,17 @@ export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = defineSupportedTokens({
 export const ERC20_TWIN_TOKENS_IDS: TokenId[] = ERC20_TWIN_TOKENS.map(({ id }) => id);
 
 // Suggested tokens to be enabled by default if the user set no preference
-export const ERC20_SUGGESTED_TOKENS = [USDT_TOKEN, USDC_TOKEN];
+export const ERC20_SUGGESTED_TOKENS = [
+	USDT_TOKEN,
+	USDC_TOKEN,
+	ICP_TOKEN,
+	ICP_ARBITRUM_TOKEN,
+	ICP_BASE_TOKEN,
+	USDC_ARBITRUM_TOKEN,
+	USDT_ARBITRUM_TOKEN,
+	USDC_BASE_TOKEN,
+	USDC_BSC_TOKEN,
+	USDT_BSC_TOKEN,
+	USDC_POLYGON_TOKEN,
+	USDT_POLYGON_TOKEN
+];

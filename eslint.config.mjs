@@ -14,7 +14,11 @@ export default [
 		rules: {
 			'local-rules/use-option-type-wrapper': 'error',
 			// TODO: re-enable this rule when it includes `expect` statements nested in callable functions.
-			'vitest/expect-expect': ['off']
+			'vitest/expect-expect': ['off'],
+			// TODO: re-enable this rule once typescript-eslint stops flagging assertions
+			// that are required for compilation (e.g. on mocked values whose receiver type
+			// is wider than what TypeScript actually infers without the assertion).
+			'@typescript-eslint/no-unnecessary-type-assertion': 'off'
 		}
 	},
 

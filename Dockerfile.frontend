@@ -32,12 +32,18 @@ ARG network="staging"
 ENV ENV=$network
 ENV DFX_NETWORK=$network
 
+ARG signer_target=""
+ENV OISY_SIGNER_TARGET=$signer_target
+
 RUN echo $ENV
 RUN echo $DFX_NETWORK
 
 RUN npm ci
 RUN npm run prepare
+
+ENV NODE_OPTIONS=--max-old-space-size=4096
 RUN npm run build
+
 RUN scripts/build.frontend-report.sh > build/build-report.txt
 
 

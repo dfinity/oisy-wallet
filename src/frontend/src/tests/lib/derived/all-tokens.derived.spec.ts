@@ -482,6 +482,24 @@ describe('all-tokens.derived', () => {
 			expect(result).toEqual(tokens);
 		});
 
+		it('should include ERC4626 tokens with their enabled property', () => {
+			const mockErc4626SwapToken: Erc4626CustomToken = {
+				...mockValidErc4626Token,
+				id: parseTokenId('vMOCK'),
+				address: mockEthAddress,
+				enabled: true
+			};
+
+			vi.spyOn(erc4626Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc4626SwapToken]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([mockErc4626SwapToken]);
+		});
+
 		it('should handle multiple tokens of the same type', () => {
 			const mockErc20Token2 = {
 				...mockErc20Token,

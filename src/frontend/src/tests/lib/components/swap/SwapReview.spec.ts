@@ -1,13 +1,18 @@
 import SwapReview from '$lib/components/swap/SwapReview.svelte';
+import * as userProviderAgreementsDerived from '$lib/derived/user-provider-agreements.derived';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapContext, type SwapError } from '$lib/stores/swap.store';
 import { SwapErrorCodes } from '$lib/types/swap';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
-import { mockSwapProviders } from '$tests/mocks/swap.mocks';
+import { mockNearIntentsProvider, mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
+
+vi.mock('$env/rest/near-intents.env', () => ({
+	NEAR_INTENTS_SWAP_ENABLED: true
+}));
 
 describe('SwapReview', () => {
 	const mockSourceToken = { ...mockValidIcToken, enabled: true };
@@ -481,6 +486,85 @@ describe('SwapReview', () => {
 			});
 
 			expect(getByText(en.swap.error.swap_failed_instruction_link.trim())).toBeInTheDocument();
+		});
+	});
+
+	describe('Near Intents ToS conditional rendering', () => {
+		const createNearIntentsContext = () => {
+			const failedSwapErrorStore = writable<SwapError | undefined>(undefined);
+
+			const swapContext: Partial<SwapContext> = {
+				sourceToken: readable(mockSourceToken),
+				destinationToken: readable(mockDestToken),
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(20),
+				failedSwapError: failedSwapErrorStore
+			};
+
+			const swapAmountsStore = initSwapAmountsStore();
+			swapAmountsStore.setSwaps({
+				swaps: [mockNearIntentsProvider],
+				amountForSwap: 1,
+				selectedProvider: mockNearIntentsProvider
+			});
+
+			const context = new Map<symbol, unknown>([
+				[SWAP_CONTEXT_KEY, swapContext],
+				[SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore }]
+			]);
+
+			return { context };
+		};
+
+		it('should show prominent ToS when Near Intents provider is selected and not acknowledged', () => {
+			vi.spyOn(
+				userProviderAgreementsDerived,
+				'hasAcknowledgedNearIntentsSwap',
+				'get'
+			).mockReturnValue(readable(false));
+
+			const { context } = createNearIntentsContext();
+
+			const { container } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(container.textContent).toContain('Terms of Service');
+		});
+
+		it('should not show prominent ToS when Near Intents provider is selected and already acknowledged', () => {
+			vi.spyOn(
+				userProviderAgreementsDerived,
+				'hasAcknowledgedNearIntentsSwap',
+				'get'
+			).mockReturnValue(readable(true));
+
+			const { context } = createNearIntentsContext();
+
+			const { container } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(container.textContent).not.toContain('Terms of Service');
+		});
+
+		it('should not show ToS when a non-Near Intents provider is selected', () => {
+			vi.spyOn(
+				userProviderAgreementsDerived,
+				'hasAcknowledgedNearIntentsSwap',
+				'get'
+			).mockReturnValue(readable(false));
+
+			const { context } = createSwapContext();
+
+			const { container } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(container.textContent).not.toContain('Terms of Service');
 		});
 	});
 });

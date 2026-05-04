@@ -45,7 +45,8 @@
 			"sorting": "排序方式",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
@@ -61,11 +62,12 @@
 			"switch_currency": "切换货币",
 			"more": "显示完整文本",
 			"less": "显示更少文本",
-			"learn_more": "点击链接了解更多"
+			"learn_more": "点击链接了解更多",
+			"up_one_level": "返回上一级"
 		},
 		"warning": {
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
-			"standalone_mode": "我们改进了 $oisy_short 在像你这样安装到主&nbsp;屏幕时的运行方式。如果你在连接 $oisy_short 或签署交易时遇到问题，请将 $oisy_short 从主&nbsp;屏幕中移除并重新安装。在 iPhone 上，请确保取消选择“以 Web App 打开”。<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">阅读更多</a>",
+			"standalone_mode": "将应用程序和 $oisy_short 同时安装到主屏幕时，存在已知的连接问题。如果在连接 $oisy_short 或签署交易时遇到问题，请从普通浏览器启动应用程序。我们正在修复此问题，将很快解决。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">了解更多</a>",
 			"video_not_supported": "你的浏览器不支持视频播放。"
 		}
 	},
@@ -77,6 +79,8 @@
 			"activity": "活动",
 			"airdrops": "奖励",
 			"earning": "赚取",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "GitHub 上的源代码",
 			"view_on_explorer": "在浏览器中查看",
 			"source_code": "源代码",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "打开应用浏览器",
 			"activity": "打开活动视图",
 			"airdrops": "打开奖励视图",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "你的钱包地址、设置、登出与外部链接",
 			"documentation": "打开 $oisy_name 文档",
 			"support": "打开 $oisy_name 文档的支持部分",
@@ -117,19 +123,31 @@
 		"text": {
 			"title_part_1": "您的数字资产",
 			"title_part_2": "私密且安全",
+			"description": "打开您的钱包，或在几秒钟内创建一个",
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
+			"sign_in_or_sign_up": "登录或注册",
+			"internet_identity": "",
 			"asset_types": "跨 Bitcoin、Solana、Ethereum、ICP 等管理资产",
 			"instant_and_private": "内置 AI 助手，隐私保护为默认标准",
-			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
-			"social_login": "即时私密访问 + 社交登录"
+			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
+			"move_swap_grow": "跨网络移动、兑换并增值您的资产"
 		},
 		"alt": {
-			"preview": "登录后 $oisy_name 的预览效果，适用于桌面端和移动端"
+			"preview": "登录后 $oisy_name 的预览效果，适用于桌面端和移动端",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": "你的会话已在另一个标签页中被锁定。"
+		},
+		"info": {
+			"signups_closed": "新用户注册目前受到限制，请稍后再试。"
+		},
+		"banner": {
+			"signups_closed": "目前，新用户注册暂不可用。现有用户可以正常使用 $oisy_short。"
 		},
 		"warning": {
 			"not_signed_in": "你尚未登录。请先登录以继续。",
@@ -138,12 +156,6 @@
 		},
 		"error": {
 			"no_internet_identity": "没有 Internet Identity。",
-			"invalid_pouh_credential": "抱歉，在验证 Humanity Credential 时发生错误。请联系签发方并重新申请该凭证。",
-			"error_validating_pouh_credential_oisy": "抱歉，在 $oisy_short 中验证 Humanity Credential 时发生错误：$error",
-			"error_validating_pouh_credential": "抱歉，在验证 Humanity Credential 时发生错误。",
-			"error_requesting_pouh_credential": "抱歉，在请求 Humanity Credential 时发生错误。",
-			"missing_pouh_issuer_origin": "抱歉，在请求 Humanity Credential 时发生错误。缺少签发方来源。",
-			"no_pouh_credential": "抱歉，在请求 Humanity Credential 时发生错误。你在 Decide AI 中是否拥有有效的凭证？",
 			"error_while_signing_in": "登录过程中发生错误。",
 			"unexpected_issue_with_syncing": "在同步你的认证状态时发生了意外问题。"
 		},
@@ -440,6 +452,31 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -583,7 +620,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles：第6集",
+				"card_title": "OISY Sprinkles：第6集正式上线 🎉",
 				"one_liner": "通过保持活跃、推荐他人以及在多个链上使用 OISY 来赚取 Sprinkles。您的操作会增加奖励，而活跃的推荐则会进一步提升奖励。<br/>此外，现在更多的链意味着更高的获胜机会。",
 				"participate_title": "通过活动和推荐赚取代币。链越多，机会越多。",
 				"description": "保持活跃以获得资格：经常登录、完成钱包操作并持有至少 5 美元。<br/>每条活跃链都会通过多链乘数提高您的获胜概率。<br/>从符合条件的朋友处获得 10%。",
@@ -600,8 +637,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "您赢得了每周奖励投放",
-						"description": "您刚刚获得了我们每周奖励投放之一。<br>保持活跃并继续推荐，以赢取更多奖励",
+						"title": "恭喜您赢得今天最大的 OISY Sprinkles！",
+						"description": "您刚刚赢得了我们最高的 Sprinkles 奖励<br>保持活跃并继续推荐以赢得更多",
 						"share_href": ""
 					},
 					"referral": {
@@ -733,11 +770,6 @@
 			"active_networks_description": "选择你希望在 $oisy_name 中使用的网络。未启用的网络中的代币和交易将不会显示，也不会包含在可用余额中。",
 			"enable_network": "启用网络",
 			"disable_network": "禁用网络",
-			"credentials_title": "凭证",
-			"pouh_credential": "人类身份凭证",
-			"pouh_credential_description": "人类身份凭证是你人类身份的证明，由 Decide AI 签发。",
-			"present_pouh_credential": "展示",
-			"pouh_credential_verified": "已验证 ✅",
 			"appearance": "外观",
 			"appearance_light": "浅色",
 			"appearance_dark": "深色",
@@ -748,7 +780,13 @@
 			"beta_features": "测试功能",
 			"enable_beta_feature": "启用测试功能",
 			"disable_beta_feature": "禁用测试功能",
-			"save_beta_feature_success": "你的测试功能设置已更新。"
+			"save_beta_feature_success": "你的测试功能设置已更新。",
+			"hide_micro_transactions": "隐藏价值非常小的交易",
+			"hide_micro_transactions_description": "价值非常小的交易通常是垃圾信息，目的是诱骗用户复制发送方地址而不是有效地址。建议在交易列表中隐藏它们。",
+			"enable_hide_micro_transactions": "启用隐藏价值非常小的交易",
+			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
+			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -949,24 +987,27 @@
 			"no_nft_selected": "尚未选择要发送的 NFT。"
 		},
 		"error": {
-			"unexpected": "发送交易时发生错误。",
-			"destination_address_unknown": "ETH 目标地址未知",
-			"metamask_connected": "无法获取你的账户。你的 Metamask 是否已开启并已连接？",
-			"metamask_no_accounts": "未找到 Metamask 账户。",
-			"metamask_switch_network": "无法请求 Metamask 切换至链 ID $chain_id。你当前是否已连接到 $network_name？",
-			"erc20_data_undefined": "ERC20 交易数据不能为 undefined 或 null。",
-			"data_undefined": "交易数据不能为 undefined 或 null。",
-			"no_identity_calculate_fee": "未提供身份，无法为其主体计算手续费。",
-			"invalid_destination": "目标地址无效。请使用有效的钱包地址重试。",
-			"incompatible_token": "代币不兼容。请尝试使用兼容的代币。",
-			"no_btc_network_id": "当前网络 ($networkId) 不是比特币网络。",
-			"no_solana_network_id": "当前网络 ($networkId) 不是 Solana 网络。",
-			"no_pending_bitcoin_transaction": "加载待处理的比特币交易时出错。请稍后重试。",
-			"unexpected_utxos_fee": "计算交易手续费时发生错误。",
-			"unable_to_retrieve_amount": "无法获取金额（n/a）",
-			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
-			"solana_confirmation_failed": "Solana确认失败",
-			"fee_calc_unsupported_standard": "由于不支持所提供的令牌标准，因此无法计算费用。"
+			"unexpected": "发送交易时出现错误。",
+			"destination_address_unknown": "ETH目标地址未知",
+			"metamask_connected": "无法获取您的账户。您的Metamask是否已打开并已连接？",
+			"metamask_no_accounts": "未找到Metamask账户。",
+			"metamask_switch_network": "无法请求Metamask切换到链ID $chain_id。您的Metamask是否正在使用$network_name？",
+			"erc20_data_undefined": "ERC20交易数据不能为undefined或null。",
+			"data_undefined": "交易数据不能为undefined或null。",
+			"no_identity_calculate_fee": "未提供身份以计算其principal的费用。",
+			"invalid_destination": "目标地址无效。请使用有效的钱包地址或目标地址重试。",
+			"incompatible_token": "该代币不兼容。请使用兼容的代币重试。",
+			"no_btc_network_id": "当前网络（$networkId）不是Bitcoin网络。",
+			"no_solana_network_id": "当前网络（$networkId）不是Solana网络。",
+			"no_pending_bitcoin_transaction": "加载待处理的Bitcoin交易时出现错误。请稍后重试。",
+			"unexpected_utxos_fee": "计算交易费用时出现错误。",
+			"unable_to_retrieve_amount": "n/a（无法获取）",
+			"solana_transaction_expired": "您的交易未被Solana网络处理并已过期，很可能是因为提供的优先费用不足。我们已将其更新为最新推荐金额，请重试。",
+			"solana_confirmation_failed": "我们未收到您刚刚创建的交易的确认。请等待几秒钟，然后检查您的代币交易列表，确认您的交易是否已正确创建。",
+			"solana_insufficient_funds": "您的代币余额不足以完成此交易。您的余额自上次显示以来可能已发生变化。",
+			"solana_insufficient_funds_for_fee": "您的SOL余额不足以支付交易费用。",
+			"solana_insufficient_funds_for_rent": "您的SOL余额不足以支付创建账户所需的租金。",
+			"fee_calc_unsupported_standard": "由于提供的代币标准不受支持，无法计算费用。"
 		}
 	},
 	"mint": {
@@ -1013,7 +1054,14 @@
 			"pay_at_failure": "向 $receipt 支付失败",
 			"try_again": "再试一次",
 			"payment_confirmed": "支付已确认",
-			"payment_failed": "支付失败"
+			"payment_failed": "支付失败",
+			"what_is_scan": "什么是扫描器",
+			"no_camera_permission": "要扫描二维码，您需要在浏览器的网站设置中允许访问摄像头。",
+			"what_is_scan_description": "$oisy_short 扫描器可以读取各种二维码并立即执行相应操作。扫描 WalletConnect 二维码建立新连接，或在使用 Open CryptoPay 的商店扫描结账码，通过 $oisy_short Pay 完成付款。",
+			"what_is_scan_title": "$oisy_short 可识别任何二维码",
+			"learn_more_about_scan": "了解更多关于扫描器的信息",
+			"learn_more_about_pay": "了解更多关于 $oisy_short Pay 的信息",
+			"scanner": "扫描器"
 		},
 		"error": {
 			"code_link_is_not_valid": "代码 / 链接无效",
@@ -1108,12 +1156,15 @@
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
 			"withdrawing": "正在取款",
+			"bridging": "正在跨链桥接... (请耐心等待，这可能需要最多一分钟。)",
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
 			"cross_chain_networks_info": "跨链网络信息",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1132,7 +1183,8 @@
 			"manually_withdraw_failed": "手动取款失败",
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
 			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1481,7 +1533,10 @@
 			"amount": "金额",
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
-			"sign_message": "签署消息"
+			"sign_message": "签署消息",
+			"connected_apps": "已连接的应用",
+			"no_connected_apps": "当前没有已连接的应用。",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "例如：wc:a281567bb3e4..."
@@ -1794,8 +1849,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "访问你的 $oisy_name",
-				"open_or_create": "打开或创建你的钱包，以安全连接 dApp 并开始管理你的资产。"
+				"open_or_create": "打开或创建你的钱包，与应用程序安全交互。",
+				"connect_your_wallet": "连接你的 $oisy_name",
+				"oisy_protects_you": "OISY 保护您！",
+				"oisy_protects_you_description": "应用程序无法直接访问您的资金，每笔交易都需要您确认。"
 			}
 		},
 		"idle": {
@@ -1890,7 +1947,7 @@
 				"possessive": "我们的 "
 			},
 			"title": "",
-			"instruction": "点击此按钮即表示你同意 $link",
+			"instruction": "登录即表示你同意 $link",
 			"body": ""
 		},
 		"alt": {
@@ -1916,7 +1973,8 @@
 			"title": "最近活动"
 		},
 		"info": {
-			"btc_transactions": "BTC 交易信息来自中心化第三方，应自行核实。"
+			"btc_transactions": "BTC 交易信息来自中心化第三方，应自行核实。",
+			"hidden_micro_transactions": "<strong>OISY 保护您！</strong>代币价值非常小的交易当前已被隐藏。要显示它们，请前往<a href=\"/settings/\">设置</a>。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">了解更多</a>"
 		},
 		"warning": {
 			"no_index_canister": "无法显示 $token_list 的交易记录。未提供 Index canister。",

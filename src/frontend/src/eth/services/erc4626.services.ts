@@ -26,6 +26,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
@@ -37,7 +38,13 @@ import { consoleError } from '$lib/utils/console.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	fromNullable,
+	isNullish,
+	nonNullish,
+	queryAndUpdate
+} from '@dfinity/utils';
 import { Interface } from 'ethers/abi';
 import { get } from 'svelte/store';
 
@@ -379,6 +386,39 @@ export const depositErc4626 = async ({
 	progress?.(ProgressStepsStake.UPDATE_UI);
 
 	await waitAndTriggerWallet();
+};
+
+export const toggleErc4626Token = async ({
+	token,
+	identity,
+	enabled
+}: {
+	token: Pick<Erc4626CustomToken, 'address' | 'network' | 'version'>;
+	identity: NullishIdentity;
+	enabled: boolean;
+}): Promise<void> => {
+	if (isNullish(identity)) {
+		return;
+	}
+
+	const {
+		address,
+		network: { chainId },
+		version
+	} = token;
+
+	await saveCustomTokens({
+		identity,
+		tokens: [
+			{
+				enabled,
+				version,
+				address,
+				chainId,
+				networkKey: 'Erc4626'
+			}
+		]
+	});
 };
 
 const sendErc4626Unstake = async ({

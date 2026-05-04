@@ -45,7 +45,8 @@
 			"sorting": "",
 			"unlimited": "",
 			"info": "",
-			"asset": ""
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
@@ -61,11 +62,12 @@
 			"switch_currency": "Mudar moeda",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up_one_level": "Ir um nível acima"
 		},
 		"warning": {
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
-			"standalone_mode": "",
+			"standalone_mode": "Há problemas de conexão conhecidos quando um aplicativo e o $oisy_short estão instalados na tela inicial. Se você tiver problemas para conectar o $oisy_short ou assinar transações, inicie o aplicativo em um navegador comum. Estamos trabalhando em uma correção que será resolvida em breve. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Leia mais</a>",
 			"video_not_supported": ""
 		}
 	},
@@ -77,6 +79,8 @@
 			"activity": "Atividade",
 			"airdrops": "Recompensas",
 			"earning": "Ganhar",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "Código-fonte no GitHub",
 			"view_on_explorer": "Ver no explorador",
 			"source_code": "Código-fonte",
@@ -98,6 +102,8 @@
 			"dapp_explorer": "Abrir explorador de aplicativos",
 			"activity": "Abrir a visualização de atividade",
 			"airdrops": "Abrir a visualização de airdrops",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "Seu endereço de carteira, configurações, sair e links externos",
 			"documentation": "Abrir a documentação de $oisy_name",
 			"support": "Abrir a seção de Suporte da documentação de $oisy_name",
@@ -117,19 +123,31 @@
 		"text": {
 			"title_part_1": "Seus Ativos Digitais",
 			"title_part_2": "Privados e Seguros",
+			"description": "Abra sua carteira ou crie uma em segundos",
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
+			"sign_in_or_sign_up": "Iniciar sessão ou criar conta",
+			"internet_identity": "",
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
-			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
-			"social_login": "Acesso instantâneo e privado + login social"
+			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
+			"move_swap_grow": "Mova, troque e aumente seus ativos entre redes"
 		},
 		"alt": {
-			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"
+			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": "Os novos cadastros estão temporariamente restritos. Por favor, tente novamente mais tarde."
+		},
+		"banner": {
+			"signups_closed": "No momento, o cadastro de novos usuários não é possível. Os usuários existentes podem usar o $oisy_short normalmente."
 		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
@@ -138,12 +156,6 @@
 		},
 		"error": {
 			"no_internet_identity": "Nenhuma Internet Identity.",
-			"invalid_pouh_credential": "Desculpe, mas ocorreu um erro ao validar a Credencial de Humanidade. Por favor, entre em contato com o emissor e solicite a credencial novamente.",
-			"error_validating_pouh_credential_oisy": "Desculpe, mas ocorreu um erro ao validar a Credencial de Humanidade em $oisy_short: $error",
-			"error_validating_pouh_credential": "Desculpe, mas ocorreu um erro ao validar a Credencial de Humanidade.",
-			"error_requesting_pouh_credential": "Desculpe, mas ocorreu um erro ao solicitar a Credencial de Humanidade.",
-			"missing_pouh_issuer_origin": "Desculpe, mas ocorreu um erro ao solicitar a Credencial de Humanidade. A origem do emissor está faltando.",
-			"no_pouh_credential": "Desculpe, mas ocorreu um erro ao solicitar a Credencial de Humanidade. Você possui uma credencial válida no Decide AI?",
 			"error_while_signing_in": "Algo deu errado durante o login.",
 			"unexpected_issue_with_syncing": "Problema inesperado ao sincronizar o status da sua autenticação."
 		},
@@ -440,6 +452,31 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -583,7 +620,7 @@
 			},
 			"sprinkles_s1e6": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episódio 6",
+				"card_title": "OISY Sprinkles: Episódio 6 está no ar 🎉",
 				"one_liner": "Ganhe Sprinkles por ser ativo, indicar outros e usar o OISY em várias redes. Suas ações aumentam suas recompensas, e indicações ativas as impulsionam ainda mais.<br/>Além disso, agora mais redes significa mais chances de ganhar.",
 				"participate_title": "Ganhe tokens por atividade e indicações. Mais redes significam mais chances.",
 				"description": "Fique ativo para se qualificar: faça login com frequência, conclua ações na carteira e mantenha pelo menos 5 $.<br/>Cada rede ativa aumenta suas chances com um Multiplicador Multicadeia.<br/>Ganhe 10% dos amigos que se qualificarem.",
@@ -600,8 +637,8 @@
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "Você ganhou o drop de bônus semanal",
-						"description": "Você acabou de ganhar um dos nossos drops de bônus semanais.<br>Fique ativo(a) e continue indicando para ganhar mais",
+						"title": "Parabéns por ganhar o maior OISY Sprinkles de hoje!",
+						"description": "Acabou de ganhar a nossa melhor recompensa Sprinkles<br>Mantenha-se ativo e continue a indicar amigos para ganhar ainda mais.",
 						"share_href": ""
 					},
 					"referral": {
@@ -733,11 +770,6 @@
 			"active_networks_description": "Selecione as redes com as quais você deseja trabalhar em $oisy_name. Tokens e transações de redes inativas não serão exibidos ou incluídos em seu saldo disponível.",
 			"enable_network": "Habilitar rede",
 			"disable_network": "Desabilitar rede",
-			"credentials_title": "Credenciais",
-			"pouh_credential": "Credencial de Humanidade",
-			"pouh_credential_description": "A Credencial de Humanidade é uma prova de humanidade. É emitida pela Decide AI.",
-			"present_pouh_credential": "Apresentar credential",
-			"pouh_credential_verified": "Verificado ?",
 			"appearance": "Aparência",
 			"appearance_light": "Claro",
 			"appearance_dark": "Escuro",
@@ -748,7 +780,13 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": ""
+			"save_beta_feature_success": "As configurações dos seus recursos beta foram atualizadas.",
+			"hide_micro_transactions": "Ocultar transações com valores muito pequenos",
+			"hide_micro_transactions_description": "Transações com valores muito pequenos geralmente são spam e têm a intenção de enganar o usuário para que copie o endereço do remetente em vez de um válido. Recomenda-se ocultá-las nas listas de transações.",
+			"enable_hide_micro_transactions": "Ativar a ocultação de transações com valores muito pequenos",
+			"disable_hide_micro_transactions": "Desativar a ocultação de transações com valores muito pequenos",
+			"save_spam_filter_success": "As configurações do seu filtro de spam foram atualizadas.",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "Alternar para mostrar ou ocultar testnets",
@@ -950,13 +988,13 @@
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",
-			"destination_address_unknown": "Endereço de destino ETH desconhecido",
-			"metamask_connected": "Não é possível obter suas contas. Seu Metamask está aberto e já conectado?",
+			"destination_address_unknown": "O endereço de destino ETH é desconhecido",
+			"metamask_connected": "Não é possível obter suas contas. O seu Metamask está aberto e já conectado?",
 			"metamask_no_accounts": "Nenhuma conta Metamask encontrada.",
-			"metamask_switch_network": "Não é possível solicitar que o Metamask mude para o ID de cadeia $chain_id. Seu Metamask está usando $network_name?",
-			"erc20_data_undefined": "Os dados de transação ERC20 não podem ser indefinidos ou nulos.",
-			"data_undefined": "Os dados de transação não podem ser indefinidos ou nulos.",
-			"no_identity_calculate_fee": "Nenhuma identidade fornecida para calcular a taxa para seu principal.",
+			"metamask_switch_network": "Não é possível solicitar ao Metamask que mude para a chain ID $chain_id. O seu Metamask está usando $network_name?",
+			"erc20_data_undefined": "Os dados da transação ERC20 não podem ser indefinidos ou nulos.",
+			"data_undefined": "Os dados da transação não podem ser indefinidos ou nulos.",
+			"no_identity_calculate_fee": "Nenhuma identidade fornecida para calcular a taxa do seu principal.",
 			"invalid_destination": "O destino é inválido. Por favor, tente novamente com um endereço de carteira ou destino válido.",
 			"incompatible_token": "O token é incompatível. Por favor, tente novamente com um token compatível.",
 			"no_btc_network_id": "A rede atual ($networkId) não é uma rede Bitcoin.",
@@ -964,9 +1002,12 @@
 			"no_pending_bitcoin_transaction": "Ocorreu um erro ao carregar as transações Bitcoin pendentes. Por favor, tente novamente mais tarde.",
 			"unexpected_utxos_fee": "Algo deu errado ao calcular a taxa de transação.",
 			"unable_to_retrieve_amount": "n/d (não foi possível recuperar)",
-			"solana_transaction_expired": "Sua transação de envio não foi processada pela rede Solana e expirou, provavelmente porque a taxa de prioridade fornecida não foi suficiente. Nós a atualizamos para o valor recomendado mais recente, então tente enviá-la novamente.",
-			"solana_confirmation_failed": "Não recebemos uma confirmação da transação que você acabou de criar. Aguarde alguns segundos e verifique a lista de transações do seu token para confirmar se a transação foi criada corretamente.",
-			"fee_calc_unsupported_standard": ""
+			"solana_transaction_expired": "Sua transação não foi processada pela rede Solana e expirou, provavelmente porque a taxa de prioridade fornecida não era suficiente. Atualizamos para o valor recomendado mais recente, por isso tente novamente.",
+			"solana_confirmation_failed": "Não recebemos uma confirmação para a transação que você acabou de criar. Aguarde alguns segundos e verifique a lista de transações do seu token para ver se a sua transação foi criada corretamente.",
+			"solana_insufficient_funds": "O saldo do seu token não é suficiente para concluir esta transação. O seu saldo pode ter mudado desde a última vez que foi exibido.",
+			"solana_insufficient_funds_for_fee": "O seu saldo de SOL não é suficiente para cobrir as taxas de transação.",
+			"solana_insufficient_funds_for_rent": "O seu saldo de SOL não é suficiente para cobrir o aluguel necessário para a criação da conta.",
+			"fee_calc_unsupported_standard": "Não foi possível calcular a taxa pois o padrão de token fornecido não é suportado."
 		}
 	},
 	"mint": {
@@ -985,39 +1026,46 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "",
-			"pay_to": "",
-			"powered_by": "",
-			"recipient": "",
-			"name": "",
-			"address": "",
-			"country": "",
-			"phone_number": "",
-			"email_address": "",
-			"website": "",
-			"enter_manually": "",
-			"url_or_code": "",
-			"enter_or_paste_code": "",
-			"scan": "",
-			"pay": "",
-			"pay_amount": "",
-			"go_to_assets": "",
-			"supported_tokens": "",
-			"no_supported_tokens": "",
-			"pay_with": "",
-			"select_token": "",
-			"select_different_token": "",
-			"tokens_available": "",
-			"select_token_to_pay": "",
-			"pay_at_successful": "",
-			"pay_at_failure": "",
-			"try_again": "",
-			"payment_confirmed": "",
-			"payment_failed": ""
+			"scan_qr_code": "Ler código QR",
+			"pay_to": "Pagar a $receipt",
+			"powered_by": "Desenvolvido por",
+			"recipient": "Destinatário",
+			"name": "Nome",
+			"address": "Endereço",
+			"country": "País",
+			"phone_number": "Número de telefone",
+			"email_address": "Endereço de email",
+			"website": "Site",
+			"enter_manually": "Inserir manualmente",
+			"url_or_code": "URL ou o código",
+			"enter_or_paste_code": "Insira ou cole o código",
+			"scan": "Ler",
+			"pay": "Pagar",
+			"pay_amount": "Pagar $amount",
+			"go_to_assets": "Ir para Ativos",
+			"supported_tokens": "O Open CryptoPay suporta os seguintes tokens: ETH, USDC, USDT, POL, ARB, WBTC, XMR, dEURO, ZCHF, etc.",
+			"no_supported_tokens": "Você não possui tokens compatíveis",
+			"pay_with": "Pagar com",
+			"select_token": "Selecionar o token",
+			"select_different_token": "Selecionar outro token",
+			"tokens_available": "$amount tokens disponíveis",
+			"select_token_to_pay": "Selecionar token para pagar",
+			"pay_at_successful": "Pago em $receipt",
+			"pay_at_failure": "Falha ao pagar em $receipt",
+			"try_again": "Tentar novamente",
+			"payment_confirmed": "Pagamento confirmado",
+			"payment_failed": "Pagamento falhou",
+			"what_is_scan": "O que é o scanner",
+			"no_camera_permission": "Para ler códigos QR, você precisa permitir o acesso à câmera nas configurações do site no seu navegador.",
+			"what_is_scan_description": "O scanner do $oisy_short pode ler diversos códigos QR e iniciar a ação correta imediatamente. Leia um código QR WalletConnect para estabelecer uma nova conexão, ou leia o código de pagamento em qualquer loja que use Open CryptoPay para pagar a conta com $oisy_short Pay.",
+			"what_is_scan_title": "$oisy_short entende qualquer código QR",
+			"learn_more_about_scan": "Saiba mais sobre o scanner",
+			"learn_more_about_pay": "Saiba mais sobre o $oisy_short Pay",
+			"scanner": "Scanner"
 		},
 		"error": {
-			"code_link_is_not_valid": "",
-			"data_is_incompleted": ""
+			"code_link_is_not_valid": "O código/link não é válido",
+			"data_is_incompleted": "Os dados recebidos estão incompletos. Alguns detalhes obrigatórios estão faltando."
 		}
 	},
 	"convert": {
@@ -1108,12 +1156,15 @@
 			"select_token": "Selecionar token",
 			"select_network_filter": "Selecionar rede",
 			"withdrawing": "A retirar...",
+			"bridging": "Realizando o bridge... (Por favor, tenha paciência, isso pode levar até um minuto.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": ""
 		},
 		"error": {
@@ -1132,7 +1183,8 @@
 			"manually_withdraw_failed": "Levantamento manual falhou",
 			"swap_sucess_withdraw_failed": "A retirada de seus fundos falhou.<br> Por favor, tente novamente ou siga ",
 			"swap_sucess_manually_withdraw_success": "A troca foi concluída, mas seus tokens não puderam ser retirados automaticamente. Clique no botão Retirar abaixo para retirá-los manualmente-<br> Ou siga",
-			"swap_completed_close_failed": ""
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1481,7 +1533,10 @@
 			"amount": "",
 			"hex_data": "Dados HEX",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
-			"sign_message": "Assinar Mensagem"
+			"sign_message": "Assinar Mensagem",
+			"connected_apps": "Aplicativos conectados",
+			"no_connected_apps": "Nenhum aplicativo está conectado no momento.",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "ex: wc:a281567bb3e4..."
@@ -1794,8 +1849,10 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Acesse sua carteira $oisy_name",
-				"open_or_create": "Abra ou crie sua carteira para se conectar com segurança ao dApp e começar a gerir seus ativos."
+				"open_or_create": "Abra ou crie sua carteira para interagir com segurança com a aplicação.",
+				"connect_your_wallet": "Conecte sua carteira $oisy_name",
+				"oisy_protects_you": "OISY protege você.",
+				"oisy_protects_you_description": "Os aplicativos não podem acessar seus fundos diretamente, e cada transação precisa ser confirmada por você!"
 			}
 		},
 		"idle": {
@@ -1890,7 +1947,7 @@
 				"possessive": "nossos "
 			},
 			"title": "",
-			"instruction": "Ao clicar neste botão, você concorda com os $link",
+			"instruction": "Ao fazer login, você concorda com os $link",
 			"body": ""
 		},
 		"alt": {
@@ -1916,7 +1973,8 @@
 			"title": "Atividade Recente"
 		},
 		"info": {
-			"btc_transactions": "As informações de transação BTC são obtidas de terceiros centralizados e devem ser verificadas independentemente."
+			"btc_transactions": "As informações de transação BTC são obtidas de terceiros centralizados e devem ser verificadas independentemente.",
+			"hidden_micro_transactions": "<strong>OISY protege você!</strong> As transações com valores de token muito pequenos estão atualmente ocultas. Para mostrá-las, vá para <a href=\"/settings/\">Configurações</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Saiba mais</a>"
 		},
 		"warning": {
 			"no_index_canister": "As transações para $token_list não podem ser exibidas. Nenhum canister Index disponível.",

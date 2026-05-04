@@ -38,7 +38,9 @@ export const mockDappSettings: DappSettings = { dapp_carousel: { hidden_dapp_ids
 export const mockUserSettings: Settings = {
 	networks: mockNetworksSettings,
 	dapp: mockDappSettings,
-	experimental_features: mockExperimentalFeaturesSettings
+	experimental_features: mockExperimentalFeaturesSettings,
+	notifications: [],
+	transactions: [{ filter: [{ hide_micro_transactions: true }] }]
 };
 
 const mockUserAgreement: UserAgreement = {
@@ -111,7 +113,6 @@ export const mockDefinedUserAgreements: Agreements = {
 export const mockUserProfileVersion = 1n;
 
 export const mockUserProfile: UserProfile = {
-	credentials: [],
 	version: toNullable(mockUserProfileVersion),
 	settings: toNullable(mockUserSettings),
 	agreements: toNullable(mockUserAgreements),

@@ -9,7 +9,7 @@ use shared::types::{
         UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest, UserAgreement,
         UserAgreements, SHA256_HEX_LENGTH,
     },
-    user_profile::{GetUserProfileError, UserProfile},
+    user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
     Timestamp, Version,
 };
 
@@ -96,8 +96,9 @@ fn test_update_user_agreements_saves_settings() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let arg = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
@@ -137,8 +138,9 @@ fn test_update_user_agreements_merges_with_existing_settings() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let arg1 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
@@ -194,8 +196,9 @@ fn test_update_user_agreement_tracks_last_updated_time() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let arg1 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
@@ -293,8 +296,9 @@ fn test_update_user_agreements_cannot_update_wrong_version() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let arg1 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
@@ -336,8 +340,9 @@ fn test_update_user_agreements_no_change_when_none_passed() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let arg1 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
@@ -383,8 +388,9 @@ fn test_update_user_agreements_accepts_valid_sha256_hex() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let valid_sha256 = "a".repeat(SHA256_HEX_LENGTH);
 
@@ -423,8 +429,9 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     assert_invalid_sha256(
         &pic_setup,
@@ -469,8 +476,9 @@ fn test_get_agreement_history_returns_empty_for_new_user() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let history = pic_setup
         .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
@@ -490,8 +498,9 @@ fn test_agreement_history_records_single_acceptance() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let sha = "a".repeat(SHA256_HEX_LENGTH);
     let arg = UpdateUserAgreementsRequest {
@@ -535,8 +544,9 @@ fn test_agreement_history_records_multiple_agreements_at_once() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let arg = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
@@ -585,8 +595,9 @@ fn test_agreement_history_accumulates_across_updates() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let arg1 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
@@ -637,8 +648,9 @@ fn test_agreement_history_not_recorded_when_no_change() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     // Send empty agreements (accepted: None for all) — no change expected
     let arg = UpdateUserAgreementsRequest {
@@ -678,8 +690,9 @@ fn test_update_provider_agreements_saves_acceptance() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let arg = UpdateProviderAgreementsRequest {
         current_user_version: profile.version,
@@ -730,8 +743,9 @@ fn test_update_provider_agreements_version_mismatch() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     // First update succeeds
     let arg1 = UpdateProviderAgreementsRequest {
@@ -780,8 +794,9 @@ fn test_update_provider_agreements_rejects_invalid_sha256() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let invalid_sha256 = "too_short";
     let arg = UpdateProviderAgreementsRequest {
@@ -822,8 +837,9 @@ fn test_provider_agreement_history_recorded() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     let sha = "b".repeat(SHA256_HEX_LENGTH);
     let arg = UpdateProviderAgreementsRequest {
@@ -875,8 +891,9 @@ fn test_provider_and_internal_agreements_coexist() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     // Accept internal agreement
     let arg1 = UpdateUserAgreementsRequest {
@@ -959,8 +976,9 @@ fn test_provider_agreements_no_change_when_accepted_none() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let profile = pic_setup
-        .update::<UserProfile>(caller, "create_user_profile", ())
-        .expect("Create failed");
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     // Send provider agreement with accepted: None — should be no-op
     let arg = UpdateProviderAgreementsRequest {
