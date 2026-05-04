@@ -308,13 +308,27 @@ describe('onesec-swap.utils', () => {
 				expect(result?.icp).toContain(USDC_LEDGER);
 			});
 
-			it('returns undefined for an unknown EVM address', () => {
+			it('returns empty icp set for an unknown EVM address', () => {
 				const result = oneSecCompatibleDestinations({
 					sourceToken: makeErc20Token({ address: '0x0000000000000000000000000000000000000001' }),
 					networkIds: [ETHEREUM_NETWORK.id]
 				});
 
-				expect(result).toBeUndefined();
+				expect(result?.icp).toBeDefined();
+				expect(result?.icp?.size).toBe(0);
+			});
+
+			it('returns empty icp set for USDT on Arbitrum (no Arbitrum address in OneSec config)', () => {
+				const result = oneSecCompatibleDestinations({
+					sourceToken: makeErc20Token({
+						address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+						network: ARBITRUM_MAINNET_NETWORK
+					}),
+					networkIds: [ARBITRUM_MAINNET_NETWORK.id]
+				});
+
+				expect(result?.icp).toBeDefined();
+				expect(result?.icp?.size).toBe(0);
 			});
 
 			it('does not set evm or sol keys for EVM source', () => {
