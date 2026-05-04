@@ -20,28 +20,31 @@ export const extractUtxoTxIds = (utxos: CkBtcMinterDid.Utxo[]): string[] =>
 	utxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
 
 /**
- * Estimates transaction size in bytes based on number of inputs and outputs
- * This is a simplified calculation for P2WPKH transactions
+ * Estimates transaction virtual size (vbytes) based on number of inputs and outputs.
+ * This is a simplified calculation for P2WPKH transactions.
+ *
+ * All constants are in vbytes: witness data is discounted to 1/4 weight per BIP-141,
+ * so the result must be multiplied by a sat/vbyte fee rate, not a sat/byte rate.
  */
-export const estimateTransactionSize = ({
+export const estimateTransactionVSize = ({
 	numInputs,
 	numOutputs
 }: {
 	numInputs: number;
 	numOutputs: number;
 }): number => {
-	// version (4) and locktime (4) and input count (1), output count (1) and SegWit marker + flag (0.5 -> rounding to 1)
-	const baseSize = 11;
+	// version (4) + locktime (4) + input count (1) + output count (1) + SegWit marker+flag (0.5 → 1) = 11 vbytes
+	const BASE_VSIZE = 11;
 
-	// P2WPKH input size: outpoint (36) and scriptSig length (1) and scriptSig (0) and sequence (4) = 41 bytes
-	// Plus witness data: witness stack items (1) and signature (72) and pubkey (33) = 106 bytes
-	// But witness data is counted as 1/4 for fee calculation, so effective size is 41 and 106/4 = 67.5 bytes
-	const inputSize = 68;
+	// P2WPKH input: non-witness outpoint (36) + scriptSig length (1) + empty scriptSig (0) + sequence (4) = 41 vbytes
+	// witness: stack item count (1) + signature (72) + pubkey (33) = 106 bytes → 106/4 = 26.5 vbytes
+	// total: 41 + 26.5 = 67.5 → 68 vbytes
+	const INPUT_VSIZE = 68;
 
-	// P2WPKH output size: value (8) and scriptPubKey length (1) and scriptPubKey (22) = 31 bytes
-	const outputSize = 31;
+	// P2WPKH output: value (8) + scriptPubKey length (1) + scriptPubKey (22) = 31 vbytes
+	const OUTPUT_VSIZE = 31;
 
-	return baseSize + numInputs * inputSize + numOutputs * outputSize;
+	return BASE_VSIZE + numInputs * INPUT_VSIZE + numOutputs * OUTPUT_VSIZE;
 };
 
 /**
@@ -77,8 +80,8 @@ export const calculateUtxoSelection = ({
 	}
 
 	const calcFee = (numInputs: number): bigint => {
-		const txSize = estimateTransactionSize({ numInputs, numOutputs: 2 });
-		return (BigInt(txSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
+		const txVSize = estimateTransactionVSize({ numInputs, numOutputs: 2 });
+		return (BigInt(txVSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
 	};
 
 	const selectedUtxos: CkBtcMinterDid.Utxo[] = [];

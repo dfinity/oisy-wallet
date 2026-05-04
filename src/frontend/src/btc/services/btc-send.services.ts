@@ -4,7 +4,7 @@ import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
+import { estimateTransactionVSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse, SignBtcResponse } from '$declarations/signer/signer.did';
 import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
@@ -198,11 +198,11 @@ export const validateBtcSend = async ({
 		network,
 		identity
 	});
-	const estimatedTxSize = estimateTransactionSize({
+	const estimatedTxVSize = estimateTransactionVSize({
 		numInputs: utxos.length,
 		numOutputs: 2
 	});
-	const expectedMinFee = (BigInt(estimatedTxSize) * feeRateMiliSatoshisPerVByte) / 1000n;
+	const expectedMinFee = (BigInt(estimatedTxVSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 
 	// Allow some tolerance for fee calculation differences (±10%)
 	const feeToleranceRange = expectedMinFee / BTC_SEND_FEE_TOLERANCE_PERCENTAGE;
