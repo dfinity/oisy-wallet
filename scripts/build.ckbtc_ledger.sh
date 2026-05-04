@@ -2,7 +2,7 @@
 [[ "${1:-}" != "--help" ]] || {
   cat <<-EOF
 
-	Assembles the ckbtc_kyt canister deploy artefacts.
+	Assembles the ckbtc_ledger canister deploy artefacts.
 
 	# Prerequisites
 	This is expected to be run by dfx.  In particular,
