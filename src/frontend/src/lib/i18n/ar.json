@@ -123,14 +123,16 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"description": "افتح محفظتك أو أنشئ واحدة خلال ثوانٍ",
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
+			"sign_in_or_sign_up": "تسجيل الدخول أو إنشاء حساب",
 			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
-			"social_login": ""
+			"move_swap_grow": "انقل أصولك وبدّلها ونمِّها عبر الشبكات"
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال",
@@ -142,10 +144,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "التسجيلات الجديدة مقيّدة حاليًا. يرجى المحاولة مرة أخرى لاحقًا."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "لا يمكن حاليًا تسجيل مستخدمين جدد. يمكن للمستخدمين الحاليين استخدام $oisy_short بشكل طبيعي."
 		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",

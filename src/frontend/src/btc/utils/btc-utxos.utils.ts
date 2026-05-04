@@ -45,8 +45,17 @@ export const estimateTransactionSize = ({
 };
 
 /**
- * Main function to select UTXOs for a transaction with fee consideration
- * This function iteratively selects UTXOs and calculates fees until sufficient funds are found
+ * Main function to select UTXOs for a transaction with fee consideration.
+ *
+ * Algorithm (greedy, smallest-sufficient):
+ * 1. Compute how many satoshis are still needed: amount + fee(N+1 inputs) - accumulated total.
+ * 2. Pick the smallest UTXO whose value alone covers that need → minimises change and input count.
+ * 3. If no such UTXO exists, pick the largest available UTXO to reduce the gap as fast as
+ *    possible, then restart from step 1 with the updated totals.
+ *
+ * The fee is recalculated after every pick because each additional input increases transaction
+ * size.  Using fee(N+1) as the target when searching for the next UTXO ensures the selected
+ * set will remain sufficient once the UTXO is added.
  */
 export const calculateUtxoSelection = ({
 	availableUtxos,
@@ -67,53 +76,66 @@ export const calculateUtxoSelection = ({
 		};
 	}
 
-	// Sort UTXOs by value in descending order
-	const sortedUtxos = [...availableUtxos].sort((a, b) => {
-		const aValue = BigInt(a.value);
-		const bValue = BigInt(b.value);
-		return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-	});
+	const calcFee = (numInputs: number): bigint => {
+		const txSize = estimateTransactionSize({ numInputs, numOutputs: 2 });
+		return (BigInt(txSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
+	};
 
 	const selectedUtxos: CkBtcMinterDid.Utxo[] = [];
 	let totalInputValue = ZERO;
-	let estimatedFee = ZERO;
+	const remaining = [...availableUtxos];
 
-	// Iteratively add UTXOs until we have enough to cover amount and fee
-	for (const utxo of sortedUtxos) {
-		selectedUtxos.push(utxo);
-		totalInputValue += BigInt(utxo.value);
+	while (remaining.length > 0) {
+		// Fee for the transaction once we add one more input.
+		const fee = calcFee(selectedUtxos.length + 1);
+		const needed = amountSatoshis + fee - totalInputValue;
 
-		// Calculate current transaction size and fee
-		// 2 outputs: one for recipient, one for change (if needed)
-		const txSize = estimateTransactionSize({
-			numInputs: selectedUtxos.length,
-			numOutputs: 2
-		});
-		// Round up to ensure fee meets minimum rate requirements
-		estimatedFee = (BigInt(txSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
-		const totalRequired = amountSatoshis + estimatedFee;
+		// Step 1: find the smallest UTXO that alone covers the remaining need.
+		let smallestSufficient: CkBtcMinterDid.Utxo | undefined;
+		let smallestSufficientValue = ZERO;
+		for (const utxo of remaining) {
+			const val = BigInt(utxo.value);
+			if (val >= needed && (smallestSufficient === undefined || val < smallestSufficientValue)) {
+				smallestSufficient = utxo;
+				smallestSufficientValue = val;
+			}
+		}
 
-		// Check if we have enough to cover amount and fee
-		if (totalInputValue >= totalRequired) {
-			const changeAmount = totalInputValue - totalRequired;
-
+		if (smallestSufficient !== undefined) {
+			selectedUtxos.push(smallestSufficient);
+			totalInputValue += smallestSufficientValue;
+			const feeSatoshis = calcFee(selectedUtxos.length);
 			return {
 				selectedUtxos,
 				totalInputValue,
-				changeAmount,
+				changeAmount: totalInputValue - amountSatoshis - feeSatoshis,
 				sufficientFunds: true,
-				feeSatoshis: estimatedFee
+				feeSatoshis
 			};
 		}
+
+		// Step 2: no single UTXO covers the need; pick the largest to reduce the gap.
+		let largestIndex = 0;
+		let largestValue = BigInt(remaining[0].value);
+		for (let i = 1; i < remaining.length; i++) {
+			const val = BigInt(remaining[i].value);
+			if (val > largestValue) {
+				largestValue = val;
+				largestIndex = i;
+			}
+		}
+		selectedUtxos.push(remaining[largestIndex]);
+		totalInputValue += largestValue;
+		remaining.splice(largestIndex, 1);
 	}
 
-	// If we get here, we don't have sufficient funds
+	// Insufficient funds.
 	return {
 		selectedUtxos,
 		totalInputValue,
 		changeAmount: ZERO,
 		sufficientFunds: false,
-		feeSatoshis: estimatedFee
+		feeSatoshis: calcFee(selectedUtxos.length)
 	};
 };
 

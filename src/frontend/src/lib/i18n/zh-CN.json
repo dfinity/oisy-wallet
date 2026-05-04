@@ -123,14 +123,16 @@
 		"text": {
 			"title_part_1": "您的数字资产",
 			"title_part_2": "私密且安全",
+			"description": "打开您的钱包，或在几秒钟内创建一个",
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
+			"sign_in_or_sign_up": "登录或注册",
 			"internet_identity": "",
 			"asset_types": "跨 Bitcoin、Solana、Ethereum、ICP 等管理资产",
 			"instant_and_private": "内置 AI 助手，隐私保护为默认标准",
 			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
-			"social_login": "即时私密访问 + 社交登录"
+			"move_swap_grow": "跨网络移动、兑换并增值您的资产"
 		},
 		"alt": {
 			"preview": "登录后 $oisy_name 的预览效果，适用于桌面端和移动端",
@@ -142,10 +144,10 @@
 			"session_locked": "你的会话已在另一个标签页中被锁定。"
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "新用户注册目前受到限制，请稍后再试。"
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "目前，新用户注册暂不可用。现有用户可以正常使用 $oisy_short。"
 		},
 		"warning": {
 			"not_signed_in": "你尚未登录。请先登录以继续。",

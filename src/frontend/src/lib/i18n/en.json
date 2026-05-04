@@ -123,14 +123,16 @@
 		"text": {
 			"title_part_1": "Your Digital Assets",
 			"title_part_2": "Private and Secure",
+			"description": "Open your wallet or create one in seconds",
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
+			"sign_in_or_sign_up": "Log in or sign up",
 			"internet_identity": "Internet Identity",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
 			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
-			"social_login": "Instant and private access + social login"
+			"move_swap_grow": "Move, swap, and grow your assets across networks"
 		},
 		"alt": {
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile",

@@ -123,14 +123,16 @@
 		"text": {
 			"title_part_1": "Dein Digitales Vermögen",
 			"title_part_2": "Vertraulich und Sicher",
+			"description": "Öffne deine Wallet oder erstelle in Sekunden eine neue",
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
+			"sign_in_or_sign_up": "Anmelden oder registrieren",
 			"internet_identity": "",
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
 			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
-			"social_login": "Einfacher und sicherer Zugriff via Social Login"
+			"move_swap_grow": "Verschiebe, tausche und vermehre deine Assets netzwerkübergreifend"
 		},
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil",
@@ -142,10 +144,10 @@
 			"session_locked": "Deine Session wurde in einem anderem Browsertab gesperrt."
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Neue Anmeldungen sind derzeit eingeschränkt. Bitte versuche es später erneut."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "Derzeit sind Anmeldungen neuer Nutzer nicht möglich. Bestehende Nutzer können $oisy_short normal verwenden."
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",

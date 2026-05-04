@@ -123,14 +123,16 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"description": "अपना वॉलेट खोलें या कुछ ही सेकंड में नया बनाएँ",
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"sign_in_or_sign_up": "लॉग इन करें या साइन अप करें",
 			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
-			"social_login": ""
+			"move_swap_grow": "नेटवर्कों पर अपनी संपत्तियाँ मूव, स्वैप और बढ़ाएँ"
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर",
@@ -142,10 +144,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "नए साइन-अप फ़िलहाल प्रतिबंधित हैं। कृपया बाद में पुनः प्रयास करें।"
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "फ़िलहाल, नए उपयोगकर्ताओं का साइन-अप संभव नहीं है। मौजूदा उपयोगकर्ता $oisy_short को सामान्य रूप से उपयोग कर सकते हैं।"
 		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",

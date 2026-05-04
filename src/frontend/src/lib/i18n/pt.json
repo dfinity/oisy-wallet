@@ -123,14 +123,16 @@
 		"text": {
 			"title_part_1": "Seus Ativos Digitais",
 			"title_part_2": "Privados e Seguros",
+			"description": "Abra sua carteira ou crie uma em segundos",
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
+			"sign_in_or_sign_up": "Iniciar sessão ou criar conta",
 			"internet_identity": "",
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
 			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
-			"social_login": "Acesso instantâneo e privado + login social"
+			"move_swap_grow": "Mova, troque e aumente seus ativos entre redes"
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular",
@@ -142,10 +144,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Os novos cadastros estão temporariamente restritos. Por favor, tente novamente mais tarde."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "No momento, o cadastro de novos usuários não é possível. Os usuários existentes podem usar o $oisy_short normalmente."
 		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",

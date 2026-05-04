@@ -123,14 +123,16 @@
 		"text": {
 			"title_part_1": "Vos Actifs Numériques",
 			"title_part_2": "Privés et Sécurisés",
+			"description": "Ouvrez votre portefeuille ou créez-en un en quelques secondes",
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
+			"sign_in_or_sign_up": "Connectez-vous ou inscrivez-vous",
 			"internet_identity": "",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
 			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
-			"social_login": "Accès instantané et privé + connexion via les réseaux sociaux"
+			"move_swap_grow": "Déplacez, échangez et faites fructifier vos actifs entre les réseaux"
 		},
 		"alt": {
 			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile",
@@ -142,10 +144,10 @@
 			"session_locked": "Votre session a été verrouillée dans un autre onglet."
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Les nouvelles inscriptions sont actuellement restreintes. Veuillez réessayer ultérieurement."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "Actuellement, les inscriptions de nouveaux utilisateurs ne sont pas possibles. Les utilisateurs existants peuvent utiliser $oisy_short normalement."
 		},
 		"warning": {
 			"not_signed_in": "Vous n'êtes pas connecté. Veuillez vous connecter pour continuer.",

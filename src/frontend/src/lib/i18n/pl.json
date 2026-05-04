@@ -123,14 +123,16 @@
 		"text": {
 			"title_part_1": "Twoje cyfrowe aktywa",
 			"title_part_2": "Prywatne i bezpieczne",
+			"description": "Otwórz swój portfel lub utwórz nowy w kilka sekund",
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
+			"sign_in_or_sign_up": "Zaloguj się lub zarejestruj",
 			"internet_identity": "",
 			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
 			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
 			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
-			"social_login": "Natychmiastowy i prywatny dostęp + logowanie społecznościowe"
+			"move_swap_grow": "Przenoś, wymieniaj i pomnażaj swoje aktywa między sieciami"
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie",
@@ -142,10 +144,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Nowe rejestracje są obecnie ograniczone. Spróbuj ponownie później."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "Rejestracja nowych użytkowników jest obecnie niemożliwa. Istniejący użytkownicy mogą korzystać z $oisy_short normalnie."
 		},
 		"warning": {
 			"not_signed_in": "Nie jesteś zalogowany. Zaloguj się, aby kontynuować.",
