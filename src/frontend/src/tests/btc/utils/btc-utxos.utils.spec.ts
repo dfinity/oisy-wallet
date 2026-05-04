@@ -3,7 +3,7 @@ import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-tr
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	calculateUtxoSelection,
-	estimateTransactionSize,
+	estimateTransactionVSize,
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
@@ -77,9 +77,9 @@ describe('btc-utxos.utils', () => {
 		});
 	});
 
-	describe('estimateTransactionSize', () => {
+	describe('estimateTransactionVSize', () => {
 		it('should calculate transaction size correctly for multiple inputs and outputs', () => {
-			const result = estimateTransactionSize({
+			const result = estimateTransactionVSize({
 				numInputs: 2,
 				numOutputs: 2
 			});
@@ -89,7 +89,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should handle single input and output', () => {
-			const result = estimateTransactionSize({
+			const result = estimateTransactionVSize({
 				numInputs: 1,
 				numOutputs: 1
 			});
@@ -99,7 +99,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should handle 0n inputs and outputs', () => {
-			const result = estimateTransactionSize({
+			const result = estimateTransactionVSize({
 				numInputs: 0,
 				numOutputs: 0
 			});
@@ -109,7 +109,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should handle large number of inputs and outputs', () => {
-			const result = estimateTransactionSize({
+			const result = estimateTransactionVSize({
 				numInputs: 10,
 				numOutputs: 5
 			});
