@@ -28,9 +28,6 @@ export const POST_MESSAGE_REQUESTS = [
 	'stopIdleTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
-	'startPowProtectionTimer',
-	'triggerPowProtectionTimer',
-	'stopPowProtectionTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -126,8 +123,7 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus',
-	'syncPowProtectionStatus'
+	'syncCkBTCUpdateBalanceStatus'
 ]);
 
 export const PostMessageErrorResponseSchema = z.enum([
@@ -138,8 +134,7 @@ export const PostMessageErrorResponseSchema = z.enum([
 	'syncBtcWalletError',
 	'syncSolWalletError',
 	'syncBtcStatusesError',
-	'syncCkMinterInfoError',
-	'syncPowProtectionError'
+	'syncCkMinterInfoError'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
@@ -159,8 +154,6 @@ export const PostMessageResponseSchema = z.enum([
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
-	'syncPowProgress',
-	'syncPowNextAllowance',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -171,16 +164,18 @@ export const PostMessageDataResponseAuthSchema = PostMessageDataResponseSchema.e
 // TODO: generate zod schema for Coingecko
 export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSchema.extend({
 	currentExchangeRate: CurrencyExchangeDataSchema.optional(),
-	currentEthPrice: z.custom<CoingeckoSimplePriceResponse>(),
-	currentBtcPrice: z.custom<CoingeckoSimplePriceResponse>(),
+	currentEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentBtcPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentErc20Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>(),
+	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>(),
+	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>(),
-	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>()
+	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentArbitrumEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentBaseEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional()
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({
@@ -225,44 +220,41 @@ export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSc
 	address: z.custom<BtcAddressData>()
 }).strict();
 
-export const PostMessageDataResponsePowProtectorProgressSchema =
-	PostMessageDataResponseSchema.extend({
-		progress: z.enum(['REQUEST_CHALLENGE', 'SOLVE_CHALLENGE', 'GRANT_CYCLES'])
-	});
-
-export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
-	PostMessageDataResponseSchema.extend({
-		nextAllowanceMs: z.custom<bigint>().optional()
-	});
-
 export const PostMessageCommonSchema = z.object({
-	ref: z.string().optional()
+	ref: z.string()
 });
 
-const buildPostMessageSchema = <T extends z.ZodTypeAny, MsgSchema extends z.ZodTypeAny>({
-	dataSchema,
-	msgSchema
+const buildPostMessageResponseSchema = <T extends z.ZodTypeAny>({
+	dataSchema
 }: {
 	dataSchema: T;
-	msgSchema: MsgSchema;
 }) =>
 	z.union([
-		z.object({
-			...PostMessageCommonSchema.shape,
-			msg: msgSchema,
-			data: z.strictObject(dataSchema).shape.optional()
-		}),
-		z.object({
-			...PostMessageCommonSchema.shape,
-			...PostMessageDataErrorSchema.shape
-		})
+		z
+			.object({
+				...PostMessageCommonSchema.shape,
+				msg: PostMessageResponseSchema,
+				data: z.strictObject(dataSchema).shape.optional()
+			})
+			.strict(),
+		z
+			.object({
+				...PostMessageCommonSchema.shape,
+				...PostMessageDataErrorSchema.shape
+			})
+			.strict()
 	]);
 
 export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
-	buildPostMessageSchema({
-		dataSchema,
-		msgSchema: z.union([PostMessageRequestSchema, PostMessageResponseSchema])
-	});
+	z.union([
+		z
+			.object({
+				msg: PostMessageRequestSchema,
+				data: z.strictObject(dataSchema).shape.optional()
+			})
+			.strict(),
+		buildPostMessageResponseSchema({ dataSchema })
+	]);
 
 export const inferPostMessageSchedulerSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
-	buildPostMessageSchema({ dataSchema, msgSchema: PostMessageResponseSchema });
+	buildPostMessageResponseSchema({ dataSchema });

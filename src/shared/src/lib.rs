@@ -1,3 +1,5 @@
+#![warn(clippy::wildcard_imports)]
+
 pub mod backend_api;
 pub mod http;
 mod impls;

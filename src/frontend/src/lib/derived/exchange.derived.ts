@@ -28,13 +28,15 @@ import {
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
-import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
+import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isErc20Icp } from '$eth/utils/token.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
+import { exchangesDataEqual } from '$lib/utils/exchange.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -49,8 +51,8 @@ export const exchangeNotInitialized: Readable<boolean> = derived(
 	([$exchangeInitialized]) => !$exchangeInitialized
 );
 
-export const exchanges: Readable<ExchangesData> = derived(
-	[exchangeStore, enabledErc20Tokens, enabledErc4626Tokens, allIcrcTokens, enabledSplTokens],
+export const exchanges: Readable<ExchangesData> = derivedMemo(
+	[exchangeStore, enabledErc20Tokens, erc4626Tokens, allIcrcTokens, enabledSplTokens],
 	([$exchangeStore, $erc20Tokens, $erc4626Tokens, $icrcTokens, $splTokens]) => {
 		const ethPrice = $exchangeStore?.ethereum;
 		const btcPrice = $exchangeStore?.bitcoin;
@@ -132,5 +134,6 @@ export const exchanges: Readable<ExchangesData> = derived(
 				};
 			}, {})
 		};
-	}
+	},
+	exchangesDataEqual
 );

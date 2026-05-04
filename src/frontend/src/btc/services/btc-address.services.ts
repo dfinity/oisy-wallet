@@ -13,20 +13,14 @@ import {
 	btcAddressTestnet
 } from '$lib/derived/address.derived';
 import { deriveBtcAddress } from '$lib/ic-pub-key/src/cli';
-import {
-	certifyAddress,
-	loadTokenAddress,
-	validateAddress,
-	type LoadTokenAddressParams
-} from '$lib/services/address.services';
+import { loadTokenAddress, type LoadTokenAddressParams } from '$lib/services/address.services';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
-	btcAddressTestnetStore,
-	type AddressStoreData
+	btcAddressTestnetStore
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import {
@@ -57,7 +51,7 @@ export const getBtcAddress = async ({
 	identity,
 	network
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	network: BitcoinNetwork;
 }): Promise<BtcAddress> => {
 	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
@@ -88,7 +82,7 @@ const loadBtcAddress = ({
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		networkId,
-		getAddress: (identity: OptionIdentity) => getBtcAddress({ identity, network }),
+		getAddress: (identity: NullishIdentity) => getBtcAddress({ identity, network }),
 		...bitcoinMapper[network]
 	});
 
@@ -108,20 +102,6 @@ export const loadBtcAddressMainnet = (): Promise<ResultSuccess> =>
 	loadBtcAddress({
 		networkId: BTC_MAINNET_NETWORK_ID,
 		network: 'mainnet'
-	});
-
-const certifyBtcAddressMainnet = (address: BtcAddress): Promise<ResultSuccess<string>> =>
-	certifyAddress<BtcAddress>({
-		networkId: BTC_MAINNET_NETWORK_ID,
-		address,
-		getAddress: (identity: OptionIdentity) => getBtcAddress({ identity, network: 'mainnet' }),
-		addressStore: btcAddressMainnetStore
-	});
-
-export const validateBtcAddressMainnet = async ($addressStore: AddressStoreData<BtcAddress>) =>
-	await validateAddress<BtcAddress>({
-		$addressStore,
-		certifyAddress: certifyBtcAddressMainnet
 	});
 
 /**

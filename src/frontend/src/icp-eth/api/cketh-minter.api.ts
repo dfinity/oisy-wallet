@@ -1,6 +1,6 @@
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import { CkEthMinterCanister, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -11,7 +11,7 @@ export const minterInfo = async ({
 	minterCanisterId,
 	...rest
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	minterCanisterId: CanisterIdText;
 } & QueryParams): Promise<CkEthMinterDid.MinterInfo> => {
 	assertNonNullish(identity);

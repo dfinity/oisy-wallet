@@ -12,5 +12,6 @@ export const filterCarouselDapps = ({
 	hiddenDappsIds: OisyDappDescription['id'][];
 }): CarouselSlideOisyDappDescription[] =>
 	dAppDescriptions.filter(
-		({ id, carousel }) => nonNullish(carousel) && !hiddenDappsIds.includes(id)
+		({ id, carousel, disabled }) =>
+			nonNullish(carousel) && !disabled && !hiddenDappsIds.includes(id)
 	) as CarouselSlideOisyDappDescription[];

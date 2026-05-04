@@ -1,13 +1,13 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use candid::Principal;
-use lazy_static::lazy_static;
+use pretty_assertions::assert_eq;
 use shared::types::{
     network::{
         NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsRequest,
         UpdateNetworksSettingsError,
     },
-    user_profile::{GetUserProfileError, UserProfile},
+    user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
 };
 
 use crate::utils::{
@@ -15,97 +15,97 @@ use crate::utils::{
     pocketic::{setup, PicCanisterTrait},
 };
 
-lazy_static! {
-    pub static ref INITIAL_NETWORKS: NetworkSettingsMap = {
-        let mut map = BTreeMap::new();
-        map.insert(
-            NetworkSettingsFor::EthereumSepolia,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::EthereumMainnet,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: false,
-            },
-        );
-        map
-    };
-    pub static ref NEW_NETWORKS: NetworkSettingsMap = {
-        let mut map = BTreeMap::new();
-        map.insert(
-            NetworkSettingsFor::EthereumMainnet,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: false,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::SolanaDevnet,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::BitcoinRegtest,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::InternetComputer,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: false,
-            },
-        );
-        map
-    };
-    pub static ref UPDATED_NETWORKS: NetworkSettingsMap = {
-        let mut map = BTreeMap::new();
-        map.insert(
-            NetworkSettingsFor::EthereumSepolia,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::EthereumMainnet,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: false,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::SolanaDevnet,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::BitcoinRegtest,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::InternetComputer,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: false,
-            },
-        );
-        map
-    };
-}
+pub static INITIAL_NETWORKS: LazyLock<NetworkSettingsMap> = LazyLock::new(|| {
+    let mut map = BTreeMap::new();
+    map.insert(
+        NetworkSettingsFor::EthereumSepolia,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::EthereumMainnet,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: false,
+        },
+    );
+    map
+});
+
+pub static NEW_NETWORKS: LazyLock<NetworkSettingsMap> = LazyLock::new(|| {
+    let mut map = BTreeMap::new();
+    map.insert(
+        NetworkSettingsFor::EthereumMainnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: false,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::SolanaDevnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::BitcoinRegtest,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::InternetComputer,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: false,
+        },
+    );
+    map
+});
+
+pub static UPDATED_NETWORKS: LazyLock<NetworkSettingsMap> = LazyLock::new(|| {
+    let mut map = BTreeMap::new();
+    map.insert(
+        NetworkSettingsFor::EthereumSepolia,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::EthereumMainnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: false,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::SolanaDevnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::BitcoinRegtest,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::InternetComputer,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: false,
+        },
+    );
+    map
+});
 
 #[test]
 fn test_update_user_network_settings_saves_settings() {
@@ -113,10 +113,15 @@ fn test_update_user_network_settings_saves_settings() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
     assert_eq!(profile.settings.unwrap().networks.networks.len(), 0);
 
     let update_user_network_settings_arg = SaveNetworksSettingsRequest {
@@ -154,10 +159,15 @@ fn test_update_user_network_settings_merges_with_existing_settings() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
     assert_eq!(profile.settings.unwrap().networks.networks.len(), 0);
 
     let update_user_network_settings_arg = SaveNetworksSettingsRequest {
@@ -223,10 +233,15 @@ fn test_update_user_network_settings_cannot_update_wrong_version() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
     assert_eq!(profile.settings.unwrap().networks.networks.len(), 0);
 
     let update_user_network_settings_arg = SaveNetworksSettingsRequest {
@@ -284,10 +299,15 @@ fn test_update_user_network_settings_does_not_change_existing_value_if_same() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+    let create_profile_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
 
-    let profile = create_profile_response.expect("Create failed");
+    let profile = create_profile_response
+        .expect("Create call failed")
+        .expect("Signups should be open");
 
     assert_eq!(profile.settings.unwrap().networks.networks.len(), 0);
 

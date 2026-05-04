@@ -1,6 +1,7 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { AMDON_TOKEN_GROUP } from '$env/tokens/groups/groups.amdon.env';
 import amdon from '$eth/assets/amdon.webp';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -17,6 +18,7 @@ export const AMDON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'AMD (Ondo Tokenized Stock)',
 	symbol: AMDON_SYMBOL,
 	decimals: AMDON_DECIMALS,

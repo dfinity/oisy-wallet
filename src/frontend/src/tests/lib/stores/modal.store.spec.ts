@@ -1,4 +1,5 @@
 import { modalStore } from '$lib/stores/modal.store';
+import type { UniversalScannerData } from '$lib/types/scanner';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { get } from 'svelte/store';
 
@@ -34,6 +35,35 @@ describe('modal.store', () => {
 		modalStore.openConvertCkBTCToBTC(id);
 
 		expect(get(modalStore)).toEqual({ id, type: 'convert-ckbtc-btc' });
+	});
+
+	it('should open harvest-stake modal with modalId', () => {
+		const id = Symbol('modalId');
+		modalStore.openHarvestStake(id);
+
+		expect(get(modalStore)).toEqual({ type: 'harvest-stake', id });
+	});
+
+	it('should open harvest-unstake modal with modalId', () => {
+		const id = Symbol('modalId');
+		modalStore.openHarvestUnstake(id);
+
+		expect(get(modalStore)).toEqual({ type: 'harvest-unstake', id });
+	});
+
+	it('should open universal-scanner modal without data', () => {
+		const id = Symbol('modalId');
+		modalStore.openUniversalScanner({ id });
+
+		expect(get(modalStore)).toEqual({ type: 'universal-scanner', id });
+	});
+
+	it('should open universal-scanner modal with data', () => {
+		const id = Symbol('modalId');
+		const data: UniversalScannerData = { walletConnectUri: 'wc:abc123@2' };
+		modalStore.openUniversalScanner({ id, data });
+
+		expect(get(modalStore)).toEqual({ type: 'universal-scanner', id, data });
 	});
 
 	it('should close the modal and reset the store', () => {

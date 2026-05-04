@@ -5,6 +5,7 @@ import type {
 	PostMessageScheduler
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
@@ -35,6 +36,36 @@ export class SchedulerTimer {
 
 	constructor(private statusMsg: PostMessageResponseStatus) {}
 
+	private static readonly IDENTITY_MAX_RETRIES = 3;
+	private static readonly IDENTITY_RETRY_DELAY_MS = 1_000;
+
+	/**
+	 * Attempts to load the authenticated identity from IndexedDB with retries.
+	 *
+	 * On cold starts — especially on mobile devices — the worker can fire before
+	 * IndexedDB has finished persisting the identity written by the main thread.
+	 * A single `loadIdentity()` call may return `undefined` in that narrow window,
+	 * silently preventing the scheduler from ever starting.
+	 * Retrying with a short delay gives IDB enough time to settle.
+	 */
+	private async loadIdentityWithRetry(): Promise<Identity | undefined> {
+		for (let attempt = 0; attempt <= SchedulerTimer.IDENTITY_MAX_RETRIES; attempt++) {
+			const identity = await AuthClientProvider.getInstance().loadIdentity();
+
+			if (nonNullish(identity)) {
+				return identity;
+			}
+
+			if (attempt < SchedulerTimer.IDENTITY_MAX_RETRIES) {
+				await new Promise<void>((resolve) =>
+					setTimeout(resolve, SchedulerTimer.IDENTITY_RETRY_DELAY_MS)
+				);
+			}
+		}
+
+		return undefined;
+	}
+
 	async start<T>({
 		interval,
 		...rest
@@ -44,11 +75,11 @@ export class SchedulerTimer {
 			return;
 		}
 
-		const identity = await AuthClientProvider.getInstance().loadIdentity();
+		const identity = await this.loadIdentityWithRetry();
 
 		if (isNullish(identity)) {
 			// We do nothing if no identity
-			console.error('Attempted to initiate a worker without an authenticated identity.');
+			consoleError('Attempted to initiate a worker without an authenticated identity.');
 			return;
 		}
 
@@ -81,12 +112,14 @@ export class SchedulerTimer {
 		scheduleNext();
 	}
 
+	// trigger() is called for on-demand user-initiated actions, not during cold start,
+	// so the identity is expected to be available without retries.
 	async trigger<T>(params: SchedulerParams<T>) {
 		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
 		if (isNullish(identity)) {
 			// We cannot execute without an identity
-			console.error('Attempted to execute a worker without an authenticated identity.');
+			consoleError('Attempted to execute a worker without an authenticated identity.');
 			return;
 		}
 
@@ -109,7 +142,7 @@ export class SchedulerTimer {
 
 			this.setStatus('idle');
 		} catch (err: unknown) {
-			console.error(err);
+			consoleError(err);
 
 			// Once the status becomes "error", the job will no longer be called and the status will remain "error"
 			this.setStatus('error');

@@ -9,6 +9,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import {
 	errorSignOut,
 	idleSignOut,
+	infoSignOut,
 	lockSession,
 	nullishSignOut,
 	signOut,
@@ -109,8 +110,8 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await signOut({});
 
-			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
+			// 1 tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(6);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -221,8 +222,8 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await errorSignOut(mockText);
 
-			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
+			// 1 tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(6);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -335,8 +336,8 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await warnSignOut(mockText);
 
-			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
+			// 1 tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(6);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -417,6 +418,42 @@ describe('auth.services', () => {
 		});
 	});
 
+	describe('infoSignOut', () => {
+		const mockText = 'New sign-ups are currently restricted.';
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should track the sign out event with the provided source', async () => {
+			await infoSignOut({ text: mockText, source: 'signups-closed' });
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_SIGN_OUT_SUCCESS,
+				metadata: {
+					reason: 'info',
+					level: '',
+					text: mockText,
+					source: 'signups-closed',
+					resetUrl: 'false',
+					clearStorages: 'true'
+				}
+			});
+		});
+
+		it('should append the message to the reload URL with level=info', async () => {
+			await infoSignOut({ text: mockText });
+
+			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
+				{},
+				'',
+				new URL(
+					`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=info&${PARAM_DELETE_IDB_CACHE}=true`
+				)
+			);
+		});
+	});
+
 	describe('nullishSignOut', () => {
 		const expectedText = en.auth.warning.not_signed_in;
 
@@ -449,8 +486,8 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await nullishSignOut();
 
-			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
+			// 1 tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(6);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {

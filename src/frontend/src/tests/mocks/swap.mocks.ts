@@ -1,6 +1,9 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
-import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
+import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
+import { mockVeloraSwapDetails } from '$tests/mocks/velora.mock';
 
 export const mockSwapProviders: SwapMappedResult[] = [
 	{
@@ -27,3 +30,33 @@ export const mockSwapProviders: SwapMappedResult[] = [
 		swapDetails: {} as SwapAmountsReply
 	}
 ];
+
+export const mockVeloraMarketProvider: SwapMappedResult = {
+	provider: SwapProvider.VELORA,
+	receiveAmount: 900000000n,
+	receiveOutMinimum: 891000000n,
+	swapDetails: mockVeloraSwapDetails,
+	type: VeloraSwapTypes.MARKET
+};
+
+export const mockVeloraDeltaProvider: SwapMappedResult = {
+	provider: SwapProvider.VELORA,
+	receiveAmount: 900000000n,
+	receiveOutMinimum: 891000000n,
+	swapDetails: mockVeloraSwapDetails,
+	type: VeloraSwapTypes.DELTA
+};
+
+export const mockNearIntentsProvider: SwapMappedResult = {
+	provider: SwapProvider.NEAR_INTENTS,
+	receiveAmount: 890000000n,
+	swapDetails: mockNearIntentsQuoteResponse as NearIntentsQuoteResponse,
+	type: undefined
+};
+
+export const mockOneSecProvider: SwapMappedResult = {
+	provider: SwapProvider.ONE_SEC,
+	receiveAmount: 880000000n,
+	swapDetails: { transferFeeInUnits: 1000n, protocolFeeInPercent: 0.1 },
+	type: undefined
+};

@@ -30,7 +30,7 @@ validate_on_deserialize!(ToyType);
 
 test_validate_on_deserialize!(
     ToyType,
-    vec![
+    [
         TestVector {
             input: ToyType {
                 name: "a".repeat(ToyType::MAX_LEN),
@@ -44,6 +44,6 @@ test_validate_on_deserialize!(
             },
             valid: false,
             description: "Too long",
-        },
+        }
     ]
 );

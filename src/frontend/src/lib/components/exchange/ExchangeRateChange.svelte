@@ -8,11 +8,12 @@
 
 	interface Props {
 		usdPriceChangePercentage24h: number | undefined;
-		withBackground?: boolean;
+		background?: 'light' | 'dark';
 		timeFrame?: '24h';
+		fontSize?: 'sm' | 'xs';
 	}
 
-	let { usdPriceChangePercentage24h, withBackground = false, timeFrame }: Props = $props();
+	let { usdPriceChangePercentage24h, background, timeFrame, fontSize = 'sm' }: Props = $props();
 
 	let parsedExchangeRateChange = $derived(
 		nonNullish(usdPriceChangePercentage24h)
@@ -31,10 +32,6 @@
 			: { formattedAbs: undefined, sign: undefined }
 	);
 
-	let exchangeRateChangeSymbol = $derived(
-		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '⏵' : '⏷') : undefined
-	);
-
 	let parsedTimeFrame = $derived(
 		nonNullish(timeFrame) ? $i18n.temporal.time_frame[`t_${timeFrame}`] : undefined
 	);
@@ -42,17 +39,20 @@
 
 {#if nonNullish(parsedExchangeRateChange)}
 	<span
-		class="px-1 text-xs sm:text-sm"
-		class:bg-error-subtle-30={withBackground && exchangeRateChangeSign === 'negative'}
-		class:bg-success-subtle-30={withBackground && exchangeRateChangeSign === 'positive'}
-		class:rounded={withBackground}
+		class={`px-1 text-xs${background === 'dark' ? ' bg-black/30' : ''}`}
+		class:bg-white={background === 'light'}
+		class:rounded={nonNullish(background)}
+		class:sm:text-sm={fontSize === 'sm'}
 		class:text-error-primary={exchangeRateChangeSign === 'negative'}
 		class:text-success-primary={exchangeRateChangeSign === 'positive'}
 		class:text-tertiary={exchangeRateChangeSign === 'zero'}
 	>
-		<span class="inline-block transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
-			{exchangeRateChangeSymbol}
-		</span>
+		<span
+			style="clip-path: polygon(50% 100%, 0% 0%, 100% 0%); background: currentColor;"
+			class="mb-px inline-block h-[0.45em] w-[0.45em]"
+			class:-rotate-90={exchangeRateChangeSign === 'zero'}
+			class:rotate-180={exchangeRateChangeSign === 'positive'}
+		></span>
 		{formattedExchangeRateChange}
 		{#if nonNullish(parsedTimeFrame)}
 			<span class="text-[9px] sm:text-[11px]">{`(${parsedTimeFrame})`}</span>

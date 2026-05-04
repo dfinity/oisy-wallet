@@ -1,16 +1,28 @@
 //! Types related to the signer & topping up the cycles ledger account for use with the signer.
 
-use candid::Nat;
+use std::fmt::Debug;
+
+use candid::{CandidType, Deserialize, Nat, Principal};
 use ic_cycles_ledger_client::ApproveError;
+use serde::Serialize;
 
-use super::{CandidType, Debug, Deserialize};
-use crate::types::pow::{AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError};
-/// Types related to topping up the cycles ledger account for use with the signer.
+use crate::types::pow::AllowSigningStatus;
 
+/// Errors that can occur when retrieving the allowed cycles from the cycles ledger.
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum GetAllowedCyclesError {
     FailedToContactCyclesLedger,
     Other(String),
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
+}
+
+/// Error returned when a caller exceeds the allowed call rate.
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct RateLimitError {
+    pub max_calls: u32,
+    pub window_ns: u64,
+    pub caller: Principal,
 }
 
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -18,19 +30,26 @@ pub enum AllowSigningError {
     Other(String),
     FailedToContactCyclesLedger,
     ApproveError(ApproveError),
-    PowChallenge(ChallengeCompletionError),
+    /// The caller exceeded the per-caller business rate limit.
+    RateLimited(RateLimitError),
+    /// The caller hit the high-frequency guard rate limit designed to prevent
+    /// cycle-draining attacks before any inter-canister call is made.
+    RateLimitedByGuard(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain {
+        msg: String,
+    },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct AllowSigningRequest {
-    pub nonce: u64,
+    pub ii_delegation_chain: Option<super::delegation::IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct AllowSigningResponse {
     pub status: AllowSigningStatus,
-    pub allowed_cycles: u64,
-    pub challenge_completion: Option<ChallengeCompletion>,
+    pub allowed_cycles: Nat,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -39,10 +58,13 @@ pub struct GetAllowedCyclesResponse {
 }
 
 pub mod topup {
-    use candid::Nat;
+    use std::fmt::Debug;
+
+    use candid::{CandidType, Deserialize, Nat};
     use serde::Serialize;
 
-    use super::{CandidType, Debug, Deserialize};
+    use crate::types::signer::RateLimitError;
+
     /// A request to top up the cycles ledger.
     #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq, Default)]
     pub struct TopUpCyclesLedgerRequest {
@@ -102,8 +124,17 @@ pub mod topup {
     #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
     pub enum TopUpCyclesLedgerError {
         CouldNotGetBalanceFromCyclesLedger,
-        InvalidArgPercentageOutOfRange { percentage: u8, min: u8, max: u8 },
-        CouldNotTopUpCyclesLedger { available: Nat, tried_to_send: Nat },
+        InvalidArgPercentageOutOfRange {
+            percentage: u8,
+            min: u8,
+            max: u8,
+        },
+        CouldNotTopUpCyclesLedger {
+            available: Nat,
+            tried_to_send: Nat,
+        },
+        /// The caller has exceeded the call rate limit.
+        RateLimited(RateLimitError),
     }
     /// Possible successful responses when topping up the cycles ledger.
     #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]

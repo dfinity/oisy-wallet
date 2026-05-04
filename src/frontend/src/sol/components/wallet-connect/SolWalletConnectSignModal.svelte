@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { untrack } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -105,6 +105,8 @@
 
 	const close = () => modalStore.close();
 
+	let closeTimeout: NodeJS.Timeout | undefined;
+
 	/**
 	 * WalletConnect
 	 */
@@ -142,8 +144,10 @@
 			identity: $authIdentity
 		});
 
-		setTimeout(() => close(), success ? 750 : 0);
+		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
 	};
+
+	onDestroy(() => clearTimeout(closeTimeout));
 </script>
 
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>

@@ -6,9 +6,9 @@ import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { isNullish, jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { getIndexPrincipal, getMintingAccount, loadMetadata, saveLogo } from './build.tokens.utils';
+import { getIndexPrincipal, getMintingAccount, loadMetadata, saveIcon } from './build.tokens.utils';
 import { ADDITIONAL_ICRC_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
@@ -101,25 +101,56 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 	);
 };
 
-const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp', 'assets');
+const STATIC_ICONS_FOLDER = join(process.cwd(), 'src', 'frontend', 'static', 'icons', 'icrc');
 
-const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: string }) => {
-	const logoName = name.toLowerCase();
-	const file = join(LOGO_FOLDER, `${logoName}.svg`);
+const saveTokenIcon = ({
+	ledgerCanisterId,
+	icon,
+	name
+}: {
+	ledgerCanisterId: LedgerCanisterIdText;
+	icon: string;
+	name: EnvTokenSymbol;
+}): string | undefined => {
+	const ext = saveIcon({
+		logoData: icon,
+		destDir: STATIC_ICONS_FOLDER,
+		fileName: ledgerCanisterId,
+		name
+	});
 
-	if (existsSync(file)) {
+	if (isNullish(ext)) {
 		return;
 	}
 
-	saveLogo({ logoData, file, name });
+	return `/icons/icrc/${ledgerCanisterId}.${ext}`;
 };
 
 const findAdditionalIcrc = async () => {
 	const { tokens, icons }: TokensAndIcons = await buildIcrcTokens();
 
-	writeFileSync(ADDITIONAL_ICRC_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));
+	const iconPaths = icons.reduce<Record<LedgerCanisterIdText, string>>(
+		(acc, { ledgerCanisterId, name, icon }) => {
+			const iconPath = saveTokenIcon({ ledgerCanisterId, icon, name });
 
-	await Promise.allSettled(icons.map(({ name, icon }) => saveTokenLogo({ name, logoData: icon })));
+			if (nonNullish(iconPath)) {
+				acc[ledgerCanisterId] = iconPath;
+			}
+
+			return acc;
+		},
+		{}
+	);
+
+	const tokensWithIcons = Object.fromEntries(
+		Object.entries(tokens).map(([key, { icon: _, ...token }]) => {
+			const iconPath = iconPaths[token.ledgerCanisterId];
+
+			return [key, nonNullish(iconPath) ? { ...token, icon: iconPath } : token];
+		})
+	);
+
+	writeFileSync(ADDITIONAL_ICRC_JSON_FILE, JSON.stringify(tokensWithIcons, jsonReplacer, 8));
 };
 
 try {

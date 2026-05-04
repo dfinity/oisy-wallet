@@ -101,6 +101,7 @@ export const WizardStepsGetToken = {
 } as const;
 
 export enum WizardStepsScanner {
+	OISY_SCANNER_INFO = 'Oisy Scanner Info',
 	SCAN = 'Scan',
 	PAY = 'Pay',
 	TOKENS_LIST = 'Tokens List',

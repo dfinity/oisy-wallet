@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -20,33 +21,32 @@
 
 	interface Props {
 		amount: OptionAmount;
+		amountSetToMax?: boolean;
 		disabled?: boolean;
 		destination?: Address;
 		totalFee?: bigint;
+		errorType?: TokenActionErrorType;
 		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
 		onClose: () => void;
 		onNext: () => void;
-		fee?: Snippet;
-		provider?: Snippet;
+		content?: Snippet;
 	}
 
 	let {
 		amount = $bindable(),
+		amountSetToMax = $bindable(false),
 		disabled,
 		destination,
 		totalFee,
+		errorType = $bindable(),
 		onCustomValidate,
 		onClose,
 		onNext,
-		fee,
-		provider
+		content
 	}: Props = $props();
 
 	const { sendToken, sendTokenExchangeRate, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	let errorType = $state<TokenActionErrorType | undefined>();
-	let amountSetToMax = $state(false);
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
@@ -100,9 +100,11 @@
 		</div>
 	{/if}
 
-	{@render fee?.()}
+	{#if errorType === 'insufficient-funds-for-fee'}
+		<InsufficientFundsForFee />
+	{/if}
 
-	{@render provider?.()}
+	{@render content?.()}
 
 	{#snippet toolbar()}
 		<ButtonGroup testId="toolbar">

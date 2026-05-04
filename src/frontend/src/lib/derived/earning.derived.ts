@@ -1,21 +1,18 @@
 import { goto } from '$app/navigation';
 import { EarningCardFields } from '$env/types/env.earning-cards';
-import { isGLDTToken } from '$icp-eth/utils/token.utils';
-import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
-import { ZERO } from '$lib/constants/app.constants';
-import { AppPath } from '$lib/constants/routes.constants';
-import { exchanges } from '$lib/derived/exchange.derived';
 import {
-	enabledFungibleTokensUi,
-	enabledMainnetFungibleTokensUsdBalance
-} from '$lib/derived/tokens-ui.derived';
-import { i18n } from '$lib/stores/i18n.store';
-import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
-import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
+	enabledHarvestAutopilotsUsdBalance,
+	harvestAutopilots,
+	harvestAutopilotsCurrentEarning,
+	harvestAutopilotsMaxApy,
+	harvestAutopilotsUsdBalance
+} from '$eth/derived/harvest-autopilots.derived';
+import { AppPath } from '$lib/constants/routes.constants';
+import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-type EarningDataRecord = { [key in EarningCardFields]?: string | number } & {
+type EarningDataRecord = { [key in EarningCardFields]?: string | number | string[] } & {
 	action: () => Promise<void>;
 };
 
@@ -23,46 +20,45 @@ type EarningData = Record<string, EarningDataRecord>;
 
 export const earningData: Readable<EarningData> = derived(
 	[
-		i18n,
-		exchanges,
-		enabledFungibleTokensUi,
 		enabledMainnetFungibleTokensUsdBalance,
-		gldtStakeStore
+		harvestAutopilotsUsdBalance,
+		enabledHarvestAutopilotsUsdBalance,
+		harvestAutopilotsCurrentEarning,
+		harvestAutopilots,
+		harvestAutopilotsMaxApy
 	],
 	([
-		$i18n,
-		$exchanges,
-		$enabledFungibleTokensUi,
 		$enabledMainnetFungibleTokensUsdBalance,
-		$gldtStakeStore
-	]) => {
-		const gldtToken = $enabledFungibleTokensUi.find(isGLDTToken);
-		return {
-			'gldt-staking': {
-				[EarningCardFields.APY]: nonNullish($gldtStakeStore?.apy)
-					? formatStakeApyNumber($gldtStakeStore.apy)
-					: undefined,
-				[EarningCardFields.CURRENT_STAKED]: nonNullish(gldtToken)
-					? `${formatToken({
-							value: $gldtStakeStore?.position?.staked ?? ZERO,
-							unitName: gldtToken.decimals
-						})} ${gldtToken.symbol}`
-					: undefined,
-				[EarningCardFields.EARNING_POTENTIAL]: nonNullish($gldtStakeStore?.apy)
-					? ($enabledMainnetFungibleTokensUsdBalance * $gldtStakeStore.apy) / 100
-					: undefined,
-				[EarningCardFields.CURRENT_EARNING]: nonNullish(gldtToken)
-					? calculateTokenUsdAmount({
-							amount: $gldtStakeStore?.position?.staked,
-							token: gldtToken,
-							$exchanges
-						})
-					: undefined,
-				[EarningCardFields.TERMS]: $i18n.earning.terms.flexible,
-				action: () => goto(AppPath.EarnGold)
-			}
-		};
-	}
+		$harvestAutopilotsUsdBalance,
+		$enabledHarvestAutopilotsUsdBalance,
+		$harvestAutopilotsCurrentEarning,
+		$harvestAutopilots,
+		$harvestAutopilotsMaxApy
+	]) => ({
+		'harvest-autopilot': {
+			[EarningCardFields.APY]: $harvestAutopilotsMaxApy,
+			[EarningCardFields.CURRENT_EARNING]: $harvestAutopilotsCurrentEarning,
+			[EarningCardFields.CURRENT_STAKED]: $harvestAutopilotsUsdBalance,
+			[EarningCardFields.NETWORKS]: [
+				...$harvestAutopilots.reduce<Set<string>>(
+					(acc, { token: { network } }) => (nonNullish(network.icon) ? acc.add(network.icon) : acc),
+					new Set()
+				)
+			],
+			[EarningCardFields.ASSETS]: [
+				...$harvestAutopilots.reduce<Set<string>>(
+					(acc, { token: { assetIcon } }) => (nonNullish(assetIcon) ? acc.add(assetIcon) : acc),
+					new Set()
+				)
+			],
+			[EarningCardFields.EARNING_POTENTIAL]: nonNullish($enabledMainnetFungibleTokensUsdBalance)
+				? (($enabledMainnetFungibleTokensUsdBalance - $enabledHarvestAutopilotsUsdBalance) *
+						Number($harvestAutopilotsMaxApy)) /
+					100
+				: undefined,
+			action: () => goto(AppPath.EarnAutopilot)
+		}
+	})
 );
 
 export const highestApyEarningData: Readable<EarningDataRecord | undefined> = derived(
@@ -96,16 +92,34 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 export const highestApyEarning: Readable<number> = derived(
 	[highestApyEarningData],
 	([$highestApyEarningData]) =>
-		!isNaN(Number($highestApyEarningData?.apy)) ? Number($highestApyEarningData?.apy) : 0
+		!isNaN(Number($highestApyEarningData?.[EarningCardFields.APY]))
+			? Number($highestApyEarningData?.[EarningCardFields.APY])
+			: 0
 );
 
 export const highestEarningPotentialUsd: Readable<number> = derived(
-	[highestApyEarning, enabledMainnetFungibleTokensUsdBalance],
-	([$highestApyEarning, $enabledMainnetFungibleTokensUsdBalance]) =>
-		($enabledMainnetFungibleTokensUsdBalance * $highestApyEarning) / 100
+	[highestApyEarning, enabledMainnetFungibleTokensUsdBalance, enabledHarvestAutopilotsUsdBalance],
+	([
+		$highestApyEarning,
+		$enabledMainnetFungibleTokensUsdBalance,
+		$enabledHarvestAutopilotsUsdBalance
+	]) =>
+		(($enabledMainnetFungibleTokensUsdBalance - $enabledHarvestAutopilotsUsdBalance) *
+			$highestApyEarning) /
+		100
 );
 
 export const allEarningPositionsUsd: Readable<number> = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce<number>(
+		(acc, record) =>
+			isNaN(Number(record[EarningCardFields.CURRENT_STAKED]))
+				? acc
+				: acc + Number(record[EarningCardFields.CURRENT_STAKED]),
+		0
+	)
+);
+
+export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData]) =>
 	Object.values($earningData).reduce<number>(
 		(acc, record) =>
 			isNaN(Number(record[EarningCardFields.CURRENT_EARNING]))
@@ -113,13 +127,4 @@ export const allEarningPositionsUsd: Readable<number> = derived([earningData], (
 				: acc + Number(record[EarningCardFields.CURRENT_EARNING]),
 		0
 	)
-);
-
-export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData]) =>
-	Object.values($earningData).reduce((acc, record) => {
-		const earning = Number(record[EarningCardFields.CURRENT_EARNING] ?? 0);
-		const apy = Number(record[EarningCardFields.APY] ?? 0);
-
-		return isNaN(earning) || isNaN(apy) ? acc : acc + earning * (apy / 100);
-	}, 0)
 );

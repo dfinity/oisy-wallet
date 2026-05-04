@@ -8,6 +8,7 @@ import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.ser
 import * as icNftServices from '$icp/services/nft.services';
 import { loadNfts as loadIcNfts } from '$icp/services/nft.services';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	loadNfts,
 	loadNftsByNetwork,
@@ -384,6 +385,7 @@ describe('nft.services', () => {
 		const base721: NonFungibleToken = {
 			address: '0x111',
 			category: 'custom',
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			decimals: 0,
 			id: parseTokenId('721'),
 			name: 'My721',
@@ -396,6 +398,7 @@ describe('nft.services', () => {
 		const base1155: NonFungibleToken = {
 			address: '0x222',
 			category: 'custom',
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			decimals: 0,
 			id: parseTokenId('1155'),
 			name: 'My1155',
@@ -571,6 +574,7 @@ describe('nft.services', () => {
 		const base721: NonFungibleToken = {
 			address: '0x111',
 			category: 'custom',
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			decimals: 0,
 			id: parseTokenId('721'),
 			name: 'My721',
@@ -583,6 +587,7 @@ describe('nft.services', () => {
 		const base1155: NonFungibleToken = {
 			address: '0x222',
 			category: 'custom',
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			decimals: 0,
 			id: parseTokenId('1155'),
 			name: 'My1155',

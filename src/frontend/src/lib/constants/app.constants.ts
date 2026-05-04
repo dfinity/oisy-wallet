@@ -13,9 +13,11 @@ export const STAGING = MODE === 'staging' || TEST_FE || AUDIT || E2E;
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
-export const TEST = parseBoolEnvVar(import.meta.env.TEST);
+// Set via OISY_SIGNER_TARGET env var at build time ('signer' | 'legacy_signer' | '')
+export const SIGNER_TARGET: string | undefined = VITE_OISY_SIGNER_TARGET || undefined;
+export const IS_SIGNER_DOMAIN = nonNullish(SIGNER_TARGET);
 
-const MAINNET_DOMAIN = 'icp0.io';
+export const TEST = parseBoolEnvVar(import.meta.env.TEST);
 
 export const REPLICA_HOST = LOCAL ? 'http://localhost:4943/' : 'https://icp-api.io';
 
@@ -26,25 +28,6 @@ export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
 	: 'https://identity.internetcomputer.org';
-
-export const POUH_ISSUER_CANISTER_ID = LOCAL
-	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_POUH_ISSUER_CANISTER_ID
-		: BETA
-			? import.meta.env.VITE_BETA_POUH_ISSUER_CANISTER_ID
-			: PROD
-				? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
-				: undefined;
-
-export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
-	? LOCAL
-		? `http://${POUH_ISSUER_CANISTER_ID}.localhost:4943`
-		: STAGING
-			? `https://${POUH_ISSUER_CANISTER_ID}.${MAINNET_DOMAIN}`
-			: // BETA and PROD
-				'https://id.decideai.xyz'
-	: undefined;
 
 export const BACKEND_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_BACKEND_CANISTER_ID
@@ -115,14 +98,6 @@ export const LLM_CANISTER_ID = LOCAL
 			? import.meta.env.VITE_BETA_LLM_CANISTER_ID
 			: import.meta.env.VITE_IC_LLM_CANISTER_ID;
 
-export const GLDT_STAKE_CANISTER_ID = LOCAL
-	? import.meta.env.VITE_LOCAL_GLDT_STAKE_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_GLDT_STAKE_CANISTER_ID
-		: BETA
-			? import.meta.env.VITE_BETA_GLDT_STAKE_CANISTER_ID
-			: import.meta.env.VITE_IC_GLDT_STAKE_CANISTER_ID;
-
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1_000 * 1_000 * 1_000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1_000 * 1_000 * 1_000);
@@ -136,9 +111,12 @@ const DOMAIN_URL_HOSTNAME =
 const IS_ICP_DOMAIN_URL = DOMAIN_URL_HOSTNAME.endsWith('.icp0.io');
 
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
+// Signer domains always need a derivation origin so users get the same identity as on the main wallet.
 export const AUTH_DERIVATION_ORIGIN =
-	BETA || (PROD && IS_ICP_DOMAIN_URL)
-		? 'https://oisy.com'
+	IS_SIGNER_DOMAIN || BETA || (PROD && IS_ICP_DOMAIN_URL)
+		? STAGING
+			? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
+			: 'https://oisy.com'
 		: STAGING
 			? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
 			: undefined;
@@ -147,9 +125,6 @@ export const AUTH_POPUP_WIDTH = 576;
 // we need to temporarily increase the height so II 2.0 in "guided mode" fits the popup
 // TODO: revert to 625 after II provides a fix on their end
 export const AUTH_POPUP_HEIGHT = 826;
-export const VC_POPUP_WIDTH = AUTH_POPUP_WIDTH;
-// Screen to allow credential presentation is longer than the authentication screen.
-export const VC_POPUP_HEIGHT = 900;
 
 // Workers
 export const AUTH_TIMER_INTERVAL = 1_000;
@@ -181,6 +156,7 @@ export const EIGHT_DECIMALS = 8;
 
 // eslint-disable-next-line no-restricted-syntax -- This is the definition
 export const ZERO = 0n;
+export const MAX_UINT_256 = (1n << 256n) - 1n;
 
 // NFTs
 export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds
@@ -230,3 +206,6 @@ export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;
 
 // NFT max filesize limit (10MB)
 export const NFT_MAX_FILESIZE_LIMIT = 1024 * 1024 * 10;
+
+// ZERO ETH address
+export const ZERO_ETH_ADDRESS = '0x0000000000000000000000000000000000000000';

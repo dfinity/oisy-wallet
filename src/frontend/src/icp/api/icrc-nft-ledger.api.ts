@@ -1,6 +1,6 @@
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import { IcrcLedgerCanister, type IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -16,7 +16,7 @@ import { Principal } from '@icp-sdk/core/principal';
  *
  * @param {Object} params - The parameters for fetching supported standards.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
- * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {NullishIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
  * @returns {Promise<IcrcStandardRecord[]>} The array of all supported standards.
  */
@@ -25,7 +25,7 @@ export const icrc10SupportedStandards = async ({
 	identity,
 	ledgerCanisterId
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	ledgerCanisterId: CanisterIdText;
 } & QueryParams): Promise<IcrcLedgerDid.StandardRecord[]> => {
 	assertNonNullish(identity);

@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { MediaStatusEnum } from '$lib/enums/media-status';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Nft, NftCollectionUi, NonFungibleToken } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -16,6 +17,7 @@ export const getMockNonFungibleToken = (params: {
 	params.addresses.map((address, index) => ({
 		address,
 		category: 'custom',
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		decimals: 0,
 		id: parseTokenId(String(index)),
 		name: params.names[index],

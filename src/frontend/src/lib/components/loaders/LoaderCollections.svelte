@@ -6,7 +6,7 @@
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
-	import { saveErcCustomTokens } from '$eth/services/erc-custom-tokens.services';
+	import { buildNewErcTokens } from '$eth/services/erc-custom-tokens.services';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
@@ -22,9 +22,14 @@
 	import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
-	import type { SaveCustomExtVariant } from '$lib/types/custom-token';
+	import type {
+		SaveCustomErc1155Variant,
+		SaveCustomErc721Variant,
+		SaveCustomExtVariant
+	} from '$lib/types/custom-token';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
+	import { consoleWarn } from '$lib/utils/console.utils';
 	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
@@ -49,16 +54,23 @@
 	const loadErcTokens = async ({ identity, customTokens }: LoadTokensParams) => {
 		const networks = [...$enabledEthereumNetworks, ...$enabledEvmNetworks];
 
+		const allNewTokens: (SaveCustomErc721Variant | SaveCustomErc1155Variant)[] = [];
+
 		for (const network of networks) {
 			const contracts: OwnedContract[] = await loadContracts(network);
 
-			await saveErcCustomTokens({
-				contracts,
-				customTokens,
-				network,
-				identity
-			});
+			const newTokens = buildNewErcTokens({ contracts, customTokens, network });
+			allNewTokens.push(...newTokens);
 		}
+
+		if (allNewTokens.length === 0) {
+			return;
+		}
+
+		await saveCustomTokens({
+			tokens: allNewTokens as NonEmptyArray<SaveCustomErc721Variant | SaveCustomErc1155Variant>,
+			identity
+		});
 	};
 
 	const loadExtTokens = async ({ identity, customTokens }: LoadTokensParams) => {
@@ -86,7 +98,7 @@
 
 				return tokens.length > 0 ? [canisterId] : [];
 			} catch (error: unknown) {
-				console.warn(`Error fetching EXT tokens from canister ${canisterId}:`, error);
+				consoleWarn(`Error fetching EXT tokens from canister ${canisterId}:`, error);
 
 				return [];
 			}

@@ -5,7 +5,11 @@ import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.c
 import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
-import type { OpenCryptoPayResponse, PayableTokenWithFees } from '$lib/types/open-crypto-pay';
+import type {
+	OpenCryptoPayResponse,
+	PayableToken,
+	PayableTokenWithFees
+} from '$lib/types/open-crypto-pay';
 import { ScannerResults } from '$lib/types/scanner';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
@@ -154,13 +158,13 @@ describe('ScannerCode.svelte', () => {
 		]
 	};
 
-	const mockBaseTokens = [
+	const mockBaseTokens: PayableToken[] = [
 		{
 			...ETHEREUM_TOKEN,
 			amount: '0.01',
 			minFee: 0.001,
 			tokenNetwork: 'Ethereum'
-		}
+		} as PayableToken
 	];
 
 	const mockTokensWithFees: PayableTokenWithFees[] = [
@@ -177,13 +181,16 @@ describe('ScannerCode.svelte', () => {
 				},
 				estimatedGasLimit: 25n
 			}
-		}
+		} as PayableTokenWithFees
 	];
+
+	const mockOnOpenInfo = vi.fn();
 
 	const renderWithContext = () =>
 		render(ScannerCode, {
 			props: {
-				onNext: mockOnNext
+				onNext: mockOnNext,
+				onOpenInfo: mockOnOpenInfo
 			},
 			context: new Map([
 				[
@@ -289,7 +296,49 @@ describe('ScannerCode.svelte', () => {
 
 		await waitFor(() => {
 			expect(mockSetData).toHaveBeenCalledExactlyOnceWith(mockApiResponse);
-			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({ results: ScannerResults.PAY });
+		});
+	});
+
+	it('should call onNext with WALLET_CONNECT result for wc: URIs', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: 'wc:abc123@2?relay-protocol=irn' } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.WALLET_CONNECT,
+				code: 'wc:abc123@2?relay-protocol=irn'
+			});
+		});
+
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should not treat non-wc: URIs as WalletConnect', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockResolvedValue(mockApiResponse);
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: 'https://example.com/pay' } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				'https://example.com/pay'
+			);
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({ results: ScannerResults.PAY });
 		});
 	});
 
@@ -439,7 +488,7 @@ describe('ScannerCode.svelte', () => {
 			await fireEvent.click(button);
 			await waitFor(() => {
 				expect(mockSetsetAvailableTokens).toHaveBeenCalledExactlyOnceWith([]);
-				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
+				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({ results: ScannerResults.PAY });
 			});
 		});
 	});
@@ -482,7 +531,7 @@ describe('ScannerCode.svelte', () => {
 
 			await waitFor(() => {
 				expect(mockSetData).toHaveBeenCalledExactlyOnceWith(mockApiResponse);
-				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
+				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({ results: ScannerResults.PAY });
 			});
 		});
 
@@ -501,7 +550,7 @@ describe('ScannerCode.svelte', () => {
 
 			await waitFor(() => {
 				expect(mockSetData).toHaveBeenCalledExactlyOnceWith(mockApiResponse);
-				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
+				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({ results: ScannerResults.PAY });
 			});
 		});
 	});

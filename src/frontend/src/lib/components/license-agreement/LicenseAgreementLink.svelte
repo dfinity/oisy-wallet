@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { TRACK_OPEN_AGREEMENT } from '$lib/constants/analytics.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -33,7 +34,7 @@
 	class:text-brand-primary-alt={color === 'blue'}
 	aria-label={replaceOisyPlaceholders($i18n.license_agreement.alt.license_agreement)}
 	data-tid={testId}
-	href="/license-agreement"
+	href={AppPath.LicenseAgreement}
 	onclick={handleClick}
 	target="_blank"
 >

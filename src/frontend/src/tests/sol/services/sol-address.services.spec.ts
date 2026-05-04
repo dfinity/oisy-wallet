@@ -16,8 +16,7 @@ import {
 	getSolAddressMainnet,
 	loadSolAddressDevnet,
 	loadSolAddressLocal,
-	loadSolAddressMainnet,
-	validateSolAddressMainnet
+	loadSolAddressMainnet
 } from '$sol/services/sol-address.services';
 import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
@@ -116,24 +115,6 @@ describe('sol-address.services', () => {
 					})
 				},
 				err: error
-			});
-		});
-	});
-
-	describe('Validate and Certify Mainnet Address', () => {
-		it('should validate and certify a matching address', async () => {
-			spyGetSchnorrPublicKey.mockResolvedValue(mockPublicKey);
-
-			const addressStore = {
-				data: mockSolAddress,
-				certified: false
-			};
-
-			await validateSolAddressMainnet(addressStore);
-
-			expect(get(solAddressMainnetStore)).toEqual({
-				data: mockSolAddress,
-				certified: true
 			});
 		});
 	});

@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
-	import oisyEpisodeFour from '$lib/assets/oisy-episode-four-coming.svg';
+	import oisyNextEpisodeComing from '/images/rewards/oisy-next-episode-is-coming.webp';
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
@@ -41,7 +41,7 @@
 
 	{#if selectedRewardState === RewardStates.ONGOING}
 		<RewardsGroup
-			altImg={oisyEpisodeFour}
+			altImg={oisyNextEpisodeComing}
 			altText={replaceOisyPlaceholders($i18n.rewards.alt.coming_soon)}
 			rewards={ongoingCampaigns}
 			testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}

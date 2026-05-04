@@ -27,7 +27,7 @@ describe('btc-post-message.schema', () => {
 				}
 			};
 
-			expect(() => BtcPostMessageDataResponseWalletSchema.parse(invalidData)).toThrowError();
+			expect(() => BtcPostMessageDataResponseWalletSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should validate if balance is not a bigint because of zod custom', () => {

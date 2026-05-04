@@ -16,7 +16,7 @@ describe('network.schema', () => {
 		it('should fail validation with a string instead of a symbol', () => {
 			const invalidNetworkId = 'NetworkId';
 
-			expect(() => NetworkIdSchema.parse(invalidNetworkId)).toThrowError();
+			expect(() => NetworkIdSchema.parse(invalidNetworkId)).toThrow();
 		});
 	});
 
@@ -36,7 +36,7 @@ describe('network.schema', () => {
 		it('should fail validation with an unsupported network environment', () => {
 			const invalidEnv = 'unsupported-env';
 
-			expect(() => NetworkEnvironmentSchema.parse(invalidEnv)).toThrowError();
+			expect(() => NetworkEnvironmentSchema.parse(invalidEnv)).toThrow();
 		});
 	});
 
@@ -52,7 +52,7 @@ describe('network.schema', () => {
 			...validNetworkWithRequiredFields,
 			icon: 'https://example.com/icon.svg',
 			buy: { onramperId: 'icp' },
-			pay: { openCryptoPay: 'Internet Computer' }
+			pay: { openCryptoPay: 'InternetComputer' }
 		};
 
 		it('should validate a complete network', () => {
@@ -68,19 +68,19 @@ describe('network.schema', () => {
 		it('should fail validation when id is missing', () => {
 			const { id: _, ...invalidNetwork } = validNetwork;
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
 		it('should fail validation when env is missing', () => {
 			const { env: _, ...invalidNetwork } = validNetwork;
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
 		it('should fail validation when name is missing', () => {
 			const { name: _, ...invalidNetwork } = validNetwork;
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
 		it('should fail validation when icon is not a valid SVG string', () => {
@@ -89,7 +89,7 @@ describe('network.schema', () => {
 				icon: 'https://example.com/invalid-icon.png'
 			};
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
 		it('should fail validation when iconBW is not a valid SVG string', () => {
@@ -98,7 +98,7 @@ describe('network.schema', () => {
 				icon: 'https://example.com/invalid-icon-bw.png'
 			};
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
 		it('should accept supportsNft value as true', () => {

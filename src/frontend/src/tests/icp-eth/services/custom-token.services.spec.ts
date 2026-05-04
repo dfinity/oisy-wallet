@@ -110,7 +110,7 @@ describe('custom-token.services', () => {
 					}
 				});
 
-				expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
+				expect(spyListCustomTokens).toHaveBeenCalledWith();
 			};
 
 			it.each([undefined, IC_CKBTC_INDEX_CANISTER_ID])(
@@ -181,7 +181,7 @@ describe('custom-token.services', () => {
 
 					expect(result).toBe('loaded');
 
-					expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
+					expect(spyListCustomTokens).toHaveBeenCalledWith();
 
 					expect(spyMetadata).toHaveBeenCalledWith({ certified: true });
 
@@ -242,9 +242,8 @@ describe('custom-token.services', () => {
 
 				expect(result).toBe('loaded');
 
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).init.error.icrc_canisters },
-					err
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: get(i18n).init.error.load_token_list }
 				});
 			});
 

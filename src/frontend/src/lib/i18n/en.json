@@ -41,7 +41,12 @@
 			"more": "More",
 			"less": "Less",
 			"ellipsis": "…",
-			"learn_more": "Learn more"
+			"learn_more": "Learn more",
+			"sorting": "Sorting",
+			"unlimited": "Unlimited $items",
+			"info": "Info",
+			"asset": "Asset",
+			"got_it": "Got it"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -57,11 +62,12 @@
 			"switch_currency": "Switch currency",
 			"more": "Show full text",
 			"less": "Show less text",
-			"learn_more": "Follow the link to learn more"
+			"learn_more": "Follow the link to learn more",
+			"up_one_level": "Go up one level"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
-			"standalone_mode": "We improved how $oisy_short operates when it's installed on a home&nbsp;screen, like you have. If you encounter issues connecting $oisy_short or signing transactions, please remove $oisy_short from the home&nbsp;screen and install it again. On iPhones, make sure to deselect “Open as Web App”.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>",
+			"standalone_mode": "There are known connection issues when both an app and $oisy_short are installed on a home&nbsp;screen. If you encounter issues connecting $oisy_short or signing transactions, please start the app from a regular browser. We are working on a fix and it will be resolved soon. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>",
 			"video_not_supported": "Your browser does not support video playback."
 		}
 	},
@@ -73,10 +79,11 @@
 			"activity": "Activity",
 			"airdrops": "Rewards",
 			"earning": "Earn",
+			"pay": "$oisy_short PAY",
+			"wallet_connect": "WalletConnect",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
-			"changelog": "Changelog",
 			"documentation": "Documentation",
 			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
@@ -95,8 +102,9 @@
 			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
+			"pay": "Open the $oisy_short PAY",
+			"wallet_connect": "Open the WalletConnect",
 			"menu": "Your wallet address, settings, sign-out and external links",
-			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
@@ -115,19 +123,31 @@
 		"text": {
 			"title_part_1": "Your Digital Assets",
 			"title_part_2": "Private and Secure",
+			"description": "Open your wallet or create one in seconds",
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
+			"sign_in_or_sign_up": "Log in or sign up",
+			"internet_identity": "Internet Identity",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
-			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
-			"social_login": "Instant and private access + social login"
+			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
+			"move_swap_grow": "Move, swap, and grow your assets across networks"
 		},
 		"alt": {
-			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
+			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile",
+			"sign_in_with_google": "Sign in with Google",
+			"sign_in_with_apple": "Sign in with Apple",
+			"sign_in_with_microsoft": "Sign in with Microsoft"
 		},
 		"message": {
 			"session_locked": "Your session was locked in another tab."
+		},
+		"info": {
+			"signups_closed": "New sign-ups are currently restricted. Please try again later."
+		},
+		"banner": {
+			"signups_closed": "Currently, sign-ups of new users are not possible. Existing users can use $oisy_short normally."
 		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
@@ -136,12 +156,6 @@
 		},
 		"error": {
 			"no_internet_identity": "No internet identity.",
-			"invalid_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential. Please contact the issuer and request the credential again.",
-			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in $oisy_short: $error",
-			"error_validating_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential.",
-			"error_requesting_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
-			"missing_pouh_issuer_origin": "Sorry, but there was an error while requesting the Humanity Credential. The issuer origin is missing.",
-			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?",
 			"error_while_signing_in": "Something went wrong while sign-in.",
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
 		},
@@ -152,7 +166,7 @@
 				"login_page_looks_different": "Why does the login page look different?",
 				"use_identity_number": "I want to use my Internet Identity number",
 				"feedback_text": "Your feedback helps us to make $oisy_short better.",
-				"thanks_text": "Thank you!",
+				"thanks_text": "Thank you.",
 				"useful_links": "Useful links",
 				"identity_new_identity": "$oisy_short Wallet switches the Internet Identity domain to: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name switches to Internet Identity 2.0",
@@ -347,11 +361,10 @@
 			},
 			"caffeine": {
 				"name": "Caffeine",
-				"one_liner": "The first platform for building self-writing apps.",
-				"call_to_action": "Try Caffeine",
-				"description": "Caffeine is the first platform for building self-writing apps. Just talk to AI on desktop or mobile, and it creates apps and services for you – including ones that connect to OISY Wallet. Experience the future of app development with AI-powered creation.",
+				"one_liner": "Create the future internet, one app at a time. Chat with AI on Caffeine to create apps and websites.",
+				"description": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing, which grants them incredible security and resilience, and provides a guarantee that a mistake during a software update cannot cause data loss. AI writes your backend software using Motoko, the first programming language for AI, and runs your apps on the revolutionary Internet Computer network (ICP).",
 				"carousel": {
-					"text": "Hello, self-writing internet",
+					"text": "Chat to create!",
 					"call_to_action": "Learn more"
 				}
 			},
@@ -430,6 +443,40 @@
 				"name": "Parcl",
 				"one_liner": "A Solana‑based perpetuals exchange offering synthetic real‑estate markets—trade real‑estate price indexes with cross‑margin and LP‑backed liquidity.",
 				"description": "Parcl is a Solana-based decentralized exchange for real-estate price perpetuals, enabling users to long or short synthetic property indexes. It uses price data from Parcl Labs and LP-backed liquidity for cross-margined trading. The protocol is tailored to traders seeking exposure to real-world asset performance without holding the underlying property."
+			},
+			"liquidium": {
+				"name": "Liquidium",
+				"one_liner": "Borrow & lend native Bitcoin against USDT.",
+				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes.",
+				"carousel": {
+					"text": "Borrow & lend native Bitcoin against USDT",
+					"call_to_action": "Learn more"
+				}
+			},
+			"icpindex": {
+				"name": "ICP Index",
+				"one_liner": "Fully on-chain analytics and trading dashboard built entirely on the Internet Computer!",
+				"description": "ICP Index is a fully on-chain analytics and trading dashboard built entirely on the Internet Computer. It's a comprehensive dashboard which helps you track everything related to the Internet Computer. Tokens, on-chain statistics, and much more to come!",
+				"carousel": {
+					"text": "Extensive token index and analytics on ICP",
+					"call_to_action": "Learn mode"
+				}
+			},
+			"icexplorer": {
+				"name": "IC Explorer",
+				"one_liner": "IC Explorer is a Block Explorer and Analytics Platform for ICP",
+				"description": "ICExplorer is a next-generation blockchain explorer hosted on the Internet Computer, paving the way to become the premier on-chain AI-driven data factory in the blockchain ecosystem. By integrating data from the ICP blockchain, Web3 platforms, and Web2 sources, ICExplorer transforms fragmented datasets into a unified, intelligent, and scalable analytics platform."
+			},
+			"icpixel": {
+				"name": "ICPixel",
+				"one_liner": "Create, animate, and export pixel art directly in your browser.",
+				"description": "ICPixel is a free online pixel art editor that runs entirely in your browser. Create sprites, pixel animations, and game assets with layers, timeline tools, and modern export options — no download required."
+			},
+			"motoko_tokyo": {
+				"name": "Motoko Tokyo",
+				"one_liner": "The hunt has begun in search of the elusive Motoko Tokyo and the Nightscroller Syndicate can use your help...",
+				"call_to_action": "Come find me when you're ready...",
+				"description": "Where in the World is Motoko Tokyo is a global, blockchain‑powered puzzle adventure built on the Internet Computer Protocol (ICP). Join an exclusive agency and collaborate with players worldwide to unravel a series of cryptic riddles. Every successful solution brings you one step closer to tracking down Motoko Tokyo. In each round, the first player to solve all riddles claims the bounty and secures a coveted spot on the leaderboard."
 			}
 		}
 	},
@@ -448,9 +495,9 @@
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
 			"open_wallet": "Take me to the wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles Episode 5 is now Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 6 is now Live!",
 			"carousel_slide_cta": "Learn more",
-			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
+			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! 🎉",
 			"youre_eligible": "You're eligible!",
 			"not_eligible": "Not eligible",
 			"ongoing": "Ongoing",
@@ -467,13 +514,13 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
-			"coming_soon": "$oisy_short episode 6 is coming soon",
+			"coming_soon": "Next $oisy_short sprinkles episode is coming soon",
 			"reward_banner": "Banner of the campaign $campaignName"
 		},
 		"campaigns": {
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 3 is Live \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episode 3 has ended",
 				"one_liner": "Earn BTC for being active—and now, for <strong>inviting friends</strong>.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer a friend, and earn 10% of the value of their rewards for the entire campaign.",
 				"participate_title": "Earn BTC by staying active - and now by inviting others.",
 				"description": "Meet simple weekly requirements. Log in, make two transactions, and hold at least $20 in tokens to stay eligible for one of 50 BTC drops every day.<br/><strong>Now with referral rewards:</strong> invite a friend to deploy a wallet and earn 10% of their Sprinkles for 30 days. They keep 100% - you earn extra.",
@@ -498,7 +545,7 @@
 			},
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 4 is Live \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episode 4 has ended",
 				"one_liner": "Earn BTC for staying active — and now, earn <strong>guaranteed</strong> Sprinkles for referrals.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer 4 friends and get rewarded directly. Top referrers win even more.",
 				"participate_title": "Earn BTC by staying active - and now by inviting others.",
 				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Now with referral rewards: invite a friend to set up a wallet and you’ll both earn guaranteed Sprinkles. Land in the top 4 referrers and win a jackpot.",
@@ -516,7 +563,7 @@
 					},
 					"jackpot": {
 						"title": "You've won the jackpot",
-						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more",
+						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more.",
 						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
 					},
 					"leaderboard": {
@@ -538,7 +585,7 @@
 			},
 			"sprinkles_s1e5": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 5 is Live 🤑",
+				"card_title": "OISY Sprinkles: Episode 5 has ended",
 				"one_liner": "Earn Sprinkles for being active, referring others, and using OISY across chains. Your actions grow your rewards, and active referrals boost them further.<br/>Plus, now more chains means better chances to win.",
 				"participate_title": "Earn tokens for activity and referrals. More chains mean more chances.",
 				"description": "Stay active over 10 days to qualify: log in often, complete wallet actions, and hold at least $20.<br/>Each active chain boosts your odds with a Multichain Multiplier.<br/>Earn 10% from friends who qualify, and rank top 3 to win a $200 Super Sprinkle.",
@@ -563,6 +610,36 @@
 						"title": "You topped the Leaderboard",
 						"description": "You ranked among the top 3 referrers this season<br>$200 has been added to your wallet",
 						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+					},
+					"referral": {
+						"title": "Here a small thank you",
+						"description": "One of your referred users just got some sprinkles.",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episode 6 is live 🎉",
+				"one_liner": "Earn Sprinkles for being active, referring others, and using OISY across chains. Your actions grow your rewards, and active referrals boost them further.<br/>Plus, now more chains means better chances to win.",
+				"participate_title": "Earn tokens for activity and referrals. More chains mean more chances.",
+				"description": "Stay active to qualify: log in often, complete wallet actions, and hold at least $5.<br/>Each active chain boosts your odds with a Multichain Multiplier.<br/>Earn 10% from friends who qualify.",
+				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"welcome": {
+					"title": "Welcome to $oisy_short!",
+					"subtitle": "Ready to Earn?",
+					"description": "You're 2 steps away from your first reward: Log in, hold $5+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer your friends and get a bonus every time one of them earns sprinkles."
+				},
+				"win": {
+					"default": {
+						"title": "You got rewarded",
+						"description": "Your rewards just landed in your wallet<br>Don't forget to refer and stay active to win more",
+						"share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
+					},
+					"jackpot": {
+						"title": "Congratulations on earning today’s largest OISY Sprinkles!",
+						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more.",
+						"share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
 					},
 					"referral": {
 						"title": "Here a small thank you",
@@ -645,7 +722,9 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
-			"icrc_canister_loading": "The token with Ledger canister $ledgerCanisterId could not be loaded because it’s currently not responding.",
+			"load_token_list": "Something went wrong loading your token list. Please reload the page to try again.",
+			"icrc_canister_loading_curated": "The $tokenSymbol token is not responding and can't be loaded right now. Try again later.",
+			"icrc_canister_loading_custom": "The token with ledger canister $ledgerCanisterId is not responding and can't be loaded right now. Try again later.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc4626_custom_tokens": "Error while loading the ERC4626 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
@@ -655,6 +734,7 @@
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"ext_custom_tokens": "Error while loading the EXT custom tokens.",
 			"icpunks_custom_tokens": "Error while loading the ICPunks custom tokens.",
+			"custom_tokens": "Error while loading the custom tokens.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
 			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
@@ -690,11 +770,6 @@
 			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions from inactive networks will not show or be included in your available balance.",
 			"enable_network": "Enable network",
 			"disable_network": "Disable network",
-			"credentials_title": "Credentials",
-			"pouh_credential": "Humanity Credential",
-			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
-			"present_pouh_credential": "Present",
-			"pouh_credential_verified": "Verified ✅",
 			"appearance": "Appearance",
 			"appearance_light": "Light",
 			"appearance_dark": "Dark",
@@ -705,7 +780,13 @@
 			"beta_features": "Beta features",
 			"enable_beta_feature": "Enable beta feature",
 			"disable_beta_feature": "Disable beta feature",
-			"save_beta_feature_success": "Your beta feature settings have been updated."
+			"save_beta_feature_success": "Your beta feature settings have been updated.",
+			"hide_micro_transactions": "Hide transactions with very small values",
+			"hide_micro_transactions_description": "Transactions with very small values are typically spam and intend to trick a user into copying their sender address instead of a valid one. Hiding them in transaction lists is recommended.",
+			"enable_hide_micro_transactions": "Enable hiding of transactions with very small values",
+			"disable_hide_micro_transactions": "Disable hiding of transactions with very small values",
+			"save_spam_filter_success": "Your spam filter settings have been updated.",
+			"learn_more": "Learn more"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -817,6 +898,7 @@
 	"send": {
 		"text": {
 			"send": "Send",
+			"send_token": "Send $token",
 			"destination": "Destination",
 			"source": "Source",
 			"balance": "Balance",
@@ -920,8 +1002,11 @@
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
-			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again.",
+			"solana_transaction_expired": "Your transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try again.",
 			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
+			"solana_insufficient_funds": "Your token balance is not sufficient to complete this transaction. Your balance may have changed since it was last displayed.",
+			"solana_insufficient_funds_for_fee": "Your SOL balance is not sufficient to cover the transaction fees.",
+			"solana_insufficient_funds_for_rent": "Your SOL balance is not sufficient to cover the rent required for account creation.",
 			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
 		}
 	},
@@ -969,7 +1054,14 @@
 			"pay_at_failure": "Failed to pay at $receipt",
 			"try_again": "Try again",
 			"payment_confirmed": "Payment Confirmed",
-			"payment_failed": "Payment Failed"
+			"payment_failed": "Payment Failed",
+			"what_is_scan": "What is the scanner",
+			"no_camera_permission": "To scan QR codes, you need to allow camera access in your browser's site settings.",
+			"what_is_scan_description": "The $oisy_short scanner can read a variety of QR codes and initiate the correct action right away. Scan a WalletConnect QR code to establish a new connection, or scan the checkout code at any shop that uses Open CryptoPay to settle the bill with $oisy_short Pay.",
+			"what_is_scan_title": "$oisy_short understands any QR code",
+			"learn_more_about_scan": "Learn more about the scanner",
+			"learn_more_about_pay": "Learn more about $oisy_short Pay",
+			"scanner": "Scanner"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
@@ -1020,6 +1112,9 @@
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized.",
 			"unexpected": "Something went wrong while converting tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "Converting USDC from/to ckUSDC is currently suspended."
 		}
 	},
 	"swap": {
@@ -1061,10 +1156,16 @@
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
 			"withdrawing": "Withdrawing...",
+			"bridging": "Bridging... (Please be patient, this can take up to a minute.)",
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
-			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network"
+			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
+			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
+			"near_intents_tos": "By clicking the \"Swap now\" button, you agree to the <a href=\"$link\" target=\"_blank\" rel=\"external noopener noreferrer\" class=\"underline\">Terms of Service</a> of 1Click Swap API. If you do not agree with those terms, do not use this swap provider.",
+			"onesec_transfer_fee": "Transfer fee",
+			"onesec_protocol_fee": "Protocol fee",
+			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed."
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -1081,7 +1182,9 @@
 			"manually_withdraw_success": "The tokens from your previous failed swap were successfully withdrawn. You can try the swap again or change the swap provider.",
 			"manually_withdraw_failed": "Withdrawing your funds failed. <br> Please try again or follow",
 			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
-			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal."
+			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
+			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page.",
+			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again."
 		}
 	},
 	"buy": {
@@ -1142,7 +1245,16 @@
 			"hide_more_networks": "Hide more networks",
 			"on_network": " on $network",
 			"delete_token": "Delete token",
-			"edit_token": "Edit token"
+			"edit_token": "Edit token",
+			"sort_by_value": "Value",
+			"sort_by_performance": "Token performance",
+			"sort_by_symbol": "Symbol",
+			"hide_asset_types": "Hide asset types",
+			"asset_type": "Asset type in $oisy_name",
+			"asset_type_all": "All asset types",
+			"no_tokens_for_asset_type": "There are no $asset_type in your wallet",
+			"no_tokens_for_asset_type_zero_tokens": "There are no $asset_type in the selected network",
+			"no_tokens_for_asset_type_description": "Choose from <strong>$count supported tokens</strong> to customize your portfolio view."
 		},
 		"details": {
 			"title": "Token details",
@@ -1259,6 +1371,7 @@
 			"unrecognised_erc_interface": "Unrecognised ERC interface.",
 			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
+			"version_mismatch": "The token has been updated since it was loaded. Please check its status again and repeat the operation if needed.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
@@ -1267,6 +1380,23 @@
 			"unexpected_undefined": "Token is undefined. This is unexpected.",
 			"unexpected_error_on_token_delete": "Something went wrong while removing the token.",
 			"unexpected_error_on_token_update": "Something went wrong while updating the token."
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "Category",
+			"risk": "Risk"
+		},
+		"category": {
+			"crypto": "Crypto",
+			"stablecoin": "Stablecoins",
+			"stock": "Stocks",
+			"commodity": "Commodities"
+		},
+		"risk": {
+			"low": "Low risk",
+			"medium": "Medium risk",
+			"high": "High risk"
 		}
 	},
 	"nfts": {
@@ -1281,7 +1411,6 @@
 			"by_collection": "Group by collection",
 			"show_spam": "Show spam",
 			"show_hidden": "Show hidden",
-			"sorting": "Sorting",
 			"recents_first": "Recents first",
 			"oldest_first": "Oldest first",
 			"collection_atoz": "Collection name A-Z",
@@ -1404,7 +1533,10 @@
 			"amount": "Amount",
 			"hex_data": "HEX Data",
 			"raw_copied": "Raw transaction data copied to clipboard.",
-			"sign_message": "Sign Message"
+			"sign_message": "Sign Message",
+			"connected_apps": "Connected Apps",
+			"no_connected_apps": "No apps are currently connected.",
+			"wallet_connect": "WalletConnect"
 		},
 		"alt": {
 			"connect_input": "e.g. wc:a281567bb3e4..."
@@ -1497,8 +1629,6 @@
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
-			"twin_token_sent": "$twinToken sent",
-			"ck_token_sent": "$ckToken sent",
 			"twin_token_converted": "Converted from $twinToken",
 			"ck_token_converted": "Converted from $ckToken",
 			"sending_twin_token": "Sending $twinToken",
@@ -1716,20 +1846,13 @@
 			"title": "Scan QR code"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Preparing Signer",
-			"description": "Verifying that you are not a robot",
-			"request_challenge": "Waiting for new challenge",
-			"solve_challenge": "Solving challenge",
-			"grant_cycles": "Enabling signing"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Access your $oisy_name",
-				"open_or_create": "Open or create your wallet to securely connect to the dApp and start managing your assets."
+				"open_or_create": "Open or create your wallet to securely interact with the application.",
+				"connect_your_wallet": "Connect your $oisy_name",
+				"oisy_protects_you": "OISY protects you!",
+				"oisy_protects_you_description": "Applications can't directly access your funds, and each transaction has to be confirmed by you."
 			}
 		},
 		"idle": {
@@ -1824,7 +1947,7 @@
 				"possessive": "our "
 			},
 			"title": "Terms Of Use",
-			"instruction": "By clicking this button, you agree to the $link",
+			"instruction": "By signing in, you agree to the $link",
 			"body": "Effective Date: $date\n\n### 1. Acceptance of Terms\n\nBy using OISY Wallet, the website at oisy.com, or any other services from which we link to these Terms of Use (“Services”), you agree with us, the DFINITY Foundation, including our affiliates and subsidiaries (collectively “DFINITY”), to these Terms of Use and our <a href=\"/license-agreement/\" target=\"_self\">License Agreement</a> (collectively “Agreement”). To the extent of any conflict or inconsistency between these Terms of Use and the License Agreement, the Terms of Use shall prevail. If you do not agree, do not use our Services. By using our Services, you warrant that you are at least 18 years old.\n\n### 2. Description of our Services\n\n* The OISY Wallet is a browser-based, self-custodial and multi-chain wallet decentralized application hosted on the Internet Computer public blockchain network, and allows you to access certain tokens supported by the OISY Wallet and other third party services. We do not own, control or operate such third parties and you use third party services at your own risk.\n* Some OISY Wallet features are experimental or in beta.\n\n### 3. Account Access and Security\n\nYou are responsible for both:\n\n* Making all arrangements necessary for you to have access to the Website.\n* Safeguarding your access credentials, including your Internet Identity.\n\nWe are unable to restore access to your account if you lose your Internet Identity or if it is otherwise compromised.\n\nTo access the Website or some of the resources it offers, you may be asked to provide certain registration details or other information. It is a condition of your use of the Website that all the information you provide on the Website is correct, current, and complete. You agree that all information you provide to register with this Website or otherwise, including, but not limited to, through the use of any interactive features on the Website, is governed by our _<a href=\"/privacy-policy/\" target=\"_self\">Privacy Policy</a>_, and you consent to all actions we take with respect to your information consistent with our Privacy Policy.\n\nYou agree to ensure that you exit from your account at the end of each session. You should use particular caution when accessing your account from a public or shared computer so that others are not able to view or record your password or other personal information.\n\nYou also acknowledge that We do not have custody, access, or control of the funds in your OISY wallet. You acknowledge that OISY wallet is exclusively user-controlled.\n\n### 4. Warranty disclaimer and limitation of liability\n\nTO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, OUR SERVICES ARE PROVIDED ON AN \"AS IS\" BASIS, WITHOUT WARRANTY OF ANY KIND, INCLUDING THAT OISY DOES NOT PROVIDE A WARRANTY OR GUARANTEE FOR ANY LOSS OF FUNDS OR TECHNICAL FAILURES. YOU ASSUME THE RISKS OF USING DECENTRALIZED INFRASTRUCTURE AND ACKNOWLEDGE THAT WE ARE NOT RESPONSIBLE FOR ANY LOSS OF FUNDS, REGARDLESS OF THE CAUSE OF THE LOSS.\n\nTO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, DFINITY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OR CONDITIONS OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, TITLE, QUALITY, RESULTS, AND NON-INFRINGEMENT. DFINITY DOES NOT GUARANTEE THAT THE SERVICES WILL ALWAYS BE AVAILABLE, SAFE, OR SECURE (NOW AND IN THE FUTURE). DFINITY EXPRESSLY DISCLAIMS ANY WARRANTIES OF ANY KIND WITH RESPECT TO THE ACCURACY OR FUNCTIONALITY OF THE SERVICES, AND WITH RESPECT TO THE ACCURACY, VALIDITY, OR COMPLETENESS OF ANY INFORMATION OR FEATURES (NOW AND IN THE FUTURE) MADE AVAILABLE THROUGH YOUR USE OF THE SERVICES, OR THE QUALITY OR CONSISTENCY OF THE SERVICES OR RESULTS OBTAINED THROUGH ITS USE. DFINITY DOES NOT GUARANTEE THAT THE SERVICES CAN TRANSFER TITLE OR RIGHT IN ANY TOKEN OR DIGITAL ASSET OR MAKE ANY WARRANTIES WHATSOEVER WITH REGARD TO TITLE. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, UNDER NO CIRCUMSTANCES WILL DFINITY BE LIABLE FOR ANY CONSEQUENTIAL, SPECIAL, INDIRECT, INCIDENTAL OR PUNITIVE DAMAGES WHATSOEVER ARISING OUT OF THE USE OR INABILITY TO USE AND ACCESS THE SERVICES OR DFINITY MATERIALS OR ANY THIRD PARTY ITEMS AS DEFINED HEREIN, EVEN IF DFINITY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, AND NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED REMEDY. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL DFINITY'S AGGREGATE LIABILITY FOR DAMAGES ARISING OUT OF THIS AGREEMENT OR YOUR USE OR INABILITY TO USE THE SERVICES EXCEED CHF 100.\n\n### 5. Indemnity\n\nYou agree to indemnify, defend and hold DFINITY and its affiliates, officers, directors, suppliers, licensors, and other customers harmless from and against any and all liability and costs, including reasonable attorneys' fees incurred by such parties, in connection with your use or misuse of our Services or your violation of this Agreement or any applicable law or regulation.\n\n### 6. Rewards programs\n\nBy participating in our rewards programs, you agree to the [OISY REWARDS INITIATIVE - TERMS AND CONDITIONS](https://docs.oisy.com/rewards/oisy-sprinkles/t-and-cs), which is incorporated herein and subject to change from time to time.\n\n### 7. Compliance with laws and acceptable use\n\nYou will comply with all applicable laws and regulations (including without limitation laws and regulations related to export controls, money laundering or economic sanctions) in connection with your use of the Services. You will not use our Services for any unlawful purposes, or in ways that violate or infringe the rights of any DFINITY entity, other users, or other persons.\n\n### 8. Tax Liability\n\nYou are responsible for complying with all applicable federal, state, and local laws and regulations regarding collection and payment of taxes and fees.\n\n### 9. Governing law; venue\n\nAny claim relating to the Services shall be governed by the laws of Switzerland, to the exclusion of the rules on conflicts of laws. Any claim or dispute related to this Agreement or in relation to it shall (including for non-contractual disputes or claims and their interpretation) be subject to the exclusive jurisdiction of the Courts of Zurich, Switzerland, subject to an appeal at the Swiss Federal Court.\n\n### 10. Third parties and other apps\n\nWe do not own, control, endorse or adopt any third party content, apps, services, websites, or other items (“Third Party Items”) you may see or connect with when using our Services. We disclaim any responsibility related to or arising out of Third Party Items. Your use, dealings, or correspondence with third parties and Third Party Items are solely between you and the third party and you do so at your own risk.\n\nNothing in this Agreement, express or implied, is intended to or shall confer any rights, benefits, or remedies on any third party, including other users of our Services.\n\n### 11. Severability\n\nIn the event that any provision of these Terms of Use is determined to be unlawful, void or unenforceable, such provision shall nonetheless be enforceable to the fullest extent permitted by applicable law, and the unenforceable portion shall be deemed to be severed from these Terms of Use, such determination shall not affect the validity and enforceability of any other remaining provisions.\n\n### 12. Terms and termination\n\nThis Agreement will remain in effect until terminated. The Agreement, and your rights and licenses hereunder, will terminate immediately upon your breach of the Agreement. DFINITY may terminate this Agreement at any time for any reason, including without limitation any actual or suspected misuse or abuse by you of the Services or any violation of this Agreement.\n\n### 13. Entire Agreement\n\nThe failure of us to exercise or enforce any right or provision of these Terms of Use shall not constitute a waiver of such right or provision.\n\nThese Terms of Use and any policies or operating rules posted by us on this site or in respect to the Service constitutes the entire agreement and understanding between you and us and governs your use of the Service, superseding any prior or contemporaneous agreements, communications and proposals, whether oral or written, between you and us (including, but not limited to, any prior versions of the Terms of Use).\n\nAny ambiguities in the interpretation of these Terms of Use shall not be construed against the drafting party.\n\n### 14. Personal Information\n\nPlease review our <a href=\"/privacy-policy/\" target=\"_self\">Privacy Policy here</a>.\n\nIf you use the OISY Wallet or other third party services and blockchain technologies, you share information with a global community that is separate and independent from us and not controlled by us. Because blockchains are decentralized and third party services are not controlled or operated by us or our affiliates, we are not able to control, erase, modify, or alter personal data processed during the use of such blockchain technologies.\n\n### 15. Changes to Terms\n\nWe may update this Agreement at our sole discretion. Continued use constitutes acceptance of changes.\n\n### 16. Contact\n\nFor inquiries, visit [support@oisy.com](mailto:support@oisy.com)."
 		},
 		"alt": {
@@ -1850,7 +1973,8 @@
 			"title": "Recent Activity"
 		},
 		"info": {
-			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
+			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified.",
+			"hidden_micro_transactions": "<strong>OISY protects you!</strong> Transactions with very small token values are currently hidden. To show them, go to <a href=\"/settings/\">Settings</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
@@ -1867,23 +1991,24 @@
 			"go_to_earn": "Go to Earn"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "Earn with Gold",
-				"description": "Stake GLDT to earn daily rewards in governance tokens, unlocking passive income from gold holdings.",
-				"action": "Stake GLDT"
+			"harvest_autopilot": {
+				"title": "Harvest - Autopilot",
+				"description": "Maximized yield efficiency with 1-click autopilot vaults.",
+				"action": "Go to Autopilot"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Use OISY and EARN! Ep. 5 is live \uD83C\uDF89",
+				"description": "Use OISY and EARN! Ep. 6 is live 🎉",
 				"action": "Check status"
 			}
 		},
 		"card_fields": {
 			"apy": "APY",
+			"networks": "Networks",
+			"assets": "Assets",
 			"currentStaked": "Staked",
 			"currentEarning": "Currently earning",
-			"earningPotential": "Additional earning potential",
+			"earningPotential": "Earning potential",
 			"terms": "Terms"
 		},
 		"terms": {
@@ -1895,13 +2020,34 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "Autopilot",
+			"live_apy": "Live APY"
+		}
+	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
-			"stake": "Stake $token_symbol",
+			"harvest_autopilot_page_description": "Maximized yield efficiency with 1-click autopilot vaults.",
+			"harvest_autopilot_vault_page_description": "Autopilot is powered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">audited IPOR</a> Fusion Vault technology.",
+			"harvest_autopilot_provider_description": "Harvest Autopilot is a specialized \"set-and-forget\" service that automates your DeFi positions with minimal effort.",
+			"harvest_autopilot_stake_terms": "I confirm that I have read and understand the product, have read the <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">Risk Disclosures</a>, and agree to the <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">Terms and Conditions</a>.",
+			"my_positions": "My positions",
+			"available_autopilots": "Available autopilots",
+			"vault_info": "Vault info",
+			"vault_address": "Vault address",
+			"protocol": "Protocol",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "Total Value Locked (TVL)",
+			"manager": "Manager",
+			"vault_description": "This pool is designed as a \"set-and-forget\" yield management service for your $asset_symbol holdings. It automatically optimizes your DeFi position with minimal effort on your part by dynamically allocating capital to the best opportunities.",
+			"stake": "Stake",
 			"stake_now": "Stake now",
 			"stake_amount": "Stake $amount $token_symbol",
 			"not_enough_to_stake": "No $token_symbol to stake",
+			"estimated_received": "Est. Received",
+			"estimated_yearly_yield": "Est. Yearly Yield",
 			"unstake": "Unstake",
 			"unstake_now": "Unstake now",
 			"unstaking": "Unstaking...",
@@ -1912,14 +2058,16 @@
 			"executing_transaction": "Executing transaction...",
 			"unsupported_token_staking": "Staking for the selected token is not supported.",
 			"provider": "Staking terms provided by $provider",
-			"earning_potential": "Additional earning potential",
+			"earning_potential": "Earning potential",
 			"earning_potential_hint": "Based on the value of your not invested assets and the highest APY of the available earning opportunities.",
-			"active_earning": "Currently earning",
+			"active_earning": "Active earning",
 			"active_earning_per_year": "$amount/year",
+			"active_earning_per_year_short": "$amount/yr",
 			"unproductive_assets": "Available",
 			"invested_assets": "Allocated",
 			"visit_provider": "Visit website",
 			"current_apy_label": "Current APY",
+			"max_apy_label": "Max. APY",
 			"stake_review_subtitle": "You stake",
 			"unstake_review_subtitle": "You unstake",
 			"delayed_dissolve": "Receive with a delay",
@@ -1942,7 +2090,7 @@
 			"claim_now": "Claim now",
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",
-			"get_tokens": "Get more $token_symbol",
+			"get_asset_tokens": "Get $token_symbol",
 			"reward_claimed": "Reward claimed",
 			"staked": "Staked",
 			"unstaked": "Unstaked",
@@ -1953,38 +2101,25 @@
 			"description_empty": "It looks like you haven't staked any tokens yet",
 			"full_history": "Show full history",
 			"recent_history": "Close full history",
-			"gldt_stake_carousel_slide_title": "Earn APY with Gold DAO Staking",
-			"gldt_stake_carousel_slide_cta": "Learn more"
+			"harvest_autopilot_carousel_slide_title": "Earn in OISY with Harvest Autopilot Yield Farming",
+			"harvest_autopilot_carousel_slide_cta": "Learn more"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens.",
 			"unexpected_error_on_unstake": "Something went wrong while unstaking tokens.",
+			"unexpected_error_on_stake": "Something went wrong while staking tokens.",
 			"dissolvement_limit_reached": "You reached the maximum of $limit active unlock requests. Complete some before creating a new one.<br/>Note that you can always unstake using the ‘immediately’ option."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "Current APY $apy%",
-				"item1_description": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
-				"item2_title_1": "Staking rewards are being paid in ",
-				"item2_title_2": " GOLDAO tokens",
-				"item3_title": "Unlock delay of 1 week",
-				"item3_description": "When unlocking GLDT from staking, the tokens are locked for 1 week without receiving any further rewards, before they can be withdrawn. You can pay a 5% fee on your stake to unlock immediately.",
-				"item4_title": "Age bonus",
-				"item4_description": "GLDT stakes start obtaining an age bonus from day 1. The older the stakes, the bigger the age bonus, growing linearly at 100% per year.",
-				"item5_title": "When you start unlocking your GLDT stake, you will no longer receive new rewards"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "What is GLDT",
-				"description": "GLDT stands for “Gold Token”, being a fungible token backed by GLD NFTs. GLD NFTs are NFTs that represent irrefutable ownership of physical gold bars. 1 GLDT represents exactly 0.01g of gold, and GLD NFTs can be swapped at a ratio of 1g for 100 GLDTs.",
-				"fact_1_title": "Backed by real gold",
-				"fact_1_description": "Every GLDT token is backed by actual gold stored in secure vaults",
-				"fact_2_title": "Flexible terms",
-				"fact_2_description": "No lock-up periods, stake and unstake anytime you want",
-				"fact_3_title": "Stable returns",
-				"fact_3_description": "Earn $apy% APY with minimal volatility risk",
-				"fact_3_description_fallback": "Earn consistent rewards with minimal volatility risk"
+			"harvest_autopilot": {
+				"title": "What is Harvest Autopilot",
+				"description": "Harvest Autopilot is a specialized feature (and a specific product line) within the Harvest Finance ecosystem designed to automate and optimize your decentralized finance (DeFi) positions with minimal effort.",
+				"fact_1_title": "Smart Yield Allocation",
+				"fact_1_description": "Automatically switches protocols to capture the highest live APY.",
+				"fact_2_title": "Passive Compounding",
+				"fact_2_description": "Rewards are automatically harvested and reinvested to maximize your growth.",
+				"fact_3_title": "Gas Cost Sharing",
+				"fact_3_description": "Lowers your expenses by pooling transactions with other users to save on gas."
 			}
 		},
 		"alt": {
@@ -2030,7 +2165,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short AI Assistant",
-			"welcome_message": "Hello there! \uD83D\uDC4B I'm your personal AI concierge. How can I help you?",
+			"welcome_message": "Hello there! 👋 I'm your personal AI concierge. How can I help you?",
 			"action_button_contacts_title": "Show contacts",
 			"action_button_contacts_subtitle": "Display your saved contacts",
 			"action_button_contacts_prompt": "Show me my contacts.",

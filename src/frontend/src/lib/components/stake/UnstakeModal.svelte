@@ -1,23 +1,28 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import type { Erc20Token } from '$eth/types/erc20';
+	import { getHarvestAutopilotBaseTrackingMetadata } from '$eth/utils/harvest-autopilots.utils';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import UnstakeWizard from '$lib/components/stake/UnstakeWizard.svelte';
 	import { unstakeWizardSteps } from '$lib/config/stake.config';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { ProgressStepsUnstake } from '$lib/enums/progress-steps';
 	import { WizardStepsUnstake } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import type { Vault } from '$lib/types/vaults';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: Token;
-		totalStaked: OptionBalance;
+		totalStaked: bigint;
+		vault?: Vault;
 	}
 
-	let { token, totalStaked }: Props = $props();
+	let { token, totalStaked, vault }: Props = $props();
 
 	let modal: WizardModal<WizardStepsUnstake> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsUnstake> | undefined = $state();
@@ -26,8 +31,7 @@
 
 	let steps: WizardSteps<WizardStepsUnstake> = $derived(
 		unstakeWizardSteps({
-			i18n: $i18n,
-			tokenSymbol: getTokenDisplaySymbol(token)
+			i18n: $i18n
 		})
 	);
 
@@ -41,6 +45,20 @@
 
 	const close = () =>
 		closeModal(() => {
+			if (unstakeProgressStep !== ProgressStepsUnstake.DONE && nonNullish(vault)) {
+				trackEvent({
+					name: PLAUSIBLE_EVENTS.UNSTAKE,
+					metadata: {
+						...getHarvestAutopilotBaseTrackingMetadata({
+							assetToken: token as Erc20Token,
+							vaultToken: vault.token
+						}),
+						source_detail1: currentStep?.name === WizardStepsUnstake.REVIEW ? 'review' : 'form',
+						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+					}
+				});
+			}
+
 			reset();
 		});
 </script>
@@ -60,6 +78,7 @@
 			onBack={modal.back}
 			onClose={close}
 			onNext={modal.next}
+			{vault}
 			bind:amount
 			bind:unstakeProgressStep
 		/>

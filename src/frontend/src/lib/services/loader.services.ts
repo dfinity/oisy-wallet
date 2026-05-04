@@ -2,10 +2,7 @@ import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import { POW_FEATURE_ENABLED } from '$env/pow.env';
-import { hasRequiredCycles } from '$icp/services/pow-protector.services';
 import { allowSigning } from '$lib/api/backend.api';
-import { POW_MIN_CYCLES_THRESHOLD, POW_ZERO_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -13,35 +10,17 @@ import {
 	networkSolanaMainnetEnabled
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
-import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
+import { trackRateLimited } from '$lib/services/analytics.services';
+import { errorSignOut, infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-
-export const isCyclesAllowanceLow = async (): Promise<boolean> => {
-	try {
-		const { identity } = get(authStore);
-		assertNonNullish(identity, 'Cannot continue without an identity.');
-		return !(await hasRequiredCycles({ identity, requiredCycles: POW_MIN_CYCLES_THRESHOLD }));
-	} catch (_err: unknown) {
-		return false;
-	}
-};
-
-export const isCyclesAllowanceSpent = async (): Promise<boolean> => {
-	try {
-		const { identity } = get(authStore);
-		assertNonNullish(identity, 'Cannot continue without an identity.');
-		return !(await hasRequiredCycles({ identity, requiredCycles: POW_ZERO_CYCLES_THRESHOLD }));
-	} catch (_err: unknown) {
-		return false;
-	}
-};
 
 /**
  * Initializes the signer allowance by calling `allow_signing`.
@@ -63,7 +42,14 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		await allowSigning({ identity });
+		const { rateLimitInfo } = await allowSigning({
+			identity,
+			iiDelegationChain: nonNullish(identity) ? extractIIDelegationChain(identity) : []
+		});
+
+		if (nonNullish(rateLimitInfo)) {
+			trackRateLimited(rateLimitInfo);
+		}
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
@@ -82,7 +68,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * - The additional data will be loaded.
  *
  * @param {Object} params The parameters to initialize the loader.
- * @param {OptionIdentity} params.identity The identity to use for the request.
+ * @param {NullishIdentity} params.identity The identity to use for the request.
  * @param {Function} params.progressAndLoad The function to set the next step of the Progress modal and load the additional data.
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
@@ -90,7 +76,7 @@ export const initLoader = async ({
 	identity,
 	progressAndLoad
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	progressAndLoad: () => void;
 }): Promise<void> => {
 	if (isNullish(identity)) {
@@ -100,24 +86,33 @@ export const initLoader = async ({
 
 	// The user profile settings will define the enabled/disabled networks.
 	// So we need to load it first to enable/disable the rest of the services.
-	const { success: userProfileSuccess } = await loadUserProfile({ identity });
+	const { success: userProfileSuccess, err: userProfileError } = await loadUserProfile({
+		identity
+	});
 
 	if (!userProfileSuccess) {
+		if (userProfileError === 'signups-closed') {
+			await infoSignOut({
+				text: get(i18n).auth.info.signups_closed,
+				source: 'signups-closed'
+			});
+
+			return;
+		}
+
 		await signOut({});
 		return;
 	}
 
-	if (!POW_FEATURE_ENABLED) {
-		if (FRONTEND_DERIVATION_ENABLED) {
-			// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
-			initSignerAllowance();
-		} else {
-			const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
+	if (FRONTEND_DERIVATION_ENABLED) {
+		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
+		initSignerAllowance();
+	} else {
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-			if (!initSignerAllowanceSuccess) {
-				// Sign-out is handled within the service.
-				return;
-			}
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
 		}
 	}
 

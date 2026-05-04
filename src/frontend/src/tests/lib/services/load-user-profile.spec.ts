@@ -2,6 +2,7 @@ import type { UserProfile } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import { SignupsClosedError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
@@ -48,7 +49,7 @@ describe('load-user-profile.services', () => {
 				.mockResolvedValue({ Err: { NotFound: null } });
 			const createUserProfileSpy = vi
 				.spyOn(backendApi, 'createUserProfile')
-				.mockResolvedValue(mockProfile);
+				.mockResolvedValue({ Ok: mockProfile });
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
@@ -122,7 +123,57 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
-			expect(result).toEqual({ success: false });
+			expect(result).toEqual({ success: false, err: 'unknown' });
+		});
+
+		it('should handle unknown error from getUserProfile', async () => {
+			vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue({
+				Err: { InternalError: null } as never
+			});
+
+			const result = await loadUserProfile({ identity: mockIdentity });
+
+			expect(result).toEqual({ success: false, err: 'unknown' });
+		});
+
+		it('should surface signups-closed when createUserProfile rejects with SignupsClosedError', async () => {
+			vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue({ Err: { NotFound: null } });
+			const createUserProfileSpy = vi
+				.spyOn(backendApi, 'createUserProfile')
+				.mockRejectedValue(new SignupsClosedError());
+
+			const result = await loadUserProfile({ identity: mockIdentity });
+
+			expect(result).toEqual({ success: false, err: 'signups-closed' });
+			expect(createUserProfileSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				nullishIdentityErrorMessage
+			});
+			expect(get(userProfileStore)).toBeNull();
+		});
+
+		it('should handle certified profile load failure gracefully', async () => {
+			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			let callCount = 0;
+			vi.spyOn(backendApi, 'getUserProfile').mockImplementation(({ certified }) => {
+				callCount++;
+
+				if (!certified) {
+					return Promise.resolve({ Ok: mockProfile });
+				}
+
+				return Promise.reject(new Error('Certified load failed'));
+			});
+
+			const result = await loadUserProfile({ identity: mockIdentity });
+
+			expect(result).toEqual({ success: true });
+			expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
+
+			await waitFor(() => expect(callCount).toBe(2));
+
+			consoleErrorSpy.mockRestore();
 		});
 	});
 });

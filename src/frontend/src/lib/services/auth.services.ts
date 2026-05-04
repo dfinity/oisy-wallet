@@ -1,13 +1,5 @@
 import { browser } from '$app/environment';
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
-import {
-	clearIdbBtcAddressMainnet,
-	clearIdbBtcAddressTestnet,
-	clearIdbEthAddress,
-	clearIdbSolAddressDevnet,
-	clearIdbSolAddressLocal,
-	clearIdbSolAddressMainnet
-} from '$lib/api/idb-addresses.api';
 import { clearIdbBalances } from '$lib/api/idb-balances.api';
 import { clearIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
@@ -40,6 +32,7 @@ import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastMsg } from '$lib/types/toast';
+import { consoleError, consoleWarn } from '$lib/utils/console.utils';
 import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
@@ -55,7 +48,8 @@ export const signIn = async (
 	busy.show();
 
 	const trackingMetadata = {
-		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0
+		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0,
+		...(nonNullish(params.openIdProvider) ? { openid_provider: params.openIdProvider } : {})
 	};
 
 	try {
@@ -145,6 +139,25 @@ export const errorSignOut = (text: string): Promise<void> => {
 	});
 };
 
+export const infoSignOut = ({
+	text,
+	source = ''
+}: {
+	text: string;
+	source?: string;
+}): Promise<void> => {
+	trackSignOut({
+		name: TRACK_SIGN_OUT_SUCCESS,
+		meta: { reason: 'info', text, source }
+	});
+	return logout({
+		msg: {
+			text,
+			level: 'info'
+		}
+	});
+};
+
 export const warnSignOut = (text: string): Promise<void> => {
 	trackSignOut({
 		name: TRACK_SIGN_OUT_WITH_WARNING,
@@ -198,18 +211,11 @@ const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 	} catch (err: unknown) {
 		// We silence the error.
 		// Effective logout is more important here.
-		console.error(err);
+		consoleError(err);
 	}
 };
 
 const clearIdbStoreList = [
-	// Addresses
-	clearIdbBtcAddressMainnet,
-	clearIdbBtcAddressTestnet,
-	clearIdbEthAddress,
-	clearIdbSolAddressMainnet,
-	clearIdbSolAddressDevnet,
-	clearIdbSolAddressLocal,
 	// Tokens
 	clearIdbAllCustomTokens,
 	// Transactions
@@ -265,7 +271,7 @@ const logout = async ({
 	try {
 		await clearSessionStorage();
 	} catch (err: unknown) {
-		console.warn('Error clearing session storage on logout', err);
+		consoleWarn('Error clearing session storage on logout', err);
 	}
 
 	await authStore.signOut();
@@ -328,7 +334,7 @@ export const displayAndCleanLogoutMsg = async () => {
 		try {
 			await deleteIdbAllOisyRelated();
 		} catch (err: unknown) {
-			console.error('Error deleting cache after logout', err);
+			consoleError('Error deleting cache after logout', err);
 		}
 	}
 

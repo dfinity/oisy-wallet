@@ -1,16 +1,17 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
-	import GldtUnstakeWizard from '$icp/components/stake/gldt/GldtUnstakeWizard.svelte';
-	import { isGLDTToken } from '$icp-eth/utils/token.utils';
+	import { nonNullish } from '@dfinity/utils';
+	import HarvestUnstakeWizard from '$eth/components/stake/harvest-autopilot/HarvestUnstakeWizard.svelte';
+	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Vault } from '$lib/types/vaults';
 
 	interface Props {
 		amount: OptionAmount;
 		unstakeProgressStep: string;
+		vault?: Vault;
 		currentStep?: WizardStep;
 		onClose: () => void;
 		onNext: () => void;
@@ -20,23 +21,21 @@
 	let {
 		amount = $bindable(),
 		unstakeProgressStep = $bindable(),
+		vault,
 		currentStep,
 		onClose,
 		onNext,
 		onBack
 	}: Props = $props();
-
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	let isGldtToken = $derived(isGLDTToken($sendToken));
 </script>
 
-{#if isGldtToken}
-	<GldtUnstakeWizard
+{#if nonNullish(vault) && isTokenHarvestAutopilot(vault.token)}
+	<HarvestUnstakeWizard
 		{currentStep}
 		{onBack}
 		{onClose}
 		{onNext}
+		{vault}
 		bind:amount
 		bind:unstakeProgressStep
 	/>

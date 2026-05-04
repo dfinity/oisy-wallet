@@ -3,22 +3,23 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
+	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import {
 		ETH_FEE_CONTEXT_KEY,
+		type EthFeeContext as FeeContextType,
 		initEthFeeContext,
-		initEthFeeStore,
-		type EthFeeContext as FeeContextType
+		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
-	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -29,10 +30,18 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { userProfileVersion } from '$lib/derived/user-profile.derived';
+	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { fetchVeloraDeltaSwap, fetchVeloraMarketSwap } from '$lib/services/swap.services';
+	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
+	import {
+		fetchNearIntentsEvmSwap,
+		fetchOneSecEvmToIcpSwap,
+		fetchVeloraDeltaSwap,
+		fetchVeloraMarketSwap
+	} from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -41,7 +50,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
+	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
@@ -55,6 +64,7 @@
 		currentStep?: WizardStep;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -72,6 +82,7 @@
 		onStopTriggerAmount,
 		onStartTriggerAmount,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext,
 		onBack
@@ -94,7 +105,7 @@
 	const feeStore = initEthFeeStore();
 
 	let nativeEthereumToken = $derived(
-		[...$enabledEvmTokens, ...$enabledEthereumTokens].find(
+		$enabledEthEvmNativeTokens.find(
 			({ network: { id: networkId } }) => $sourceToken?.network.id === networkId
 		)
 	);
@@ -169,13 +180,21 @@
 		})
 	);
 
-	const isApproveNeeded = $derived<boolean>(
-		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
+	const isNearIntentsProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
+	);
+
+	const isApproveNeeded = $derived(
+		!isNearIntentsProvider &&
+			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.MARKET &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
-	const isGasless = $derived<boolean>(
-		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.DELTA &&
+	const isTransferNeeded = $derived(isNearIntentsProvider);
+
+	const isGasless = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
+			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.DELTA &&
 			nonNullish($isSourceTokenPermitSupported) &&
 			$isSourceTokenPermitSupported
 	);
@@ -213,8 +232,7 @@
 			isNullish(maxFeePerGas) ||
 			isNullish(maxPriorityFeePerGas) ||
 			isNullish(gas) ||
-			!isNetworkEthereum($sourceToken.network) ||
-			!isNetworkEthereum($destinationToken.network)
+			!isNetworkEthereum($sourceToken.network)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -222,63 +240,152 @@
 			return;
 		}
 
+		const swapTrackingMetadata = {
+			sourceToken: $sourceToken.symbol,
+			destinationToken: $destinationToken.symbol,
+			dApp: $swapAmountsStore.selectedProvider.provider,
+			usdSourceValue: sourceTokenUsdValue ?? '',
+			swapType: $swapAmountsStore.selectedProvider.type ?? '',
+			sourceNetwork: $sourceToken.network.name,
+			destinationNetwork: $destinationToken.network.name
+		};
+
 		onNext();
 		onStopTriggerAmount();
+
+		const { selectedProvider } = $swapAmountsStore;
 
 		try {
 			failedSwapError.set(undefined);
 
-			const params = {
+			const baseParams = {
 				identity: $authIdentity,
 				progress: (step: ProgressStep) => (swapProgressStep = step),
 				sourceToken: $sourceToken as Erc20Token,
-				destinationToken: $destinationToken as Erc20Token,
 				swapAmount,
 				sourceNetwork: $sourceToken.network,
-				receiveAmount: $swapAmountsStore?.selectedProvider?.receiveAmount,
 				slippageValue,
-				destinationNetwork: $destinationToken.network,
 				userAddress: $ethAddress,
 				gas,
 				maxFeePerGas,
-				maxPriorityFeePerGas,
-				isGasless: $isSourceTokenPermitSupported ?? false,
-				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
+				maxPriorityFeePerGas
 			};
 
-			if ($swapAmountsStore.swaps[0].type === VeloraSwapTypes.DELTA) {
-				await fetchVeloraDeltaSwap(params);
+			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED) {
+				if (!$hasAcknowledgedNearIntentsSwap) {
+					// To be conservative on the legal side, we only allow the swap if persisting
+					// the provider agreement succeeds. If it fails we abort, since the user must
+					// explicitly accept the ToS before funds move through a third-party provider.
+					try {
+						await acceptProviderAgreement({
+							identity: $authIdentity,
+							currentUserVersion: $userProfileVersion
+						});
+					} catch (err) {
+						toastsError({
+							msg: { text: $i18n.swap.error.cannot_save_provider_agreement },
+							err
+						});
+
+						onBack();
+
+						onStartTriggerAmount();
+
+						return;
+					}
+				}
+
+				const params = {
+					...baseParams,
+					destinationToken: $destinationToken as Erc20Token,
+					receiveAmount: selectedProvider.receiveAmount,
+					swapDetails: selectedProvider.swapDetails
+				};
+
+				await fetchNearIntentsEvmSwap(params);
+			} else if (selectedProvider?.provider === SwapProvider.VELORA) {
+				// Velora requires EVM destination chain params, but Near Intents can bridge to/from non-EVM networks.
+				if (!isNetworkEthereum($destinationToken.network)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				const params = {
+					...baseParams,
+					destinationToken: $destinationToken as Erc20Token,
+					receiveAmount: selectedProvider.receiveAmount,
+					isGasless: $isSourceTokenPermitSupported ?? false,
+					destinationNetwork: $destinationToken.network,
+					swapDetails: selectedProvider.swapDetails
+				};
+
+				if (selectedProvider.type === VeloraSwapTypes.DELTA) {
+					await fetchVeloraDeltaSwap(params);
+				} else {
+					await fetchVeloraMarketSwap(params);
+				}
+			} else if (selectedProvider?.provider === SwapProvider.ONE_SEC) {
+				if (!isIcToken($destinationToken) || isNullish($ethAddress)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				await fetchOneSecEvmToIcpSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as Erc20Token,
+					destinationToken: $destinationToken,
+					swapAmount,
+					userEthAddress: $ethAddress,
+					gas,
+					maxFeePerGas,
+					maxPriorityFeePerGas
+				});
 			} else {
-				await fetchVeloraMarketSwap(params);
+				toastsError({
+					msg: { text: $i18n.swap.error.unexpected }
+				});
+
+				onBack();
+				onStartTriggerAmount();
+
+				return;
 			}
 
 			progress(ProgressStepsSwap.DONE);
 
 			trackEvent({
 				name: TRACK_COUNT_SWAP_SUCCESS,
-				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
-					usdSourceValue: sourceTokenUsdValue ?? '',
-					swapType: $swapAmountsStore.swaps[0].type ?? '',
-					sourceNetwork: $sourceToken.network.name,
-					destinationNetwork: $destinationToken.network.name
-				}
+				metadata: swapTrackingMetadata
 			});
 
-			setTimeout(() => onClose(), 750);
+			setTimeout(() => {
+				try {
+					onClose();
+				} catch (_: unknown) {
+					toastsError({
+						msg: { text: $i18n.swap.error.swap_completed_close_failed }
+					});
+				}
+			}, 750);
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
-					swapType: $swapAmountsStore.swaps[0].type ?? '',
-					error: errorDetailToString(err) ?? '',
-					sourceNetwork: $sourceToken.network.name,
-					destinationNetwork: $destinationToken.network.name
+					...swapTrackingMetadata,
+					error: errorDetailToString(err) ?? ''
 				}
 			});
 
@@ -314,6 +421,7 @@
 					{nativeEthereumToken}
 					{onClose}
 					{onNext}
+					{onShowProviderList}
 					{onShowTokensList}
 					bind:swapAmount
 					bind:receiveAmount
@@ -342,7 +450,12 @@
 					{/snippet}
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-				<SwapProgress sendWithApproval={true} {swapProgressStep} />
+				<SwapProgress
+					sendWithApproval={isApproveNeeded}
+					sendWithTransfer={isTransferNeeded}
+					{swapProgressStep}
+					swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
+				/>
 			{/if}
 		{/key}
 	</EthFeeContext>

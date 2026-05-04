@@ -20,7 +20,6 @@ import {
 	filterTokenGroups,
 	groupSecondaryToken,
 	groupTokens,
-	groupTokensByTwin,
 	sortTokenOrGroupUi,
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
@@ -34,6 +33,7 @@ const tokens: TokenUi[] = [
 		balance: bn1Bi,
 		usdBalance: 50000,
 		usdPrice: 40000,
+		usdMarketCap: 800000000000,
 		usdPriceChangePercentage24h: 1.2
 	},
 	{
@@ -43,6 +43,7 @@ const tokens: TokenUi[] = [
 		balance: bn2Bi,
 		usdBalance: 100000,
 		usdPrice: 80000,
+		usdMarketCap: 1600000000000,
 		usdPriceChangePercentage24h: 2.3,
 		standard: { code: 'icrc' },
 		category: 'default',
@@ -55,6 +56,7 @@ const tokens: TokenUi[] = [
 		balance: 10n,
 		usdBalance: 20000,
 		usdPrice: 2000,
+		usdMarketCap: 240000000000,
 		usdPriceChangePercentage24h: -0.5
 	},
 	{
@@ -64,6 +66,7 @@ const tokens: TokenUi[] = [
 		balance: 5n,
 		usdBalance: 15000,
 		usdPrice: 3000,
+		usdMarketCap: 450000000000,
 		usdPriceChangePercentage24h: 3.1,
 		standard: { code: 'icrc' },
 		category: 'default',
@@ -76,158 +79,12 @@ const tokens: TokenUi[] = [
 		balance: 50n,
 		usdBalance: 1000,
 		usdPrice: 20,
+		usdMarketCap: 20000000000,
 		usdPriceChangePercentage24h: -8
 	}
 ];
 
-const reorderedTokens = [
-	tokens[1], // ckBTC
-	tokens[0], // BTC
-	tokens[3], // ckETH
-	tokens[2], // ETH
-	tokens[4] // ICP
-];
-
 describe('token-group.utils', () => {
-	describe('groupTokensByTwin', () => {
-		it('should group tokens with matching group ID', () => {
-			const groupedTokens = groupTokensByTwin(tokens);
-
-			expect(groupedTokens).toHaveLength(3);
-
-			const [btcGroup, _, icpToken] = groupedTokens;
-
-			expect(btcGroup).toHaveProperty('group');
-
-			assert('group' in btcGroup);
-
-			expect(btcGroup.group.tokens).toHaveLength(2);
-			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
-			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
-
-			expect(icpToken).toHaveProperty('token.symbol', 'ICP');
-		});
-
-		it('should handle tokens without twinTokenSymbol', () => {
-			const tokensWithoutTwins = [ICP_TOKEN];
-			const groupedTokens = groupTokensByTwin(tokensWithoutTwins);
-
-			expect(groupedTokens).toHaveLength(1);
-
-			const [firstGroup] = groupedTokens;
-
-			expect(firstGroup).toHaveProperty('token.symbol', 'ICP');
-		});
-
-		it('should place the group in the position of the first token', () => {
-			const groupedTokens = groupTokensByTwin(tokens);
-			const [firstGroup] = groupedTokens;
-
-			expect(firstGroup).toHaveProperty('group');
-
-			assert('group' in firstGroup);
-
-			expect(firstGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
-			expect(firstGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
-		});
-
-		it('should not duplicate tokens in the result', () => {
-			const groupedTokens = groupTokensByTwin(tokens);
-
-			const tokenSymbols = groupedTokens.flatMap((groupOrToken) =>
-				'group' in groupOrToken
-					? groupOrToken.group.tokens.map((t) => t.symbol)
-					: [groupOrToken.token.symbol]
-			);
-			const uniqueSymbols = new Set(tokenSymbols);
-
-			expect(uniqueSymbols.size).toBe(tokenSymbols.length);
-		});
-
-		it('should correctly group tokens even when the ckToken is declared before the native token', () => {
-			const groupedTokens = groupTokensByTwin(reorderedTokens);
-
-			expect(groupedTokens).toHaveLength(3);
-
-			const btcGroup = groupedTokens.find(
-				(groupOrToken) =>
-					'group' in groupOrToken && groupOrToken.group.tokens.some((t) => t.symbol === 'BTC')
-			);
-
-			expect(btcGroup).toBeDefined();
-
-			assertNonNullish(btcGroup);
-			assert('group' in btcGroup);
-
-			expect(btcGroup.group.tokens).toHaveLength(2);
-			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
-			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
-
-			const ethGroup = groupedTokens.find(
-				(groupOrToken) =>
-					'group' in groupOrToken && groupOrToken.group.tokens.some((t) => t.symbol === 'ETH')
-			);
-
-			expect(ethGroup).toBeDefined();
-
-			assertNonNullish(ethGroup);
-			assert('group' in ethGroup);
-
-			expect(ethGroup.group.tokens).toHaveLength(2);
-			expect(ethGroup.group.tokens.map((t) => t.symbol)).toContain('ETH');
-			expect(ethGroup.group.tokens.map((t) => t.symbol)).toContain('ckETH');
-
-			const icpToken = groupedTokens.find((t) => 'token' in t && t.token.symbol === 'ICP');
-
-			expect(icpToken).toBeDefined();
-		});
-
-		it('should re-sort groups if their total USD balance made them out of order', () => {
-			const reorderedTokens = [
-				{ ...tokens[0], usdBalance: 5 }, // BTC
-				{ ...tokens[2], usdBalance: 4 }, // ETH
-				{ ...tokens[3], usdBalance: 3 }, // ckETH
-				{ ...tokens[4], usdBalance: 0 }, // ICP
-				{ ...tokens[1], usdBalance: 0 } // ckBTC
-			];
-
-			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
-
-			expect(groupedTokens).toHaveLength(3);
-
-			expect(groupedTokens[0]).toHaveProperty('group.tokens', [
-				reorderedTokens[1],
-				reorderedTokens[2]
-			]);
-			expect(groupedTokens[1]).toHaveProperty('group.tokens', [
-				reorderedTokens[0],
-				reorderedTokens[4]
-			]);
-		});
-
-		it('should re-sort groups if their total balance made them out of order', () => {
-			const reorderedTokens = [
-				{ ...tokens[0], balance: bn2Bi, usdBalance: 0 }, // BTC
-				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: bn1Bi, usdBalance: 0 }, // ckETH
-				{ ...tokens[1], balance: ZERO, usdBalance: 0 } // ckBTC
-			];
-
-			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
-
-			expect(groupedTokens).toHaveLength(2);
-
-			expect(groupedTokens[0]).toHaveProperty('group.tokens', [
-				reorderedTokens[1],
-				reorderedTokens[2]
-			]);
-			expect(groupedTokens[1]).toHaveProperty('group.tokens', [
-				reorderedTokens[0],
-				reorderedTokens[3]
-			]);
-		});
-	});
-
 	describe('filterTokenGroups', () => {
 		const reorderedTokens = [
 			{ ...tokens[0], balance: ZERO, usdBalance: 0 }, // BTC
@@ -236,7 +93,7 @@ describe('token-group.utils', () => {
 		];
 
 		it('should give me all token groups', () => {
-			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
+			const groupedTokens = groupTokens(reorderedTokens as TokenUi[]);
 
 			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: true });
 
@@ -249,7 +106,7 @@ describe('token-group.utils', () => {
 				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
 				{ ...tokens[3], balance: ZERO, usdBalance: 0 } // ckETH
 			];
-			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
+			const groupedTokens = groupTokens(customReorderedTokens as TokenUi[]);
 
 			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
 
@@ -261,13 +118,28 @@ describe('token-group.utils', () => {
 			]);
 		});
 
+		it('should keep individual tokens with non-zero balance when showZeroBalances is false', () => {
+			const tokenWithBalance = { ...tokens[2], balance: bn2Bi, usdBalance: 200 }; // ETH
+			const tokenWithoutBalance = { ...tokens[4], balance: ZERO, usdBalance: 0 }; // ICP
+
+			const groupedTokens: TokenUiOrGroupUi[] = [
+				{ token: tokenWithBalance },
+				{ token: tokenWithoutBalance }
+			];
+
+			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
+
+			expect(filteredTokenGroups).toHaveLength(1);
+			expect(filteredTokenGroups[0]).toHaveProperty('token', tokenWithBalance);
+		});
+
 		it('should give me only token groups where at least one token has a usd balance', () => {
 			const customReorderedTokens = [
 				...reorderedTokens,
 				{ ...tokens[2], balance: ZERO, usdBalance: 0 }, // ETH
 				{ ...tokens[3], balance: ZERO, usdBalance: 1 } // ckETH
 			];
-			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
+			const groupedTokens = groupTokens(customReorderedTokens as TokenUi[]);
 
 			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
 
@@ -460,6 +332,73 @@ describe('token-group.utils', () => {
 				usdBalance: anotherToken.usdBalance + thirdToken.usdBalance + token.usdBalance
 			});
 		});
+
+		it('should use price from the first token that has one when group has no price', () => {
+			const tokenWithPrice = {
+				...ETHEREUM_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn1Bi,
+				usdBalance: 100,
+				usdPrice: 2000,
+				usdMarketCap: 240000000000,
+				usdPriceChangePercentage24h: -0.5
+			};
+
+			const groupWithoutPrice: TokenUiGroup = {
+				id: ETH_TOKEN_GROUP.id,
+				decimals: BASE_ETH_TOKEN.decimals,
+				groupData: ETH_TOKEN_GROUP,
+				tokens: [
+					{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn2Bi, usdBalance: 200 }
+				],
+				balance: bn2Bi,
+				usdBalance: 200,
+				usdPrice: undefined,
+				usdMarketCap: undefined,
+				usdPriceChangePercentage24h: undefined
+			};
+
+			const result = updateTokenGroup({ token: tokenWithPrice, tokenGroup: groupWithoutPrice });
+
+			expect(result.usdPrice).toBe(tokenWithPrice.usdPrice);
+			expect(result.usdMarketCap).toBe(tokenWithPrice.usdMarketCap);
+			expect(result.usdPriceChangePercentage24h).toBe(tokenWithPrice.usdPriceChangePercentage24h);
+		});
+
+		it('should keep existing group price when it already has one', () => {
+			const groupWithPrice: TokenUiGroup = {
+				id: ETH_TOKEN_GROUP.id,
+				decimals: BASE_ETH_TOKEN.decimals,
+				groupData: ETH_TOKEN_GROUP,
+				tokens: [
+					{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn1Bi, usdBalance: 100 }
+				],
+				balance: bn1Bi,
+				usdBalance: 100,
+				usdPrice: 1500,
+				usdMarketCap: 180000000000,
+				usdPriceChangePercentage24h: 1.0
+			};
+
+			const tokenWithDifferentPrice = {
+				...ETHEREUM_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn2Bi,
+				usdBalance: 200,
+				usdPrice: 2000,
+				usdMarketCap: 240000000000,
+				usdPriceChangePercentage24h: -0.5
+			};
+
+			const result = updateTokenGroup({
+				token: tokenWithDifferentPrice,
+				tokenGroup: groupWithPrice
+			});
+
+			expect(result.usdPrice).toBe(groupWithPrice.usdPrice);
+			expect(result.usdMarketCap).toBe(groupWithPrice.usdMarketCap);
+			expect(result.usdPriceChangePercentage24h).toBe(groupWithPrice.usdPriceChangePercentage24h);
+		});
 	});
 
 	describe('groupSecondaryToken', () => {
@@ -544,6 +483,7 @@ describe('token-group.utils', () => {
 			balance: bn1Bi,
 			usdBalance: 100,
 			usdPrice: 1000,
+			usdMarketCap: 100000000000,
 			usdPriceChangePercentage24h: 10
 		};
 		const mockSecondToken = {
@@ -552,6 +492,7 @@ describe('token-group.utils', () => {
 			balance: bn3Bi,
 			usdBalance: 300,
 			usdPrice: 30000,
+			usdMarketCap: 600000000000,
 			usdPriceChangePercentage24h: -5
 		};
 		const mockThirdToken = {
@@ -560,6 +501,7 @@ describe('token-group.utils', () => {
 			balance: bn2Bi,
 			usdBalance: 200,
 			usdPrice: 20,
+			usdMarketCap: 40000000000,
 			usdPriceChangePercentage24h: -8
 		};
 
@@ -570,6 +512,7 @@ describe('token-group.utils', () => {
 			balance: bn2Bi,
 			usdBalance: 250,
 			usdPrice: 123,
+			usdMarketCap: 123000000000,
 			usdPriceChangePercentage24h: 5,
 			groupData: mockToken.groupData
 		};
@@ -579,6 +522,7 @@ describe('token-group.utils', () => {
 			balance: bn1Bi,
 			usdBalance: 450,
 			usdPrice: 321,
+			usdMarketCap: 321000000000,
 			usdPriceChangePercentage24h: -3,
 			groupData: mockToken.groupData
 		};
@@ -651,6 +595,7 @@ describe('token-group.utils', () => {
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
 				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
 				usdPrice: mockToken.usdPrice,
+				usdMarketCap: mockToken.usdMarketCap,
 				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
 
@@ -679,6 +624,7 @@ describe('token-group.utils', () => {
 				balance: mockTwinToken1.balance + mockToken.balance + mockTwinToken2.balance,
 				usdBalance: mockTwinToken1.usdBalance + mockToken.usdBalance + mockTwinToken2.usdBalance,
 				usdPrice: mockTwinToken1.usdPrice,
+				usdMarketCap: mockTwinToken1.usdMarketCap,
 				usdPriceChangePercentage24h: mockTwinToken1.usdPriceChangePercentage24h
 			});
 
@@ -710,6 +656,7 @@ describe('token-group.utils', () => {
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
 				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
 				usdPrice: mockToken.usdPrice,
+				usdMarketCap: mockToken.usdMarketCap,
 				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
 		});
@@ -739,6 +686,7 @@ describe('token-group.utils', () => {
 				balance: undefined,
 				usdBalance: mockToken.usdBalance + mockTwinToken2.usdBalance,
 				usdPrice: mockToken.usdPrice,
+				usdMarketCap: mockToken.usdMarketCap,
 				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
 		});
@@ -762,6 +710,24 @@ describe('token-group.utils', () => {
 			const result = sortTokenOrGroupUi(tokenList);
 
 			expect(result).toEqual([mockToken, mockSecondToken, mockThirdToken, mockFourthToken]);
+		});
+
+		it('should sort two non-alphanumeric names using localeCompare', () => {
+			const nonAlpha1 = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- BBB' });
+			const nonAlpha2 = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- AAA' });
+
+			const result = sortTokenOrGroupUi([nonAlpha1, nonAlpha2]);
+
+			expect(result).toEqual([nonAlpha2, nonAlpha1]);
+		});
+
+		it('should sort alphanumeric name before non-alphanumeric name', () => {
+			const alpha = toTokenUiOrGroupUi({ ...ETHEREUM_TOKEN, name: 'Aaa' });
+			const nonAlpha = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- ZZZ' });
+
+			const result = sortTokenOrGroupUi([nonAlpha, alpha]);
+
+			expect(result).toEqual([alpha, nonAlpha]);
 		});
 
 		it('should keep order the same if groups passed', () => {

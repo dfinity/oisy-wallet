@@ -7,6 +7,7 @@ import {
 	type QrStatus
 } from '$lib/types/qr-code';
 import type { OptionToken } from '$lib/types/token';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
 
@@ -62,7 +63,7 @@ export const decodeQrCodeUrn = ({ urn }: { urn: string }): DecodedUrn | undefine
 				{}
 			);
 		} catch (error: unknown) {
-			console.warn('Invalid query string:', error);
+			consoleWarn('Invalid query string:', error);
 		}
 	};
 
@@ -84,7 +85,7 @@ export const decodeQrCodeUrn = ({ urn }: { urn: string }): DecodedUrn | undefine
 	const result = DecodedUrnSchema.safeParse(decodedUrn);
 
 	if (!result.success) {
-		console.warn('QR code cannot be correctly parsed:', result.error);
+		consoleWarn('QR code cannot be correctly parsed:', result.error);
 		return;
 	}
 	return result.data;

@@ -1,7 +1,7 @@
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { NonFungibleTokenAppearance } from '$lib/types/nft-ui';
-import type { RequiredToken, Token, TokenMetadata, TokenStandardCode } from '$lib/types/token';
+import type { Token, TokenMetadata, TokenStandardCode } from '$lib/types/token';
 
 type Erc1155Standard = Extract<TokenStandardCode, 'erc1155'>;
 
@@ -11,10 +11,6 @@ export type Erc1155Token = Erc1155Contract &
 		network: EthereumNetwork;
 		standard: { code: Erc1155Standard; version?: string };
 	};
-
-export type RequiredErc1155Token = RequiredToken<
-	Omit<Erc1155Token, 'section' | 'allowExternalContentSource'>
->;
 
 export type Erc1155ContractAddress = ContractAddress;
 export type Erc1155Contract = Erc1155ContractAddress;

@@ -42,7 +42,7 @@ describe('open-crypto-pay.utils', () => {
 		it('should decode LNURL to specific URL format', () => {
 			const result = decodeLNURL(mockLNURL);
 
-			expect(() => new URL(result)).not.toThrowError();
+			expect(() => new URL(result)).not.toThrow();
 
 			const url = new URL(result);
 
@@ -60,25 +60,25 @@ describe('open-crypto-pay.utils', () => {
 		it('should throw error for invalid LNURL format', () => {
 			const invalidLnurl = 'invalid-lnurl-string';
 
-			expect(() => decodeLNURL(invalidLnurl)).toThrowError();
+			expect(() => decodeLNURL(invalidLnurl)).toThrow();
 		});
 
 		it('should throw error for empty string', () => {
-			expect(() => decodeLNURL('')).toThrowError();
+			expect(() => decodeLNURL('')).toThrow();
 		});
 
 		it('should throw error for non-lnurl prefix', () => {
 			// Valid bech32 but wrong prefix
 			const btcAddress = 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
 
-			expect(() => decodeLNURL(btcAddress)).toThrowError();
+			expect(() => decodeLNURL(btcAddress)).toThrow();
 		});
 
 		it('should throw error for corrupted LNURL', () => {
 			// LNURL with some characters removed
 			const corruptedLnurl = 'lnurl1dp68gurn8ghj7ctsdyh8gct5wvhxxmmd';
 
-			expect(() => decodeLNURL(corruptedLnurl)).toThrowError();
+			expect(() => decodeLNURL(corruptedLnurl)).toThrow();
 		});
 
 		it('should decode and return valid UTF-8 string', () => {
@@ -1119,7 +1119,7 @@ describe('open-crypto-pay.utils', () => {
 				},
 				estimatedGasLimit: 21000n
 			}
-		};
+		} as PayableTokenWithFees;
 
 		const mockToken2: PayableTokenWithFees = {
 			...USDC_TOKEN,
@@ -1330,7 +1330,7 @@ describe('open-crypto-pay.utils', () => {
 				quote: null
 			} as unknown as OpenCryptoPayResponse;
 
-			expect(() => extractQuoteData(invalidResponse)).toThrowError(
+			expect(() => extractQuoteData(invalidResponse)).toThrow(
 				'Invalid OpenCryptoPay response data'
 			);
 		});
@@ -1341,7 +1341,7 @@ describe('open-crypto-pay.utils', () => {
 				quote: undefined
 			} as unknown as OpenCryptoPayResponse;
 
-			expect(() => extractQuoteData(invalidResponse)).toThrowError(
+			expect(() => extractQuoteData(invalidResponse)).toThrow(
 				'Invalid OpenCryptoPay response data'
 			);
 		});
@@ -1352,7 +1352,7 @@ describe('open-crypto-pay.utils', () => {
 				callback: null
 			} as unknown as OpenCryptoPayResponse;
 
-			expect(() => extractQuoteData(invalidResponse)).toThrowError(
+			expect(() => extractQuoteData(invalidResponse)).toThrow(
 				'Invalid OpenCryptoPay response data'
 			);
 		});
@@ -1363,7 +1363,7 @@ describe('open-crypto-pay.utils', () => {
 				callback: undefined
 			} as unknown as OpenCryptoPayResponse;
 
-			expect(() => extractQuoteData(invalidResponse)).toThrowError(
+			expect(() => extractQuoteData(invalidResponse)).toThrow(
 				'Invalid OpenCryptoPay response data'
 			);
 		});
@@ -1450,12 +1450,12 @@ describe('open-crypto-pay.utils', () => {
 		const mockToken: PayableTokenWithConvertedAmount = {
 			...ETHEREUM_TOKEN,
 			...payableTokenData
-		};
+		} as PayableTokenWithConvertedAmount;
 
 		const mockErc20Token: PayableTokenWithConvertedAmount = {
 			...USDC_TOKEN,
 			...payableTokenData
-		};
+		} as PayableTokenWithConvertedAmount;
 
 		it('should return base tracking params without token and providerData', () => {
 			const result = getOpenCryptoPayBaseTrackingParams({});

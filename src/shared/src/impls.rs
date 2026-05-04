@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, fmt};
+use std::collections::BTreeMap;
 
 use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
@@ -6,7 +6,9 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        agreement::{Agreements, UpdateAgreementsError, UserAgreements},
+        agreement::{
+            Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
+        },
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -16,6 +18,7 @@ use crate::{
             IcPunksToken, IcrcToken, SplToken, SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
+        exchange::{ExchangeData, ExchangeRate},
         experimental_feature::{
             ExperimentalFeatureSettingsMap, ExperimentalFeaturesSettings,
             UpdateExperimentalFeaturesSettingsError,
@@ -24,12 +27,16 @@ use crate::{
             NetworkSettingsMap, NetworksSettings, SetTestnetsSettingsError,
             UpdateNetworksSettingsError,
         },
+        notification::{
+            AddDismissedNotificationError, DismissedNotification, NotificationSettings,
+            MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH,
+        },
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
-        user_profile::{
-            AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
+        transaction_settings::{
+            TransactionFilterSettings, TransactionSettings, UpdateTransactionFilterSettingsError,
         },
-        verifiable_credential::CredentialType,
+        user_profile::{OisyUser, StoredUserProfile, UserProfile},
         Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },
     validate::{validate_on_deserialize, Validate},
@@ -77,6 +84,21 @@ fn validate_collection_size<T>(
         return Err(Error::msg(format!(
             "Too many {collection_name}, max allowed is {max_size}"
         )));
+    }
+    Ok(())
+}
+
+fn validate_finite_float(value: f64, field_name: &str) -> Result<(), Error> {
+    if !value.is_finite() {
+        return Err(Error::msg(format!("{field_name} must be a finite number")));
+    }
+    Ok(())
+}
+
+fn validate_non_negative_float(value: f64, field_name: &str) -> Result<(), Error> {
+    validate_finite_float(value, field_name)?;
+    if value < 0.0 {
+        return Err(Error::msg(format!("{field_name} cannot be negative")));
     }
     Ok(())
 }
@@ -145,10 +167,11 @@ impl From<InitArg> for Config {
         let InitArg {
             ecdsa_key_name,
             allowed_callers,
-            supported_credentials,
             ic_root_key_der,
             cfs_canister_id,
             derivation_origin,
+            ii_canister_id,
+            new_user_signups_allowed,
         } = arg;
         let ic_root_key_raw = match extract_raw_root_pk_from_der(
             &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
@@ -160,9 +183,10 @@ impl From<InitArg> for Config {
             ecdsa_key_name,
             allowed_callers,
             cfs_canister_id,
-            supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),
             derivation_origin,
+            ii_canister_id,
+            new_user_signups_allowed,
         }
     }
 }
@@ -182,14 +206,6 @@ impl TokenVersion for CustomToken {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
-    }
-}
-
-impl fmt::Display for CredentialType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            CredentialType::ProofOfUniqueness => write!(f, "ProofOfUniqueness"),
-        }
     }
 }
 
@@ -222,43 +238,19 @@ impl StoredUserProfile {
                 },
             },
             experimental_features: ExperimentalFeaturesSettings::default(),
+            notifications: None,
+            transactions: Some(TransactionSettings {
+                filter: Some(TransactionFilterSettings::default()),
+            }),
         };
         let agreements = Agreements::default();
-        let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
             settings: Some(settings),
             agreements: Some(agreements),
-            credentials,
             created_timestamp: now,
             updated_timestamp: now,
             version: None,
         }
-    }
-
-    /// # Errors
-    ///
-    /// Will return Err if there is a version mismatch.
-    pub fn add_credential(
-        &self,
-        profile_version: Option<Version>,
-        now: Timestamp,
-        credential_type: &CredentialType,
-        issuer: String,
-    ) -> Result<StoredUserProfile, AddUserCredentialError> {
-        if profile_version != self.version {
-            return Err(AddUserCredentialError::VersionMismatch);
-        }
-        let mut new_profile = self.with_incremented_version();
-        let user_credential = UserCredential {
-            credential_type: credential_type.clone(),
-            verified_date_timestamp: Some(now),
-            issuer,
-        };
-        let mut new_credentials = new_profile.credentials.clone();
-        new_credentials.insert(credential_type.clone(), user_credential);
-        new_profile.credentials = new_credentials;
-        new_profile.updated_timestamp = now;
-        Ok(new_profile)
     }
 
     /// Returns a copy with networks map set to the specified value.
@@ -378,6 +370,46 @@ impl StoredUserProfile {
         Ok(new_profile)
     }
 
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or the set would exceed its capacity.
+    pub fn add_dismissed_notifications(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        notifications: Vec<DismissedNotification>,
+    ) -> Result<StoredUserProfile, AddDismissedNotificationError> {
+        if profile_version != self.version {
+            return Err(AddDismissedNotificationError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+        let mut dismissed = settings
+            .notifications
+            .unwrap_or_default()
+            .dismissed_notifications;
+
+        let old_len = dismissed.len();
+        dismissed.extend(notifications);
+
+        if dismissed.len() == old_len {
+            return Ok(self.clone());
+        }
+
+        if dismissed.len() > MAX_DISMISSED_NOTIFICATIONS_LIST_LENGTH {
+            return Err(AddDismissedNotificationError::MaxDismissedNotifications);
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_settings = new_profile.settings.clone().unwrap_or_default();
+        new_settings.notifications = Some(NotificationSettings {
+            dismissed_notifications: dismissed,
+        });
+        new_profile.settings = Some(new_settings);
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
     /// Returns a copy with the specified user agreements updated.
     ///
     /// # Errors
@@ -432,6 +464,60 @@ impl StoredUserProfile {
         Ok(new_profile)
     }
 
+    /// Returns a copy with the specified provider agreements updated.
+    ///
+    /// Only entries where `accepted` is `Some(_)` are applied. Existing provider agreements not
+    /// present in the request are left unchanged.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_provider_agreements(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        provider_agreements: BTreeMap<ProviderAgreementType, UserAgreement>,
+    ) -> Result<StoredUserProfile, UpdateAgreementsError> {
+        if profile_version != self.version {
+            return Err(UpdateAgreementsError::VersionMismatch);
+        }
+
+        let current = self
+            .agreements
+            .clone()
+            .unwrap_or_default()
+            .provider_agreements
+            .unwrap_or_default();
+
+        let mut merged = current.clone();
+
+        for (provider_type, agreement) in provider_agreements {
+            if agreement.accepted.is_some() {
+                merged.insert(provider_type.clone(), agreement.clone());
+            }
+        }
+
+        if current == merged {
+            return Ok(self.clone());
+        }
+
+        for agreement in merged.values_mut() {
+            if matches!(agreement.accepted, Some(true)) {
+                agreement.last_accepted_at_ns = Some(now);
+            }
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.agreements = {
+            let mut agreements = new_profile.agreements.unwrap_or_default();
+            agreements.provider_agreements = Some(merged);
+            Some(agreements)
+        };
+        new_profile.updated_timestamp = now;
+
+        Ok(new_profile)
+    }
+
     /// Returns a copy with experimental features settings map set to the specified value.
     ///
     /// # Errors
@@ -468,6 +554,44 @@ impl StoredUserProfile {
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
+
+    /// Returns a copy with the transaction filter settings updated.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_transaction_filter_settings(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        filter: TransactionFilterSettings,
+    ) -> Result<StoredUserProfile, UpdateTransactionFilterSettingsError> {
+        if profile_version != self.version {
+            return Err(UpdateTransactionFilterSettingsError::VersionMismatch);
+        }
+
+        let transactions = self
+            .settings
+            .clone()
+            .unwrap_or_default()
+            .transactions
+            .unwrap_or_default();
+
+        if transactions.filter.as_ref() == Some(&filter) {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            let mut transactions = settings.transactions.unwrap_or_default();
+            transactions.filter = Some(filter);
+            settings.transactions = Some(transactions);
+            Some(settings)
+        };
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
 }
 
 impl From<&StoredUserProfile> for UserProfile {
@@ -476,7 +600,6 @@ impl From<&StoredUserProfile> for UserProfile {
             created_timestamp,
             updated_timestamp,
             version,
-            credentials,
             settings,
             agreements,
         } = user;
@@ -484,7 +607,6 @@ impl From<&StoredUserProfile> for UserProfile {
             created_timestamp: *created_timestamp,
             updated_timestamp: *updated_timestamp,
             version: *version,
-            credentials: credentials.clone().into_values().collect(),
             settings: settings.clone(),
             agreements: agreements.clone(),
         }
@@ -496,9 +618,6 @@ impl OisyUser {
     pub fn from_profile(user: &StoredUserProfile, principal: Principal) -> OisyUser {
         OisyUser {
             principal,
-            pouh_verified: user
-                .credentials
-                .contains_key(&CredentialType::ProofOfUniqueness),
             updated_timestamp: user.updated_timestamp,
         }
     }
@@ -514,26 +633,22 @@ impl Validate for SplTokenId {
     ///
     /// # References
     /// - <https://solana.com/docs/more/exchange#basic-verification>
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         if self.0.len() < 32 {
-            return Err(candid::Error::msg(
-                "Minimum valid Solana address length is 32",
-            ));
+            return Err(Error::msg("Minimum valid Solana address length is 32"));
         }
         if self.0.len() > 44 {
-            return Err(candid::Error::msg(
-                "Maximum valid Solana address length is 44",
-            ));
+            return Err(Error::msg("Maximum valid Solana address length is 44"));
         }
         let parsed_maybe = bs58::decode(&self.0).into_vec();
         if let Ok(bytes) = parsed_maybe {
             if bytes.len() != 32 {
-                return Err(candid::Error::msg(
+                return Err(Error::msg(
                     "Invalid Solana address: not 32 bytes when decoded",
                 ));
             }
         } else {
-            return Err(candid::Error::msg("Invalid Solana address: not base58"));
+            return Err(Error::msg("Invalid Solana address: not base58"));
         }
         Ok(())
     }
@@ -546,18 +661,16 @@ impl ErcTokenId {
 
 impl Validate for ErcTokenId {
     /// Verifies that an Ethereum/EVM address is valid.
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         if self.0.len() != 42 {
-            return Err(candid::Error::msg(
-                "Invalid Ethereum/EVM contract address length",
-            ));
+            return Err(Error::msg("Invalid Ethereum/EVM contract address length"));
         }
         Ok(())
     }
 }
 
 impl Validate for CustomTokenId {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         match self {
             CustomTokenId::Icrc(_)
             | CustomTokenId::ExtV2(_)
@@ -575,13 +688,13 @@ impl Validate for CustomTokenId {
 }
 
 impl Validate for CustomToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         self.token.validate()
     }
 }
 
 impl Validate for Token {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         match self {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
@@ -597,11 +710,11 @@ impl Validate for Token {
 }
 
 impl Validate for SplToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         use crate::types::MAX_SYMBOL_LENGTH;
         if let Some(symbol) = &self.symbol {
             if symbol.chars().count() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg(format!(
+                return Err(Error::msg(format!(
                     "Symbol too long: {} > {}",
                     symbol.len(),
                     MAX_SYMBOL_LENGTH
@@ -613,7 +726,7 @@ impl Validate for SplToken {
 }
 
 impl Validate for ErcToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         self.token_address.validate()
     }
 }
@@ -625,19 +738,19 @@ impl Validate for IcrcToken {
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
     /// - If an index principal is present, checks that it is also the type of principal used for a
     ///   canister.
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         let IcrcToken {
             ledger_id,
             index_id,
         } = self;
         // The ledger_id should be appropriate for a canister.
         if ledger_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Ledger ID is not a canister"));
+            return Err(Error::msg("Ledger ID is not a canister"));
         }
         // Likewise for the index ID, if present:
         if let Some(index_id) = index_id {
             if index_id.as_slice().last() != Some(&1) {
-                return Err(candid::Error::msg("Index ID is not a canister"));
+                return Err(Error::msg("Index ID is not a canister"));
             }
         }
         Ok(())
@@ -649,11 +762,11 @@ impl Validate for ExtV2Token {
     ///
     /// - Checks that the canister principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         let ExtV2Token { canister_id } = self;
         // The canister_id should be appropriate for a canister.
         if canister_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Canister ID is not a canister"));
+            return Err(Error::msg("Canister ID is not a canister"));
         }
         Ok(())
     }
@@ -664,11 +777,11 @@ impl Validate for Dip721Token {
     ///
     /// - Checks that the canister principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         let Dip721Token { canister_id } = self;
         // The canister_id should be appropriate for a canister.
         if canister_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Canister ID is not a canister"));
+            return Err(Error::msg("Canister ID is not a canister"));
         }
         Ok(())
     }
@@ -679,24 +792,24 @@ impl Validate for IcPunksToken {
     ///
     /// - Checks that the canister principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         let IcPunksToken { canister_id } = self;
         // The canister_id should be appropriate for a canister.
         if canister_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Canister ID is not a canister"));
+            return Err(Error::msg("Canister ID is not a canister"));
         }
         Ok(())
     }
 }
 
 impl Validate for UserToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         if self.contract_address.len() != EVM_CONTRACT_ADDRESS_LENGTH {
-            return Err(candid::Error::msg("Invalid EVM contract address length"));
+            return Err(Error::msg("Invalid EVM contract address length"));
         }
         if let Some(symbol) = &self.symbol {
             if symbol.len() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg(format!(
+                return Err(Error::msg(format!(
                     "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
                 )));
             }
@@ -787,6 +900,33 @@ impl Validate for UpdateContactRequest {
     }
 }
 
+impl Validate for ExchangeData {
+    fn validate(&self) -> Result<(), Error> {
+        if self.timestamp_ns == 0 {
+            return Err(Error::msg("timestamp_ns cannot be zero"));
+        }
+        if let Some(price) = self.price {
+            validate_non_negative_float(price, "price")?;
+        }
+        if let Some(change) = self.price_24h_change_pct {
+            validate_finite_float(change, "price_24h_change_pct")?;
+            if change < -100.0 {
+                return Err(Error::msg("price_24h_change_pct cannot be less than -100%"));
+            }
+        }
+        if let Some(market_cap) = self.market_cap {
+            validate_non_negative_float(market_cap, "market_cap")?;
+        }
+        Ok(())
+    }
+}
+
+impl Validate for ExchangeRate {
+    fn validate(&self) -> Result<(), Error> {
+        self.usd.validate()
+    }
+}
+
 // Apply the validation during deserialization for all types
 validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
@@ -804,3 +944,5 @@ validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(ErcToken);
 validate_on_deserialize!(ErcTokenId);
 validate_on_deserialize!(UserToken);
+validate_on_deserialize!(ExchangeData);
+validate_on_deserialize!(ExchangeRate);

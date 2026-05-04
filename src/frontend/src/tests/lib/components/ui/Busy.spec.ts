@@ -1,6 +1,6 @@
 import Busy from '$lib/components/ui/Busy.svelte';
 import { busy } from '$lib/stores/busy.store';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('Busy', () => {
@@ -9,6 +9,8 @@ describe('Busy', () => {
 	});
 
 	afterEach(() => {
+		cleanup();
+
 		busy.stop();
 	});
 

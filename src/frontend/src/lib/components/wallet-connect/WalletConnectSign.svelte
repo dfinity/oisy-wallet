@@ -34,9 +34,11 @@
 </script>
 
 {#if $modalWalletConnectSign && nonNullish(request)}
-	{#if nonNullish(ethChainId)}
-		<EthWalletConnectSignModal {listener} {request} />
-	{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
-		<SolWalletConnectSignModal {listener} network={sourceSolNetwork} {request} />
-	{/if}
+	{#key request.id}
+		{#if nonNullish(ethChainId)}
+			<EthWalletConnectSignModal {listener} {request} />
+		{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
+			<SolWalletConnectSignModal {listener} network={sourceSolNetwork} {request} />
+		{/if}
+	{/key}
 {/if}

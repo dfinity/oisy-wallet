@@ -1,3 +1,7 @@
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { CKERC20_FEE } from '$eth/constants/ckerc20.constants';
 import { CKETH_FEE } from '$eth/constants/cketh.constants';
 import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
@@ -9,13 +13,30 @@ import { InfuraGasRest } from '$eth/rest/infura.rest';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { GetFeeData } from '$eth/types/infura';
-import type { EthereumNetwork } from '$eth/types/network';
+import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
+import {
+	BSC_MIN_MAX_FEE_PER_GAS,
+	BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
+} from '$evm/bsc/constants/bsc.constants';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { maxBigInt } from '$lib/utils/bigint.utils';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
+
+const BSC_CHAIN_IDS: EthereumChainId[] = [BSC_MAINNET_NETWORK.chainId, BSC_TESTNET_NETWORK.chainId];
+
+const getGasFeeFloor = (
+	chainId: EthereumChainId
+): { maxFeePerGas: bigint | null; maxPriorityFeePerGas: bigint | null } =>
+	BSC_CHAIN_IDS.includes(chainId)
+		? {
+				maxFeePerGas: BSC_MIN_MAX_FEE_PER_GAS,
+				maxPriorityFeePerGas: BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
+			}
+		: { maxFeePerGas: null, maxPriorityFeePerGas: null };
 
 export const getEthFeeData = ({
 	to,
@@ -64,7 +85,7 @@ export const getErc20FeeData = async ({
 		// We silence the error on purpose.
 		// The queries above often produce errors on mainnet, even when all parameters are correctly set.
 		// Additionally, it's possible that the queries are executed with inaccurate parameters, such as when a user enters an incorrect address or an address that is not supported by the selected function (e.g., an ICP account identifier on the Ethereum network rather than for the burn contract).
-		console.warn(err);
+		consoleWarn(err);
 
 		return ERC20_FALLBACK_FEE;
 	}
@@ -130,10 +151,18 @@ export const getEthFeeDataWithProvider = async ({
 		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
 	} = await getSuggestedFeeData();
 
+	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
+		getGasFeeFloor(chainId);
+
 	const feeData = {
 		...feeDataRest,
-		maxFeePerGas: maxBigInt(maxFeePerGas, suggestedMaxFeePerGas) ?? null,
-		maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas) ?? null
+		maxFeePerGas:
+			maxBigInt(maxBigInt(maxFeePerGas, suggestedMaxFeePerGas), floorMaxFeePerGas) ?? null,
+		maxPriorityFeePerGas:
+			maxBigInt(
+				maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas),
+				floorMaxPriorityFeePerGas
+			) ?? null
 	};
 
 	return { feeData, provider, params };

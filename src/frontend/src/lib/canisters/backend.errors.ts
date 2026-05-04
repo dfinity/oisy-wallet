@@ -1,22 +1,92 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
-	ChallengeCompletionError,
-	CreateChallengeError,
+	BtcGetPendingTransactionsError,
 	GetAllowedCyclesError,
+	RateLimitError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+import { assertNever } from '@dfinity/utils';
 import { mapIcrc2ApproveError, type ApproveError } from '@icp-sdk/canisters/ledger/icp';
 
-export const mapBtcPendingTransactionError = (
+// eslint-disable-next-line local-rules/prefer-object-params -- this util is more meaningful with separate parameters instead of an object
+const assertNeverOr = <T>(value: never, fallback: T): T => {
+	try {
+		assertNever(value);
+	} catch {
+		// If a new/untracked variant arrives at runtime, assertNever will throw.
+		// We deliberately return the fallback instead of crashing.
+	}
+
+	return fallback;
+};
+
+const mapRateLimitError = (err: RateLimitError): CanisterInternalError => {
+	const { max_calls: maxCalls, window_ns: windowNs } = err;
+
+	const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+	return new CanisterInternalError(
+		`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+	);
+};
+
+export const mapBtcAddPendingTransactionError = (
 	err: BtcAddPendingTransactionError
 ): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
 	}
 
-	return new CanisterInternalError('Unknown BtcAddPendingTransactionError');
+	if ('InvalidUtxos' in err) {
+		return new CanisterInternalError('The provided UTXOs are invalid.');
+	}
+
+	if ('EmptyUtxos' in err) {
+		return new CanisterInternalError('No UTXOs provided.');
+	}
+
+	if ('DuplicateUtxos' in err) {
+		return new CanisterInternalError('Duplicate UTXOs provided.');
+	}
+
+	if ('UtxosAlreadyReserved' in err) {
+		return new CanisterInternalError('Some of the provided UTXOs are already reserved.');
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcAddPendingTransactionError'));
+};
+
+export const mapBtcGetPendingTransactionsError = (
+	err: BtcGetPendingTransactionsError
+): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetPendingTransactionsError'));
 };
 
 export const mapBtcSelectUserUtxosFeeError = (
@@ -32,7 +102,17 @@ export const mapBtcSelectUserUtxosFeeError = (
 		);
 	}
 
-	return new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError');
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
 };
 
 export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterInternalError => {
@@ -40,48 +120,20 @@ export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterIn
 		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
 	}
 
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}
 
-	return new CanisterInternalError('Unknown GetAllowedCyclesError');
+	return assertNeverOr(err, new CanisterInternalError('Unknown GetAllowedCyclesError'));
 };
-
-export enum ChallengeCompletionErrorEnum {
-	InvalidNonce = 'InvalidNonce',
-	MissingChallenge = 'MissingChallenge',
-	ExpiredChallenge = 'ExpiredChallenge',
-	MissingUserProfile = 'MissingUserProfile',
-	ChallengeAlreadySolved = 'ChallengeAlreadySolved',
-	Unknown = 'Unknown'
-}
-
-export enum CreateChallengeEnum {
-	ChallengeInProgress = 'ChallengeInProgress',
-	Unknown = 'Unknown'
-}
-
-export class PowCreateChallengeError extends CanisterInternalError {
-	public code: CreateChallengeEnum;
-
-	constructor(message: string, code: CreateChallengeEnum) {
-		super(message);
-		this.code = code;
-	}
-}
-
-export class PowChallengeError extends CanisterInternalError {
-	public code: ChallengeCompletionErrorEnum;
-
-	constructor(message: string, challengeCompletionError: ChallengeCompletionErrorEnum) {
-		super(message);
-		this.code = challengeCompletionError;
-	}
-}
 
 export const mapAllowSigningError = (
 	err: AllowSigningError
-): CanisterInternalError | ApproveError | ChallengeCompletionError => {
+): CanisterInternalError | ApproveError => {
 	if ('ApproveError' in err) {
 		return mapIcrc2ApproveError(err.ApproveError);
 	}
@@ -90,47 +142,23 @@ export const mapAllowSigningError = (
 		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
 	}
 
-	if ('PowChallenge' in err) {
-		const powError = err.PowChallenge;
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
 
-		// Convert the backend Candid variant type to a strongly typed enum so we can easily handle it
-		// when thrown
-		if ('InvalidNonce' in powError) {
-			return new PowChallengeError(
-				'The provided nonce is valid.',
-				ChallengeCompletionErrorEnum.InvalidNonce
-			);
-		}
-		if ('MissingChallenge' in powError) {
-			return new PowChallengeError(
-				'No active challenge found.',
-				ChallengeCompletionErrorEnum.MissingChallenge
-			);
-		}
-		if ('ExpiredChallenge' in powError) {
-			return new PowChallengeError(
-				'The challange was not solved within the given timeframe. Reduce the difficulty or increase the expiary ' +
-					'duration to avoid this issue from happening again',
-				ChallengeCompletionErrorEnum.ExpiredChallenge
-			);
-		}
-		if ('MissingUserProfile' in powError) {
-			return new PowChallengeError(
-				'User profile not found. Please create a profile first.',
-				ChallengeCompletionErrorEnum.MissingUserProfile
-			);
-		}
-		if ('ChallengeAlreadySolved' in powError) {
-			return new PowChallengeError(
-				'This challenge has already been solved.',
-				ChallengeCompletionErrorEnum.ChallengeAlreadySolved
-			);
-		}
+	if ('RateLimitedByGuard' in err) {
+		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimitedByGuard;
 
-		// Fallback for any unknown PowChallenge error types
-		return new PowChallengeError(
-			`Unknown error: ${JSON.stringify(powError)}`,
-			ChallengeCompletionErrorEnum.Unknown
+		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+		return new CanisterInternalError(
+			`Guard rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+		);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
 		);
 	}
 
@@ -138,28 +166,5 @@ export const mapAllowSigningError = (
 		return new CanisterInternalError(err.Other);
 	}
 
-	return new CanisterInternalError('An uknown error occurred.');
-};
-
-export const mapCreateChallengeError = (err: CreateChallengeError): CanisterInternalError => {
-	if ('ChallengeInProgress' in err) {
-		return new PowCreateChallengeError(
-			'Challenge is already in progress.',
-			CreateChallengeEnum.ChallengeInProgress
-		);
-	}
-
-	if ('MissingUserProfile' in err) {
-		return new CanisterInternalError('User profile is missing.');
-	}
-
-	if ('RandomnessError' in err) {
-		return new CanisterInternalError('Could not generate randomness.');
-	}
-
-	if ('Other' in err) {
-		return new CanisterInternalError('An other error occurred.');
-	}
-
-	return new CanisterInternalError('An uknown error occurred.');
+	return assertNeverOr(err, new CanisterInternalError('Unknown AllowSigningError'));
 };

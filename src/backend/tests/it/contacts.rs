@@ -25,6 +25,7 @@ pub fn call_create_contact(
     caller: Principal,
     name: String,
 ) -> Result<Contact, ContactError> {
+    pic_setup.ensure_user_profile(caller);
     let request = CreateContactRequest { name, image: None };
     let wrapped_result =
         pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
@@ -53,6 +54,7 @@ pub fn call_update_contact(
     caller: Principal,
     contact: Contact,
 ) -> Result<Contact, ContactError> {
+    pic_setup.ensure_user_profile(caller);
     let request = UpdateContactRequest {
         id: contact.id,
         name: contact.name,
@@ -116,6 +118,37 @@ fn test_create_contact_requires_authenticated_user() {
         "Error should indicate unauthorized anonymous caller"
     );
 }
+
+/// Sanity check for the `caller_is_registered_user` guard on
+/// `create_contact`: a non-anonymous caller that has not created a user
+/// profile must be rejected by the guard before any endpoint logic runs.
+#[test]
+fn test_create_contact_requires_registered_user() {
+    let pic_setup = setup();
+    // Non-anonymous caller, but no user profile has been created.
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let request = CreateContactRequest {
+        name: "Test Contact".to_string(),
+        image: None,
+    };
+    let result =
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
+
+    assert!(
+        result.is_err(),
+        "Caller without a user profile should not be able to create contacts"
+    );
+    assert!(
+        result
+            .clone()
+            .unwrap_err()
+            .contains("Caller has no user profile"),
+        "Error should indicate the caller has no user profile, got: {:?}",
+        result.unwrap_err()
+    );
+}
+
 #[test]
 fn test_create_contact_should_succeed_with_valid_name() {
     let pic_setup = setup();
@@ -130,9 +163,43 @@ fn test_create_contact_should_succeed_with_valid_name() {
 }
 
 #[test]
+fn test_create_contact_should_fail_when_limit_reached() {
+    let pic_setup = setup();
+
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    for i in 1..=500 {
+        let result = call_create_contact(&pic_setup, caller, format!("Contact {i}"));
+
+        assert!(result.is_ok(), "Contact {i} should be created successfully");
+    }
+
+    let contacts = call_get_contacts(&pic_setup, caller);
+
+    assert_eq!(contacts.len(), 500);
+
+    let result = call_create_contact(&pic_setup, caller, "One too many".to_string());
+
+    assert_eq!(
+        result.unwrap_err(),
+        ContactError::TooManyContacts,
+        "Creating contact beyond the limit should return TooManyContacts"
+    );
+
+    let contacts = call_get_contacts(&pic_setup, caller);
+
+    assert_eq!(
+        contacts.len(),
+        500,
+        "Count should remain at 500 after rejected creation"
+    );
+}
+
+#[test]
 fn test_create_contact_should_fail_with_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Test empty string
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
@@ -164,6 +231,7 @@ fn test_create_contact_should_fail_with_whitespace_name() {
 fn test_create_contact_should_fail_with_leading_and_trailing_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
 
     // Create a contact with a name that has leading whitespace
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
@@ -412,6 +480,7 @@ fn test_contacts_are_isolated_between_users() {
         );
     }
 }
+
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the update contact functionality
 // -------------------------------------------------------------------------------------------------
@@ -685,7 +754,7 @@ fn test_update_contact_preserves_other_contacts() {
     let contact3 = result3.unwrap();
 
     // Update the second contact
-    let updated_contact2 = Contact {
+    let changed_contact = Contact {
         id: contact2.id,
         name: "Updated Contact 2".to_string(),
         addresses: vec![],
@@ -693,7 +762,7 @@ fn test_update_contact_preserves_other_contacts() {
         image: None,
     };
 
-    let update_result = call_update_contact(&pic_setup, caller, updated_contact2);
+    let update_result = call_update_contact(&pic_setup, caller, changed_contact);
     assert!(update_result.is_ok());
 
     // Get all contacts after update
@@ -701,23 +770,23 @@ fn test_update_contact_preserves_other_contacts() {
     assert_eq!(updated_contacts.len(), 3); // Should still have 3 contacts
 
     // Find each contact by ID and verify
-    let updated_contact1 = updated_contacts
+    let updated_contact_first = updated_contacts
         .iter()
         .find(|c| c.id == contact1.id)
         .unwrap();
-    let updated_contact2 = updated_contacts
+    let updated_contact_second = updated_contacts
         .iter()
         .find(|c| c.id == contact2.id)
         .unwrap();
-    let updated_contact3 = updated_contacts
+    let updated_contact_third = updated_contacts
         .iter()
         .find(|c| c.id == contact3.id)
         .unwrap();
 
     // Verify only contact2 was changed
-    assert_eq!(updated_contact1.name, "Contact 1");
-    assert_eq!(updated_contact2.name, "Updated Contact 2");
-    assert_eq!(updated_contact3.name, "Contact 3");
+    assert_eq!(updated_contact_first.name, "Contact 1");
+    assert_eq!(updated_contact_second.name, "Updated Contact 2");
+    assert_eq!(updated_contact_third.name, "Contact 3");
 }
 
 #[test]
@@ -819,12 +888,11 @@ fn test_update_contact_image_jpeg() {
 
 #[cfg(test)]
 mod tests {
-    use std::assert_eq;
-
+    use pretty_assertions::assert_eq;
     use serde_bytes::ByteBuf;
-    use shared::types::contact::{ContactImage, ImageMimeType};
+    use shared::types::contact::{Contact, ContactImage, ImageMimeType, UpdateContactRequest};
 
-    use super::*;
+    use super::create_empty_contacts;
 
     #[test]
     fn test_update_contact_image_png() {

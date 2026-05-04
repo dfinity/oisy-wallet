@@ -42,7 +42,6 @@ describe('custom-tokens.services', () => {
 			expect(result).toStrictEqual(mockCustomTokens);
 
 			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith({
-				certified: true,
 				identity: mockIdentity,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
@@ -93,13 +92,13 @@ describe('custom-tokens.services', () => {
 		it('should throw if listCustomTokens fails', async () => {
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Backend error'));
 
-			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrowError('Backend error');
+			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('Backend error');
 		});
 
 		it('should throw if setIdbTokens fails', async () => {
 			mockSetIdbTokens.mockRejectedValue(new Error('IDB error'));
 
-			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrowError('IDB error');
+			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('IDB error');
 		});
 
 		it('should fetch the cached tokens if useCache is true and certified is false', async () => {
@@ -132,7 +131,6 @@ describe('custom-tokens.services', () => {
 			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 
 			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith({
-				certified: false,
 				identity: mockIdentity,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});

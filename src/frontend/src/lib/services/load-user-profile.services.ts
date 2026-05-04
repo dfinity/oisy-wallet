@@ -3,9 +3,10 @@ import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { UserProfileNotFoundError } from '$lib/types/errors';
-import type { OptionIdentity } from '$lib/types/identity';
+import { SignupsClosedError, UserProfileNotFoundError } from '$lib/types/errors';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -13,7 +14,7 @@ const queryProfile = async ({
 	identity,
 	certified
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	certified: boolean;
 }): Promise<UserProfile> => {
 	const response = await getUserProfile({
@@ -34,7 +35,7 @@ const queryProfile = async ({
 const queryUnsafeProfile = async ({
 	identity
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): Promise<UserProfile | undefined> => {
 	try {
 		return await queryProfile({ identity, certified: false });
@@ -49,24 +50,26 @@ const queryUnsafeProfile = async ({
 export const loadCertifiedUserProfile = async ({
 	identity
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 }): Promise<void> => {
 	try {
 		const profile = await queryProfile({ identity, certified: true });
 		userProfileStore.set({ certified: true, profile });
 	} catch (err) {
 		// We ignore the error because this is a background task.
-		console.error('Failed to load certified user profile.', err);
+		consoleError('Failed to load certified user profile.', err);
 	}
 };
+
+export type LoadUserProfileFailureReason = 'signups-closed' | 'unknown';
 
 export const loadUserProfile = async ({
 	identity,
 	reload = true
 }: {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	reload?: boolean;
-}): Promise<ResultSuccess> => {
+}): Promise<ResultSuccess<LoadUserProfileFailureReason>> => {
 	// We just want to verify that the store is empty, without being interested in the data.
 	// So we fetch it imperatively, instead of passing as parameter.
 	// If it is not empty, and we don't want to reload, we can return early.
@@ -78,10 +81,17 @@ export const loadUserProfile = async ({
 	try {
 		let profile = await queryUnsafeProfile({ identity });
 		if (isNullish(profile)) {
-			profile = await createUserProfile({
+			const response = await createUserProfile({
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
+			if ('Err' in response) {
+				if ('SignupsClosed' in response.Err) {
+					throw new SignupsClosedError();
+				}
+				throw new Error('Unknown error');
+			}
+			profile = response.Ok;
 			userProfileStore.set({ certified: true, profile });
 		} else {
 			// We set the store before the call to load the certified profile.
@@ -91,12 +101,16 @@ export const loadUserProfile = async ({
 			loadCertifiedUserProfile({ identity });
 		}
 	} catch (err: unknown) {
+		if (err instanceof SignupsClosedError) {
+			return { success: false, err: 'signups-closed' };
+		}
+
 		const { settings } = get(i18n);
 		toastsError({
 			msg: { text: settings.error.loading_profile },
 			err
 		});
-		return { success: false };
+		return { success: false, err: 'unknown' };
 	}
 
 	return { success: true };

@@ -2,6 +2,7 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { WETH_TOKEN_GROUP } from '$env/tokens/groups/groups.weth.env';
 import weth from '$eth/assets/weth.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,6 +17,7 @@ export const WETH_TOKEN: RequiredAdditionalErc20Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Wrapped Ether',
 	symbol: WETH_SYMBOL,
 	decimals: WETH_DECIMALS,

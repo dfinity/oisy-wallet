@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
@@ -64,7 +64,7 @@ jobs:
         run: npm run test:merge
 
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         if: always()
         with:
           name: vitest-coverage-threshold-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -88,6 +88,33 @@ jobs:
           else
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Close outdated Coverage Thresholds PRs
+        if: steps.check_changes.outputs.changes_detected != 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: bot-update-vitest-coverage-thresholds
+        run: |
+          prs="$(gh pr list \
+            --repo "$REPO" \
+            --state open \
+            --head "$BRANCH" \
+            --base main \
+            --json number \
+            --jq '.[].number')"
+
+          if [[ -z "$prs" ]]; then
+            echo "No open PRs to close."
+            exit 0
+          fi
+
+          for pr in $prs; do
+            gh pr close "$pr" \
+              --repo "$REPO" \
+              --delete-branch \
+              --comment "This PR is now outdated: the current Vitest coverage thresholds no longer require an update."
+          done
 
       - name: Stage Changes on main
         if: steps.check_changes.outputs.changes_detected == 'true'

@@ -10,8 +10,8 @@ import type {
 	NonFungibleTokensByNetwork
 } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
-import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 export const isTokenNonFungible = (token: Token): token is NonFungibleToken =>
 	isTokenErc721(token) || isTokenErc1155(token) || isTokenIcNft(token);
@@ -95,9 +95,9 @@ export const mapNftAttributes = (
 	attributes:
 		| {
 				trait_type: string;
-				value?: Option<string | number | boolean>;
+				value?: Nullish<string | number | boolean>;
 		  }[]
-		| Record<string, Option<string | number | boolean>>
+		| Record<string, Nullish<string | number | boolean>>
 		| undefined
 		| null
 ): NftAttribute[] => {

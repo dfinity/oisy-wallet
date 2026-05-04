@@ -41,7 +41,12 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": "छँटाई",
+			"unlimited": "",
+			"info": "",
+			"asset": "",
+			"got_it": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -57,11 +62,12 @@
 			"switch_currency": "मुद्रा बदलें",
 			"more": "",
 			"less": "",
-			"learn_more": ""
+			"learn_more": "",
+			"up_one_level": "एक स्तर ऊपर जाएं"
 		},
 		"warning": {
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
-			"standalone_mode": "",
+			"standalone_mode": "जब किसी ऐप और $oisy_short दोनों को होम स्क्रीन पर इंस्टॉल किया गया हो, तो कनेक्शन संबंधी ज्ञात समस्याएं हो सकती हैं। यदि आपको $oisy_short से कनेक्ट करने या ट्रांज़ैक्शन साइन करने में समस्या आती है, तो कृपया ऐप को एक सामान्य ब्राउज़र से खोलें। हम एक समाधान पर काम कर रहे हैं जो जल्द ही उपलब्ध होगा। <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">अधिक पढ़ें</a>",
 			"video_not_supported": ""
 		}
 	},
@@ -73,10 +79,11 @@
 			"activity": "गतिविधि",
 			"airdrops": "पुरस्कार",
 			"earning": "कमाएँ और पुरस्कार",
+			"pay": "",
+			"wallet_connect": "",
 			"source_code_on_github": "GitHub पर स्रोत कोड",
 			"view_on_explorer": "एक्सप्लोरर पर देखें",
 			"source_code": "स्रोत कोड",
-			"changelog": "परिवर्तन लॉग",
 			"documentation": "दस्तावेज़",
 			"support": "सहायता",
 			"confirm_navigate": "क्या आप वाकई बाहर जाना चाहते हैं?",
@@ -95,8 +102,9 @@
 			"dapp_explorer": "ऐप एक्सप्लोरर खोलें",
 			"activity": "गतिविधि दृश्य खोलें",
 			"airdrops": "पुरस्कार दृश्य खोलें",
+			"pay": "",
+			"wallet_connect": "",
 			"menu": "आपका वॉलेट पता, सेटिंग्स, साइन-आउट और बाहरी लिंक",
-			"changelog": "$oisy_name के नवीनतम अपडेट की समीक्षा करने के लिए GitHub पर चेंजलॉग खोलें",
 			"documentation": "$oisy_name दस्तावेज़ खोलें",
 			"support": "$oisy_name दस्तावेज़ों का समर्थन अनुभाग खोलें",
 			"open_twitter": "DFINITY X/Twitter फ़ीड खोलें",
@@ -115,19 +123,31 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"description": "अपना वॉलेट खोलें या कुछ ही सेकंड में नया बनाएँ",
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"sign_in_or_sign_up": "लॉग इन करें या साइन अप करें",
+			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
-			"social_login": ""
+			"move_swap_grow": "नेटवर्कों पर अपनी संपत्तियाँ मूव, स्वैप और बढ़ाएँ"
 		},
 		"alt": {
-			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
+			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर",
+			"sign_in_with_google": "",
+			"sign_in_with_apple": "",
+			"sign_in_with_microsoft": ""
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": "नए साइन-अप फ़िलहाल प्रतिबंधित हैं। कृपया बाद में पुनः प्रयास करें।"
+		},
+		"banner": {
+			"signups_closed": "फ़िलहाल, नए उपयोगकर्ताओं का साइन-अप संभव नहीं है। मौजूदा उपयोगकर्ता $oisy_short को सामान्य रूप से उपयोग कर सकते हैं।"
 		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
@@ -136,12 +156,6 @@
 		},
 		"error": {
 			"no_internet_identity": "कोई इंटरनेट पहचान नहीं।",
-			"invalid_pouh_credential": "क्षमा करें, लेकिन मानवता क्रेडेंशियल को सत्यापित करते समय एक त्रुटि हुई। कृपया जारीकर्ता से संपर्क करें और क्रेडेंशियल फिर से अनुरोध करें।",
-			"error_validating_pouh_credential_oisy": "क्षमा करें, लेकिन $oisy_short में मानवता क्रेडेंशियल को सत्यापित करते समय एक त्रुटि हुई: $error",
-			"error_validating_pouh_credential": "क्षमा करें, लेकिन मानवता क्रेडेंशियल को सत्यापित करते समय एक त्रुटि हुई।",
-			"error_requesting_pouh_credential": "क्षमा करें, लेकिन मानवता क्रेडेंशियल का अनुरोध करते समय एक त्रुटि हुई।",
-			"missing_pouh_issuer_origin": "क्षमा करें, लेकिन मानवता क्रेडेंशियल का अनुरोध करते समय एक त्रुटि हुई। जारीकर्ता का मूल गायब है।",
-			"no_pouh_credential": "क्षमा करें, लेकिन मानवता क्रेडेंशियल का अनुरोध करते समय एक त्रुटि हुई। क्या आपके पास Decide AI में एक वैध क्रेडेंशियल है?",
 			"error_while_signing_in": "साइन-इन करते समय कुछ गलत हो गया।",
 			"unexpected_issue_with_syncing": "आपकी प्रमाणीकरण की स्थिति को सिंक्रनाइज़ करते समय अप्रत्याशित समस्या।"
 		},
@@ -348,7 +362,6 @@
 			"caffeine": {
 				"name": "",
 				"one_liner": "",
-				"call_to_action": "",
 				"description": "",
 				"carousel": {
 					"text": "",
@@ -430,6 +443,40 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icpindex": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icexplorer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpixel": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"motoko_tokyo": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -467,7 +514,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "आगामी टोकन ड्रॉप्स पर नज़र रखें! <a href=\"https://x.com/oisy\" target=\"_blank\">X पर हमें फ़ॉलो करें</a>, हमारे <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> से जुड़ें, या <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> में शामिल हों ताकि अपडेट रहें।",
-			"coming_soon": "$oisy_short एपिसोड 4 जल्द आ रहा है",
+			"coming_soon": "अगला $oisy_short Sprinkles एपिसोड जल्द आ रहा है",
 			"reward_banner": "अभियान $campaignName का बैनर"
 		},
 		"campaigns": {
@@ -570,6 +617,36 @@
 						"share_href": ""
 					}
 				}
+			},
+			"sprinkles_s1e6": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: एपिसोड 6 अब लाइव है 🎉",
+				"one_liner": "सक्रिय रहने, दूसरों को रेफर करने और OISY को कई चेन पर उपयोग करने के लिए Sprinkles कमाएं। आपके कार्य आपके पुरस्कार बढ़ाते हैं, और सक्रिय रेफरल उन्हें और बढ़ाते हैं।<br/>साथ ही, अब अधिक चेन का मतलब है जीतने के बेहतर अवसर।",
+				"participate_title": "गतिविधि और रेफरल के लिए टोकन कमाएं। अधिक चेन का मतलब है अधिक अवसर।",
+				"description": "योग्य बनने के लिए सक्रिय रहें: अक्सर लॉग इन करें, वॉलेट क्रियाएं पूरी करें और कम से कम 5 $ रखें।<br/>हर सक्रिय चेन मल्टीचेन मल्टीप्लायर के साथ आपकी संभावनाएं बढ़ाती है।<br/>योग्य दोस्तों से 10% कमाएं।",
+				"campaign_href": "",
+				"welcome": {
+					"title": "$oisy_short में आपका स्वागत है!",
+					"subtitle": "कमाने के लिए तैयार हैं?",
+					"description": "आप अपने पहले पुरस्कार से 2 कदम दूर हैं: लॉग इन करें, 5 $+ रखें और 2 क्रियाएं पूरी करें। Sprinkles कमाना शुरू करने के लिए बस इतना काफी है।<br><br>और चाहिए? अपने दोस्तों को रेफर करें और हर बार जब उनमें से कोई Sprinkles कमाए तो बोनस पाएं।"
+				},
+				"win": {
+					"default": {
+						"title": "आपको पुरस्कृत किया गया",
+						"description": "आपके पुरस्कार आपके वॉलेट में आ गए हैं।<br>अधिक जीतने के लिए रेफर करना और सक्रिय रहना न भूलें",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "आज के सबसे बड़े OISY स्प्रिंकल्स कमाने के लिए बधाई!",
+						"description": "आपने अभी हमारा शीर्ष स्प्रिंकल्स पुरस्कार अर्जित किया है<br>सक्रिय रहें, और अधिक जीतने के लिए रेफर करते रहें।",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "एक छोटा सा धन्यवाद",
+						"description": "आपके किसी रेफर किए गए उपयोगकर्ता को अभी कुछ Sprinkles मिले हैं।",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},
@@ -645,7 +722,9 @@
 			"btc_withdrawal_statuses": "BTC निकासी स्थिति लाते समय त्रुटइ।",
 			"transaction_price": "लेनदेन की कीमत का अनुमान लोड करते समय त्रुटि।",
 			"icrc_canisters": "ICRC कैनिस्टर लोड करते समय त्रुटि।",
-			"icrc_canister_loading": "",
+			"load_token_list": "",
+			"icrc_canister_loading_curated": "",
+			"icrc_canister_loading_custom": "",
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
@@ -655,6 +734,7 @@
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "आपके वॉलेट को कुछ प्रारंभिक डेटा की आवश्यकता है जो अभी तक लोड नहीं हुआ है। कृपया पुनः प्रयास करें।",
 			"allow_signing": "आपके वॉलेट को साइन करने के लिए सेट करते समय एक समस्या हुई। आपको साइन आउट कर दिया गया है। यदि समस्या बनी रहती है, तो सहायता से संपर्क करें।",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -690,11 +770,6 @@
 			"active_networks_description": "उन नेटवर्कों का चयन करें जिनके साथ आप $oisy_name में काम करना चाहते हैं। निष्क्रिय नेटवर्कों से टोकन और लेनदेन आपके उपलब्ध बैलेंस में नहीं दिखेंगे या शामिल नहीं होंगे।",
 			"enable_network": "नेटवर्क सक्षम करें",
 			"disable_network": "नेटवर्क अक्षम करें",
-			"credentials_title": "क्रेडेंशियल",
-			"pouh_credential": "मानवता क्रेडेंशियल",
-			"pouh_credential_description": "मानवता क्रेडेंशियल मानवता का एक प्रमाण है। इसे Decide AI द्वारा जारी किया जाता है।",
-			"present_pouh_credential": "प्रस्तुत करें",
-			"pouh_credential_verified": "सत्यापित ✅",
 			"appearance": "दिखावट",
 			"appearance_light": "लाइट",
 			"appearance_dark": "डार्क",
@@ -705,7 +780,13 @@
 			"beta_features": "",
 			"enable_beta_feature": "",
 			"disable_beta_feature": "",
-			"save_beta_feature_success": ""
+			"save_beta_feature_success": "आपकी बीटा फ़ीचर सेटिंग्स अपडेट कर दी गई हैं।",
+			"hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन छिपाएं",
+			"hide_micro_transactions_description": "बहुत छोटे मूल्यों वाले लेनदेन आमतौर पर स्पैम होते हैं और उपयोगकर्ता को वैध पते के बजाय प्रेषक के पते को कॉपी करने के लिए धोखा देने का इरादा रखते हैं। इन्हें लेनदेन सूचियों में छिपाने की अनुशंसा की जाती है।",
+			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
+			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
+			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
+			"learn_more": ""
 		},
 		"alt": {
 			"testnets_toggle": "परीक्षण नेटवर्क दिखाने या छिपाने के लिए टॉगल करें",
@@ -817,6 +898,7 @@
 	"send": {
 		"text": {
 			"send": "भेजें",
+			"send_token": "",
 			"destination": "गंतव्य",
 			"source": "स्रोत",
 			"balance": "शेष राशि",
@@ -907,22 +989,25 @@
 		"error": {
 			"unexpected": "लेनदेन भेजते समय कुछ गलत हो गया।",
 			"destination_address_unknown": "ETH गंतव्य पता अज्ञात है",
-			"metamask_connected": "आपके खाते प्राप्त नहीं कर सकते। क्या आपका मेटामास्क खुला और पहले से ही जुड़ा हुआ है?",
-			"metamask_no_accounts": "कोई मेटामास्क खाते नहीं मिले।",
-			"metamask_switch_network": "मेटामास्क को चेन आईडी $chain_id पर स्विच करने का अनुरोध नहीं कर सकता। क्या आपका मेटामास्क $network_name का उपयोग कर रहा है?",
-			"erc20_data_undefined": "ERC20 लेनदेन डेटा अपरिभाषित या शून्य नहीं हो सकता है।",
-			"data_undefined": "लेनदेन डेटा अपरिभाषित या शून्य नहीं हो सकता है।",
-			"no_identity_calculate_fee": "अपने प्रिंसिपल के लिए शुल्क की गणना करने के लिए कोई पहचान प्रदान नहीं की गई।",
-			"invalid_destination": "गंतव्य अमान्य है। कृपया एक वैध वॉलेट पता या गंतव्य के साथ पुनः प्रयास करें।",
+			"metamask_connected": "आपके खाते प्राप्त नहीं किए जा सकते। क्या आपका Metamask खुला और पहले से जुड़ा हुआ है?",
+			"metamask_no_accounts": "कोई Metamask खाता नहीं मिला।",
+			"metamask_switch_network": "Metamask को chain ID $chain_id पर स्विच करने का अनुरोध नहीं किया जा सकता। क्या आपका Metamask $network_name का उपयोग कर रहा है?",
+			"erc20_data_undefined": "ERC20 लेनदेन डेटा अपरिभाषित या null नहीं हो सकता।",
+			"data_undefined": "लेनदेन डेटा अपरिभाषित या null नहीं हो सकता।",
+			"no_identity_calculate_fee": "इसके principal के लिए शुल्क की गणना करने हेतु कोई पहचान प्रदान नहीं की गई।",
+			"invalid_destination": "गंतव्य अमान्य है। कृपया एक वैध वॉलेट पते या गंतव्य के साथ पुनः प्रयास करें।",
 			"incompatible_token": "टोकन असंगत है। कृपया एक संगत टोकन के साथ पुनः प्रयास करें।",
-			"no_btc_network_id": "वर्तमान नेटवर्क ($networkId) बिटकॉइन नेटवर्क नहीं है।",
-			"no_solana_network_id": "वर्तमान नेटवर्क ($networkId) सोलाना नेटवर्क नहीं है।",
-			"no_pending_bitcoin_transaction": "लंबित बिटकॉइन लेनदेन लोड करते समय एक त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।",
+			"no_btc_network_id": "वर्तमान नेटवर्क ($networkId) Bitcoin नेटवर्क नहीं है।",
+			"no_solana_network_id": "वर्तमान नेटवर्क ($networkId) Solana नेटवर्क नहीं है।",
+			"no_pending_bitcoin_transaction": "लंबित Bitcoin लेनदेन लोड करते समय एक त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।",
 			"unexpected_utxos_fee": "लेनदेन शुल्क की गणना करते समय कुछ गलत हो गया।",
-			"unable_to_retrieve_amount": "लागू नहीं है (पुनः प्राप्त करने में असमर्थ)",
-			"solana_transaction_expired": "आपका लेनदेन सोलाना नेटवर्क द्वारा संसाधित नहीं किया गया था और समाप्त हो गया था, सबसे अधिक संभावना है क्योंकि प्रदान किया गया प्राथमिकता शुल्क पर्याप्त नहीं था। हमने इसे नवीनतम अनुशंसित राशि में अपडेट कर दिया है, इसलिए कृपया इसे फिर से भेजने का प्रयास करें।",
-			"solana_confirmation_failed": "हमें आपके द्वारा अभी बनाए गए लेनदेन के लिए कोई पुष्टि नहीं मिली। कृपया कुछ सेकंड प्रतीक्षा करें और फिर अपनी टोकन की लेनदेन सूची जांचें कि क्या आपका लेनदेन सही ढंग से बनाया गया था।",
-			"fee_calc_unsupported_standard": ""
+			"unable_to_retrieve_amount": "n/a (प्राप्त करने में असमर्थ)",
+			"solana_transaction_expired": "आपका लेनदेन Solana नेटवर्क द्वारा संसाधित नहीं किया गया और समाप्त हो गया, सबसे अधिक संभावना है क्योंकि प्रदान की गई प्राथमिकता शुल्क पर्याप्त नहीं थी। हमने इसे नवीनतम अनुशंसित राशि पर अपडेट कर दिया है, इसलिए कृपया पुनः प्रयास करें।",
+			"solana_confirmation_failed": "हमें आपके द्वारा अभी बनाए गए लेनदेन की कोई पुष्टि प्राप्त नहीं हुई। कृपया कुछ सेकंड प्रतीक्षा करें और फिर अपने टोकन की लेनदेन सूची जांचें कि आपका लेनदेन सही तरीके से बनाया गया था या नहीं।",
+			"solana_insufficient_funds": "इस लेनदेन को पूरा करने के लिए आपके टोकन का बैलेंस पर्याप्त नहीं है। आपका बैलेंस अंतिम बार प्रदर्शित होने के बाद से बदल सकता है।",
+			"solana_insufficient_funds_for_fee": "लेनदेन शुल्क को कवर करने के लिए आपका SOL बैलेंस पर्याप्त नहीं है।",
+			"solana_insufficient_funds_for_rent": "खाता निर्माण के लिए आवश्यक किराए को कवर करने के लिए आपका SOL बैलेंस पर्याप्त नहीं है।",
+			"fee_calc_unsupported_standard": "शुल्क की गणना नहीं की जा सकी क्योंकि प्रदान किया गया टोकन मानक समर्थित नहीं है।"
 		}
 	},
 	"mint": {
@@ -941,39 +1026,46 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "",
-			"pay_to": "",
-			"powered_by": "",
-			"recipient": "",
-			"name": "",
-			"address": "",
-			"country": "",
-			"phone_number": "",
-			"email_address": "",
-			"website": "",
-			"enter_manually": "",
-			"url_or_code": "",
-			"enter_or_paste_code": "",
-			"scan": "",
-			"pay": "",
-			"pay_amount": "",
-			"go_to_assets": "",
-			"supported_tokens": "",
-			"no_supported_tokens": "",
-			"pay_with": "",
-			"select_token": "",
-			"select_different_token": "",
-			"tokens_available": "",
-			"select_token_to_pay": "",
-			"pay_at_successful": "",
-			"pay_at_failure": "",
-			"try_again": "",
-			"payment_confirmed": "",
-			"payment_failed": ""
+			"scan_qr_code": "QR कोड स्कैन करें",
+			"pay_to": "$receipt को भुगतान करें",
+			"powered_by": "द्वारा संचालित",
+			"recipient": "प्राप्तकर्ता",
+			"name": "नाम",
+			"address": "पता",
+			"country": "देश",
+			"phone_number": "फ़ोन नंबर",
+			"email_address": "ईमेल पता",
+			"website": "वेबसाइट",
+			"enter_manually": "मैन्युअल रूप से दर्ज करें",
+			"url_or_code": "URL या कोड",
+			"enter_or_paste_code": "कोड दर्ज करें या पेस्ट करें",
+			"scan": "स्कैन",
+			"pay": "भुगतान करें",
+			"pay_amount": "$amount का भुगतान करें",
+			"go_to_assets": "एसेट पर जाएं",
+			"supported_tokens": "Open CryptoPay निम्नलिखित टोकन का समर्थन करता है: ETH, USDC, USDT, POL, ARB, WBTC, XMR, dEURO, ZCHF, आदि।",
+			"no_supported_tokens": "आपके पास कोई समर्थित टोकन नहीं है",
+			"pay_with": "इससे भुगतान करें",
+			"select_token": "टोकन चुनें",
+			"select_different_token": "दूसरा टोकन चुनें",
+			"tokens_available": "$amount टोकन उपलब्ध",
+			"select_token_to_pay": "भुगतान के लिए टोकन चुनें",
+			"pay_at_successful": "$receipt पर भुगतान किया गया",
+			"pay_at_failure": "$receipt पर भुगतान विफल",
+			"try_again": "पुनः प्रयास करें",
+			"payment_confirmed": "भुगतान की पुष्टि हो गई",
+			"payment_failed": "भुगतान विफल",
+			"what_is_scan": "स्कैनर क्या है",
+			"no_camera_permission": "QR कोड स्कैन करने के लिए, आपको अपने ब्राउज़र की साइट सेटिंग में कैमरा एक्सेस की अनुमति देनी होगी।",
+			"what_is_scan_description": "$oisy_short स्कैनर विभिन्न प्रकार के QR कोड पढ़ सकता है और तुरंत सही कार्रवाई शुरू कर सकता है। नया कनेक्शन स्थापित करने के लिए WalletConnect QR कोड स्कैन करें, या Open CryptoPay का उपयोग करने वाली किसी भी दुकान में चेकआउट कोड स्कैन करके $oisy_short Pay से बिल का भुगतान करें।",
+			"what_is_scan_title": "$oisy_short किसी भी QR कोड को समझता है",
+			"learn_more_about_scan": "स्कैनर के बारे में और जानें",
+			"learn_more_about_pay": "$oisy_short Pay के बारे में और जानें",
+			"scanner": "स्कैनर"
 		},
 		"error": {
-			"code_link_is_not_valid": "",
-			"data_is_incompleted": ""
+			"code_link_is_not_valid": "कोड/लिंक मान्य नहीं है",
+			"data_is_incompleted": "प्राप्त डेटा अपूर्ण है। कुछ आवश्यक विवरण गायब हैं।"
 		}
 	},
 	"convert": {
@@ -1020,6 +1112,9 @@
 			"loading_cketh_helper": "ckETH सहायक अनुबंध पता लोड करते समय त्रुटि। कोई मिन्टर कैनिस्टर आईडी प्रारंभ नहीं की गई है।",
 			"unexpected": "टोकन बदलते समय कुछ गलत हो गया।",
 			"unexpected_missing_data": "एक कनवर्ट लेनदेन शुरू करते समय कुछ गलत हो गया।"
+		},
+		"warning": {
+			"ckusdc_conversion_currently_suspended": "USDC को ckUSDC से/में परिवर्तित करना अभी निलंबित है।"
 		}
 	},
 	"swap": {
@@ -1061,10 +1156,16 @@
 			"select_token": "टोकन चुनें",
 			"select_network_filter": "नेटवर्क चुनें",
 			"withdrawing": "निकासी कर रहा है...",
+			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें एक मिनट तक का समय लग सकता है।)",
 			"network_cost": "नेटवर्क लागत",
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
-			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं"
+			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
+			"near_intents_estimated_time": "",
+			"near_intents_tos": "",
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"value_difference_error_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
@@ -1081,7 +1182,9 @@
 			"manually_withdraw_success": "आपके पिछले असफल स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। आप स्वैप को फिर से आज़मा सकते हैं या स्वैप प्रदाता बदल सकते हैं।",
 			"manually_withdraw_failed": "आपके फंड निकालने में विफल रहा। <br> कृपया पुनः प्रयास करें या अनुसरण करें",
 			"swap_sucess_withdraw_failed": "स्वैप पूरा हो गया, लेकिन आपके टोकन स्वचालित रूप से वापस नहीं लिए जा सके। उन्हें मैन्युअल रूप से वापस लेने के लिए नीचे दिए गए निकालें बटन पर क्लिक करें।<br> या अनुसरण करें",
-			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।"
+			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
+			"swap_completed_close_failed": "",
+			"cannot_save_provider_agreement": ""
 		}
 	},
 	"buy": {
@@ -1142,7 +1245,16 @@
 			"hide_more_networks": "अधिक नेटवर्क छुपाएं",
 			"on_network": " $network पर",
 			"delete_token": "टोकन मिटाएँ",
-			"edit_token": "टोकन संपादित करें"
+			"edit_token": "टोकन संपादित करें",
+			"sort_by_value": "मूल्य",
+			"sort_by_performance": "टोकन प्रदर्शन",
+			"sort_by_symbol": "प्रतीक",
+			"hide_asset_types": "असेट प्रकार छुपाएं",
+			"asset_type": "$oisy_name में असेट प्रकार",
+			"asset_type_all": "सभी असेट प्रकार",
+			"no_tokens_for_asset_type": "आपके वॉलेट में कोई $asset_type नहीं है",
+			"no_tokens_for_asset_type_zero_tokens": "चयनित नेटवर्क में कोई $asset_type नहीं है",
+			"no_tokens_for_asset_type_description": "अपना पोर्टफोलियो दृश्य अनुकूलित करने के लिए <strong>$count समर्थित टोकन</strong> में से चुनें।"
 		},
 		"details": {
 			"title": "टोकन विवरण",
@@ -1259,6 +1371,7 @@
 			"unrecognised_erc_interface": "अपरिचित ERC इंटरफ़ेस।",
 			"no_metadata": "कोई मेटाडेटा प्राप्त नहीं हुआ।",
 			"unexpected": "टोकन सहेजते समय कुछ गलत हो गया।",
+			"version_mismatch": "",
 			"unexpected_hiding": "टोकन छिपाते समय कुछ गलत हो गया।",
 			"already_available": "टोकन पहले से उपलब्ध है।",
 			"not_toggleable": "टोकन टॉगलेबल नहीं है, इसे छिपाया नहीं जा सकता।",
@@ -1267,6 +1380,23 @@
 			"unexpected_undefined": "टोकन अपरिभाषित है। यह अप्रत्याशित है।",
 			"unexpected_error_on_token_delete": "टोकन हटाते समय कुछ गलत हो गया।",
 			"unexpected_error_on_token_update": "टोकन अपडेट करते समय कुछ गलत हो गया।"
+		}
+	},
+	"token_tag": {
+		"type": {
+			"category": "श्रेणी",
+			"risk": "जोखिम"
+		},
+		"category": {
+			"crypto": "क्रिप्टो",
+			"stablecoin": "स्टेबलकॉइन",
+			"stock": "शेयर",
+			"commodity": "कमोडिटी"
+		},
+		"risk": {
+			"low": "कम जोखिम",
+			"medium": "मध्यम जोखिम",
+			"high": "उच्च जोखिम"
 		}
 	},
 	"nfts": {
@@ -1281,7 +1411,6 @@
 			"by_collection": "संग्रह के अनुसार समूहित करें",
 			"show_spam": "स्पैम दिखाएँ",
 			"show_hidden": "छिपा हुआ दिखाएँ",
-			"sorting": "छँटाई",
 			"recents_first": "नवीनतम पहले",
 			"oldest_first": "सबसे पुराना पहले",
 			"collection_atoz": "संग्रह का नाम A-Z",
@@ -1404,7 +1533,10 @@
 			"amount": "",
 			"hex_data": "हेक्स डेटा",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
-			"sign_message": "संदेश पर हस्ताक्षर करें"
+			"sign_message": "संदेश पर हस्ताक्षर करें",
+			"connected_apps": "जुड़े हुए ऐप्स",
+			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
+			"wallet_connect": ""
 		},
 		"alt": {
 			"connect_input": "उदाहरण के लिए wc:a281567bb3e4..."
@@ -1497,8 +1629,6 @@
 		},
 		"label": {
 			"reimbursement": "प्रतिपूर्ति",
-			"twin_token_sent": "$twinToken भेजा गया",
-			"ck_token_sent": "$ckToken भेजा गया",
 			"twin_token_converted": "$twinToken से परिवर्तित",
 			"ck_token_converted": "$ckToken से परिवर्तित",
 			"sending_twin_token": "$twinToken भेज रहा है",
@@ -1716,20 +1846,13 @@
 			"title": "QR कोड स्कैन करें"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Preparing Signer",
-			"description": "Verifying that you are not a robot",
-			"request_challenge": "Waiting for new challenge",
-			"solve_challenge": "Solving challenge",
-			"grant_cycles": "Enabling signing"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "अपने $oisy_name तक पहुंचें",
-				"open_or_create": "dApp से सुरक्षित रूप से कनेक्ट होने और अपनी संपत्तियों का प्रबंधन शुरू करने के लिए अपना वॉलेट खोलें या बनाएँ।"
+				"open_or_create": "एप्लिकेशन के साथ सुरक्षित रूप से इंटरैक्ट करने के लिए अपना वॉलेट खोलें या बनाएं।",
+				"connect_your_wallet": "अपने $oisy_name से कनेक्ट करें",
+				"oisy_protects_you": "OISY आपकी सुरक्षा करता है!",
+				"oisy_protects_you_description": "एप्लिकेशन आपके फंड तक सीधे नहीं पहुंच सकते, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए."
 			}
 		},
 		"idle": {
@@ -1850,7 +1973,8 @@
 			"title": "हाल की गतिविधि"
 		},
 		"info": {
-			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।"
+			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
+			"hidden_micro_transactions": "<strong>OISY आपकी रक्षा करता है!</strong> बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",
@@ -1859,161 +1983,172 @@
 	},
 	"earning": {
 		"text": {
-			"title": "कमाएँ",
-			"tab_title": "",
-			"earning_opportunities": "",
-			"header_title": "",
-			"header_description": "",
-			"go_to_earn": ""
+			"title": "कमाएं",
+			"tab_title": "कमाई हो रही है",
+			"earning_opportunities": "कमाई के अवसर",
+			"header_title": "कमाएं में आपका स्वागत है!",
+			"header_description": "अपने टोकन को कमाई के अवसरों में लगाकर अपना डिजिटल एसेट पोर्टफोलियो बढ़ाएं।",
+			"go_to_earn": "कमाएं पर जाएं"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "",
-				"title2": "",
-				"description": "",
-				"action": ""
+			"harvest_autopilot": {
+				"title": "Harvest – Autopilot",
+				"description": "एक क्लिक के Autopilot vaults के साथ अधिकतम यील्ड दक्षता।",
+				"action": "Autopilot पर जाएं"
 			},
 			"sprinkles": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "OISY Sprinkles",
+				"description": "OISY उपयोग करें और कमाएं! एपिसोड 6 लाइव है 🎉",
+				"action": "स्थिति जांचें"
 			}
 		},
 		"card_fields": {
-			"apy": "",
-			"currentStaked": "",
-			"currentEarning": "",
-			"earningPotential": "",
-			"terms": ""
+			"apy": "APY",
+			"networks": "नेटवर्क",
+			"assets": "एसेट",
+			"currentStaked": "स्टेक किया गया",
+			"currentEarning": "अभी कमाई",
+			"earningPotential": "कमाई की संभावना",
+			"terms": "शर्तें"
 		},
 		"terms": {
-			"flexible": ""
+			"flexible": "लचीला"
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": ""
+				"cardTitle": "Gold DAO के साथ कमाएं"
 			}
+		}
+	},
+	"vaults": {
+		"text": {
+			"autopilot": "Autopilot",
+			"live_apy": "लाइव APY"
 		}
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
-			"stake": "",
-			"stake_now": "",
-			"stake_amount": "",
-			"not_enough_to_stake": "",
-			"unstake": "",
-			"unstake_now": "",
-			"unstaking": "",
-			"unstake_token": "",
-			"enable_token_text": "",
-			"enable_token_button": "",
-			"review": "",
-			"executing_transaction": "",
-			"unsupported_token_staking": "",
-			"provider": "",
-			"earning_potential": "",
-			"earning_potential_hint": "",
-			"active_earning": "",
-			"active_earning_per_year": "",
-			"unproductive_assets": "",
-			"invested_assets": "",
-			"visit_provider": "",
-			"current_apy_label": "",
-			"stake_review_subtitle": "",
-			"unstake_review_subtitle": "",
-			"delayed_dissolve": "",
-			"immediate_dissolve": "",
-			"included_token_fee": "",
-			"included_dissolve_fee": "",
-			"delayed_dissolve_terms": "",
-			"delayed_dissolve_info": "",
-			"immediate_dissolve_terms": "",
-			"amount_to_receive": "",
-			"unclaimed_rewards": "",
-			"unlock_requests": "",
-			"unlocking_in": "",
-			"unlocked": "",
-			"withdraw": "",
-			"withdraw_successful": "",
-			"claim_reward": "",
-			"claim_rewards": "",
-			"claim_reward_short": "",
-			"claim_now": "",
-			"claiming": "",
-			"get_tokens_with_amount": "",
-			"get_tokens": "",
-			"reward_claimed": "",
-			"staked": "",
-			"unstaked": "",
-			"title_empty_1": "",
-			"title_empty_2_usd": "",
-			"title_empty_2_apy": "",
+			"harvest_autopilot_page_description": "एक क्लिक के Autopilot vaults के साथ अधिकतम यील्ड दक्षता।",
+			"harvest_autopilot_vault_page_description": "Autopilot <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">ऑडिटेड IPOR</a> Fusion Vault तकनीक द्वारा संचालित है।",
+			"harvest_autopilot_provider_description": "Harvest Autopilot एक विशेष \"सेट करें और भूल जाएं\" सेवा है जो न्यूनतम प्रयास के साथ आपके DeFi पोज़ीशन को स्वचालित करती है।",
+			"harvest_autopilot_stake_terms": "मैं पुष्टि करता/करती हूं कि मैंने उत्पाद पढ़ा और समझा है, <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/risk-disclosures\" target=\"_blank\">जोखिम प्रकटीकरण</a> पढ़ा है, और <a class='no-underline blue-link' href=\"https://docs.harvest.finance/legal/terms-and-conditions\" target=\"_blank\">नियम और शर्तें</a> से सहमत हूं।",
+			"my_positions": "मेरी पोज़ीशन",
+			"available_autopilots": "उपलब्ध Autopilots",
+			"vault_info": "Vault जानकारी",
+			"vault_address": "Vault पता",
+			"protocol": "प्रोटोकॉल",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "कुल लॉक मूल्य (TVL)",
+			"manager": "प्रबंधक",
+			"vault_description": "यह पूल आपके $asset_symbol के लिए \"सेट करें और भूल जाएं\" यील्ड प्रबंधन सेवा के रूप में डिज़ाइन किया गया है। यह सर्वोत्तम अवसरों में पूंजी को गतिशील रूप से आवंटित करके आपकी DeFi पोज़ीशन को न्यूनतम प्रयास के साथ स्वचालित रूप से अनुकूलित करता है।",
+			"stake": "स्टेक करें",
+			"stake_now": "अभी स्टेक करें",
+			"stake_amount": "$amount $token_symbol स्टेक करें",
+			"not_enough_to_stake": "स्टेक करने के लिए कोई $token_symbol नहीं",
+			"estimated_received": "अनुमानित प्राप्ति",
+			"estimated_yearly_yield": "अनुमानित वार्षिक यील्ड",
+			"unstake": "अनस्टेक करें",
+			"unstake_now": "अभी अनस्टेक करें",
+			"unstaking": "अनस्टेक हो रहा है...",
+			"unstake_token": "$token_symbol अनस्टेक करें",
+			"enable_token_text": "आपको $token_symbol सक्षम करना होगा",
+			"enable_token_button": "$token_symbol सक्षम करें",
+			"review": "लेन-देन की समीक्षा करें",
+			"executing_transaction": "लेन-देन निष्पादित हो रहा है...",
+			"unsupported_token_staking": "चयनित टोकन के लिए स्टेकिंग समर्थित नहीं है।",
+			"provider": "स्टेकिंग शर्तें $provider द्वारा प्रदान की गई हैं",
+			"earning_potential": "कमाई की संभावना",
+			"earning_potential_hint": "आपके गैर-निवेशित एसेट के मूल्य और उपलब्ध कमाई अवसरों के उच्चतम APY पर आधारित।",
+			"active_earning": "सक्रिय कमाई",
+			"active_earning_per_year": "$amount/वर्ष",
+			"active_earning_per_year_short": "$amount/वर्ष",
+			"unproductive_assets": "उपलब्ध",
+			"invested_assets": "आवंटित",
+			"visit_provider": "वेबसाइट देखें",
+			"current_apy_label": "वर्तमान APY",
+			"max_apy_label": "अधिकतम APY",
+			"stake_review_subtitle": "आप स्टेक कर रहे हैं",
+			"unstake_review_subtitle": "आप अनस्टेक कर रहे हैं",
+			"delayed_dissolve": "देरी से प्राप्त करें",
+			"immediate_dissolve": "तुरंत प्राप्त करें",
+			"included_token_fee": "नेटवर्क शुल्क शामिल",
+			"included_dissolve_fee": "अनलॉक शुल्क शामिल",
+			"delayed_dissolve_terms": "$token को स्टेकिंग से अनलॉक करते समय, टोकन $delay दिनों के लिए बिना किसी पुरस्कार के लॉक रहते हैं, उसके बाद ही निकाले जा सकते हैं।",
+			"delayed_dissolve_info": "जब आप अपना $token स्टेक अनलॉक करना शुरू करते हैं, तो आपको नए पुरस्कार मिलने बंद हो जाएंगे।",
+			"immediate_dissolve_terms": "आपको अपना $token तुरंत मिलेगा, लेकिन अनलॉक किए जा रहे $token टोकन पर शुल्क लगाया जाएगा।",
+			"amount_to_receive": "प्राप्त करने की राशि",
+			"unclaimed_rewards": "अदावा पुरस्कार",
+			"unlock_requests": "अनलॉक अनुरोध",
+			"unlocking_in": "$time में अनलॉक",
+			"unlocked": "अनलॉक हो गया",
+			"withdraw": "निकालें",
+			"withdraw_successful": "टोकन सफलतापूर्वक निकाले गए।",
+			"claim_reward": "पुरस्कार प्राप्त करें",
+			"claim_rewards": "पुरस्कार प्राप्त करें",
+			"claim_reward_short": "प्राप्त करें",
+			"claim_now": "अभी प्राप्त करें",
+			"claiming": "प्राप्त हो रहा है...",
+			"get_tokens_with_amount": "$amount $token_symbol तक प्राप्त करें",
+			"get_asset_tokens": "$token_symbol प्राप्त करें",
+			"reward_claimed": "पुरस्कार प्राप्त हुआ",
+			"staked": "स्टेक किया गया",
+			"unstaked": "अनस्टेक किया गया",
+			"title_empty_1": "प्रति वर्ष तक कमाएं",
+			"title_empty_2_usd": "/वर्ष",
+			"title_empty_2_apy": "वार्षिक",
 			"title_empty_3": "",
-			"description_empty": "",
-			"full_history": "",
-			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"description_empty": "ऐसा लगता है कि आपने अभी तक कोई टोकन स्टेक नहीं किया है",
+			"full_history": "पूरा इतिहास दिखाएं",
+			"recent_history": "पूरा इतिहास बंद करें",
+			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield Farming के साथ OISY में कमाएं",
+			"harvest_autopilot_carousel_slide_cta": "और जानें"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "",
-			"unexpected_error_on_unstake": "",
-			"dissolvement_limit_reached": ""
-		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
+			"unexpected_error_on_withdraw": "टोकन निकालते समय कुछ गलत हो गया।",
+			"unexpected_error_on_unstake": "टोकन अनस्टेक करते समय कुछ गलत हो गया।",
+			"unexpected_error_on_stake": "टोकन स्टेक करते समय कुछ गलत हो गया।",
+			"dissolvement_limit_reached": "आप $limit सक्रिय अनलॉक अनुरोधों की अधिकतम सीमा तक पहुंच गए हैं। नया बनाने से पहले कुछ पूरे करें।<br/>ध्यान दें कि आप हमेशा \"तुरंत\" विकल्प का उपयोग करके अनस्टेक कर सकते हैं।"
 		},
 		"info": {
-			"gldt": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
+			"harvest_autopilot": {
+				"title": "Harvest Autopilot क्या है",
+				"description": "Harvest Autopilot, Harvest Finance इकोसिस्टम के भीतर एक विशेष सुविधा (और एक विशिष्ट उत्पाद लाइन) है जो न्यूनतम प्रयास के साथ आपके विकेंद्रीकृत वित्त (DeFi) पोज़ीशन को स्वचालित और अनुकूलित करने के लिए डिज़ाइन की गई है।",
+				"fact_1_title": "स्मार्ट यील्ड आवंटन",
+				"fact_1_description": "उच्चतम लाइव APY प्राप्त करने के लिए स्वचालित रूप से प्रोटोकॉल बदलता है।",
+				"fact_2_title": "निष्क्रिय कंपाउंडिंग",
+				"fact_2_description": "आपकी वृद्धि को अधिकतम करने के लिए पुरस्कार स्वचालित रूप से हार्वेस्ट और पुनर्निवेश किए जाते हैं।",
+				"fact_3_title": "गैस लागत साझाकरण",
+				"fact_3_description": "गैस बचाने के लिए अन्य उपयोगकर्ताओं के साथ लेन-देन को एकत्रित करके आपके खर्च को कम करता है।"
 			}
 		},
 		"alt": {
-			"placeholder_image": ""
+			"placeholder_image": "अभी तक कोई टोकन स्टेक नहीं किया"
 		}
 	},
 	"get_token": {
 		"text": {
-			"title": "",
-			"swap_to_token": "",
-			"ready_to_swap": "",
-			"convert_assets": "",
-			"convertible_assets": "",
-			"how_to_convert": "",
-			"get_more_token": "",
-			"receive_token": "",
-			"receive_token_title": "",
-			"receive_token_text": "",
-			"buy_assets": "",
-			"buy_assets_title": "",
-			"buy_assets_text": ""
+			"title": "$token प्राप्त करें",
+			"swap_to_token": "$token के लिए स्वैप करें",
+			"ready_to_swap": "स्वैप के लिए तैयार",
+			"convert_assets": "एसेट रूपांतरित करें",
+			"convertible_assets": "रूपांतरणीय एसेट",
+			"how_to_convert": "कैसे रूपांतरित करें",
+			"get_more_token": "अधिक $token प्राप्त करें",
+			"receive_token": "$token प्राप्त करें",
+			"receive_token_title": "$token सीधे प्राप्त करें",
+			"receive_token_text": "$token सीधे अपने खाते में प्राप्त करें",
+			"buy_assets": "एसेट खरीदें",
+			"buy_assets_title": "रूपांतरणीय एसेट खरीदें",
+			"buy_assets_text": "अधिक एसेट खरीदें और $token में रूपांतरित करें"
 		}
 	},
 	"temporal": {
 		"seconds_to_duration": {
 			"year": "वर्ष",
 			"year_plural": "वर्ष",
-			"month": "माह",
-			"month_plural": "माह",
+			"month": "महीना",
+			"month_plural": "महीने",
 			"day": "दिन",
 			"day_plural": "दिन",
 			"hour": "घंटा",
@@ -2024,7 +2159,7 @@
 			"second_plural": "सेकंड"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24h"
 		}
 	},
 	"ai_assistant": {

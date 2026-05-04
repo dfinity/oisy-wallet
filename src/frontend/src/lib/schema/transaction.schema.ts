@@ -2,7 +2,7 @@ import * as z from 'zod';
 
 const commonTypes = ['send', 'receive'] as const;
 
-const ethSpecificTypes = ['withdraw', 'deposit'] as const;
+const ethSpecificTypes = ['approve', 'withdraw', 'deposit'] as const;
 
 const icpSpecificTypes = ['approve', 'burn', 'mint'] as const;
 

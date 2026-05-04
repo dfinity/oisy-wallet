@@ -7,8 +7,7 @@ export const themeVariables = {
 		'1.5md': '56rem', // 896px
 		'1.5lg': '72rem', // 1152px
 		'1.5xl': '88rem', // 1408px
-		'2.5xl': '108rem', // 1728px
-		'h-md': { raw: '(max-height: 68rem)' } // ~1090px
+		'2.5xl': '108rem' // 1728px
 	},
 	background: {
 		page: 'var(--color-background-page)',

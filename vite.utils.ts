@@ -4,17 +4,33 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readCanisterIds as readIds } from './env.utils';
 import OISY_DOMAINS from './scripts/domains.json' with { type: 'json' };
+import SIGNER_VERSIONS from './signer-versions.json' with { type: 'json' };
+
+const SIGNER_TARGET_MAP: Record<string, keyof typeof OISY_DOMAINS> = {
+	signer: 'signer_frontend',
+	legacy_signer: 'legacy_signer_frontend'
+};
 
 /**
- * Get the domain URL for a given DFX network
- * @param dfx_network - The DFX network name (e.g., 'ic', 'staging', 'beta', etc.)
- * @returns The domain URL for the network, or a default URL if not found
+ * Get the domain URL for a given DFX network.
+ * When OISY_SIGNER_TARGET is set (e.g., 'signer' or 'legacy_signer'),
+ * resolves the domain from the corresponding signer entry in domains.json
+ * instead of the default frontend entry.
  */
 const domain_for_dfx_network = (dfx_network: string): string => {
 	if (dfx_network === 'local') {
 		return 'http://localhost:4943';
 	}
-	const map = OISY_DOMAINS.frontend as Record<string, string>;
+
+	const signerTarget = process.env.OISY_SIGNER_TARGET;
+
+	const domainsKey: keyof typeof OISY_DOMAINS =
+		signerTarget && signerTarget in SIGNER_TARGET_MAP
+			? SIGNER_TARGET_MAP[signerTarget]
+			: 'frontend';
+
+	const map = OISY_DOMAINS[domainsKey] as Record<string, string>;
+
 	return map[dfx_network] ?? `https://${dfx_network}.oisy.com`;
 };
 
@@ -107,10 +123,11 @@ export const defineViteReplacements = (): {
 	VITE_DFX_NETWORK: string;
 	VITE_GIT_COMMIT_HASH: string;
 	VITE_GIT_BRANCH_NAME: string;
+	VITE_OISY_SIGNER_TARGET: string;
 } => {
 	const file = fileURLToPath(new URL('package.json', import.meta.url));
 	const json = readFileSync(file, 'utf8');
-	const { version } = JSON.parse(json);
+	const { version: packageVersion } = JSON.parse(json);
 
 	// npm run dev = local
 	// npm run build = local
@@ -119,6 +136,12 @@ export const defineViteReplacements = (): {
 	// dfx deploy --network ic = ic
 	// dfx deploy --network staging = staging
 	const network = process.env.DFX_NETWORK ?? 'local';
+
+	const signerTarget = process.env.OISY_SIGNER_TARGET;
+
+	const version =
+		(signerTarget === 'legacy_signer' ? SIGNER_VERSIONS['legacy_signer_frontend'] : undefined) ??
+		packageVersion;
 
 	const isTestFe = network.startsWith('test_fe_');
 
@@ -130,6 +153,7 @@ export const defineViteReplacements = (): {
 		VITE_APP_VERSION: JSON.stringify(version),
 		VITE_DFX_NETWORK: JSON.stringify(network),
 		VITE_GIT_COMMIT_HASH: JSON.stringify(commitHash),
-		VITE_GIT_BRANCH_NAME: JSON.stringify(branchName)
+		VITE_GIT_BRANCH_NAME: JSON.stringify(branchName),
+		VITE_OISY_SIGNER_TARGET: JSON.stringify(process.env.OISY_SIGNER_TARGET ?? '')
 	};
 };

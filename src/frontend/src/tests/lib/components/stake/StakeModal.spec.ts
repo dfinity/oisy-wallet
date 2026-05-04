@@ -1,50 +1,45 @@
-import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
-import {
-	GLDT_STAKE_CONTEXT_KEY,
-	initGldtStakeStore,
-	type GldtStakeContext
-} from '$icp/stores/gldt-stake.store';
+import { BAUTOPILOT_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc4626/tokens.bautopilot_usdc.env';
 import StakeModal from '$lib/components/stake/StakeModal.svelte';
-import * as appConstants from '$lib/constants/app.constants';
-import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
+import type { Vault } from '$lib/types/vaults';
 import en from '$tests/mocks/i18n.mock';
-import { mockLedgerCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { render } from '@testing-library/svelte';
+
+vi.mock('$eth/services/eth-listener.services', () => ({
+	initMinedTransactionsListener: vi.fn(() => ({
+		disconnect: vi.fn()
+	}))
+}));
 
 describe('StakeModal', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
-
-		vi.spyOn(appConstants, 'GLDT_STAKE_CANISTER_ID', 'get').mockImplementation(
-			() => mockLedgerCanisterId
-		);
 	});
 
-	it('should display correct modal title after navigating between steps', async () => {
-		const { container, getByText, getByTestId } = render(StakeModal, {
+	it('should display unsupported staking message', () => {
+		const { container } = render(StakeModal, {
 			props: {
-				token: {
-					...mockValidIcrcToken,
-					symbol: 'GLDT',
-					ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
-				} as Token
-			},
-			context: new Map<symbol, GldtStakeContext>([
-				[GLDT_STAKE_CONTEXT_KEY, { store: initGldtStakeStore() }]
-			])
+				token: mockValidIcrcToken as Token
+			}
 		});
 
-		const firstStepTitle = 'Stake GLDT';
+		expect(container).toHaveTextContent(en.stake.text.unsupported_token_staking);
+	});
 
-		expect(container).toHaveTextContent(firstStepTitle);
+	it('should not display unsupported message when vault is harvest autopilot', () => {
+		const mockVault: Vault = {
+			token: { ...BAUTOPILOT_USDC_TOKEN, enabled: true },
+			apy: '5.5'
+		};
 
-		await fireEvent.click(getByTestId(STAKE_FORM_REVIEW_BUTTON));
+		const { container } = render(StakeModal, {
+			props: {
+				token: BAUTOPILOT_USDC_TOKEN as Token,
+				vault: mockVault
+			}
+		});
 
-		expect(container).toHaveTextContent(en.stake.text.review);
-
-		await fireEvent.click(getByText(en.core.text.back));
-
-		expect(container).toHaveTextContent(firstStepTitle);
+		expect(container).not.toHaveTextContent(en.stake.text.unsupported_token_staking);
 	});
 });

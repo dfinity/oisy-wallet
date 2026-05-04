@@ -41,6 +41,8 @@
 		approveExpiresAt
 	} = $derived(transaction);
 
+	let isIncoming = $derived(type === 'receive' || type === 'mint');
+
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
 			id: Symbol(),
@@ -53,7 +55,7 @@
 	{#snippet title()}{$i18n.transaction.text.details}{/snippet}
 
 	<ContentWithToolbar>
-		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
+		<ModalHero variant={isIncoming ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
 					<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
@@ -64,12 +66,12 @@
 			{/snippet}
 			{#snippet title()}
 				{#if nonNullish(token) && nonNullish(value)}
-					<output class:text-success-primary={type === 'receive'}>
+					<output class:text-success-primary={isIncoming}>
 						{formatToken({
 							value,
 							unitName: token.decimals,
 							displayDecimals: token.decimals,
-							showPlusSign: type === 'receive'
+							showPlusSign: isIncoming
 						})}
 						{token.symbol}
 					</output>
@@ -87,7 +89,7 @@
 				{onSaveAddressComplete}
 				{to}
 				{toExplorerUrl}
-				type={type === 'receive' ? 'receive' : type === 'approve' ? 'approve' : 'send'}
+				type={isIncoming ? 'receive' : type === 'approve' ? 'approve' : 'send'}
 			/>
 		{/if}
 
@@ -142,6 +144,7 @@
 					</output>
 				</ListItem>
 			{/if}
+
 			{#if nonNullish(approveExpiresAt)}
 				<ListItem>
 					<span>{$i18n.transaction?.text?.expiration}</span>

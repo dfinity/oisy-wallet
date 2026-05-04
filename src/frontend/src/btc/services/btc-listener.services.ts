@@ -9,6 +9,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -40,7 +41,7 @@ export const syncWallet = ({
 		});
 	}
 	if (nonNullish(btcWalletBalance)) {
-		balancesStore.set({
+		balancesStore.batchSet({
 			id: tokenId,
 			data: {
 				data: btcWalletBalance.confirmed,
@@ -69,7 +70,7 @@ export const syncWalletError = ({
 	btcTransactionsStore.reset(tokenId);
 
 	if (hideToast) {
-		console.warn(`${errorText}:`, err);
+		consoleWarn(`${errorText}:`, err);
 		return;
 	}
 

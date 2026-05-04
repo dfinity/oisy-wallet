@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { Theme, themeStore } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+	import { isTokenIcp } from '$icp/utils/icrc.utils';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
 		isVCHFToken as isVCHFTokenUtil,
@@ -35,7 +37,6 @@
 		networkBsc,
 		networkEthereum,
 		networkPolygon,
-		networkICP,
 		networkSolana,
 		pseudoNetworkChainFusion,
 		networkArbitrum,
@@ -119,18 +120,33 @@
 
 	let isVeurToken = $derived(nonNullish($pageToken) && isVEURTokenUtil($pageToken));
 
+	let isIcpHero = $derived(nonNullish($pageToken) && isTokenIcp($pageToken));
+
+	let isDarkTheme = $derived($themeStore === Theme.DARK);
+
 	let isGradientToRight = $derived($networkSolana && !isTrumpToken);
 
 	let isGradientToBottomRight = $derived(isGLDTToken || $networkBsc);
+
+	let rateChangeBackground = $derived.by(() => {
+		if (isIcpHero) {
+			return isDarkTheme ? ('dark' as const) : ('light' as const);
+		}
+
+		return $networkBase || $networkPolygon || $networkArbitrum || isTrumpToken || isVeurToken
+			? ('dark' as const)
+			: ('light' as const);
+	});
 </script>
 
 <div
-	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center text-primary-inverted transition-all duration-500 ease-in-out md:rounded-[28px] md:p-5"
+	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5"
 	class:bg-center={isVeurToken}
 	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
 	class:bg-gradient-to-r={isGradientToRight}
+	class:bg-icp-token-hero-gradient={isIcpHero}
 	class:bg-linear-105={isGradientToBottomRight}
-	class:bg-linear-to-b={!isGradientToRight && !isGradientToBottomRight}
+	class:bg-linear-to-b={!isIcpHero && !isGradientToRight && !isGradientToBottomRight}
 	class:bg-pos-100={!$pseudoNetworkChainFusion}
 	class:bg-size-200={!isTrumpToken}
 	class:bg-top-right={isVchfToken}
@@ -144,10 +160,11 @@
 	class:from-default-0={$pseudoNetworkChainFusion}
 	class:from-eth-0={$networkEthereum}
 	class:from-gold-0={isGLDTToken}
-	class:from-icp-0={$networkICP && !isGLDTToken}
 	class:from-polygon-0={$networkPolygon}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:from-trump-0={isTrumpToken}
+	class:text-primary={isIcpHero}
+	class:text-primary-inverted={!isIcpHero}
 	class:to-arbitrum-100={$networkArbitrum}
 	class:to-base-100={$networkBase}
 	class:to-bsc-100={$networkBsc}
@@ -155,7 +172,6 @@
 	class:to-default-100={$pseudoNetworkChainFusion}
 	class:to-eth-100={$networkEthereum}
 	class:to-gold-100={isGLDTToken}
-	class:to-icp-100={$networkICP && !isGLDTToken}
 	class:to-polygon-100={$networkPolygon}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:to-trump-100={isTrumpToken}
@@ -169,16 +185,21 @@
 					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base"
 				>
 					{#if nonNullish(pageTokenUi)}
-						<div class="flex min-w-0 items-center justify-center gap-1 sm:gap-2" in:fade>
+						<div class="flex min-w-0 items-center justify-start gap-1 sm:gap-2" in:fade>
 							<TokenLogo data={pageTokenUi} logoSize="sm" ring />
 
-							<div class="flex flex-col text-left">
+							<div class="flex flex-col truncate text-left">
 								<span class="truncate font-semibold">
 									{getTokenDisplayName(pageTokenUi)}
 								</span>
 
-								<div class="flex items-center justify-center gap-1">
-									<NetworkLogo network={pageTokenUi.network} size="xxs" transparent />
+								<div class="flex items-center justify-start gap-1">
+									<NetworkLogo
+										alwaysInverted={!isIcpHero}
+										network={pageTokenUi.network}
+										size="xxs"
+										transparent
+									/>
 									<span class="truncate">
 										{pageTokenUi.network.name}
 									</span>
@@ -192,7 +213,11 @@
 							</span>
 
 							<span>
-								<ExchangeRateChange timeFrame="24h" {usdPriceChangePercentage24h} withBackground />
+								<ExchangeRateChange
+									background={rateChangeBackground}
+									timeFrame="24h"
+									{usdPriceChangePercentage24h}
+								/>
 							</span>
 						</div>
 					{:else}

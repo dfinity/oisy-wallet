@@ -320,20 +320,56 @@ export const formatCurrency = ({
 	return formatted;
 };
 
+export const formatCurrencyAsNumber = ({
+	value,
+	currency,
+	exchangeRate,
+	language
+}: {
+	value: number;
+	currency: Currency;
+	exchangeRate: CurrencyExchangeData;
+	language: Languages;
+}): number | undefined => {
+	const formatted = formatCurrency({
+		value,
+		currency,
+		exchangeRate,
+		language,
+		hideSymbol: true,
+		normalizeSeparators: true
+	});
+
+	if (isNullish(formatted)) {
+		return;
+	}
+
+	try {
+		const number = Number(formatted);
+
+		return isNaN(number) ? undefined : number;
+	} catch {
+		// In case the formatted string cannot be parsed to a number, we return undefined
+	}
+};
+
 export const formatStakeApyNumber = (apy: number): string => {
-	if (apy >= 100) {
-		return `${Math.round(apy)}`;
+	if (apy === 0) {
+		return '0';
 	}
 
-	if (apy >= 10) {
-		return (Math.round(apy * 10) / 10).toFixed(1);
+	const sign = apy < 0 ? '-' : '';
+	const abs = Math.abs(apy);
+
+	if (abs >= 100) {
+		return `${sign}${Math.round(abs)}`;
 	}
 
-	if (apy > 0) {
-		return (Math.round(apy * 100) / 100).toFixed(2);
+	if (abs >= 10) {
+		return `${sign}${(Math.round(abs * 10) / 10).toFixed(1)}`;
 	}
 
-	return '0';
+	return `${sign}${(Math.round(abs * 100) / 100).toFixed(2)}`;
 };
 
 export const format24hChangeInCurrency = ({

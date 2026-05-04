@@ -102,7 +102,6 @@ export const TRACK_REWARD_CAMPAIGN_WIN_LEARN_MORE = 'reward_campaign_win_learn_m
 export const TRACK_REWARD_CAMPAIGN_OPEN = 'reward_campaign_open';
 export const TRACK_REWARD_CAMPAIGN_LEARN_MORE = 'reward_campaign_learn_more';
 export const TRACK_REWARD_CAMPAIGN_SHARE = 'reward_campaign_share';
-export const TRACK_SPRINKLES_BANNER_CLICK = 'sprinkles_banner_click';
 
 // Welcome
 export const TRACK_WELCOME_OPEN = 'welcome_open';
@@ -114,7 +113,6 @@ export const TRACK_EDIT_TOKEN_SUCCESS = 'edit_token_success';
 // Navigation
 export const TRACK_COUNT_OPEN_WHY_OISY = 'open_why_oisy';
 export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation';
-export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog';
 
 // I18n
 export const TRACK_CHANGE_LANGUAGE = 'change_language';
@@ -181,13 +179,3 @@ export const TRACK_NFT_CONSENT_GIVEN = 'nft_consent_given';
 export const TRACK_NFT_OPEN = 'nft_open';
 export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
 export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
-
-// Stake
-export const TRACK_COUNT_STAKE_SUCCESS = 'stake_success';
-export const TRACK_COUNT_STAKE_ERROR = 'stake_error';
-export const TRACK_COUNT_UNSTAKE_SUCCESS = 'unstake_success';
-export const TRACK_COUNT_UNSTAKE_ERROR = 'unstake_error';
-export const TRACK_COUNT_CLAIM_STAKING_REWARD_SUCCESS = 'claim_staking_reward_success';
-export const TRACK_COUNT_CLAIM_STAKING_REWARD_ERROR = 'claim_staking_reward_error';
-export const TRACK_COUNT_WITHDRAW_SUCCESS = 'dissolved_tokens_withdraw_success';
-export const TRACK_COUNT_WITHDRAW_ERROR = 'dissolved_tokens_withdraw_error';

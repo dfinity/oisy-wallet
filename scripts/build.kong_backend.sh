@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+####
+# Note: KongSwap was sunsetted but we keep the infrastructure code in case they make a comeback.
+
 set -euo pipefail
 
 print_help() {

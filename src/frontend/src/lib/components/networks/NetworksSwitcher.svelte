@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
 	import { SUPPORTED_MAINNET_NETWORKS, SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
@@ -10,7 +11,14 @@
 	import { selectedNetwork, networkId } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import {
+		PLAUSIBLE_EVENTS,
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENT_RESULT_STATUSES
+	} from '$lib/enums/plausible';
 	import { SettingsModalType } from '$lib/enums/settings-modal-types';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionNetworkId } from '$lib/types/network';
@@ -26,11 +34,41 @@
 
 	let dropdown = $state<Dropdown | undefined>();
 
-	const onNetworkSelect = async (networkId: OptionNetworkId) => {
-		await switchNetwork({ networkId });
+	const trackNetworkFilterEvent = ({
+		networkId,
+		status
+	}: {
+		networkId: OptionNetworkId;
+		status: string;
+	}) => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.NETWORK_FILTER,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NETWORKS,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.NETWORK,
+				event_value: isNullish(networkId) ? 'all' : (networkId.description ?? 'unknown'),
+				result_status: status
+			}
+		});
+	};
 
-		if (isRouteTransactions(page)) {
-			await gotoReplaceRoot();
+	const onNetworkSelect = async (networkId: OptionNetworkId) => {
+		try {
+			await switchNetwork({ networkId });
+
+			if (isRouteTransactions(page)) {
+				await gotoReplaceRoot();
+			}
+
+			trackNetworkFilterEvent({
+				networkId,
+				status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			});
+		} catch (_: unknown) {
+			trackNetworkFilterEvent({
+				networkId,
+				status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR
+			});
 		}
 
 		dropdown?.close();

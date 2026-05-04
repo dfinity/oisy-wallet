@@ -13,7 +13,8 @@ export const mockEthTransaction: Transaction = {
 	timestamp: 123456789,
 	to: mockEthAddress2,
 	value: bn1Bi,
-	hash: '0x123456789'
+	hash: '0x123456789',
+	data: '0xabcdef'
 };
 
 export const createMockEthTransactions = (n: number): Transaction[] =>

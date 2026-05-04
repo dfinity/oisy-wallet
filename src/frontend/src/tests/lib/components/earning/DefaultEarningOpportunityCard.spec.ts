@@ -53,7 +53,7 @@ describe('DefaultEarningOpportunityCard', () => {
 			cardFields: mockCardFields
 		});
 
-		expect(screen.getByText(get(i18n).stake.text.current_apy_label)).toBeInTheDocument();
+		expect(screen.getByText(get(i18n).stake.text.max_apy_label)).toBeInTheDocument();
 		expect(screen.getAllByText('5.00%').length).toBeGreaterThanOrEqual(1);
 	});
 
@@ -73,7 +73,7 @@ describe('DefaultEarningOpportunityCard', () => {
 			cardFields: mockCardFields
 		});
 
-		expect(screen.getByText('$2.5/year')).toBeInTheDocument();
+		expect(screen.getByText('+ $50/year')).toBeInTheDocument();
 		expect(screen.getByText('+ $200/year')).toBeInTheDocument();
 	});
 

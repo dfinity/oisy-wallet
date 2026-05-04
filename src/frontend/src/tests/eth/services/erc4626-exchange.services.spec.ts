@@ -49,6 +49,7 @@ describe('erc4626-exchange.services', () => {
 			expect(result).toEqual({
 				'0xvaultaddress': {
 					usd: 1.05,
+					assets_per_share: 1.05,
 					usd_market_cap: 0
 				}
 			});
@@ -72,9 +73,9 @@ describe('erc4626-exchange.services', () => {
 			expect(result).toEqual({});
 		});
 
-		it('should return empty results when erc20Prices is null', async () => {
+		it('should return empty results when erc20Prices is empty', async () => {
 			const result = await calculateErc4626Prices({
-				erc20Prices: null,
+				erc20Prices: {},
 				erc4626TokensExchangeData: [mockExchangeData]
 			});
 
@@ -119,8 +120,8 @@ describe('erc4626-exchange.services', () => {
 			});
 
 			expect(result).toEqual({
-				'0xvaultaddress': { usd: 1.05, usd_market_cap: 0 },
-				'0xsecondvault': { usd: 2.0, usd_market_cap: 0 }
+				'0xvaultaddress': { usd: 1.05, assets_per_share: 1.05, usd_market_cap: 0 },
+				'0xsecondvault': { usd: 2.0, assets_per_share: 2, usd_market_cap: 0 }
 			});
 		});
 

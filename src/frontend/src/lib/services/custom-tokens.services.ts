@@ -3,13 +3,13 @@ import { listCustomTokens } from '$lib/api/backend.api';
 import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { NullishIdentity } from '$lib/types/identity';
 import { assertNever, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 interface LoadCustomTokensFromBackendParams {
-	identity: OptionIdentity;
+	identity: NullishIdentity;
 	certified: boolean;
 }
 
@@ -23,7 +23,6 @@ const loadCustomTokensFromBackend = async ({
 }: LoadCustomTokensFromBackendParams): Promise<CustomToken[]> => {
 	const tokens = await listCustomTokens({
 		identity,
-		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 

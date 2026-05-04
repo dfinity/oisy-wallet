@@ -5,6 +5,7 @@
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
+	import { ckUsdcConversionDisabled } from '$icp-eth/derived/cketh.derived';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ETH_CONVERT_FORM_TEST_ID } from '$lib/constants/test-ids.constants';
@@ -44,7 +45,8 @@
 		$insufficientFunds ||
 			$insufficientFundsForFee ||
 			invalidAmount(sendAmount) ||
-			isNullishOrEmpty(destination)
+			isNullishOrEmpty(destination) ||
+			$ckUsdcConversionDisabled
 	);
 </script>
 
@@ -65,6 +67,14 @@
 					>{$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees}</MessageBox
 				>
 			</div>
+		{/if}
+	{/snippet}
+
+	{#snippet warningBanner()}
+		{#if $ckUsdcConversionDisabled}
+			<MessageBox level="warning">
+				{$i18n.convert.warning.ckusdc_conversion_currently_suspended}
+			</MessageBox>
 		{/if}
 	{/snippet}
 
