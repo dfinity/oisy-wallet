@@ -140,15 +140,17 @@ describe('btc-utxos.utils', () => {
 			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 		});
 
-		it('should select UTXOs in descending order by value', () => {
+		it('should select the smallest UTXO that covers amount + fee', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: utxos,
 				amountSatoshis: 100_000n,
 				feeRateMiliSatoshisPerVByte: 1000n
 			});
 
-			// Should select the largest UTXO first (300_000)
-			expect(result.selectedUtxos[0].value).toBe(300_000n);
+			// fee(1 input) = 141 sats; needed = 100_141. Candidates >= 100_141: 200_000 and 300_000.
+			// Smallest sufficient is 200_000.
+			expect(result.selectedUtxos).toHaveLength(1);
+			expect(result.selectedUtxos[0].value).toBe(200_000n);
 			expect(result.sufficientFunds).toBeTruthy();
 			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 		});
@@ -207,6 +209,237 @@ describe('btc-utxos.utils', () => {
 			expect(result.changeAmount).toBe(50_000n); // No fees
 			expect(result.sufficientFunds).toBeTruthy();
 			expect(result.feeSatoshis).toBe(ZERO);
+		});
+	});
+
+	describe('calculateUtxoSelection — algorithm scenarios', () => {
+		// Fee reference at feeRateMiliSatoshisPerVByte = 1000n (1 sat/vbyte):
+		//   1 input : 11 + 1×68 + 2×31 = 141 sats
+		//   2 inputs: 11 + 2×68 + 2×31 = 209 sats
+		//   3 inputs: 11 + 3×68 + 2×31 = 277 sats
+
+		const FEE_RATE = 1000n;
+		const FEE_1_INPUT = 141n;
+		const FEE_2_INPUTS = 209n;
+		const FEE_3_INPUTS = 277n;
+
+		describe('single-input selection', () => {
+			it('picks the smallest UTXO that alone covers amount + fee when several candidates qualify', () => {
+				// Mirrors user example: [4,2,6,40,8,12,43] → send 10 → pick 12
+				const utxos = [
+					createMockUtxo({ value: 400_000 }),
+					createMockUtxo({ value: 200_000 }),
+					createMockUtxo({ value: 600_000 }),
+					createMockUtxo({ value: 4_000_000 }),
+					createMockUtxo({ value: 800_000 }),
+					createMockUtxo({ value: 1_200_000 }),
+					createMockUtxo({ value: 4_300_000 })
+				];
+
+				// needed = 1_000_000 + 141 = 1_000_141
+				// Candidates ≥ 1_000_141: 1_200_000, 4_000_000, 4_300_000 → pick 1_200_000
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 1_000_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(1);
+				expect(result.selectedUtxos[0].value).toBe(1_200_000n);
+				expect(result.feeSatoshis).toBe(FEE_1_INPUT);
+				expect(result.changeAmount).toBe(1_200_000n - 1_000_000n - FEE_1_INPUT);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+
+			it('picks the UTXO that exactly covers amount + fee (zero change)', () => {
+				// 100_000 + 141 = 100_141 → UTXO of exactly 100_141 should be selected
+				const utxos = [
+					createMockUtxo({ value: 200_000 }),
+					createMockUtxo({ value: 100_141 }),
+					createMockUtxo({ value: 500_000 })
+				];
+
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 100_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(1);
+				expect(result.selectedUtxos[0].value).toBe(100_141n);
+				expect(result.changeAmount).toBe(ZERO);
+				expect(result.feeSatoshis).toBe(FEE_1_INPUT);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+
+			it('is insufficient when the only UTXO is 1 sat below amount + fee', () => {
+				// 100_000 + 141 = 100_141; UTXO = 100_140 → cannot satisfy
+				const result = calculateUtxoSelection({
+					availableUtxos: [createMockUtxo({ value: 100_140 })],
+					amountSatoshis: 100_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.sufficientFunds).toBeFalsy();
+				expect(result.changeAmount).toBe(ZERO);
+			});
+		});
+
+		describe('two-input selection (restart after picking largest)', () => {
+			it('picks smallest sufficient UTXO on the second pass, not the next-largest', () => {
+				// Mirrors user example: [3,7,2,6,1] → send 10 → pick [7, 3] not [7, 6]
+				// Scaled: send 999_791 so that amount + fee(2) = 1_000_000 exactly
+				const utxos = [
+					createMockUtxo({ value: 300_000 }),
+					createMockUtxo({ value: 700_000 }),
+					createMockUtxo({ value: 200_000 }),
+					createMockUtxo({ value: 600_000 }),
+					createMockUtxo({ value: 100_000 })
+				];
+
+				// Pass 1: needed = 999_791 + 141 = 999_932 → no single UTXO qualifies → pick largest (700_000)
+				// Pass 2: needed = 999_791 + 209 − 700_000 = 300_000 → candidates ≥ 300_000: {300_000, 600_000} → pick 300_000
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 999_791n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(2);
+				expect(result.selectedUtxos[0].value).toBe(700_000n);
+				expect(result.selectedUtxos[1].value).toBe(300_000n);
+				expect(result.feeSatoshis).toBe(FEE_2_INPUTS);
+				expect(result.changeAmount).toBe(ZERO);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+
+			it('produces less change than a largest-first approach would', () => {
+				// [700k, 600k, 300k] → amount chosen so largest-first would pick [700k, 600k]
+				// but smallest-sufficient restart gives [700k, 300k]
+				const utxos = [
+					createMockUtxo({ value: 700_000 }),
+					createMockUtxo({ value: 600_000 }),
+					createMockUtxo({ value: 300_000 })
+				];
+
+				// Pass 1: needed = 999_791 + 141 = 999_932 → no UTXO qualifies → pick 700_000
+				// Pass 2: needed = 999_791 + 209 − 700_000 = 300_000 → pick 300_000 (not 600_000)
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 999_791n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(2);
+				expect(result.selectedUtxos[1].value).toBe(300_000n); // smallest sufficient, not 600_000
+				expect(result.changeAmount).toBe(ZERO);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+		});
+
+		describe('three-input selection', () => {
+			it('restarts the smallest-sufficient search after each largest-UTXO pick', () => {
+				const utxos = [
+					createMockUtxo({ value: 400_000 }),
+					createMockUtxo({ value: 350_000 }),
+					createMockUtxo({ value: 300_000 }),
+					createMockUtxo({ value: 200_000 }),
+					createMockUtxo({ value: 100_000 })
+				];
+
+				// Pass 1: needed = 900_000 + 141 = 900_141 → no UTXO qualifies → pick 400_000
+				// Pass 2: needed = 900_000 + 209 − 400_000 = 500_209 → no UTXO qualifies → pick 350_000
+				// Pass 3: needed = 900_000 + 277 − 750_000 = 150_277 → candidates ≥ 150_277: {300_000, 200_000} → pick 200_000
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 900_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(3);
+				expect(result.selectedUtxos[0].value).toBe(400_000n);
+				expect(result.selectedUtxos[1].value).toBe(350_000n);
+				expect(result.selectedUtxos[2].value).toBe(200_000n); // not 300_000
+				expect(result.feeSatoshis).toBe(FEE_3_INPUTS);
+				expect(result.changeAmount).toBe(950_000n - 900_000n - FEE_3_INPUTS); // 49_723
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+		});
+
+		describe('fee grows with each additional input', () => {
+			it('accounts for the higher fee when a second input is required', () => {
+				// Single UTXO of 600_000 is enough for amount 500_000 + fee(1) = 500_141.
+				// But here the largest UTXO is 300_000 which is below the needed 500_141,
+				// forcing a second pick — at which point fee(2) = 209 applies.
+				const utxos = [createMockUtxo({ value: 300_000 }), createMockUtxo({ value: 250_000 })];
+
+				// Pass 1: needed = 500_000 + 141 = 500_141 → no UTXO qualifies → pick 300_000
+				// Pass 2: needed = 500_000 + 209 − 300_000 = 200_209 → 250_000 ≥ 200_209 → pick 250_000
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 500_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(2);
+				expect(result.feeSatoshis).toBe(FEE_2_INPUTS);
+				expect(result.changeAmount).toBe(550_000n - 500_000n - FEE_2_INPUTS); // 49_791
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+		});
+
+		describe('UTXOs with equal values', () => {
+			it('selects one UTXO when any single one covers amount + fee', () => {
+				const utxos = [
+					createMockUtxo({ value: 500_000, vout: 0 }),
+					createMockUtxo({ value: 500_000, vout: 1 }),
+					createMockUtxo({ value: 500_000, vout: 2 })
+				];
+
+				// needed = 450_000 + 141 = 450_141 → 500_000 qualifies → pick one
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 450_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(1);
+				expect(result.selectedUtxos[0].value).toBe(500_000n);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+		});
+
+		describe('insufficient funds', () => {
+			it('returns all available UTXOs when total is still not enough', () => {
+				const utxos = [createMockUtxo({ value: 100_000 }), createMockUtxo({ value: 50_000 })];
+
+				// 100_000 + 50_000 = 150_000 < 200_000 + 141
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 200_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.sufficientFunds).toBeFalsy();
+				expect(result.selectedUtxos).toHaveLength(2);
+				expect(result.changeAmount).toBe(ZERO);
+			});
+
+			it('is insufficient when the total exactly covers amount but not amount + fee', () => {
+				// total = 200_000, amount = 200_000, fee(2) = 209 → 200_000 < 200_209
+				const utxos = [
+					createMockUtxo({ value: 100_000 }),
+					createMockUtxo({ value: 100_000, vout: 1 })
+				];
+
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 200_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.sufficientFunds).toBeFalsy();
+			});
 		});
 	});
 
