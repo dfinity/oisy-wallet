@@ -54,12 +54,31 @@ usage() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -y|--yes|--apply) APPLY=1; shift ;;
-    --remote) REMOTE="$2"; shift 2 ;;
-    --manifest) MANIFEST="$2"; shift 2 ;;
-    --skip-pr-check) SKIP_PR_CHECK=1; shift ;;
-    -h|--help) usage; exit 0 ;;
-    *) echo "Unknown argument: $1" >&2; usage; exit 1 ;;
+  -y | --yes | --apply)
+    APPLY=1
+    shift
+    ;;
+  --remote)
+    REMOTE="$2"
+    shift 2
+    ;;
+  --manifest)
+    MANIFEST="$2"
+    shift 2
+    ;;
+  --skip-pr-check)
+    SKIP_PR_CHECK=1
+    shift
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "Unknown argument: $1" >&2
+    usage
+    exit 1
+    ;;
   esac
 done
 
@@ -68,7 +87,10 @@ if [[ ! -f "${MANIFEST}" ]]; then
   exit 2
 fi
 
-command -v git >/dev/null || { echo "git is required" >&2; exit 1; }
+command -v git >/dev/null || {
+  echo "git is required" >&2
+  exit 1
+}
 
 if [[ ${APPLY} -eq 0 ]]; then
   echo "=== DRY RUN === (pass --yes to actually delete)"
@@ -85,7 +107,7 @@ declare -A REMOTE_TIPS=()
 while read -r sha ref; do
   [[ -z "${ref:-}" ]] && continue
   case "${ref}" in
-    refs/heads/*) REMOTE_TIPS["${ref#refs/heads/}"]="${sha}" ;;
+  refs/heads/*) REMOTE_TIPS["${ref#refs/heads/}"]="${sha}" ;;
   esac
 done < <(git ls-remote --heads "${REMOTE}")
 
@@ -150,7 +172,7 @@ while IFS=$'\t' read -r BRANCH DATE EXPECTED_SHA; do
   fi
 
   TO_DELETE+=("${BRANCH}")
-done < "${MANIFEST}"
+done <"${MANIFEST}"
 
 echo "Plan:"
 echo "  to delete:        ${#TO_DELETE[@]}"
@@ -202,21 +224,21 @@ DELETED=0
 FAILED=()
 
 while [[ ${START} -lt ${TOTAL} ]]; do
-  END=$(( START + BATCH_SIZE ))
+  END=$((START + BATCH_SIZE))
   [[ ${END} -gt ${TOTAL} ]] && END=${TOTAL}
   BATCH=("${TO_DELETE[@]:START:END-START}")
-  echo ">>> Deleting batch $((START/BATCH_SIZE + 1)) (${#BATCH[@]} branches)..."
+  echo ">>> Deleting batch $((START / BATCH_SIZE + 1)) (${#BATCH[@]} branches)..."
   REFSPECS=()
   for b in "${BATCH[@]}"; do
     REFSPECS+=(":refs/heads/${b}")
   done
   if git push "${REMOTE}" "${REFSPECS[@]}"; then
-    DELETED=$(( DELETED + ${#BATCH[@]} ))
+    DELETED=$((DELETED + ${#BATCH[@]}))
   else
     echo "Batch failed; retrying branches one by one..." >&2
     for b in "${BATCH[@]}"; do
       if git push "${REMOTE}" --delete "${b}"; then
-        DELETED=$(( DELETED + 1 ))
+        DELETED=$((DELETED + 1))
       else
         FAILED+=("${b}")
       fi
