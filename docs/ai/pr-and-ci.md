@@ -79,7 +79,7 @@ Rules:
   benefit from one bullet per section.
 - **Atomicity statement** if the PR touches more than one logical thing —
   add a one-liner explaining why they belong together. If you can't, split.
-- **Mention `docs/ai/**` updates** under `# Changes` whenever the
+- **Mention `docs/ai/**`updates** under`# Changes` whenever the
   meta-update rule fired.
 - **No Jira / Atlassian links.** The `check-pr-description` job rejects any
   URL matching `*.atlassian.*` or `*.jira.*`. Reference internal trackers
