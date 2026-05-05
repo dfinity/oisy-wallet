@@ -11,19 +11,21 @@ A branch is added to a manifest only if, on the audit date:
 
 The audit excludes `main` and any branch with a live, open PR.
 
-Two manifests are shipped:
+Three manifests are shipped, each disjoint from the previous one (so they can be applied in order):
 
 | File                                     | Cutoff                  | Audited on | # branches |
 | ---------------------------------------- | ----------------------- | ---------- | ---------- |
 | `stale-branches-2026-05-05.tsv`          | 6 months (≤ 2025-11-05) | 2026-05-05 | 250        |
 | `stale-branches-3-months-2026-05-05.tsv` | 3 months (≤ 2026-02-05) | 2026-05-05 | 25         |
+| `stale-branches-2-months-2026-05-05.tsv` | 2 months (≤ 2026-03-05) | 2026-05-05 | 2          |
 
-The 3-month manifest is fully disjoint from the 6-month one — once you've run the 6-month cleanup the additional branches it covers are those with their last commit between 2025-11-05 and 2026-02-05.
+After running the 6-month cleanup, the 3-month manifest covers branches whose last commit was between 2025-11-05 and 2026-02-05; after the 3-month cleanup, the 2-month manifest covers branches between 2026-02-05 and 2026-03-05.
 
 ## Files
 
 - `stale-branches-2026-05-05.tsv` — 6-month manifest.
 - `stale-branches-3-months-2026-05-05.tsv` — 3-month manifest.
+- `stale-branches-2-months-2026-05-05.tsv` — 2-month manifest.
 - `delete-stale-remote-branches.sh` — deletion script. Defaults to dry-run and to the 6-month manifest. Pass `--manifest <path>` to use a different one.
 
 ## How to run
@@ -40,6 +42,12 @@ The 3-month manifest is fully disjoint from the 6-month one — once you've run 
   --manifest scripts/cleanup/stale-branches-3-months-2026-05-05.tsv
 ./scripts/cleanup/delete-stale-remote-branches.sh --yes \
   --manifest scripts/cleanup/stale-branches-3-months-2026-05-05.tsv
+
+# Same flow with the 2-month manifest:
+./scripts/cleanup/delete-stale-remote-branches.sh \
+  --manifest scripts/cleanup/stale-branches-2-months-2026-05-05.tsv
+./scripts/cleanup/delete-stale-remote-branches.sh --yes \
+  --manifest scripts/cleanup/stale-branches-2-months-2026-05-05.tsv
 ```
 
 Useful flags:
