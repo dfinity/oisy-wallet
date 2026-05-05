@@ -4,26 +4,42 @@ Tooling to delete branches on `origin` that are abandoned.
 
 ## What counts as "stale"
 
-A branch was added to `stale-branches-2026-05-05.tsv` only if, on **2026-05-05**:
+A branch is added to a manifest only if, on the audit date:
 
 - it had **no open or draft pull request** on GitHub (`gh api repos/.../pulls?state=open`), and
-- its **tip commit** (committer date) was older than **6 months** — i.e. no commits, force-pushes or rebases in the last 6 months.
+- its **tip commit** (committer date) was older than the cutoff — i.e. no commits, force-pushes or rebases in that window.
 
-The audit excludes `main` and any branch with a live, open PR. The list contains 250 branches.
+The audit excludes `main` and any branch with a live, open PR.
+
+Two manifests are shipped:
+
+| File | Cutoff | Audited on | # branches |
+|---|---|---|---|
+| `stale-branches-2026-05-05.tsv` | 6 months (≤ 2025-11-05) | 2026-05-05 | 250 |
+| `stale-branches-3-months-2026-05-05.tsv` | 3 months (≤ 2026-02-05) | 2026-05-05 | 25 |
+
+The 3-month manifest is fully disjoint from the 6-month one — once you've run the 6-month cleanup the additional branches it covers are those with their last commit between 2025-11-05 and 2026-02-05.
 
 ## Files
 
-- `stale-branches-2026-05-05.tsv` — TAB-separated `branch <TAB> last_commit_date <TAB> sha` manifest used as input.
-- `delete-stale-remote-branches.sh` — deletion script. Defaults to dry-run.
+- `stale-branches-2026-05-05.tsv` — 6-month manifest.
+- `stale-branches-3-months-2026-05-05.tsv` — 3-month manifest.
+- `delete-stale-remote-branches.sh` — deletion script. Defaults to dry-run and to the 6-month manifest. Pass `--manifest <path>` to use a different one.
 
 ## How to run
 
 ```bash
-# Show what would be deleted (no changes):
+# Show what would be deleted (no changes) using the 6-month manifest:
 ./scripts/cleanup/delete-stale-remote-branches.sh
 
-# Actually delete the branches from origin:
+# Actually delete those branches from origin:
 ./scripts/cleanup/delete-stale-remote-branches.sh --yes
+
+# Same flow with the 3-month manifest:
+./scripts/cleanup/delete-stale-remote-branches.sh \
+  --manifest scripts/cleanup/stale-branches-3-months-2026-05-05.tsv
+./scripts/cleanup/delete-stale-remote-branches.sh --yes \
+  --manifest scripts/cleanup/stale-branches-3-months-2026-05-05.tsv
 ```
 
 Useful flags:
