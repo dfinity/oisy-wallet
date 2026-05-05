@@ -1,0 +1,61 @@
+---
+description: i18n and accessibility rules for any user-visible UI in the frontend.
+globs: ["src/frontend/**/*.svelte", "src/frontend/**/*.ts"]
+---
+
+# Cursor — i18n & a11y
+
+Authoritative source: [docs/ai/frontend/i18n-and-a11y.md](mdc:docs/ai/frontend/i18n-and-a11y.md).
+
+## i18n
+
+- The single source of truth is
+  [`src/frontend/src/lib/i18n/en.json`](mdc:src/frontend/src/lib/i18n/en.json).
+  All other locale files (`ar.json`, `de.json`, `es.json`, `fr.json`,
+  `it.json`, `ja.json`, `ko-KR.json`, `pl.json`, `pt.json`, `ru.json`,
+  `vi.json`, `zh-CN.json`, `cs.json`, `hi.json`) are **machine-translated**
+  by the `auto-update-i18n` workflow. **Edit only `en.json`.**
+- After editing `en.json`, regenerate the typed shape and key list:
+  ```bash
+  npm run i18n
+  ```
+  This regenerates `src/frontend/src/lib/types/i18n.d.ts` and the i18n key
+  helpers. Commit both source and generated files together. Never edit the
+  generated `.d.ts` by hand.
+- Reference keys via property access only — never construct keys
+  dynamically:
+  ```svelte
+  <button>{$i18n.core.text.save}</button>
+  ```
+
+  ```ts
+  import { i18n } from '$lib/stores/i18n.store';
+  import { get } from 'svelte/store';
+  const msg = get(i18n).send.error.amount_too_low;
+  ```
+
+- Replacement placeholders use `$placeholder` syntax (see existing keys like
+  `more_items: "+$items more"`). Substitute with `replacePlaceholders` from
+  `$lib/utils/i18n.utils`.
+
+## Forbidden
+
+- Hard-coded English in any user-visible context: text node, `aria-label`,
+  `title`, `alt`, `placeholder`, button copy, error messages.
+- Concatenating sentences with `+` — use a single i18n key with placeholders.
+- Editing any locale file other than `en.json` (the workflow overwrites them).
+- Adding orphan keys — `frontend-remove-unused-components` and the i18n
+  generator will eventually flag them.
+
+## a11y baseline
+
+- Real semantics: `<button>` for actions, `<a>` for navigation, `<label>`
+  for inputs, headings in order. No bare clickable `<div>`.
+- Every input has a label or `aria-label`.
+- Icon-only buttons need `aria-label` (or visible text via `sr-only`).
+- Decorative icons / images: `aria-hidden="true"` / `alt=""`.
+- Don't kill focus outlines. Don't communicate state with color alone.
+- Use the existing `$lib/components/ui/...` and `@dfinity/gix-components`
+  primitives for dialogs / modals — they handle focus trap / escape / ARIA.
+- `target="_blank"` ⇒ `rel="noopener noreferrer"`.
+- Untrusted HTML ⇒ sanitize before `{@html …}`.
