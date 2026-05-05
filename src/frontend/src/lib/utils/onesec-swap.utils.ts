@@ -130,7 +130,10 @@ export const oneSecCompatibleDestinations = ({
 		const address = getEvmAddressForNetwork({ config, networkId: sourceToken.network.id });
 		if (nonNullish(address) && address.toLowerCase() === srcAddress.toLowerCase()) {
 			const ledger = config.ledgerMainnet ?? config.ledger;
-			return nonNullish(ledger) ? { icp: new Set([ledger]) } : undefined;
+			return nonNullish(ledger) ? { icp: new Set([ledger]) } : { icp: new Set() };
 		}
 	}
+
+	// No OneSec config matched this EVM address: restrict ICP destinations to nothing.
+	return { icp: new Set() };
 };
