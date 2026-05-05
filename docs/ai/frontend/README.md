@@ -78,10 +78,10 @@ Recent merged PRs to learn from (from `git log` on `main`):
 - `feat(frontend): expose newUserSignupsAllowed backend method` (#12620) —
   thin wrapper added in the right service layer.
 - `feat(frontend): improve UTXO selection to smallest-sufficient greedy
-algorithm` (#12657) — single-purpose algorithmic change with a
+  algorithm` (#12657) — single-purpose algorithmic change with a
   regression test.
 - `fix(frontend): correct error ordering in assertCkEthAmount when amount
-is below ledger fee` (#12499) — single bug, dedicated regression test.
+  is below ledger fee` (#12499) — single bug, dedicated regression test.
 - `style(frontend): align typography with new design` — pure visual,
   uses tokens.
 
