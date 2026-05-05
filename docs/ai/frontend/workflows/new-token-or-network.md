@@ -68,8 +68,8 @@ A token / network add is naturally cross-cutting. To stay reviewable:
   per logical group (`feat(frontend): add <network> ERC-20 tokens batch 1`).
 - Exchange-rate plumbing → can ship in the first PR if it's small;
   otherwise split.
-- Backend variant change is usually its own PR (`feat(backend): add
-<network> variant to NetworkSettingsFor`).
+- Backend variant change is usually its own PR
+  (`feat(backend): add <network> variant to NetworkSettingsFor`).
 
 ## Don'ts
 
