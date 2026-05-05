@@ -31,7 +31,7 @@ When sources disagree, the higher one wins:
 1. Code in `src/**`
 2. CI in `.github/workflows/**`
 3. [`.github/CODEOWNERS`](mdc:.github/CODEOWNERS)
-4. [docs/ai/\*\*](mdc:docs/ai/README.md)
+4. [`docs/ai/**`](mdc:docs/ai/README.md)
 5. [AGENTS.md](mdc:AGENTS.md)
 6. Tool-specific layers (this file, `CLAUDE.md`, `copilot-instructions.md`)
 
@@ -45,10 +45,15 @@ When sources disagree, the higher one wins:
   warnings. In Rust: no `unwrap()` / `expect()` in non-test code.
 - **i18n + a11y (FE).** No hard-coded English. No bare clickable `<div>`.
   See [docs/ai/frontend/i18n-and-a11y.md](mdc:docs/ai/frontend/i18n-and-a11y.md).
-- **CI green locally.** `npm run format && npm run lint -- --max-warnings 0
-&& npm run check && npm run test` before any FE PR. For Rust changes, also
-  `./scripts/lint.rust.sh && ./scripts/lint.did.sh`. See
-  [docs/ai/pr-and-ci.md](mdc:docs/ai/pr-and-ci.md).
+- **CI green locally.** Before any FE PR, run:
+
+  ```bash
+  npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run test
+  ```
+
+  For Rust changes, also run `./scripts/lint.rust.sh && ./scripts/lint.did.sh`.
+  See [docs/ai/pr-and-ci.md](mdc:docs/ai/pr-and-ci.md).
+
 - **Conventional PR title.** `verb(scope): description`. CI enforces it.
 - **No Jira / Atlassian links** in PR descriptions — CI rejects them.
 

@@ -112,9 +112,9 @@ Never silence a failure with `// eslint-disable` / `// @ts-ignore` /
 
 ## Updating an existing PR
 
-- **Add commits.** Never `git push --force` to a PR branch. Don't `git commit
---amend` after pushing. Don't rebase a PR onto `main` to "tidy history" —
-  let the merge group handle it.
+- **Add commits.** Never `git push --force` to a PR branch. Don't amend
+  pushed commits with `git commit --amend`. Don't rebase a PR onto `main`
+  to "tidy history" — let the merge group handle it.
 - The only exception is when the user explicitly asks for a force-push or
   history rewrite.
 
