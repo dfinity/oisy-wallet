@@ -20,15 +20,46 @@ The repo is **Svelte 5** but uses both reactive primitives:
 
 Inside a component, prefer the rune syntax for new code:
 
-| Use (new code)                           | Don't use (Svelte 4 in new code)              |
-| ---------------------------------------- | --------------------------------------------- |
-| `let { foo, bar = default } = $props()`  | `export let foo`                              |
-| `let count = $state(0)`                  | plain `let` for component-local reactive vars |
-| `let total = $derived(price * qty)`      | `$: total = price * qty`                      |
-| `$effect(() => { /* I/O */ })`           | side-effect via `$:`                          |
-| `<button onclick={fn}>`                  | `on:click`                                    |
-| `{#snippet}` + `{@render}`               | named `<slot>` for new code                   |
-| `let { value = $bindable() } = $props()` | top-level `bind:value` in callee              |
+| Use (new code)                                                                                       | Don't use (Svelte 4 in new code)              |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Separate `interface Props { … }` + `let { … }: Props = $props()` (see [Props shape](#props-shape))   | `export let foo`                              |
+| `let count = $state(0)`                                                                              | plain `let` for component-local reactive vars |
+| `let total = $derived(price * qty)`                                                                  | `$: total = price * qty`                      |
+| `$effect(() => { /* I/O */ })`                                                                       | side-effect via `$:`                          |
+| `<button onclick={fn}>`                                                                              | `on:click`                                    |
+| `{#snippet}` + `{@render}`                                                                           | named `<slot>` for new code                   |
+| `let { value = $bindable() }: Props = $props()`                                                      | top-level `bind:value` in callee              |
+
+### Props shape
+
+Always declare props as a **named `interface Props`** above the
+destructuring. This keeps the shape easy to read, easy to extend, and
+easy to reuse in tests / sibling components:
+
+```svelte
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { OptionAmount } from '$lib/types/amount';
+
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		onConvert: () => void;
+		cancel: Snippet;
+	}
+
+	let { sendAmount, receiveAmount, onConvert, cancel }: Props = $props();
+</script>
+```
+
+- One `interface Props` per component, declared at the top of the
+  `<script>` after imports.
+- Required props first, optional (`?:`) and defaulted ones after.
+- Two-way bindings use `$bindable()` on the destructure side; the
+  interface still declares the field normally.
+- Don't inline the type literal into `$props()` for new code — it makes
+  the destructuring line unreadable as soon as you have more than two
+  or three props.
 
 **Don't rewrite legacy components in unrelated PRs.** Atomicity first.
 Migration PRs are welcome but must be `refactor(frontend): migrate <X> to
@@ -128,14 +159,14 @@ export const exchangeRateUsdToCurrency = async (
 
 ## Stores, derived, runes — when to use which
 
-| Need                                           | Use                                                                             | Where it lives                                                         |
-| ---------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Component-local mutable value                  | `$state`                                                                        | Inside the component                                                   |
-| Component-local computed value                 | `$derived` / `$derived.by`                                                      | Inside the component                                                   |
-| Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work)                                    | Inside the component                                                   |
-| Value shared by 2+ components in the same page | Pass via props / snippets                                                       | —                                                                      |
+| Need                                           | Use                                                          | Where it lives                          |
+| ---------------------------------------------- | ------------------------------------------------------------ | --------------------------------------- |
+| Component-local mutable value                  | `$state`                                                     | Inside the component                    |
+| Component-local computed value                 | `$derived` / `$derived.by`                                   | Inside the component                    |
+| Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work)                 | Inside the component                    |
+| Value shared by 2+ components in the same page | Pass via props / snippets                                    | —                                       |
 | Value shared across routes                     | A Svelte `writable` / `readable` store **or** a `*.svelte.ts` rune-state module | `$lib/stores/`, `<chain>/stores/`, `$lib/derived/`, `<chain>/derived/` |
-| Cached server data                             | The matching `*.services.ts` owns the cache                                     | —                                                                      |
+| Cached server data                             | The matching `*.services.ts` owns the cache                  | —                                       |
 
 Avoid duplicating server state into a local store — fetch via the service
 layer and let the service own caching.
@@ -186,6 +217,9 @@ component uses. Never re-implement an icon that already exists.
 ## Anti-patterns (do not do these)
 
 - `export let foo` in new code.
+- Inline type literal in `$props()` (`let { … }: { … } = $props()`).
+  Use a named `interface Props` instead — see
+  [Props shape](#props-shape).
 - Reactive `$:` statements in new code.
 - Reaching into `document.querySelector` to mutate Svelte-managed DOM.
 - Catching an error and silently swallowing it; always toast or propagate.

@@ -22,11 +22,11 @@ Inside a component, prefer `$:` → `$derived` for new code, `on:click` →
 `onclick={...}`, and `export let` → `let { … } = $props()`. But **do not
 rewrite legacy components in unrelated PRs**. Atomicity first.
 
-| Use (new code)                                          | Don't use (Svelte 4 in new code)              |
-| ------------------------------------------------------- | --------------------------------------------- |
-| `let { foo } = $props()`                                | `export let foo`                              |
-| `$state(...)`                                           | plain `let` for component-local reactive vars |
-| `$derived(...)` / `$derived.by(() => ...)`              | `$:` reactive statements                      |
+| Use (new code)                                                                  | Don't use (Svelte 4 in new code)              |
+| ------------------------------------------------------------------------------- | --------------------------------------------- |
+| Separate `interface Props { … }` + `let { … }: Props = $props()` (see below)    | `export let foo`                              |
+| `$state(...)`                                                                   | plain `let` for component-local reactive vars |
+| `$derived(...)` / `$derived.by(() => ...)`                                      | `$:` reactive statements                      |
 | `$effect(() => ...)`                                    | side-effect via `$:`                          |
 | `<button onclick={fn}>`                                 | `on:click`                                    |
 | `{#snippet}` + `{@render}`                              | named `<slot>` for new code                   |
@@ -81,13 +81,40 @@ chain folder.
 1. External lib imports
 2. SvelteKit / framework imports (`$app/...`)
 3. Alias imports grouped by area (`$lib`, `$btc`, `$eth`, …, `$env`, `$routes`)
-4. `$props()` destructuring with explicit types
-5. Local `$state` / `$derived` / `$effect`
-6. `{#snippet}` definitions
-7. Markup
+4. `interface Props { … }` declaration
+5. `let { … }: Props = $props()` destructuring
+6. Local `$state` / `$derived` / `$effect`
+7. `{#snippet}` definitions
+8. Markup
+
+## Props shape (always)
+
+Declare a named `interface Props` above the destructure — never inline
+the type literal into `$props()`:
+
+```svelte
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { OptionAmount } from '$lib/types/amount';
+
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		onConvert: () => void;
+		cancel: Snippet;
+	}
+
+	let { sendAmount, receiveAmount, onConvert, cancel }: Props = $props();
+</script>
+```
+
+Required props first, optional / defaulted after. `$bindable()` on the
+destructure side; the interface declares the field normally.
 
 ## Anti-patterns (reject these)
 
+- Inline type literal in `$props()` (`let { … }: { … } = $props()`).
+  Use a named `interface Props` instead.
 - `console.error` / `console.warn` (use `consoleError` / `consoleWarn`).
 - `0n` literal (use `ZERO`).
 - Relative imports (`../../`) under `src/frontend/src/`.

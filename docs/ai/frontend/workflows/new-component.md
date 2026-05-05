@@ -16,21 +16,24 @@ covers the use case.
 2. **Pick the name.** PascalCase, descriptive, no `Component` / `Widget`
    suffix. Reflects role, not appearance (`SwapDetailsOneSec`, not
    `BluePill`).
-3. **Sketch props first.**
+3. **Sketch props first.** Always use a named `interface Props` above
+   the destructure — see
+   [stack-and-patterns.md#props-shape](../stack-and-patterns.md#props-shape).
 
    ```ts
-   let {
-   	token,
-   	onSubmit = () => {}
-   }: {
+   interface Props {
    	token: Token;
    	onSubmit?: (id: TokenId) => void;
-   } = $props();
+   }
+
+   let { token, onSubmit = () => {} }: Props = $props();
    ```
 
-   - All props typed.
+   - All props typed via `interface Props`.
+   - Required props first, optional / defaulted after.
    - Callbacks default to no-op.
-   - Two-way binding via `$bindable()`, never legacy `bind:` on the parent.
+   - Two-way binding via `$bindable()` on the destructure side, never
+     legacy `bind:` on the parent.
 
 4. **Compose, don't reinvent.** Build on `$lib/components/{ui,common,core}/`
    and `@dfinity/gix-components`. Pull existing icons before adding new
@@ -65,13 +68,12 @@ covers the use case.
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 
-	let {
-		token,
-		onSubmit = () => {}
-	}: {
+	interface Props {
 		token: Token;
 		onSubmit?: (id: Token['id']) => void;
-	} = $props();
+	}
+
+	let { token, onSubmit = () => {} }: Props = $props();
 
 	let isReady = $derived(token.enabled);
 </script>
