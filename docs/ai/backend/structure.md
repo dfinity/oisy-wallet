@@ -5,13 +5,13 @@
 The Cargo workspace ([`Cargo.toml`](../../../Cargo.toml)) has these
 members:
 
-| Crate                                   | Path                          | Purpose                                                                |
-| --------------------------------------- | ----------------------------- | ---------------------------------------------------------------------- |
-| `backend`                               | `src/backend/`                | The IC canister itself (`crate-type = ["cdylib"]`, target wasm32).     |
-| `shared`                                | `src/shared/`                 | Public types reused across crates and exposed in the Candid interface. |
-| `ic-cycles-ledger-client`               | `src/cycles_ledger/client/`   | Generated client for the cycles-ledger canister.                       |
-| `ic-cycles-ledger-pic`                  | `src/cycles_ledger/pic/`      | Pocket-IC helpers for cycles-ledger.                                   |
-| `ic-cycles-ledger-types`                | `src/cycles_ledger/types/`    | Types for the cycles-ledger.                                           |
+| Crate                     | Path                        | Purpose                                                                |
+| ------------------------- | --------------------------- | ---------------------------------------------------------------------- |
+| `backend`                 | `src/backend/`              | The IC canister itself (`crate-type = ["cdylib"]`, target wasm32).     |
+| `shared`                  | `src/shared/`               | Public types reused across crates and exposed in the Candid interface. |
+| `ic-cycles-ledger-client` | `src/cycles_ledger/client/` | Generated client for the cycles-ledger canister.                       |
+| `ic-cycles-ledger-pic`    | `src/cycles_ledger/pic/`    | Pocket-IC helpers for cycles-ledger.                                   |
+| `ic-cycles-ledger-types`  | `src/cycles_ledger/types/`  | Types for the cycles-ledger.                                           |
 
 **Don't add a new crate without explicit user approval.**
 

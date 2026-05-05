@@ -15,14 +15,14 @@ Component (.svelte)
        ↳ $lib/workers/*        web workers (auth, exchange) — scheduled via $lib/schedulers/
 ```
 
-| You need…                                                          | Layer                                                                                  |
-| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| To call a new backend canister method                              | Update Rust + `backend.did`, run `npm run generate`, then add a wrapper in `$lib/api/backend.api.ts` (or a dedicated `*.api.ts`). |
-| To call another canister                                           | Add a typed wrapper under `$lib/canisters/<name>.canister.ts`.                         |
-| To call an HTTP service (CoinGecko, kongswap, …)                   | Add or extend a `*.rest.ts` under `$lib/rest/`.                                        |
-| To orchestrate calls + toast + i18n + side effects                 | `$lib/services/<thing>.services.ts` (cross-chain) or `$<chain>/services/...services.ts`. |
-| To share reactive state across routes                              | A Svelte store in `$lib/stores/` or `$<chain>/stores/`. Or a `*.svelte.ts` rune module. |
-| To compute derived state from stores                               | A `derived(...)` Svelte store in `$lib/derived/` or `$<chain>/derived/`.               |
+| You need…                                          | Layer                                                                                                                             |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| To call a new backend canister method              | Update Rust + `backend.did`, run `npm run generate`, then add a wrapper in `$lib/api/backend.api.ts` (or a dedicated `*.api.ts`). |
+| To call another canister                           | Add a typed wrapper under `$lib/canisters/<name>.canister.ts`.                                                                    |
+| To call an HTTP service (CoinGecko, kongswap, …)   | Add or extend a `*.rest.ts` under `$lib/rest/`.                                                                                   |
+| To orchestrate calls + toast + i18n + side effects | `$lib/services/<thing>.services.ts` (cross-chain) or `$<chain>/services/...services.ts`.                                          |
+| To share reactive state across routes              | A Svelte store in `$lib/stores/` or `$<chain>/stores/`. Or a `*.svelte.ts` rune module.                                           |
+| To compute derived state from stores               | A `derived(...)` Svelte store in `$lib/derived/` or `$<chain>/derived/`.                                                          |
 
 ## Steps
 

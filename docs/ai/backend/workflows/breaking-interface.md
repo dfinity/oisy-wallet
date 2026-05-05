@@ -48,12 +48,15 @@ declare it breaking.
 
    ```markdown
    # Motivation
+
    …
 
    # Changes
+
    - …
 
    # Tests
+
    - …
 
    BREAKING CHANGE: `allow_signing` now returns a typed

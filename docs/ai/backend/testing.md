@@ -12,14 +12,14 @@ Two layers, both required:
 
 ## What to test
 
-| Add tests for                                                                | Don't bother                            |
-| ---------------------------------------------------------------------------- | --------------------------------------- |
-| Pure functions on `model.rs`                                                 | Generated bindings under `$declarations` |
-| Validation / parsing helpers in `shared::validate`                           | Re-exports                              |
-| Each branch of every public endpoint (happy path + each error)               | Trivial getter wrappers                 |
-| State migrations (before/after structures)                                   | —                                       |
-| Bug fixes (write the regression test that fails on `main`)                   | —                                       |
-| Guard logic (`utils/guards.rs`)                                              | —                                       |
+| Add tests for                                                  | Don't bother                             |
+| -------------------------------------------------------------- | ---------------------------------------- |
+| Pure functions on `model.rs`                                   | Generated bindings under `$declarations` |
+| Validation / parsing helpers in `shared::validate`             | Re-exports                               |
+| Each branch of every public endpoint (happy path + each error) | Trivial getter wrappers                  |
+| State migrations (before/after structures)                     | —                                        |
+| Bug fixes (write the regression test that fails on `main`)     | —                                        |
+| Guard logic (`utils/guards.rs`)                                | —                                        |
 
 ## Unit tests
 

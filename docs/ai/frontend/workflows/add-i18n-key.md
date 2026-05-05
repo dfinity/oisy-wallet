@@ -84,7 +84,7 @@ Tiny but easy to get wrong. Follow these steps in order.
 
 1. Add the new key. Migrate every caller. Remove the old key. Run
    `npm run i18n`. Verify nothing references the old key (`grep -r
-   'old_key'`).
+'old_key'`).
 2. Single PR titled `refactor(frontend): rename i18n key <old> → <new>`
    (atomic — no other changes).
 

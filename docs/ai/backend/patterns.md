@@ -80,13 +80,13 @@ in the same PR — that's the
 
 Public update / query handlers should declare the right guard:
 
-| Caller class                                     | Guard                                          | Defined in                                    |
-| ------------------------------------------------ | ---------------------------------------------- | --------------------------------------------- |
-| Anonymous OK                                     | _none_                                         | —                                             |
-| Authenticated, profile may not yet exist         | `caller_is_not_anonymous`                      | `src/backend/src/utils/guards.rs`             |
-| Authenticated, must have a registered profile    | `caller_is_registered_user`                    | same                                          |
-| Controller-only (admin)                          | `caller_is_controller`                         | same                                          |
-| Allowed-callers list (admin / monitoring)        | `caller_is_allowed`                            | same                                          |
+| Caller class                                  | Guard                       | Defined in                        |
+| --------------------------------------------- | --------------------------- | --------------------------------- |
+| Anonymous OK                                  | _none_                      | —                                 |
+| Authenticated, profile may not yet exist      | `caller_is_not_anonymous`   | `src/backend/src/utils/guards.rs` |
+| Authenticated, must have a registered profile | `caller_is_registered_user` | same                              |
+| Controller-only (admin)                       | `caller_is_controller`      | same                              |
+| Allowed-callers list (admin / monitoring)     | `caller_is_allowed`         | same                              |
 
 Apply with `#[update(guard = "caller_is_X")]` /
 `#[query(guard = "caller_is_X")]`. New guards live in
@@ -166,7 +166,7 @@ The root `Cargo.toml` enables strict lints (`pedantic`, `warnings = "deny"`,
 - `#[allow(...)]` on individual items is a code smell; clippy warns. If
   you really need it, justify in the PR description.
 - New code must compile clean against `cargo clippy --target wasm32-unknown-unknown
-  --all-features` and against the native target with tests + benches
+--all-features` and against the native target with tests + benches
   (this is what `./scripts/lint.rust.sh` runs).
 
 ## Disallowed macros / methods (from [`clippy.toml`](../../../clippy.toml))

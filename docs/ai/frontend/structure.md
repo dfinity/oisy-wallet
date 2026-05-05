@@ -84,38 +84,38 @@ so agents must.
 
 ### File suffixes
 
-| Suffix             | Meaning                                                                               | Example                                |
-| ------------------ | ------------------------------------------------------------------------------------- | -------------------------------------- |
-| `*.svelte`         | Component (PascalCase filename)                                                       | `AiAssistantChat.svelte`               |
-| `*.svelte.ts`      | Module that uses Svelte 5 runes (`$state`, `$derived`, `$effect`) outside a component | `theme.svelte.ts`                      |
-| `*.services.ts`    | Side-effectful module (calls APIs, toasts, mutates state)                             | `exchange.services.ts`                 |
-| `*.utils.ts`       | Pure helpers — no I/O, no side effects, no DOM access                                 | `format.utils.ts`, `network.utils.ts`  |
-| `*.constants.ts`   | Compile-time constants, enums, lookup tables                                          | `tokens.constants.ts`, `app.constants.ts` |
-| `*.derived.ts`     | Derived Svelte stores or rune-derived modules                                         | `tokens.derived.ts`, `auth.derived.ts` |
-| `*.store.ts`       | Writable / readable Svelte store factory                                              | `i18n.store.ts`, `auth.store.ts`       |
-| `*.api.ts`         | Hand-written wrapper over a generated declaration                                     | `backend.api.ts`                       |
-| `*.canister.ts`    | Class wrapping IC actor calls                                                         | `signer.canister.ts`                   |
-| `*.provider.ts`    | Long-lived provider (auth client, swap provider, …)                                   | `auth-client.providers.ts`             |
-| `*.rest.ts`        | REST client                                                                           | `coingecko.rest.ts`                    |
-| `*.scheduler.ts`   | Worker scheduling primitive                                                           | `nft.scheduler.ts`                     |
-| `*.worker.ts`      | Web worker entrypoint                                                                 | `exchange.worker.ts`                   |
-| `*.env.ts`         | Environment / feature flag / catalog under `env/`                                     | `tokens.usdc.env.ts`                   |
-| `*.spec.ts`        | Vitest spec — under `src/frontend/src/tests/` mirroring source                        | `exchange.services.spec.ts`            |
-| `*.test-utils.ts`  | Reusable test helper under `tests/utils/`                                             | `derived.test-utils.ts`                |
-| `*.mock.ts`        | Mock data / factories under `tests/mocks/`                                            | `exchanges.mock.ts`                    |
+| Suffix            | Meaning                                                                               | Example                                   |
+| ----------------- | ------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `*.svelte`        | Component (PascalCase filename)                                                       | `AiAssistantChat.svelte`                  |
+| `*.svelte.ts`     | Module that uses Svelte 5 runes (`$state`, `$derived`, `$effect`) outside a component | `theme.svelte.ts`                         |
+| `*.services.ts`   | Side-effectful module (calls APIs, toasts, mutates state)                             | `exchange.services.ts`                    |
+| `*.utils.ts`      | Pure helpers — no I/O, no side effects, no DOM access                                 | `format.utils.ts`, `network.utils.ts`     |
+| `*.constants.ts`  | Compile-time constants, enums, lookup tables                                          | `tokens.constants.ts`, `app.constants.ts` |
+| `*.derived.ts`    | Derived Svelte stores or rune-derived modules                                         | `tokens.derived.ts`, `auth.derived.ts`    |
+| `*.store.ts`      | Writable / readable Svelte store factory                                              | `i18n.store.ts`, `auth.store.ts`          |
+| `*.api.ts`        | Hand-written wrapper over a generated declaration                                     | `backend.api.ts`                          |
+| `*.canister.ts`   | Class wrapping IC actor calls                                                         | `signer.canister.ts`                      |
+| `*.provider.ts`   | Long-lived provider (auth client, swap provider, …)                                   | `auth-client.providers.ts`                |
+| `*.rest.ts`       | REST client                                                                           | `coingecko.rest.ts`                       |
+| `*.scheduler.ts`  | Worker scheduling primitive                                                           | `nft.scheduler.ts`                        |
+| `*.worker.ts`     | Web worker entrypoint                                                                 | `exchange.worker.ts`                      |
+| `*.env.ts`        | Environment / feature flag / catalog under `env/`                                     | `tokens.usdc.env.ts`                      |
+| `*.spec.ts`       | Vitest spec — under `src/frontend/src/tests/` mirroring source                        | `exchange.services.spec.ts`               |
+| `*.test-utils.ts` | Reusable test helper under `tests/utils/`                                             | `derived.test-utils.ts`                   |
+| `*.mock.ts`       | Mock data / factories under `tests/mocks/`                                            | `exchanges.mock.ts`                       |
 
 ### Casing
 
-| Thing                         | Style             | Example                       |
-| ----------------------------- | ----------------- | ----------------------------- |
-| `.svelte` filename            | `PascalCase`      | `AiAssistantChat.svelte`      |
-| `.ts` / `.svelte.ts` filename | `kebab-case`      | `exchange.services.ts`        |
+| Thing                         | Style             | Example                            |
+| ----------------------------- | ----------------- | ---------------------------------- |
+| `.svelte` filename            | `PascalCase`      | `AiAssistantChat.svelte`           |
+| `.ts` / `.svelte.ts` filename | `kebab-case`      | `exchange.services.ts`             |
 | Folder                        | `kebab-case`      | `ai-assistant/`, `wallet-connect/` |
-| Component name                | `PascalCase`      | `AiAssistantChat`             |
-| TS type / interface           | `PascalCase`      | `BackendExchangeRate`         |
-| Function / variable           | `camelCase`       | `exchangeRateUsdToCurrency`   |
-| Constant export               | `SCREAMING_SNAKE` | `BSC_MAINNET_NETWORK`         |
-| Test ID / data attribute      | `kebab-case`      | `data-tid="ai-assistant-chat"` |
+| Component name                | `PascalCase`      | `AiAssistantChat`                  |
+| TS type / interface           | `PascalCase`      | `BackendExchangeRate`              |
+| Function / variable           | `camelCase`       | `exchangeRateUsdToCurrency`        |
+| Constant export               | `SCREAMING_SNAKE` | `BSC_MAINNET_NETWORK`              |
+| Test ID / data attribute      | `kebab-case`      | `data-tid="ai-assistant-chat"`     |
 
 ### Imports — aliases only
 
@@ -123,19 +123,19 @@ The local rule `local-rules/no-relative-imports` is **`error`** under
 `src/frontend/src/**`. Use the path aliases declared in
 [`svelte.config.js`](../../../svelte.config.js):
 
-| Alias            | Path                            |
-| ---------------- | ------------------------------- |
-| `$lib`           | `src/frontend/src/lib`          |
-| `$routes`        | `src/frontend/src/routes`       |
-| `$btc`           | `src/frontend/src/btc`          |
-| `$eth`           | `src/frontend/src/eth`          |
-| `$evm`           | `src/frontend/src/evm`          |
-| `$icp`           | `src/frontend/src/icp`          |
-| `$sol`           | `src/frontend/src/sol`          |
-| `$icp-eth`       | `src/frontend/src/icp-eth`      |
-| `$env`           | `src/frontend/src/env`          |
-| `$declarations`  | `src/declarations`              |
-| `$tests`         | `src/frontend/src/tests` (test-only, declared in `vitest.config.ts`) |
+| Alias           | Path                                                                 |
+| --------------- | -------------------------------------------------------------------- |
+| `$lib`          | `src/frontend/src/lib`                                               |
+| `$routes`       | `src/frontend/src/routes`                                            |
+| `$btc`          | `src/frontend/src/btc`                                               |
+| `$eth`          | `src/frontend/src/eth`                                               |
+| `$evm`          | `src/frontend/src/evm`                                               |
+| `$icp`          | `src/frontend/src/icp`                                               |
+| `$sol`          | `src/frontend/src/sol`                                               |
+| `$icp-eth`      | `src/frontend/src/icp-eth`                                           |
+| `$env`          | `src/frontend/src/env`                                               |
+| `$declarations` | `src/declarations`                                                   |
+| `$tests`        | `src/frontend/src/tests` (test-only, declared in `vitest.config.ts`) |
 
 ```ts
 import { i18n } from '$lib/stores/i18n.store';

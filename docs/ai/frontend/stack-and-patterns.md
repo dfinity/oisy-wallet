@@ -20,15 +20,15 @@ The repo is **Svelte 5** but uses both reactive primitives:
 
 Inside a component, prefer the rune syntax for new code:
 
-| Use (new code)                                          | Don't use (Svelte 4 in new code)              |
-| ------------------------------------------------------- | --------------------------------------------- |
-| `let { foo, bar = default } = $props()`                 | `export let foo`                              |
-| `let count = $state(0)`                                 | plain `let` for component-local reactive vars |
-| `let total = $derived(price * qty)`                     | `$: total = price * qty`                      |
-| `$effect(() => { /* I/O */ })`                          | side-effect via `$:`                          |
-| `<button onclick={fn}>`                                 | `on:click`                                    |
-| `{#snippet}` + `{@render}`                              | named `<slot>` for new code                   |
-| `let { value = $bindable() } = $props()`                | top-level `bind:value` in callee              |
+| Use (new code)                           | Don't use (Svelte 4 in new code)              |
+| ---------------------------------------- | --------------------------------------------- |
+| `let { foo, bar = default } = $props()`  | `export let foo`                              |
+| `let count = $state(0)`                  | plain `let` for component-local reactive vars |
+| `let total = $derived(price * qty)`      | `$: total = price * qty`                      |
+| `$effect(() => { /* I/O */ })`           | side-effect via `$:`                          |
+| `<button onclick={fn}>`                  | `on:click`                                    |
+| `{#snippet}` + `{@render}`               | named `<slot>` for new code                   |
+| `let { value = $bindable() } = $props()` | top-level `bind:value` in callee              |
 
 **Don't rewrite legacy components in unrelated PRs.** Atomicity first.
 Migration PRs are welcome but must be `refactor(frontend): migrate <X> to
@@ -128,14 +128,14 @@ export const exchangeRateUsdToCurrency = async (
 
 ## Stores, derived, runes — when to use which
 
-| Need                                           | Use                                                          | Where it lives                          |
-| ---------------------------------------------- | ------------------------------------------------------------ | --------------------------------------- |
-| Component-local mutable value                  | `$state`                                                     | Inside the component                    |
-| Component-local computed value                 | `$derived` / `$derived.by`                                   | Inside the component                    |
-| Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work)                 | Inside the component                    |
-| Value shared by 2+ components in the same page | Pass via props / snippets                                    | —                                       |
+| Need                                           | Use                                                                             | Where it lives                                                         |
+| ---------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Component-local mutable value                  | `$state`                                                                        | Inside the component                                                   |
+| Component-local computed value                 | `$derived` / `$derived.by`                                                      | Inside the component                                                   |
+| Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work)                                    | Inside the component                                                   |
+| Value shared by 2+ components in the same page | Pass via props / snippets                                                       | —                                                                      |
 | Value shared across routes                     | A Svelte `writable` / `readable` store **or** a `*.svelte.ts` rune-state module | `$lib/stores/`, `<chain>/stores/`, `$lib/derived/`, `<chain>/derived/` |
-| Cached server data                             | The matching `*.services.ts` owns the cache                  | —                                       |
+| Cached server data                             | The matching `*.services.ts` owns the cache                                     | —                                                                      |
 
 Avoid duplicating server state into a local store — fetch via the service
 layer and let the service own caching.

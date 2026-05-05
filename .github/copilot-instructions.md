@@ -29,7 +29,7 @@
   non-test Rust.
 - **i18n + a11y safe.** No hard-coded English; no bare clickable `<div>`.
 - **CI green locally.** `npm run format && npm run lint -- --max-warnings 0
-  && npm run check && npm run test` before opening a PR (plus
+&& npm run check && npm run test` before opening a PR (plus
   `./scripts/lint.rust.sh` etc. when Rust files change).
 - **Meta-update rule.** When you introduce a new pattern, shared component,
   or workflow, update the corresponding page under `docs/ai/**` in the same

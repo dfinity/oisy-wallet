@@ -15,16 +15,16 @@ file. If it doesn't, point it here.
 `dfinity/oisy-wallet` is a multi-chain crypto wallet running entirely on the
 Internet Computer. It is a multi-stack repo:
 
-| Stack              | Path                                            | Language                                  | Status                                                                                                |
-| ------------------ | ----------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Frontend           | `src/frontend/`                                 | SvelteKit 2 + Svelte 5 + TS + Tailwind v4 | **AI-active**                                                                                         |
-| Backend canister   | `src/backend/`                                  | Rust (`wasm32-unknown-unknown`)           | **AI-active**                                                                                         |
-| Shared crate       | `src/shared/`                                   | Rust                                      | **AI-active**                                                                                         |
-| Generated bindings | `src/declarations/`                             | TS / Candid (generated)                   | **Do not hand-edit**                                                                                  |
-| Benchmarks         | `src/backend/src/benchmark.rs`, `canbench.yml`  | Rust + canbench-rs                        | **Active but lightly maintained.** Update when touching hot paths — see [`docs/ai/backend/testing.md#benchmarks--canbench`](./docs/ai/backend/testing.md#benchmarks--canbench). |
+| Stack              | Path                                            | Language                                  | Status                                                                                                                                                                                             |
+| ------------------ | ----------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend           | `src/frontend/`                                 | SvelteKit 2 + Svelte 5 + TS + Tailwind v4 | **AI-active**                                                                                                                                                                                      |
+| Backend canister   | `src/backend/`                                  | Rust (`wasm32-unknown-unknown`)           | **AI-active**                                                                                                                                                                                      |
+| Shared crate       | `src/shared/`                                   | Rust                                      | **AI-active**                                                                                                                                                                                      |
+| Generated bindings | `src/declarations/`                             | TS / Candid (generated)                   | **Do not hand-edit**                                                                                                                                                                               |
+| Benchmarks         | `src/backend/src/benchmark.rs`, `canbench.yml`  | Rust + canbench-rs                        | **Active but lightly maintained.** Update when touching hot paths — see [`docs/ai/backend/testing.md#benchmarks--canbench`](./docs/ai/backend/testing.md#benchmarks--canbench).                    |
 | E2E tests          | `e2e/`                                          | TypeScript (Playwright)                   | **Maintenance-only.** Default rule: do not add new specs — see [`docs/ai/frontend/testing.md#e2e-status-temporarily-restricted`](./docs/ai/frontend/testing.md#e2e-status-temporarily-restricted). |
-| Scripts            | `scripts/`                                      | Bash / Node                               | Restricted                                                                                            |
-| CI / infra         | `.github/workflows/`, `dfx.json`, `Dockerfile*` | Mixed                                     | Restricted                                                                                            |
+| Scripts            | `scripts/`                                      | Bash / Node                               | Restricted                                                                                                                                                                                         |
+| CI / infra         | `.github/workflows/`, `dfx.json`, `Dockerfile*` | Mixed                                     | Restricted                                                                                                                                                                                         |
 
 Both **frontend and backend** are areas where agents are expected to ship PRs
 with little to no human review. CI gates and CODEOWNERS still apply.
@@ -71,34 +71,34 @@ with little to no human review. CI gates and CODEOWNERS still apply.
 
 ## 3. Where to look (frontend)
 
-| You're about to…                              | Read first                                                                                       |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Open any PR                                   | [`docs/ai/pr-and-ci.md`](./docs/ai/pr-and-ci.md)                                                 |
-| Touch any frontend file                       | [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)                                     |
-| Add or move a file                            | [`docs/ai/frontend/structure.md`](./docs/ai/frontend/structure.md)                               |
-| Write Svelte 5 / runes / stores / TS          | [`docs/ai/frontend/stack-and-patterns.md`](./docs/ai/frontend/stack-and-patterns.md)             |
-| Add UI                                        | [`docs/ai/frontend/reusability.md`](./docs/ai/frontend/reusability.md)                           |
-| Add user-visible text or interactive elements | [`docs/ai/frontend/i18n-and-a11y.md`](./docs/ai/frontend/i18n-and-a11y.md)                       |
-| Add a Svelte component                        | [`docs/ai/frontend/workflows/new-component.md`](./docs/ai/frontend/workflows/new-component.md)   |
-| Add an API call / service / store             | [`docs/ai/frontend/workflows/new-service.md`](./docs/ai/frontend/workflows/new-service.md)       |
-| Split / refactor a component                  | [`docs/ai/frontend/workflows/refactor-split.md`](./docs/ai/frontend/workflows/refactor-split.md) |
-| Add an i18n key                               | [`docs/ai/frontend/workflows/add-i18n-key.md`](./docs/ai/frontend/workflows/add-i18n-key.md)     |
+| You're about to…                              | Read first                                                                                                   |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Open any PR                                   | [`docs/ai/pr-and-ci.md`](./docs/ai/pr-and-ci.md)                                                             |
+| Touch any frontend file                       | [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)                                                 |
+| Add or move a file                            | [`docs/ai/frontend/structure.md`](./docs/ai/frontend/structure.md)                                           |
+| Write Svelte 5 / runes / stores / TS          | [`docs/ai/frontend/stack-and-patterns.md`](./docs/ai/frontend/stack-and-patterns.md)                         |
+| Add UI                                        | [`docs/ai/frontend/reusability.md`](./docs/ai/frontend/reusability.md)                                       |
+| Add user-visible text or interactive elements | [`docs/ai/frontend/i18n-and-a11y.md`](./docs/ai/frontend/i18n-and-a11y.md)                                   |
+| Add a Svelte component                        | [`docs/ai/frontend/workflows/new-component.md`](./docs/ai/frontend/workflows/new-component.md)               |
+| Add an API call / service / store             | [`docs/ai/frontend/workflows/new-service.md`](./docs/ai/frontend/workflows/new-service.md)                   |
+| Split / refactor a component                  | [`docs/ai/frontend/workflows/refactor-split.md`](./docs/ai/frontend/workflows/refactor-split.md)             |
+| Add an i18n key                               | [`docs/ai/frontend/workflows/add-i18n-key.md`](./docs/ai/frontend/workflows/add-i18n-key.md)                 |
 | Add a token / network                         | [`docs/ai/frontend/workflows/new-token-or-network.md`](./docs/ai/frontend/workflows/new-token-or-network.md) |
-| Add or change tests                           | [`docs/ai/frontend/testing.md`](./docs/ai/frontend/testing.md)                                   |
+| Add or change tests                           | [`docs/ai/frontend/testing.md`](./docs/ai/frontend/testing.md)                                               |
 
 ---
 
 ## 4. Where to look (backend)
 
-| You're about to…                                     | Read first                                                                                       |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Touch any Rust file                                  | [`docs/ai/backend/README.md`](./docs/ai/backend/README.md)                                       |
-| Add a module / file                                  | [`docs/ai/backend/structure.md`](./docs/ai/backend/structure.md)                                 |
-| Write Rust idioms / state access / errors            | [`docs/ai/backend/patterns.md`](./docs/ai/backend/patterns.md)                                   |
-| Add a new endpoint                                   | [`docs/ai/backend/workflows/new-endpoint.md`](./docs/ai/backend/workflows/new-endpoint.md)       |
-| Change `backend.did` / break the API                 | [`docs/ai/backend/workflows/breaking-interface.md`](./docs/ai/backend/workflows/breaking-interface.md) |
-| Touch persisted state / stable structures            | [`docs/ai/backend/workflows/state-and-migrations.md`](./docs/ai/backend/workflows/state-and-migrations.md) |
-| Add or change tests                                  | [`docs/ai/backend/testing.md`](./docs/ai/backend/testing.md)                                     |
+| You're about to…                          | Read first                                                                                                 |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Touch any Rust file                       | [`docs/ai/backend/README.md`](./docs/ai/backend/README.md)                                                 |
+| Add a module / file                       | [`docs/ai/backend/structure.md`](./docs/ai/backend/structure.md)                                           |
+| Write Rust idioms / state access / errors | [`docs/ai/backend/patterns.md`](./docs/ai/backend/patterns.md)                                             |
+| Add a new endpoint                        | [`docs/ai/backend/workflows/new-endpoint.md`](./docs/ai/backend/workflows/new-endpoint.md)                 |
+| Change `backend.did` / break the API      | [`docs/ai/backend/workflows/breaking-interface.md`](./docs/ai/backend/workflows/breaking-interface.md)     |
+| Touch persisted state / stable structures | [`docs/ai/backend/workflows/state-and-migrations.md`](./docs/ai/backend/workflows/state-and-migrations.md) |
+| Add or change tests                       | [`docs/ai/backend/testing.md`](./docs/ai/backend/testing.md)                                               |
 
 ---
 

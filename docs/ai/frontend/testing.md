@@ -6,16 +6,16 @@ by CI and auto-bumped upward by the
 
 ## What to test
 
-| Add tests for                                                          | Don't bother                                          |
-| ---------------------------------------------------------------------- | ----------------------------------------------------- |
-| Pure utils (`*.utils.ts`) — every public function                      | Re-exports, barrels                                   |
-| Service modules (`*.services.ts`) — happy path + each error branch     | Generated files (`$declarations`, `i18n.d.ts`, …)     |
-| Derived stores (`*.derived.ts`) with non-trivial logic                 | Throwaway prototypes                                  |
-| Reusable components in `$lib/components/{common,ui,core}/`             | One-off presentational components used in 1 page only |
-| Components with logic (any non-trivial branch / event handler)         | —                                                     |
-| Workers and schedulers                                                 | —                                                     |
-| Validation / schema modules                                            | —                                                     |
-| Bug fixes (write the regression test that fails on `main`)             | —                                                     |
+| Add tests for                                                      | Don't bother                                          |
+| ------------------------------------------------------------------ | ----------------------------------------------------- |
+| Pure utils (`*.utils.ts`) — every public function                  | Re-exports, barrels                                   |
+| Service modules (`*.services.ts`) — happy path + each error branch | Generated files (`$declarations`, `i18n.d.ts`, …)     |
+| Derived stores (`*.derived.ts`) with non-trivial logic             | Throwaway prototypes                                  |
+| Reusable components in `$lib/components/{common,ui,core}/`         | One-off presentational components used in 1 page only |
+| Components with logic (any non-trivial branch / event handler)     | —                                                     |
+| Workers and schedulers                                             | —                                                     |
+| Validation / schema modules                                        | —                                                     |
+| Bug fixes (write the regression test that fails on `main`)         | —                                                     |
 
 If you fix a bug, **the PR contains a test that fails on `main` and
 passes on your branch**. Otherwise it's an "I think this is fine" PR.
@@ -136,7 +136,7 @@ describe('exchange.services', () => {
 
 		it('should query the price for BTC to USD and BTC to currency', async () => {
 			await exchangeRateUsdToCurrency(Currency.EUR);
-			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({ ids: 'bitcoin', /* … */ });
+			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({ ids: 'bitcoin' /* … */ });
 		});
 
 		// … one `it` per behaviour
@@ -186,7 +186,11 @@ import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 
 describe('MaxBalanceButton', () => {
 	it('renders the max action label', () => {
-		render(MaxBalanceButton, { props: { /* … */ } });
+		render(MaxBalanceButton, {
+			props: {
+				/* … */
+			}
+		});
 		expect(screen.getByRole('button', { name: get(i18n).core.text.max })).toBeInTheDocument();
 	});
 });

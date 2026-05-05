@@ -69,7 +69,7 @@ A token / network add is naturally cross-cutting. To stay reviewable:
 - Exchange-rate plumbing → can ship in the first PR if it's small;
   otherwise split.
 - Backend variant change is usually its own PR (`feat(backend): add
-  <network> variant to NetworkSettingsFor`).
+<network> variant to NetworkSettingsFor`).
 
 ## Don'ts
 

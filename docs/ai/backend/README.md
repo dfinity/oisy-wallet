@@ -75,12 +75,12 @@ focused diff, dedicated test), reconsider scope before continuing.
 
 ## Where to look
 
-| You're about to…                                  | Read first                                                                                       |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Add or move a Rust file                           | [`structure.md`](./structure.md)                                                                 |
-| Pick the right idiom (errors, state, guards, …)   | [`patterns.md`](./patterns.md)                                                                   |
-| Add a new endpoint                                | [`workflows/new-endpoint.md`](./workflows/new-endpoint.md)                                       |
-| Change `backend.did` / break the API              | [`workflows/breaking-interface.md`](./workflows/breaking-interface.md)                           |
-| Touch persisted state / stable structures         | [`workflows/state-and-migrations.md`](./workflows/state-and-migrations.md)                       |
-| Write or run integration tests                    | [`testing.md`](./testing.md)                                                                     |
-| Benchmark a hot path (`canbench`)                 | [`testing.md#benchmarks--canbench`](./testing.md#benchmarks--canbench)                           |
+| You're about to…                                | Read first                                                                 |
+| ----------------------------------------------- | -------------------------------------------------------------------------- |
+| Add or move a Rust file                         | [`structure.md`](./structure.md)                                           |
+| Pick the right idiom (errors, state, guards, …) | [`patterns.md`](./patterns.md)                                             |
+| Add a new endpoint                              | [`workflows/new-endpoint.md`](./workflows/new-endpoint.md)                 |
+| Change `backend.did` / break the API            | [`workflows/breaking-interface.md`](./workflows/breaking-interface.md)     |
+| Touch persisted state / stable structures       | [`workflows/state-and-migrations.md`](./workflows/state-and-migrations.md) |
+| Write or run integration tests                  | [`testing.md`](./testing.md)                                               |
+| Benchmark a hot path (`canbench`)               | [`testing.md#benchmarks--canbench`](./testing.md#benchmarks--canbench)     |

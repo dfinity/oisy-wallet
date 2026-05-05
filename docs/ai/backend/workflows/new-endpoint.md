@@ -4,12 +4,12 @@ Use when you need to expose a new `update` or `query` from the canister.
 
 ## Decide the shape
 
-| You need…                              | Endpoint kind                              |
-| -------------------------------------- | ------------------------------------------ |
-| Read-only, fast                        | `#[query]`                                 |
-| Mutates state or makes inter-canister calls | `#[update]`                           |
-| Read-only but reads cross-subnet certified state | `#[query]` with caveats           |
-| HTTP path under `/metrics`, `/status`, … | extend `api/admin.rs::http_request`      |
+| You need…                                        | Endpoint kind                       |
+| ------------------------------------------------ | ----------------------------------- |
+| Read-only, fast                                  | `#[query]`                          |
+| Mutates state or makes inter-canister calls      | `#[update]`                         |
+| Read-only but reads cross-subnet certified state | `#[query]` with caveats             |
+| HTTP path under `/metrics`, `/status`, …         | extend `api/admin.rs::http_request` |
 
 Pick the right guard from [patterns.md](../patterns.md#guards-on-endpoints).
 The default for user-facing endpoints is `caller_is_registered_user`.
@@ -55,6 +55,7 @@ The default for user-facing endpoints is `caller_is_registered_user`.
      `Result<T, E>` via a `From` impl in `shared::types::impls` or a
      local `into()`.
    - Re-export from `api/mod.rs` if you added a new file.
+
 4. **Regenerate the Candid interface and FE bindings.**
 
    ```bash
