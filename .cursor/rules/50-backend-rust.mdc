@@ -1,6 +1,6 @@
 ---
 description: Rust backend (IC canister) idioms and structure. Apply to Rust files and Candid.
-globs: ["src/backend/**/*.rs", "src/shared/**/*.rs", "src/backend/**/*.did"]
+globs: ['src/backend/**/*.rs', 'src/shared/**/*.rs', 'src/backend/**/*.did']
 ---
 
 # Cursor — Backend (Rust / IC canister)
@@ -91,9 +91,9 @@ lib.rs      Top-level wire-up
   Commit the regenerated `canbench_results.yml` together with the change
   that caused the delta.
 - **Add a bench** when you touch a hot path on a user-scaling
-  `StableBTreeMap` (user_profile, contacts, custom_tokens,
+  `StableBTreeMap` (user*profile, contacts, custom_tokens,
   user_transactions, token_activity). Mirror an existing
-  `bench_<method>` / `bench_<method>_<N>` pair.
+  `bench*<method>`/`bench*<method>*<N>` pair.
 - Lightly maintained — not gated by CI yet. See
   [docs/ai/backend/testing.md#benchmarks--canbench](mdc:docs/ai/backend/testing.md).
 

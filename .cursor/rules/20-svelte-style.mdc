@@ -1,6 +1,6 @@
 ---
 description: Svelte 5 + Svelte stores + TypeScript + Tailwind v4 patterns for the frontend.
-globs: ["src/frontend/**/*.svelte", "src/frontend/**/*.ts", "src/frontend/**/*.svelte.ts"]
+globs: ['src/frontend/**/*.svelte', 'src/frontend/**/*.ts', 'src/frontend/**/*.svelte.ts']
 ---
 
 # Cursor — Svelte / TS / Tailwind
@@ -22,14 +22,14 @@ Inside a component, prefer `$:` → `$derived` for new code, `on:click` →
 `onclick={...}`, and `export let` → `let { … } = $props()`. But **do not
 rewrite legacy components in unrelated PRs**. Atomicity first.
 
-| Use (new code)                                                                  | Don't use (Svelte 4 in new code)              |
-| ------------------------------------------------------------------------------- | --------------------------------------------- |
-| Separate `interface Props { … }` + `let { … }: Props = $props()` (see below)    | `export let foo`                              |
-| `$state(...)`                                                                   | plain `let` for component-local reactive vars |
-| `$derived(...)` / `$derived.by(() => ...)`                                      | `$:` reactive statements                      |
-| `$effect(() => ...)`                                    | side-effect via `$:`                          |
-| `<button onclick={fn}>`                                 | `on:click`                                    |
-| `{#snippet}` + `{@render}`                              | named `<slot>` for new code                   |
+| Use (new code)                                                               | Don't use (Svelte 4 in new code)              |
+| ---------------------------------------------------------------------------- | --------------------------------------------- |
+| Separate `interface Props { … }` + `let { … }: Props = $props()` (see below) | `export let foo`                              |
+| `$state(...)`                                                                | plain `let` for component-local reactive vars |
+| `$derived(...)` / `$derived.by(() => ...)`                                   | `$:` reactive statements                      |
+| `$effect(() => ...)`                                                         | side-effect via `$:`                          |
+| `<button onclick={fn}>`                                                      | `on:click`                                    |
+| `{#snippet}` + `{@render}`                                                   | named `<slot>` for new code                   |
 
 - Never read state in `$effect` and write it back without a guard — it loops.
 - Prefer `$derived` over `$effect` for computation. `$effect` is for I/O.

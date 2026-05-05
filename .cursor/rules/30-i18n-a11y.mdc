@@ -1,6 +1,6 @@
 ---
 description: i18n and accessibility rules for any user-visible UI in the frontend.
-globs: ["src/frontend/**/*.svelte", "src/frontend/**/*.ts"]
+globs: ['src/frontend/**/*.svelte', 'src/frontend/**/*.ts']
 ---
 
 # Cursor — i18n & a11y
@@ -24,6 +24,7 @@ Authoritative source: [docs/ai/frontend/i18n-and-a11y.md](mdc:docs/ai/frontend/i
   generated `.d.ts` by hand.
 - Reference keys via property access only — never construct keys
   dynamically:
+
   ```svelte
   <button>{$i18n.core.text.save}</button>
   ```

@@ -1,6 +1,6 @@
 ---
 description: Frontend testing rules. Apply when creating or modifying tests.
-globs: ["src/frontend/src/tests/**/*", "src/frontend/**/*.spec.ts", "src/frontend/**/*.test.ts"]
+globs: ['src/frontend/src/tests/**/*', 'src/frontend/**/*.spec.ts', 'src/frontend/**/*.test.ts']
 ---
 
 # Cursor — Frontend Testing
