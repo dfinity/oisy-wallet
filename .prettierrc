@@ -9,6 +9,12 @@
   ],
   "overrides": [
     {
+      "files": "*.mdc",
+      "options": {
+        "parser": "markdown"
+      }
+    },
+    {
       "files": "*.svelte",
       "options": {
         "plugins": [
