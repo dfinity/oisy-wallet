@@ -13,10 +13,10 @@ The audit excludes `main` and any branch with a live, open PR.
 
 Two manifests are shipped:
 
-| File | Cutoff | Audited on | # branches |
-|---|---|---|---|
-| `stale-branches-2026-05-05.tsv` | 6 months (≤ 2025-11-05) | 2026-05-05 | 250 |
-| `stale-branches-3-months-2026-05-05.tsv` | 3 months (≤ 2026-02-05) | 2026-05-05 | 25 |
+| File                                     | Cutoff                  | Audited on | # branches |
+| ---------------------------------------- | ----------------------- | ---------- | ---------- |
+| `stale-branches-2026-05-05.tsv`          | 6 months (≤ 2025-11-05) | 2026-05-05 | 250        |
+| `stale-branches-3-months-2026-05-05.tsv` | 3 months (≤ 2026-02-05) | 2026-05-05 | 25         |
 
 The 3-month manifest is fully disjoint from the 6-month one — once you've run the 6-month cleanup the additional branches it covers are those with their last commit between 2025-11-05 and 2026-02-05.
 
