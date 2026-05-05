@@ -85,7 +85,7 @@ Three options, in order of preference:
    - Write into the new `MemoryId`.
    - Leave the legacy `MemoryId` empty (do not reuse).
    - Add a `// TODO: remove migration after all canisters have been
-upgraded past this release.` comment so the cleanup is obvious.
+     upgraded past this release.` comment so the cleanup is obvious.
 
 3. **Bumped `MemoryId` + parallel migration.** Define a new `MemoryId`
    for the new shape, populate it from the old one in `post_upgrade`,
