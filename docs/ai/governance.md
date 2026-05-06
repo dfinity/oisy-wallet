@@ -109,10 +109,12 @@ lockfiles, …). Treat that file as authoritative for bot-context PRs.
   `unwrap()` to bypass a type / error.
 - Skip / `.skip()` / `.todo()` / `#[ignore]` an existing test.
 - `git push --force`, amend a pushed commit, rebase to "tidy history", or
-  rewrite shared history. "Explicit prompt" means the user types the
-  words "force-push", "amend", "rebase", or "rewrite history" — task-level
-  delegation like "do what you think is best" or "do what's most correct"
-  does **NOT** count. See
+  rewrite shared history. "Explicit prompt" means the user names the
+  operation directly — any unambiguous phrasing works (e.g.
+  "force-push", "force push", "push --force", "push -f", "amend",
+  "git commit --amend", "rebase", "git rebase", "rewrite history").
+  Task-level delegation like "do what you think is best" or "do what's
+  most correct" does **NOT** count. See
   [`docs/ai/pr-and-ci.md#updating-an-existing-pr`](./pr-and-ci.md#updating-an-existing-pr).
 - Commit secrets, `.env*` (other than `.env.example` /
   `.env.backend.example`), or large binaries.

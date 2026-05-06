@@ -198,10 +198,13 @@ job — that's expected.
 - **Add commits.** Never `git push --force` to a PR branch. Don't
   `git commit --amend` after pushing. Don't rebase a PR onto `main` to
   "tidy history" — let the merge group handle it.
-- **What counts as "the user explicitly asks":** the user uses the
-  literal words "force-push", "amend", "rebase", or "rewrite history"
-  in their request, **or** selects a multi-choice option whose label
-  itself contains those words. Anything else **DOES NOT** count, including:
+- **What counts as "the user explicitly asks":** the user names the
+  operation directly — any unambiguous phrasing works. Examples that
+  count: "force-push", "force push", "push --force", "push -f",
+  "amend", "amend the commit", "git commit --amend", "rebase",
+  "git rebase", "rewrite history", "rewrite the history". Selecting
+  a multi-choice option whose label itself contains one of those
+  phrases also counts. Anything else **DOES NOT** count, including:
   - "do what you think is best",
   - "do what's most correct" / "do it the idiomatic way",
   - "do it your way" / "use your judgement",
