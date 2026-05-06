@@ -26,6 +26,25 @@ export type SwapSelectTokenType = 'source' | 'destination';
 
 export type DisplayUnit = 'token' | 'usd';
 
+export type SwapTokenCategory = 'icp' | 'evm' | 'sol';
+
+export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string>>>;
+
+export type FindProviderSourceTokens = (params: {
+	key: SwapProvider;
+	category: SwapTokenCategory;
+}) => Set<string> | undefined;
+
+export interface SwapDestinationsContext {
+	sourceToken: Token;
+	supportedSourceTokens: Set<string> | undefined;
+	findProviderSourceTokens: FindProviderSourceTokens;
+}
+
+export type GetSupportedDestinationsFn = (
+	ctx: SwapDestinationsContext
+) => SwapCategorizedTokenIds | undefined;
+
 export enum SwapProvider {
 	ICP_SWAP = 'icpSwap',
 	KONG_SWAP = 'kongSwap',
@@ -135,6 +154,7 @@ interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> 
 	mapQuoteResult: (params: QuoteMapParams) => SwapMappedResult;
 	isEnabled: boolean;
 	getSupportedTokens?: (params: { identity: Identity }) => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
 type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsReply, KongQuoteParams>;
@@ -148,6 +168,7 @@ export interface EvmSwapProviderConfig {
 	getQuote: (params: EvmQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
 	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
 export interface SolSwapProviderConfig {
@@ -155,6 +176,7 @@ export interface SolSwapProviderConfig {
 	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
 	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
 export interface SwapParams {
@@ -272,6 +294,7 @@ export interface IcpBridgeSwapProviderConfig {
 	getQuote: (params: IcpBridgeQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
 	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
 export interface SwapProvidersConfig {
