@@ -1627,6 +1627,19 @@
 			"burn": "Burn",
 			"mint": "Mint"
 		},
+		"filter": {
+			"types_label": "Type",
+			"tokens_label": "Token",
+			"contacts_label": "Contacts",
+			"types_aria_label": "Filter by transaction type",
+			"tokens_aria_label": "Filter by token",
+			"contacts_aria_label": "Filter by contact",
+			"search_tokens_placeholder": "Start typing...",
+			"search_contacts_placeholder": "Start typing name...",
+			"clear": "Clear filters",
+			"sheet_title": "Filter activity",
+			"open_filters_aria_label": "Open activity filters"
+		},
 		"label": {
 			"reimbursement": "Reimbursement",
 			"twin_token_converted": "Converted from $twinToken",

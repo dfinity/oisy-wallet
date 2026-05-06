@@ -1301,6 +1301,19 @@ interface I18nTransaction {
 		burn: string;
 		mint: string;
 	};
+	filter: {
+		types_label: string;
+		tokens_label: string;
+		contacts_label: string;
+		types_aria_label: string;
+		tokens_aria_label: string;
+		contacts_aria_label: string;
+		search_tokens_placeholder: string;
+		search_contacts_placeholder: string;
+		clear: string;
+		sheet_title: string;
+		open_filters_aria_label: string;
+	};
 	label: {
 		reimbursement: string;
 		twin_token_converted: string;

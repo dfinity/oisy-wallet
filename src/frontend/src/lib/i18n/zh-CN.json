@@ -1627,6 +1627,19 @@
 			"burn": "销毁",
 			"mint": "铸造"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": ""
+		},
 		"label": {
 			"reimbursement": "报销",
 			"twin_token_converted": "从 $twinToken 转换",
