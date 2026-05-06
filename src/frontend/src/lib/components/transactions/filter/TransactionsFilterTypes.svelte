@@ -44,8 +44,8 @@
 			{#each sortedTypes as { type, label } (type)}
 				<li class="flex items-center">
 					<Checkbox
-						inputId={`transactions-filter-type-${type}`}
 						checked={selectedSet.has(type)}
+						inputId={`transactions-filter-type-${type}`}
 						text="inline"
 						on:nnsChange={() => transactionsFilterStore.toggleType(type)}
 					>
