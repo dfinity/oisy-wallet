@@ -2,7 +2,7 @@ import type { ContactUi } from '$lib/types/contact';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { TransactionsFilter } from '$lib/types/transactions-filter';
 import { filterAddressFromContact } from '$lib/utils/contact.utils';
-import { nonNullish, notEmptyString } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 const candidateAddresses = (transactionUi: AllTransactionUiWithCmp): string[] => {
 	const { component, transaction } = transactionUi;
@@ -84,7 +84,7 @@ export const applyTransactionsFilter = ({
 
 		if (hasTokenFilter) {
 			const tokenKey = transactionUi.token.id.description;
-			if (!nonNullish(tokenKey) || !tokenSet.has(tokenKey)) {
+			if (isNullish(tokenKey) || !tokenSet.has(tokenKey)) {
 				return false;
 			}
 		}
