@@ -4,25 +4,11 @@ import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import {
 	swapSupportedTokensStore,
-	type SwapProviderListCoverage,
 	type SwapSupportedTokensInfo
 } from '$lib/stores/swap-supported-tokens.store';
+import { determineCoverage } from '$lib/utils/swap-tokens-filter.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-
-const determineCoverage = ({
-	totalEnabled,
-	withList
-}: {
-	totalEnabled: number;
-	withList: number;
-}): SwapProviderListCoverage => {
-	if (totalEnabled === 0 || withList === 0) {
-		return 'none';
-	}
-
-	return withList >= totalEnabled ? 'all' : 'some';
-};
 
 /**
  * Filters providers that have `getSupportedTokens` and calls it in a single pass,
