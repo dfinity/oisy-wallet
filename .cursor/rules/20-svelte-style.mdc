@@ -1,0 +1,126 @@
+---
+description: Svelte 5 + Svelte stores + TypeScript + Tailwind v4 patterns for the frontend.
+globs: ['src/frontend/**/*.svelte', 'src/frontend/**/*.ts', 'src/frontend/**/*.svelte.ts']
+---
+
+# Cursor — Svelte / TS / Tailwind
+
+Authoritative source: [docs/ai/frontend/stack-and-patterns.md](mdc:docs/ai/frontend/stack-and-patterns.md).
+
+## Svelte — runes preferred, stores still pervasive
+
+The codebase is **Svelte 5** but uses both:
+
+- **Runes** (`$state`, `$derived`, `$effect`, `$props`, `$bindable`) for new
+  component-local state and new components.
+- **Svelte stores** (`writable`, `readable`, `derived` from `svelte/store`)
+  for cross-component / cross-route state — there is a large existing graph
+  in `$lib/derived/`, `$lib/stores/` and the chain-specific `*/derived/`
+  folders. Keep adding to it where it fits.
+
+Inside a component, prefer `$:` → `$derived` for new code, `on:click` →
+`onclick={...}`, and `export let` → `let { … } = $props()`. But **do not
+rewrite legacy components in unrelated PRs**. Atomicity first.
+
+| Use (new code)                                                               | Don't use (Svelte 4 in new code)              |
+| ---------------------------------------------------------------------------- | --------------------------------------------- |
+| Separate `interface Props { … }` + `let { … }: Props = $props()` (see below) | `export let foo`                              |
+| `$state(...)`                                                                | plain `let` for component-local reactive vars |
+| `$derived(...)` / `$derived.by(() => ...)`                                   | `$:` reactive statements                      |
+| `$effect(() => ...)`                                                         | side-effect via `$:`                          |
+| `<button onclick={fn}>`                                                      | `on:click`                                    |
+| `{#snippet}` + `{@render}`                                                   | named `<slot>` for new code                   |
+
+- Never read state in `$effect` and write it back without a guard — it loops.
+- Prefer `$derived` over `$effect` for computation. `$effect` is for I/O.
+- Cross-route reactive state often lives as a `derived(...)` Svelte store in
+  `$lib/derived/` or `<chain>/derived/`. Reach for that catalog before
+  introducing a new shape.
+
+## TypeScript
+
+- No `any`. No `as unknown as X`. No non-null `!` on possibly-null values
+  (use `isNullish` / `nonNullish` from `@dfinity/utils`).
+- Validate cross-boundary data with the project's `zod` schemas under
+  `$lib/schema/` (or chain-specific `<chain>/schema/`).
+- Use the `Option<T>` / discriminated-result patterns the local rule
+  `local-rules/use-option-type-wrapper` enforces.
+- `BigInt` zero literal is forbidden by ESLint (`0n`) — use the shared
+  `ZERO` constant from `$lib/constants/...` (search for `ZERO`).
+
+## Layering
+
+Components do not call `fetch` directly. Go through the right service:
+
+```
+Component (.svelte)
+  → $lib/services/*.services.ts          (or $btc / $eth / $evm / $icp / $sol / $icp-eth)
+       → $lib/api/*  or  $lib/canisters/*  (HTTP / IC actor)
+```
+
+For cross-chain orchestration (e.g. swap, send, balances), services live in
+`$lib/services/`. For chain-specific operations they live in the matching
+chain folder.
+
+## Logging
+
+- **Forbidden:** `console.error` and `console.warn`. Use `consoleError` and
+  `consoleWarn` from `$lib/utils/console.utils` (eslint enforces).
+- `console.log` is allowed only behind a debug switch — strip before commit.
+
+## Tailwind v4
+
+- Use the project's design tokens & utility classes (look at neighbours
+  before inventing). No raw hex, no inline `style="color:…"`.
+- Class order is auto-sorted by `prettier-plugin-tailwindcss`. Don't fight it.
+- Imports in `.svelte` `<script>` are auto-sorted by
+  `prettier-plugin-organize-imports`. Don't fight it either.
+
+## Component file order
+
+1. External lib imports
+2. SvelteKit / framework imports (`$app/...`)
+3. Alias imports grouped by area (`$lib`, `$btc`, `$eth`, …, `$env`, `$routes`)
+4. `interface Props { … }` declaration
+5. `let { … }: Props = $props()` destructuring
+6. Local `$state` / `$derived` / `$effect`
+7. `{#snippet}` definitions
+8. Markup
+
+## Props shape (always)
+
+Declare a named `interface Props` above the destructure — never inline
+the type literal into `$props()`:
+
+```svelte
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { OptionAmount } from '$lib/types/amount';
+
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		onConvert: () => void;
+		cancel: Snippet;
+	}
+
+	let { sendAmount, receiveAmount, onConvert, cancel }: Props = $props();
+</script>
+```
+
+Required props first, optional / defaulted after. `$bindable()` on the
+destructure side; the interface declares the field normally.
+
+## Anti-patterns (reject these)
+
+- Inline type literal in `$props()` (`let { … }: { … } = $props()`).
+  Use a named `interface Props` instead.
+- `console.error` / `console.warn` (use `consoleError` / `consoleWarn`).
+- `0n` literal (use `ZERO`).
+- Relative imports (`../../`) under `src/frontend/src/`.
+- Hand-edit of `src/declarations/**`, `src/frontend/src/lib/types/i18n.d.ts`,
+  or generated tokens JSON.
+- Mixing a refactor / split with a behaviour change in the same PR.
+- New `<div>` that duplicates an existing `$lib/components/...` block.
+- `target="_blank"` without `rel="noopener noreferrer"`.
+- `{@html …}` without sanitisation.

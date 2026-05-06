@@ -1,0 +1,108 @@
+---
+description: Rust backend (IC canister) idioms and structure. Apply to Rust files and Candid.
+globs: ['src/backend/**/*.rs', 'src/shared/**/*.rs', 'src/backend/**/*.did']
+---
+
+# Cursor — Backend (Rust / IC canister)
+
+Authoritative sources:
+
+- [docs/ai/backend/structure.md](mdc:docs/ai/backend/structure.md)
+- [docs/ai/backend/patterns.md](mdc:docs/ai/backend/patterns.md)
+- [docs/ai/backend/testing.md](mdc:docs/ai/backend/testing.md)
+
+## Crates
+
+- **`backend`** ([`src/backend/`](mdc:src/backend/Cargo.toml)) — the canister
+  itself. Compiles to `wasm32-unknown-unknown`. Entry point is
+  [`src/backend/src/lib.rs`](mdc:src/backend/src/lib.rs) with `#[init]`,
+  `#[post_upgrade]`, and `export_candid!()`.
+- **`shared`** ([`src/shared/`](mdc:src/shared/Cargo.toml)) — request /
+  response types, validation, utilities reused across crates and exposed in
+  the Candid interface. Never put canister-only logic here.
+
+## Module layout (`src/backend/src/`)
+
+```
+api/        Public update/query handlers, one module per area
+state/      Stable state + memory IDs (StableBTreeMap, StableCell)
+types/      Canister-internal types + Storable wrappers
+signer/     Threshold-signature plumbing (chain-fusion signer)
+bitcoin/, contacts/, exchange/, transactions/, user_profile/, token/  Domain modules
+utils/      Internal helpers (housekeeping timers, …)
+status/     /status endpoint
+delegation.rs, benchmark.rs
+lib.rs      Top-level wire-up
+```
+
+## Idioms (strict)
+
+- **No `unwrap()` / `expect()` outside tests.** Return a typed error from
+  `shared::types::result_types` or trap with a clear message via
+  `ic_cdk::trap`.
+- **Single state borrow.** Mutate via `state::mutate_state(|s| ...)` and
+  read via `state::read_state(|s| ...)`. Don't hold a borrow across `await`.
+- **`thread_local!` `STATE`** is the only state. Don't introduce parallel
+  globals.
+- **Stable structures only** for persisted data — `StableBTreeMap`,
+  `StableCell` keyed by `MemoryId` from `state::memory`. Bumping or reusing
+  a `MemoryId` is a state migration; see
+  [docs/ai/backend/workflows/state-and-migrations.md](mdc:docs/ai/backend/workflows/state-and-migrations.md).
+- **Disallowed macros** (clippy enforces — see
+  [`clippy.toml`](mdc:clippy.toml)):
+  - `std::print` / `std::println` / `std::eprint` / `std::eprintln` →
+    use `ic_cdk::print` / `ic_cdk::println`.
+  - `std::assert_eq` in tests → use `pretty_assertions::assert_eq`.
+- **Disallowed methods:** raw `sign_with_ecdsa` / `sign_with_schnorr` —
+  threshold signatures go through the chain-fusion signer canister only.
+- **Workspace dependencies.** Every dependency must be declared in the root
+  `Cargo.toml` workspace and referenced as `pkg.workspace = true` from each
+  crate. `./scripts/lint.cargo-workspace-dependencies.sh` enforces this.
+- **Wildcard imports** are warned (`#![warn(clippy::wildcard_imports)]` is
+  on in `lib.rs`). Import explicit symbols.
+
+## Public API (`backend.did` + Candid)
+
+- The Candid file [`src/backend/backend.did`](mdc:src/backend/backend.did)
+  is the source of truth for the canister interface. After changing
+  `lib.rs`, regenerate via `npm run generate` (or `./scripts/did.sh`) and
+  commit both the `.did` and the regenerated `src/declarations/`.
+- Any change to `backend.did` is **breaking-interface** unless proven
+  otherwise — see
+  [docs/ai/backend/workflows/breaking-interface.md](mdc:docs/ai/backend/workflows/breaking-interface.md)
+  and add `!` + `BREAKING CHANGE:` to the PR title and body when needed.
+
+## Testing
+
+- Integration tests live under
+  [`src/backend/tests/it/`](mdc:src/backend/tests/it). Run with
+  `./scripts/test.backend.sh` (downloads `pocket-ic`, BTC canister, II,
+  cycles ledger, builds the canister, runs `cargo test -p backend`).
+- Unit tests sit next to source as `#[cfg(test)] mod tests { … }`.
+- Use `pretty_assertions::assert_eq` (clippy enforces).
+
+## Benchmarks (`canbench-rs`)
+
+- Suite at [`src/backend/src/benchmark.rs`](mdc:src/backend/src/benchmark.rs),
+  feature-gated behind `canbench-rs`, configured by
+  [`canbench.yml`](mdc:canbench.yml), results tracked in
+  [`canbench_results.yml`](mdc:canbench_results.yml).
+- Run `npm run benchmark` (= `canbench --persist --show-summary`).
+  Commit the regenerated `canbench_results.yml` together with the change
+  that caused the delta.
+- **Add a bench** when you touch a hot path on a user-scaling
+  `StableBTreeMap` (`user_profile`, `contacts`, `custom_tokens`,
+  `user_transactions`, `token_activity`). Mirror an existing
+  `bench_NAME` / `bench_NAME_N` pair (where `NAME` is the method).
+- Lightly maintained — not gated by CI yet. See
+  [docs/ai/backend/testing.md#benchmarks--canbench](mdc:docs/ai/backend/testing.md).
+
+## Anti-patterns (reject these)
+
+- New `unwrap()` / `expect()` in non-test code.
+- New `panic!()` outside `init` / `post_upgrade` traps.
+- Holding a state borrow across `.await`.
+- Logging via `std::println!` (use `ic_cdk::println!`).
+- Adding a dependency only inside a single crate's `Cargo.toml` without
+  routing it through the workspace.
+- Editing `src/declarations/**` by hand.
