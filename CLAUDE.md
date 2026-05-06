@@ -70,7 +70,11 @@ These are on top of the [10 commandments](./AGENTS.md#2-the-10-commandments-read
   [`eslint.config.mjs`](./eslint.config.mjs) and
   [`clippy.toml`](./clippy.toml).
 - **Never push force / amend pushed commits / rewrite shared history.** Add
-  a new commit instead. See
+  a new commit instead. Approval of a broader task (e.g. "do what you
+  think is best", "make the most correct one", "do it your way") is
+  **NOT** approval to force-push — the user must literally use the words
+  "force-push", "amend", or "rebase" (or pick a multi-choice option
+  whose label contains them). When in doubt, add a new commit. See
   [`docs/ai/pr-and-ci.md#updating-an-existing-pr`](./docs/ai/pr-and-ci.md#updating-an-existing-pr).
 
 ---
