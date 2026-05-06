@@ -20,9 +20,9 @@
 	let selectedSet = $derived(new Set<TransactionType>($transactionsFilterStore.types));
 </script>
 
-<ul class="m-0 flex list-none flex-col gap-1 p-0">
+<ul class="filter-list">
 	{#each sortedTypes as { type, label } (type)}
-		<li class="flex items-center">
+		<li>
 			<Checkbox
 				checked={selectedSet.has(type)}
 				inputId={`transactions-filter-type-${type}`}
@@ -34,3 +34,35 @@
 		</li>
 	{/each}
 </ul>
+
+<style lang="scss">
+	ul.filter-list {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+
+		// Match Figma: checkbox on the LEFT, label on the RIGHT, tight rows, hover state.
+		// gix Checkbox renders DOM as <label/><input/> with justify-content: space-between;
+		// we override the label's flex order so the checkbox renders first visually,
+		// and pull the row in tight.
+		li :global(.checkbox) {
+			--checkbox-label-order: 1;
+			--checkbox-padding: 6px 8px;
+			justify-content: flex-start;
+			gap: 8px;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+
+		li :global(.checkbox:hover) {
+			background: var(--color-background-brand-subtle-10);
+		}
+
+		li :global(label) {
+			flex: initial;
+		}
+	}
+</style>

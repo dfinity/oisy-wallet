@@ -42,9 +42,27 @@
 	};
 
 	let title = $derived(titleForStep[step]());
+
+	const rows: { step: Exclude<FilterStep, 'root'>; label: string; count: number }[] = $derived([
+		{
+			step: 'types',
+			label: $i18n.transaction.filter.types_label,
+			count: $selectedTransactionsFilterTypesCount
+		},
+		{
+			step: 'tokens',
+			label: $i18n.transaction.filter.tokens_label,
+			count: $selectedTransactionsFilterTokensCount
+		},
+		{
+			step: 'contacts',
+			label: $i18n.transaction.filter.contacts_label,
+			count: $selectedTransactionsFilterContactsCount
+		}
+	]);
 </script>
 
-<BottomSheet contentClass="min-h-[40vh]" {onClose} bind:visible>
+<BottomSheet contentClass="min-h-[40vh]" {onClose} wrapperClass="fixed inset-0 z-50" bind:visible>
 	{#snippet content()}
 		<div class="flex w-full flex-col gap-4">
 			<div class="flex items-center gap-2">
@@ -64,65 +82,32 @@
 
 			{#if step === 'root'}
 				<ul class="m-0 flex list-none flex-col gap-1 p-0">
-					<li>
-						<button
-							class="flex w-full items-center justify-between rounded-md px-3 py-3 text-left transition hover:bg-brand-subtle-10"
-							onclick={() => (step = 'types')}
-							type="button"
-						>
-							<span class="flex items-center gap-3 text-sm">
-								<IconListFilter size="20" />
-								{$i18n.transaction.filter.types_label}
-							</span>
-							<span class="flex items-center gap-2">
-								{#if $selectedTransactionsFilterTypesCount > 0}
-									<Badge variant="info" width="w-fit">{$selectedTransactionsFilterTypesCount}</Badge
-									>
-								{/if}
-								<IconChevronRight size="20" />
-							</span>
-						</button>
-					</li>
-					<li>
-						<button
-							class="flex w-full items-center justify-between rounded-md px-3 py-3 text-left transition hover:bg-brand-subtle-10"
-							onclick={() => (step = 'tokens')}
-							type="button"
-						>
-							<span class="flex items-center gap-3 text-sm">
-								<IconCoins size="20" />
-								{$i18n.transaction.filter.tokens_label}
-							</span>
-							<span class="flex items-center gap-2">
-								{#if $selectedTransactionsFilterTokensCount > 0}
-									<Badge variant="info" width="w-fit"
-										>{$selectedTransactionsFilterTokensCount}</Badge
-									>
-								{/if}
-								<IconChevronRight size="20" />
-							</span>
-						</button>
-					</li>
-					<li>
-						<button
-							class="flex w-full items-center justify-between rounded-md px-3 py-3 text-left transition hover:bg-brand-subtle-10"
-							onclick={() => (step = 'contacts')}
-							type="button"
-						>
-							<span class="flex items-center gap-3 text-sm">
-								<IconUserSquare size="20" />
-								{$i18n.transaction.filter.contacts_label}
-							</span>
-							<span class="flex items-center gap-2">
-								{#if $selectedTransactionsFilterContactsCount > 0}
-									<Badge variant="info" width="w-fit"
-										>{$selectedTransactionsFilterContactsCount}</Badge
-									>
-								{/if}
-								<IconChevronRight size="20" />
-							</span>
-						</button>
-					</li>
+					{#each rows as { step: rowStep, label, count } (rowStep)}
+						<li>
+							<button
+								class="flex w-full items-center justify-between rounded-md px-3 py-3 text-left transition hover:bg-brand-subtle-10"
+								onclick={() => (step = rowStep)}
+								type="button"
+							>
+								<span class="flex items-center gap-3 text-sm">
+									{#if rowStep === 'types'}
+										<IconListFilter size="20" />
+									{:else if rowStep === 'tokens'}
+										<IconCoins size="20" />
+									{:else}
+										<IconUserSquare size="20" />
+									{/if}
+									{label}
+								</span>
+								<span class="flex items-center gap-2">
+									{#if count > 0}
+										<Badge variant="info" width="w-fit">{count}</Badge>
+									{/if}
+									<IconChevronRight size="20" />
+								</span>
+							</button>
+						</li>
+					{/each}
 				</ul>
 
 				<div class="flex justify-center pt-2">
