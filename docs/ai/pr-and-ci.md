@@ -198,9 +198,31 @@ job — that's expected.
 - **Add commits.** Never `git push --force` to a PR branch. Don't
   `git commit --amend` after pushing. Don't rebase a PR onto `main` to
   "tidy history" — let the merge group handle it.
-- The only exception is when the user explicitly asks for a force-push or
-  history rewrite (e.g. to remove an accidentally-committed secret — and
-  even then, also rotate the secret).
+- **What counts as "the user explicitly asks":** the user names the
+  operation directly — any unambiguous phrasing works. Examples that
+  count: "force-push", "force push", "push --force", "push -f",
+  "amend", "amend the commit", "git commit --amend", "rebase",
+  "git rebase", "rewrite history", "rewrite the history". Selecting
+  a multi-choice option whose label itself contains one of those
+  phrases also counts. Anything else **DOES NOT** count, including:
+  - "do what you think is best",
+  - "do what's most correct" / "do it the idiomatic way",
+  - "do it your way" / "use your judgement",
+  - approval of a stacked-PR plan (stacked PRs do not require force-push;
+    add follow-up commits to each branch instead),
+  - approval of a refactor that would "look cleaner" in the originating PR.
+
+  If in doubt, **add a new commit** even if the result looks messier.
+  Squash-merge tidies history at merge time; force-push destroys it.
+
+- When the agent is offering choices, the **default** must always be the
+  no-force-push option. Do not put a force-push option first, and do not
+  pick a force-push option in response to delegated decisions.
+- Typical legitimate reasons a user might ask for a force-push include
+  removing an accidentally-committed secret (rotate the secret afterwards
+  too) or recovering from a catastrophic mistake. These are illustrative,
+  not an exhaustive whitelist — the rule is still "the user must name the
+  operation directly", per the bullet above.
 - If you need to drop a commit, push a new revert commit instead.
 
 ## 8. CODEOWNERS auto-routing

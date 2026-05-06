@@ -115,8 +115,18 @@ Never silence a failure with `// eslint-disable` / `// @ts-ignore` /
 - **Add commits.** Never `git push --force` to a PR branch. Don't amend
   pushed commits with `git commit --amend`. Don't rebase a PR onto `main`
   to "tidy history" — let the merge group handle it.
-- The only exception is when the user explicitly asks for a force-push or
-  history rewrite.
+- **What counts as "the user explicitly asks":** the user names the
+  operation directly — any unambiguous phrasing works (e.g.
+  "force-push", "force push", "push --force", "push -f", "amend",
+  "git commit --amend", "rebase", "git rebase", "rewrite history").
+  Selecting a multi-choice option whose label itself contains one of
+  those phrases also counts. Phrases like "do what you think is
+  best", "do what's most correct", "do it your way", or general
+  approval of a stacked-PR plan **DO NOT** count. When in doubt,
+  add a new commit — squash-merge will tidy history at merge time.
+- When offering choices, the **default** must always be the
+  no-force-push option. Do not put a force-push option first, and do
+  not pick a force-push option in response to delegated decisions.
 
 ## Bot-approved files
 
