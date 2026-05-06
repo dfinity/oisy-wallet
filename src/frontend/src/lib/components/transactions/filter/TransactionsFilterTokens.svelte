@@ -49,8 +49,8 @@
 <MultiSelectDropdown
 	ariaLabel={$i18n.transaction.filter.tokens_aria_label}
 	count={selectedSet.size}
-	searchable
 	searchPlaceholder={$i18n.transaction.filter.search_tokens_placeholder}
+	searchable
 	testId={TRANSACTIONS_FILTER_TOKENS_DROPDOWN}
 	{triggerLabel}
 	bind:searchValue
@@ -66,8 +66,8 @@
 				{#if nonNullish(key)}
 					<li class="flex items-center gap-2">
 						<Checkbox
-							inputId={`transactions-filter-token-${key}`}
 							checked={selectedSet.has(key)}
+							inputId={`transactions-filter-token-${key}`}
 							text="inline"
 							on:nnsChange={() => transactionsFilterStore.toggleTokenId(key)}
 						>
