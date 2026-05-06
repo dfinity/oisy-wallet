@@ -218,9 +218,11 @@ job — that's expected.
 - When the agent is offering choices, the **default** must always be the
   no-force-push option. Do not put a force-push option first, and do not
   pick a force-push option in response to delegated decisions.
-- The only legitimate exceptions are: removing an accidentally-committed
-  secret (and rotating the secret afterwards), or recovering from a
-  catastrophic mistake the user explicitly accepts.
+- Typical legitimate reasons a user might ask for a force-push include
+  removing an accidentally-committed secret (rotate the secret afterwards
+  too) or recovering from a catastrophic mistake. These are illustrative,
+  not an exhaustive whitelist — the rule is still "the user must name the
+  operation directly", per the bullet above.
 - If you need to drop a commit, push a new revert commit instead.
 
 ## 8. CODEOWNERS auto-routing

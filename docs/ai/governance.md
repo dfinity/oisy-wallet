@@ -115,7 +115,7 @@ lockfiles, …). Treat that file as authoritative for bot-context PRs.
   "git commit --amend", "rebase", "git rebase", "rewrite history").
   Task-level delegation like "do what you think is best" or "do what's
   most correct" does **NOT** count. See
-  [`docs/ai/pr-and-ci.md#updating-an-existing-pr`](./pr-and-ci.md#updating-an-existing-pr).
+  [`docs/ai/pr-and-ci.md#7-updating-an-existing-pr`](./pr-and-ci.md#7-updating-an-existing-pr).
 - Commit secrets, `.env*` (other than `.env.example` /
   `.env.backend.example`), or large binaries.
 - Touch the public Candid interface (`src/backend/backend.did`) without

@@ -78,7 +78,7 @@ These are on top of the [10 commandments](./AGENTS.md#2-the-10-commandments-read
   "rebase", "git rebase", "rewrite history"), or pick a multi-choice
   option whose label contains one of those phrases. When in doubt, add
   a new commit. See
-  [`docs/ai/pr-and-ci.md#updating-an-existing-pr`](./docs/ai/pr-and-ci.md#updating-an-existing-pr).
+  [`docs/ai/pr-and-ci.md#7-updating-an-existing-pr`](./docs/ai/pr-and-ci.md#7-updating-an-existing-pr).
 
 ---
 
