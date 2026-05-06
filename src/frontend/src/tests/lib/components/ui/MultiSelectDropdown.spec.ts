@@ -1,0 +1,65 @@
+import { screensStore } from '$lib/stores/screens.store';
+import MultiSelectDropdownTest from '$tests/lib/components/ui/MultiSelectDropdownTest.svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
+
+describe('MultiSelectDropdown', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		screensStore.set('lg');
+	});
+
+	it('renders the trigger button with the supplied label and ariaLabel', () => {
+		const { getByTestId, getByText } = render(MultiSelectDropdownTest);
+
+		const trigger = getByTestId('multi-select-dropdown');
+
+		expect(trigger).toHaveAttribute('aria-label', 'Filter');
+		expect(getByText('Filter')).toBeInTheDocument();
+	});
+
+	it('does not render the count badge when count is zero', () => {
+		const { queryByText } = render(MultiSelectDropdownTest);
+
+		expect(queryByText('0')).not.toBeInTheDocument();
+	});
+
+	it('renders the count badge when count is greater than zero', () => {
+		const { getByText } = render(MultiSelectDropdownTest, { props: { count: 3 } });
+
+		expect(getByText('3')).toBeInTheDocument();
+	});
+
+	it('opens the panel on click', async () => {
+		const { getByTestId, queryByTestId } = render(MultiSelectDropdownTest);
+
+		expect(queryByTestId('multi-select-dropdown-panel')).not.toBeInTheDocument();
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			expect(queryByTestId('multi-select-dropdown-panel')).toBeInTheDocument();
+		});
+	});
+
+	it('renders the search input only when searchable is true', async () => {
+		const { getByTestId, queryByPlaceholderText } = render(MultiSelectDropdownTest, {
+			props: { searchable: true }
+		});
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			expect(queryByPlaceholderText('Search items')).toBeInTheDocument();
+		});
+	});
+
+	it('does not render the search input when searchable is false', async () => {
+		const { getByTestId, queryByPlaceholderText } = render(MultiSelectDropdownTest);
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			expect(queryByPlaceholderText('Search items')).not.toBeInTheDocument();
+		});
+	});
+});
