@@ -1,4 +1,5 @@
 <script lang="ts">
+	import TransactionsFilterClearButton from '$lib/components/transactions/filter/TransactionsFilterClearButton.svelte';
 	import TransactionsFilterContacts from '$lib/components/transactions/filter/TransactionsFilterContacts.svelte';
 	import TransactionsFilterTokens from '$lib/components/transactions/filter/TransactionsFilterTokens.svelte';
 	import TransactionsFilterTypes from '$lib/components/transactions/filter/TransactionsFilterTypes.svelte';
@@ -9,4 +10,5 @@
 	<TransactionsFilterTypes />
 	<TransactionsFilterTokens />
 	<TransactionsFilterContacts />
+	<TransactionsFilterClearButton />
 </div>
