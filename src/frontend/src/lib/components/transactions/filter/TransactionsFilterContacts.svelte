@@ -62,8 +62,8 @@
 <MultiSelectDropdown
 	ariaLabel={$i18n.transaction.filter.contacts_aria_label}
 	count={selectedSet.size}
-	searchable
 	searchPlaceholder={$i18n.transaction.filter.search_contacts_placeholder}
+	searchable
 	testId={TRANSACTIONS_FILTER_CONTACTS_DROPDOWN}
 	{triggerLabel}
 	bind:searchValue
@@ -84,7 +84,7 @@
 						on:nnsChange={() => transactionsFilterStore.toggleContactId(id)}
 					>
 						<span class="flex items-center gap-2">
-							<Avatar image={contact.image} name={contact.name} variant="xxs" />
+							<Avatar name={contact.name} image={contact.image} variant="xxs" />
 							<span class="text-sm">{contact.name}</span>
 						</span>
 					</Checkbox>
