@@ -98,3 +98,5 @@ export const calculateUsdValues = ({
 		sumInUSD: amountInUSD + feeInUSD
 	};
 };
+
+export const isTokenEthereumNative = (token: Token): boolean => token.standard?.code === 'ethereum';

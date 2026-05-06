@@ -1,6 +1,17 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { calculateUsdValues, hasSufficientBalance } from '$eth/utils/token.utils';
+import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
+import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
+import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
+import { ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
+import { ETHEREUM_TOKEN, SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
+import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
+import {
+	calculateUsdValues,
+	hasSufficientBalance,
+	isTokenEthereumNative
+} from '$eth/utils/token.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -297,5 +308,28 @@ describe('token.utils', () => {
 			expect(result.feeInUSD).toBeCloseTo(0.002, 6);
 			expect(result.sumInUSD).toBeCloseTo(2000.002, 3);
 		});
+	});
+
+	describe('isTokenEthereumNative', () => {
+		it.each([...SUPPORTED_ETHEREUM_TOKENS, ...SUPPORTED_EVM_TOKENS])(
+			'should return true for token $name',
+			(token) => {
+				expect(isTokenEthereumNative(token)).toBeTruthy();
+			}
+		);
+
+		it.each([...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS])(
+			'should return false for token $name',
+			(token) => {
+				expect(isTokenEthereumNative(token)).toBeFalsy();
+			}
+		);
+
+		it.each([ICP_TOKEN, ...SUPPORTED_BITCOIN_TOKENS, ...SUPPORTED_SOLANA_TOKENS, ...SPL_TOKENS])(
+			'should return false for token $name',
+			(token) => {
+				expect(isTokenEthereumNative(token)).toBeFalsy();
+			}
+		);
 	});
 });
