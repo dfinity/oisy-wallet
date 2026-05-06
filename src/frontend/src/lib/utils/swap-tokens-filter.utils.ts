@@ -1,13 +1,30 @@
 import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
+import { isTokenEthereumNative } from '$eth/utils/token.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import type {
+	SwapProviderListCoverage,
 	SwapSupportedTokensData,
 	SwapSupportedTokensInfo
 } from '$lib/stores/swap-supported-tokens.store';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { isTokenSolanaNative } from '$sol/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+export const determineCoverage = ({
+	totalEnabled,
+	withList
+}: {
+	totalEnabled: number;
+	withList: number;
+}): SwapProviderListCoverage => {
+	if (totalEnabled === 0 || withList === 0) {
+		return 'none';
+	}
+
+	return withList >= totalEnabled ? 'all' : 'some';
+};
 
 /**
  * Resolves the provider-group info and the token identifier used for matching
@@ -15,7 +32,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  *
  * Returns `undefined` when the token doesn't belong to a known swap network.
  */
-const resolveSwapTokenLookup = ({
+export const resolveSwapTokenLookup = ({
 	token,
 	supportedData
 }: {
@@ -36,11 +53,11 @@ const resolveSwapTokenLookup = ({
 		return { info: supportedData.sol, identifier: token.address, category: 'sol' };
 	}
 
-	if (token.standard.code === 'ethereum') {
+	if (isTokenEthereumNative(token)) {
 		return { info: supportedData.evm, identifier: token.symbol.toLowerCase(), category: 'evm' };
 	}
 
-	if (token.standard.code === 'solana') {
+	if (isTokenSolanaNative(token)) {
 		return { info: supportedData.sol, identifier: token.symbol.toLowerCase(), category: 'sol' };
 	}
 };
