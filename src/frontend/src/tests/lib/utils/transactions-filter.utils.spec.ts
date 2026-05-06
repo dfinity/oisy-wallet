@@ -7,7 +7,12 @@ import { applyTransactionsFilter } from '$lib/utils/transactions-filter.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
-import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import {
+	mockAtaAddress,
+	mockAtaAddress2,
+	mockSolAddress,
+	mockSolAddress2
+} from '$tests/mocks/sol.mock';
 import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -96,6 +101,10 @@ const icpApproveTx = {
 	}
 } as unknown as AllTransactionUiWithCmp;
 
+// `from` and `to` are SPL token-account (ATA) addresses; `fromOwner` and
+// `toOwner` are the wallet-level addresses. We deliberately do NOT use a
+// wallet address in `to` so the Solana contact-match test can only succeed
+// via the `toOwner` preference (asserts the documented behavior).
 const solSendTx = {
 	component: 'solana',
 	token: solToken,
@@ -105,7 +114,8 @@ const solSendTx = {
 		signature: 'sig-1',
 		from: mockAtaAddress,
 		fromOwner: mockSolAddress,
-		to: mockSolAddress2,
+		to: mockAtaAddress2,
+		toOwner: mockSolAddress2,
 		value: 100n,
 		status: 'finalized',
 		timestamp: ZERO
@@ -122,14 +132,16 @@ const allTxs: AllTransactionUiWithCmp[] = [
 ];
 
 describe('applyTransactionsFilter', () => {
-	it('returns the input untouched when no filter is set', () => {
+	it('returns the same array reference when no filter is set', () => {
 		const result = applyTransactionsFilter({
 			transactions: allTxs,
 			filter: EMPTY_TRANSACTIONS_FILTER,
 			contacts: []
 		});
 
-		expect(result).toEqual(allTxs);
+		// Reference equality is part of the contract — the empty-filter
+		// short-circuit must not allocate a copy.
+		expect(result).toBe(allTxs);
 	});
 
 	describe('type filter', () => {
@@ -212,7 +224,7 @@ describe('applyTransactionsFilter', () => {
 			expect(result).toEqual([ethSendTx]);
 		});
 
-		it('matches BTC by recipient', () => {
+		it('matches BTC by sender or recipient', () => {
 			const result = applyTransactionsFilter({
 				transactions: allTxs,
 				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['2'] },

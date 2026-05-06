@@ -2,31 +2,40 @@ import type { ContactUi } from '$lib/types/contact';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { TransactionsFilter } from '$lib/types/transactions-filter';
 import { filterAddressFromContact } from '$lib/utils/contact.utils';
-import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { assertNever, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 const candidateAddresses = (transactionUi: AllTransactionUiWithCmp): string[] => {
-	const { component, transaction } = transactionUi;
-
 	const collected: (string | undefined)[] = [];
 
-	if (component === 'bitcoin') {
+	if (transactionUi.component === 'bitcoin') {
+		const { transaction } = transactionUi;
 		collected.push(transaction.from);
 		if (nonNullish(transaction.to)) {
 			collected.push(...transaction.to);
 		}
-	} else if (component === 'ethereum') {
+	} else if (transactionUi.component === 'ethereum') {
+		const { transaction } = transactionUi;
 		collected.push(transaction.from);
 		const { to } = transaction;
 		if (typeof to === 'string') {
 			collected.push(to);
 		}
-	} else if (component === 'ic') {
+	} else if (transactionUi.component === 'ic') {
+		const { transaction } = transactionUi;
 		collected.push(transaction.from);
 		collected.push(transaction.to);
-	} else {
-		// solana — prefer owners (the wallet-level address), fall back to token accounts
+	} else if (transactionUi.component === 'solana') {
+		// Solana — prefer the owner (the wallet-level address) over the SPL
+		// token-account (ATA), matching what TransactionContactCard resolves
+		// against today.
+		const { transaction } = transactionUi;
 		collected.push(transaction.fromOwner ?? transaction.from);
 		collected.push(transaction.toOwner ?? transaction.to);
+	} else {
+		assertNever(
+			transactionUi,
+			`Unexpected transaction component: ${JSON.stringify(transactionUi)}`
+		);
 	}
 
 	return collected.filter((address): address is string => notEmptyString(address));
