@@ -1,0 +1,282 @@
+import { ZERO } from '$lib/constants/app.constants';
+import type { ContactUi } from '$lib/types/contact';
+import type { Token } from '$lib/types/token';
+import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
+import { EMPTY_TRANSACTIONS_FILTER } from '$lib/types/transactions-filter';
+import { applyTransactionsFilter } from '$lib/utils/transactions-filter.utils';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
+import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
+import { Principal } from '@icp-sdk/core/principal';
+
+const mockPrincipal = Principal.fromText(mockPrincipalText);
+const mockDerivedAccountIdentifierHex = AccountIdentifier.fromPrincipal({
+	principal: mockPrincipal,
+	subAccount: undefined
+}).toHex();
+
+const tokenWithSymbol = (symbol: string): Token => ({ id: Symbol(symbol) }) as unknown as Token;
+
+const btcToken = tokenWithSymbol('BTC');
+const ethToken = tokenWithSymbol('ETH');
+const icpToken = tokenWithSymbol('ICP');
+const solToken = tokenWithSymbol('SOL');
+
+const btcSendTx: AllTransactionUiWithCmp = {
+	component: 'bitcoin',
+	token: btcToken,
+	transaction: {
+		id: 'btc-1',
+		type: 'send',
+		status: 'confirmed',
+		from: mockBtcAddress,
+		to: ['receiver-btc-1'],
+		value: 1000n,
+		timestamp: ZERO
+	}
+};
+
+const btcReceiveTx: AllTransactionUiWithCmp = {
+	component: 'bitcoin',
+	token: btcToken,
+	transaction: {
+		id: 'btc-2',
+		type: 'receive',
+		status: 'confirmed',
+		from: 'sender-btc-2',
+		to: [mockBtcAddress],
+		value: 2000n,
+		timestamp: ZERO
+	}
+};
+
+const ethSendTx: AllTransactionUiWithCmp = {
+	component: 'ethereum',
+	token: ethToken,
+	transaction: {
+		id: 'eth-1',
+		type: 'send',
+		hash: '0xabc',
+		from: mockEthAddress,
+		to: mockEthAddress2,
+		value: ZERO,
+		gasLimit: ZERO,
+		nonce: 0,
+		chainId: 1n
+	} as unknown as AllTransactionUiWithCmp['transaction']
+};
+
+const icpSendToHexTx: AllTransactionUiWithCmp = {
+	component: 'ic',
+	token: icpToken,
+	transaction: {
+		id: 'icp-1',
+		type: 'send',
+		from: 'caller-account-id',
+		to: mockDerivedAccountIdentifierHex,
+		value: 100n,
+		timestamp: ZERO
+	}
+};
+
+const icpApproveTx: AllTransactionUiWithCmp = {
+	component: 'ic',
+	token: icpToken,
+	transaction: {
+		id: 'icp-2',
+		type: 'approve',
+		from: 'caller-account-id',
+		to: 'spender-account-id',
+		value: 50n,
+		timestamp: ZERO
+	}
+};
+
+const solSendTx: AllTransactionUiWithCmp = {
+	component: 'solana',
+	token: solToken,
+	transaction: {
+		id: 'sol-1',
+		type: 'send',
+		signature: 'sig-1',
+		from: mockAtaAddress,
+		fromOwner: mockSolAddress,
+		to: mockSolAddress2,
+		value: 100n,
+		status: 'finalized',
+		timestamp: ZERO
+	} as unknown as AllTransactionUiWithCmp['transaction']
+};
+
+const allTxs: AllTransactionUiWithCmp[] = [
+	btcSendTx,
+	btcReceiveTx,
+	ethSendTx,
+	icpSendToHexTx,
+	icpApproveTx,
+	solSendTx
+];
+
+describe('applyTransactionsFilter', () => {
+	it('returns the input untouched when no filter is set', () => {
+		const result = applyTransactionsFilter({
+			transactions: allTxs,
+			filter: EMPTY_TRANSACTIONS_FILTER,
+			contacts: []
+		});
+
+		expect(result).toEqual(allTxs);
+	});
+
+	describe('type filter', () => {
+		it('keeps only transactions whose type is selected', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, types: ['send'] },
+				contacts: []
+			});
+
+			expect(result).toEqual([btcSendTx, ethSendTx, icpSendToHexTx, solSendTx]);
+		});
+
+		it('supports multi-type selection (OR semantics)', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, types: ['receive', 'approve'] },
+				contacts: []
+			});
+
+			expect(result).toEqual([btcReceiveTx, icpApproveTx]);
+		});
+	});
+
+	describe('token filter', () => {
+		it('keeps only transactions whose token id description is selected', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, tokenIds: ['BTC', 'ICP'] },
+				contacts: []
+			});
+
+			expect(result).toEqual([btcSendTx, btcReceiveTx, icpSendToHexTx, icpApproveTx]);
+		});
+	});
+
+	describe('contact filter', () => {
+		const ethContact: ContactUi = {
+			name: 'Eth Friend',
+			id: 1n,
+			updateTimestampNs: ZERO,
+			addresses: [{ address: mockEthAddress2, addressType: 'Eth' }]
+		};
+
+		const btcContact: ContactUi = {
+			name: 'Btc Friend',
+			id: 2n,
+			updateTimestampNs: ZERO,
+			addresses: [{ address: mockBtcAddress, addressType: 'Btc' }]
+		};
+
+		const solContactByOwner: ContactUi = {
+			name: 'Sol Friend',
+			id: 3n,
+			updateTimestampNs: ZERO,
+			addresses: [{ address: mockSolAddress2, addressType: 'Sol' }]
+		};
+
+		const icpPrincipalContact: ContactUi = {
+			name: 'ICP Principal Friend',
+			id: 4n,
+			updateTimestampNs: ZERO,
+			addresses: [{ address: mockPrincipalText, addressType: 'Icrcv2' }]
+		};
+
+		const allContacts: ContactUi[] = [
+			ethContact,
+			btcContact,
+			solContactByOwner,
+			icpPrincipalContact
+		];
+
+		it('matches by direct address (ETH)', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['1'] },
+				contacts: allContacts
+			});
+
+			expect(result).toEqual([ethSendTx]);
+		});
+
+		it('matches BTC by recipient', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['2'] },
+				contacts: allContacts
+			});
+
+			expect(result).toEqual([btcSendTx, btcReceiveTx]);
+		});
+
+		it('matches Solana by owner address (not ATA)', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['3'] },
+				contacts: allContacts
+			});
+
+			expect(result).toEqual([solSendTx]);
+		});
+
+		it('matches an ICP send to a derived account-id when contact has only the principal', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['4'] },
+				contacts: allContacts
+			});
+
+			expect(result).toEqual([icpSendToHexTx]);
+		});
+
+		it('drops contact ids that do not exist in the contact list', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['9999'] },
+				contacts: allContacts
+			});
+
+			expect(result).toEqual([]);
+		});
+	});
+
+	describe('combined filters (AND across categories)', () => {
+		const ethContact: ContactUi = {
+			name: 'Eth Friend',
+			id: 1n,
+			updateTimestampNs: ZERO,
+			addresses: [{ address: mockEthAddress2, addressType: 'Eth' }]
+		};
+
+		it('intersects type, token and contact', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { types: ['send'], tokenIds: ['ETH'], contactIds: ['1'] },
+				contacts: [ethContact]
+			});
+
+			expect(result).toEqual([ethSendTx]);
+		});
+
+		it('returns empty when an intersection is impossible', () => {
+			const result = applyTransactionsFilter({
+				transactions: allTxs,
+				filter: { types: ['receive'], tokenIds: ['ETH'], contactIds: [] },
+				contacts: []
+			});
+
+			expect(result).toEqual([]);
+		});
+	});
+});
