@@ -1638,7 +1638,8 @@
 			"search_contacts_placeholder": "",
 			"clear": "",
 			"sheet_title": "",
-			"open_filters_aria_label": ""
+			"open_filters_aria_label": "",
+			"showing_partial": ""
 		},
 		"label": {
 			"reimbursement": "تعويض",

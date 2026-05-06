@@ -9,6 +9,13 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	// Cap the visible list when the user has not searched yet.
+	// Mounting hundreds of <Checkbox> + <TokenLogo> rows synchronously when
+	// the popover opens blocks the main thread and the dropdown feels frozen.
+	// We render at most this many rows by default; users can search to find
+	// any token by name or symbol and the cap is then bypassed.
+	const VISIBLE_LIMIT = 50;
+
 	let searchValue = $state('');
 
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.tokenIds));
@@ -31,6 +38,12 @@
 					return name.toLowerCase().includes(needle) || symbol.toLowerCase().includes(needle);
 				})
 	);
+
+	let visibleTokens = $derived(
+		searchValue.length === 0 ? filteredTokens.slice(0, VISIBLE_LIMIT) : filteredTokens
+	);
+
+	let isCapped = $derived(searchValue.length === 0 && filteredTokens.length > VISIBLE_LIMIT);
 </script>
 
 <div class="flex flex-col gap-3">
@@ -41,7 +54,7 @@
 	/>
 
 	<ul class="filter-list">
-		{#each filteredTokens as token (token.id.description)}
+		{#each visibleTokens as token (token.id.description)}
 			{@const key = tokenKey(token)}
 			{#if nonNullish(key)}
 				<li>
@@ -67,6 +80,15 @@
 			{/if}
 		{/each}
 	</ul>
+
+	{#if isCapped}
+		<p class="text-xs text-tertiary">
+			{replacePlaceholders($i18n.transaction.filter.showing_partial, {
+				$shown: `${VISIBLE_LIMIT}`,
+				$total: `${filteredTokens.length}`
+			})}
+		</p>
+	{/if}
 </div>
 
 <style lang="scss">

@@ -8,6 +8,11 @@
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { filterAddressFromContact } from '$lib/utils/contact.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	// Same cap rationale as TransactionsFilterTokensPanel — keep the initial
+	// mount cheap so the popover feels instant, and let users search past it.
+	const VISIBLE_LIMIT = 50;
 
 	let searchValue = $state('');
 
@@ -49,6 +54,12 @@
 	let filteredContacts = $derived(
 		alphaSorted.filter((contact) => matchesSearch({ contact, raw: searchValue }))
 	);
+
+	let visibleContacts = $derived(
+		searchValue.length === 0 ? filteredContacts.slice(0, VISIBLE_LIMIT) : filteredContacts
+	);
+
+	let isCapped = $derived(searchValue.length === 0 && filteredContacts.length > VISIBLE_LIMIT);
 </script>
 
 <div class="flex flex-col gap-3">
@@ -59,7 +70,7 @@
 	/>
 
 	<ul class="filter-list">
-		{#each filteredContacts as contact (contact.id.toString())}
+		{#each visibleContacts as contact (contact.id.toString())}
 			{@const id = contact.id.toString()}
 			<li>
 				<Checkbox
@@ -76,6 +87,15 @@
 			</li>
 		{/each}
 	</ul>
+
+	{#if isCapped}
+		<p class="text-xs text-tertiary">
+			{replacePlaceholders($i18n.transaction.filter.showing_partial, {
+				$shown: `${VISIBLE_LIMIT}`,
+				$total: `${filteredContacts.length}`
+			})}
+		</p>
+	{/if}
 </div>
 
 <style lang="scss">
