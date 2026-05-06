@@ -217,6 +217,7 @@ export const TRANSACTIONS_FILTER_TYPES_DROPDOWN = 'transactions-filter-types-dro
 export const TRANSACTIONS_FILTER_TOKENS_DROPDOWN = 'transactions-filter-tokens-dropdown';
 export const TRANSACTIONS_FILTER_CONTACTS_DROPDOWN = 'transactions-filter-contacts-dropdown';
 export const TRANSACTIONS_FILTER_CLEAR_BUTTON = 'transactions-filter-clear-button';
+export const TRANSACTIONS_FILTER_MOBILE_TRIGGER = 'transactions-filter-mobile-trigger';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

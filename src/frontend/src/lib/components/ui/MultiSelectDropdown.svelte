@@ -64,7 +64,7 @@
 
 <ResponsivePopover {button} bind:visible>
 	{#snippet content()}
-		<div class="flex w-full min-w-60 flex-col gap-2 p-1">
+		<div class="flex w-full min-w-72 flex-col gap-3 p-2">
 			{#if searchable}
 				<InputSearch
 					autofocus

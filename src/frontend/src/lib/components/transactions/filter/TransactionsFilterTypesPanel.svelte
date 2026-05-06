@@ -1,0 +1,68 @@
+<script lang="ts">
+	import { Checkbox } from '@dfinity/gix-components';
+	import { TransactionTypeSchema } from '$lib/schema/transaction.schema';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
+	import type { TransactionType } from '$lib/types/transaction';
+
+	const allTypes: TransactionType[] = Array.from(new Set(TransactionTypeSchema.options));
+
+	let translated = $derived(
+		allTypes.map((type) => ({ type, label: $i18n.transaction.type[type] }))
+	);
+
+	let sortedTypes = $derived(
+		[...translated].sort((a, b) =>
+			a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })
+		)
+	);
+
+	let selectedSet = $derived(new Set<TransactionType>($transactionsFilterStore.types));
+</script>
+
+<ul class="filter-list">
+	{#each sortedTypes as { type, label } (type)}
+		<li>
+			<Checkbox
+				checked={selectedSet.has(type)}
+				inputId={`transactions-filter-type-${type}`}
+				text="inline"
+				on:nnsChange={() => transactionsFilterStore.toggleType(type)}
+			>
+				<span class="text-sm">{label}</span>
+			</Checkbox>
+		</li>
+	{/each}
+</ul>
+
+<style lang="scss">
+	ul.filter-list {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+
+		// Match Figma: checkbox on the LEFT, label on the RIGHT, tight rows, hover state.
+		// gix Checkbox renders DOM as <label/><input/> with justify-content: space-between;
+		// we override the label's flex order so the checkbox renders first visually,
+		// and pull the row in tight.
+		li :global(.checkbox) {
+			--checkbox-label-order: 1;
+			--checkbox-padding: 6px 8px;
+			justify-content: flex-start;
+			gap: 8px;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+
+		li :global(.checkbox:hover) {
+			background: var(--color-background-brand-subtle-10);
+		}
+
+		li :global(label) {
+			flex: initial;
+		}
+	}
+</style>

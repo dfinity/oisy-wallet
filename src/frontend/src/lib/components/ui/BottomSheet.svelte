@@ -12,6 +12,11 @@
 		content: Snippet;
 		footer?: Snippet;
 		contentClass?: string;
+		// Optional override for the outer wrapper. Defaults to the shared
+		// `z-14` tier; callers that need to escape a higher stacking context
+		// (e.g. sticky date headers inside a `StickyHeader`) can pass a
+		// higher z-index class such as `fixed inset-0 z-50`.
+		wrapperClass?: string;
 		testId?: string;
 		onClose?: () => void;
 	}
@@ -21,6 +26,7 @@
 		content,
 		footer,
 		contentClass = 'min-h-[30vh]',
+		wrapperClass = 'fixed inset-0 z-14',
 		testId,
 		onClose
 	}: Props = $props();
@@ -37,7 +43,7 @@
 </script>
 
 {#if visible}
-	<div class="fixed inset-0 z-14" data-tid={testId}>
+	<div class={wrapperClass} data-tid={testId}>
 		<BottomSheet transition>
 			{#snippet header()}
 				<div class="w-full p-4">
