@@ -24,7 +24,7 @@ const ethToken = tokenWithSymbol('ETH');
 const icpToken = tokenWithSymbol('ICP');
 const solToken = tokenWithSymbol('SOL');
 
-const btcSendTx: AllTransactionUiWithCmp = {
+const btcSendTx = {
 	component: 'bitcoin',
 	token: btcToken,
 	transaction: {
@@ -36,9 +36,9 @@ const btcSendTx: AllTransactionUiWithCmp = {
 		value: 1000n,
 		timestamp: ZERO
 	}
-};
+} as unknown as AllTransactionUiWithCmp;
 
-const btcReceiveTx: AllTransactionUiWithCmp = {
+const btcReceiveTx = {
 	component: 'bitcoin',
 	token: btcToken,
 	transaction: {
@@ -50,9 +50,9 @@ const btcReceiveTx: AllTransactionUiWithCmp = {
 		value: 2000n,
 		timestamp: ZERO
 	}
-};
+} as unknown as AllTransactionUiWithCmp;
 
-const ethSendTx: AllTransactionUiWithCmp = {
+const ethSendTx = {
 	component: 'ethereum',
 	token: ethToken,
 	transaction: {
@@ -65,36 +65,38 @@ const ethSendTx: AllTransactionUiWithCmp = {
 		gasLimit: ZERO,
 		nonce: 0,
 		chainId: 1n
-	} as unknown as AllTransactionUiWithCmp['transaction']
-};
+	}
+} as unknown as AllTransactionUiWithCmp;
 
-const icpSendToHexTx: AllTransactionUiWithCmp = {
+const icpSendToHexTx = {
 	component: 'ic',
 	token: icpToken,
 	transaction: {
 		id: 'icp-1',
 		type: 'send',
+		status: 'executed',
 		from: 'caller-account-id',
 		to: mockDerivedAccountIdentifierHex,
 		value: 100n,
 		timestamp: ZERO
 	}
-};
+} as unknown as AllTransactionUiWithCmp;
 
-const icpApproveTx: AllTransactionUiWithCmp = {
+const icpApproveTx = {
 	component: 'ic',
 	token: icpToken,
 	transaction: {
 		id: 'icp-2',
 		type: 'approve',
+		status: 'executed',
 		from: 'caller-account-id',
 		to: 'spender-account-id',
 		value: 50n,
 		timestamp: ZERO
 	}
-};
+} as unknown as AllTransactionUiWithCmp;
 
-const solSendTx: AllTransactionUiWithCmp = {
+const solSendTx = {
 	component: 'solana',
 	token: solToken,
 	transaction: {
@@ -107,8 +109,8 @@ const solSendTx: AllTransactionUiWithCmp = {
 		value: 100n,
 		status: 'finalized',
 		timestamp: ZERO
-	} as unknown as AllTransactionUiWithCmp['transaction']
-};
+	}
+} as unknown as AllTransactionUiWithCmp;
 
 const allTxs: AllTransactionUiWithCmp[] = [
 	btcSendTx,
