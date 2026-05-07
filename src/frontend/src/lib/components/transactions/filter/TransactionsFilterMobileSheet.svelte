@@ -62,7 +62,7 @@
 	]);
 </script>
 
-<BottomSheet contentClass="min-h-[40vh]" {onClose} wrapperClass="fixed inset-0 z-50" bind:visible>
+<BottomSheet contentClass="min-h-[40vh]" {onClose} bind:visible>
 	{#snippet content()}
 		<div class="flex w-full flex-col gap-4">
 			<div class="flex items-center gap-2">
