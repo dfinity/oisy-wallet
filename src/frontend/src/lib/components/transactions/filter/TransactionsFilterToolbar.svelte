@@ -7,6 +7,9 @@
 
 <div class="mb-4 flex flex-wrap items-center gap-2" data-tid={TRANSACTIONS_FILTER_TOOLBAR}>
 	<TransactionsFilterTypes />
-	<TransactionsFilterTokens />
+
+<TransactionsFilterTokens />
+
 	<TransactionsFilterContacts />
+	
 </div>
