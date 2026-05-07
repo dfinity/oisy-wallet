@@ -9,10 +9,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import {
-		TRANSACTIONS_FILTER_MOBILE_TRIGGER,
-		TRANSACTIONS_FILTER_TOOLBAR
-	} from '$lib/constants/test-ids.constants';
+	import { TRANSACTIONS_FILTER_TOOLBAR } from '$lib/constants/test-ids.constants';
 	import {
 		selectedTransactionsFilterContactsCount,
 		selectedTransactionsFilterTokensCount,
@@ -54,7 +51,6 @@
 				colorStyle="muted"
 				link={false}
 				onclick={() => (mobileSheetVisible = true)}
-				testId={TRANSACTIONS_FILTER_MOBILE_TRIGGER}
 			>
 				{#snippet icon()}
 					<span class="relative flex">
