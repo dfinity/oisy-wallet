@@ -32,15 +32,6 @@
 	);
 </script>
 
-<!--
-	The `md` / `sm` boundary is non-overlapping: `up="md"` renders for
-	`activeScreen` of `md` and wider, `down="sm"` renders for `sm` and
-	narrower. Using `up="sm"` would also include `sm`, where `down="sm"`
-	already renders, so the chip row and the mobile trigger would both be
-	visible at viewports between 512–640px. The `md` boundary also gives
-	the chip row enough horizontal room to fit on one line without
-	flex-wrap shimmying.
--->
 <div class="mb-4 w-full" data-tid={TRANSACTIONS_FILTER_TOOLBAR}>
 	<Responsive up="md">
 		<div class="flex flex-wrap items-center gap-2">
