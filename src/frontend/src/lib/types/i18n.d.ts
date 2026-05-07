@@ -241,7 +241,7 @@ interface I18nDapps {
 			carousel: { text: string; call_to_action: string };
 		};
 		icpswap: { name: string; one_liner: string; call_to_action: string; description: string };
-		nnsdapp2: { name: string; one_liner: string; call_to_action: string; description: string };
+		nnsdapp: { name: string; one_liner: string; call_to_action: string; description: string };
 		uniswap: { name: string; one_liner: string; call_to_action: string; description: string };
 		oneinch: { name: string; one_liner: string; call_to_action: string; description: string };
 		compound_finance: {
