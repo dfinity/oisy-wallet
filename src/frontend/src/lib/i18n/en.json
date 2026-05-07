@@ -1638,7 +1638,8 @@
 			"search_contacts_placeholder": "Start typing name...",
 			"clear": "Clear",
 			"sheet_title": "Filter activity",
-			"open_filters_aria_label": "Open activity filters"
+			"open_filters_aria_label": "Open activity filters",
+			"showing_partial": "Showing $shown of $total · type to search"
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
