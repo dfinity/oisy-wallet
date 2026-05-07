@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext, type Snippet } from 'svelte';
+	import { get } from 'svelte/store';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext,
@@ -27,6 +28,7 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { initSwapContext, SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 
 	interface Props {
 		children: Snippet;
@@ -38,7 +40,38 @@
 		store: initSwapAmountsStore()
 	});
 
-	setContext<SwapContext>(SWAP_CONTEXT_KEY, initSwapContext());
+	const swapContext = initSwapContext();
+	setContext<SwapContext>(SWAP_CONTEXT_KEY, swapContext);
+
+	const { destinationToken, receiveSupportedData, setDestinationToken } = swapContext;
+
+	// Re-evaluate the destination whenever the source or provider data changes (i.e. when
+	// `receiveSupportedData` re-derives). If the previously chosen destination is no longer
+	// reachable, clear it. The current destination is read non-reactively so picking a new
+	// destination doesn't re-trigger this effect.
+	$effect(() => {
+		const supportedData = $receiveSupportedData;
+
+		if (isNullish(supportedData)) {
+			return;
+		}
+
+		const dest = get(destinationToken);
+
+		if (isNullish(dest)) {
+			return;
+		}
+
+		const stillReachable =
+			filterSwapTokens({
+				tokens: [{ ...dest, enabled: true }],
+				supportedData
+			}).length > 0;
+
+		if (!stillReachable) {
+			setDestinationToken(undefined);
+		}
+	});
 
 	const tokensListContext = initModalTokensListContext({
 		tokens: [],
