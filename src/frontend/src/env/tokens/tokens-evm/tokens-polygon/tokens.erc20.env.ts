@@ -3,6 +3,7 @@ import {
 	AMOY_USDC_TOKEN,
 	USDC_TOKEN
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
+import { USDCE_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdce.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.wbtc.env';
 import { ZCHF_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.zchf.env';
@@ -13,6 +14,7 @@ const POLYGON_ERC20_TOKENS_AMOY: RequiredEvmErc20Token[] = [AMOY_USDC_TOKEN];
 
 const POLYGON_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
 	USDC_TOKEN,
+	USDCE_TOKEN,
 	USDT_TOKEN,
 	WBTC_TOKEN,
 	ZCHF_TOKEN
