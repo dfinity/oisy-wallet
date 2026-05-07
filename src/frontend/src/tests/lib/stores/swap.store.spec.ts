@@ -414,4 +414,58 @@ describe('swapStore', () => {
 			expect(get(isSourceTokenPermitSupported)).toBeUndefined();
 		});
 	});
+
+	describe('receiveSupportedData', () => {
+		it('returns undefined when source is unset', () => {
+			const { receiveSupportedData } = initSwapContext();
+
+			expect(get(receiveSupportedData)).toBeUndefined();
+		});
+
+		it('returns undefined when supported tokens store is empty', async () => {
+			const { swapSupportedTokensStore } = await import('$lib/stores/swap-supported-tokens.store');
+			swapSupportedTokensStore.reset();
+
+			const { receiveSupportedData } = initSwapContext({ sourceToken: mockToken1 });
+
+			expect(get(receiveSupportedData)).toBeUndefined();
+		});
+
+		it('aggregates per-provider destinations for the current source', async () => {
+			const { SwapProvider } = await import('$lib/types/swap');
+			const { swapSupportedTokensStore } = await import('$lib/stores/swap-supported-tokens.store');
+
+			const ckBtcLedger = mockToken1.ledgerCanisterId;
+			const supportedSet = new Set([ckBtcLedger]);
+
+			swapSupportedTokensStore.set({
+				aggregated: {
+					icp: { coverage: 'all', supportedTokenIds: supportedSet },
+					evm: { coverage: 'none', supportedTokenIds: new Set() },
+					sol: { coverage: 'none', supportedTokenIds: new Set() }
+				},
+				providers: [
+					{
+						key: SwapProvider.KONG_SWAP,
+						sourceCategory: 'icp',
+						supportedSourceTokens: supportedSet,
+						getSupportedDestinations: ({ supportedSourceTokens }) => ({
+							icp: supportedSourceTokens ?? new Set()
+						})
+					}
+				]
+			});
+
+			const { receiveSupportedData } = initSwapContext({ sourceToken: mockToken1 });
+			const data = get(receiveSupportedData);
+
+			expect(data?.icp.coverage).toBe('all');
+			expect(data?.icp.supportedTokenIds).toEqual(supportedSet);
+			// EVM/SOL have no supporting provider for this source → blocked.
+			expect(data?.evm).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
+			expect(data?.sol).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
+
+			swapSupportedTokensStore.reset();
+		});
+	});
 });
