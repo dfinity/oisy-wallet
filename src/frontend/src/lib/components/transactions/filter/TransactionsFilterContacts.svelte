@@ -24,7 +24,7 @@
 	// Matches by name, by any address label, by partial address substring, and by full
 	// address equivalence (so an ICRC-2 principal finds a contact saved by its derived
 	// ICP account-id hex, and vice versa, via filterAddressFromContact).
-	const matchesSearch = (contact: ContactUi, raw: string): boolean => {
+	const matchesSearch = ({ contact, raw }: { contact: ContactUi; raw: string }): boolean => {
 		if (raw.length === 0) {
 			return true;
 		}
@@ -48,7 +48,9 @@
 		return nonNullish(filterAddressFromContact({ contact, address: raw }));
 	};
 
-	let filteredContacts = $derived(alphaSorted.filter((c) => matchesSearch(c, searchValue)));
+	let filteredContacts = $derived(
+		alphaSorted.filter((contact) => matchesSearch({ contact, raw: searchValue }))
+	);
 
 	let triggerLabel = $derived.by(() => {
 		if (selectedSet.size === 0) {
