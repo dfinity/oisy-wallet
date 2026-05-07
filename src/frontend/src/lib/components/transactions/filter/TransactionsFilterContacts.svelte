@@ -27,7 +27,9 @@
 		if (selectedSet.size === 0) {
 			return $i18n.transaction.filter.contacts_label;
 		}
+		
 		const first = alphaSorted.find((c) => selectedSet.has(c.id.toString()));
+		
 		return first?.name ?? $i18n.transaction.filter.contacts_label;
 	});
 </script>
@@ -49,6 +51,7 @@
 		<ul class="m-0 flex list-none flex-col gap-1 p-0">
 			{#each filteredContacts as contact (contact.id.toString())}
 				{@const id = contact.id.toString()}
+				
 				<li class="flex items-center gap-2">
 					<Checkbox
 						checked={selectedSet.has(id)}
