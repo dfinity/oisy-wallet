@@ -57,7 +57,7 @@
 				...$allSortedIcrcTokens,
 				...$allCrossChainSwapTokens
 			],
-			supportedData: $swapSupportedTokensStore,
+			supportedData: $swapSupportedTokensStore?.aggregated,
 			compatibleTokenIds
 		})
 	);
