@@ -269,11 +269,11 @@
 				"call_to_action": "遇见未来",
 				"description": "未来去中心化金融的中心！<br/>通过将交易所重塑为中心，ICPSwap 在ICP上提供全栈金融、市场和 DAO 服务。基于 DFINITY 互联网计算机的底层技术，ICPSwap 通过重构用户和开发者共同构建项目的方式，建立了一个真正去中心化的金融生态系统。"
 			},
-			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "NNS 前端 dapp 允许任何人通过用户友好的界面与互联网计算机的网络神经系统进行交互。",
-				"call_to_action": "参与其中",
-				"description": "NNS 前端 dapp 允许任何人通过用户友好的界面与互联网计算机的网络神经系统进行交互。该去中心化 dapp 完全通过区块链端到端提供服务，让您可以轻松执行以下操作：<br/><ul><li>发送和接收代币（ICP、ckBTC、CHAT 等）</li><li>质押和管理神经元</li><li>对互联网计算机和 SNS 的治理进行投票</li><li>参与去中心化交换</li><li>创建和充值容器</li><li>赚取治理奖励</li></ul>"
+			"nnsdapp2": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			},
 			"uniswap": {
 				"name": "Uniswap",

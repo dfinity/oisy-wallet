@@ -269,11 +269,11 @@
 				"call_to_action": "Gặp gỡ tương lai",
 				"description": "Trung tâm của tài chính Phi tập trung tương lai!<br/>Tái định nghĩa sàn giao dịch thành một trung tâm, ICPSwap cung cấp các dịch vụ tài chính, thị trường và DAO đầy đủ trên Internet Computer. Dựa trên công nghệ nền tảng của Internet Computer của DFINITY, ICPSwap thiết lập một hệ sinh thái tài chính phi tập trung thực sự bằng cách tái cấu trúc cách người dùng và nhà phát triển cùng nhau xây dựng các dự án."
 			},
-			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "Ứng dụng dapp giao diện người dùng NNS cho phép bất kỳ ai tương tác với Network Nervous System của Internet Computer bằng giao diện người dùng thân thiện.",
-				"call_to_action": "Tham gia",
-				"description": "Ứng dụng dapp giao diện người dùng NNS cho phép bất kỳ ai tương tác với Network Nervous System của Internet Computer bằng giao diện người dùng thân thiện. Được phục vụ hoàn toàn từ đầu đến cuối thông qua chuỗi khối, ứng dụng dapp phi tập trung này cho phép bạn dễ dàng thực hiện các hành động sau:<br/><ul><li>Gửi và nhận token (ICP, ckBTC, CHAT, v.v.)</li><li>Đặt cược và quản lý các nơ-ron</li><li>Bỏ phiếu về quản trị của Internet Computer và các SNS</li><li>Tham gia vào các giao dịch hoán đổi phi tập trung</li><li>Tạo và nạp tiền vào các canister</li><li>Kiếm phần thưởng quản trị</li></ul>"
+			"nnsdapp2": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			},
 			"uniswap": {
 				"name": "Uniswap",

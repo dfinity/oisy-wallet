@@ -269,11 +269,11 @@
 				"call_to_action": "Seznamte se s budoucností",
 				"description": "Centrum budoucnosti decentralizovaných financí!<br/>Znovuobjevením burzy jako centra poskytuje ICPSwap full-stack finanční, tržní a DAO služby na Internet Computer. Na základě základní technologie Internet Computer od DFINITY vytváří ICPSwap ekosystém skutečně decentralizovaných financí tím, že refaktoruje způsob, jakým uživatelé a vývojáři společně budují projekty."
 			},
-			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "Frontendová dapp NNS umožňuje komukoli interagovat s Network Nervous System na Internet Computeru pomocí uživatelsky přívětivého rozhraní.",
-				"call_to_action": "Zapojte se",
-				"description": "Frontendová dapp NNS umožňuje komukoli interagovat s Network Nervous System na Internet Computeru pomocí uživatelsky přívětivého rozhraní. Tato decentralizovaná dapp, která je kompletně obsluhována end-to-end prostřednictvím blockchainu, vám umožňuje snadno provádět následující akce:<br/><ul><li>Odesílat a přijímat tokeny (ICP, ckBTC, CHAT atd.)</li><li>Stakovat a spravovat neurony</li><li>Hlasovat o správě Internet Computeru a SNS</li><li>Účastnit se decentralizačních swapů</li><li>Vytvářet a doplňovat kanystry</li><li>Získávat odměny za správu</li></ul>"
+			"nnsdapp2": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			},
 			"uniswap": {
 				"name": "Uniswap",

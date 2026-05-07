@@ -269,11 +269,11 @@
 				"call_to_action": "Rencontrez l'avenir",
 				"description": "Le centre de la finance décentralisée du futur !<br/>Réinventant l'échange en tant que hub, ICPSwap fournit des services financiers, de marché et DAO complets sur Internet Computer. Basé sur la technologie sous-jacente d'Internet Computer de DFINITY, ICPSwap établit un écosystème de finance véritablement décentralisée en réorganisant la manière dont les utilisateurs et les développeurs construisent conjointement des projets."
 			},
-			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "La dApp front-end NNS permet à quiconque d'interagir avec le Network Nervous System d'Internet Computer avec une interface utilisateur conviviale.",
-				"call_to_action": "Engagez-vous",
-				"description": "La dApp front-end NNS permet à quiconque d'interagir avec le Network Nervous System d'Internet Computer avec une interface utilisateur conviviale. Servie entièrement de bout en bout via la blockchain, cette dApp décentralisée vous permet d'effectuer facilement les actions suivantes :<br/><ul><li>Envoyer et recevoir des tokens (ICP, ckBTC, CHAT, etc.)</li><li>Staker et gérer des neurones</li><li>Voter sur la gouvernance d'Internet Computer et des SNSes</li><li>Participer à des échanges de décentralisation</li><li>Créer et recharger des canisters</li><li>Gagner des récompenses de gouvernance</li></ul>"
+			"nnsdapp2": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			},
 			"uniswap": {
 				"name": "Uniswap",
