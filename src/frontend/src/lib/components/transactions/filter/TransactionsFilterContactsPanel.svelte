@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { Checkbox } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { allContacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
-	import type { ContactUi } from '$lib/types/contact';
-	import { filterAddressFromContact } from '$lib/utils/contact.utils';
+	import { matchesContactByText } from '$lib/utils/contact.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// Same cap rationale as TransactionsFilterTokensPanel — keep the initial
@@ -24,35 +22,8 @@
 		)
 	);
 
-	// Matches by name, by any address label, by partial address substring, and by full
-	// address equivalence (so an ICRC-2 principal finds a contact saved by its derived
-	// ICP account-id hex, and vice versa, via filterAddressFromContact).
-	const matchesSearch = ({ contact, raw }: { contact: ContactUi; raw: string }): boolean => {
-		if (raw.length === 0) {
-			return true;
-		}
-
-		const needle = raw.toLowerCase();
-
-		if (contact.name.toLowerCase().includes(needle)) {
-			return true;
-		}
-
-		if (
-			contact.addresses.some(
-				({ address, label }) =>
-					address.toLowerCase().includes(needle) ||
-					(nonNullish(label) && label.toLowerCase().includes(needle))
-			)
-		) {
-			return true;
-		}
-
-		return nonNullish(filterAddressFromContact({ contact, address: raw }));
-	};
-
 	let filteredContacts = $derived(
-		alphaSorted.filter((contact) => matchesSearch({ contact, raw: searchValue }))
+		alphaSorted.filter((contact) => matchesContactByText({ contact, query: searchValue }))
 	);
 
 	let visibleContacts = $derived(
