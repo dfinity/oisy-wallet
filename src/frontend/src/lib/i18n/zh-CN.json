@@ -270,10 +270,10 @@
 				"description": "未来去中心化金融的中心！<br/>通过将交易所重塑为中心，ICPSwap 在ICP上提供全栈金融、市场和 DAO 服务。基于 DFINITY 互联网计算机的底层技术，ICPSwap 通过重构用户和开发者共同构建项目的方式，建立了一个真正去中心化的金融生态系统。"
 			},
 			"nnsdapp": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "NNS Governance",
+				"one_liner": "Internet Computer的治理平台，使用户能够质押、投票并关注网络活动。",
+				"call_to_action": "参与ICP治理",
+				"description": "NNS dapp是Internet Computer（ICP）的治理平台，使用户能够质押代币、参与投票并关注网络活动。<br/><br/>该项目致力于提高用户行为和治理活动的可见性，帮助用户理解质押、投票和参与如何为更广泛的生态系统做出贡献。"
 			},
 			"uniswap": {
 				"name": "Uniswap",

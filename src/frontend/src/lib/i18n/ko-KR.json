@@ -270,10 +270,10 @@
 				"description": "미래 탈중앙화 금융의 허브!<br/>ICPSwap은 거래소를 허브로 재정의하여 인터넷 컴퓨터 위에서 풀스택 금융, 시장 및 DAO 서비스를 제공합니다. DFINITY의 인터넷 컴퓨터 기반 기술을 바탕으로 ICPSwap은 사용자와 개발자가 함께 프로젝트를 구축하는 방식을 재구성하여 진정한 탈중앙화 금융 생태계를 구축합니다."
 			},
 			"nnsdapp": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "NNS Governance",
+				"one_liner": "Internet Computer를 위한 거버넌스 플랫폼으로, 사용자가 스테이킹, 투표, 네트워크 활동 팔로우를 할 수 있습니다.",
+				"call_to_action": "ICP 거버넌스에 참여하기",
+				"description": "NNS dapp은 Internet Computer(ICP)를 위한 거버넌스 플랫폼으로, 사용자가 토큰 스테이킹, 투표 참여, 네트워크 활동 팔로우를 할 수 있습니다.<br/><br/>이 프로젝트는 사용자 행동과 거버넌스 활동에 대한 가시성을 높이는 데 중점을 두며, 스테이킹, 투표 및 참여가 더 넓은 생태계에 어떻게 기여하는지 사용자가 이해할 수 있도록 돕습니다."
 			},
 			"uniswap": {
 				"name": "Uniswap",

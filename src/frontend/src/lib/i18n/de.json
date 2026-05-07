@@ -270,10 +270,10 @@
 				"description": "Der Hub der zukünftigen dezentralen Finanzwelt!<br/>ICPSwap erfindet die Börse als Hub neu und bietet umfassende Finanz-, Markt- und DAO-Dienste auf dem Internet-Computer. Basierend auf der zugrundeliegenden Technologie des Internet-Computers von DFINITY etabliert ICPSwap ein Ökosystem für wirklich dezentrale Finanzwelt, indem es die Art und Weise, wie Nutzer und Entwickler gemeinsam Projekte erstellen, neu gestaltet."
 			},
 			"nnsdapp": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "NNS Governance",
+				"one_liner": "Governance-Plattform für den Internet Computer, die Nutzern ermöglicht, zu staken, abzustimmen und die Netzwerkaktivität zu verfolgen.",
+				"call_to_action": "An der ICP-Governance teilnehmen",
+				"description": "NNS dapp ist eine Governance-Plattform für den Internet Computer (ICP), die Nutzern ermöglicht, Token zu staken, an Abstimmungen teilzunehmen und Netzwerkaktivitäten zu verfolgen.<br/><br/>Das Projekt konzentriert sich darauf, Benutzeraktionen und Governance-Aktivitäten besser sichtbar zu machen und Nutzern zu helfen zu verstehen, wie Staking, Abstimmungen und Beteiligung zum breiteren Ökosystem beitragen."
 			},
 			"uniswap": {
 				"name": "Uniswap",

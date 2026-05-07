@@ -270,10 +270,10 @@
 				"description": "未来の分散型金融のハブ！<br/>取引所をハブとして再発明し、ICPSwapはInternet Computer上でフルスタックの金融、市場、DAOサービスを提供します。DFINITYのInternet Computerの基盤技術に基づき、ICPSwapはユーザーと開発者が共同でプロジェクトを構築する方法を再構築することにより、真に分散化された金融のエコシステムを確立します。"
 			},
 			"nnsdapp": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "NNS Governance",
+				"one_liner": "Internet Computerのガバナンスプラットフォームで、ユーザーがステーキング、投票、ネットワーク活動の追跡を行えます。",
+				"call_to_action": "ICPガバナンスに参加する",
+				"description": "NNS dappはInternet Computer（ICP）のガバナンスプラットフォームで、ユーザーはトークンのステーキング、投票への参加、ネットワーク活動の追跡が可能です。<br/><br/>このプロジェクトはユーザーのアクションやガバナンス活動の可視性向上に焦点を当て、ステーキング・投票・参加がエコシステム全体にどのように貢献するかを理解しやすくします。"
 			},
 			"uniswap": {
 				"name": "Uniswap",
