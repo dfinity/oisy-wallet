@@ -35,13 +35,6 @@
 	{/each}
 </ul>
 
-<!--
-	Tailwind doesn't reach the gix Checkbox internals (renders DOM as
-	<label/><input/> with justify-content: space-between). To match
-	Figma we need to swap the label/input visual order, override
-	checkbox padding, add hover background and reset the slot label's
-	flex sizing — kept minimal here.
--->
 <style lang="scss">
 	li :global(.checkbox) {
 		--checkbox-label-order: 1;
