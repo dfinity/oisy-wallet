@@ -10,7 +10,7 @@ export const USDCE_DECIMALS = 6;
 
 export const USDCE_SYMBOL = 'USDC.e';
 
-export const USDCE_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
+export const USDCE_TOKEN_ID: TokenId = parseTokenId(USDCE_SYMBOL);
 
 export const USDCE_TOKEN: RequiredEvmErc20Token = {
 	id: USDCE_TOKEN_ID,
