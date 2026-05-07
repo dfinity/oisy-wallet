@@ -25,7 +25,7 @@
 		"callToAction": "dapps.descriptions.nnsdapp.call_to_action",
 		"website": "https://nns.internetcomputer.org/",
 		"github": "https://github.com/dfinity/nns-dapp",
-		"tags": ["dapps.categories.staking", "dapps.categories.ab_icp"],
+		"tags": ["dapps.categories.staking", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
 		"stats": "",
 		"usesInternetIdentity": true,
 		"description": "dapps.descriptions.nnsdapp.description",
