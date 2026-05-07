@@ -273,7 +273,7 @@
 				"name": "NNS Governance",
 				"one_liner": "Internet Computer的治理平台，使用户能够质押、投票并关注网络活动。",
 				"call_to_action": "参与ICP治理",
-				"description": "NNS应用程序是Internet Computer（ICP）的治理平台，使用户能够质押代币、参与投票并关注网络活动。<br/><br/>它致力于提高用户行为和治理活动的可见性，帮助用户理解质押、投票和参与如何为更广泛的生态系统做出贡献。"
+				"description": "NNS应用程序是Internet Computer（ICP）的治理平台，使用户能够质押代币、参与投票并关注网络活动。<br/><br/>它为用户行为和治理活动带来更高的可见性，帮助用户理解质押、投票和参与如何为更广泛的生态系统做出贡献。"
 			},
 			"uniswap": {
 				"name": "Uniswap",

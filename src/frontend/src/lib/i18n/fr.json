@@ -273,7 +273,7 @@
 				"name": "NNS Governance",
 				"one_liner": "Plateforme de gouvernance pour Internet Computer permettant aux utilisateurs de staker, voter et suivre l'activité du réseau.",
 				"call_to_action": "Participer à la gouvernance ICP",
-				"description": "L'application NNS est une plateforme de gouvernance pour Internet Computer (ICP) qui permet aux utilisateurs de staker des tokens, de participer aux votes et de suivre l'activité du réseau.<br/><br/>Elle vise à apporter plus de visibilité sur les actions des utilisateurs et les activités de gouvernance, aidant les utilisateurs à comprendre comment le staking, le vote et la participation contribuent à l'écosystème global."
+				"description": "L'application NNS est une plateforme de gouvernance pour Internet Computer (ICP) qui permet aux utilisateurs de staker des tokens, de participer aux votes et de suivre l'activité du réseau.<br/><br/>Elle apporte une meilleure visibilité sur les actions des utilisateurs et les activités de gouvernance, aidant les utilisateurs à comprendre comment le staking, le vote et la participation contribuent à l'écosystème global."
 			},
 			"uniswap": {
 				"name": "Uniswap",
