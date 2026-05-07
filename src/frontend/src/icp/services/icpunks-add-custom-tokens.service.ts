@@ -8,7 +8,6 @@ import { mapIcPunksToken } from '$icp/utils/icpunks.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
-import { assertExistingTokens } from '$lib/utils/tokens.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
@@ -58,16 +57,6 @@ export const loadAndAssertAddCustomToken = async ({
 				msg: { text: get(i18n).tokens.import.error.no_metadata }
 			});
 
-			return { result: 'error' };
-		}
-
-		const { valid } = assertExistingTokens({
-			existingTokens: icPunksTokens,
-			token,
-			errorMsg: get(i18n).tokens.error.duplicate_metadata
-		});
-
-		if (!valid) {
 			return { result: 'error' };
 		}
 
