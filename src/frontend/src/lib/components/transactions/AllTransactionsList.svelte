@@ -20,6 +20,7 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import TransactionsFilterToolbar from '$lib/components/transactions/filter/TransactionsFilterToolbar.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { allContacts } from '$lib/derived/contacts.derived';
@@ -124,29 +125,46 @@
 	);
 </script>
 
-<div class="sticky top-0 z-10 -mx-1 bg-page px-1 pt-6 pb-3">
-	<TransactionsFilterToolbar />
-</div>
+<!--
+	The toolbar is sticky in its OWN stacking context at z-10 (passed
+	through `StickyHeader`). Each `TransactionsDateGroup` uses the same
+	`StickyHeader` internally at the default z-3, so without a stronger
+	z-index here the gix Popover that the chips open would be trapped
+	inside the toolbar's z-3 context and the date stickies (also z-3,
+	but rendered later in DOM) would paint on top of it. Bumping to z-10
+	puts the popover's containing stacking context above all date z-3
+	contexts, so the dropdown content paints on top of the date headers.
 
-<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
-	<AllTransactionsLoader transactions={allTransactions}>
-		<AllTransactionsScroll {sortedTransactions} bind:transactionsToDisplay>
-			{#if Object.values(groupedTransactions).length > 0}
-				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-					<TransactionsDateGroup
-						{formattedDate}
-						testId={`all-transactions-date-group-${index}`}
-						{transactions}
-					/>
-				{/each}
-			{/if}
+	Reusing `StickyHeader` (rather than an inline sticky div with a
+	hard-coded `bg-page`) gives us back its conditional `bg-page` / `pt-6`
+	behavior — the toolbar is fully transparent until the user actually
+	scrolls into it, matching the date headers below.
+-->
+<StickyHeader zIndex={10}>
+	{#snippet header()}
+		<TransactionsFilterToolbar />
+	{/snippet}
 
-			{#if Object.values(groupedTransactions).length === 0}
-				<TransactionsPlaceholder />
-			{/if}
-		</AllTransactionsScroll>
-	</AllTransactionsLoader>
-</AllTransactionsSkeletons>
+	<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
+		<AllTransactionsLoader transactions={allTransactions}>
+			<AllTransactionsScroll {sortedTransactions} bind:transactionsToDisplay>
+				{#if Object.values(groupedTransactions).length > 0}
+					{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+						<TransactionsDateGroup
+							{formattedDate}
+							testId={`all-transactions-date-group-${index}`}
+							{transactions}
+						/>
+					{/each}
+				{/if}
+
+				{#if Object.values(groupedTransactions).length === 0}
+					<TransactionsPlaceholder />
+				{/if}
+			</AllTransactionsScroll>
+		</AllTransactionsLoader>
+	</AllTransactionsSkeletons>
+</StickyHeader>
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
 	<BtcTransactionModal token={selectedBtcToken} transaction={selectedBtcTransaction} />
