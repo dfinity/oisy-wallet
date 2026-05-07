@@ -105,9 +105,9 @@ export const loadUserProfile = async ({
 			return { success: false, err: 'signups-closed' };
 		}
 
-		const { settings } = get(i18n);
+		const { init } = get(i18n);
 		toastsError({
-			msg: { text: settings.error.loading_profile },
+			msg: { text: init.error.loading_profile },
 			err
 		});
 		return { success: false, err: 'unknown' };
