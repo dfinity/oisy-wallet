@@ -40,9 +40,9 @@
 	{/snippet}
 
 	{#snippet panel()}
-		<ul class="m-0 flex list-none flex-col gap-1 p-0">
+		<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
 			{#each sortedTypes as { type, label } (type)}
-				<li class="flex items-center">
+				<li>
 					<Checkbox
 						checked={selectedSet.has(type)}
 						inputId={`transactions-filter-type-${type}`}
@@ -56,3 +56,22 @@
 		</ul>
 	{/snippet}
 </MultiSelectDropdown>
+
+<style lang="scss">
+	li :global(.checkbox) {
+		--checkbox-label-order: 1;
+		--checkbox-padding: 6px 8px;
+		justify-content: flex-start;
+		gap: 8px;
+		border-radius: 6px;
+		cursor: pointer;
+	}
+
+	li :global(.checkbox:hover) {
+		background: var(--color-background-brand-subtle-10);
+	}
+
+	li :global(label) {
+		flex: initial;
+	}
+</style>
