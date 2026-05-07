@@ -3,7 +3,7 @@
 	import TransactionsFilterContactsPanel from '$lib/components/transactions/filter/TransactionsFilterContactsPanel.svelte';
 	import MultiSelectDropdown from '$lib/components/ui/MultiSelectDropdown.svelte';
 	import { TRANSACTIONS_FILTER_CONTACTS_DROPDOWN } from '$lib/constants/test-ids.constants';
-	import { sortedContacts } from '$lib/derived/contacts.derived';
+	import { allContacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 
@@ -13,7 +13,9 @@
 		if (selectedSet.size === 0) {
 			return $i18n.transaction.filter.contacts_label;
 		}
-		const first = $sortedContacts.find((c) => selectedSet.has(c.id.toString()));
+
+		const first = $allContacts.find((c) => selectedSet.has(c.id.toString()));
+
 		return first?.name ?? $i18n.transaction.filter.contacts_label;
 	});
 </script>
