@@ -91,7 +91,6 @@
 	{/if}
 </div>
 
-<!-- See TransactionsFilterTypesPanel for the rationale. -->
 <style lang="scss">
 	li :global(.checkbox) {
 		--checkbox-label-order: 1;
