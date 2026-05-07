@@ -40,9 +40,9 @@
 	{/snippet}
 
 	{#snippet panel()}
-		<ul class="m-0 flex list-none flex-col gap-1 p-0">
+		<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
 			{#each sortedTypes as { type, label } (type)}
-				<li class="flex items-center">
+				<li>
 					<Checkbox
 						checked={selectedSet.has(type)}
 						inputId={`transactions-filter-type-${type}`}
@@ -56,3 +56,29 @@
 		</ul>
 	{/snippet}
 </MultiSelectDropdown>
+
+<!--
+	Tailwind doesn't reach the gix Checkbox internals (renders DOM as
+	<label/><input/> with justify-content: space-between, which pushes the
+	input to the far edge of the row). To match Figma we need to swap the
+	label/input visual order, override checkbox padding, add a hover
+	background and reset the slot label's flex sizing — kept minimal here.
+-->
+<style lang="scss">
+	li :global(.checkbox) {
+		--checkbox-label-order: 1;
+		--checkbox-padding: 6px 8px;
+		justify-content: flex-start;
+		gap: 8px;
+		border-radius: 6px;
+		cursor: pointer;
+	}
+
+	li :global(.checkbox:hover) {
+		background: var(--color-background-brand-subtle-10);
+	}
+
+	li :global(label) {
+		flex: initial;
+	}
+</style>
