@@ -1636,7 +1636,7 @@
 			"contacts_aria_label": "Filter by contact",
 			"search_tokens_placeholder": "Start typing...",
 			"search_contacts_placeholder": "Start typing name...",
-			"clear": "Clear filters",
+			"clear": "Clear",
 			"sheet_title": "Filter activity",
 			"open_filters_aria_label": "Open activity filters"
 		},
