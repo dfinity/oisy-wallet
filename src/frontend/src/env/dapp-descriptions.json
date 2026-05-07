@@ -29,8 +29,8 @@
 		"stats": "",
 		"usesInternetIdentity": true,
 		"description": "dapps.descriptions.nnsdapp.description",
-		"logo": "/images/dapps/nns-dapp-logo.svg",
-		"screenshots": ["/images/dapps/nns-dapp.webp"]
+		"logo": "/images/dapps/nns-logo.webp",
+		"screenshots": ["/images/dapps/nns-screenshot.webp"]
 	},
 	{
 		"id": "icpswap",
