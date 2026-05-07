@@ -53,7 +53,7 @@
 		bind:filter={searchValue}
 	/>
 
-	<ul class="filter-list">
+	<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
 		{#each visibleTokens as token (token.id.description)}
 			{@const key = tokenKey(token)}
 			{#if nonNullish(key)}
@@ -64,7 +64,7 @@
 						text="inline"
 						on:nnsChange={() => transactionsFilterStore.toggleTokenId(key)}
 					>
-						<span class="row-content">
+						<span class="inline-flex items-center gap-2">
 							<TokenLogo data={token} logoSize="xxs" />
 							<span class="text-sm">
 								<span class="font-medium">{token.symbol}</span>
@@ -91,37 +91,22 @@
 	{/if}
 </div>
 
+<!-- See TransactionsFilterTypesPanel for the rationale. -->
 <style lang="scss">
-	ul.filter-list {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		list-style: none;
-		margin: 0;
-		padding: 0;
+	li :global(.checkbox) {
+		--checkbox-label-order: 1;
+		--checkbox-padding: 6px 8px;
+		justify-content: flex-start;
+		gap: 8px;
+		border-radius: 6px;
+		cursor: pointer;
+	}
 
-		// See TransactionsFilterTypesPanel for the rationale.
-		li :global(.checkbox) {
-			--checkbox-label-order: 1;
-			--checkbox-padding: 6px 8px;
-			justify-content: flex-start;
-			gap: 8px;
-			border-radius: 6px;
-			cursor: pointer;
-		}
+	li :global(.checkbox:hover) {
+		background: var(--color-background-brand-subtle-10);
+	}
 
-		li :global(.checkbox:hover) {
-			background: var(--color-background-brand-subtle-10);
-		}
-
-		li :global(label) {
-			flex: initial;
-		}
-
-		.row-content {
-			display: inline-flex;
-			align-items: center;
-			gap: 8px;
-		}
+	li :global(label) {
+		flex: initial;
 	}
 </style>

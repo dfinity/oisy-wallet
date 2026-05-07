@@ -20,7 +20,7 @@
 	let selectedSet = $derived(new Set<TransactionType>($transactionsFilterStore.types));
 </script>
 
-<ul class="filter-list">
+<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
 	{#each sortedTypes as { type, label } (type)}
 		<li>
 			<Checkbox
@@ -35,34 +35,28 @@
 	{/each}
 </ul>
 
+<!--
+	Tailwind doesn't reach the gix Checkbox internals (renders DOM as
+	<label/><input/> with justify-content: space-between). To match
+	Figma we need to swap the label/input visual order, override
+	checkbox padding, add hover background and reset the slot label's
+	flex sizing — kept minimal here.
+-->
 <style lang="scss">
-	ul.filter-list {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		list-style: none;
-		margin: 0;
-		padding: 0;
+	li :global(.checkbox) {
+		--checkbox-label-order: 1;
+		--checkbox-padding: 6px 8px;
+		justify-content: flex-start;
+		gap: 8px;
+		border-radius: 6px;
+		cursor: pointer;
+	}
 
-		// Match Figma: checkbox on the LEFT, label on the RIGHT, tight rows, hover state.
-		// gix Checkbox renders DOM as <label/><input/> with justify-content: space-between;
-		// we override the label's flex order so the checkbox renders first visually,
-		// and pull the row in tight.
-		li :global(.checkbox) {
-			--checkbox-label-order: 1;
-			--checkbox-padding: 6px 8px;
-			justify-content: flex-start;
-			gap: 8px;
-			border-radius: 6px;
-			cursor: pointer;
-		}
+	li :global(.checkbox:hover) {
+		background: var(--color-background-brand-subtle-10);
+	}
 
-		li :global(.checkbox:hover) {
-			background: var(--color-background-brand-subtle-10);
-		}
-
-		li :global(label) {
-			flex: initial;
-		}
+	li :global(label) {
+		flex: initial;
 	}
 </style>
