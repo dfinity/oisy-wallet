@@ -121,9 +121,7 @@ describe('load-user-profile.services', () => {
 
 		it('should sign out and surface unknown error when loading the user profile fails', async () => {
 			vi.spyOn(backendApi, 'getUserProfile').mockRejectedValue(new Error('Error'));
-			const errorSignOutSpy = vi
-				.spyOn(authServices, 'errorSignOut')
-				.mockResolvedValue();
+			const errorSignOutSpy = vi.spyOn(authServices, 'errorSignOut').mockResolvedValue();
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
@@ -135,9 +133,7 @@ describe('load-user-profile.services', () => {
 			vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue({
 				Err: { InternalError: null } as never
 			});
-			const errorSignOutSpy = vi
-				.spyOn(authServices, 'errorSignOut')
-				.mockResolvedValue();
+			const errorSignOutSpy = vi.spyOn(authServices, 'errorSignOut').mockResolvedValue();
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
