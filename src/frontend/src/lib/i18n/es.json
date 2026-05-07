@@ -739,7 +739,8 @@
 			"allow_signing": "Ocurrió un problema al configurar tu billetera para firmar. Has sido desconectado. Si el problema persiste, contacta con el soporte.",
 			"waiting_for_allowed_cycles_aborted": "Preparación del ledger de ciclos abortada. Por favor, intenta iniciar sesión más tarde",
 			"btc_wallet_error": "Error al cargar la información de la billetera BTC.",
-			"sol_wallet_error": "Error al cargar la información de la billetera SOL."
+			"sol_wallet_error": "Error al cargar la información de la billetera SOL.",
+			"loading_profile": "Error al cargar el perfil. Por favor, actualiza la página para tener la experiencia completa."
 		}
 	},
 	"hero": {
@@ -794,9 +795,6 @@
 			"appearance_light": "Habilita el modo claro",
 			"appearance_dark": "Habilita el modo oscuro",
 			"appearance_system": "Habilita el modo de color de tu sistema operativo"
-		},
-		"error": {
-			"loading_profile": "Error al cargar el perfil. Por favor, actualiza la página para tener la experiencia completa."
 		}
 	},
 	"shortcuts": {

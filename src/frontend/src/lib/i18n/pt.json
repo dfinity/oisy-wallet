@@ -739,7 +739,8 @@
 			"allow_signing": "Ocorreu um problema ao configurar sua carteira para assinar. Você foi desconectado. Se o problema persistir, entre em contato com o suporte.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Erro ao carregar informações da carteira BTC.",
-			"sol_wallet_error": "Erro ao carregar informações da carteira SOL."
+			"sol_wallet_error": "Erro ao carregar informações da carteira SOL.",
+			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa."
 		}
 	},
 	"hero": {
@@ -794,9 +795,6 @@
 			"appearance_light": "Habilita o modo claro",
 			"appearance_dark": "Habilita o modo escuro",
 			"appearance_system": "Habilita o modo de cor do seu sistema operacional"
-		},
-		"error": {
-			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa."
 		}
 	},
 	"shortcuts": {

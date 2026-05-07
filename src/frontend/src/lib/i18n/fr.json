@@ -739,7 +739,8 @@
 			"allow_signing": "Un problème est survenu lors de la configuration de votre portefeuille pour la signature. Vous avez été déconnecté. Si le problème persiste, contactez le support.",
 			"waiting_for_allowed_cycles_aborted": "Préparation du ledger de cycles abandonnée. Veuillez essayer de vous connecter plus tard",
 			"btc_wallet_error": "Erreur lors du chargement des informations du portefeuille BTC.",
-			"sol_wallet_error": "Erreur lors du chargement des informations du portefeuille SOL."
+			"sol_wallet_error": "Erreur lors du chargement des informations du portefeuille SOL.",
+			"loading_profile": "Erreur lors du chargement du profil. Veuillez actualiser la page pour profiter de l'expérience complète."
 		}
 	},
 	"hero": {
@@ -794,9 +795,6 @@
 			"appearance_light": "Active le mode clair",
 			"appearance_dark": "Active le mode sombre",
 			"appearance_system": "Active le mode couleur de votre système d'exploitation"
-		},
-		"error": {
-			"loading_profile": "Erreur lors du chargement du profil. Veuillez actualiser la page pour profiter de l'expérience complète."
 		}
 	},
 	"shortcuts": {
