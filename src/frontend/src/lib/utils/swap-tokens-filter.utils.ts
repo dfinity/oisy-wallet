@@ -1,5 +1,5 @@
 import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
-import { isTokenEthereumNative } from '$eth/utils/token.utils';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import type {
 	SwapProviderListCoverage,

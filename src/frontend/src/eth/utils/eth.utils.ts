@@ -2,13 +2,14 @@ import {
 	SUPPORTED_ETHEREUM_TOKEN_IDS,
 	type SUPPORTED_ETHEREUM_TOKENS
 } from '$env/tokens/tokens.eth.env';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { Network } from '$lib/types/network';
 import type { OptionToken, TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
 export const isDefaultEthereumToken = (token: OptionToken): boolean =>
-	nonNullish(token) && token.category === 'default' && token.standard.code === 'ethereum';
+	nonNullish(token) && token.category === 'default' && isTokenEthereumNative(token);
 
 export const isNotDefaultEthereumToken = (token: OptionToken): boolean =>
 	!isDefaultEthereumToken(token);

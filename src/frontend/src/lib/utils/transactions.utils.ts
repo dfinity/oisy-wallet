@@ -2,6 +2,7 @@ import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { OptionEthAddress } from '$eth/types/address';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
@@ -91,11 +92,11 @@ const findDuplicateEthNativeTransactions = (
 	for (const networkMap of groupsByNetworkAndHash.values()) {
 		for (const group of networkMap.values()) {
 			if (group.length > 1) {
-				const hasNonNative = group.some(({ token }) => token.standard.code !== 'ethereum');
+				const hasNonNative = group.some(({ token }) => !isTokenEthereumNative(token));
 
 				if (hasNonNative) {
 					for (const tx of group) {
-						if (tx.token.standard.code === 'ethereum') {
+						if (isTokenEthereumNative(tx.token)) {
 							duplicates.add(tx);
 						}
 					}
