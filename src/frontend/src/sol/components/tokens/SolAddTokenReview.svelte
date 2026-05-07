@@ -93,20 +93,6 @@
 				symbol,
 				name
 			};
-
-			if (
-				nonNullish(
-					$splTokens?.find(
-						({ symbol }) => symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '')
-					)
-				)
-			) {
-				toastsError({
-					msg: { text: $i18n.tokens.error.duplicate_metadata }
-				});
-
-				onBack();
-			}
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
