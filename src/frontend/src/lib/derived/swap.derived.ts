@@ -51,7 +51,7 @@ export const isPageTokenSwappable: Readable<boolean> = derived(
 
 		const result = filterSwapTokens({
 			tokens: [{ ...$selectedSwappableToken, enabled: true }],
-			supportedData: $swapSupportedTokensStore
+			supportedData: $swapSupportedTokensStore?.aggregated
 		});
 
 		return result.length > 0;

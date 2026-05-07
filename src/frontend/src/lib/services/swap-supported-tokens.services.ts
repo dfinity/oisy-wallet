@@ -4,62 +4,66 @@ import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import {
 	swapSupportedTokensStore,
+	type SwapProviderSupport,
+	type SwapSupportedTokensData,
 	type SwapSupportedTokensInfo
 } from '$lib/stores/swap-supported-tokens.store';
+import type { GetSupportedDestinationsFn, SwapProvider, SwapTokenCategory } from '$lib/types/swap';
 import { determineCoverage } from '$lib/utils/swap-tokens-filter.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
-/**
- * Filters providers that have `getSupportedTokens` and calls it in a single pass,
- * collecting the resulting promises without non-null assertions.
- */
-const buildFetchTokenSets = <
-	P extends { getSupportedTokens?: (...args: never[]) => Promise<Set<string>> }
+const resolveProviderGroup = <
+	P extends {
+		key: SwapProvider;
+		isEnabled: boolean;
+		getSupportedTokens?: (...args: never[]) => Promise<Set<string>>;
+		getSupportedDestinations: GetSupportedDestinationsFn;
+	}
 >({
 	providers,
+	sourceCategory,
 	callFn
 }: {
 	providers: P[];
+	sourceCategory: SwapTokenCategory;
 	callFn: (getSupportedTokens: NonNullable<P['getSupportedTokens']>) => Promise<Set<string>>;
-}): Promise<Set<string>>[] =>
-	providers.reduce<Promise<Set<string>>[]>((acc, provider) => {
-		if (nonNullish(provider.getSupportedTokens)) {
-			acc.push(callFn(provider.getSupportedTokens));
+}): Promise<SwapProviderSupport[]> =>
+	Promise.all(
+		providers
+			.filter(({ isEnabled }) => isEnabled)
+			.map(async (provider) => {
+				let supportedSourceTokens: Set<string> | undefined;
+				if (nonNullish(provider.getSupportedTokens)) {
+					try {
+						supportedSourceTokens = await callFn(provider.getSupportedTokens);
+					} catch (_err) {
+						supportedSourceTokens = new Set();
+					}
+				}
+				return {
+					key: provider.key,
+					sourceCategory,
+					supportedSourceTokens,
+					getSupportedDestinations: provider.getSupportedDestinations
+				};
+			})
+	);
+
+const aggregateCategory = (resolutions: SwapProviderSupport[]): SwapSupportedTokensInfo => {
+	const totalEnabled = resolutions.length;
+	const withList = resolutions.filter((r) => nonNullish(r.supportedSourceTokens)).length;
+	const supportedTokenIds = resolutions.reduce<Set<string>>((acc, { supportedSourceTokens }) => {
+		if (nonNullish(supportedSourceTokens)) {
+			supportedSourceTokens.forEach((id) => acc.add(id));
 		}
-
-		return acc;
-	}, []);
-
-const collectSupportedTokens = async ({
-	totalEnabled,
-	fetchTokenSets
-}: {
-	totalEnabled: number;
-	fetchTokenSets: Promise<Set<string>>[];
-}): Promise<SwapSupportedTokensInfo> => {
-	const coverage = determineCoverage({
-		totalEnabled,
-		withList: fetchTokenSets.length
-	});
-
-	if (coverage === 'none') {
-		return { coverage, supportedTokenIds: new Set() };
-	}
-
-	const results = await Promise.allSettled(fetchTokenSets);
-
-	const supportedTokenIds = results.reduce<Set<string>>((acc, result) => {
-		if (result.status === 'fulfilled') {
-			for (const id of result.value) {
-				acc.add(id);
-			}
-		}
-
 		return acc;
 	}, new Set());
 
-	return { coverage, supportedTokenIds };
+	return {
+		coverage: determineCoverage({ totalEnabled, withList }),
+		supportedTokenIds
+	};
 };
 
 export const loadSwapSupportedTokens = async ({
@@ -67,35 +71,38 @@ export const loadSwapSupportedTokens = async ({
 }: {
 	identity: Identity;
 }): Promise<void> => {
-	const enabledIcpProviders = [
-		...swapProviders.filter(({ isEnabled }) => isEnabled),
-		...icpBridgeProviders.filter(({ isEnabled }) => isEnabled)
-	];
-	const enabledEvmProviders = evmSwapProviders.filter(({ isEnabled }) => isEnabled);
-	const enabledSolProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
-	const [icp, evm, sol] = await Promise.all([
-		collectSupportedTokens({
-			totalEnabled: enabledIcpProviders.length,
-			fetchTokenSets: buildFetchTokenSets({
-				providers: enabledIcpProviders,
-				callFn: (fn) => fn({ identity })
-			})
+	const [icpProviders, icpBridgeProvidersResolved, evmProviders, solProviders] = await Promise.all([
+		resolveProviderGroup({
+			providers: swapProviders,
+			sourceCategory: 'icp',
+			callFn: (fn) => fn({ identity })
 		}),
-		collectSupportedTokens({
-			totalEnabled: enabledEvmProviders.length,
-			fetchTokenSets: buildFetchTokenSets({
-				providers: enabledEvmProviders,
-				callFn: (fn) => fn()
-			})
+		resolveProviderGroup({
+			providers: icpBridgeProviders,
+			sourceCategory: 'icp',
+			callFn: (fn) => fn()
 		}),
-		collectSupportedTokens({
-			totalEnabled: enabledSolProviders.length,
-			fetchTokenSets: buildFetchTokenSets({
-				providers: enabledSolProviders,
-				callFn: (fn) => fn()
-			})
+		resolveProviderGroup({
+			providers: evmSwapProviders,
+			sourceCategory: 'evm',
+			callFn: (fn) => fn()
+		}),
+		resolveProviderGroup({
+			providers: solSwapProviders,
+			sourceCategory: 'sol',
+			callFn: (fn) => fn()
 		})
 	]);
 
-	swapSupportedTokensStore.set({ icp, evm, sol });
+	const icpResolutions = [...icpProviders, ...icpBridgeProvidersResolved];
+
+	const aggregated: SwapSupportedTokensData = {
+		icp: aggregateCategory(icpResolutions),
+		evm: aggregateCategory(evmProviders),
+		sol: aggregateCategory(solProviders)
+	};
+
+	const providers: SwapProviderSupport[] = [...icpResolutions, ...evmProviders, ...solProviders];
+
+	swapSupportedTokensStore.set({ aggregated, providers });
 };
