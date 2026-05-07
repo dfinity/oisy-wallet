@@ -1,7 +1,7 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
+import { errorSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { SignupsClosedError, UserProfileNotFoundError } from '$lib/types/errors';
 import type { NullishIdentity } from '$lib/types/identity';
@@ -105,11 +105,8 @@ export const loadUserProfile = async ({
 			return { success: false, err: 'signups-closed' };
 		}
 
-		const { init } = get(i18n);
-		toastsError({
-			msg: { text: init.error.loading_profile },
-			err
-		});
+		consoleError(err);
+		await errorSignOut(get(i18n).init.error.loading_profile);
 		return { success: false, err: 'unknown' };
 	}
 

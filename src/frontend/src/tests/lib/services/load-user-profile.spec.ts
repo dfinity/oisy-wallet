@@ -1,5 +1,6 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
+import * as authServices from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { SignupsClosedError } from '$lib/types/errors';
@@ -118,22 +119,30 @@ describe('load-user-profile.services', () => {
 			expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
 		});
 
-		it('should handle errors when loading the user profile', async () => {
+		it('should sign out and surface unknown error when loading the user profile fails', async () => {
 			vi.spyOn(backendApi, 'getUserProfile').mockRejectedValue(new Error('Error'));
+			const errorSignOutSpy = vi
+				.spyOn(authServices, 'errorSignOut')
+				.mockResolvedValue();
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
 			expect(result).toEqual({ success: false, err: 'unknown' });
+			expect(errorSignOutSpy).toHaveBeenCalledExactlyOnceWith(en.init.error.loading_profile);
 		});
 
-		it('should handle unknown error from getUserProfile', async () => {
+		it('should sign out and surface unknown error when getUserProfile returns an unknown variant', async () => {
 			vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue({
 				Err: { InternalError: null } as never
 			});
+			const errorSignOutSpy = vi
+				.spyOn(authServices, 'errorSignOut')
+				.mockResolvedValue();
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
 			expect(result).toEqual({ success: false, err: 'unknown' });
+			expect(errorSignOutSpy).toHaveBeenCalledExactlyOnceWith(en.init.error.loading_profile);
 		});
 
 		it('should surface signups-closed when createUserProfile rejects with SignupsClosedError', async () => {
