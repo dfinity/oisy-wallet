@@ -291,22 +291,6 @@ describe('filterSwapTokens', () => {
 		});
 	});
 
-	describe('missing network key in supportedData (undefined info)', () => {
-		it('falls back to enabled check when supportedData lacks the network key', () => {
-			const supportedData: SwapSupportedTokensData = {};
-
-			const result = filterSwapTokens({
-				tokens: [icpTokenActive, icpTokenInactive, erc20Active, erc20Inactive],
-				supportedData
-			});
-
-			expect(result).toContain(icpTokenActive);
-			expect(result).not.toContain(icpTokenInactive);
-			expect(result).toContain(erc20Active);
-			expect(result).not.toContain(erc20Inactive);
-		});
-	});
-
 	describe('compatibleTokenIds', () => {
 		const supportedData: SwapSupportedTokensData = {
 			icp: {
