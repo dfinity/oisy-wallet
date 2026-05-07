@@ -1,3 +1,4 @@
+import {POLYGON_MAINNET_NETWORK} from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { USDCE_TOKEN_GROUP } from '$env/tokens/groups/groups.usdce.env';
 import usdce from '$eth/assets/usdc.svg';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
