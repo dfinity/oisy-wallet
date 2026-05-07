@@ -270,10 +270,10 @@
 				"description": "Der Hub der zukünftigen dezentralen Finanzwelt!<br/>ICPSwap erfindet die Börse als Hub neu und bietet umfassende Finanz-, Markt- und DAO-Dienste auf dem Internet-Computer. Basierend auf der zugrundeliegenden Technologie des Internet-Computers von DFINITY etabliert ICPSwap ein Ökosystem für wirklich dezentrale Finanzwelt, indem es die Art und Weise, wie Nutzer und Entwickler gemeinsam Projekte erstellen, neu gestaltet."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "Die NNS-Front-End-Dapp ermöglicht jedem die Interaktion mit dem Netzwerknervensystem des Internetcomputers über eine benutzerfreundliche Benutzeroberfläche.",
-				"call_to_action": "Öffne NNS Dapp",
-				"description": "Die NNS-Frontend-Dapp ermöglicht jedem die Interaktion mit dem Netzwerknervensystem des Internetcomputers über eine benutzerfreundliche Oberfläche. Diese dezentrale Dapp wird vollständig durchgängig über die Blockchain bereitgestellt und ermöglicht Ihnen die einfache Durchführung folgender Aktionen:<br/><ul><li>Token senden und empfangen (ICP, ckBTC, CHAT usw.)</li><li>Neuronen staken und verwalten</li><li>Über die Governance des Internetcomputers und der SNSes abstimmen</li><li>An Dezentralisierungs-Swaps teilnehmen</li><li>Kanister erstellen und aufladen</li><li>Governance-Belohnungen erhalten</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Governance-Plattform für den Internet Computer, die Nutzern ermöglicht, zu staken, abzustimmen und die Netzwerkaktivität zu verfolgen.",
+				"call_to_action": "An der ICP-Governance teilnehmen",
+				"description": "Die NNS-Anwendung ist eine Governance-Plattform für den Internet Computer (ICP), die Nutzern ermöglicht, Token zu staken, an Abstimmungen teilzunehmen und Netzwerkaktivitäten zu verfolgen.<br/><br/>Sie bietet mehr Transparenz bei Benutzeraktionen und Governance-Aktivitäten und hilft Nutzern zu verstehen, wie Staking, Abstimmungen und Beteiligung zum breiteren Ökosystem beitragen."
 			},
 			"uniswap": {
 				"name": "Uniswap",

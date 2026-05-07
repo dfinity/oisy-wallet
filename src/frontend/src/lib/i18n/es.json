@@ -270,10 +270,10 @@
 				"description": "¡El Centro de las Finanzas Descentralizadas del Futuro!<br/>Reinventando el Exchange como un Hub, ICPSwap proporciona servicios financieros, de mercado y de DAO de pila completa en Internet Computer. Basado en la tecnología subyacente de Internet Computer de DFINITY, ICPSwap establece un ecosistema de finanzas verdaderamente descentralizadas al refactorizar la forma en que los usuarios y desarrolladores construyen proyectos conjuntamente."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "La dapp de frontend de NNS permite a cualquiera interactuar con el Sistema Nervioso de Red de Internet Computer con una interfaz de usuario amigable.",
-				"call_to_action": "Participa",
-				"description": "La dapp de frontend de NNS permite a cualquiera interactuar con el Sistema Nervioso de Red de Internet Computer con una interfaz de usuario amigable. Servida completamente de extremo a extremo a través de la blockchain, esta dapp descentralizada te permite realizar fácilmente las siguientes acciones:<br/><ul><li>Enviar y recibir tokens (ICP, ckBTC, CHAT, etc.)</li><li>Hacer staking y gestionar neuronas</li><li>Votar en la gobernanza de Internet Computer y las SNSes</li><li>Participar en intercambios de descentralización</li><li>Crear y recargar canisters</li><li>Ganar recompensas de gobernanza</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Plataforma de gobernanza para Internet Computer que permite a los usuarios hacer staking, votar y seguir la actividad de la red.",
+				"call_to_action": "Participar en la gobernanza de ICP",
+				"description": "La aplicación NNS es una plataforma de gobernanza para Internet Computer (ICP) que permite a los usuarios hacer staking de tokens, participar en votaciones y seguir la actividad de la red.<br/><br/>Aporta mayor visibilidad a las acciones de los usuarios y la actividad de gobernanza, ayudando a los usuarios a comprender cómo el staking, la votación y la participación contribuyen al ecosistema más amplio."
 			},
 			"uniswap": {
 				"name": "Uniswap",
