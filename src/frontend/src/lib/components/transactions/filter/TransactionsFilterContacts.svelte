@@ -13,7 +13,10 @@
 		if (selectedSet.size === 0) {
 			return $i18n.transaction.filter.contacts_label;
 		}
+
 		const first = $sortedContacts.find((c) => selectedSet.has(c.id.toString()));
+		
+		
 		return first?.name ?? $i18n.transaction.filter.contacts_label;
 	});
 </script>
