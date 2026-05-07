@@ -38,10 +38,13 @@
 		if (selectedSet.size === 0) {
 			return $i18n.transaction.filter.tokens_label;
 		}
+		
 		const first = sortedTokens.find((t) => {
 			const key = tokenKey(t);
+			
 			return nonNullish(key) && selectedSet.has(key);
 		});
+		
 		return first?.symbol ?? $i18n.transaction.filter.tokens_label;
 	});
 </script>
@@ -63,6 +66,7 @@
 		<ul class="m-0 flex list-none flex-col gap-1 p-0">
 			{#each filteredTokens as token (token.id.description)}
 				{@const key = tokenKey(token)}
+				
 				{#if nonNullish(key)}
 					<li class="flex items-center gap-2">
 						<Checkbox
@@ -73,8 +77,10 @@
 						>
 							<span class="flex items-center gap-2">
 								<TokenLogo data={token} logoSize="xxs" />
+								
 								<span class="text-sm">
 									<span class="font-medium">{token.symbol}</span>
+									
 									<span class="text-tertiary"
 										>{replacePlaceholders($i18n.tokens.text.on_network, {
 											$network: token.network.name
