@@ -1313,7 +1313,6 @@ interface I18nTransaction {
 		clear: string;
 		sheet_title: string;
 		open_filters_aria_label: string;
-		showing_partial: string;
 	};
 	label: {
 		reimbursement: string;

@@ -124,19 +124,7 @@
 	);
 </script>
 
-<!--
-	The toolbar is sticky in its OWN stacking context at z-10. Each
-	TransactionsDateGroup uses StickyHeader internally which creates a
-	z-3 stacking context per date label; if the toolbar were also wrapped
-	in <StickyHeader> (z-3), the gix Popover that the chips open would be
-	trapped inside the toolbar's z-3 context and the date stickies (also
-	z-3, but rendered later in DOM) would paint above it. Using z-10 here
-	puts the popover's containing stacking context above all date z-3
-	contexts, so the dropdown content paints on top of the date headers.
--->
-<div class="sticky top-0 z-10 -mx-1 bg-page px-1 pt-6 pb-3">
-	<TransactionsFilterToolbar />
-</div>
+<TransactionsFilterToolbar />
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader transactions={allTransactions}>

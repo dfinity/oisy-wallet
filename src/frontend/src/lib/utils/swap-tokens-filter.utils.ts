@@ -37,28 +37,32 @@ export const resolveSwapTokenLookup = ({
 	supportedData
 }: {
 	token: Token;
-	supportedData: SwapSupportedTokensData;
+	supportedData?: SwapSupportedTokensData;
 }):
-	| { info: SwapSupportedTokensInfo; identifier: string; category: 'icp' | 'evm' | 'sol' }
+	| {
+			info: SwapSupportedTokensInfo | undefined;
+			identifier: string;
+			category: 'icp' | 'evm' | 'sol';
+	  }
 	| undefined => {
 	if (isIcToken(token)) {
-		return { info: supportedData.icp, identifier: token.ledgerCanisterId, category: 'icp' };
+		return { info: supportedData?.icp, identifier: token.ledgerCanisterId, category: 'icp' };
 	}
 
 	if (isTokenErcFungible(token)) {
-		return { info: supportedData.evm, identifier: token.address.toLowerCase(), category: 'evm' };
+		return { info: supportedData?.evm, identifier: token.address.toLowerCase(), category: 'evm' };
 	}
 
 	if (isTokenSpl(token)) {
-		return { info: supportedData.sol, identifier: token.address, category: 'sol' };
+		return { info: supportedData?.sol, identifier: token.address, category: 'sol' };
 	}
 
 	if (isTokenEthereumNative(token)) {
-		return { info: supportedData.evm, identifier: token.symbol.toLowerCase(), category: 'evm' };
+		return { info: supportedData?.evm, identifier: token.symbol.toLowerCase(), category: 'evm' };
 	}
 
 	if (isTokenSolanaNative(token)) {
-		return { info: supportedData.sol, identifier: token.symbol.toLowerCase(), category: 'sol' };
+		return { info: supportedData?.sol, identifier: token.symbol.toLowerCase(), category: 'sol' };
 	}
 };
 
