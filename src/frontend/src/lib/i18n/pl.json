@@ -270,10 +270,10 @@
 				"description": "Centrum przyszłych zdecentralizowanych finansów!<br/>Przeobrażając giełdę w centrum, ICPSwap zapewnia pełne usługi finansowe, rynkowe i DAO na Internet Computer. Opierając się na podstawowej technologii Internet Computer firmy DFINITY, ICPSwap tworzy ekosystem prawdziwie zdecentralizowanych finansów poprzez restrukturyzację sposobu, w jaki użytkownicy i deweloperzy wspólnie tworzą projekty."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "Aplikacja NNS front-end dapp pozwala każdemu na interakcję z systemem nerwowym sieci Internet Computer za pomocą przyjaznego interfejsu użytkownika.",
-				"call_to_action": "Zaangażuj się",
-				"description": "Aplikacja NNS front-end dapp pozwala każdemu na interakcję z systemem nerwowym sieci Internet Computer za pomocą przyjaznego interfejsu użytkownika. Serwowana w całości end-to-end za pośrednictwem blockchaina, ta zdecentralizowana aplikacja pozwala na łatwe wykonywanie następujących czynności:<br/><ul><li>Wysyłanie i odbieranie tokenów (ICP, ckBTC, CHAT itp.)</li><li>Stakowanie i zarządzanie neuronami</li><li>Głosowanie w sprawie zarządzania Internet Computer i SNSes</li><li>Uczestnictwo w swapach decentralizacyjnych</li><li>Tworzenie i doładowywanie kanistrów</li><li>Zdobywanie nagród za zarządzanie</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Platforma governance dla Internet Computer umożliwiająca użytkownikom stakowanie, głosowanie i śledzenie aktywności sieci.",
+				"call_to_action": "Weź udział w governance ICP",
+				"description": "Aplikacja NNS to platforma governance dla Internet Computer (ICP), która umożliwia użytkownikom stakowanie tokenów, udział w głosowaniach i śledzenie aktywności sieci.<br/><br/>Zapewnia większą widoczność działań użytkowników i aktywności governance, pomagając użytkownikom zrozumieć, jak stakowanie, głosowanie i uczestnictwo przyczyniają się do szerszego ekosystemu."
 			},
 			"uniswap": {
 				"name": "Uniswap",

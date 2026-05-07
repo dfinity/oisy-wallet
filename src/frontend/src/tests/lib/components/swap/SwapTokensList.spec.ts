@@ -1,26 +1,20 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
-import { ONESEC_EVM_NETWORK_IDS } from '$lib/constants/swap.constants';
 import { MODAL_TOKENS_LIST } from '$lib/constants/test-ids.constants';
 import {
 	initModalTokensListContext,
 	MODAL_TOKENS_LIST_CONTEXT_KEY
 } from '$lib/stores/modal-tokens-list.store';
+import {
+	swapSupportedTokensStore,
+	type SwapSupportedTokensData
+} from '$lib/stores/swap-supported-tokens.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
-import * as oneSecSwapUtils from '$lib/utils/onesec-swap.utils';
-import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
-
-vi.mock('$lib/utils/onesec-swap.utils', async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...(actual as Record<string, unknown>),
-		oneSecCompatibleDestinations: vi.fn()
-	};
-});
 
 describe('SwapTokensList', () => {
 	const props = {
@@ -31,13 +25,20 @@ describe('SwapTokensList', () => {
 
 	const destinationProps = { ...props, side: 'destination' as const };
 
-	const mockContext = (sourceToken?: Token) => {
+	const mockContext = ({
+		sourceToken,
+		receiveSupportedData
+	}: {
+		sourceToken?: Token;
+		receiveSupportedData?: SwapSupportedTokensData;
+	} = {}) => {
 		const result = new Map();
 
 		result.set(SWAP_CONTEXT_KEY, {
 			sourceToken: readable(sourceToken),
 			destinationToken: readable(mockValidIcCkToken),
-			destinationTokenExchangeRate: readable(0.00002)
+			destinationTokenExchangeRate: readable(0.00002),
+			receiveSupportedData: readable(receiveSupportedData)
 		});
 
 		result.set(MODAL_TOKENS_LIST_CONTEXT_KEY, initModalTokensListContext({ tokens: [ICP_TOKEN] }));
@@ -46,7 +47,7 @@ describe('SwapTokensList', () => {
 	};
 
 	beforeEach(() => {
-		vi.clearAllMocks();
+		swapSupportedTokensStore.reset();
 	});
 
 	it('renders tokens list', () => {
@@ -58,36 +59,44 @@ describe('SwapTokensList', () => {
 		expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 	});
 
-	it('does not call oneSecCompatibleDestinations when sourceToken is nullish', () => {
-		render(SwapTokensList, { props: destinationProps, context: mockContext() });
-
-		expect(oneSecSwapUtils.oneSecCompatibleDestinations).not.toHaveBeenCalled();
-	});
-
-	it('does not call oneSecCompatibleDestinations when side is source', () => {
-		render(SwapTokensList, {
-			props: { ...props, side: 'source' },
-			context: mockContext(mockValidIcToken)
+	it('renders tokens list on the destination side without a source', () => {
+		const { getByTestId } = render(SwapTokensList, {
+			props: destinationProps,
+			context: mockContext()
 		});
 
-		expect(oneSecSwapUtils.oneSecCompatibleDestinations).not.toHaveBeenCalled();
+		expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 	});
 
-	it('calls oneSecCompatibleDestinations with ICP sourceToken and ONESEC_EVM_NETWORK_IDS', () => {
-		render(SwapTokensList, { props: destinationProps, context: mockContext(mockValidIcToken) });
-
-		expect(oneSecSwapUtils.oneSecCompatibleDestinations).toHaveBeenCalledWith({
-			sourceToken: mockValidIcToken,
-			networkIds: ONESEC_EVM_NETWORK_IDS
+	it('renders tokens list on the destination side with receive supported data', () => {
+		swapSupportedTokensStore.set({
+			aggregated: {
+				icp: { coverage: 'all', supportedTokenIds: new Set() },
+				evm: { coverage: 'none', supportedTokenIds: new Set() },
+				sol: { coverage: 'none', supportedTokenIds: new Set() }
+			},
+			providers: [
+				{
+					key: SwapProvider.ONE_SEC,
+					sourceCategory: 'icp',
+					supportedSourceTokens: new Set([mockValidIcToken.ledgerCanisterId]),
+					getSupportedDestinations: () => undefined
+				}
+			]
 		});
-	});
 
-	it('calls oneSecCompatibleDestinations with EVM sourceToken and ONESEC_EVM_NETWORK_IDS', () => {
-		render(SwapTokensList, { props: destinationProps, context: mockContext(mockValidErc20Token) });
-
-		expect(oneSecSwapUtils.oneSecCompatibleDestinations).toHaveBeenCalledWith({
-			sourceToken: mockValidErc20Token,
-			networkIds: ONESEC_EVM_NETWORK_IDS
+		const { getByTestId } = render(SwapTokensList, {
+			props: destinationProps,
+			context: mockContext({
+				sourceToken: mockValidIcToken,
+				receiveSupportedData: {
+					icp: { coverage: 'all', supportedTokenIds: new Set() },
+					evm: { coverage: 'all', supportedTokenIds: new Set() },
+					sol: { coverage: 'all', supportedTokenIds: new Set() }
+				}
+			})
 		});
+
+		expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 	});
 });

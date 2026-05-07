@@ -1,11 +1,14 @@
 import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
-import { isTokenEthereumNative } from '$eth/utils/token.utils';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import type {
 	SwapProviderListCoverage,
+	SwapProviderSupport,
 	SwapSupportedTokensData,
 	SwapSupportedTokensInfo
 } from '$lib/stores/swap-supported-tokens.store';
+import type { Network, NetworkId } from '$lib/types/network';
+import type { SwapProvider, SwapTokenCategory } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -26,6 +29,12 @@ export const determineCoverage = ({
 	return withList >= totalEnabled ? 'all' : 'some';
 };
 
+interface SwapTokenLookup {
+	info: SwapSupportedTokensInfo | undefined;
+	identifier: string;
+	category: SwapTokenCategory;
+}
+
 /**
  * Resolves the provider-group info and the token identifier used for matching
  * against provider supported-token sets.
@@ -38,19 +47,21 @@ export const resolveSwapTokenLookup = ({
 }: {
 	token: Token;
 	supportedData?: SwapSupportedTokensData;
-}):
-	| {
-			info: SwapSupportedTokensInfo | undefined;
-			identifier: string;
-			category: 'icp' | 'evm' | 'sol';
-	  }
-	| undefined => {
+}): SwapTokenLookup | undefined => {
 	if (isIcToken(token)) {
-		return { info: supportedData?.icp, identifier: token.ledgerCanisterId, category: 'icp' };
+		return {
+			info: supportedData?.icp,
+			identifier: token.ledgerCanisterId,
+			category: 'icp'
+		};
 	}
 
 	if (isTokenErcFungible(token)) {
-		return { info: supportedData?.evm, identifier: token.address.toLowerCase(), category: 'evm' };
+		return {
+			info: supportedData?.evm,
+			identifier: token.address.toLowerCase(),
+			category: 'evm'
+		};
 	}
 
 	if (isTokenSpl(token)) {
@@ -58,11 +69,19 @@ export const resolveSwapTokenLookup = ({
 	}
 
 	if (isTokenEthereumNative(token)) {
-		return { info: supportedData?.evm, identifier: token.symbol.toLowerCase(), category: 'evm' };
+		return {
+			info: supportedData?.evm,
+			identifier: token.symbol.toLowerCase(),
+			category: 'evm'
+		};
 	}
 
 	if (isTokenSolanaNative(token)) {
-		return { info: supportedData?.sol, identifier: token.symbol.toLowerCase(), category: 'sol' };
+		return {
+			info: supportedData?.sol,
+			identifier: token.symbol.toLowerCase(),
+			category: 'sol'
+		};
 	}
 };
 
@@ -78,19 +97,13 @@ export const resolveSwapTokenLookup = ({
  * - S  = union of supported tokens across providers that expose a list
  * - A  = active (enabled) tokens
  * - I  = inactive (disabled) tokens
- *
- * The optional `compatibleTokenIds` parameter narrows destinations on a per-category basis.
- * Only categories present in the map are filtered; others pass through unchanged.
- * This lets cross-chain providers restrict EVM destinations without hiding same-chain ICP tokens.
  */
 export const filterSwapTokens = <T extends Token>({
 	tokens,
-	supportedData,
-	compatibleTokenIds
+	supportedData
 }: {
 	tokens: TokenToggleable<T>[];
 	supportedData: SwapSupportedTokensData | undefined;
-	compatibleTokenIds?: Partial<Record<'icp' | 'evm' | 'sol', Set<string>>>;
 }): TokenToggleable<T>[] => {
 	if (isNullish(supportedData)) {
 		return tokens;
@@ -99,36 +112,122 @@ export const filterSwapTokens = <T extends Token>({
 	return tokens.filter((token) => {
 		const lookup = resolveSwapTokenLookup({ token, supportedData });
 
-		if (isNullish(lookup)) {
+		if (isNullish(lookup) || isNullish(lookup.info)) {
 			return token.enabled;
 		}
 
-		const { info, identifier, category } = lookup;
-
-		if (isNullish(info)) {
-			return token.enabled;
-		}
-
+		const { info } = lookup;
 		const { coverage, supportedTokenIds } = info;
 
 		if (coverage === 'none') {
 			return token.enabled;
 		}
 
-		const isSupported = supportedTokenIds.has(identifier);
-		const passesCoverage = coverage === 'all' ? isSupported : token.enabled || isSupported;
+		const isSupported = supportedTokenIds.has(lookup.identifier);
+		return coverage === 'all' ? isSupported : token.enabled || isSupported;
+	});
+};
 
-		if (!passesCoverage) {
-			return false;
-		}
+interface CategoryAccum {
+	total: number;
+	withList: number;
+	ids: Set<string>;
+}
 
-		if (nonNullish(compatibleTokenIds)) {
-			const categoryFilter = compatibleTokenIds[category];
-			if (nonNullish(categoryFilter)) {
-				return categoryFilter.has(identifier);
+// A category with no supporting provider for the source is returned as coverage='all' with an
+// empty supported set, so filterSwapTokens rejects every token in this category (intersection
+// is empty). Each blocked category gets a fresh Set to avoid sharing mutable state.
+const toInfo = ({ total, withList, ids }: CategoryAccum): SwapSupportedTokensInfo =>
+	total === 0
+		? { coverage: 'all', supportedTokenIds: new Set() }
+		: {
+				coverage: determineCoverage({ totalEnabled: total, withList }),
+				supportedTokenIds: ids
+			};
+
+/**
+ * Aggregates per-provider directed-pair destinations for a given source token,
+ * producing data with the same shape as the pay-side `SwapSupportedTokensData`.
+ *
+ * Each provider's `getSupportedDestinations` returns:
+ * - `undefined`: provider does not support the source → skip.
+ * - `{}` (empty map): provider supports the source as a wildcard contributor with
+ *   no explicit destination list. Bumps the source category's `total` count only,
+ *   so the category falls back to coverage='some' / 'none' rules.
+ * - `{ icp: Set, evm: Set, ... }`: explicit destinations per category. Each populated
+ *   category bumps both `total` and `withList` and unions its IDs.
+ *
+ * A category with `total === 0` (no provider supports the source there) is returned
+ * as coverage='all' + empty supported set, which causes `filterSwapTokens` to drop
+ * every token of that category — preserving the directed-pair semantics.
+ */
+export const computeReceiveSupportedTokens = ({
+	sourceToken,
+	providers
+}: {
+	sourceToken: Token;
+	providers: SwapProviderSupport[];
+}): SwapSupportedTokensData => {
+	const accum: Record<SwapTokenCategory, CategoryAccum> = {
+		icp: { total: 0, withList: 0, ids: new Set() },
+		evm: { total: 0, withList: 0, ids: new Set() },
+		sol: { total: 0, withList: 0, ids: new Set() }
+	};
+
+	const findProviderSourceTokens = ({
+		key,
+		category
+	}: {
+		key: SwapProvider;
+		category: SwapTokenCategory;
+	}): Set<string> | undefined =>
+		providers.find((p) => p.key === key && p.sourceCategory === category)?.supportedSourceTokens;
+
+	for (const provider of providers) {
+		const dests = provider.getSupportedDestinations({
+			sourceToken,
+			supportedSourceTokens: provider.supportedSourceTokens,
+			findProviderSourceTokens
+		});
+
+		if (nonNullish(dests)) {
+			const entries = Object.entries(dests) as [SwapTokenCategory, Set<string>][];
+
+			if (entries.length === 0) {
+				accum[provider.sourceCategory].total++;
+			} else {
+				for (const [category, ids] of entries) {
+					accum[category].total++;
+					accum[category].withList++;
+					ids.forEach((id) => accum[category].ids.add(id));
+				}
 			}
 		}
+	}
 
-		return true;
-	});
+	return {
+		icp: toInfo(accum.icp),
+		evm: toInfo(accum.evm),
+		sol: toInfo(accum.sol)
+	};
+};
+
+/**
+ * Returns the subset of `networks` that have at least one token in `tokens`
+ * passing `filterSwapTokens` against `supportedData`.
+ */
+export const networksWithSupport = ({
+	networks,
+	tokens,
+	supportedData
+}: {
+	networks: Network[];
+	tokens: TokenToggleable<Token>[];
+	supportedData: SwapSupportedTokensData;
+}): NetworkId[] => {
+	const passingNetworkIds = new Set(
+		filterSwapTokens({ tokens, supportedData }).map((t) => t.network.id)
+	);
+
+	return networks.filter(({ id }) => passingNetworkIds.has(id)).map(({ id }) => id);
 };

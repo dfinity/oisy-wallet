@@ -34,6 +34,7 @@ import type {
 	EthCertifiedTransactionsData
 } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
@@ -592,7 +593,7 @@ describe('transactions.utils', () => {
 				});
 
 				expect(result).toHaveLength(2);
-				expect(result.every(({ token }) => token.standard.code !== 'ethereum')).toBeTruthy();
+				expect(result.every(({ token }) => !isTokenEthereumNative(token))).toBeTruthy();
 				expect(result.map(({ token }) => token)).toEqual([PEPE_TOKEN, USDC_TOKEN]);
 			});
 
