@@ -7,7 +7,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 
 export const USDCE_DECIMALS = 6;
 
-export const USDCE_SYMBOL = 'USDC';
+export const USDCE_SYMBOL = 'USDC.e';
 
 export const USDCE_TOKEN_ID: TokenId = parseTokenId(USDCE_SYMBOL);
 
