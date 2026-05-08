@@ -2,12 +2,12 @@ import TransactionsFilterTokensPanel from '$lib/components/transactions/filter/T
 import * as networkTokensDerived from '$lib/derived/network-tokens.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
-import { assertNonNullish } from '@dfinity/utils';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 

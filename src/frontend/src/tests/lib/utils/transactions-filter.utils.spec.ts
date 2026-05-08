@@ -3,7 +3,6 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { nonNullish } from '@dfinity/utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ContactUi } from '$lib/types/contact';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
@@ -21,6 +20,7 @@ import {
 	mockSolAddress,
 	mockSolAddress2
 } from '$tests/mocks/sol.mock';
+import { nonNullish } from '@dfinity/utils';
 import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
 
