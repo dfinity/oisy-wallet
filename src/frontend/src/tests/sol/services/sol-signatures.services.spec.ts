@@ -316,6 +316,21 @@ describe('sol-signatures.services', () => {
 			expect(spyFetchTransactionsForSignature).not.toHaveBeenCalled();
 		});
 
+		it('should skip parsing when exitIfFirstSignatureMatches equals the newest RPC signature', async () => {
+			const head = mockSignatures[0];
+
+			const transactions = await getSolTransactions({
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				exitIfFirstSignatureMatches: String(head.signature)
+			});
+
+			expect(transactions).toEqual([]);
+			expect(spyFetchSignatures).toHaveBeenCalledOnce();
+			expect(spyFetchTransactionsForSignature).not.toHaveBeenCalled();
+		});
+
 		it('should handle empty transactions responses', async () => {
 			spyFetchSignatures.mockReturnValue([mockSolSignatureResponse()]);
 			spyFetchTransactionsForSignature.mockReturnValue([]);
