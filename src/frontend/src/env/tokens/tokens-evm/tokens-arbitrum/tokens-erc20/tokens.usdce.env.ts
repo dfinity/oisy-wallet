@@ -18,7 +18,7 @@ export const USDCE_TOKEN: RequiredEvmErc20Token = {
 	standard: { code: 'erc20' },
 	category: 'default',
 	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
-	name: 'USD Coin Bridge',
+	name: 'USD Coin Bridged',
 	symbol: USDCE_SYMBOL,
 	decimals: USDCE_DECIMALS,
 	icon: usdce,
