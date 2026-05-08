@@ -3,8 +3,7 @@ import type { TransactionType } from '$lib/types/transaction';
 import { EMPTY_TRANSACTIONS_FILTER, type TransactionsFilter } from '$lib/types/transactions-filter';
 import { get as getStore } from 'svelte/store';
 
-// Bumped when the persisted token filter shape changes (e.g. composite token keys).
-export const TRANSACTIONS_FILTER_STORAGE_KEY = 'oisy_transactions_filter_v2';
+export const TRANSACTIONS_FILTER_STORAGE_KEY = 'oisy_transactions_filter';
 
 export interface TransactionsFilterStore extends StorageStore<TransactionsFilter> {
 	toggleType: (type: TransactionType) => void;
