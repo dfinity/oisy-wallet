@@ -43,25 +43,16 @@
 	let isCapped = $derived(searchValue.length === 0 && filteredContacts.length > VISIBLE_LIMIT);
 </script>
 
-<div class="flex flex-col">
-	<!--
-		The popover scrolls the panel as a whole (`MultiSelectDropdown`'s
-		wrapper has `max-h-80 overflow-y-auto`), so we make the search input
-		`sticky` with the popover background to keep it pinned at the top
-		while the rows scroll under it. `pb-3` reproduces the previous
-		`gap-3` spacing while also covering scrolled rows so they don't
-		bleed visually behind the input.
-	-->
-	<div class="sticky top-0 z-1 bg-primary pb-3">
-		<InputSearch
-			{autofocus}
-			placeholder={$i18n.transaction.filter.search_contacts_placeholder}
-			showResetButton={searchValue.length > 0}
-			bind:filter={searchValue}
-		/>
-	</div>
+<div class="flex flex-col gap-3">
+	<!-- See TransactionsFilterTokensPanel for the layout rationale. -->
+	<InputSearch
+		{autofocus}
+		placeholder={$i18n.transaction.filter.search_contacts_placeholder}
+		showResetButton={searchValue.length > 0}
+		bind:filter={searchValue}
+	/>
 
-	<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
+	<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
 		{#each visibleContacts as contact (contact.id.toString())}
 			{@const id = contact.id.toString()}
 			<li>
@@ -83,7 +74,7 @@
 	</ul>
 
 	{#if isCapped}
-		<p class="pt-3 text-xs text-tertiary">
+		<p class="text-xs text-tertiary">
 			{replacePlaceholders($i18n.transaction.filter.showing_partial, {
 				$shown: `${VISIBLE_LIMIT}`,
 				$total: `${filteredContacts.length}`
