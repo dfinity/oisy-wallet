@@ -33,20 +33,6 @@
 					return name.toLowerCase().includes(needle) || symbol.toLowerCase().includes(needle);
 				})
 	);
-
-	let triggerLabel = $derived.by(() => {
-		if (selectedSet.size === 0) {
-			return $i18n.transaction.filter.tokens_label;
-		}
-
-		const first = sortedTokens.find((t) => {
-			const key = tokenKey(t);
-
-			return nonNullish(key) && selectedSet.has(key);
-		});
-
-		return first?.symbol ?? $i18n.transaction.filter.tokens_label;
-	});
 </script>
 
 <MultiSelectDropdown
@@ -55,7 +41,7 @@
 	searchPlaceholder={$i18n.transaction.filter.search_tokens_placeholder}
 	searchable
 	testId={TRANSACTIONS_FILTER_TOKENS_DROPDOWN}
-	{triggerLabel}
+	triggerLabel={$i18n.transaction.filter.tokens_label}
 	bind:searchValue
 >
 	{#snippet triggerIcon()}
