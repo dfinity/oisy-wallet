@@ -74,9 +74,7 @@
 				/>
 			{/if}
 
-			<div class="flex max-h-80 flex-col overflow-y-auto">
-				{@render panel()}
-			</div>
+			{@render panel()}
 		</div>
 	{/snippet}
 </ResponsivePopover>

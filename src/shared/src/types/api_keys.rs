@@ -8,9 +8,9 @@ pub struct ApiKeys {
     pub infura_api_key: Option<String>,
     pub alchemy_api_key: Option<String>,
     pub coingecko_api_key: Option<String>,
-    /// When `Some(true)` the backend periodically fetches exchange rates via
-    /// HTTP outcalls.  Any other value (including the default `None`) keeps the
-    /// feature disabled so no cycles are spent on outcalls.
+    /// When `Some(false)`, periodic exchange-rate HTTP outcalls are disabled (even with a
+    /// `CoinGecko` key). When `None` or `Some(true)`, outcalls run iff `coingecko_api_key` is set
+    /// (misconfiguration with no key does not run refresh).
     pub exchange_rate_enabled: Option<bool>,
 }
 
@@ -23,10 +23,7 @@ impl Debug for ApiKeys {
             .field("infura_api_key", &redact(&self.infura_api_key))
             .field("alchemy_api_key", &redact(&self.alchemy_api_key))
             .field("coingecko_api_key", &redact(&self.coingecko_api_key))
-            .field(
-                "exchange_rate_enabled",
-                &self.exchange_rate_enabled.unwrap_or(false),
-            )
+            .field("exchange_rate_enabled", &self.exchange_rate_enabled)
             .finish()
     }
 }
