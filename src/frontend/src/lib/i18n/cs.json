@@ -1156,7 +1156,7 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
-			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až minutu.)",
+			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až 2 minuty.)",
 			"network_cost": "Náklady sítě",
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
