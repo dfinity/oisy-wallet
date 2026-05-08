@@ -1166,7 +1166,7 @@
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": ""
+			"value_difference_missing_price_confirmation": "No se pudo obtener el precio de al menos uno de los tokens. Por favor, <strong>verifica de forma independiente</strong> que esta oferta de intercambio sea justa.<br>Ten en cuenta que la configuración de slippage <strong>no</strong> te protege de una oferta con un valor de recepción mucho menor."
 		},
 		"error": {
 			"kong_not_available": "Actualmente no hay ningún exchange disponible para intercambiar tokens. Por favor, inténtalo de nuevo más tarde.",
