@@ -1156,7 +1156,7 @@
 			"select_token": "Selecionar token",
 			"select_network_filter": "Selecionar rede",
 			"withdrawing": "A retirar...",
-			"bridging": "Realizando o bridge... (Por favor, tenha paciência, isso pode levar até um minuto.)",
+			"bridging": "Realizando o bridge... (Por favor, tenha paciência, isso pode levar até 2 minutos.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",

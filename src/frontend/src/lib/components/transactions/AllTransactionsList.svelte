@@ -125,7 +125,17 @@
 	);
 </script>
 
-<StickyHeader>
+<!--
+	Each `TransactionsDateGroup` uses `StickyHeader` internally at the
+	default `z-3`, creating a sibling stacking context per date label. If
+	the toolbar's `StickyHeader` were also at `z-3`, the gix Popover that
+	the chips open would be trapped inside the toolbar's `z-3` context and
+	the date stickies (also `z-3`, but rendered later in DOM) would paint
+	on top of it — visually freezing the dropdown. Using `zIndex={10}`
+	lifts the popover's containing stacking context above every date `z-3`
+	context, so the dropdown content paints on top of the date headers.
+-->
+<StickyHeader zIndex={10}>
 	{#snippet header()}
 		<TransactionsFilterToolbar />
 	{/snippet}
