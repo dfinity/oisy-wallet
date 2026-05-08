@@ -1,5 +1,5 @@
 import TransactionsFilterTokensPanel from '$lib/components/transactions/filter/TransactionsFilterTokensPanel.svelte';
-import * as allTokensDerived from '$lib/derived/all-tokens.derived';
+import * as networkTokensDerived from '$lib/derived/network-tokens.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import type { Token } from '$lib/types/token';
@@ -9,11 +9,13 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-const mockAllFungibleTokens = (tokens: Token[]) => {
-	vi.spyOn(allTokensDerived.allFungibleTokens, 'subscribe').mockImplementation((fn) => {
-		fn(tokens);
-		return () => {};
-	});
+const mockEnabledFungibleNetworkTokens = (tokens: Token[]) => {
+	vi.spyOn(networkTokensDerived.enabledFungibleNetworkTokens, 'subscribe').mockImplementation(
+		(fn) => {
+			fn(tokens);
+			return () => {};
+		}
+	);
 };
 
 const buildToken = ({ id, name, symbol }: { id: string; name: string; symbol: string }): Token => ({
@@ -32,7 +34,7 @@ describe('TransactionsFilterTokensPanel', () => {
 		vi.restoreAllMocks();
 		localStorage.clear();
 		transactionsFilterStore.clear();
-		mockAllFungibleTokens([tokenBeta, tokenAlpha, tokenGamma]);
+		mockEnabledFungibleNetworkTokens([tokenBeta, tokenAlpha, tokenGamma]);
 	});
 
 	it('renders one row per fungible token, alphabetically sorted by name', () => {
@@ -109,7 +111,7 @@ describe('TransactionsFilterTokensPanel', () => {
 				symbol: `T${i.toString().padStart(3, '0')}`
 			})
 		);
-		mockAllFungibleTokens(tokens);
+		mockEnabledFungibleNetworkTokens(tokens);
 
 		const { container, getByText } = render(TransactionsFilterTokensPanel);
 
@@ -131,7 +133,7 @@ describe('TransactionsFilterTokensPanel', () => {
 				symbol: `T${i.toString().padStart(3, '0')}`
 			})
 		);
-		mockAllFungibleTokens(tokens);
+		mockEnabledFungibleNetworkTokens(tokens);
 
 		const { container, getByPlaceholderText } = render(TransactionsFilterTokensPanel);
 
