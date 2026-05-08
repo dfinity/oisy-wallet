@@ -179,7 +179,7 @@
 				{/snippet}
 
 				<label
-					class="align-top text-sm leading-tight"
+					class="align-top text-sm leading-[1.1]"
 					for="swap-review-value-difference-confirmation"
 				>
 					{isValueDifferenceError
