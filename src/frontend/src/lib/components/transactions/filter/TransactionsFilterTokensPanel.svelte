@@ -85,7 +85,7 @@
 		{#each visibleTokens as token (tokenRenderKey(token))}
 			{@const key = tokenFilterKey(token)}
 			{@const rowKey = tokenRenderKey(token)}
-			
+
 			{#if nonNullish(key)}
 				<li>
 					<Checkbox
