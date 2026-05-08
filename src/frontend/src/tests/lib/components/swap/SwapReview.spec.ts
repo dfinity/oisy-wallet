@@ -350,7 +350,7 @@ describe('SwapReview', () => {
 			const { getByText } = renderWithMissingPrice();
 
 			expect(
-				getByText(en.swap.text.value_difference_missing_price_confirmation)
+				getByText(/The price for at least one of the tokens could not be retrieved/)
 			).toBeInTheDocument();
 		});
 

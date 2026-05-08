@@ -179,9 +179,11 @@
 				{/snippet}
 
 				<label class="block text-sm leading-snug" for="swap-review-value-difference-confirmation">
-					{isValueDifferenceError
-						? $i18n.swap.text.value_difference_error_confirmation
-						: $i18n.swap.text.value_difference_missing_price_confirmation}
+					<Html
+						text={isValueDifferenceError
+							? $i18n.swap.text.value_difference_error_confirmation
+							: $i18n.swap.text.value_difference_missing_price_confirmation}
+					/>
 				</label>
 			</MessageBox>
 		</div>
