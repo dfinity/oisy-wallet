@@ -570,13 +570,13 @@ describe('token.utils', () => {
 
 		describe.each([
 			{
-				description: 'Suggested native ICRC token USDC',
-				token: dummyIcUSDC,
-				setupMock: setupIcrcSuggestedTokenMock
+				description: 'Suggested ICRC token ckUSDT',
+				token: dummyCkUSDT,
+				setupMock: setupSuggestedTokenMock
 			},
 			{
-				description: 'Suggested native ICRC token USDT',
-				token: dummyIcUSDT,
+				description: 'Suggested native ICRC token USDC',
+				token: dummyIcUSDC,
 				setupMock: setupIcrcSuggestedTokenMock
 			},
 			{ description: 'Suggested ERC20 token USDC', token: USDC_TOKEN },
