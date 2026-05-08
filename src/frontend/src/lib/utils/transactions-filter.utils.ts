@@ -1,8 +1,25 @@
 import type { ContactUi } from '$lib/types/contact';
+import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { TransactionsFilter } from '$lib/types/transactions-filter';
 import { filterAddressFromContact } from '$lib/utils/contact.utils';
 import { assertNever, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+
+/**
+ * Stable key for activity token filters. Token `id.description` alone is not
+ * unique across networks (e.g. native ETH reuses `Symbol('ETH')` on Ethereum
+ * and Base); pairing with the network id matches list rows and transactions.
+ */
+export const transactionsFilterTokenKey = (token: Token): string | undefined => {
+	const tokenDesc = token.id.description;
+	const networkDesc = token.network.id.description;
+
+	if (isNullish(tokenDesc) || isNullish(networkDesc)) {
+		return undefined;
+	}
+
+	return `${tokenDesc}-${networkDesc}`;
+};
 
 const candidateAddresses = (transactionUi: AllTransactionUiWithCmp): string[] => {
 	const collected: (string | undefined)[] = [];
@@ -92,7 +109,7 @@ export const applyTransactionsFilter = ({
 		}
 
 		if (hasTokenFilter) {
-			const tokenKey = transactionUi.token.id.description;
+			const tokenKey = transactionsFilterTokenKey(transactionUi.token);
 			if (isNullish(tokenKey) || !tokenSet.has(tokenKey)) {
 				return false;
 			}
