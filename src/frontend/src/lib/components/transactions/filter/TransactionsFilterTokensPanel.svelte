@@ -35,6 +35,9 @@
 	const tokenRenderKey = (token: Token): string =>
 		`${token.id.description}-${token.network.id.description}`;
 
+	const tokenInputId = (token: Token): string =>
+		`transactions-filter-token-${tokenRenderKey(token).replace(/[^A-Za-z0-9_-]/g, '-')}`;
+
 	let sortedTokens = $derived(
 		[
 			...new Map(
@@ -84,13 +87,12 @@
 	<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
 		{#each visibleTokens as token (tokenRenderKey(token))}
 			{@const key = tokenFilterKey(token)}
-			{@const rowKey = tokenRenderKey(token)}
 
 			{#if nonNullish(key)}
 				<li>
 					<Checkbox
 						checked={selectedSet.has(key)}
-						inputId={`transactions-filter-token-${rowKey}`}
+						inputId={tokenInputId(token)}
 						text="inline"
 						on:nnsChange={() => transactionsFilterStore.toggleTokenId(key)}
 					>
