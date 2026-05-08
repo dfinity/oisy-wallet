@@ -178,7 +178,10 @@
 					/>
 				{/snippet}
 
-				<label class="align-top text-sm" for="swap-review-value-difference-confirmation">
+				<label
+					class="align-top text-sm leading-tight"
+					for="swap-review-value-difference-confirmation"
+				>
 					{isValueDifferenceError
 						? $i18n.swap.text.value_difference_error_confirmation
 						: $i18n.swap.text.value_difference_missing_price_confirmation}
