@@ -44,7 +44,6 @@
 </script>
 
 <div class="flex flex-col gap-3">
-	<!-- See TransactionsFilterTokensPanel for the layout rationale. -->
 	<InputSearch
 		{autofocus}
 		placeholder={$i18n.transaction.filter.search_contacts_placeholder}
