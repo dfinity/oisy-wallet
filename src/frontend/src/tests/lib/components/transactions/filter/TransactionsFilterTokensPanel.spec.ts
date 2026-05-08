@@ -69,7 +69,9 @@ describe('TransactionsFilterTokensPanel', () => {
 	it('toggles the corresponding token id in the store when a checkbox changes', async () => {
 		const { container } = render(TransactionsFilterTokensPanel);
 
-		const input = container.querySelector<HTMLInputElement>(`input[id="${tokenInputId(tokenAlpha)}"]`);
+		const input = container.querySelector<HTMLInputElement>(
+			`input[id="${tokenInputId(tokenAlpha)}"]`
+		);
 
 		expect(input).not.toBeNull();
 
