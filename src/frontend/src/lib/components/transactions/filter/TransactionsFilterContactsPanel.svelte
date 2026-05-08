@@ -51,7 +51,9 @@
 					on:nnsChange={() => transactionsFilterStore.toggleContactId(id)}
 				>
 					<span class="inline-flex items-center gap-2">
-						<Avatar name={contact.name} image={contact.image} variant="xxs" />
+						<span class="flex shrink-0 items-center">
+							<Avatar name={contact.name} image={contact.image} variant="xxs" />
+						</span>
 						<span class="text-sm">{contact.name}</span>
 					</span>
 				</Checkbox>
@@ -75,7 +77,9 @@
 		--checkbox-label-order: 1;
 		--checkbox-padding: 6px 8px;
 		justify-content: flex-start;
+		align-items: center;
 		gap: 8px;
+		min-height: 32px;
 		border-radius: 6px;
 		cursor: pointer;
 	}
@@ -86,5 +90,7 @@
 
 	li :global(label) {
 		flex: initial;
+		display: inline-flex;
+		align-items: center;
 	}
 </style>

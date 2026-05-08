@@ -5,7 +5,7 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import MultiSelectDropdown from '$lib/components/ui/MultiSelectDropdown.svelte';
 	import { TRANSACTIONS_FILTER_TOKENS_DROPDOWN } from '$lib/constants/test-ids.constants';
-	import { allFungibleTokens } from '$lib/derived/all-tokens.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { Token } from '$lib/types/token';
@@ -18,7 +18,7 @@
 	const tokenKey = (token: Token): string | undefined => token.id.description;
 
 	let sortedTokens = $derived(
-		[...$allFungibleTokens].sort((a, b) =>
+		[...$enabledFungibleNetworkTokens].sort((a, b) =>
 			(a.name ?? a.symbol).localeCompare(b.name ?? b.symbol, undefined, {
 				sensitivity: 'base'
 			})
@@ -33,20 +33,6 @@
 					return name.toLowerCase().includes(needle) || symbol.toLowerCase().includes(needle);
 				})
 	);
-
-	let triggerLabel = $derived.by(() => {
-		if (selectedSet.size === 0) {
-			return $i18n.transaction.filter.tokens_label;
-		}
-
-		const first = sortedTokens.find((t) => {
-			const key = tokenKey(t);
-
-			return nonNullish(key) && selectedSet.has(key);
-		});
-
-		return first?.symbol ?? $i18n.transaction.filter.tokens_label;
-	});
 </script>
 
 <MultiSelectDropdown
@@ -55,7 +41,7 @@
 	searchPlaceholder={$i18n.transaction.filter.search_tokens_placeholder}
 	searchable
 	testId={TRANSACTIONS_FILTER_TOKENS_DROPDOWN}
-	{triggerLabel}
+	triggerLabel={$i18n.transaction.filter.tokens_label}
 	bind:searchValue
 >
 	{#snippet triggerIcon()}

@@ -1,6 +1,6 @@
 import TransactionsFilterMobileSheet from '$lib/components/transactions/filter/TransactionsFilterMobileSheet.svelte';
-import * as allTokensDerived from '$lib/derived/all-tokens.derived';
 import * as contactsDerived from '$lib/derived/contacts.derived';
+import * as networkTokensDerived from '$lib/derived/network-tokens.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -12,10 +12,12 @@ describe('TransactionsFilterMobileSheet', () => {
 		localStorage.clear();
 		transactionsFilterStore.clear();
 
-		vi.spyOn(allTokensDerived.allFungibleTokens, 'subscribe').mockImplementation((fn) => {
-			fn([]);
-			return () => {};
-		});
+		vi.spyOn(networkTokensDerived.enabledFungibleNetworkTokens, 'subscribe').mockImplementation(
+			(fn) => {
+				fn([]);
+				return () => {};
+			}
+		);
 		vi.spyOn(contactsDerived.allContacts, 'subscribe').mockImplementation((fn) => {
 			fn([]);
 			return () => {};
