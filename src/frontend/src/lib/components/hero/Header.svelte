@@ -22,7 +22,7 @@
 	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 
-	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
+	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340).
 	let networkSwitcherOpen = $state(false);
 	let menuOpen = $state(false);
 
@@ -32,7 +32,18 @@
 		$modalWalletConnect || $modalUniversalScannerOpen || $modalPayDialogOpen
 	);
 
-	let biggerOverlay = $derived(menuOpen || networkSwitcherOpen || modalsOpen);
+	// Header-anchored popovers (user menu, network switcher) need the
+	// Header's stacking context to outrank the activity filter toolbar's
+	// `StickyHeader` (`z-10`, see `AllTransactionsList`). We do NOT bump
+	// for modals — gix modals/bottom sheets already paint above the
+	// default Header at `z-14`, and bumping here would hide them behind
+	// the Header and capture pointer events on top of the modal backdrop.
+	// Likewise we do NOT raise the `1.5xl` signed-in default — banners
+	// (`Banner`, `PwaBanner`, `AgreementsGuard`) and `FullscreenMediaModal`
+	// all sit at `z-10` and would render behind the Header otherwise.
+	let popoverOpen = $derived(menuOpen || networkSwitcherOpen);
+
+	let biggerOverlay = $derived(popoverOpen || modalsOpen);
 
 	// When WalletConnect tries to connect, it adds the "Disconnect" label, increasing the width of the header.
 	// That causes the screen to expand, without auto-zooming, and the modals overflow outside of the screen.
@@ -47,11 +58,13 @@
 	class:1.5xl:fixed={$authSignedIn}
 	class:1.5xl:inset-x-0={$authSignedIn}
 	class:1.5xl:top-0={$authSignedIn}
-	class:1.5xl:z-10={$authSignedIn}
+	class:1.5xl:z-10={$authSignedIn && !popoverOpen}
+	class:1.5xl:z-20={$authSignedIn && popoverOpen}
 	class:pb-10={$authNotSignedIn}
 	class:sm:pb-8={$authNotSignedIn}
+	class:z-20={popoverOpen}
 	class:z-3={!biggerOverlay}
-	class:z-4={biggerOverlay}
+	class:z-4={modalsOpen && !popoverOpen}
 >
 	<div class="pointer-events-auto">
 		<OisyWalletLogoLink />

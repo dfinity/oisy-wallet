@@ -1156,7 +1156,7 @@
 			"select_token": "トークンを選択",
 			"select_network_filter": "ネットワークを選択",
 			"withdrawing": "出金中...",
-			"bridging": "ブリッジ中... (しばらくお待ちください。最大1分かかる場合があります。)",
+			"bridging": "ブリッジ中... (しばらくお待ちください。最大2分かかる場合があります。)",
 			"network_cost": "ネットワークコスト",
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
