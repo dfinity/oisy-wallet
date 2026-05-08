@@ -31,8 +31,11 @@
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
-	--toast-info-z-index: calc(var(--overlay-z-index) + 4);
-	--toast-error-z-index: calc(var(--overlay-z-index) + 5);
+	// Toasts sit above popovers (so they're never hidden by an open chip
+	// dropdown) but below modals and bottom sheets (so a bottom sheet open
+	// over the activity filters isn't covered by an incoming toast).
+	--toast-info-z-index: calc(var(--overlay-z-index) + 1);
+	--toast-error-z-index: calc(var(--overlay-z-index) + 2);
 
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
