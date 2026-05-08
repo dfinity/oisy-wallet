@@ -1166,7 +1166,7 @@
 			"onesec_transfer_fee": "Transfer fee",
 			"onesec_protocol_fee": "Protocol fee",
 			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed.",
-			"value_difference_missing_price_confirmation": "The price for at least one of the tokens involved in this swap could not be retrieved. Please verify independently that this swap offer provides a fair deal before proceeding."
+			"value_difference_missing_price_confirmation": "The price for at least one of the tokens involved in this swap could not be retrieved. Please verify independently that this swap offer provides a fair deal before proceeding. Note that the slippage setting does not protect you from a bad offer!"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
