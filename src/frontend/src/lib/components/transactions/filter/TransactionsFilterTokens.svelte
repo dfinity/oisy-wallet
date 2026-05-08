@@ -20,6 +20,6 @@
 	{/snippet}
 
 	{#snippet panel()}
-		<TransactionsFilterTokensPanel />
+		<TransactionsFilterTokensPanel autofocus />
 	{/snippet}
 </MultiSelectDropdown>
