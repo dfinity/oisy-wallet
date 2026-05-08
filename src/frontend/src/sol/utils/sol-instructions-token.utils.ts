@@ -6,6 +6,7 @@ import {
 	parseAmountToUiAmountInstruction,
 	parseApproveCheckedInstruction,
 	parseApproveInstruction,
+	parseBatchInstruction,
 	parseBurnCheckedInstruction,
 	parseBurnInstruction,
 	parseCloseAccountInstruction,
@@ -27,7 +28,9 @@ import {
 	parseThawAccountInstruction,
 	parseTransferCheckedInstruction,
 	parseTransferInstruction,
-	parseUiAmountToAmountInstruction
+	parseUiAmountToAmountInstruction,
+	parseUnwrapLamportsInstruction,
+	parseWithdrawExcessLamportsInstruction
 } from '@solana-program/token';
 import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/kit';
 
@@ -163,6 +166,21 @@ export const parseSolTokenInstruction = (
 			return {
 				...parseUiAmountToAmountInstruction(instruction),
 				instructionType: TokenInstruction.UiAmountToAmount
+			};
+		case TokenInstruction.WithdrawExcessLamports:
+			return {
+				...parseWithdrawExcessLamportsInstruction(instruction),
+				instructionType: TokenInstruction.WithdrawExcessLamports
+			};
+		case TokenInstruction.UnwrapLamports:
+			return {
+				...parseUnwrapLamportsInstruction(instruction),
+				instructionType: TokenInstruction.UnwrapLamports
+			};
+		case TokenInstruction.Batch:
+			return {
+				...parseBatchInstruction(instruction),
+				instructionType: TokenInstruction.Batch
 			};
 		default: {
 			assertNever(decodedInstruction, `Unknown Solana Token instruction: ${decodedInstruction}`);
