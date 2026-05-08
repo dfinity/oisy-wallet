@@ -247,25 +247,6 @@
 		},
 		"icon": "/icons/icrc/7rrmx-tyaaa-aaaal-qsraq-cai.png"
 	},
-	"USDC": {
-		"ledgerCanisterId": "53nhb-haaaa-aaaar-qbn5q-cai",
-		"indexCanisterId": "f4e7e-pqaaa-aaaar-qbpgq-cai",
-		"mintingAccount": "5okwm-giaaa-aaaar-qbn6a-cai",
-		"tags": [
-			{
-				"type": "category",
-				"value": "stablecoin"
-			}
-		],
-		"groupDataId": "USDC",
-		"decimals": 6,
-		"name": "USDC",
-		"symbol": "USDC",
-		"fee": {
-			"__bigint__": "10000"
-		},
-		"icon": "/icons/icrc/53nhb-haaaa-aaaar-qbn5q-cai.svg"
-	},
 	"USDT": {
 		"ledgerCanisterId": "ij33n-oiaaa-aaaar-qbooa-cai",
 		"indexCanisterId": "fvhuy-zyaaa-aaaar-qbpha-cai",
