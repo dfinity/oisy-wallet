@@ -9,6 +9,16 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	interface Props {
+		// When the panel is rendered inside a desktop dropdown popover the
+		// caller wants the search input to grab focus on open; when it's
+		// rendered inside the mobile bottom sheet we leave it unfocused so
+		// the on-screen keyboard does not pop up unprompted.
+		autofocus?: boolean;
+	}
+
+	const { autofocus = false }: Props = $props();
+
 	// Cap the visible list when the user has not searched yet.
 	// Mounting hundreds of <Checkbox> + <TokenLogo> rows synchronously when
 	// the popover opens blocks the main thread and the dropdown feels frozen.
@@ -46,12 +56,23 @@
 	let isCapped = $derived(searchValue.length === 0 && filteredTokens.length > VISIBLE_LIMIT);
 </script>
 
-<div class="flex flex-col gap-3">
-	<InputSearch
-		placeholder={$i18n.transaction.filter.search_tokens_placeholder}
-		showResetButton={searchValue.length > 0}
-		bind:filter={searchValue}
-	/>
+<div class="flex flex-col">
+	<!--
+		The popover scrolls the panel as a whole (`MultiSelectDropdown`'s
+		wrapper has `max-h-80 overflow-y-auto`), so we make the search input
+		`sticky` with the popover background to keep it pinned at the top
+		while the rows scroll under it. `pb-3` reproduces the previous
+		`gap-3` spacing while also covering scrolled rows so they don't
+		bleed visually behind the input.
+	-->
+	<div class="sticky top-0 z-1 bg-primary pb-3">
+		<InputSearch
+			{autofocus}
+			placeholder={$i18n.transaction.filter.search_tokens_placeholder}
+			showResetButton={searchValue.length > 0}
+			bind:filter={searchValue}
+		/>
+	</div>
 
 	<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
 		{#each visibleTokens as token (token.id.description)}
@@ -84,7 +105,7 @@
 	</ul>
 
 	{#if isCapped}
-		<p class="text-xs text-tertiary">
+		<p class="pt-3 text-xs text-tertiary">
 			{replacePlaceholders($i18n.transaction.filter.showing_partial, {
 				$shown: `${VISIBLE_LIMIT}`,
 				$total: `${filteredTokens.length}`
