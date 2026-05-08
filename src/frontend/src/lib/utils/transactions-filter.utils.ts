@@ -10,12 +10,12 @@ import { assertNever, isNullish, nonNullish, notEmptyString } from '@dfinity/uti
  * unique across networks (e.g. native ETH reuses `Symbol('ETH')` on Ethereum
  * and Base); pairing with the network id matches list rows and transactions.
  */
-export const transactionsFilterTokenKey = (token: Token): string | undefined => {
-	const tokenDesc = token.id.description;
-	const networkDesc = token.network.id.description;
+export const transactionsFilterTokenKey = ({id, network:{id:networkId}}: Token): string | undefined => {
+	const tokenDesc = id.description;
+	const networkDesc = networkId.description;
 
 	if (isNullish(tokenDesc) || isNullish(networkDesc)) {
-		return undefined;
+		return;
 	}
 
 	return `${tokenDesc}-${networkDesc}`;
