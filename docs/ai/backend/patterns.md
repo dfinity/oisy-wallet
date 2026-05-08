@@ -146,10 +146,10 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
 - Don't add a new ad-hoc timer at module load time. Wire it through one
   of the existing entry points and ensure both `init` and `post_upgrade`
   trigger it.
-- **Exchange rates:** Controllers store API keys via `set_api_keys`. When
-  `coingecko_api_key` is set, periodic refreshes run unless
-  `exchange_rate_enabled` is `opt false`. (`None` defaults to on-with-key; see
-  [`shared::types::api_keys::ApiKeys`](../../../src/shared/src/types/api_keys.rs).)
+- **Exchange rates:** Controllers store API keys via `set_api_keys`. Periodic
+  refreshes run when `coingecko_api_key` is set and `exchange_rate_enabled` is not
+  `opt false`. See
+  [`shared::types::api_keys::ApiKeys`](../../../src/shared/src/types/api_keys.rs).
 
 ## Workspace dependencies — root or nothing
 
