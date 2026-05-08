@@ -16,6 +16,7 @@
 		testId?: string;
 		triggerIcon?: Snippet;
 		panel: Snippet;
+		panelWidthClass?: string;
 	}
 
 	let {
@@ -27,7 +28,8 @@
 		searchValue = $bindable(''),
 		testId,
 		triggerIcon,
-		panel
+		panel,
+		panelWidthClass
 	}: Props = $props();
 
 	let visible = $state(false);
@@ -64,7 +66,7 @@
 
 <ResponsivePopover {button} bind:visible>
 	{#snippet content()}
-		<div class="flex w-full min-w-60 flex-col gap-2 p-1">
+		<div class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}">
 			{#if searchable}
 				<InputSearch
 					autofocus

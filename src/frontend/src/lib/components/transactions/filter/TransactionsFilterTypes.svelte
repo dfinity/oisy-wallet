@@ -26,6 +26,7 @@
 <MultiSelectDropdown
 	ariaLabel={$i18n.transaction.filter.types_aria_label}
 	count={selectedSet.size}
+	panelWidthClass="w-64"
 	testId={TRANSACTIONS_FILTER_TYPES_DROPDOWN}
 	triggerLabel={$i18n.transaction.filter.types_label}
 >
