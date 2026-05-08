@@ -30,10 +30,20 @@
 
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.tokenIds));
 
-	const tokenKey = (token: Token): string | undefined => token.id.description;
+	const tokenFilterKey = (token: Token): string | undefined => token.id.description;
+
+	const tokenRenderKey = (token: Token): string =>
+		`${token.id.description}-${token.network.id.description}`;
+
+	const tokenInputId = (token: Token): string =>
+		`transactions-filter-token-${tokenRenderKey(token).replace(/[^A-Za-z0-9_-]/g, '-')}`;
 
 	let sortedTokens = $derived(
-		[...$enabledFungibleNetworkTokens].sort((a, b) =>
+		[
+			...new Map(
+				[...$enabledFungibleNetworkTokens].map((token) => [tokenRenderKey(token), token])
+			).values()
+		].sort((a, b) =>
 			(a.name ?? a.symbol).localeCompare(b.name ?? b.symbol, undefined, {
 				sensitivity: 'base'
 			})
@@ -75,13 +85,14 @@
 	</div>
 
 	<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
-		{#each visibleTokens as token (token.id.description)}
-			{@const key = tokenKey(token)}
+		{#each visibleTokens as token (tokenRenderKey(token))}
+			{@const key = tokenFilterKey(token)}
+
 			{#if nonNullish(key)}
 				<li>
 					<Checkbox
 						checked={selectedSet.has(key)}
-						inputId={`transactions-filter-token-${key}`}
+						inputId={tokenInputId(token)}
 						text="inline"
 						on:nnsChange={() => transactionsFilterStore.toggleTokenId(key)}
 					>
