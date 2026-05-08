@@ -1156,7 +1156,7 @@
 			"select_token": "टोकन चुनें",
 			"select_network_filter": "नेटवर्क चुनें",
 			"withdrawing": "निकासी कर रहा है...",
-			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें एक मिनट तक का समय लग सकता है।)",
+			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें 2 मिनट तक का समय लग सकता है।)",
 			"network_cost": "नेटवर्क लागत",
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",

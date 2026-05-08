@@ -1156,7 +1156,7 @@
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
 			"withdrawing": "",
-			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقة واحدة.)",
+			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقتين.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",

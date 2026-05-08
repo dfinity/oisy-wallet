@@ -1156,7 +1156,7 @@
 			"select_token": "Seleziona il token",
 			"select_network_filter": "Seleziona la rete",
 			"withdrawing": "",
-			"bridging": "Bridge in corso... (Per favore sii paziente, questo può richiedere fino a un minuto.)",
+			"bridging": "Bridge in corso... (Per favore sii paziente, questo può richiedere fino a 2 minuti.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",

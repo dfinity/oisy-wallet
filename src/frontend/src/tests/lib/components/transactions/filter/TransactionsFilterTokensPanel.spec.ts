@@ -25,6 +25,9 @@ const buildToken = ({ id, name, symbol }: { id: string; name: string; symbol: st
 	symbol
 });
 
+const tokenInputId = ({ id, network }: Token): string =>
+	`transactions-filter-token-${`${id.description}-${network.id.description}`.replace(/[^A-Za-z0-9_-]/g, '-')}`;
+
 describe('TransactionsFilterTokensPanel', () => {
 	const tokenAlpha = buildToken({ id: 'AlphaTokenId', name: 'Alpha', symbol: 'ALP' });
 	const tokenBeta = buildToken({ id: 'BetaTokenId', name: 'Beta', symbol: 'BTA' });
@@ -53,10 +56,10 @@ describe('TransactionsFilterTokensPanel', () => {
 		const { container } = render(TransactionsFilterTokensPanel);
 
 		const alphaInput = container.querySelector<HTMLInputElement>(
-			'input[id="transactions-filter-token-AlphaTokenId"]'
+			`input[id="${tokenInputId(tokenAlpha)}"]`
 		);
 		const betaInput = container.querySelector<HTMLInputElement>(
-			'input[id="transactions-filter-token-BetaTokenId"]'
+			`input[id="${tokenInputId(tokenBeta)}"]`
 		);
 
 		expect(alphaInput?.checked).toBeTruthy();
@@ -67,7 +70,7 @@ describe('TransactionsFilterTokensPanel', () => {
 		const { container } = render(TransactionsFilterTokensPanel);
 
 		const input = container.querySelector<HTMLInputElement>(
-			'input[id="transactions-filter-token-AlphaTokenId"]'
+			`input[id="${tokenInputId(tokenAlpha)}"]`
 		);
 
 		expect(input).not.toBeNull();

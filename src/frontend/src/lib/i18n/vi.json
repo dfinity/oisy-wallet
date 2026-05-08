@@ -1156,7 +1156,7 @@
 			"select_token": "Chọn token",
 			"select_network_filter": "Chọn mạng",
 			"withdrawing": "Đang rút...",
-			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến một phút.)",
+			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến 2 phút.)",
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",

@@ -1156,7 +1156,7 @@
 			"select_token": "토큰 선택",
 			"select_network_filter": "네트워크 선택",
 			"withdrawing": "출금 중...",
-			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 1분 정도 소요될 수 있습니다.)",
+			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 2분 정도 소요될 수 있습니다.)",
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": ""
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",
