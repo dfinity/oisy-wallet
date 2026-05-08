@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { allFungibleTokens } from '$lib/derived/all-tokens.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { Token } from '$lib/types/token';
@@ -23,7 +23,7 @@
 	const tokenKey = (token: Token): string | undefined => token.id.description;
 
 	let sortedTokens = $derived(
-		[...$allFungibleTokens].sort((a, b) =>
+		[...$enabledFungibleNetworkTokens].sort((a, b) =>
 			(a.name ?? a.symbol).localeCompare(b.name ?? b.symbol, undefined, {
 				sensitivity: 'base'
 			})
@@ -65,7 +65,9 @@
 						on:nnsChange={() => transactionsFilterStore.toggleTokenId(key)}
 					>
 						<span class="inline-flex items-center gap-2">
-							<TokenLogo data={token} logoSize="xxs" />
+							<span class="flex shrink-0 items-center">
+								<TokenLogo data={token} logoSize="xxs" />
+							</span>
 							<span class="text-sm">
 								<span class="font-medium">{token.symbol}</span>
 								<span class="text-tertiary"
@@ -96,7 +98,9 @@
 		--checkbox-label-order: 1;
 		--checkbox-padding: 6px 8px;
 		justify-content: flex-start;
+		align-items: center;
 		gap: 8px;
+		min-height: 34px;
 		border-radius: 6px;
 		cursor: pointer;
 	}
@@ -107,5 +111,7 @@
 
 	li :global(label) {
 		flex: initial;
+		display: inline-flex;
+		align-items: center;
 	}
 </style>
