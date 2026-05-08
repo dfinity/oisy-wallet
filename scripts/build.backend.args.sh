@@ -31,7 +31,7 @@ case "$DFX_NETWORK" in
   ic_root_key_der="null"
   DERIVATION_ORIGIN="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io"
   ;;
-"ic" | "beta")
+"ic" | "beta" | "test_be_1")
   ECDSA_KEY_NAME="key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
