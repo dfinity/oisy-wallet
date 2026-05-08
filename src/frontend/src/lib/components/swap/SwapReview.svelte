@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Checkbox, Html } from '@dfinity/gix-components';
-	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet, untrack } from 'svelte';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
@@ -99,20 +99,26 @@
 		nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE
 	);
 
-	let isValueDifferenceConfirmed = $state(false);
+	let isMissingTokenPrice = $derived(
+		isNullish($sourceTokenExchangeRate) || isNullish($destinationTokenExchangeRate)
+	);
+
+	let isWarningConfirmationRequired = $derived(isValueDifferenceError || isMissingTokenPrice);
+
+	let isWarningConfirmed = $state(false);
 
 	const reset = () => {
-		isValueDifferenceConfirmed = false;
+		isWarningConfirmed = false;
 	};
 
 	$effect(() => {
-		[valueDifference, isValueDifferenceError];
+		[valueDifference, isValueDifferenceError, isMissingTokenPrice];
 
 		untrack(reset);
 	});
 
 	let swapButtonDisabled = $derived(
-		isSwapAmountsLoading || (isValueDifferenceError && !isValueDifferenceConfirmed)
+		isSwapAmountsLoading || (isWarningConfirmationRequired && !isWarningConfirmed)
 	);
 </script>
 
@@ -161,19 +167,21 @@
 		</div>
 	{/if}
 
-	{#if isValueDifferenceError}
+	{#if isWarningConfirmationRequired}
 		<div class="mt-4">
 			<MessageBox level="error">
 				{#snippet icon()}
 					<Checkbox
 						inputId="swap-review-value-difference-confirmation"
-						bind:checked={isValueDifferenceConfirmed}
-						on:nnsChange={() => (isValueDifferenceConfirmed = !isValueDifferenceConfirmed)}
+						bind:checked={isWarningConfirmed}
+						on:nnsChange={() => (isWarningConfirmed = !isWarningConfirmed)}
 					/>
 				{/snippet}
 
 				<label class="align-top text-sm" for="swap-review-value-difference-confirmation">
-					{$i18n.swap.text.value_difference_error_confirmation}
+					{isValueDifferenceError
+						? $i18n.swap.text.value_difference_error_confirmation
+						: $i18n.swap.text.value_difference_missing_price_confirmation}
 				</label>
 			</MessageBox>
 		</div>
