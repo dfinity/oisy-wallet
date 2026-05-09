@@ -12,7 +12,7 @@
 <MultiSelectDropdown
 	ariaLabel={$i18n.transaction.filter.tokens_aria_label}
 	count={selectedSet.size}
-	panelWidthClass="w-80"
+	panelWidthClass="w-full sm:w-80"
 	testId={TRANSACTIONS_FILTER_TOKENS_DROPDOWN}
 	triggerLabel={$i18n.transaction.filter.tokens_label}
 >

@@ -5,6 +5,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import { MULTI_SELECT_DROPDOWN_PANEL_SHELL } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		triggerLabel: string;
@@ -66,7 +67,10 @@
 
 <ResponsivePopover {button} bind:visible>
 	{#snippet content()}
-		<div class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}">
+		<div
+			class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}"
+			data-tid={MULTI_SELECT_DROPDOWN_PANEL_SHELL}
+		>
 			{#if searchable}
 				<InputSearch
 					autofocus

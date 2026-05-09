@@ -212,6 +212,8 @@ export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-c
 export const TRANSACTIONS_DATE_GROUP_PREFIX = 'transactions-date-group-';
 export const TRANSACTION_CHILDREN_CONTAINER = 'transaction-children-container';
 
+export const MULTI_SELECT_DROPDOWN_PANEL_SHELL = 'multi-select-dropdown-panel-shell';
+
 export const TRANSACTIONS_FILTER_TOOLBAR = 'transactions-filter-toolbar';
 export const TRANSACTIONS_FILTER_TYPES_DROPDOWN = 'transactions-filter-types-dropdown';
 export const TRANSACTIONS_FILTER_TOKENS_DROPDOWN = 'transactions-filter-tokens-dropdown';
