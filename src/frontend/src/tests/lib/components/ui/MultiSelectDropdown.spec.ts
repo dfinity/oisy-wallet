@@ -1,5 +1,5 @@
-import { screensStore } from '$lib/stores/screens.store';
 import { MULTI_SELECT_DROPDOWN_PANEL_SHELL } from '$lib/constants/test-ids.constants';
+import { screensStore } from '$lib/stores/screens.store';
 import MultiSelectDropdownTest from '$tests/lib/components/ui/MultiSelectDropdownTest.svelte';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
