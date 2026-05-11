@@ -6,8 +6,10 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 	import HiddenMicroTransactionsInfoBox from '$lib/components/transactions/HiddenMicroTransactionsInfoBox.svelte';
+	import TransactionsFilterMobileButton from '$lib/components/transactions/filter/TransactionsFilterMobileButton.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
@@ -127,16 +129,22 @@
 </script>
 
 <div class="flex flex-col gap-5">
-	{#if !$isPrivacyMode}
-		<PageTitle>{$i18n.activity.text.title}</PageTitle>
-	{:else}
-		<span class="flex items-center gap-2">
+	<div class="flex items-center justify-between gap-2">
+		{#if !$isPrivacyMode}
 			<PageTitle>{$i18n.activity.text.title}</PageTitle>
-			<span class="text-tertiary">
-				<IconEyeOff />
-			</span>
-		</span>
-	{/if}
+		{:else}
+			<div class="flex items-center gap-2">
+				<PageTitle>{$i18n.activity.text.title}</PageTitle>
+				<span class="text-tertiary">
+					<IconEyeOff />
+				</span>
+			</div>
+		{/if}
+
+		<Responsive down="sm">
+			<TransactionsFilterMobileButton />
+		</Responsive>
+	</div>
 
 	{#if hasBanners}
 		<div class="flex flex-col">
