@@ -1,5 +1,7 @@
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 
+export const ONRAMPER_ENABLED = false;
+
 const ONRAMPER_ENV: 'dev' | 'prod' = LOCAL || STAGING ? 'dev' : 'prod';
 
 export const isOnRamperDev = ONRAMPER_ENV === 'dev';
