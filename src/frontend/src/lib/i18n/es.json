@@ -1190,7 +1190,13 @@
 	"buy": {
 		"text": {
 			"buy": "Comprar",
-			"buy_dev": "Comprar (Entorno de Desarrollo)"
+			"buy_dev": "Comprar (Entorno de Desarrollo)",
+			"unavailable_title": "",
+			"unavailable_description": "",
+			"unavailable_fallback_hint": ""
+		},
+		"actions": {
+			"close": ""
 		},
 		"onramper": {
 			"title": "Comprar a través de Onramper"

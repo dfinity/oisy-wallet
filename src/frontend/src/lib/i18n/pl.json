@@ -1190,7 +1190,13 @@
 	"buy": {
 		"text": {
 			"buy": "Kup",
-			"buy_dev": "Kup (środowisko deweloperskie)"
+			"buy_dev": "Kup (środowisko deweloperskie)",
+			"unavailable_title": "",
+			"unavailable_description": "",
+			"unavailable_fallback_hint": ""
+		},
+		"actions": {
+			"close": ""
 		},
 		"onramper": {
 			"title": "Kup przez Onramper"
