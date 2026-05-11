@@ -1,6 +1,6 @@
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 
-export const ONRAMPER_ENABLED = false;
+export const ONRAMPER_ENABLED: boolean = false;
 
 const ONRAMPER_ENV: 'dev' | 'prod' = LOCAL || STAGING ? 'dev' : 'prod';
 
