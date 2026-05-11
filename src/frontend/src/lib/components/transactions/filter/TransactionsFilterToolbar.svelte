@@ -44,8 +44,6 @@
 
 	<Responsive down="sm">
 		<div class="flex items-center justify-end gap-2">
-			<TransactionsFilterClearButton />
-
 			<ButtonIcon
 				ariaLabel={$i18n.transaction.filter.open_filters_aria_label}
 				colorStyle="muted"
