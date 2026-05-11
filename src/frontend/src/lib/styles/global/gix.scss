@@ -374,16 +374,13 @@ div.radio {
 
 	input[type='checkbox'],
 	input[type='radio'] {
-		--secondary: var(--color-primary);
 		--focus-background: var(--color-background-primary);
 
 		&:focus {
-			--secondary: var(--color-primary);
 			--focus-background: var(--color-background-primary);
 		}
 
 		&:checked {
-			--secondary: var(--color-primary);
 			--focus-background: var(--color-background-brand-primary-alt);
 			--input-custom-border-color: var(--color-background-brand-primary-alt);
 			--input-background: var(--color-background-brand-primary-alt);
