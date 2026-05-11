@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { ONRAMPER_API_KEY } from '$env/rest/onramper.env';
+	import { ONRAMPER_API_KEY, ONRAMPER_ENABLED } from '$env/rest/onramper.env';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import IconlyBuy from '$lib/components/icons/iconly/IconlyBuy.svelte';
 	import { BUY_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
@@ -20,7 +20,9 @@
 
 <ButtonHero
 	ariaLabel={$i18n.send.text.send}
-	disabled={$isBusy || isNullishOrEmpty(ONRAMPER_API_KEY) || $inflowActionsDisabled}
+	disabled={$isBusy ||
+		(ONRAMPER_ENABLED && isNullishOrEmpty(ONRAMPER_API_KEY)) ||
+		$inflowActionsDisabled}
 	{onclick}
 	testId={BUY_TOKENS_MODAL_OPEN_BUTTON}
 >

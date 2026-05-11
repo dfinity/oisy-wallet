@@ -28,6 +28,8 @@ describe('BuyButton', () => {
 		vi.spyOn(onramperEnv, 'ONRAMPER_API_KEY', 'get').mockImplementation(
 			() => 'mock-onramper-api-key'
 		);
+
+		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
 	});
 
 	it('should render the Hero button', () => {
@@ -132,5 +134,25 @@ describe('BuyButton', () => {
 		btn.click();
 
 		expect(mockOnClick).not.toHaveBeenCalled();
+	});
+
+	it('should be enabled when ONRAMPER_ENABLED is false even without an API key', async () => {
+		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => false);
+		vi.spyOn(onramperEnv, 'ONRAMPER_API_KEY', 'get').mockImplementation(() => '');
+
+		const { getByTestId } = render(BuyButton, {
+			props,
+			context: mockContext(mockContextStore)
+		});
+
+		const btn = getByTestId(BUY_TOKENS_MODAL_OPEN_BUTTON) as HTMLButtonElement;
+
+		await waitFor(() => {
+			expect(btn).toBeEnabled();
+		});
+
+		btn.click();
+
+		expect(mockOnClick).toHaveBeenCalledOnce();
 	});
 });
