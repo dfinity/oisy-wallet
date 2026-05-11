@@ -32,6 +32,10 @@ describe('BuyButton', () => {
 		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
 	});
 
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	it('should render the Hero button', () => {
 		const { getByTestId } = render(BuyButton, {
 			props,

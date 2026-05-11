@@ -5,6 +5,10 @@ import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
 describe('BuyModalContent', () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	it('renders the Onramper iframe when ONRAMPER_ENABLED is true', () => {
 		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
 
