@@ -272,15 +272,6 @@ div.popover {
 
 		max-width: calc(100vw - (2 * var(--padding)));
 	}
-
-	// gix computes `--popover-right: window.innerWidth - anchorRect.right` but
-	// the wrapper's containing block (`div.popover`) sits at the inner viewport
-	// edge, so the rtl panel lands `scrollbarWidth` left of the anchor. Subtract
-	// `100vw - 100%` (= scrollbar width when the containing block spans the
-	// inner viewport) to bring the panel's right border back onto the trigger.
-	.wrapper.rtl {
-		right: calc(var(--popover-right) - (100vw - 100%));
-	}
 }
 
 div.toggle {
