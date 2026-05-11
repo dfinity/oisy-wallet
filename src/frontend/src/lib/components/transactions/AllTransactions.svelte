@@ -133,12 +133,12 @@
 		{#if !$isPrivacyMode}
 			<PageTitle>{$i18n.activity.text.title}</PageTitle>
 		{:else}
-			<span class="flex items-center gap-2">
+			<div class="flex items-center gap-2">
 				<PageTitle>{$i18n.activity.text.title}</PageTitle>
 				<span class="text-tertiary">
 					<IconEyeOff />
 				</span>
-			</span>
+			</div>
 		{/if}
 
 		<Responsive down="sm">

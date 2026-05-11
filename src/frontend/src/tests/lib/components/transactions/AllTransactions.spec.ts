@@ -307,18 +307,18 @@ describe('AllTransactions', () => {
 
 			const { container } = render(AllTransactions);
 
-			const titleContainer = container.querySelector('span.flex.items-center.gap-2');
+			const eyeOffIcon = container.querySelector('span.text-tertiary');
 
-			expect(titleContainer).toBeInTheDocument();
+			expect(eyeOffIcon).toBeInTheDocument();
+
+			const titleContainer = eyeOffIcon?.parentElement;
+
+			expect(titleContainer?.tagName.toLowerCase()).toBe('div');
 
 			const title = titleContainer?.querySelector('h1');
 
 			expect(title).toBeInTheDocument();
 			expect(title?.textContent).toBe(en.activity.text.title);
-
-			const eyeOffIcon = titleContainer?.querySelector('span.text-tertiary');
-
-			expect(eyeOffIcon).toBeInTheDocument();
 		});
 
 		it('renders simple title when privacy mode is disabled', async () => {
@@ -330,9 +330,9 @@ describe('AllTransactions', () => {
 
 			const { container } = render(AllTransactions);
 
-			const titleContainer = container.querySelector('span.flex.items-center.gap-2');
+			const eyeOffIcon = container.querySelector('span.text-tertiary');
 
-			expect(titleContainer).not.toBeInTheDocument();
+			expect(eyeOffIcon).not.toBeInTheDocument();
 
 			const title = container.querySelector('h1');
 
