@@ -1192,13 +1192,13 @@
 		"text": {
 			"buy": "खरीदें",
 			"buy_dev": "खरीदें (Dev एनवायरनमेंट)",
-			"unavailable_title": "",
-			"oisy_protects_you": "",
-			"unavailable_description": "",
-			"unavailable_fallback_hint": ""
+			"unavailable_title": "टोकन खरीदना अस्थायी रूप से अनुपलब्ध है",
+			"oisy_protects_you": "OISY आपकी सुरक्षा करता है!",
+			"unavailable_description": "टोकन खरीदना वर्तमान में बंद है, क्योंकि हम URL साइनिंग शुरू करके इस प्रक्रिया की सुरक्षा को और बेहतर बना रहे हैं। काम पूरा होते ही इसे फिर से चालू कर दिया जाएगा।",
+			"unavailable_fallback_hint": "इस बीच, आप अभी भी अपने वॉलेट का पता साझा करके टोकन प्राप्त कर सकते हैं।"
 		},
 		"actions": {
-			"close": ""
+			"close": "समझ गया"
 		},
 		"onramper": {
 			"title": "ऑनराम्पर के माध्यम से खरीदें"

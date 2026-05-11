@@ -1192,13 +1192,13 @@
 		"text": {
 			"buy": "Acquista",
 			"buy_dev": "Acquista (Ambiente di sviluppo)",
-			"unavailable_title": "",
-			"oisy_protects_you": "",
-			"unavailable_description": "",
-			"unavailable_fallback_hint": ""
+			"unavailable_title": "L'acquisto di token è temporaneamente non disponibile",
+			"oisy_protects_you": "OISY ti protegge!",
+			"unavailable_description": "L'acquisto di token è attualmente disattivato mentre continuiamo a migliorare la sicurezza di questo processo introducendo la firma degli URL. Verrà riattivato non appena il lavoro sarà completato.",
+			"unavailable_fallback_hint": "Nel frattempo, puoi comunque ricevere token condividendo l'indirizzo del tuo portafoglio."
 		},
 		"actions": {
-			"close": ""
+			"close": "Capito"
 		},
 		"onramper": {
 			"title": "Acquista tramite Onramper"
