@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "토큰 중 하나 이상의 가격을 가져올 수 없습니다. 이 스왑 제안이 공정한 거래인지 <strong>독립적으로 확인</strong>해 주세요.<br>슬리피지 설정은 받는 가치가 훨씬 낮은 제안으로부터 사용자를 보호하지 <strong>않습니다</strong>!"
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",
