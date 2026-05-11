@@ -15,22 +15,18 @@
 
 	let pages = $state(1);
 
-	// Stable signature of the persisted activity filter. We use it both as the
-	// dependency that resets the page counter and as the `{#key}` of the
-	// `InfiniteScroll` below. Without remounting, switching filters can leave
-	// `transactionsToDisplay` capped at the previous page count because the
-	// upstream `IntersectionObserver` does not re-fire for a sentinel that stays
-	// in view as the list grows under it (e.g. clearing a 2-item filter on a
-	// page that already had `disabled=true`). Remounting matches the user's
-	// manual workaround of navigating away and back.
-	let filterSignature = $derived(JSON.stringify($transactionsFilterStore));
-
+	// Filter changes need to remount the `InfiniteScroll` below: the upstream
+	// gix-components `IntersectionObserver` does not re-fire for a sentinel
+	// that stays in view as the list grows under it, so without a fresh
+	// observer `transactionsToDisplay` can stay capped at the previous page
+	// count (e.g. clearing a 2-item filter that had `disabled=true`). Every
+	// `transactionsFilterStore` mutation produces a new object reference, so
+	// the store value is already a stable `{#key}`. `$effect.pre` resets the
+	// page counter before the re-key happens; doing it after would let the
+	// freshly-mounted observer fire `onIntersect` against the stale `pages`
+	// and the increment would then be clobbered by this effect.
 	$effect.pre(() => {
-		// Read for reactivity so the page counter resets before the `{#key}`
-		// re-renders the `InfiniteScroll` below. If we reset after the remount,
-		// the fresh observer fires `onIntersect` against the stale page count
-		// and the increment is then clobbered by this effect.
-		[filterSignature];
+		[$transactionsFilterStore];
 
 		pages = 1;
 	});
@@ -51,7 +47,7 @@
 	});
 </script>
 
-{#key filterSignature}
+{#key $transactionsFilterStore}
 	<InfiniteScroll disabled={disableInfiniteScroll} {onIntersect}>
 		{@render children()}
 	</InfiniteScroll>
