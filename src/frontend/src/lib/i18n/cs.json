@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Cenu alespoň jednoho z tokenů se nepodařilo získat. <strong>Nezávisle ověřte</strong>, zda tato nabídka swapu představuje férovou výměnu.<br>Upozorňujeme, že nastavení slippage vás <strong>nechrání</strong> před nabídkou s podstatně nižší přijatou hodnotou!"
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",

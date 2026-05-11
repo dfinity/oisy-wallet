@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Не удалось получить цену хотя бы одного из токенов. Пожалуйста, <strong>проверьте самостоятельно</strong>, что это предложение свопа является справедливым.<br>Обратите внимание, что настройка проскальзывания <strong>не</strong> защищает вас от предложения с гораздо меньшей суммой получения!"
 		},
 		"error": {
 			"kong_not_available": "Сейчас обмен недоступен. Попробуйте позже.",

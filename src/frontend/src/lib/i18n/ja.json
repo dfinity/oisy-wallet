@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "少なくとも1つのトークンの価格を取得できませんでした。このスワップオファーが公正な取引であることを<strong>独自に確認</strong>してください。<br>スリッページ設定は、受取額が大幅に低いオファーからは保護<strong>されません</strong>のでご注意ください！"
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",

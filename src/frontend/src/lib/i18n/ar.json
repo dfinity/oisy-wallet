@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "تعذر استرجاع سعر واحد على الأقل من الرموز. يرجى <strong>التحقق بشكل مستقل</strong> من أن عرض المبادلة هذا يقدم صفقة عادلة.<br>لاحظ أن إعداد الانزلاق السعري <strong>لا</strong> يحميك من عرض بقيمة استلام أقل بكثير!"
 		},
 		"error": {
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",

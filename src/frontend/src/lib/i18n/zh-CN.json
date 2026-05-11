@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "无法获取至少一种代币的价格。请<strong>独立核实</strong>此次兑换报价是否公平。<br>请注意,滑点设置<strong>不会</strong>保护您免受接收价值大幅降低的报价。"
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",

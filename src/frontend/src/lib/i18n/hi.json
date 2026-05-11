@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "कम से कम एक टोकन की कीमत प्राप्त नहीं की जा सकी। कृपया <strong>स्वतंत्र रूप से सत्यापित करें</strong> कि यह स्वैप ऑफर उचित सौदा है।<br>ध्यान दें कि स्लिपेज सेटिंग आपको बहुत कम प्राप्त मूल्य वाले ऑफर से सुरक्षित <strong>नहीं</strong> करती है!"
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
