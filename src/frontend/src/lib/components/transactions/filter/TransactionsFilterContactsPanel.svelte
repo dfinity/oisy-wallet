@@ -2,7 +2,7 @@
 	import { Checkbox } from '@dfinity/gix-components';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { allContacts } from '$lib/derived/contacts.derived';
+	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import { matchesContactByText } from '$lib/utils/contact.utils';
@@ -26,10 +26,13 @@
 
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.contactIds));
 
+	// We list only user-managed contacts here. Built-in/system contacts (e.g.
+	// CK minter helper contracts, ckBTC / CK Ethereum minter principals) are
+	// still part of `allContacts` and resolved for display on transaction rows,
+	// but would otherwise dominate this dropdown without the user ever having
+	// added them.
 	let alphaSorted = $derived(
-		[...$allContacts].sort((a, b) =>
-			a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-		)
+		[...$contacts].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
 	);
 
 	let filteredContacts = $derived(
