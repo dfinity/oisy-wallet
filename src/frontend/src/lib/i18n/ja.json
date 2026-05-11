@@ -1193,6 +1193,7 @@
 			"buy": "購入",
 			"buy_dev": "購入（開発環境）",
 			"unavailable_title": "",
+			"oisy_protects_you": "",
 			"unavailable_description": "",
 			"unavailable_fallback_hint": ""
 		},

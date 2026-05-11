@@ -1193,6 +1193,7 @@
 			"buy": "Acquista",
 			"buy_dev": "Acquista (Ambiente di sviluppo)",
 			"unavailable_title": "",
+			"oisy_protects_you": "",
 			"unavailable_description": "",
 			"unavailable_fallback_hint": ""
 		},
