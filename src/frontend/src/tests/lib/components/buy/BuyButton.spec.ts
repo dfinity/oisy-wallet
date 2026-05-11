@@ -4,6 +4,7 @@ import { BUY_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants'
 import { isBusy } from '$lib/derived/busy.derived';
 import { busy } from '$lib/stores/busy.store';
 import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores/hero.store';
+import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -43,6 +44,15 @@ describe('BuyButton', () => {
 		});
 
 		expect(getByTestId(BUY_TOKENS_MODAL_OPEN_BUTTON)).toBeInTheDocument();
+	});
+
+	it('uses the Buy label as the accessible name', () => {
+		const { getByRole } = render(BuyButton, {
+			props,
+			context: mockContext(mockContextStore)
+		});
+
+		expect(getByRole('button', { name: en.buy.text.buy })).toBeInTheDocument();
 	});
 
 	it('should be enabled if not busy and inflow actions enabled', async () => {
