@@ -264,28 +264,6 @@ div.modal {
 div.popover {
 	--background-contrast: var(--overlay-background-contrast);
 
-	// gix `Popover` computes its panel position with
-	// `--popover-right: ${window.innerWidth - anchorRect.right}px` and applies it
-	// as `right: var(--popover-right)` on `.wrapper.rtl`. The wrapper's
-	// containing block is this `div.popover`, which gix declares as
-	// `position: fixed; right: 0` — so its right edge sits at the inner
-	// viewport edge (i.e. without the scrollbar). But `window.innerWidth`
-	// includes the scrollbar width. The result is that the RTL panel's
-	// right edge lands at `anchorRect.right - scrollbarWidth`, i.e.
-	// nudged left by exactly one scrollbar width whenever a vertical
-	// scrollbar is present (visible as a few-pixel misalignment between
-	// the activity filter chips and the panel they open).
-	//
-	// Stretching the overlay to the full `100vw` (which in every major
-	// browser is the same value `window.innerWidth` reports, scrollbar
-	// included) keeps the wrapper's `right` calculation consistent with
-	// gix's anchor math, so the panel's right border aligns with the
-	// trigger's right border. The wrapper itself is the only visible
-	// child and it stays anchored away from the scrollbar, so widening
-	// the (invisible) overlay has no visual side-effect.
-	right: auto;
-	width: 100vw;
-
 	.wrapper {
 		padding: var(--padding-0_5x);
 		--padding: var(--padding-0_5x);
