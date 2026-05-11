@@ -63,11 +63,14 @@ Tiny but easy to get wrong. Follow these steps in order.
    defeats type safety.
 
 8. **Other locale files sync structurally, not via translation.** The
-   `auto-update-i18n` workflow runs `npm run i18n` on every PR, which
-   keeps `de.json`, `fr.json`, `ja.json`, `zh-CN.json`, etc. aligned
-   with `en.json` by adding missing keys with empty-string
-   placeholders. **It does not translate** — existing non-empty values
-   are preserved (see
+   `auto-update-i18n` workflow runs `npm run i18n` whenever a PR
+   touches `src/frontend/src/lib/i18n/*` or
+   `src/frontend/src/lib/types/i18n.d.ts`. That script rewrites each
+   non-en locale file to match `en.json`'s key structure — missing
+   keys are added with empty-string placeholders, and any extra keys
+   not in `en.json` are dropped. **It does not translate** — existing
+   non-empty values for keys that still exist in `en.json` are
+   preserved (see
    [`scripts/i18n.generate.keys.ts`](../../../../scripts/i18n.generate.keys.ts)).
    Leave new keys blank in your PR unless you can translate them at
    native quality.
