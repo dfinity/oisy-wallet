@@ -8,6 +8,7 @@
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
 
 	interface Props {
 		// When the panel is rendered inside a desktop dropdown popover the
@@ -30,18 +31,17 @@
 
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.tokenIds));
 
-	const tokenFilterKey = (token: Token): string | undefined => token.id.description;
-
-	const tokenRenderKey = (token: Token): string =>
-		`${token.id.description}-${token.network.id.description}`;
+	const tokenRenderKey = (token: Token): string | undefined => transactionsFilterTokenKey(token);
 
 	const tokenInputId = (token: Token): string =>
-		`transactions-filter-token-${tokenRenderKey(token).replace(/[^A-Za-z0-9_-]/g, '-')}`;
+		`transactions-filter-token-${(tokenRenderKey(token) ?? '').replace(/[^A-Za-z0-9_-]/g, '-')}`;
 
 	let sortedTokens = $derived(
 		[
 			...new Map(
-				[...$enabledFungibleNetworkTokens].map((token) => [tokenRenderKey(token), token])
+				[...$enabledFungibleNetworkTokens]
+					.map((token) => [tokenRenderKey(token), token] as const)
+					.filter((entry): entry is [string, Token] => nonNullish(entry[0]))
 			).values()
 		].sort((a, b) =>
 			(a.name ?? a.symbol).localeCompare(b.name ?? b.symbol, undefined, {
@@ -83,7 +83,7 @@
 
 	<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
 		{#each visibleTokens as token (tokenRenderKey(token))}
-			{@const key = tokenFilterKey(token)}
+			{@const key = tokenRenderKey(token)}
 
 			{#if nonNullish(key)}
 				<li>

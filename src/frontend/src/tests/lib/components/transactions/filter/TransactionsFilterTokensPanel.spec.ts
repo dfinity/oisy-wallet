@@ -4,8 +4,10 @@ import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -25,8 +27,8 @@ const buildToken = ({ id, name, symbol }: { id: string; name: string; symbol: st
 	symbol
 });
 
-const tokenInputId = ({ id, network }: Token): string =>
-	`transactions-filter-token-${`${id.description}-${network.id.description}`.replace(/[^A-Za-z0-9_-]/g, '-')}`;
+const tokenInputId = (token: Token): string =>
+	`transactions-filter-token-${(transactionsFilterTokenKey(token) ?? '').replace(/[^A-Za-z0-9_-]/g, '-')}`;
 
 describe('TransactionsFilterTokensPanel', () => {
 	const tokenAlpha = buildToken({ id: 'AlphaTokenId', name: 'Alpha', symbol: 'ALP' });
@@ -51,7 +53,9 @@ describe('TransactionsFilterTokensPanel', () => {
 	});
 
 	it('reflects the store as the checked state', () => {
-		transactionsFilterStore.toggleTokenId('AlphaTokenId');
+		const alphaKey = transactionsFilterTokenKey(tokenAlpha);
+		assertNonNullish(alphaKey);
+		transactionsFilterStore.toggleTokenId(alphaKey);
 
 		const { container } = render(TransactionsFilterTokensPanel);
 
@@ -77,7 +81,10 @@ describe('TransactionsFilterTokensPanel', () => {
 
 		await fireEvent.click(input as HTMLInputElement);
 
-		expect(get(transactionsFilterStore).tokenIds).toEqual(['AlphaTokenId']);
+		const expectedAlphaKey = transactionsFilterTokenKey(tokenAlpha);
+		assertNonNullish(expectedAlphaKey);
+
+		expect(get(transactionsFilterStore).tokenIds).toEqual([expectedAlphaKey]);
 	});
 
 	it('filters the list by token name using the search input (case-insensitive)', async () => {
