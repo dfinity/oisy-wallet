@@ -20,7 +20,6 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import TransactionsFilterToolbar from '$lib/components/transactions/filter/TransactionsFilterToolbar.svelte';
-	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { allContacts } from '$lib/derived/contacts.derived';
@@ -125,41 +124,27 @@
 	);
 </script>
 
-<!--
-	Each `TransactionsDateGroup` uses `StickyHeader` internally at the
-	default `z-3`, creating a sibling stacking context per date label. If
-	the toolbar's `StickyHeader` were also at `z-3`, the gix Popover that
-	the chips open would be trapped inside the toolbar's `z-3` context and
-	the date stickies (also `z-3`, but rendered later in DOM) would paint
-	on top of it — visually freezing the dropdown. Using `zIndex={10}`
-	lifts the popover's containing stacking context above every date `z-3`
-	context, so the dropdown content paints on top of the date headers.
--->
-<StickyHeader zIndex={10}>
-	{#snippet header()}
-		<TransactionsFilterToolbar />
-	{/snippet}
+<TransactionsFilterToolbar />
 
-	<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
-		<AllTransactionsLoader transactions={allTransactions}>
-			<AllTransactionsScroll {sortedTransactions} bind:transactionsToDisplay>
-				{#if Object.values(groupedTransactions).length > 0}
-					{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-						<TransactionsDateGroup
-							{formattedDate}
-							testId={`all-transactions-date-group-${index}`}
-							{transactions}
-						/>
-					{/each}
-				{/if}
+<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
+	<AllTransactionsLoader transactions={allTransactions}>
+		<AllTransactionsScroll {sortedTransactions} bind:transactionsToDisplay>
+			{#if Object.values(groupedTransactions).length > 0}
+				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+					<TransactionsDateGroup
+						{formattedDate}
+						testId={`all-transactions-date-group-${index}`}
+						{transactions}
+					/>
+				{/each}
+			{/if}
 
-				{#if Object.values(groupedTransactions).length === 0}
-					<TransactionsPlaceholder />
-				{/if}
-			</AllTransactionsScroll>
-		</AllTransactionsLoader>
-	</AllTransactionsSkeletons>
-</StickyHeader>
+			{#if Object.values(groupedTransactions).length === 0}
+				<TransactionsPlaceholder />
+			{/if}
+		</AllTransactionsScroll>
+	</AllTransactionsLoader>
+</AllTransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
 	<BtcTransactionModal token={selectedBtcToken} transaction={selectedBtcTransaction} />
