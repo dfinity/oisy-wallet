@@ -71,8 +71,14 @@ export class IntersectionObserverOnce implements IntersectionObserver {
 			this
 		);
 	}
-	disconnect = () => null;
-	unobserve = () => null;
+
+	unobserve(element: Element) {
+		this.observed.delete(element);
+	}
+
+	disconnect() {
+		this.observed = new WeakSet<Element>();
+	}
 }
 
 export const INTERSECTION_OBSERVER_ACTIVE_INTERVAL = 5000;

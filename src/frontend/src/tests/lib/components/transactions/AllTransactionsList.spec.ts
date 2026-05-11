@@ -244,30 +244,32 @@ describe('AllTransactionsList', () => {
 				value: TrackedIntersectionObserver
 			});
 
-			render(AllTransactionsList);
-			await tick();
+			try {
+				render(AllTransactionsList);
+				await tick();
 
-			const initialCalls = constructorCalls;
+				const initialCalls = constructorCalls;
 
-			expect(initialCalls).toBeGreaterThan(0);
+				expect(initialCalls).toBeGreaterThan(0);
 
-			transactionsFilterStore.toggleType('send');
-			await tick();
+				transactionsFilterStore.toggleType('send');
+				await tick();
 
-			expect(constructorCalls).toBeGreaterThan(initialCalls);
+				expect(constructorCalls).toBeGreaterThan(initialCalls);
 
-			const callsAfterApply = constructorCalls;
+				const callsAfterApply = constructorCalls;
 
-			transactionsFilterStore.clear();
-			await tick();
+				transactionsFilterStore.clear();
+				await tick();
 
-			expect(constructorCalls).toBeGreaterThan(callsAfterApply);
-
-			Object.defineProperty(window, 'IntersectionObserver', {
-				writable: true,
-				configurable: true,
-				value: IntersectionObserverOnce
-			});
+				expect(constructorCalls).toBeGreaterThan(callsAfterApply);
+			} finally {
+				Object.defineProperty(window, 'IntersectionObserver', {
+					writable: true,
+					configurable: true,
+					value: IntersectionObserverOnce
+				});
+			}
 		});
 
 		it('re-runs the pagination cycle after clearing a narrow filter', async () => {
