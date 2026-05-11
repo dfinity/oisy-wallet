@@ -19,7 +19,7 @@
 </script>
 
 <ButtonHero
-	ariaLabel={$i18n.send.text.send}
+	ariaLabel={$i18n.buy.text.buy}
 	disabled={$isBusy ||
 		(ONRAMPER_ENABLED && isNullishOrEmpty(ONRAMPER_API_KEY)) ||
 		$inflowActionsDisabled}
