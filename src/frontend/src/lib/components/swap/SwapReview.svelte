@@ -172,13 +172,13 @@
 			<MessageBox level="error">
 				{#snippet icon()}
 					<Checkbox
-						inputId="swap-review-value-difference-confirmation"
+						inputId="swap-review-warning-confirmation"
 						bind:checked={isWarningConfirmed}
 						on:nnsChange={() => (isWarningConfirmed = !isWarningConfirmed)}
 					/>
 				{/snippet}
 
-				<label class="block text-sm leading-snug" for="swap-review-value-difference-confirmation">
+				<label class="block text-sm leading-snug" for="swap-review-warning-confirmation">
 					<Html
 						text={isValueDifferenceError
 							? $i18n.swap.text.value_difference_error_confirmation
