@@ -35,13 +35,8 @@ export class IntersectionObserverActive implements IntersectionObserver {
 }
 
 /**
- * Mimics the real-browser IntersectionObserver more closely than
- * `IntersectionObserverActive`: it fires the callback once per
- * `(observer instance, target)` pair (matching the spec's initial-state
- * notification) and stays silent on subsequent `observe()` calls for the same
- * target. Use this when a test needs to exercise the "sentinel stays in view"
- * path that the upstream gix-components `InfiniteScroll` cannot recover from
- * without remounting.
+ * Fires the callback once per `(observer instance, target)` pair, then stays
+ * silent. Matches the spec's initial-state notification.
  */
 export class IntersectionObserverOnce implements IntersectionObserver {
 	public readonly root: Element | Document | null = null;

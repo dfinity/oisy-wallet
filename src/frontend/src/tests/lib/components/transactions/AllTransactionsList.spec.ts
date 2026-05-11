@@ -174,13 +174,9 @@ describe('AllTransactionsList', () => {
 		});
 	});
 
-	// Regression coverage for the "Clear filter leaves the list capped at the
-	// first page" bug: clearing a narrow filter used to keep
-	// `AllTransactionsScroll` stuck at `pages = 1` because the upstream
-	// gix-components `InfiniteScroll` does not re-fire its `IntersectionObserver`
-	// for a sentinel that stays in view as the list grows under it. Re-keying
-	// the `InfiniteScroll` on the persisted filter signature re-runs the
-	// load-on-mount cycle with a fresh observer.
+	// Regression: clearing a narrow filter used to leave `AllTransactionsScroll`
+	// stuck at `pages = 1` because the upstream `InfiniteScroll` observer never
+	// re-fires for a sentinel that stays in view.
 	describe('when the persisted filter changes', () => {
 		const todayTimestamp = new Date().getTime();
 		const sendCount = 2;

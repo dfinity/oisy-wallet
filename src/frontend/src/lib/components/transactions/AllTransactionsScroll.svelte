@@ -15,16 +15,8 @@
 
 	let pages = $state(1);
 
-	// Filter changes need to remount the `InfiniteScroll` below: the upstream
-	// gix-components `IntersectionObserver` does not re-fire for a sentinel
-	// that stays in view as the list grows under it, so without a fresh
-	// observer `transactionsToDisplay` can stay capped at the previous page
-	// count (e.g. clearing a 2-item filter that had `disabled=true`). Every
-	// `transactionsFilterStore` mutation produces a new object reference, so
-	// the store value is already a stable `{#key}`. `$effect.pre` resets the
-	// page counter before the re-key happens; doing it after would let the
-	// freshly-mounted observer fire `onIntersect` against the stale `pages`
-	// and the increment would then be clobbered by this effect.
+	// Reset pagination on filter change so the re-keyed `InfiniteScroll`
+	// below mounts with a fresh observer and `pages = 1`.
 	$effect.pre(() => {
 		[$transactionsFilterStore];
 
