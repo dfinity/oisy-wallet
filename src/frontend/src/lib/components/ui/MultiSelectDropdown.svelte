@@ -41,48 +41,46 @@
 	};
 </script>
 
-<div class="inline-flex shrink-0 items-center">
-	<button
-		bind:this={button}
-		class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary hover:border-brand-primary"
-		class:opened={visible}
-		aria-label={ariaLabel}
-		data-tid={testId}
-		onclick={onTriggerClick}
-		type="button"
-	>
-		{#if nonNullish(triggerIcon)}
-			<span class="flex items-center text-secondary">
-				{@render triggerIcon()}
-			</span>
-		{/if}
+<button
+	bind:this={button}
+	class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary hover:border-brand-primary"
+	class:opened={visible}
+	aria-label={ariaLabel}
+	data-tid={testId}
+	onclick={onTriggerClick}
+	type="button"
+>
+	{#if nonNullish(triggerIcon)}
+		<span class="flex items-center text-secondary">
+			{@render triggerIcon()}
+		</span>
+	{/if}
 
-		<span class="min-w-0 flex-1 truncate font-medium">{triggerLabel}</span>
+	<span class="min-w-0 flex-1 truncate font-medium">{triggerLabel}</span>
 
-		{#if count > 0}
-			<Badge variant="info" width="w-fit">{count}</Badge>
-		{/if}
+	{#if count > 0}
+		<Badge variant="info" width="w-fit">{count}</Badge>
+	{/if}
 
-		<IconExpandMore size="20" />
-	</button>
+	<IconExpandMore size="20" />
+</button>
 
-	<ResponsivePopover {button} bind:visible>
-		{#snippet content()}
-			<div
-				class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}"
-				data-tid={MULTI_SELECT_DROPDOWN_PANEL_SHELL}
-			>
-				{#if searchable}
-					<InputSearch
-						autofocus
-						placeholder={searchPlaceholder}
-						showResetButton={searchValue.length > 0}
-						bind:filter={searchValue}
-					/>
-				{/if}
+<ResponsivePopover {button} bind:visible>
+	{#snippet content()}
+		<div
+			class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}"
+			data-tid={MULTI_SELECT_DROPDOWN_PANEL_SHELL}
+		>
+			{#if searchable}
+				<InputSearch
+					autofocus
+					placeholder={searchPlaceholder}
+					showResetButton={searchValue.length > 0}
+					bind:filter={searchValue}
+				/>
+			{/if}
 
-				{@render panel()}
-			</div>
-		{/snippet}
-	</ResponsivePopover>
-</div>
+			{@render panel()}
+		</div>
+	{/snippet}
+</ResponsivePopover>

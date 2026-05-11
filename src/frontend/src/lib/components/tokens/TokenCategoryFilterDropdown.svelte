@@ -43,54 +43,52 @@
 	};
 </script>
 
-<div class="inline-flex shrink-0 items-center">
-	<ModalFilterButton ariaLabel={currentLabel} onclick={() => (visible = !visible)} bind:button>
-		{currentLabel}
-	</ModalFilterButton>
+<ModalFilterButton ariaLabel={currentLabel} onclick={() => (visible = !visible)} bind:button>
+	{currentLabel}
+</ModalFilterButton>
 
-	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
-		<List condensed noPadding>
+<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+	<List condensed noPadding>
+		<ListItem>
+			<Button
+				alignLeft
+				colorStyle="tertiary-alt"
+				fullWidth
+				innerStyleClass="font-normal text-primary"
+				onclick={() => select(undefined)}
+				paddingSmall
+				styleClass="py-1 rounded-md pl-0.5 min-w-28"
+				transparent
+			>
+				<span class="w-[20px] pt-0.75 text-brand-primary">
+					{#if isNullish(activeCategory)}
+						<IconCheck size="20" />
+					{/if}
+				</span>
+				{$i18n.tokens.text.asset_type_all}
+			</Button>
+		</ListItem>
+
+		{#each categories as category (category)}
 			<ListItem>
 				<Button
 					alignLeft
 					colorStyle="tertiary-alt"
 					fullWidth
 					innerStyleClass="font-normal text-primary"
-					onclick={() => select(undefined)}
+					onclick={() => select(category)}
 					paddingSmall
 					styleClass="py-1 rounded-md pl-0.5 min-w-28"
 					transparent
 				>
 					<span class="w-[20px] pt-0.75 text-brand-primary">
-						{#if isNullish(activeCategory)}
+						{#if activeCategory === category}
 							<IconCheck size="20" />
 						{/if}
 					</span>
-					{$i18n.tokens.text.asset_type_all}
+					{getCategoryLabel(category)}
 				</Button>
 			</ListItem>
-
-			{#each categories as category (category)}
-				<ListItem>
-					<Button
-						alignLeft
-						colorStyle="tertiary-alt"
-						fullWidth
-						innerStyleClass="font-normal text-primary"
-						onclick={() => select(category)}
-						paddingSmall
-						styleClass="py-1 rounded-md pl-0.5 min-w-28"
-						transparent
-					>
-						<span class="w-[20px] pt-0.75 text-brand-primary">
-							{#if activeCategory === category}
-								<IconCheck size="20" />
-							{/if}
-						</span>
-						{getCategoryLabel(category)}
-					</Button>
-				</ListItem>
-			{/each}
-		</List>
-	</Popover>
-</div>
+		{/each}
+	</List>
+</Popover>
