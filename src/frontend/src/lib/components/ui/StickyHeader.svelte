@@ -8,8 +8,8 @@
 		// Optional stacking-context override. Defaults to `3` to match the
 		// historical behavior shared by every sticky header in the app
 		// (date stickies, `Assets`, `TokensList`). Pass a higher value for
-		// headers whose contents open a popover that must paint above other
-		// sibling sticky headers — see `AllTransactionsList`.
+		// headers whose contents open a popover that must paint above
+		// other sibling sticky headers.
 		zIndex?: number;
 	}
 

@@ -8,8 +8,8 @@ import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contact
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-const mockAllContacts = (contacts: ContactUi[]) => {
-	vi.spyOn(contactsDerived.allContacts, 'subscribe').mockImplementation((fn) => {
+const mockContacts = (contacts: ContactUi[]) => {
+	vi.spyOn(contactsDerived.contacts, 'subscribe').mockImplementation((fn) => {
 		fn(contacts);
 		return () => {};
 	});
@@ -34,7 +34,7 @@ describe('TransactionsFilterContactsPanel', () => {
 		vi.restoreAllMocks();
 		localStorage.clear();
 		transactionsFilterStore.clear();
-		mockAllContacts([bob, alice]);
+		mockContacts([bob, alice]);
 	});
 
 	it('renders one row per contact, alphabetically sorted by name', () => {
@@ -103,6 +103,17 @@ describe('TransactionsFilterContactsPanel', () => {
 		expect(names).toEqual(['Alice']);
 	});
 
+	it('does not render built-in / minter contacts (only user-managed ones)', () => {
+		// Even if the user has no contacts of their own, built-in minter
+		// contacts (which live in `allContacts` but not in `contacts`) must
+		// not pollute the activity contact filter dropdown.
+		mockContacts([]);
+
+		const { container } = render(TransactionsFilterContactsPanel);
+
+		expect(container.querySelectorAll('li')).toHaveLength(0);
+	});
+
 	it('caps the visible list to 50 rows when over the limit and renders the showing-partial hint', () => {
 		const contacts: ContactUi[] = Array.from({ length: 60 }, (_, i) => ({
 			id: BigInt(i + 1),
@@ -111,7 +122,7 @@ describe('TransactionsFilterContactsPanel', () => {
 			image: undefined,
 			addresses: []
 		}));
-		mockAllContacts(contacts);
+		mockContacts(contacts);
 
 		const { container, getByText } = render(TransactionsFilterContactsPanel);
 
