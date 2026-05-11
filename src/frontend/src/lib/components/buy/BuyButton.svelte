@@ -19,7 +19,7 @@
 </script>
 
 <ButtonHero
-	ariaLabel={$i18n.send.text.send}
+	ariaLabel={$i18n.buy.text.buy}
 	disabled={$isBusy || isNullishOrEmpty(ONRAMPER_API_KEY) || $inflowActionsDisabled}
 	{onclick}
 	testId={BUY_TOKENS_MODAL_OPEN_BUTTON}

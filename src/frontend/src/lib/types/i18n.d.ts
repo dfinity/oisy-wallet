@@ -885,6 +885,7 @@ interface I18nSwap {
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
 		value_difference_error_confirmation: string;
+		value_difference_missing_price_confirmation: string;
 	};
 	error: {
 		kong_not_available: string;

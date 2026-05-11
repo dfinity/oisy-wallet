@@ -1165,7 +1165,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Der Preis für mindestens einen der Token konnte nicht abgerufen werden. Bitte <strong>überprüfe unabhängig</strong>, ob dieses Swap-Angebot ein faires Geschäft darstellt.<br>Beachte, dass die Slippage-Einstellung dich <strong>nicht</strong> vor einem Angebot mit einem deutlich geringeren Erhaltsbetrag schützt!"
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",

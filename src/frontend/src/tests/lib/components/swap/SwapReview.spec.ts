@@ -304,6 +304,83 @@ describe('SwapReview', () => {
 		});
 	});
 
+	describe('missing token price warning', () => {
+		const renderWithMissingPrice = (
+			params: {
+				sourceTokenExchangeRate?: number;
+				destinationTokenExchangeRate?: number;
+			} = { sourceTokenExchangeRate: undefined, destinationTokenExchangeRate: 20 }
+		) => {
+			const { context } = createSwapContext(params);
+
+			return render(SwapReview, {
+				props: baseProps,
+				context
+			});
+		};
+
+		it('should show confirmation checkbox when source token price is missing', () => {
+			const { getByRole } = renderWithMissingPrice({
+				sourceTokenExchangeRate: undefined,
+				destinationTokenExchangeRate: 20
+			});
+
+			expect(getByRole('checkbox')).toBeInTheDocument();
+		});
+
+		it('should show confirmation checkbox when destination token price is missing', () => {
+			const { getByRole } = renderWithMissingPrice({
+				sourceTokenExchangeRate: 10,
+				destinationTokenExchangeRate: undefined
+			});
+
+			expect(getByRole('checkbox')).toBeInTheDocument();
+		});
+
+		it('should show confirmation checkbox when both token prices are missing', () => {
+			const { getByRole } = renderWithMissingPrice({
+				sourceTokenExchangeRate: undefined,
+				destinationTokenExchangeRate: undefined
+			});
+
+			expect(getByRole('checkbox')).toBeInTheDocument();
+		});
+
+		it('should show missing-price confirmation message when a token price is missing', () => {
+			const { getByText } = renderWithMissingPrice();
+
+			expect(
+				getByText(/The price for at least one of the tokens could not be retrieved/)
+			).toBeInTheDocument();
+		});
+
+		it('should not show value-difference confirmation message when a token price is missing', () => {
+			const { queryByText } = renderWithMissingPrice();
+
+			expect(queryByText(en.swap.text.value_difference_error_confirmation)).not.toBeInTheDocument();
+		});
+
+		it('should disable swap button when missing-price warning is not confirmed', () => {
+			const { getByText } = renderWithMissingPrice();
+
+			const swapButton = getByText(en.swap.text.swap_button).closest('button');
+
+			expect(swapButton).toBeDisabled();
+		});
+
+		it('should enable swap button after confirming missing-price warning checkbox', async () => {
+			const { getByText, getByRole } = renderWithMissingPrice();
+
+			const swapButton = getByText(en.swap.text.swap_button).closest('button');
+
+			expect(swapButton).toBeDisabled();
+
+			await fireEvent.click(getByRole('checkbox'));
+
+			expect(swapButton).toBeEnabled();
+		});
+	});
+
 	describe('failed swap error', () => {
 		it('should show error message when failedSwapError has a message', () => {
 			const errorMessage = 'Something went wrong';
