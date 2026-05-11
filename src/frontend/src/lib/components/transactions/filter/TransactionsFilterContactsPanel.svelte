@@ -26,11 +26,6 @@
 
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.contactIds));
 
-	// We list only user-managed contacts here. Built-in/system contacts (e.g.
-	// CK minter helper contracts, ckBTC / CK Ethereum minter principals) are
-	// still part of `allContacts` and resolved for display on transaction rows,
-	// but would otherwise dominate this dropdown without the user ever having
-	// added them.
 	let alphaSorted = $derived(
 		[...$contacts].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
 	);
