@@ -1191,7 +1191,14 @@
 	"buy": {
 		"text": {
 			"buy": "Comprar",
-			"buy_dev": "Comprar (Entorno de Desarrollo)"
+			"buy_dev": "Comprar (Entorno de Desarrollo)",
+			"unavailable_title": "La compra de tokens no está disponible temporalmente",
+			"oisy_protects_you": "OISY te protege!",
+			"unavailable_description": "La compra de tokens está desactivada actualmente mientras seguimos mejorando la seguridad de este proceso mediante la introducción de la firma de URL. Se reactivará en cuanto se complete el trabajo.",
+			"unavailable_fallback_hint": "Mientras tanto, aún puedes recibir tokens compartiendo la dirección de tu billetera."
+		},
+		"actions": {
+			"close": "Entendido"
 		},
 		"onramper": {
 			"title": "Comprar a través de Onramper"
