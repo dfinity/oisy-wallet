@@ -4,7 +4,7 @@ import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store'
 import {
 	calculateUtxoSelection,
 	estimateTransactionVSize,
-	extractUtxoTxIds,
+	extractUtxoOutpoints,
 	filterAvailableUtxos,
 	filterLockedUtxos,
 	resetUtxosDataStores,
@@ -58,20 +58,29 @@ describe('btc-utxos.utils', () => {
 		});
 	});
 
-	describe('extractUtxoTxIds', () => {
-		it('should extract transaction IDs from UTXOs', () => {
+	describe('extractUtxoOutpoints', () => {
+		it('should extract outpoint keys (txid + vout) from UTXOs', () => {
 			const utxos = [
-				createMockUtxo({ value: 100_000, txid: new Uint8Array([1, 2, 3, 4]) }),
-				createMockUtxo({ value: 200_000, txid: new Uint8Array([5, 6, 7, 8]) })
+				createMockUtxo({ value: 100_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 0 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([5, 6, 7, 8]), vout: 3 })
 			];
 
-			const result = extractUtxoTxIds(utxos);
+			const result = extractUtxoOutpoints(utxos);
 
-			expect(result).toEqual(['04030201', '08070605']);
+			expect(result).toEqual(['04030201:0', '08070605:3']);
+		});
+
+		it('should distinguish UTXOs sharing a txid by their vout', () => {
+			const utxos = [
+				createMockUtxo({ value: 100_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 0 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 1 })
+			];
+
+			expect(extractUtxoOutpoints(utxos)).toEqual(['04030201:0', '04030201:1']);
 		});
 
 		it('should return empty array for empty input', () => {
-			const result = extractUtxoTxIds([]);
+			const result = extractUtxoOutpoints([]);
 
 			expect(result).toEqual([]);
 		});
@@ -447,34 +456,53 @@ describe('btc-utxos.utils', () => {
 		const utxos = [
 			createMockUtxo({
 				value: 100_000,
-				txid: new Uint8Array([1, 2, 3, 4])
+				txid: new Uint8Array([1, 2, 3, 4]),
+				vout: 0
 			}),
 			createMockUtxo({
 				value: 200_000,
-				txid: new Uint8Array([5, 6, 7, 8])
+				txid: new Uint8Array([5, 6, 7, 8]),
+				vout: 0
 			}),
 			createMockUtxo({
 				value: 300_000,
-				txid: new Uint8Array([9, 10, 11, 12])
+				txid: new Uint8Array([9, 10, 11, 12]),
+				vout: 0
 			})
 		];
 
-		it('should filter out locked UTXOs', () => {
-			const pendingUtxoTxIds = ['04030201', '0c0b0a09']; // Hex of [1,2,3,4] and [9,10,11,12] reversed
+		it('should filter out reserved UTXOs by outpoint', () => {
+			const pendingUtxoOutpoints = ['04030201:0', '0c0b0a09:0'];
 
 			const result = filterLockedUtxos({
 				utxos,
-				pendingUtxoTxIds
+				pendingUtxoOutpoints
 			});
 
 			expect(result).toHaveLength(1);
 			expect(result[0].value).toBe(200_000n);
 		});
 
+		it('should keep UTXOs that share a txid with a reserved outpoint but differ in vout', () => {
+			const sharedTxidUtxos = [
+				createMockUtxo({ value: 100_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 0 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 1 }),
+				createMockUtxo({ value: 300_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 2 })
+			];
+
+			// Only vout=0 is reserved; vouts 1 and 2 must remain spendable.
+			const result = filterLockedUtxos({
+				utxos: sharedTxidUtxos,
+				pendingUtxoOutpoints: ['04030201:0']
+			});
+
+			expect(result.map((u) => u.outpoint.vout)).toEqual([1, 2]);
+		});
+
 		it('should return all UTXOs when no pending transactions', () => {
 			const result = filterLockedUtxos({
 				utxos,
-				pendingUtxoTxIds: []
+				pendingUtxoOutpoints: []
 			});
 
 			expect(result).toHaveLength(3);
@@ -483,7 +511,7 @@ describe('btc-utxos.utils', () => {
 		it('should handle empty UTXO array', () => {
 			const result = filterLockedUtxos({
 				utxos: [],
-				pendingUtxoTxIds: ['04030201']
+				pendingUtxoOutpoints: ['04030201:0']
 			});
 
 			expect(result).toEqual([]);
@@ -498,12 +526,14 @@ describe('btc-utxos.utils', () => {
 			createMockUtxo({
 				value: 400_000,
 				height: 15,
-				txid: new Uint8Array([5, 6, 7, 8])
-			}), // Good but might be locked
+				txid: new Uint8Array([5, 6, 7, 8]),
+				vout: 0
+			}), // Good but might be reserved
 			createMockUtxo({
 				value: 500_000,
 				height: 20,
-				txid: new Uint8Array([9, 10, 11, 12])
+				txid: new Uint8Array([9, 10, 11, 12]),
+				vout: 0
 			}) // Good
 		];
 
@@ -512,7 +542,7 @@ describe('btc-utxos.utils', () => {
 				utxos,
 				options: {
 					minConfirmations: 6,
-					pendingUtxoTxIds: []
+					pendingUtxoOutpoints: []
 				}
 			});
 
@@ -525,7 +555,7 @@ describe('btc-utxos.utils', () => {
 				utxos,
 				options: {
 					minConfirmations: 1,
-					pendingUtxoTxIds: []
+					pendingUtxoOutpoints: []
 				}
 			});
 
@@ -534,14 +564,14 @@ describe('btc-utxos.utils', () => {
 			expect(result.every((utxo) => utxo.height > 0)).toBeTruthy();
 		});
 
-		it('should filter out locked UTXOs', () => {
-			const pendingUtxoTxIds = ['08070605']; // Hex of [5, 6, 7, 8] reversed
+		it('should filter out reserved UTXOs', () => {
+			const pendingUtxoOutpoints = ['08070605:0'];
 
 			const result = filterAvailableUtxos({
 				utxos,
 				options: {
 					minConfirmations: 6,
-					pendingUtxoTxIds
+					pendingUtxoOutpoints
 				}
 			});
 
@@ -549,18 +579,47 @@ describe('btc-utxos.utils', () => {
 			expect(result.map((u) => Number(u.value))).toEqual([300_000, 500_000]);
 		});
 
+		it('should keep UTXOs sharing a txid with a reserved outpoint but a different vout', () => {
+			const sharedTxidUtxos = [
+				createMockUtxo({
+					value: 400_000,
+					height: 15,
+					txid: new Uint8Array([5, 6, 7, 8]),
+					vout: 0
+				}),
+				createMockUtxo({
+					value: 600_000,
+					height: 18,
+					txid: new Uint8Array([5, 6, 7, 8]),
+					vout: 1
+				})
+			];
+
+			const result = filterAvailableUtxos({
+				utxos: sharedTxidUtxos,
+				options: {
+					minConfirmations: 6,
+					pendingUtxoOutpoints: ['08070605:0']
+				}
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].value).toBe(600_000n);
+			expect(result[0].outpoint.vout).toBe(1);
+		});
+
 		it('should apply both confirmation and lock filters', () => {
-			const pendingUtxoTxIds = ['0c0b0a09']; // Hex of [9, 10, 11, 12] reversed
+			const pendingUtxoOutpoints = ['0c0b0a09:0'];
 
 			const result = filterAvailableUtxos({
 				utxos,
 				options: {
 					minConfirmations: 10,
-					pendingUtxoTxIds
+					pendingUtxoOutpoints
 				}
 			});
 
-			// Should only have the 300_000 and 400_000 UTXOs (height >= 10, not locked)
+			// Should only have the 300_000 and 400_000 UTXOs (height >= 10, not reserved)
 			expect(result).toHaveLength(2);
 			expect(result.map((u) => Number(u.value))).toEqual([300_000, 400_000]);
 		});
@@ -570,7 +629,7 @@ describe('btc-utxos.utils', () => {
 				utxos: [],
 				options: {
 					minConfirmations: 1,
-					pendingUtxoTxIds: []
+					pendingUtxoOutpoints: []
 				}
 			});
 

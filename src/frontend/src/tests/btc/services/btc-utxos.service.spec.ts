@@ -216,6 +216,85 @@ describe('btc-utxos.service', () => {
 			expect(result.utxos.length).toBeGreaterThan(0);
 		});
 
+		it('should keep a UTXO available when only a different vout of the same parent tx is reserved', () => {
+			// Two UTXOs share the same parent txid but differ in vout. The pending
+			// tx reserves vout=0; vout=1 must remain spendable.
+			const sharedTxid = new Uint8Array([10, 20, 30, 40]);
+			const reservedUtxo: CkBtcMinterDid.Utxo = {
+				value: 200_000n,
+				height: 100,
+				outpoint: { txid: sharedTxid, vout: 0 }
+			};
+			const spendableUtxo: CkBtcMinterDid.Utxo = {
+				value: 500_000n,
+				height: 100,
+				outpoint: { txid: sharedTxid, vout: 1 }
+			};
+
+			mockStoreApi.setStoreValue({
+				[mockBtcAddress]: {
+					certified: true as const,
+					data: [
+						{
+							txid: new Uint8Array([99]),
+							utxos: [{ value: 200_000n, outpoint: { txid: sharedTxid, vout: 0 } }]
+						}
+					]
+				}
+			});
+
+			const result = prepareBtcSend({
+				...defaultParams,
+				allUtxos: [reservedUtxo, spendableUtxo]
+			});
+
+			expect(result.error).toBeUndefined();
+			expect(result.utxos).toHaveLength(1);
+			expect(result.utxos[0].outpoint.vout).toBe(1);
+			expect(result.utxos[0].value).toBe(500_000n);
+		});
+
+		it('should return UtxoLocked when every available UTXO is reserved by pending transactions', () => {
+			const txidA = new Uint8Array([1, 2, 3, 4]);
+			const txidB = new Uint8Array([5, 6, 7, 8]);
+			const utxoA: CkBtcMinterDid.Utxo = {
+				value: 200_000n,
+				height: 100,
+				outpoint: { txid: txidA, vout: 0 }
+			};
+			const utxoB: CkBtcMinterDid.Utxo = {
+				value: 300_000n,
+				height: 100,
+				outpoint: { txid: txidB, vout: 0 }
+			};
+
+			mockStoreApi.setStoreValue({
+				[mockBtcAddress]: {
+					certified: true as const,
+					data: [
+						{
+							txid: new Uint8Array([99]),
+							utxos: [
+								{ value: 200_000n, outpoint: { txid: txidA, vout: 0 } },
+								{ value: 300_000n, outpoint: { txid: txidB, vout: 0 } }
+							]
+						}
+					]
+				}
+			});
+
+			const result = prepareBtcSend({
+				...defaultParams,
+				allUtxos: [utxoA, utxoB]
+			});
+
+			expect(result).toEqual({
+				feeSatoshis: ZERO,
+				utxos: [],
+				error: BtcPrepareSendError.UtxoLocked
+			});
+		});
+
 		it('should return UtxoLocked error when all UTXOs are filtered out by confirmations', () => {
 			const unconfirmedUtxo: CkBtcMinterDid.Utxo = {
 				value: 500000n,
