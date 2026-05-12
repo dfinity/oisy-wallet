@@ -339,7 +339,12 @@ describe('exchange.services', () => {
 				splTokenAddresses: ['SoLaddr1']
 			});
 
-			const expectedPrice = { usd: 42000, usd_24h_change: 1.5, usd_market_cap: 800_000_000_000 };
+			const expectedPrice = {
+				usd: 42000,
+				usd_24h_change: 1.5,
+				usd_market_cap: 800_000_000_000,
+				last_updated_at: 1000
+			};
 
 			expect(result.currentErc20Prices).toEqual({ '0xabc': expectedPrice });
 			expect(result.currentIcrcPrices).toEqual({
@@ -457,7 +462,12 @@ describe('exchange.services', () => {
 				splTokenAddresses: []
 			});
 
-			const expectedPrice = { usd: 42000, usd_24h_change: 1.5, usd_market_cap: 800_000_000_000 };
+			const expectedPrice = {
+				usd: 42000,
+				usd_24h_change: 1.5,
+				usd_market_cap: 800_000_000_000,
+				last_updated_at: 1000
+			};
 
 			expect(result.currentEthPrice).toEqual({ ethereum: expectedPrice });
 			expect(result.currentBtcPrice).toEqual({ bitcoin: expectedPrice });
@@ -491,7 +501,12 @@ describe('exchange.services', () => {
 			});
 
 			expect(result.currentErc20Prices).toEqual({
-				'0xabc': { usd: 100, usd_24h_change: undefined, usd_market_cap: 0 }
+				'0xabc': {
+					usd: 100,
+					usd_24h_change: undefined,
+					usd_market_cap: 0,
+					last_updated_at: 0
+				}
 			});
 		});
 	});

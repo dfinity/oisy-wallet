@@ -76,7 +76,7 @@ Key facts:
 
 - [Release Notes](https://docs.oisy.com/introduction/whats-new): Version history and release notes.
 
-## Latest Release (v2.0.7)
+## Latest Release (v2.0.8)
 
 ### New Features
 
