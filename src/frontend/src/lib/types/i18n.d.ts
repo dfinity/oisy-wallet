@@ -909,7 +909,15 @@ interface I18nSwap {
 }
 
 interface I18nBuy {
-	text: { buy: string; buy_dev: string };
+	text: {
+		buy: string;
+		buy_dev: string;
+		unavailable_title: string;
+		oisy_protects_you: string;
+		unavailable_description: string;
+		unavailable_fallback_hint: string;
+	};
+	actions: { close: string };
 	onramper: { title: string };
 }
 
