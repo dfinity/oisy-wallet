@@ -146,11 +146,7 @@ export const getPendingTransactionUtxoOutpoints = (address: string): string[] | 
 		if (nonNullish(tx.utxos)) {
 			for (const utxo of tx.utxos) {
 				const outpoint = utxo?.outpoint;
-				if (
-					nonNullish(outpoint?.txid) &&
-					outpoint.txid.length > 0 &&
-					nonNullish(outpoint.vout)
-				) {
+				if (nonNullish(outpoint?.txid) && outpoint.txid.length > 0 && nonNullish(outpoint.vout)) {
 					outpointKeys.push(outpointToKey(outpoint));
 				}
 			}
