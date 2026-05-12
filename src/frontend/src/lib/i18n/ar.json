@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": ""
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -1193,7 +1194,6 @@
 			"buy": "شراء",
 			"buy_dev": "شراء (بيئة تطوير)",
 			"unavailable_title": "شراء الرموز غير متاح مؤقتًا",
-			"oisy_protects_you": "OISY يحميك!",
 			"unavailable_description": "شراء الرموز معطل حاليًا بينما نواصل تحسين أمان هذه العملية من خلال إضافة توقيع عناوين URL. ستتم إعادة تفعيله بمجرد اكتمال العمل.",
 			"unavailable_fallback_hint": "في غضون ذلك، لا يزال بإمكانك استلام الرموز عن طريق مشاركة عنوان محفظتك."
 		},
@@ -1873,7 +1873,6 @@
 			"text": {
 				"open_or_create": "افتح أو أنشئ محفظتك للتفاعل بأمان مع التطبيق.",
 				"connect_your_wallet": "اتصل بمحفظة $oisy_name الخاصة بك",
-				"oisy_protects_you": "OISY يحميك!",
 				"oisy_protects_you_description": "لا يمكن للتطبيقات الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة."
 			}
 		},

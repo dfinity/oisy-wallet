@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": ""
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
@@ -1193,7 +1194,6 @@
 			"buy": "Kup",
 			"buy_dev": "Kup (środowisko deweloperskie)",
 			"unavailable_title": "Kupowanie tokenów jest tymczasowo niedostępne",
-			"oisy_protects_you": "OISY cię chroni!",
 			"unavailable_description": "Kupowanie tokenów jest obecnie wyłączone, podczas gdy nadal ulepszamy bezpieczeństwo tego procesu poprzez wprowadzenie podpisywania URL. Zostanie ponownie włączone, gdy tylko praca zostanie zakończona.",
 			"unavailable_fallback_hint": "W międzyczasie nadal możesz otrzymywać tokeny, udostępniając adres swojego portfela."
 		},
@@ -1873,7 +1873,6 @@
 			"text": {
 				"open_or_create": "Otwórz lub utwórz swój portfel, aby bezpiecznie korzystać z aplikacji.",
 				"connect_your_wallet": "Połącz swój $oisy_name",
-				"oisy_protects_you": "OISY cię chroni!",
 				"oisy_protects_you_description": "Aplikacje nie mogą bezpośrednio uzyskać dostępu do Twoich środków, a każda transakcja musi zostać przez Ciebie zatwierdzona."
 			}
 		},
