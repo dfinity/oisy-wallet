@@ -12,7 +12,7 @@
 	import { dismissNotifications } from '$lib/services/notification.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { hiddenMicroTransactionsResetStore } from '$lib/stores/settings.store';
-	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	// Optimistic local dismissal: the backend dismiss call is an update call that takes
 	// some time to complete. Keep an instant local override so the box hides immediately
@@ -26,12 +26,6 @@
 	});
 
 	let visible = $derived($hiddenMicroTransactionsBannerVisible && !locallyDismissed);
-
-	let text = $derived(
-		replacePlaceholders($i18n.activity.info.hidden_micro_transactions, {
-			$oisy_protects_you: replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)
-		})
-	);
 
 	const dismiss = () => {
 		locallyDismissed = true;
@@ -66,6 +60,7 @@
 
 {#if visible}
 	<MessageBox icon={shieldIcon} level="plain" onDismiss={dismiss}>
-		<Html {text} />
+		<strong>{replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)}</strong>
+		<Html text={$i18n.activity.info.hidden_micro_transactions} />
 	</MessageBox>
 {/if}
