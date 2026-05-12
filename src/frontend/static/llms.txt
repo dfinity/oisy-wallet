@@ -84,12 +84,14 @@ Key facts:
 
 ### Improvements
 
+- The swap review page now shows a warning, which the user must confirm, if one of the tokens has no price available and OISY can't verify if the offer is a fair deal or not.
 - Optimized Bitcoin sending by optimizing for the cheapest transaction cost by using the ideal UTXO(s).
 - Allow creating multiple unconfirmed Bitcoin transactions by improving the locking concept to now work at the UTXO level.
 - Improved the behavior of the swap form by additionally filtering the receive token and network list by the selected pay token, respecting the swap capabilities of all available providers.
 
 ### Bug Fixes
 
+- -
 
 ## Most recent Features and Improvements
 
