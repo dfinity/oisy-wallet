@@ -3,7 +3,7 @@ pub(crate) mod provider;
 mod providers;
 mod supplemental;
 
-use std::time::Duration;
+use std::{cell::RefCell, collections::BTreeSet, time::Duration};
 
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
@@ -38,6 +38,14 @@ pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
 /// bootstrap or a manual refresh has just populated the cache with a price
 /// the provider also reports as recent.
 const PRICE_FRESHNESS_GRACE_NS: u64 = (PRICE_REFRESH_INTERVAL_SEC / 2) * 1_000_000_000;
+
+thread_local! {
+    /// Tokens queued for a best-effort lazy refresh because they were just
+    /// marked active and either have no cached price or one older than the
+    /// refresh interval. Drained by [`flush_pending_bootstrap`].
+    static PENDING_BOOTSTRAP: RefCell<BTreeSet<StoredTokenId>> =
+        const { RefCell::new(BTreeSet::new()) };
+}
 
 /// Native tokens whose prices are always fetched, regardless of user activity.
 fn native_token_ids() -> Vec<StoredTokenId> {
@@ -100,19 +108,6 @@ fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
 }
 
 pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
-    let enabled = with_api_keys(|keys| {
-        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled != Some(false)
-    });
-
-    if !enabled {
-        return Err(ExchangeError::Disabled);
-    }
-
-    let api_key =
-        with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
-
-    let provider = CoinGeckoProvider::new(api_key);
-
     let now = time();
     let threshold = now.saturating_sub(PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000);
 
@@ -139,12 +134,93 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
         });
     });
 
-    if tokens_to_fetch.is_empty() {
+    fetch_and_store(&tokens_to_fetch).await
+}
+
+/// Schedules a best-effort one-shot refresh for any of `token_ids` whose
+/// cached price is missing or older than [`PRICE_REFRESH_INTERVAL_SEC`].
+///
+/// Subsequent calls coalesce into the same scheduled run while it is pending,
+/// so a flurry of activations (e.g. `set_many_custom_tokens`) results in a
+/// single batched fetch instead of one per call.
+///
+/// Safe to call from `update` handlers: the actual fetch happens out-of-band
+/// in a spawned task and any failure is logged and swallowed.
+pub(crate) fn schedule_lazy_refresh<I>(token_ids: I)
+where
+    I: IntoIterator<Item = TokenId>,
+{
+    let now = time();
+    let staleness_floor_ns = now.saturating_sub(PRICE_REFRESH_INTERVAL_SEC * 1_000_000_000);
+
+    let to_queue: Vec<StoredTokenId> = read_state(|s| {
+        token_ids
+            .into_iter()
+            .map(StoredTokenId)
+            .filter(|t| {
+                s.exchange_rates
+                    .get(t)
+                    .is_none_or(|r| r.0.usd.timestamp_ns < staleness_floor_ns)
+            })
+            .collect()
+    });
+
+    if to_queue.is_empty() {
+        return;
+    }
+
+    let was_empty = PENDING_BOOTSTRAP.with(|cell| {
+        let mut set = cell.borrow_mut();
+        let was_empty = set.is_empty();
+        set.extend(to_queue);
+        was_empty
+    });
+
+    if was_empty {
+        set_timer(Duration::ZERO, || {
+            ic_cdk::futures::spawn(async {
+                if let Err(err) = flush_pending_bootstrap().await {
+                    ic_cdk::println!("Lazy exchange rate bootstrap skipped: {err:?}");
+                }
+            });
+        });
+    }
+}
+
+async fn flush_pending_bootstrap() -> Result<(), ExchangeError> {
+    let tokens: Vec<StoredTokenId> = PENDING_BOOTSTRAP.with(|cell| {
+        let mut set = cell.borrow_mut();
+        let drained: Vec<StoredTokenId> = set.iter().cloned().collect();
+        set.clear();
+        drained
+    });
+
+    if tokens.is_empty() {
         return Ok(());
     }
 
+    fetch_and_store(&tokens).await
+}
+
+async fn fetch_and_store(tokens: &[StoredTokenId]) -> Result<(), ExchangeError> {
+    if tokens.is_empty() {
+        return Ok(());
+    }
+
+    let enabled = with_api_keys(|keys| {
+        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled != Some(false)
+    });
+
+    if !enabled {
+        return Err(ExchangeError::Disabled);
+    }
+
+    let api_key =
+        with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
+
+    let provider = CoinGeckoProvider::new(api_key);
     let supplementals = supplemental_price_providers();
-    let prices = fetch_all_prices(&provider, &supplementals, &tokens_to_fetch).await;
+    let prices = fetch_all_prices(&provider, &supplementals, tokens).await;
 
     for (token_id, exchange_data) in prices {
         update_price(&token_id, &exchange_data);

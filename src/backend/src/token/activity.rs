@@ -3,6 +3,7 @@ use ic_stable_structures::StableBTreeMap;
 use shared::types::{token_id::TokenId, Timestamp};
 
 use crate::{
+    exchange::schedule_lazy_refresh,
     state::mutate_state,
     types::{StoredTokenId, VMem},
 };
@@ -32,6 +33,8 @@ pub fn mark_token_active(token_id: &TokenId) {
             time(),
         );
     });
+
+    schedule_lazy_refresh(std::iter::once(token_id.clone()));
 }
 
 pub fn mark_tokens_active(token_ids: &[TokenId]) {
@@ -42,6 +45,8 @@ pub fn mark_tokens_active(token_ids: &[TokenId]) {
             add_to_token_activity(StoredTokenId(token_id.clone()), &mut s.token_activity, now);
         }
     });
+
+    schedule_lazy_refresh(token_ids.iter().cloned());
 }
 
 /// Removes entries from `token_activity` whose timestamp is older than
