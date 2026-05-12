@@ -7,11 +7,12 @@
 	import BtcConvertReview from '$btc/components/convert/BtcConvertReview.svelte';
 	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
-	import { sendBtc } from '$btc/services/btc-send.services';
+	import { sendBtc, validateBtcSend } from '$btc/services/btc-send.services';
 	import {
 		UTXOS_FEE_CONTEXT_KEY,
 		type UtxosFeeContext as UtxosFeeContextType
 	} from '$btc/stores/utxos-fee.store';
+	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -113,6 +114,24 @@
 		}
 
 		onNext();
+
+		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
+			// Last-line guard against a race: between fee preview and broadcast
+			// another tab may have reserved one of the UTXOs we selected.
+			try {
+				await validateBtcSend({
+					utxosFee: $utxosFeeStore.utxosFee,
+					source: sourceAddress,
+					amount: sendAmount,
+					network,
+					identity: $authIdentity
+				});
+			} catch (_: unknown) {
+				// Go back so the user can refresh the fee preview and retry.
+				back();
+				return;
+			}
+		}
 
 		try {
 			await sendBtc({

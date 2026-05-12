@@ -1,1 +1,1 @@
-export const BTC_EXTENSION_FEATURE_FLAG_ENABLED = false;
+export const BTC_EXTENSION_FEATURE_FLAG_ENABLED = true;
