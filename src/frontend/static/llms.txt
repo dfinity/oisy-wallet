@@ -98,7 +98,7 @@ Key facts:
 - Integration to 1Sec to offer bridging several tokens from ICP to Ethereum, Base, and Arbitrum, or vice versa.
 - Allow to quickly sign up or sign in with Google, Apple, or Microsoft accounts.
 - Micro transaction filter that filters out small value transactions from the user's activity list.
-- Added a new "Earn" section that shows all available earn oportunities in OISY 
+- Added a new "Earn" section that shows all available earn opportunities in OISY 
 - Integrated with Harvest Autopilot. Allows users stake/unstake in all Harvest Autopilot vaults directly in OISY.
 - Integrated the NEAR Intents protocol, offering now an additional option for doing cross-chain swaps
 
