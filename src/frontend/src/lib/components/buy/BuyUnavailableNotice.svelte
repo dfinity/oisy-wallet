@@ -3,6 +3,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
 <div class="flex flex-col items-center px-4 py-6 text-center">
@@ -12,7 +13,7 @@
 		<strong
 			><span class="relative -top-px mr-1 inline-block align-middle text-success-primary"
 				><IconShieldCheck size="16" /></span
-			>{$i18n.core.text.oisy_protects_you}</strong
+			>{replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)}</strong
 		>
 		{$i18n.buy.text.unavailable_description}
 	</p>

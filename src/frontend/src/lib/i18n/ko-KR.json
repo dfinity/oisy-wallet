@@ -47,7 +47,7 @@
 			"info": "정보",
 			"asset": "자산",
 			"got_it": "",
-			"oisy_protects_you": "OISY가 당신을 보호합니다!"
+			"oisy_protects_you": "$oisy_short가 당신을 보호합니다!"
 		},
 		"info": {
 			"test_banner": "테스트 목적으로만 사용하세요!",

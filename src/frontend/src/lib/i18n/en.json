@@ -47,7 +47,7 @@
 			"info": "Info",
 			"asset": "Asset",
 			"got_it": "Got it",
-			"oisy_protects_you": "OISY protects you!"
+			"oisy_protects_you": "$oisy_short protects you!"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",

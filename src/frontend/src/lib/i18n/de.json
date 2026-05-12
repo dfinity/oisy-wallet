@@ -47,7 +47,7 @@
 			"info": "",
 			"asset": "",
 			"got_it": "",
-			"oisy_protects_you": "OISY schützt dich!"
+			"oisy_protects_you": "$oisy_short schützt dich!"
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",

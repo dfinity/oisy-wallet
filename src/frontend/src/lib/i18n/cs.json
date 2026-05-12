@@ -47,7 +47,7 @@
 			"info": "",
 			"asset": "",
 			"got_it": "",
-			"oisy_protects_you": "OISY vás chrání!"
+			"oisy_protects_you": "$oisy_short vás chrání!"
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
