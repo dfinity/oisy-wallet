@@ -42,7 +42,7 @@ describe('TransactionsFilterTokensPanel', () => {
 		mockEnabledFungibleNetworkTokens([tokenBeta, tokenAlpha, tokenGamma]);
 	});
 
-	it('renders one row per fungible token, alphabetically sorted by name', () => {
+	it('renders one row per fungible token, alphabetically sorted by symbol', () => {
 		const { container } = render(TransactionsFilterTokensPanel);
 
 		const symbols = Array.from(container.querySelectorAll('li span.font-medium')).map(
@@ -50,6 +50,37 @@ describe('TransactionsFilterTokensPanel', () => {
 		);
 
 		expect(symbols).toEqual(['ALP', 'BTA', 'GMA']);
+	});
+
+	it('sorts by symbol even when the alphabetical order of names disagrees', () => {
+		// Names are deliberately reverse-ordered vs. symbols so that a
+		// regression to name-based sorting would flip the rendered order.
+		const tokenZebraAaa = buildToken({ id: 'ZebraTokenId', name: 'Zebra', symbol: 'AAA' });
+		const tokenMangoMmm = buildToken({ id: 'MangoTokenId', name: 'Mango', symbol: 'MMM' });
+		const tokenAlphaZzz = buildToken({ id: 'AlphaZzzTokenId', name: 'Alpha', symbol: 'ZZZ' });
+		mockEnabledFungibleNetworkTokens([tokenAlphaZzz, tokenMangoMmm, tokenZebraAaa]);
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const symbols = Array.from(container.querySelectorAll('li span.font-medium')).map(
+			(el) => el.textContent?.trim() ?? ''
+		);
+
+		expect(symbols).toEqual(['AAA', 'MMM', 'ZZZ']);
+	});
+
+	it('sorts symbols case-insensitively', () => {
+		const tokenLowerB = buildToken({ id: 'LowerBTokenId', name: 'Lower B', symbol: 'btc' });
+		const tokenUpperA = buildToken({ id: 'UpperATokenId', name: 'Upper A', symbol: 'ETH' });
+		mockEnabledFungibleNetworkTokens([tokenLowerB, tokenUpperA]);
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const symbols = Array.from(container.querySelectorAll('li span.font-medium')).map(
+			(el) => el.textContent?.trim() ?? ''
+		);
+
+		expect(symbols).toEqual(['btc', 'ETH']);
 	});
 
 	it('reflects the store as the checked state', () => {

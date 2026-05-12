@@ -44,7 +44,7 @@
 					.filter((entry): entry is [string, Token] => nonNullish(entry[0]))
 			).values()
 		].sort((a, b) =>
-			(a.name ?? a.symbol).localeCompare(b.name ?? b.symbol, undefined, {
+			a.symbol.localeCompare(b.symbol, undefined, {
 				sensitivity: 'base'
 			})
 		)
