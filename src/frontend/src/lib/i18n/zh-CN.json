@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short 保护您！"
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
@@ -1193,7 +1194,6 @@
 			"buy": "购买",
 			"buy_dev": "购买（开发环境）",
 			"unavailable_title": "购买代币暂时不可用",
-			"oisy_protects_you": "OISY 保护您！",
 			"unavailable_description": "购买代币目前已关闭，我们正在通过引入 URL 签名进一步增强此流程的安全性。工作完成后将立即重新开启。",
 			"unavailable_fallback_hint": "在此期间，您仍然可以通过分享您的钱包地址来接收代币。"
 		},
@@ -1873,7 +1873,6 @@
 			"text": {
 				"open_or_create": "打开或创建你的钱包，与应用程序安全交互。",
 				"connect_your_wallet": "连接你的 $oisy_name",
-				"oisy_protects_you": "OISY 保护您！",
 				"oisy_protects_you_description": "应用程序无法直接访问您的资金，每笔交易都需要您确认。"
 			}
 		},

@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short protege você."
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
@@ -1193,7 +1194,6 @@
 			"buy": "Comprar",
 			"buy_dev": "Comprar (Ambiente de Desenvolvimento)",
 			"unavailable_title": "A compra de tokens está temporariamente indisponível",
-			"oisy_protects_you": "OISY protege você.",
 			"unavailable_description": "A compra de tokens está atualmente desativada enquanto continuamos a melhorar a segurança deste processo introduzindo a assinatura de URL. Será reativada assim que o trabalho for concluído.",
 			"unavailable_fallback_hint": "Enquanto isso, você ainda pode receber tokens compartilhando o endereço da sua carteira."
 		},
@@ -1873,7 +1873,6 @@
 			"text": {
 				"open_or_create": "Abra ou crie sua carteira para interagir com segurança com a aplicação.",
 				"connect_your_wallet": "Conecte sua carteira $oisy_name",
-				"oisy_protects_you": "OISY protege você.",
 				"oisy_protects_you_description": "Os aplicativos não podem acessar seus fundos diretamente, e cada transação precisa ser confirmada por você!"
 			}
 		},

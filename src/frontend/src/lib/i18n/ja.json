@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_shortがあなたを守ります！"
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -1193,7 +1194,6 @@
 			"buy": "購入",
 			"buy_dev": "購入（開発環境）",
 			"unavailable_title": "トークンの購入は一時的にご利用いただけません",
-			"oisy_protects_you": "OISYがあなたを守ります！",
 			"unavailable_description": "URL署名の導入により、このプロセスのセキュリティをさらに強化しているため、現在トークンの購入はオフになっています。作業が完了次第、再び有効になります。",
 			"unavailable_fallback_hint": "それまでの間も、ウォレットアドレスを共有することでトークンを受け取ることができます。"
 		},
@@ -1873,7 +1873,6 @@
 			"text": {
 				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
 				"connect_your_wallet": "あなたの$oisy_nameに接続する",
-				"oisy_protects_you": "OISYがあなたを守ります！",
 				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},

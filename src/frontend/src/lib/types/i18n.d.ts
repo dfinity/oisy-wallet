@@ -50,6 +50,7 @@ interface I18nCore {
 		info: string;
 		asset: string;
 		got_it: string;
+		oisy_protects_you: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -913,7 +914,6 @@ interface I18nBuy {
 		buy: string;
 		buy_dev: string;
 		unavailable_title: string;
-		oisy_protects_you: string;
 		unavailable_description: string;
 		unavailable_fallback_hint: string;
 	};
@@ -1481,7 +1481,6 @@ interface I18nSigner {
 		text: {
 			open_or_create: string;
 			connect_your_wallet: string;
-			oisy_protects_you: string;
 			oisy_protects_you_description: string;
 		};
 	};
