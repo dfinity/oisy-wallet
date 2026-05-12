@@ -123,6 +123,8 @@
 </div>
 
 <style lang="scss">
+	@use '../../../styles/mixins/media';
+
 	li :global(.checkbox) {
 		--checkbox-label-order: 1;
 		--checkbox-padding: 6px 8px;
@@ -142,5 +144,14 @@
 		flex: initial;
 		display: inline-flex;
 		align-items: center;
+	}
+
+	// On mobile, give each row a comfortable touch target so checkboxes
+	// are easier to tap. The desktop dropdown keeps its denser layout.
+	@media (max-width: #{media.$breakpoint-medium - 1px}) {
+		li :global(.checkbox) {
+			--checkbox-padding: 12px;
+			min-height: var(--touch-target-min-height);
+		}
 	}
 </style>
