@@ -226,6 +226,8 @@ export const exchangeRateSPLToUsd = async (
 	});
 };
 
+const NS_PER_MS = 1_000_000n;
+
 const mapExchangeRateToCoingecko = (
 	rate: BackendExchangeRate | undefined
 ): CoingeckoSimpleTokenPrice | undefined => {
@@ -236,7 +238,8 @@ const mapExchangeRateToCoingecko = (
 	return {
 		usd: rate.usd.price,
 		usd_24h_change: rate.usd.price24hChangePct,
-		usd_market_cap: rate.usd.marketCap ?? 0
+		usd_market_cap: rate.usd.marketCap ?? 0,
+		last_updated_at: Number(rate.usd.timestampNs / NS_PER_MS)
 	};
 };
 
