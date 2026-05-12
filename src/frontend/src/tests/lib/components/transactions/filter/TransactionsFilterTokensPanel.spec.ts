@@ -20,11 +20,25 @@ const mockEnabledFungibleNetworkTokens = (tokens: Token[]) => {
 	);
 };
 
-const buildToken = ({ id, name, symbol }: { id: string; name: string; symbol: string }): Token => ({
+const buildToken = ({
+	id,
+	name,
+	symbol,
+	networkName
+}: {
+	id: string;
+	name: string;
+	symbol: string;
+	networkName?: string;
+}): Token => ({
 	...mockValidIcToken,
 	id: parseTokenId(id),
 	name,
-	symbol
+	symbol,
+	network:
+		networkName === undefined
+			? mockValidIcToken.network
+			: { ...mockValidIcToken.network, name: networkName }
 });
 
 const tokenInputId = (token: Token): string =>
@@ -81,6 +95,42 @@ describe('TransactionsFilterTokensPanel', () => {
 		);
 
 		expect(symbols).toEqual(['btc', 'ETH']);
+	});
+
+	it('breaks symbol ties by network name (case-insensitive)', () => {
+		// Same symbol on three networks; tiebreaker should order them by
+		// network name, regardless of the input order.
+		const tokenUsdcPolygon = buildToken({
+			id: 'UsdcPolygonTokenId',
+			name: 'USDC',
+			symbol: 'USDC',
+			networkName: 'Polygon'
+		});
+		const tokenUsdcEthereum = buildToken({
+			id: 'UsdcEthereumTokenId',
+			name: 'USDC',
+			symbol: 'USDC',
+			networkName: 'ethereum'
+		});
+		const tokenUsdcBase = buildToken({
+			id: 'UsdcBaseTokenId',
+			name: 'USDC',
+			symbol: 'USDC',
+			networkName: 'Base'
+		});
+		mockEnabledFungibleNetworkTokens([tokenUsdcPolygon, tokenUsdcEthereum, tokenUsdcBase]);
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const networkNames = Array.from(container.querySelectorAll('li span.text-tertiary')).map(
+			(el) => el.textContent?.trim() ?? ''
+		);
+
+		expect(networkNames).toEqual([
+			replacePlaceholders(get(i18n).tokens.text.on_network, { $network: 'Base' }).trim(),
+			replacePlaceholders(get(i18n).tokens.text.on_network, { $network: 'ethereum' }).trim(),
+			replacePlaceholders(get(i18n).tokens.text.on_network, { $network: 'Polygon' }).trim()
+		]);
 	});
 
 	it('reflects the store as the checked state', () => {

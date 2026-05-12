@@ -43,11 +43,12 @@
 					.map((token) => [tokenRenderKey(token), token] as const)
 					.filter((entry): entry is [string, Token] => nonNullish(entry[0]))
 			).values()
-		].sort((a, b) =>
-			a.symbol.localeCompare(b.symbol, undefined, {
-				sensitivity: 'base'
-			})
-		)
+		].sort((a, b) => {
+			const bySymbol = a.symbol.localeCompare(b.symbol, undefined, { sensitivity: 'base' });
+			return bySymbol !== 0
+				? bySymbol
+				: a.network.name.localeCompare(b.network.name, undefined, { sensitivity: 'base' });
+		})
 	);
 
 	let filteredTokens = $derived(
