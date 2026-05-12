@@ -18,6 +18,7 @@
 	const { inflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
+<!-- API-key gate only matters while OnRamper is enabled; with the flag off, the modal shows the notice and doesn't need the key. -->
 <ButtonHero
 	ariaLabel={$i18n.buy.text.buy}
 	disabled={$isBusy ||
