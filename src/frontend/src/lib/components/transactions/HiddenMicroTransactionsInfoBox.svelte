@@ -60,7 +60,8 @@
 
 {#if visible}
 	<MessageBox icon={shieldIcon} level="plain" onDismiss={dismiss}>
-		<strong>{replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)}</strong>
-		<Html text={$i18n.activity.info.hidden_micro_transactions} />
+		<strong>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong><Html
+			text={$i18n.activity.info.hidden_micro_transactions}
+		/>
 	</MessageBox>
 {/if}
