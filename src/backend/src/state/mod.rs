@@ -39,7 +39,8 @@ pub(crate) struct State {
     pub(crate) user_profile_updated: UserProfileUpdatedMap,
     pub(crate) contact: ContactMap,
     pub(crate) btc_user_pending_transactions: BtcUserPendingTransactionsMap,
-    // TODO: implement a periodic cleanup of old entries
+    // Periodic cleanup of stale entries lives in `utils::housekeeping`
+    // (`evict_inactive_tokens` with `TOKEN_ACTIVITY_RETENTION_SEC`).
     // TODO: limit the map size with an eviction policy
     pub(crate) token_activity: TokenActivityMap,
     pub(crate) exchange_rates: ExchangeRateMap,
