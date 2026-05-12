@@ -27,8 +27,14 @@ use crate::{
 const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60;
 
 /// Tokens that haven't been queried within this window are considered inactive
-/// and skipped during price refreshes (1 hour).
-pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
+/// and skipped during price refreshes (30 minutes).
+///
+/// The frontend exchange worker (`exchange.worker.ts`) hits the backend on a
+/// short interval whenever a tab is open, so any session actually using a
+/// token re-bumps its activity well within this window. Tightening from 1 h
+/// to 30 min materially reduces upstream price-provider calls for tokens
+/// whose user has already left.
+pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 30 * 60;
 
 /// Native tokens whose prices are always fetched, regardless of user activity.
 fn native_token_ids() -> Vec<StoredTokenId> {
