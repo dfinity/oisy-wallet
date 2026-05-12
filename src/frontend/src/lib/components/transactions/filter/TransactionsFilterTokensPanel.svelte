@@ -45,6 +45,7 @@
 			).values()
 		].sort((a, b) => {
 			const bySymbol = a.symbol.localeCompare(b.symbol, undefined, { sensitivity: 'base' });
+
 			return bySymbol !== 0
 				? bySymbol
 				: a.network.name.localeCompare(b.network.name, undefined, { sensitivity: 'base' });
