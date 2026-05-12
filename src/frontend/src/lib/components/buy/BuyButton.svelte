@@ -21,6 +21,7 @@
 <ButtonHero
 	ariaLabel={$i18n.buy.text.buy}
 	disabled={$isBusy ||
+		// a missing API key should only disable the button if OnRamper is enabled. If it's disabled anyway, we want the button to remain active, so we can show a modal content about why it's not available.
 		(ONRAMPER_ENABLED && isNullishOrEmpty(ONRAMPER_API_KEY)) ||
 		$inflowActionsDisabled}
 	{onclick}
