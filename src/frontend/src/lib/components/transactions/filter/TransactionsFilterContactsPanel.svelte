@@ -110,7 +110,6 @@
 	@media (max-width: #{media.$breakpoint-medium - 1px}) {
 		li :global(.checkbox) {
 			--checkbox-padding: 12px;
-			min-height: var(--touch-target-min-height);
 		}
 	}
 </style>
