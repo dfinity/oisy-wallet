@@ -117,37 +117,43 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
 };
 
 /**
- * Get all UTXO transaction IDs from all pending transactions for a given address.
- * These are the transaction IDs that UTXOs reference (inputs being spent), not the pending transaction IDs themselves.
+ * Build a stable string key for an outpoint, used to compare reserved UTXOs
+ * against available UTXOs across the FE.
  *
- * @param address - Bitcoin address to get pending UTXO transaction IDs for
- * @returns Array of UTXO transaction ID strings, or null if no pending data available
+ * Format: `${reversed-txid-hex}:${vout}`.
  */
-export const getPendingTransactionUtxoTxIds = (address: string): string[] | null => {
+export const outpointToKey = ({ txid, vout }: { txid: Uint8Array; vout: number }): string =>
+	`${utxoTxIdToString(txid)}:${vout}`;
+
+/**
+ * Get the outpoint keys (txid + vout) of every UTXO reserved by a pending
+ * transaction for a given address. These are the inputs already committed to
+ * an unconfirmed send and therefore unavailable for a new selection.
+ *
+ * @param address - Bitcoin address to get reserved outpoints for
+ * @returns Array of outpoint keys, or null if no pending data available
+ */
+export const getPendingTransactionUtxoOutpoints = (address: string): string[] | null => {
 	const pendingTransactions = getPendingTransactions(address);
 
 	if (isNullish(pendingTransactions)) {
 		return null;
 	}
 
-	// Extract all UTXO transaction IDs from all pending transactions
-	const utxoTxIds: string[] = [];
+	const outpointKeys: string[] = [];
 
 	for (const tx of pendingTransactions) {
 		if (nonNullish(tx.utxos)) {
 			for (const utxo of tx.utxos) {
-				if (nonNullish(utxo?.outpoint?.txid)) {
-					const utxoTxId = utxoTxIdToString(utxo.outpoint.txid);
-					if (notEmptyString(utxoTxId)) {
-						utxoTxIds.push(utxoTxId);
-					}
+				const outpoint = utxo?.outpoint;
+				if (nonNullish(outpoint?.txid) && outpoint.txid.length > 0 && nonNullish(outpoint.vout)) {
+					outpointKeys.push(outpointToKey(outpoint));
 				}
 			}
 		}
 	}
 
-	// Remove duplicates and return
-	return Array.from(new Set(utxoTxIds));
+	return Array.from(new Set(outpointKeys));
 };
 
 /**
