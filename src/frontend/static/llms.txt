@@ -84,8 +84,8 @@ Key facts:
 
 ### Improvements
 
-- Optimized bitcoin sending by optimizing for the cheapest transaction cost by using the ideal utxo(s).
-- Allow creating multiple unconfirmed Bitcoin transaction by improving the locking concept to now work at utxo level.
+- Optimized Bitcoin sending by optimizing for the cheapest transaction cost by using the ideal UTXO(s).
+- Allow creating multiple unconfirmed Bitcoin transactions by improving the locking concept to now work at the UTXO level.
 - Improved the behavior of the swap form by additionally filtering the receive token and network list by the selected pay token, respecting the swap capabilities of all available providers.
 
 ### Bug Fixes
