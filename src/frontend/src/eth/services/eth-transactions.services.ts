@@ -80,7 +80,7 @@ export const reloadEthereumTransactions = (params: {
 
 const maxEthNativeBlockNumberInStore = (tokenId: TokenId): number | undefined => {
 	const rows = get(ethTransactionsStore)?.[tokenId];
-	
+
 	if (isNullish(rows) || rows.length === 0) {
 		return;
 	}
@@ -95,8 +95,8 @@ const maxEthNativeBlockNumberInStore = (tokenId: TokenId): number | undefined =>
 };
 
 /**
-* Next Etherscan `startBlock` after the newest known height; backend cursor wins over the store. 
-*/
+ * Next Etherscan `startBlock` after the newest known height; backend cursor wins over the store.
+ */
 const resolveEthIncrementalStartBlock = ({
 	newestStoredBlockIndex,
 	maxBlockFromTransactionsStore
@@ -107,11 +107,11 @@ const resolveEthIncrementalStartBlock = ({
 	if (nonNullish(newestStoredBlockIndex)) {
 		return Number(newestStoredBlockIndex) + 1;
 	}
-	
+
 	if (nonNullish(maxBlockFromTransactionsStore)) {
 		return maxBlockFromTransactionsStore + 1;
 	}
-	
+
 	return 0;
 };
 
@@ -137,9 +137,9 @@ const loadNewEthNativeTransactionsAfterStartBlock = async ({
 	const tipReachesStartBlock = await (async (): Promise<boolean> => {
 		try {
 			const { getBlockNumber } = infuraProviders(networkId);
-			
+
 			const latestBlockNumber = await getBlockNumber();
-			
+
 			return latestBlockNumber >= startBlock;
 		} catch (_: unknown) {
 			// If we cannot read the tip, still query Etherscan rather than leave the UI stale.
