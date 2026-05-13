@@ -32,6 +32,7 @@
 		"ambient.d.ts",
 		"./types/**/$types.d.ts",
 		"./vite.config.ts",
+		"./vite.config.ai.ts",
 		"./src/**/*.js",
 		"./src/**/*.ts",
 		"./src/**/*.svelte",
