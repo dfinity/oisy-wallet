@@ -5,9 +5,15 @@
 	interface Props {
 		header: Snippet;
 		children: Snippet;
+		// Optional stacking-context override. Defaults to `3` to match the
+		// historical behavior shared by every sticky header in the app
+		// (date stickies, `Assets`, `TokensList`). Pass a higher value for
+		// headers whose contents open a popover that must paint above
+		// other sibling sticky headers.
+		zIndex?: number;
 	}
 
-	const { header, children }: Props = $props();
+	const { header, children, zIndex = 3 }: Props = $props();
 
 	const SPACING_UNIT = 4;
 	const SPACING_TOP = SPACING_UNIT * 6; // since we add pt-6 we need to trigger earlier
@@ -29,7 +35,8 @@
 
 <div bind:this={rootElement}>
 	<div
-		class="sticky top-0 z-3 px-1 whitespace-nowrap"
+		style:z-index={zIndex}
+		class="sticky top-0 px-1 whitespace-nowrap"
 		class:bg-page={scrolledSoon}
 		class:pt-6={scrolledSoon}
 	>

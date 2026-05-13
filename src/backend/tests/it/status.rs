@@ -10,7 +10,13 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use serde_json::Value;
-use shared::http::{HttpRequest, HttpResponse};
+use shared::{
+    http::{HttpRequest, HttpResponse},
+    types::{
+        network::{SetShowTestnetsRequest, SetTestnetsSettingsError},
+        user_profile::{CreateUserProfileError, UserProfile},
+    },
+};
 
 use crate::utils::pocketic::{BackendBuilder, PicCanisterTrait};
 
@@ -18,11 +24,11 @@ use crate::utils::pocketic::{BackendBuilder, PicCanisterTrait};
 /// independent of the canister-internal module.
 const CACHE_TTL_SECS: u64 = 60;
 
-/// Mirror of `crate::status::metrics::SIGNUPS_WARN_THRESHOLD`. Kept as `u64` to match the
+/// Mirror of `crate::status::metrics::SIGNUPS_WARN_THRESHOLD`. Kept as `usize` to match the
 /// canister-side type; narrowed to `u8` at the call site below since `create_users` takes a
 /// `RangeBounds<u8>`. The `try_from` will trip if the threshold is ever bumped past `u8::MAX`,
 /// which is exactly the signal we want to retune this test rather than silently truncate.
-const SIGNUPS_WARN_THRESHOLD: u64 = 50;
+const SIGNUPS_WARN_THRESHOLD: usize = 50;
 
 fn signups_warn_threshold_u8() -> u8 {
     u8::try_from(SIGNUPS_WARN_THRESHOLD)
@@ -175,6 +181,66 @@ fn status_endpoint_caches_within_ttl() {
     assert!(
         refreshed_ts > first_ts,
         "after TTL expiry, response timestamp must advance (first={first_ts}, refreshed={refreshed_ts})"
+    );
+}
+
+/// Regression test for the `count_signups_in_window` rewrite.
+///
+/// The metric must count profiles by `created_timestamp`, not by `updated_timestamp`. The
+/// underlying `user_profile` map is keyed by `(updated_timestamp, principal)`, so a profile that
+/// was created long ago but recently updated lives in the same "tail" as fresh signups; the
+/// post-filter must still exclude it.
+#[test]
+fn status_does_not_count_old_profiles_with_recent_updates() {
+    let pic_setup = BackendBuilder::default().deploy();
+    let caller = Principal::self_authenticating("status-old-profile-recent-update");
+
+    // Sign up: `created_timestamp` and `updated_timestamp` both equal "now".
+    let create_response = pic_setup.update::<Result<UserProfile, CreateUserProfileError>>(
+        caller,
+        "create_user_profile",
+        (),
+    );
+    let profile = create_response
+        .expect("create_user_profile call must succeed")
+        .expect("signups must be open on a fresh canister");
+
+    // Age the profile out of the signups window, then bump `updated_timestamp` by toggling a
+    // setting. After this the profile satisfies `updated_timestamp >= cutoff` (so it lies in the
+    // suffix scanned by `range`) but `created_timestamp < cutoff` (so it must be filtered out).
+    pic_setup.pic().advance_time(Duration::from_mins(31));
+    pic_setup.pic().tick();
+
+    let toggle_response = pic_setup.update::<Result<(), SetTestnetsSettingsError>>(
+        caller,
+        "set_user_show_testnets",
+        SetShowTestnetsRequest {
+            show_testnets: true,
+            current_user_version: profile.version,
+        },
+    );
+    assert_eq!(
+        toggle_response,
+        Ok(Ok(())),
+        "toggling testnets must succeed so updated_timestamp is bumped"
+    );
+
+    // Bypass the cached response from canister boot.
+    pic_setup
+        .pic()
+        .advance_time(Duration::from_secs(CACHE_TTL_SECS + 1));
+    pic_setup.pic().tick();
+
+    let (_, body) = fetch_status(&pic_setup);
+    assert_eq!(
+        body["metrics"]["signups_30m"]["status"],
+        Value::String("ok".to_string()),
+        "profile created >30min ago must not count as a recent signup even after a fresh update: {body}"
+    );
+    assert_eq!(
+        body["status"],
+        Value::String("ok".to_string()),
+        "top-level status must roll up to ok: {body}"
     );
 }
 

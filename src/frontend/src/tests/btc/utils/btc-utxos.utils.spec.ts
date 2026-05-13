@@ -3,8 +3,8 @@ import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-tr
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	calculateUtxoSelection,
-	estimateTransactionSize,
-	extractUtxoTxIds,
+	estimateTransactionVSize,
+	extractUtxoOutpoints,
 	filterAvailableUtxos,
 	filterLockedUtxos,
 	resetUtxosDataStores,
@@ -58,28 +58,37 @@ describe('btc-utxos.utils', () => {
 		});
 	});
 
-	describe('extractUtxoTxIds', () => {
-		it('should extract transaction IDs from UTXOs', () => {
+	describe('extractUtxoOutpoints', () => {
+		it('should extract outpoint keys (txid + vout) from UTXOs', () => {
 			const utxos = [
-				createMockUtxo({ value: 100_000, txid: new Uint8Array([1, 2, 3, 4]) }),
-				createMockUtxo({ value: 200_000, txid: new Uint8Array([5, 6, 7, 8]) })
+				createMockUtxo({ value: 100_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 0 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([5, 6, 7, 8]), vout: 3 })
 			];
 
-			const result = extractUtxoTxIds(utxos);
+			const result = extractUtxoOutpoints(utxos);
 
-			expect(result).toEqual(['04030201', '08070605']);
+			expect(result).toEqual(['04030201:0', '08070605:3']);
+		});
+
+		it('should distinguish UTXOs sharing a txid by their vout', () => {
+			const utxos = [
+				createMockUtxo({ value: 100_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 0 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 1 })
+			];
+
+			expect(extractUtxoOutpoints(utxos)).toEqual(['04030201:0', '04030201:1']);
 		});
 
 		it('should return empty array for empty input', () => {
-			const result = extractUtxoTxIds([]);
+			const result = extractUtxoOutpoints([]);
 
 			expect(result).toEqual([]);
 		});
 	});
 
-	describe('estimateTransactionSize', () => {
+	describe('estimateTransactionVSize', () => {
 		it('should calculate transaction size correctly for multiple inputs and outputs', () => {
-			const result = estimateTransactionSize({
+			const result = estimateTransactionVSize({
 				numInputs: 2,
 				numOutputs: 2
 			});
@@ -89,7 +98,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should handle single input and output', () => {
-			const result = estimateTransactionSize({
+			const result = estimateTransactionVSize({
 				numInputs: 1,
 				numOutputs: 1
 			});
@@ -99,7 +108,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should handle 0n inputs and outputs', () => {
-			const result = estimateTransactionSize({
+			const result = estimateTransactionVSize({
 				numInputs: 0,
 				numOutputs: 0
 			});
@@ -109,7 +118,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should handle large number of inputs and outputs', () => {
-			const result = estimateTransactionSize({
+			const result = estimateTransactionVSize({
 				numInputs: 10,
 				numOutputs: 5
 			});
@@ -140,15 +149,17 @@ describe('btc-utxos.utils', () => {
 			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 		});
 
-		it('should select UTXOs in descending order by value', () => {
+		it('should select the smallest UTXO that covers amount + fee', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: utxos,
 				amountSatoshis: 100_000n,
 				feeRateMiliSatoshisPerVByte: 1000n
 			});
 
-			// Should select the largest UTXO first (300_000)
-			expect(result.selectedUtxos[0].value).toBe(300_000n);
+			// fee(1 input) = 141 sats; needed = 100_141. Candidates >= 100_141: 200_000 and 300_000.
+			// Smallest sufficient is 200_000.
+			expect(result.selectedUtxos).toHaveLength(1);
+			expect(result.selectedUtxos[0].value).toBe(200_000n);
 			expect(result.sufficientFunds).toBeTruthy();
 			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 		});
@@ -210,38 +221,288 @@ describe('btc-utxos.utils', () => {
 		});
 	});
 
+	describe('calculateUtxoSelection — algorithm scenarios', () => {
+		// Fee reference at feeRateMiliSatoshisPerVByte = 1000n (1 sat/vbyte):
+		//   1 input : 11 + 1×68 + 2×31 = 141 sats
+		//   2 inputs: 11 + 2×68 + 2×31 = 209 sats
+		//   3 inputs: 11 + 3×68 + 2×31 = 277 sats
+
+		const FEE_RATE = 1000n;
+		const FEE_1_INPUT = 141n;
+		const FEE_2_INPUTS = 209n;
+		const FEE_3_INPUTS = 277n;
+
+		describe('single-input selection', () => {
+			it('picks the smallest UTXO that alone covers amount + fee when several candidates qualify', () => {
+				// Mirrors user example: [4,2,6,40,8,12,43] → send 10 → pick 12
+				const utxos = [
+					createMockUtxo({ value: 400_000 }),
+					createMockUtxo({ value: 200_000 }),
+					createMockUtxo({ value: 600_000 }),
+					createMockUtxo({ value: 4_000_000 }),
+					createMockUtxo({ value: 800_000 }),
+					createMockUtxo({ value: 1_200_000 }),
+					createMockUtxo({ value: 4_300_000 })
+				];
+
+				// needed = 1_000_000 + 141 = 1_000_141
+				// Candidates ≥ 1_000_141: 1_200_000, 4_000_000, 4_300_000 → pick 1_200_000
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 1_000_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(1);
+				expect(result.selectedUtxos[0].value).toBe(1_200_000n);
+				expect(result.feeSatoshis).toBe(FEE_1_INPUT);
+				expect(result.changeAmount).toBe(1_200_000n - 1_000_000n - FEE_1_INPUT);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+
+			it('picks the UTXO that exactly covers amount + fee (zero change)', () => {
+				// 100_000 + 141 = 100_141 → UTXO of exactly 100_141 should be selected
+				const utxos = [
+					createMockUtxo({ value: 200_000 }),
+					createMockUtxo({ value: 100_141 }),
+					createMockUtxo({ value: 500_000 })
+				];
+
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 100_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(1);
+				expect(result.selectedUtxos[0].value).toBe(100_141n);
+				expect(result.changeAmount).toBe(ZERO);
+				expect(result.feeSatoshis).toBe(FEE_1_INPUT);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+
+			it('is insufficient when the only UTXO is 1 sat below amount + fee', () => {
+				// 100_000 + 141 = 100_141; UTXO = 100_140 → cannot satisfy
+				const result = calculateUtxoSelection({
+					availableUtxos: [createMockUtxo({ value: 100_140 })],
+					amountSatoshis: 100_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.sufficientFunds).toBeFalsy();
+				expect(result.changeAmount).toBe(ZERO);
+			});
+		});
+
+		describe('two-input selection (restart after picking largest)', () => {
+			it('picks smallest sufficient UTXO on the second pass, not the next-largest', () => {
+				// Mirrors user example: [3,7,2,6,1] → send 10 → pick [7, 3] not [7, 6]
+				// Scaled: send 999_791 so that amount + fee(2) = 1_000_000 exactly
+				const utxos = [
+					createMockUtxo({ value: 300_000 }),
+					createMockUtxo({ value: 700_000 }),
+					createMockUtxo({ value: 200_000 }),
+					createMockUtxo({ value: 600_000 }),
+					createMockUtxo({ value: 100_000 })
+				];
+
+				// Pass 1: needed = 999_791 + 141 = 999_932 → no single UTXO qualifies → pick largest (700_000)
+				// Pass 2: needed = 999_791 + 209 − 700_000 = 300_000 → candidates ≥ 300_000: {300_000, 600_000} → pick 300_000
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 999_791n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(2);
+				expect(result.selectedUtxos[0].value).toBe(700_000n);
+				expect(result.selectedUtxos[1].value).toBe(300_000n);
+				expect(result.feeSatoshis).toBe(FEE_2_INPUTS);
+				expect(result.changeAmount).toBe(ZERO);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+
+			it('produces less change than a largest-first approach would', () => {
+				// [700k, 600k, 300k] → amount chosen so largest-first would pick [700k, 600k]
+				// but smallest-sufficient restart gives [700k, 300k]
+				const utxos = [
+					createMockUtxo({ value: 700_000 }),
+					createMockUtxo({ value: 600_000 }),
+					createMockUtxo({ value: 300_000 })
+				];
+
+				// Pass 1: needed = 999_791 + 141 = 999_932 → no UTXO qualifies → pick 700_000
+				// Pass 2: needed = 999_791 + 209 − 700_000 = 300_000 → pick 300_000 (not 600_000)
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 999_791n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(2);
+				expect(result.selectedUtxos[1].value).toBe(300_000n); // smallest sufficient, not 600_000
+				expect(result.changeAmount).toBe(ZERO);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+		});
+
+		describe('three-input selection', () => {
+			it('restarts the smallest-sufficient search after each largest-UTXO pick', () => {
+				const utxos = [
+					createMockUtxo({ value: 400_000 }),
+					createMockUtxo({ value: 350_000 }),
+					createMockUtxo({ value: 300_000 }),
+					createMockUtxo({ value: 200_000 }),
+					createMockUtxo({ value: 100_000 })
+				];
+
+				// Pass 1: needed = 900_000 + 141 = 900_141 → no UTXO qualifies → pick 400_000
+				// Pass 2: needed = 900_000 + 209 − 400_000 = 500_209 → no UTXO qualifies → pick 350_000
+				// Pass 3: needed = 900_000 + 277 − 750_000 = 150_277 → candidates ≥ 150_277: {300_000, 200_000} → pick 200_000
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 900_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(3);
+				expect(result.selectedUtxos[0].value).toBe(400_000n);
+				expect(result.selectedUtxos[1].value).toBe(350_000n);
+				expect(result.selectedUtxos[2].value).toBe(200_000n); // not 300_000
+				expect(result.feeSatoshis).toBe(FEE_3_INPUTS);
+				expect(result.changeAmount).toBe(950_000n - 900_000n - FEE_3_INPUTS); // 49_723
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+		});
+
+		describe('fee grows with each additional input', () => {
+			it('accounts for the higher fee when a second input is required', () => {
+				// Single UTXO of 600_000 is enough for amount 500_000 + fee(1) = 500_141.
+				// But here the largest UTXO is 300_000 which is below the needed 500_141,
+				// forcing a second pick — at which point fee(2) = 209 applies.
+				const utxos = [createMockUtxo({ value: 300_000 }), createMockUtxo({ value: 250_000 })];
+
+				// Pass 1: needed = 500_000 + 141 = 500_141 → no UTXO qualifies → pick 300_000
+				// Pass 2: needed = 500_000 + 209 − 300_000 = 200_209 → 250_000 ≥ 200_209 → pick 250_000
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 500_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(2);
+				expect(result.feeSatoshis).toBe(FEE_2_INPUTS);
+				expect(result.changeAmount).toBe(550_000n - 500_000n - FEE_2_INPUTS); // 49_791
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+		});
+
+		describe('UTXOs with equal values', () => {
+			it('selects one UTXO when any single one covers amount + fee', () => {
+				const utxos = [
+					createMockUtxo({ value: 500_000, vout: 0 }),
+					createMockUtxo({ value: 500_000, vout: 1 }),
+					createMockUtxo({ value: 500_000, vout: 2 })
+				];
+
+				// needed = 450_000 + 141 = 450_141 → 500_000 qualifies → pick one
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 450_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.selectedUtxos).toHaveLength(1);
+				expect(result.selectedUtxos[0].value).toBe(500_000n);
+				expect(result.sufficientFunds).toBeTruthy();
+			});
+		});
+
+		describe('insufficient funds', () => {
+			it('returns all available UTXOs when total is still not enough', () => {
+				const utxos = [createMockUtxo({ value: 100_000 }), createMockUtxo({ value: 50_000 })];
+
+				// 100_000 + 50_000 = 150_000 < 200_000 + 141
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 200_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.sufficientFunds).toBeFalsy();
+				expect(result.selectedUtxos).toHaveLength(2);
+				expect(result.changeAmount).toBe(ZERO);
+			});
+
+			it('is insufficient when the total exactly covers amount but not amount + fee', () => {
+				// total = 200_000, amount = 200_000, fee(2) = 209 → 200_000 < 200_209
+				const utxos = [
+					createMockUtxo({ value: 100_000 }),
+					createMockUtxo({ value: 100_000, vout: 1 })
+				];
+
+				const result = calculateUtxoSelection({
+					availableUtxos: utxos,
+					amountSatoshis: 200_000n,
+					feeRateMiliSatoshisPerVByte: FEE_RATE
+				});
+
+				expect(result.sufficientFunds).toBeFalsy();
+			});
+		});
+	});
+
 	describe('filterLockedUtxos', () => {
 		const utxos = [
 			createMockUtxo({
 				value: 100_000,
-				txid: new Uint8Array([1, 2, 3, 4])
+				txid: new Uint8Array([1, 2, 3, 4]),
+				vout: 0
 			}),
 			createMockUtxo({
 				value: 200_000,
-				txid: new Uint8Array([5, 6, 7, 8])
+				txid: new Uint8Array([5, 6, 7, 8]),
+				vout: 0
 			}),
 			createMockUtxo({
 				value: 300_000,
-				txid: new Uint8Array([9, 10, 11, 12])
+				txid: new Uint8Array([9, 10, 11, 12]),
+				vout: 0
 			})
 		];
 
-		it('should filter out locked UTXOs', () => {
-			const pendingUtxoTxIds = ['04030201', '0c0b0a09']; // Hex of [1,2,3,4] and [9,10,11,12] reversed
+		it('should filter out reserved UTXOs by outpoint', () => {
+			const pendingUtxoOutpoints = ['04030201:0', '0c0b0a09:0'];
 
 			const result = filterLockedUtxos({
 				utxos,
-				pendingUtxoTxIds
+				pendingUtxoOutpoints
 			});
 
 			expect(result).toHaveLength(1);
 			expect(result[0].value).toBe(200_000n);
 		});
 
+		it('should keep UTXOs that share a txid with a reserved outpoint but differ in vout', () => {
+			const sharedTxidUtxos = [
+				createMockUtxo({ value: 100_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 0 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 1 }),
+				createMockUtxo({ value: 300_000, txid: new Uint8Array([1, 2, 3, 4]), vout: 2 })
+			];
+
+			// Only vout=0 is reserved; vouts 1 and 2 must remain spendable.
+			const result = filterLockedUtxos({
+				utxos: sharedTxidUtxos,
+				pendingUtxoOutpoints: ['04030201:0']
+			});
+
+			expect(result.map((u) => u.outpoint.vout)).toEqual([1, 2]);
+		});
+
 		it('should return all UTXOs when no pending transactions', () => {
 			const result = filterLockedUtxos({
 				utxos,
-				pendingUtxoTxIds: []
+				pendingUtxoOutpoints: []
 			});
 
 			expect(result).toHaveLength(3);
@@ -250,7 +511,7 @@ describe('btc-utxos.utils', () => {
 		it('should handle empty UTXO array', () => {
 			const result = filterLockedUtxos({
 				utxos: [],
-				pendingUtxoTxIds: ['04030201']
+				pendingUtxoOutpoints: ['04030201:0']
 			});
 
 			expect(result).toEqual([]);
@@ -265,12 +526,14 @@ describe('btc-utxos.utils', () => {
 			createMockUtxo({
 				value: 400_000,
 				height: 15,
-				txid: new Uint8Array([5, 6, 7, 8])
-			}), // Good but might be locked
+				txid: new Uint8Array([5, 6, 7, 8]),
+				vout: 0
+			}), // Good but might be reserved
 			createMockUtxo({
 				value: 500_000,
 				height: 20,
-				txid: new Uint8Array([9, 10, 11, 12])
+				txid: new Uint8Array([9, 10, 11, 12]),
+				vout: 0
 			}) // Good
 		];
 
@@ -279,7 +542,7 @@ describe('btc-utxos.utils', () => {
 				utxos,
 				options: {
 					minConfirmations: 6,
-					pendingUtxoTxIds: []
+					pendingUtxoOutpoints: []
 				}
 			});
 
@@ -292,7 +555,7 @@ describe('btc-utxos.utils', () => {
 				utxos,
 				options: {
 					minConfirmations: 1,
-					pendingUtxoTxIds: []
+					pendingUtxoOutpoints: []
 				}
 			});
 
@@ -301,14 +564,14 @@ describe('btc-utxos.utils', () => {
 			expect(result.every((utxo) => utxo.height > 0)).toBeTruthy();
 		});
 
-		it('should filter out locked UTXOs', () => {
-			const pendingUtxoTxIds = ['08070605']; // Hex of [5, 6, 7, 8] reversed
+		it('should filter out reserved UTXOs', () => {
+			const pendingUtxoOutpoints = ['08070605:0'];
 
 			const result = filterAvailableUtxos({
 				utxos,
 				options: {
 					minConfirmations: 6,
-					pendingUtxoTxIds
+					pendingUtxoOutpoints
 				}
 			});
 
@@ -316,18 +579,47 @@ describe('btc-utxos.utils', () => {
 			expect(result.map((u) => Number(u.value))).toEqual([300_000, 500_000]);
 		});
 
+		it('should keep UTXOs sharing a txid with a reserved outpoint but a different vout', () => {
+			const sharedTxidUtxos = [
+				createMockUtxo({
+					value: 400_000,
+					height: 15,
+					txid: new Uint8Array([5, 6, 7, 8]),
+					vout: 0
+				}),
+				createMockUtxo({
+					value: 600_000,
+					height: 18,
+					txid: new Uint8Array([5, 6, 7, 8]),
+					vout: 1
+				})
+			];
+
+			const result = filterAvailableUtxos({
+				utxos: sharedTxidUtxos,
+				options: {
+					minConfirmations: 6,
+					pendingUtxoOutpoints: ['08070605:0']
+				}
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].value).toBe(600_000n);
+			expect(result[0].outpoint.vout).toBe(1);
+		});
+
 		it('should apply both confirmation and lock filters', () => {
-			const pendingUtxoTxIds = ['0c0b0a09']; // Hex of [9, 10, 11, 12] reversed
+			const pendingUtxoOutpoints = ['0c0b0a09:0'];
 
 			const result = filterAvailableUtxos({
 				utxos,
 				options: {
 					minConfirmations: 10,
-					pendingUtxoTxIds
+					pendingUtxoOutpoints
 				}
 			});
 
-			// Should only have the 300_000 and 400_000 UTXOs (height >= 10, not locked)
+			// Should only have the 300_000 and 400_000 UTXOs (height >= 10, not reserved)
 			expect(result).toHaveLength(2);
 			expect(result.map((u) => Number(u.value))).toEqual([300_000, 400_000]);
 		});
@@ -337,7 +629,7 @@ describe('btc-utxos.utils', () => {
 				utxos: [],
 				options: {
 					minConfirmations: 1,
-					pendingUtxoTxIds: []
+					pendingUtxoOutpoints: []
 				}
 			});
 

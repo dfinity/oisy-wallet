@@ -5,7 +5,11 @@ use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
 use super::rate_limiter::ALLOW_SIGNING_RATE_LIMITER;
-use crate::{api, signer, types::StoredPrincipal};
+use crate::{
+    api, signer,
+    token::{evict_inactive_tokens, TOKEN_ACTIVITY_RETENTION_SEC},
+    types::StoredPrincipal,
+};
 
 thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
@@ -135,6 +139,7 @@ pub(crate) fn start_periodic_housekeeping_timers() {
 
 /// Runs hourly housekeeping tasks:
 /// - Top up the cycles ledger.
+/// - Evict `token_activity` entries older than [`TOKEN_ACTIVITY_RETENTION_SEC`].
 async fn hourly_housekeeping_tasks() {
     // Tops up the account on the cycles ledger
     {
@@ -144,6 +149,11 @@ async fn hourly_housekeeping_tasks() {
         }
         // TODO: Add monitoring for how many cycles have been topped up and whether topping up is
         // failing.
+    }
+
+    let evicted = evict_inactive_tokens(TOKEN_ACTIVITY_RETENTION_SEC);
+    if evicted > 0 {
+        ic_cdk::println!("Evicted {evicted} stale token_activity entries");
     }
 }
 

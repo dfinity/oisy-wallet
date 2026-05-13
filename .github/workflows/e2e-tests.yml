@@ -34,6 +34,7 @@ jobs:
               - playwright.config.ts
               - .env.e2e
               - canister_e2e_ids.json
+              - .github/workflows/e2e-tests.yml
               - e2e/**/*
 
   oisy-backend-wasm:

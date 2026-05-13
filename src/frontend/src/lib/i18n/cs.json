@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short vás chrání!"
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -123,14 +124,16 @@
 		"text": {
 			"title_part_1": "Vaše Digitální Aktiva",
 			"title_part_2": "Soukromá a Bezpečná",
+			"description": "Otevřete svou peněženku nebo si ji vytvořte během několika sekund",
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
+			"sign_in_or_sign_up": "Přihlásit se nebo se zaregistrovat",
 			"internet_identity": "",
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
-			"social_login": "Okamžitý a soukromý přístup + přihlášení přes sociální sítě"
+			"move_swap_grow": "Přesouvejte, směňujte a zhodnocujte svá aktiva napříč sítěmi"
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu",
@@ -142,10 +145,10 @@
 			"session_locked": "Vaše relace byla uzamčena v jiné kartě."
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "Nové registrace jsou momentálně omezeny. Zkuste to prosím znovu později."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "V současné době není registrace nových uživatelů možná. Stávající uživatelé mohou $oisy_short používat normálně."
 		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
@@ -268,10 +271,10 @@
 				"description": "Centrum budoucnosti decentralizovaných financí!<br/>Znovuobjevením burzy jako centra poskytuje ICPSwap full-stack finanční, tržní a DAO služby na Internet Computer. Na základě základní technologie Internet Computer od DFINITY vytváří ICPSwap ekosystém skutečně decentralizovaných financí tím, že refaktoruje způsob, jakým uživatelé a vývojáři společně budují projekty."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "Frontendová dapp NNS umožňuje komukoli interagovat s Network Nervous System na Internet Computeru pomocí uživatelsky přívětivého rozhraní.",
-				"call_to_action": "Zapojte se",
-				"description": "Frontendová dapp NNS umožňuje komukoli interagovat s Network Nervous System na Internet Computeru pomocí uživatelsky přívětivého rozhraní. Tato decentralizovaná dapp, která je kompletně obsluhována end-to-end prostřednictvím blockchainu, vám umožňuje snadno provádět následující akce:<br/><ul><li>Odesílat a přijímat tokeny (ICP, ckBTC, CHAT atd.)</li><li>Stakovat a spravovat neurony</li><li>Hlasovat o správě Internet Computeru a SNS</li><li>Účastnit se decentralizačních swapů</li><li>Vytvářet a doplňovat kanystry</li><li>Získávat odměny za správu</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Governance platforma pro Internet Computer umožňující uživatelům stakovat, hlasovat a sledovat aktivitu sítě.",
+				"call_to_action": "Zapojte se do ICP governance",
+				"description": "Aplikace NNS je governance platforma pro Internet Computer (ICP), která umožňuje uživatelům stakovat tokeny, účastnit se hlasování a sledovat aktivitu sítě.<br/><br/>Přináší větší viditelnost uživatelských akcí a governance aktivit, pomáhá uživatelům pochopit, jak staking, hlasování a účast přispívají k širšímu ekosystému."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -1154,7 +1157,7 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
-			"bridging": "",
+			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až 2 minuty.)",
 			"network_cost": "Náklady sítě",
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
@@ -1163,7 +1166,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Cenu alespoň jednoho z tokenů se nepodařilo získat. <strong>Nezávisle ověřte</strong>, zda tato nabídka swapu představuje férovou výměnu.<br>Upozorňujeme, že nastavení slippage vás <strong>nechrání</strong> před nabídkou s podstatně nižší přijatou hodnotou!"
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
@@ -1188,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "Koupit",
-			"buy_dev": "Koupit (vývojové prostředí)"
+			"buy_dev": "Koupit (vývojové prostředí)",
+			"unavailable_title": "Nákup tokenů je dočasně nedostupný",
+			"unavailable_description": "Nákup tokenů je momentálně vypnutý, zatímco dále vylepšujeme zabezpečení tohoto procesu zavedením podepisování URL. Bude znovu zapnut, jakmile bude práce dokončena.",
+			"unavailable_fallback_hint": "Mezitím můžete stále přijímat tokeny sdílením adresy své peněženky."
+		},
+		"actions": {
+			"close": "Rozumím"
 		},
 		"onramper": {
 			"title": "Koupit přes Onramper"
@@ -1625,6 +1635,20 @@
 			"burn": "Spálit",
 			"mint": "Razit"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": ""
+		},
 		"label": {
 			"reimbursement": "Náhrada",
 			"twin_token_converted": "Převedeno z $twinToken",
@@ -1849,7 +1873,6 @@
 			"text": {
 				"open_or_create": "Otevřete nebo vytvořte svou peněženku pro bezpečnou interakci s aplikací.",
 				"connect_your_wallet": "Připojte svou peněženku $oisy_name",
-				"oisy_protects_you": "OISY vás chrání!",
 				"oisy_protects_you_description": "Aplikace nemohou přímo přistupovat k vašim prostředkům, a každá transakce musí být potvrzena vámi."
 			}
 		},
@@ -1972,7 +1995,7 @@
 		},
 		"info": {
 			"btc_transactions": "Informace o transakcích BTC jsou získány od centrálních třetích stran a měly by být nezávisle ověřeny.",
-			"hidden_micro_transactions": "<strong>OISY vás chrání!</strong> Transakce s velmi malými hodnotami tokenů jsou aktuálně skryty. Chcete-li je zobrazit, přejděte do <a href=\"/settings/\">Nastavení</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Zjistit více</a>"
+			"hidden_micro_transactions": "Transakce s velmi malými hodnotami tokenů jsou aktuálně skryty. Chcete-li je zobrazit, přejděte do <a href=\"/settings/\">Nastavení</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Zjistit více</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transakce pro $token_list nelze zobrazit. Není k dispozici žádný indexový kanystr.",

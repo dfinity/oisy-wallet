@@ -7,7 +7,6 @@ import {
 	validateEthEvmTransfer
 } from '$eth/utils/eth-open-crypto-pay.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { getPendingTransactions } from '$icp/utils/btc.utils';
 import {
 	enrichIcPayableToken,
 	isIcPayableToken,
@@ -159,8 +158,7 @@ export const mapTokenToPayableToken = ({
 export const prepareBasePayableTokens = ({
 	transferAmounts,
 	networks,
-	availableTokens,
-	btcAddressMainnet
+	availableTokens
 }: PrepareTokensParams): PayableToken[] => {
 	if (transferAmounts.length === 0 || networks.length === 0 || availableTokens.length === 0) {
 		return [];
@@ -175,19 +173,10 @@ export const prepareBasePayableTokens = ({
 		const payableToken = mapTokenToPayableToken({ token, methodDataMap });
 
 		if (nonNullish(payableToken)) {
-			if (isBitcoinToken(payableToken)) {
-				if (!OCP_PAY_WITH_BTC_ENABLED) {
-					return acc;
-				}
-
-				const btcPendingSentTransactions = getPendingTransactions(btcAddressMainnet ?? '');
-
-				if (nonNullish(btcPendingSentTransactions) && btcPendingSentTransactions.length === 0) {
-					acc.push(payableToken);
-				}
-			} else {
-				acc.push(payableToken);
+			if (isBitcoinToken(payableToken) && !OCP_PAY_WITH_BTC_ENABLED) {
+				return acc;
 			}
+			acc.push(payableToken);
 		}
 		return acc;
 	}, []);

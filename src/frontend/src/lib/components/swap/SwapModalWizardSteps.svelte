@@ -2,12 +2,15 @@
 	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { get } from 'svelte/store';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
+	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import {
@@ -28,6 +31,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
+	import { networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
@@ -60,8 +64,13 @@
 		onClose
 	}: Props = $props();
 
-	const { setSourceToken, setDestinationToken, sourceToken, destinationToken } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		setSourceToken,
+		setDestinationToken,
+		sourceToken,
+		destinationToken,
+		receiveSupportedData
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { setFilterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -129,6 +138,29 @@
 		}, undefined);
 	};
 
+	const computeDestinationAllowedIds = (source: Token): NetworkId[] | undefined => {
+		const baseAllowedIds = SUPPORTED_CROSS_SWAP_NETWORKS[source.network.id];
+
+		const supportedData = get(receiveSupportedData);
+		if (isNullish(supportedData)) {
+			return baseAllowedIds;
+		}
+
+		const reachableIds = networksWithSupport({
+			networks: get(crossChainSwapNetworksMainnets),
+			tokens: get(allSwapUniverseTokens),
+			supportedData
+		});
+
+		const reachableSet = new Set(reachableIds);
+
+		if (isNullish(baseAllowedIds)) {
+			return reachableIds;
+		}
+
+		return baseAllowedIds.filter((id) => reachableSet.has(id));
+	};
+
 	const applyListConstraints = (side: TokenSide) => {
 		// SOURCE list: user can browse all networks (but keep current network preselected if any)
 		if (side === 'source') {
@@ -149,8 +181,9 @@
 			return;
 		}
 
-		// source selected (constraints apply)
-		const allowedIds = SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id];
+		// source selected: intersect the static cross-swap pre-filter with networks
+		// that have at least one reachable destination via the providers supporting the source.
+		const allowedIds = computeDestinationAllowedIds($sourceToken);
 
 		setNetworksMode({ enabled: false, allowedIds });
 
@@ -181,30 +214,11 @@
 		selectTokenType = undefined;
 	};
 
-	const isDestinationCompatibleWithSource = ({
-		source,
-		destination
-	}: {
-		source: Token;
-		destination: Token;
-	}): boolean => {
-		const allowed = SUPPORTED_CROSS_SWAP_NETWORKS[source.network.id];
-
-		return isNullish(allowed) ? true : allowed.includes(destination.network.id);
-	};
-
 	const selectToken = (token: Token) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
 
 			setFilterNetwork(token.network);
-
-			if (
-				nonNullish($destinationToken) &&
-				!isDestinationCompatibleWithSource({ source: token, destination: $destinationToken })
-			) {
-				setDestinationToken(undefined);
-			}
 		} else if (selectTokenType === 'destination') {
 			setDestinationToken(token);
 

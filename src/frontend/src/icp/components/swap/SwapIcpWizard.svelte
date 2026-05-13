@@ -150,7 +150,10 @@
 			sourceToken: $sourceToken.symbol,
 			destinationToken: $destinationToken.symbol,
 			dApp: $swapAmountsStore.selectedProvider.provider,
-			usdSourceValue: sourceTokenUsdValue ?? ''
+			usdSourceValue: sourceTokenUsdValue ?? '',
+			swapType: $swapAmountsStore.selectedProvider.type ?? '',
+			sourceNetwork: $sourceToken.network.name,
+			destinationNetwork: $destinationToken.network.name
 		};
 
 		const sourceLedgerCanisterId = ($sourceToken as IcToken).ledgerCanisterId;

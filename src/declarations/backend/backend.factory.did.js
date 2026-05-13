@@ -369,6 +369,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const GetAllowedCyclesResponse = IDL.Record({ allowed_cycles: IDL.Nat });
 	const GetAllowedCyclesError = IDL.Variant({
+		RateLimited: RateLimitError,
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
@@ -626,6 +627,7 @@ export const idlFactory = ({ IDL }) => {
 			min: IDL.Nat8,
 			percentage: IDL.Nat8
 		}),
+		RateLimited: RateLimitError,
 		CouldNotGetBalanceFromCyclesLedger: IDL.Null,
 		CouldNotTopUpCyclesLedger: IDL.Record({
 			tried_to_send: IDL.Nat,

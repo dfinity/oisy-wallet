@@ -29,8 +29,9 @@ vi.mock('$btc/stores/btc-pending-sent-transactions.store', async () => {
 // Import after mocks
 import {
 	getPendingTransactionIds,
-	getPendingTransactionUtxoTxIds,
+	getPendingTransactionUtxoOutpoints,
 	getPendingTransactions,
+	outpointToKey,
 	pendingTransactionTxidToString,
 	utxoTxIdToString
 } from '$icp/utils/btc.utils';
@@ -141,15 +142,26 @@ describe('btc.utils', () => {
 		});
 	});
 
-	describe('getPendingTransactionUtxoTxIds', () => {
+	describe('outpointToKey', () => {
+		it('encodes a (txid, vout) pair as `${reversed-txid-hex}:${vout}`', () => {
+			expect(outpointToKey({ txid: new Uint8Array([0x01, 0x02, 0x03, 0x04]), vout: 0 })).toBe(
+				'04030201:0'
+			);
+			expect(outpointToKey({ txid: new Uint8Array([0x01, 0x02, 0x03, 0x04]), vout: 7 })).toBe(
+				'04030201:7'
+			);
+		});
+	});
+
+	describe('getPendingTransactionUtxoOutpoints', () => {
 		it('returns null when data is null or missing', () => {
 			mockStoreApi.setStoreValue({ [addr]: { certified: true as const, data: null } });
 
-			expect(getPendingTransactionUtxoTxIds(addr)).toEqual(null);
+			expect(getPendingTransactionUtxoOutpoints(addr)).toEqual(null);
 
 			mockStoreApi.setStoreValue({}); // address not present
 
-			expect(getPendingTransactionUtxoTxIds(addr)).toEqual(null);
+			expect(getPendingTransactionUtxoOutpoints(addr)).toEqual(null);
 		});
 
 		it('returns empty array when no pending transactions', () => {
@@ -157,10 +169,10 @@ describe('btc.utils', () => {
 				[addr]: { certified: true as const, data: [] }
 			});
 
-			expect(getPendingTransactionUtxoTxIds(addr)).toEqual([]);
+			expect(getPendingTransactionUtxoOutpoints(addr)).toEqual([]);
 		});
 
-		it('extracts UTXO transaction IDs from pending transactions', () => {
+		it('extracts outpoint keys from pending transactions', () => {
 			mockStoreApi.setStoreValue({
 				[addr]: {
 					certified: true as const,
@@ -171,14 +183,14 @@ describe('btc.utils', () => {
 								{
 									value: 100000n,
 									outpoint: {
-										txid: new Uint8Array([0x01, 0x02, 0x03, 0x04]), // UTXO tx ID
+										txid: new Uint8Array([0x01, 0x02, 0x03, 0x04]),
 										vout: 0
 									}
 								},
 								{
 									value: 200000n,
 									outpoint: {
-										txid: new Uint8Array([0x05, 0x06, 0x07, 0x08]), // UTXO tx ID
+										txid: new Uint8Array([0x05, 0x06, 0x07, 0x08]),
 										vout: 1
 									}
 								}
@@ -188,10 +200,71 @@ describe('btc.utils', () => {
 				}
 			});
 
-			const result = getPendingTransactionUtxoTxIds(addr);
+			const result = getPendingTransactionUtxoOutpoints(addr);
 
-			// Should return UTXO transaction IDs (with byte reversal), not the pending transaction ID
-			expect(result).toEqual(['04030201', '08070605']);
+			// Outpoints are reversed-txid-hex + vout, never the pending tx id itself
+			expect(result).toEqual(['04030201:0', '08070605:1']);
+		});
+
+		it('keeps UTXOs with the same txid but different vout as distinct outpoints', () => {
+			mockStoreApi.setStoreValue({
+				[addr]: {
+					certified: true as const,
+					data: [
+						{
+							txid: new Uint8Array([9]),
+							utxos: [
+								{
+									value: 100000n,
+									outpoint: {
+										txid: new Uint8Array([0x01, 0x02, 0x03, 0x04]),
+										vout: 0
+									}
+								},
+								{
+									value: 200000n,
+									outpoint: {
+										txid: new Uint8Array([0x01, 0x02, 0x03, 0x04]),
+										vout: 1
+									}
+								}
+							]
+						}
+					]
+				}
+			});
+
+			expect(getPendingTransactionUtxoOutpoints(addr)).toEqual(['04030201:0', '04030201:1']);
+		});
+
+		it('deduplicates identical outpoints across multiple pending transactions', () => {
+			mockStoreApi.setStoreValue({
+				[addr]: {
+					certified: true as const,
+					data: [
+						{
+							txid: new Uint8Array([1]),
+							utxos: [
+								{
+									value: 100000n,
+									outpoint: { txid: new Uint8Array([0xaa]), vout: 0 }
+								}
+							]
+						},
+						{
+							txid: new Uint8Array([2]),
+							utxos: [
+								{
+									value: 100000n,
+									outpoint: { txid: new Uint8Array([0xaa]), vout: 0 }
+								}
+							]
+						}
+					]
+				}
+			});
+
+			expect(getPendingTransactionUtxoOutpoints(addr)).toEqual(['aa:0']);
 		});
 
 		it('handles transactions without UTXOs', () => {
@@ -211,7 +284,7 @@ describe('btc.utils', () => {
 				}
 			});
 
-			const result = getPendingTransactionUtxoTxIds(addr);
+			const result = getPendingTransactionUtxoOutpoints(addr);
 
 			expect(result).toEqual([]);
 		});

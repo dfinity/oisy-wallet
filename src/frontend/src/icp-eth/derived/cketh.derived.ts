@@ -10,6 +10,7 @@ import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import {
 	toCkErc20HelperContractAddress,
@@ -98,8 +99,7 @@ export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
 export const ethToCkETHEnabled: Readable<boolean> = derived(
 	[tokenWithFallbackAsIcToken, selectedEthereumNetwork, ckEthereumNativeTokenEnabledNetwork],
 	([$tokenWithFallbackAsIcToken, $selectedEthereumNetwork, $ckEthereumNativeTokenEnabledNetwork]) =>
-		($tokenWithFallbackAsIcToken.standard.code === 'ethereum' &&
-			nonNullish($selectedEthereumNetwork)) ||
+		(isTokenEthereumNative($tokenWithFallbackAsIcToken) && nonNullish($selectedEthereumNetwork)) ||
 		(isTokenCkEthLedger($tokenWithFallbackAsIcToken) &&
 			nonNullish($ckEthereumNativeTokenEnabledNetwork))
 );

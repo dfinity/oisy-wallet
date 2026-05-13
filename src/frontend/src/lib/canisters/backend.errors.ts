@@ -120,6 +120,10 @@ export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterIn
 		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
 	}
 
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}

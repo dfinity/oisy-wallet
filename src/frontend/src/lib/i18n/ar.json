@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short يحميك!"
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -123,14 +124,16 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"description": "افتح محفظتك أو أنشئ واحدة خلال ثوانٍ",
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
+			"sign_in_or_sign_up": "تسجيل الدخول أو إنشاء حساب",
 			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
-			"social_login": ""
+			"move_swap_grow": "انقل أصولك وبدّلها ونمِّها عبر الشبكات"
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال",
@@ -142,10 +145,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "التسجيلات الجديدة مقيّدة حاليًا. يرجى المحاولة مرة أخرى لاحقًا."
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "لا يمكن حاليًا تسجيل مستخدمين جدد. يمكن للمستخدمين الحاليين استخدام $oisy_short بشكل طبيعي."
 		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
@@ -268,10 +271,10 @@
 				"description": "محور التمويل اللامركزي المستقبلي!<br/>إعادة ابتكار البورصة كمركز، يوفر ICPSwap خدمات مالية وسوقية وDAO متكاملة على Internet Computer. استنادًا إلى التكنولوجيا الأساسية لـ DFINITY's Internet Computer، ينشئ ICPSwap نظامًا بيئيًا للتمويل اللامركزي الحقيقي من خلال إعادة هيكلة طريقة بناء المستخدمين والمطورين للمشاريع بشكل مشترك."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "تطبيق الواجهة الأمامية لـ NNS يسمح لأي شخص بالتفاعل مع نظام الشبكة العصبية لـ Internet Computer بواجهة مستخدم سهلة الاستخدام.",
-				"call_to_action": "شارك",
-				"description": "تطبيق الواجهة الأمامية لـ NNS يسمح لأي شخص بالتفاعل مع نظام الشبكة العصبية لـ Internet Computer بواجهة مستخدم سهلة الاستخدام. يتم تقديمه بالكامل من طرف إلى طرف من خلال البلوكتشين، يتيح لك هذا التطبيق اللامركزي القيام بالإجراءات التالية بسهولة:<br/><ul><li>إرسال واستلام التوكنات (ICP, ckBTC, CHAT, إلخ)</li><li>تخزين وإدارة الخلايا العصبية</li><li>التصويت على حوكمة Internet Computer و SNSes</li><li>المشاركة في تبادلات اللامركزية</li><li>إنشاء وتعبئة الحاويات</li><li>كسب مكافآت الحوكمة</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "منصة حوكمة لـ Internet Computer تمكّن المستخدمين من الرهان والتصويت ومتابعة نشاط الشبكة.",
+				"call_to_action": "المشاركة في حوكمة ICP",
+				"description": "تطبيق NNS هو منصة حوكمة لـ Internet Computer (ICP) تمكّن المستخدمين من رهان الرموز والمشاركة في التصويت ومتابعة نشاط الشبكة.<br/><br/>يوفر رؤية أوسع لإجراءات المستخدمين وأنشطة الحوكمة، ويساعد المستخدمين على فهم كيفية إسهام الرهان والتصويت والمشاركة في النظام البيئي الأشمل."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -1154,7 +1157,7 @@
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
 			"withdrawing": "",
-			"bridging": "",
+			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقتين.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
@@ -1163,7 +1166,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "تعذر استرجاع سعر واحد على الأقل من الرموز. يرجى <strong>التحقق بشكل مستقل</strong> من أن عرض المبادلة هذا يقدم صفقة عادلة.<br>لاحظ أن إعداد الانزلاق السعري <strong>لا</strong> يحميك من عرض بقيمة استلام أقل بكثير!"
 		},
 		"error": {
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",
@@ -1188,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "شراء",
-			"buy_dev": "شراء (بيئة تطوير)"
+			"buy_dev": "شراء (بيئة تطوير)",
+			"unavailable_title": "شراء الرموز غير متاح مؤقتًا",
+			"unavailable_description": "شراء الرموز معطل حاليًا بينما نواصل تحسين أمان هذه العملية من خلال إضافة توقيع عناوين URL. ستتم إعادة تفعيله بمجرد اكتمال العمل.",
+			"unavailable_fallback_hint": "في غضون ذلك، لا يزال بإمكانك استلام الرموز عن طريق مشاركة عنوان محفظتك."
+		},
+		"actions": {
+			"close": "حسنًا"
 		},
 		"onramper": {
 			"title": "شراء عبر Onramper"
@@ -1625,6 +1635,20 @@
 			"burn": "حرق",
 			"mint": "إنشاء"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": ""
+		},
 		"label": {
 			"reimbursement": "تعويض",
 			"twin_token_converted": "تم التحويل من $twinToken",
@@ -1849,7 +1873,6 @@
 			"text": {
 				"open_or_create": "افتح أو أنشئ محفظتك للتفاعل بأمان مع التطبيق.",
 				"connect_your_wallet": "اتصل بمحفظة $oisy_name الخاصة بك",
-				"oisy_protects_you": "OISY يحميك!",
 				"oisy_protects_you_description": "لا يمكن للتطبيقات الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة."
 			}
 		},
@@ -1972,7 +1995,7 @@
 		},
 		"info": {
 			"btc_transactions": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
-			"hidden_micro_transactions": "<strong>OISY يحميك!</strong> المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">معرفة المزيد</a>"
+			"hidden_micro_transactions": "المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">معرفة المزيد</a>"
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",

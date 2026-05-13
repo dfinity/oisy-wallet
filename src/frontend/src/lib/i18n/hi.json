@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short आपकी सुरक्षा करता है!"
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -123,14 +124,16 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"description": "अपना वॉलेट खोलें या कुछ ही सेकंड में नया बनाएँ",
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"sign_in_or_sign_up": "लॉग इन करें या साइन अप करें",
 			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
-			"social_login": ""
+			"move_swap_grow": "नेटवर्कों पर अपनी संपत्तियाँ मूव, स्वैप और बढ़ाएँ"
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर",
@@ -142,10 +145,10 @@
 			"session_locked": ""
 		},
 		"info": {
-			"signups_closed": ""
+			"signups_closed": "नए साइन-अप फ़िलहाल प्रतिबंधित हैं। कृपया बाद में पुनः प्रयास करें।"
 		},
 		"banner": {
-			"signups_closed": ""
+			"signups_closed": "फ़िलहाल, नए उपयोगकर्ताओं का साइन-अप संभव नहीं है। मौजूदा उपयोगकर्ता $oisy_short को सामान्य रूप से उपयोग कर सकते हैं।"
 		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
@@ -268,10 +271,10 @@
 				"description": "भविष्य के विकेन्द्रीकृत वित्त का केंद्र!<br/>एक्सचेंज को एक केंद्र के रूप में फिर से आविष्कार करते हुए, आईसीपीस्वैप इंटरनेट कंप्यूटर पर फुल-स्टैक वित्तीय, बाजार और डीएओ सेवाएं प्रदान करता है। DFINITY के इंटरनेट कंप्यूटर की अंतर्निहित तकनीक के आधार पर, आईसीपीस्वैप उपयोगकर्ताओं और डेवलपर्स द्वारा संयुक्त रूप से परियोजनाओं के निर्माण के तरीके को पुनर्रचना करके वास्तव में विकेन्द्रीकृत वित्त का एक पारिस्थितिकी तंत्र स्थापित करता है।"
 			},
 			"nnsdapp": {
-				"name": "NNS डैप",
-				"one_liner": "NNS फ्रंट-एंड डैप किसी को भी इंटरनेट कंप्यूटर के नेटवर्क नर्वस सिस्टम के साथ उपयोगकर्ता के अनुकूल यूआई के साथ बातचीत करने की अनुमति देता है।",
-				"call_to_action": "शामिल हों",
-				"description": "NNS फ्रंट-एंड डैप किसी को भी इंटरनेट कंप्यूटर के नेटवर्क नर्वस सिस्टम के साथ उपयोगकर्ता के अनुकूल यूआई के साथ बातचीत करने की अनुमति देता है। ब्लॉकचेन के माध्यम से पूरी तरह से एंड-टू-एंड परोसा गया, यह विकेन्द्रीकृत डैप आपको निम्नलिखित कार्यों को आसानी से करने की अनुमति देता है:<br/><ul><li>टोकन भेजें और प्राप्त करें (ICP, ckBTC, CHAT, आदि)</li><li>न्यूरॉन्स को स्टेक और प्रबंधित करें</li><li>इंटरनेट कंप्यूटर और एसएनएस के शासन पर वोट करें</li><li>विकेन्द्रीकरण स्वैप में भाग लें</li><li>कैनिस्टर बनाएँ और टॉप अप करें</li><li>शासन पुरस्कार अर्जित करें</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Internet Computer के लिए एक गवर्नेंस प्लेटफ़ॉर्म जो उपयोगकर्ताओं को स्टेक करने, मतदान करने और नेटवर्क गतिविधि का पालन करने में सक्षम बनाता है।",
+				"call_to_action": "ICP गवर्नेंस में भाग लें",
+				"description": "NNS एप्लिकेशन Internet Computer (ICP) के लिए एक गवर्नेंस प्लेटफ़ॉर्म है जो उपयोगकर्ताओं को टोकन स्टेक करने, मतदान में भाग लेने और नेटवर्क गतिविधि का पालन करने में सक्षम बनाता है।<br/><br/>यह उपयोगकर्ता कार्यों और गवर्नेंस गतिविधि पर अधिक दृश्यता प्रदान करता है, जो उपयोगकर्ताओं को यह समझने में मदद करता है कि स्टेकिंग, मतदान और भागीदारी व्यापक पारिस्थितिकी तंत्र में कैसे योगदान करती है।"
 			},
 			"uniswap": {
 				"name": "यूनिस्वैप",
@@ -1154,7 +1157,7 @@
 			"select_token": "टोकन चुनें",
 			"select_network_filter": "नेटवर्क चुनें",
 			"withdrawing": "निकासी कर रहा है...",
-			"bridging": "",
+			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें 2 मिनट तक का समय लग सकता है।)",
 			"network_cost": "नेटवर्क लागत",
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
@@ -1163,7 +1166,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "कम से कम एक टोकन की कीमत प्राप्त नहीं की जा सकी। कृपया <strong>स्वतंत्र रूप से सत्यापित करें</strong> कि यह स्वैप ऑफर उचित सौदा है।<br>ध्यान दें कि स्लिपेज सेटिंग आपको बहुत कम प्राप्त मूल्य वाले ऑफर से सुरक्षित <strong>नहीं</strong> करती है!"
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
@@ -1188,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "खरीदें",
-			"buy_dev": "खरीदें (Dev एनवायरनमेंट)"
+			"buy_dev": "खरीदें (Dev एनवायरनमेंट)",
+			"unavailable_title": "टोकन खरीदना अस्थायी रूप से अनुपलब्ध है",
+			"unavailable_description": "टोकन खरीदना वर्तमान में बंद है, क्योंकि हम URL साइनिंग शुरू करके इस प्रक्रिया की सुरक्षा को और बेहतर बना रहे हैं। काम पूरा होते ही इसे फिर से चालू कर दिया जाएगा।",
+			"unavailable_fallback_hint": "इस बीच, आप अभी भी अपने वॉलेट का पता साझा करके टोकन प्राप्त कर सकते हैं।"
+		},
+		"actions": {
+			"close": "समझ गया"
 		},
 		"onramper": {
 			"title": "ऑनराम्पर के माध्यम से खरीदें"
@@ -1625,6 +1635,20 @@
 			"burn": "बर्न",
 			"mint": "मिंट"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": ""
+		},
 		"label": {
 			"reimbursement": "प्रतिपूर्ति",
 			"twin_token_converted": "$twinToken से परिवर्तित",
@@ -1849,7 +1873,6 @@
 			"text": {
 				"open_or_create": "एप्लिकेशन के साथ सुरक्षित रूप से इंटरैक्ट करने के लिए अपना वॉलेट खोलें या बनाएं।",
 				"connect_your_wallet": "अपने $oisy_name से कनेक्ट करें",
-				"oisy_protects_you": "OISY आपकी सुरक्षा करता है!",
 				"oisy_protects_you_description": "एप्लिकेशन आपके फंड तक सीधे नहीं पहुंच सकते, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए."
 			}
 		},
@@ -1972,7 +1995,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
-			"hidden_micro_transactions": "<strong>OISY आपकी रक्षा करता है!</strong> बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
+			"hidden_micro_transactions": "बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",
