@@ -1649,7 +1649,7 @@
 			"open_filters_aria_label": "Open activity filters",
 			"showing_partial": "Showing $shown of $total · type to search",
 			"contacts_empty_description": "Contacts make it easier to send tokens to people you know and harder to send to the wrong address by mistake.",
-			"contacts_empty_cta": "Open contacts",
+			"contacts_empty_cta": "Add your first contact",
 			"contacts_empty_image_alt": "Address book illustration"
 		},
 		"label": {
