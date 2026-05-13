@@ -6,60 +6,10 @@ alwaysApply: true
 
 # Cursor — Overview
 
-You are working in `dfinity/oisy-wallet`. Multi-stack repo:
+Authoritative source: [AGENTS.md](mdc:AGENTS.md).
 
-- **Frontend** — `src/frontend/` — SvelteKit 2 + Svelte 5 + TS + Tailwind v4.
-- **Backend** — `src/backend/` (canister) + `src/shared/` (Rust shared types).
-- **Generated** — `src/declarations/` (Candid bindings, do not hand-edit).
-- **E2E** — `e2e/` (Playwright).
-
-Both frontend and backend are AI-active.
-
-## Mandatory first read
-
-Before any change, read the canonical entry:
-
-- [AGENTS.md](mdc:AGENTS.md)
-
-It links to everything else: the 10 commandments, the folder taxonomy, the
-PR conventions, the CI gates.
-
-## Truth hierarchy
-
-When sources disagree, the higher one wins:
-
-1. Code in `src/**`
-2. CI in `.github/workflows/**`
-3. [`.github/CODEOWNERS`](mdc:.github/CODEOWNERS)
-4. [`docs/ai/**`](mdc:docs/ai/README.md)
-5. [AGENTS.md](mdc:AGENTS.md)
-6. Tool-specific layers (this file, `CLAUDE.md`, `copilot-instructions.md`)
-
-## Non-negotiables (every change)
-
-- **Idiomatic.** Match surrounding code, not your training.
-- **Atomic.** One logical change per PR. No drive-by edits.
-- **Reusable.** Search before creating a new component / util / constant /
-  shared type. See [docs/ai/frontend/reusability.md](mdc:docs/ai/frontend/reusability.md).
-- **Typed.** No `any`, no `as unknown as …`, no suppressed `svelte-check`
-  warnings. In Rust: no `unwrap()` / `expect()` in non-test code.
-- **i18n + a11y (FE).** No hard-coded English. No bare clickable `<div>`.
-  See [docs/ai/frontend/i18n-and-a11y.md](mdc:docs/ai/frontend/i18n-and-a11y.md).
-- **CI green locally.** Before any FE PR, run:
-
-  ```bash
-  npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run test
-  ```
-
-  For Rust changes, also run `./scripts/lint.rust.sh && ./scripts/lint.did.sh`.
-  See [docs/ai/pr-and-ci.md](mdc:docs/ai/pr-and-ci.md).
-
-- **Conventional PR title.** `verb(scope): description`. CI enforces it.
-- **No Jira / Atlassian links** in PR descriptions — CI rejects them.
-
-## Meta-update rule
-
-If your change introduces a new pattern, shared component, naming
-convention, shared type, or workflow — update the corresponding page in
-`docs/ai/**` in the **same PR**. See
-[docs/ai/governance.md#meta-update-rule](mdc:docs/ai/governance.md).
+Read [AGENTS.md](mdc:AGENTS.md) before any change. It covers the stack,
+the [10 commandments](mdc:AGENTS.md#2-the-10-commandments-read-before-every-change),
+the truth hierarchy, and the meta-update rule. Tool-specific layers
+(this file, [CLAUDE.md](mdc:CLAUDE.md), [`.github/copilot-instructions.md`](mdc:.github/copilot-instructions.md))
+never contradict it.
