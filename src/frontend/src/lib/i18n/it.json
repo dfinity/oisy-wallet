@@ -1647,7 +1647,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_description": "",
+			"contacts_empty_cta": "",
+			"contacts_empty_image_alt": ""
 		},
 		"label": {
 			"reimbursement": "Rimborso",
