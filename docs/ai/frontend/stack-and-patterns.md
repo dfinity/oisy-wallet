@@ -162,14 +162,14 @@ export const exchangeRateUsdToCurrency = async (
 
 ## Stores, derived, runes — when to use which
 
-| Need                                           | Use                                                                             | Where it lives                                                         |
-| ---------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Component-local mutable value                  | `$state`                                                                        | Inside the component                                                   |
-| Component-local computed value                 | `$derived` / `$derived.by`                                                      | Inside the component                                                   |
-| Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work)                                    | Inside the component                                                   |
-| Value shared by 2+ components in the same page | Pass via props / snippets                                                       | —                                                                      |
+| Need                                           | Use                                                                                                                                                | Where it lives                                                         |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Component-local mutable value                  | `$state`                                                                                                                                           | Inside the component                                                   |
+| Component-local computed value                 | `$derived` / `$derived.by`                                                                                                                         | Inside the component                                                   |
+| Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work)                                                                                                       | Inside the component                                                   |
+| Value shared by 2+ components in the same page | Pass via props / snippets                                                                                                                          | —                                                                      |
 | Value shared across routes                     | `*.svelte.ts` rune-state module by default; [reuse the existing store graph](#svelte-stores--when-to-reuse-them) when one already covers the value | `$lib/stores/`, `<chain>/stores/`, `$lib/derived/`, `<chain>/derived/` |
-| Cached server data                             | The matching `*.services.ts` owns the cache                                     | —                                                                      |
+| Cached server data                             | The matching `*.services.ts` owns the cache                                                                                                        | —                                                                      |
 
 Avoid duplicating server state into a local store — fetch via the service
 layer and let the service own caching.
