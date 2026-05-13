@@ -317,7 +317,7 @@ describe('sol-signatures.services', () => {
 		});
 
 		it('should skip parsing when exitIfFirstSignatureMatches equals the newest RPC signature', async () => {
-			const head = mockSignatures[0];
+			const [head] = mockSignatures;
 
 			const transactions = await getSolTransactions({
 				identity: mockIdentity,
