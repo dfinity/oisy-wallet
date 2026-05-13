@@ -141,9 +141,23 @@ describe('TransactionsFilterContactsPanel', () => {
 			expect(
 				getByText(replaceOisyPlaceholders(get(i18n).core.text.oisy_protects_you))
 			).toBeInTheDocument();
-			expect(
-				getByText(get(i18n).transaction.filter.contacts_empty_description)
-			).toBeInTheDocument();
+			// The description i18n string ends with an inline Learn more anchor,
+			// so match the leading prose with a partial regex instead of the
+			// full literal.
+			expect(getByText(/Save the addresses you use often as contacts/)).toBeInTheDocument();
+		});
+
+		it('renders a Learn more link pointing to the protected-contacts docs', () => {
+			const { getByRole } = render(TransactionsFilterContactsPanel);
+
+			const link = getByRole('link', { name: 'Learn more' });
+
+			expect(link).toHaveAttribute(
+				'href',
+				'https://docs.oisy.com/introduction/oisy-keeps-you-protected#contacts'
+			);
+			expect(link).toHaveAttribute('target', '_blank');
+			expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 		});
 
 		it('renders the CTA button that opens the address book', async () => {

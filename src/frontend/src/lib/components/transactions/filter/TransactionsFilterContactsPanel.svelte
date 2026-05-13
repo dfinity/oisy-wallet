@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Checkbox } from '@dfinity/gix-components';
+	import { Checkbox, Html } from '@dfinity/gix-components';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconAddressBook from '$lib/components/icons/IconAddressBook.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
@@ -65,9 +65,8 @@
 				<strong
 					><span class="relative -top-px mr-1 inline-block align-middle text-success-primary"
 						><IconShieldCheck size="16" /></span
-					>{replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)}</strong
-				>
-				{$i18n.transaction.filter.contacts_empty_description}
+					>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong
+				><Html text={$i18n.transaction.filter.contacts_empty_description} />
 			</p>
 
 			<Button
