@@ -59,7 +59,7 @@
 				<IconAddressBook />
 			</div>
 
-			<p class="text-sm">{$i18n.send.text.contacts_empty_state_description}</p>
+			<p class="text-sm">{$i18n.transaction.filter.contacts_empty_title}</p>
 
 			<p class="mt-2 text-sm text-tertiary">
 				<strong

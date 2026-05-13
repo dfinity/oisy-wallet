@@ -132,7 +132,7 @@ describe('TransactionsFilterContactsPanel', () => {
 		it('renders the no-contacts-yet line above the OISY-protects-you block', () => {
 			const { getByText } = render(TransactionsFilterContactsPanel);
 
-			expect(getByText(get(i18n).send.text.contacts_empty_state_description)).toBeInTheDocument();
+			expect(getByText(get(i18n).transaction.filter.contacts_empty_title)).toBeInTheDocument();
 		});
 
 		it('renders the OISY-protects-you lockup and description', () => {
