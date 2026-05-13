@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { earningCards } from '$env/earning-cards.env';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
 	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
@@ -16,9 +15,16 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
+	import type { EarningProviderCardConfig } from '$lib/types/earning-provider';
 	import { formatToShortDateString } from '$lib/utils/format.utils';
 	import { resolveText } from '$lib/utils/i18n.utils';
 	import { normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
+
+	interface Props {
+		card: EarningProviderCardConfig;
+	}
+
+	let { card }: Props = $props();
 
 	const currentReward = $derived(rewardCampaigns[rewardCampaigns.length - 1]);
 
@@ -35,14 +41,12 @@
 		)
 	);
 	const criteria = $derived($campaignEligibility?.criteria ?? []);
-
-	const cardData = $derived(earningCards.find((card) => card.id === currentReward?.id));
 </script>
 
-{#if nonNullish(cardData)}
-	<EarningOpportunityCard titles={cardData.titles}>
+{#if nonNullish(currentReward)}
+	<EarningOpportunityCard titles={card.titles}>
 		{#snippet logo()}
-			<Logo size="lg" src={cardData.logo} />
+			<Logo size="lg" src={card.logo} />
 		{/snippet}
 		{#snippet badge()}
 			<span class="mr-2"><IconCalendarDays size="14" /></span>
@@ -50,7 +54,7 @@
 			{`${formatToShortDateString({ date: currentReward.endDate, i18n: $i18n })} ${currentReward.endDate.getDate()}`}
 		{/snippet}
 		{#snippet description()}
-			<p>{resolveText({ i18n: $i18n, path: cardData.description })}</p>
+			<p>{resolveText({ i18n: $i18n, path: card.description })}</p>
 
 			<RewardsRequirements
 				{criteria}
@@ -63,7 +67,7 @@
 		{/snippet}
 		{#snippet button()}
 			<Button colorStyle="primary" fullWidth onclick={() => goto(AppPath.EarnRewards)} paddingSmall>
-				{resolveText({ i18n: $i18n, path: cardData.actionText })}
+				{resolveText({ i18n: $i18n, path: card.actionText })}
 			</Button>
 		{/snippet}
 	</EarningOpportunityCard>
