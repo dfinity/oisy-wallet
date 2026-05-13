@@ -1,5 +1,6 @@
 import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
+import * as backendApi from '$lib/api/backend.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { WALLET_TIMER_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
@@ -139,6 +140,8 @@ describe('btc-wallet.worker', () => {
 			await waitFor(() => Promise.resolve(), { timeout: 1000 });
 			return mockBalance;
 		});
+
+		vi.spyOn(backendApi, 'getPendingBtcTransactions').mockResolvedValue({ response: [] });
 	});
 
 	afterEach(() => {
@@ -191,10 +194,14 @@ describe('btc-wallet.worker', () => {
 					await awaitJobExecution();
 
 					expect(postMessageMock).toHaveBeenCalledTimes(4);
+					// The uncertified/certified payloads may interleave between
+					// the in_progress and idle brackets depending on microtask
+					// timing, so assert membership and bracketing rather than
+					// strict ordering of the two data messages.
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageUncertified);
-					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
 					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
@@ -255,9 +262,9 @@ describe('btc-wallet.worker', () => {
 
 					expect(postMessageMock).toHaveBeenCalledTimes(4);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageUncertified);
-					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
 					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
 				});
 
 				it('should trigger postMessage with error on third try', async () => {

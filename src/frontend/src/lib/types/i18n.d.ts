@@ -50,6 +50,7 @@ interface I18nCore {
 		info: string;
 		asset: string;
 		got_it: string;
+		oisy_protects_you: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -119,14 +120,16 @@ interface I18nAuth {
 	text: {
 		title_part_1: string;
 		title_part_2: string;
+		description: string;
 		logout: string;
 		lock: string;
 		authenticate: string;
+		sign_in_or_sign_up: string;
 		internet_identity: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
-		social_login: string;
+		move_swap_grow: string;
 	};
 	alt: {
 		preview: string;
@@ -883,6 +886,7 @@ interface I18nSwap {
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
 		value_difference_error_confirmation: string;
+		value_difference_missing_price_confirmation: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -906,7 +910,14 @@ interface I18nSwap {
 }
 
 interface I18nBuy {
-	text: { buy: string; buy_dev: string };
+	text: {
+		buy: string;
+		buy_dev: string;
+		unavailable_title: string;
+		unavailable_description: string;
+		unavailable_fallback_hint: string;
+	};
+	actions: { close: string };
 	onramper: { title: string };
 }
 
@@ -1299,6 +1310,20 @@ interface I18nTransaction {
 		burn: string;
 		mint: string;
 	};
+	filter: {
+		types_label: string;
+		tokens_label: string;
+		contacts_label: string;
+		types_aria_label: string;
+		tokens_aria_label: string;
+		contacts_aria_label: string;
+		search_tokens_placeholder: string;
+		search_contacts_placeholder: string;
+		clear: string;
+		sheet_title: string;
+		open_filters_aria_label: string;
+		showing_partial: string;
+	};
 	label: {
 		reimbursement: string;
 		twin_token_converted: string;
@@ -1456,7 +1481,6 @@ interface I18nSigner {
 		text: {
 			open_or_create: string;
 			connect_your_wallet: string;
-			oisy_protects_you: string;
 			oisy_protects_you_description: string;
 		};
 	};

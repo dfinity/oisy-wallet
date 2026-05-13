@@ -24,7 +24,7 @@
 
 	<div class="flex w-full justify-center">
 		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
-			<Img alt={ariaLabel} {src} styleClass="h-full w-full object-cover" />
+			<Img alt={ariaLabel} {src} styleClass="h-full w-[90%] object-cover" />
 		{/await}
 	</div>
 

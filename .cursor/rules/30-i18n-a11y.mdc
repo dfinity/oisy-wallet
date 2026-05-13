@@ -1,0 +1,12 @@
+---
+description: i18n and accessibility rules for any user-visible UI in the frontend.
+globs: ['src/frontend/**/*.svelte', 'src/frontend/**/*.ts']
+---
+
+# Cursor — i18n & a11y
+
+Authoritative source: [docs/ai/frontend/i18n-and-a11y.md](mdc:docs/ai/frontend/i18n-and-a11y.md).
+
+Read it before adding user-visible text or interactive elements. Edit
+only `src/frontend/src/lib/i18n/en.json`; non-`en` locales are
+machine-translated by the `auto-update-i18n` workflow.

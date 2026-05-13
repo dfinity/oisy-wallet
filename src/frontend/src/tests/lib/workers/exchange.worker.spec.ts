@@ -1163,7 +1163,8 @@ describe('exchange.worker', () => {
 				const expectedPrice = {
 					usd: 42000,
 					usd_24h_change: 1.5,
-					usd_market_cap: 800_000_000_000
+					usd_market_cap: 800_000_000_000,
+					last_updated_at: 1000
 				};
 
 				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
@@ -1240,7 +1241,8 @@ describe('exchange.worker', () => {
 				const expectedPrice = {
 					usd: 42000,
 					usd_24h_change: 1.5,
-					usd_market_cap: 800_000_000_000
+					usd_market_cap: 800_000_000_000,
+					last_updated_at: 1000
 				};
 
 				expect(postedData.currentEthPrice).toEqual({ ethereum: expectedPrice });

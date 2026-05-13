@@ -3,24 +3,53 @@
 //! Thresholds are intentionally hardcoded for v1; if/when ops needs to retune without a code
 //! change, migrate them into `Config` (see plan).
 
+use candid::Principal;
 use shared::types::Timestamp;
 
 use crate::{
     state::read_state,
     status::{HealthStatus, MetricEntry, StatusResponse},
+    types::StoredPrincipal,
 };
 
 /// Window over which signups are counted, in nanoseconds (30 minutes).
 pub(crate) const SIGNUPS_WINDOW_NS: u64 = 30 * 60 * 1_000_000_000;
 
 /// Number of signups in [`SIGNUPS_WINDOW_NS`] at or above which the status is `warn`.
-pub(crate) const SIGNUPS_WARN_THRESHOLD: u64 = 50;
+pub(crate) const SIGNUPS_WARN_THRESHOLD: usize = 50;
 
 /// Number of signups in [`SIGNUPS_WINDOW_NS`] at or above which the status is `critical`.
-pub(crate) const SIGNUPS_CRITICAL_THRESHOLD: u64 = 200;
+pub(crate) const SIGNUPS_CRITICAL_THRESHOLD: usize = 200;
+
+/// Hard upper bound on the number of `user_profile` index entries scanned by
+/// [`count_signups_in_window`].
+///
+/// The suffix `updated_timestamp >= cutoff` is in principle bounded by the number of profiles
+/// *touched* (created or merely updated) in the window, not by the total user count. On a busy
+/// canister with many existing users mutating settings within a 30-minute window that suffix
+/// can still grow large, so we cap the scan explicitly to keep the per-call instruction cost
+/// well below the 5 B single-message limit.
+///
+/// Sized two orders of magnitude above [`SIGNUPS_CRITICAL_THRESHOLD`]: large enough that under
+/// normal traffic the cap is never reached (and therefore does not bias the classification),
+/// small enough that the worst-case `range` walk over stable storage stays comfortably bounded.
+pub(crate) const SIGNUPS_SCAN_CAP: usize = 10_000;
+
+const _: () = {
+    assert!(
+        SIGNUPS_WARN_THRESHOLD < SIGNUPS_CRITICAL_THRESHOLD,
+        "warn threshold must be strictly less than critical threshold"
+    );
+    // The scan cap must not be smaller than the critical threshold, otherwise the per-call cap
+    // would silently mask actual `critical` bursts.
+    assert!(
+        SIGNUPS_CRITICAL_THRESHOLD <= SIGNUPS_SCAN_CAP,
+        "scan cap must be at least the critical threshold"
+    );
+};
 
 /// Pure thresholding helper, exposed so it can be unit-tested without touching state.
-fn classify_signups(count: u64) -> HealthStatus {
+fn classify_signups(count: usize) -> HealthStatus {
     if count >= SIGNUPS_CRITICAL_THRESHOLD {
         HealthStatus::Critical
     } else if count >= SIGNUPS_WARN_THRESHOLD {
@@ -35,15 +64,34 @@ fn classify_signups(count: u64) -> HealthStatus {
 /// Only the lower bound is enforced explicitly: `created_timestamp` is always set by the canister
 /// via [`ic_cdk::api::time`], so timestamps are never in the future relative to `now`.
 ///
-/// Iterates the full `user_profile` map. The cost is acceptable because the caller memoizes the
-/// result (see [`crate::status::cache`]) so this runs at most once per minute per replica.
-fn count_signups_in_window(now: Timestamp) -> u64 {
+/// Cost is bounded by [`SIGNUPS_SCAN_CAP`] index entries, walked over the suffix
+/// `updated_timestamp >= cutoff` of the `user_profile` map (i.e. profiles *touched* in the
+/// last 30 minutes), not by the total user count. The suffix is correct because
+/// `updated_timestamp >= created_timestamp` holds by construction: `created_timestamp` is set
+/// once at profile creation and `updated_timestamp` is monotonically bumped to
+/// `ic_cdk::api::time()` on every mutation. So any profile whose `created_timestamp >= cutoff`
+/// necessarily has `updated_timestamp >= cutoff` and lies in the scanned suffix; we then
+/// post-filter on `created_timestamp >= cutoff` to discard older profiles whose
+/// `updated_timestamp` was merely refreshed by a recent settings change.
+///
+/// The hard cap is applied *before* the `created_timestamp` filter so that the bound holds
+/// regardless of how many of the touched profiles are actual signups vs. mere updates of older
+/// profiles. A second `take(SIGNUPS_CRITICAL_THRESHOLD)` short-circuits past that point because
+/// classification is `critical` regardless of the exact count beyond it.
+fn count_signups_in_window(now: Timestamp) -> usize {
     let cutoff = now.saturating_sub(SIGNUPS_WINDOW_NS);
+    // Smallest possible `(Timestamp, StoredPrincipal)` key for `cutoff`. The management-canister
+    // principal is the zero-length blob and therefore the minimum `StoredPrincipal` under the
+    // BTree's encoded-byte ordering, giving us a half-open range `[cutoff, ∞)` over the
+    // `(updated_timestamp, principal)` index.
+    let start = (cutoff, StoredPrincipal(Principal::from_slice(&[])));
     read_state(|s| {
         s.user_profile
-            .iter()
+            .range(start..)
+            .take(SIGNUPS_SCAN_CAP)
             .filter(|entry| entry.value().created_timestamp >= cutoff)
-            .count() as u64
+            .take(SIGNUPS_CRITICAL_THRESHOLD)
+            .count()
     })
 }
 

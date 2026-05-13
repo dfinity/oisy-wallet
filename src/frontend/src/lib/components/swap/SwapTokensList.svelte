@@ -1,15 +1,12 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import { ONESEC_EVM_NETWORK_IDS } from '$lib/constants/swap.constants';
-	import { allCrossChainSwapTokens, allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
+	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -23,7 +20,6 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import type { TokenUi } from '$lib/types/token-ui';
-	import { oneSecCompatibleDestinations } from '$lib/utils/onesec-swap.utils';
 	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { sortTokens } from '$lib/utils/tokens.utils';
@@ -37,28 +33,22 @@
 
 	let { side, onSelectToken, onSelectNetworkFilter, onCloseTokensList }: Props = $props();
 
-	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { sourceToken, destinationToken, receiveSupportedData } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
-	let compatibleTokenIds = $derived(
-		side === 'destination' && nonNullish($sourceToken)
-			? oneSecCompatibleDestinations({
-					sourceToken: $sourceToken,
-					networkIds: ONESEC_EVM_NETWORK_IDS
-				})
-			: undefined
+	// On the destination side use the per-source receive data (when available); on the source
+	// side fall back to the aggregated source-side data. Both come from the same provider state,
+	// just shaped differently.
+	let supportedData = $derived(
+		side === 'destination' ? $receiveSupportedData : $swapSupportedTokensStore?.aggregated
 	);
 
 	let allSwapTokens: TokenToggleable<Token>[] = $derived(
 		filterSwapTokens({
-			tokens: [
-				{ ...ICP_TOKEN, enabled: true },
-				...$allSortedIcrcTokens,
-				...$allCrossChainSwapTokens
-			],
-			supportedData: $swapSupportedTokensStore,
-			compatibleTokenIds
+			tokens: $allSwapUniverseTokens,
+			supportedData
 		})
 	);
 

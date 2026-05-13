@@ -18,6 +18,8 @@ dotenv.populate(
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
+const port = DEV ? 5173 : 4173;
+
 const MATRIX_OS = process.env.MATRIX_OS ?? '';
 const isMac = notEmptyString(MATRIX_OS)
 	? MATRIX_OS.includes('macos')
@@ -89,7 +91,7 @@ export default defineConfig({
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
-		port: DEV ? 5173 : 4173,
+		port,
 		timeout: TIMEOUT
 	},
 	testDir: 'e2e',
@@ -102,5 +104,15 @@ export default defineConfig({
 		navigationTimeout: TIMEOUT,
 		...(DEV && { headless: false })
 	},
-	projects: isMac ? appleProjects : nonAppleProjects
+	projects: [
+		{
+			name: 'warmup',
+			testMatch: 'warmup.setup.ts',
+			use: { baseURL: `http://localhost:${port}` }
+		},
+		...(isMac ? appleProjects : nonAppleProjects).map((project) => ({
+			...project,
+			dependencies: ['warmup']
+		}))
+	]
 });
