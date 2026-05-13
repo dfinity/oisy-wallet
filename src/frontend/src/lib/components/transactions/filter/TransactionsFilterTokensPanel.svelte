@@ -4,6 +4,11 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import {
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENT_FILTER_ACTIONS
+	} from '$lib/enums/plausible';
+	import { trackActivityFilter } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { Token } from '$lib/types/token';
@@ -66,6 +71,18 @@
 	);
 
 	let isCapped = $derived(searchValue.length === 0 && filteredTokens.length > VISIBLE_LIMIT);
+
+	const onToggleTokenId = (key: string) => {
+		trackActivityFilter({
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+			value: key,
+			action: selectedSet.has(key)
+				? PLAUSIBLE_EVENT_FILTER_ACTIONS.REMOVE
+				: PLAUSIBLE_EVENT_FILTER_ACTIONS.ADD
+		});
+
+		transactionsFilterStore.toggleTokenId(key);
+	};
 </script>
 
 <div class="flex flex-col gap-3">
@@ -93,7 +110,7 @@
 						checked={selectedSet.has(key)}
 						inputId={tokenInputId(token)}
 						text="inline"
-						on:nnsChange={() => transactionsFilterStore.toggleTokenId(key)}
+						on:nnsChange={() => onToggleTokenId(key)}
 					>
 						<span class="inline-flex items-center gap-2">
 							<span class="flex shrink-0 items-center">

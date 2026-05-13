@@ -3,6 +3,11 @@
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
+	import {
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENT_FILTER_ACTIONS
+	} from '$lib/enums/plausible';
+	import { trackActivityFilter } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import { matchesContactByText } from '$lib/utils/contact.utils';
@@ -39,6 +44,20 @@
 	);
 
 	let isCapped = $derived(searchValue.length === 0 && filteredContacts.length > VISIBLE_LIMIT);
+
+	// We deliberately omit the contact id / name from the tracking payload to
+	// avoid leaking user PII to analytics. We only record that a contact-row
+	// toggle happened and whether the user added or removed the filter.
+	const onToggleContactId = (id: string) => {
+		trackActivityFilter({
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.CONTACT,
+			action: selectedSet.has(id)
+				? PLAUSIBLE_EVENT_FILTER_ACTIONS.REMOVE
+				: PLAUSIBLE_EVENT_FILTER_ACTIONS.ADD
+		});
+
+		transactionsFilterStore.toggleContactId(id);
+	};
 </script>
 
 <div class="flex flex-col gap-3">
@@ -57,7 +76,7 @@
 					checked={selectedSet.has(id)}
 					inputId={`transactions-filter-contact-${id}`}
 					text="inline"
-					on:nnsChange={() => transactionsFilterStore.toggleContactId(id)}
+					on:nnsChange={() => onToggleContactId(id)}
 				>
 					<span class="inline-flex items-center gap-2">
 						<span class="flex shrink-0 items-center">

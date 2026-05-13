@@ -3,6 +3,8 @@ import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
+	type PLAUSIBLE_EVENT_EVENTS_KEYS,
+	type PLAUSIBLE_EVENT_FILTER_ACTIONS,
 	PLAUSIBLE_EVENT_SOURCES,
 	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
 	PLAUSIBLE_EVENTS
@@ -93,6 +95,35 @@ export const trackRateLimited = ({ endpoint, limiter }: RateLimitInfo) => {
 			location_source: PLAUSIBLE_EVENT_SOURCES.BACKEND,
 			endpoint,
 			limiter
+		}
+	});
+};
+
+/**
+ * Track usage of an activity (transactions) page filter. Centralises the
+ * metadata shape so the type / token / contact / clear toggles all show up
+ * under a single Plausible event with the same property layout.
+ *
+ * Contact filter intentionally omits `event_value` so we never ship contact
+ * names or ids (PII) to analytics. Token / type values are public token
+ * identifiers and transaction types respectively.
+ */
+export const trackActivityFilter = ({
+	key,
+	value,
+	action
+}: {
+	key: PLAUSIBLE_EVENT_EVENTS_KEYS;
+	value?: string;
+	action?: PLAUSIBLE_EVENT_FILTER_ACTIONS;
+}) => {
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.ACTIVITY_FILTER,
+		metadata: {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.ACTIVITY,
+			event_key: key,
+			...(nonNullish(value) && { event_value: value }),
+			...(nonNullish(action) && { event_action: action })
 		}
 	});
 };

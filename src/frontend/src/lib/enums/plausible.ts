@@ -16,7 +16,8 @@ export enum PLAUSIBLE_EVENTS {
 	SIGNER_PAGE_VISIT = 'signer_page_visit',
 	SIGNER_INTERACTION = 'signer_interaction',
 	NETWORK_FILTER = 'network_filter',
-	NETWORK_MANAGE = 'network_manage'
+	NETWORK_MANAGE = 'network_manage',
+	ACTIVITY_FILTER = 'activity_filter'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -29,7 +30,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	EARN = 'earn',
 	TRANSACTIONS = 'transactions',
 	SIGNER = 'signer',
-	NETWORKS = 'networks'
+	NETWORKS = 'networks',
+	ACTIVITY = 'activity'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -88,7 +90,16 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	SORT_ASC = 'sort_asc',
 	SORT_DESC = 'sort_desc',
 	PRICE = 'price',
-	NETWORK = 'network'
+	NETWORK = 'network',
+	TYPE = 'type',
+	TOKEN = 'token',
+	CONTACT = 'contact',
+	CLEAR = 'clear'
+}
+
+export enum PLAUSIBLE_EVENT_FILTER_ACTIONS {
+	ADD = 'add',
+	REMOVE = 'remove'
 }
 
 export enum PLAUSIBLE_EVENT_RESULT_STATUSES {

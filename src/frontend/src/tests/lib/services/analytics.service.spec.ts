@@ -276,6 +276,49 @@ describe('plausible analytics service', () => {
 		consoleDebugSpy.mockRestore();
 	});
 
+	describe('trackActivityFilter', () => {
+		it('emits an activity_filter event with the activity context, key, value and action', async () => {
+			const { trackActivityFilter, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_EVENTS_KEYS, PLAUSIBLE_EVENT_FILTER_ACTIONS } =
+				await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			trackActivityFilter({
+				key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+				value: 'BTC-bitcoin',
+				action: PLAUSIBLE_EVENT_FILTER_ACTIONS.ADD
+			});
+
+			expect(trackMock).toHaveBeenCalledWith('activity_filter', {
+				props: {
+					event_context: 'activity',
+					event_key: 'token',
+					event_value: 'BTC-bitcoin',
+					event_action: 'add'
+				}
+			});
+		});
+
+		it('omits event_value and event_action when not provided', async () => {
+			const { trackActivityFilter, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_EVENTS_KEYS } = await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			trackActivityFilter({ key: PLAUSIBLE_EVENT_EVENTS_KEYS.CLEAR });
+
+			expect(trackMock).toHaveBeenCalledWith('activity_filter', {
+				props: {
+					event_context: 'activity',
+					event_key: 'clear'
+				}
+			});
+		});
+	});
+
 	it('should console.debug the error in STAGING when tracker.track throws', async () => {
 		mockStaging = true;
 

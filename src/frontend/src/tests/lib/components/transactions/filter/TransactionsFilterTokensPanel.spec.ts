@@ -1,5 +1,7 @@
 import TransactionsFilterTokensPanel from '$lib/components/transactions/filter/TransactionsFilterTokensPanel.svelte';
 import * as networkTokensDerived from '$lib/derived/network-tokens.derived';
+import { PLAUSIBLE_EVENT_EVENTS_KEYS, PLAUSIBLE_EVENT_FILTER_ACTIONS } from '$lib/enums/plausible';
+import * as analyticsServices from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import type { Token } from '$lib/types/token';
@@ -232,5 +234,52 @@ describe('TransactionsFilterTokensPanel', () => {
 		await fireEvent.input(search, { target: { value: 'Token' } });
 
 		expect(container.querySelectorAll('li')).toHaveLength(60);
+	});
+
+	it('tracks an activity filter event with action=add when a token is selected', async () => {
+		const trackSpy = vi
+			.spyOn(analyticsServices, 'trackActivityFilter')
+			.mockImplementation(() => {});
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const input = container.querySelector<HTMLInputElement>(
+			`input[id="${tokenInputId(tokenAlpha)}"]`
+		);
+
+		await fireEvent.click(input as HTMLInputElement);
+
+		const expectedKey = transactionsFilterTokenKey(tokenAlpha);
+		assertNonNullish(expectedKey);
+
+		expect(trackSpy).toHaveBeenCalledWith({
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+			value: expectedKey,
+			action: PLAUSIBLE_EVENT_FILTER_ACTIONS.ADD
+		});
+	});
+
+	it('tracks an activity filter event with action=remove when a token is unselected', async () => {
+		const expectedKey = transactionsFilterTokenKey(tokenAlpha);
+		assertNonNullish(expectedKey);
+		transactionsFilterStore.toggleTokenId(expectedKey);
+
+		const trackSpy = vi
+			.spyOn(analyticsServices, 'trackActivityFilter')
+			.mockImplementation(() => {});
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const input = container.querySelector<HTMLInputElement>(
+			`input[id="${tokenInputId(tokenAlpha)}"]`
+		);
+
+		await fireEvent.click(input as HTMLInputElement);
+
+		expect(trackSpy).toHaveBeenCalledWith({
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+			value: expectedKey,
+			action: PLAUSIBLE_EVENT_FILTER_ACTIONS.REMOVE
+		});
 	});
 });
