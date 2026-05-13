@@ -1432,24 +1432,6 @@ describe('backend.canister', () => {
 			);
 		});
 
-		it('should throw an error if btc_get_current_fee_percentiles returns a pending-transactions error', async () => {
-			service.btc_get_current_fee_percentiles.mockResolvedValue({
-				Err: { PendingTransactions: null }
-			});
-
-			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
-
-			await expect(res).rejects.toThrow(
-				new CanisterInternalError(
-					'Selecting utxos fee is not possible - pending transactions found.'
-				)
-			);
-		});
-
 		it('should throw an error if btc_get_current_fee_percentiles returns a generic canister error', async () => {
 			// @ts-expect-error we test this in purposes
 			service.btc_get_current_fee_percentiles.mockResolvedValue({ Err: { CanisterError: null } });
@@ -1461,7 +1443,7 @@ describe('backend.canister', () => {
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
 			await expect(res).rejects.toThrow(
-				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
+				new CanisterInternalError('Unknown BtcGetFeePercentilesError')
 			);
 		});
 
