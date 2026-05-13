@@ -27,7 +27,6 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
-	BtcSelectUserUtxosFeeParams,
 	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
@@ -37,7 +36,6 @@ import type {
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
-	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
@@ -191,43 +189,6 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapBtcGetPendingTransactionsError(response.Err);
-	};
-
-	btcSelectUserUtxosFee = async ({
-		network,
-		minConfirmations,
-		amountSatoshis,
-		iiDelegationChain
-	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeOutcome> => {
-		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
-
-		const response = await btc_select_user_utxos_fee({
-			network,
-			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis,
-			ii_delegation_chain: iiDelegationChain
-		});
-
-		if ('Ok' in response) {
-			return { response: response.Ok };
-		}
-
-		// In case of rate limit reached, we ignore the error and let the user continue (for now).
-		// TODO: improve placeholder with significant data, for now we do not use them
-		if ('RateLimited' in response.Err) {
-			return {
-				response: {
-					fee_satoshis: ZERO,
-					utxos: []
-				},
-				rateLimitInfo: {
-					endpoint: 'btc_select_user_utxos_fee',
-					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
-				}
-			};
-		}
-
-		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
 	btcGetCurrentFeePercentiles = async ({
