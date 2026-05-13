@@ -13,8 +13,9 @@ export interface GetSolTransactionsParams {
 	before?: string;
 	limit?: number;
 	/**
-	 * When set, compares this to the newest RPC signature after `fetchSignatures`.
-	 * If they match, skips parsing transaction details (no new activity at the head of history).
+	 * Head loads only (`before` unset): when set, compares to the first signature returned by
+	 * `fetchSignatures` (the newest page item). If they match, skips per-signature detail fetches.
+	 * Ignored when `before` is set — paginated pages are not global chain head.
 	 */
 	exitIfFirstSignatureMatches?: string;
 }

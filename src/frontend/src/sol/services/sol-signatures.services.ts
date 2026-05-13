@@ -116,6 +116,7 @@ export const getSolTransactions = async ({
 	});
 
 	if (
+		isNullish(before) &&
 		nonNullish(exitIfFirstSignatureMatches) &&
 		signatures.length > 0 &&
 		String(signatures[0].signature) === exitIfFirstSignatureMatches

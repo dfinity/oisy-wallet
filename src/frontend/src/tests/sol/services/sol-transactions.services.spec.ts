@@ -554,6 +554,51 @@ describe('sol-transactions.services', () => {
 			});
 		});
 
+		it('should pass exitIfFirstSignatureMatches when loading head with backend-stored transactions', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `stored-${i}`
+			}));
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: storedTransactions,
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 50n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(spyGetTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({
+					exitIfFirstSignatureMatches: String(storedTransactions[0].signature)
+				})
+			);
+		});
+
+		it('should not pass exitIfFirstSignatureMatches when paginating with before', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2);
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: storedTransactions,
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 50n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+
+			const before = mockSolSignature();
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			await loadNextSolTransactions({ ...mockParams, before, limit: 10 });
+
+			const [callArg] = spyGetTransactions.mock.calls[0];
+			expect(callArg.exitIfFirstSignatureMatches).toBeUndefined();
+			expect(callArg.before).toBe(before);
+		});
+
 		it('should combine stored and new transactions in the store', async () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
