@@ -12,6 +12,7 @@
 <MultiSelectDropdown
 	ariaLabel={$i18n.transaction.filter.contacts_aria_label}
 	count={selectedSet.size}
+	panelWidthClass="w-full sm:w-72"
 	testId={TRANSACTIONS_FILTER_CONTACTS_DROPDOWN}
 	triggerLabel={$i18n.transaction.filter.contacts_label}
 >
@@ -20,6 +21,6 @@
 	{/snippet}
 
 	{#snippet panel()}
-		<TransactionsFilterContactsPanel />
+		<TransactionsFilterContactsPanel autofocus />
 	{/snippet}
 </MultiSelectDropdown>

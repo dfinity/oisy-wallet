@@ -3,7 +3,7 @@ import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
-import { getPendingTransactionUtxoTxIds } from '$icp/utils/btc.utils';
+import { getPendingTransactionUtxoOutpoints } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
@@ -31,8 +31,9 @@ export const prepareBtcSend = ({
 }: BtcReviewServiceParams): UtxosFee => {
 	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
-	if (isNullish(pendingUtxoTxIds)) {
+	const pendingUtxoOutpoints = getPendingTransactionUtxoOutpoints(source);
+
+	if (isNullish(pendingUtxoOutpoints)) {
 		return {
 			feeSatoshis: ZERO,
 			utxos: [],
@@ -51,12 +52,12 @@ export const prepareBtcSend = ({
 		};
 	}
 
-	// Filter UTXOs based on confirmations and exclude locked ones
+	// Filter UTXOs based on confirmations and exclude reserved ones
 	const filteredUtxos = filterAvailableUtxos({
 		utxos: allUtxos,
 		options: {
 			minConfirmations: requiredMinConfirmations,
-			pendingUtxoTxIds
+			pendingUtxoOutpoints
 		}
 	});
 

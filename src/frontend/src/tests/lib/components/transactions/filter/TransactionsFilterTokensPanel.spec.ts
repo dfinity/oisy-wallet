@@ -4,8 +4,10 @@ import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -18,15 +20,29 @@ const mockEnabledFungibleNetworkTokens = (tokens: Token[]) => {
 	);
 };
 
-const buildToken = ({ id, name, symbol }: { id: string; name: string; symbol: string }): Token => ({
+const buildToken = ({
+	id,
+	name,
+	symbol,
+	networkName
+}: {
+	id: string;
+	name: string;
+	symbol: string;
+	networkName?: string;
+}): Token => ({
 	...mockValidIcToken,
 	id: parseTokenId(id),
 	name,
-	symbol
+	symbol,
+	network:
+		networkName === undefined
+			? mockValidIcToken.network
+			: { ...mockValidIcToken.network, name: networkName }
 });
 
-const tokenInputId = ({ id, network }: Token): string =>
-	`transactions-filter-token-${`${id.description}-${network.id.description}`.replace(/[^A-Za-z0-9_-]/g, '-')}`;
+const tokenInputId = (token: Token): string =>
+	`transactions-filter-token-${(transactionsFilterTokenKey(token) ?? '').replace(/[^A-Za-z0-9_-]/g, '-')}`;
 
 describe('TransactionsFilterTokensPanel', () => {
 	const tokenAlpha = buildToken({ id: 'AlphaTokenId', name: 'Alpha', symbol: 'ALP' });
@@ -40,7 +56,7 @@ describe('TransactionsFilterTokensPanel', () => {
 		mockEnabledFungibleNetworkTokens([tokenBeta, tokenAlpha, tokenGamma]);
 	});
 
-	it('renders one row per fungible token, alphabetically sorted by name', () => {
+	it('renders one row per fungible token, alphabetically sorted by symbol', () => {
 		const { container } = render(TransactionsFilterTokensPanel);
 
 		const symbols = Array.from(container.querySelectorAll('li span.font-medium')).map(
@@ -50,8 +66,77 @@ describe('TransactionsFilterTokensPanel', () => {
 		expect(symbols).toEqual(['ALP', 'BTA', 'GMA']);
 	});
 
+	it('sorts by symbol even when the alphabetical order of names disagrees', () => {
+		// Names are deliberately reverse-ordered vs. symbols so that a
+		// regression to name-based sorting would flip the rendered order.
+		const tokenZebraAaa = buildToken({ id: 'ZebraTokenId', name: 'Zebra', symbol: 'AAA' });
+		const tokenMangoMmm = buildToken({ id: 'MangoTokenId', name: 'Mango', symbol: 'MMM' });
+		const tokenAlphaZzz = buildToken({ id: 'AlphaZzzTokenId', name: 'Alpha', symbol: 'ZZZ' });
+		mockEnabledFungibleNetworkTokens([tokenAlphaZzz, tokenMangoMmm, tokenZebraAaa]);
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const symbols = Array.from(container.querySelectorAll('li span.font-medium')).map(
+			(el) => el.textContent?.trim() ?? ''
+		);
+
+		expect(symbols).toEqual(['AAA', 'MMM', 'ZZZ']);
+	});
+
+	it('sorts symbols case-insensitively', () => {
+		const tokenLowerB = buildToken({ id: 'LowerBTokenId', name: 'Lower B', symbol: 'btc' });
+		const tokenUpperA = buildToken({ id: 'UpperATokenId', name: 'Upper A', symbol: 'ETH' });
+		mockEnabledFungibleNetworkTokens([tokenLowerB, tokenUpperA]);
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const symbols = Array.from(container.querySelectorAll('li span.font-medium')).map(
+			(el) => el.textContent?.trim() ?? ''
+		);
+
+		expect(symbols).toEqual(['btc', 'ETH']);
+	});
+
+	it('breaks symbol ties by network name (case-insensitive)', () => {
+		// Same symbol on three networks; tiebreaker should order them by
+		// network name, regardless of the input order.
+		const tokenUsdcPolygon = buildToken({
+			id: 'UsdcPolygonTokenId',
+			name: 'USDC',
+			symbol: 'USDC',
+			networkName: 'Polygon'
+		});
+		const tokenUsdcEthereum = buildToken({
+			id: 'UsdcEthereumTokenId',
+			name: 'USDC',
+			symbol: 'USDC',
+			networkName: 'ethereum'
+		});
+		const tokenUsdcBase = buildToken({
+			id: 'UsdcBaseTokenId',
+			name: 'USDC',
+			symbol: 'USDC',
+			networkName: 'Base'
+		});
+		mockEnabledFungibleNetworkTokens([tokenUsdcPolygon, tokenUsdcEthereum, tokenUsdcBase]);
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const networkNames = Array.from(container.querySelectorAll('li span.text-tertiary')).map(
+			(el) => el.textContent?.trim() ?? ''
+		);
+
+		expect(networkNames).toEqual([
+			replacePlaceholders(get(i18n).tokens.text.on_network, { $network: 'Base' }).trim(),
+			replacePlaceholders(get(i18n).tokens.text.on_network, { $network: 'ethereum' }).trim(),
+			replacePlaceholders(get(i18n).tokens.text.on_network, { $network: 'Polygon' }).trim()
+		]);
+	});
+
 	it('reflects the store as the checked state', () => {
-		transactionsFilterStore.toggleTokenId('AlphaTokenId');
+		const alphaKey = transactionsFilterTokenKey(tokenAlpha);
+		assertNonNullish(alphaKey);
+		transactionsFilterStore.toggleTokenId(alphaKey);
 
 		const { container } = render(TransactionsFilterTokensPanel);
 
@@ -77,7 +162,10 @@ describe('TransactionsFilterTokensPanel', () => {
 
 		await fireEvent.click(input as HTMLInputElement);
 
-		expect(get(transactionsFilterStore).tokenIds).toEqual(['AlphaTokenId']);
+		const expectedAlphaKey = transactionsFilterTokenKey(tokenAlpha);
+		assertNonNullish(expectedAlphaKey);
+
+		expect(get(transactionsFilterStore).tokenIds).toEqual([expectedAlphaKey]);
 	});
 
 	it('filters the list by token name using the search input (case-insensitive)', async () => {

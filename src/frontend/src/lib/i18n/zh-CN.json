@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short 保护您！"
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
@@ -1165,7 +1166,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "无法获取至少一种代币的价格。请<strong>独立核实</strong>此次兑换报价是否公平。<br>请注意,滑点设置<strong>不会</strong>保护您免受接收价值大幅降低的报价。"
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -1190,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "购买",
-			"buy_dev": "购买（开发环境）"
+			"buy_dev": "购买（开发环境）",
+			"unavailable_title": "购买代币暂时不可用",
+			"unavailable_description": "购买代币目前已关闭，我们正在通过引入 URL 签名进一步增强此流程的安全性。工作完成后将立即重新开启。",
+			"unavailable_fallback_hint": "在此期间，您仍然可以通过分享您的钱包地址来接收代币。"
+		},
+		"actions": {
+			"close": "了解"
 		},
 		"onramper": {
 			"title": "通过 Onramper 购买"
@@ -1865,7 +1873,6 @@
 			"text": {
 				"open_or_create": "打开或创建你的钱包，与应用程序安全交互。",
 				"connect_your_wallet": "连接你的 $oisy_name",
-				"oisy_protects_you": "OISY 保护您！",
 				"oisy_protects_you_description": "应用程序无法直接访问您的资金，每笔交易都需要您确认。"
 			}
 		},
@@ -1988,7 +1995,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC 交易信息来自中心化第三方，应自行核实。",
-			"hidden_micro_transactions": "<strong>OISY 保护您！</strong>代币价值非常小的交易当前已被隐藏。要显示它们，请前往<a href=\"/settings/\">设置</a>。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">了解更多</a>"
+			"hidden_micro_transactions": "代币价值非常小的交易当前已被隐藏。要显示它们，请前往<a href=\"/settings/\">设置</a>。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">了解更多</a>"
 		},
 		"warning": {
 			"no_index_canister": "无法显示 $token_list 的交易记录。未提供 Index canister。",

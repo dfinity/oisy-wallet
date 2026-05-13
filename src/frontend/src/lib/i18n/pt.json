@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short protege você!"
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
@@ -1165,7 +1166,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Não foi possível obter o preço de pelo menos um dos tokens. Por favor, <strong>verifique de forma independente</strong> se esta oferta de swap é justa.<br>Observe que a configuração de slippage <strong>não</strong> o protege de uma oferta com um valor de recebimento muito menor!"
 		},
 		"error": {
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",
@@ -1190,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "Comprar",
-			"buy_dev": "Comprar (Ambiente de Desenvolvimento)"
+			"buy_dev": "Comprar (Ambiente de Desenvolvimento)",
+			"unavailable_title": "A compra de tokens está temporariamente indisponível",
+			"unavailable_description": "A compra de tokens está atualmente desativada enquanto continuamos a melhorar a segurança deste processo introduzindo a assinatura de URL. Será reativada assim que o trabalho for concluído.",
+			"unavailable_fallback_hint": "Enquanto isso, você ainda pode receber tokens compartilhando o endereço da sua carteira."
+		},
+		"actions": {
+			"close": "Entendi"
 		},
 		"onramper": {
 			"title": "Comprar via Onramper"
@@ -1865,7 +1873,6 @@
 			"text": {
 				"open_or_create": "Abra ou crie sua carteira para interagir com segurança com a aplicação.",
 				"connect_your_wallet": "Conecte sua carteira $oisy_name",
-				"oisy_protects_you": "OISY protege você.",
 				"oisy_protects_you_description": "Os aplicativos não podem acessar seus fundos diretamente, e cada transação precisa ser confirmada por você!"
 			}
 		},
@@ -1988,7 +1995,7 @@
 		},
 		"info": {
 			"btc_transactions": "As informações de transação BTC são obtidas de terceiros centralizados e devem ser verificadas independentemente.",
-			"hidden_micro_transactions": "<strong>OISY protege você!</strong> As transações com valores de token muito pequenos estão atualmente ocultas. Para mostrá-las, vá para <a href=\"/settings/\">Configurações</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Saiba mais</a>"
+			"hidden_micro_transactions": "As transações com valores de token muito pequenos estão atualmente ocultas. Para mostrá-las, vá para <a href=\"/settings/\">Configurações</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Saiba mais</a>"
 		},
 		"warning": {
 			"no_index_canister": "As transações para $token_list não podem ser exibidas. Nenhum canister Index disponível.",

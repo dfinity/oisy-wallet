@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_shortはあなたを守ります！"
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -1165,7 +1166,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "少なくとも1つのトークンの価格を取得できませんでした。このスワップオファーが公正な取引であることを<strong>独自に確認</strong>してください。<br>スリッページ設定は、受取額が大幅に低いオファーからは保護<strong>されません</strong>のでご注意ください！"
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",
@@ -1190,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "購入",
-			"buy_dev": "購入（開発環境）"
+			"buy_dev": "購入（開発環境）",
+			"unavailable_title": "トークンの購入は一時的にご利用いただけません",
+			"unavailable_description": "URL署名の導入により、このプロセスのセキュリティをさらに強化しているため、現在トークンの購入はオフになっています。作業が完了次第、再び有効になります。",
+			"unavailable_fallback_hint": "それまでの間も、ウォレットアドレスを共有することでトークンを受け取ることができます。"
+		},
+		"actions": {
+			"close": "了解"
 		},
 		"onramper": {
 			"title": "Onramper経由で購入"
@@ -1865,7 +1873,6 @@
 			"text": {
 				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
 				"connect_your_wallet": "あなたの$oisy_nameに接続する",
-				"oisy_protects_you": "OISYがあなたを守ります！",
 				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},
@@ -1988,7 +1995,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。",
-			"hidden_micro_transactions": "<strong>OISYはあなたを守ります！</strong>非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
+			"hidden_micro_transactions": "非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",

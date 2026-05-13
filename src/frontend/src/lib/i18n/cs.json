@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short vás chrání!"
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -1165,7 +1166,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Cenu alespoň jednoho z tokenů se nepodařilo získat. <strong>Nezávisle ověřte</strong>, zda tato nabídka swapu představuje férovou výměnu.<br>Upozorňujeme, že nastavení slippage vás <strong>nechrání</strong> před nabídkou s podstatně nižší přijatou hodnotou!"
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
@@ -1190,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "Koupit",
-			"buy_dev": "Koupit (vývojové prostředí)"
+			"buy_dev": "Koupit (vývojové prostředí)",
+			"unavailable_title": "Nákup tokenů je dočasně nedostupný",
+			"unavailable_description": "Nákup tokenů je momentálně vypnutý, zatímco dále vylepšujeme zabezpečení tohoto procesu zavedením podepisování URL. Bude znovu zapnut, jakmile bude práce dokončena.",
+			"unavailable_fallback_hint": "Mezitím můžete stále přijímat tokeny sdílením adresy své peněženky."
+		},
+		"actions": {
+			"close": "Rozumím"
 		},
 		"onramper": {
 			"title": "Koupit přes Onramper"
@@ -1865,7 +1873,6 @@
 			"text": {
 				"open_or_create": "Otevřete nebo vytvořte svou peněženku pro bezpečnou interakci s aplikací.",
 				"connect_your_wallet": "Připojte svou peněženku $oisy_name",
-				"oisy_protects_you": "OISY vás chrání!",
 				"oisy_protects_you_description": "Aplikace nemohou přímo přistupovat k vašim prostředkům, a každá transakce musí být potvrzena vámi."
 			}
 		},
@@ -1988,7 +1995,7 @@
 		},
 		"info": {
 			"btc_transactions": "Informace o transakcích BTC jsou získány od centrálních třetích stran a měly by být nezávisle ověřeny.",
-			"hidden_micro_transactions": "<strong>OISY vás chrání!</strong> Transakce s velmi malými hodnotami tokenů jsou aktuálně skryty. Chcete-li je zobrazit, přejděte do <a href=\"/settings/\">Nastavení</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Zjistit více</a>"
+			"hidden_micro_transactions": "Transakce s velmi malými hodnotami tokenů jsou aktuálně skryty. Chcete-li je zobrazit, přejděte do <a href=\"/settings/\">Nastavení</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Zjistit více</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transakce pro $token_list nelze zobrazit. Není k dispozici žádný indexový kanystr.",

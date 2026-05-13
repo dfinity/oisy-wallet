@@ -1,9 +1,16 @@
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ContactUi } from '$lib/types/contact';
-import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import { EMPTY_TRANSACTIONS_FILTER } from '$lib/types/transactions-filter';
-import { applyTransactionsFilter } from '$lib/utils/transactions-filter.utils';
+import {
+	applyTransactionsFilter,
+	transactionsFilterTokenKey
+} from '$lib/utils/transactions-filter.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
@@ -13,6 +20,7 @@ import {
 	mockSolAddress,
 	mockSolAddress2
 } from '$tests/mocks/sol.mock';
+import { nonNullish } from '@dfinity/utils';
 import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -22,16 +30,9 @@ const mockDerivedAccountIdentifierHex = AccountIdentifier.fromPrincipal({
 	subAccount: undefined
 }).toHex();
 
-const tokenWithSymbol = (symbol: string): Token => ({ id: Symbol(symbol) }) as unknown as Token;
-
-const btcToken = tokenWithSymbol('BTC');
-const ethToken = tokenWithSymbol('ETH');
-const icpToken = tokenWithSymbol('ICP');
-const solToken = tokenWithSymbol('SOL');
-
 const btcSendTx = {
 	component: 'bitcoin',
-	token: btcToken,
+	token: BTC_MAINNET_TOKEN,
 	transaction: {
 		id: 'btc-1',
 		type: 'send',
@@ -45,7 +46,7 @@ const btcSendTx = {
 
 const btcReceiveTx = {
 	component: 'bitcoin',
-	token: btcToken,
+	token: BTC_MAINNET_TOKEN,
 	transaction: {
 		id: 'btc-2',
 		type: 'receive',
@@ -59,7 +60,7 @@ const btcReceiveTx = {
 
 const ethSendTx = {
 	component: 'ethereum',
-	token: ethToken,
+	token: ETHEREUM_TOKEN,
 	transaction: {
 		id: 'eth-1',
 		type: 'send',
@@ -75,7 +76,7 @@ const ethSendTx = {
 
 const icpSendToHexTx = {
 	component: 'ic',
-	token: icpToken,
+	token: ICP_TOKEN,
 	transaction: {
 		id: 'icp-1',
 		type: 'send',
@@ -89,7 +90,7 @@ const icpSendToHexTx = {
 
 const icpApproveTx = {
 	component: 'ic',
-	token: icpToken,
+	token: ICP_TOKEN,
 	transaction: {
 		id: 'icp-2',
 		type: 'approve',
@@ -107,7 +108,7 @@ const icpApproveTx = {
 // via the `toOwner` preference (asserts the documented behavior).
 const solSendTx = {
 	component: 'solana',
-	token: solToken,
+	token: SOLANA_TOKEN,
 	transaction: {
 		id: 'sol-1',
 		type: 'send',
@@ -167,14 +168,55 @@ describe('applyTransactionsFilter', () => {
 	});
 
 	describe('token filter', () => {
-		it('keeps only transactions whose token id description is selected', () => {
+		it('keeps only transactions matching selected token-and-network keys', () => {
 			const result = applyTransactionsFilter({
 				transactions: allTxs,
-				filter: { ...EMPTY_TRANSACTIONS_FILTER, tokenIds: ['BTC', 'ICP'] },
+				filter: {
+					...EMPTY_TRANSACTIONS_FILTER,
+					tokenIds: [
+						transactionsFilterTokenKey(BTC_MAINNET_TOKEN),
+						transactionsFilterTokenKey(ICP_TOKEN)
+					].filter(nonNullish)
+				},
 				contacts: []
 			});
 
 			expect(result).toEqual([btcSendTx, btcReceiveTx, icpSendToHexTx, icpApproveTx]);
+		});
+
+		it('scopes by network when distinct tokens share the same token id description', () => {
+			const baseEthSendTx = {
+				...ethSendTx,
+				token: BASE_ETH_TOKEN,
+				transaction: {
+					...ethSendTx.transaction,
+					id: 'eth-base-send'
+				}
+			} as unknown as AllTransactionUiWithCmp;
+
+			const txs: AllTransactionUiWithCmp[] = [ethSendTx, baseEthSendTx];
+
+			const baseOnly = applyTransactionsFilter({
+				transactions: txs,
+				filter: {
+					...EMPTY_TRANSACTIONS_FILTER,
+					tokenIds: [transactionsFilterTokenKey(BASE_ETH_TOKEN)].filter(nonNullish)
+				},
+				contacts: []
+			});
+
+			expect(baseOnly).toEqual([baseEthSendTx]);
+
+			const mainnetOnly = applyTransactionsFilter({
+				transactions: txs,
+				filter: {
+					...EMPTY_TRANSACTIONS_FILTER,
+					tokenIds: [transactionsFilterTokenKey(ETHEREUM_TOKEN)].filter(nonNullish)
+				},
+				contacts: []
+			});
+
+			expect(mainnetOnly).toEqual([ethSendTx]);
 		});
 	});
 
@@ -276,7 +318,11 @@ describe('applyTransactionsFilter', () => {
 		it('intersects type, token and contact', () => {
 			const result = applyTransactionsFilter({
 				transactions: allTxs,
-				filter: { types: ['send'], tokenIds: ['ETH'], contactIds: ['1'] },
+				filter: {
+					types: ['send'],
+					tokenIds: [transactionsFilterTokenKey(ETHEREUM_TOKEN)].filter(nonNullish),
+					contactIds: ['1']
+				},
 				contacts: [ethContact]
 			});
 
@@ -286,7 +332,11 @@ describe('applyTransactionsFilter', () => {
 		it('returns empty when an intersection is impossible', () => {
 			const result = applyTransactionsFilter({
 				transactions: allTxs,
-				filter: { types: ['receive'], tokenIds: ['ETH'], contactIds: [] },
+				filter: {
+					types: ['receive'],
+					tokenIds: [transactionsFilterTokenKey(ETHEREUM_TOKEN)].filter(nonNullish),
+					contactIds: []
+				},
 				contacts: []
 			});
 

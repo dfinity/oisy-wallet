@@ -8,6 +8,7 @@
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
 
 	interface Props {
 		// When the panel is rendered inside a desktop dropdown popover the
@@ -30,24 +31,25 @@
 
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.tokenIds));
 
-	const tokenFilterKey = (token: Token): string | undefined => token.id.description;
-
-	const tokenRenderKey = (token: Token): string =>
-		`${token.id.description}-${token.network.id.description}`;
+	const tokenRenderKey = (token: Token): string | undefined => transactionsFilterTokenKey(token);
 
 	const tokenInputId = (token: Token): string =>
-		`transactions-filter-token-${tokenRenderKey(token).replace(/[^A-Za-z0-9_-]/g, '-')}`;
+		`transactions-filter-token-${(tokenRenderKey(token) ?? '').replace(/[^A-Za-z0-9_-]/g, '-')}`;
 
 	let sortedTokens = $derived(
 		[
 			...new Map(
-				[...$enabledFungibleNetworkTokens].map((token) => [tokenRenderKey(token), token])
+				[...$enabledFungibleNetworkTokens]
+					.map((token) => [tokenRenderKey(token), token] as const)
+					.filter((entry): entry is [string, Token] => nonNullish(entry[0]))
 			).values()
-		].sort((a, b) =>
-			(a.name ?? a.symbol).localeCompare(b.name ?? b.symbol, undefined, {
-				sensitivity: 'base'
-			})
-		)
+		].sort((a, b) => {
+			const bySymbol = a.symbol.localeCompare(b.symbol, undefined, { sensitivity: 'base' });
+
+			return bySymbol !== 0
+				? bySymbol
+				: a.network.name.localeCompare(b.network.name, undefined, { sensitivity: 'base' });
+		})
 	);
 
 	let filteredTokens = $derived(
@@ -66,27 +68,24 @@
 	let isCapped = $derived(searchValue.length === 0 && filteredTokens.length > VISIBLE_LIMIT);
 </script>
 
-<div class="flex flex-col">
+<div class="flex flex-col gap-3">
 	<!--
-		The popover scrolls the panel as a whole (`MultiSelectDropdown`'s
-		wrapper has `max-h-80 overflow-y-auto`), so we make the search input
-		`sticky` with the popover background to keep it pinned at the top
-		while the rows scroll under it. `pb-3` reproduces the previous
-		`gap-3` spacing while also covering scrolled rows so they don't
-		bleed visually behind the input.
+		Keep the search input out of any scroll container so it stays put
+		when the user scrolls the rows. `MultiSelectDropdown` no longer
+		imposes its own scroll wrapper, so the panel owns the layout: the
+		`<ul>` is the scroll port (capped at `max-h-80`), the search and
+		the "showing N of M" hint live as siblings above / below it.
 	-->
-	<div class="sticky top-0 z-1 bg-primary pb-3">
-		<InputSearch
-			{autofocus}
-			placeholder={$i18n.transaction.filter.search_tokens_placeholder}
-			showResetButton={searchValue.length > 0}
-			bind:filter={searchValue}
-		/>
-	</div>
+	<InputSearch
+		{autofocus}
+		placeholder={$i18n.transaction.filter.search_tokens_placeholder}
+		showResetButton={searchValue.length > 0}
+		bind:filter={searchValue}
+	/>
 
-	<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
+	<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
 		{#each visibleTokens as token (tokenRenderKey(token))}
-			{@const key = tokenFilterKey(token)}
+			{@const key = tokenRenderKey(token)}
 
 			{#if nonNullish(key)}
 				<li>
@@ -116,7 +115,7 @@
 	</ul>
 
 	{#if isCapped}
-		<p class="pt-3 text-xs text-tertiary">
+		<p class="text-xs text-tertiary">
 			{replacePlaceholders($i18n.transaction.filter.showing_partial, {
 				$shown: `${VISIBLE_LIMIT}`,
 				$total: `${filteredTokens.length}`
@@ -126,6 +125,8 @@
 </div>
 
 <style lang="scss">
+	@use '../../../styles/mixins/media';
+
 	li :global(.checkbox) {
 		--checkbox-label-order: 1;
 		--checkbox-padding: 6px 8px;
@@ -145,5 +146,13 @@
 		flex: initial;
 		display: inline-flex;
 		align-items: center;
+	}
+
+	// On mobile, give each row a comfortable touch target so checkboxes
+	// are easier to tap. The desktop dropdown keeps its denser layout.
+	@media (max-width: #{media.$breakpoint-medium - 1px}) {
+		li :global(.checkbox) {
+			--checkbox-padding: 12px;
+		}
 	}
 </style>

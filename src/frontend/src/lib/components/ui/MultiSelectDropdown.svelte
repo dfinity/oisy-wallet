@@ -5,6 +5,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import { MULTI_SELECT_DROPDOWN_PANEL_SHELL } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		triggerLabel: string;
@@ -16,6 +17,7 @@
 		testId?: string;
 		triggerIcon?: Snippet;
 		panel: Snippet;
+		panelWidthClass?: string;
 	}
 
 	let {
@@ -27,7 +29,8 @@
 		searchValue = $bindable(''),
 		testId,
 		triggerIcon,
-		panel
+		panel,
+		panelWidthClass
 	}: Props = $props();
 
 	let visible = $state(false);
@@ -62,9 +65,12 @@
 	<IconExpandMore size="20" />
 </button>
 
-<ResponsivePopover {button} bind:visible>
+<ResponsivePopover {button} direction="ltr" bind:visible>
 	{#snippet content()}
-		<div class="flex w-full min-w-60 flex-col gap-2 p-1">
+		<div
+			class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}"
+			data-tid={MULTI_SELECT_DROPDOWN_PANEL_SHELL}
+		>
 			{#if searchable}
 				<InputSearch
 					autofocus
@@ -74,9 +80,7 @@
 				/>
 			{/if}
 
-			<div class="flex max-h-80 flex-col overflow-y-auto">
-				{@render panel()}
-			</div>
+			{@render panel()}
 		</div>
 	{/snippet}
 </ResponsivePopover>

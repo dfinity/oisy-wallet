@@ -134,8 +134,8 @@ describe('btc-send.services', () => {
 				btcPendingSentTransactionsServices,
 				'loadBtcPendingSentTransactions'
 			).mockResolvedValue({ success: true });
-			vi.spyOn(btcUtils, 'getPendingTransactionUtxoTxIds').mockReturnValue([]);
-			vi.spyOn(btcUtxosUtils, 'extractUtxoTxIds').mockReturnValue(['txid1', 'txid2']);
+			vi.spyOn(btcUtils, 'getPendingTransactionUtxoOutpoints').mockReturnValue([]);
+			vi.spyOn(btcUtxosUtils, 'extractUtxoOutpoints').mockReturnValue(['txid1:0', 'txid2:0']);
 			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(250);
 			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
 		});
@@ -271,9 +271,9 @@ describe('btc-send.services', () => {
 			});
 		});
 
-		it('should throw UtxoLocked error when UTXO is in pending transactions', async () => {
-			vi.spyOn(btcUtils, 'getPendingTransactionUtxoTxIds').mockReturnValue(['txid1']);
-			vi.spyOn(btcUtxosUtils, 'extractUtxoTxIds').mockReturnValue(['txid1']);
+		it('should throw UtxoLocked error when a UTXO outpoint is reserved by a pending tx', async () => {
+			vi.spyOn(btcUtils, 'getPendingTransactionUtxoOutpoints').mockReturnValue(['txid1:0']);
+			vi.spyOn(btcUtxosUtils, 'extractUtxoOutpoints').mockReturnValue(['txid1:0']);
 
 			await expect(validateBtcSend(defaultValidateParams)).rejects.toThrow(BtcValidationError);
 
@@ -282,6 +282,15 @@ describe('btc-send.services', () => {
 			} catch (error: unknown) {
 				expect((error as BtcValidationError).type).toBe(BtcSendValidationError.UtxoLocked);
 			}
+		});
+
+		it('should not throw UtxoLocked when a reserved outpoint shares a txid but differs in vout', async () => {
+			// A previous send reserved (txid1, vout=0); the new selection picks (txid1, vout=1)
+			// — that is a different outpoint and must remain spendable.
+			vi.spyOn(btcUtils, 'getPendingTransactionUtxoOutpoints').mockReturnValue(['txid1:0']);
+			vi.spyOn(btcUtxosUtils, 'extractUtxoOutpoints').mockReturnValue(['txid1:1']);
+
+			await expect(validateBtcSend(defaultValidateParams)).resolves.not.toThrow();
 		});
 
 		describe('InvalidFeeCalculation validation', () => {
