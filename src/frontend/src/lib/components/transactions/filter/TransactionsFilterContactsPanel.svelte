@@ -59,7 +59,7 @@
 				<IconAddressBook />
 			</div>
 
-			<p class="text-sm">{$i18n.transaction.filter.contacts_empty_title}</p>
+			<p class="text-sm text-secondary">{$i18n.transaction.filter.contacts_empty_title}</p>
 
 			<p class="text-sm text-tertiary">
 				<strong
