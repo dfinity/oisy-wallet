@@ -168,7 +168,7 @@ export const exchangeRateUsdToCurrency = async (
 | Component-local computed value                 | `$derived` / `$derived.by`                                                      | Inside the component                                                   |
 | Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work)                                    | Inside the component                                                   |
 | Value shared by 2+ components in the same page | Pass via props / snippets                                                       | —                                                                      |
-| Value shared across routes                     | A Svelte `writable` / `readable` store **or** a `*.svelte.ts` rune-state module | `$lib/stores/`, `<chain>/stores/`, `$lib/derived/`, `<chain>/derived/` |
+| Value shared across routes                     | `*.svelte.ts` rune-state module by default; [reuse the existing store graph](#svelte-stores--when-to-reuse-them) when one already covers the value | `$lib/stores/`, `<chain>/stores/`, `$lib/derived/`, `<chain>/derived/` |
 | Cached server data                             | The matching `*.services.ts` owns the cache                                     | —                                                                      |
 
 Avoid duplicating server state into a local store — fetch via the service
