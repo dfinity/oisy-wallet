@@ -1,14 +1,17 @@
 import { getTokensByOwner as getDip721TokensByOwner } from '$icp/api/dip721.api';
 import { getTokensByOwner as getExtTokensByOwner } from '$icp/api/ext-v2-token.api';
 import { getTokensByOwner as getIcPunksTokensByOwner } from '$icp/api/icpunks.api';
+import { getTokensByOwner as getIcrc7TokensByOwner } from '$icp/api/icrc7.api';
 import type { Dip721Token } from '$icp/types/dip721-token';
 import type { ExtToken } from '$icp/types/ext-token';
 import type { IcPunksToken } from '$icp/types/icpunks-token';
+import type { Icrc7Token } from '$icp/types/icrc7-token';
 import type { IcNonFungibleToken } from '$icp/types/nft';
 import { isTokenDip721 } from '$icp/utils/dip721.utils';
 import { isTokenExt } from '$icp/utils/ext.utils';
 import { isTokenIcPunks } from '$icp/utils/icpunks.utils';
-import { mapDip721Nft, mapExtNft, mapIcPunksNft } from '$icp/utils/nft.utils';
+import { isTokenIcrc7 } from '$icp/utils/icrc7.utils';
+import { mapDip721Nft, mapExtNft, mapIcPunksNft, mapIcrc7Nft } from '$icp/utils/nft.utils';
 import { TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import type { NullishIdentity } from '$lib/types/identity';
@@ -126,6 +129,44 @@ const loadIcPunksNfts = async ({
 	}
 };
 
+const loadIcrc7Nfts = async ({
+	token,
+	identity,
+	certified
+}: {
+	token: Icrc7Token;
+	identity: Identity;
+} & QueryParams) => {
+	const {
+		canisterId,
+		standard: { code: standard }
+	} = token;
+
+	const owner = identity.getPrincipal();
+
+	try {
+		const tokenIndices = await getIcrc7TokensByOwner({
+			identity,
+			owner,
+			canisterId,
+			certified
+		});
+
+		const promises = tokenIndices.map(
+			async (index) => await mapIcrc7Nft({ index, token, identity, certified })
+		);
+
+		return await Promise.all(promises);
+	} catch (err: unknown) {
+		trackEvent({
+			name: TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR,
+			metadata: { ...(mapIcErrorMetadata(err) ?? {}), canisterId, standard }
+		});
+
+		return [];
+	}
+};
+
 export const loadNfts = async ({
 	tokens,
 	identity,
@@ -149,6 +190,10 @@ export const loadNfts = async ({
 
 		if (isTokenIcPunks(token)) {
 			return await loadIcPunksNfts({ token, identity, certified });
+		}
+
+		if (isTokenIcrc7(token)) {
+			return await loadIcrc7Nfts({ token, identity, certified });
 		}
 
 		assertNever(token, `Unsupported NFT IC token ${(token as Token).standard.code}`);
