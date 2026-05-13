@@ -86,12 +86,7 @@ export const detectNftCanisterStandard = async ({
 	};
 
 	try {
-		return await resolveByProbing([
-			extCanister,
-			dip721Canister,
-			icPunksCanister,
-			icrc7Canister
-		]);
+		return await resolveByProbing([extCanister, dip721Canister, icPunksCanister, icrc7Canister]);
 	} catch (err: unknown) {
 		// If the error is caused by the probing service, we cannot identify correctly the standard.
 		if (err instanceof ResolveByProbingError) {
