@@ -1325,7 +1325,6 @@ interface I18nTransaction {
 		showing_partial: string;
 		contacts_empty_description: string;
 		contacts_empty_cta: string;
-		contacts_empty_image_alt: string;
 	};
 	label: {
 		reimbursement: string;

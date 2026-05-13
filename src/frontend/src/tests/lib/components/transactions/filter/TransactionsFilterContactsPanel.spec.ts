@@ -129,6 +129,12 @@ describe('TransactionsFilterContactsPanel', () => {
 			).toBeNull();
 		});
 
+		it('renders the no-contacts-yet line above the OISY-protects-you block', () => {
+			const { getByText } = render(TransactionsFilterContactsPanel);
+
+			expect(getByText(get(i18n).send.text.contacts_empty_state_description)).toBeInTheDocument();
+		});
+
 		it('renders the OISY-protects-you lockup and description', () => {
 			const { getByText } = render(TransactionsFilterContactsPanel);
 

@@ -54,12 +54,14 @@
 
 <div class="flex flex-col gap-3">
 	{#if isEmpty}
-		<div class="flex flex-col items-center gap-4 px-2 py-4 text-center">
-			<div class="w-20 text-brand-primary [&_svg]:h-auto [&_svg]:w-full">
+		<div class="flex flex-col items-center gap-3 px-2 py-4 text-center">
+			<div class="w-20 text-brand-primary [&_svg]:h-auto [&_svg]:w-full" aria-hidden="true">
 				<IconAddressBook />
 			</div>
 
-			<p class="text-sm text-tertiary">
+			<p class="text-sm">{$i18n.send.text.contacts_empty_state_description}</p>
+
+			<p class="mt-2 text-sm text-tertiary">
 				<strong
 					><span class="relative -top-px mr-1 inline-block align-middle text-success-primary"
 						><IconShieldCheck size="16" /></span
