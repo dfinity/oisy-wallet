@@ -42,8 +42,13 @@ const valueToString = (value: Value): string => {
 	return '';
 };
 
-const findValue = (entries: Array<[string, Value]>, key: string): Value | undefined =>
-	entries.find(([k]) => k === key)?.[1];
+const findValue = ({
+	entries,
+	key
+}: {
+	entries: Array<[string, Value]>;
+	key: string;
+}): Value | undefined => entries.find(([k]) => k === key)?.[1];
 
 export class Icrc7Canister extends Canister<Icrc7Service> {
 	static async create({
@@ -111,13 +116,15 @@ export class Icrc7Canister extends Canister<Icrc7Service> {
 
 		const entries = fromNullable(entry) ?? [];
 
-		const nameValue = findValue(entries, 'icrc7:name') ?? findValue(entries, 'name');
+		const nameValue =
+			findValue({ entries, key: 'icrc7:name' }) ?? findValue({ entries, key: 'name' });
 		const descriptionValue =
-			findValue(entries, 'icrc7:description') ?? findValue(entries, 'description');
+			findValue({ entries, key: 'icrc7:description' }) ??
+			findValue({ entries, key: 'description' });
 		const imageValue =
-			findValue(entries, 'icrc7:image') ??
-			findValue(entries, 'image') ??
-			findValue(entries, 'icrc7:logo');
+			findValue({ entries, key: 'icrc7:image' }) ??
+			findValue({ entries, key: 'image' }) ??
+			findValue({ entries, key: 'icrc7:logo' });
 
 		const attributes = entries
 			.filter(

@@ -44,11 +44,7 @@ export const idlFactory = ({ IDL }) => {
 	const StandardRecord = IDL.Record({ name: IDL.Text, url: IDL.Text });
 
 	return IDL.Service({
-		icrc7_collection_metadata: IDL.Func(
-			[],
-			[IDL.Vec(IDL.Tuple(IDL.Text, Value))],
-			['query']
-		),
+		icrc7_collection_metadata: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Text, Value))], ['query']),
 		icrc7_symbol: IDL.Func([], [IDL.Text], ['query']),
 		icrc7_name: IDL.Func([], [IDL.Text], ['query']),
 		icrc7_description: IDL.Func([], [IDL.Opt(IDL.Text)], ['query']),
@@ -70,11 +66,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		icrc7_owner_of: IDL.Func([IDL.Vec(IDL.Nat)], [IDL.Vec(IDL.Opt(Account))], ['query']),
 		icrc7_balance_of: IDL.Func([IDL.Vec(Account)], [IDL.Vec(IDL.Nat)], ['query']),
-		icrc7_tokens: IDL.Func(
-			[IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
-			[IDL.Vec(IDL.Nat)],
-			['query']
-		),
+		icrc7_tokens: IDL.Func([IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)], [IDL.Vec(IDL.Nat)], ['query']),
 		icrc7_tokens_of: IDL.Func(
 			[Account, IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
 			[IDL.Vec(IDL.Nat)],
