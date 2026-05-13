@@ -20,6 +20,7 @@
 		loadDefaultIcPunksTokens,
 		processCustomTokens as processIcPunksCustomTokens
 	} from '$icp/services/icpunks.services';
+	import { loadDefaultIcrc7Tokens } from '$icp/services/icrc7.services';
 	import {
 		loadDefaultIcrcTokens,
 		processCustomTokens as processIcrcCustomTokens
@@ -61,6 +62,7 @@
 		loadDefaultIcrcTokens();
 		loadDefaultExtTokens();
 		loadDefaultIcPunksTokens();
+		loadDefaultIcrc7Tokens();
 	});
 
 	let loadErc = $derived(
