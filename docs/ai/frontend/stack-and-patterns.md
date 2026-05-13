@@ -6,17 +6,18 @@ code wins (truth hierarchy in [governance.md](../governance.md)). Update
 this page in the same PR — that's the
 [meta-update rule](../governance.md#meta-update-rule).
 
-## Svelte — runes preferred for new code, stores still pervasive
+## Svelte — runes for new code
 
-The repo is **Svelte 5** but uses both reactive primitives:
+The repo is **Svelte 5**. For new code, default to runes (`$state`,
+`$derived`, `$effect`, `$props`, `$bindable`).
 
-- **Runes** (`$state`, `$derived`, `$effect`, `$props`, `$bindable`) — new
-  components and component-local state.
-- **Svelte stores** (`writable`, `readable`, `derived` from
-  `svelte/store`) — cross-component / cross-route reactive state. There is
-  a large existing graph in `$lib/derived/`, `$lib/stores/`, and the
-  per-chain `*/derived/` and `*/stores/` folders. Keep adding to it where
-  it fits an existing shape.
+A large existing Svelte-store graph lives in `$lib/derived/`,
+`$lib/stores/`, and per-chain `*/derived/` and `*/stores/` folders. It
+predates the runes migration. **Read from it freely; do not migrate it
+in unrelated PRs.** Author new reactive state as runes; only fall back to
+`writable` / `readable` / `derived` from `svelte/store` when extending an
+existing store graph in place (see [Svelte stores — when to reuse them](#svelte-stores--when-to-reuse-them)
+below).
 
 Inside a component, prefer the rune syntax for new code:
 
@@ -77,9 +78,10 @@ runes` and contain no behaviour change.
   When you suspect a runaway, use `__oisyReactivityDebug.printTop()` in
   the browser console.
 
-### Svelte stores — when to use them
+### Svelte stores — when to reuse them
 
-Many cross-route values are still expressed as Svelte stores. Use them for:
+The following cross-route values are already expressed as Svelte stores.
+**Consume the existing store; do not re-implement these as runes:**
 
 - Auth / identity state (`$lib/stores/auth.store`,
   `$lib/derived/auth.derived`).
@@ -87,10 +89,11 @@ Many cross-route values are still expressed as Svelte stores. Use them for:
 - Toasts, modals, busy-state (`$lib/stores/toasts.store`,
   `modal.store`, `busy.store`).
 - Per-chain enabled tokens / networks (`$<chain>/derived/...`).
-- Anything composed via `derived([a, b], ([$a, $b]) => …)` from existing
-  stores.
 
-When unsure, look at the closest neighbour and follow the same shape.
+When extending an existing store graph (e.g. a new `derived([a, b], …)`
+composed from those stores), match the surrounding shape. For brand-new
+cross-route state with no neighbour to follow, prefer a rune-based module
+(`*.svelte.ts`).
 
 ## TypeScript
 
