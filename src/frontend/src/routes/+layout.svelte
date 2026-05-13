@@ -27,6 +27,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { consoleWarn } from '$lib/utils/console.utils';
+	import { registerMemoryReloadCleanup } from '$lib/utils/memory-reload-cleanup.utils';
 
 	interface Props {
 		children: Snippet;
@@ -188,6 +189,8 @@
 	onMount(() => {
 		userSelectedNetworkStore.set($networkId);
 	});
+
+	onMount(registerMemoryReloadCleanup);
 </script>
 
 {#await init()}

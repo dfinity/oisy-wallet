@@ -12,6 +12,7 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { MEMORY_FIX_ACTIVE_FLAGS } from '$lib/utils/memory-flags.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 
 	let isHomePage = $derived(isRouteTokens(page));
@@ -49,6 +50,15 @@
 				>
 					<IconGitHub />
 				</ExternalLinkIcon>
+
+				<span
+					class="font-mono rounded bg-secondary px-2 py-0.5 text-xs text-primary"
+					title="Active memory test flags (set via ?memFlags=...)"
+				>
+					memFlags: {MEMORY_FIX_ACTIVE_FLAGS.length > 0
+						? MEMORY_FIX_ACTIVE_FLAGS.join(',')
+						: 'none'}
+				</span>
 			</div>
 		</div>
 
