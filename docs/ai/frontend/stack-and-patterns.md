@@ -6,6 +6,16 @@ code wins (truth hierarchy in [governance.md](../governance.md)). Update
 this page in the same PR — that's the
 [meta-update rule](../governance.md#meta-update-rule).
 
+## Chain transaction loads — redundant external calls
+
+### Native ETH (Etherscan / Infura)
+
+Incremental `startBlock` comes from backend `newestBlockIndex + 1` when user-transaction persistence is enabled, otherwise from the maximum `blockNumber` already in `ethTransactionsStore` so refresh does not always reset to `startBlock: 0`. When `startBlock > 0`, the client compares Infura’s latest block to that cursor; if the chain tip is still before the next block to fetch, the Etherscan history request is skipped.
+
+### Solana (RPC signatures and details)
+
+`getSolTransactions` may receive `exitIfFirstSignatureMatches`. After `fetchSignatures`, if the newest RPC signature matches the newest backend-stored signature (non-pagination loads only), per-signature transaction detail fetching is skipped.
+
 ## Svelte — runes for new code
 
 The repo is **Svelte 5**. For new code, default to runes (`$state`,
