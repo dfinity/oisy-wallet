@@ -144,7 +144,7 @@ describe('TransactionsFilterContactsPanel', () => {
 			// The description i18n string ends with an inline Learn more anchor,
 			// so match the leading prose with a partial regex instead of the
 			// full literal.
-			expect(getByText(/Save the addresses you use often as contacts/)).toBeInTheDocument();
+			expect(getByText(/Save known addresses in Contacts\./)).toBeInTheDocument();
 		});
 
 		it('renders a Learn more link pointing to the protected-contacts docs', () => {

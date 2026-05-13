@@ -1649,7 +1649,7 @@
 			"open_filters_aria_label": "Open activity filters",
 			"showing_partial": "Showing $shown of $total · type to search",
 			"contacts_empty_title": "You haven't added contacts yet",
-			"contacts_empty_description": "Save the addresses you use often as contacts. This reduces the risk of accidentally selecting a wrong address when sending tokens.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#contacts\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>",
+			"contacts_empty_description": "Save known addresses in Contacts. This reduces the risk of accidentally selecting a wrong address when sending tokens.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#contacts\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>",
 			"contacts_empty_cta": "Add your first contact"
 		},
 		"label": {
