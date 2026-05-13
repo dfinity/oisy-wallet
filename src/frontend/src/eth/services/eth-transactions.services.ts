@@ -7,6 +7,7 @@ import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import {
 	loadEthUserTransactions,
 	saveEthFinalizedTransactions
@@ -105,13 +106,38 @@ const loadEthTransactions = async ({
 			? await loadEthUserTransactions({ identity, tokenId: transactionTokenId })
 			: undefined;
 
-		// Fetch from Etherscan starting after the newest stored block (incremental loading)
-		const startBlock = nonNullish(stored?.newestBlockIndex)
-			? Number(stored.newestBlockIndex) + 1
-			: 0;
+		// Fetch from Etherscan starting after the newest stored block (incremental loading).
+		// When the backend has no cursor yet, reuse the highest block already shown in the store so
+		// production (backend persistence disabled) still avoids `startBlock: 0` full-history pulls on refresh.
+		let startBlock = nonNullish(stored?.newestBlockIndex) ? Number(stored.newestBlockIndex) + 1 : 0;
+
+		if (startBlock === 0) {
+			const maxBlockFromStore = maxEthNativeBlockNumberInStore(tokenId);
+			if (nonNullish(maxBlockFromStore)) {
+				startBlock = maxBlockFromStore + 1;
+			}
+		}
 
 		const { transactions: transactionsProvider } = etherscanProviders(networkId);
-		const newTransactions = await transactionsProvider({ address, startBlock, sort: 'desc' });
+
+		let newTransactions: Transaction[];
+
+		if (startBlock > 0) {
+			try {
+				const { getBlockNumber } = infuraProviders(networkId);
+				const latestBlockNumber = await getBlockNumber();
+
+				if (latestBlockNumber < startBlock) {
+					newTransactions = [];
+				} else {
+					newTransactions = await transactionsProvider({ address, startBlock, sort: 'desc' });
+				}
+			} catch (_: unknown) {
+				newTransactions = await transactionsProvider({ address, startBlock, sort: 'desc' });
+			}
+		} else {
+			newTransactions = await transactionsProvider({ address, startBlock: 0, sort: 'desc' });
+		}
 
 		// Combine newest-first: new transactions (desc) then stored (desc from backend)
 		const allTransactions = [...newTransactions, ...(stored?.transactions ?? [])];
@@ -344,6 +370,21 @@ const loadErc721Transactions = async ({
 	return await retryWithDelay({
 		request: async () => await erc721Transactions({ contract: token, address })
 	});
+};
+
+const maxEthNativeBlockNumberInStore = (tokenId: TokenId): number | undefined => {
+	const rows = get(ethTransactionsStore)?.[tokenId];
+	if (isNullish(rows) || rows.length === 0) {
+		return undefined;
+	}
+
+	const blocks = rows.map(({ data }) => data.blockNumber).filter(nonNullish);
+
+	if (blocks.length === 0) {
+		return undefined;
+	}
+
+	return Math.max(...blocks);
 };
 
 const loadErc1155Transactions = async ({
