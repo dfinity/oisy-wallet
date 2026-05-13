@@ -1,9 +1,11 @@
 import TransactionsFilterContactsPanel from '$lib/components/transactions/filter/TransactionsFilterContactsPanel.svelte';
+import { TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA } from '$lib/constants/test-ids.constants';
 import * as contactsDerived from '$lib/derived/contacts.derived';
 import { i18n } from '$lib/stores/i18n.store';
+import { modalStore } from '$lib/stores/modal.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import type { ContactUi } from '$lib/types/contact';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -112,6 +114,45 @@ describe('TransactionsFilterContactsPanel', () => {
 		const { container } = render(TransactionsFilterContactsPanel);
 
 		expect(container.querySelectorAll('li')).toHaveLength(0);
+	});
+
+	describe('when the user has no contacts', () => {
+		beforeEach(() => {
+			mockContacts([]);
+		});
+
+		it('does not render the search input', () => {
+			const { queryByPlaceholderText } = render(TransactionsFilterContactsPanel);
+
+			expect(
+				queryByPlaceholderText(get(i18n).transaction.filter.search_contacts_placeholder)
+			).toBeNull();
+		});
+
+		it('renders the OISY-protects-you lockup and description', () => {
+			const { getByText } = render(TransactionsFilterContactsPanel);
+
+			expect(
+				getByText(replaceOisyPlaceholders(get(i18n).core.text.oisy_protects_you))
+			).toBeInTheDocument();
+			expect(
+				getByText(get(i18n).transaction.filter.contacts_empty_description)
+			).toBeInTheDocument();
+		});
+
+		it('renders the CTA button that opens the address book', async () => {
+			const openSpy = vi.spyOn(modalStore, 'openAddressBook');
+
+			const { getByTestId } = render(TransactionsFilterContactsPanel);
+
+			const cta = getByTestId(TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA);
+
+			expect(cta).toHaveTextContent(get(i18n).transaction.filter.contacts_empty_cta);
+
+			await fireEvent.click(cta);
+
+			expect(openSpy).toHaveBeenCalledOnce();
+		});
 	});
 
 	it('caps the visible list to 50 rows when over the limit and renders the showing-partial hint', () => {

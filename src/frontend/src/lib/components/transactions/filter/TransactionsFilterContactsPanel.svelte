@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { Checkbox } from '@dfinity/gix-components';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import IconAddressBook from '$lib/components/icons/IconAddressBook.svelte';
+	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA } from '$lib/constants/test-ids.constants';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import { matchesContactByText } from '$lib/utils/contact.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		// When the panel is rendered inside a desktop dropdown popover the
@@ -24,6 +29,8 @@
 
 	let searchValue = $state('');
 
+	let isEmpty = $derived($contacts.length === 0);
+
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.contactIds));
 
 	let alphaSorted = $derived(
@@ -39,44 +46,75 @@
 	);
 
 	let isCapped = $derived(searchValue.length === 0 && filteredContacts.length > VISIBLE_LIMIT);
+
+	const openAddressBook = () => {
+		modalStore.openAddressBook({ id: Symbol() });
+	};
 </script>
 
 <div class="flex flex-col gap-3">
-	<InputSearch
-		{autofocus}
-		placeholder={$i18n.transaction.filter.search_contacts_placeholder}
-		showResetButton={searchValue.length > 0}
-		bind:filter={searchValue}
-	/>
+	{#if isEmpty}
+		<div class="flex flex-col items-center gap-4 px-2 py-4 text-center">
+			<div class="w-20 text-brand-primary [&_svg]:h-auto [&_svg]:w-full">
+				<IconAddressBook />
+			</div>
 
-	<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
-		{#each visibleContacts as contact (contact.id.toString())}
-			{@const id = contact.id.toString()}
-			<li>
-				<Checkbox
-					checked={selectedSet.has(id)}
-					inputId={`transactions-filter-contact-${id}`}
-					text="inline"
-					on:nnsChange={() => transactionsFilterStore.toggleContactId(id)}
+			<p class="text-sm text-tertiary">
+				<strong
+					><span class="relative -top-px mr-1 inline-block align-middle text-success-primary"
+						><IconShieldCheck size="16" /></span
+					>{replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)}</strong
 				>
-					<span class="inline-flex items-center gap-2">
-						<span class="flex shrink-0 items-center">
-							<Avatar name={contact.name} image={contact.image} variant="xxs" />
-						</span>
-						<span class="text-sm">{contact.name}</span>
-					</span>
-				</Checkbox>
-			</li>
-		{/each}
-	</ul>
+				{$i18n.transaction.filter.contacts_empty_description}
+			</p>
 
-	{#if isCapped}
-		<p class="text-xs text-tertiary">
-			{replacePlaceholders($i18n.transaction.filter.showing_partial, {
-				$shown: `${VISIBLE_LIMIT}`,
-				$total: `${filteredContacts.length}`
-			})}
-		</p>
+			<Button
+				colorStyle="primary"
+				fullWidth
+				onclick={openAddressBook}
+				testId={TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA}
+				type="button"
+			>
+				{$i18n.transaction.filter.contacts_empty_cta}
+			</Button>
+		</div>
+	{:else}
+		<InputSearch
+			{autofocus}
+			placeholder={$i18n.transaction.filter.search_contacts_placeholder}
+			showResetButton={searchValue.length > 0}
+			bind:filter={searchValue}
+		/>
+
+		<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
+			{#each visibleContacts as contact (contact.id.toString())}
+				{@const id = contact.id.toString()}
+				<li>
+					<Checkbox
+						checked={selectedSet.has(id)}
+						inputId={`transactions-filter-contact-${id}`}
+						text="inline"
+						on:nnsChange={() => transactionsFilterStore.toggleContactId(id)}
+					>
+						<span class="inline-flex items-center gap-2">
+							<span class="flex shrink-0 items-center">
+								<Avatar name={contact.name} image={contact.image} variant="xxs" />
+							</span>
+							<span class="text-sm">{contact.name}</span>
+						</span>
+					</Checkbox>
+				</li>
+			{/each}
+		</ul>
+
+		{#if isCapped}
+			<p class="text-xs text-tertiary">
+				{replacePlaceholders($i18n.transaction.filter.showing_partial, {
+					$shown: `${VISIBLE_LIMIT}`,
+					$total: `${filteredContacts.length}`
+				})}
+			</p>
+		{/if}
 	{/if}
 </div>
 
