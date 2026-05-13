@@ -9,6 +9,7 @@ import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
+import { mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
 
 export const getMockNonFungibleToken = (params: {
 	addresses: string[];
@@ -104,6 +105,19 @@ export const mockValidIcPunksNft: Nft = {
 	collection: {
 		...mockValidIcPunksToken,
 		address: mockValidIcPunksToken.canisterId
+	},
+	mediaStatus: {
+		image: MediaStatusEnum.OK,
+		thumbnail: MediaStatusEnum.OK
+	}
+};
+
+export const mockValidIcrc7Nft: Nft = {
+	name: 'Mock ICRC-7 NFT',
+	id: parseNftId('22222'),
+	collection: {
+		...mockValidIcrc7Token,
+		address: mockValidIcrc7Token.canisterId
 	},
 	mediaStatus: {
 		image: MediaStatusEnum.OK,
