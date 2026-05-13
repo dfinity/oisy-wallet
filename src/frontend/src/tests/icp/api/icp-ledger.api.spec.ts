@@ -59,6 +59,20 @@ describe('icp-ledger.api', () => {
 			});
 		});
 
+		it('successfully calls transfer endpoint with nat64 memo', async () => {
+			const memo = 42n;
+
+			const result = await transfer({ ...params, memo });
+
+			expect(result).toEqual(mockBlock);
+
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: AccountIdentifier.fromHex(mockAccountIdentifierText),
+				memo
+			});
+		});
+
 		it('throws an error if identity is undefined', async () => {
 			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
@@ -119,6 +133,22 @@ describe('icp-ledger.api', () => {
 				amount,
 				to: toAccount,
 				createdAt: 987_654_321n
+			});
+		});
+
+		it('successfully calls icrc1Transfer endpoint with memo', async () => {
+			const memoText = 'payment for invoice #42';
+			const memo = new TextEncoder().encode(memoText);
+
+			const result = await icrc1Transfer({ ...params, memo });
+
+			expect(result).toEqual(mockIndex);
+
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: toAccount,
+				icrc1Memo: memo,
+				createdAt
 			});
 		});
 

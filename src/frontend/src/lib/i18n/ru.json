@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "Ваши контакты появятся здесь",
 			"contacts_empty_state_description": "Похоже, вы еще не добавили контактов",
 			"send_review_subtitle": "Вы отправляете",
+			"memo": "",
 			"no_nfts_found": "NFT не найдены",
 			"no_nfts_found_desc": "Измените параметры поиска или сеть, чтобы найти нужные вам NFT.",
 			"select_nft": "Выбрать NFT"
 		},
 		"placeholder": {
+			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "Введите публичный адрес (0x), имя или псевдоним",
 			"enter_recipient_address": "Введите адрес получателя, имя или псевдоним",
 			"enter_wallet_address": "Введите адрес кошелька, имя или псевдоним",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "Токен ckETH не может быть получен.",
 			"destination_address_invalid": "Адрес получателя недействителен.",
 			"amount_invalid": "Сумма недействительна.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Недостаточно средств для газа",
 			"insufficient_funds_for_amount": "Недостаточно средств для этой суммы",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "Баланс вашего токена недостаточен для выполнения этой транзакции. Ваш баланс мог измениться с момента последнего отображения.",
 			"solana_insufficient_funds_for_fee": "Ваш баланс SOL недостаточен для покрытия комиссий за транзакцию.",
 			"solana_insufficient_funds_for_rent": "Ваш баланс SOL недостаточен для покрытия аренды, необходимой для создания аккаунта.",
-			"fee_calc_unsupported_standard": "Не удалось рассчитать комиссию, так как указанный стандарт токена не поддерживается."
+			"fee_calc_unsupported_standard": "Не удалось рассчитать комиссию, так как указанный стандарт токена не поддерживается.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "Для",
 			"for_copied": "Скопировать",
 			"expiration": "Истечение срока",
-			"approve_label": "Одобрить"
+			"approve_label": "Одобрить",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "Подтверждено",

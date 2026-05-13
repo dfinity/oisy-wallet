@@ -9,6 +9,7 @@
 	import { sendNft } from '$icp/services/nft-send.services';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
+	import { mapIcSendErrorMsg } from '$icp/utils/ic-send.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
@@ -21,7 +22,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
@@ -64,7 +65,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendToken, sendTokenSymbol } =
+	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendMemo } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
@@ -171,6 +172,7 @@
 					unitName: $sendTokenDecimals
 				}),
 				identity: $authIdentity,
+				memo: $sendMemo.trim() !== '' ? $sendMemo : undefined,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
 			};
 
@@ -200,10 +202,13 @@
 				}
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
+			const friendlyMsg = mapIcSendErrorMsg({ err, i18n: $i18n.send });
+
+			if (nonNullish(friendlyMsg)) {
+				toastsErrorNoTrace({ msg: { text: friendlyMsg }, err });
+			} else {
+				toastsError({ msg: { text: $i18n.send.error.unexpected }, err });
+			}
 
 			onBack();
 		}

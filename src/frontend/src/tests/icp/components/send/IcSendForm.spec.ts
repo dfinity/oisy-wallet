@@ -1,4 +1,5 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 import {
@@ -7,8 +8,9 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
+import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('IcSendForm', () => {
 	const mockContext = new Map([]);
@@ -64,5 +66,83 @@ describe('IcSendForm', () => {
 		});
 
 		expect(queryByText(en.fee.text.fee)).toBeNull();
+	});
+
+	it('should render the memo label and input', () => {
+		const { getByText, getByPlaceholderText } = render(IcSendForm, {
+			props,
+			context: mockContext
+		});
+
+		expect(getByText(en.send.text.memo)).toBeInTheDocument();
+		expect(getByPlaceholderText(en.send.placeholder.enter_memo)).toBeInTheDocument();
+	});
+
+	it('should render memo input as optional', () => {
+		const { getByPlaceholderText } = render(IcSendForm, {
+			props,
+			context: mockContext
+		});
+
+		const memoInput = getByPlaceholderText(en.send.placeholder.enter_memo);
+
+		expect(memoInput).not.toBeRequired();
+	});
+
+	describe('with classic ICP address destination', () => {
+		let icpMockContext: Map<symbol, ReturnType<typeof initSendContext>>;
+
+		const icpProps = {
+			...props,
+			destination: mockAccountIdentifierText
+		};
+
+		beforeEach(() => {
+			icpMockContext = new Map([[SEND_CONTEXT_KEY, initSendContext({ token: ICP_TOKEN })]]);
+		});
+
+		it('should use the nat64 placeholder when destination is a classic ICP address', () => {
+			const { getByPlaceholderText } = render(IcSendForm, {
+				props: icpProps,
+				context: icpMockContext
+			});
+
+			expect(getByPlaceholderText(en.send.placeholder.enter_memo_nat64)).toBeInTheDocument();
+		});
+
+		it('should show a validation error when memo is not a valid nat64', async () => {
+			const { getByPlaceholderText, getByText } = render(IcSendForm, {
+				props: icpProps,
+				context: icpMockContext
+			});
+
+			const memoInput = getByPlaceholderText(en.send.placeholder.enter_memo_nat64);
+
+			await fireEvent.input(memoInput, { target: { value: 'not-a-number' } });
+
+			expect(getByText(en.send.assertion.memo_invalid_nat64)).toBeInTheDocument();
+		});
+
+		it('should not show a validation error when memo is a valid nat64', async () => {
+			const { getByPlaceholderText, queryByText } = render(IcSendForm, {
+				props: icpProps,
+				context: icpMockContext
+			});
+
+			const memoInput = getByPlaceholderText(en.send.placeholder.enter_memo_nat64);
+
+			await fireEvent.input(memoInput, { target: { value: '12345' } });
+
+			expect(queryByText(en.send.assertion.memo_invalid_nat64)).toBeNull();
+		});
+
+		it('should not show a validation error when memo is empty', () => {
+			const { queryByText } = render(IcSendForm, {
+				props: icpProps,
+				context: icpMockContext
+			});
+
+			expect(queryByText(en.send.assertion.memo_invalid_nat64)).toBeNull();
+		});
 	});
 });

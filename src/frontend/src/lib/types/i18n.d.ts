@@ -666,11 +666,14 @@ interface I18nSend {
 		contacts_empty_state_title: string;
 		contacts_empty_state_description: string;
 		send_review_subtitle: string;
+		memo: string;
 		no_nfts_found: string;
 		no_nfts_found_desc: string;
 		select_nft: string;
 	};
 	placeholder: {
+		enter_memo: string;
+		enter_memo_nat64: string;
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
@@ -698,6 +701,7 @@ interface I18nSend {
 		unknown_cketh: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
+		memo_invalid_nat64: string;
 		insufficient_funds_verbose_btc: string;
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
@@ -742,6 +746,7 @@ interface I18nSend {
 		solana_insufficient_funds_for_fee: string;
 		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
+		memo_too_large: string;
 	};
 }
 
@@ -1290,6 +1295,7 @@ interface I18nTransaction {
 		for_copied: string;
 		expiration: string;
 		approve_label: string;
+		memo: string;
 	};
 	status: {
 		confirmed: string;

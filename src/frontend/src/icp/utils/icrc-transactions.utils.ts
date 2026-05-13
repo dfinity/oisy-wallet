@@ -112,6 +112,11 @@ export const mapIcrcTransaction = ({
 	const approveFee = fromNullishNullable(fromNullable(approve)?.fee);
 	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee);
 
+	const transferMemoBytes = fromNullishNullable(fromNullable(transfer)?.memo);
+	const memo = nonNullish(transferMemoBytes)
+		? new TextDecoder().decode(transferMemoBytes)
+		: undefined;
+
 	const value = data?.amount;
 	const fee = isApprove ? approveFee : transferFee;
 
@@ -135,6 +140,7 @@ export const mapIcrcTransaction = ({
 		...(nonNullish(approveSpender) && {
 			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approveSpender}`
 		}),
-		...(nonNullish(approveExpiresAt) && { approveExpiresAt })
+		...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
+		...(nonNullish(memo) && memo.trim() !== '' && { memo })
 	};
 };

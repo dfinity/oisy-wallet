@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "I tuoi contatti appariranno qui",
 			"contacts_empty_state_description": "Sembra che tu non abbia ancora aggiunto contatti",
 			"send_review_subtitle": "Tu invii",
+			"memo": "",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
 			"select_nft": ""
 		},
 		"placeholder": {
+			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "Inserisci indirizzo pubblico (0x), nome o alias",
 			"enter_recipient_address": "Inserisci indirizzo del destinatario, nome o alias",
 			"enter_wallet_address": "Inserisci indirizzo del wallet, nome o alias",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "Il token ckETH non può essere recuperato.",
 			"destination_address_invalid": "L'indirizzo di destinazione non è valido.",
 			"amount_invalid": "L'importo non è valido.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Saldo insufficiente per il gas",
 			"insufficient_funds_for_amount": "Saldo insufficiente",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "Il saldo del tuo token non è sufficiente per completare questa transazione. Il tuo saldo potrebbe essere cambiato dall'ultima volta che è stato visualizzato.",
 			"solana_insufficient_funds_for_fee": "Il tuo saldo SOL non è sufficiente per coprire le commissioni di transazione.",
 			"solana_insufficient_funds_for_rent": "Il tuo saldo SOL non è sufficiente per coprire l'affitto richiesto per la creazione dell'account.",
-			"fee_calc_unsupported_standard": "Impossibile calcolare la commissione poiché lo standard token fornito non è supportato."
+			"fee_calc_unsupported_standard": "Impossibile calcolare la commissione poiché lo standard token fornito non è supportato.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "",
 			"for_copied": "",
 			"expiration": "",
-			"approve_label": ""
+			"approve_label": "",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "Confermato",

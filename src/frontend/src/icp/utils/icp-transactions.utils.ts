@@ -5,8 +5,9 @@ import type {
 	IcpTransaction
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { NullishIdentity } from '$lib/types/identity';
-import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
+import { fromNullable, fromNullishNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
 export const mapTransactionIcpToSelf = (
@@ -59,7 +60,17 @@ export const mapIcpTransaction = ({
 	transaction: IcpTransaction;
 	identity: NullishIdentity;
 }): IcTransactionUi => {
-	const { operation, timestamp, transferToSelf } = transaction;
+	const { operation, timestamp, transferToSelf, memo: nat64Memo, icrc1_memo } = transaction;
+
+	// ICP transactions carry the memo in one of two fields depending on the send path:
+	// - icrc1_memo (Uint8Array): set when sending to a principal via icrc1_transfer
+	// - memo (nat64/bigint): set when sending to a classic AccountIdentifier via transfer; 0 means unset
+	const icrc1MemoBytes = fromNullishNullable(icrc1_memo);
+	const memo = nonNullish(icrc1MemoBytes)
+		? new TextDecoder().decode(icrc1MemoBytes)
+		: nat64Memo !== ZERO
+			? nat64Memo.toString()
+			: undefined;
 
 	const tx: Pick<IcTransactionUi, 'timestamp' | 'id' | 'status' | 'txExplorerUrl'> = {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
@@ -87,6 +98,8 @@ export const mapIcpTransaction = ({
 		toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}`
 	});
 
+	const memoField = nonNullish(memo) && memo.trim() !== '' ? { memo } : {};
+
 	if ('Approve' in operation) {
 		const approve = operation.Approve;
 		const approveValue = approve.allowance.e8s;
@@ -95,6 +108,7 @@ export const mapIcpTransaction = ({
 
 		return {
 			...tx,
+			...memoField,
 			type: 'approve',
 			...mapFrom(operation.Approve.from),
 			value: approveValue,
@@ -108,6 +122,7 @@ export const mapIcpTransaction = ({
 	if ('Burn' in operation) {
 		return {
 			...tx,
+			...memoField,
 			type: 'burn',
 			...mapFrom(operation.Burn.from),
 			value: operation.Burn.amount.e8s
@@ -117,6 +132,7 @@ export const mapIcpTransaction = ({
 	if ('Mint' in operation) {
 		return {
 			...tx,
+			...memoField,
 			type: 'mint',
 			...mapTo(operation.Mint.to),
 			incoming: true,
@@ -130,6 +146,7 @@ export const mapIcpTransaction = ({
 
 		return {
 			...tx,
+			...memoField,
 			type: source.incoming === false ? 'send' : 'receive',
 			...source,
 			...mapTo(operation.Transfer.to),

@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "Danh bạ của bạn sẽ xuất hiện ở đây",
 			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
 			"send_review_subtitle": "Bạn gửi",
+			"memo": "",
 			"no_nfts_found": "Không NFT nào được tìm thấy",
 			"no_nfts_found_desc": "Điều chỉnh tìm kiếm hoặc mạng của bạn để tìm NFT",
 			"select_nft": "Chọn NFT"
 		},
 		"placeholder": {
+			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
 			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
 			"amount_invalid": "Số lượng không hợp lệ.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Không đủ tiền cho gas",
 			"insufficient_funds_for_amount": "Không đủ tiền cho số lượng",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "Số dư token của bạn không đủ để hoàn tất giao dịch này. Số dư của bạn có thể đã thay đổi kể từ lần hiển thị cuối cùng.",
 			"solana_insufficient_funds_for_fee": "Số dư SOL của bạn không đủ để trang trải phí giao dịch.",
 			"solana_insufficient_funds_for_rent": "Số dư SOL của bạn không đủ để trang trải khoản thuê cần thiết cho việc tạo tài khoản.",
-			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
+			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "",
 			"for_copied": "",
 			"expiration": "",
-			"approve_label": ""
+			"approve_label": "",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "Đã xác nhận",

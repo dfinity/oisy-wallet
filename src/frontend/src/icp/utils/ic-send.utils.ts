@@ -11,6 +11,7 @@ import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
+import { errorDetailToString } from '$lib/utils/error.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
@@ -38,6 +39,39 @@ export const isNetworkIdETHMainnet = (networkId: NetworkId | undefined): boolean
 
 export const isNetworkIdETH = (networkId: NetworkId | undefined): boolean =>
 	nonNullish(networkId) && isNetworkIdEthereum(networkId);
+
+const MAX_NAT64 = 18446744073709551615n; // 2n ** 64n - 1n
+
+export const isInvalidNat64Memo = (memo: string): boolean => {
+	if (!/^\d+$/.test(memo.trim())) {
+		return true;
+	}
+	try {
+		return BigInt(memo.trim()) > MAX_NAT64;
+	} catch {
+		return true;
+	}
+};
+
+/**
+ * Maps known IC canister send errors to user-friendly i18n messages.
+ * Returns `undefined` for unrecognised errors so the caller can fall back to a generic message.
+ */
+export const mapIcSendErrorMsg = ({
+	err,
+	i18n
+}: {
+	err: unknown;
+	i18n: I18nSend;
+}): string | undefined => {
+	const message = errorDetailToString(err) ?? '';
+
+	if (message.includes('memo field is too large')) {
+		return i18n.error.memo_too_large;
+	}
+
+	return undefined;
+};
 
 export const isInvalidDestinationIc = ({
 	destination,

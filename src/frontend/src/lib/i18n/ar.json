@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "ستظهر جهات اتصالك هنا",
 			"contacts_empty_state_description": "يبدو أنك لم تقم بإضافة جهات اتصال بعد",
 			"send_review_subtitle": "أنت ترسل",
+			"memo": "",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
 			"select_nft": ""
 		},
 		"placeholder": {
+			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
 			"enter_recipient_address": "أدخل عنوان المستلم، الاسم أو الاسم المستعار",
 			"enter_wallet_address": "أدخل عنوان المحفظة، الاسم أو الاسم المستعار",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "لا يمكن استرداد توكن ckETH.",
 			"destination_address_invalid": "عنوان الوجهة غير صالح.",
 			"amount_invalid": "المبلغ غير صالح.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "أموال غير كافية للغاز",
 			"insufficient_funds_for_amount": "أموال غير كافية للمبلغ",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "",
 			"solana_insufficient_funds_for_fee": "",
 			"solana_insufficient_funds_for_rent": "",
-			"fee_calc_unsupported_standard": ""
+			"fee_calc_unsupported_standard": "",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "",
 			"for_copied": "",
 			"expiration": "",
-			"approve_label": ""
+			"approve_label": "",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "تم التأكيد",

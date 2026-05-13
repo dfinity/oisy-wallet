@@ -569,7 +569,46 @@ describe('ic-send.services', () => {
 				identity: mockIdentity,
 				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
 				to: decodeIcrcAccount(mockPrincipalText2),
-				amount: mockAmount
+				amount: mockAmount,
+				memo: undefined
+			});
+		});
+
+		it('should encode a non-empty memo as UTF-8 bytes', async () => {
+			const memo = 'hello memo';
+
+			await sendIcrc({ ...mockParams, memo });
+
+			expect(transferIcrc).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
+				to: decodeIcrcAccount(mockPrincipalText2),
+				amount: mockAmount,
+				memo: new TextEncoder().encode(memo)
+			});
+		});
+
+		it('should treat a whitespace-only memo as undefined', async () => {
+			await sendIcrc({ ...mockParams, memo: '   ' });
+
+			expect(transferIcrc).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
+				to: decodeIcrcAccount(mockPrincipalText2),
+				amount: mockAmount,
+				memo: undefined
+			});
+		});
+
+		it('should treat an undefined memo as undefined', async () => {
+			await sendIcrc({ ...mockParams, memo: undefined });
+
+			expect(transferIcrc).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
+				to: decodeIcrcAccount(mockPrincipalText2),
+				amount: mockAmount,
+				memo: undefined
 			});
 		});
 
@@ -628,6 +667,24 @@ describe('ic-send.services', () => {
 			expect(transferIcp).not.toHaveBeenCalled();
 		});
 
+		it('should encode and pass a non-empty memo for ICRC address transfers', async () => {
+			vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(false);
+			vi.spyOn(accountUtils, 'invalidIcpAddress').mockReturnValueOnce(true);
+
+			const memo = 'payment for invoice #42';
+
+			await sendIcp({ ...mockParams, memo });
+
+			expect(icrc1TransferIcp).toHaveBeenCalledOnce();
+			expect(icrc1TransferIcp).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				to: decodeIcrcAccount(mockPrincipalText2),
+				amount: mockAmount,
+				ledgerCanisterId: mockLedgerCanisterId,
+				memo: new TextEncoder().encode(memo)
+			});
+		});
+
 		it('should execute full send flow if destination is a valid ICP address', async () => {
 			vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 			vi.spyOn(accountUtils, 'invalidIcpAddress').mockReturnValueOnce(false);
@@ -643,6 +700,24 @@ describe('ic-send.services', () => {
 			});
 
 			expect(icrc1TransferIcp).not.toHaveBeenCalled();
+		});
+
+		it('should parse and pass a nat64 memo for classic ICP address transfers', async () => {
+			vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
+			vi.spyOn(accountUtils, 'invalidIcpAddress').mockReturnValueOnce(false);
+
+			const memo = '12345';
+
+			await sendIcp({ ...mockParams, memo });
+
+			expect(transferIcp).toHaveBeenCalledOnce();
+			expect(transferIcp).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				to: mockPrincipalText2,
+				amount: mockAmount,
+				ledgerCanisterId: mockLedgerCanisterId,
+				memo: 12345n
+			});
 		});
 
 		it('should call the auxiliary function', async () => {

@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "Vaše kontakty se zobrazí zde",
 			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
 			"send_review_subtitle": "Odesíláte",
+			"memo": "",
 			"no_nfts_found": "Nebyly nalezeny žádné NFT",
 			"no_nfts_found_desc": "Upravte své vyhledávání nebo síť, abyste našli své NFT.",
 			"select_nft": "Vyberte NFT"
 		},
 		"placeholder": {
+			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "Token ckETH nelze získat.",
 			"destination_address_invalid": "Cílová adresa je neplatná.",
 			"amount_invalid": "Částka je neplatná.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Nedostatek prostředků na gas/poplatky",
 			"insufficient_funds_for_amount": "Nedostatek prostředků na částku",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "Zůstatek vašeho tokenu není dostatečný k dokončení této transakce. Váš zůstatek se mohl od posledního zobrazení změnit.",
 			"solana_insufficient_funds_for_fee": "Váš zůstatek SOL není dostatečný k pokrytí poplatků za transakci.",
 			"solana_insufficient_funds_for_rent": "Váš zůstatek SOL není dostatečný k pokrytí nájmu požadovaného pro vytvoření účtu.",
-			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován."
+			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "Pro",
 			"for_copied": "Adresa příjemce zkopírována do schránky.",
 			"expiration": "Platnost",
-			"approve_label": "Schválit $approveAmount"
+			"approve_label": "Schválit $approveAmount",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "Potvrzeno",

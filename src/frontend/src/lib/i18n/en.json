@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "Your contacts will appear here",
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
 			"send_review_subtitle": "You send",
+			"memo": "Memo",
 			"no_nfts_found": "No NFTs found",
 			"no_nfts_found_desc": "Adjust your search or network to find your NFTs",
 			"select_nft": "Select NFT"
 		},
 		"placeholder": {
+			"enter_memo": "Optional memo",
+			"enter_memo_nat64": "Optional memo (0–18446744073709551615)",
 			"enter_eth_address": "Enter public address (0x), name or alias",
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "The ckETH token cannot be retrieved.",
 			"destination_address_invalid": "Destination address is invalid.",
 			"amount_invalid": "Amount is invalid.",
+			"memo_invalid_nat64": "Memo must be a whole number between 0 and 18446744073709551615.",
 			"insufficient_funds_verbose_btc": "The specified amount is higher than the amount you have available to send. Note that amounts from unconfirmed incoming Bitcoin can't be sent until confirmed.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "Your token balance is not sufficient to complete this transaction. Your balance may have changed since it was last displayed.",
 			"solana_insufficient_funds_for_fee": "Your SOL balance is not sufficient to cover the transaction fees.",
 			"solana_insufficient_funds_for_rent": "Your SOL balance is not sufficient to cover the rent required for account creation.",
-			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
+			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported.",
+			"memo_too_large": "The memo you entered is too long. Please shorten it and try again."
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "For",
 			"for_copied": "Spender address copied to clipboard.",
 			"expiration": "Expiration",
-			"approve_label": "Approve $approveAmount"
+			"approve_label": "Approve $approveAmount",
+			"memo": "Memo"
 		},
 		"status": {
 			"confirmed": "Confirmed",

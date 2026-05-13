@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "आपके संपर्क यहाँ दिखाई देंगे",
 			"contacts_empty_state_description": "ऐसा लगता है कि आपने अभी तक संपर्क नहीं जोड़े हैं",
 			"send_review_subtitle": "आप भेजते हैं",
+			"memo": "",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
 			"select_nft": ""
 		},
 		"placeholder": {
+			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "सार्वजनिक पता (0x), नाम या उपनाम दर्ज करें",
 			"enter_recipient_address": "प्राप्तकर्ता का पता, नाम या उपनाम दर्ज करें",
 			"enter_wallet_address": "वॉलेट पता, नाम या उपनाम दर्ज करें",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "ckETH टोकन पुनः प्राप्त नहीं किया जा सकता है।",
 			"destination_address_invalid": "गंतव्य पता अमान्य है।",
 			"amount_invalid": "राशि अमान्य है।",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "गैस के लिए अपर्याप्त धन",
 			"insufficient_funds_for_amount": "राशि के लिए अपर्याप्त धन",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "इस लेनदेन को पूरा करने के लिए आपके टोकन का बैलेंस पर्याप्त नहीं है। आपका बैलेंस अंतिम बार प्रदर्शित होने के बाद से बदल सकता है।",
 			"solana_insufficient_funds_for_fee": "लेनदेन शुल्क को कवर करने के लिए आपका SOL बैलेंस पर्याप्त नहीं है।",
 			"solana_insufficient_funds_for_rent": "खाता निर्माण के लिए आवश्यक किराए को कवर करने के लिए आपका SOL बैलेंस पर्याप्त नहीं है।",
-			"fee_calc_unsupported_standard": "शुल्क की गणना नहीं की जा सकी क्योंकि प्रदान किया गया टोकन मानक समर्थित नहीं है।"
+			"fee_calc_unsupported_standard": "शुल्क की गणना नहीं की जा सकी क्योंकि प्रदान किया गया टोकन मानक समर्थित नहीं है।",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "",
 			"for_copied": "",
 			"expiration": "",
-			"approve_label": ""
+			"approve_label": "",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "पुष्टि",

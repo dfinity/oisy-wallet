@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "你的联系人将显示在此处",
 			"contacts_empty_state_description": "你似乎还没有添加联系人",
 			"send_review_subtitle": "你将发送",
+			"memo": "",
 			"no_nfts_found": "未找到 NFT",
 			"no_nfts_found_desc": "请调整搜索条件或网络以查找你的 NFT",
 			"select_nft": "选择 NFT"
 		},
 		"placeholder": {
+			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "无法获取 ckETH 代币。",
 			"destination_address_invalid": "目标地址无效。",
 			"amount_invalid": "金额无效。",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "燃料费不足",
 			"insufficient_funds_for_amount": "金额不足",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "您的代币余额不足以完成此交易。您的余额自上次显示以来可能已发生变化。",
 			"solana_insufficient_funds_for_fee": "您的SOL余额不足以支付交易费用。",
 			"solana_insufficient_funds_for_rent": "您的SOL余额不足以支付创建账户所需的租金。",
-			"fee_calc_unsupported_standard": "由于提供的代币标准不受支持，无法计算费用。"
+			"fee_calc_unsupported_standard": "由于提供的代币标准不受支持，无法计算费用。",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "用于",
 			"for_copied": "支出方地址已复制到剪贴板。",
 			"expiration": "过期时间",
-			"approve_label": "批准 $approveAmount"
+			"approve_label": "批准 $approveAmount",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "已确认",

@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "Deine Kontakte werden hier angezeigt",
 			"contacts_empty_state_description": "Es sieht so aus, als hättest du noch keine Kontakte hinzugefügt",
 			"send_review_subtitle": "Du sendest",
+			"memo": "",
 			"no_nfts_found": "Keine NFTs gefunden",
 			"no_nfts_found_desc": "Passe die Suche oder das Netzwerk an um deine NFTs zu finden",
 			"select_nft": "NFT auswählen"
 		},
 		"placeholder": {
+			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "Gib öffentliche Adresse (0x), Name oder Alias ein",
 			"enter_recipient_address": "Gib Empfängeradresse, Name oder Alias ein",
 			"enter_wallet_address": "Gib Wallet-Adresse, Name oder Alias ein",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "Das ckETH-Token kann nicht abgerufen werden.",
 			"destination_address_invalid": "Zieladresse ist ungültig.",
 			"amount_invalid": "Betrag ist ungültig.",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Unzureichende Mittel für Gas.",
 			"insufficient_funds_for_amount": "Unzureichende Mittel für den Betrag.",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "Ihr Token-Guthaben reicht nicht aus, um diese Transaktion abzuschließen. Ihr Guthaben kann sich seit der letzten Anzeige geändert haben.",
 			"solana_insufficient_funds_for_fee": "Ihr SOL-Guthaben reicht nicht aus, um die Transaktionsgebühren zu decken.",
 			"solana_insufficient_funds_for_rent": "Ihr SOL-Guthaben reicht nicht aus, um die für die Kontoerstellung erforderliche Miete zu decken.",
-			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird."
+			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird.",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "Für",
 			"for_copied": "Adresse in die Zwischenablage kopiert.",
 			"expiration": "Ablaufdatum",
-			"approve_label": ""
+			"approve_label": "",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "Bestätigt",

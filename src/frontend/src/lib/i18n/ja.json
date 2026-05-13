@@ -933,11 +933,14 @@
 			"contacts_empty_state_title": "あなたの連絡先がここに表示されます。",
 			"contacts_empty_state_description": "まだ連絡先を追加していないようです。",
 			"send_review_subtitle": "以下の内容を送信します。",
+			"memo": "",
 			"no_nfts_found": "NFTが見つかりません。",
 			"no_nfts_found_desc": "NFTを見つけるには、検索条件またはネットワークを調整してください。",
 			"select_nft": "送信するNFTを選択"
 		},
 		"placeholder": {
+			"enter_memo": "",
+			"enter_memo_nat64": "",
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
@@ -965,6 +968,7 @@
 			"unknown_cketh": "ckETHトークンは取得できません。",
 			"destination_address_invalid": "送信先アドレスが無効です。",
 			"amount_invalid": "金額が無効です。",
+			"memo_invalid_nat64": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています。",
 			"insufficient_funds_for_amount": "送金額に対して残高が不足しています。",
@@ -1008,7 +1012,8 @@
 			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",
 			"solana_insufficient_funds_for_fee": "トランザクション手数料を賄うためのSOL残高が不足しています。",
 			"solana_insufficient_funds_for_rent": "アカウント作成に必要なレントを賄うためのSOL残高が不足しています。",
-			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。"
+			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。",
+			"memo_too_large": ""
 		}
 	},
 	"mint": {
@@ -1614,7 +1619,8 @@
 			"for": "承認先",
 			"for_copied": "承認先アドレスをクリップボードにコピーしました。",
 			"expiration": "有効期限",
-			"approve_label": "$approveAmount を承認"
+			"approve_label": "$approveAmount を承認",
+			"memo": ""
 		},
 		"status": {
 			"confirmed": "確認済み",
