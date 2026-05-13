@@ -61,7 +61,7 @@
 
 			<p class="text-sm">{$i18n.transaction.filter.contacts_empty_title}</p>
 
-			<p class="mt-2 text-sm text-tertiary">
+			<p class="text-sm text-tertiary">
 				<strong
 					><span class="relative -top-px mr-1 inline-block align-middle text-success-primary"
 						><IconShieldCheck size="16" /></span
