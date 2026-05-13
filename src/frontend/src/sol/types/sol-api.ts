@@ -12,6 +12,11 @@ export interface GetSolTransactionsParams {
 	tokenOwnerAddress?: SolAddress;
 	before?: string;
 	limit?: number;
+	/**
+	 * When set, compares this to the newest RPC signature after `fetchSignatures`.
+	 * If they match, skips parsing transaction details (no new activity at the head of history).
+	 */
+	exitIfFirstSignatureMatches?: string;
 }
 
 export type LoadSolTransactionsParams = GetSolTransactionsParams & {

@@ -84,7 +84,8 @@ export const getSolTransactions = async ({
 	tokenAddress,
 	tokenOwnerAddress,
 	before,
-	limit = Number(WALLET_PAGINATION)
+	limit = Number(WALLET_PAGINATION),
+	exitIfFirstSignatureMatches
 }: GetSolTransactionsParams): Promise<SolTransactionUi[]> => {
 	if (nonNullish(tokenAddress)) {
 		assertIsAddress(tokenAddress);
@@ -113,6 +114,14 @@ export const getSolTransactions = async ({
 		before: beforeSignature,
 		limit
 	});
+
+	if (
+		nonNullish(exitIfFirstSignatureMatches) &&
+		signatures.length > 0 &&
+		String(signatures[0].signature) === exitIfFirstSignatureMatches
+	) {
+		return [];
+	}
 
 	return await signatures.reduce(
 		async (accPromise, signature) => {
