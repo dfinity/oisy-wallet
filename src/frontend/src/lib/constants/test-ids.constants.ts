@@ -19,6 +19,7 @@ export const CURRENCY_SWITCHER_DROPDOWN = 'currency-switcher-dropdown';
 export const CURRENCY_SWITCHER_DROPDOWN_BUTTON = 'currency-switcher-dropdown-button';
 
 export const LOGOUT_BUTTON = 'logout-button';
+export const SIGNER_LOGOUT_BUTTON = 'signer-logout-button';
 export const LOGIN_BUTTON = 'login-button';
 export const LOGIN_BUTTON_GOOGLE = 'login-button-google';
 export const LOGIN_BUTTON_APPLE = 'login-button-apple';
