@@ -34,13 +34,9 @@ export const TICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 export const IC_USDC_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA.USDC?.ledgerCanisterId ?? '53nhb-haaaa-aaaar-qbn5q-cai';
 
-export const IC_USDT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA.USDT?.ledgerCanisterId ?? 'ij33n-oiaaa-aaaar-qbooa-cai';
-
 // Suggested non-Chain-Fusion ICRC tokens to be enabled by default if the user set no preference
 export const ICRC_SUGGESTED_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = [
-	IC_USDC_LEDGER_CANISTER_ID,
-	IC_USDT_LEDGER_CANISTER_ID
+	IC_USDC_LEDGER_CANISTER_ID
 ];
 
 export const ADDITIONAL_ICRC_TOKENS: IcTokenWithoutId[] = Object.values(
