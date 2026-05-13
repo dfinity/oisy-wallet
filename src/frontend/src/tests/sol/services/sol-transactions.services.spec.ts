@@ -559,6 +559,7 @@ describe('sol-transactions.services', () => {
 				...tx,
 				id: `stored-${i}`
 			}));
+			const [firstStored] = storedTransactions;
 
 			vi.mocked(loadSolUserTransactions).mockResolvedValue({
 				transactions: storedTransactions,
@@ -573,7 +574,7 @@ describe('sol-transactions.services', () => {
 
 			expect(spyGetTransactions).toHaveBeenCalledWith(
 				expect.objectContaining({
-					exitIfFirstSignatureMatches: String(storedTransactions[0].signature)
+					exitIfFirstSignatureMatches: String(firstStored.signature)
 				})
 			);
 		});
@@ -594,7 +595,8 @@ describe('sol-transactions.services', () => {
 
 			await loadNextSolTransactions({ ...mockParams, before, limit: 10 });
 
-			const [callArg] = spyGetTransactions.mock.calls[0];
+			const [[callArg]] = spyGetTransactions.mock.calls;
+
 			expect(callArg.exitIfFirstSignatureMatches).toBeUndefined();
 			expect(callArg.before).toBe(before);
 		});
