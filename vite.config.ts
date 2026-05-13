@@ -19,14 +19,23 @@ const projectRoot = fileURLToPath(new URL('.', import.meta.url));
 const config: UserConfig = {
 	plugins: [reactivityDebugPlugin(), sveltekit()],
 	resolve: {
-		alias: {
-			$declarations: resolve('./src/declarations'),
+		alias: [
+			{ find: '$declarations', replacement: resolve('./src/declarations') },
 			// Rollup can fail to resolve "exports" subpaths in dynamic import(); pin the entry file.
-			'barcode-detector/ponyfill': resolve(
-				projectRoot,
-				'node_modules/barcode-detector/dist/es/ponyfill.js'
-			)
-		}
+			{
+				find: 'barcode-detector/ponyfill',
+				replacement: resolve(projectRoot, 'node_modules/barcode-detector/dist/es/ponyfill.js')
+			},
+			// Vite 8's bundled postcss-import does not honor the `style` exports
+			// condition when resolving `@import 'tailwindcss'` from .scss files,
+			// so we explicitly point it at the CSS entry shipped by tailwindcss v4.
+			// Use an exact-match regex so JS subpath imports like
+			// `tailwindcss/defaultTheme` keep going through normal resolution.
+			{
+				find: /^tailwindcss$/,
+				replacement: resolve(projectRoot, 'node_modules/tailwindcss/index.css')
+			}
+		]
 	},
 	build: {
 		target: 'es2020',
@@ -77,21 +86,6 @@ const config: UserConfig = {
 	server: {
 		proxy: {
 			'/api': 'http://localhost:4943'
-		}
-	},
-	optimizeDeps: {
-		esbuildOptions: {
-			define: {
-				global: 'globalThis'
-			},
-			plugins: [
-				{
-					name: 'fix-node-globals-polyfill',
-					setup: (build) => {
-						build.onResolve({ filter: /_virtual-process-polyfill_\.js/ }, ({ path }) => ({ path }));
-					}
-				}
-			]
 		}
 	},
 	worker: {
