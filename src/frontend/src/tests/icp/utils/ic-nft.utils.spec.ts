@@ -4,7 +4,7 @@ import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 
 describe('ic-nft.utils', () => {
 	describe('isTokenIcNft', () => {
-		it.each(['ext', 'dip721', 'icpunks'])(
+		it.each(['ext', 'dip721', 'icpunks', 'icrc7'])(
 			'should return true for valid token standards: %s',
 			(standard) => {
 				expect(
