@@ -13,21 +13,19 @@ file. If it doesn't, point it here.
 ## 1. What this repo is
 
 `dfinity/oisy-wallet` is a multi-chain crypto wallet running entirely on the
-Internet Computer. It is a multi-stack repo:
+Internet Computer. Stack and dependencies are discoverable from `package.json`
+and `Cargo.toml`. The non-obvious bits:
 
-| Stack              | Path                                            | Language                                  | Status                                                                                                                                                                                             |
-| ------------------ | ----------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Frontend           | `src/frontend/`                                 | SvelteKit 2 + Svelte 5 + TS + Tailwind v4 | **AI-active**                                                                                                                                                                                      |
-| Backend canister   | `src/backend/`                                  | Rust (`wasm32-unknown-unknown`)           | **AI-active**                                                                                                                                                                                      |
-| Shared crate       | `src/shared/`                                   | Rust                                      | **AI-active**                                                                                                                                                                                      |
-| Generated bindings | `src/declarations/`                             | TS / Candid (generated)                   | **Do not hand-edit**                                                                                                                                                                               |
-| Benchmarks         | `src/backend/src/benchmark.rs`, `canbench.yml`  | Rust + canbench-rs                        | **Active but lightly maintained.** Update when touching hot paths — see [`docs/ai/backend/testing.md#benchmarks--canbench`](./docs/ai/backend/testing.md#benchmarks--canbench).                    |
-| E2E tests          | `e2e/`                                          | TypeScript (Playwright)                   | **Maintenance-only.** Default rule: do not add new specs — see [`docs/ai/frontend/testing.md#e2e-status-temporarily-restricted`](./docs/ai/frontend/testing.md#e2e-status-temporarily-restricted). |
-| Scripts            | `scripts/`                                      | Bash / Node                               | Restricted                                                                                                                                                                                         |
-| CI / infra         | `.github/workflows/`, `dfx.json`, `Dockerfile*` | Mixed                                     | Restricted                                                                                                                                                                                         |
-
-Both **frontend and backend** are areas where agents are expected to ship PRs
-with little to no human review. CI gates and CODEOWNERS still apply.
+- **AI-active areas (ship with little to no human review):** `src/frontend/`,
+  `src/backend/`, `src/shared/`. CI gates and CODEOWNERS still apply.
+- **Do not hand-edit:** `src/declarations/` (regenerate via `npm run generate`).
+- **Restricted (ask before changing):** `scripts/`, `.github/workflows/`,
+  `dfx.json`, `Dockerfile*`.
+- **E2E (`e2e/`) is maintenance-only** — do not add new Playwright specs by
+  default. See [`docs/ai/frontend/testing.md#e2e-status-temporarily-restricted`](./docs/ai/frontend/testing.md#e2e-status-temporarily-restricted).
+- **Benchmarks** (`src/backend/src/benchmark.rs`, `canbench.yml`) are
+  lightly maintained — update when touching hot paths. See
+  [`docs/ai/backend/testing.md#benchmarks--canbench`](./docs/ai/backend/testing.md#benchmarks--canbench).
 
 ---
 

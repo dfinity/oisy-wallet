@@ -46,7 +46,8 @@
 			"unlimited": "무제한 $items",
 			"info": "정보",
 			"asset": "자산",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short가 당신을 보호합니다!"
 		},
 		"info": {
 			"test_banner": "테스트 목적으로만 사용하세요!",
@@ -1156,7 +1157,7 @@
 			"select_token": "토큰 선택",
 			"select_network_filter": "네트워크 선택",
 			"withdrawing": "출금 중...",
-			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 1분 정도 소요될 수 있습니다.)",
+			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 2분 정도 소요될 수 있습니다.)",
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
@@ -1165,7 +1166,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "토큰 중 하나 이상의 가격을 가져올 수 없습니다. 이 스왑 제안이 공정한 거래인지 <strong>독립적으로 확인</strong>해 주세요.<br>슬리피지 설정은 받는 가치가 훨씬 낮은 제안으로부터 사용자를 보호하지 <strong>않습니다</strong>!"
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",
@@ -1190,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "구매",
-			"buy_dev": "구매 (개발 환경)"
+			"buy_dev": "구매 (개발 환경)",
+			"unavailable_title": "토큰 구매는 일시적으로 사용할 수 없습니다",
+			"unavailable_description": "URL 서명을 도입하여 이 프로세스의 보안을 더욱 개선하는 동안 토큰 구매가 현재 꺼져 있습니다. 작업이 완료되는 즉시 다시 켜집니다.",
+			"unavailable_fallback_hint": "그동안에도 지갑 주소를 공유하여 토큰을 받을 수 있습니다."
+		},
+		"actions": {
+			"close": "확인"
 		},
 		"onramper": {
 			"title": "Onramper를 통해 구매"
@@ -1865,7 +1873,6 @@
 			"text": {
 				"open_or_create": "애플리케이션과 안전하게 상호작용하려면 지갑을 열거나 생성하세요.",
 				"connect_your_wallet": "$oisy_name에 연결",
-				"oisy_protects_you": "OISY가 당신을 보호합니다!",
 				"oisy_protects_you_description": "애플리케이션은 귀하의 자금에 직접 접근할 수 없으며, 모든 거래는 귀하의 확인이 필요합니다!"
 			}
 		},
@@ -1988,7 +1995,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC 거래 정보는 중앙 집중식 제3자로부터 제공되므로 독립적으로 검증해야 합니다.",
-			"hidden_micro_transactions": "<strong>OISY가 당신을 보호합니다!</strong> 매우 작은 토큰 가치의 거래가 현재 숨겨져 있습니다. 표시하려면 <a href=\"/settings/\">설정</a>으로 이동하세요.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">자세히 알아보기</a>"
+			"hidden_micro_transactions": "매우 작은 토큰 가치의 거래가 현재 숨겨져 있습니다. 표시하려면 <a href=\"/settings/\">설정</a>으로 이동하세요.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">자세히 알아보기</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 사용 가능한 인덱스 캐니스터가 없습니다.",

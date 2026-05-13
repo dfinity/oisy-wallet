@@ -21,19 +21,14 @@
 	);
 
 	let selectedSet = $derived(new Set<TransactionType>($transactionsFilterStore.types));
-
-	let triggerLabel = $derived(
-		selectedSet.size === 0
-			? $i18n.transaction.filter.types_label
-			: ($i18n.transaction.type[[...selectedSet][0]] ?? $i18n.transaction.filter.types_label)
-	);
 </script>
 
 <MultiSelectDropdown
 	ariaLabel={$i18n.transaction.filter.types_aria_label}
 	count={selectedSet.size}
+	panelWidthClass="w-full sm:w-64"
 	testId={TRANSACTIONS_FILTER_TYPES_DROPDOWN}
-	{triggerLabel}
+	triggerLabel={$i18n.transaction.filter.types_label}
 >
 	{#snippet triggerIcon()}
 		<IconListFilter size="20" />

@@ -50,6 +50,7 @@ interface I18nCore {
 		info: string;
 		asset: string;
 		got_it: string;
+		oisy_protects_you: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -885,6 +886,7 @@ interface I18nSwap {
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
 		value_difference_error_confirmation: string;
+		value_difference_missing_price_confirmation: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -908,7 +910,14 @@ interface I18nSwap {
 }
 
 interface I18nBuy {
-	text: { buy: string; buy_dev: string };
+	text: {
+		buy: string;
+		buy_dev: string;
+		unavailable_title: string;
+		unavailable_description: string;
+		unavailable_fallback_hint: string;
+	};
+	actions: { close: string };
 	onramper: { title: string };
 }
 
@@ -1472,7 +1481,6 @@ interface I18nSigner {
 		text: {
 			open_or_create: string;
 			connect_your_wallet: string;
-			oisy_protects_you: string;
 			oisy_protects_you_description: string;
 		};
 	};

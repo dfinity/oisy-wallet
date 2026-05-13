@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "2.0.7",
+	"version": "2.0.8",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -70,7 +70,7 @@
 		"benchmark": "canbench --persist --show-summary"
 	},
 	"dependencies": {
-		"@dfinity/gix-components": "^10.0.0",
+		"@dfinity/gix-components": "^10.0.2",
 		"@dfinity/ic-pub-key": "^1.0.1-next-2026-01-28",
 		"@dfinity/oisy-wallet-signer": "^4.0.0",
 		"@dfinity/utils": "^4.0.3",
@@ -84,7 +84,7 @@
 		"@reown/walletkit": "^1.5.5",
 		"@solana-program/compute-budget": "^0.15.0",
 		"@solana-program/system": "^0.12.0",
-		"@solana-program/token": "^0.12.0",
+		"@solana-program/token": "^0.13.0",
 		"@solana-program/token-2022": "^0.9.0",
 		"@solana/kit": "^6.0.1",
 		"@velora-dex/sdk": "^9.3.3",
@@ -137,7 +137,7 @@
 		"vite": "^8.0.3",
 		"vite-node": "^6.0.0",
 		"vitest": "^4.0.10",
-		"vitest-mock-extended": "^3.1.0"
+		"vitest-mock-extended": "^4.0.0"
 	},
 	"type": "module",
 	"overrides": {

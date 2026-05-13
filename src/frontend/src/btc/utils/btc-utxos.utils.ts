@@ -1,7 +1,7 @@
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
-import { utxoTxIdToString } from '$icp/utils/btc.utils';
+import { outpointToKey } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
@@ -14,10 +14,12 @@ export interface UtxoSelectionResult {
 }
 
 /**
- * Extracts transaction IDs from an array of UTXOs
+ * Extracts outpoint keys (txid + vout) from an array of UTXOs.
+ * Outpoints uniquely identify a UTXO; matching on txid alone over-filters
+ * UTXOs that share a parent transaction.
  */
-export const extractUtxoTxIds = (utxos: CkBtcMinterDid.Utxo[]): string[] =>
-	utxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
+export const extractUtxoOutpoints = (utxos: CkBtcMinterDid.Utxo[]): string[] =>
+	utxos.map(({ outpoint }) => outpointToKey(outpoint));
 
 /**
  * Estimates transaction virtual size (vbytes) based on number of inputs and outputs.
@@ -143,22 +145,26 @@ export const calculateUtxoSelection = ({
 };
 
 /**
- * Filters out UTXOs that are locked by pending transactions
+ * Filters out UTXOs that are reserved by pending transactions.
+ *
+ * Matching is at the outpoint level (txid + vout) so that unrelated UTXOs
+ * sharing a parent txid stay available — this is what allows a user to keep
+ * sending while a previous unconfirmed send is still pending.
  */
 export const filterLockedUtxos = ({
 	utxos,
-	pendingUtxoTxIds
+	pendingUtxoOutpoints
 }: {
 	utxos: CkBtcMinterDid.Utxo[];
-	pendingUtxoTxIds: string[];
-}): CkBtcMinterDid.Utxo[] =>
-	utxos.filter((utxo) => {
-		const txIdHex = utxoTxIdToString(utxo.outpoint.txid);
-		return !pendingUtxoTxIds.includes(txIdHex);
-	});
+	pendingUtxoOutpoints: string[];
+}): CkBtcMinterDid.Utxo[] => {
+	const reserved = new Set(pendingUtxoOutpoints);
+
+	return utxos.filter((utxo) => !reserved.has(outpointToKey(utxo.outpoint)));
+};
 
 /**
- * Filters UTXOs based on confirmations and excludes those locked by pending transactions
+ * Filters UTXOs based on confirmations and excludes those reserved by pending transactions
  */
 export const filterAvailableUtxos = ({
 	utxos,
@@ -167,10 +173,10 @@ export const filterAvailableUtxos = ({
 	utxos: CkBtcMinterDid.Utxo[];
 	options: {
 		minConfirmations: number;
-		pendingUtxoTxIds: string[];
+		pendingUtxoOutpoints: string[];
 	};
 }): CkBtcMinterDid.Utxo[] => {
-	const { minConfirmations, pendingUtxoTxIds } = options;
+	const { minConfirmations, pendingUtxoOutpoints } = options;
 
 	// First filter by confirmations to ensure transaction security
 	// Note: UTXOs are pre-filtered by the Bitcoin canister endpoint
@@ -187,7 +193,7 @@ export const filterAvailableUtxos = ({
 	// Then filter out locked UTXOs
 	return filterLockedUtxos({
 		utxos: confirmedUtxos,
-		pendingUtxoTxIds
+		pendingUtxoOutpoints
 	});
 };
 

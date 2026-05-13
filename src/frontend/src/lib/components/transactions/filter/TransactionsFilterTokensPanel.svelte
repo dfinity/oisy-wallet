@@ -3,11 +3,22 @@
 	import { nonNullish } from '@dfinity/utils';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { allFungibleTokens } from '$lib/derived/all-tokens.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
+
+	interface Props {
+		// When the panel is rendered inside a desktop dropdown popover the
+		// caller wants the search input to grab focus on open; when it's
+		// rendered inside the mobile bottom sheet we leave it unfocused so
+		// the on-screen keyboard does not pop up unprompted.
+		autofocus?: boolean;
+	}
+
+	const { autofocus = false }: Props = $props();
 
 	// Cap the visible list when the user has not searched yet.
 	// Mounting hundreds of <Checkbox> + <TokenLogo> rows synchronously when
@@ -20,14 +31,25 @@
 
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.tokenIds));
 
-	const tokenKey = (token: Token): string | undefined => token.id.description;
+	const tokenRenderKey = (token: Token): string | undefined => transactionsFilterTokenKey(token);
+
+	const tokenInputId = (token: Token): string =>
+		`transactions-filter-token-${(tokenRenderKey(token) ?? '').replace(/[^A-Za-z0-9_-]/g, '-')}`;
 
 	let sortedTokens = $derived(
-		[...$allFungibleTokens].sort((a, b) =>
-			(a.name ?? a.symbol).localeCompare(b.name ?? b.symbol, undefined, {
-				sensitivity: 'base'
-			})
-		)
+		[
+			...new Map(
+				[...$enabledFungibleNetworkTokens]
+					.map((token) => [tokenRenderKey(token), token] as const)
+					.filter((entry): entry is [string, Token] => nonNullish(entry[0]))
+			).values()
+		].sort((a, b) => {
+			const bySymbol = a.symbol.localeCompare(b.symbol, undefined, { sensitivity: 'base' });
+
+			return bySymbol !== 0
+				? bySymbol
+				: a.network.name.localeCompare(b.network.name, undefined, { sensitivity: 'base' });
+		})
 	);
 
 	let filteredTokens = $derived(
@@ -47,25 +69,36 @@
 </script>
 
 <div class="flex flex-col gap-3">
+	<!--
+		Keep the search input out of any scroll container so it stays put
+		when the user scrolls the rows. `MultiSelectDropdown` no longer
+		imposes its own scroll wrapper, so the panel owns the layout: the
+		`<ul>` is the scroll port (capped at `max-h-80`), the search and
+		the "showing N of M" hint live as siblings above / below it.
+	-->
 	<InputSearch
+		{autofocus}
 		placeholder={$i18n.transaction.filter.search_tokens_placeholder}
 		showResetButton={searchValue.length > 0}
 		bind:filter={searchValue}
 	/>
 
-	<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
-		{#each visibleTokens as token (token.id.description)}
-			{@const key = tokenKey(token)}
+	<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
+		{#each visibleTokens as token (tokenRenderKey(token))}
+			{@const key = tokenRenderKey(token)}
+
 			{#if nonNullish(key)}
 				<li>
 					<Checkbox
 						checked={selectedSet.has(key)}
-						inputId={`transactions-filter-token-${key}`}
+						inputId={tokenInputId(token)}
 						text="inline"
 						on:nnsChange={() => transactionsFilterStore.toggleTokenId(key)}
 					>
 						<span class="inline-flex items-center gap-2">
-							<TokenLogo data={token} logoSize="xxs" />
+							<span class="flex shrink-0 items-center">
+								<TokenLogo data={token} logoSize="xxs" />
+							</span>
 							<span class="text-sm">
 								<span class="font-medium">{token.symbol}</span>
 								<span class="text-tertiary"
@@ -92,11 +125,15 @@
 </div>
 
 <style lang="scss">
+	@use '../../../styles/mixins/media';
+
 	li :global(.checkbox) {
 		--checkbox-label-order: 1;
 		--checkbox-padding: 6px 8px;
 		justify-content: flex-start;
+		align-items: center;
 		gap: 8px;
+		min-height: 34px;
 		border-radius: 6px;
 		cursor: pointer;
 	}
@@ -107,5 +144,15 @@
 
 	li :global(label) {
 		flex: initial;
+		display: inline-flex;
+		align-items: center;
+	}
+
+	// On mobile, give each row a comfortable touch target so checkboxes
+	// are easier to tap. The desktop dropdown keeps its denser layout.
+	@media (max-width: #{media.$breakpoint-medium - 1px}) {
+		li :global(.checkbox) {
+			--checkbox-padding: 12px;
+		}
 	}
 </style>

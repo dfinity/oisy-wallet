@@ -46,7 +46,8 @@
 			"unlimited": "Unlimited $items",
 			"info": "Info",
 			"asset": "Asset",
-			"got_it": "Got it"
+			"got_it": "Got it",
+			"oisy_protects_you": "$oisy_short protects you!"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -1156,7 +1157,7 @@
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
 			"withdrawing": "Withdrawing...",
-			"bridging": "Bridging... (Please be patient, this can take up to a minute.)",
+			"bridging": "Bridging... (Please be patient, this can take up to 2 minutes.)",
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
@@ -1165,7 +1166,8 @@
 			"near_intents_tos": "By clicking the \"Swap now\" button, you agree to the <a href=\"$link\" target=\"_blank\" rel=\"external noopener noreferrer\" class=\"underline\">Terms of Service</a> of 1Click Swap API. If you do not agree with those terms, do not use this swap provider.",
 			"onesec_transfer_fee": "Transfer fee",
 			"onesec_protocol_fee": "Protocol fee",
-			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed."
+			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed.",
+			"value_difference_missing_price_confirmation": "The price for at least one of the tokens could not be retrieved. Please <strong>verify independently</strong> that this swap offer provides a fair deal.<br>Note that the slippage setting does <strong>not</strong> protect you from an offer with a much lower receive value!"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -1190,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "Buy",
-			"buy_dev": "Buy (Dev Environment)"
+			"buy_dev": "Buy (Dev Environment)",
+			"unavailable_title": "Buying tokens is temporarily unavailable",
+			"unavailable_description": "Buying tokens is currently turned off while we further improve the security of this process by introducing URL signing. It will be turned back on as soon as the work is complete.",
+			"unavailable_fallback_hint": "In the meantime, you can still receive tokens by sharing your wallet address."
+		},
+		"actions": {
+			"close": "Got it"
 		},
 		"onramper": {
 			"title": "Buy through Onramper"
@@ -1865,7 +1873,6 @@
 			"text": {
 				"open_or_create": "Open or create your wallet to securely interact with the application.",
 				"connect_your_wallet": "Connect your $oisy_name",
-				"oisy_protects_you": "OISY protects you!",
 				"oisy_protects_you_description": "Applications can't directly access your funds, and each transaction has to be confirmed by you."
 			}
 		},
@@ -1988,7 +1995,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified.",
-			"hidden_micro_transactions": "<strong>OISY protects you!</strong> Transactions with very small token values are currently hidden. To show them, go to <a href=\"/settings/\">Settings</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>"
+			"hidden_micro_transactions": "Transactions with very small token values are currently hidden. To show them, go to <a href=\"/settings/\">Settings</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",

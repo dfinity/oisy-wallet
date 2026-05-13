@@ -75,10 +75,11 @@ What this means for an agent:
 > **When the suite is restored:** this section will flip. The
 > expectation will become "every user-facing flow has e2e coverage,
 > bug fixes include a regression spec, no `test.skip` on `main`". When
-> that happens, this page is updated in the same PR per the
-> [meta-update rule](../governance.md#meta-update-rule), and the
-> Cursor rule [`40-testing.mdc`](../../../.cursor/rules/40-testing.mdc)
-> is mirrored.
+> that happens, update this page in the same PR per the
+> [meta-update rule](../governance.md#meta-update-rule). The Cursor
+> rule [`40-testing.mdc`](../../../.cursor/rules/40-testing.mdc) is a
+> thin routing pointer to this page, so no separate update is needed
+> there.
 
 ## Running
 
