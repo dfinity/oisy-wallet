@@ -20,8 +20,9 @@ export interface BtcReviewServiceParams {
 }
 
 /**
- * Main orchestrator function that replaces the backend btc_select_user_utxos_fee call
- * This function coordinates all the steps needed to select UTXOs and calculate fees
+ * Selects UTXOs and calculates the fee for a BTC send on the frontend:
+ * filters out pending-reserved and under-confirmed UTXOs, picks the
+ * smallest-sufficient set, and returns the estimated fee.
  */
 export const prepareBtcSend = ({
 	amount,
