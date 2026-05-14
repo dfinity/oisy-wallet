@@ -1,5 +1,8 @@
 import TransactionsFilterTypesPanel from '$lib/components/transactions/filter/TransactionsFilterTypesPanel.svelte';
-import { PLAUSIBLE_EVENT_EVENTS_KEYS, PLAUSIBLE_EVENT_FILTER_ACTIONS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENT_EVENTS_KEYS,
+	PLAUSIBLE_EVENT_FILTER_MODIFIERS
+} from '$lib/enums/plausible';
 import * as analyticsServices from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
@@ -66,9 +69,9 @@ describe('TransactionsFilterTypesPanel', () => {
 		expect(getByText(get(i18n).transaction.type.receive)).toBeInTheDocument();
 	});
 
-	it('tracks an activity filter event with action=add when a type is selected', async () => {
+	it('tracks a transaction_filter event with modifier=set when a type is selected', async () => {
 		const trackSpy = vi
-			.spyOn(analyticsServices, 'trackActivityFilter')
+			.spyOn(analyticsServices, 'trackTransactionFilter')
 			.mockImplementation(() => {});
 
 		const { container } = render(TransactionsFilterTypesPanel);
@@ -80,17 +83,17 @@ describe('TransactionsFilterTypesPanel', () => {
 		await fireEvent.click(sendInput as HTMLInputElement);
 
 		expect(trackSpy).toHaveBeenCalledWith({
-			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TYPE,
-			value: 'send',
-			action: PLAUSIBLE_EVENT_FILTER_ACTIONS.ADD
+			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.SET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TRANSACTION_TYPE,
+			value: 'send'
 		});
 	});
 
-	it('tracks an activity filter event with action=remove when a type is unselected', async () => {
+	it('tracks a transaction_filter event with modifier=unset when a type is unselected', async () => {
 		transactionsFilterStore.toggleType('send');
 
 		const trackSpy = vi
-			.spyOn(analyticsServices, 'trackActivityFilter')
+			.spyOn(analyticsServices, 'trackTransactionFilter')
 			.mockImplementation(() => {});
 
 		const { container } = render(TransactionsFilterTypesPanel);
@@ -102,9 +105,9 @@ describe('TransactionsFilterTypesPanel', () => {
 		await fireEvent.click(sendInput as HTMLInputElement);
 
 		expect(trackSpy).toHaveBeenCalledWith({
-			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TYPE,
-			value: 'send',
-			action: PLAUSIBLE_EVENT_FILTER_ACTIONS.REMOVE
+			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.UNSET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TRANSACTION_TYPE,
+			value: 'send'
 		});
 	});
 });

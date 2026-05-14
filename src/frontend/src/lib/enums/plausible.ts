@@ -17,7 +17,7 @@ export enum PLAUSIBLE_EVENTS {
 	SIGNER_INTERACTION = 'signer_interaction',
 	NETWORK_FILTER = 'network_filter',
 	NETWORK_MANAGE = 'network_manage',
-	ACTIVITY_FILTER = 'activity_filter'
+	TRANSACTION_FILTER = 'transaction_filter'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -30,8 +30,7 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	EARN = 'earn',
 	TRANSACTIONS = 'transactions',
 	SIGNER = 'signer',
-	NETWORKS = 'networks',
-	ACTIVITY = 'activity'
+	NETWORKS = 'networks'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -83,6 +82,10 @@ export enum PLAUSIBLE_EVENT_SOURCES {
 	HARVEST_AUTOPILOT = 'harvest-autopilot'
 }
 
+export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
+	ACTIVITY_PAGE = 'activity_page'
+}
+
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	GROUP = 'group',
 	VISIBILITY = 'visibility',
@@ -91,15 +94,15 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	SORT_DESC = 'sort_desc',
 	PRICE = 'price',
 	NETWORK = 'network',
-	TYPE = 'type',
+	TRANSACTION_TYPE = 'transaction_type',
 	TOKEN = 'token',
-	CONTACT = 'contact',
-	CLEAR = 'clear'
+	CONTACT = 'contact'
 }
 
-export enum PLAUSIBLE_EVENT_FILTER_ACTIONS {
-	ADD = 'add',
-	REMOVE = 'remove'
+export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {
+	SET = 'set',
+	UNSET = 'unset',
+	CLEAR = 'clear'
 }
 
 export enum PLAUSIBLE_EVENT_RESULT_STATUSES {

@@ -276,44 +276,79 @@ describe('plausible analytics service', () => {
 		consoleDebugSpy.mockRestore();
 	});
 
-	describe('trackActivityFilter', () => {
-		it('emits an activity_filter event with the activity context, key, value and action', async () => {
-			const { trackActivityFilter, initPlausibleAnalytics } =
+	describe('trackTransactionFilter', () => {
+		it('emits a transaction_filter event with modifier, key, value, source_location and result_status for the transaction-type filter', async () => {
+			const { trackTransactionFilter, initPlausibleAnalytics } =
 				await import('$lib/services/analytics.services');
-			const { PLAUSIBLE_EVENT_EVENTS_KEYS, PLAUSIBLE_EVENT_FILTER_ACTIONS } =
+			const { PLAUSIBLE_EVENT_EVENTS_KEYS, PLAUSIBLE_EVENT_FILTER_MODIFIERS } =
 				await import('$lib/enums/plausible');
 
 			await initPlausibleAnalytics();
 
-			trackActivityFilter({
-				key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
-				value: 'BTC-bitcoin',
-				action: PLAUSIBLE_EVENT_FILTER_ACTIONS.ADD
+			trackTransactionFilter({
+				modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.SET,
+				key: PLAUSIBLE_EVENT_EVENTS_KEYS.TRANSACTION_TYPE,
+				value: 'send'
 			});
 
-			expect(trackMock).toHaveBeenCalledWith('activity_filter', {
+			expect(trackMock).toHaveBeenCalledWith('transaction_filter', {
 				props: {
-					event_context: 'activity',
-					event_key: 'token',
-					event_value: 'BTC-bitcoin',
-					event_action: 'add'
+					event_modifier: 'set',
+					event_key: 'transaction_type',
+					event_value: 'send',
+					source_location: 'activity_page',
+					result_status: 'success'
 				}
 			});
 		});
 
-		it('omits event_value and event_action when not provided', async () => {
-			const { trackActivityFilter, initPlausibleAnalytics } =
+		it('emits dedicated token_* fields instead of event_value when filtering by token', async () => {
+			const { trackTransactionFilter, initPlausibleAnalytics } =
 				await import('$lib/services/analytics.services');
-			const { PLAUSIBLE_EVENT_EVENTS_KEYS } = await import('$lib/enums/plausible');
+			const { PLAUSIBLE_EVENT_EVENTS_KEYS, PLAUSIBLE_EVENT_FILTER_MODIFIERS } =
+				await import('$lib/enums/plausible');
 
 			await initPlausibleAnalytics();
 
-			trackActivityFilter({ key: PLAUSIBLE_EVENT_EVENTS_KEYS.CLEAR });
+			trackTransactionFilter({
+				modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.SET,
+				key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+				token: {
+					network: 'eth',
+					address: '0x0000000000000000000000000000000000000000',
+					symbol: 'ETH',
+					name: 'Ethereum'
+				}
+			});
 
-			expect(trackMock).toHaveBeenCalledWith('activity_filter', {
+			expect(trackMock).toHaveBeenCalledWith('transaction_filter', {
 				props: {
-					event_context: 'activity',
-					event_key: 'clear'
+					event_modifier: 'set',
+					event_key: 'token',
+					token_network: 'eth',
+					token_address: '0x0000000000000000000000000000000000000000',
+					token_symbol: 'ETH',
+					token_name: 'Ethereum',
+					source_location: 'activity_page',
+					result_status: 'success'
+				}
+			});
+		});
+
+		it('omits event_key and value when modifier is clear', async () => {
+			const { trackTransactionFilter, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_FILTER_MODIFIERS } = await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			trackTransactionFilter({ modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.CLEAR });
+
+			expect(trackMock).toHaveBeenCalledWith('transaction_filter', {
+				props: {
+					event_modifier: 'clear',
+					source_location: 'activity_page',
+					result_status: 'success'
 				}
 			});
 		});

@@ -4,7 +4,9 @@ import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
 	type PLAUSIBLE_EVENT_EVENTS_KEYS,
-	type PLAUSIBLE_EVENT_FILTER_ACTIONS,
+	type PLAUSIBLE_EVENT_FILTER_MODIFIERS,
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENT_SOURCES,
 	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
 	PLAUSIBLE_EVENTS
@@ -100,30 +102,45 @@ export const trackRateLimited = ({ endpoint, limiter }: RateLimitInfo) => {
 };
 
 /**
- * Track usage of an activity (transactions) page filter. Centralises the
- * metadata shape so the type / token / contact / clear toggles all show up
- * under a single Plausible event with the same property layout.
+ * Track a single transaction-filter change emitted from the activity page.
  *
- * Contact filter intentionally omits `event_value` so we never ship contact
- * names or ids (PII) to analytics. Token / type values are public token
- * identifiers and transaction types respectively.
+ * Centralises the payload so the type / token / contact toggles and the
+ * "clear" action all show up under one Plausible event with the same shape:
+ *
+ * - `event_modifier`: `set` / `unset` for toggles, `clear` for the bulk reset.
+ * - `event_key`: `transaction_type` / `token` / `contact`. Omitted for `clear`.
+ * - For transaction types: `event_value` carries the type (e.g. `send`).
+ * - For tokens: instead of `event_value` we emit dedicated `token_*` props
+ *   (network / address / symbol / name) so dashboards can group cleanly.
+ * - For contacts we deliberately ship no value to avoid leaking PII (custom
+ *   names / ids) to analytics; `event_modifier` already tells us whether the
+ *   user added or removed a contact filter.
  */
-export const trackActivityFilter = ({
+export const trackTransactionFilter = ({
+	modifier,
 	key,
 	value,
-	action
+	token
 }: {
-	key: PLAUSIBLE_EVENT_EVENTS_KEYS;
+	modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS;
+	key?: PLAUSIBLE_EVENT_EVENTS_KEYS;
 	value?: string;
-	action?: PLAUSIBLE_EVENT_FILTER_ACTIONS;
+	token?: { network: string; address: string; symbol: string; name: string };
 }) => {
 	trackEvent({
-		name: PLAUSIBLE_EVENTS.ACTIVITY_FILTER,
+		name: PLAUSIBLE_EVENTS.TRANSACTION_FILTER,
 		metadata: {
-			event_context: PLAUSIBLE_EVENT_CONTEXTS.ACTIVITY,
-			event_key: key,
+			event_modifier: modifier,
+			...(nonNullish(key) && { event_key: key }),
 			...(nonNullish(value) && { event_value: value }),
-			...(nonNullish(action) && { event_action: action })
+			...(nonNullish(token) && {
+				token_network: token.network,
+				token_address: token.address,
+				token_symbol: token.symbol,
+				token_name: token.name
+			}),
+			source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.ACTIVITY_PAGE,
+			result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 		}
 	});
 };
