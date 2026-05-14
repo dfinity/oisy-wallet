@@ -152,7 +152,7 @@ describe('TransactionsFilterContactsPanel', () => {
 		it('renders a Learn more link pointing to the protected-contacts docs', () => {
 			const { getByRole } = render(TransactionsFilterContactsPanel);
 
-			const link = getByRole('link', { name: 'Learn more' });
+			const link = getByRole('link', { name: get(i18n).core.text.learn_more });
 
 			expect(link).toHaveAttribute(
 				'href',
