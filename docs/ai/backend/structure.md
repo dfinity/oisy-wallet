@@ -52,7 +52,11 @@ src/backend/src/
 │   ├── canister_ids.rs CYCLES_LEDGER + SIGNER canister principals
 │   └── service.rs      allow_signing, get_allowed_cycles, top-up flow
 │
-├── bitcoin/            BTC domain logic (fee cache, pending transactions, UTXO selection)
+├── bitcoin/            BTC domain logic: fee-percentiles cache + pending-tx
+│                       reservations. UTXO selection lives on the frontend
+│                       (`prepareBtcSend` in `$btc/services/btc-utxos.service.ts`
+│                       orchestrates the flow; `calculateUtxoSelection` in
+│                       `$btc/utils/btc-utxos.utils.ts` picks the UTXOs).
 ├── contacts/           Contact-book domain
 ├── exchange/           Exchange-rate domain (timer + provider plumbing)
 ├── transactions/       User-transaction storage / queries
