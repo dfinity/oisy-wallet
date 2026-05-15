@@ -469,16 +469,27 @@ abstract class Homepage {
 	}
 
 	async getStableViewportHeight(): Promise<number> {
+		// Hard cap so a page with an animation, polling worker, or streaming
+		// content that never settles can't burn the entire test timeout. If
+		// the page hasn't stabilised after `MAX_POLLS * POLL_INTERVAL_MS`,
+		// fall back to the latest sample and let the snapshot diff surface
+		// any layout drift instead of hanging.
+		const POLL_INTERVAL_MS = 1_000;
+		const MAX_POLLS = 10;
+
 		let previousHeight: number;
 		let currentHeight: number = await this.#page.evaluate(
 			() => document.documentElement.scrollHeight
 		);
 
-		do {
+		for (let i = 0; i < MAX_POLLS; i++) {
 			previousHeight = currentHeight;
-			await this.#page.waitForTimeout(1000);
+			await this.#page.waitForTimeout(POLL_INTERVAL_MS);
 			currentHeight = await this.#page.evaluate(() => document.documentElement.scrollHeight);
-		} while (currentHeight !== previousHeight);
+			if (currentHeight === previousHeight) {
+				return currentHeight;
+			}
+		}
 
 		return currentHeight;
 	}
