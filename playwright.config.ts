@@ -18,6 +18,12 @@ dotenv.populate(
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
+// CI sets this to skip the in-server `npm run build` because a pre-built
+// `build/` is downloaded from a dedicated `oisy-frontend-build` job and the
+// preview server can serve it directly. Local invocations of `npm run e2e`
+// keep the build step so a fresh clone still works without extra setup.
+const SKIP_BUILD = process.env.OISY_E2E_SKIP_BUILD === 'true';
+
 const port = DEV ? 5173 : 4173;
 
 const MATRIX_OS = process.env.MATRIX_OS ?? '';
@@ -107,7 +113,11 @@ export default defineConfig({
 		}
 	},
 	webServer: {
-		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
+		command: DEV
+			? 'npm run dev'
+			: SKIP_BUILD
+				? 'npm run preview'
+				: 'npm run build && npm run preview',
 		reuseExistingServer: true,
 		port,
 		timeout: WEB_SERVER_TIMEOUT
