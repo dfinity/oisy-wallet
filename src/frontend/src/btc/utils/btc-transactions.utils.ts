@@ -67,7 +67,11 @@ export const mapBtcTransaction = ({
 			inputs[0].prev_out.addr)
 		: btcAddress;
 
-	const to = isReceive ? [btcAddress] : recipients;
+	// On a send with zero non-user outputs (consolidation), fall back to the user's
+	// own address so the list row has a counterparty to render. Every output in
+	// this branch literally has `addr === btcAddress`, so this is the true
+	// destination, not a guess.
+	const to = isReceive || recipients.length === 0 ? [btcAddress] : recipients;
 
 	return {
 		id: hash,

@@ -321,7 +321,7 @@ describe('mapBtcTransaction', () => {
 			expect(result.to).toEqual([otherAddress]);
 		});
 
-		it('returns to = [] for a pure self-consolidation', () => {
+		it('returns to = [self] for a pure self-consolidation', () => {
 			const transaction = buildTransaction({ inMe: 10, outMe: 9 });
 
 			const result = mapBtcTransaction({
@@ -331,7 +331,7 @@ describe('mapBtcTransaction', () => {
 			});
 
 			expect(result.from).toBe(mockBtcAddress);
-			expect(result.to).toEqual([]);
+			expect(result.to).toEqual([mockBtcAddress]);
 		});
 	});
 });
