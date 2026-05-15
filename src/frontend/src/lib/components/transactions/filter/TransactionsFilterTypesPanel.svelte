@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { Checkbox } from '@dfinity/gix-components';
+	import {
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENT_FILTER_MODIFIERS
+	} from '$lib/enums/plausible';
 	import { TransactionTypeSchema } from '$lib/schema/transaction.schema';
+	import { trackTransactionFilter } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { TransactionType } from '$lib/types/transaction';
@@ -20,6 +25,14 @@
 	let selectedSet = $derived(new Set<TransactionType>($transactionsFilterStore.types));
 
 	const onToggleType = (type: TransactionType) => {
+		trackTransactionFilter({
+			modifier: selectedSet.has(type)
+				? PLAUSIBLE_EVENT_FILTER_MODIFIERS.UNSET
+				: PLAUSIBLE_EVENT_FILTER_MODIFIERS.SET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TRANSACTION_TYPE,
+			value: type
+		});
+
 		transactionsFilterStore.toggleType(type);
 	};
 </script>

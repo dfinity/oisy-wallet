@@ -4,10 +4,16 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import {
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENT_FILTER_MODIFIERS
+	} from '$lib/enums/plausible';
+	import { trackTransactionFilter } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 	import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
 
 	interface Props {
@@ -67,7 +73,22 @@
 
 	let isCapped = $derived(searchValue.length === 0 && filteredTokens.length > VISIBLE_LIMIT);
 
-	const onToggleTokenId = (key: string) => {
+	const onToggleToken = ({ token, key }: { token: Token; key: string }) => {
+		trackTransactionFilter({
+			modifier: selectedSet.has(key)
+				? PLAUSIBLE_EVENT_FILTER_MODIFIERS.UNSET
+				: PLAUSIBLE_EVENT_FILTER_MODIFIERS.SET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+			token: {
+				// Native tokens have no on-chain identifier; ship empty string
+				// so the column stays present and is groupable in dashboards.
+				network: token.network.id.description ?? '',
+				address: getTokenIdentifier(token) ?? '',
+				symbol: token.symbol,
+				name: token.name
+			}
+		});
+
 		transactionsFilterStore.toggleTokenId(key);
 	};
 </script>
@@ -97,7 +118,7 @@
 						checked={selectedSet.has(key)}
 						inputId={tokenInputId(token)}
 						text="inline"
-						on:nnsChange={() => onToggleTokenId(key)}
+						on:nnsChange={() => onToggleToken({ token, key })}
 					>
 						<span class="inline-flex items-center gap-2">
 							<span class="flex shrink-0 items-center">
