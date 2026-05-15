@@ -1647,7 +1647,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "आपने अभी तक कोई संपर्क नहीं जोड़ा है",
+			"contacts_empty_description": "जाने-पहचाने पते संपर्क में सहेजें और गलती से गलत पते का उपयोग करने का जोखिम कम करें।",
+			"contacts_empty_cta": "अपना पहला संपर्क जोड़ें"
 		},
 		"label": {
 			"reimbursement": "प्रतिपूर्ति",

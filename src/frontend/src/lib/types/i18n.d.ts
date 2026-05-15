@@ -1323,6 +1323,9 @@ interface I18nTransaction {
 		sheet_title: string;
 		open_filters_aria_label: string;
 		showing_partial: string;
+		contacts_empty_title: string;
+		contacts_empty_description: string;
+		contacts_empty_cta: string;
 	};
 	label: {
 		reimbursement: string;
