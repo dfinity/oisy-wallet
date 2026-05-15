@@ -217,6 +217,11 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				maxRetries: 10
 			});
 		} catch (error: unknown) {
+			// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
+			this.store = {
+				balance: undefined,
+				transactions: {}
+			};
 			this.postMessageWalletError({ error });
 		}
 	};
