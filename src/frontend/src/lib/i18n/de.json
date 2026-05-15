@@ -1648,9 +1648,9 @@
 			"sheet_title": "",
 			"open_filters_aria_label": "",
 			"showing_partial": "",
-			"contacts_empty_title": "",
-			"contacts_empty_description": "",
-			"contacts_empty_cta": ""
+			"contacts_empty_title": "Du hast noch keine Kontakte hinzugefügt",
+			"contacts_empty_description": "Speichere bekannte Adressen in den Kontakten und verringere das Risiko, versehentlich eine falsche Adresse zu verwenden.",
+			"contacts_empty_cta": "Ersten Kontakt hinzufügen"
 		},
 		"label": {
 			"reimbursement": "Rückerstattung",

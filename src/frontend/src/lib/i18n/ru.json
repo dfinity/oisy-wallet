@@ -1648,9 +1648,9 @@
 			"sheet_title": "",
 			"open_filters_aria_label": "",
 			"showing_partial": "",
-			"contacts_empty_title": "",
-			"contacts_empty_description": "",
-			"contacts_empty_cta": ""
+			"contacts_empty_title": "Вы ещё не добавили контакты",
+			"contacts_empty_description": "Сохраняйте известные адреса в Контактах, чтобы снизить риск случайно использовать неправильный адрес.",
+			"contacts_empty_cta": "Добавить первый контакт"
 		},
 		"label": {
 			"reimbursement": "Возмещение",

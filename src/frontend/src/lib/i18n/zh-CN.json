@@ -1648,9 +1648,9 @@
 			"sheet_title": "",
 			"open_filters_aria_label": "",
 			"showing_partial": "",
-			"contacts_empty_title": "",
-			"contacts_empty_description": "",
-			"contacts_empty_cta": ""
+			"contacts_empty_title": "你还没有添加联系人",
+			"contacts_empty_description": "将已知地址保存到联系人中，降低意外使用错误地址的风险。",
+			"contacts_empty_cta": "添加你的第一个联系人"
 		},
 		"label": {
 			"reimbursement": "报销",

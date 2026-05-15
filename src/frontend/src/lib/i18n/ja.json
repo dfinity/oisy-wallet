@@ -1648,9 +1648,9 @@
 			"sheet_title": "",
 			"open_filters_aria_label": "",
 			"showing_partial": "",
-			"contacts_empty_title": "",
-			"contacts_empty_description": "",
-			"contacts_empty_cta": ""
+			"contacts_empty_title": "まだ連絡先を追加していません",
+			"contacts_empty_description": "よく使うアドレスを連絡先に保存して、誤ったアドレスをうっかり使ってしまうリスクを減らしましょう。",
+			"contacts_empty_cta": "最初の連絡先を追加"
 		},
 		"label": {
 			"reimbursement": "払い戻し",
