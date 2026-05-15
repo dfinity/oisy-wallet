@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { Checkbox } from '@dfinity/gix-components';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import IconAddressBook from '$lib/components/icons/IconAddressBook.svelte';
+	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA } from '$lib/constants/test-ids.constants';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import {
 		PLAUSIBLE_EVENT_EVENTS_KEYS,
@@ -9,9 +13,10 @@
 	} from '$lib/enums/plausible';
 	import { trackTransactionFilter } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import { matchesContactByText } from '$lib/utils/contact.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		// When the panel is rendered inside a desktop dropdown popover the
@@ -28,6 +33,8 @@
 	const VISIBLE_LIMIT = 50;
 
 	let searchValue = $state('');
+
+	let isEmpty = $derived($contacts.length === 0);
 
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.contactIds));
 
@@ -58,44 +65,82 @@
 
 		transactionsFilterStore.toggleContactId(id);
 	};
+
+	const openAddressBook = () => {
+		modalStore.openAddressBook({ id: Symbol() });
+	};
 </script>
 
 <div class="flex flex-col gap-3">
-	<InputSearch
-		{autofocus}
-		placeholder={$i18n.transaction.filter.search_contacts_placeholder}
-		showResetButton={searchValue.length > 0}
-		bind:filter={searchValue}
-	/>
+	{#if isEmpty}
+		<div class="flex flex-col items-center gap-3 px-2 py-4 text-center">
+			<div class="w-16 text-brand-primary [&_svg]:h-auto [&_svg]:w-full" aria-hidden="true">
+				<IconAddressBook />
+			</div>
 
-	<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
-		{#each visibleContacts as contact (contact.id.toString())}
-			{@const id = contact.id.toString()}
-			<li>
-				<Checkbox
-					checked={selectedSet.has(id)}
-					inputId={`transactions-filter-contact-${id}`}
-					text="inline"
-					on:nnsChange={() => onToggleContactId(id)}
+			<p class="text-sm text-secondary">{$i18n.transaction.filter.contacts_empty_title}</p>
+
+			<p class="text-sm text-tertiary">
+				<strong
+					><span class="relative -top-px mr-1 inline-block align-middle text-success-primary"
+						><IconShieldCheck size="16" /></span
+					>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong
+				>{$i18n.transaction.filter.contacts_empty_description}<br />
+				<a
+					class="blue-link no-underline"
+					href="https://docs.oisy.com/introduction/oisy-keeps-you-protected#contacts"
+					rel="noopener noreferrer"
+					target="_blank">{$i18n.core.text.learn_more}</a
 				>
-					<span class="inline-flex items-center gap-2">
-						<span class="flex shrink-0 items-center">
-							<Avatar name={contact.name} image={contact.image} variant="xxs" />
-						</span>
-						<span class="text-sm">{contact.name}</span>
-					</span>
-				</Checkbox>
-			</li>
-		{/each}
-	</ul>
+			</p>
 
-	{#if isCapped}
-		<p class="text-xs text-tertiary">
-			{replacePlaceholders($i18n.transaction.filter.showing_partial, {
-				$shown: `${VISIBLE_LIMIT}`,
-				$total: `${filteredContacts.length}`
-			})}
-		</p>
+			<Button
+				colorStyle="primary"
+				fullWidth
+				onclick={openAddressBook}
+				testId={TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA}
+				type="button"
+			>
+				{$i18n.transaction.filter.contacts_empty_cta}
+			</Button>
+		</div>
+	{:else}
+		<InputSearch
+			{autofocus}
+			placeholder={$i18n.transaction.filter.search_contacts_placeholder}
+			showResetButton={searchValue.length > 0}
+			bind:filter={searchValue}
+		/>
+
+		<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
+			{#each visibleContacts as contact (contact.id.toString())}
+				{@const id = contact.id.toString()}
+				<li>
+					<Checkbox
+						checked={selectedSet.has(id)}
+						inputId={`transactions-filter-contact-${id}`}
+						text="inline"
+						on:nnsChange={() => onToggleContactId(id)}
+					>
+						<span class="inline-flex items-center gap-2">
+							<span class="flex shrink-0 items-center">
+								<Avatar name={contact.name} image={contact.image} variant="xxs" />
+							</span>
+							<span class="text-sm">{contact.name}</span>
+						</span>
+					</Checkbox>
+				</li>
+			{/each}
+		</ul>
+
+		{#if isCapped}
+			<p class="text-xs text-tertiary">
+				{replacePlaceholders($i18n.transaction.filter.showing_partial, {
+					$shown: `${VISIBLE_LIMIT}`,
+					$total: `${filteredContacts.length}`
+				})}
+			</p>
+		{/if}
 	{/if}
 </div>
 

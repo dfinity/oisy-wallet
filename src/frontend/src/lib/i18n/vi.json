@@ -1647,7 +1647,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "Bạn chưa thêm liên hệ nào",
+			"contacts_empty_description": "Lưu các địa chỉ đã biết vào Danh bạ để giảm rủi ro vô tình dùng nhầm địa chỉ.",
+			"contacts_empty_cta": "Thêm liên hệ đầu tiên"
 		},
 		"label": {
 			"reimbursement": "Hoàn tiền",
