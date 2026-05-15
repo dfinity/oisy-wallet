@@ -127,7 +127,10 @@ export default defineConfig({
 	snapshotDir: 'e2e/snapshots',
 	use: {
 		testIdAttribute: 'data-tid',
-		trace: 'on',
+		// Skip trace recording for tests that pass on the first try. Keeps a
+		// full trace for failures that survive a retry (when we actually want
+		// one) at a fraction of the recording overhead and artifact size.
+		trace: 'on-first-retry',
 		actionTimeout: ACTION_TIMEOUT,
 		navigationTimeout: NAVIGATION_TIMEOUT,
 		...(DEV && { headless: false })
