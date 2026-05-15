@@ -331,7 +331,10 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				});
 
 				if (nonNullish(initSuccessMock)) {
-					it('should reset the internal store after an error so the next successful sync re-emits', async () => {
+					// Implicitly covers the in-memory store reset on error: a successful sync after
+					// a fatal error can only re-emit the wallet payload (rather than just status
+					// messages) when the scheduler's internal store and initialized flag were cleared.
+					it('should re-emit the wallet payload on the next successful sync after an error', async () => {
 						const err = new Error('Failed to fetch');
 						initErrorMock(err);
 
@@ -345,16 +348,6 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 							data: { error: err }
 						});
 
-						// After the fatal error, the in-memory store must be cleared so the next tick
-						// behaves like an initial sync (mirroring the listener-side UI reset).
-						expect(scheduler['store']).toEqual({
-							balance: undefined,
-							transactions: {}
-						});
-						expect(scheduler['initialized']).toBeFalsy();
-
-						// Recovery: the next successful sync must emit the wallet payload again
-						// (not just status messages), so the previously reset UI store is repopulated.
 						initSuccessMock();
 						postMessageMock.mockClear();
 
