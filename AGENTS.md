@@ -128,3 +128,60 @@ These are thin layers on top of this file. They never contradict it.
 
 If you add a new agent / tool, add a tiny pointer file (≤ 30 lines) here that
 references this `AGENTS.md` — do **not** duplicate the rules.
+
+---
+
+## Cursor Cloud specific instructions
+
+### Environment prerequisites
+
+- **Node.js 24.x** (`.node-version` = `24.11.0`). Installed via `nvm`.
+- **npm 11.5+** (ships with Node 24).
+- **Rust 1.95.0** with `wasm32-unknown-unknown` target (per `rust-toolchain.toml`).
+- **dfx 0.26.1** (Internet Computer SDK). Install non-interactively:
+  `DFXVM_INIT_YES=1 DFX_VERSION=0.26.1 sh -c "$(curl -fsSL https://sdk.dfinity.org/install.sh)"`
+- **cargo-binstall**, **candid-extractor** (0.1.6), **ic-wasm** (0.9.3) for backend builds.
+
+### Starting services
+
+```bash
+# Source environment
+export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use 24.11.0
+source "$HOME/.local/share/dfx/env"
+
+# Start local IC replica (from repo root)
+dfx start --background --clean
+
+# Deploy all canisters (builds backend from Rust, deploys ~22 canisters)
+npm run deploy
+
+# Start frontend dev server (http://localhost:5173)
+npm run dev
+```
+
+### Quality gates
+
+| Command | What it does |
+|---------|-------------|
+| `npm run check` | svelte-check (type-checking + Svelte diagnostics) |
+| `npm run test -- --run` | Vitest frontend unit/integration tests (828 files, ~14k tests) |
+| `npm run lint` | Prettier + ESLint (ESLint requires ~16GB+ RAM due to type-aware rules) |
+| `npm run cargo:test` | Backend Rust tests via pocket-ic |
+| `npm run clippy` | Rust clippy lints |
+
+### Known caveats
+
+- **ESLint OOM**: The full `npm run lint` (ESLint portion) requires more RAM than
+  typical cloud agent VMs provide (16GB is insufficient). Use `prettier --check`
+  and `npm run check` as alternative quality checks. ESLint passes in CI (32GB+ runners).
+- **Internet Identity auth in VNC browsers**: The II auth flow uses popup windows.
+  In headless/VNC environments, the browser may open tabs instead of popups,
+  breaking the `postMessage` callback. Full E2E auth testing requires a desktop
+  browser or Playwright with proper popup handling.
+- **`.env.development`**: Copy from `.env.example`. Set
+  `VITE_AI_ASSISTANT_CONSOLE_ENABLED=false` (empty string causes a runtime error).
+  API keys for Infura/Alchemy/Etherscan etc. are optional for basic local dev but
+  needed for mainnet token functionality.
+- **Backend deploy time**: First `npm run deploy` compiles the Rust backend to
+  WASM which takes 2-5 minutes depending on hardware. Subsequent deploys are
+  faster due to Cargo caching.
