@@ -92,32 +92,4 @@ describe('MultiSelectDropdown', () => {
 			expect(shell.className).not.toContain('min-w-60');
 		});
 	});
-
-	it('does not invoke onToggle on initial mount', () => {
-		const onToggle = vi.fn();
-
-		render(MultiSelectDropdownTest, { props: { onToggle } });
-
-		expect(onToggle).not.toHaveBeenCalled();
-	});
-
-	it('invokes onToggle(true) when the panel opens and onToggle(false) when it closes', async () => {
-		const onToggle = vi.fn();
-
-		const { getByTestId } = render(MultiSelectDropdownTest, { props: { onToggle } });
-
-		await fireEvent.click(getByTestId('multi-select-dropdown'));
-
-		await waitFor(() => {
-			expect(onToggle).toHaveBeenLastCalledWith(true);
-		});
-
-		await fireEvent.click(getByTestId('multi-select-dropdown'));
-
-		await waitFor(() => {
-			expect(onToggle).toHaveBeenLastCalledWith(false);
-		});
-
-		expect(onToggle).toHaveBeenCalledTimes(2);
-	});
 });

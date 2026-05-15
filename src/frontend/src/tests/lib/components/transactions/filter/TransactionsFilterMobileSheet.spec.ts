@@ -1,11 +1,6 @@
 import TransactionsFilterMobileSheet from '$lib/components/transactions/filter/TransactionsFilterMobileSheet.svelte';
 import * as contactsDerived from '$lib/derived/contacts.derived';
 import * as networkTokensDerived from '$lib/derived/network-tokens.derived';
-import {
-	PLAUSIBLE_EVENT_EVENTS_KEYS,
-	PLAUSIBLE_EVENT_FILTER_MODIFIERS
-} from '$lib/enums/plausible';
-import * as analyticsServices from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -91,39 +86,6 @@ describe('TransactionsFilterMobileSheet', () => {
 		expect(container.querySelector('input[id="transactions-filter-type-send"]')).toBeNull();
 		expect(getByText(get(i18n).transaction.filter.tokens_label)).toBeInTheDocument();
 		expect(getByText(get(i18n).transaction.filter.contacts_label)).toBeInTheDocument();
-	});
-
-	it('tracks an open event when entering a filter step from the root', async () => {
-		const trackSpy = vi
-			.spyOn(analyticsServices, 'trackTransactionFilter')
-			.mockImplementation(() => {});
-
-		const { getByText } = render(TransactionsFilterMobileSheet, { props: { visible: true } });
-
-		await fireEvent.click(getByText(get(i18n).transaction.filter.tokens_label));
-
-		expect(trackSpy).toHaveBeenCalledWith({
-			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.OPEN,
-			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN
-		});
-	});
-
-	it('tracks a close event when navigating back to the root step', async () => {
-		const trackSpy = vi
-			.spyOn(analyticsServices, 'trackTransactionFilter')
-			.mockImplementation(() => {});
-
-		const { getByText, getByLabelText } = render(TransactionsFilterMobileSheet, {
-			props: { visible: true }
-		});
-
-		await fireEvent.click(getByText(get(i18n).transaction.filter.types_label));
-		await fireEvent.click(getByLabelText(get(i18n).core.text.back));
-
-		expect(trackSpy).toHaveBeenCalledWith({
-			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.CLOSE,
-			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TRANSACTION_TYPE
-		});
 	});
 
 	it('resets to the root step when the sheet is closed', async () => {

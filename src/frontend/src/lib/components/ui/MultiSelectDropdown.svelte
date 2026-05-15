@@ -18,10 +18,6 @@
 		triggerIcon?: Snippet;
 		panel: Snippet;
 		panelWidthClass?: string;
-		// Fires whenever the panel transitions from hidden→visible or
-		// visible→hidden (including clicks outside that close the popover).
-		// Optional so existing callers stay untouched.
-		onToggle?: (visible: boolean) => void;
 	}
 
 	let {
@@ -34,8 +30,7 @@
 		testId,
 		triggerIcon,
 		panel,
-		panelWidthClass,
-		onToggle
+		panelWidthClass
 	}: Props = $props();
 
 	let visible = $state(false);
@@ -44,20 +39,6 @@
 	const onTriggerClick = () => {
 		visible = !visible;
 	};
-
-	// Surface every visibility change (trigger click, click-outside, escape)
-	// through the optional `onToggle` callback so consumers can react without
-	// wiring up `bind:visible` themselves. We skip the very first run so we
-	// don't fire a spurious "close" for the initial `visible = false`.
-	let initialised = false;
-	$effect(() => {
-		const next = visible;
-		if (!initialised) {
-			initialised = true;
-			return;
-		}
-		onToggle?.(next);
-	});
 </script>
 
 <button
