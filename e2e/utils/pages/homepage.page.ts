@@ -33,7 +33,6 @@ import {
 import type { InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
-import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import {
@@ -66,7 +65,6 @@ interface WaitForModalParams {
 }
 
 interface TakeScreenshotParams {
-	freezeCarousel?: boolean;
 	centeredElementTestId?: string;
 	screenshotTarget?: Locator;
 }
@@ -92,8 +90,6 @@ abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
 	readonly #isMobile?: boolean;
-
-	private promotionCarousel?: PromotionCarousel;
 
 	protected constructor({ page, viewportSize, isMobile }: HomepageParams) {
 		this.#page = page;
@@ -337,15 +333,6 @@ abstract class Homepage {
 		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
-	// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
-	async setCarouselFirstSlide(): Promise<void> {
-		if (isNullish(this.promotionCarousel)) {
-			this.promotionCarousel = new PromotionCarousel(this.#page);
-		}
-		await this.promotionCarousel.freezeCarouselToSlide(1);
-		await this.waitForLoadState();
-	}
-
 	async waitForLoadState() {
 		await this.#page.waitForLoadState('networkidle');
 	}
@@ -493,25 +480,16 @@ abstract class Homepage {
 		await this.#page.setViewportSize({ height: stablePageHeight, width });
 	}
 
-	async takeScreenshot(
-		{ freezeCarousel: _ = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
-			freezeCarousel: false
-		}
-	): Promise<void> {
+	async takeScreenshot({
+		centeredElementTestId,
+		screenshotTarget
+	}: TakeScreenshotParams = {}): Promise<void> {
 		if (isNullish(screenshotTarget) && !this.#isMobile) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
 			await this.viewportAdjuster();
 		}
 
 		const element = screenshotTarget ?? this.#page;
-
-		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
-		// if (freezeCarousel) {
-		// 	// Freezing the time because the carousel has a timer that resets the animations and the transitions.
-		// 	await this.#page.clock.pauseAt(Date.now());
-		// 	await this.setCarouselFirstSlide();
-		// 	await this.#page.clock.pauseAt(Date.now());
-		// }
 
 		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
@@ -560,12 +538,6 @@ abstract class Homepage {
 			}
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
-
-		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
-		// if (freezeCarousel) {
-		// 	// Resuming the time that we froze because of the carousel animations.
-		// 	await this.#page.clock.resume();
-		// }
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
