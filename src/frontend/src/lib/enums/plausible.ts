@@ -102,7 +102,9 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {
 	SET = 'set',
 	UNSET = 'unset',
-	CLEAR = 'clear'
+	CLEAR = 'clear',
+	OPEN = 'open',
+	CLOSE = 'close'
 }
 
 export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
