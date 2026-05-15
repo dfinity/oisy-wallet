@@ -143,6 +143,30 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
+      - name: Get Playwright version
+        id: playwright-version
+        shell: bash
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/Library/Caches/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers (cache miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: npx playwright install --with-deps
+
+      - name: Install Playwright system deps (cache hit, Linux only)
+        if: steps.playwright-cache.outputs.cache-hit == 'true' && runner.os == 'Linux'
+        shell: bash
+        run: npx playwright install-deps
+
       - name: Test
         run: npm run e2e:ci -- --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
