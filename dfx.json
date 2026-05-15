@@ -101,6 +101,7 @@
 			"wasm": "out/backend.wasm.gz",
 			"init_arg_file": "out/backend.args.did",
 			"build": "scripts/build.backend.sh",
+			"specified_id": "d3nvo-aaaaa-aaaar-qagzq-cai",
 			"remote": {
 				"id": {
 					"test_fe_1": "d3nvo-aaaaa-aaaar-qagzq-cai",
@@ -522,6 +523,7 @@
 			"type": "custom",
 			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.10/rewards.did",
 			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.10/rewards.wasm.gz",
+			"specified_id": "vi6cu-aiaaa-aaaad-aad7q-cai",
 			"remote": {
 				"id": {
 					"ic": "nynz6-haaaa-aaaan-qzqda-cai",
