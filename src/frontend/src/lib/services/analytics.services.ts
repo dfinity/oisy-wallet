@@ -3,6 +3,10 @@ import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
+	type PLAUSIBLE_EVENT_EVENTS_KEYS,
+	type PLAUSIBLE_EVENT_FILTER_MODIFIERS,
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENT_SOURCES,
 	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
 	PLAUSIBLE_EVENTS
@@ -93,6 +97,50 @@ export const trackRateLimited = ({ endpoint, limiter }: RateLimitInfo) => {
 			location_source: PLAUSIBLE_EVENT_SOURCES.BACKEND,
 			endpoint,
 			limiter
+		}
+	});
+};
+
+/**
+ * Track a single transaction-filter change emitted from the activity page.
+ *
+ * Centralises the payload so the type / token / contact toggles and the
+ * "clear" action all show up under one Plausible event with the same shape:
+ *
+ * - `event_modifier`: `set` / `unset` for toggles, `clear` for the bulk reset.
+ * - `event_key`: `transaction_type` / `token` / `contact`. Omitted for `clear`.
+ * - For transaction types: `event_value` carries the type (e.g. `send`).
+ * - For tokens: instead of `event_value` we emit dedicated `token_*` props
+ *   (network / address / symbol / name) so dashboards can group cleanly.
+ * - For contacts we deliberately ship no value to avoid leaking PII (custom
+ *   names / ids) to analytics; `event_modifier` already tells us whether the
+ *   user added or removed a contact filter.
+ */
+export const trackTransactionFilter = ({
+	modifier,
+	key,
+	value,
+	token
+}: {
+	modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS;
+	key?: PLAUSIBLE_EVENT_EVENTS_KEYS;
+	value?: string;
+	token?: { network: string; address: string; symbol: string; name: string };
+}) => {
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.TRANSACTION_FILTER,
+		metadata: {
+			event_modifier: modifier,
+			...(nonNullish(key) && { event_key: key }),
+			...(nonNullish(value) && { event_value: value }),
+			...(nonNullish(token) && {
+				token_network: token.network,
+				token_address: token.address,
+				token_symbol: token.symbol,
+				token_name: token.name
+			}),
+			source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.ACTIVITY_PAGE,
+			result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 		}
 	});
 };

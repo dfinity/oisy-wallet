@@ -1,5 +1,10 @@
 import TransactionsFilterTokensPanel from '$lib/components/transactions/filter/TransactionsFilterTokensPanel.svelte';
 import * as networkTokensDerived from '$lib/derived/network-tokens.derived';
+import {
+	PLAUSIBLE_EVENT_EVENTS_KEYS,
+	PLAUSIBLE_EVENT_FILTER_MODIFIERS
+} from '$lib/enums/plausible';
+import * as analyticsServices from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import type { Token } from '$lib/types/token';
@@ -232,5 +237,59 @@ describe('TransactionsFilterTokensPanel', () => {
 		await fireEvent.input(search, { target: { value: 'Token' } });
 
 		expect(container.querySelectorAll('li')).toHaveLength(60);
+	});
+
+	it('tracks a transaction_filter event with modifier=set and the token_* fields when a token is selected', async () => {
+		const trackSpy = vi
+			.spyOn(analyticsServices, 'trackTransactionFilter')
+			.mockImplementation(() => {});
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const input = container.querySelector<HTMLInputElement>(
+			`input[id="${tokenInputId(tokenAlpha)}"]`
+		);
+
+		await fireEvent.click(input as HTMLInputElement);
+
+		expect(trackSpy).toHaveBeenCalledWith({
+			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.SET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+			token: {
+				network: tokenAlpha.network.id.description,
+				address: mockValidIcToken.ledgerCanisterId,
+				symbol: tokenAlpha.symbol,
+				name: tokenAlpha.name
+			}
+		});
+	});
+
+	it('tracks a transaction_filter event with modifier=unset when a token is unselected', async () => {
+		const expectedKey = transactionsFilterTokenKey(tokenAlpha);
+		assertNonNullish(expectedKey);
+		transactionsFilterStore.toggleTokenId(expectedKey);
+
+		const trackSpy = vi
+			.spyOn(analyticsServices, 'trackTransactionFilter')
+			.mockImplementation(() => {});
+
+		const { container } = render(TransactionsFilterTokensPanel);
+
+		const input = container.querySelector<HTMLInputElement>(
+			`input[id="${tokenInputId(tokenAlpha)}"]`
+		);
+
+		await fireEvent.click(input as HTMLInputElement);
+
+		expect(trackSpy).toHaveBeenCalledWith({
+			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.UNSET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+			token: {
+				network: tokenAlpha.network.id.description,
+				address: mockValidIcToken.ledgerCanisterId,
+				symbol: tokenAlpha.symbol,
+				name: tokenAlpha.name
+			}
+		});
 	});
 });
