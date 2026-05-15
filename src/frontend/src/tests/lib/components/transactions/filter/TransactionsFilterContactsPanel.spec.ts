@@ -141,11 +141,12 @@ describe('TransactionsFilterContactsPanel', () => {
 			expect(
 				getByText(replaceOisyPlaceholders(get(i18n).core.text.oisy_protects_you))
 			).toBeInTheDocument();
-			// The description i18n string ends with an inline Learn more anchor,
-			// so match the leading prose with a partial regex instead of the
-			// full literal.
+			// The description sits between the OISY-protects-you <strong> and the
+			// Learn more <a> inside the same <p>, so the paragraph's full text is
+			// "<oisy lockup> <description> <learn more>". Use a partial match
+			// against the i18n value so the test stays in sync with the copy.
 			expect(
-				getByText(/Save known addresses in Contacts and reduce the risk of accidentally/)
+				getByText(get(i18n).transaction.filter.contacts_empty_description, { exact: false })
 			).toBeInTheDocument();
 		});
 
