@@ -127,6 +127,10 @@ describe('TransactionsFilterMobileSheet', () => {
 	});
 
 	it('resets to the root step when the sheet is closed', async () => {
+		const trackSpy = vi
+			.spyOn(analyticsServices, 'trackTransactionFilter')
+			.mockImplementation(() => {});
+
 		const { getByText, getByRole, queryByPlaceholderText, rerender } = render(
 			TransactionsFilterMobileSheet,
 			{ props: { visible: true } }
@@ -146,5 +150,10 @@ describe('TransactionsFilterMobileSheet', () => {
 			queryByPlaceholderText(get(i18n).transaction.filter.search_tokens_placeholder)
 		).toBeNull();
 		expect(getByText(get(i18n).transaction.filter.sheet_title)).toBeInTheDocument();
+
+		expect(trackSpy).toHaveBeenCalledWith({
+			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.CLOSE,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN
+		});
 	});
 });
