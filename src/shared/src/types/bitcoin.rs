@@ -50,32 +50,8 @@ pub struct BtcGetFeePercentilesResponse {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub struct SelectedUtxosFeeRequest {
-    pub amount_satoshis: u64,
-    pub network: BitcoinNetwork,
-    pub min_confirmations: Option<u32>,
-    pub ii_delegation_chain: Option<IIDelegationChain>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-#[serde(remote = "Self")]
-pub struct SelectedUtxosFeeResponse {
-    pub utxos: Vec<Utxo>,
-    pub fee_satoshis: u64,
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SelectedUtxosFeeError {
-    InternalError {
-        msg: String,
-    },
-    PendingTransactions,
-    /// The caller has exceeded the call rate limit.
-    RateLimited(RateLimitError),
-    /// The provided II delegation chain is missing or failed verification.
-    InvalidDelegationChain {
-        msg: String,
-    },
+pub enum BtcGetFeePercentilesError {
+    InternalError { msg: String },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

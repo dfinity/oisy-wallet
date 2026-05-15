@@ -13,8 +13,8 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
+	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
-	mapBtcSelectUserUtxosFeeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
@@ -205,8 +205,7 @@ export class BackendCanister extends Canister<BackendService> {
 			return Ok;
 		}
 
-		// Reuse the same error mapping as other BTC methods since they share the same error type
-		throw mapBtcSelectUserUtxosFeeError(response.Err);
+		throw mapBtcGetFeePercentilesError(response.Err);
 	};
 
 	getAllowedCycles = async (): Promise<GetAllowedCyclesResponse> => {
