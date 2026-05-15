@@ -198,6 +198,13 @@ describe('icrc7.canister', () => {
 	describe('collectionMetadata', () => {
 		const mockParams = { certified };
 
+		const fullBulkEntries: Array<[string, Value]> = [
+			['icrc7:symbol', { Text: mockIcrc7CollectionMetadata.symbol }],
+			['icrc7:name', { Text: mockIcrc7CollectionMetadata.name }],
+			['icrc7:description', { Text: mockIcrc7CollectionMetadata.description }],
+			['icrc7:logo', { Text: mockIcrc7CollectionMetadata.icon }]
+		];
+
 		beforeEach(() => {
 			service.icrc7_symbol.mockResolvedValue(mockIcrc7CollectionMetadata.symbol);
 			service.icrc7_name.mockResolvedValue(mockIcrc7CollectionMetadata.name);
@@ -205,7 +212,41 @@ describe('icrc7.canister', () => {
 			service.icrc7_logo.mockResolvedValue([mockIcrc7CollectionMetadata.icon]);
 		});
 
-		it('should aggregate collection-level getters into a TokenMetadata-shape', async () => {
+		it('should use icrc7_collection_metadata as the primary source', async () => {
+			service.icrc7_collection_metadata.mockResolvedValue(fullBulkEntries);
+
+			const { collectionMetadata } = await createIcrc7Canister({ serviceOverride: service });
+
+			const res = await collectionMetadata(mockParams);
+
+			expect(res).toStrictEqual(mockIcrc7CollectionMetadata);
+			expect(service.icrc7_collection_metadata).toHaveBeenCalledExactlyOnceWith();
+			expect(service.icrc7_symbol).not.toHaveBeenCalled();
+			expect(service.icrc7_name).not.toHaveBeenCalled();
+			expect(service.icrc7_description).not.toHaveBeenCalled();
+			expect(service.icrc7_logo).not.toHaveBeenCalled();
+		});
+
+		it('should fall back to individual getters for keys absent from the bulk entries', async () => {
+			service.icrc7_collection_metadata.mockResolvedValue([
+				['icrc7:symbol', { Text: mockIcrc7CollectionMetadata.symbol }],
+				['icrc7:name', { Text: mockIcrc7CollectionMetadata.name }]
+			]);
+
+			const { collectionMetadata } = await createIcrc7Canister({ serviceOverride: service });
+
+			const res = await collectionMetadata(mockParams);
+
+			expect(res).toStrictEqual(mockIcrc7CollectionMetadata);
+			expect(service.icrc7_symbol).not.toHaveBeenCalled();
+			expect(service.icrc7_name).not.toHaveBeenCalled();
+			expect(service.icrc7_description).toHaveBeenCalledExactlyOnceWith();
+			expect(service.icrc7_logo).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should fall back to every individual getter when the bulk call rejects', async () => {
+			service.icrc7_collection_metadata.mockRejectedValue(new Error('no bulk metadata'));
+
 			const { collectionMetadata } = await createIcrc7Canister({ serviceOverride: service });
 
 			const res = await collectionMetadata(mockParams);
@@ -217,7 +258,7 @@ describe('icrc7.canister', () => {
 			expect(service.icrc7_logo).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		it('should omit description and icon when they are absent', async () => {
+		it('should omit description and icon when both bulk and individual getters return them empty', async () => {
 			service.icrc7_description.mockResolvedValue([]);
 			service.icrc7_logo.mockResolvedValue([]);
 
@@ -245,8 +286,22 @@ describe('icrc7.canister', () => {
 			});
 		});
 
-		it.each(['icrc7_symbol', 'icrc7_name', 'icrc7_description', 'icrc7_logo'] as const)(
-			'should throw if %s throws',
+		it.each(['icrc7_description', 'icrc7_logo'] as const)(
+			'should silently skip optional %s when it rejects (e.g. canister did not implement it)',
+			async (method) => {
+				service[method].mockRejectedValue(new Error(`${method} method not implemented`));
+
+				const { collectionMetadata } = await createIcrc7Canister({ serviceOverride: service });
+
+				const res = await collectionMetadata(mockParams);
+
+				expect(res.symbol).toBe(mockIcrc7CollectionMetadata.symbol);
+				expect(res.name).toBe(mockIcrc7CollectionMetadata.name);
+			}
+		);
+
+		it.each(['icrc7_symbol', 'icrc7_name'] as const)(
+			'should throw if mandatory %s throws and is missing from the bulk entries',
 			async (method) => {
 				const mockError = new Error(`${method} error`);
 				service[method].mockRejectedValue(mockError);

@@ -147,25 +147,40 @@ export class Icrc7Canister extends Canister<Icrc7Service> {
 	collectionMetadata = async ({
 		certified
 	}: QueryParams): Promise<Omit<TokenMetadata, 'decimals'>> => {
-		const { icrc7_symbol, icrc7_name, icrc7_description, icrc7_logo } = this.caller({
-			certified
-		});
+		const { icrc7_collection_metadata, icrc7_symbol, icrc7_name, icrc7_description, icrc7_logo } =
+			this.caller({ certified });
 
-		const [symbol, name, description, logo] = await Promise.all([
-			icrc7_symbol(),
-			icrc7_name(),
-			icrc7_description(),
-			icrc7_logo()
-		]);
+		// `icrc7_collection_metadata` is the spec-canonical bulk getter and is the only
+		// metadata method that every compliant collection is required to expose. Real
+		// canisters routinely omit the per-field getters (especially the optional
+		// `icrc7_logo` and `icrc7_description`), so we read from the bulk entries first
+		// and only fall back to the individual methods when a key is missing.
+		let entries: Array<[string, Value]> | undefined;
+		try {
+			entries = await icrc7_collection_metadata();
+		} catch (_err) {
+			entries = undefined;
+		}
 
-		const descriptionValue = fromNullable(description);
-		const logoValue = fromNullable(logo);
+		const findText = (key: string): string | undefined => {
+			const value = entries?.find(([k]) => k === key)?.[1];
+			return value !== undefined && 'Text' in value ? value.Text : undefined;
+		};
+
+		const collectionSymbol = findText('icrc7:symbol') ?? (await icrc7_symbol());
+		const collectionName = findText('icrc7:name') ?? (await icrc7_name());
+
+		const collectionDescription =
+			findText('icrc7:description') ??
+			fromNullable((await icrc7_description().catch(() => [])) as [] | [string]);
+		const collectionLogo =
+			findText('icrc7:logo') ?? fromNullable((await icrc7_logo().catch(() => [])) as [] | [string]);
 
 		return {
-			symbol,
-			name,
-			...(notEmptyString(descriptionValue) && { description: descriptionValue }),
-			...(notEmptyString(logoValue) && { icon: logoValue })
+			symbol: collectionSymbol,
+			name: collectionName,
+			...(notEmptyString(collectionDescription) && { description: collectionDescription }),
+			...(notEmptyString(collectionLogo) && { icon: collectionLogo })
 		};
 	};
 }
