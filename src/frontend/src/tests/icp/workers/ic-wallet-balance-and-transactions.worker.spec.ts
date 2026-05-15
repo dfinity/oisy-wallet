@@ -21,7 +21,13 @@ import type {
 import * as eventsUtils from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
+import {
+	arrayOfNumberToUint8Array,
+	isNullish,
+	jsonReplacer,
+	nonNullish,
+	toNullable
+} from '@dfinity/utils';
 import { IcpIndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import {
 	IcrcIndexCanister,
@@ -248,6 +254,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		startData = undefined,
 		initCleanupMock,
 		initErrorMock,
+		initSuccessMock,
 		msg
 	}: {
 		initScheduler: (
@@ -256,6 +263,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		startData?: PostMessageDataRequest | undefined;
 		initCleanupMock: (mockRogueId: bigint) => void;
 		initErrorMock: (err: Error) => void;
+		initSuccessMock?: () => void;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
@@ -321,6 +329,45 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 						}
 					});
 				});
+
+				if (nonNullish(initSuccessMock)) {
+					it('should reset the internal store after an error so the next successful sync re-emits', async () => {
+						const err = new Error('Failed to fetch');
+						initErrorMock(err);
+
+						await scheduler.start(startData);
+
+						await awaitJobExecution();
+
+						expect(postMessageMock).toHaveBeenCalledWith({
+							ref,
+							msg: `${msg}Error`,
+							data: { error: err }
+						});
+
+						// After the fatal error, the in-memory store must be cleared so the next tick
+						// behaves like an initial sync (mirroring the listener-side UI reset).
+						expect(scheduler['store']).toEqual({
+							balance: undefined,
+							transactions: {}
+						});
+						expect(scheduler['initialized']).toBeFalsy();
+
+						// Recovery: the next successful sync must emit the wallet payload again
+						// (not just status messages), so the previously reset UI store is repopulated.
+						initSuccessMock();
+						postMessageMock.mockClear();
+
+						await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+						expect(postMessageMock).toHaveBeenCalledWith(
+							expect.objectContaining({
+								ref,
+								msg
+							})
+						);
+					});
+				}
 			}
 		};
 	};
@@ -805,6 +852,14 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					startData,
 					initCleanupMock,
 					initErrorMock: (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err),
+					initSuccessMock: () => {
+						ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
+						indexCanisterMock.getTransactions.mockResolvedValue({
+							balance: mockBalanceFromTransactions(),
+							transactions: [mockTransaction],
+							oldest_tx_id: [mockOldestTxId]
+						});
+					},
 					msg: 'syncIcrcWallet'
 				});
 

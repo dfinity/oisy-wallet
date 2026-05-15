@@ -91,7 +91,12 @@ export class IcWalletBalanceAndTransactionsScheduler<
 				this.syncTransactions({ jobData: { identity, ...data }, certified, ...rest });
 				this.cleanTransactions({ certified });
 			},
-			onUpdateError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
+			onUpdateError: ({ error }) => {
+				// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
+				this.store = { balance: undefined, transactions: {} };
+				this.initialized = false;
+				this.postMessageWalletError({ msg: this.msg, error });
+			},
 			identity
 		});
 	};
