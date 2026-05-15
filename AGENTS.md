@@ -161,13 +161,13 @@ npm run dev
 
 ### Quality gates
 
-| Command | What it does |
-|---------|-------------|
-| `npm run check` | svelte-check (type-checking + Svelte diagnostics) |
-| `npm run test -- --run` | Vitest frontend unit/integration tests (828 files, ~14k tests) |
-| `npm run lint` | Prettier + ESLint (ESLint requires ~16GB+ RAM due to type-aware rules) |
-| `npm run cargo:test` | Backend Rust tests via pocket-ic |
-| `npm run clippy` | Rust clippy lints |
+| Command                 | What it does                                                           |
+| ----------------------- | ---------------------------------------------------------------------- |
+| `npm run check`         | svelte-check (type-checking + Svelte diagnostics)                      |
+| `npm run test -- --run` | Vitest frontend unit/integration tests (828 files, ~14k tests)         |
+| `npm run lint`          | Prettier + ESLint (ESLint requires ~16GB+ RAM due to type-aware rules) |
+| `npm run cargo:test`    | Backend Rust tests via pocket-ic                                       |
+| `npm run clippy`        | Rust clippy lints                                                      |
 
 ### Known caveats
 
