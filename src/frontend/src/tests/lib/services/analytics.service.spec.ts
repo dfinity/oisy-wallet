@@ -352,6 +352,52 @@ describe('plausible analytics service', () => {
 				}
 			});
 		});
+
+		it('emits an open event with only event_key when a filter is opened', async () => {
+			const { trackTransactionFilter, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_EVENTS_KEYS, PLAUSIBLE_EVENT_FILTER_MODIFIERS } =
+				await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			trackTransactionFilter({
+				modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.OPEN,
+				key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN
+			});
+
+			expect(trackMock).toHaveBeenCalledWith('transaction_filter', {
+				props: {
+					event_modifier: 'open',
+					event_key: 'token',
+					source_location: 'activity_page',
+					result_status: 'success'
+				}
+			});
+		});
+
+		it('emits a close event with only event_key when a filter is closed', async () => {
+			const { trackTransactionFilter, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_EVENTS_KEYS, PLAUSIBLE_EVENT_FILTER_MODIFIERS } =
+				await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			trackTransactionFilter({
+				modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.CLOSE,
+				key: PLAUSIBLE_EVENT_EVENTS_KEYS.CONTACT
+			});
+
+			expect(trackMock).toHaveBeenCalledWith('transaction_filter', {
+				props: {
+					event_modifier: 'close',
+					event_key: 'contact',
+					source_location: 'activity_page',
+					result_status: 'success'
+				}
+			});
+		});
 	});
 
 	it('should console.debug the error in STAGING when tracker.track throws', async () => {
