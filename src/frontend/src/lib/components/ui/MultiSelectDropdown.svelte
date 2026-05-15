@@ -43,16 +43,16 @@
 	};
 
 	let initialised = false;
-	
+
 	$effect(() => {
 		const next = visible;
-		
+
 		if (!initialised) {
 			initialised = true;
-			
+
 			return;
 		}
-		
+
 		onToggle?.(next);
 	});
 </script>
