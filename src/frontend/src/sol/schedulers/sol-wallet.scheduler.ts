@@ -148,12 +148,18 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			}
 		}
 
+		const exitIfFirstSignatureMatches =
+			storedTransactions.length > 0 && nonNullish(storedTransactions[0]?.data.signature)
+				? String(storedTransactions[0].data.signature)
+				: undefined;
+
 		const rpcTransactions = await getSolTransactions({
 			network,
 			identity,
 			address,
 			tokenAddress,
-			tokenOwnerAddress
+			tokenOwnerAddress,
+			exitIfFirstSignatureMatches
 		});
 
 		const rpcCertified = rpcTransactions.map((transaction) => ({

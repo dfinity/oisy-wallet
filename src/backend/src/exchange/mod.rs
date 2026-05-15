@@ -30,6 +30,15 @@ const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60;
 /// and skipped during price refreshes (1 hour).
 pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
 
+/// A token's cached price is considered "fresh enough" if its
+/// [`ExchangeData::timestamp_ns`] (the provider-reported `last_updated_at`,
+/// or `time()` when the provider doesn't supply one) is within
+/// `PRICE_REFRESH_INTERVAL_SEC / 2` of now. Such tokens are skipped on the
+/// next refresh tick to avoid duplicate upstream calls when, e.g., a lazy
+/// bootstrap or a manual refresh has just populated the cache with a price
+/// the provider also reports as recent.
+const PRICE_FRESHNESS_GRACE_NS: u64 = (PRICE_REFRESH_INTERVAL_SEC / 2) * 1_000_000_000;
+
 /// Native tokens whose prices are always fetched, regardless of user activity.
 fn native_token_ids() -> Vec<StoredTokenId> {
     vec![
@@ -120,6 +129,15 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     tokens_to_fetch.extend(active_custom_tokens);
     tokens_to_fetch.sort_unstable();
     tokens_to_fetch.dedup();
+
+    let freshness_floor_ns = now.saturating_sub(PRICE_FRESHNESS_GRACE_NS);
+    read_state(|s| {
+        tokens_to_fetch.retain(|t| {
+            s.exchange_rates
+                .get(t)
+                .is_none_or(|r| r.0.usd.timestamp_ns < freshness_floor_ns)
+        });
+    });
 
     if tokens_to_fetch.is_empty() {
         return Ok(());

@@ -56,6 +56,16 @@ vi.mock('$env/user-transactions.env', () => ({
 	USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED: true
 }));
 
+const infuraMocks = vi.hoisted(() => ({
+	mockInfuraGetBlockNumber: vi.fn().mockResolvedValue(99_999_999)
+}));
+
+vi.mock('$eth/providers/infura.providers', () => ({
+	infuraProviders: vi.fn(() => ({
+		getBlockNumber: infuraMocks.mockInfuraGetBlockNumber
+	}))
+}));
+
 describe('eth-transactions.services', () => {
 	const mockErc20CustomTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
 		data: { ...token, enabled: true },
@@ -303,6 +313,14 @@ describe('eth-transactions.services', () => {
 
 				vi.mocked(loadEthUserTransactions).mockResolvedValue(undefined);
 				vi.mocked(saveEthFinalizedTransactions).mockResolvedValue({ success: true });
+
+				infuraMocks.mockInfuraGetBlockNumber.mockReset();
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValue(99_999_999);
+
+				mockEthTransactionsProvider.mockReset();
+				mockEthTransactionsProvider.mockResolvedValue([]);
+
+				ethTransactionsStore.nullify(mockTokenId);
 			});
 
 			it('should return false if address store is empty', async () => {
@@ -356,6 +374,8 @@ describe('eth-transactions.services', () => {
 					startBlock: 0,
 					sort: 'desc'
 				});
+
+				expect(infuraMocks.mockInfuraGetBlockNumber).not.toHaveBeenCalled();
 			});
 
 			it('should fetch incrementally from Etherscan using newestBlockIndex + 1', async () => {
@@ -369,6 +389,7 @@ describe('eth-transactions.services', () => {
 					totalStored: 2n
 				});
 
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(150);
 				mockEthTransactionsProvider.mockResolvedValueOnce([]);
 
 				await loadEthereumTransactions({
@@ -386,6 +407,65 @@ describe('eth-transactions.services', () => {
 				});
 			});
 
+			it('should skip Etherscan when the chain tip is still before the incremental start block', async () => {
+				const storedTransactions = createMockEthTransactions(2);
+
+				vi.mocked(loadEthUserTransactions).mockResolvedValue({
+					transactions: storedTransactions,
+					newestBlockIndex: 100n,
+					oldestBlockIndex: 50n,
+					nextStart: undefined,
+					totalStored: 2n
+				});
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(100);
+				mockEthTransactionsProvider.mockResolvedValueOnce([]);
+
+				await loadEthereumTransactions({
+					identity: mockIdentity,
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					chainId: mockChainId,
+					standard: mockStandard
+				});
+
+				expect(mockEthTransactionsProvider).not.toHaveBeenCalled();
+			});
+
+			it('should use max block from the store when the backend has no cursor', async () => {
+				vi.mocked(loadEthUserTransactions).mockResolvedValue(undefined);
+
+				const existingTransactions = createMockEthTransactions(2).map((tx, i) => ({
+					...tx,
+					blockNumber: 300 + i
+				}));
+
+				ethTransactionsStore.set({
+					tokenId: mockTokenId,
+					transactions: existingTransactions.map((data) => ({
+						data,
+						certified: false
+					}))
+				});
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(400);
+				mockEthTransactionsProvider.mockResolvedValueOnce([]);
+
+				await loadEthereumTransactions({
+					identity: mockIdentity,
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					chainId: mockChainId,
+					standard: mockStandard
+				});
+
+				expect(mockEthTransactionsProvider).toHaveBeenCalledWith({
+					address: mockEthAddress,
+					startBlock: 302,
+					sort: 'desc'
+				});
+			});
+
 			it('should combine stored and new transactions in the store', async () => {
 				const storedTransactions = createMockEthTransactions(2);
 				const newTransactions = createMockEthTransactions(3);
@@ -398,6 +478,7 @@ describe('eth-transactions.services', () => {
 					totalStored: 2n
 				});
 
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(150);
 				mockEthTransactionsProvider.mockResolvedValueOnce(newTransactions);
 
 				const result = await loadEthereumTransactions({
@@ -521,6 +602,7 @@ describe('eth-transactions.services', () => {
 					totalStored: 2n
 				});
 
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(100);
 				mockEthTransactionsProvider.mockResolvedValueOnce([]);
 
 				await loadEthereumTransactions({
@@ -531,6 +613,7 @@ describe('eth-transactions.services', () => {
 					standard: mockStandard
 				});
 
+				expect(mockEthTransactionsProvider).not.toHaveBeenCalled();
 				expect(saveEthFinalizedTransactions).not.toHaveBeenCalled();
 			});
 
