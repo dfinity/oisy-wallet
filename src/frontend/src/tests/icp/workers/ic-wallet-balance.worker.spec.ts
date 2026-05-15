@@ -9,7 +9,7 @@ import type {
 } from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -245,6 +245,7 @@ describe('ic-wallet-balance.worker', () => {
 		initScheduler,
 		startData = undefined,
 		initErrorMock,
+		initSuccessMock,
 		msg
 	}: {
 		initScheduler: (
@@ -252,9 +253,18 @@ describe('ic-wallet-balance.worker', () => {
 		) => IcWalletScheduler<PostMessageDataRequest>;
 		startData?: PostMessageDataRequest | undefined;
 		initErrorMock: (err: Error) => void;
+		initSuccessMock?: () => void;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
+
+		const ref = isNullish(startData)
+			? undefined
+			: 'ledgerCanisterId' in startData
+				? startData.ledgerCanisterId
+				: 'indexCanisterId' in startData
+					? startData.indexCanisterId
+					: startData.canisterId;
 
 		return {
 			setup: () => {
@@ -279,19 +289,47 @@ describe('ic-wallet-balance.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
-						ref: isNullish(startData)
-							? undefined
-							: 'ledgerCanisterId' in startData
-								? startData.ledgerCanisterId
-								: 'indexCanisterId' in startData
-									? startData.indexCanisterId
-									: startData.canisterId,
+						ref,
 						msg: `${msg}Error`,
 						data: {
 							error: err
 						}
 					});
 				});
+
+				if (nonNullish(initSuccessMock)) {
+					it('should reset the internal store after an error so the next successful sync re-emits the balance', async () => {
+						const err = new Error('Failed to fetch');
+						initErrorMock(err);
+
+						await scheduler.start(startData);
+
+						await awaitJobExecution();
+
+						expect(postMessageMock).toHaveBeenCalledWith({
+							ref,
+							msg: `${msg}Error`,
+							data: { error: err }
+						});
+
+						// After the fatal error, the in-memory store must be cleared so the next tick
+						// behaves like an initial sync (mirroring the listener-side UI reset).
+						expect(scheduler['store']).toEqual({ balance: undefined });
+
+						// Recovery: the next successful sync must emit the balance payload again
+						// (not just status messages), so the previously reset UI store is repopulated.
+						initSuccessMock();
+						postMessageMock.mockClear();
+
+						await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+						expect(postMessageMock).toHaveBeenCalledWith({
+							ref,
+							msg,
+							data: mockPostMessageData({ certified: false })
+						});
+					});
+				}
 			}
 		};
 	};
@@ -328,11 +366,13 @@ describe('ic-wallet-balance.worker', () => {
 
 		describe('other scenarios', () => {
 			const initErrorMock = (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err);
+			const initSuccessMock = () => ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
 
 			const { setup, teardown, tests } = initOtherScenarios({
 				initScheduler: initIcrcWalletScheduler,
 				startData,
 				initErrorMock,
+				initSuccessMock,
 				msg: 'syncIcrcWallet'
 			});
 
