@@ -16,6 +16,11 @@
 		selectedTransactionsFilterTokensCount,
 		selectedTransactionsFilterTypesCount
 	} from '$lib/derived/transactions-filter.derived';
+	import {
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENT_FILTER_MODIFIERS
+	} from '$lib/enums/plausible';
+	import { trackTransactionFilter } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
@@ -26,11 +31,46 @@
 
 	type FilterStep = 'root' | 'types' | 'tokens' | 'contacts';
 
+	const FILTER_KEY_BY_STEP: Record<Exclude<FilterStep, 'root'>, PLAUSIBLE_EVENT_EVENTS_KEYS> = {
+		types: PLAUSIBLE_EVENT_EVENTS_KEYS.TRANSACTION_TYPE,
+		tokens: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+		contacts: PLAUSIBLE_EVENT_EVENTS_KEYS.CONTACT
+	};
+
+	const trackStepOpen = (next: Exclude<FilterStep, 'root'>) => {
+		trackTransactionFilter({
+			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.OPEN,
+			key: FILTER_KEY_BY_STEP[next]
+		});
+	};
+
+	const trackStepClose = (previous: Exclude<FilterStep, 'root'>) => {
+		trackTransactionFilter({
+			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.CLOSE,
+			key: FILTER_KEY_BY_STEP[previous]
+		});
+	};
+
 	let step = $state<FilterStep>('root');
 
-	const goToRoot = () => (step = 'root');
+	const enterStep = (next: Exclude<FilterStep, 'root'>) => {
+		trackStepOpen(next);
+		step = next;
+	};
+
+	const goToRoot = () => {
+		if (step !== 'root') {
+			trackStepClose(step);
+		}
+		step = 'root';
+	};
 
 	const onClose = () => {
+		// Sheet dismissed: if the user was inside a sub-step, we still emit
+		// the matching close event so dashboards see balanced open/close pairs.
+		if (step !== 'root') {
+			trackStepClose(step);
+		}
 		step = 'root';
 	};
 
@@ -86,7 +126,7 @@
 						<li>
 							<button
 								class="flex w-full items-center justify-between rounded-md px-3 py-3 text-left transition hover:bg-brand-subtle-10"
-								onclick={() => (step = rowStep)}
+								onclick={() => enterStep(rowStep)}
 								type="button"
 							>
 								<span class="flex items-center gap-3 text-sm">
