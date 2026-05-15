@@ -66,6 +66,10 @@
 	);
 
 	let isCapped = $derived(searchValue.length === 0 && filteredTokens.length > VISIBLE_LIMIT);
+
+	const onToggleTokenId = (key: string) => {
+		transactionsFilterStore.toggleTokenId(key);
+	};
 </script>
 
 <div class="flex flex-col gap-3">
@@ -93,7 +97,7 @@
 						checked={selectedSet.has(key)}
 						inputId={tokenInputId(token)}
 						text="inline"
-						on:nnsChange={() => transactionsFilterStore.toggleTokenId(key)}
+						on:nnsChange={() => onToggleTokenId(key)}
 					>
 						<span class="inline-flex items-center gap-2">
 							<span class="flex shrink-0 items-center">

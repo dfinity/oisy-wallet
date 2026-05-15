@@ -18,6 +18,10 @@
 	);
 
 	let selectedSet = $derived(new Set<TransactionType>($transactionsFilterStore.types));
+
+	const onToggleType = (type: TransactionType) => {
+		transactionsFilterStore.toggleType(type);
+	};
 </script>
 
 <ul class="m-0 flex list-none flex-col gap-0.5 p-0">
@@ -27,7 +31,7 @@
 				checked={selectedSet.has(type)}
 				inputId={`transactions-filter-type-${type}`}
 				text="inline"
-				on:nnsChange={() => transactionsFilterStore.toggleType(type)}
+				on:nnsChange={() => onToggleType(type)}
 			>
 				<span class="text-sm">{label}</span>
 			</Checkbox>
