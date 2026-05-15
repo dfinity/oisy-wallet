@@ -22,6 +22,6 @@ testWithII.skip(
 
 		await homepageLoggedIn.waitForReady();
 
-		await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
+		await homepageLoggedIn.takeScreenshot();
 	}
 );
