@@ -88,7 +88,15 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	SORT_ASC = 'sort_asc',
 	SORT_DESC = 'sort_desc',
 	PRICE = 'price',
-	NETWORK = 'network'
+	NETWORK = 'network',
+	TRANSACTION_TYPE = 'transaction_type',
+	TOKEN = 'token',
+	CONTACT = 'contact'
+}
+
+export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {
+	OPEN = 'open',
+	CLOSE = 'close'
 }
 
 export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
