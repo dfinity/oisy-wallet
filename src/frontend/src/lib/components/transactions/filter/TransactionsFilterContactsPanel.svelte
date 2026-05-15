@@ -3,6 +3,11 @@
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
+	import {
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENT_FILTER_MODIFIERS
+	} from '$lib/enums/plausible';
+	import { trackTransactionFilter } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import { matchesContactByText } from '$lib/utils/contact.utils';
@@ -40,7 +45,17 @@
 
 	let isCapped = $derived(searchValue.length === 0 && filteredContacts.length > VISIBLE_LIMIT);
 
+	// We deliberately omit the contact id / name from the tracking payload to
+	// avoid leaking user PII to analytics. We only record that a contact-row
+	// toggle happened and whether it set or unset the filter.
 	const onToggleContactId = (id: string) => {
+		trackTransactionFilter({
+			modifier: selectedSet.has(id)
+				? PLAUSIBLE_EVENT_FILTER_MODIFIERS.UNSET
+				: PLAUSIBLE_EVENT_FILTER_MODIFIERS.SET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.CONTACT
+		});
+
 		transactionsFilterStore.toggleContactId(id);
 	};
 </script>

@@ -16,7 +16,8 @@ export enum PLAUSIBLE_EVENTS {
 	SIGNER_PAGE_VISIT = 'signer_page_visit',
 	SIGNER_INTERACTION = 'signer_interaction',
 	NETWORK_FILTER = 'network_filter',
-	NETWORK_MANAGE = 'network_manage'
+	NETWORK_MANAGE = 'network_manage',
+	TRANSACTION_FILTER = 'transaction_filter'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -81,6 +82,10 @@ export enum PLAUSIBLE_EVENT_SOURCES {
 	HARVEST_AUTOPILOT = 'harvest-autopilot'
 }
 
+export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
+	ACTIVITY_PAGE = 'activity_page'
+}
+
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	GROUP = 'group',
 	VISIBILITY = 'visibility',
@@ -95,6 +100,9 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 }
 
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {
+	SET = 'set',
+	UNSET = 'unset',
+	CLEAR = 'clear',
 	OPEN = 'open',
 	CLOSE = 'close'
 }
