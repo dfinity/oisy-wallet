@@ -99,7 +99,12 @@ export default defineConfig({
 	snapshotDir: 'e2e/snapshots',
 	use: {
 		testIdAttribute: 'data-tid',
-		trace: 'on',
+		// Only collect a trace when a test is being retried. With `retries: 3`
+		// today (and `retries: 1` once #12796 lands) we still get a full trace
+		// on every failure, but pay the recording cost on at most one in N
+		// runs instead of every single test — large reduction in
+		// `playwright-report` artifact size and per-test overhead.
+		trace: 'on-first-retry',
 		actionTimeout: TIMEOUT,
 		navigationTimeout: TIMEOUT,
 		...(DEV && { headless: false })
