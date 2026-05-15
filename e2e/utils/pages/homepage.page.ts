@@ -173,6 +173,12 @@ abstract class Homepage {
 
 	protected async mockSelectorAll({ selector }: SelectorOperationParams): Promise<void> {
 		const elementsLocator = this.#page.locator(selector);
+
+		// Wait for the first match to render before masking. Otherwise
+		// `evaluateAll` runs against an empty NodeList (silently no-op) and
+		// the screenshot captures the un-mocked, time-sensitive content.
+		await elementsLocator.first().waitFor({ state: 'visible' });
+
 		await elementsLocator.evaluateAll((elements) => {
 			for (const element of elements) {
 				(element as HTMLElement).innerHTML = 'placeholder';
