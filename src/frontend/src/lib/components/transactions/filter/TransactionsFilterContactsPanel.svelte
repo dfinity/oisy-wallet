@@ -39,6 +39,10 @@
 	);
 
 	let isCapped = $derived(searchValue.length === 0 && filteredContacts.length > VISIBLE_LIMIT);
+
+	const onToggleContactId = (id: string) => {
+		transactionsFilterStore.toggleContactId(id);
+	};
 </script>
 
 <div class="flex flex-col gap-3">
@@ -57,7 +61,7 @@
 					checked={selectedSet.has(id)}
 					inputId={`transactions-filter-contact-${id}`}
 					text="inline"
-					on:nnsChange={() => transactionsFilterStore.toggleContactId(id)}
+					on:nnsChange={() => onToggleContactId(id)}
 				>
 					<span class="inline-flex items-center gap-2">
 						<span class="flex shrink-0 items-center">
