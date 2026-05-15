@@ -16,9 +16,6 @@ import {
 	NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
 	NETWORKS_SWITCHER_DROPDOWN,
 	NETWORKS_SWITCHER_SELECTOR,
-	RECEIVE_TOKENS_MODAL,
-	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
-	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
 	SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
 	SETTINGS_NETWORKS_MODAL,
 	SETTINGS_NETWORKS_MODAL_SAVE_BUTTON,
@@ -35,11 +32,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
-import { getQRCodeValueFromDataURL } from '../qr-code.utils';
-import {
-	getReceiveTokensModalAddressLabelSelector,
-	getReceiveTokensModalQrCodeButtonSelector
-} from '../selectors.utils';
+import { getReceiveTokensModalAddressLabelSelector } from '../selectors.utils';
 
 interface HomepageParams {
 	page: Page;
@@ -200,30 +193,6 @@ abstract class Homepage {
 
 	protected async waitForLoginButton(options?: WaitForLocatorOptions): Promise<void> {
 		await this.waitForByTestId({ testId: LOGIN_BUTTON, options });
-	}
-
-	private async getCanvasAsDataURL({
-		selector
-	}: SelectorOperationParams): Promise<string | undefined> {
-		return await this.#page.evaluate<string | undefined, { selector: string }>(
-			({ selector }) => {
-				const canvas = document.querySelector<HTMLCanvasElement>(selector);
-				return canvas?.toDataURL();
-			},
-			{
-				selector
-			}
-		);
-	}
-
-	protected async readQRCode({ selector }: SelectorOperationParams): Promise<string | undefined> {
-		await this.#page.locator(selector).waitFor();
-
-		const dataUrl = await this.getCanvasAsDataURL({ selector });
-
-		if (nonNullish(dataUrl)) {
-			return getQRCodeValueFromDataURL({ dataUrl });
-		}
 	}
 
 	protected async waitForModal({
@@ -629,34 +598,6 @@ export class HomepageLoggedIn extends Homepage {
 
 	async clickTokenGroupCard(tokenSymbol: string): Promise<void> {
 		await this.clickByTestId({ testId: `${TOKEN_GROUP}-${tokenSymbol}` });
-	}
-
-	async testReceiveModalQrCode({
-		receiveModalSectionSelector
-	}: {
-		receiveModalSectionSelector: string;
-	}): Promise<void> {
-		await this.waitForModal({
-			modalOpenButtonTestId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
-			modalTestId: RECEIVE_TOKENS_MODAL
-		});
-
-		await this.clickSelector({
-			selector: getReceiveTokensModalQrCodeButtonSelector({
-				sectionSelector: receiveModalSectionSelector
-			})
-		});
-
-		const qrCodeOutputLocator = this.getLocatorByTestId({
-			testId: RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT
-		});
-		await qrCodeOutputLocator.waitFor();
-
-		const qrCode = await this.readQRCode({
-			selector: `[data-tid="${RECEIVE_TOKENS_MODAL}"] canvas`
-		});
-
-		await expect(qrCodeOutputLocator).toHaveText(qrCode ?? '');
 	}
 
 	override async extendWaitForReady(): Promise<void> {

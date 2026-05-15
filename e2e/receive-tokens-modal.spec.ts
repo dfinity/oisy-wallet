@@ -52,38 +52,3 @@ testWithII.skip('should display receive-tokens modal', async () => {
 		])
 	});
 });
-
-// TODO: E2E tests are failing and/or take too much time, we need to fix them slowly, so we skip them for now
-testWithII.skip('should display correct QR codes for receiving ICP tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ICP_SECTION
-	});
-});
-
-// TODO: E2E tests are failing and/or take too much time, we need to fix them slowly, so we skip them for now
-testWithII.skip('should display correct QR codes for receiving ICRC tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ICRC_SECTION
-	});
-});
-
-// TODO: E2E tests are failing and/or take too much time, we need to fix them slowly, so we skip them for now
-testWithII.skip('should display correct QR codes for receiving ETH tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ETH_SECTION
-	});
-});
-
-// TODO: E2E tests are failing and/or take too much time, we need to fix them slowly, so we skip them for now
-testWithII.skip('should display correct QR codes for receiving SOL mainnet tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION
-	});
-});
-
-// TODO: E2E tests are failing and/or take too much time, we need to fix them slowly, so we skip them for now
-testWithII.skip('should display correct QR codes for receiving SOL devnet tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION
-	});
-});
