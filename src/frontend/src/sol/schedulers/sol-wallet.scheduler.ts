@@ -217,11 +217,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				maxRetries: 10
 			});
 		} catch (error: unknown) {
-			// On a fatal sync failure, the listener (main thread) resets the UI stores for this token.
-			// We must mirror that on the scheduler side, otherwise the next successful run only emits
-			// deltas (no `newBalance` / `newTransactions`) and the UI stays empty until the worker is
-			// re-created. Clearing the in-memory store forces the next run to behave like an initial
-			// sync, re-loading from the backend cache and re-emitting the full state.
+			// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
 			this.store = {
 				balance: undefined,
 				transactions: {}
