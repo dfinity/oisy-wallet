@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
@@ -53,7 +53,7 @@
 			return;
 		}
 
-		onToggle?.(next);
+		untrack(() => onToggle?.(next));
 	});
 </script>
 
