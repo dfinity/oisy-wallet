@@ -15,11 +15,10 @@
 	import type { ValidateTokenData as ValidateIcrcTokenData } from '$icp/services/ic-add-custom-tokens.service';
 	import type { ValidateTokenData as ValidateIcPunksTokenData } from '$icp/services/icpunks-add-custom-tokens.service';
 	import type { ValidateTokenData as ValidateIcrc7TokenData } from '$icp/services/icrc7-add-custom-tokens.service';
-	import { saveIcrc7CustomTokenInMemory } from '$icp/services/icrc7-save.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import { TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+	import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -114,9 +113,7 @@
 		]);
 	};
 
-	// PR 1: persists in memory only. PR 2 replaces this with a backend save
-	// once the `Icrc7` variant is added to the backend `Token` enum.
-	const addIcrc7Token = () => {
+	const addIcrc7Token = async () => {
 		if (isNullish(icrc7CanisterId)) {
 			toastsError({
 				msg: { text: $i18n.tokens.import.error.missing_canister_id }
@@ -124,21 +121,13 @@
 			return;
 		}
 
-		if (isNullish(icrc7Metadata)) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.no_metadata }
-			});
-			return;
-		}
-
-		progress(ProgressStepsAddToken.SAVE);
-
-		saveIcrc7CustomTokenInMemory({ token: icrc7Metadata.token });
-
-		progress(ProgressStepsAddToken.UPDATE_UI);
-
-		modalNext();
-		onSuccess();
+		await saveTokens([
+			{
+				enabled: true,
+				networkKey: 'Icrc7',
+				canisterId: icrc7CanisterId
+			}
+		]);
 	};
 
 	const saveEthToken = async () => {
