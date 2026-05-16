@@ -788,14 +788,14 @@ type Token = variant {
 	Erc20 : ErcToken;
 	ExtV2 : ExtV2Token;
 	Icrc : IcrcToken;
+	Icrc7 : ExtV2Token;
 	Erc721 : ErcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken;
 	IcPunks : ExtV2Token;
 	Erc1155 : ErcToken;
 	Erc4626 : ErcToken;
-	Dip721 : ExtV2Token;
-	Icrc7 : ExtV2Token
+	Dip721 : ExtV2Token
 };
 type TokenAccountId = variant {
 	Btc : BtcAddress;
@@ -819,6 +819,8 @@ type TokenId = variant {
 	Icrc : principal;
 	// Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
 	EvmNative : nat64;
+	// ICRC-7 NFT collection on the Internet Computer
+	Icrc7 : principal;
 	// Native BTC on mainnet
 	BtcNativeMainnet;
 	// ERC-721 NFT on an EVM chain
@@ -840,9 +842,7 @@ type TokenId = variant {
 	// ERC-4626 vault token on an EVM chain
 	Erc4626 : record { text; nat64 };
 	// DIP721 token on the Internet Computer
-	Dip721 : principal;
-	// ICRC-7 NFT collection on the Internet Computer
-	Icrc7 : principal
+	Dip721 : principal
 };
 type TokenSection = variant { Spam; Hidden };
 // Possible error conditions when topping up the cycles ledger.

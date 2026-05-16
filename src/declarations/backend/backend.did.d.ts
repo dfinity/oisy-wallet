@@ -1190,14 +1190,14 @@ export type Token =
 	| { Erc20: ErcToken }
 	| { ExtV2: ExtV2Token }
 	| { Icrc: IcrcToken }
+	| { Icrc7: ExtV2Token }
 	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken }
 	| { IcPunks: ExtV2Token }
 	| { Erc1155: ErcToken }
 	| { Erc4626: ErcToken }
-	| { Dip721: ExtV2Token }
-	| { Icrc7: ExtV2Token };
+	| { Dip721: ExtV2Token };
 export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }
@@ -1240,6 +1240,12 @@ export type TokenId =
 			 * Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
 			 */
 			EvmNative: bigint;
+	  }
+	| {
+			/**
+			 * ICRC-7 NFT collection on the Internet Computer
+			 */
+			Icrc7: Principal;
 	  }
 	| {
 			/**
@@ -1306,12 +1312,6 @@ export type TokenId =
 			 * DIP721 token on the Internet Computer
 			 */
 			Dip721: Principal;
-	  }
-	| {
-			/**
-			 * ICRC-7 NFT collection on the Internet Computer
-			 */
-			Icrc7: Principal;
 	  };
 export type TokenSection = { Spam: null } | { Hidden: null };
 /**
