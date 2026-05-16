@@ -794,7 +794,8 @@ type Token = variant {
 	IcPunks : ExtV2Token;
 	Erc1155 : ErcToken;
 	Erc4626 : ErcToken;
-	Dip721 : ExtV2Token
+	Dip721 : ExtV2Token;
+	Icrc7 : ExtV2Token
 };
 type TokenAccountId = variant {
 	Btc : BtcAddress;
@@ -839,7 +840,9 @@ type TokenId = variant {
 	// ERC-4626 vault token on an EVM chain
 	Erc4626 : record { text; nat64 };
 	// DIP721 token on the Internet Computer
-	Dip721 : principal
+	Dip721 : principal;
+	// ICRC-7 NFT collection on the Internet Computer
+	Icrc7 : principal
 };
 type TokenSection = variant { Spam; Hidden };
 // Possible error conditions when topping up the cycles ledger.
