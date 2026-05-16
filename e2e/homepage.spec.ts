@@ -14,14 +14,10 @@ testWithII.beforeEach(async ({ page }) => {
 	await page.clock.install();
 });
 
-// TODO: E2E tests are failing and/or take too much time, we need to fix them slowly, so we skip them for now
-testWithII.skip(
-	'should display homepage in logged in state',
-	async ({ page, iiPage, isMobile }) => {
-		const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage, isMobile });
+testWithII('should display homepage in logged in state', async ({ page, iiPage, isMobile }) => {
+	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage, isMobile });
 
-		await homepageLoggedIn.waitForReady();
+	await homepageLoggedIn.waitForReady();
 
-		await homepageLoggedIn.takeScreenshot();
-	}
-);
+	await homepageLoggedIn.takeScreenshot();
+});
