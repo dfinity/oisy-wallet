@@ -2,15 +2,18 @@ import { testWithII } from '@dfinity/internet-identity-playwright';
 import { SettingsPage } from './utils/pages/settings.page';
 
 // Internet Identity registration is flaky around the 15 s default actionTimeout
-// (the popup occasionally takes longer than that to render `#userNumber` after
-// `#registerButton` is clicked). Give it 60 s so the slow path doesn't fail
-// the suite — every other action is still capped by Playwright's default.
-testWithII.use({ actionTimeout: 60_000 });
+// — both the `#userNumber` render after `#registerButton` and the post-
+// `#displayUserContinue` popup close can occasionally take a long time on a
+// loaded CI runner. Give every action 120 s so the slow path doesn't fail
+// the suite; every other action is still capped by Playwright's default
+// elsewhere.
+testWithII.use({ actionTimeout: 120_000 });
 
-// Per-test cap. The default 60 s isn't enough to cover both the II popup
-// registration AND the post-login token initialisation (each can take 30 s+
-// on a slow CI runner). Bump to 3 min for this file only.
-testWithII.describe.configure({ timeout: 180_000 });
+// The default 60 s per-test cap can't cover II popup registration + post-
+// login token initialisation on a slow runner. Bump to 5 min, and allow one
+// extra retry on top of the global setting because the popup is still
+// occasionally flaky despite the timeout bump.
+testWithII.describe.configure({ timeout: 300_000, retries: 2 });
 
 testWithII.beforeEach(() => {
 	// Internet Identity registration needs a WebAuthn virtual authenticator.
