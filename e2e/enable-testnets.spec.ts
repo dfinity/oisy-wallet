@@ -1,6 +1,12 @@
 import { testWithII } from '@dfinity/internet-identity-playwright';
 import { TestnetCases, TestnetsPage } from './utils/pages/testnets.page';
 
+// Internet Identity registration is flaky around the 15 s default actionTimeout
+// (the popup occasionally takes longer than that to render `#userNumber` after
+// `#registerButton` is clicked). Give it 60 s so the slow path doesn't fail
+// the suite — every other action is still capped by Playwright's default.
+testWithII.use({ actionTimeout: 60_000 });
+
 TestnetCases.forEach(({ networkSymbol, tokenSymbol }) => {
 	testWithII.beforeEach(async ({ page }) => {
 		// Internet Identity registration needs a WebAuthn virtual authenticator.
