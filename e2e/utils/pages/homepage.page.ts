@@ -662,10 +662,10 @@ export class HomepageLoggedIn extends Homepage {
 	async waitForReady(): Promise<void> {
 		await this.waitForAuthentication();
 
-		await this.waitForLoaderModal();
-
-		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
-
+		// Skip the "wait for `loader-modal` to appear then disappear" pattern:
+		// the loader can render and vanish faster than Playwright's poll, so
+		// waiting for `visible` deadlocks. `waitForContentReady()` checks the
+		// real destination (tokens initialised) directly.
 		await this.waitForContentReady();
 	}
 
