@@ -595,7 +595,11 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForHomepageReady();
 
-		await this.#iiPage.signInWithNewIdentity();
+		// `release-2024-10-25` of Internet Identity always shows the passkey
+		// construction step after `#registerButton` is clicked; without
+		// `createPasskey: true` the lib library skips that click and the
+		// popup hangs waiting for the user.
+		await this.#iiPage.signInWithNewIdentity({ createPasskey: true });
 	}
 
 	async checkIfStillLoggedIn(timeout = 10000): Promise<void> {
