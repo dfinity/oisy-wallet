@@ -8,6 +8,11 @@ import { HomepageLoggedIn, HomepageLoggedOut } from './utils/pages/homepage.page
 // the suite — every other action is still capped by Playwright's default.
 testWithII.use({ actionTimeout: 60_000 });
 
+// Per-test cap. The default 60 s isn't enough to cover both the II popup
+// registration AND the post-login token initialisation (each can take 30 s+
+// on a slow CI runner). Bump to 3 min for this file only.
+testWithII.describe.configure({ timeout: 180_000 });
+
 test('should display homepage in logged out state', async ({ page }) => {
 	const homepageLoggedOut = new HomepageLoggedOut({ page });
 
