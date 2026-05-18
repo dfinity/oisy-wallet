@@ -197,6 +197,20 @@
 		"screenshots": ["/images/dapps/decide-ai.webp"]
 	},
 	{
+		"id": "icp-flags",
+		"name": "dapps.descriptions.icp_flags.name",
+		"oneLiner": "dapps.descriptions.icp_flags.one_liner",
+		"callToAction": "dapps.descriptions.icp_flags.call_to_action",
+		"website": "https://icp-flags.fans/",
+		"openChat": "https://oc.app/community/uhnd7-niaaa-aaaac-becgq-cai/channel/1043641175/?ref=meaay-cyaaa-aaaar-azo3a-cai",
+		"tags": ["dapps.categories.game", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
+		"stats": "",
+		"description": "dapps.descriptions.icp_flags.description",
+		"usesInternetIdentity": true,
+		"logo": "/images/dapps/icp-flags-logo.webp",
+		"screenshots": ["/images/dapps/icp-flags-screenshot.webp"]
+	},
+	{
 		"id": "uniswap",
 		"name": "dapps.descriptions.uniswap.name",
 		"oneLiner": "dapps.descriptions.uniswap.one_liner",
