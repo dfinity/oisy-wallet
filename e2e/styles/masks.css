@@ -1,4 +1,5 @@
-/* TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.*/
+/* The promotion carousel auto-rotates and embeds dynamic dApp content, so it
+   is masked from screenshot diffs. */
 .carousel-container {
 	visibility: hidden;
 }

@@ -1648,7 +1648,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "Você ainda não adicionou contatos",
+			"contacts_empty_description": "Salve endereços conhecidos em Contatos e reduza o risco de usar acidentalmente um endereço errado.",
+			"contacts_empty_cta": "Adicionar seu primeiro contato"
 		},
 		"label": {
 			"reimbursement": "Reembolso",

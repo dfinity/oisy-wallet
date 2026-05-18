@@ -314,6 +314,7 @@ const loadSolTransactions = async ({
 	identity,
 	address,
 	tokenAddress,
+	before,
 	...rest
 }: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	try {
@@ -327,15 +328,25 @@ const loadSolTransactions = async ({
 				})
 			: undefined;
 
+		const storedTransactions = stored?.transactions ?? [];
+
+		const exitIfFirstSignatureMatches =
+			USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED &&
+			isNullish(before) &&
+			storedTransactions.length > 0 &&
+			nonNullish(storedTransactions[0]?.signature)
+				? String(storedTransactions[0].signature)
+				: undefined;
+
 		const newTransactions = await getSolTransactions({
 			network,
 			identity,
 			address,
 			tokenAddress,
+			before,
+			exitIfFirstSignatureMatches,
 			...rest
 		});
-
-		const storedTransactions = stored?.transactions ?? [];
 		const newestStoredSlot = stored?.newestBlockIndex;
 
 		// Filter RPC results to only include transactions from slots newer than the stored data.

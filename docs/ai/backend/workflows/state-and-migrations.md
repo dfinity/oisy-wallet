@@ -61,20 +61,19 @@ Three options, in order of preference:
    needed. This is the default; reach for it whenever possible.
 
 2. **In-place migration on `post_upgrade`.** Read the legacy data, write
-   the new shape, drop the legacy memory. The canonical example is
-   [`state/stored_token_migration.rs`](../../../../src/backend/src/state/stored_token_migration.rs)
-   used in `lib.rs::post_upgrade`:
+   the new shape, drop the legacy memory. Sketch:
 
    ```rust
    #[post_upgrade]
    pub fn post_upgrade(arg: Option<Arg>) {
-       // Phase 1: extract legacy entries BEFORE STATE is initialised.
-       let migrated = state::stored_token_migration::extract_legacy_token_activity();
+       // Phase 1: extract legacy entries BEFORE STATE is initialised,
+       // so STATE can reopen the same memory page with the new type.
+       let migrated = state::my_migration::extract_legacy_entries();
 
        match arg { … }
 
        // Phase 2: insert converted entries now that STATE owns the (empty) map.
-       state::stored_token_migration::insert_migrated_token_activity(migrated);
+       state::my_migration::insert_migrated_entries(migrated);
    }
    ```
 
@@ -85,7 +84,9 @@ Three options, in order of preference:
    - Write into the new `MemoryId`.
    - Leave the legacy `MemoryId` empty (do not reuse).
    - Add a `// TODO: remove migration after all canisters have been
-upgraded past this release.` comment so the cleanup is obvious.
+upgraded past this release.` comment so the cleanup is obvious, and
+     drop the module + `post_upgrade` wiring in a follow-up PR once the
+     rollout is complete.
 
 3. **Bumped `MemoryId` + parallel migration.** Define a new `MemoryId`
    for the new shape, populate it from the old one in `post_upgrade`,

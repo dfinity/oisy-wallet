@@ -340,6 +340,9 @@ export type BtcAddress =
 			 */
 			P2TR: string;
 	  };
+export type BtcGetFeePercentilesError = {
+	InternalError: { msg: string };
+};
 export interface BtcGetFeePercentilesRequest {
 	network: Network;
 }
@@ -357,7 +360,7 @@ export type BtcGetFeePercentilesResult =
 			/**
 			 * The fee was not selected due to an error.
 			 */
-			Err: SelectedUtxosFeeError;
+			Err: BtcGetFeePercentilesError;
 	  };
 export type BtcGetPendingTransactionsError =
 	| {
@@ -393,19 +396,6 @@ export type BtcGetPendingTransactionsResult =
 			 * The pending transactions were not retrieved due to an error.
 			 */
 			Err: BtcGetPendingTransactionsError;
-	  };
-export type BtcSelectUserUtxosFeeResult =
-	| {
-			/**
-			 * The fee was selected successfully.
-			 */
-			Ok: SelectedUtxosFeeResponse;
-	  }
-	| {
-			/**
-			 * The fee was not selected due to an error.
-			 */
-			Err: SelectedUtxosFeeError;
 	  };
 /**
  * Bitcoin transaction data.
@@ -466,7 +456,7 @@ export interface Config {
 	ecdsa_key_name: string;
 	/**
 	 * Chain Fusion Signer canister id. Used to derive the bitcoin address in
-	 * `btc_select_user_utxos_fee`
+	 * `btc_add_pending_transaction`.
 	 */
 	cfs_canister_id: [] | [Principal];
 	/**
@@ -935,7 +925,7 @@ export interface InitArg {
 	ecdsa_key_name: string;
 	/**
 	 * Chain Fusion Signer canister id. Used to derive the bitcoin address in
-	 * `btc_select_user_utxos_fee`
+	 * `btc_add_pending_transaction`.
 	 */
 	cfs_canister_id: [] | [Principal];
 	/**
@@ -1090,31 +1080,6 @@ export interface SaveUserTransactionsRequest {
 	transactions: Array<UserTransaction>;
 }
 export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
-export type SelectedUtxosFeeError =
-	| { PendingTransactions: null }
-	| {
-			/**
-			 * The provided II delegation chain is missing or failed verification.
-			 */
-			InvalidDelegationChain: { msg: string };
-	  }
-	| {
-			/**
-			 * The caller has exceeded the call rate limit.
-			 */
-			RateLimited: RateLimitError;
-	  }
-	| { InternalError: { msg: string } };
-export interface SelectedUtxosFeeRequest {
-	ii_delegation_chain: [] | [IIDelegationChain];
-	network: Network;
-	amount_satoshis: bigint;
-	min_confirmations: [] | [number];
-}
-export interface SelectedUtxosFeeResponse {
-	fee_satoshis: bigint;
-	utxos: Array<Utxo>;
-}
 export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
@@ -1637,16 +1602,6 @@ export interface _SERVICE {
 		[BtcGetPendingTransactionsRequest],
 		BtcGetPendingTransactionsResult
 	>;
-	/**
-	 * Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
-	 *
-	 * Requires a valid II delegation chain to verify the caller authenticated
-	 * through Internet Identity. Controllers bypass this check.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `SelectedUtxosFeeError`.
-	 */
-	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], BtcSelectUserUtxosFeeResult>;
 	/**
 	 * Gets the canister configuration.
 	 */

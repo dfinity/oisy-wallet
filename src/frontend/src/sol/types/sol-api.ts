@@ -12,6 +12,12 @@ export interface GetSolTransactionsParams {
 	tokenOwnerAddress?: SolAddress;
 	before?: string;
 	limit?: number;
+	/**
+	 * Head loads only (`before` unset): when set, compares to the first signature returned by
+	 * `fetchSignatures` (the newest page item). If they match, skips per-signature detail fetches.
+	 * Ignored when `before` is set — paginated pages are not global chain head.
+	 */
+	exitIfFirstSignatureMatches?: string;
 }
 
 export type LoadSolTransactionsParams = GetSolTransactionsParams & {

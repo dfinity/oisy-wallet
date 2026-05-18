@@ -272,6 +272,56 @@ describe('sol-wallet.scheduler', () => {
 					});
 				});
 
+				it('should reset the internal store after a fatal error so the next successful sync re-emits the full state', async () => {
+					await scheduler.start(startData);
+
+					await awaitJobExecution();
+
+					// Sanity check: the first sync populated the internal store.
+					expect(scheduler['store'].transactions).toEqual(
+						expectedSoLTransactions.reduce(
+							(acc, transaction) => ({
+								...acc,
+								[transaction.data.id]: transaction
+							}),
+							{}
+						)
+					);
+					expect(scheduler['store'].balance).toBeDefined();
+
+					// Force the next iteration to fail and exhaust retries.
+					const err = new Error('Failed to fetch');
+					spyLoadBalance.mockRejectedValue(err);
+
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+
+					expect(postMessageMock).toHaveBeenCalledWith({
+						msg: 'syncSolWalletError',
+						ref,
+						data: {
+							error: err
+						}
+					});
+
+					// After the fatal error, the in-memory store must be cleared so the worker
+					// can start fresh on the next tick (mirroring the listener-side UI reset).
+					expect(scheduler['store']).toEqual({
+						balance: undefined,
+						transactions: {}
+					});
+
+					// Recovery: the next successful sync must emit the wallet payload again,
+					// not just status messages, so the previously reset UI store is repopulated.
+					spyLoadBalance.mockResolvedValue(isSpl ? mockSplBalance : mockSolBalance);
+					postMessageMock.mockClear();
+
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+
+					expect(postMessageMock).toHaveBeenCalledWith(
+						mockPostMessage({ withTransactions: true, isSpl, ref })
+					);
+				});
+
 				it('should not post message when no new transactions or balance changes', async () => {
 					await scheduler.start(startData);
 

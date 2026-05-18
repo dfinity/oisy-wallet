@@ -1648,7 +1648,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "Zatím jste nepřidali žádné kontakty",
+			"contacts_empty_description": "Ukládejte si známé adresy do Kontaktů a snižte riziko, že omylem použijete nesprávnou adresu.",
+			"contacts_empty_cta": "Přidat první kontakt"
 		},
 		"label": {
 			"reimbursement": "Náhrada",

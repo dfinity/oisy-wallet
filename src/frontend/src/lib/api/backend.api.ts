@@ -17,7 +17,6 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
-	BtcSelectUserUtxosFeeParams,
 	CreateContactParams,
 	CreateUserProfileResponse,
 	DeleteContactParams,
@@ -30,7 +29,6 @@ import type {
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
-	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
 	UpdateUserExperimentalFeatureSettings,
@@ -123,15 +121,6 @@ export const getPendingBtcTransactions = async ({
 	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
 	return btcGetPendingTransactions(params);
-};
-
-export const selectUserUtxosFee = async ({
-	identity,
-	...params
-}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeOutcome> => {
-	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
-
-	return btcSelectUserUtxosFee(params);
 };
 
 export const getCurrentBtcFeePercentiles = async ({

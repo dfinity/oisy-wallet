@@ -239,13 +239,16 @@ type BtcAddress = variant {
 	// - `bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k`
 	P2TR : text
 };
+type BtcGetFeePercentilesError = variant {
+	InternalError : record { msg : text }
+};
 type BtcGetFeePercentilesRequest = record { network : Network };
 type BtcGetFeePercentilesResponse = record { fee_percentiles : vec nat64 };
 type BtcGetFeePercentilesResult = variant {
 	// The fee was selected successfully.
 	Ok : BtcGetFeePercentilesResponse;
 	// The fee was not selected due to an error.
-	Err : SelectedUtxosFeeError
+	Err : BtcGetFeePercentilesError
 };
 type BtcGetPendingTransactionsError = variant {
 	// The provided II delegation chain is missing or failed verification.
@@ -267,12 +270,6 @@ type BtcGetPendingTransactionsResult = variant {
 	Ok : BtcGetPendingTransactionsReponse;
 	// The pending transactions were not retrieved due to an error.
 	Err : BtcGetPendingTransactionsError
-};
-type BtcSelectUserUtxosFeeResult = variant {
-	// The fee was selected successfully.
-	Ok : SelectedUtxosFeeResponse;
-	// The fee was not selected due to an error.
-	Err : SelectedUtxosFeeError
 };
 // Bitcoin transaction data.
 type BtcTransactionData = record { fee : opt nat };
@@ -309,7 +306,7 @@ type Config = record {
 	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-	// `btc_select_user_utxos_fee`
+	// `btc_add_pending_transaction`.
 	cfs_canister_id : opt principal;
 	// A list of allowed callers to restrict access to endpoints that do not particularly check or
 	// use the `msg_caller()`
@@ -608,7 +605,7 @@ type InitArg = record {
 	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-	// `btc_select_user_utxos_fee`
+	// `btc_add_pending_transaction`.
 	cfs_canister_id : opt principal;
 	// A list of allowed callers to restrict access to endpoints that do not particularly check or
 	// use the `msg_caller()`
@@ -716,24 +713,6 @@ type SaveUserTransactionsRequest = record {
 	transactions : vec UserTransaction
 };
 type SaveUserTransactionsResult = variant { Ok; Err : UserTransactionError };
-type SelectedUtxosFeeError = variant {
-	PendingTransactions;
-	// The provided II delegation chain is missing or failed verification.
-	InvalidDelegationChain : record { msg : text };
-	// The caller has exceeded the call rate limit.
-	RateLimited : RateLimitError;
-	InternalError : record { msg : text }
-};
-type SelectedUtxosFeeRequest = record {
-	ii_delegation_chain : opt IIDelegationChain;
-	network : Network;
-	amount_satoshis : nat64;
-	min_confirmations : opt nat32
-};
-type SelectedUtxosFeeResponse = record {
-	fee_satoshis : nat64;
-	utxos : vec Utxo
-};
 type SetShowTestnetsRequest = record {
 	current_user_version : opt nat64;
 	show_testnets : bool
@@ -1070,16 +1049,6 @@ service : (Arg) -> {
 	// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
-	);
-	// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
-	//
-	// Requires a valid II delegation chain to verify the caller authenticated
-	// through Internet Identity. Controllers bypass this check.
-	//
-	// # Errors
-	// Errors are enumerated by: `SelectedUtxosFeeError`.
-	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
-		BtcSelectUserUtxosFeeResult
 	);
 	// Gets the canister configuration.
 	config : () -> (Config) query;

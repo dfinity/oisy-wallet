@@ -1648,7 +1648,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "Nie dodałeś jeszcze żadnych kontaktów",
+			"contacts_empty_description": "Zapisuj znane adresy w Kontaktach i zmniejsz ryzyko przypadkowego użycia niewłaściwego adresu.",
+			"contacts_empty_cta": "Dodaj pierwszy kontakt"
 		},
 		"label": {
 			"reimbursement": "Zwrot kosztów",

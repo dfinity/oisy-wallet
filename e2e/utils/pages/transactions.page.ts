@@ -1,8 +1,4 @@
-import {
-	CAROUSEL_SLIDE_NAVIGATION,
-	NO_TRANSACTIONS_PLACEHOLDER,
-	TOKEN_CARD
-} from '$lib/constants/test-ids.constants';
+import { NO_TRANSACTIONS_PLACEHOLDER, TOKEN_CARD } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 type TransactionsPageParams = HomepageLoggedInParams;
@@ -58,9 +54,6 @@ export class TransactionsPage extends HomepageLoggedIn {
 		await this.toggleNetworkSelector({ networkSymbol: networkId });
 		const testId = `${TOKEN_CARD}-${tokenSymbol}-${networkId}`;
 		await this.clickByTestId({ testId });
-		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
-			state: 'hidden'
-		});
 		if (waitForPlaceholder) {
 			await this.waitForByTestId({ testId: NO_TRANSACTIONS_PLACEHOLDER });
 		}

@@ -1648,7 +1648,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "아직 연락처를 추가하지 않으셨습니다",
+			"contacts_empty_description": "알고 있는 주소를 연락처에 저장하여 실수로 잘못된 주소를 사용할 위험을 줄이세요.",
+			"contacts_empty_cta": "첫 연락처 추가"
 		},
 		"label": {
 			"reimbursement": "환불",

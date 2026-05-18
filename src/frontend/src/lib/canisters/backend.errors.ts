@@ -1,10 +1,10 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
+	BtcGetFeePercentilesError,
 	BtcGetPendingTransactionsError,
 	GetAllowedCyclesError,
-	RateLimitError,
-	SelectedUtxosFeeError
+	RateLimitError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
@@ -89,30 +89,14 @@ export const mapBtcGetPendingTransactionsError = (
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetPendingTransactionsError'));
 };
 
-export const mapBtcSelectUserUtxosFeeError = (
-	err: SelectedUtxosFeeError
+export const mapBtcGetFeePercentilesError = (
+	err: BtcGetFeePercentilesError
 ): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
 	}
 
-	if ('PendingTransactions' in err) {
-		return new CanisterInternalError(
-			'Selecting utxos fee is not possible - pending transactions found.'
-		);
-	}
-
-	if ('RateLimited' in err) {
-		return mapRateLimitError(err.RateLimited);
-	}
-
-	if ('InvalidDelegationChain' in err) {
-		return new CanisterInternalError(
-			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
-		);
-	}
-
-	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetFeePercentilesError'));
 };
 
 export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterInternalError => {

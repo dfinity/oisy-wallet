@@ -75,6 +75,17 @@ export const mockCustomTokens: CustomToken[] = [
 	},
 	{
 		token: {
+			Icrc7: {
+				canister_id: Principal.fromText(mockIcrc7CanisterId)
+			}
+		},
+		version: toNullable(7n),
+		enabled: true,
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	},
+	{
+		token: {
 			SplDevnet: {
 				decimals: toNullable(18),
 				symbol: toNullable(),
