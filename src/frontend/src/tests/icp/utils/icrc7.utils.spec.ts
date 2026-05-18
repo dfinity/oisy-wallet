@@ -1,6 +1,11 @@
 import type { Value } from '$declarations/icrc7/icrc7.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { isTokenIcrc7, mapIcrc7CollectionMetadata, mapIcrc7Token } from '$icp/utils/icrc7.utils';
+import {
+	isTokenIcrc7,
+	isTokenIcrc7CustomToken,
+	mapIcrc7CollectionMetadata,
+	mapIcrc7Token
+} from '$icp/utils/icrc7.utils';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIcrc7CanisterId, mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
@@ -17,6 +22,32 @@ describe('icrc7.utils', () => {
 
 		it('should return false when standard is missing', () => {
 			expect(isTokenIcrc7({})).toBeFalsy();
+		});
+	});
+
+	describe('isTokenIcrc7CustomToken', () => {
+		it('should return true for a toggleable ICRC-7 token (has `enabled`)', () => {
+			expect(
+				isTokenIcrc7CustomToken({
+					...mockValidIcrc7Token,
+					version: undefined,
+					enabled: true
+				})
+			).toBeTruthy();
+		});
+
+		it('should return false for a non-toggleable ICRC-7 token (no `enabled`)', () => {
+			expect(isTokenIcrc7CustomToken(mockValidIcrc7Token)).toBeFalsy();
+		});
+
+		it('should return false for a non-ICRC-7 toggleable token', () => {
+			expect(
+				isTokenIcrc7CustomToken({
+					...mockValidIcPunksToken,
+					version: undefined,
+					enabled: true
+				})
+			).toBeFalsy();
 		});
 	});
 
