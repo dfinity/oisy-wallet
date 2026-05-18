@@ -1,7 +1,9 @@
 import type { Value } from '$declarations/icrc7/icrc7.did';
-import { isTokenIcrc7, mapIcrc7CollectionMetadata } from '$icp/utils/icrc7.utils';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { isTokenIcrc7, mapIcrc7CollectionMetadata, mapIcrc7Token } from '$icp/utils/icrc7.utils';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
-import { mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
+import { mockIcrc7CanisterId, mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
 
 describe('icrc7.utils', () => {
 	describe('isTokenIcrc7', () => {
@@ -85,6 +87,26 @@ describe('icrc7.utils', () => {
 
 		it('should return undefined for an empty entries array', () => {
 			expect(mapIcrc7CollectionMetadata([])).toBeUndefined();
+		});
+	});
+
+	describe('mapIcrc7Token', () => {
+		it('should map an EnvIcrc7Token into an Icrc7TokenWithoutId', () => {
+			expect(
+				mapIcrc7Token({
+					canisterId: mockIcrc7CanisterId,
+					metadata: { name: 'Cosmicrafts', symbol: 'CCC' }
+				})
+			).toEqual({
+				canisterId: mockIcrc7CanisterId,
+				network: ICP_NETWORK,
+				name: 'Cosmicrafts',
+				symbol: 'CCC',
+				decimals: 0,
+				standard: { code: 'icrc7' },
+				category: 'custom',
+				tags: DEFAULT_TOKEN_TAGS
+			});
 		});
 	});
 });

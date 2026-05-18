@@ -16,3 +16,5 @@ export const Icrc7TokenSchema = z.object({
 	...NonFungibleTokenAppearanceSchema.shape,
 	...Icrc7InterfaceSchema.shape
 });
+
+export const Icrc7TokenWithoutIdSchema = Icrc7TokenSchema.omit({ id: true }).strict();

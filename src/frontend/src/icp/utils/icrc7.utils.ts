@@ -1,10 +1,31 @@
 import type { Value } from '$declarations/icrc7/icrc7.did';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import type { EnvIcrc7Token } from '$env/types/env-icrc7-token';
 import type { IcToken } from '$icp/types/ic-token';
-import type { Icrc7Token } from '$icp/types/icrc7-token';
+import type { Icrc7Token, Icrc7TokenWithoutId } from '$icp/types/icrc7-token';
+import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { TokenMetadata } from '$lib/types/token';
 
 export const isTokenIcrc7 = (token: Partial<IcToken>): token is Icrc7Token =>
 	token.standard?.code === 'icrc7';
+
+export const mapIcrc7Token = ({
+	canisterId,
+	metadata: { name, symbol }
+}: EnvIcrc7Token): Icrc7TokenWithoutId => ({
+	canisterId,
+	network: ICP_NETWORK,
+	name,
+	symbol,
+	// ICRC-7 collections do not have a meaningful `decimals` (NFTs); kept at 0 to satisfy
+	// the shared `TokenSchema` shape — same convention as `mapIcPunksToken` / `mapDip721Token`.
+	decimals: 0,
+	standard: {
+		code: 'icrc7'
+	},
+	category: 'custom',
+	tags: DEFAULT_TOKEN_TAGS
+});
 
 // Standard collection-level metadata keys defined in ICRC-7.
 // Reference: https://github.com/dfinity/ICRC/blob/main/ICRCs/ICRC-7/ICRC-7.md#icrc7_collection_metadata
