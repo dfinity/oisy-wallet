@@ -26,7 +26,8 @@ const promises = Object.keys(canisters)
 				'llm',
 				'ext_v2_token',
 				'dip721',
-				'icpunks'
+				'icpunks',
+				'icrc7'
 			].includes(canister)
 	)
 	.map(deleteFolder);
