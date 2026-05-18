@@ -39,8 +39,7 @@ src/backend/src/
 │
 ├── state/              Stable state container + memory IDs
 │   ├── mod.rs          STATE thread_local + read_state / mutate_state / read_config
-│   ├── memory.rs       MemoryManager + per-collection MemoryId constants
-│   └── stored_token_migration.rs  Example of a one-shot migration helper
+│   └── memory.rs       MemoryManager + per-collection MemoryId constants
 │
 ├── types/              Canister-internal types + Storable wrappers
 │   ├── mod.rs
