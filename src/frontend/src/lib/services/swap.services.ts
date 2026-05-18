@@ -7,7 +7,7 @@ import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isTokenErc } from '$eth/utils/erc.utils';
-import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -1280,7 +1280,7 @@ export const fetchVeloraMarketSwap = async ({
 
 	const TokenTransferProxy = await sdk.swap.getSpender();
 
-	if (!isDefaultEthereumToken(sourceToken)) {
+	if (isNotDefaultEthereumToken(sourceToken)) {
 		await approveToken({
 			token: sourceToken,
 			from: userAddress,
