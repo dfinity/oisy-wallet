@@ -49,7 +49,8 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 		'BtcNativeTestnet' in id ||
 		'Erc1155' in id ||
 		'Erc4626' in id ||
-		'Dip721' in id
+		'Dip721' in id ||
+		'Icrc7' in id
 	) {
 		return;
 	}

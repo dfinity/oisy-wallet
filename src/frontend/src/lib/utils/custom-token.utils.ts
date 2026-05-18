@@ -6,6 +6,8 @@ import type {
 	ExtV2Token,
 	// The backend declarations are not exporting IcPunksToken because it is structurally identical to ExtV2Token
 	ExtV2Token as IcPunksToken,
+	// The backend declarations are not exporting Icrc7Token because it is structurally identical to ExtV2Token
+	ExtV2Token as Icrc7Token,
 	IcrcToken,
 	SplToken,
 	Token
@@ -17,6 +19,7 @@ import type {
 	ErcSaveCustomToken,
 	ExtSaveCustomToken,
 	IcPunksSaveCustomToken,
+	Icrc7SaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
@@ -48,6 +51,10 @@ const toDip721CustomToken = ({ canisterId }: Dip721SaveCustomToken): Dip721Token
 });
 
 const toIcPunksCustomToken = ({ canisterId }: IcPunksSaveCustomToken): IcPunksToken => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
+const toIcrc7CustomToken = ({ canisterId }: Icrc7SaveCustomToken): Icrc7Token => ({
 	canister_id: Principal.fromText(canisterId)
 });
 
@@ -93,6 +100,10 @@ export const toCustomToken = ({
 
 		if (networkKey === 'IcPunks') {
 			return { IcPunks: toIcPunksCustomToken(rest) };
+		}
+
+		if (networkKey === 'Icrc7') {
+			return { Icrc7: toIcrc7CustomToken(rest) };
 		}
 
 		if (networkKey === 'Erc20') {
