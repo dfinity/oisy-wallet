@@ -190,6 +190,12 @@
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
+	const swapEmitsApprovalSteps = $derived(
+		!isNearIntentsProvider &&
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
+			isNotDefaultEthereumToken($sourceToken)
+	);
+
 	const isTransferNeeded = $derived(isNearIntentsProvider);
 
 	const isGasless = $derived(
@@ -451,7 +457,7 @@
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 				<SwapProgress
-					sendWithApproval={isApproveNeeded}
+					sendWithApproval={swapEmitsApprovalSteps}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
 					swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
