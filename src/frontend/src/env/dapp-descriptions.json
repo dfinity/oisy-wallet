@@ -207,7 +207,7 @@
 		"stats": "",
 		"description": "dapps.descriptions.icp_flags.description",
 		"usesInternetIdentity": true,
-		"logo": "/images/dapps/icp-flags-logo.webp",
+		"logo": "/images/dapps/icp-flags-logo.svg",
 		"screenshots": ["/images/dapps/icp-flags-screenshot.webp"]
 	},
 	{
