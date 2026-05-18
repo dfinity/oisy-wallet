@@ -6,7 +6,6 @@ import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import { enabledEvmNetworksIds } from '$evm/derived/networks.derived';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
-import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -14,46 +13,59 @@ import { derived, type Readable } from 'svelte/store';
  */
 export const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
 	[erc20DefaultTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
-	([$erc20TokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
-		($erc20TokensStore ?? []).filter(({ network: { id: networkId } }) =>
-			[...$enabledEthereumNetworksIds, ...$enabledEvmNetworksIds].includes(networkId)
-		)
+	([$erc20TokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) => {
+		const enabledNetworkIds = new Set([
+			...$enabledEthereumNetworksIds,
+			...$enabledEvmNetworksIds
+		]);
+
+		return ($erc20TokensStore ?? []).filter(({ network: { id: networkId } }) =>
+			enabledNetworkIds.has(networkId)
+		);
+	}
 );
 
 export const erc20CustomTokens: Readable<Erc20CustomToken[]> = derived(
 	[erc20CustomTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
-	([$erc20CustomTokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
-		$erc20CustomTokensStore?.reduce<Erc20CustomToken[]>((acc, { data: token }) => {
-			const {
-				network: { id: networkId }
-			} = token;
+	([$erc20CustomTokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) => {
+		const enabledNetworkIds = new Set([
+			...$enabledEthereumNetworksIds,
+			...$enabledEvmNetworksIds
+		]);
 
-			if ([...$enabledEthereumNetworksIds, ...$enabledEvmNetworksIds].includes(networkId)) {
-				return [...acc, token];
-			}
+		return (
+			$erc20CustomTokensStore?.reduce<Erc20CustomToken[]>((acc, { data: token }) => {
+				if (enabledNetworkIds.has(token.network.id)) {
+					acc.push(token);
+				}
 
-			return acc;
-		}, []) ?? []
+				return acc;
+			}, []) ?? []
+		);
+	}
 );
 
 const erc20DefaultTokensToggleable: Readable<Erc20CustomToken[]> = derived(
 	[erc20DefaultTokens, erc20CustomTokens],
-	([$erc20DefaultTokens, $erc20CustomTokens]) =>
-		$erc20DefaultTokens.map(({ address, network, ...rest }) => {
-			const customToken = $erc20CustomTokens.find(
-				({ address: contractAddress, network: contractNetwork }) =>
-					contractAddress === address && network.chainId === contractNetwork.chainId
-			);
+	([$erc20DefaultTokens, $erc20CustomTokens]) => {
+		const customTokenByAddressAndChainId = new Map(
+			$erc20CustomTokens.map((token) => [
+				`${token.address}|${token.network.chainId}`,
+				token
+			])
+		);
 
-			return mapDefaultTokenToToggleable({
+		return $erc20DefaultTokens.map(({ address, network, ...rest }) =>
+			mapDefaultTokenToToggleable({
 				defaultToken: {
 					address,
 					network,
 					...rest
 				},
-				customToken
-			});
-		})
+				customToken: customTokenByAddressAndChainId.get(`${address}|${network.chainId}`)
+			})
+		);
+	}
 );
 
 /**
@@ -71,17 +83,19 @@ const enabledErc20DefaultTokens: Readable<Erc20CustomToken[]> = derived(
  */
 const erc20CustomTokensToggleable: Readable<Erc20CustomToken[]> = derived(
 	[erc20CustomTokens, erc20DefaultTokens],
-	([$erc20CustomTokens, $erc20DefaultTokens]) =>
-		$erc20CustomTokens.filter(({ address, network }) =>
-			isNullish(
-				$erc20DefaultTokens.find(
-					({ address: defaultAddress, network: defaultNetwork }) =>
-						mapAddressStartsWith0x(defaultAddress).toLowerCase() ===
-							mapAddressStartsWith0x(address).toLowerCase() &&
-						defaultNetwork.chainId === network.chainId
-				)
+	([$erc20CustomTokens, $erc20DefaultTokens]) => {
+		const defaultTokenKeys = new Set(
+			$erc20DefaultTokens.map(
+				({ address, network: { chainId } }) =>
+					`${mapAddressStartsWith0x(address).toLowerCase()}|${chainId}`
 			)
-		)
+		);
+
+		return $erc20CustomTokens.filter(
+			({ address, network: { chainId } }) =>
+				!defaultTokenKeys.has(`${mapAddressStartsWith0x(address).toLowerCase()}|${chainId}`)
+		);
+	}
 );
 
 const enabledErc20CustomTokens: Readable<Erc20CustomToken[]> = derived(

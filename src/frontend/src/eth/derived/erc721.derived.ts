@@ -9,18 +9,22 @@ import { derived, type Readable } from 'svelte/store';
  */
 export const erc721CustomTokens: Readable<Erc721CustomToken[]> = derived(
 	[erc721CustomTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
-	([$erc721CustomTokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
-		$erc721CustomTokensStore?.reduce<Erc721CustomToken[]>((acc, { data: token }) => {
-			const {
-				network: { id: networkId }
-			} = token;
+	([$erc721CustomTokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) => {
+		const enabledNetworkIds = new Set([
+			...$enabledEthereumNetworksIds,
+			...$enabledEvmNetworksIds
+		]);
 
-			if ([...$enabledEthereumNetworksIds, ...$enabledEvmNetworksIds].includes(networkId)) {
-				return [...acc, token];
-			}
+		return (
+			$erc721CustomTokensStore?.reduce<Erc721CustomToken[]>((acc, { data: token }) => {
+				if (enabledNetworkIds.has(token.network.id)) {
+					acc.push(token);
+				}
 
-			return acc;
-		}, []) ?? []
+				return acc;
+			}, []) ?? []
+		);
+	}
 );
 
 /**

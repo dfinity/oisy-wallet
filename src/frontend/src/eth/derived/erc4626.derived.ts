@@ -10,51 +10,63 @@ import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { enabledEvmNetworksIds } from '$evm/derived/networks.derived';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
-import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const erc4626DefaultTokens: Readable<Erc4626Token[]> = derived(
 	[erc4626DefaultTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
-	([$erc4626TokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
-		($erc4626TokensStore ?? []).filter(({ network: { id: networkId } }) =>
-			[...$enabledEthereumNetworksIds, ...$enabledEvmNetworksIds].includes(networkId)
-		)
+	([$erc4626TokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) => {
+		const enabledNetworkIds = new Set([
+			...$enabledEthereumNetworksIds,
+			...$enabledEvmNetworksIds
+		]);
+
+		return ($erc4626TokensStore ?? []).filter(({ network: { id: networkId } }) =>
+			enabledNetworkIds.has(networkId)
+		);
+	}
 );
 
 export const erc4626CustomTokens: Readable<Erc4626CustomToken[]> = derived(
 	[erc4626CustomTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
-	([$erc4626CustomTokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
-		$erc4626CustomTokensStore?.reduce<Erc4626CustomToken[]>((acc, { data: token }) => {
-			const {
-				network: { id: networkId }
-			} = token;
+	([$erc4626CustomTokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) => {
+		const enabledNetworkIds = new Set([
+			...$enabledEthereumNetworksIds,
+			...$enabledEvmNetworksIds
+		]);
 
-			if ([...$enabledEthereumNetworksIds, ...$enabledEvmNetworksIds].includes(networkId)) {
-				return [...acc, token];
-			}
+		return (
+			$erc4626CustomTokensStore?.reduce<Erc4626CustomToken[]>((acc, { data: token }) => {
+				if (enabledNetworkIds.has(token.network.id)) {
+					acc.push(token);
+				}
 
-			return acc;
-		}, []) ?? []
+				return acc;
+			}, []) ?? []
+		);
+	}
 );
 
 const erc4626DefaultTokensToggleable: Readable<Erc4626CustomToken[]> = derived(
 	[erc4626DefaultTokens, erc4626CustomTokens],
-	([$erc4626DefaultTokens, $erc4626CustomTokens]) =>
-		$erc4626DefaultTokens.map(({ address, network, ...rest }) => {
-			const customToken = $erc4626CustomTokens.find(
-				({ address: contractAddress, network: contractNetwork }) =>
-					contractAddress === address && network.chainId === contractNetwork.chainId
-			);
+	([$erc4626DefaultTokens, $erc4626CustomTokens]) => {
+		const customTokenByAddressAndChainId = new Map(
+			$erc4626CustomTokens.map((token) => [
+				`${token.address}|${token.network.chainId}`,
+				token
+			])
+		);
 
-			return mapDefaultTokenToToggleable({
+		return $erc4626DefaultTokens.map(({ address, network, ...rest }) =>
+			mapDefaultTokenToToggleable({
 				defaultToken: {
 					address,
 					network,
 					...rest
 				},
-				customToken
-			});
-		})
+				customToken: customTokenByAddressAndChainId.get(`${address}|${network.chainId}`)
+			})
+		);
+	}
 );
 
 const enabledErc4626DefaultTokens: Readable<Erc4626CustomToken[]> = derived(
@@ -65,17 +77,19 @@ const enabledErc4626DefaultTokens: Readable<Erc4626CustomToken[]> = derived(
 
 const erc4626CustomTokensToggleable: Readable<Erc4626CustomToken[]> = derived(
 	[erc4626CustomTokens, erc4626DefaultTokens],
-	([$erc4626CustomTokens, $erc4626DefaultTokens]) =>
-		$erc4626CustomTokens.filter(({ address, network }) =>
-			isNullish(
-				$erc4626DefaultTokens.find(
-					({ address: defaultAddress, network: defaultNetwork }) =>
-						mapAddressStartsWith0x(defaultAddress).toLowerCase() ===
-							mapAddressStartsWith0x(address).toLowerCase() &&
-						defaultNetwork.chainId === network.chainId
-				)
+	([$erc4626CustomTokens, $erc4626DefaultTokens]) => {
+		const defaultTokenKeys = new Set(
+			$erc4626DefaultTokens.map(
+				({ address, network: { chainId } }) =>
+					`${mapAddressStartsWith0x(address).toLowerCase()}|${chainId}`
 			)
-		)
+		);
+
+		return $erc4626CustomTokens.filter(
+			({ address, network: { chainId } }) =>
+				!defaultTokenKeys.has(`${mapAddressStartsWith0x(address).toLowerCase()}|${chainId}`)
+		);
+	}
 );
 
 const enabledErc4626CustomTokens: Readable<Erc4626CustomToken[]> = derived(
