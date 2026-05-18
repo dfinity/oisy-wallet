@@ -157,15 +157,12 @@ export const idlFactory = ({ IDL }) => {
 	const BtcGetFeePercentilesResponse = IDL.Record({
 		fee_percentiles: IDL.Vec(IDL.Nat64)
 	});
-	const SelectedUtxosFeeError = IDL.Variant({
-		PendingTransactions: IDL.Null,
-		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
-		RateLimited: RateLimitError,
+	const BtcGetFeePercentilesError = IDL.Variant({
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetFeePercentilesResult = IDL.Variant({
 		Ok: BtcGetFeePercentilesResponse,
-		Err: SelectedUtxosFeeError
+		Err: BtcGetFeePercentilesError
 	});
 	const BtcGetPendingTransactionsRequest = IDL.Record({
 		ii_delegation_chain: IDL.Opt(IIDelegationChain),
@@ -187,20 +184,6 @@ export const idlFactory = ({ IDL }) => {
 	const BtcGetPendingTransactionsResult = IDL.Variant({
 		Ok: BtcGetPendingTransactionsReponse,
 		Err: BtcGetPendingTransactionsError
-	});
-	const SelectedUtxosFeeRequest = IDL.Record({
-		ii_delegation_chain: IDL.Opt(IIDelegationChain),
-		network: Network,
-		amount_satoshis: IDL.Nat64,
-		min_confirmations: IDL.Opt(IDL.Nat32)
-	});
-	const SelectedUtxosFeeResponse = IDL.Record({
-		fee_satoshis: IDL.Nat64,
-		utxos: IDL.Vec(Utxo)
-	});
-	const BtcSelectUserUtxosFeeResult = IDL.Variant({
-		Ok: SelectedUtxosFeeResponse,
-		Err: SelectedUtxosFeeError
 	});
 	const Config = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
@@ -421,6 +404,7 @@ export const idlFactory = ({ IDL }) => {
 		SolNativeDevnet: IDL.Null,
 		Icrc: IDL.Principal,
 		EvmNative: IDL.Nat64,
+		Icrc7: IDL.Principal,
 		BtcNativeMainnet: IDL.Null,
 		Erc721: IDL.Tuple(IDL.Text, IDL.Nat64),
 		SolNativeMainnet: IDL.Null,
@@ -566,6 +550,7 @@ export const idlFactory = ({ IDL }) => {
 		Erc20: ErcToken,
 		ExtV2: ExtV2Token,
 		Icrc: IcrcToken,
+		Icrc7: ExtV2Token,
 		Erc721: ErcToken,
 		SplDevnet: SplToken,
 		SplMainnet: SplToken,
@@ -681,11 +666,6 @@ export const idlFactory = ({ IDL }) => {
 		btc_get_pending_transactions: IDL.Func(
 			[BtcGetPendingTransactionsRequest],
 			[BtcGetPendingTransactionsResult],
-			[]
-		),
-		btc_select_user_utxos_fee: IDL.Func(
-			[SelectedUtxosFeeRequest],
-			[BtcSelectUserUtxosFeeResult],
 			[]
 		),
 		config: IDL.Func([], [Config]),

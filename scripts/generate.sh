@@ -63,6 +63,8 @@ DFX_NETWORK=ic ./scripts/build.ext_v2_token.sh
 DFX_NETWORK=ic ./scripts/build.dip721.sh
 # .. downloads candid for the icpunks
 DFX_NETWORK=ic ./scripts/build.icpunks.sh
+# .. downloads candid for icrc7
+DFX_NETWORK=ic ./scripts/build.icrc7.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings

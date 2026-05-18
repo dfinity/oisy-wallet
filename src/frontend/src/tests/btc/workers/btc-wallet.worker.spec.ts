@@ -287,6 +287,39 @@ describe('btc-wallet.worker', () => {
 						}
 					});
 				});
+
+				it('should reset the internal store when emitting an error so the next successful sync re-emits', async () => {
+					await scheduler.start(startData);
+
+					await awaitJobExecution();
+
+					// Sanity check: the first sync populated the internal store.
+					expect(scheduler['store'].balance).toBeDefined();
+
+					// Force three consecutive update failures to cross the FAILURE_THRESHOLD.
+					const err = new Error('Failed to fetch');
+					signerCanisterMock.getBtcBalance.mockRejectedValue(err);
+
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+					expect(postMessageMock).toHaveBeenCalledWith({
+						ref,
+						msg: 'syncBtcWalletError',
+						data: {
+							error: err
+						}
+					});
+
+					// After the fatal error, the in-memory store must be cleared so the next tick
+					// behaves like an initial sync (mirroring the listener-side UI reset).
+					expect(scheduler['store']).toEqual({
+						balance: undefined,
+						transactions: {},
+						latestBitcoinBlockHeight: undefined
+					});
+				});
 			}
 		};
 	};

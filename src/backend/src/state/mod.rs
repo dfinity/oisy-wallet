@@ -24,7 +24,6 @@ use crate::{
 };
 
 pub(crate) mod memory;
-pub(crate) mod stored_token_migration;
 
 pub(crate) struct State {
     pub(crate) config: ConfigCell,

@@ -92,8 +92,6 @@ export class FlowPage extends HomepageLoggedIn {
 	async navigateToActivity(): Promise<void> {
 		await this.navigateTo({ testId: NAVIGATION_ITEM_ACTIVITY, expectedPath: AppPath.Activity });
 
-		await new Promise((resolve) => setTimeout(resolve, 5000));
-
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
 		});
@@ -116,8 +114,6 @@ export class FlowPage extends HomepageLoggedIn {
 			testId: this.getTokenCardTestId({ tokenSymbol, networkSymbol }),
 			expectedPath: AppPath.Transactions
 		});
-
-		await new Promise((resolve) => setTimeout(resolve, 1000));
 
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'

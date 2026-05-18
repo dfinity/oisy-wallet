@@ -8,6 +8,7 @@ export interface BtcTransactionUi extends Omit<TransactionUiCommon, 'to'> {
 	type: BtcTransactionType;
 	status: BtcTransactionStatus;
 	value?: bigint;
+	fee?: bigint;
 	confirmations?: number;
 
 	// BTC transaction can have multiple recipients

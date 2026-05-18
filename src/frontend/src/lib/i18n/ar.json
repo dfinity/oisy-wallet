@@ -1647,7 +1647,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "لم تضف أي جهات اتصال بعد",
+			"contacts_empty_description": "احفظ العناوين المعروفة في جهات الاتصال وقلّل من خطر استخدام عنوان خاطئ عن طريق الخطأ.",
+			"contacts_empty_cta": "أضف أول جهة اتصال لك"
 		},
 		"label": {
 			"reimbursement": "تعويض",
