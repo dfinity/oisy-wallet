@@ -479,7 +479,7 @@
 				"call_to_action": "Come find me when you're ready...",
 				"description": "Where in the World is Motoko Tokyo is a global, blockchain‑powered puzzle adventure built on the Internet Computer Protocol (ICP). Join an exclusive agency and collaborate with players worldwide to unravel a series of cryptic riddles. Every successful solution brings you one step closer to tracking down Motoko Tokyo. In each round, the first player to solve all riddles claims the bounty and secures a coveted spot on the leaderboard."
 			},
-			"icp-flags": {
+			"icp_flags": {
 				"name": "icp-flags",
 				"one_liner": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions.",
 				"call_to_action": "Fun with Flags!",
