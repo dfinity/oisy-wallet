@@ -44,6 +44,8 @@ pub enum TokenId {
     Dip721(CanisterId) = 14,
     /// ICPunks-compatible token on the Internet Computer
     IcPunks(CanisterId) = 15,
+    /// ICRC-7 NFT collection on the Internet Computer
+    Icrc7(CanisterId) = 16,
 }
 
 impl From<&Token> for TokenId {
@@ -59,6 +61,7 @@ impl From<&Token> for TokenId {
             Token::ExtV2(t) => Self::ExtV2(t.canister_id),
             Token::Dip721(t) => Self::Dip721(t.canister_id),
             Token::IcPunks(t) => Self::IcPunks(t.canister_id),
+            Token::Icrc7(t) => Self::Icrc7(t.canister_id),
         }
     }
 }
@@ -76,6 +79,7 @@ impl From<&CustomTokenId> for TokenId {
             CustomTokenId::ExtV2(id) => Self::ExtV2(*id),
             CustomTokenId::Dip721(id) => Self::Dip721(*id),
             CustomTokenId::IcPunks(id) => Self::IcPunks(*id),
+            CustomTokenId::Icrc7(id) => Self::Icrc7(*id),
         }
     }
 }

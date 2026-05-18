@@ -5,7 +5,7 @@ use pretty_assertions::assert_eq;
 use shared::types::{
     custom_token::{
         ChainId, CustomToken, Dip721Token, ErcToken, ErcTokenId, ExtV2Token, IcPunksToken,
-        IcrcToken, SplToken, SplTokenId, Token,
+        Icrc7Token, IcrcToken, SplToken, SplTokenId, Token,
     },
     Stats, TokenVersion,
 };
@@ -139,6 +139,15 @@ static ICPUNKS_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     section: None,
     allow_external_content_source: None,
 });
+static ICRC7_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Icrc7(Icrc7Token {
+        canister_id: Principal::from_text("xea2t-daaaa-aaaaj-qnp2a-cai").unwrap(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
         USER_TOKEN.clone(),
@@ -151,6 +160,7 @@ static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
         EXT_V2_TOKEN.clone(),
         DIP721_TOKEN.clone(),
         ICPUNKS_TOKEN.clone(),
+        ICRC7_TOKEN.clone(),
     ]
 });
 
@@ -241,6 +251,11 @@ fn test_remove_custom_di721_token() {
 #[test]
 fn test_remove_custom_icpunks_token() {
     test_remove_custom_token(&ICPUNKS_TOKEN);
+}
+
+#[test]
+fn test_remove_custom_icrc7_token() {
+    test_remove_custom_token(&ICRC7_TOKEN);
 }
 
 #[test]
