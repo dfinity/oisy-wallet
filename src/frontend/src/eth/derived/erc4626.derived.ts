@@ -15,10 +15,7 @@ import { derived, type Readable } from 'svelte/store';
 export const erc4626DefaultTokens: Readable<Erc4626Token[]> = derived(
 	[erc4626DefaultTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
 	([$erc4626TokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) => {
-		const enabledNetworkIds = new Set([
-			...$enabledEthereumNetworksIds,
-			...$enabledEvmNetworksIds
-		]);
+		const enabledNetworkIds = new Set([...$enabledEthereumNetworksIds, ...$enabledEvmNetworksIds]);
 
 		return ($erc4626TokensStore ?? []).filter(({ network: { id: networkId } }) =>
 			enabledNetworkIds.has(networkId)
@@ -29,10 +26,7 @@ export const erc4626DefaultTokens: Readable<Erc4626Token[]> = derived(
 export const erc4626CustomTokens: Readable<Erc4626CustomToken[]> = derived(
 	[erc4626CustomTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
 	([$erc4626CustomTokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) => {
-		const enabledNetworkIds = new Set([
-			...$enabledEthereumNetworksIds,
-			...$enabledEvmNetworksIds
-		]);
+		const enabledNetworkIds = new Set([...$enabledEthereumNetworksIds, ...$enabledEvmNetworksIds]);
 
 		return (
 			$erc4626CustomTokensStore?.reduce<Erc4626CustomToken[]>((acc, { data: token }) => {
@@ -50,10 +44,7 @@ const erc4626DefaultTokensToggleable: Readable<Erc4626CustomToken[]> = derived(
 	[erc4626DefaultTokens, erc4626CustomTokens],
 	([$erc4626DefaultTokens, $erc4626CustomTokens]) => {
 		const customTokenByAddressAndChainId = new Map(
-			$erc4626CustomTokens.map((token) => [
-				`${token.address}|${token.network.chainId}`,
-				token
-			])
+			$erc4626CustomTokens.map((token) => [`${token.address}|${token.network.chainId}`, token])
 		);
 
 		return $erc4626DefaultTokens.map(({ address, network, ...rest }) =>
