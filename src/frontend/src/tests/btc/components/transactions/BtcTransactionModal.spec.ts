@@ -81,4 +81,30 @@ describe('BtcTransactionModal', () => {
 		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
 		expect(getByText(BTC_MAINNET_TOKEN.network.name)).toBeInTheDocument();
 	});
+
+	it('should display fee when present', () => {
+		const fee = 1019n;
+		const { getByText } = render(BtcTransactionModal, {
+			transaction: { ...mockBtcTransactionUi, type: 'send', fee },
+			token: BTC_MAINNET_TOKEN
+		});
+
+		const formattedFee = `${formatToken({
+			value: fee,
+			unitName: BTC_MAINNET_TOKEN.decimals,
+			displayDecimals: BTC_MAINNET_TOKEN.decimals
+		})} ${BTC_MAINNET_TOKEN.symbol}`;
+
+		expect(getByText(get(i18n).fee.text.fee)).toBeInTheDocument();
+		expect(getByText(formattedFee)).toBeInTheDocument();
+	});
+
+	it('should not display fee when nullish', () => {
+		const { queryByText } = render(BtcTransactionModal, {
+			transaction: { ...mockBtcTransactionUi, fee: undefined },
+			token: BTC_MAINNET_TOKEN
+		});
+
+		expect(queryByText(get(i18n).fee.text.fee)).not.toBeInTheDocument();
+	});
 });
