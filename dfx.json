@@ -578,6 +578,12 @@
 			"candid": "target/dip721.did",
 			"wasm": "target/dip721.wasm.gz"
 		},
+		"icrc7": {
+			"type": "custom",
+			"build": "scripts/build.icrc7.sh",
+			"candid": "target/icrc7.did",
+			"wasm": "target/icrc7.wasm.gz"
+		},
 		"icpunks": {
 			"type": "custom",
 			"build": "scripts/build.icpunks.sh",
