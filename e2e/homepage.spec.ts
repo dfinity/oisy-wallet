@@ -2,13 +2,12 @@ import { testWithII } from '@dfinity/internet-identity-playwright';
 import { test } from '@playwright/test';
 import { HomepageLoggedIn, HomepageLoggedOut } from './utils/pages/homepage.page';
 
-// Internet Identity registration is flaky around the 15 s default actionTimeout
-// — both the `#userNumber` render after `#registerButton` and the post-
-// `#displayUserContinue` popup close can occasionally take a long time on a
-// loaded CI runner. Give every action 120 s so the slow path doesn't fail
-// the suite; every other action is still capped by Playwright's default
-// elsewhere.
-testWithII.use({ actionTimeout: 120_000 });
+// Internet Identity registration can be slow on a loaded CI runner: each
+// passkey creation step and the post-login token initialisation occasionally
+// brush against the 15 s default actionTimeout. Give every action 60 s so the
+// slow path doesn't fail the suite; every other action is still capped by
+// Playwright's default elsewhere.
+testWithII.use({ actionTimeout: 60_000 });
 
 // The default 60 s per-test cap can't cover II popup registration + post-
 // login token initialisation on a slow runner. Bump to 5 min, and allow one
@@ -28,8 +27,8 @@ testWithII.beforeEach(async ({ page }) => {
 	// Internet Identity registration needs a WebAuthn virtual authenticator.
 	// Playwright only ships one for desktop Chromium; Firefox has no such API,
 	// and the Pixel 7 mobile emulation triggers an alternate II popup flow we
-	// don't drive. Skip those projects rather than hang on the `#userNumber`
-	// locator until `actionTimeout` fires.
+	// don't drive. Skip those projects rather than hang on the passkey UI
+	// until `actionTimeout` fires.
 	const testInfo = testWithII.info();
 	testInfo.skip(
 		testInfo.project.name !== 'Google Chrome',
