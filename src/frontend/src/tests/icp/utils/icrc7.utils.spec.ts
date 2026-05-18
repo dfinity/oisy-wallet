@@ -26,14 +26,11 @@ describe('icrc7.utils', () => {
 	});
 
 	describe('isTokenIcrc7CustomToken', () => {
+		const toggleableIcrc7Token = { ...mockValidIcrc7Token, enabled: true };
+		const toggleableIcPunksToken = { ...mockValidIcPunksToken, enabled: true };
+
 		it('should return true for a toggleable ICRC-7 token (has `enabled`)', () => {
-			expect(
-				isTokenIcrc7CustomToken({
-					...mockValidIcrc7Token,
-					version: undefined,
-					enabled: true
-				})
-			).toBeTruthy();
+			expect(isTokenIcrc7CustomToken(toggleableIcrc7Token)).toBeTruthy();
 		});
 
 		it('should return false for a non-toggleable ICRC-7 token (no `enabled`)', () => {
@@ -41,13 +38,7 @@ describe('icrc7.utils', () => {
 		});
 
 		it('should return false for a non-ICRC-7 toggleable token', () => {
-			expect(
-				isTokenIcrc7CustomToken({
-					...mockValidIcPunksToken,
-					version: undefined,
-					enabled: true
-				})
-			).toBeFalsy();
+			expect(isTokenIcrc7CustomToken(toggleableIcPunksToken)).toBeFalsy();
 		});
 	});
 
