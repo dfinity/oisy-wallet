@@ -84,7 +84,7 @@ Three options, in order of preference:
    - Write into the new `MemoryId`.
    - Leave the legacy `MemoryId` empty (do not reuse).
    - Add a `// TODO: remove migration after all canisters have been
-     upgraded past this release.` comment so the cleanup is obvious, and
+upgraded past this release.` comment so the cleanup is obvious, and
      drop the module + `post_upgrade` wiring in a follow-up PR once the
      rollout is complete.
 
