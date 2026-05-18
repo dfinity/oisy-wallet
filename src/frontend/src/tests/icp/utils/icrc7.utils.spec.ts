@@ -114,4 +114,24 @@ describe('icrc7.utils', () => {
 			});
 		});
 	});
+
+	describe('mapIcrc7Token', () => {
+		it('should map an EnvIcrc7Token into an Icrc7TokenWithoutId', () => {
+			expect(
+				mapIcrc7Token({
+					canisterId: mockIcrc7CanisterId,
+					metadata: { name: 'Cosmicrafts', symbol: 'CCC' }
+				})
+			).toEqual({
+				canisterId: mockIcrc7CanisterId,
+				network: ICP_NETWORK,
+				name: 'Cosmicrafts',
+				symbol: 'CCC',
+				decimals: 0,
+				standard: { code: 'icrc7' },
+				category: 'custom',
+				tags: DEFAULT_TOKEN_TAGS
+			});
+		});
+	});
 });

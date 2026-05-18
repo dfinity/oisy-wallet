@@ -154,7 +154,7 @@ vi.mock('$eth/utils/eip712.utils', () => ({
 }));
 
 vi.mock('$eth/utils/eth.utils', () => ({
-	isDefaultEthereumToken: vi.fn(() => false)
+	isNotDefaultEthereumToken: vi.fn(() => true)
 }));
 
 vi.mock('$lib/api/signer.api', () => ({
@@ -1132,7 +1132,7 @@ describe('swap.services', () => {
 		});
 
 		it('should execute market swap successfully with default Ethereum token', async () => {
-			vi.mocked(ethUtils.isDefaultEthereumToken).mockReturnValue(true);
+			vi.mocked(ethUtils.isNotDefaultEthereumToken).mockReturnValue(false);
 
 			await fetchVeloraMarketSwap({
 				identity: mockIdentity,
