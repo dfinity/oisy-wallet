@@ -1,8 +1,6 @@
 use candid::{CandidType, Deserialize};
 
-use super::custom_token::{
-    CanisterId, ChainId, CustomTokenId, ErcTokenId, LedgerId, SplTokenId, Token,
-};
+use super::custom_token::{CanisterId, ChainId, ErcTokenId, LedgerId, SplTokenId, Token};
 
 /// A unified token identifier covering both native and custom tokens for the main supported chains.
 /// Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
@@ -59,23 +57,6 @@ impl From<&Token> for TokenId {
             Token::ExtV2(t) => Self::ExtV2(t.canister_id),
             Token::Dip721(t) => Self::Dip721(t.canister_id),
             Token::IcPunks(t) => Self::IcPunks(t.canister_id),
-        }
-    }
-}
-
-/// Lossy conversion: `CustomTokenId::Ethereum` always maps to `TokenId::Erc20` because
-/// `CustomTokenId` does not distinguish ERC sub-standards.  Used only by the one-shot
-/// stable-memory migration where the richer `Token` type is unavailable.
-impl From<&CustomTokenId> for TokenId {
-    fn from(id: &CustomTokenId) -> Self {
-        match id {
-            CustomTokenId::Icrc(ledger) => Self::Icrc(*ledger),
-            CustomTokenId::Ethereum(addr, chain_id) => Self::Erc20(addr.clone(), *chain_id),
-            CustomTokenId::SolMainnet(addr) => Self::SplMainnet(addr.clone()),
-            CustomTokenId::SolDevnet(addr) => Self::SplDevnet(addr.clone()),
-            CustomTokenId::ExtV2(id) => Self::ExtV2(*id),
-            CustomTokenId::Dip721(id) => Self::Dip721(*id),
-            CustomTokenId::IcPunks(id) => Self::IcPunks(*id),
         }
     }
 }
