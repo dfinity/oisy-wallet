@@ -202,13 +202,8 @@ const initAuthStore = (): AuthStore => {
 					? InternetIdentityDomain.VERSION_2_0
 					: domain;
 
-			// `@icp-sdk/auth` v6 relies on ICRC-29 `PostMessageTransport` (heartbeat
-			// + JSON-RPC), which Internet Identity serves from `/authorize`. The
-			// root `/` on `id.ai` returns the marketing landing page, and the
-			// local II canister (since the routing refactor in #3387) only mounts
-			// the ICRC-29 handler on the `(new-styling)/authorize` route; without
-			// `/authorize` the heartbeat handshake silently times out, which is
-			// why sign-in appeared to do nothing after the v4 → v6 migration.
+			// II only mounts the ICRC-29 handler on `/authorize`; the root path
+			// silently times out the heartbeat handshake.
 			const identityProvider =
 				nonNullish(INTERNET_IDENTITY_CANISTER_ID) && isNullish(openIdProvider)
 					? /apple/i.test(navigator?.vendor)

@@ -595,11 +595,6 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForHomepageReady();
 
-		// v3 of `@dfinity/internet-identity-playwright` targets the redesigned
-		// II UI used by all releases since `release-2026-01-16` and auto-detects
-		// first-time vs. existing passkey flows; v2 only knew about the legacy
-		// `#registerButton` / `#displayUserContinue` selectors and is no longer
-		// driveable against ICRC-29-capable II canisters.
 		await this.#iiPage.signIn();
 	}
 
