@@ -143,15 +143,14 @@
 				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
 
 		if (type === 'withdraw') {
-			return replacePlaceholders(
-				pending
-					? $i18n.transaction.label.converting_ck_token
-					: $i18n.transaction.label.ck_token_converted,
-				{
+			if (pending) {
+				return replacePlaceholders($i18n.transaction.label.converting_ck_token, {
 					$twinToken: token?.symbol ?? '',
 					$ckToken: ckTokenSymbol
-				}
-			);
+				});
+			}
+
+			return $i18n.receive.text.receive;
 		}
 
 		if (type === 'deposit') {
