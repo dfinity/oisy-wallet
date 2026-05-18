@@ -1155,6 +1155,7 @@ export type Token =
 	| { Erc20: ErcToken }
 	| { ExtV2: ExtV2Token }
 	| { Icrc: IcrcToken }
+	| { Icrc7: ExtV2Token }
 	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken }
@@ -1204,6 +1205,12 @@ export type TokenId =
 			 * Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
 			 */
 			EvmNative: bigint;
+	  }
+	| {
+			/**
+			 * ICRC-7 NFT collection on the Internet Computer
+			 */
+			Icrc7: Principal;
 	  }
 	| {
 			/**
