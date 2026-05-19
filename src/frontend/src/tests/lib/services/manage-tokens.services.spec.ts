@@ -1,3 +1,5 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -13,13 +15,21 @@ import {
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import { saveTokens } from '$lib/services/manage-tokens.services';
+import { trackTokenManage } from '$lib/services/token-manage-analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
+}));
+
+vi.mock('$lib/services/token-manage-analytics.services', () => ({
+	trackTokenManage: vi.fn()
 }));
 
 describe('manage-tokens.services', () => {
@@ -108,6 +118,62 @@ describe('manage-tokens.services', () => {
 						source: MANAGE_TOKENS_MODAL_ROUTE
 					}
 				});
+
+				expect(trackTokenManage).toHaveBeenNthCalledWith(index + 1, {
+					modifier: token.enabled ? 'enable' : 'disable',
+					token: {
+						network: token.network.id.description,
+						address:
+							'address' in token
+								? token.address
+								: 'ledgerCanisterId' in token
+									? token.ledgerCanisterId
+									: token.id.description,
+						symbol: token.symbol,
+						name: token.name
+					},
+					sourceLocation: 'manage_tokens',
+					resultStatus: 'success'
+				});
+			});
+		});
+
+		it('should derive token_manage network fields for backend custom-token variants', async () => {
+			const customTokens: SaveCustomTokenWithKey[] = [
+				{
+					enabled: true,
+					networkKey: 'Icrc7',
+					canisterId: mockIcrc7CanisterId
+				},
+				{
+					enabled: false,
+					networkKey: 'Erc20',
+					address: mockEthAddress,
+					chainId: ETHEREUM_NETWORK.chainId
+				}
+			];
+
+			mockSave.mockResolvedValueOnce(undefined);
+
+			await saveTokens({ ...params, tokens: customTokens });
+
+			expect(trackTokenManage).toHaveBeenNthCalledWith(1, {
+				modifier: 'enable',
+				token: {
+					network: ICP_NETWORK_ID.description,
+					address: mockIcrc7CanisterId
+				},
+				sourceLocation: 'manage_tokens',
+				resultStatus: 'success'
+			});
+			expect(trackTokenManage).toHaveBeenNthCalledWith(2, {
+				modifier: 'disable',
+				token: {
+					network: ETHEREUM_NETWORK.id.description,
+					address: mockEthAddress
+				},
+				sourceLocation: 'manage_tokens',
+				resultStatus: 'success'
 			});
 		});
 
