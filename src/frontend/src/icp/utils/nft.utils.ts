@@ -1,16 +1,18 @@
 import type { TokenIndex } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { metadata as getIcPunksMetadata } from '$icp/api/icpunks.api';
+import { metadata as getIcrc7Metadata } from '$icp/api/icrc7.api';
 import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import type { Dip721Token } from '$icp/types/dip721-token';
 import type { ExtToken } from '$icp/types/ext-token';
 import type { IcPunksToken } from '$icp/types/icpunks-token';
+import type { Icrc7Token } from '$icp/types/icrc7-token';
 import { extIndexToIdentifier, parseExtTokenIndex } from '$icp/utils/ext.utils';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { notEmptyString, type QueryParams } from '@dfinity/utils';
+import { nonNullish, notEmptyString, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -133,5 +135,47 @@ export const mapIcPunksNft = async ({
 			attributes.map(({ name: trait_type, value }) => ({ trait_type, value }))
 		),
 		collection: mapIcPunksCollection(token)
+	};
+};
+
+const mapIcrc7Collection = ({ canisterId, ...rest }: Icrc7Token): NftCollection => ({
+	...rest,
+	address: canisterId
+});
+
+export const mapIcrc7Nft = async ({
+	index: tokenId,
+	token,
+	identity,
+	certified
+}: {
+	index: bigint;
+	token: Icrc7Token;
+	identity: Identity;
+} & QueryParams): Promise<Nft> => {
+	const { canisterId } = token;
+
+	const metadata =
+		(await getIcrc7Metadata({
+			canisterId,
+			tokenId,
+			identity,
+			certified
+		})) ?? {};
+
+	const mediaStatus = {
+		image: nonNullish(metadata.imageUrl)
+			? await getMediaStatusOrCache(metadata.imageUrl)
+			: MediaStatusEnum.INVALID_DATA,
+		thumbnail: nonNullish(metadata.thumbnailUrl)
+			? await getMediaStatusOrCache(metadata.thumbnailUrl)
+			: MediaStatusEnum.INVALID_DATA
+	};
+
+	return {
+		...metadata,
+		id: parseNftId(tokenId.toString()),
+		mediaStatus,
+		collection: mapIcrc7Collection(token)
 	};
 };
