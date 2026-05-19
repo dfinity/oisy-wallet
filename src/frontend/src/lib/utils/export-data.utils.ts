@@ -1,6 +1,7 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import type { Currency } from '$lib/enums/currency';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -200,16 +201,16 @@ const normalizeType = (rawType: string): string => {
 	return 'other';
 };
 
-// ICP/BTC/SOL store timestamps as bigint nanoseconds. ETH stores them as a `number` of seconds
-// (ethers convention). Empty when the source value is missing.
+// Networks disagree on the unit: ICP uses bigint nanoseconds, Solana uses bigint seconds
+// (blockTime), EVM uses a number of seconds (ethers). normalizeTimestampToSeconds detects
+// the unit by magnitude (the same heuristic already shared across the per-chain code).
+// Empty when the source value is missing.
 const formatTimestamp = (timestamp: bigint | number | undefined): string => {
 	if (isNullish(timestamp)) {
 		return '';
 	}
 
-	const millis = typeof timestamp === 'bigint' ? Number(timestamp / 1_000_000n) : timestamp * 1000;
-
-	return new Date(millis).toISOString();
+	return new Date(normalizeTimestampToSeconds(timestamp) * 1000).toISOString();
 };
 
 const addressesEqual = ({ a, b }: { a: Nullish<string>; b: Nullish<string> }): boolean =>

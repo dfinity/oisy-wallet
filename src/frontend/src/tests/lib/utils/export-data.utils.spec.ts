@@ -356,7 +356,10 @@ describe('export-data.utils', () => {
 			to: 'recipientAta',
 			fromOwner: 'UserSolAddress',
 			toOwner: 'RecipientOwner',
-			timestamp: TIMESTAMP_NS,
+			// Solana stores blockTime in seconds (cast to bigint), not nanoseconds — this is
+			// exactly the shape that previously rendered as 1970 because the formatter
+			// hard-coded the ns assumption.
+			timestamp: BigInt(TIMESTAMP_S),
 			txExplorerUrl: 'https://solscan.io/tx/sol-tx-1'
 		};
 
@@ -649,6 +652,10 @@ describe('export-data.utils', () => {
 			expect(row.direction).toBe('out');
 			expect(row.from).toBe('UserSolAddress');
 			expect(row.to).toBe('RecipientOwner');
+			// Regression: SOL timestamps are seconds-as-bigint. The formatter must detect that
+			// by magnitude rather than blindly dividing every bigint by 1e9, otherwise this row
+			// would render as 1970-01-01.
+			expect(row.timestamp_iso).toBe(TIMESTAMP_ISO);
 			expect(row.tx_id).toMatch(/^[A-HJ-NP-Za-km-z1-9]{87,88}$/);
 		});
 
