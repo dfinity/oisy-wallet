@@ -23,12 +23,12 @@ use crate::{
     types::storable::{Candid, StoredTokenId},
 };
 
-/// How often exchange rates are refreshed (5 minutes).
-const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60;
+/// How often exchange rates are refreshed (1 minute).
+const PRICE_REFRESH_INTERVAL_SEC: u64 = 60;
 
 /// Tokens that haven't been queried within this window are considered inactive
-/// and skipped during price refreshes (1 hour).
-pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
+/// and skipped during price refreshes (10 minutes).
+pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 10 * 60;
 
 /// A token's cached price is considered "fresh enough" if its
 /// [`ExchangeData::timestamp_ns`] (the provider-reported `last_updated_at`,
