@@ -9,6 +9,7 @@ import type { NftMetadataWithoutId } from '$lib/types/nft';
 import type { Token, TokenMetadata } from '$lib/types/token';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isTokenIcrc7 = (token: Partial<IcToken>): token is Icrc7Token =>
 	token.standard?.code === 'icrc7';
@@ -66,8 +67,8 @@ const lookupText = ({
 }): string | undefined => {
 	const entry = entries.find(([k]) => k === key);
 
-	if (entry === undefined) {
-		return undefined;
+	if (isNullish(entry)) {
+		return;
 	}
 
 	const [, value] = entry;
@@ -87,8 +88,6 @@ const valueToString = ({ value }: { value: Value }): string | undefined => {
 	if ('Int' in value) {
 		return value.Int.toString();
 	}
-
-	return undefined;
 };
 
 const lookupStringByKeys = ({
@@ -100,7 +99,11 @@ const lookupStringByKeys = ({
 }): string | undefined => {
 	const entry = entries.find(([key]) => keys.includes(key));
 
-	return entry === undefined ? undefined : valueToString({ value: entry[1] });
+	if (isNullish(entry)) {
+		return;
+	}
+
+	return valueToString({ value: entry[1] });
 };
 
 const valueToAttributeValue = ({
@@ -115,7 +118,7 @@ const valueToAttributeRecord = ({
 	value: Value;
 }): { trait_type: string; value?: string | number | boolean } | undefined => {
 	if (!('Map' in value)) {
-		return undefined;
+		return;
 	}
 
 	const traitType = lookupStringByKeys({
@@ -123,15 +126,15 @@ const valueToAttributeRecord = ({
 		keys: ['trait_type', 'traitType', 'name']
 	});
 
-	if (traitType === undefined) {
-		return undefined;
+	if (isNullish(traitType)) {
+		return;
 	}
 
 	const rawValue = value.Map.find(([key]) => key === 'value')?.[1];
 
 	return {
 		trait_type: traitType,
-		...(rawValue !== undefined && { value: valueToAttributeValue({ value: rawValue }) })
+		...(nonNullish(rawValue) && { value: valueToAttributeValue({ value: rawValue }) })
 	};
 };
 
@@ -144,8 +147,8 @@ const lookupAttributesByKeys = ({
 }): NftMetadataWithoutId['attributes'] | undefined => {
 	const entry = entries.find(([key]) => keys.includes(key));
 
-	if (entry === undefined) {
-		return undefined;
+	if (isNullish(entry)) {
+		return;
 	}
 
 	const [, value] = entry;
@@ -165,12 +168,10 @@ const lookupAttributesByKeys = ({
 		return mapNftAttributes(
 			value.Array.map((attributeValue) => valueToAttributeRecord({ value: attributeValue })).filter(
 				(attribute): attribute is { trait_type: string; value?: string | number | boolean } =>
-					attribute !== undefined
+					nonNullish(attribute)
 			)
 		);
 	}
-
-	return undefined;
 };
 
 /**
@@ -189,8 +190,8 @@ export const mapIcrc7CollectionMetadata = (
 	const name = lookupText({ entries, key: ICRC7_NAME_KEY });
 	const symbol = lookupText({ entries, key: ICRC7_SYMBOL_KEY });
 
-	if (name === undefined || symbol === undefined) {
-		return undefined;
+	if (isNullish(name) || isNullish(symbol)) {
+		return;
 	}
 
 	const description = lookupText({ entries, key: ICRC7_DESCRIPTION_KEY });
@@ -199,8 +200,8 @@ export const mapIcrc7CollectionMetadata = (
 	return {
 		name,
 		symbol,
-		...(description !== undefined && { description }),
-		...(icon !== undefined && { icon })
+		...(nonNullish(description) && { description }),
+		...(nonNullish(icon) && { icon })
 	};
 };
 
@@ -220,9 +221,9 @@ export const mapIcrc7TokenMetadata = (
 	const attributes = lookupAttributesByKeys({ entries, keys: ICRC7_TOKEN_ATTRIBUTES_KEYS });
 
 	return {
-		...(name !== undefined && { name }),
-		...(description !== undefined && { description }),
-		...(imageUrl !== undefined && { imageUrl }),
-		...(attributes !== undefined && { attributes })
+		...(nonNullish(name) && { name }),
+		...(nonNullish(description) && { description }),
+		...(nonNullish(imageUrl) && { imageUrl }),
+		...(nonNullish(attributes) && { attributes })
 	};
 };
