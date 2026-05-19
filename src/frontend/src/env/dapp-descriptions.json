@@ -159,7 +159,7 @@
 		"website": "https://motokotokyogame.net/",
 		"twitter": "https://x.com/NightscrollerEX",
 		"discord": "https://discord.gg/d3WnbPPkes",
-		"tags": ["dapps.categories.ab_icp", "dapps.categories.game", "dapps.categories.aa_new"],
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.game"],
 		"description": "dapps.descriptions.motoko_tokyo.description",
 		"usesInternetIdentity": true,
 		"stats": "",
@@ -195,6 +195,19 @@
 		"logo": "/images/dapps/decide-ai-logo.svg",
 		"github": "https://github.com/modclub-app",
 		"screenshots": ["/images/dapps/decide-ai.webp"]
+	},
+	{
+		"id": "icp-flags",
+		"name": "dapps.descriptions.icp_flags.name",
+		"oneLiner": "dapps.descriptions.icp_flags.one_liner",
+		"website": "https://icp-flags.fans/",
+		"openChat": "https://oc.app/community/uhnd7-niaaa-aaaac-becgq-cai/channel/1043641175/?ref=meaay-cyaaa-aaaar-azo3a-cai",
+		"tags": ["dapps.categories.defi", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
+		"stats": "",
+		"description": "dapps.descriptions.icp_flags.description",
+		"usesInternetIdentity": true,
+		"logo": "/images/dapps/icp-flags-logo.svg",
+		"screenshots": ["/images/dapps/icp-flags-screenshot.webp"]
 	},
 	{
 		"id": "uniswap",
