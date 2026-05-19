@@ -19,13 +19,13 @@ export const parseIcrc7CollectionDeepLink = ({
 	const network = url.searchParams.get(ICRC7_COLLECTION_NETWORK_QUERY_PARAM);
 
 	if (network !== ICP_NETWORK_SYMBOL) {
-		return undefined;
+		return;
 	}
 
 	const parsedCollection = CanisterIdTextSchema.safeParse(collection);
 
 	if (!parsedCollection.success) {
-		return undefined;
+		return;
 	}
 
 	return {
