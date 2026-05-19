@@ -5,6 +5,7 @@ import {
 	parseIcrc7CollectionDeepLink
 } from '$icp/services/icrc7-deep-link.services';
 import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
+import { nonNullish } from '@dfinity/utils';
 
 describe('icrc7-deep-link.services', () => {
 	describe('parseIcrc7CollectionDeepLink', () => {
@@ -17,11 +18,11 @@ describe('icrc7-deep-link.services', () => {
 		}): URL => {
 			const url = new URL('https://oisy.com/nfts/');
 
-			if (collection !== undefined) {
+			if (nonNullish(collection)) {
 				url.searchParams.set(ICRC7_COLLECTION_QUERY_PARAM, collection);
 			}
 
-			if (network !== undefined) {
+			if (nonNullish(network)) {
 				url.searchParams.set(ICRC7_COLLECTION_NETWORK_QUERY_PARAM, network);
 			}
 
