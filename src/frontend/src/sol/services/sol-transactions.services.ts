@@ -348,16 +348,20 @@ const loadSolTransactions = async ({
 			...rest
 		});
 		const newestStoredSlot = stored?.newestBlockIndex;
+		const isHeadLoad = isNullish(before);
 
 		// Filter RPC results to only include transactions from slots newer than the stored data.
 		// This avoids overlap by range-partitioning.
-		const freshTransactions = nonNullish(newestStoredSlot)
-			? newTransactions.filter(
-					({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
-				)
-			: newTransactions;
+		const freshTransactions =
+			nonNullish(newestStoredSlot) && isHeadLoad
+				? newTransactions.filter(
+						({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
+					)
+				: newTransactions;
 
-		const allTransactions = [...freshTransactions, ...storedTransactions];
+		const allTransactions = isHeadLoad
+			? [...freshTransactions, ...storedTransactions]
+			: freshTransactions;
 
 		const certifiedTransactions = allTransactions.map((transaction) => ({
 			data: transaction,
