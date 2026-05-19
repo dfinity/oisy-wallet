@@ -682,10 +682,7 @@ describe('backend.api', () => {
 	});
 
 	describe('getExchangeRates', () => {
-		const tokenIds: TokenId[] = [
-			{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
-			{ Erc20: ['0xabc', 1n] }
-		];
+		const tokenId: TokenId = { Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
 		const mockRate: BackendExchangeRate = {
 			usd: {
 				price: 42000,
@@ -694,35 +691,21 @@ describe('backend.api', () => {
 				timestampNs: 1_000_000_000n
 			}
 		};
-
-		const mockMap = new Map([
-			['Icrc:ryjl3-tyaaa-aaaaa-aaaba-cai', mockRate],
-			['Erc20:0xabc:1', mockRate]
-		]);
+		const mockResponse: Array<[TokenId, BackendExchangeRate | undefined]> = [[tokenId, mockRate]];
 
 		beforeEach(() => {
-			backendCanisterMock.getExchangeRates.mockResolvedValue(mockMap);
+			backendCanisterMock.getExchangeRates.mockResolvedValue(mockResponse);
 		});
 
 		it('should successfully call getExchangeRates endpoint', async () => {
-			const result = await getExchangeRates({
-				...baseParams,
-				token_ids: tokenIds,
-				certified: false
-			});
+			const result = await getExchangeRates({ ...baseParams });
 
-			expect(result).toBeInstanceOf(Map);
-			expect(result.size).toBe(2);
-			expect(backendCanisterMock.getExchangeRates).toHaveBeenCalledExactlyOnceWith({
-				token_ids: tokenIds,
-				certified: false
-			});
+			expect(result).toEqual(mockResponse);
+			expect(backendCanisterMock.getExchangeRates).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(
-				getExchangeRates({ identity: undefined, token_ids: tokenIds, certified: false })
-			).rejects.toThrow();
+			await expect(getExchangeRates({ identity: undefined })).rejects.toThrow();
 		});
 
 		it('should throw an error if getExchangeRates throws', async () => {
@@ -730,9 +713,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(
-				getExchangeRates({ ...baseParams, token_ids: tokenIds, certified: false })
-			).rejects.toThrow();
+			await expect(getExchangeRates({ ...baseParams })).rejects.toThrow();
 		});
 	});
 

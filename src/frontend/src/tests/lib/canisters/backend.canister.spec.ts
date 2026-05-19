@@ -1707,7 +1707,7 @@ describe('backend.canister', () => {
 			}
 		};
 
-		it('should return a Map with fully unwrapped exchange rates', async () => {
+		it('should return the response paired with unwrapped rates', async () => {
 			const rawResponse = tokenIds.map(
 				(id) => [id, [mockCandidRate]] as [typeof id, [typeof mockCandidRate]]
 			);
@@ -1715,30 +1715,29 @@ describe('backend.canister', () => {
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
-			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
+			const result = await getExchangeRates();
 
-			expect(result).toBeInstanceOf(Map);
-			expect(result.size).toBe(2);
-
-			for (const rate of result.values()) {
-				expect(rate).toEqual(expectedUnwrapped);
-			}
-
+			expect(result).toEqual([
+				[tokenIds[0], expectedUnwrapped],
+				[tokenIds[1], expectedUnwrapped]
+			]);
 			expect(service.get_exchange_rates).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		it('should omit entries with no rate from the Map', async () => {
-			const rawResponse = [
+		it('should map empty rates to undefined', async () => {
+			service.get_exchange_rates.mockResolvedValue([
 				[tokenIds[0], [mockCandidRate]],
 				[tokenIds[1], []]
-			] as Array<[(typeof tokenIds)[number], [] | [typeof mockCandidRate]]>;
-			service.get_exchange_rates.mockResolvedValue(rawResponse);
+			]);
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
-			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
+			const result = await getExchangeRates();
 
-			expect(result.size).toBe(1);
+			expect(result).toEqual([
+				[tokenIds[0], expectedUnwrapped],
+				[tokenIds[1], undefined]
+			]);
 		});
 
 		it('should throw an error if the service throws', async () => {
@@ -1749,9 +1748,7 @@ describe('backend.canister', () => {
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
-			await expect(getExchangeRates({ token_ids: tokenIds, certified: false })).rejects.toThrow(
-				mockResponseError
-			);
+			await expect(getExchangeRates()).rejects.toThrow(mockResponseError);
 		});
 	});
 
