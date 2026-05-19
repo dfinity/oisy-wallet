@@ -2,7 +2,8 @@ import {
 	collectionMetadata,
 	getOwnersOf,
 	getTokensByOwner,
-	tokenMetadata
+	tokenMetadata,
+	transfer
 } from '$icp/api/icrc7.api';
 import { Icrc7Canister } from '$icp/canisters/icrc7.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -157,6 +158,38 @@ describe('icrc7.api', () => {
 			tokenCanisterMock.tokenMetadata.mockRejectedValueOnce(mockError);
 
 			await expect(tokenMetadata(params)).rejects.toThrow(mockError);
+		});
+	});
+
+	describe('transfer', () => {
+		const mockTokenId = 555n;
+
+		const params = {
+			identity: mockIdentity,
+			canisterId: mockIcrc7CanisterId,
+			to: mockIcrc7Account,
+			tokenId: mockTokenId
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.transfer.mockResolvedValue(7n);
+		});
+
+		it('should call transfer with certified=true by default', async () => {
+			await transfer(params);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				certified: true,
+				to: mockIcrc7Account,
+				tokenId: mockTokenId
+			});
+		});
+
+		it('should throw if the canister transfer fails', async () => {
+			const mockError = new CanisterInternalError('Transfer error');
+			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError);
+
+			await expect(transfer(params)).rejects.toThrow(mockError);
 		});
 	});
 });
