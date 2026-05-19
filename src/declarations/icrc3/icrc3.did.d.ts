@@ -10,20 +10,45 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface BlockType {
-	url: string;
-	block_type: string;
-}
 export interface DataCertificate {
+	/**
+	 * See https://internetcomputer.org/docs/current/references/ic-interface-spec#certification
+	 */
 	certificate: Uint8Array;
+	/**
+	 * CBOR encoded hash_tree
+	 */
 	hash_tree: Uint8Array;
 }
 export interface GetArchivesArgs {
+	/**
+	 * The last archive seen by the client.
+	 * The Ledger will return archives coming
+	 * after this one if set, otherwise it
+	 * will return the first archives.
+	 */
 	from: [] | [Principal];
 }
-export type GetArchivesResult = Array<{ end: bigint; canister_id: Principal; start: bigint }>;
+export type GetArchivesResult = Array<{
+	/**
+	 * The last block in the archive
+	 */
+	end: bigint;
+	/**
+	 * The id of the archive
+	 */
+	canister_id: Principal;
+	/**
+	 * The first block in the archive
+	 */
+	start: bigint;
+}>;
 export type GetBlocksArgs = Array<{ start: bigint; length: bigint }>;
 export interface GetBlocksResult {
+	/**
+	 * Total number of blocks in the
+	 * block log
+	 */
 	log_length: bigint;
 	blocks: Array<{ id: bigint; block: Value }>;
 	archived_blocks: Array<{ args: GetBlocksArgs; callback: [Principal, string] }>;
@@ -39,7 +64,7 @@ export interface _SERVICE {
 	icrc3_get_archives: ActorMethod<[GetArchivesArgs], GetArchivesResult>;
 	icrc3_get_blocks: ActorMethod<[GetBlocksArgs], GetBlocksResult>;
 	icrc3_get_tip_certificate: ActorMethod<[], [] | [DataCertificate]>;
-	icrc3_supported_block_types: ActorMethod<[], Array<BlockType>>;
+	icrc3_supported_block_types: ActorMethod<[], Array<{ url: string; block_type: string }>>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

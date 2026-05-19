@@ -44,13 +44,15 @@ export const idlFactory = ({ IDL }) => {
 		certificate: IDL.Vec(IDL.Nat8),
 		hash_tree: IDL.Vec(IDL.Nat8)
 	});
-	const BlockType = IDL.Record({ url: IDL.Text, block_type: IDL.Text });
 
 	return IDL.Service({
 		icrc3_get_archives: IDL.Func([GetArchivesArgs], [GetArchivesResult]),
 		icrc3_get_blocks: IDL.Func([GetBlocksArgs], [GetBlocksResult]),
 		icrc3_get_tip_certificate: IDL.Func([], [IDL.Opt(DataCertificate)]),
-		icrc3_supported_block_types: IDL.Func([], [IDL.Vec(BlockType)])
+		icrc3_supported_block_types: IDL.Func(
+			[],
+			[IDL.Vec(IDL.Record({ url: IDL.Text, block_type: IDL.Text }))]
+		)
 	});
 };
 
