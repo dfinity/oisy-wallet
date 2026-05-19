@@ -1,7 +1,9 @@
 import type { Account, _SERVICE as Icrc7Service, Value } from '$declarations/icrc7/icrc7.did';
 import { idlFactory as idlCertifiedFactoryIcrc7 } from '$declarations/icrc7/icrc7.factory.certified.did';
 import { idlFactory as idlFactoryIcrc7 } from '$declarations/icrc7/icrc7.factory.did';
+import { mapIcrc7TransferError } from '$icp/canisters/icrc7.errors';
 import { getAgent } from '$lib/actors/agents.ic';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
@@ -91,7 +93,7 @@ export class Icrc7Canister extends Canister<Icrc7Service> {
 		]);
 
 		if (result === undefined || result.length === 0) {
-			throw new Error('ICRC-7 transfer returned no result');
+			throw new CanisterInternalError('ICRC-7 transfer returned no result');
 		}
 
 		const [response] = result;
@@ -100,6 +102,6 @@ export class Icrc7Canister extends Canister<Icrc7Service> {
 			return response.Ok;
 		}
 
-		throw new Error(`ICRC-7 transfer failed: ${JSON.stringify(response.Err)}`);
+		throw mapIcrc7TransferError(response.Err);
 	};
 }

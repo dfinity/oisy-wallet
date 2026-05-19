@@ -1,5 +1,6 @@
 import type { _SERVICE as Icrc7Service } from '$declarations/icrc7/icrc7.did';
 import { Icrc7Canister } from '$icp/canisters/icrc7.canister';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import {
 	mockIcrc7Account,
@@ -172,20 +173,46 @@ describe('icrc7.canister', () => {
 			expect(service.icrc7_transfer).toHaveBeenCalledExactlyOnceWith(expectedArg);
 		});
 
-		it('should throw when the canister returns an Err arm', async () => {
+		it('should throw a CanisterInternalError mapped from a `Unauthorized` Err arm', async () => {
 			service.icrc7_transfer.mockResolvedValue([[{ Err: { Unauthorized: null } }]]);
 
 			const { transfer } = await createIcrc7Canister({ serviceOverride: service });
 
-			await expect(transfer(mockParams)).rejects.toThrow(/Unauthorized/);
+			await expect(transfer(mockParams)).rejects.toThrow(
+				new CanisterInternalError('Unauthorized to transfer this NFT')
+			);
 		});
 
-		it('should throw when the canister returns an empty result', async () => {
+		it('should format `bigint` payloads in `Duplicate` Err without crashing', async () => {
+			service.icrc7_transfer.mockResolvedValue([[{ Err: { Duplicate: { duplicate_of: 42n } } }]]);
+
+			const { transfer } = await createIcrc7Canister({ serviceOverride: service });
+
+			await expect(transfer(mockParams)).rejects.toThrow(
+				new CanisterInternalError('Duplicate of transaction 42')
+			);
+		});
+
+		it('should format `bigint` payloads in `GenericError` Err without crashing', async () => {
+			service.icrc7_transfer.mockResolvedValue([
+				[{ Err: { GenericError: { error_code: 9001n, message: 'broken' } } }]
+			]);
+
+			const { transfer } = await createIcrc7Canister({ serviceOverride: service });
+
+			await expect(transfer(mockParams)).rejects.toThrow(
+				new CanisterInternalError('Generic error (code 9001): broken')
+			);
+		});
+
+		it('should throw a CanisterInternalError when the canister returns an empty result', async () => {
 			service.icrc7_transfer.mockResolvedValue([[]]);
 
 			const { transfer } = await createIcrc7Canister({ serviceOverride: service });
 
-			await expect(transfer(mockParams)).rejects.toThrow('ICRC-7 transfer returned no result');
+			await expect(transfer(mockParams)).rejects.toThrow(
+				new CanisterInternalError('ICRC-7 transfer returned no result')
+			);
 		});
 
 		it('should throw when icrc7_transfer rejects', async () => {
