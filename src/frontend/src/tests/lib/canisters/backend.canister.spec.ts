@@ -1745,4 +1745,68 @@ describe('backend.canister', () => {
 			);
 		});
 	});
+
+	describe('getMyExchangeRates', () => {
+		const tokenIds = [{ Icrc: mockPrincipal }, { Erc20: ['0xabc', 1n] as [string, bigint] }];
+		const mockCandidRate = {
+			usd: {
+				price: [42000] as [] | [number],
+				price_24h_change_pct: [1.5] as [] | [number],
+				market_cap: [800_000_000_000] as [] | [number],
+				timestamp_ns: 1_000_000_000n
+			}
+		};
+		const expectedUnwrapped = {
+			usd: {
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
+			}
+		};
+
+		it('should return the response paired with unwrapped rates', async () => {
+			const rawResponse = tokenIds.map(
+				(id) => [id, [mockCandidRate]] as [typeof id, [typeof mockCandidRate]]
+			);
+			service.get_my_exchange_rates.mockResolvedValue(rawResponse);
+
+			const { getMyExchangeRates } = await createBackendCanister({ serviceOverride: service });
+
+			const result = await getMyExchangeRates();
+
+			expect(result).toEqual([
+				[tokenIds[0], expectedUnwrapped],
+				[tokenIds[1], expectedUnwrapped]
+			]);
+			expect(service.get_my_exchange_rates).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should map empty rates to undefined', async () => {
+			service.get_my_exchange_rates.mockResolvedValue([
+				[tokenIds[0], [mockCandidRate]],
+				[tokenIds[1], []]
+			]);
+
+			const { getMyExchangeRates } = await createBackendCanister({ serviceOverride: service });
+
+			const result = await getMyExchangeRates();
+
+			expect(result).toEqual([
+				[tokenIds[0], expectedUnwrapped],
+				[tokenIds[1], undefined]
+			]);
+		});
+
+		it('should throw an error if the service throws', async () => {
+			service.get_my_exchange_rates.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getMyExchangeRates } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(getMyExchangeRates()).rejects.toThrow(mockResponseError);
+		});
+	});
 });

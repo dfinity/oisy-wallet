@@ -17,7 +17,7 @@ import {
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency,
-	fetchAllExchangeRatesFromBackend
+	fetchMyExchangeRatesFromBackend
 } from '$lib/services/exchange.services';
 import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
@@ -130,9 +130,6 @@ const buildErc20PriceParams = (
 
 const syncExchangeFromBackend = async ({
 	currentCurrency,
-	erc20ContractAddresses,
-	icrcLedgerCanisterIds,
-	splTokenAddresses,
 	erc4626TokensExchangeData
 }: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
 	const identity = await AuthClientProvider.getInstance().loadIdentity();
@@ -164,12 +161,7 @@ const syncExchangeFromBackend = async ({
 
 	const [currentExchangeRate, backendPrices] = await Promise.all([
 		exchangeRateUsdToCurrency(currentCurrency),
-		fetchAllExchangeRatesFromBackend({
-			identity,
-			erc20Addresses: erc20ContractAddresses,
-			icrcCanisterIds: icrcLedgerCanisterIds,
-			splTokenAddresses
-		})
+		fetchMyExchangeRatesFromBackend({ identity })
 	]);
 
 	const {

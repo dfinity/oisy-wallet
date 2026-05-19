@@ -284,6 +284,14 @@ export const getExchangeRates = async ({
 	return getExchangeRates(params);
 };
 
+export const getMyExchangeRates = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<Array<[TokenId, BackendExchangeRate | undefined]>> => {
+	const { getMyExchangeRates } = await backendCanister({ identity });
+
+	return getMyExchangeRates();
+};
+
 export const getUserTransactions = async ({
 	identity,
 	...params

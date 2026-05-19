@@ -448,6 +448,16 @@ export class BackendCanister extends Canister<BackendService> {
 		}, new Map());
 	};
 
+	getMyExchangeRates = async (): Promise<Array<[TokenId, BackendExchangeRate | undefined]>> => {
+		// `get_my_exchange_rates` is an update on the backend (mutates token_activity, may issue
+		// HTTP outcalls), so it always goes through the certified service.
+		const { get_my_exchange_rates } = this.caller({ certified: true });
+
+		const results = await get_my_exchange_rates();
+
+		return results.map(([id, rate]) => [id, this.mapExchangeRate(fromNullable(rate))]);
+	};
+
 	getUserTransactions = async ({
 		tokenId,
 		start,

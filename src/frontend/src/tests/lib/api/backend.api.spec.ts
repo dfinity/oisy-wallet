@@ -6,6 +6,7 @@ import {
 	createUserProfile,
 	getExchangeRate,
 	getExchangeRates,
+	getMyExchangeRates,
 	getPendingBtcTransactions,
 	getUserProfile,
 	getUserTransactions,
@@ -721,6 +722,42 @@ describe('backend.api', () => {
 			await expect(
 				getExchangeRates({ ...baseParams, token_ids: tokenIds, certified: false })
 			).rejects.toThrow();
+		});
+	});
+
+	describe('getMyExchangeRates', () => {
+		const tokenId: TokenId = { Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
+		const mockRate: BackendExchangeRate = {
+			usd: {
+				price: 42000,
+				price24hChangePct: 1.5,
+				marketCap: 800_000_000_000,
+				timestampNs: 1_000_000_000n
+			}
+		};
+		const mockResponse: Array<[TokenId, BackendExchangeRate | undefined]> = [[tokenId, mockRate]];
+
+		beforeEach(() => {
+			backendCanisterMock.getMyExchangeRates.mockResolvedValue(mockResponse);
+		});
+
+		it('should successfully call getMyExchangeRates endpoint', async () => {
+			const result = await getMyExchangeRates({ ...baseParams });
+
+			expect(result).toEqual(mockResponse);
+			expect(backendCanisterMock.getMyExchangeRates).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(getMyExchangeRates({ identity: undefined })).rejects.toThrow();
+		});
+
+		it('should throw an error if getMyExchangeRates throws', async () => {
+			backendCanisterMock.getMyExchangeRates.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(getMyExchangeRates({ ...baseParams })).rejects.toThrow();
 		});
 	});
 });
