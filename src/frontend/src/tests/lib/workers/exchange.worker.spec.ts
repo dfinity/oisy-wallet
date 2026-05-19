@@ -2,7 +2,7 @@ import type { TokenId } from '$declarations/backend/backend.did';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { getExchangeRates } from '$lib/api/backend.api';
+import { getMyExchangeRates } from '$lib/api/backend.api';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
@@ -18,13 +18,11 @@ import type {
 } from '$lib/types/coingecko';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
-import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
 import { Principal } from '@dfinity/principal';
-import { nonNullish } from '@dfinity/utils';
 
 const { backendExchangeEnabled } = vi.hoisted(() => ({
 	backendExchangeEnabled: { current: false }
@@ -63,7 +61,7 @@ vi.mock('$eth/services/erc4626-exchange.services', () => ({
 }));
 
 vi.mock('$lib/api/backend.api', () => ({
-	getExchangeRates: vi.fn()
+	getMyExchangeRates: vi.fn()
 }));
 
 vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
@@ -1093,15 +1091,9 @@ describe('exchange.worker', () => {
 				}
 			};
 
-			const mockRatesMap = (
+			const mockMyRates = (
 				...entries: [TokenId, BackendExchangeRate][]
-			): Map<string, BackendExchangeRate> =>
-				new Map(
-					entries.reduce<[string, BackendExchangeRate][]>((acc, [id, rate]) => {
-						const key = tokenIdKey(id);
-						return nonNullish(key) ? [...acc, [key, rate]] : acc;
-					}, [])
-				);
+			): Array<[TokenId, BackendExchangeRate | undefined]> => entries;
 
 			beforeEach(() => {
 				backendExchangeEnabled.current = true;
@@ -1112,7 +1104,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should fetch prices from backend instead of CoinGecko', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+				vi.mocked(getMyExchangeRates).mockResolvedValue([]);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
 					...createEvent(msg),
@@ -1130,7 +1122,7 @@ describe('exchange.worker', () => {
 
 				await onExchangeMessage(mockEvent);
 
-				expect(getExchangeRates).toHaveBeenCalledOnce();
+				expect(getMyExchangeRates).toHaveBeenCalledOnce();
 				expect(simpleTokenPrice).not.toHaveBeenCalled();
 			});
 
@@ -1140,8 +1132,8 @@ describe('exchange.worker', () => {
 					Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
 				};
 
-				vi.mocked(getExchangeRates).mockResolvedValue(
-					mockRatesMap([erc20TokenId, mockExchangeRate], [icrcTokenId, mockExchangeRate])
+				vi.mocked(getMyExchangeRates).mockResolvedValue(
+					mockMyRates([erc20TokenId, mockExchangeRate], [icrcTokenId, mockExchangeRate])
 				);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
@@ -1181,7 +1173,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should return native prices as undefined when backend has no data for them', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+				vi.mocked(getMyExchangeRates).mockResolvedValue([]);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
 					...createEvent(msg),
@@ -1210,8 +1202,8 @@ describe('exchange.worker', () => {
 			});
 
 			it('should include native token prices when backend provides them', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(
-					mockRatesMap(
+				vi.mocked(getMyExchangeRates).mockResolvedValue(
+					mockMyRates(
 						[{ EvmNative: 1n }, mockExchangeRate],
 						[{ BtcNativeMainnet: null }, mockExchangeRate],
 						[{ IcpNative: null }, mockExchangeRate],
@@ -1256,7 +1248,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should still fetch currency exchange rate from CoinGecko for non-USD currencies', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+				vi.mocked(getMyExchangeRates).mockResolvedValue([]);
 				vi.mocked(simplePrice).mockResolvedValue({
 					bitcoin: { usd: 60000, eur: 55000, usd_24h_change: 2, eur_24h_change: 1.5 }
 				});
@@ -1295,7 +1287,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should post syncExchangeError when backend call fails', async () => {
-				vi.mocked(getExchangeRates).mockRejectedValue(new Error('Backend unavailable'));
+				vi.mocked(getMyExchangeRates).mockRejectedValue(new Error('Backend unavailable'));
 				vi.mocked(calculateErc4626Prices).mockResolvedValue({});
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
@@ -1367,7 +1359,7 @@ describe('exchange.worker', () => {
 					'Cannot fetch backend exchange rates without an authenticated identity.'
 				);
 
-				expect(getExchangeRates).not.toHaveBeenCalled();
+				expect(getMyExchangeRates).not.toHaveBeenCalled();
 			});
 		});
 	});

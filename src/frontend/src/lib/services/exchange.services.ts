@@ -8,7 +8,7 @@ import { ICPSWAP_PROVIDER_ENABLED } from '$env/rest/icpswap.env';
 import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { getExchangeRates } from '$lib/api/backend.api';
+import { getExchangeRates, getMyExchangeRates } from '$lib/api/backend.api';
 import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
@@ -429,6 +429,79 @@ export const fetchAllExchangeRatesFromBackend = async ({
 			normalizeId: lower
 		}),
 		currentSplPrices: buildPriceMap({ pairs: spl.pairs, rates: coingeckoRates })
+	};
+};
+
+/**
+ * Caller-aware variant of `fetchAllExchangeRatesFromBackend`.
+ *
+ * Calls the per-caller `get_my_exchange_rates` endpoint, which derives the
+ * relevant token list server-side (native + the caller's custom tokens,
+ * filtered to priceable variants) and guarantees the response is at most
+ * ~2 minutes stale. The frontend therefore no longer has to assemble the
+ * token list itself, and no longer has to keep `erc20Addresses /
+ * icrcCanisterIds / splTokenAddresses` in sync with whatever the backend
+ * considers "the user's tokens".
+ *
+ * The shape of the returned object is identical to
+ * `fetchAllExchangeRatesFromBackend` so the worker doesn't care which
+ * source produced it.
+ */
+export const fetchMyExchangeRatesFromBackend = async ({
+	identity
+}: {
+	identity: Identity;
+}): Promise<{
+	currentEthPrice: CoingeckoSimplePriceResponse | undefined;
+	currentBtcPrice: CoingeckoSimplePriceResponse | undefined;
+	currentIcpPrice: CoingeckoSimplePriceResponse | undefined;
+	currentSolPrice: CoingeckoSimplePriceResponse | undefined;
+	currentBnbPrice: CoingeckoSimplePriceResponse | undefined;
+	currentPolPrice: CoingeckoSimplePriceResponse | undefined;
+	currentArbitrumEthPrice: CoingeckoSimplePriceResponse | undefined;
+	currentBaseEthPrice: CoingeckoSimplePriceResponse | undefined;
+	currentErc20Prices: CoingeckoSimpleTokenPriceResponse;
+	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
+	currentSplPrices: CoingeckoSimpleTokenPriceResponse;
+}> => {
+	const rates = await getMyExchangeRates({ identity });
+
+	const coingeckoRates = new Map<string, CoingeckoSimpleTokenPrice>();
+	const currentErc20Prices: CoingeckoSimpleTokenPriceResponse = {};
+	const currentIcrcPrices: CoingeckoSimpleTokenPriceResponse = {};
+	const currentSplPrices: CoingeckoSimpleTokenPriceResponse = {};
+
+	for (const [tokenId, rate] of rates) {
+		const mapped = mapExchangeRateToCoingecko(rate);
+		if (nonNullish(mapped)) {
+			const key = tokenIdKey(tokenId);
+			if (nonNullish(key)) {
+				coingeckoRates.set(key, mapped);
+			}
+
+			if ('Erc20' in tokenId) {
+				const [address] = tokenId.Erc20;
+				currentErc20Prices[address.toLowerCase()] = mapped;
+			} else if ('Icrc' in tokenId) {
+				currentIcrcPrices[tokenId.Icrc.toText().toLowerCase()] = mapped;
+			} else if ('SplMainnet' in tokenId) {
+				currentSplPrices[tokenId.SplMainnet] = mapped;
+			}
+		}
+	}
+
+	return {
+		currentEthPrice: nativePrice({ ...ETH_NATIVE_ENTRY, coingeckoRates }),
+		currentBtcPrice: nativePrice({ ...BTC_NATIVE_ENTRY, coingeckoRates }),
+		currentIcpPrice: nativePrice({ ...ICP_NATIVE_ENTRY, coingeckoRates }),
+		currentSolPrice: nativePrice({ ...SOL_NATIVE_ENTRY, coingeckoRates }),
+		currentBnbPrice: nativePrice({ ...BNB_NATIVE_ENTRY, coingeckoRates }),
+		currentPolPrice: nativePrice({ ...POL_NATIVE_ENTRY, coingeckoRates }),
+		currentArbitrumEthPrice: nativePrice({ ...ARBITRUM_ETH_NATIVE_ENTRY, coingeckoRates }),
+		currentBaseEthPrice: nativePrice({ ...BASE_ETH_NATIVE_ENTRY, coingeckoRates }),
+		currentErc20Prices,
+		currentIcrcPrices,
+		currentSplPrices
 	};
 };
 
