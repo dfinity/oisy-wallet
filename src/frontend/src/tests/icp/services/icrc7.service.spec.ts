@@ -79,7 +79,16 @@ describe('icrc7.services', () => {
 		it('should populate both default and custom stores', async () => {
 			await loadIcrc7Tokens({ identity: mockIdentity });
 
-			expect(get(icrc7DefaultTokensStore)).toEqual([]);
+			const defaultTokens = get(icrc7DefaultTokensStore) ?? [];
+
+			expect(defaultTokens).toHaveLength(ICRC7_BUILTIN_TOKENS.length);
+
+			ICRC7_BUILTIN_TOKENS.forEach((token, index) => {
+				expect(defaultTokens[index]).toEqual({
+					...token,
+					id: defaultTokens[index].id
+				});
+			});
 
 			const customTokens = get(icrc7CustomTokensStore);
 
