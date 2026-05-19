@@ -145,4 +145,56 @@ describe('icrc7.canister', () => {
 			await expect(tokenMetadata({ certified, tokenIds: mockTokenIds })).rejects.toThrow(mockError);
 		});
 	});
+
+	describe('transfer', () => {
+		const mockTokenId = 12345n;
+		const mockBlockIndex = 7n;
+		const mockParams = { certified, to: mockIcrc7Account, tokenId: mockTokenId };
+
+		const expectedArg = [
+			{
+				to: mockIcrc7Account,
+				token_id: mockTokenId,
+				memo: [],
+				from_subaccount: [],
+				created_at_time: []
+			}
+		];
+
+		it('should call icrc7_transfer with a single TransferArg and return the block index', async () => {
+			service.icrc7_transfer.mockResolvedValue([[{ Ok: mockBlockIndex }]]);
+
+			const { transfer } = await createIcrc7Canister({ serviceOverride: service });
+
+			const res = await transfer(mockParams);
+
+			expect(res).toEqual(mockBlockIndex);
+			expect(service.icrc7_transfer).toHaveBeenCalledExactlyOnceWith(expectedArg);
+		});
+
+		it('should throw when the canister returns an Err arm', async () => {
+			service.icrc7_transfer.mockResolvedValue([[{ Err: { Unauthorized: null } }]]);
+
+			const { transfer } = await createIcrc7Canister({ serviceOverride: service });
+
+			await expect(transfer(mockParams)).rejects.toThrow(/Unauthorized/);
+		});
+
+		it('should throw when the canister returns an empty result', async () => {
+			service.icrc7_transfer.mockResolvedValue([[]]);
+
+			const { transfer } = await createIcrc7Canister({ serviceOverride: service });
+
+			await expect(transfer(mockParams)).rejects.toThrow('ICRC-7 transfer returned no result');
+		});
+
+		it('should throw when icrc7_transfer rejects', async () => {
+			const mockError = new Error('transfer failed');
+			service.icrc7_transfer.mockRejectedValue(mockError);
+
+			const { transfer } = await createIcrc7Canister({ serviceOverride: service });
+
+			await expect(transfer(mockParams)).rejects.toThrow(mockError);
+		});
+	});
 });
