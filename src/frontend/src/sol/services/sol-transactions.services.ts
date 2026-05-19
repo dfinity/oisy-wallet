@@ -350,8 +350,8 @@ const loadSolTransactions = async ({
 		});
 		const newestStoredSlot = stored?.newestBlockIndex;
 
-		// Filter RPC results to only include transactions from slots newer than the stored data.
-		// This avoids overlap by range-partitioning.
+		// On head loads, keep only RPC transactions newer than the backend cache.
+		// Cursor pagination already asks RPC for older transactions, so those pages must not use this filter.
 		const freshTransactions =
 			nonNullish(newestStoredSlot) && isHeadLoad
 				? newTransactions.filter(
