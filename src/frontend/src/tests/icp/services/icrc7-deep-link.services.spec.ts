@@ -1,9 +1,6 @@
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import {
-	ICRC7_COLLECTION_NETWORK_QUERY_PARAM,
-	ICRC7_COLLECTION_QUERY_PARAM,
-	parseIcrc7CollectionDeepLink
-} from '$icp/services/icrc7-deep-link.services';
+import { parseIcrc7CollectionDeepLink } from '$icp/services/icrc7-deep-link.services';
+import { COLLECTION_PARAM, NETWORK_PARAM } from '$lib/constants/routes.constants';
 import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
 import { nonNullish } from '@dfinity/utils';
 
@@ -19,11 +16,11 @@ describe('icrc7-deep-link.services', () => {
 			const url = new URL('https://oisy.com/nfts/');
 
 			if (nonNullish(collection)) {
-				url.searchParams.set(ICRC7_COLLECTION_QUERY_PARAM, collection);
+				url.searchParams.set(COLLECTION_PARAM, collection);
 			}
 
 			if (nonNullish(network)) {
-				url.searchParams.set(ICRC7_COLLECTION_NETWORK_QUERY_PARAM, network);
+				url.searchParams.set(NETWORK_PARAM, network);
 			}
 
 			return url;
