@@ -319,8 +319,9 @@ const loadSolTransactions = async ({
 }: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	try {
 		const backendTokenId = solBackendTokenId({ network, tokenAddress });
+		const isHeadLoad = isNullish(before);
 
-		const stored = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED
+		const stored = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && isHeadLoad
 			? await loadSolUserTransactions({
 					identity,
 					tokenId: backendTokenId,
@@ -348,7 +349,6 @@ const loadSolTransactions = async ({
 			...rest
 		});
 		const newestStoredSlot = stored?.newestBlockIndex;
-		const isHeadLoad = isNullish(before);
 
 		// Filter RPC results to only include transactions from slots newer than the stored data.
 		// This avoids overlap by range-partitioning.

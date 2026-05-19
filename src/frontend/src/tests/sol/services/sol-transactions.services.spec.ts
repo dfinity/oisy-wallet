@@ -599,6 +599,7 @@ describe('sol-transactions.services', () => {
 
 			expect(callArg.exitIfFirstSignatureMatches).toBeUndefined();
 			expect(callArg.before).toBe(before);
+			expect(loadSolUserTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should combine stored and new transactions in the store', async () => {
