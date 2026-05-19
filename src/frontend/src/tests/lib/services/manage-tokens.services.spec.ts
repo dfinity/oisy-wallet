@@ -13,6 +13,7 @@ import {
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import { saveTokens } from '$lib/services/manage-tokens.services';
+import { trackTokenManage } from '$lib/services/token-manage-analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import en from '$tests/mocks/i18n.mock';
@@ -20,6 +21,10 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
+}));
+
+vi.mock('$lib/services/token-manage-analytics.services', () => ({
+	trackTokenManage: vi.fn()
 }));
 
 describe('manage-tokens.services', () => {
@@ -107,6 +112,23 @@ describe('manage-tokens.services', () => {
 						networkId: token.network?.id.description,
 						source: MANAGE_TOKENS_MODAL_ROUTE
 					}
+				});
+
+				expect(trackTokenManage).toHaveBeenNthCalledWith(index + 1, {
+					modifier: token.enabled ? 'enable' : 'disable',
+					token: {
+						network: token.network.id.description,
+						address:
+							'address' in token
+								? token.address
+								: 'ledgerCanisterId' in token
+									? token.ledgerCanisterId
+									: token.id.description,
+						symbol: token.symbol,
+						name: token.name
+					},
+					sourceLocation: 'manage_tokens',
+					resultStatus: 'success'
 				});
 			});
 		});

@@ -8,9 +8,14 @@ import {
 	TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR
 } from '$lib/constants/analytics.constants';
+import {
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS
+} from '$lib/enums/plausible';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
+import { trackTokenManage } from '$lib/services/token-manage-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
@@ -37,6 +42,58 @@ export interface SaveTokensParams<T> {
 	identity: Identity;
 	tokens: NonEmptyArray<T>;
 }
+
+type SaveTokensToken =
+	| SaveCustomTokenWithKey
+	| SaveErc20CustomToken
+	| SaveSplCustomToken
+	| SaveErc721CustomToken
+	| SaveErc1155CustomToken
+	| SaveErc4626CustomToken
+	| TokenToggleable<Token>;
+
+const mapTokenManageToken = <T extends SaveTokensToken>({
+	token,
+	tokenId,
+	network
+}: {
+	token: T;
+	tokenId?: Token['id'];
+	network?: Token['network'];
+}):
+	| {
+			network: string;
+			address: string;
+			symbol?: string;
+			name?: string;
+	  }
+	| undefined => {
+	const address =
+		'address' in token
+			? token.address
+			: 'ledgerCanisterId' in token
+				? token.ledgerCanisterId
+				: 'canisterId' in token
+					? token.canisterId
+					: tokenId?.description;
+
+	const tokenNetwork = nonNullish(network)
+		? network.id.description
+		: 'networkKey' in token
+			? token.networkKey
+			: undefined;
+
+	if (isNullish(address) || isNullish(tokenNetwork)) {
+		return;
+	}
+
+	return {
+		network: tokenNetwork,
+		address,
+		...('symbol' in token && nonNullish(token.symbol) && { symbol: token.symbol }),
+		...('name' in token && nonNullish(token.name) && { name: token.name })
+	};
+};
 
 export const saveTokens = async <
 	T extends
@@ -110,6 +167,17 @@ export const saveTokens = async <
 					...{ source: MANAGE_TOKENS_MODAL_ROUTE }
 				}
 			});
+
+			const tokenManageToken = mapTokenManageToken({ token, tokenId, network });
+
+			if (nonNullish(tokenManageToken)) {
+				trackTokenManage({
+					modifier: enabled ? 'enable' : 'disable',
+					token: tokenManageToken,
+					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS,
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+				});
+			}
 		});
 	} catch (err: unknown) {
 		const versionMismatch = isVersionMismatchError(err);
