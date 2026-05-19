@@ -304,6 +304,7 @@ interface I18nDapps {
 		icexplorer: { name: string; one_liner: string; description: string };
 		icpixel: { name: string; one_liner: string; description: string };
 		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
+		icp_flags: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -477,6 +478,7 @@ interface I18nInit {
 		icrc_custom_token: string;
 		ext_custom_tokens: string;
 		icpunks_custom_tokens: string;
+		icrc7_custom_tokens: string;
 		custom_tokens: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;

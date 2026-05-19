@@ -34,12 +34,14 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derivedMemo(
 			IC_BUILTIN_TOKENS.map((token) => ({ ...token, enabled: false })) ?? [];
 
 		// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
-		const knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
+		const knownLedgerCanisterIds = new Set(
+			$icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
+		);
 
 		return [
 			...$icrcTokens,
 			...icrcEnvTokens.filter(
-				({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
+				({ ledgerCanisterId }) => !knownLedgerCanisterIds.has(ledgerCanisterId)
 			)
 		];
 	},
