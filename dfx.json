@@ -159,8 +159,8 @@
 		},
 		"internet_identity": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2024-10-25/internet_identity.did",
-			"wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2024-10-25/internet_identity_dev.wasm.gz",
+			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2026-03-06/internet_identity.did",
+			"wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2026-03-06/internet_identity_dev.wasm.gz",
 			"init_arg": "(opt record { captcha_config = opt record { max_unsolved_captchas= 50:nat64; captcha_trigger = variant {Static = variant {CaptchaDisabled}}}})",
 			"specified_id": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 			"remote": {
@@ -577,6 +577,12 @@
 			"build": "scripts/build.dip721.sh",
 			"candid": "target/dip721.did",
 			"wasm": "target/dip721.wasm.gz"
+		},
+		"icrc7": {
+			"type": "custom",
+			"build": "scripts/build.icrc7.sh",
+			"candid": "target/icrc7.did",
+			"wasm": "target/icrc7.wasm.gz"
 		},
 		"icpunks": {
 			"type": "custom",
