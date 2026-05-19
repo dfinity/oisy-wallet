@@ -529,6 +529,15 @@ interface I18nSettings {
 		enable_hide_micro_transactions: string;
 		disable_hide_micro_transactions: string;
 		save_spam_filter_success: string;
+		export_data: string;
+		export_data_description: string;
+		export_tokens: string;
+		export_tokens_description: string;
+		export_transactions: string;
+		export_transactions_description: string;
+		export_in_progress: string;
+		export_tokens_success: string;
+		export_transactions_success: string;
 		learn_more: string;
 	};
 	alt: {
@@ -538,7 +547,11 @@ interface I18nSettings {
 		appearance_dark: string;
 		appearance_system: string;
 	};
-	error: { loading_profile: string };
+	error: {
+		loading_profile: string;
+		export_exchange_rate_unavailable: string;
+		export_failed: string;
+	};
 }
 
 interface I18nShortcuts {

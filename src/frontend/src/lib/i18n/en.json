@@ -787,6 +787,15 @@
 			"enable_hide_micro_transactions": "Enable hiding of transactions with very small values",
 			"disable_hide_micro_transactions": "Disable hiding of transactions with very small values",
 			"save_spam_filter_success": "Your spam filter settings have been updated.",
+			"export_data": "Export data",
+			"export_data_description": "Download your tokens and transactions as CSV files.",
+			"export_tokens": "Export tokens",
+			"export_tokens_description": "Snapshot of your enabled tokens with balances and current prices.",
+			"export_transactions": "Export transactions",
+			"export_transactions_description": "All transactions across every enabled token and network. Loading the full history may take a moment.",
+			"export_in_progress": "Preparing export…",
+			"export_tokens_success": "Tokens CSV downloaded.",
+			"export_transactions_success": "Transactions CSV downloaded.",
 			"learn_more": "Learn more"
 		},
 		"alt": {
@@ -797,7 +806,9 @@
 			"appearance_system": "Enables your operating systems color mode"
 		},
 		"error": {
-			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience.",
+			"export_exchange_rate_unavailable": "Exchange rates are still loading. Try again in a moment.",
+			"export_failed": "We couldn't generate your export. Please try again."
 		}
 	},
 	"shortcuts": {
