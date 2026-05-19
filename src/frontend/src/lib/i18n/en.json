@@ -482,7 +482,6 @@
 			"icp_flags": {
 				"name": "icp-flags",
 				"one_liner": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions.",
-				"call_to_action": "Fun with Flags!",
 				"description": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions. Control over each position is determined exclusively by deterministic smart contract logic. There is no administrator discretion, no off-chain settlement layer, and no manual intervention.<br/>Each flag represents a single, indivisible on-chain position controlled by exactly one principal at a time. Control is transferred only through a valid higher bid that satisfies the contract’s escalation formula."
 			}
 		}
