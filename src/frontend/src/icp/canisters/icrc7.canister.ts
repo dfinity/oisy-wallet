@@ -2,10 +2,19 @@ import type { Account, _SERVICE as Icrc7Service, Value } from '$declarations/icr
 import { idlFactory as idlCertifiedFactoryIcrc7 } from '$declarations/icrc7/icrc7.factory.certified.did';
 import { idlFactory as idlFactoryIcrc7 } from '$declarations/icrc7/icrc7.factory.did';
 import { mapIcrc7TransferError } from '$icp/canisters/icrc7.errors';
+import { mapIcrc7TokenMetadata } from '$icp/utils/icrc7.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import type { NftMetadataWithoutId } from '$lib/types/nft';
+import {
+	Canister,
+	createServices,
+	fromNullable,
+	isNullish,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 
 // Wrapper around an ICRC-7 NFT collection canister.
 // Reference: https://github.com/dfinity/ICRC/blob/main/ICRCs/ICRC-7/ICRC-7.md
@@ -65,6 +74,20 @@ export class Icrc7Canister extends Canister<Icrc7Service> {
 		const { icrc7_token_metadata } = this.caller({ certified });
 
 		return await icrc7_token_metadata(tokenIds);
+	};
+
+	metadata = async ({
+		tokenId,
+		certified
+	}: { tokenId: bigint } & QueryParams): Promise<NftMetadataWithoutId | undefined> => {
+		const [metadata] = await this.tokenMetadata({ tokenIds: [tokenId], certified });
+		const entries = fromNullable(metadata);
+
+		if (isNullish(entries)) {
+			return;
+		}
+
+		return mapIcrc7TokenMetadata(entries);
 	};
 
 	/**
