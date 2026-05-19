@@ -62,23 +62,22 @@ export const transferIcPunks = async ({
 
 export const transferIcrc7 = async ({
 	progress,
-	to,
-	tokenId,
 	...rest
 }: {
 	identity: Identity;
 	canisterId: CanisterIdText;
 	to: Principal;
-	tokenId: bigint;
+	tokenIdentifier: bigint;
+	certified?: boolean;
 	progress?: (step: ProgressStepsSendIc) => void;
 }) => {
 	progress?.(ProgressStepsSendIc.SEND);
 
-	await transferIcrc7Api({
-		...rest,
-		to: { owner: to, subaccount: [] },
-		tokenId
-	});
+	const result = await transferIcrc7Api({ certified: true, ...rest });
+
+	if ('Err' in result) {
+		throw new Error(`ICRC-7 transfer failed: ${JSON.stringify(result.Err)}`);
+	}
 
 	progress?.(ProgressStepsSendIc.RELOAD);
 };

@@ -1,7 +1,6 @@
 import { collectionMetadata } from '$icp/api/icrc7.api';
-import type { Icrc7CanistersSchema } from '$icp/schema/icrc7-token.schema';
-import type { Icrc7Token, Icrc7TokenWithoutId } from '$icp/types/icrc7-token';
-import { mapIcrc7CollectionMetadata, mapIcrc7Token } from '$icp/utils/icrc7.utils';
+import type { Icrc7Canisters, Icrc7Token, Icrc7TokenWithoutId } from '$icp/types/icrc7-token';
+import { mapIcrc7Token } from '$icp/utils/icrc7.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
@@ -9,9 +8,6 @@ import { assertExistingTokens } from '$lib/utils/tokens.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
-import type * as z from 'zod';
-
-type Icrc7Canisters = z.infer<typeof Icrc7CanistersSchema>;
 
 export interface ValidateTokenData {
 	token: Icrc7TokenWithoutId;
@@ -99,17 +95,9 @@ const loadMetadata = async ({
 	canisterId
 }: Icrc7Canisters & { identity: Identity }): Promise<Icrc7TokenWithoutId | undefined> => {
 	try {
-		const entries = await collectionMetadata({ canisterId, identity, certified: true });
-
-		const metadata = mapIcrc7CollectionMetadata(entries);
-
-		if (isNullish(metadata)) {
-			return undefined;
-		}
-
 		return mapIcrc7Token({
 			canisterId,
-			metadata: { name: metadata.name, symbol: metadata.symbol }
+			metadata: await collectionMetadata({ canisterId, identity, certified: true })
 		});
 	} catch (err: unknown) {
 		toastsError({ msg: { text: get(i18n).tokens.import.error.loading_metadata } });

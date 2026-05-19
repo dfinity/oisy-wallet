@@ -24,10 +24,7 @@
 		loadDefaultIcrcTokens,
 		processCustomTokens as processIcrcCustomTokens
 	} from '$icp/services/icrc.services';
-	import {
-		loadDefaultIcrc7Tokens,
-		processCustomTokens as processIcrc7CustomTokens
-	} from '$icp/services/icrc7.services';
+	import { loadDefaultIcrc7Tokens } from '$icp/services/icrc7.services';
 	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 	import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';

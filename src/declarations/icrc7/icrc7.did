@@ -1,8 +1,13 @@
+// ICRC-7: Minimal Non-Fungible Token (NFT) Standard
+// Reference: https://github.com/dfinity/ICRC/blob/main/ICRCs/ICRC-7/ICRC-7.md
+
 type Subaccount = blob;
 
-type Account = record { owner : principal; subaccount : opt Subaccount };
+type Account = record {
+	owner : principal;
+	subaccount : opt Subaccount
+};
 
-// Generic value in accordance with ICRC-3
 type Value = variant {
 	Blob : blob;
 	Text : text;
@@ -13,16 +18,11 @@ type Value = variant {
 };
 
 type TransferArg = record {
-	from_subaccount : opt blob; // The subaccount to transfer the token from
+	from_subaccount : opt Subaccount;
 	to : Account;
 	token_id : nat;
 	memo : opt blob;
 	created_at_time : opt nat64
-};
-
-type TransferResult = variant {
-	Ok : nat; // Transaction index for successful transfer
-	Err : TransferError
 };
 
 type TransferError = variant {
@@ -34,6 +34,16 @@ type TransferError = variant {
 	Duplicate : record { duplicate_of : nat };
 	GenericError : record { error_code : nat; message : text };
 	GenericBatchError : record { error_code : nat; message : text }
+};
+
+type TransferResult = variant {
+	Ok : nat;
+	Err : TransferError
+};
+
+type StandardRecord = record {
+	name : text;
+	url : text
 };
 
 service : {
@@ -52,10 +62,11 @@ service : {
 	icrc7_atomic_batch_transfers : () -> (opt bool) query;
 	icrc7_tx_window : () -> (opt nat) query;
 	icrc7_permitted_drift : () -> (opt nat) query;
-	icrc7_token_metadata : (token_ids : vec nat) -> (vec opt vec record { text; Value }) query;
-	icrc7_owner_of : (token_ids : vec nat) -> (vec opt Account) query;
+	icrc7_token_metadata : (vec nat) -> (vec opt vec record { text; Value }) query;
+	icrc7_owner_of : (vec nat) -> (vec opt Account) query;
 	icrc7_balance_of : (vec Account) -> (vec nat) query;
-	icrc7_tokens : (prev : opt nat, take : opt nat) -> (vec nat) query;
-	icrc7_tokens_of : (account : Account, prev : opt nat, take : opt nat) -> (vec nat) query;
-	icrc7_transfer : (vec TransferArg) -> (vec opt TransferResult)
+	icrc7_tokens : (opt nat, opt nat) -> (vec nat) query;
+	icrc7_tokens_of : (Account, opt nat, opt nat) -> (vec nat) query;
+	icrc7_transfer : (vec TransferArg) -> (vec opt TransferResult);
+	icrc10_supported_standards : () -> (vec StandardRecord) query
 }

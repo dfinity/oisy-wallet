@@ -4,8 +4,8 @@ import type { CanisterIdText } from '$lib/types/canister';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
-// Cosmicrafts Avatars — used as a reference ICRC-7 deployment for tests.
-export const mockIcrc7CanisterId: CanisterIdText = 'xea2t-daaaa-aaaaj-qnp2a-cai';
+export const mockIcrc7CanisterId: CanisterIdText = 'aaaaa-aa';
+export const mockIcrc7CanisterId2: CanisterIdText = 'mxzaz-hqaaa-aaaar-qaada-cai';
 
 export const mockValidIcrc7Token: Icrc7Token = {
 	...mockValidToken,

@@ -67,7 +67,7 @@ export const sendNft = async ({
 				identity,
 				canisterId: token.canisterId,
 				to: Principal.fromText(to),
-				tokenId: BigInt(tokenId),
+				tokenIdentifier: BigInt(tokenId),
 				progress
 			});
 		}

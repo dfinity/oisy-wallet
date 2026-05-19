@@ -1,114 +1,117 @@
-import type { Value } from '$declarations/icrc7/icrc7.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import {
-	isTokenIcrc7,
-	isTokenIcrc7CustomToken,
-	mapIcrc7CollectionMetadata,
-	mapIcrc7Token
-} from '$icp/utils/icrc7.utils';
-import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
-import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
+import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
+import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
+import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
+import { ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
+import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
+import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
+import type { Icrc7TokenWithoutId } from '$icp/types/icrc7-token';
+import { isTokenIcrc7, isTokenIcrc7CustomToken, mapIcrc7Token } from '$icp/utils/icrc7.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import type { TokenStandardCode } from '$lib/types/token';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIcrc7CanisterId, mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
 
 describe('icrc7.utils', () => {
 	describe('isTokenIcrc7', () => {
-		it('should return true for an ICRC-7 token', () => {
-			expect(isTokenIcrc7(mockValidIcrc7Token)).toBeTruthy();
+		it.each(['icrc7'])('should return true for valid token standards: %s', (standard) => {
+			expect(
+				isTokenIcrc7({
+					...mockIcrcCustomToken,
+					standard: { code: standard as TokenStandardCode }
+				})
+			).toBeTruthy();
 		});
 
-		it('should return false for a non-ICRC-7 token', () => {
-			expect(isTokenIcrc7(mockValidIcPunksToken)).toBeFalsy();
-		});
-
-		it('should return false when standard is missing', () => {
-			expect(isTokenIcrc7({})).toBeFalsy();
-		});
+		it.each(['icrc', 'icpunks', 'ext', 'dip721', 'ethereum', 'erc20', 'bitcoin', 'solana', 'spl'])(
+			'should return false for invalid token standards: %s',
+			(standard) => {
+				expect(
+					isTokenIcrc7({
+						...mockIcrcCustomToken,
+						standard: { code: standard as TokenStandardCode }
+					})
+				).toBeFalsy();
+			}
+		);
 	});
 
 	describe('isTokenIcrc7CustomToken', () => {
-		const toggleableIcrc7Token = { ...mockValidIcrc7Token, enabled: true };
-		const toggleableIcPunksToken = { ...mockValidIcPunksToken, enabled: true };
+		const mockTokens = [mockValidIcrc7Token];
 
-		it('should return true for a toggleable ICRC-7 token (has `enabled`)', () => {
-			expect(isTokenIcrc7CustomToken(toggleableIcrc7Token)).toBeTruthy();
+		it.each(
+			mockTokens.map((token) => ({
+				...token,
+				enabled: Math.random() < 0.5
+			}))
+		)('should return true for token $name that has the enabled field', (token) => {
+			expect(isTokenIcrc7CustomToken(token)).toBeTruthy();
 		});
 
-		it('should return false for a non-toggleable ICRC-7 token (no `enabled`)', () => {
-			expect(isTokenIcrc7CustomToken(mockValidIcrc7Token)).toBeFalsy();
-		});
+		it.each(mockTokens)(
+			'should return false for token $name that has not the enabled field',
+			(token) => {
+				expect(isTokenIcrc7CustomToken(token)).toBeFalsy();
+			}
+		);
 
-		it('should return false for a non-ICRC-7 toggleable token', () => {
-			expect(isTokenIcrc7CustomToken(toggleableIcPunksToken)).toBeFalsy();
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...SPL_TOKENS,
+			...ERC20_TWIN_TOKENS,
+			...EVM_ERC20_TOKENS,
+			...mockTokens
+		])('should return false for token $name', (token) => {
+			expect(isTokenIcrc7CustomToken(token)).toBeFalsy();
 		});
 	});
 
-	describe('mapIcrc7CollectionMetadata', () => {
-		const fullEntries: Array<[string, Value]> = [
-			['icrc7:name', { Text: 'Cosmicrafts Avatars' }],
-			['icrc7:symbol', { Text: 'CCC' }],
-			['icrc7:description', { Text: 'A test collection' }],
-			['icrc7:logo', { Text: 'https://example.com/logo.png' }],
-			['icrc7:total_supply', { Nat: 1000n }]
-		];
+	describe('mapIcrc7Token', () => {
+		const mockSymbol = 'MOCKICRC7';
+		const mockName = 'Mock ICRC-7 Collection';
+		const mockCanisterId = mockIcrc7CanisterId;
+		const mockParams = {
+			canisterId: mockCanisterId,
+			metadata: { symbol: mockSymbol, name: mockName }
+		};
 
-		it('should map all standard text keys', () => {
-			expect(mapIcrc7CollectionMetadata(fullEntries)).toEqual({
-				name: 'Cosmicrafts Avatars',
-				symbol: 'CCC',
-				description: 'A test collection',
-				icon: 'https://example.com/logo.png'
+		const expected: Icrc7TokenWithoutId = {
+			canisterId: mockCanisterId,
+			network: ICP_NETWORK,
+			name: mockName,
+			symbol: mockSymbol,
+			decimals: 0,
+			standard: { code: 'icrc7' },
+			category: 'custom',
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
+		};
+
+		it('should correctly map an ICRC-7 token', () => {
+			expect(mapIcrc7Token(mockParams)).toStrictEqual(expected);
+		});
+
+		it('should handle empty string as name', () => {
+			expect(
+				mapIcrc7Token({ ...mockParams, metadata: { ...mockParams.metadata, name: '' } })
+			).toStrictEqual({
+				...expected,
+				name: ''
 			});
 		});
 
-		it('should omit description and icon when absent', () => {
-			const minimal: Array<[string, Value]> = [
-				['icrc7:name', { Text: 'Coll' }],
-				['icrc7:symbol', { Text: 'C' }]
-			];
-
-			expect(mapIcrc7CollectionMetadata(minimal)).toEqual({
-				name: 'Coll',
-				symbol: 'C'
+		it('should handle empty string as symbol', () => {
+			expect(
+				mapIcrc7Token({ ...mockParams, metadata: { ...mockParams.metadata, symbol: '' } })
+			).toStrictEqual({
+				...expected,
+				symbol: ''
 			});
-		});
-
-		it('should return undefined when name is missing', () => {
-			const noName: Array<[string, Value]> = [['icrc7:symbol', { Text: 'C' }]];
-
-			expect(mapIcrc7CollectionMetadata(noName)).toBeUndefined();
-		});
-
-		it('should return undefined when symbol is missing', () => {
-			const noSymbol: Array<[string, Value]> = [['icrc7:name', { Text: 'Coll' }]];
-
-			expect(mapIcrc7CollectionMetadata(noSymbol)).toBeUndefined();
-		});
-
-		it('should ignore non-Text values for required keys', () => {
-			const wrongType: Array<[string, Value]> = [
-				['icrc7:name', { Nat: 42n }],
-				['icrc7:symbol', { Text: 'C' }]
-			];
-
-			expect(mapIcrc7CollectionMetadata(wrongType)).toBeUndefined();
-		});
-
-		it('should ignore non-Text optional values without breaking', () => {
-			const wrongType: Array<[string, Value]> = [
-				['icrc7:name', { Text: 'Coll' }],
-				['icrc7:symbol', { Text: 'C' }],
-				['icrc7:description', { Nat: 1n }],
-				['icrc7:logo', { Blob: new Uint8Array() }]
-			];
-
-			expect(mapIcrc7CollectionMetadata(wrongType)).toEqual({
-				name: 'Coll',
-				symbol: 'C'
-			});
-		});
-
-		it('should return undefined for an empty entries array', () => {
-			expect(mapIcrc7CollectionMetadata([])).toBeUndefined();
 		});
 	});
 

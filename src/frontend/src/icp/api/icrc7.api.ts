@@ -1,35 +1,19 @@
-import type { Account, Value } from '$declarations/icrc7/icrc7.did';
-import { Icrc7Canister } from '$icp/canisters/icrc7.canister';
+import type { TransferResult } from '$declarations/icrc7/icrc7.did';
+import { Icrc7Canister, type Icrc7TokenMetadata } from '$icp/canisters/icrc7.canister';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
+import type { TokenMetadata } from '$lib/types/token';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
-
-export const collectionMetadata = async ({
-	certified,
-	identity,
-	canisterId,
-	...rest
-}: CanisterApiFunctionParamsWithCanisterId<QueryParams>): Promise<Array<[string, Value]>> => {
-	const { collectionMetadata } = await icrc7Canister({
-		identity,
-		canisterId,
-		...rest
-	});
-
-	return await collectionMetadata({ certified });
-};
 
 export const getTokensByOwner = async ({
 	certified,
 	identity,
+	owner: principal,
 	canisterId,
-	owner,
-	prev,
-	take,
 	...rest
-}: CanisterApiFunctionParamsWithCanisterId<
-	{ owner: Account; prev?: bigint; take?: bigint } & QueryParams
->): Promise<bigint[]> => {
+}: CanisterApiFunctionParamsWithCanisterId<{ owner: Principal } & QueryParams>): Promise<
+	bigint[]
+> => {
 	if (isNullish(identity)) {
 		return [];
 	}
@@ -40,43 +24,61 @@ export const getTokensByOwner = async ({
 		...rest
 	});
 
-	return await getTokensByOwner({ certified, owner, prev, take });
+	return await getTokensByOwner({ certified, principal });
 };
 
-export const getOwnersOf = async ({
+export const transfer = async ({
 	certified,
 	identity,
 	canisterId,
-	tokenIds,
+	to,
+	tokenIdentifier,
 	...rest
-}: CanisterApiFunctionParamsWithCanisterId<{ tokenIds: bigint[] } & QueryParams>): Promise<
-	Array<[] | [Account]>
-> => {
-	const { getOwnersOf } = await icrc7Canister({
+}: CanisterApiFunctionParamsWithCanisterId<
+	{ to: Principal; tokenIdentifier: bigint } & QueryParams
+>): Promise<TransferResult> => {
+	const { transfer } = await icrc7Canister({
 		identity,
 		canisterId,
 		...rest
 	});
 
-	return await getOwnersOf({ certified, tokenIds });
+	return await transfer({ certified, to, tokenIdentifier });
 };
 
-export const tokenMetadata = async ({
+export const metadata = async ({
 	certified,
 	identity,
 	canisterId,
-	tokenIds,
+	tokenIdentifier,
 	...rest
-}: CanisterApiFunctionParamsWithCanisterId<{ tokenIds: bigint[] } & QueryParams>): Promise<
-	Array<[] | [Array<[string, Value]>]>
-> => {
-	const { tokenMetadata } = await icrc7Canister({
+}: CanisterApiFunctionParamsWithCanisterId<
+	{ tokenIdentifier: bigint } & QueryParams
+>): Promise<Icrc7TokenMetadata> => {
+	const { metadata } = await icrc7Canister({
 		identity,
 		canisterId,
 		...rest
 	});
 
-	return await tokenMetadata({ certified, tokenIds });
+	return await metadata({ certified, tokenIdentifier });
+};
+
+export const collectionMetadata = async ({
+	certified,
+	identity,
+	canisterId,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<QueryParams>): Promise<
+	Omit<TokenMetadata, 'decimals'>
+> => {
+	const { collectionMetadata } = await icrc7Canister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	return await collectionMetadata({ certified });
 };
 
 export const transfer = async ({

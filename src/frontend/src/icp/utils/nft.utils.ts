@@ -1,9 +1,11 @@
 import type { TokenIndex } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { metadata as getIcPunksMetadata } from '$icp/api/icpunks.api';
+import { metadata as getIcrc7Metadata } from '$icp/api/icrc7.api';
 import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import type { Dip721Token } from '$icp/types/dip721-token';
 import type { ExtToken } from '$icp/types/ext-token';
 import type { IcPunksToken } from '$icp/types/icpunks-token';
+import type { Icrc7Token } from '$icp/types/icrc7-token';
 import { extIndexToIdentifier, parseExtTokenIndex } from '$icp/utils/ext.utils';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import type { Nft, NftCollection } from '$lib/types/nft';
@@ -133,5 +135,49 @@ export const mapIcPunksNft = async ({
 			attributes.map(({ name: trait_type, value }) => ({ trait_type, value }))
 		),
 		collection: mapIcPunksCollection(token)
+	};
+};
+
+const mapIcrc7Collection = ({ canisterId, ...rest }: Icrc7Token): NftCollection => ({
+	...rest,
+	address: canisterId
+});
+
+export const mapIcrc7Nft = async ({
+	index: tokenIdentifier,
+	token,
+	identity,
+	certified
+}: {
+	index: bigint;
+	token: Icrc7Token;
+	identity: Identity;
+} & QueryParams): Promise<Nft> => {
+	const { canisterId } = token;
+
+	const { name, description, imageUrl, attributes } = await getIcrc7Metadata({
+		canisterId,
+		tokenIdentifier,
+		identity,
+		certified
+	});
+
+	const mediaStatus = {
+		image: notEmptyString(imageUrl)
+			? await getMediaStatusOrCache(imageUrl)
+			: MediaStatusEnum.INVALID_DATA,
+		thumbnail: MediaStatusEnum.INVALID_DATA
+	};
+
+	return {
+		id: parseNftId(tokenIdentifier.toString()),
+		...(notEmptyString(imageUrl) ? { imageUrl } : {}),
+		mediaStatus,
+		...(notEmptyString(name) ? { name } : {}),
+		...(notEmptyString(description) ? { description } : {}),
+		attributes: mapNftAttributes(
+			attributes.map(({ name: trait_type, value }) => ({ trait_type, value }))
+		),
+		collection: mapIcrc7Collection(token)
 	};
 };

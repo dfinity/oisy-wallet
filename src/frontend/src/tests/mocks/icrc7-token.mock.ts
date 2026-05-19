@@ -1,23 +1,39 @@
-import type { Account, Value } from '$declarations/icrc7/icrc7.did';
+import type { Account, TransferResult, Value } from '$declarations/icrc7/icrc7.did';
+import type { Icrc7TokenMetadata } from '$icp/canisters/icrc7.canister';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+
+export const mockIcrc7TokenIds: bigint[] = [12345n, 54321n];
 
 export const mockIcrc7Account: Account = {
 	owner: mockPrincipal,
 	subaccount: []
 };
 
-// Standard ICRC-7 collection metadata keys.
-// Reference: https://github.com/dfinity/ICRC/blob/main/ICRCs/ICRC-7/ICRC-7.md#icrc7_collection_metadata
-export const mockIcrc7CollectionMetadata: Array<[string, Value]> = [
-	['icrc7:name', { Text: 'Cosmicrafts Avatars' }],
-	['icrc7:symbol', { Text: 'CCC' }],
-	['icrc7:description', { Text: 'Mock ICRC-7 collection used in tests.' }],
-	['icrc7:logo', { Text: 'data:image/svg+xml;utf8,<svg/>' }],
-	['icrc7:total_supply', { Nat: 1000n }],
-	['icrc7:supply_cap', { Nat: 10_000n }]
+export const mockIcrc7TokenMetadataEntries: Array<[string, Value]> = [
+	['icrc7:name', { Text: 'Mock ICRC-7 NFT' }],
+	['icrc7:description', { Text: 'Description for a mock ICRC-7 NFT' }],
+	['icrc7:image', { Text: 'https://example.com/icrc7/1.png' }],
+	['background', { Text: 'Yellow' }],
+	['rarity', { Nat: 42n } as Value]
 ];
 
-export const mockIcrc7TokenMetadata: Array<[string, Value]> = [
-	['icrc7:metadata:uri', { Text: 'https://example.com/nft/1.json' }],
-	['icrc7:metadata:name', { Text: 'Mock ICRC-7 NFT #1' }]
-];
+export const mockIcrc7TokenMetadata: Icrc7TokenMetadata = {
+	name: 'Mock ICRC-7 NFT',
+	description: 'Description for a mock ICRC-7 NFT',
+	imageUrl: 'https://example.com/icrc7/1.png',
+	attributes: [
+		{ name: 'background', value: 'Yellow' },
+		{ name: 'rarity', value: '42' }
+	]
+};
+
+export const mockIcrc7CollectionMetadata = {
+	symbol: 'ICRC7',
+	name: 'Mock ICRC-7 Collection',
+	description: 'A collection of ICRC-7 NFTs',
+	icon: 'https://example.com/icrc7/logo.png'
+};
+
+export const mockIcrc7TransferOk: TransferResult = { Ok: 1n };
+
+export const mockIcrc7TransferErrUnauthorized: TransferResult = { Err: { Unauthorized: null } };

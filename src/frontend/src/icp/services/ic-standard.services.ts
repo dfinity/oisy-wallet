@@ -12,7 +12,10 @@ import {
 	getTokensByOwner as icPunksGetTokensByOwner,
 	metadata as icPunksMetadata
 } from '$icp/api/icpunks.api';
-import { collectionMetadata as icrc7CollectionMetadata } from '$icp/api/icrc7.api';
+import {
+	collectionMetadata as icrc7CollectionMetadata,
+	getTokensByOwner as icrc7GetTokensByOwner
+} from '$icp/api/icrc7.api';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
 import {
 	ResolveByProbingError,
@@ -75,7 +78,10 @@ export const detectNftCanisterStandard = async ({
 	};
 
 	const icrc7Canister: ResolveGroup<AcceptedStandards> = {
-		probes: [() => icrc7CollectionMetadata(baseParams)],
+		probes: [
+			() => icrc7GetTokensByOwner({ ...baseParams, owner: identity.getPrincipal() }),
+			() => icrc7CollectionMetadata(baseParams)
+		],
 		onResolve: () => 'icrc7'
 	};
 
