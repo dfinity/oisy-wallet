@@ -19,9 +19,8 @@
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
-	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
-	import { nativeTokens } from '$lib/derived/tokens.derived';
+	import { enabledFungibleTokens, nativeTokens } from '$lib/derived/tokens.derived';
 	import { exportTokensCsv, exportTransactionsCsv } from '$lib/services/export-data.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -60,12 +59,12 @@
 
 			await exportTransactionsCsv({
 				identity: $authIdentity,
-				tokens: $enabledFungibleNetworkTokens,
+				tokens: $enabledFungibleTokens,
 				userAddresses,
 				nativeSymbolByNetworkId,
 				buildTransactions: () =>
 					mapAllTransactionsUi({
-						tokens: $enabledFungibleNetworkTokens,
+						tokens: $enabledFungibleTokens,
 						$btcTransactions: $btcTransactionsStore,
 						$ethTransactions: $ethTransactionsStore,
 						$ckEthMinterInfo: $ckEthMinterInfoStore,
