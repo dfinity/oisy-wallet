@@ -65,6 +65,8 @@ DFX_NETWORK=ic ./scripts/build.dip721.sh
 DFX_NETWORK=ic ./scripts/build.icpunks.sh
 # .. downloads candid for icrc7
 DFX_NETWORK=ic ./scripts/build.icrc7.sh
+# .. creates candid for icrc3
+DFX_NETWORK=ic ./scripts/build.icrc3.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
