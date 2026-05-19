@@ -1,0 +1,50 @@
+type Value = variant {
+	Blob : blob;
+	Text : text;
+	Nat : nat;
+	Int : int;
+	Array : vec Value;
+	Map : vec record { text; Value }
+};
+
+type GetArchivesArgs = record { from : opt principal };
+
+type GetArchivesResult = vec record {
+	canister_id : principal;
+	start : nat;
+	end : nat
+};
+
+type GetBlocksArgs = vec record {
+	start : nat;
+	length : nat
+};
+
+type GetBlocksResult = record {
+	log_length : nat;
+	blocks : vec record {
+		id : nat;
+		block : Value
+	};
+	archived_blocks : vec record {
+		args : GetBlocksArgs;
+		callback : func(GetBlocksArgs) -> (GetBlocksResult) query
+	}
+};
+
+type DataCertificate = record {
+	certificate : blob;
+	hash_tree : blob
+};
+
+type BlockType = record {
+	block_type : text;
+	url : text
+};
+
+service : {
+	icrc3_get_archives : (GetArchivesArgs) -> (GetArchivesResult) query;
+	icrc3_get_blocks : (GetBlocksArgs) -> (GetBlocksResult) query;
+	icrc3_get_tip_certificate : () -> (opt DataCertificate) query;
+	icrc3_supported_block_types : () -> (vec BlockType) query
+}
