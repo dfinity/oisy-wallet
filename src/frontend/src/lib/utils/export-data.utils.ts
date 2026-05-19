@@ -165,11 +165,15 @@ const BTC_DECIMALS = 8;
 const normalizeType = (rawType: string): string => {
 	const t = rawType.toLowerCase();
 
-	if (['send', 'sent', 'withdraw'].includes(t)) {
+	// `withdraw` and `deposit` originate from the EVM ck-minter mapper in
+	// eth/utils/transactions.utils.ts: `withdraw` is the minter releasing funds *to* the
+	// user (so incoming for the user), and `deposit` is the user sending *to* the minter
+	// (so outgoing for the user).
+	if (['send', 'sent', 'deposit'].includes(t)) {
 		return 'send';
 	}
 
-	if (['receive', 'received', 'deposit'].includes(t)) {
+	if (['receive', 'received', 'withdraw'].includes(t)) {
 		return 'receive';
 	}
 

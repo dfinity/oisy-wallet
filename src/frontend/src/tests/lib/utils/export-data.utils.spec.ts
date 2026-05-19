@@ -637,17 +637,36 @@ describe('export-data.utils', () => {
 			expect(row.tx_id).toMatch(/^[A-HJ-NP-Za-km-z1-9]{87,88}$/);
 		});
 
-		it('preserves type_raw verbatim while normalizing the type column', () => {
-			const tx: EthTransactionUi = { ...ethTx, type: 'withdraw' };
+		it('maps the ck-minter withdraw raw type to receive (user is receiving back)', () => {
+			// `withdraw` in eth/utils/transactions.utils.ts means the ck-minter is sending funds
+			// to the user — incoming for the user despite the banking-style verb.
+			const withdraw: EthTransactionUi = { ...ethTx, type: 'withdraw', from: '0xMinter' };
 			const [row] = buildTransactionRows({
-				transactions: [{ component: 'ethereum', transaction: tx, token: ethToken }],
+				transactions: [{ component: 'ethereum', transaction: withdraw, token: ethToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				exportedAt
+			});
+
+			expect(row.type).toBe('receive');
+			expect(row.type_raw).toBe('withdraw');
+			expect(row.direction).toBe('in');
+		});
+
+		it('maps the ck-minter deposit raw type to send (user is sending in)', () => {
+			// `deposit` in eth/utils/transactions.utils.ts means the user is sending funds to
+			// the ck-minter to mint a wrapped asset — outgoing for the user.
+			const deposit: EthTransactionUi = { ...ethTx, type: 'deposit', to: '0xMinter' };
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ethereum', transaction: deposit, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
 				exportedAt
 			});
 
 			expect(row.type).toBe('send');
-			expect(row.type_raw).toBe('withdraw');
+			expect(row.type_raw).toBe('deposit');
+			expect(row.direction).toBe('out');
 		});
 
 		it('falls back to "other" for unknown types', () => {
