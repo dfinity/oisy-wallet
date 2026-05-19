@@ -212,9 +212,7 @@ export const mapIcrc7CollectionMetadata = (
  * Real collections are not fully consistent about key names, so this accepts the standard
  * `icrc7:*` keys, the `icrc7:metadata:*` namespace and common unprefixed fallbacks.
  */
-export const mapIcrc7TokenMetadata = (
-	entries: Array<[string, Value]>
-): Omit<NftMetadataWithoutId, 'id'> => {
+export const mapIcrc7TokenMetadata = (entries: Array<[string, Value]>): NftMetadataWithoutId => {
 	const name = lookupStringByKeys({ entries, keys: ICRC7_TOKEN_NAME_KEYS });
 	const description = lookupStringByKeys({ entries, keys: ICRC7_TOKEN_DESCRIPTION_KEYS });
 	const imageUrl = lookupStringByKeys({ entries, keys: ICRC7_TOKEN_IMAGE_KEYS });
