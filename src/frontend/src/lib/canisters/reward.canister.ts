@@ -1,7 +1,14 @@
 import type {
+	CancelQrGiftCodeResponse,
 	ClaimedVipReward,
+	CreateQrGiftCodeRequest,
+	CreateQrGiftCodeResponse,
 	EligibilityReport,
 	NewVipRewardResponse,
+	QrGiftCodeEntry,
+	QrGiftCodeInfoResponse,
+	RedeemQrGiftCodeRequest,
+	RedeemQrGiftCodeResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
 	SetReferrerResponse,
@@ -91,5 +98,39 @@ export class RewardCanister extends Canister<RewardService> {
 		const { register_airdrop_recipient } = this.caller({ certified: true });
 
 		return register_airdrop_recipient(userSnapshot);
+	};
+
+	createQrGiftCode = (request: CreateQrGiftCodeRequest): Promise<CreateQrGiftCodeResponse> => {
+		const { create_qr_gift_code } = this.caller({ certified: true });
+
+		return create_qr_gift_code(request);
+	};
+
+	redeemQrGiftCode = (request: RedeemQrGiftCodeRequest): Promise<RedeemQrGiftCodeResponse> => {
+		const { redeem_qr_gift_code } = this.caller({ certified: true });
+
+		return redeem_qr_gift_code(request);
+	};
+
+	cancelQrGiftCode = (code: string): Promise<CancelQrGiftCodeResponse> => {
+		const { cancel_qr_gift_code } = this.caller({ certified: true });
+
+		return cancel_qr_gift_code(code);
+	};
+
+	getQrGiftCodeInfo = async ({
+		certified = true,
+		code
+	}: { code: string } & QueryParams): Promise<QrGiftCodeInfoResponse | undefined> => {
+		const { qr_gift_code_info } = this.caller({ certified });
+
+		const result = await qr_gift_code_info(code);
+		return fromNullable(result);
+	};
+
+	getMyQrGiftCodes = ({ certified = true }: QueryParams): Promise<QrGiftCodeEntry[]> => {
+		const { my_qr_gift_codes } = this.caller({ certified });
+
+		return my_qr_gift_codes();
 	};
 }
