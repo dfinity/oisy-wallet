@@ -1,7 +1,15 @@
+import type { BtcTransactionUi } from '$btc/types/btc';
+import type { EthTransactionUi } from '$eth/types/eth-transaction';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { Currency } from '$lib/enums/currency';
+import type { NetworkId } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
+import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { formatUnits } from 'ethers/utils';
 
 export interface TokenCsvRow extends CsvRow {
@@ -36,11 +44,56 @@ export const TOKEN_CSV_COLUMNS: CsvColumn<TokenCsvRow>[] = [
 	{ key: 'snapshot_at', header: 'snapshot_at' }
 ];
 
+export interface TransactionCsvRow extends CsvRow {
+	timestamp_iso: string;
+	network: string;
+	token_symbol: string;
+	token_address_or_ledger_id: string;
+	type: string;
+	type_raw: string;
+	direction: string;
+	status: string;
+	from: string;
+	to: string;
+	amount: string;
+	fee: string;
+	fee_token: string;
+	tx_id: string;
+	explorer_url: string;
+	exported_at: string;
+}
+
+export const TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
+	{ key: 'timestamp_iso', header: 'timestamp_iso' },
+	{ key: 'network', header: 'network' },
+	{ key: 'token_symbol', header: 'token_symbol' },
+	{ key: 'token_address_or_ledger_id', header: 'token_address_or_ledger_id' },
+	{ key: 'type', header: 'type' },
+	{ key: 'type_raw', header: 'type_raw' },
+	{ key: 'direction', header: 'direction' },
+	{ key: 'status', header: 'status' },
+	{ key: 'from', header: 'from' },
+	{ key: 'to', header: 'to' },
+	{ key: 'amount', header: 'amount' },
+	{ key: 'fee', header: 'fee' },
+	{ key: 'fee_token', header: 'fee_token' },
+	{ key: 'tx_id', header: 'tx_id' },
+	{ key: 'explorer_url', header: 'explorer_url' },
+	{ key: 'exported_at', header: 'exported_at' }
+];
+
+export interface UserAddresses {
+	btc?: string;
+	eth?: string;
+	icp?: string;
+	sol?: string;
+}
+
 // Tokens model the on-chain identifier under different field names depending on the standard
 // (ICRC ledgers, ERC20 contracts, SPL mints). For a flat CSV we surface whichever is present;
 // native tokens have neither and the column is left empty.
-const getAddressOrLedgerId = (token: TokenUi): string => {
-	const candidate = token as TokenUi & {
+const getAddressOrLedgerId = (token: Token | TokenUi): string => {
+	const candidate = token as (Token | TokenUi) & {
 		ledgerCanisterId?: unknown;
 		address?: unknown;
 	};
@@ -56,13 +109,8 @@ const getAddressOrLedgerId = (token: TokenUi): string => {
 	return '';
 };
 
-const formatBalance = ({
-	value,
-	decimals
-}: {
-	value: Nullish<bigint>;
-	decimals: number;
-}): string => (nonNullish(value) ? formatUnits(value, decimals) : '');
+const formatAmount = ({ value, decimals }: { value: Nullish<bigint>; decimals: number }): string =>
+	nonNullish(value) ? formatUnits(value, decimals) : '';
 
 const toUserCurrencyValue = ({
 	usdValue,
@@ -93,7 +141,7 @@ export const buildTokenRows = ({
 		standard: token.standard.code,
 		address_or_ledger_id: getAddressOrLedgerId(token),
 		decimals: token.decimals,
-		balance: formatBalance({ value: token.balance, decimals: token.decimals }),
+		balance: formatAmount({ value: token.balance, decimals: token.decimals }),
 		usd_price: token.usdPrice,
 		usd_value: token.usdBalance,
 		currency: currency.toUpperCase(),
@@ -101,4 +149,271 @@ export const buildTokenRows = ({
 		value: toUserCurrencyValue({ usdValue: token.usdBalance, exchangeRateToUsd }),
 		snapshot_at: snapshotAt
 	}));
+};
+
+// Decimals of the native chain currency used to pay gas/fees. ETH, BNB, MATIC, AVAX
+// all use 18; SOL uses 9; BTC uses 8.
+const EVM_NATIVE_DECIMALS = 18;
+const SOL_NATIVE_DECIMALS = 9;
+const BTC_DECIMALS = 8;
+
+const normalizeType = (rawType: string): string => {
+	const t = rawType.toLowerCase();
+
+	if (['send', 'sent', 'withdraw'].includes(t)) {
+		return 'send';
+	}
+
+	if (['receive', 'received', 'deposit'].includes(t)) {
+		return 'receive';
+	}
+
+	if (t === 'mint') {
+		return 'mint';
+	}
+
+	if (t === 'burn') {
+		return 'burn';
+	}
+
+	if (t === 'approve') {
+		return 'approve';
+	}
+
+	return 'other';
+};
+
+// ICP/BTC/SOL store timestamps as bigint nanoseconds. ETH stores them as a `number` of seconds
+// (ethers convention). Empty when the source value is missing.
+const formatTimestamp = (timestamp: bigint | number | undefined): string => {
+	if (isNullish(timestamp)) {
+		return '';
+	}
+
+	const millis = typeof timestamp === 'bigint' ? Number(timestamp / 1_000_000n) : timestamp * 1000;
+
+	return new Date(millis).toISOString();
+};
+
+const addressesEqual = ({ a, b }: { a: string | undefined; b: string | undefined }): boolean =>
+	nonNullish(a) && nonNullish(b) && a.toLowerCase() === b.toLowerCase();
+
+const toBitcoinRow = ({
+	transaction: tx,
+	token,
+	userAddress,
+	exportedAt
+}: {
+	transaction: BtcTransactionUi;
+	token: Token;
+	userAddress: string | undefined;
+	exportedAt: string;
+}): TransactionCsvRow => {
+	const type = normalizeType(tx.type);
+	const recipients = tx.to ?? [];
+	const direction: string =
+		type === 'send'
+			? 'out'
+			: type === 'receive'
+				? 'in'
+				: nonNullish(userAddress) &&
+					  recipients.some((r) => addressesEqual({ a: r, b: userAddress }))
+					? 'in'
+					: '';
+
+	return {
+		timestamp_iso: formatTimestamp(tx.timestamp),
+		network: token.network.name,
+		token_symbol: token.symbol,
+		token_address_or_ledger_id: getAddressOrLedgerId(token),
+		type,
+		type_raw: tx.type,
+		direction,
+		status: tx.status,
+		from: tx.from ?? '',
+		to: recipients.join(';'),
+		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
+		fee: formatAmount({ value: tx.fee, decimals: BTC_DECIMALS }),
+		fee_token: 'BTC',
+		tx_id: tx.id,
+		explorer_url: tx.txExplorerUrl ?? '',
+		exported_at: exportedAt
+	};
+};
+
+const toEthereumRow = ({
+	transaction: tx,
+	token,
+	userAddress,
+	nativeSymbolByNetworkId,
+	exportedAt
+}: {
+	transaction: EthTransactionUi;
+	token: Token;
+	userAddress: string | undefined;
+	nativeSymbolByNetworkId: (networkId: NetworkId) => string | undefined;
+	exportedAt: string;
+}): TransactionCsvRow => {
+	const type = normalizeType(tx.type);
+	const direction: string =
+		type === 'send'
+			? 'out'
+			: type === 'receive'
+				? 'in'
+				: addressesEqual({ a: tx.from, b: userAddress })
+					? 'out'
+					: addressesEqual({ a: tx.to, b: userAddress })
+						? 'in'
+						: '';
+
+	const status: string = nonNullish(tx.blockNumber)
+		? 'confirmed'
+		: nonNullish(tx.pendingTimestamp)
+			? 'pending'
+			: '';
+
+	const gasFee: bigint | undefined =
+		nonNullish(tx.gasUsed) && nonNullish(tx.gasPrice) ? tx.gasUsed * tx.gasPrice : undefined;
+
+	return {
+		timestamp_iso: formatTimestamp(tx.timestamp),
+		network: token.network.name,
+		token_symbol: token.symbol,
+		token_address_or_ledger_id: getAddressOrLedgerId(token),
+		type,
+		type_raw: tx.type,
+		direction,
+		status,
+		from: tx.from,
+		to: tx.to ?? '',
+		amount: formatAmount({ value: tx.value as bigint | undefined, decimals: token.decimals }),
+		fee: formatAmount({ value: gasFee, decimals: EVM_NATIVE_DECIMALS }),
+		fee_token: nativeSymbolByNetworkId(token.network.id) ?? '',
+		tx_id: tx.hash ?? '',
+		explorer_url: '',
+		exported_at: exportedAt
+	};
+};
+
+const toIcRow = ({
+	transaction: tx,
+	token,
+	exportedAt
+}: {
+	transaction: IcTransactionUi;
+	token: Token;
+	exportedAt: string;
+}): TransactionCsvRow => {
+	const direction: string = tx.incoming === true ? 'in' : tx.incoming === false ? 'out' : '';
+
+	return {
+		timestamp_iso: formatTimestamp(tx.timestamp),
+		network: token.network.name,
+		token_symbol: token.symbol,
+		token_address_or_ledger_id: getAddressOrLedgerId(token),
+		type: normalizeType(tx.type),
+		type_raw: tx.type,
+		direction,
+		status: tx.status,
+		from: tx.from ?? '',
+		to: tx.to ?? '',
+		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
+		fee: formatAmount({ value: tx.fee, decimals: token.decimals }),
+		fee_token: token.symbol,
+		tx_id: String(tx.id),
+		explorer_url: tx.txExplorerUrl ?? '',
+		exported_at: exportedAt
+	};
+};
+
+const toSolanaRow = ({
+	transaction: tx,
+	token,
+	userAddress,
+	exportedAt
+}: {
+	transaction: SolTransactionUi;
+	token: Token;
+	userAddress: string | undefined;
+	exportedAt: string;
+}): TransactionCsvRow => {
+	const type = normalizeType(tx.type);
+	const from = tx.fromOwner ?? tx.from;
+	const to = tx.toOwner ?? tx.to;
+	const direction: string =
+		type === 'send'
+			? 'out'
+			: type === 'receive'
+				? 'in'
+				: addressesEqual({ a: from, b: userAddress })
+					? 'out'
+					: addressesEqual({ a: to, b: userAddress })
+						? 'in'
+						: '';
+
+	return {
+		timestamp_iso: formatTimestamp(tx.timestamp),
+		network: token.network.name,
+		token_symbol: token.symbol,
+		token_address_or_ledger_id: getAddressOrLedgerId(token),
+		type,
+		type_raw: tx.type,
+		direction,
+		status: tx.status ?? '',
+		from: from ?? '',
+		to: to ?? '',
+		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
+		fee: formatAmount({ value: tx.fee, decimals: SOL_NATIVE_DECIMALS }),
+		fee_token: 'SOL',
+		tx_id: String(tx.signature),
+		explorer_url: tx.txExplorerUrl ?? '',
+		exported_at: exportedAt
+	};
+};
+
+export const buildTransactionRows = ({
+	transactions,
+	userAddresses,
+	nativeSymbolByNetworkId,
+	exportedAt
+}: {
+	transactions: AllTransactionUiWithCmp[];
+	userAddresses: UserAddresses;
+	nativeSymbolByNetworkId: (networkId: NetworkId) => string | undefined;
+	exportedAt: Date;
+}): TransactionCsvRow[] => {
+	const exportedAtIso = exportedAt.toISOString();
+
+	return transactions.map((entry) => {
+		switch (entry.component) {
+			case 'bitcoin':
+				return toBitcoinRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					userAddress: userAddresses.btc,
+					exportedAt: exportedAtIso
+				});
+			case 'ethereum':
+				return toEthereumRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					userAddress: userAddresses.eth,
+					nativeSymbolByNetworkId,
+					exportedAt: exportedAtIso
+				});
+			case 'ic':
+				return toIcRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					exportedAt: exportedAtIso
+				});
+			case 'solana':
+				return toSolanaRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					userAddress: userAddresses.sol,
+					exportedAt: exportedAtIso
+				});
+		}
+	});
 };
