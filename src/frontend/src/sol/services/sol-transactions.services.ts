@@ -62,9 +62,7 @@ const setSolBackendPaginationCursor = ({
 	solBackendPaginationCursors.delete(tokenId);
 };
 
-const mapSolCertifiedTransactions = (
-	transactions: SolTransactionUi[]
-): SolCertifiedTransaction[] =>
+const mapSolCertifiedTransactions = (transactions: SolTransactionUi[]): SolCertifiedTransaction[] =>
 	transactions.map((transaction) => ({
 		data: transaction,
 		certified: false
