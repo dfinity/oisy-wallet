@@ -29,6 +29,7 @@
 			"not_available": "n/a",
 			"new": "New",
 			"edit": "Edit",
+			"download": "Download",
 			"no_results": "No results",
 			"paste": "Paste",
 			"to": "To",
@@ -799,7 +800,6 @@
 			"export_tokens_description": "Snapshot of your enabled tokens with balances and current prices.",
 			"export_transactions": "Export transactions",
 			"export_transactions_description": "All transactions across every enabled token and network. Loading the full history may take a moment.",
-			"export_in_progress": "Preparing export…",
 			"export_tokens_success": "Tokens CSV downloaded.",
 			"export_transactions_success": "Transactions CSV downloaded.",
 			"learn_more": "Learn more"

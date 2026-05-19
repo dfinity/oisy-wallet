@@ -29,6 +29,7 @@
 			"not_available": "غير متاح",
 			"new": "جديد",
 			"edit": "تعديل",
+			"download": "",
 			"no_results": "لا توجد نتائج",
 			"paste": "لصق",
 			"to": "إلى",
@@ -799,7 +800,6 @@
 			"export_tokens_description": "",
 			"export_transactions": "",
 			"export_transactions_description": "",
-			"export_in_progress": "",
 			"export_tokens_success": "",
 			"export_transactions_success": "",
 			"learn_more": ""

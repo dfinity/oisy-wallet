@@ -29,6 +29,7 @@
 			"not_available": "Недоступно",
 			"new": "New",
 			"edit": "Изменить",
+			"download": "",
 			"no_results": "Нет результатов",
 			"paste": "Вставить",
 			"to": "Кому",
@@ -799,7 +800,6 @@
 			"export_tokens_description": "",
 			"export_transactions": "",
 			"export_transactions_description": "",
-			"export_in_progress": "",
 			"export_tokens_success": "",
 			"export_transactions_success": "",
 			"learn_more": ""

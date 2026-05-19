@@ -8,16 +8,13 @@ describe('SettingsExportData', () => {
 		vi.resetAllMocks();
 	});
 
-	it('renders the section title and both buttons', () => {
-		const { getByText, getAllByRole } = render(SettingsExportData);
+	it('renders the section title and both download buttons', () => {
+		const { getByText, getByRole } = render(SettingsExportData);
 
 		expect(getByText(en.settings.text.export_data)).toBeInTheDocument();
-
-		const buttons = getAllByRole('button') as HTMLButtonElement[];
-		const labels = buttons.map((b) => b.textContent?.trim());
-
-		expect(labels).toContain(en.settings.text.export_tokens);
-		expect(labels).toContain(en.settings.text.export_transactions);
+		// Both buttons show "Download >" as visible text and are differentiated by aria-label.
+		expect(getByRole('button', { name: en.settings.text.export_tokens })).toBeInTheDocument();
+		expect(getByRole('button', { name: en.settings.text.export_transactions })).toBeInTheDocument();
 	});
 
 	it('calls exportTokensCsv when the tokens button is clicked', async () => {

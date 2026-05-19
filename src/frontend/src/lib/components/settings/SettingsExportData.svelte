@@ -93,10 +93,10 @@
 
 		{#snippet value()}
 			<Button
-				colorStyle="primary"
+				ariaLabel={$i18n.settings.text.export_tokens}
 				disabled={exportingTokens || exportingTransactions}
-				onclick={onExportTokens}
-				paddingSmall>{$i18n.settings.text.export_tokens}</Button
+				link
+				onclick={onExportTokens}>{$i18n.core.text.download} ></Button
 			>
 		{/snippet}
 
@@ -112,14 +112,11 @@
 
 		{#snippet value()}
 			<Button
-				colorStyle="primary"
+				ariaLabel={$i18n.settings.text.export_transactions}
 				disabled={exportingTokens || exportingTransactions}
+				link
 				loading={exportingTransactions}
-				onclick={onExportTransactions}
-				paddingSmall
-				>{exportingTransactions
-					? $i18n.settings.text.export_in_progress
-					: $i18n.settings.text.export_transactions}</Button
+				onclick={onExportTransactions}>{$i18n.core.text.download} ></Button
 			>
 		{/snippet}
 

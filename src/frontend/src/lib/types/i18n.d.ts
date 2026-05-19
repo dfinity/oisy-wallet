@@ -32,6 +32,7 @@ interface I18nCore {
 		not_available: string;
 		new: string;
 		edit: string;
+		download: string;
 		no_results: string;
 		paste: string;
 		to: string;
@@ -537,7 +538,6 @@ interface I18nSettings {
 		export_tokens_description: string;
 		export_transactions: string;
 		export_transactions_description: string;
-		export_in_progress: string;
 		export_tokens_success: string;
 		export_transactions_success: string;
 		learn_more: string;
