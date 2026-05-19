@@ -28,9 +28,11 @@ export const solTransactionsNotInitialized: Readable<boolean> = derived(
 export const solKnownDestinations: Readable<KnownDestinations> = derived(
 	[solTransactionsStore, tokens],
 	([$solTransactionsStore, $tokens]) => {
+		const tokenById = new Map($tokens.map((token) => [token.id, token]));
+
 		const mappedTransactions: AnyTransactionUiWithToken[] = [];
 		Object.getOwnPropertySymbols($solTransactionsStore ?? {}).forEach((tokenId) => {
-			const token = $tokens.find(({ id }) => id === tokenId);
+			const token = tokenById.get(tokenId as TokenId);
 
 			if (nonNullish(token)) {
 				($solTransactionsStore?.[tokenId as TokenId] ?? []).forEach(
