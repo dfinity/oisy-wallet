@@ -474,6 +474,19 @@ describe('token.utils', () => {
 			{
 				description: 'Dummy ck token',
 				token: { ...mockValidIcToken, ledgerCanisterId: 'etik7-oiaaa-aaaar-qagia-cai' }
+			},
+			{
+				// 1Sec-bridged USDC ICRC ledger on ICP (introduced in #12456, removed from
+				// ICRC_SUGGESTED_LEDGER_CANISTER_IDS in this PR). Pinned here so a future
+				// re-addition to the suggested list trips an assertion instead of silently
+				// re-enabling the token by default for new users.
+				description: '1Sec USDC ICRC ledger on ICP',
+				token: { ...mockValidIcToken, ledgerCanisterId: '53nhb-haaaa-aaaar-qbn5q-cai' }
+			},
+			{
+				// Same intent as above for the 1Sec-bridged USDT ICRC ledger on ICP.
+				description: '1Sec USDT ICRC ledger on ICP',
+				token: { ...mockValidIcToken, ledgerCanisterId: 'ij33n-oiaaa-aaaar-qbooa-cai' }
 			}
 		])(
 			'Every other random token is only enabled if the user enables it - $description',
