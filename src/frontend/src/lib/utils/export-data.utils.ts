@@ -385,35 +385,37 @@ export const buildTransactionRows = ({
 	const exportedAtIso = exportedAt.toISOString();
 
 	return transactions.map((entry) => {
-		switch (entry.component) {
-			case 'bitcoin':
-				return toBitcoinRow({
-					transaction: entry.transaction,
-					token: entry.token,
-					userAddress: userAddresses.btc,
-					exportedAt: exportedAtIso
-				});
-			case 'ethereum':
-				return toEthereumRow({
-					transaction: entry.transaction,
-					token: entry.token,
-					userAddress: userAddresses.eth,
-					nativeSymbolByNetworkId,
-					exportedAt: exportedAtIso
-				});
-			case 'ic':
-				return toIcRow({
-					transaction: entry.transaction,
-					token: entry.token,
-					exportedAt: exportedAtIso
-				});
-			case 'solana':
-				return toSolanaRow({
-					transaction: entry.transaction,
-					token: entry.token,
-					userAddress: userAddresses.sol,
-					exportedAt: exportedAtIso
-				});
-		}
+		const row =
+			entry.component === 'bitcoin'
+				? toBitcoinRow({
+						transaction: entry.transaction,
+						token: entry.token,
+						userAddress: userAddresses.btc,
+						exportedAt: exportedAtIso
+					})
+				: entry.component === 'ethereum'
+					? toEthereumRow({
+							transaction: entry.transaction,
+							token: entry.token,
+							userAddress: userAddresses.eth,
+							nativeSymbolByNetworkId,
+							exportedAt: exportedAtIso
+						})
+					: entry.component === 'ic'
+						? toIcRow({
+								transaction: entry.transaction,
+								token: entry.token,
+								exportedAt: exportedAtIso
+							})
+						: toSolanaRow({
+								transaction: entry.transaction,
+								token: entry.token,
+								userAddress: userAddresses.sol,
+								exportedAt: exportedAtIso
+							});
+
+		// Fees on incoming transactions are paid by the sender, not the user — blank them
+		// so the CSV doesn't suggest the recipient bore a cost they didn't.
+		return row.direction === 'in' ? { ...row, fee: '', fee_token: '' } : row;
 	});
 };

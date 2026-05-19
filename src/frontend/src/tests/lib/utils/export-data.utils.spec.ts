@@ -446,10 +446,37 @@ describe('export-data.utils', () => {
 			expect(row.token_address_or_ledger_id).toBe('mxzaz-hqaaa-aaaar-qaada-cai');
 			expect(row.direction).toBe('in');
 			expect(row.amount).toBe('0.5');
-			expect(row.fee).toBe('0.0000001');
-			expect(row.fee_token).toBe('ckBTC');
+			// Sender paid the fee — blank on incoming rows.
+			expect(row.fee).toBe('');
+			expect(row.fee_token).toBe('');
 			expect(row.status).toBe('executed');
 			expect(row.tx_id).toBe('42');
+		});
+
+		it('blanks fee and fee_token on incoming rows but keeps them on outgoing rows', () => {
+			const outgoingIcTx: IcTransactionUi = {
+				...icTx,
+				type: 'send',
+				incoming: false
+			};
+
+			const rows = buildTransactionRows({
+				transactions: [
+					{ component: 'ic', transaction: icTx, token: icrcToken },
+					{ component: 'ic', transaction: outgoingIcTx, token: icrcToken }
+				],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				exportedAt
+			});
+
+			expect(rows[0].direction).toBe('in');
+			expect(rows[0].fee).toBe('');
+			expect(rows[0].fee_token).toBe('');
+
+			expect(rows[1].direction).toBe('out');
+			expect(rows[1].fee).toBe('0.0000001');
+			expect(rows[1].fee_token).toBe('ckBTC');
 		});
 
 		it('renders a Solana send with fee in SOL (9 decimals) and direction from owner addresses', () => {
