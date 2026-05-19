@@ -29,6 +29,7 @@
 			"not_available": "no es disponible",
 			"new": "Nuevo",
 			"edit": "Editar",
+			"download": "",
 			"no_results": "Sin resultados",
 			"paste": "Pegar",
 			"to": "A",
@@ -793,6 +794,14 @@
 			"enable_hide_micro_transactions": "Habilitar la ocultación de transacciones con valores muy pequeños",
 			"disable_hide_micro_transactions": "Deshabilitar la ocultación de transacciones con valores muy pequeños",
 			"save_spam_filter_success": "La configuración de tu filtro de spam se ha actualizado.",
+			"export_data": "",
+			"export_data_description": "",
+			"export_tokens": "",
+			"export_tokens_description": "",
+			"export_transactions": "",
+			"export_transactions_description": "",
+			"export_tokens_success": "",
+			"export_transactions_success": "",
 			"learn_more": ""
 		},
 		"alt": {
@@ -803,7 +812,9 @@
 			"appearance_system": "Habilita el modo de color de tu sistema operativo"
 		},
 		"error": {
-			"loading_profile": "Error al cargar el perfil. Por favor, actualiza la página para tener la experiencia completa."
+			"loading_profile": "Error al cargar el perfil. Por favor, actualiza la página para tener la experiencia completa.",
+			"export_exchange_rate_unavailable": "",
+			"export_failed": ""
 		}
 	},
 	"shortcuts": {

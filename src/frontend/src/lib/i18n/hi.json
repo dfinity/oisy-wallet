@@ -29,6 +29,7 @@
 			"not_available": "उपलब्ध नहीं है",
 			"new": "नया",
 			"edit": "संपादित करें",
+			"download": "",
 			"no_results": "कोई परिणाम नहीं",
 			"paste": "चिपकाएँ",
 			"to": "को",
@@ -793,6 +794,14 @@
 			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
 			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
 			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
+			"export_data": "",
+			"export_data_description": "",
+			"export_tokens": "",
+			"export_tokens_description": "",
+			"export_transactions": "",
+			"export_transactions_description": "",
+			"export_tokens_success": "",
+			"export_transactions_success": "",
 			"learn_more": ""
 		},
 		"alt": {
@@ -803,7 +812,9 @@
 			"appearance_system": "आपके ऑपरेटिंग सिस्टम के रंग मोड को सक्षम करता है"
 		},
 		"error": {
-			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।"
+			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।",
+			"export_exchange_rate_unavailable": "",
+			"export_failed": ""
 		}
 	},
 	"shortcuts": {

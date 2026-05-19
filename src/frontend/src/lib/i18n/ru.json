@@ -29,6 +29,7 @@
 			"not_available": "Недоступно",
 			"new": "New",
 			"edit": "Изменить",
+			"download": "",
 			"no_results": "Нет результатов",
 			"paste": "Вставить",
 			"to": "Кому",
@@ -793,6 +794,14 @@
 			"enable_hide_micro_transactions": "Включить скрытие транзакций с очень маленькими значениями",
 			"disable_hide_micro_transactions": "Отключить скрытие транзакций с очень маленькими значениями",
 			"save_spam_filter_success": "Настройки вашего спам-фильтра были обновлены.",
+			"export_data": "",
+			"export_data_description": "",
+			"export_tokens": "",
+			"export_tokens_description": "",
+			"export_transactions": "",
+			"export_transactions_description": "",
+			"export_tokens_success": "",
+			"export_transactions_success": "",
 			"learn_more": ""
 		},
 		"alt": {
@@ -803,7 +812,9 @@
 			"appearance_system": "Включает цветовой режим вашей операционной системы"
 		},
 		"error": {
-			"loading_profile": "Ошибка при загрузке профиля. Пожалуйста, обновите страницу для полного опыта."
+			"loading_profile": "Ошибка при загрузке профиля. Пожалуйста, обновите страницу для полного опыта.",
+			"export_exchange_rate_unavailable": "",
+			"export_failed": ""
 		}
 	},
 	"shortcuts": {

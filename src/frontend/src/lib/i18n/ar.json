@@ -29,6 +29,7 @@
 			"not_available": "غير متاح",
 			"new": "جديد",
 			"edit": "تعديل",
+			"download": "",
 			"no_results": "لا توجد نتائج",
 			"paste": "لصق",
 			"to": "إلى",
@@ -793,6 +794,14 @@
 			"enable_hide_micro_transactions": "تمكين إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
+			"export_data": "",
+			"export_data_description": "",
+			"export_tokens": "",
+			"export_tokens_description": "",
+			"export_transactions": "",
+			"export_transactions_description": "",
+			"export_tokens_success": "",
+			"export_transactions_success": "",
 			"learn_more": ""
 		},
 		"alt": {
@@ -803,7 +812,9 @@
 			"appearance_system": "يمكّن وضع الألوان لنظام التشغيل الخاص بك"
 		},
 		"error": {
-			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة."
+			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة.",
+			"export_exchange_rate_unavailable": "",
+			"export_failed": ""
 		}
 	},
 	"shortcuts": {

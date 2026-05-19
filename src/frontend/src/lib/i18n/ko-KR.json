@@ -29,6 +29,7 @@
 			"not_available": "해당 없음",
 			"new": "새로 만들기",
 			"edit": "편집",
+			"download": "",
 			"no_results": "결과 없음",
 			"paste": "붙여넣기",
 			"to": "받는 사람",
@@ -793,6 +794,14 @@
 			"enable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 활성화",
 			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
 			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
+			"export_data": "",
+			"export_data_description": "",
+			"export_tokens": "",
+			"export_tokens_description": "",
+			"export_transactions": "",
+			"export_transactions_description": "",
+			"export_tokens_success": "",
+			"export_transactions_success": "",
 			"learn_more": ""
 		},
 		"alt": {
@@ -803,7 +812,9 @@
 			"appearance_system": "운영 체제의 색상 모드 활성화"
 		},
 		"error": {
-			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요."
+			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요.",
+			"export_exchange_rate_unavailable": "",
+			"export_failed": ""
 		}
 	},
 	"shortcuts": {
