@@ -12,6 +12,7 @@ import {
 	getTokensByOwner as icPunksGetTokensByOwner,
 	metadata as icPunksMetadata
 } from '$icp/api/icpunks.api';
+import { collectionMetadata as icrc7CollectionMetadata } from '$icp/api/icrc7.api';
 import { detectNftCanisterStandard } from '$icp/services/ic-standard.services';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -38,6 +39,10 @@ vi.mock('$icp/api/dip721.api', () => ({
 vi.mock('$icp/api/icpunks.api', () => ({
 	getTokensByOwner: vi.fn(),
 	metadata: vi.fn(),
+	collectionMetadata: vi.fn()
+}));
+
+vi.mock('$icp/api/icrc7.api', () => ({
 	collectionMetadata: vi.fn()
 }));
 
@@ -72,6 +77,11 @@ describe('ic-standard.services', () => {
 			vi.mocked(icPunksGetTokensByOwner).mockResolvedValue([]);
 			vi.mocked(icPunksMetadata).mockResolvedValue(mockIcPunksMetadata);
 			vi.mocked(icPunksCollectionMetadata).mockResolvedValue(mockIcPunksCollectionMetadata);
+
+			vi.mocked(icrc7CollectionMetadata).mockResolvedValue([
+				['icrc7:name', { Text: 'Mock Icrc7 Collection' }],
+				['icrc7:symbol', { Text: 'MOCK7' }]
+			]);
 		});
 
 		it('should detect an EXT canister', async () => {
@@ -98,6 +108,18 @@ describe('ic-standard.services', () => {
 			expect(icPunksGetTokensByOwner).not.toHaveBeenCalled();
 			expect(icPunksMetadata).not.toHaveBeenCalled();
 			expect(icPunksCollectionMetadata).not.toHaveBeenCalled();
+
+			expect(icrc7CollectionMetadata).not.toHaveBeenCalled();
+		});
+
+		it('should detect an Icrc7 canister', async () => {
+			vi.mocked(extBalance).mockRejectedValue(new Error('Not an EXT canister'));
+			vi.mocked(dip721Balance).mockRejectedValue(new Error('Not a DIP721 canister'));
+			vi.mocked(icPunksGetTokensByOwner).mockRejectedValue(new Error('Not an ICPunks canister'));
+
+			await expect(detectNftCanisterStandard(params)).resolves.toBe('icrc7');
+
+			expect(icrc7CollectionMetadata).toHaveBeenCalledExactlyOnceWith(expected);
 		});
 
 		it('should detect a DIP721 canister', async () => {
@@ -127,6 +149,8 @@ describe('ic-standard.services', () => {
 			expect(icPunksGetTokensByOwner).not.toHaveBeenCalled();
 			expect(icPunksMetadata).not.toHaveBeenCalled();
 			expect(icPunksCollectionMetadata).not.toHaveBeenCalled();
+
+			expect(icrc7CollectionMetadata).not.toHaveBeenCalled();
 		});
 
 		it('should detect an ICPunks canister', async () => {
@@ -163,12 +187,15 @@ describe('ic-standard.services', () => {
 				tokenIdentifier: 1n
 			});
 			expect(icPunksCollectionMetadata).toHaveBeenCalledExactlyOnceWith(expected);
+
+			expect(icrc7CollectionMetadata).not.toHaveBeenCalled();
 		});
 
 		it('should return undefined for unrecognized canisters', async () => {
 			vi.mocked(extBalance).mockRejectedValue(new Error('Not an EXT canister'));
 			vi.mocked(dip721Balance).mockRejectedValue(new Error('Not a DIP721 canister'));
 			vi.mocked(icPunksGetTokensByOwner).mockRejectedValue(new Error('Not an ICPunks canister'));
+			vi.mocked(icrc7CollectionMetadata).mockRejectedValue(new Error('Not an ICRC-7 canister'));
 
 			await expect(detectNftCanisterStandard(params)).resolves.toBeUndefined();
 
@@ -200,6 +227,8 @@ describe('ic-standard.services', () => {
 				tokenIdentifier: 1n
 			});
 			expect(icPunksCollectionMetadata).toHaveBeenCalledExactlyOnceWith(expected);
+
+			expect(icrc7CollectionMetadata).toHaveBeenCalledExactlyOnceWith(expected);
 		});
 
 		it('should throw any other error from the service', async () => {
@@ -219,6 +248,8 @@ describe('ic-standard.services', () => {
 			expect(icPunksGetTokensByOwner).not.toHaveBeenCalled();
 			expect(icPunksMetadata).not.toHaveBeenCalled();
 			expect(icPunksCollectionMetadata).not.toHaveBeenCalled();
+
+			expect(icrc7CollectionMetadata).not.toHaveBeenCalled();
 		});
 
 		it('should prioritize EXT over any other standard', async () => {
@@ -243,6 +274,8 @@ describe('ic-standard.services', () => {
 			expect(icPunksGetTokensByOwner).not.toHaveBeenCalled();
 			expect(icPunksMetadata).not.toHaveBeenCalled();
 			expect(icPunksCollectionMetadata).not.toHaveBeenCalled();
+
+			expect(icrc7CollectionMetadata).not.toHaveBeenCalled();
 		});
 	});
 });
