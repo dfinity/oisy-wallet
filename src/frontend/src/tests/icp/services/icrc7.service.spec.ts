@@ -1,5 +1,6 @@
 import type { Value } from '$declarations/icrc7/icrc7.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { ICRC7_BUILTIN_TOKENS } from '$env/tokens/tokens-icrc7/tokens.icrc7.env';
 import { collectionMetadata } from '$icp/api/icrc7.api';
 import {
 	loadCustomTokens,
@@ -42,11 +43,21 @@ describe('icrc7.services', () => {
 			icrc7DefaultTokensStore.reset();
 		});
 
-		it('should set the default-tokens store to an empty array (curated list is empty)', () => {
+		it('should populate the default-tokens store from the curated builtin list', () => {
 			const result = loadDefaultIcrc7Tokens();
 
 			expect(result).toEqual({ success: true });
-			expect(get(icrc7DefaultTokensStore)).toEqual([]);
+
+			const tokens = get(icrc7DefaultTokensStore) ?? [];
+
+			expect(tokens).toHaveLength(ICRC7_BUILTIN_TOKENS.length);
+
+			ICRC7_BUILTIN_TOKENS.forEach((token, index) => {
+				expect(tokens[index]).toEqual({
+					...token,
+					id: tokens[index].id
+				});
+			});
 		});
 	});
 
@@ -68,7 +79,16 @@ describe('icrc7.services', () => {
 		it('should populate both default and custom stores', async () => {
 			await loadIcrc7Tokens({ identity: mockIdentity });
 
-			expect(get(icrc7DefaultTokensStore)).toEqual([]);
+			const defaultTokens = get(icrc7DefaultTokensStore) ?? [];
+
+			expect(defaultTokens).toHaveLength(ICRC7_BUILTIN_TOKENS.length);
+
+			ICRC7_BUILTIN_TOKENS.forEach((token, index) => {
+				expect(defaultTokens[index]).toEqual({
+					...token,
+					id: defaultTokens[index].id
+				});
+			});
 
 			const customTokens = get(icrc7CustomTokensStore);
 
