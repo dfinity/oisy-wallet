@@ -1,0 +1,15 @@
+---
+description: Universal entry point for any change in this repo. Always read first.
+globs: ['**/*']
+alwaysApply: true
+---
+
+# Cursor — Overview
+
+Authoritative source: [AGENTS.md](mdc:AGENTS.md).
+
+Read [AGENTS.md](mdc:AGENTS.md) before any change. It covers the stack,
+the [10 commandments](mdc:AGENTS.md#2-the-10-commandments-read-before-every-change),
+the truth hierarchy, and the meta-update rule. Tool-specific layers
+(this file, [CLAUDE.md](mdc:CLAUDE.md), [`.github/copilot-instructions.md`](mdc:.github/copilot-instructions.md))
+never contradict it.

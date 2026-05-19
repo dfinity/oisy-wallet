@@ -4,29 +4,61 @@ type AddDappSettingsError = variant {
 	DappIdTooLong;
 	UserNotFound
 };
+type AddDismissedNotificationError = variant {
+	TooManyNotifications;
+	VersionMismatch;
+	MaxDismissedNotifications;
+	UserNotFound
+};
+type AddDismissedNotificationRequest = record {
+	notifications : vec DismissedNotification;
+	current_user_version : opt nat64
+};
 type AddHiddenDappIdRequest = record {
 	current_user_version : opt nat64;
 	dapp_id : text
 };
-type AddUserCredentialError = variant {
-	InvalidCredential;
-	VersionMismatch;
-	ConfigurationError;
-	UserNotFound
+type AddUserDismissedNotificationResult = variant {
+	Ok;
+	Err : AddDismissedNotificationError
 };
-type AddUserCredentialRequest = record {
-	credential_jwt : text;
-	issuer_canister_id : principal;
-	current_user_version : opt nat64;
-	credential_spec : CredentialSpec
+type AddUserHiddenDappIdResult = variant {
+	// The user's hidden dapp id was added successfully.
+	Ok;
+	// The user's hidden dapp id was not added due to an error.
+	Err : AddDappSettingsError
 };
-type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
-type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
-type Agreements = record { agreements : UserAgreements };
+// A single audit-trail entry recording that a user accepted (or rejected) a specific agreement
+// version at a point in time.
+type AgreementHistoryEntry = record {
+	// Canister timestamp (nanos since epoch) when this action was recorded.
+	timestamp_ns : nat64;
+	agreement_type : AgreementType;
+	// SHA256 hash of the agreement text the user was shown, if provided.
+	text_sha256 : opt text;
+	accepted : bool;
+	// Document-version timestamp (millis since epoch) of the agreement the user acted on.
+	last_updated_at_ms : opt nat64
+};
+// Identifies which agreement a history entry refers to.
+type AgreementType = variant {
+	TermsOfUse;
+	PrivacyPolicy;
+	LicenseAgreement;
+	Provider : ProviderAgreementType
+};
+type Agreements = record {
+	agreements : UserAgreements;
+	provider_agreements : opt vec record { ProviderAgreementType; UserAgreement }
+};
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
+	// The provided II delegation chain is missing or failed verification.
 	InvalidDelegationChain : record { msg : text };
+	// The caller exceeded the per-caller business rate limit.
 	RateLimited : RateLimitError;
+	// The caller hit the high-frequency guard rate limit designed to prevent
+	// cycle-draining attacks before any inter-canister call is made.
 	RateLimitedByGuard : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
@@ -39,10 +71,22 @@ type AllowSigningResponse = record {
 	allowed_cycles : nat
 };
 type AllowSigningResult = variant {
+	// The signing was allowed successfully.
 	Ok : AllowSigningResponse;
+	// The signing was not allowed due to an error.
 	Err : AllowSigningError
 };
 type AllowSigningStatus = variant { Skipped; Failed; Executed };
+type ApiKeys = record {
+	// When `Some(false)`, periodic exchange-rate HTTP outcalls are disabled (even with a
+	// `CoinGecko` key). When `None` or `Some(true)`, outcalls run iff `coingecko_api_key` is set
+	// (misconfiguration with no key does not run refresh).
+	exchange_rate_enabled : opt bool;
+	alchemy_api_key : opt text;
+	etherscan_api_key : opt text;
+	coingecko_api_key : opt text;
+	infura_api_key : opt text
+};
 type ApproveError = variant {
 	GenericError : record { message : text; error_code : nat };
 	TemporarilyUnavailable;
@@ -55,67 +99,181 @@ type ApproveError = variant {
 	InsufficientFunds : record { balance : nat }
 };
 type Arg = variant { Upgrade; Init : InitArg };
-type ArgumentValue = variant { Int : int32; String : text };
-type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type BtcAddPendingTransactionError = variant {
+	// One or more provided UTXOs not in current UTXO list for the address
 	InvalidUtxos;
+	// The provided list of UTXOs is empty
 	EmptyUtxos;
+	// One or more provided UTXOs are duplicates among themselves
 	DuplicateUtxos;
+	// The provided II delegation chain is missing or failed verification.
 	InvalidDelegationChain : record { msg : text };
+	// The caller has exceeded the call rate limit.
+	RateLimited : RateLimitError;
+	// Server-side / unexpected
 	InternalError : record { msg : text };
+	// Intersects with caller's existing pending reservations
 	UtxosAlreadyReserved
 };
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
-	network : BitcoinNetwork;
-	utxos : vec Utxo;
-	ii_delegation_chain : opt IIDelegationChain
-};
-type Delegation = record {
-	pubkey : blob;
-	expiration : nat64;
-	targets : opt vec principal
-};
-type IIDelegationChain = record {
-	delegations : vec SignedDelegation;
-	public_key : blob
-};
-type SignedDelegation = record {
-	delegation : Delegation;
-	signature : blob
+	ii_delegation_chain : opt IIDelegationChain;
+	network : Network;
+	utxos : vec Utxo
 };
 type BtcAddPendingTransactionResult = variant {
+	// The pending transaction was added successfully.
 	Ok;
+	// The pending transaction was not added due to an error.
 	Err : BtcAddPendingTransactionError
 };
+// A bitcoin address
+//
+// # Reference
+// - <https://en.bitcoin.it/wiki/Address>
+// - <https://www.unchained.com/blog/bitcoin-address-types-compared>
 type BtcAddress = variant {
+	// Pay-to-Witness-Public-Key-Hash (P2WPKH)
+	//
+	// ## Format
+	// Pay-to-Witness-Public-Key-Hash (P2WPKH) is the first of two address
+	// types introduced to bitcoin upon the Segwit Soft Fork in August 2017.
+	// The story behind this extremely important and particularly contentious
+	// soft fork is documented in a book called The Blocksize War, written by
+	// Jonathan Bier.
+	//
+	// P2WPKH is the segwit variant of P2PKH, which at a basic level, means
+	// that choosing this address type rather than older P2PKH addresses will
+	// help you save money on transaction fees when moving your bitcoin around.
+	//
+	// Segwit addresses look quite different from the older address types
+	// because, per BIP 173, they use Bech32 encoding instead of Base58. Most
+	// notably, there are no capital letters in Bech32. P2WPKH addresses can be
+	// identified by a prefix of bc1q and a character length of exactly 42.
+	//
+	// ## Example
+	// - `bc1q34aq5drpuwy3wgl9lhup9892qp6svr8ldzyy7c`
+	//
+	// ## Reference
+	// - <https://en.bitcoin.it/wiki/BIP_0173>
+	// - <https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki>
 	P2WPKH : text;
+	// Legacy format.
+	//
+	// This is the widely used original format encoded using Base58, which
+	// excludes characters that are frequently confused with one another.
+	// Addresses starting with “1” use the Pay-to-Public-Key-Hash (P2PKH)
+	// script type and are case-sensitive. In the context of P2PKH, “Pay-to”
+	// refers to the recipient’s ability to claim the funds, “Public-Key”
+	// refers to the recipient’s public cryptographic key, and “Hash” refers to
+	// a cryptographic hash of the public key.
+	//
+	// They offer a straightforward way to send and receive Bitcoin since they
+	// are generated from the hash of the recipient’s public key. Legacy
+	// addresses are widely compatible because the majority of wallets and
+	// exchanges support them.
+	//
+	// ## Format
+	// A string, 27-34 alphanumeric characters in length, starting with the
+	// digit "1".
+	//
+	// The string is a base58 encoded [u8;25] where the first byte is 0x00 and
+	// the last 4 bytes are a checksum.
+	//
+	// ## Example
+	// - `1RainRzqJtJxHTngafpCejDLfYq2y4KBc`
+	//
+	// ## Reference
+	// <https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses>
 	P2PKH : text;
+	// Pay-to-Witness-Script-Hash (P2WSH)
+	//
+	// Pay-to-Witness-Script-Hash (P2WSH) is the segwit variant of P2SH. The main advantage to
+	// using P2WSH over P2SH is that it can help lower transaction fees, and the primary reason to
+	// use a script hash instead of a public key hash is to accommodate multisig arrangements.
+	//
+	// ## Format
+	// P2WSH addresses are exactly 62 characters in length, starting with `bc1q`.
+	//
+	// ## Example
+	// - `bc1qeklep85ntjz4605drds6aww9u0qr46qzrv5xswd35uhjuj8ahfcqgf6hak`
+	//
+	// ## Reference
+	// - <https://en.bitcoin.it/wiki/BIP_0173>
 	P2WSH : text;
+	// Pay-to-Script-Hash (P2SH)
+	//
+	// ## Format
+	// P2SH addresses are exactly 34 characters in length, and they begin with
+	// a prefix of 3, as specified by BIP 13.
+	//
+	// ## Example
+	// - `342ftSRCvFHfCeFFBuz4xwbeqnDw6BGUey`
+	//
+	// ## Reference
+	// - <https://en.bitcoin.it/wiki/BIP_0013>
 	P2SH : text;
+	// Pay-to-Taproot (P2TR)
+	//
+	// Pay-to-Taproot (P2TR) is the newest address type, made available by the Taproot soft-fork
+	// in November 2021. P2TR adoption remains quite low at the time of writing, and many bitcoin
+	// softwares and services are still working on integration.
+	//
+	// While P2WPKH and P2WSH are known as Segwit V0, P2TR is considered Segwit V1. Notably, P2TR
+	// utilizes a digital signature algorithm called Schnorr, which differs from the ECDSA format
+	// used in earlier bitcoin transaction types. Schnorr signatures have several advantages,
+	// including additional transaction fee reductions and increased privacy.
+	//
+	// Regarding privacy, the key and signature aggregations made possible by Schnorr allow
+	// multisig addresses to be indistinguishable from singlesig, and the full spending conditions
+	// for a P2TR address are not necessarily revealed publicly. The creator of the address can
+	// even include multiple customized redeem scripts to choose from in order to spend the
+	// bitcoin later.
+	//
+	// ## Format
+	// P2TR addresses are 62 characters long, and they use Bech32m encoding, a slightly modified
+	// version of Bech32, as described in BIP 350. P2TR addresses can be identified by their
+	// unique bc1p prefix.
+	//
+	// ## Example
+	// - `bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k`
 	P2TR : text
 };
-type BtcGetFeePercentilesRequest = record { network : BitcoinNetwork };
+type BtcGetFeePercentilesError = variant {
+	InternalError : record { msg : text }
+};
+type BtcGetFeePercentilesRequest = record { network : Network };
 type BtcGetFeePercentilesResponse = record { fee_percentiles : vec nat64 };
 type BtcGetFeePercentilesResult = variant {
+	// The fee was selected successfully.
 	Ok : BtcGetFeePercentilesResponse;
-	Err : SelectedUtxosFeeError
+	// The fee was not selected due to an error.
+	Err : BtcGetFeePercentilesError
+};
+type BtcGetPendingTransactionsError = variant {
+	// The provided II delegation chain is missing or failed verification.
+	InvalidDelegationChain : record { msg : text };
+	// The caller has exceeded the call rate limit.
+	RateLimited : RateLimitError;
+	InternalError : record { msg : text }
 };
 type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
 type BtcGetPendingTransactionsRequest = record {
-	network : BitcoinNetwork;
+	ii_delegation_chain : opt IIDelegationChain;
+	network : Network;
 	address : text
 };
 type BtcGetPendingTransactionsResult = variant {
+	// The pending transactions were retrieved successfully.
 	Ok : BtcGetPendingTransactionsReponse;
-	Err : BtcAddPendingTransactionError
+	// The pending transactions were not retrieved due to an error.
+	Err : BtcGetPendingTransactionsError
 };
-type BtcSelectUserUtxosFeeResult = variant {
-	Ok : SelectedUtxosFeeResponse;
-	Err : SelectedUtxosFeeError
-};
+// Bitcoin transaction data.
+type BtcTransactionData = record { fee : opt nat };
+// Copy of the synonymous Rosetta type.
 type CanisterStatusResultV2 = record {
 	controller : principal;
 	status : CanisterStatusType;
@@ -127,14 +285,39 @@ type CanisterStatusResultV2 = record {
 	idle_cycles_burned_per_day : nat;
 	module_hash : opt blob
 };
-type CanisterStatusType = variant { stopped; stopping; running };
+// # Canister Status Type
+//
+// Status of a canister.
+//
+// See [`CanisterStatusResult::status`].
+type CanisterStatusType = variant {
+	// The canister is stopped.
+	stopped;
+	// The canister is stopping.
+	stopping;
+	// The canister is running.
+	running
+};
 type Config = record {
+	// The derivation origin used for II authentication, ensuring users get a
+	// consistent identity across different domains.
 	derivation_origin : opt text;
+	// The Internet Identity canister used for delegation verification.
+	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
+	// Chain Fusion Signer canister id. Used to derive the bitcoin address in
+	// `btc_add_pending_transaction`.
 	cfs_canister_id : opt principal;
+	// A list of allowed callers to restrict access to endpoints that do not particularly check or
+	// use the `msg_caller()`
 	allowed_callers : vec principal;
-	supported_credentials : opt vec SupportedCredential;
-	ic_root_key_raw : opt blob
+	// Root of trust for checking canister signatures.
+	ic_root_key_raw : opt blob;
+	// Whether sign-ups of new users (i.e. new user profiles) are allowed.
+	//
+	// `None` is treated as "allowed" (the default), ensuring backward compatibility with
+	// config payloads persisted before this field existed.
+	new_user_signups_allowed : opt bool
 };
 type Contact = record {
 	id : nat64;
@@ -153,6 +336,7 @@ type ContactError = variant {
 	InvalidImageFormat;
 	ContactNotFound;
 	ImageTooLarge;
+	TooManyContacts;
 	RandomnessError;
 	ImageExceedsMaxSize;
 	CanisterStatusError;
@@ -160,12 +344,25 @@ type ContactError = variant {
 };
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
 type CreateContactRequest = record { name : text; image : opt ContactImage };
-type CreateContactResult = variant { Ok : Contact; Err : ContactError };
-type CredentialSpec = record {
-	arguments : opt vec record { text; ArgumentValue };
-	credential_type : text
+type CreateContactResult = variant {
+	// The contact was retrieved successfully.
+	Ok : Contact;
+	// The contact could not be created due to an error
+	Err : ContactError
 };
-type CredentialType = variant { ProofOfUniqueness };
+type CreateUserProfileError = variant {
+	// Sign-ups of new users are currently disabled on the backend. Callers that already have a
+	// profile are unaffected; this variant is only returned for principals without an existing
+	// profile.
+	SignupsClosed
+};
+type CreateUserProfileResult = variant {
+	// The user's profile was created (or already existed) and is returned.
+	Ok : UserProfile;
+	// The profile could not be created due to an error.
+	Err : CreateUserProfileError
+};
+// User preferences for any token
 type CustomToken = record {
 	token : Token;
 	allow_external_content_source : opt bool;
@@ -175,6 +372,7 @@ type CustomToken = record {
 };
 type DappCarouselSettings = record { hidden_dapp_ids : vec text };
 type DappSettings = record { dapp_carousel : DappCarouselSettings };
+// Copy of synonymous Rosetta type.
 type DefiniteCanisterSettingsArgs = record {
 	controller : principal;
 	freezing_threshold : nat;
@@ -182,10 +380,61 @@ type DefiniteCanisterSettingsArgs = record {
 	memory_allocation : nat;
 	compute_allocation : nat
 };
-type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
+// Represents an IC delegation (public data only, no private keys).
+type Delegation = record {
+	pubkey : blob;
+	targets : opt vec principal;
+	expiration : nat64
+};
+type DeleteContactResult = variant {
+	// The contact was deleted successfully.
+	Ok : nat64;
+	// The contact was not deleted due to an error.
+	Err : ContactError
+};
+type DismissedNotification = variant {
+	Qualified : record {
+		kind : QualifiedNotificationKind;
+		version : nat32;
+		qualifier : text
+	};
+	Simple : record { kind : SimpleNotificationKind; version : nat32 }
+};
+// An ERC compliant token on the Ethereum or EVM-compatible networks (for example, ERC20, ERC721,
+// ERC1155).
 type ErcToken = record { token_address : text; chain_id : nat64 };
-type EthAddress = variant { Public : text };
+type EthAddress = variant {
+	// A public Ethereum address.
+	//
+	// # Format
+	// A string, 42 characters long, starting with "0x" followed by
+	// hex.  The address is case-insensitive.
+	//
+	// # Example
+	// - `0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B`
+	Public : text
+};
+// EVM / Ethereum-family transaction data.
+type EvmTransactionData = record {
+	// NFT token ID (ERC-721 / ERC-1155).
+	nft_token_id : opt nat;
+	// Hex-encoded input data.
+	data : opt text;
+	chain_id : opt nat64;
+	nonce : opt nat64;
+	gas_limit : opt nat;
+	gas_used : opt nat;
+	gas_price : opt nat
+};
+type ExchangeData = record {
+	price_24h_change_pct : opt float64;
+	market_cap : opt float64;
+	timestamp_ns : nat64;
+	price : opt float64
+};
+type ExchangeRate = record { usd : ExchangeData };
 type ExperimentalFeatureSettings = record { enabled : bool };
+// A flat list of logical experimental features.
 type ExperimentalFeatureSettingsFor = variant { AiAssistantBeta };
 type ExperimentalFeaturesSettings = record {
 	experimental_features : vec record {
@@ -193,40 +442,155 @@ type ExperimentalFeaturesSettings = record {
 		ExperimentalFeatureSettings
 	}
 };
-type ExtV2Token = record { ledger_id : principal };
+// An EXT v2 compliant token on the Internet Computer.
+type ExtV2Token = record { canister_id : principal };
+type GetAgreementHistoryError = variant { UserNotFound };
+type GetAgreementHistoryResult = variant {
+	Ok : vec AgreementHistoryEntry;
+	Err : GetAgreementHistoryError
+};
+// Errors that can occur when retrieving the allowed cycles from the cycles ledger.
 type GetAllowedCyclesError = variant {
+	// The caller has exceeded the call rate limit.
+	RateLimited : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
 };
 type GetAllowedCyclesResponse = record { allowed_cycles : nat };
 type GetAllowedCyclesResult = variant {
+	// The allowed cycles were retrieved successfully.
 	Ok : GetAllowedCyclesResponse;
+	// The allowed cycles were not retrieved due to an error.
 	Err : GetAllowedCyclesError
 };
-type GetContactResult = variant { Ok : Contact; Err : ContactError };
-type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
+type GetContactResult = variant {
+	// The contacts were retrieved successfully.
+	Ok : Contact;
+	// The contacts were not retrieved due to an error.
+	Err : ContactError
+};
+type GetContactsResult = variant {
+	// The contacts were retrieved successfully.
+	Ok : vec Contact;
+	// The contacts were not retrieved due to an error.
+	Err : ContactError
+};
 type GetUserProfileError = variant { NotFound };
 type GetUserProfileResult = variant {
+	// The user's profile was retrieved successfully.
 	Ok : UserProfile;
+	// The user's profile was not retrieved due to an error.
 	Err : GetUserProfileError
 };
+// Request to retrieve stored transactions with cursor-based pagination.
+type GetUserTransactionsRequest = record {
+	// Which token's transactions to retrieve
+	token_id : TokenId;
+	// Maximum number of transactions to return (capped at `MAX_GET_USER_TRANSACTIONS_RESULTS`)
+	max_results : nat64;
+	// Opaque pagination cursor returned as `next_start` from a previous response.
+	// `None` starts from the newest transactions.
+	start : opt nat64
+};
+// Response containing stored transactions and pagination info.
+type GetUserTransactionsResponse = record {
+	// Opaque cursor for the next page. Pass as `start` to fetch older transactions.
+	// `None` when there are no more older transactions.
+	next_start : opt nat64;
+	// Total number of transactions stored for this (user, token) pair.
+	// The frontend can compare this against `MAX_USER_TRANSACTIONS_PER_TOKEN` to skip
+	// saving older transactions that would be immediately evicted.
+	total_stored : nat64;
+	// Block index of the oldest stored transaction for this token.
+	// The frontend can fetch from the network with `endBlock = oldest_block_index - 1`
+	// to load even older history.
+	oldest_block_index : opt nat64;
+	// Block index of the newest stored transaction for this token.
+	// The frontend should fetch from the network starting after this block.
+	newest_block_index : opt nat64;
+	// The requested transactions, sorted newest first
+	transactions : vec UserTransaction
+};
+type GetUserTransactionsResult = variant {
+	Ok : GetUserTransactionsResponse;
+	Err : UserTransactionError
+};
 type HasUserProfileResponse = record { has_user_profile : bool };
+// # HTTP Header.
+//
+// Represents a HTTP header.
+//
+// See [`HttpRequestArgs::headers`] and [`HttpRequestResult::headers`].
+type HttpHeader = record {
+	// Value of the header.
+	value : text;
+	// Name of the header.
+	name : text
+};
 type HttpRequest = record {
+	// The requested path and query string, for example `/some/path?foo=bar`.
+	//
+	// Note: This does NOT contain the domain, port or protocol.
 	url : text;
+	// The HTTP method of the request, such as `GET` or `POST`.
 	method : text;
+	// The complete body of the HTTP request
 	body : blob;
+	// The HTTP request headers
 	headers : vec record { text; text }
+};
+// # HTTP Request Result
+//
+// Result type of [`http_request`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-http_request).
+type HttpRequestResult = record {
+	// The response status (e.g. 200, 404).
+	status : nat;
+	// The response’s body.
+	body : blob;
+	// List of HTTP response headers and their corresponding values.
+	headers : vec HttpHeader
 };
 type HttpResponse = record {
 	body : blob;
 	headers : vec record { text; text };
 	status_code : nat16
 };
+// The public part of an Internet Identity delegation chain.
+//
+// This contains only public information (no private session keys) and
+// is safe to transmit over the wire for backend verification.
+type IIDelegationChain = record {
+	public_key : blob;
+	delegations : vec SignedDelegation
+};
+// An ICRC-1 compliant token on the Internet Computer.
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
+// ICRC / ICP transaction data.
+type IcrcTransactionData = record {
+	fee : opt nat;
+	memo : opt blob;
+	tx_type : IcrcTransactionType
+};
+// The kind of ICRC ledger operation.
+type IcrcTransactionType = variant {
+	Approve : record { spender : text };
+	Burn;
+	Mint;
+	Transfer
+};
+// An account identifier for Internet Computer tokens.
 type Icrcv2AccountId = variant {
+	// This is a redacted identifier typically available from transaction records.
 	Account : blob;
+	// An account identifier that declares the owner's principal.
+	//
+	// Note: Given a transaction, it is NOT typically possible to determine the owner
+	// principal & subaccount ID.  A such, this type is primarily used for internal management
+	// of accounts within a wallet.  It is not normally available for transactions with third
+	// parties.
 	WithPrincipal : record { owner : principal; subaccount : opt blob }
 };
+// Represents the MIME type of image.
 type ImageMimeType = variant {
 	"image/gif";
 	"image/png";
@@ -234,14 +598,40 @@ type ImageMimeType = variant {
 	"image/webp"
 };
 type InitArg = record {
+	// The derivation origin used for II authentication, ensuring users get a
+	// consistent identity across different domains.
 	derivation_origin : opt text;
+	// The Internet Identity canister used for delegation verification.
+	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
+	// Chain Fusion Signer canister id. Used to derive the bitcoin address in
+	// `btc_add_pending_transaction`.
 	cfs_canister_id : opt principal;
+	// A list of allowed callers to restrict access to endpoints that do not particularly check or
+	// use the `msg_caller()`
 	allowed_callers : vec principal;
-	supported_credentials : opt vec SupportedCredential;
-	ic_root_key_der : opt blob
+	// Root of trust for checking canister signatures.
+	ic_root_key_der : opt blob;
+	// Whether sign-ups of new users (i.e. new user profiles) are allowed.
+	//
+	// When `Some(false)`, `create_user_profile` rejects callers that do not already have a
+	// profile with `CreateUserProfileError::SignupsClosed`. Existing users are unaffected.
+	//
+	// `None` is treated as "allowed" (the default), ensuring backward compatibility with
+	// deployments that pre-date this field.
+	new_user_signups_allowed : opt bool
+};
+// Bitcoin Network.
+type Network = variant {
+	// The Bitcoin mainnet.
+	mainnet;
+	// The Bitcoin regtest, used for local testing purposes.
+	regtest;
+	// The Bitcoin testnet.
+	testnet
 };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
+// A flat list of logical networks.
 type NetworkSettingsFor = variant {
 	ArbitrumMainnet;
 	InternetComputer;
@@ -261,40 +651,101 @@ type NetworkSettingsFor = variant {
 	BitcoinMainnet;
 	BscTestnet
 };
+// Discriminated union carrying the chain-specific portion of a transaction.
+type NetworkTransactionData = variant {
+	Btc : BtcTransactionData;
+	Evm : EvmTransactionData;
+	Sol : SolTransactionData;
+	Icrc : IcrcTransactionData
+};
 type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
 };
-type Outpoint = record { txid : blob; vout : nat32 };
+type NotificationSettings = record {
+	dismissed_notifications : vec DismissedNotification
+};
+// Outpoint.
+type Outpoint = record {
+	// Transaction ID (TxID).
+	//
+	// The hash of the transaction that created the UTXO.
+	txid : blob;
+	// Output Index (vout).
+	//
+	// The index of the specific output within that transaction (since a transaction can have multiple outputs).
+	vout : nat32
+};
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
+// Which external provider the agreement belongs to.
+//
+// Add a new variant and redeploy the canister when onboarding a new provider.
+type ProviderAgreementProvider = variant { NearIntents };
+// The feature/context within a provider that the agreement covers.
+//
+// A single provider may require separate acknowledgements for different scopes
+// (e.g., swap, bridge, staking).
+type ProviderAgreementScope = variant { Swap };
+// Composite key identifying a specific provider agreement.
+type ProviderAgreementType = record {
+	provider : ProviderAgreementProvider;
+	scope : ProviderAgreementScope
+};
+type QualifiedNotificationKind = variant {
+	NoIndexCanister;
+	UnavailableIndexCanister
+};
+// Error returned when a caller exceeds the allowed call rate.
+type RateLimitError = record {
+	max_calls : nat32;
+	window_ns : nat64;
+	caller : principal
+};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
 };
-type SelectedUtxosFeeError = variant {
-	PendingTransactions;
-	InternalError : record { msg : text }
+// Request to save finalized transactions.
+type SaveUserTransactionsRequest = record {
+	// Which token these transactions belong to
+	token_id : TokenId;
+	// Transactions to save (must be finalized/immutable)
+	transactions : vec UserTransaction
 };
-type SelectedUtxosFeeRequest = record {
-	network : BitcoinNetwork;
-	amount_satoshis : nat64;
-	min_confirmations : opt nat32
-};
-type SelectedUtxosFeeResponse = record {
-	fee_satoshis : nat64;
-	utxos : vec Utxo
-};
+type SaveUserTransactionsResult = variant { Ok; Err : UserTransactionError };
 type SetShowTestnetsRequest = record {
 	current_user_version : opt nat64;
 	show_testnets : bool
 };
 type SetTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
-type SetUserShowTestnetsResult = variant { Ok; Err : UpdateAgreementsError };
+type SetUserShowTestnetsResult = variant {
+	// The user's show testnets was set successfully.
+	Ok;
+	// The user's show testnets was not set due to an error.
+	Err : UpdateAgreementsError
+};
 type Settings = record {
 	networks : NetworksSettings;
+	notifications : opt NotificationSettings;
 	dapp : DappSettings;
-	experimental_features : ExperimentalFeaturesSettings
+	experimental_features : ExperimentalFeaturesSettings;
+	transactions : opt TransactionSettings
 };
+// A signed delegation from the delegation chain.
+type SignedDelegation = record { signature : blob; delegation : Delegation };
+type SimpleNotificationKind = variant {
+	BtcActivityInfo;
+	HiddenMicroTransactions
+};
+// Solana transaction data.
+type SolTransactionData = record {
+	fee : opt nat;
+	// Owner account that controls the destination token account.
+	to_owner : opt text;
+	// Owner account that controls the source token account (relevant for SPL).
+	from_owner : opt text
+};
+// A Solana token
 type SplToken = record {
 	decimals : opt nat8;
 	token_address : text;
@@ -302,18 +753,16 @@ type SplToken = record {
 };
 type Stats = record {
 	user_profile_count : nat64;
+	user_transactions_count : nat64;
 	custom_token_count : nat64;
+	exchange_rates_count : nat64;
+	token_activity_count : nat64;
+	agreement_history_count : nat64;
 	user_timestamps_count : nat64;
 	user_token_count : nat64
 };
-type SupportedCredential = record {
-	ii_canister_id : principal;
-	issuer_origin : text;
-	issuer_canister_id : principal;
-	ii_origin : text;
-	credential_type : CredentialType
-};
 type TestnetsSettings = record { show_testnets : bool };
+// A variant describing any token
 type Token = variant {
 	Erc20 : ErcToken;
 	ExtV2 : ExtV2Token;
@@ -321,7 +770,10 @@ type Token = variant {
 	Erc721 : ErcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken;
-	Erc1155 : ErcToken
+	IcPunks : ExtV2Token;
+	Erc1155 : ErcToken;
+	Erc4626 : ErcToken;
+	Dip721 : ExtV2Token
 };
 type TokenAccountId = variant {
 	Btc : BtcAddress;
@@ -329,28 +781,99 @@ type TokenAccountId = variant {
 	Sol : text;
 	Icrcv2 : Icrcv2AccountId
 };
+// A unified token identifier covering both native and custom tokens for the main supported chains.
+// Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
+// selected native tokens (e.g., ETH, ICP, SOL, BTC) and distinguishes several ERC sub-standards.
+// Suitable for flows that need to reference one of these supported tokens: transactions, activity,
+// etc.
+type TokenId = variant {
+	// ERC-20 token on an EVM chain
+	Erc20 : record { text; nat64 };
+	// EXT v2 token on the Internet Computer
+	ExtV2 : principal;
+	// Native SOL on devnet
+	SolNativeDevnet;
+	// ICRC token on ICP
+	Icrc : principal;
+	// Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
+	EvmNative : nat64;
+	// Native BTC on mainnet
+	BtcNativeMainnet;
+	// ERC-721 NFT on an EVM chain
+	Erc721 : record { text; nat64 };
+	// Native SOL on mainnet
+	SolNativeMainnet;
+	// SPL token on Solana devnet
+	SplDevnet : text;
+	// SPL token on Solana mainnet
+	SplMainnet : text;
+	// Native ICP
+	IcpNative;
+	// ICPunks-compatible token on the Internet Computer
+	IcPunks : principal;
+	// Native BTC on testnet
+	BtcNativeTestnet;
+	// ERC-1155 multi-token on an EVM chain
+	Erc1155 : record { text; nat64 };
+	// ERC-4626 vault token on an EVM chain
+	Erc4626 : record { text; nat64 };
+	// DIP721 token on the Internet Computer
+	Dip721 : principal
+};
 type TokenSection = variant { Spam; Hidden };
+// Possible error conditions when topping up the cycles ledger.
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;
 		min : nat8;
 		percentage : nat8
 	};
+	// The caller has exceeded the call rate limit.
+	RateLimited : RateLimitError;
 	CouldNotGetBalanceFromCyclesLedger;
 	CouldNotTopUpCyclesLedger : record { tried_to_send : nat; available : nat }
 };
+// A request to top up the cycles ledger.
 type TopUpCyclesLedgerRequest = record {
+	// If the cycles ledger account balance is below this threshold, top it up.
 	threshold : opt nat;
+	// The percentage of the backend canister's own cycles to send to the cycles ledger.
 	percentage : opt nat8
 };
+// Possible successful responses when topping up the cycles ledger.
 type TopUpCyclesLedgerResponse = record {
+	// The backend canister cycles after topping up.
 	backend_cycles : nat;
+	// The ledger balance after topping up.
 	ledger_balance : nat;
+	// The amount topped up.
+	// - Zero if the ledger balance was already sufficient.
+	// - The requested amount otherwise.
 	topped_up : nat
 };
 type TopUpCyclesLedgerResult = variant {
+	// The cycles ledger was topped up successfully.
 	Ok : TopUpCyclesLedgerResponse;
+	// The cycles ledger could not be topped up due to an error.
 	Err : TopUpCyclesLedgerError
+};
+type TransactionFilterSettings = record { hide_micro_transactions : bool };
+type TransactionSettings = record { filter : opt TransactionFilterSettings };
+// # Transform Args.
+//
+// ```text
+// record {
+// response : http_response;
+// context : blob;
+// }
+// ```
+//
+// See [`TransformContext`].
+type TransformArgs = record {
+	// Context for response transformation
+	context : blob;
+	// Raw response from remote service, to be transformed
+	response : HttpRequestResult
 };
 type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
 type UpdateExperimentalFeaturesSettingsRequest = record {
@@ -360,50 +883,99 @@ type UpdateExperimentalFeaturesSettingsRequest = record {
 	};
 	current_user_version : opt nat64
 };
+type UpdateProviderAgreementsRequest = record {
+	current_user_version : opt nat64;
+	provider_agreements : vec record { ProviderAgreementType; UserAgreement }
+};
+type UpdateTransactionFilterSettingsRequest = record {
+	filter : TransactionFilterSettings;
+	current_user_version : opt nat64
+};
 type UpdateUserAgreementsRequest = record {
 	agreements : UserAgreements;
 	current_user_version : opt nat64
 };
+// Per-agreement status/metadata.
 type UserAgreement = record {
+	// When the user last accepted this agreement (nanos since epoch).
 	last_accepted_at_ns : opt nat64;
+	// SHA256 hash of the agreement text, to detect changes.
 	text_sha256 : opt text;
+	// Whether the user has accepted this agreement (true), rejected it (false), or has not yet
+	// responded (null).
 	accepted : opt bool;
+	// When the agreement itself was last updated (millis since epoch).
 	last_updated_at_ms : opt nat64
 };
+// The user agreements tracked by the system.
 type UserAgreements = record {
 	license_agreement : UserAgreement;
 	privacy_policy : UserAgreement;
 	terms_of_use : UserAgreement
 };
-type UserCredential = record {
-	issuer : text;
-	verified_date_timestamp : opt nat64;
-	credential_type : CredentialType
-};
 type UserProfile = record {
 	agreements : opt Agreements;
-	credentials : vec UserCredential;
 	version : opt nat64;
 	settings : opt Settings;
 	created_timestamp : nat64;
 	updated_timestamp : nat64
 };
-type UserToken = record {
-	decimals : opt nat8;
-	version : opt nat64;
-	enabled : opt bool;
-	chain_id : nat64;
-	contract_address : text;
-	symbol : opt text
+// A finalized transaction stored in the backend.
+//
+// Contains common fields shared across all networks plus a network-specific
+// payload via [`NetworkTransactionData`]. Only fully confirmed/finalized
+// transactions should be stored here.
+type UserTransaction = record {
+	// Network-unique identifier (EVM tx hash, BTC txid, SOL signature,
+	// stringified ICRC block index, etc.)
+	id : text;
+	// Recipient address or account (`None` for contract creation, mint, burn, …).
+	to : opt text;
+	// Chain-specific ordering index (EVM block number, Bitcoin block height,
+	// Solana slot, ICP block index, etc.)
+	block_index : nat64;
+	// Value transferred in the token's smallest unit.
+	value : nat;
+	// Sender address or account.
+	from : text;
+	// Network-specific data that only applies to a particular chain family.
+	network_data : NetworkTransactionData;
+	// Block timestamp in seconds since epoch.
+	timestamp : nat64
 };
-type UserTokenId = record { chain_id : nat64; contract_address : text };
-type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
+type UserTransactionError = variant {
+	// Reserved — duplicates are currently silently skipped during save.
+	DuplicateTransaction : record { id : text };
+	InternalError : record { msg : text };
+	TooManyTransactions;
+	// Reserved for future caller-validation logic.
+	UserNotFound
+};
+// Unspent Transaction Output (UTXO).
+type Utxo = record {
+	// The block height at which the UTXO was created.
+	height : nat32;
+	// The value of the UTXO in satoshis.
+	value : nat64;
+	// The outpoint of the UTXO.
+	outpoint : Outpoint
+};
 service : (Arg) -> {
-	// Adds a verifiable credential to the user profile.
+	// Adds one or more dismissed notifications to the user's profile.
+	//
+	// # Arguments
+	// * `request` - The request containing the typed notifications to dismiss.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the notifications were added successfully, or if they were all already
+	// present.
 	//
 	// # Errors
-	// Errors are enumerated by: `AddUserCredentialError`.
-	add_user_credential : (AddUserCredentialRequest) -> (AddUserCredentialResult);
+	// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+	// the batch is too large.
+	add_user_dismissed_notification : (AddDismissedNotificationRequest) -> (
+		AddUserDismissedNotificationResult
+	);
 	// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	//
 	// # Arguments
@@ -417,11 +989,22 @@ service : (Arg) -> {
 	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (
 		AddUserHiddenDappIdResult
 	);
-	// This function authorizes the caller to spend a specific
+	// Ensures the caller has enough cycles allowance for chain-fusion signer
+	// operations (providing public keys, creating signatures, etc.).
 	//
-	// Note:
-	// - The chain fusion signer performs threshold key operations including providing public keys,
-	// creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
+	// If the caller already has sufficient allowance the call returns
+	// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
+	// call is made.  Otherwise, the endpoint is rate-limited and a new
+	// `icrc_2_approve` is issued on the cycles ledger.
+	//
+	// # Rate limiting
+	// Two rate limiters are applied in order:
+	// 1. **Guard limiter** – a high-frequency limiter (10 calls/min) checked *before* any
+	// inter-canister call to cheaply reject bursts that would drain cycles.
+	// 2. **Business limiter** – the stricter per-caller limit (3 calls/hour) for normal usage.
 	//
 	// # Errors
 	// Errors are enumerated by: `AllowSigningError`.
@@ -442,8 +1025,7 @@ service : (Arg) -> {
 	// and are periodically updated in the background.
 	//
 	// # Returns
-	// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
-	// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+	// - `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
 	//
 	// # Errors
 	// - `InternalError`: If fee percentiles are not available in the cache for the requested network
@@ -451,23 +1033,19 @@ service : (Arg) -> {
 	// # Note
 	// This function only returns data from the in-memory cache and doesn't make any calls
 	// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
-	// an error is returned rather than fetching fresh data.
+	// it returns the default percentiles.
 	btc_get_current_fee_percentiles : (BtcGetFeePercentilesRequest) -> (
 		BtcGetFeePercentilesResult
 	) query;
 	// Returns the pending Bitcoin transactions for the caller.
 	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
 	// # Errors
 	// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
-	);
-	// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
-	//
-	// # Errors
-	// Errors are enumerated by: `SelectedUtxosFeeError`.
-	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
-		BtcSelectUserUtxosFeeResult
 	);
 	// Gets the canister configuration.
 	config : () -> (Config) query;
@@ -478,13 +1056,15 @@ service : (Arg) -> {
 	//
 	// # Returns
 	// The created contact on success.
-	//
-	// # Test
-	// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
 	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
-	create_user_profile : () -> (UserProfile);
+	//
+	// # Errors
+	// - Returns `Err(SignupsClosed)` when sign-ups of new users are disabled on the backend and the
+	// caller does not already have a profile. Existing users are unaffected and still receive
+	// `Ok(profile)` for idempotent calls.
+	create_user_profile : () -> (CreateUserProfileResult);
 	// Deletes a contact for the caller.
 	//
 	// # Errors
@@ -498,7 +1078,8 @@ service : (Arg) -> {
 		vec record { principal; nat64 }
 	) query;
 	// Retrieves the amount of cycles that the signer canister is allowed to spend
-	// on behalf of the current user
+	// on behalf of the current user.
+	//
 	// # Returns
 	// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
 	// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong
@@ -507,6 +1088,10 @@ service : (Arg) -> {
 	// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 	// - `Other`: If another error occurred during the operation
 	get_allowed_cycles : () -> (GetAllowedCyclesResult);
+	// Returns the currently stored API keys.
+	//
+	// Restricted to canister controllers only.
+	get_api_keys : () -> (ApiKeys) query;
 	// API method to get cycle balance and burn rate.
 	get_canister_status : () -> (CanisterStatusResultV2);
 	// Gets a contact by ID for the caller.
@@ -524,6 +1109,18 @@ service : (Arg) -> {
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
+	get_exchange_rate : (TokenId) -> (opt ExchangeRate) query;
+	get_exchange_rates : (vec TokenId) -> (
+		vec record { TokenId; opt ExchangeRate }
+	) query;
+	// Returns the full agreement consent/rejection history for the caller.
+	//
+	// # Returns
+	// - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
+	//
+	// # Errors
+	// - `Err(UserNotFound)` if no history exists and the user has no profile.
+	get_user_agreement_history : () -> (GetAgreementHistoryResult) query;
 	// Returns the caller's user profile.
 	//
 	// # Errors
@@ -532,6 +1129,16 @@ service : (Arg) -> {
 	// # Panics
 	// - If the caller is anonymous.  See: `may_read_user_data`.
 	get_user_profile : () -> (GetUserProfileResult) query;
+	// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
+	//
+	// # Returns
+	// - `Ok(GetUserTransactionsResponse)` with the requested page of transactions.
+	//
+	// Currently, this function always returns `Ok` for valid (non-anonymous) calls.
+	// The `Err(UserTransactionError)` variant is reserved for future validation logic.
+	get_user_transactions : (GetUserTransactionsRequest) -> (
+		GetUserTransactionsResult
+	) query;
 	// Checks if the caller has an associated user profile.
 	//
 	// # Returns
@@ -542,15 +1149,54 @@ service : (Arg) -> {
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
-	list_custom_tokens : () -> (vec CustomToken) query;
-	list_user_tokens : () -> (vec UserToken) query;
+	// Strips volatile HTTP headers so that IC replicas can reach consensus.
+	//
+	// Each replica makes the same HTTP request independently and the raw
+	// responses must match for consensus. Headers like `Date`, `X-Request-Id`,
+	// `CF-Ray`, etc. differ across replicas, causing consensus failure.
+	// This transform keeps only status + body.
+	http_request_transform : (TransformArgs) -> (HttpRequestResult) query;
+	// List the custom tokens for the calling user.
+	//
+	// Note: This method was previously exposed as a *query* but is now an *update*
+	// call. The change is intentional and breaking: `list_custom_tokens` now tracks
+	// token activity by calling `mark_tokens_active`, which mutates canister state.
+	// Because queries must not modify state on the IC, this function must be an
+	// update, not a query.
+	//
+	// Implications for callers:
+	// - This call now participates in consensus and may have higher latency than a query.
+	// - It consumes cycles as an update call.
+	// - Integrations that previously relied on query semantics must be updated to invoke this as an
+	// update method.
+	list_custom_tokens : () -> (vec CustomToken);
+	// Returns whether sign-ups of new users are currently allowed.
+	//
+	// Exposed as an unauthenticated query so the landing page can display an info banner before the
+	// user signs in.
+	new_user_signups_allowed : () -> (bool) query;
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
-	remove_user_token : (UserTokenId) -> ();
+	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
+	//
+	// # Errors
+	// Errors are enumerated by: `UserTransactionError`.
+	save_user_transactions : (SaveUserTransactionsRequest) -> (
+		SaveUserTransactionsResult
+	);
+	// Overwrites the stored API keys.
+	//
+	// Restricted to canister controllers only.
+	set_api_keys : (ApiKeys) -> ();
 	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
-	set_many_user_tokens : (vec UserToken) -> ();
+	// Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
+	//
+	// When disabled, `create_user_profile` rejects callers that do not already have a profile with
+	// `CreateUserProfileError::SignupsClosed`. Existing users are unaffected. All other `Config`
+	// fields are preserved.
+	set_new_user_signups_allowed : (bool) -> ();
 	// Sets the user's preference to show (or hide) testnets in the interface.
 	//
 	// # Returns
@@ -562,7 +1208,6 @@ service : (Arg) -> {
 	set_user_show_testnets : (SetShowTestnetsRequest) -> (
 		SetUserShowTestnetsResult
 	);
-	set_user_token : (UserToken) -> ();
 	// Gets statistics about the canister.
 	//
 	// Note: This is a private method, restricted to authorized users, as some stats may not be
@@ -580,7 +1225,24 @@ service : (Arg) -> {
 	// # Errors
 	// Errors are enumerated by: `ContactError`.
 	update_contact : (Contact) -> (GetContactResult);
-	// Updates the user's agreements, merging with any existing ones.
+	// Updates the user's provider agreements, merging with any existing ones, and records an
+	// audit-trail entry for every provider agreement that was actually changed.
+	//
+	// Only entries where `accepted` is `Some(_)` are applied. If `Some(true)`,
+	// `last_accepted_at_ns` is set to `now`.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the provider agreements were saved successfully, or if they were already
+	// set to the same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	update_provider_agreements : (UpdateProviderAgreementsRequest) -> (
+		SetUserShowTestnetsResult
+	);
+	// Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
+	// for every agreement that was actually changed.
+	//
 	// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
 	// set to `now`.
 	//
@@ -616,5 +1278,16 @@ service : (Arg) -> {
 	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	update_user_network_settings : (SaveNetworksSettingsRequest) -> (
 		SetUserShowTestnetsResult
-	)
+	);
+	// Updates the user's transaction filter settings.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the transaction filter settings were updated successfully, or if they were
+	// already set to the same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	update_user_transaction_filter_settings : (
+		UpdateTransactionFilterSettingsRequest
+	) -> (SetUserShowTestnetsResult)
 }

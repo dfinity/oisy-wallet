@@ -13,88 +13,76 @@ export const mapBtcTransaction = ({
 	btcAddress: BtcAddress;
 	latestBitcoinBlockHeight: number;
 }): BtcTransactionUi => {
-	// Step 1: Calculate total input value and determine if the transaction is a "send"
-	const { totalInputValue, isTypeSend } = inputs.reduce<{
-		totalInputValue: number;
-		isTypeSend: boolean;
-	}>(
-		(acc, { prev_out: { value, addr } }) => ({
-			totalInputValue: acc.totalInputValue + value,
-			isTypeSend: acc.isTypeSend ? acc.isTypeSend : addr === btcAddress
-		}),
-		{
-			totalInputValue: 0,
-			isTypeSend: false
-		}
+	// Step 1: Aggregate input/output values split by user vs. others.
+	const inputsFromUser = inputs.reduce(
+		(acc, { prev_out: { addr, value } }) => acc + (addr === btcAddress ? value : 0),
+		0
 	);
 
-	// Step 2: Analyse outputs to determine total value, destination addresses, and whether it's a self-transaction
-	const { totalOutputValue, totalValue, to, selfTransaction } = out.reduce<{
-		to: string[];
-		totalValue: number | undefined;
-		totalOutputValue: number;
-		selfTransaction: boolean;
+	const { outputsToUser, outputsToOthers, recipients } = out.reduce<{
+		outputsToUser: number;
+		outputsToOthers: number;
+		recipients: string[];
 	}>(
-		(acc, output) => {
-			const { addr, value } = output;
-
-			// For 'send' tx: include outputs not to the sender
-			// For 'receive' tx: include only outputs to the user
-			const isValidOutput =
-				(isTypeSend && addr !== btcAddress) || (!isTypeSend && addr === btcAddress);
-
-			return {
-				...acc,
-				totalValue: isValidOutput ? (acc.totalValue ?? 0) + value : acc.totalValue,
-				to: isValidOutput ? [...acc.to, addr] : acc.to,
-				totalOutputValue: acc.totalOutputValue + value,
-				// If all outputs are to the sender, it's a self-transaction
-				selfTransaction: acc.selfTransaction && addr === btcAddress
-			};
-		},
-		{
-			totalOutputValue: 0,
-			totalValue: undefined,
-			to: [],
-			selfTransaction: true
-		}
+		(acc, { addr, value }) =>
+			addr === btcAddress
+				? { ...acc, outputsToUser: acc.outputsToUser + value }
+				: {
+						...acc,
+						outputsToOthers: acc.outputsToOthers + value,
+						recipients: [...acc.recipients, addr]
+					},
+		{ outputsToUser: 0, outputsToOthers: 0, recipients: [] }
 	);
 
-	// Step 3: Calculate the transaction fee from the difference between input and output values
-	const utxosFee = totalInputValue - totalOutputValue;
+	// Step 2: Classify by net flow. The user "received" if more BTC came into their
+	// address than left it. Otherwise it's a send (including the zero-net consolidation case).
+	const isReceive = outputsToUser > inputsFromUser;
 
-	// Step 4: Compute the number of confirmations
-	// +1 is needed to account for the block where the transaction was first included
+	// Step 3: Derive the displayable amount and the fee attributable to the user.
+	// For a send, the user's net spend (rawNet) is capped at what actually went to
+	// other recipients; any excess is the user's share of the network fee.
+	const rawNet = inputsFromUser - outputsToUser;
+	const sendAmount = Math.min(rawNet, outputsToOthers);
+	const value = BigInt(isReceive ? outputsToUser - inputsFromUser : sendAmount);
+	const fee = isReceive ? undefined : BigInt(rawNet - sendAmount);
+
+	// Step 4: Resolve confirmations / status from the latest block height.
+	// +1 accounts for the block where the transaction was first included.
 	const confirmations = nonNullish(block_index)
 		? latestBitcoinBlockHeight - block_index + 1
 		: undefined;
 
-	// Step 5: Derive transaction status based on confirmations thresholds
 	const status = isNullish(confirmations)
 		? 'pending'
 		: confirmations >= CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 			? 'confirmed'
 			: 'unconfirmed';
 
-	// Step 6: Determine the value of the transaction
-	const value = selfTransaction
-		? // For self-transactions, we consider the total output value plus the fee, since that is logically the value spent for the presumable 'send' transaction
-			BigInt(totalOutputValue + utxosFee)
-		: nonNullish(totalValue)
-			? // For 'send' transactions, we consider the total value sent plus the fee, since that is logically the value spent for the transaction
-				BigInt(isTypeSend ? totalValue + utxosFee : totalValue)
-			: undefined;
+	// Step 5: Pick a sensible counterparty for from/to. For a receive, prefer the
+	// first non-user input as the sender (falls back to inputs[0] when all inputs
+	// happen to be user-owned, which shouldn't occur for an isReceive transaction).
+	const from = isReceive
+		? (inputs.find(({ prev_out: { addr } }) => addr !== btcAddress)?.prev_out.addr ??
+			inputs[0].prev_out.addr)
+		: btcAddress;
 
-	// Step 7: Compose the final structured BTC transaction object for the UI
+	// On a send with zero non-user outputs (consolidation), fall back to the user's
+	// own address so the list row has a counterparty to render. Every output in
+	// this branch literally has `addr === btcAddress`, so this is the true
+	// destination, not a guess.
+	const to = isReceive || recipients.length === 0 ? [btcAddress] : recipients;
+
 	return {
 		id: hash,
 		timestamp: BigInt(time),
 		value,
+		fee,
 		status,
 		blockNumber: block_index ?? undefined,
-		type: isTypeSend ? 'send' : 'receive',
-		from: isTypeSend ? btcAddress : inputs[0].prev_out.addr,
-		to: selfTransaction ? [btcAddress] : to,
+		type: isReceive ? 'receive' : 'send',
+		from,
+		to,
 		confirmations
 	};
 };

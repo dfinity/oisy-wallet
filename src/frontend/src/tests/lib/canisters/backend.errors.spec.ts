@@ -1,8 +1,8 @@
 import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
+	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
-	mapBtcSelectUserUtxosFeeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -120,49 +120,22 @@ describe('backend.errors', () => {
 		});
 	});
 
-	describe('mapBtcSelectUserUtxosFeeError', () => {
+	describe('mapBtcGetFeePercentilesError', () => {
 		it('should map InternalError', () => {
-			const err = mapBtcSelectUserUtxosFeeError({
-				InternalError: { msg: 'utxos fee error' }
+			const err = mapBtcGetFeePercentilesError({
+				InternalError: { msg: 'fee percentiles error' }
 			});
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('utxos fee error');
-		});
-
-		it('should map PendingTransactions', () => {
-			const err = mapBtcSelectUserUtxosFeeError({
-				PendingTransactions: null
-			});
-
-			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Selecting utxos fee is not possible - pending transactions found.');
-		});
-
-		it('should map RateLimited', () => {
-			const err = mapBtcSelectUserUtxosFeeError({
-				RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal }
-			});
-
-			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
-		});
-
-		it('should map InvalidDelegationChain', () => {
-			const err = mapBtcSelectUserUtxosFeeError({
-				InvalidDelegationChain: { msg: 'unknown canister' }
-			});
-
-			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('II delegation chain verification failed: unknown canister');
+			expect(err.message).toBe('fee percentiles error');
 		});
 
 		it('should return unknown error for unrecognized variant', () => {
 			// @ts-expect-error testing unknown error variant
-			const err = mapBtcSelectUserUtxosFeeError({ SomeOther: null });
+			const err = mapBtcGetFeePercentilesError({ SomeOther: null });
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Unknown BtcSelectUserUtxosFeeError');
+			expect(err.message).toBe('Unknown BtcGetFeePercentilesError');
 		});
 	});
 
@@ -174,6 +147,17 @@ describe('backend.errors', () => {
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
 			expect(err.message).toBe('The Cycles Ledger cannot be contacted.');
+		});
+
+		it('should map RateLimited', () => {
+			const err = mapGetAllowedCyclesError({
+				RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe(
+				'Rate limit exceeded. Maximum of 10 calls allowed every 60 seconds.'
+			);
 		});
 
 		it('should map Other', () => {

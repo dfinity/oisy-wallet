@@ -10,6 +10,7 @@ import {
 	ARB_SEPOLIA_USDC_TOKEN,
 	USDC_TOKEN
 } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
+import { USDCE_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdce.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.wbtc.env';
 import { WETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.weth.env';
@@ -21,6 +22,7 @@ const ARBITRUM_ERC20_TOKENS_SEPOLIA: RequiredEvmErc20Token[] = [ARB_SEPOLIA_USDC
 
 const ARBITRUM_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
 	USDC_TOKEN,
+	USDCE_TOKEN,
 	USDT_TOKEN,
 	ARB_TOKEN,
 	BOB_TOKEN,

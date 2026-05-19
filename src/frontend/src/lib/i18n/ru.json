@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short защищает вас!"
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -123,14 +124,16 @@
 		"text": {
 			"title_part_1": "Ваши цифровые активы",
 			"title_part_2": "Приватные и безопасные",
+			"description": "Откройте свой кошелёк или создайте новый за несколько секунд",
 			"logout": "Выйти",
 			"lock": "Закрыть",
 			"authenticate": "Открыть или создать",
+			"sign_in_or_sign_up": "Войти или зарегистрироваться",
 			"internet_identity": "",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP и другие",
 			"instant_and_private": "Приватный доступ в любой момент",
 			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain",
-			"social_login": ""
+			"move_swap_grow": "Перемещайте, обменивайте и приумножайте активы в разных сетях"
 		},
 		"alt": {
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве",
@@ -140,6 +143,12 @@
 		},
 		"message": {
 			"session_locked": "Сессия заблокирована"
+		},
+		"info": {
+			"signups_closed": "Новые регистрации временно ограничены. Пожалуйста, повторите попытку позже."
+		},
+		"banner": {
+			"signups_closed": "В настоящее время регистрация новых пользователей недоступна. Существующие пользователи могут использовать $oisy_short в обычном режиме."
 		},
 		"warning": {
 			"not_signed_in": "Вы не вошли в систему. Пожалуйста, войдите, чтобы продолжить.",
@@ -262,10 +271,10 @@
 				"description": "Центр будущего децентрализованных финансов! ICPSwap — это не просто биржа, а хаб для финансовых, торговых и DAO-сервисов на Internet Computer. Создает экосистему децентрализованных финансов, где пользователи и разработчики могут совместно создавать проекты."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "Удобный интерфейс для управления Internet Computer",
-				"call_to_action": "Присоединяйтесь",
-				"description": "NNS Dapp — это удобный интерфейс для взаимодействия с Network Nervous System Internet Computer. Позволяет легко:<br/><ul><li>Отправлять и получать токены (ICP, ckBTC, CHAT и др.)</li><li>Стейкать и управлять нейронами</li><li>Голосовать за управление Internet Computer и SNS</li><li>Участвовать в децентрализованных обменах</li><li>Создавать и пополнять контейнеры</li><li>Зарабатывать награды за управление</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Платформа управления для Internet Computer, позволяющая пользователям делать стейкинг, голосовать и следить за активностью сети.",
+				"call_to_action": "Участвовать в управлении ICP",
+				"description": "Приложение NNS — это платформа управления для Internet Computer (ICP), которая позволяет пользователям стейкать токены, участвовать в голосованиях и следить за активностью сети.<br/><br/>Оно обеспечивает большую прозрачность действий пользователей и управленческой активности, помогая пользователям понять, как стейкинг, голосование и участие способствуют развитию экосистемы."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -1148,13 +1157,17 @@
 			"select_token": "Выбрать токен",
 			"select_network_filter": "Выбрать сеть",
 			"withdrawing": "Вывод",
+			"bridging": "Выполняется бридж... (Пожалуйста, подождите — это может занять до 2 минут.)",
 			"network_cost": "Комиссия за транзакцию",
 			"gasless": "Без комиссии за газ",
 			"swap_fees": "Комиссия за обмен",
 			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
-			"value_difference_error_confirmation": ""
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Не удалось получить цену хотя бы одного из токенов. Пожалуйста, <strong>проверьте самостоятельно</strong>, что это предложение свопа является справедливым.<br>Обратите внимание, что настройка проскальзывания <strong>не</strong> защищает вас от предложения с гораздо меньшей суммой получения!"
 		},
 		"error": {
 			"kong_not_available": "Сейчас обмен недоступен. Попробуйте позже.",
@@ -1179,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "Купить",
-			"buy_dev": "Купить (среда разработки)"
+			"buy_dev": "Купить (среда разработки)",
+			"unavailable_title": "Покупка токенов временно недоступна",
+			"unavailable_description": "Покупка токенов сейчас отключена, пока мы продолжаем повышать безопасность этого процесса, внедряя подписание URL. Она будет снова включена, как только работа будет завершена.",
+			"unavailable_fallback_hint": "Тем временем вы по-прежнему можете получать токены, поделившись адресом своего кошелька."
+		},
+		"actions": {
+			"close": "Понятно"
 		},
 		"onramper": {
 			"title": "Купить через Onramper"
@@ -1616,6 +1635,23 @@
 			"burn": "Сжигание",
 			"mint": "Создание"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "Вы ещё не добавили контакты",
+			"contacts_empty_description": "Сохраняйте известные адреса в Контактах, чтобы снизить риск случайно использовать неправильный адрес.",
+			"contacts_empty_cta": "Добавить первый контакт"
+		},
 		"label": {
 			"reimbursement": "Возмещение",
 			"twin_token_converted": "Обменяно из $twinToken",
@@ -1838,8 +1874,9 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Доступ к вашему кошельку $oisy_name",
-				"open_or_create": "Откройте или создайте свой кошелек, чтобы безопасно подключиться к dApp и начать управлять своими активами."
+				"open_or_create": "Откройте или создайте кошелёк, чтобы безопасно взаимодействовать с приложением.",
+				"connect_your_wallet": "Подключите ваш кошелёк $oisy_name",
+				"oisy_protects_you_description": "Приложения не могут напрямую получить доступ к вашим средствам, и каждая транзакция должна быть подтверждена вами."
 			}
 		},
 		"idle": {
@@ -1961,7 +1998,7 @@
 		},
 		"info": {
 			"btc_transactions": "Данные о транзакциях Bitcoin поступают от внешних сервисов — рекомендуем проверять их самостоятельно.",
-			"hidden_micro_transactions": "<strong>OISY защищает вас</strong>! Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Узнать больше</a>"
+			"hidden_micro_transactions": "Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Узнать больше</a>"
 		},
 		"warning": {
 			"no_index_canister": "Транзакции для $token_list не могут быть отображены. Нет доступного контейнера индекса.",

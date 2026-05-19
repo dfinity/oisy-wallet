@@ -3,7 +3,7 @@ use candid::{CandidType, Deserialize};
 use super::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcGetPendingTransactionsError,
-        BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
+        BtcGetPendingTransactionsReponse,
     },
     dapp::AddDappSettingsError,
     notification::AddDismissedNotificationError,
@@ -14,7 +14,7 @@ use super::{
 };
 use crate::types::{
     agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
-    bitcoin::BtcGetFeePercentilesResponse,
+    bitcoin::{BtcGetFeePercentilesError, BtcGetFeePercentilesResponse},
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
@@ -185,32 +185,16 @@ impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowe
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum BtcSelectUserUtxosFeeResult {
-    /// The fee was selected successfully.
-    Ok(SelectedUtxosFeeResponse),
-    /// The fee was not selected due to an error.
-    Err(SelectedUtxosFeeError),
-}
-impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelectUserUtxosFeeResult {
-    fn from(result: Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>) -> Self {
-        match result {
-            Ok(response) => BtcSelectUserUtxosFeeResult::Ok(response),
-            Err(err) => BtcSelectUserUtxosFeeResult::Err(err),
-        }
-    }
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetFeePercentilesResult {
     /// The fee was selected successfully.
     Ok(BtcGetFeePercentilesResponse),
     /// The fee was not selected due to an error.
-    Err(SelectedUtxosFeeError),
+    Err(BtcGetFeePercentilesError),
 }
-impl From<Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>>
+impl From<Result<BtcGetFeePercentilesResponse, BtcGetFeePercentilesError>>
     for BtcGetFeePercentilesResult
 {
-    fn from(result: Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>) -> Self {
+    fn from(result: Result<BtcGetFeePercentilesResponse, BtcGetFeePercentilesError>) -> Self {
         match result {
             Ok(response) => BtcGetFeePercentilesResult::Ok(response),
             Err(err) => BtcGetFeePercentilesResult::Err(err),

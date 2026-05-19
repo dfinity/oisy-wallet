@@ -1,0 +1,12 @@
+---
+description: Frontend testing rules. Apply when creating or modifying tests.
+globs: ['src/frontend/src/tests/**/*', 'src/frontend/**/*.spec.ts', 'src/frontend/**/*.test.ts']
+---
+
+# Cursor — Frontend Testing
+
+Authoritative source: [docs/ai/frontend/testing.md](mdc:docs/ai/frontend/testing.md).
+
+Read it before adding or modifying tests. Tests live under
+`src/frontend/src/tests/` mirroring source — never co-located. E2E
+(`e2e/`) is currently **maintenance-only**.

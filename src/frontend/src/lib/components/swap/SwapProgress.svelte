@@ -9,6 +9,7 @@
 		sendWithApproval?: boolean;
 		sendWithTransfer?: boolean;
 		swapWithWithdrawing?: boolean;
+		swapWithBridging?: boolean;
 		failedSteps?: string[];
 	}
 
@@ -17,7 +18,8 @@
 		failedSteps = $bindable([]),
 		sendWithApproval = false,
 		sendWithTransfer = false,
-		swapWithWithdrawing = false
+		swapWithWithdrawing = false,
+		swapWithBridging = false
 	}: Props = $props();
 
 	let steps = $derived<ProgressSteps>([
@@ -51,7 +53,7 @@
 			: []),
 		{
 			step: ProgressStepsSwap.SWAP,
-			text: $i18n.swap.text.swapping,
+			text: swapWithBridging ? $i18n.swap.text.bridging : $i18n.swap.text.swapping,
 			state: 'next'
 		},
 		...(swapWithWithdrawing

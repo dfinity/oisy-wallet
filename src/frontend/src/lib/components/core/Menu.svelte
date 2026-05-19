@@ -120,6 +120,9 @@
 		role="none"
 	>
 		{#if $authNotSignedIn}
+			<div class="mb-2 text-center text-base font-semibold">
+				{$i18n.auth.text.sign_in_or_sign_up}
+			</div>
 			<span class="mb-2 text-center">
 				<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
 			</span>
@@ -285,7 +288,9 @@
 
 	<Hr />
 
-	<div class="mt-4 flex justify-center gap-2 text-xs text-nowrap text-tertiary">
+	<div
+		class="mt-4 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
+	>
 		<TermsOfUseLink />
 		<PrivacyPolicyLink />
 		<LicenseAgreementLink />

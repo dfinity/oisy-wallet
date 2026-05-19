@@ -8,6 +8,7 @@ import type { IcNonFungibleToken } from '$icp/types/nft';
 import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
+import { isTokenIcrc7CustomToken } from '$icp/utils/icrc7.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { nftStore } from '$lib/stores/nft.store';
@@ -114,7 +115,8 @@ export const saveNftCustomToken = async ({
 	} else if (
 		isTokenExtCustomToken(token) ||
 		isTokenDip721CustomToken(token) ||
-		isTokenIcPunksCustomToken(token)
+		isTokenIcPunksCustomToken(token) ||
+		isTokenIcrc7CustomToken(token)
 	) {
 		await saveCustomTokens({
 			identity,
@@ -125,7 +127,9 @@ export const saveNftCustomToken = async ({
 						? 'ExtV2'
 						: isTokenDip721CustomToken(token)
 							? 'Dip721'
-							: 'IcPunks'
+							: isTokenIcPunksCustomToken(token)
+								? 'IcPunks'
+								: 'Icrc7'
 				}
 			]
 		});

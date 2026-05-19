@@ -19,6 +19,7 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -37,6 +38,7 @@
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import {
 		fetchNearIntentsEvmSwap,
+		fetchOneSecEvmToIcpSwap,
 		fetchVeloraDeltaSwap,
 		fetchVeloraMarketSwap
 	} from '$lib/services/swap.services';
@@ -188,6 +190,12 @@
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
+	const swapEmitsApprovalSteps = $derived(
+		!isNearIntentsProvider &&
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
+			isNotDefaultEthereumToken($sourceToken)
+	);
+
 	const isTransferNeeded = $derived(isNearIntentsProvider);
 
 	const isGasless = $derived(
@@ -328,6 +336,29 @@
 				} else {
 					await fetchVeloraMarketSwap(params);
 				}
+			} else if (selectedProvider?.provider === SwapProvider.ONE_SEC) {
+				if (!isIcToken($destinationToken) || isNullish($ethAddress)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				await fetchOneSecEvmToIcpSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as Erc20Token,
+					destinationToken: $destinationToken,
+					swapAmount,
+					userEthAddress: $ethAddress,
+					gas,
+					maxFeePerGas,
+					maxPriorityFeePerGas
+				});
 			} else {
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected }
@@ -426,9 +457,10 @@
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 				<SwapProgress
-					sendWithApproval={isApproveNeeded}
+					sendWithApproval={swapEmitsApprovalSteps}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
+					swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
 				/>
 			{/if}
 		{/key}

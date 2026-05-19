@@ -148,12 +148,18 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			}
 		}
 
+		const exitIfFirstSignatureMatches =
+			storedTransactions.length > 0 && nonNullish(storedTransactions[0]?.data.signature)
+				? String(storedTransactions[0].data.signature)
+				: undefined;
+
 		const rpcTransactions = await getSolTransactions({
 			network,
 			identity,
 			address,
 			tokenAddress,
-			tokenOwnerAddress
+			tokenOwnerAddress,
+			exitIfFirstSignatureMatches
 		});
 
 		const rpcCertified = rpcTransactions.map((transaction) => ({
@@ -211,6 +217,11 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				maxRetries: 10
 			});
 		} catch (error: unknown) {
+			// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
+			this.store = {
+				balance: undefined,
+				transactions: {}
+			};
 			this.postMessageWalletError({ error });
 		}
 	};

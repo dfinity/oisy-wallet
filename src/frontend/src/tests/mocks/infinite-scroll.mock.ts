@@ -34,6 +34,53 @@ export class IntersectionObserverActive implements IntersectionObserver {
 	unobserve = () => null;
 }
 
+/**
+ * Fires the callback once per `(observer instance, target)` pair, then stays
+ * silent. Matches the spec's initial-state notification.
+ */
+export class IntersectionObserverOnce implements IntersectionObserver {
+	public readonly root: Element | Document | null = null;
+	public readonly rootMargin: string = '';
+	public readonly thresholds: ReadonlyArray<number> = [];
+	public takeRecords: () => IntersectionObserverEntry[] = () => [];
+
+	private observed = new WeakSet<Element>();
+
+	constructor(
+		private callback: (
+			entries: IntersectionObserverEntry[],
+			observer: IntersectionObserver
+		) => void,
+		private options?: IntersectionObserverInit
+	) {}
+
+	observe(element: HTMLElement) {
+		if (this.observed.has(element)) {
+			return;
+		}
+
+		this.observed.add(element);
+
+		this.callback(
+			[
+				{
+					isIntersecting: true,
+					target: element
+				} as unknown as IntersectionObserverEntry
+			],
+			this
+		);
+	}
+
+	unobserve(element: Element) {
+		this.observed.delete(element);
+	}
+
+	disconnect() {
+		this.observed = new WeakSet<Element>();
+	}
+}
+
 export const INTERSECTION_OBSERVER_ACTIVE_INTERVAL = 5000;
 
 export class IntersectionObserverActiveInterval implements IntersectionObserver {

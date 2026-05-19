@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_shortはあなたを守ります！"
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -123,14 +124,16 @@
 		"text": {
 			"title_part_1": "あなたのデジタル資産を",
 			"title_part_2": "プライベートで、安全に。",
+			"description": "ウォレットを開くか、数秒で作成できます",
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "ログイン/新規作成",
+			"sign_in_or_sign_up": "ログインまたは新規登録",
 			"internet_identity": "",
 			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
 			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
 			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで",
-			"social_login": "即時かつプライベートなアクセス + ソーシャルログイン"
+			"move_swap_grow": "ネットワークをまたいで資産を移動・スワップ・成長"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー",
@@ -140,6 +143,12 @@
 		},
 		"message": {
 			"session_locked": "別のタブで操作が行われたため、このセッションはロックされました。"
+		},
+		"info": {
+			"signups_closed": "現在、新規登録は制限されています。後でもう一度お試しください。"
+		},
+		"banner": {
+			"signups_closed": "現在、新規ユーザーの登録はできません。既存のユーザーは引き続き $oisy_short を通常どおりご利用いただけます。"
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
@@ -262,10 +271,10 @@
 				"description": "未来の分散型金融のハブ！<br/>取引所をハブとして再発明し、ICPSwapはInternet Computer上でフルスタックの金融、市場、DAOサービスを提供します。DFINITYのInternet Computerの基盤技術に基づき、ICPSwapはユーザーと開発者が共同でプロジェクトを構築する方法を再構築することにより、真に分散化された金融のエコシステムを確立します。"
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "NNSフロントエンドdappは、誰でも使いやすいUIでInternet Computerのネットワークナーバスシステムと対話できるようにします。",
-				"call_to_action": "参加する",
-				"description": "NNSフロントエンドdappは、誰でも使いやすいUIでInternet Computerのネットワークナーバスシステムと対話できるようにします。ブロックチェーンを介して完全にエンドツーエンドで提供されるこの分散型dappを使用すると、次のアクションを簡単に実行できます：<br/><ul><li>トークン（ICP, ckBTC, CHATなど）の送受信</li><li>ニューロンのステーキングと管理</li><li>Internet ComputerとSNSのガバナンスへの投票</li><li>分散化スワップへの参加</li><li>キャニスターの作成と補充</li><li>ガバナンス報酬の獲得</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Internet Computerのガバナンスプラットフォームで、ユーザーがステーキング、投票、ネットワーク活動の追跡を行えます。",
+				"call_to_action": "ICPガバナンスに参加する",
+				"description": "NNSアプリケーションはInternet Computer（ICP）のガバナンスプラットフォームで、ユーザーはトークンのステーキング、投票への参加、ネットワーク活動の追跡が可能です。<br/><br/>ユーザーのアクションやガバナンス活動の可視性を高め、ステーキング・投票・参加がエコシステム全体にどのように貢献するかを理解しやすくします。"
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -1148,13 +1157,17 @@
 			"select_token": "トークンを選択",
 			"select_network_filter": "ネットワークを選択",
 			"withdrawing": "出金中...",
+			"bridging": "ブリッジ中... (しばらくお待ちください。最大2分かかる場合があります。)",
 			"network_cost": "ネットワークコスト",
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
-			"value_difference_error_confirmation": ""
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "少なくとも1つのトークンの価格を取得できませんでした。このスワップオファーが公正な取引であることを<strong>独自に確認</strong>してください。<br>スリッページ設定は、受取額が大幅に低いオファーからは保護<strong>されません</strong>のでご注意ください！"
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",
@@ -1179,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "購入",
-			"buy_dev": "購入（開発環境）"
+			"buy_dev": "購入（開発環境）",
+			"unavailable_title": "トークンの購入は一時的にご利用いただけません",
+			"unavailable_description": "URL署名の導入により、このプロセスのセキュリティをさらに強化しているため、現在トークンの購入はオフになっています。作業が完了次第、再び有効になります。",
+			"unavailable_fallback_hint": "それまでの間も、ウォレットアドレスを共有することでトークンを受け取ることができます。"
+		},
+		"actions": {
+			"close": "了解"
 		},
 		"onramper": {
 			"title": "Onramper経由で購入"
@@ -1616,6 +1635,23 @@
 			"burn": "バーン",
 			"mint": "ミント"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "まだ連絡先を追加していません",
+			"contacts_empty_description": "よく使うアドレスを連絡先に保存して、誤ったアドレスをうっかり使ってしまうリスクを減らしましょう。",
+			"contacts_empty_cta": "最初の連絡先を追加"
+		},
 		"label": {
 			"reimbursement": "払い戻し",
 			"twin_token_converted": "$twinTokenから変換済み",
@@ -1838,8 +1874,9 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "あなたの$oisy_nameにアクセス",
-				"open_or_create": "既存のウォレットにログインするか、新規作成して、安全にdAppに接続し、資産の管理を始めましょう。"
+				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
+				"connect_your_wallet": "あなたの$oisy_nameに接続する",
+				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},
 		"idle": {
@@ -1961,7 +1998,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。",
-			"hidden_micro_transactions": "<strong>OISYはあなたを守ります！</strong>非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
+			"hidden_micro_transactions": "非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",

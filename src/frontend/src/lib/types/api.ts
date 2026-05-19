@@ -9,7 +9,6 @@ import type {
 	GetUserProfileError,
 	IIDelegationChain,
 	PendingTransaction,
-	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserTransaction,
 	Utxo
@@ -51,11 +50,6 @@ export interface GetPendingTransactionsOutcome {
 	rateLimitInfo?: RateLimitInfo;
 }
 
-export interface SelectedUtxosFeeOutcome {
-	response: SelectedUtxosFeeResponse;
-	rateLimitInfo?: RateLimitInfo;
-}
-
 export interface AllowSigningParams {
 	iiDelegationChain: Nullable<IIDelegationChain>;
 }
@@ -63,13 +57,6 @@ export interface AllowSigningParams {
 export interface AllowSigningOutcome {
 	response: AllowSigningResponse;
 	rateLimitInfo?: RateLimitInfo;
-}
-
-export interface BtcSelectUserUtxosFeeParams {
-	network: BitcoinNetwork;
-	amountSatoshis: bigint;
-	minConfirmations: [number];
-	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
 export interface BtcGetPendingTransactionParams {

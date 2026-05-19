@@ -78,9 +78,9 @@ type AllowSigningResult = variant {
 };
 type AllowSigningStatus = variant { Skipped; Failed; Executed };
 type ApiKeys = record {
-	// When `Some(true)` the backend periodically fetches exchange rates via
-	// HTTP outcalls.  Any other value (including the default `None`) keeps the
-	// feature disabled so no cycles are spent on outcalls.
+	// When `Some(false)`, periodic exchange-rate HTTP outcalls are disabled (even with a
+	// `CoinGecko` key). When `None` or `Some(true)`, outcalls run iff `coingecko_api_key` is set
+	// (misconfiguration with no key does not run refresh).
 	exchange_rate_enabled : opt bool;
 	alchemy_api_key : opt text;
 	etherscan_api_key : opt text;
@@ -239,15 +239,17 @@ type BtcAddress = variant {
 	// - `bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k`
 	P2TR : text
 };
+type BtcGetFeePercentilesError = variant {
+	InternalError : record { msg : text }
+};
 type BtcGetFeePercentilesRequest = record { network : Network };
 type BtcGetFeePercentilesResponse = record { fee_percentiles : vec nat64 };
 type BtcGetFeePercentilesResult = variant {
 	// The fee was selected successfully.
 	Ok : BtcGetFeePercentilesResponse;
 	// The fee was not selected due to an error.
-	Err : SelectedUtxosFeeError
+	Err : BtcGetFeePercentilesError
 };
-// Errors that can occur when retrieving pending Bitcoin transactions.
 type BtcGetPendingTransactionsError = variant {
 	// The provided II delegation chain is missing or failed verification.
 	InvalidDelegationChain : record { msg : text };
@@ -268,12 +270,6 @@ type BtcGetPendingTransactionsResult = variant {
 	Ok : BtcGetPendingTransactionsReponse;
 	// The pending transactions were not retrieved due to an error.
 	Err : BtcGetPendingTransactionsError
-};
-type BtcSelectUserUtxosFeeResult = variant {
-	// The fee was selected successfully.
-	Ok : SelectedUtxosFeeResponse;
-	// The fee was not selected due to an error.
-	Err : SelectedUtxosFeeError
 };
 // Bitcoin transaction data.
 type BtcTransactionData = record { fee : opt nat };
@@ -310,7 +306,7 @@ type Config = record {
 	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-	// `btc_select_user_utxos_fee`
+	// `btc_add_pending_transaction`.
 	cfs_canister_id : opt principal;
 	// A list of allowed callers to restrict access to endpoints that do not particularly check or
 	// use the `msg_caller()`
@@ -453,8 +449,10 @@ type GetAgreementHistoryResult = variant {
 	Ok : vec AgreementHistoryEntry;
 	Err : GetAgreementHistoryError
 };
-// Types related to topping up the cycles ledger account for use with the signer.
+// Errors that can occur when retrieving the allowed cycles from the cycles ledger.
 type GetAllowedCyclesError = variant {
+	// The caller has exceeded the call rate limit.
+	RateLimited : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
 };
@@ -607,7 +605,7 @@ type InitArg = record {
 	ii_canister_id : opt principal;
 	ecdsa_key_name : text;
 	// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-	// `btc_select_user_utxos_fee`
+	// `btc_add_pending_transaction`.
 	cfs_canister_id : opt principal;
 	// A list of allowed callers to restrict access to endpoints that do not particularly check or
 	// use the `msg_caller()`
@@ -715,24 +713,6 @@ type SaveUserTransactionsRequest = record {
 	transactions : vec UserTransaction
 };
 type SaveUserTransactionsResult = variant { Ok; Err : UserTransactionError };
-type SelectedUtxosFeeError = variant {
-	PendingTransactions;
-	// The provided II delegation chain is missing or failed verification.
-	InvalidDelegationChain : record { msg : text };
-	// The caller has exceeded the call rate limit.
-	RateLimited : RateLimitError;
-	InternalError : record { msg : text }
-};
-type SelectedUtxosFeeRequest = record {
-	ii_delegation_chain : opt IIDelegationChain;
-	network : Network;
-	amount_satoshis : nat64;
-	min_confirmations : opt nat32
-};
-type SelectedUtxosFeeResponse = record {
-	fee_satoshis : nat64;
-	utxos : vec Utxo
-};
 type SetShowTestnetsRequest = record {
 	current_user_version : opt nat64;
 	show_testnets : bool
@@ -787,6 +767,7 @@ type Token = variant {
 	Erc20 : ErcToken;
 	ExtV2 : ExtV2Token;
 	Icrc : IcrcToken;
+	Icrc7 : ExtV2Token;
 	Erc721 : ErcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken;
@@ -817,6 +798,8 @@ type TokenId = variant {
 	Icrc : principal;
 	// Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
 	EvmNative : nat64;
+	// ICRC-7 NFT collection on the Internet Computer
+	Icrc7 : principal;
 	// Native BTC on mainnet
 	BtcNativeMainnet;
 	// ERC-721 NFT on an EVM chain
@@ -848,6 +831,8 @@ type TopUpCyclesLedgerError = variant {
 		min : nat8;
 		percentage : nat8
 	};
+	// The caller has exceeded the call rate limit.
+	RateLimited : RateLimitError;
 	CouldNotGetBalanceFromCyclesLedger;
 	CouldNotTopUpCyclesLedger : record { tried_to_send : nat; available : nat }
 };
@@ -1065,16 +1050,6 @@ service : (Arg) -> {
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
-	// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
-	//
-	// Requires a valid II delegation chain to verify the caller authenticated
-	// through Internet Identity. Controllers bypass this check.
-	//
-	// # Errors
-	// Errors are enumerated by: `SelectedUtxosFeeError`.
-	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
-		BtcSelectUserUtxosFeeResult
-	);
 	// Gets the canister configuration.
 	config : () -> (Config) query;
 	// Creates a new contact for the caller.
@@ -1106,7 +1081,8 @@ service : (Arg) -> {
 		vec record { principal; nat64 }
 	) query;
 	// Retrieves the amount of cycles that the signer canister is allowed to spend
-	// on behalf of the current user
+	// on behalf of the current user.
+	//
 	// # Returns
 	// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
 	// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong

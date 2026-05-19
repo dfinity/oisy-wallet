@@ -4,7 +4,6 @@ import type {
 	_SERVICE as BackendService,
 	BtcAddPendingTransactionResult,
 	BtcGetPendingTransactionsResult,
-	BtcSelectUserUtxosFeeResult,
 	CustomToken,
 	IcrcToken,
 	UserProfile
@@ -12,7 +11,7 @@ import type {
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
-import type { BtcAddPendingTransactionParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
+import type { BtcAddPendingTransactionParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
@@ -100,19 +99,6 @@ describe('backend.canister', () => {
 		network: btcGetPendingTransactionParams.network,
 		address: btcGetPendingTransactionParams.address,
 		ii_delegation_chain: btcGetPendingTransactionParams.iiDelegationChain
-	};
-
-	const btcSelectUserUtxosFeeParams = {
-		network: btcAddPendingTransactionParams.network,
-		minConfirmations: [100],
-		amountSatoshis: 100n,
-		iiDelegationChain: mockIIDelegationChain
-	} as BtcSelectUserUtxosFeeParams;
-	const btcSelectUserUtxosFeeEndpointParams = {
-		network: btcSelectUserUtxosFeeParams.network,
-		min_confirmations: btcSelectUserUtxosFeeParams.minConfirmations,
-		amount_satoshis: btcSelectUserUtxosFeeParams.amountSatoshis,
-		ii_delegation_chain: btcSelectUserUtxosFeeParams.iiDelegationChain
 	};
 
 	const mockedUserProfile = {
@@ -229,6 +215,18 @@ describe('backend.canister', () => {
 		const res = await createUserProfile();
 
 		expect(res).toEqual(response);
+	});
+
+	it('should throw SignupsClosedError when backend returns SignupsClosed', async () => {
+		service.create_user_profile.mockResolvedValue({ Err: { SignupsClosed: null } });
+
+		const { createUserProfile } = await createBackendCanister({
+			serviceOverride: service
+		});
+
+		const { SignupsClosedError } = await import('$lib/types/errors');
+
+		await expect(createUserProfile()).rejects.toThrow(SignupsClosedError);
 	});
 
 	it('should throw an error if create_user_profile throws', async () => {
@@ -519,151 +517,6 @@ describe('backend.canister', () => {
 
 			await expect(btcGetPendingTransactions(btcGetPendingTransactionParams)).rejects.toThrow(
 				new CanisterInternalError('II delegation chain verification failed: chain expired')
-			);
-		});
-	});
-
-	describe('btc_select_user_utxos_fee', () => {
-		it('should return user utxos fee with success response', async () => {
-			const response = {
-				Ok: {
-					fee_satoshis: 1n,
-					utxos: btcAddPendingTransactionParams.utxos
-				}
-			};
-
-			service.btc_select_user_utxos_fee.mockResolvedValue(response);
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = await btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
-				btcSelectUserUtxosFeeEndpointParams
-			);
-			expect(res).toEqual({ response: response.Ok });
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee returns an internal error', async () => {
-			service.btc_select_user_utxos_fee.mockResolvedValue(errorResponse);
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow(
-				new CanisterInternalError(errorResponse.Err.InternalError.msg)
-			);
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee returns a pending-transactions error', async () => {
-			service.btc_select_user_utxos_fee.mockResolvedValue({ Err: { PendingTransactions: null } });
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow(
-				new CanisterInternalError(
-					'Selecting utxos fee is not possible - pending transactions found.'
-				)
-			);
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee returns a generic canister error', async () => {
-			// @ts-expect-error we test this in purposes
-			service.btc_select_user_utxos_fee.mockResolvedValue({ Err: { CanisterError: null } });
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow(
-				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
-			);
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee throws', async () => {
-			service.btc_select_user_utxos_fee.mockImplementation(async () => {
-				await Promise.resolve();
-				throw mockResponseError;
-			});
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow(mockResponseError);
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee returns an unexpected response', async () => {
-			// @ts-expect-error we test this in purposes
-			service.btc_select_user_utxos_fee.mockResolvedValue({ test: 'unexpected' });
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow();
-		});
-
-		it('should return rateLimitInfo if RateLimited error is returned', async () => {
-			const response = {
-				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
-			};
-
-			service.btc_select_user_utxos_fee.mockResolvedValue(
-				response as unknown as BtcSelectUserUtxosFeeResult
-			);
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = await btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
-				btcSelectUserUtxosFeeEndpointParams
-			);
-			expect(res).toStrictEqual({
-				response: {
-					fee_satoshis: ZERO,
-					utxos: []
-				},
-				rateLimitInfo: {
-					endpoint: 'btc_select_user_utxos_fee',
-					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
-				}
-			});
-		});
-
-		it('should throw a CanisterInternalError if InvalidDelegationChain error is returned', async () => {
-			const response = {
-				Err: { InvalidDelegationChain: { msg: 'unknown canister' } }
-			};
-
-			service.btc_select_user_utxos_fee.mockResolvedValue(
-				response as unknown as BtcSelectUserUtxosFeeResult
-			);
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			await expect(btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams)).rejects.toThrow(
-				new CanisterInternalError('II delegation chain verification failed: unknown canister')
 			);
 		});
 	});
@@ -1579,24 +1432,6 @@ describe('backend.canister', () => {
 			);
 		});
 
-		it('should throw an error if btc_get_current_fee_percentiles returns a pending-transactions error', async () => {
-			service.btc_get_current_fee_percentiles.mockResolvedValue({
-				Err: { PendingTransactions: null }
-			});
-
-			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
-
-			await expect(res).rejects.toThrow(
-				new CanisterInternalError(
-					'Selecting utxos fee is not possible - pending transactions found.'
-				)
-			);
-		});
-
 		it('should throw an error if btc_get_current_fee_percentiles returns a generic canister error', async () => {
 			// @ts-expect-error we test this in purposes
 			service.btc_get_current_fee_percentiles.mockResolvedValue({ Err: { CanisterError: null } });
@@ -1608,7 +1443,7 @@ describe('backend.canister', () => {
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
 			await expect(res).rejects.toThrow(
-				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
+				new CanisterInternalError('Unknown BtcGetFeePercentilesError')
 			);
 		});
 

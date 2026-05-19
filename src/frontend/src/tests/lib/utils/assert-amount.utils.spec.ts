@@ -173,7 +173,7 @@ describe('asserts-amount.utils', () => {
 					...params,
 					userAmount: 50n
 				})
-			).toBe('minimum-amount-not-reached');
+			).toBe('amount-less-than-ledger-fee');
 		});
 
 		it('should return unknown minimum amount error', () => {

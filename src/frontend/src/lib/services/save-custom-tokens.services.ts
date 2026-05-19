@@ -13,6 +13,7 @@ import { dip721CustomTokensStore } from '$icp/stores/dip721-custom-tokens.store'
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrc7CustomTokensStore } from '$icp/stores/icrc7-custom-tokens.store';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
@@ -48,6 +49,12 @@ const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 
 	if (token.networkKey === 'IcPunks') {
 		icPunksCustomTokensStore.resetByIdentifier(token.canisterId);
+
+		return;
+	}
+
+	if (token.networkKey === 'Icrc7') {
+		icrc7CustomTokensStore.resetByIdentifier(token.canisterId);
 
 		return;
 	}

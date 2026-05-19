@@ -9,6 +9,7 @@ import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
+import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchIcpSwapPrices } from '$lib/rest/icpswap.rest';
@@ -236,7 +237,8 @@ const mapExchangeRateToCoingecko = (
 	return {
 		usd: rate.usd.price,
 		usd_24h_change: rate.usd.price24hChangePct,
-		usd_market_cap: rate.usd.marketCap ?? 0
+		usd_market_cap: rate.usd.marketCap ?? 0,
+		last_updated_at: Number(rate.usd.timestampNs / NANO_SECONDS_IN_MILLISECOND)
 	};
 };
 

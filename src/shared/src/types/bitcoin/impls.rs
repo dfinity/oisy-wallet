@@ -6,8 +6,7 @@ use serde::{de, Deserializer};
 
 use super::{
     BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, PendingTransaction,
-    SelectedUtxosFeeResponse, StoredPendingTransaction, MAX_ADDRESS_LEN, MAX_TXID_BYTES,
-    MAX_UTXOS_LEN,
+    StoredPendingTransaction, MAX_ADDRESS_LEN, MAX_TXID_BYTES, MAX_UTXOS_LEN,
 };
 use crate::validate::{validate_on_deserialize, Validate};
 
@@ -51,13 +50,6 @@ fn validate_address(address: &str) -> Result<(), candid::Error> {
     }
     Ok(())
 }
-
-impl Validate for SelectedUtxosFeeResponse {
-    fn validate(&self) -> Result<(), candid::Error> {
-        validate_utxo_vec(&self.utxos)
-    }
-}
-validate_on_deserialize!(SelectedUtxosFeeResponse);
 
 impl Validate for BtcAddPendingTransactionRequest {
     fn validate(&self) -> Result<(), candid::Error> {

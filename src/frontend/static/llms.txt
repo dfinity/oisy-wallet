@@ -76,11 +76,31 @@ Key facts:
 
 - [Release Notes](https://docs.oisy.com/introduction/whats-new): Version history and release notes.
 
-## Latest Release (v2.0.0)
+## Latest Release (v2.0.8)
 
 ### New Features
 
-- Added a new "Earn" section that shows all available earn oportunities in OISY 
+- A new transaction filter on the Activity page now allows to filter transactions by contact, token or transaction type.
+
+### Improvements
+
+- The swap review page now shows a warning, which the user must confirm, if one of the tokens has no price available and OISY can't verify if the offer is a fair deal or not.
+- Optimized Bitcoin sending by optimizing for the cheapest transaction cost by using the ideal UTXO(s).
+- Allow creating multiple unconfirmed Bitcoin transactions by improving the locking concept to now work at the UTXO level.
+- Improved the behavior of the swap form by additionally filtering the receive token and network list by the selected pay token, respecting the swap capabilities of all available providers.
+
+### Bug Fixes
+
+- -
+
+## Most recent Features and Improvements
+
+### New Features
+
+- Integration to 1Sec to offer bridging several tokens from ICP to Ethereum, Base, and Arbitrum, or vice versa.
+- Allow to quickly sign up or sign in with Google, Apple, or Microsoft accounts.
+- Micro transaction filter that filters out small value transactions from the user's activity list.
+- Added a new "Earn" section that shows all available earn opportunities in OISY 
 - Integrated with Harvest Autopilot. Allows users stake/unstake in all Harvest Autopilot vaults directly in OISY.
 - Integrated the NEAR Intents protocol, offering now an additional option for doing cross-chain swaps
 
@@ -89,10 +109,6 @@ Key facts:
 - Move the help menu into the user menu to get more space available on the header row.
 - Keep the text based token filter when switching between Tokens, NFTs and Earning.
 - Use ICPSwap as fallback price source if we don't get a price for an icrc token.
-
-### Bug Fixes
-
-- Fixed a bug that caused some icrc tokens to fail loading the latest balance
 
 
 ## For Developers

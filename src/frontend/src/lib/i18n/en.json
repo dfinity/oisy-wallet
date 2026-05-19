@@ -46,7 +46,8 @@
 			"unlimited": "Unlimited $items",
 			"info": "Info",
 			"asset": "Asset",
-			"got_it": "Got it"
+			"got_it": "Got it",
+			"oisy_protects_you": "$oisy_short protects you!"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -123,14 +124,16 @@
 		"text": {
 			"title_part_1": "Your Digital Assets",
 			"title_part_2": "Private and Secure",
+			"description": "Open your wallet or create one in seconds",
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
+			"sign_in_or_sign_up": "Log in or sign up",
 			"internet_identity": "Internet Identity",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
-			"advanced_cryptography": "Secured by advanced cryptography - 100%\u00A0onchain",
-			"social_login": "Instant and private access + social login"
+			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
+			"move_swap_grow": "Move, swap, and grow your assets across networks"
 		},
 		"alt": {
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile",
@@ -140,6 +143,12 @@
 		},
 		"message": {
 			"session_locked": "Your session was locked in another tab."
+		},
+		"info": {
+			"signups_closed": "New sign-ups are currently restricted. Please try again later."
+		},
+		"banner": {
+			"signups_closed": "Currently, sign-ups of new users are not possible. Existing users can use $oisy_short normally."
 		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
@@ -158,7 +167,7 @@
 				"login_page_looks_different": "Why does the login page look different?",
 				"use_identity_number": "I want to use my Internet Identity number",
 				"feedback_text": "Your feedback helps us to make $oisy_short better.",
-				"thanks_text": "Thank you!",
+				"thanks_text": "Thank you.",
 				"useful_links": "Useful links",
 				"identity_new_identity": "$oisy_short Wallet switches the Internet Identity domain to: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name switches to Internet Identity 2.0",
@@ -262,10 +271,10 @@
 				"description": "The Hub of Future Decentralized Finance!<br/>Reinventing the Exchange as a Hub, ICPSwap provides full-stack financial, market, and DAO services on the Internet Computer. Based on the underlying technology of DFINITY's Internet Computer, ICPSwap establishes an ecosystem of genuinely decentralized finance by refactoring the way users and developers build projects jointly."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI.",
-				"call_to_action": "Get engaged",
-				"description": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI. Served completely end-to-end through blockchain, this decentralized dapp allows you to easily perform the following actions:<br/><ul><li>Send and receive tokens (ICP, ckBTC, CHAT, etc.)</li><li>Stake and manage neurons</li><li>Vote on the governance of the Internet Computer and SNSes</li><li>Participate in decentralization swaps</li><li>Create and top up canisters</li><li>Earn governance rewards</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Governance platform for the Internet Computer that enables users to stake, vote, and follow network activity.",
+				"call_to_action": "Participate in ICP governance",
+				"description": "The NNS application is a governance platform for the Internet Computer (ICP) that enables users to stake tokens, participate in voting, and follow network activity.<br/><br/>It brings greater visibility to user actions and governance activity, helping users understand how staking, voting, and participation contribute to the broader ecosystem."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -489,7 +498,7 @@
 			"open_wallet": "Take me to the wallet",
 			"carousel_slide_title": "$oisy_short Sprinkles Episode 6 is now Live!",
 			"carousel_slide_cta": "Learn more",
-			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
+			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! 🎉",
 			"youre_eligible": "You're eligible!",
 			"not_eligible": "Not eligible",
 			"ongoing": "Ongoing",
@@ -1148,13 +1157,17 @@
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
 			"withdrawing": "Withdrawing...",
+			"bridging": "Bridging... (Please be patient, this can take up to 2 minutes.)",
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
 			"near_intents_tos": "By clicking the \"Swap now\" button, you agree to the <a href=\"$link\" target=\"_blank\" rel=\"external noopener noreferrer\" class=\"underline\">Terms of Service</a> of 1Click Swap API. If you do not agree with those terms, do not use this swap provider.",
-			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed."
+			"onesec_transfer_fee": "Transfer fee",
+			"onesec_protocol_fee": "Protocol fee",
+			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed.",
+			"value_difference_missing_price_confirmation": "The price for at least one of the tokens could not be retrieved. Please <strong>verify independently</strong> that this swap offer provides a fair deal.<br>Note that the slippage setting does <strong>not</strong> protect you from an offer with a much lower receive value!"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -1179,7 +1192,13 @@
 	"buy": {
 		"text": {
 			"buy": "Buy",
-			"buy_dev": "Buy (Dev Environment)"
+			"buy_dev": "Buy (Dev Environment)",
+			"unavailable_title": "Buying tokens is temporarily unavailable",
+			"unavailable_description": "Buying tokens is currently turned off while we further improve the security of this process by introducing URL signing. It will be turned back on as soon as the work is complete.",
+			"unavailable_fallback_hint": "In the meantime, you can still receive tokens by sharing your wallet address."
+		},
+		"actions": {
+			"close": "Got it"
 		},
 		"onramper": {
 			"title": "Buy through Onramper"
@@ -1616,6 +1635,23 @@
 			"burn": "Burn",
 			"mint": "Mint"
 		},
+		"filter": {
+			"types_label": "Type",
+			"tokens_label": "Token",
+			"contacts_label": "Contacts",
+			"types_aria_label": "Filter by transaction type",
+			"tokens_aria_label": "Filter by token",
+			"contacts_aria_label": "Filter by contact",
+			"search_tokens_placeholder": "Start typing...",
+			"search_contacts_placeholder": "Start typing name...",
+			"clear": "Clear",
+			"sheet_title": "Filter activity",
+			"open_filters_aria_label": "Open activity filters",
+			"showing_partial": "Showing $shown of $total · type to search",
+			"contacts_empty_title": "You haven't added contacts yet",
+			"contacts_empty_description": "Save known addresses in Contacts and reduce the risk of accidentally using a wrong address.",
+			"contacts_empty_cta": "Add your first contact"
+		},
 		"label": {
 			"reimbursement": "Reimbursement",
 			"twin_token_converted": "Converted from $twinToken",
@@ -1838,8 +1874,9 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Access your $oisy_name",
-				"open_or_create": "Open or create your wallet to securely connect to the dApp and start managing your assets."
+				"open_or_create": "Open or create your wallet to securely interact with the application.",
+				"connect_your_wallet": "Connect your $oisy_name",
+				"oisy_protects_you_description": "Applications can't directly access your funds, and each transaction has to be confirmed by you."
 			}
 		},
 		"idle": {
@@ -1961,7 +1998,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified.",
-			"hidden_micro_transactions": "<strong>OISY protects you!</strong> Transactions with very small token values are currently hidden. To show them, go to <a href=\"/settings/\">Settings</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>"
+			"hidden_micro_transactions": "Transactions with very small token values are currently hidden. To show them, go to <a href=\"/settings/\">Settings</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
@@ -1985,7 +2022,7 @@
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Use OISY and EARN! Ep. 6 is live \uD83C\uDF89",
+				"description": "Use OISY and EARN! Ep. 6 is live 🎉",
 				"action": "Check status"
 			}
 		},
@@ -2152,7 +2189,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short AI Assistant",
-			"welcome_message": "Hello there! \uD83D\uDC4B I'm your personal AI concierge. How can I help you?",
+			"welcome_message": "Hello there! 👋 I'm your personal AI concierge. How can I help you?",
 			"action_button_contacts_title": "Show contacts",
 			"action_button_contacts_subtitle": "Display your saved contacts",
 			"action_button_contacts_prompt": "Show me my contacts.",

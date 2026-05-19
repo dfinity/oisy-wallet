@@ -24,7 +24,6 @@ use crate::{
 };
 
 pub(crate) mod memory;
-pub(crate) mod stored_token_migration;
 
 pub(crate) struct State {
     pub(crate) config: ConfigCell,
@@ -39,7 +38,6 @@ pub(crate) struct State {
     pub(crate) user_profile_updated: UserProfileUpdatedMap,
     pub(crate) contact: ContactMap,
     pub(crate) btc_user_pending_transactions: BtcUserPendingTransactionsMap,
-    // TODO: implement a periodic cleanup of old entries
     // TODO: limit the map size with an eviction policy
     pub(crate) token_activity: TokenActivityMap,
     pub(crate) exchange_rates: ExchangeRateMap,
