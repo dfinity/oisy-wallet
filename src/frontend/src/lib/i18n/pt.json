@@ -478,6 +478,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -735,6 +740,7 @@
 			"icrc_custom_token": "Erro ao carregar o token personalizado ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Sua carteira requer alguns dados iniciais que ainda não foram carregados. Por favor, tente novamente.",
 			"allow_signing": "Ocorreu um problema ao configurar sua carteira para assinar. Você foi desconectado. Se o problema persistir, entre em contato com o suporte.",

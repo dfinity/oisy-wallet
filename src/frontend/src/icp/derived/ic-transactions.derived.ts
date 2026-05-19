@@ -71,11 +71,13 @@ export const icKnownDestinations: Readable<KnownDestinations> = derived(
 			$icTransactionsStore ?? {};
 		const icpTransactionsStore = { [ICP_TOKEN_ID]: icpTransactions ?? [] };
 
+		const tokenById = new Map($tokens.map((token) => [token.id, token]));
+
 		const mappedTransactions: AnyTransactionUiWithToken[] = [];
 
 		Object.getOwnPropertySymbols(isIcpToken ? icpTransactionsStore : icCkTransactionsStore).forEach(
 			(tokenId) => {
-				const token = $tokens.find(({ id }) => id === tokenId);
+				const token = tokenById.get(tokenId as TokenId);
 
 				if (nonNullish(token)) {
 					($icTransactionsStore?.[tokenId as TokenId] ?? []).forEach(({ data }) => {

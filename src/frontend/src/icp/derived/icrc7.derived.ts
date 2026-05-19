@@ -23,25 +23,27 @@ export const icrc7CustomTokens: Readable<Icrc7CustomToken[]> = derived(
 
 const icrc7DefaultTokensToggleable: Readable<Icrc7CustomToken[]> = derived(
 	[icrc7DefaultTokens, icrc7CustomTokens],
-	([$icrc7DefaultTokens, $icrc7CustomTokens]) =>
-		$icrc7DefaultTokens.map(({ canisterId, ...rest }) => {
-			const customToken = $icrc7CustomTokens.find(
-				({ canisterId: canisterIdCustomToken }) => canisterIdCustomToken === canisterId
-			);
+	([$icrc7DefaultTokens, $icrc7CustomTokens]) => {
+		const customTokenByCanisterId = new Map(
+			$icrc7CustomTokens.map((token) => [token.canisterId, token])
+		);
 
-			return mapDefaultTokenToToggleable<Icrc7Token>({
+		return $icrc7DefaultTokens.map(({ canisterId, ...rest }) =>
+			mapDefaultTokenToToggleable<Icrc7Token>({
 				defaultToken: { canisterId, ...rest },
-				customToken
-			});
-		})
+				customToken: customTokenByCanisterId.get(canisterId)
+			})
+		);
+	}
 );
 
 const icrc7CustomTokensToggleable: Readable<Icrc7CustomToken[]> = derived(
 	[icrc7CustomTokens, icrc7DefaultTokensCanisterIds],
-	([$icrc7CustomTokens, $icrc7DefaultTokensCanisterIds]) =>
-		$icrc7CustomTokens.filter(
-			({ canisterId }) => !$icrc7DefaultTokensCanisterIds.includes(canisterId)
-		)
+	([$icrc7CustomTokens, $icrc7DefaultTokensCanisterIds]) => {
+		const defaultCanisterIds = new Set($icrc7DefaultTokensCanisterIds);
+
+		return $icrc7CustomTokens.filter(({ canisterId }) => !defaultCanisterIds.has(canisterId));
+	}
 );
 
 export const icrc7Tokens: Readable<Icrc7CustomToken[]> = derived(
