@@ -7,6 +7,7 @@ import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
@@ -21,11 +22,16 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { signature } from '@solana/kit';
 
+const TOKEN_TAGS: Token['tags'] = [
+	{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }
+];
+
 const baseToken: TokenUi = {
 	id: parseTokenId('test'),
 	network: ICP_NETWORK,
 	standard: { code: 'icrc' },
 	category: 'default',
+	tags: TOKEN_TAGS,
 	name: 'Test Token',
 	symbol: 'TST',
 	decimals: 8
@@ -229,6 +235,7 @@ describe('export-data.utils', () => {
 			network: BTC_MAINNET_NETWORK,
 			standard: { code: 'bitcoin' },
 			category: 'default',
+			tags: TOKEN_TAGS,
 			name: 'Bitcoin',
 			symbol: 'BTC',
 			decimals: 8
@@ -239,6 +246,7 @@ describe('export-data.utils', () => {
 			network: ETHEREUM_NETWORK,
 			standard: { code: 'ethereum' },
 			category: 'default',
+			tags: TOKEN_TAGS,
 			name: 'Ether',
 			symbol: 'ETH',
 			decimals: 18
@@ -260,6 +268,7 @@ describe('export-data.utils', () => {
 			network: SOLANA_MAINNET_NETWORK,
 			standard: { code: 'solana' },
 			category: 'default',
+			tags: TOKEN_TAGS,
 			name: 'Solana',
 			symbol: 'SOL',
 			decimals: 9
@@ -305,7 +314,7 @@ describe('export-data.utils', () => {
 		};
 
 		const icTx: IcTransactionUi = {
-			id: 42n,
+			id: '42',
 			type: 'receive',
 			status: 'executed',
 			value: 50_000_000n,

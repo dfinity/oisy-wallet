@@ -1,8 +1,8 @@
-import { downloadCsv, toCsv, type CsvColumn } from '$lib/utils/csv.utils';
+import { downloadCsv, toCsv, type CsvColumn, type CsvRow } from '$lib/utils/csv.utils';
 
 describe('csv.utils', () => {
 	describe('toCsv', () => {
-		interface Row {
+		interface Row extends CsvRow {
 			a: string;
 			b: number | null;
 			c: bigint | undefined;
