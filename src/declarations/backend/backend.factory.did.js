@@ -769,6 +769,7 @@ export const idlFactory = ({ IDL }) => {
 			[IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))],
 			['query']
 		),
+		get_my_exchange_rates: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))], []),
 		get_user_agreement_history: IDL.Func([], [GetAgreementHistoryResult], ['query']),
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		get_user_transactions: IDL.Func(
