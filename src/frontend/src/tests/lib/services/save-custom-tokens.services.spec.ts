@@ -2,6 +2,7 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { loadCustomTokens as loadCustomErc1155Tokens } from '$eth/services/erc1155.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
+import { loadCustomErc4626Tokens } from '$eth/services/erc4626.services';
 import { loadCustomTokens as loadCustomErc721Tokens } from '$eth/services/erc721.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
@@ -160,6 +161,9 @@ describe('save-custom-tokens.services', () => {
 			expect(loadCustomErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadCustomErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadCustomErc1155Tokens).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity
+			});
+			expect(loadCustomErc4626Tokens).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity
 			});
 			expect(loadCustomIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
