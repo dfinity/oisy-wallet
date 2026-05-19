@@ -4,7 +4,7 @@ import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
 import type { NullishIdentity } from '$lib/types/identity';
-import type { Token } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
@@ -44,6 +44,29 @@ import { get } from 'svelte/store';
 // https://solana.com/docs/core/fees#base-transaction-fee
 export const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
+
+const solBackendPaginationCursors = new Map<TokenId, bigint>();
+
+const setSolBackendPaginationCursor = ({
+	tokenId,
+	nextStart
+}: {
+	tokenId: TokenId;
+	nextStart: bigint | undefined;
+}) => {
+	if (nonNullish(nextStart)) {
+		solBackendPaginationCursors.set(tokenId, nextStart);
+		return;
+	}
+
+	solBackendPaginationCursors.delete(tokenId);
+};
+
+const mapSolCertifiedTransactions = (transactions: SolTransactionUi[]): SolCertifiedTransaction[] =>
+	transactions.map((transaction) => ({
+		data: transaction,
+		certified: false
+	}));
 
 const extractBalances = ({
 	address,
@@ -320,6 +343,29 @@ const loadSolTransactions = async ({
 	try {
 		const backendTokenId = solBackendTokenId({ network, tokenAddress });
 		const isHeadLoad = isNullish(before);
+		const backendCursor = solBackendPaginationCursors.get(tokenId);
+
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && !isHeadLoad && nonNullish(backendCursor)) {
+			const storedPage = await loadSolUserTransactions({
+				identity,
+				tokenId: backendTokenId,
+				address,
+				start: backendCursor
+			});
+
+			setSolBackendPaginationCursor({ tokenId, nextStart: storedPage?.nextStart });
+
+			if (nonNullish(storedPage) && storedPage.transactions.length > 0) {
+				const certifiedTransactions = mapSolCertifiedTransactions(storedPage.transactions);
+
+				solTransactionsStore.append({
+					tokenId,
+					transactions: certifiedTransactions
+				});
+
+				return certifiedTransactions;
+			}
+		}
 
 		const stored =
 			USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && isHeadLoad
@@ -329,6 +375,10 @@ const loadSolTransactions = async ({
 						address
 					})
 				: undefined;
+
+		if (isHeadLoad) {
+			setSolBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
+		}
 
 		const storedTransactions = stored?.transactions ?? [];
 
@@ -364,10 +414,7 @@ const loadSolTransactions = async ({
 			? [...freshTransactions, ...storedTransactions]
 			: freshTransactions;
 
-		const certifiedTransactions = allTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+		const certifiedTransactions = mapSolCertifiedTransactions(allTransactions);
 
 		solTransactionsStore.append({
 			tokenId,
@@ -382,10 +429,7 @@ const loadSolTransactions = async ({
 			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
 		}
 
-		return freshTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+		return mapSolCertifiedTransactions(freshTransactions);
 	} catch (error: unknown) {
 		solTransactionsStore.reset(tokenId);
 
