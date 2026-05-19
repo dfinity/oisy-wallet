@@ -304,7 +304,7 @@ interface I18nDapps {
 		icexplorer: { name: string; one_liner: string; description: string };
 		icpixel: { name: string; one_liner: string; description: string };
 		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
-		icp_flags: { name: string; one_liner: string; call_to_action: string; description: string };
+		icp_flags: { name: string; one_liner: string; description: string };
 	};
 }
 
