@@ -12,6 +12,7 @@ import {
 	isTokenIcrc,
 	isTokenIcrcCustomToken
 } from '$icp/utils/icrc.utils';
+import { isTokenIcrc7CustomToken } from '$icp/utils/icrc7.utils';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -558,6 +559,10 @@ const normaliseTokenForSave = (token: Token): SaveCustomTokenWithKey | undefined
 
 	if (isTokenIcPunksCustomToken(token)) {
 		return { ...token, networkKey: 'IcPunks' };
+	}
+
+	if (isTokenIcrc7CustomToken(token)) {
+		return { ...token, networkKey: 'Icrc7' };
 	}
 
 	if (isTokenErc20CustomToken(token)) {
