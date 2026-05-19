@@ -1,8 +1,9 @@
-import { trackEvent } from '$lib/services/analytics.services';
 import {
-	trackTokenManage,
-	type TrackTokenManageParams
-} from '$lib/services/token-manage-analytics.services';
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS
+} from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
+import { trackTokenManage } from '$lib/services/token-manage-analytics.services';
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
@@ -17,8 +18,8 @@ describe('token-manage-analytics.services', () => {
 		it('should track a token_manage success event with token metadata', () => {
 			trackTokenManage({
 				modifier: 'import',
-				sourceLocation: 'manage_tokens' as TrackTokenManageParams['sourceLocation'],
-				resultStatus: 'success' as TrackTokenManageParams['resultStatus'],
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				token: {
 					network: 'ICP',
 					address: 'sey3i-jyaaa-aaaap-quo3q-cai',
@@ -46,8 +47,8 @@ describe('token-manage-analytics.services', () => {
 				modifier: 'edit',
 				key: 'index_canister',
 				value: 'index-canister-id',
-				sourceLocation: 'token_details' as TrackTokenManageParams['sourceLocation'],
-				resultStatus: 'error' as TrackTokenManageParams['resultStatus'],
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				error: 'Version mismatch',
 				errorCode: 'version_mismatch',
 				token: {
