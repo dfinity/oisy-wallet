@@ -42,6 +42,8 @@ describe('export-data.utils', () => {
 		const exportedAt = new Date('2026-05-19T08:30:00Z');
 
 		it('maps a token with full financial data to a row', () => {
+			// exchangeRateToUsd = 2 means "1 EUR = 2 USD" (hypothetical, chosen for clean
+			// arithmetic). To convert USD → EUR we divide: usd / rate.
 			const rows = buildTokenRows({
 				tokens: [
 					{
@@ -52,7 +54,7 @@ describe('export-data.utils', () => {
 					}
 				],
 				currency: Currency.EUR,
-				exchangeRateToUsd: 0.9,
+				exchangeRateToUsd: 2,
 				exportedAt
 			});
 
@@ -68,10 +70,23 @@ describe('export-data.utils', () => {
 				usd_price: 10,
 				usd_value: 1.2345678,
 				currency: 'EUR',
-				price: 9,
-				value: 1.11111102,
+				price: 5,
+				value: 0.6172839,
 				snapshot_at: '2026-05-19T08:30:00.000Z'
 			});
+		});
+
+		it('leaves price and value undefined when the exchange rate is zero', () => {
+			// Defensive guard: matches format.utils.ts:241 to avoid division by zero.
+			const [row] = buildTokenRows({
+				tokens: [{ ...baseToken, balance: 1n, usdPrice: 1, usdBalance: 1 }],
+				currency: Currency.EUR,
+				exchangeRateToUsd: 0,
+				exportedAt
+			});
+
+			expect(row.price).toBeUndefined();
+			expect(row.value).toBeUndefined();
 		});
 
 		it('leaves price and value undefined when the exchange rate has not loaded', () => {

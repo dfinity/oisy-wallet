@@ -117,14 +117,22 @@ const getAddressOrLedgerId = (token: Token | TokenUi): string => {
 const formatAmount = ({ value, decimals }: { value: Nullish<bigint>; decimals: number }): string =>
 	nonNullish(value) ? formatUnits(value, decimals) : '';
 
+// `exchangeRateToUsd` follows the same convention as the rest of the app
+// (see format.utils.ts:248): it expresses "1 unit of the user's currency = X USD",
+// so to convert a USD value to the user's currency we divide by the rate.
 const toUserCurrencyValue = ({
 	usdValue,
 	exchangeRateToUsd
 }: {
 	usdValue: number | undefined;
 	exchangeRateToUsd: number | null;
-}): number | undefined =>
-	isNullish(exchangeRateToUsd) || isNullish(usdValue) ? undefined : usdValue * exchangeRateToUsd;
+}): number | undefined => {
+	if (isNullish(usdValue) || isNullish(exchangeRateToUsd) || exchangeRateToUsd === 0) {
+		return undefined;
+	}
+
+	return usdValue / exchangeRateToUsd;
+};
 
 export const buildTokenRows = ({
 	tokens,
