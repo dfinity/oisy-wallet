@@ -9,6 +9,7 @@ import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store'
 import { loadCustomTokens as loadCustomExtTokens } from '$icp/services/ext.services';
 import { loadCustomTokens as loadCustomIcPunksTokens } from '$icp/services/icpunks.services';
 import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
+import { loadCustomTokens as loadCustomIcrc7Tokens } from '$icp/services/icrc7.services';
 import { dip721CustomTokensStore } from '$icp/stores/dip721-custom-tokens.store';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
@@ -102,6 +103,7 @@ const reloadAllCustomTokens = ({ identity }: { identity: Identity }) =>
 		loadCustomExtTokens({ identity }),
 		// TODO: add loadCustomDip721Tokens here (and in the tests)
 		loadCustomIcPunksTokens({ identity }),
+		loadCustomIcrc7Tokens({ identity }),
 		loadCustomSplTokens({ identity })
 	]);
 

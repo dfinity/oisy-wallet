@@ -36,7 +36,7 @@ pub struct IcPunksToken {
     pub canister_id: CanisterId,
 }
 
-/// An ICRC-7 compliant non-fungible token collection on the Internet Computer.
+/// An ICRC-7 compliant NFT collection on the Internet Computer.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[serde(remote = "Self")]
 pub struct Icrc7Token {
@@ -141,6 +141,6 @@ pub enum CustomTokenId {
     Dip721(CanisterId) = 5,
     /// A token on the Internet Computer with an interface similar to the one of `ICPunks`.
     IcPunks(CanisterId) = 6,
-    /// An ICRC-7 compliant non-fungible token collection on the Internet Computer mainnet.
+    /// An ICRC-7 compliant NFT collection on the Internet Computer mainnet.
     Icrc7(CanisterId) = 7,
 }

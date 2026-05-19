@@ -63,3 +63,21 @@ impl From<&Token> for TokenId {
         }
     }
 }
+
+/// Lossy conversion: `CustomTokenId::Ethereum` always maps to `TokenId::Erc20` because
+/// `CustomTokenId` does not distinguish ERC sub-standards.  Used only by the one-shot
+/// stable-memory migration where the richer `Token` type is unavailable.
+impl From<&CustomTokenId> for TokenId {
+    fn from(id: &CustomTokenId) -> Self {
+        match id {
+            CustomTokenId::Icrc(ledger) => Self::Icrc(*ledger),
+            CustomTokenId::Ethereum(addr, chain_id) => Self::Erc20(addr.clone(), *chain_id),
+            CustomTokenId::SolMainnet(addr) => Self::SplMainnet(addr.clone()),
+            CustomTokenId::SolDevnet(addr) => Self::SplDevnet(addr.clone()),
+            CustomTokenId::ExtV2(id) => Self::ExtV2(*id),
+            CustomTokenId::Dip721(id) => Self::Dip721(*id),
+            CustomTokenId::IcPunks(id) => Self::IcPunks(*id),
+            CustomTokenId::Icrc7(id) => Self::Icrc7(*id),
+        }
+    }
+}
