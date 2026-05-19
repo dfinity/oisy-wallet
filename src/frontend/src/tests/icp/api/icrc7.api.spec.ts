@@ -141,4 +141,36 @@ describe('icrc7.api', () => {
 			await expect(collectionMetadata(params)).rejects.toThrow(mockError);
 		});
 	});
+
+	describe('transfer', () => {
+		const mockTokenId = 555n;
+
+		const params = {
+			identity: mockIdentity,
+			canisterId: mockIcrc7CanisterId,
+			to: mockIcrc7Account,
+			tokenId: mockTokenId
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.transfer.mockResolvedValue(7n);
+		});
+
+		it('should call transfer with certified=true by default', async () => {
+			await transfer(params);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				certified: true,
+				to: mockIcrc7Account,
+				tokenId: mockTokenId
+			});
+		});
+
+		it('should throw if the canister transfer fails', async () => {
+			const mockError = new CanisterInternalError('Transfer error');
+			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError);
+
+			await expect(transfer(params)).rejects.toThrow(mockError);
+		});
+	});
 });

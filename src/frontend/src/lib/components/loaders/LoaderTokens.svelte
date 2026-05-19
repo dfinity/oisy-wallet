@@ -150,7 +150,8 @@
 		await Promise.allSettled([
 			processIcrcCustomTokens(loadParams),
 			processExtCustomTokens(loadParams),
-			processIcPunksCustomTokens(loadParams)
+			processIcPunksCustomTokens(loadParams),
+			processIcrc7CustomTokens(loadParams)
 		]);
 	};
 

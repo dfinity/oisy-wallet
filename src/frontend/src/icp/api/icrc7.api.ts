@@ -81,6 +81,23 @@ export const collectionMetadata = async ({
 	return await collectionMetadata({ certified });
 };
 
+export const transfer = async ({
+	certified = true,
+	identity,
+	canisterId,
+	to,
+	tokenId,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<{ to: Account; tokenId: bigint } & QueryParams>) => {
+	const { transfer } = await icrc7Canister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	await transfer({ certified, to, tokenId });
+};
+
 const icrc7Canister = async ({
 	identity,
 	nullishIdentityErrorMessage,

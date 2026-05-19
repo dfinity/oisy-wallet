@@ -7,7 +7,9 @@ import type {
 } from '$declarations/icrc7/icrc7.did';
 import { idlFactory as idlCertifiedFactoryIcrc7 } from '$declarations/icrc7/icrc7.factory.certified.did';
 import { idlFactory as idlFactoryIcrc7 } from '$declarations/icrc7/icrc7.factory.did';
+import { mapIcrc7TransferError } from '$icp/canisters/icrc7.errors';
 import { getAgent } from '$lib/actors/agents.ic';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import type { TokenMetadata } from '$lib/types/token';
 import {
@@ -182,5 +184,43 @@ export class Icrc7Canister extends Canister<Icrc7Service> {
 			...(notEmptyString(collectionDescription) && { description: collectionDescription }),
 			...(notEmptyString(collectionLogo) && { icon: collectionLogo })
 		};
+	};
+
+	/**
+	 * Sends a single ICRC-7 token to the specified account.
+	 *
+	 * @link https://github.com/dfinity/ICRC/blob/main/ICRCs/ICRC-7/ICRC-7.md#icrc7_transfer
+	 *
+	 * @returns the transaction index on success.
+	 * @throws if the canister returns an empty result, or any of the documented `TransferError` variants.
+	 */
+	transfer = async ({
+		certified,
+		to,
+		tokenId
+	}: { to: Account; tokenId: bigint } & QueryParams): Promise<bigint> => {
+		const { icrc7_transfer } = this.caller({ certified });
+
+		const [result] = await icrc7_transfer([
+			{
+				to,
+				token_id: tokenId,
+				memo: [],
+				from_subaccount: [],
+				created_at_time: []
+			}
+		]);
+
+		if (result === undefined || result.length === 0) {
+			throw new CanisterInternalError('ICRC-7 transfer returned no result');
+		}
+
+		const [response] = result;
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapIcrc7TransferError(response.Err);
 	};
 }
