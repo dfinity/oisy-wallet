@@ -159,7 +159,7 @@
 		"website": "https://motokotokyogame.net/",
 		"twitter": "https://x.com/NightscrollerEX",
 		"discord": "https://discord.gg/d3WnbPPkes",
-		"tags": ["dapps.categories.ab_icp", "dapps.categories.game", "dapps.categories.aa_new"],
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.game"],
 		"description": "dapps.descriptions.motoko_tokyo.description",
 		"usesInternetIdentity": true,
 		"stats": "",
