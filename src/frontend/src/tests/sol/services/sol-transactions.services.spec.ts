@@ -695,16 +695,20 @@ describe('sol-transactions.services', () => {
 			};
 			const before = mockSolSignature();
 
-			spyGetTransactions.mockResolvedValue([olderRpcTransaction]);
+			spyGetTransactions.mockResolvedValueOnce([]);
 
+			await loadNextSolTransactions(mockParams);
+
+			spyGetTransactions.mockResolvedValueOnce([olderRpcTransaction]);
 			await loadNextSolTransactions({ ...mockParams, before });
 
-			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual([
-				{
-					data: olderRpcTransaction,
+			expect(loadSolUserTransactions).toHaveBeenCalledOnce();
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(
+				[...storedTransactions, olderRpcTransaction].map((data) => ({
+					data,
 					certified: false
-				}
-			]);
+				}))
+			);
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
