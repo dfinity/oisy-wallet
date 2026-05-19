@@ -15,12 +15,14 @@
 		extCanisterId?: string;
 		dip721CanisterId?: string;
 		icPunksCanisterId?: string;
+		icrc7CanisterId?: string;
 	}
 
 	let {
 		extCanisterId = $bindable(),
 		dip721CanisterId = $bindable(),
-		icPunksCanisterId = $bindable()
+		icPunksCanisterId = $bindable(),
+		icrc7CanisterId = $bindable()
 	}: Props = $props();
 
 	let canisterId = $state<CanisterIdText | undefined>();
@@ -31,6 +33,7 @@
 		extCanisterId = undefined;
 		dip721CanisterId = undefined;
 		icPunksCanisterId = undefined;
+		icrc7CanisterId = undefined;
 
 		if (isNullish($authIdentity)) {
 			return;
@@ -71,6 +74,14 @@
 
 		if (standard === 'icpunks') {
 			icPunksCanisterId = canisterId;
+
+			standardNotRecognized = false;
+
+			return;
+		}
+
+		if (standard === 'icrc7') {
+			icrc7CanisterId = canisterId;
 
 			standardNotRecognized = false;
 
