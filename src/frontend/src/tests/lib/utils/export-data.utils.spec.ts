@@ -371,8 +371,10 @@ describe('export-data.utils', () => {
 				amount: '0.001',
 				fee: '0.000005',
 				fee_token: 'BTC',
-				effective_token: '-0.001',
-				effective_fee_token: '-0.000005',
+				// Fee and asset share the BTC token symbol, so the signed fee is folded into
+				// effective_token and effective_fee_token is left blank.
+				effective_token: '-0.001005',
+				effective_fee_token: '',
 				tx_id: 'btc-tx-1',
 				explorer_url: 'https://blockstream.info/tx/btc-tx-1',
 				exported_at: exportedAtIso
@@ -477,18 +479,17 @@ describe('export-data.utils', () => {
 			expect(rows[0].direction).toBe('in');
 			expect(rows[0].fee).toBe('');
 			expect(rows[0].fee_token).toBe('');
-			// effective_token mirrors the received amount; effective_fee_token is 0 because the
-			// sender — not the user — paid the fee.
+			// Fee + asset share ckBTC, so the columns merge: effective_token carries the
+			// received amount and effective_fee_token stays blank.
 			expect(rows[0].effective_token).toBe('0.5');
-			expect(rows[0].effective_fee_token).toBe('0');
+			expect(rows[0].effective_fee_token).toBe('');
 
 			expect(rows[1].direction).toBe('out');
 			expect(rows[1].fee).toBe('0.0000001');
 			expect(rows[1].fee_token).toBe('ckBTC');
-			// effective_token is the negated amount; effective_fee_token is the negated fee since
-			// the user paid it.
-			expect(rows[1].effective_token).toBe('-0.5');
-			expect(rows[1].effective_fee_token).toBe('-0.0000001');
+			// Merged: -amount + -fee = -0.5000001.
+			expect(rows[1].effective_token).toBe('-0.5000001');
+			expect(rows[1].effective_fee_token).toBe('');
 		});
 
 		it('treats a self-transfer as zero asset change but still records the fee', () => {
@@ -511,12 +512,111 @@ describe('export-data.utils', () => {
 
 			expect(row.direction).toBe('out');
 			expect(row.amount).toBe('0.5');
-			// Fee is kept (the user paid it on a self-transfer) and reflected in the effective
-			// column. The main-asset balance is unchanged, so effective_token is 0.
+			// Fee is kept (the user paid it on a self-transfer). Merged into effective_token
+			// because fee shares the ckBTC token symbol: 0 + (-0.0000001) = -0.0000001.
 			expect(row.fee).toBe('0.0000001');
 			expect(row.fee_token).toBe('ckBTC');
+			expect(row.effective_token).toBe('-0.0000001');
+			expect(row.effective_fee_token).toBe('');
+		});
+
+		it('keeps the fee only on the outgoing duplicate of an ICRC self-transfer', () => {
+			// ICRC indexers emit self-transfers twice — once as send, once as receive. Only the
+			// outgoing duplicate should carry the fee so the spreadsheet sum stays honest.
+			const outSelf: IcTransactionUi = {
+				...icTx,
+				type: 'send',
+				from: 'user-principal',
+				to: 'user-principal',
+				incoming: false
+			};
+			const inSelf: IcTransactionUi = {
+				...icTx,
+				type: 'receive',
+				from: 'user-principal',
+				to: 'user-principal',
+				incoming: true
+			};
+
+			const rows = buildTransactionRows({
+				transactions: [
+					{ component: 'ic', transaction: outSelf, token: icrcToken },
+					{ component: 'ic', transaction: inSelf, token: icrcToken }
+				],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				exportedAt
+			});
+
+			expect(rows[0].direction).toBe('out');
+			expect(rows[0].fee).toBe('0.0000001');
+			expect(rows[0].effective_token).toBe('-0.0000001');
+
+			expect(rows[1].direction).toBe('in');
+			expect(rows[1].fee).toBe('');
+			expect(rows[1].fee_token).toBe('');
+			// Sum of effective_token across both duplicates is the fee, charged once.
+			expect(rows[1].effective_token).toBe('0');
+			expect(rows[1].effective_fee_token).toBe('');
+		});
+
+		it('zeros effective_token on approve rows but still records the fee', () => {
+			// Same-token approve (ICRC): fee folds into effective_token. amount is descriptive
+			// (the approved allowance), not a balance movement.
+			const sameTokenApprove: IcTransactionUi = {
+				...icTx,
+				type: 'approve',
+				from: 'user-principal',
+				to: 'spender-principal',
+				incoming: false
+			};
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ic', transaction: sameTokenApprove, token: icrcToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				exportedAt
+			});
+
+			expect(row.type).toBe('approve');
+			expect(row.amount).toBe('0.5');
+			expect(row.fee).toBe('0.0000001');
+			// Asset contribution is 0 (approve doesn't move balance) + fee folded in.
+			expect(row.effective_token).toBe('-0.0000001');
+			expect(row.effective_fee_token).toBe('');
+		});
+
+		it('zeros effective_token but populates effective_fee_token for an approve with a different fee token', () => {
+			// EVM approve: ERC20 token + gas fee in the chain's native token. Columns don't merge.
+			const evmApprove: EthTransactionUi = {
+				...ethTx,
+				type: 'approve',
+				from: '0xUserEth',
+				to: '0xUSDCContract'
+			};
+			const erc20Token: Token = {
+				...ethToken,
+				standard: { code: 'erc20' },
+				name: 'USD Coin',
+				symbol: 'USDC',
+				decimals: 6,
+				...({ address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' } as object)
+			} as Token;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ethereum', transaction: evmApprove, token: erc20Token }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				exportedAt
+			});
+
+			expect(row.type).toBe('approve');
+			expect(row.token_symbol).toBe('USDC');
+			expect(row.fee_token).toBe('ETH');
+			// Asset (USDC) is unchanged by an approve.
 			expect(row.effective_token).toBe('0');
-			expect(row.effective_fee_token).toBe('-0.0000001');
+			// Fee is in ETH, kept in its own column.
+			expect(row.effective_fee_token).toBe('-0.00105');
 		});
 
 		it('renders a Solana send with fee in SOL (9 decimals) and direction from owner addresses', () => {

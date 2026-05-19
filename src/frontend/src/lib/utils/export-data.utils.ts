@@ -10,6 +10,7 @@ import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
+import Decimal from 'decimal.js';
 import { formatUnits } from 'ethers/utils';
 
 export interface TokenCsvRow extends CsvRow {
@@ -397,8 +398,29 @@ const negate = (decimal: string): string => {
 	return decimal.startsWith('-') ? decimal.slice(1) : `-${decimal}`;
 };
 
-// Fills in effective_token / effective_fee_token and blanks the fee on
-// non-self incoming rows (since the sender, not the user, paid it).
+// Sums two decimal strings via Decimal.js so we keep full precision even at 18-decimal
+// EVM scale. Empty inputs are treated as missing rather than as zero; if either side is
+// missing we return the other (or empty if both are).
+const sumDecimals = ({ a, b }: { a: string; b: string }): string => {
+	if (a === '' && b === '') {
+		return '';
+	}
+
+	if (a === '') {
+		return b;
+	}
+
+	if (b === '') {
+		return a;
+	}
+
+	return new Decimal(a).plus(new Decimal(b)).toFixed();
+};
+
+// Fills in effective_token / effective_fee_token and blanks the fee on incoming rows
+// (where the sender, or — for ICRC self-transfer duplicates — the matching outgoing row
+// already accounts for it). When the asset and fee share the same token symbol, the
+// signed fee is folded into effective_token so a single column sum reconciles.
 const finalizeRow = ({
 	row,
 	isSelfTransfer
@@ -406,25 +428,44 @@ const finalizeRow = ({
 	row: TransactionCsvRow;
 	isSelfTransfer: boolean;
 }): TransactionCsvRow => {
-	const userPaidFee = row.direction === 'out' || isSelfTransfer;
+	const isApprove = row.type === 'approve';
+	const isIncoming = row.direction === 'in';
+	const isOutgoing = row.direction === 'out';
 
-	let effective_token = '';
+	// The user paid the fee only on the outgoing row. ICRC self-transfers are emitted twice
+	// by the indexer (one 'out' + one 'in' for the same on-chain tx); attributing the fee to
+	// the outgoing row only keeps the sum honest. Non-self incoming rows: the sender paid.
+	const userPaidFee = isOutgoing;
+
+	// Signed change to the user's main-asset balance for this row.
+	// Approve and self-transfer rows contribute zero — approve doesn't move the asset, and a
+	// self-transfer's asset returns to the same wallet.
+	let assetSigned = '';
 	if (row.amount !== '') {
-		if (isSelfTransfer) {
-			effective_token = '0';
-		} else if (row.direction === 'in') {
-			effective_token = row.amount;
-		} else if (row.direction === 'out') {
-			effective_token = negate(row.amount);
+		if (isApprove || isSelfTransfer) {
+			assetSigned = '0';
+		} else if (isIncoming) {
+			assetSigned = row.amount;
+		} else if (isOutgoing) {
+			assetSigned = negate(row.amount);
 		}
 	}
 
-	let effective_fee_token = '';
+	// Signed change to the fee-token balance for this row.
+	let feeSigned = '';
 	if (userPaidFee) {
-		effective_fee_token = row.fee === '' ? '' : negate(row.fee);
-	} else if (row.direction === 'in') {
-		effective_fee_token = '0';
+		feeSigned = row.fee === '' ? '' : negate(row.fee);
+	} else if (isIncoming) {
+		feeSigned = '0';
 	}
+
+	// When the fee is paid in the same token as the asset, fold the two signed values into
+	// effective_token so the user can sum a single column per token to reconcile.
+	const mergeColumns = row.fee_token !== '' && row.fee_token === row.token_symbol;
+	const effective_token = mergeColumns
+		? sumDecimals({ a: assetSigned, b: feeSigned })
+		: assetSigned;
+	const effective_fee_token = mergeColumns ? '' : feeSigned;
 
 	return {
 		...row,
