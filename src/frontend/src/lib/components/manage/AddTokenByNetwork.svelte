@@ -61,6 +61,7 @@
 		extCanisterId,
 		dip721CanisterId,
 		icPunksCanisterId,
+		icrc7CanisterId,
 		ethContractAddress,
 		splTokenAddress
 	} = $derived(tokenData);
@@ -74,7 +75,9 @@
 					? { extCanisterId }
 					: nonNullish(dip721CanisterId)
 						? { dip721CanisterId }
-						: { icPunksCanisterId }
+						: nonNullish(icPunksCanisterId)
+							? { icPunksCanisterId }
+							: { icrc7CanisterId }
 				: {
 						ledgerCanisterId,
 						indexCanisterId:
@@ -101,7 +104,9 @@
 
 	let invalidIcPunks = $derived(isNullishOrEmpty(icPunksCanisterId));
 
-	let invalidIcNft = $derived(invalidExt && invalidDip721 && invalidIcPunks);
+	let invalidIcrc7 = $derived(isNullishOrEmpty(icrc7CanisterId));
+
+	let invalidIcNft = $derived(invalidExt && invalidDip721 && invalidIcPunks && invalidIcrc7);
 
 	let invalidSpl = $derived(isNullishOrEmpty(splTokenAddress));
 
@@ -135,7 +140,12 @@
 
 		{#if isIcpNetwork}
 			{#if isNftsPage}
-				<IcAddNftForm bind:extCanisterId bind:dip721CanisterId bind:icPunksCanisterId />
+				<IcAddNftForm
+					bind:extCanisterId
+					bind:dip721CanisterId
+					bind:icPunksCanisterId
+					bind:icrc7CanisterId
+				/>
 			{:else}
 				<IcAddIcrcTokenForm bind:ledgerCanisterId bind:indexCanisterId />
 			{/if}
