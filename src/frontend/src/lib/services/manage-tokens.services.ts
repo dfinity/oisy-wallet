@@ -1,3 +1,10 @@
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import {
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
 import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { SaveErc4626CustomToken } from '$eth/types/erc4626-custom-token';
@@ -15,7 +22,10 @@ import {
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
-import { trackTokenManage } from '$lib/services/token-manage-analytics.services';
+import {
+	trackTokenManage,
+	type TokenManageEventToken
+} from '$lib/services/token-manage-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
@@ -52,6 +62,55 @@ type SaveTokensToken =
 	| SaveErc4626CustomToken
 	| TokenToggleable<Token>;
 
+const mapTokenManageNetwork = <T extends SaveTokensToken>({
+	token,
+	network
+}: {
+	token: T;
+	network?: Token['network'];
+}): string | undefined => {
+	if (nonNullish(network)) {
+		return network.id.description;
+	}
+
+	if (!('networkKey' in token)) {
+		return;
+	}
+
+	if (
+		token.networkKey === 'Icrc' ||
+		token.networkKey === 'ExtV2' ||
+		token.networkKey === 'Dip721' ||
+		token.networkKey === 'IcPunks' ||
+		token.networkKey === 'Icrc7'
+	) {
+		return ICP_NETWORK_ID.description;
+	}
+
+	if (token.networkKey === 'SplMainnet') {
+		return SOLANA_MAINNET_NETWORK_ID.description;
+	}
+
+	if (token.networkKey === 'SplDevnet') {
+		return SOLANA_DEVNET_NETWORK_ID.description;
+	}
+
+	if (
+		token.networkKey !== 'Erc20' &&
+		token.networkKey !== 'Erc721' &&
+		token.networkKey !== 'Erc1155' &&
+		token.networkKey !== 'Erc4626'
+	) {
+		return;
+	}
+
+	const evmNetwork = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
+		({ chainId }) => chainId === token.chainId
+	);
+
+	return evmNetwork?.id.description;
+};
+
 const mapTokenManageToken = <T extends SaveTokensToken>({
 	token,
 	tokenId,
@@ -60,14 +119,7 @@ const mapTokenManageToken = <T extends SaveTokensToken>({
 	token: T;
 	tokenId?: Token['id'];
 	network?: Token['network'];
-}):
-	| {
-			network: string;
-			address: string;
-			symbol?: string;
-			name?: string;
-	  }
-	| undefined => {
+}): TokenManageEventToken | undefined => {
 	const address =
 		'address' in token
 			? token.address
@@ -77,11 +129,7 @@ const mapTokenManageToken = <T extends SaveTokensToken>({
 					? token.canisterId
 					: tokenId?.description;
 
-	const tokenNetwork = nonNullish(network)
-		? network.id.description
-		: 'networkKey' in token
-			? token.networkKey
-			: undefined;
+	const tokenNetwork = mapTokenManageNetwork({ token, network });
 
 	if (isNullish(address) || isNullish(tokenNetwork)) {
 		return;
