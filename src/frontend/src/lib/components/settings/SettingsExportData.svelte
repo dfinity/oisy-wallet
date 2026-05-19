@@ -95,7 +95,8 @@
 			<Button
 				colorStyle="primary"
 				disabled={exportingTokens || exportingTransactions}
-				onclick={onExportTokens}>{$i18n.settings.text.export_tokens}</Button
+				onclick={onExportTokens}
+				paddingSmall>{$i18n.settings.text.export_tokens}</Button
 			>
 		{/snippet}
 
@@ -115,6 +116,7 @@
 				disabled={exportingTokens || exportingTransactions}
 				loading={exportingTransactions}
 				onclick={onExportTransactions}
+				paddingSmall
 				>{exportingTransactions
 					? $i18n.settings.text.export_in_progress
 					: $i18n.settings.text.export_transactions}</Button
