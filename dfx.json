@@ -584,6 +584,12 @@
 			"candid": "target/icrc7.did",
 			"wasm": "target/icrc7.wasm.gz"
 		},
+		"icrc3": {
+			"type": "custom",
+			"build": "scripts/build.icrc3.sh",
+			"candid": "target/icrc3.did",
+			"wasm": "target/icrc3.wasm.gz"
+		},
 		"icpunks": {
 			"type": "custom",
 			"build": "scripts/build.icpunks.sh",

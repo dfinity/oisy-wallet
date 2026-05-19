@@ -4,7 +4,8 @@ import {
 	isTokenIcrc7,
 	isTokenIcrc7CustomToken,
 	mapIcrc7CollectionMetadata,
-	mapIcrc7Token
+	mapIcrc7Token,
+	mapIcrc7TokenMetadata
 } from '$icp/utils/icrc7.utils';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
@@ -129,6 +130,80 @@ describe('icrc7.utils', () => {
 				category: 'custom',
 				tags: DEFAULT_TOKEN_TAGS
 			});
+		});
+	});
+
+	describe('mapIcrc7TokenMetadata', () => {
+		it('should map prefixed token metadata keys', () => {
+			expect(
+				mapIcrc7TokenMetadata([
+					['icrc7:name', { Text: 'Token #50' }],
+					['icrc7:description', { Text: 'The test NFT' }],
+					[
+						'icrc7:image',
+						{
+							Text: 'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A3dafe45&owner_id=sey3i-jyaaa-aaaap-quo3q-cai'
+						}
+					],
+					['icrc7:attributes', { Map: [['Background', { Text: 'Blue' }]] }]
+				])
+			).toEqual({
+				name: 'Token #50',
+				description: 'The test NFT',
+				imageUrl:
+					'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A3dafe45&owner_id=sey3i-jyaaa-aaaap-quo3q-cai',
+				attributes: [{ traitType: 'Background', value: 'Blue' }]
+			});
+		});
+
+		it('should map icrc7:metadata namespace keys', () => {
+			expect(
+				mapIcrc7TokenMetadata([
+					['icrc7:metadata:name', { Text: 'Namespaced token' }],
+					['icrc7:metadata:description', { Text: 'Namespaced description' }],
+					['icrc7:metadata:image_url', { Text: 'https://example.com/token.png' }]
+				])
+			).toEqual({
+				name: 'Namespaced token',
+				description: 'Namespaced description',
+				imageUrl: 'https://example.com/token.png'
+			});
+		});
+
+		it('should map unprefixed fallback keys and array attributes', () => {
+			expect(
+				mapIcrc7TokenMetadata([
+					['name', { Text: 'Fallback token' }],
+					['image', { Text: 'https://example.com/fallback.png' }],
+					[
+						'attributes',
+						{
+							Array: [
+								{
+									Map: [
+										['trait_type', { Text: 'Level' }],
+										['value', { Nat: 50n }]
+									]
+								}
+							]
+						}
+					]
+				])
+			).toEqual({
+				name: 'Fallback token',
+				imageUrl: 'https://example.com/fallback.png',
+				attributes: [{ traitType: 'Level', value: '50' }]
+			});
+		});
+
+		it('should ignore unsupported metadata values without throwing', () => {
+			expect(
+				mapIcrc7TokenMetadata([
+					['icrc7:name', { Blob: new Uint8Array([1, 2, 3]) }],
+					['icrc7:image', { Blob: new Uint8Array([4, 5, 6]) }],
+					['icrc7:attributes', { Text: 'not an attributes structure' }]
+				])
+			).toEqual({});
 		});
 	});
 });
