@@ -200,7 +200,7 @@ describe('export-data.utils', () => {
 	});
 
 	describe('TRANSACTION_CSV_COLUMNS', () => {
-		it('lists the 16 documented columns in order', () => {
+		it('lists the 18 documented columns in order', () => {
 			expect(TRANSACTION_CSV_COLUMNS.map(({ key }) => key)).toEqual([
 				'timestamp_iso',
 				'network',
@@ -215,6 +215,8 @@ describe('export-data.utils', () => {
 				'amount',
 				'fee',
 				'fee_token',
+				'effective_token',
+				'effective_fee_token',
 				'tx_id',
 				'explorer_url',
 				'exported_at'
@@ -343,7 +345,7 @@ describe('export-data.utils', () => {
 			txExplorerUrl: 'https://solscan.io/tx/sol-tx-1'
 		};
 
-		it('renders a Bitcoin send with all 16 columns populated', () => {
+		it('renders a Bitcoin send with all 18 columns populated', () => {
 			const transactions: AllTransactionUiWithCmp[] = [
 				{ component: 'bitcoin', transaction: btcTx, token: btcToken }
 			];
@@ -369,6 +371,8 @@ describe('export-data.utils', () => {
 				amount: '0.001',
 				fee: '0.000005',
 				fee_token: 'BTC',
+				effective_token: '-0.001',
+				effective_fee_token: '-0.000005',
 				tx_id: 'btc-tx-1',
 				explorer_url: 'https://blockstream.info/tx/btc-tx-1',
 				exported_at: exportedAtIso
@@ -473,10 +477,46 @@ describe('export-data.utils', () => {
 			expect(rows[0].direction).toBe('in');
 			expect(rows[0].fee).toBe('');
 			expect(rows[0].fee_token).toBe('');
+			// effective_token mirrors the received amount; effective_fee_token is 0 because the
+			// sender — not the user — paid the fee.
+			expect(rows[0].effective_token).toBe('0.5');
+			expect(rows[0].effective_fee_token).toBe('0');
 
 			expect(rows[1].direction).toBe('out');
 			expect(rows[1].fee).toBe('0.0000001');
 			expect(rows[1].fee_token).toBe('ckBTC');
+			// effective_token is the negated amount; effective_fee_token is the negated fee since
+			// the user paid it.
+			expect(rows[1].effective_token).toBe('-0.5');
+			expect(rows[1].effective_fee_token).toBe('-0.0000001');
+		});
+
+		it('treats a self-transfer as zero asset change but still records the fee', () => {
+			// from === to: the user is sending to their own address. Net asset change is 0,
+			// but the fee was still paid.
+			const selfIcTx: IcTransactionUi = {
+				...icTx,
+				type: 'send',
+				from: 'user-principal',
+				to: 'user-principal',
+				incoming: false
+			};
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ic', transaction: selfIcTx, token: icrcToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				exportedAt
+			});
+
+			expect(row.direction).toBe('out');
+			expect(row.amount).toBe('0.5');
+			// Fee is kept (the user paid it on a self-transfer) and reflected in the effective
+			// column. The main-asset balance is unchanged, so effective_token is 0.
+			expect(row.fee).toBe('0.0000001');
+			expect(row.fee_token).toBe('ckBTC');
+			expect(row.effective_token).toBe('0');
+			expect(row.effective_fee_token).toBe('-0.0000001');
 		});
 
 		it('renders a Solana send with fee in SOL (9 decimals) and direction from owner addresses', () => {

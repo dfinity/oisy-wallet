@@ -58,6 +58,8 @@ export interface TransactionCsvRow extends CsvRow {
 	amount: string;
 	fee: string;
 	fee_token: string;
+	effective_token: string;
+	effective_fee_token: string;
 	tx_id: string;
 	explorer_url: string;
 	exported_at: string;
@@ -77,6 +79,8 @@ export const TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'amount', header: 'amount' },
 	{ key: 'fee', header: 'fee' },
 	{ key: 'fee_token', header: 'fee_token' },
+	{ key: 'effective_token', header: 'effective_token' },
+	{ key: 'effective_fee_token', header: 'effective_fee_token' },
 	{ key: 'tx_id', header: 'tx_id' },
 	{ key: 'explorer_url', header: 'explorer_url' },
 	{ key: 'exported_at', header: 'exported_at' }
@@ -235,6 +239,9 @@ const toBitcoinRow = ({
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: BTC_DECIMALS }),
 		fee_token: 'BTC',
+		// effective_* are filled in by finalizeRow once direction + self-transfer are resolved.
+		effective_token: '',
+		effective_fee_token: '',
 		tx_id: tx.id,
 		explorer_url: tx.txExplorerUrl ?? '',
 		exported_at: exportedAt
@@ -289,6 +296,8 @@ const toEthereumRow = ({
 		amount: formatAmount({ value: tx.value as bigint | undefined, decimals: token.decimals }),
 		fee: formatAmount({ value: gasFee, decimals: EVM_NATIVE_DECIMALS }),
 		fee_token: nativeSymbolByNetworkId(token.network.id) ?? '',
+		effective_token: '',
+		effective_fee_token: '',
 		tx_id: tx.hash ?? '',
 		explorer_url: '',
 		exported_at: exportedAt
@@ -320,6 +329,8 @@ const toIcRow = ({
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: token.decimals }),
 		fee_token: token.symbol,
+		effective_token: '',
+		effective_fee_token: '',
 		tx_id: String(tx.id),
 		explorer_url: tx.txExplorerUrl ?? '',
 		exported_at: exportedAt
@@ -365,9 +376,62 @@ const toSolanaRow = ({
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: SOL_NATIVE_DECIMALS }),
 		fee_token: 'SOL',
+		effective_token: '',
+		effective_fee_token: '',
 		tx_id: String(tx.signature),
 		explorer_url: tx.txExplorerUrl ?? '',
 		exported_at: exportedAt
+	};
+};
+
+// Negates a decimal-string amount, suppressing "-0" for zero values.
+const negate = (decimal: string): string => {
+	if (decimal === '') {
+		return '';
+	}
+
+	if (parseFloat(decimal) === 0) {
+		return decimal.replace(/^-/, '');
+	}
+
+	return decimal.startsWith('-') ? decimal.slice(1) : `-${decimal}`;
+};
+
+// Fills in effective_token / effective_fee_token and blanks the fee on
+// non-self incoming rows (since the sender, not the user, paid it).
+const finalizeRow = ({
+	row,
+	isSelfTransfer
+}: {
+	row: TransactionCsvRow;
+	isSelfTransfer: boolean;
+}): TransactionCsvRow => {
+	const userPaidFee = row.direction === 'out' || isSelfTransfer;
+
+	let effective_token = '';
+	if (row.amount !== '') {
+		if (isSelfTransfer) {
+			effective_token = '0';
+		} else if (row.direction === 'in') {
+			effective_token = row.amount;
+		} else if (row.direction === 'out') {
+			effective_token = negate(row.amount);
+		}
+	}
+
+	let effective_fee_token = '';
+	if (userPaidFee) {
+		effective_fee_token = row.fee === '' ? '' : negate(row.fee);
+	} else if (row.direction === 'in') {
+		effective_fee_token = '0';
+	}
+
+	return {
+		...row,
+		fee: userPaidFee ? row.fee : '',
+		fee_token: userPaidFee ? row.fee_token : '',
+		effective_token,
+		effective_fee_token
 	};
 };
 
@@ -385,37 +449,58 @@ export const buildTransactionRows = ({
 	const exportedAtIso = exportedAt.toISOString();
 
 	return transactions.map((entry) => {
-		const row =
-			entry.component === 'bitcoin'
-				? toBitcoinRow({
-						transaction: entry.transaction,
-						token: entry.token,
-						userAddress: userAddresses.btc,
-						exportedAt: exportedAtIso
-					})
-				: entry.component === 'ethereum'
-					? toEthereumRow({
-							transaction: entry.transaction,
-							token: entry.token,
-							userAddress: userAddresses.eth,
-							nativeSymbolByNetworkId,
-							exportedAt: exportedAtIso
-						})
-					: entry.component === 'ic'
-						? toIcRow({
-								transaction: entry.transaction,
-								token: entry.token,
-								exportedAt: exportedAtIso
-							})
-						: toSolanaRow({
-								transaction: entry.transaction,
-								token: entry.token,
-								userAddress: userAddresses.sol,
-								exportedAt: exportedAtIso
-							});
+		let row: TransactionCsvRow;
+		// BTC: tx.value is already net of change, so self-transfer detection is unnecessary
+		// (and ambiguous with multi-recipient txs). Default to false.
+		let isSelfTransfer = false;
 
-		// Fees on incoming transactions are paid by the sender, not the user — blank them
-		// so the CSV doesn't suggest the recipient bore a cost they didn't.
-		return row.direction === 'in' ? { ...row, fee: '', fee_token: '' } : row;
+		switch (entry.component) {
+			case 'bitcoin':
+				row = toBitcoinRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					userAddress: userAddresses.btc,
+					exportedAt: exportedAtIso
+				});
+				break;
+			case 'ethereum':
+				row = toEthereumRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					userAddress: userAddresses.eth,
+					nativeSymbolByNetworkId,
+					exportedAt: exportedAtIso
+				});
+				isSelfTransfer = addressesEqual({
+					a: entry.transaction.from,
+					b: entry.transaction.to
+				});
+				break;
+			case 'ic':
+				row = toIcRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					exportedAt: exportedAtIso
+				});
+				isSelfTransfer = addressesEqual({
+					a: entry.transaction.from,
+					b: entry.transaction.to
+				});
+				break;
+			case 'solana':
+				row = toSolanaRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					userAddress: userAddresses.sol,
+					exportedAt: exportedAtIso
+				});
+				isSelfTransfer = addressesEqual({
+					a: entry.transaction.fromOwner ?? entry.transaction.from,
+					b: entry.transaction.toOwner ?? entry.transaction.to
+				});
+				break;
+		}
+
+		return finalizeRow({ row, isSelfTransfer });
 	});
 };
