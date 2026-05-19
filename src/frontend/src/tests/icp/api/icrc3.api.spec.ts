@@ -2,7 +2,7 @@ import { getArchives, getBlocks, getTipCertificate, supportedBlockTypes } from '
 import { Icrc3Canister } from '$icp/canisters/icrc3.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
-import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
+import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mock } from 'vitest-mock-extended';
 
@@ -11,7 +11,7 @@ describe('icrc3.api', () => {
 
 	const params = {
 		identity: mockIdentity,
-		canisterId: mockIcrc7CanisterId
+		canisterId: mockLedgerCanisterId
 	};
 
 	beforeEach(() => {

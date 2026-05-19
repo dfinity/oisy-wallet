@@ -2,7 +2,7 @@ import type { _SERVICE as Icrc3Service } from '$declarations/icrc3/icrc3.did';
 import { Icrc3Canister } from '$icp/canisters/icrc3.canister';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
+import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -15,7 +15,7 @@ describe('icrc3.canister', () => {
 		serviceOverride
 	}: Pick<CreateCanisterOptions<Icrc3Service>, 'serviceOverride'>): Promise<Icrc3Canister> =>
 		Icrc3Canister.create({
-			canisterId: Principal.fromText(mockIcrc7CanisterId),
+			canisterId: Principal.fromText(mockLedgerCanisterId),
 			identity: mockIdentity,
 			certifiedServiceOverride: serviceOverride,
 			serviceOverride
