@@ -150,6 +150,15 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
   refreshes run when `coingecko_api_key` is set and `exchange_rate_enabled` is not
   `opt false`. See
   [`shared::types::api_keys::ApiKeys`](../../../src/shared/src/types/api_keys.rs).
+  - `get_my_exchange_rates` is the per-caller fetch endpoint: it returns the
+    USD price for each of the caller's priceable tokens (native + custom,
+    minus testnets / NFTs / ERC-4626), re-marks them as active so the timer
+    keeps them warm, and awaits a one-shot refresh for any token whose
+    cache is older than `PRICE_STALENESS_THRESHOLD_SEC` (2 min) or missing.
+    It's an `update` (mutates `token_activity`, may issue HTTP outcalls).
+  - The legacy `get_exchange_rates(vec TokenId)` and `get_exchange_rate(TokenId)`
+    queries are kept for now but should be considered deprecated in favour
+    of `get_my_exchange_rates` for client-driven price fetches.
 
 ## Workspace dependencies — root or nothing
 
