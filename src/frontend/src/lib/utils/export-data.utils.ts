@@ -83,10 +83,10 @@ export const TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 ];
 
 export interface UserAddresses {
-	btc?: string;
-	eth?: string;
-	icp?: string;
-	sol?: string;
+	btc?: Nullish<string>;
+	eth?: Nullish<string>;
+	icp?: Nullish<string>;
+	sol?: Nullish<string>;
 }
 
 // Tokens model the on-chain identifier under different field names depending on the standard
@@ -195,7 +195,7 @@ const formatTimestamp = (timestamp: bigint | number | undefined): string => {
 	return new Date(millis).toISOString();
 };
 
-const addressesEqual = ({ a, b }: { a: string | undefined; b: string | undefined }): boolean =>
+const addressesEqual = ({ a, b }: { a: Nullish<string>; b: Nullish<string> }): boolean =>
 	nonNullish(a) && nonNullish(b) && a.toLowerCase() === b.toLowerCase();
 
 const toBitcoinRow = ({
@@ -206,7 +206,7 @@ const toBitcoinRow = ({
 }: {
 	transaction: BtcTransactionUi;
 	token: Token;
-	userAddress: string | undefined;
+	userAddress: Nullish<string>;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const type = normalizeType(tx.type);
@@ -250,7 +250,7 @@ const toEthereumRow = ({
 }: {
 	transaction: EthTransactionUi;
 	token: Token;
-	userAddress: string | undefined;
+	userAddress: Nullish<string>;
 	nativeSymbolByNetworkId: (networkId: NetworkId) => string | undefined;
 	exportedAt: string;
 }): TransactionCsvRow => {
@@ -334,7 +334,7 @@ const toSolanaRow = ({
 }: {
 	transaction: SolTransactionUi;
 	token: Token;
-	userAddress: string | undefined;
+	userAddress: Nullish<string>;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const type = normalizeType(tx.type);
