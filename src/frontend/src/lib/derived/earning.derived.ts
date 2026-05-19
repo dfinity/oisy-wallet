@@ -1,10 +1,10 @@
 import { goto } from '$app/navigation';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
+	allHarvestAutopilots,
+	allHarvestAutopilotsMaxApy,
 	enabledHarvestAutopilotsUsdBalance,
-	harvestAutopilots,
 	harvestAutopilotsCurrentEarning,
-	harvestAutopilotsMaxApy,
 	harvestAutopilotsUsdBalance
 } from '$eth/derived/harvest-autopilots.derived';
 import { AppPath } from '$lib/constants/routes.constants';
@@ -24,36 +24,36 @@ export const earningData: Readable<EarningData> = derived(
 		harvestAutopilotsUsdBalance,
 		enabledHarvestAutopilotsUsdBalance,
 		harvestAutopilotsCurrentEarning,
-		harvestAutopilots,
-		harvestAutopilotsMaxApy
+		allHarvestAutopilots,
+		allHarvestAutopilotsMaxApy
 	],
 	([
 		$enabledMainnetFungibleTokensUsdBalance,
 		$harvestAutopilotsUsdBalance,
 		$enabledHarvestAutopilotsUsdBalance,
 		$harvestAutopilotsCurrentEarning,
-		$harvestAutopilots,
-		$harvestAutopilotsMaxApy
+		$allHarvestAutopilots,
+		$allHarvestAutopilotsMaxApy
 	]) => ({
 		'harvest-autopilot': {
-			[EarningCardFields.APY]: $harvestAutopilotsMaxApy,
+			[EarningCardFields.APY]: $allHarvestAutopilotsMaxApy,
 			[EarningCardFields.CURRENT_EARNING]: $harvestAutopilotsCurrentEarning,
 			[EarningCardFields.CURRENT_STAKED]: $harvestAutopilotsUsdBalance,
 			[EarningCardFields.NETWORKS]: [
-				...$harvestAutopilots.reduce<Set<string>>(
+				...$allHarvestAutopilots.reduce<Set<string>>(
 					(acc, { token: { network } }) => (nonNullish(network.icon) ? acc.add(network.icon) : acc),
 					new Set()
 				)
 			],
 			[EarningCardFields.ASSETS]: [
-				...$harvestAutopilots.reduce<Set<string>>(
+				...$allHarvestAutopilots.reduce<Set<string>>(
 					(acc, { token: { assetIcon } }) => (nonNullish(assetIcon) ? acc.add(assetIcon) : acc),
 					new Set()
 				)
 			],
 			[EarningCardFields.EARNING_POTENTIAL]: nonNullish($enabledMainnetFungibleTokensUsdBalance)
 				? (($enabledMainnetFungibleTokensUsdBalance - $enabledHarvestAutopilotsUsdBalance) *
-						Number($harvestAutopilotsMaxApy)) /
+						Number($allHarvestAutopilotsMaxApy)) /
 					100
 				: undefined,
 			action: () => goto(AppPath.EarnAutopilot)
