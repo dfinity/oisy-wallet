@@ -1,11 +1,6 @@
 import type { TransferError } from '$declarations/icrc7/icrc7.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 
-// Maps an ICRC-7 `TransferError` variant to a human-readable `CanisterInternalError`.
-// Reference: https://github.com/dfinity/ICRC/blob/main/ICRCs/ICRC-7/ICRC-7.md#icrc7_transfer
-//
-// `bigint` fields are interpolated via template literals (which call `.toString()`); we
-// intentionally avoid `JSON.stringify` here because it throws `TypeError` on `bigint`.
 export const mapIcrc7TransferError = (err: TransferError): CanisterInternalError => {
 	if ('NonExistingTokenId' in err) {
 		return new CanisterInternalError('NFT token id does not exist');
