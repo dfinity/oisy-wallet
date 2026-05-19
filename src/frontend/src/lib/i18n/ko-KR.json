@@ -746,7 +746,8 @@
 			"allow_signing": "서명을 위한 지갑 설정 중 문제가 발생하여 로그아웃되었습니다. 문제가 지속되면 지원팀에 문의하세요.",
 			"waiting_for_allowed_cycles_aborted": "사이클 레저 준비가 중단되었습니다. 나중에 다시 로그인을 시도해 주세요",
 			"btc_wallet_error": "BTC 지갑 정보를 불러오는 중 오류가 발생했습니다.",
-			"sol_wallet_error": "SOL 지갑 정보를 불러오는 중 오류가 발생했습니다."
+			"sol_wallet_error": "SOL 지갑 정보를 불러오는 중 오류가 발생했습니다.",
+			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요."
 		}
 	},
 	"hero": {
@@ -801,9 +802,6 @@
 			"appearance_light": "라이트 모드 활성화",
 			"appearance_dark": "다크 모드 활성화",
 			"appearance_system": "운영 체제의 색상 모드 활성화"
-		},
-		"error": {
-			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요."
 		}
 	},
 	"shortcuts": {

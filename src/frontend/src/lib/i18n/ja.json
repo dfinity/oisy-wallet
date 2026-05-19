@@ -746,7 +746,8 @@
 			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
 			"waiting_for_allowed_cycles_aborted": "Cyclesレジャーの準備を中止しました。後でログインしてください。",
 			"btc_wallet_error": "BTCウォレット情報の読み込み中にエラーが発生しました。",
-			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました。"
+			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました。",
+			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。"
 		}
 	},
 	"hero": {
@@ -801,9 +802,6 @@
 			"appearance_light": "ライトモードを有効化",
 			"appearance_dark": "ダークモードを有効化",
 			"appearance_system": "OSのテーマ設定に従う"
-		},
-		"error": {
-			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。"
 		}
 	},
 	"shortcuts": {

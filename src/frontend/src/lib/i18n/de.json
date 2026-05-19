@@ -746,7 +746,8 @@
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Fehler beim Laden der BTC-Wallet-Informationen.",
-			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen."
+			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen.",
+			"loading_profile": "Fehler beim Laden des Profils. Bitte aktualisiere die Seite, um das volle Erlebnis zu haben."
 		}
 	},
 	"hero": {
@@ -801,9 +802,6 @@
 			"appearance_light": "Aktiviert den Hellmodus",
 			"appearance_dark": "Aktiviert den Dunkelmodus",
 			"appearance_system": "Aktiviert den Farbmodus deines Betriebssystems"
-		},
-		"error": {
-			"loading_profile": "Fehler beim Laden des Profils. Bitte aktualisiere die Seite, um das volle Erlebnis zu haben."
 		}
 	},
 	"shortcuts": {
