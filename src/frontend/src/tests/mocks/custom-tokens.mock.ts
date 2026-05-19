@@ -304,3 +304,17 @@ export const mockCustomTokensIcPunks: CustomToken[] = [
 		allow_external_content_source: toNullable()
 	}
 ];
+
+export const mockCustomTokensIcrc7: CustomToken[] = [
+	{
+		version: toNullable(1n),
+		enabled: true,
+		token: {
+			Icrc7: {
+				canister_id: Principal.fromText(mockIcrc7CanisterId)
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	}
+];
