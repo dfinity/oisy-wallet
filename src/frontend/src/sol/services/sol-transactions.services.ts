@@ -321,13 +321,14 @@ const loadSolTransactions = async ({
 		const backendTokenId = solBackendTokenId({ network, tokenAddress });
 		const isHeadLoad = isNullish(before);
 
-		const stored = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && isHeadLoad
-			? await loadSolUserTransactions({
-					identity,
-					tokenId: backendTokenId,
-					address
-				})
-			: undefined;
+		const stored =
+			USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && isHeadLoad
+				? await loadSolUserTransactions({
+						identity,
+						tokenId: backendTokenId,
+						address
+					})
+				: undefined;
 
 		const storedTransactions = stored?.transactions ?? [];
 
