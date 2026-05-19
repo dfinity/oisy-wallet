@@ -365,39 +365,94 @@ describe('token-group.utils', () => {
 			expect(result.usdPriceChangePercentage24h).toBe(tokenWithPrice.usdPriceChangePercentage24h);
 		});
 
-		it('should keep existing group price when it already has one', () => {
-			const groupWithPrice: TokenUiGroup = {
-				id: ETH_TOKEN_GROUP.id,
-				decimals: BASE_ETH_TOKEN.decimals,
+		it('should keep the existing group price when its visually-first token already has both price and performance', () => {
+			const visuallyFirstToken = {
+				...BASE_ETH_TOKEN,
 				groupData: ETH_TOKEN_GROUP,
-				tokens: [
-					{ ...BASE_ETH_TOKEN, groupData: ETH_TOKEN_GROUP, balance: bn1Bi, usdBalance: 100 }
-				],
 				balance: bn1Bi,
-				usdBalance: 100,
+				usdBalance: 300,
 				usdPrice: 1500,
 				usdMarketCap: 180000000000,
 				usdPriceChangePercentage24h: 1.0
 			};
 
-			const tokenWithDifferentPrice = {
+			const groupWithPrice: TokenUiGroup = {
+				id: ETH_TOKEN_GROUP.id,
+				decimals: BASE_ETH_TOKEN.decimals,
+				groupData: ETH_TOKEN_GROUP,
+				tokens: [visuallyFirstToken],
+				balance: bn1Bi,
+				usdBalance: 300,
+				usdPrice: visuallyFirstToken.usdPrice,
+				usdMarketCap: visuallyFirstToken.usdMarketCap,
+				usdPriceChangePercentage24h: visuallyFirstToken.usdPriceChangePercentage24h
+			};
+
+			const lowerBalanceToken = {
 				...ETHEREUM_TOKEN,
 				groupData: ETH_TOKEN_GROUP,
 				balance: bn2Bi,
-				usdBalance: 200,
+				usdBalance: 100,
 				usdPrice: 2000,
 				usdMarketCap: 240000000000,
 				usdPriceChangePercentage24h: -0.5
 			};
 
 			const result = updateTokenGroup({
-				token: tokenWithDifferentPrice,
+				token: lowerBalanceToken,
 				tokenGroup: groupWithPrice
 			});
 
-			expect(result.usdPrice).toBe(groupWithPrice.usdPrice);
-			expect(result.usdMarketCap).toBe(groupWithPrice.usdMarketCap);
-			expect(result.usdPriceChangePercentage24h).toBe(groupWithPrice.usdPriceChangePercentage24h);
+			expect(result.usdPrice).toBe(visuallyFirstToken.usdPrice);
+			expect(result.usdMarketCap).toBe(visuallyFirstToken.usdMarketCap);
+			expect(result.usdPriceChangePercentage24h).toBe(
+				visuallyFirstToken.usdPriceChangePercentage24h
+			);
+		});
+
+		it('should skip the visually-first token and use the next one with both price and performance available', () => {
+			const visuallyFirstWithoutPerformance = {
+				...BASE_ETH_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn1Bi,
+				usdBalance: 300,
+				usdPrice: 1500,
+				usdMarketCap: 180000000000,
+				usdPriceChangePercentage24h: undefined
+			};
+
+			const groupWithPartialPrice: TokenUiGroup = {
+				id: ETH_TOKEN_GROUP.id,
+				decimals: BASE_ETH_TOKEN.decimals,
+				groupData: ETH_TOKEN_GROUP,
+				tokens: [visuallyFirstWithoutPerformance],
+				balance: bn1Bi,
+				usdBalance: 300,
+				usdPrice: visuallyFirstWithoutPerformance.usdPrice,
+				usdMarketCap: visuallyFirstWithoutPerformance.usdMarketCap,
+				usdPriceChangePercentage24h: undefined
+			};
+
+			const lowerBalanceTokenWithBoth = {
+				...ETHEREUM_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn2Bi,
+				usdBalance: 100,
+				usdPrice: 2000,
+				usdMarketCap: 240000000000,
+				usdPriceChangePercentage24h: -0.5
+			};
+
+			const result = updateTokenGroup({
+				token: lowerBalanceTokenWithBoth,
+				tokenGroup: groupWithPartialPrice
+			});
+
+			expect(result.usdPrice).toBe(lowerBalanceTokenWithBoth.usdPrice);
+			expect(result.usdMarketCap).toBe(lowerBalanceTokenWithBoth.usdMarketCap);
+			expect(result.usdPriceChangePercentage24h).toBe(
+				lowerBalanceTokenWithBoth.usdPriceChangePercentage24h
+			);
 		});
 	});
 
@@ -587,6 +642,7 @@ describe('token-group.utils', () => {
 
 			const [{ group: group0 }, { token: token1 }] = result;
 
+			// `mockTwinToken2` has the highest USD balance, so it drives the group price/performance.
 			expect(group0).toStrictEqual({
 				id: mockToken.groupData?.id,
 				decimals,
@@ -594,9 +650,9 @@ describe('token-group.utils', () => {
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
 				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
-				usdPrice: mockToken.usdPrice,
-				usdMarketCap: mockToken.usdMarketCap,
-				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
+				usdPrice: mockTwinToken2.usdPrice,
+				usdMarketCap: mockTwinToken2.usdMarketCap,
+				usdPriceChangePercentage24h: mockTwinToken2.usdPriceChangePercentage24h
 			});
 
 			expect(token1).toStrictEqual(mockSecondToken);
@@ -623,9 +679,9 @@ describe('token-group.utils', () => {
 				tokens: [mockTwinToken1, mockToken, mockTwinToken2],
 				balance: mockTwinToken1.balance + mockToken.balance + mockTwinToken2.balance,
 				usdBalance: mockTwinToken1.usdBalance + mockToken.usdBalance + mockTwinToken2.usdBalance,
-				usdPrice: mockTwinToken1.usdPrice,
-				usdMarketCap: mockTwinToken1.usdMarketCap,
-				usdPriceChangePercentage24h: mockTwinToken1.usdPriceChangePercentage24h
+				usdPrice: mockTwinToken2.usdPrice,
+				usdMarketCap: mockTwinToken2.usdMarketCap,
+				usdPriceChangePercentage24h: mockTwinToken2.usdPriceChangePercentage24h
 			});
 
 			expect(token1).toStrictEqual(mockSecondToken);
@@ -655,9 +711,9 @@ describe('token-group.utils', () => {
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
 				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
-				usdPrice: mockToken.usdPrice,
-				usdMarketCap: mockToken.usdMarketCap,
-				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
+				usdPrice: mockTwinToken2.usdPrice,
+				usdMarketCap: mockTwinToken2.usdMarketCap,
+				usdPriceChangePercentage24h: mockTwinToken2.usdPriceChangePercentage24h
 			});
 		});
 
@@ -685,10 +741,87 @@ describe('token-group.utils', () => {
 				tokens: [mockToken, mockTwinToken, mockTwinToken2],
 				balance: undefined,
 				usdBalance: mockToken.usdBalance + mockTwinToken2.usdBalance,
-				usdPrice: mockToken.usdPrice,
-				usdMarketCap: mockToken.usdMarketCap,
-				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
+				usdPrice: mockTwinToken2.usdPrice,
+				usdMarketCap: mockTwinToken2.usdMarketCap,
+				usdPriceChangePercentage24h: mockTwinToken2.usdPriceChangePercentage24h
 			});
+		});
+
+		it('should source price and performance from the first visually-sorted token that has both, not mix them across tokens', () => {
+			// Visually-first token (highest USD balance) is missing the 24h performance — the
+			// previous behaviour kept its `usdPrice` and silently picked the performance from
+			// the next token, mixing two assets in the header.
+			const visuallyFirstWithoutPerformance = {
+				...mockTwinToken1,
+				usdBalance: 500,
+				usdPrice: 0.99,
+				usdMarketCap: undefined,
+				usdPriceChangePercentage24h: undefined
+			};
+			const visuallyLaterWithBoth = {
+				...mockTwinToken2,
+				usdBalance: 100,
+				usdPrice: 1.01,
+				usdMarketCap: 50000000000,
+				usdPriceChangePercentage24h: 0.2
+			};
+
+			const tokens = [visuallyFirstWithoutPerformance, visuallyLaterWithBoth];
+
+			const result = groupTokens(tokens);
+
+			expect(result).toHaveLength(1);
+
+			assert('group' in result[0]);
+
+			const [{ group }] = result;
+
+			expect(group.usdPrice).toBe(visuallyLaterWithBoth.usdPrice);
+			expect(group.usdMarketCap).toBe(visuallyLaterWithBoth.usdMarketCap);
+			expect(group.usdPriceChangePercentage24h).toBe(
+				visuallyLaterWithBoth.usdPriceChangePercentage24h
+			);
+		});
+
+		it('should use the visually-first token with both price and performance even if a later one also has both', () => {
+			// Mirrors the reported bug: a new user with zero balances filtered to ICP sees
+			// ckUSDC (a ck-token) listed before USDC. Both have full price data; the header
+			// should reflect ckUSDC's, not USDC's.
+			const visuallyFirstCkToken = {
+				...mockTwinToken1,
+				balance: ZERO,
+				usdBalance: 0,
+				oisyName: { prefix: 'ck', oisyName: 'Chain key Stable' },
+				usdPrice: 0.99,
+				usdMarketCap: 40000000000,
+				usdPriceChangePercentage24h: 0.1
+			};
+			const visuallyLaterToken = {
+				...mockTwinToken2,
+				balance: ZERO,
+				usdBalance: 0,
+				usdPrice: 1.01,
+				usdMarketCap: 50000000000,
+				usdPriceChangePercentage24h: 0.2
+			};
+
+			// Input order intentionally reversed from the visual order to ensure the picker
+			// follows the in-group sort, not the array order.
+			const tokens = [visuallyLaterToken, visuallyFirstCkToken];
+
+			const result = groupTokens(tokens);
+
+			expect(result).toHaveLength(1);
+
+			assert('group' in result[0]);
+
+			const [{ group }] = result;
+
+			expect(group.usdPrice).toBe(visuallyFirstCkToken.usdPrice);
+			expect(group.usdMarketCap).toBe(visuallyFirstCkToken.usdMarketCap);
+			expect(group.usdPriceChangePercentage24h).toBe(
+				visuallyFirstCkToken.usdPriceChangePercentage24h
+			);
 		});
 	});
 
