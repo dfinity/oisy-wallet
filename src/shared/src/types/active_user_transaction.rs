@@ -1,6 +1,7 @@
 use candid::{CandidType, Deserialize, Nat, Principal};
 
 use super::token_id::TokenId;
+use crate::types::Timestamp;
 
 /// Maximum number of active user transactions kept per user. Counts every
 /// stored row regardless of status; the FE must delete acknowledged rows to
@@ -76,7 +77,7 @@ pub struct OneSecIcpToEvmData {
     pub source_token: TokenId,
     pub dest_token: TokenId,
     pub amount: Nat,
-    pub recipient_eth_address: String,
+    pub recipient_evm_address: String,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -97,10 +98,12 @@ pub struct ActiveUserTransaction {
     pub data: ActiveUserTransactionData,
     /// Opaque to the backend; the FE writes a flow-specific step name here.
     pub progress_step: Option<String>,
-    /// Learned-mid-flow `(key, value)` references, e.g. `("tx_hash", "0x…")`.
+    /// Learned-mid-flow named references, e.g.
+    /// `{ key: "tx_hash", value: "0x…" }`. See [`ActiveUserTransactionRef`]
+    /// for the field layout exposed on the wire and in TS bindings.
     pub external_refs: Vec<ActiveUserTransactionRef>,
-    pub created_at_ns: u64,
-    pub updated_at_ns: u64,
+    pub created_at_ns: Timestamp,
+    pub updated_at_ns: Timestamp,
     /// Populated when `status = Failed`.
     pub error: Option<String>,
 }
@@ -113,9 +116,12 @@ pub struct CreateActiveUserTransactionRequest {
     pub external_refs: Vec<ActiveUserTransactionRef>,
 }
 
-/// Partial update. Only fields that are `Some` are applied; everything else is
-/// left untouched. `external_refs`, when provided, **replaces** the stored list
-/// in full — the FE always knows the complete set after each poll.
+/// Partial update. `None` means "leave untouched"; `Some(value)` overwrites
+/// the stored value. There is no encoding for "clear back to `None`" — this
+/// is intentional: `error` is only ever set on the `Failed` terminal state
+/// (immutable by lifecycle), and `progress_step` is forward-only.
+/// `external_refs`, when provided, **replaces** the stored list in full —
+/// the FE always knows the complete set after each poll.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct UpdateActiveUserTransactionRequest {
     pub id: String,
@@ -161,7 +167,7 @@ mod tests {
                 source_token: TokenId::IcpNative,
                 dest_token: TokenId::EvmNative(1),
                 amount: Nat::from(1_000_000u64),
-                recipient_eth_address: "0x0000000000000000000000000000000000000001".to_string(),
+                recipient_evm_address: "0x0000000000000000000000000000000000000001".to_string(),
             }),
             progress_step: Some("submitting".to_string()),
             external_refs: vec![ActiveUserTransactionRef {
