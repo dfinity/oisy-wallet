@@ -23,6 +23,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
@@ -93,7 +94,7 @@
 
 		const tokenNetwork = network?.id.description;
 
-		if (isNullish(address) || isNullish(tokenNetwork)) {
+		if (isNullishOrEmpty(address) || isNullish(tokenNetwork)) {
 			return;
 		}
 

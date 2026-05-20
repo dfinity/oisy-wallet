@@ -159,7 +159,7 @@
 			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS,
 			resultStatus,
 			...(nonNullish(key) && { key }),
-			...(nonNullish(value) && { value }),
+			...(notEmptyString(value) && { value }),
 			...(nonNullish(error) && { error })
 		});
 
