@@ -161,12 +161,27 @@ describe('icrc7.utils', () => {
 				mapIcrc7TokenMetadata([
 					['icrc7:metadata:name', { Text: 'Namespaced token' }],
 					['icrc7:metadata:description', { Text: 'Namespaced description' }],
-					['icrc7:metadata:image_url', { Text: 'https://example.com/token.png' }]
+					['icrc7:metadata:image_url', { Text: 'https://example.com/token.png' }],
+					['icrc7:metadata:thumbnail_url', { Text: 'https://example.com/token-thumb.png' }]
 				])
 			).toEqual({
 				name: 'Namespaced token',
 				description: 'Namespaced description',
-				imageUrl: 'https://example.com/token.png'
+				imageUrl: 'https://example.com/token.png',
+				thumbnailUrl: 'https://example.com/token-thumb.png'
+			});
+		});
+
+		it('should map image blobs into data URLs', () => {
+			expect(
+				mapIcrc7TokenMetadata([
+					[
+						'icrc7:image',
+						{ Blob: new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]) }
+					]
+				])
+			).toEqual({
+				imageUrl: 'data:image/png;base64,iVBORw0KGgo='
 			});
 		});
 

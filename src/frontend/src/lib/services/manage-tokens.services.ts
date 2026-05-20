@@ -24,7 +24,9 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import {
 	trackTokenManage,
-	type TokenManageEventToken
+	type TokenManageEventModifier,
+	type TokenManageEventToken,
+	type TokenManageSourceLocation
 } from '$lib/services/token-manage-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -33,7 +35,11 @@ import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { isVersionMismatchError, mapIcErrorMetadata } from '$lib/utils/error.utils';
+import {
+	errorDetailToString,
+	isVersionMismatchError,
+	mapIcErrorMetadata
+} from '$lib/utils/error.utils';
 import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -45,6 +51,8 @@ interface ManageTokensSaveParams {
 	onSuccess?: () => void;
 	onError?: () => void;
 	identity: NullishIdentity;
+	tokenManageModifier?: TokenManageEventModifier;
+	tokenManageSourceLocation?: TokenManageSourceLocation;
 }
 
 export interface SaveTokensParams<T> {
@@ -143,6 +151,49 @@ const mapTokenManageToken = <T extends SaveTokensToken>({
 	};
 };
 
+const tokenManageModifier = <T extends SaveTokensToken>({
+	token,
+	modifier
+}: {
+	token: T;
+	modifier?: TokenManageEventModifier;
+}): TokenManageEventModifier => modifier ?? (token.enabled ? 'enable' : 'disable');
+
+const trackTokenManageResults = <T extends SaveTokensToken>({
+	tokens,
+	modifier,
+	sourceLocation,
+	resultStatus,
+	error,
+	errorCode
+}: {
+	tokens: T[];
+	modifier?: TokenManageEventModifier;
+	sourceLocation: TokenManageSourceLocation;
+	resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES;
+	error?: string;
+	errorCode?: string;
+}) => {
+	tokens.forEach((token) => {
+		const tokenId = 'id' in token ? token.id : undefined;
+		const network = 'network' in token ? token.network : undefined;
+		const tokenManageToken = mapTokenManageToken({ token, tokenId, network });
+
+		if (isNullish(tokenManageToken)) {
+			return;
+		}
+
+		trackTokenManage({
+			modifier: tokenManageModifier({ token, modifier }),
+			token: tokenManageToken,
+			sourceLocation,
+			resultStatus,
+			...(nonNullish(error) && { error }),
+			...(nonNullish(errorCode) && { errorCode })
+		});
+	});
+};
+
 export const saveTokens = async <
 	T extends
 		| SaveCustomTokenWithKey
@@ -159,7 +210,9 @@ export const saveTokens = async <
 	modalNext,
 	onSuccess,
 	onError,
-	identity
+	identity,
+	tokenManageModifier: modifier,
+	tokenManageSourceLocation = PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS
 }: {
 	tokens: T[];
 	save: (params: SaveTokensParams<T>) => Promise<void>;
@@ -216,16 +269,12 @@ export const saveTokens = async <
 				}
 			});
 
-			const tokenManageToken = mapTokenManageToken({ token, tokenId, network });
-
-			if (nonNullish(tokenManageToken)) {
-				trackTokenManage({
-					modifier: enabled ? 'enable' : 'disable',
-					token: tokenManageToken,
-					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS,
-					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
-				});
-			}
+			trackTokenManageResults({
+				tokens: [token],
+				modifier,
+				sourceLocation: tokenManageSourceLocation,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			});
 		});
 	} catch (err: unknown) {
 		const versionMismatch = isVersionMismatchError(err);
@@ -247,6 +296,15 @@ export const saveTokens = async <
 		trackEvent({
 			name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
 			metadata: mapIcErrorMetadata(err)
+		});
+
+		trackTokenManageResults({
+			tokens,
+			modifier,
+			sourceLocation: tokenManageSourceLocation,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			error: errorDetailToString(err),
+			...(versionMismatch && { errorCode: 'version_mismatch' })
 		});
 	}
 };

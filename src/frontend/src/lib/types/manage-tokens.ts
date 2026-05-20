@@ -1,4 +1,5 @@
 export interface ManageTokensData {
-	initialSearch: string;
+	initialSearch?: string;
 	message?: string;
+	icrc7CanisterId?: string;
 }

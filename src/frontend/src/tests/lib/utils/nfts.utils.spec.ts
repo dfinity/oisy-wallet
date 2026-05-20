@@ -803,6 +803,24 @@ describe('nfts.utils', () => {
 			expect(result).toBe(MediaStatusEnum.OK);
 		});
 
+		it('returns OK for data image URLs without fetching', async () => {
+			global.fetch = vi.fn();
+
+			const result = await getMediaStatus('data:image/png;base64,iVBORw0KGgo=');
+
+			expect(result).toBe(MediaStatusEnum.OK);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('returns NON_SUPPORTED_MEDIA_TYPE for non-media data URLs', async () => {
+			global.fetch = vi.fn();
+
+			const result = await getMediaStatus('data:text/html;base64,PGgxPkhlbGxvPC9oMT4=');
+
+			expect(result).toBe(MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
 		it('returns INVALID_DATA for invalid URL', async () => {
 			const result = await getMediaStatus('not-a-url');
 

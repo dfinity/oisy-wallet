@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import AddTokenReviewByNetwork from '$lib/components/manage/AddTokenReviewByNetwork.svelte';
@@ -11,8 +13,13 @@
 	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SOURCE_LOCATIONS
+	} from '$lib/enums/plausible';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
+	import { trackTokenManage } from '$lib/services/token-manage-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Network } from '$lib/types/network';
@@ -22,11 +29,12 @@
 
 	interface Props {
 		initialSearch?: string;
+		icrc7CanisterId?: string;
 		onClose?: () => void;
 		infoElement?: Snippet;
 	}
 
-	let { initialSearch, onClose = () => {}, infoElement }: Props = $props();
+	let { initialSearch, icrc7CanisterId, onClose = () => {}, infoElement }: Props = $props();
 
 	const isNftsPage = $derived(isRouteNfts(page));
 
@@ -53,6 +61,7 @@
 
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
+	let initializedIcrc7ReviewStep = false;
 
 	const saveTokens = async (tokens: Token[]) => {
 		await saveAllCustomTokens({
@@ -68,15 +77,65 @@
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
+	const trackImportCancel = () => {
+		if (
+			currentStep?.name !== WizardStepsManageTokens.IMPORT &&
+			currentStep?.name !== WizardStepsManageTokens.REVIEW
+		) {
+			return;
+		}
+
+		const address =
+			tokenData.ledgerCanisterId ??
+			tokenData.extCanisterId ??
+			tokenData.dip721CanisterId ??
+			tokenData.icPunksCanisterId ??
+			tokenData.icrc7CanisterId ??
+			tokenData.ethContractAddress ??
+			tokenData.splTokenAddress;
+		const tokenNetwork = network?.id.description;
+
+		if (isNullish(address) || isNullish(tokenNetwork)) {
+			return;
+		}
+
+		trackTokenManage({
+			modifier: 'import',
+			token: {
+				network: tokenNetwork,
+				address
+			},
+			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+		});
+	};
+
 	const close = () => {
+		trackImportCancel();
+
 		modalStore.close();
 
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
 		onClose();
 	};
 
-	let network: Network | undefined = $state($selectedNetwork);
-	let tokenData: Partial<AddTokenData> = $state({});
+	const initialNetwork = (): Network | undefined =>
+		icrc7CanisterId === undefined ? $selectedNetwork : ICP_NETWORK;
+
+	const initialTokenData = (): Partial<AddTokenData> =>
+		icrc7CanisterId === undefined ? {} : { icrc7CanisterId };
+
+	let network: Network | undefined = $state(initialNetwork());
+	let tokenData: Partial<AddTokenData> = $state(initialTokenData());
+
+	$effect(() => {
+		if (initializedIcrc7ReviewStep || icrc7CanisterId === undefined || modal === undefined) {
+			return;
+		}
+
+		initializedIcrc7ReviewStep = true;
+		modal.set(2);
+	});
 </script>
 
 <WizardModal

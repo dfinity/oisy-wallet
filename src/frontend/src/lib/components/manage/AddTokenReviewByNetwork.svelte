@@ -244,7 +244,8 @@
 			modalNext,
 			onSuccess,
 			onError,
-			identity: $authIdentity
+			identity: $authIdentity,
+			tokenManageModifier: 'import'
 		});
 
 	let icrcMetadata: ValidateIcrcTokenData | undefined = $state();
