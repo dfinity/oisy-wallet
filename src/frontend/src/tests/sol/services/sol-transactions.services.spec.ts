@@ -48,6 +48,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
+import { address as solAddress } from '@solana/kit';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -161,6 +162,23 @@ describe('sol-transactions.services', () => {
 		};
 
 		const indexStartAtaMapping = Math.floor(mockAllInstructions.length / 3);
+		const mockInitializedTokenAccount = 'F5Qu5Lx2aDwis6KwtpXBuHWHh2VGWewQAVEaatAKfir3';
+		const mockInitializedTokenAddress = 'So11111111111111111111111111111111111111112';
+		const expectedInstructionAddressToToken = ({
+			instructions,
+			index
+		}: {
+			instructions: ReadonlyArray<(typeof mockAllInstructions)[number]>;
+			index: number;
+		}): Record<string, string> => {
+			const indexStartInstructionTokenMapping = instructions.findIndex(
+				(instruction) => 'parsed' in instruction && instruction.parsed.type === 'initializeAccount3'
+			);
+
+			return indexStartInstructionTokenMapping >= 0 && index >= indexStartInstructionTokenMapping
+				? { [mockInitializedTokenAccount]: mockInitializedTokenAddress }
+				: {};
+		};
 
 		const expectedResults: SolTransactionUi[] = Array.from(
 			{ length: nInstructions },
@@ -224,7 +242,10 @@ describe('sol-transactions.services', () => {
 									[mockSolAddress]: initialBalance - mockValue * BigInt(index),
 									[mockSolAddress2]: mockValue * BigInt(index)
 								},
-					addressToToken: {}
+					addressToToken: expectedInstructionAddressToToken({
+						instructions: mockAllInstructions,
+						index
+					})
 				});
 			});
 		});
@@ -263,7 +284,10 @@ describe('sol-transactions.services', () => {
 									[mockSolAddress]: initialBalance - mockValue * BigInt(index),
 									[mockSolAddress2]: mockValue * BigInt(index)
 								},
-					addressToToken: {}
+					addressToToken: expectedInstructionAddressToToken({
+						instructions: innerInstructions,
+						index
+					})
 				});
 			});
 		});
@@ -400,13 +424,16 @@ describe('sol-transactions.services', () => {
 									[mockSolAddress2]:
 										mockValue * BigInt(index >= indexStartAtaMapping ? index - 1 : index)
 								},
-					addressToToken:
-						index >= indexStartAtaMapping
-							? {
-									[mockAtaAddress]: mockSplAddress,
-									[mockAtaAddress2]: mockSplAddress
-								}
-							: {}
+					addressToToken: {
+						...expectedInstructionAddressToToken({
+							instructions: mockAllInstructions,
+							index
+						}),
+						...(index >= indexStartAtaMapping && {
+							[mockAtaAddress]: mockSplAddress,
+							[mockAtaAddress2]: mockSplAddress
+						})
+					}
 				});
 			});
 		});
@@ -444,7 +471,7 @@ describe('sol-transactions.services', () => {
 									type: 'createIdempotent'
 								},
 								program: 'spl-associated-token-account',
-								programId: ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
+								programId: solAddress(ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS),
 								stackHeight: undefined
 							},
 							{
@@ -458,7 +485,7 @@ describe('sol-transactions.services', () => {
 									type: 'transfer'
 								},
 								program: 'spl-token',
-								programId: TOKEN_PROGRAM_ADDRESS,
+								programId: solAddress(TOKEN_PROGRAM_ADDRESS),
 								stackHeight: undefined
 							},
 							{
@@ -472,7 +499,7 @@ describe('sol-transactions.services', () => {
 									type: 'transfer'
 								},
 								program: 'spl-token',
-								programId: TOKEN_PROGRAM_ADDRESS,
+								programId: solAddress(TOKEN_PROGRAM_ADDRESS),
 								stackHeight: undefined
 							}
 						]
@@ -482,7 +509,7 @@ describe('sol-transactions.services', () => {
 					...mockTransactionDetail.meta,
 					innerInstructions: []
 				}
-			} as SolRpcTransaction;
+			};
 
 			spyFetchTransactionDetailForSignature.mockResolvedValue(mockTransactionDetailWithClosedAta);
 			spyFindAssociatedTokenPda.mockResolvedValue([mockAtaAddress]);
@@ -505,7 +532,11 @@ describe('sol-transactions.services', () => {
 						return Promise.resolve(undefined);
 					}
 
-					const { amount, source: from, destination: to } = info as {
+					const {
+						amount,
+						source: from,
+						destination: to
+					} = info as {
 						amount: string;
 						source: SolMappedTransaction['from'];
 						destination: SolMappedTransaction['to'];
@@ -544,7 +575,7 @@ describe('sol-transactions.services', () => {
 			]);
 			expect(
 				vi.mocked(getAccountOwner).mock.calls.some(([{ address }]) => address === mockAtaAddress)
-			).toBe(false);
+			).toBeFalsy();
 
 			const [outboundTransaction] = transactions;
 			const cachedOutboundTransaction = mapUserTransactionToSolTransaction({
