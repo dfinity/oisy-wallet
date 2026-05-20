@@ -26,6 +26,9 @@ import {
 } from '$lib/utils/export-data.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIcrcAccount } from '$tests/mocks/identity.mock';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { signature } from '@solana/kit';
 
 const TOKEN_TAGS: Token['tags'] = [
@@ -794,6 +797,57 @@ describe('export-data.utils', () => {
 			// Asset contribution is 0 (approve doesn't move balance) + fee folded in.
 			expect(row.effective_token).toBe('-0.0000001');
 			expect(row.effective_fee_token).toBe('');
+		});
+
+		it('surfaces the token mintingAccount as From on ICRC mint rows', () => {
+			// Indexer leaves from undefined on mints. The activity page falls back to the IC
+			// token's mintingAccount via IcTransaction.svelte:53; the CSV must do the same.
+			const mintTx: IcTransactionUi = {
+				...icTx,
+				type: 'mint',
+				from: undefined,
+				to: 'user-principal',
+				incoming: true
+			};
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ic', transaction: mintTx, token: mockValidIcrcToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.type).toBe('mint');
+			expect(row.direction).toBe('in');
+			// encodeIcrcAccount of the token's mintingAccount — exact value lives in the mock,
+			// so assert it's non-empty and matches what the helper produces.
+			expect(row.from).not.toBe('');
+			expect(row.from).toBe(encodeIcrcAccount(mockIcrcAccount));
+		});
+
+		it('surfaces the token mintingAccount as To on ICRC burn rows', () => {
+			const burnTx: IcTransactionUi = {
+				...icTx,
+				type: 'burn',
+				from: 'user-principal',
+				to: undefined,
+				incoming: false
+			};
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ic', transaction: burnTx, token: mockValidIcrcToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.type).toBe('burn');
+			expect(row.direction).toBe('out');
+			expect(row.from).toBe('user-principal');
+			expect(row.to).not.toBe('');
+			expect(row.to).toBe(encodeIcrcAccount(mockIcrcAccount));
 		});
 
 		it('zeros effective_token but populates effective_fee_token for an approve with a different fee token', () => {

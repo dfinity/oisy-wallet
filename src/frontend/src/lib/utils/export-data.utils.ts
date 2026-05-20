@@ -2,6 +2,7 @@ import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
+import { isIcToken } from '$icp/validation/ic-token.validation';
 import type { Currency } from '$lib/enums/currency';
 import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
@@ -13,6 +14,7 @@ import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import Decimal from 'decimal.js';
 import { formatUnits } from 'ethers/utils';
 
@@ -420,6 +422,18 @@ const toEthereumRow = ({
 	};
 };
 
+// IC tokens carry a `mintingAccount` that the protocol uses to issue and absorb supply.
+// The activity page (IcTransaction.svelte) surfaces it as the "from" side of mint rows
+// (tokens come from the minter) and as the "to" side of burn rows (tokens go back to the
+// minter) — the indexer leaves those fields blank otherwise.
+const getIcMintingAccount = (token: Token): string | undefined => {
+	if (!isIcToken(token) || isNullish(token.mintingAccount)) {
+		return undefined;
+	}
+
+	return encodeIcrcAccount(token.mintingAccount);
+};
+
 const toIcRow = ({
 	transaction: tx,
 	token,
@@ -431,12 +445,18 @@ const toIcRow = ({
 }): TransactionCsvRow => {
 	const direction: string = tx.incoming === true ? 'in' : tx.incoming === false ? 'out' : '';
 	const type = normalizeType(tx.type);
-	// ICRC approves store the spender in tx.approveSpender (tx.to is undefined). Surface it
-	// as the To column so the activity page's "approving Alice" reading carries into the
-	// CSV — without this the row would have an empty To and the Counterparty derived from
-	// it would be blank too.
+	const minter = getIcMintingAccount(token);
+	// Mirror IcTransaction.svelte's listFrom/listTo logic so the CSV reads the same way as
+	// the activity page: mints surface the minter as From (tokens are issued from it), burns
+	// surface the minter as To (tokens are sent back), and approves surface the spender as To
+	// (the indexer leaves tx.to undefined and stores the spender on tx.approveSpender).
+	const from = type === 'mint' && nonNullish(minter) ? minter : (tx.from ?? '');
 	const to =
-		type === 'approve' && nonNullish(tx.approveSpender) ? tx.approveSpender : (tx.to ?? '');
+		type === 'approve' && nonNullish(tx.approveSpender)
+			? tx.approveSpender
+			: type === 'burn' && nonNullish(minter)
+				? minter
+				: (tx.to ?? '');
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
@@ -449,7 +469,7 @@ const toIcRow = ({
 		type_raw: tx.type,
 		direction,
 		status: tx.status,
-		from: tx.from ?? '',
+		from,
 		to,
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: token.decimals }),
