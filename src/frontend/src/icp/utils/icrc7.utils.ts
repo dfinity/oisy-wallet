@@ -9,7 +9,7 @@ import type { NftMetadataWithoutId } from '$lib/types/nft';
 import type { Token, TokenMetadata } from '$lib/types/token';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, uint8ArrayToBase64 } from '@dfinity/utils';
 
 export const isTokenIcrc7 = (token: Partial<IcToken>): token is Icrc7Token =>
 	token.standard?.code === 'icrc7';
@@ -96,17 +96,6 @@ const valueToString = ({ value }: { value: Value }): string | undefined => {
 	if ('Int' in value) {
 		return value.Int.toString();
 	}
-};
-
-const uint8ArrayToBase64 = (value: Uint8Array): string => {
-	let binary = '';
-	const chunkSize = 0x8000;
-
-	for (let i = 0; i < value.length; i += chunkSize) {
-		binary += String.fromCharCode(...value.slice(i, i + chunkSize));
-	}
-
-	return btoa(binary);
 };
 
 const blobImageMimeType = (value: Uint8Array): string | undefined => {
