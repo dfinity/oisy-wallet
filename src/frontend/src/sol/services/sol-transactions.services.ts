@@ -501,15 +501,6 @@ const loadSolTransactions = async ({
 				)
 				.map(({ signature }) => String(signature))
 		);
-
-		const storedRefreshIds = new Set(
-			storedTransactions
-				.filter((transaction) =>
-					requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress })
-				)
-				.map(({ id }) => id)
-		);
-
 		const shouldRefreshStoredTransactions = storedRefreshSignatures.size > 0;
 
 		const exitIfFirstSignatureMatches =
@@ -545,12 +536,12 @@ const loadSolTransactions = async ({
 				: newTransactions;
 
 		const freshSignatures = new Set(freshTransactions.map(({ signature }) => String(signature)));
+		const refreshedSignatures = new Set(
+			[...storedRefreshSignatures].filter((signature) => freshSignatures.has(signature))
+		);
 
 		const storedTransactionsToUse = isHeadLoad
-			? storedTransactions.filter(
-					({ id, signature }) =>
-						!storedRefreshIds.has(id) || !freshSignatures.has(String(signature))
-				)
+			? storedTransactions.filter(({ signature }) => !refreshedSignatures.has(String(signature)))
 			: storedTransactions;
 
 		const allTransactions = isHeadLoad

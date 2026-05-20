@@ -847,8 +847,15 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should refresh stored SPL transactions that are missing owner context', async () => {
-			const [storedTransaction] = createMockSolTransactionsUi(1).map((tx) => ({
+			const [storedTransaction, storedSameSignatureTransaction] = createMockSolTransactionsUi(
+				2
+			).map((tx, index) => ({
 				...tx,
+				id: `stored-same-signature-transaction-${index}`,
+				blockNumber: 100
+			}));
+			const ownerlessStoredTransaction: SolTransactionUi = {
+				...storedTransaction,
 				id: 'ownerless-stored-transaction',
 				blockNumber: 100,
 				type: 'receive' as const,
@@ -856,21 +863,28 @@ describe('sol-transactions.services', () => {
 				to: mockSolAddress2,
 				fromOwner: undefined,
 				toOwner: undefined
-			}));
+			};
 			const correctedTransaction: SolTransactionUi = {
-				...storedTransaction,
+				...ownerlessStoredTransaction,
 				type: 'send',
 				fromOwner: mockSolAddress
 			};
+			const correctedSameSignatureTransaction: SolTransactionUi = {
+				...storedSameSignatureTransaction,
+				id: 'corrected-same-signature-transaction'
+			};
 
 			vi.mocked(loadSolUserTransactions).mockResolvedValue({
-				transactions: [storedTransaction],
+				transactions: [ownerlessStoredTransaction, storedSameSignatureTransaction],
 				newestBlockIndex: 100n,
 				oldestBlockIndex: 100n,
 				nextStart: undefined,
-				totalStored: 1n
+				totalStored: 2n
 			});
-			spyGetTransactions.mockResolvedValue([correctedTransaction]);
+			spyGetTransactions.mockResolvedValue([
+				correctedTransaction,
+				correctedSameSignatureTransaction
+			]);
 
 			await loadNextSolTransactions({ ...mockParams, token: BONK_TOKEN });
 
@@ -883,12 +897,16 @@ describe('sol-transactions.services', () => {
 				{
 					data: correctedTransaction,
 					certified: false
+				},
+				{
+					data: correctedSameSignatureTransaction,
+					certified: false
 				}
 			]);
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokenId: { SplMainnet: BONK_TOKEN.address },
-				transactions: [correctedTransaction]
+				transactions: [correctedTransaction, correctedSameSignatureTransaction]
 			});
 		});
 
