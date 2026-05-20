@@ -15,6 +15,7 @@ import {
 	BASIC_TOKEN_CSV_COLUMNS,
 	buildTokenRows,
 	buildTransactionRows,
+	sortBasicTokenRows,
 	TOKEN_CSV_COLUMNS,
 	TRANSACTION_CSV_COLUMNS,
 	type TokenCsvRow
@@ -216,11 +217,11 @@ describe('export-data.utils', () => {
 	});
 
 	describe('BASIC_TOKEN_CSV_COLUMNS', () => {
-		it('lists the 6 basic-export columns in order', () => {
+		it('lists the 6 basic-export columns with network first', () => {
 			expect(BASIC_TOKEN_CSV_COLUMNS.map(({ key }) => key)).toEqual([
+				'network',
 				'symbol',
 				'name',
-				'network',
 				'balance',
 				'currency',
 				'value'
@@ -232,6 +233,47 @@ describe('export-data.utils', () => {
 			BASIC_TOKEN_CSV_COLUMNS.forEach(({ key }) => {
 				expect(extendedKeys.has(key)).toBeTruthy();
 			});
+		});
+	});
+
+	describe('sortBasicTokenRows', () => {
+		const row = (overrides: Partial<TokenCsvRow>): TokenCsvRow =>
+			({ network: '', symbol: '', name: '', ...overrides }) as TokenCsvRow;
+
+		it('sorts by network ascending first', () => {
+			const sorted = sortBasicTokenRows([
+				row({ network: 'Solana', symbol: 'ZZZ', name: 'Aaa' }),
+				row({ network: 'Bitcoin', symbol: 'BBB', name: 'Zzz' }),
+				row({ network: 'Ethereum', symbol: 'AAA', name: 'Mmm' })
+			]);
+
+			expect(sorted.map(({ network }) => network)).toEqual(['Bitcoin', 'Ethereum', 'Solana']);
+		});
+
+		it('breaks network ties by symbol, then by name', () => {
+			const sorted = sortBasicTokenRows([
+				row({ network: 'Ethereum', symbol: 'USDC', name: 'USD Coin (Bridged)' }),
+				row({ network: 'Ethereum', symbol: 'USDC', name: 'USD Coin' }),
+				row({ network: 'Ethereum', symbol: 'AAA', name: 'Alpha' })
+			]);
+
+			expect(sorted.map(({ symbol, name }) => `${symbol}/${name}`)).toEqual([
+				'AAA/Alpha',
+				'USDC/USD Coin',
+				'USDC/USD Coin (Bridged)'
+			]);
+		});
+
+		it('does not mutate the input array', () => {
+			const input = [
+				row({ network: 'Solana', symbol: 'SOL', name: 'Solana' }),
+				row({ network: 'Bitcoin', symbol: 'BTC', name: 'Bitcoin' })
+			];
+			const snapshot = [...input];
+
+			sortBasicTokenRows(input);
+
+			expect(input).toEqual(snapshot);
 		});
 	});
 

@@ -47,16 +47,28 @@ export const TOKEN_CSV_COLUMNS: CsvColumn<TokenCsvRow>[] = [
 ];
 
 // Slim variant for the Basic tokens export — just the columns a non-technical user needs to
-// answer "what tokens do I hold and what are they worth in my currency". Reuses the same
-// TokenCsvRow shape so the row builder doesn't need to know about the variant.
+// answer "what tokens do I hold and what are they worth in my currency". Network comes first
+// so the file groups naturally by chain when sorted. Reuses the same TokenCsvRow shape so the
+// row builder doesn't need to know about the variant.
 export const BASIC_TOKEN_CSV_COLUMNS: CsvColumn<TokenCsvRow>[] = [
+	{ key: 'network', header: 'network' },
 	{ key: 'symbol', header: 'symbol' },
 	{ key: 'name', header: 'name' },
-	{ key: 'network', header: 'network' },
 	{ key: 'balance', header: 'balance' },
 	{ key: 'currency', header: 'currency' },
 	{ key: 'value', header: 'value' }
 ];
+
+// Sorts the Basic export lexicographically by network → symbol → name. Locale-aware so users
+// on non-English locales still see a natural ordering. Returns a new array — the input is
+// not mutated.
+export const sortBasicTokenRows = (rows: TokenCsvRow[]): TokenCsvRow[] =>
+	[...rows].sort(
+		(a, b) =>
+			a.network.localeCompare(b.network) ||
+			a.symbol.localeCompare(b.symbol) ||
+			a.name.localeCompare(b.name)
+	);
 
 export interface TransactionCsvRow extends CsvRow {
 	timestamp_iso: string;
