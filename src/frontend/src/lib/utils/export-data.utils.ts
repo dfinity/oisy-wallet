@@ -608,10 +608,16 @@ const formatCounterparty = ({
 const finalizeRow = ({
 	row,
 	isSelfTransfer,
+	isStandaloneRoundTrip,
 	contacts
 }: {
 	row: TransactionCsvRow;
 	isSelfTransfer: boolean;
+	// True when the row is a non-IC self-transfer represented as a single outgoing row —
+	// the asset returns to the same wallet within this row, so only the fee actually leaves.
+	// ICRC self-transfers are emitted by the indexer as a paired in + out, where the IN
+	// duplicate's +Credit cancels the OUT's -Amount; for that case this flag is false.
+	isStandaloneRoundTrip: boolean;
 	contacts: ContactUi[];
 }): TransactionCsvRow => {
 	const isApprove = row.type === 'approve';
@@ -668,7 +674,10 @@ const finalizeRow = ({
 
 	let debit = '';
 	if (isOutgoing) {
-		const assetPortion = isApprove ? '0' : row.amount;
+		// Zero the asset portion for approve rows (allowance doesn't move) and for
+		// non-IC self-transfers (asset returns to the same wallet within this row). ICRC
+		// self-transfer OUTs keep -amount so the IN duplicate's +Credit nets them.
+		const assetPortion = isApprove || isStandaloneRoundTrip ? '0' : row.amount;
 		const feePortion = mergeColumns ? fee : '';
 		const total = sumDecimals({ a: assetPortion, b: feePortion });
 		if (total !== '' && parseFloat(total) !== 0) {
@@ -711,6 +720,11 @@ export const buildTransactionRows = ({
 		// BTC: tx.value is already net of change, so self-transfer detection is unnecessary
 		// (and ambiguous with multi-recipient txs). Default to false.
 		let isSelfTransfer = false;
+		// True only when the row IS a single-row representation of a self-transfer (asset
+		// returns within the same row, no companion row from the indexer). ICRC is the
+		// exception — it emits a paired in + out, so the OUT row should NOT zero its asset
+		// portion (the IN duplicate's +Credit balances it).
+		let isStandaloneRoundTrip = false;
 
 		switch (entry.component) {
 			case 'bitcoin':
@@ -733,6 +747,7 @@ export const buildTransactionRows = ({
 					a: entry.transaction.from,
 					b: entry.transaction.to
 				});
+				isStandaloneRoundTrip = isSelfTransfer;
 				break;
 			case 'ic':
 				row = toIcRow({
@@ -744,6 +759,8 @@ export const buildTransactionRows = ({
 					a: entry.transaction.from,
 					b: entry.transaction.to
 				});
+				// IC emits an IN duplicate for self-transfers — see icrc-transactions.utils.ts —
+				// so this OUT row is not a standalone round-trip.
 				break;
 			case 'solana':
 				row = toSolanaRow({
@@ -756,9 +773,10 @@ export const buildTransactionRows = ({
 					a: entry.transaction.fromOwner ?? entry.transaction.from,
 					b: entry.transaction.toOwner ?? entry.transaction.to
 				});
+				isStandaloneRoundTrip = isSelfTransfer;
 				break;
 		}
 
-		return finalizeRow({ row, isSelfTransfer, contacts });
+		return finalizeRow({ row, isSelfTransfer, isStandaloneRoundTrip, contacts });
 	});
 };

@@ -616,6 +616,34 @@ describe('export-data.utils', () => {
 			expect(row.tx_id).toBe('0xeth-tx-1');
 		});
 
+		it('zeros the asset portion of Debit on a non-IC self-transfer (single row, asset returns)', () => {
+			// User sends ETH to their own address. The transaction is a single OUT row — there
+			// is no companion IN duplicate (unlike ICRC). The asset goes out and immediately
+			// returns to the same wallet, so only the gas fee actually leaves: Debit = -fee.
+			const selfEthTx: EthTransactionUi = {
+				...ethTx,
+				type: 'send',
+				from: '0xUserEth',
+				to: '0xUserEth'
+			};
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ethereum', transaction: selfEthTx, token: ethToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.direction).toBe('out');
+			expect(row.amount).toBe('1.0');
+			expect(row.fee).toBe('0.00105');
+			expect(row.fee_token).toBe('ETH');
+			// Asset and fee share the same token (ETH self-transfer), so Debit = -fee only.
+			expect(row.debit).toBe('-0.00105');
+			expect(row.fee_token_debit).toBe('');
+		});
+
 		it('marks an ETH transaction with no blockNumber and a pendingTimestamp as pending', () => {
 			const tx: EthTransactionUi = {
 				...ethTx,
