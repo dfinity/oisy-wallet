@@ -19,7 +19,6 @@
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 	import { enabledFungibleTokens, nativeTokens } from '$lib/derived/tokens.derived';
 	import {
@@ -69,7 +68,6 @@
 				tokens: $enabledFungibleTokens,
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: $currentLanguage,
 				variant,
 				buildTransactions: () =>
 					mapAllTransactionsUi({

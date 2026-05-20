@@ -2,7 +2,6 @@ import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.se
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
-import type { Languages } from '$lib/enums/languages';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
@@ -172,7 +171,6 @@ export const exportTransactionsCsv = async ({
 	buildTransactions,
 	userAddresses,
 	nativeSymbolByNetworkId,
-	language,
 	variant = 'extended'
 }: {
 	identity: Nullish<Identity>;
@@ -180,7 +178,6 @@ export const exportTransactionsCsv = async ({
 	buildTransactions: () => AllTransactionUiWithCmp[];
 	userAddresses: UserAddresses;
 	nativeSymbolByNetworkId: Parameters<typeof buildTransactionRows>[0]['nativeSymbolByNetworkId'];
-	language: Languages;
 	variant?: TransactionCsvVariant;
 }): Promise<boolean> => {
 	const $i18n = get(i18n);
@@ -198,7 +195,6 @@ export const exportTransactionsCsv = async ({
 			transactions,
 			userAddresses,
 			nativeSymbolByNetworkId,
-			language,
 			exportedAt
 		});
 		// The Basic export is meant to be skimmed like an activity feed — sort newest first.

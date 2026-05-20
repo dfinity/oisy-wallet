@@ -3,13 +3,11 @@ import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import type { Currency } from '$lib/enums/currency';
-import type { Languages } from '$lib/enums/languages';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
-import { formatSecondsToDate } from '$lib/utils/format.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
@@ -280,24 +278,20 @@ const formatTimestamp = (timestamp: bigint | number | undefined): string => {
 	return new Date(normalizeTimestampToSeconds(timestamp) * 1000).toISOString();
 };
 
-// Same source value as formatTimestamp, rendered with the user's language + the browser's
-// timezone via the shared `formatSecondsToDate` helper — so the Basic export reads the same
-// way as the transaction row in the wallet UI.
-const formatTimestampLocal = ({
-	timestamp,
-	language
-}: {
-	timestamp: bigint | number | undefined;
-	language: Languages;
-}): string => {
+const pad2 = (n: number): string => String(n).padStart(2, '0');
+
+// Same source value as formatTimestamp, rendered as `YYYY-MM-DD HH:MM:SS` in the browser's
+// local timezone. The format is locale-agnostic and parses cleanly as a datetime across
+// Excel / Google Sheets / Numbers, so the user can sort, filter and use it in formulas
+// without doing a manual text-to-date conversion. The timezone offset itself isn't part of
+// the value — the export is the user's own snapshot in their own timezone.
+const formatTimestampLocal = (timestamp: bigint | number | undefined): string => {
 	if (isNullish(timestamp)) {
 		return '';
 	}
 
-	return formatSecondsToDate({
-		seconds: normalizeTimestampToSeconds(timestamp),
-		language
-	});
+	const date = new Date(normalizeTimestampToSeconds(timestamp) * 1000);
+	return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())} ${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`;
 };
 
 // Title-cases a normalized transaction type for the human-facing Basic export (e.g.
@@ -312,13 +306,11 @@ const toBitcoinRow = ({
 	transaction: tx,
 	token,
 	userAddress,
-	language,
 	exportedAt
 }: {
 	transaction: BtcTransactionUi;
 	token: Token;
 	userAddress: Nullish<string>;
-	language: Languages;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const type = normalizeType(tx.type);
@@ -335,7 +327,7 @@ const toBitcoinRow = ({
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
-		timestamp_local: formatTimestampLocal({ timestamp: tx.timestamp, language }),
+		timestamp_local: formatTimestampLocal(tx.timestamp),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
@@ -363,14 +355,12 @@ const toEthereumRow = ({
 	token,
 	userAddress,
 	nativeSymbolByNetworkId,
-	language,
 	exportedAt
 }: {
 	transaction: EthTransactionUi;
 	token: Token;
 	userAddress: Nullish<string>;
 	nativeSymbolByNetworkId: (networkId: NetworkId) => string | undefined;
-	language: Languages;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const type = normalizeType(tx.type);
@@ -396,7 +386,7 @@ const toEthereumRow = ({
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
-		timestamp_local: formatTimestampLocal({ timestamp: tx.timestamp, language }),
+		timestamp_local: formatTimestampLocal(tx.timestamp),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
@@ -421,12 +411,10 @@ const toEthereumRow = ({
 const toIcRow = ({
 	transaction: tx,
 	token,
-	language,
 	exportedAt
 }: {
 	transaction: IcTransactionUi;
 	token: Token;
-	language: Languages;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const direction: string = tx.incoming === true ? 'in' : tx.incoming === false ? 'out' : '';
@@ -434,7 +422,7 @@ const toIcRow = ({
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
-		timestamp_local: formatTimestampLocal({ timestamp: tx.timestamp, language }),
+		timestamp_local: formatTimestampLocal(tx.timestamp),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
@@ -460,13 +448,11 @@ const toSolanaRow = ({
 	transaction: tx,
 	token,
 	userAddress,
-	language,
 	exportedAt
 }: {
 	transaction: SolTransactionUi;
 	token: Token;
 	userAddress: Nullish<string>;
-	language: Languages;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const type = normalizeType(tx.type);
@@ -485,7 +471,7 @@ const toSolanaRow = ({
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
-		timestamp_local: formatTimestampLocal({ timestamp: tx.timestamp, language }),
+		timestamp_local: formatTimestampLocal(tx.timestamp),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
@@ -602,13 +588,11 @@ export const buildTransactionRows = ({
 	transactions,
 	userAddresses,
 	nativeSymbolByNetworkId,
-	language,
 	exportedAt
 }: {
 	transactions: AllTransactionUiWithCmp[];
 	userAddresses: UserAddresses;
 	nativeSymbolByNetworkId: (networkId: NetworkId) => string | undefined;
-	language: Languages;
 	exportedAt: Date;
 }): TransactionCsvRow[] => {
 	const exportedAtIso = exportedAt.toISOString();
@@ -625,7 +609,6 @@ export const buildTransactionRows = ({
 					transaction: entry.transaction,
 					token: entry.token,
 					userAddress: userAddresses.btc,
-					language,
 					exportedAt: exportedAtIso
 				});
 				break;
@@ -635,7 +618,6 @@ export const buildTransactionRows = ({
 					token: entry.token,
 					userAddress: userAddresses.eth,
 					nativeSymbolByNetworkId,
-					language,
 					exportedAt: exportedAtIso
 				});
 				isSelfTransfer = addressesEqual({
@@ -647,7 +629,6 @@ export const buildTransactionRows = ({
 				row = toIcRow({
 					transaction: entry.transaction,
 					token: entry.token,
-					language,
 					exportedAt: exportedAtIso
 				});
 				isSelfTransfer = addressesEqual({
@@ -660,7 +641,6 @@ export const buildTransactionRows = ({
 					transaction: entry.transaction,
 					token: entry.token,
 					userAddress: userAddresses.sol,
-					language,
 					exportedAt: exportedAtIso
 				});
 				isSelfTransfer = addressesEqual({

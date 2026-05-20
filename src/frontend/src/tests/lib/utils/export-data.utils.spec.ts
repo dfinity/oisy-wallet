@@ -7,7 +7,6 @@ import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
-import { Languages } from '$lib/enums/languages';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -24,7 +23,6 @@ import {
 	type TokenCsvRow,
 	type TransactionCsvRow
 } from '$lib/utils/export-data.utils';
-import { formatSecondsToDate } from '$lib/utils/format.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { signature } from '@solana/kit';
@@ -530,15 +528,16 @@ describe('export-data.utils', () => {
 				transactions,
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
-			// Computed at test time so the assertion holds regardless of the host timezone.
-			const expectedTimestampLocal = formatSecondsToDate({
-				seconds: TIMESTAMP_S,
-				language: Languages.ENGLISH
-			});
+			// Computed at test time so the assertion holds regardless of the host timezone —
+			// the helper renders the date in whatever timezone the test environment is in.
+			const expectedTimestampLocal = (() => {
+				const d = new Date(TIMESTAMP_S * 1000);
+				const pad = (n: number): string => String(n).padStart(2, '0');
+				return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+			})();
 
 			expect(row).toEqual({
 				timestamp_iso: TIMESTAMP_ISO,
@@ -572,7 +571,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'bitcoin', transaction: tx, token: btcToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -585,7 +583,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: ethTx, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -609,7 +606,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: tx, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -621,7 +617,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: ethTx, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId: () => undefined,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -633,7 +628,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ic', transaction: icTx, token: icrcToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -663,7 +657,6 @@ describe('export-data.utils', () => {
 				],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -698,7 +691,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ic', transaction: selfIcTx, token: icrcToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -737,7 +729,6 @@ describe('export-data.utils', () => {
 				],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -768,7 +759,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ic', transaction: sameTokenApprove, token: icrcToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -801,7 +791,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: evmApprove, token: erc20Token }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -819,7 +808,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'solana', transaction: solTx, token: solToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -845,7 +833,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: withdraw, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -862,7 +849,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: deposit, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -877,7 +863,6 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: tx, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -894,7 +879,6 @@ describe('export-data.utils', () => {
 				],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
@@ -907,7 +891,6 @@ describe('export-data.utils', () => {
 				transactions: [],
 				userAddresses,
 				nativeSymbolByNetworkId,
-				language: Languages.ENGLISH,
 				exportedAt
 			});
 
