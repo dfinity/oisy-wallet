@@ -328,7 +328,7 @@ describe('export-data.utils', () => {
 				'from',
 				'to',
 				'effective_token',
-				'fee_token',
+				'fee_token_display',
 				'effective_fee_token',
 				'tx_id'
 			]);
@@ -562,6 +562,9 @@ describe('export-data.utils', () => {
 				amount: '0.001',
 				fee: '0.000005',
 				fee_token: 'BTC',
+				// On a same-token merge the Basic export's Fee column is empty, so the
+				// Basic Fee Token reads empty too — that's what fee_token_display surfaces.
+				fee_token_display: '',
 				// Fee and asset share the BTC token symbol, so the signed fee is folded into
 				// effective_token and effective_fee_token is left blank.
 				effective_token: '-0.001005',
@@ -814,6 +817,9 @@ describe('export-data.utils', () => {
 			expect(row.type).toBe('approve');
 			expect(row.token_symbol).toBe('USDC');
 			expect(row.fee_token).toBe('ETH');
+			// fee_token_display keeps the gas token since the Basic Fee column has a value
+			// to label — only the same-token merge clears it.
+			expect(row.fee_token_display).toBe('ETH');
 			// Asset (USDC) is unchanged by an approve.
 			expect(row.effective_token).toBe('0');
 			// Fee is in ETH, kept in its own column.

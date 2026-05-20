@@ -90,6 +90,7 @@ export interface TransactionCsvRow extends CsvRow {
 	amount: string;
 	fee: string;
 	fee_token: string;
+	fee_token_display: string;
 	effective_token: string;
 	effective_fee_token: string;
 	tx_id: string;
@@ -134,7 +135,7 @@ export const BASIC_TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'from', header: 'From' },
 	{ key: 'to', header: 'To' },
 	{ key: 'effective_token', header: 'Amount' },
-	{ key: 'fee_token', header: 'Fee Token' },
+	{ key: 'fee_token_display', header: 'Fee Token' },
 	{ key: 'effective_fee_token', header: 'Fee' },
 	{ key: 'tx_id', header: 'Transaction ID' }
 ];
@@ -347,9 +348,10 @@ const toBitcoinRow = ({
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: BTC_DECIMALS }),
 		fee_token: 'BTC',
-		// counterparty + effective_* are filled in by finalizeRow once direction + contacts +
-		// self-transfer are known.
+		// counterparty + effective_* + fee_token_display are filled in by finalizeRow once
+		// direction + contacts + self-transfer are known.
 		counterparty: '',
+		fee_token_display: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.id,
@@ -409,6 +411,7 @@ const toEthereumRow = ({
 		fee: formatAmount({ value: gasFee, decimals: EVM_NATIVE_DECIMALS }),
 		fee_token: nativeSymbolByNetworkId(token.network.id) ?? '',
 		counterparty: '',
+		fee_token_display: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.hash ?? '',
@@ -446,6 +449,7 @@ const toIcRow = ({
 		fee: formatAmount({ value: tx.fee, decimals: token.decimals }),
 		fee_token: token.symbol,
 		counterparty: '',
+		fee_token_display: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.id),
@@ -496,6 +500,7 @@ const toSolanaRow = ({
 		fee: formatAmount({ value: tx.fee, decimals: SOL_NATIVE_DECIMALS }),
 		fee_token: 'SOL',
 		counterparty: '',
+		fee_token_display: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.signature),
@@ -616,10 +621,18 @@ const finalizeRow = ({
 	const counterpartyAddress = isOutgoing ? row.to : isIncoming ? row.from : '';
 	const counterparty = formatCounterparty({ address: counterpartyAddress, contacts });
 
+	const fee = userPaidFee ? row.fee : '';
+	const fee_token = userPaidFee ? row.fee_token : '';
+	// On a same-token merge the Basic export's "Fee" column reads effective_fee_token, which
+	// is blank — so naming the fee token there is misleading. The raw fee_token stays
+	// populated for the Extended export, where the "Fee" column still shows the amount.
+	const fee_token_display = mergeColumns ? '' : fee_token;
+
 	return {
 		...row,
-		fee: userPaidFee ? row.fee : '',
-		fee_token: userPaidFee ? row.fee_token : '',
+		fee,
+		fee_token,
+		fee_token_display,
 		counterparty,
 		effective_token,
 		effective_fee_token
