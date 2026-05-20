@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use candid::{Nat, Principal};
 use pretty_assertions::assert_eq;
 use shared::types::{
@@ -227,6 +229,16 @@ fn records_survive_canister_upgrade() {
     let pic = setup();
     let user = caller();
     create_active(&pic, user, TX_ID);
+
+    // PocketIC throttles install_code based on instructions used in recent
+    // rounds; advance simulated time and drive ticks so the heavy `setup()`
+    // install rolls out of the rate-limit window before we attempt the
+    // upgrade. Mirrors the advance_time + tick-loop idiom used in
+    // `tests/it/signer.rs` and `tests/it/status.rs`.
+    pic.pic.advance_time(Duration::from_secs(60));
+    for _ in 0..20 {
+        pic.pic.tick();
+    }
 
     pic.upgrade_with_wasm(&BackendBuilder::default_wasm_path(), None)
         .expect("canister upgrade should succeed");
