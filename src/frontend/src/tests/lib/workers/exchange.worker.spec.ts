@@ -240,6 +240,66 @@ describe('exchange.worker', () => {
 				expect(postMessageMock).toHaveBeenCalledOnce();
 			});
 
+			it('should sync the latest payload when restarted during the immediate sync', async () => {
+				let resolveFirstSync: ((v: CoingeckoSimpleErc4626TokenPriceResponse) => void) | undefined;
+				vi.mocked(calculateErc4626Prices)
+					.mockImplementationOnce(
+						() =>
+							new Promise((resolve) => {
+								resolveFirstSync = resolve;
+							})
+					)
+					.mockResolvedValue({});
+
+				const firstEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				const latestEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: ['icrc1'],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				const firstStart = onExchangeMessage(firstEvent);
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(resolveFirstSync).toBeDefined();
+
+				await onExchangeMessage(createEvent('stopExchangeTimer'));
+				const latestStart = onExchangeMessage(latestEvent);
+
+				resolveFirstSync?.({});
+
+				await Promise.all([firstStart, latestStart]);
+
+				expect(simpleTokenPrice).toHaveBeenCalledWith({
+					id: 'internet-computer',
+					vs_currencies: Currency.USD,
+					contract_addresses: ['icrc1'],
+					include_market_cap: true,
+					include_24hr_change: true
+				});
+			});
+
 			it('should sync prices at the correct interval', async () => {
 				await onExchangeMessage(event);
 
