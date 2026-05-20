@@ -3,6 +3,7 @@ import type { Icrc7CustomToken } from '$icp/types/icrc7-custom-token';
 import { COLLECTION_PARAM, NETWORK_PARAM } from '$lib/constants/routes.constants';
 import { CanisterIdTextSchema, type CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';
+import { isNullish } from '@dfinity/utils';
 
 export interface Icrc7CollectionDeepLink {
 	canisterId: CanisterIdText;
@@ -47,13 +48,13 @@ export const resolveIcrc7CollectionDeepLinkAction = ({
 }): Icrc7CollectionDeepLinkAction | undefined => {
 	const deepLink = parseIcrc7CollectionDeepLink({ url });
 
-	if (deepLink === undefined) {
+	if (isNullish(deepLink)) {
 		return;
 	}
 
 	const token = tokens.find(({ canisterId }) => canisterId === deepLink.canisterId);
 
-	if (token === undefined) {
+	if (isNullish(token)) {
 		return { type: 'import', ...deepLink };
 	}
 

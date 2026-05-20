@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
@@ -79,16 +80,16 @@
 	};
 
 	const initialNetwork = (): Network | undefined =>
-		icrc7CanisterId === undefined ? $selectedNetwork : ICP_NETWORK;
+		isNullish(icrc7CanisterId) ? $selectedNetwork : ICP_NETWORK;
 
 	const initialTokenData = (): Partial<AddTokenData> =>
-		icrc7CanisterId === undefined ? {} : { icrc7CanisterId };
+		isNullish(icrc7CanisterId) ? {} : { icrc7CanisterId };
 
 	let network: Network | undefined = $state(initialNetwork());
 	let tokenData: Partial<AddTokenData> = $state(initialTokenData());
 
 	$effect(() => {
-		if (initializedIcrc7ReviewStep || icrc7CanisterId === undefined || modal === undefined) {
+		if (initializedIcrc7ReviewStep || isNullish(icrc7CanisterId) || isNullish(modal)) {
 			return;
 		}
 

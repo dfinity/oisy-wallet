@@ -72,7 +72,7 @@
 		const action = icrc7DeepLinkAction;
 
 		if (
-			action === undefined ||
+			isNullish(action) ||
 			action.type === 'ready' ||
 			handledIcrc7DeepLinkCanisterIds.has(action.canisterId)
 		) {
