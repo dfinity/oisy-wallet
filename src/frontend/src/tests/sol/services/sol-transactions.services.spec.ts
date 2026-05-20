@@ -606,6 +606,7 @@ describe('sol-transactions.services', () => {
 			solAddressDevnetStore.set({ data: mockSolAddress2, certified: false });
 
 			solTransactionsStore.reset(mockToken.id);
+			solTransactionsStore.reset(BONK_TOKEN_ID);
 
 			spyGetTransactions.mockResolvedValue(mockTransactions);
 		});
@@ -842,6 +843,52 @@ describe('sol-transactions.services', () => {
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
 				transactions: [newerRpcTransaction]
+			});
+		});
+
+		it('should refresh stored SPL transactions that are missing owner context', async () => {
+			const [storedTransaction] = createMockSolTransactionsUi(1).map((tx) => ({
+				...tx,
+				id: 'ownerless-stored-transaction',
+				blockNumber: 100,
+				type: 'receive' as const,
+				from: mockAtaAddress,
+				to: mockSolAddress2,
+				fromOwner: undefined,
+				toOwner: undefined
+			}));
+			const correctedTransaction: SolTransactionUi = {
+				...storedTransaction,
+				type: 'send',
+				fromOwner: mockSolAddress
+			};
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: [storedTransaction],
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 100n,
+				nextStart: undefined,
+				totalStored: 1n
+			});
+			spyGetTransactions.mockResolvedValue([correctedTransaction]);
+
+			await loadNextSolTransactions({ ...mockParams, token: BONK_TOKEN });
+
+			expect(spyGetTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({
+					exitIfFirstSignatureMatches: undefined
+				})
+			);
+			expect(get(solTransactionsStore)?.[BONK_TOKEN_ID]).toEqual([
+				{
+					data: correctedTransaction,
+					certified: false
+				}
+			]);
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SplMainnet: BONK_TOKEN.address },
+				transactions: [correctedTransaction]
 			});
 		});
 
