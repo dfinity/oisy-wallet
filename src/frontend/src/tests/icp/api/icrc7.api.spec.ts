@@ -142,6 +142,37 @@ describe('icrc7.api', () => {
 		});
 	});
 
+	describe('metadata', () => {
+		const mockTokenId = 1n;
+		const mockResponse = { name: 'Mock ICRC-7 NFT #1' };
+
+		const params = {
+			identity: mockIdentity,
+			canisterId: mockIcrc7CanisterId,
+			tokenId: mockTokenId
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.metadata.mockResolvedValue(mockResponse);
+		});
+
+		it('should call metadata successfully', async () => {
+			const result = await metadata(params);
+
+			expect(result).toStrictEqual(mockResponse);
+			expect(tokenCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith({
+				tokenId: mockTokenId
+			});
+		});
+
+		it('should throw if metadata fails', async () => {
+			const mockError = new CanisterInternalError('Generic error');
+			tokenCanisterMock.metadata.mockRejectedValueOnce(mockError);
+
+			await expect(metadata(params)).rejects.toThrow(mockError);
+		});
+	});
+
 	describe('transfer', () => {
 		const mockTokenId = 555n;
 

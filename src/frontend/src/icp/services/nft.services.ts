@@ -18,7 +18,7 @@ import type { NullishIdentity } from '$lib/types/identity';
 import type { Nft } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
-import { assertNever, isNullish, type QueryParams } from '@dfinity/utils';
+import { assertNever, isNullish, toNullable, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
 const loadExtNfts = async ({

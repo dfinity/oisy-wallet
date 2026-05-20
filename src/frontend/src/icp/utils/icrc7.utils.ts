@@ -6,6 +6,7 @@ import type { Icrc7Token, Icrc7TokenWithoutId } from '$icp/types/icrc7-token';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isTokenIcrc7 = (token: Partial<IcToken>): token is Icrc7Token =>
 	token.standard?.code === 'icrc7';

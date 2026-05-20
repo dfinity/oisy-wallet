@@ -8,6 +8,7 @@ import type {
 import { idlFactory as idlCertifiedFactoryIcrc7 } from '$declarations/icrc7/icrc7.factory.certified.did';
 import { idlFactory as idlFactoryIcrc7 } from '$declarations/icrc7/icrc7.factory.did';
 import { mapIcrc7TransferError } from '$icp/canisters/icrc7.errors';
+import { mapIcrc7TokenMetadata } from '$icp/utils/icrc7.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -184,6 +185,20 @@ export class Icrc7Canister extends Canister<Icrc7Service> {
 			...(notEmptyString(collectionDescription) && { description: collectionDescription }),
 			...(notEmptyString(collectionLogo) && { icon: collectionLogo })
 		};
+	};
+
+	metadata = async ({
+		tokenId,
+		certified
+	}: { tokenId: bigint } & QueryParams): Promise<NftMetadataWithoutId | undefined> => {
+		const [metadata] = await this.tokenMetadata({ tokenIds: [tokenId], certified });
+		const entries = fromNullable(metadata);
+
+		if (isNullish(entries)) {
+			return;
+		}
+
+		return mapIcrc7TokenMetadata(entries);
 	};
 
 	/**

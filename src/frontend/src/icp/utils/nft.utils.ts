@@ -12,7 +12,8 @@ import type { Nft, NftCollection } from '$lib/types/nft';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { notEmptyString, type QueryParams } from '@dfinity/utils';
+import { UrlSchema } from '$lib/validation/url.validation';
+import { nonNullish, notEmptyString, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 

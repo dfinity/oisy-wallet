@@ -4,7 +4,7 @@ import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
 import type { NullishIdentity } from '$lib/types/identity';
-import type { Token } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
@@ -22,6 +22,7 @@ import {
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
+import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,
@@ -44,6 +45,29 @@ import { get } from 'svelte/store';
 // https://solana.com/docs/core/fees#base-transaction-fee
 export const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
+
+const solBackendPaginationCursors = new Map<TokenId, bigint>();
+
+const setSolBackendPaginationCursor = ({
+	tokenId,
+	nextStart
+}: {
+	tokenId: TokenId;
+	nextStart: bigint | undefined;
+}) => {
+	if (nonNullish(nextStart)) {
+		solBackendPaginationCursors.set(tokenId, nextStart);
+		return;
+	}
+
+	solBackendPaginationCursors.delete(tokenId);
+};
+
+const mapSolCertifiedTransactions = (transactions: SolTransactionUi[]): SolCertifiedTransaction[] =>
+	transactions.map((transaction) => ({
+		data: transaction,
+		certified: false
+	}));
 
 const extractBalances = ({
 	address,
@@ -70,6 +94,70 @@ const extractBalances = ({
 		preBalance: accountIndex < preBalances.length ? preBalances[accountIndex] : lamports(ZERO),
 		postBalance: accountIndex < postBalances.length ? postBalances[accountIndex] : lamports(ZERO)
 	};
+};
+
+interface SolTokenAccountMetadata {
+	addressToOwner: Record<SolAddress, SolAddress>;
+	addressToToken: Record<SolAddress, SplTokenAddress>;
+}
+
+const emptySolTokenAccountMetadata: SolTokenAccountMetadata = {
+	addressToOwner: {},
+	addressToToken: {}
+};
+
+const extractTokenAccountMetadata = (instruction: SolRpcInstruction): SolTokenAccountMetadata => {
+	if (!('parsed' in instruction)) {
+		return emptySolTokenAccountMetadata;
+	}
+
+	const {
+		parsed: { type, info }
+	} = instruction;
+
+	if (isNullish(info)) {
+		return emptySolTokenAccountMetadata;
+	}
+
+	if (type === 'create' || type === 'createIdempotent') {
+		const {
+			account,
+			wallet: owner,
+			mint
+		} = info as Partial<{
+			account: SolAddress;
+			wallet: SolAddress;
+			mint: SplTokenAddress;
+		}>;
+
+		if (nonNullish(account) && nonNullish(owner) && nonNullish(mint)) {
+			return {
+				addressToOwner: { [account]: owner },
+				addressToToken: { [account]: mint }
+			};
+		}
+	}
+
+	if (
+		type === 'initializeAccount' ||
+		type === 'initializeAccount2' ||
+		type === 'initializeAccount3'
+	) {
+		const { account, owner, mint } = info as Partial<{
+			account: SolAddress;
+			owner: SolAddress;
+			mint: SplTokenAddress;
+		}>;
+
+		if (nonNullish(account) && nonNullish(owner) && nonNullish(mint)) {
+			return {
+				addressToOwner: { [account]: owner },
+				addressToToken: { [account]: mint }
+			};
+		}
+	}
+
+	return emptySolTokenAccountMetadata;
 };
 
 export const fetchSolTransactionsForSignature = async ({
@@ -147,28 +235,50 @@ export const fetchSolTransactionsForSignature = async ({
 			parsedTransactions: SolTransactionUi[];
 			cumulativeBalances: Record<SolAddress, SolMappedTransaction['value']>;
 			addressToToken: Record<SolAddress, SplTokenAddress>;
+			addressToOwner: Record<SolAddress, SolAddress>;
 		}>
 	>(
 		async (acc, instruction, idx) => {
 			const {
 				parsedTransactions,
 				cumulativeBalances: accCumulativeBalances,
-				addressToToken: accAddressToToken
+				addressToToken: accAddressToToken,
+				addressToOwner: accAddressToOwner
 			} = await acc;
+
+			const instructionWithProgramAddress = {
+				...instruction,
+				programAddress: instruction.programId
+			};
+			const {
+				addressToToken: instructionAddressToToken,
+				addressToOwner: instructionAddressToOwner
+			} = extractTokenAccountMetadata(instructionWithProgramAddress);
+
+			const addressToOwner = {
+				...accAddressToOwner,
+				...instructionAddressToOwner
+			};
+			const addressToTokenFromInstruction = {
+				...accAddressToToken,
+				...instructionAddressToToken
+			};
 
 			const mappedTransaction = await mapSolParsedInstruction({
 				identity,
-				instruction: {
-					...instruction,
-					programAddress: instruction.programId
-				},
+				instruction: instructionWithProgramAddress,
 				network,
 				cumulativeBalances: accCumulativeBalances,
-				addressToToken: accAddressToToken
+				addressToToken: addressToTokenFromInstruction
 			});
 
 			if (isNullish(mappedTransaction)) {
-				return acc;
+				return {
+					parsedTransactions,
+					cumulativeBalances: accCumulativeBalances,
+					addressToToken: addressToTokenFromInstruction,
+					addressToOwner
+				};
 			}
 
 			const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
@@ -177,7 +287,7 @@ export const fetchSolTransactionsForSignature = async ({
 			// associated with a certain address. This way, we can skip the call to request the account info
 			// for mapping a certain transaction to its specific token.
 			const addressToToken = {
-				...accAddressToToken,
+				...addressToTokenFromInstruction,
 				...(nonNullish(mappedTokenAddress) && {
 					[from]: mappedTokenAddress,
 					[to]: mappedTokenAddress
@@ -197,24 +307,32 @@ export const fetchSolTransactionsForSignature = async ({
 				})
 			};
 
+			const instructionFromOwner = addressToOwner[from];
+			const instructionToOwner = addressToOwner[to];
+
 			// Ignoring the instruction if the transaction is not related to the address or its associated token account.
-			if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
-				return { parsedTransactions, cumulativeBalances, addressToToken };
+			if (
+				from !== address &&
+				to !== address &&
+				from !== ataAddress &&
+				to !== ataAddress &&
+				instructionFromOwner !== address &&
+				instructionToOwner !== address
+			) {
+				return { parsedTransactions, cumulativeBalances, addressToToken, addressToOwner };
 			}
 
 			// If the token address is not the one we are looking for, we can skip this instruction.
 			// In the case of Solana native tokens, the token address is undefined.
 			if (mappedTokenAddress !== tokenAddress) {
-				return { parsedTransactions, cumulativeBalances, addressToToken };
+				return { parsedTransactions, cumulativeBalances, addressToToken, addressToOwner };
 			}
 
-			const fromOwner: SolTransactionUi['fromOwner'] = await getAccountOwner({
-				address: from,
-				network
-			});
+			const fromOwner: SolTransactionUi['fromOwner'] =
+				instructionFromOwner ?? (await getAccountOwner({ address: from, network }));
 
 			const toOwner: SolTransactionUi['toOwner'] = nonNullish(to)
-				? await getAccountOwner({ address: to, network })
+				? (instructionToOwner ?? (await getAccountOwner({ address: to, network })))
 				: undefined;
 
 			const newTransaction: SolTransactionUi = {
@@ -223,7 +341,7 @@ export const fetchSolTransactionsForSignature = async ({
 				blockNumber: Number(slot),
 				timestamp: blockTime ?? ZERO,
 				value,
-				type: address === from || ataAddress === from ? 'send' : 'receive',
+				type: address === from || ataAddress === from || address === fromOwner ? 'send' : 'receive',
 				from,
 				...(nonNullish(fromOwner) && { fromOwner }),
 				to,
@@ -250,13 +368,15 @@ export const fetchSolTransactionsForSignature = async ({
 						: [])
 				],
 				cumulativeBalances,
-				addressToToken
+				addressToToken,
+				addressToOwner
 			};
 		},
 		Promise.resolve({
 			parsedTransactions: [],
 			cumulativeBalances: initialCumulativeBalances,
-			addressToToken: {}
+			addressToToken: {},
+			addressToOwner: {}
 		})
 	);
 
@@ -319,14 +439,43 @@ const loadSolTransactions = async ({
 }: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	try {
 		const backendTokenId = solBackendTokenId({ network, tokenAddress });
+		const isHeadLoad = isNullish(before);
+		const backendCursor = solBackendPaginationCursors.get(tokenId);
 
-		const stored = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED
-			? await loadSolUserTransactions({
-					identity,
-					tokenId: backendTokenId,
-					address
-				})
-			: undefined;
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && !isHeadLoad && nonNullish(backendCursor)) {
+			const storedPage = await loadSolUserTransactions({
+				identity,
+				tokenId: backendTokenId,
+				address,
+				start: backendCursor
+			});
+
+			setSolBackendPaginationCursor({ tokenId, nextStart: storedPage?.nextStart });
+
+			if (nonNullish(storedPage) && storedPage.transactions.length > 0) {
+				const certifiedTransactions = mapSolCertifiedTransactions(storedPage.transactions);
+
+				solTransactionsStore.append({
+					tokenId,
+					transactions: certifiedTransactions
+				});
+
+				return certifiedTransactions;
+			}
+		}
+
+		const stored =
+			USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && isHeadLoad
+				? await loadSolUserTransactions({
+						identity,
+						tokenId: backendTokenId,
+						address
+					})
+				: undefined;
+
+		if (isHeadLoad) {
+			setSolBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
+		}
 
 		const storedTransactions = stored?.transactions ?? [];
 
@@ -349,20 +498,20 @@ const loadSolTransactions = async ({
 		});
 		const newestStoredSlot = stored?.newestBlockIndex;
 
-		// Filter RPC results to only include transactions from slots newer than the stored data.
-		// This avoids overlap by range-partitioning.
-		const freshTransactions = nonNullish(newestStoredSlot)
-			? newTransactions.filter(
-					({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
-				)
-			: newTransactions;
+		// On head loads, keep only RPC transactions newer than the backend cache.
+		// Cursor pagination already asks RPC for older transactions, so those pages must not use this filter.
+		const freshTransactions =
+			nonNullish(newestStoredSlot) && isHeadLoad
+				? newTransactions.filter(
+						({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
+					)
+				: newTransactions;
 
-		const allTransactions = [...freshTransactions, ...storedTransactions];
+		const allTransactions = isHeadLoad
+			? [...freshTransactions, ...storedTransactions]
+			: freshTransactions;
 
-		const certifiedTransactions = allTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+		const certifiedTransactions = mapSolCertifiedTransactions(allTransactions);
 
 		solTransactionsStore.append({
 			tokenId,
@@ -377,10 +526,7 @@ const loadSolTransactions = async ({
 			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
 		}
 
-		return freshTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+		return mapSolCertifiedTransactions(freshTransactions);
 	} catch (error: unknown) {
 		solTransactionsStore.reset(tokenId);
 

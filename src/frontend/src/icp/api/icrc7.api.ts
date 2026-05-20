@@ -81,6 +81,24 @@ export const collectionMetadata = async ({
 	return await collectionMetadata({ certified });
 };
 
+export const metadata = async ({
+	certified,
+	identity,
+	canisterId,
+	tokenId,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<{ tokenId: bigint } & QueryParams>): Promise<
+	NftMetadataWithoutId | undefined
+> => {
+	const { metadata } = await icrc7Canister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	return await metadata({ certified, tokenId });
+};
+
 export const transfer = async ({
 	certified = true,
 	identity,

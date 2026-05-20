@@ -314,6 +314,31 @@ describe('icrc7.canister', () => {
 		);
 	});
 
+	describe('metadata', () => {
+		const mockTokenId = 1n;
+
+		it('should map the first icrc7_token_metadata result', async () => {
+			service.icrc7_token_metadata.mockResolvedValue([[mockIcrc7TokenMetadata]]);
+
+			const { metadata } = await createIcrc7Canister({ serviceOverride: service });
+
+			const res = await metadata({ certified, tokenId: mockTokenId });
+
+			expect(res).toEqual({
+				name: 'Mock ICRC-7 NFT #1'
+			});
+			expect(service.icrc7_token_metadata).toHaveBeenCalledExactlyOnceWith([mockTokenId]);
+		});
+
+		it('should return undefined when metadata is missing', async () => {
+			service.icrc7_token_metadata.mockResolvedValue([[]]);
+
+			const { metadata } = await createIcrc7Canister({ serviceOverride: service });
+
+			await expect(metadata({ certified, tokenId: mockTokenId })).resolves.toBeUndefined();
+		});
+	});
+
 	describe('transfer', () => {
 		const mockTokenId = 12345n;
 		const mockBlockIndex = 7n;
