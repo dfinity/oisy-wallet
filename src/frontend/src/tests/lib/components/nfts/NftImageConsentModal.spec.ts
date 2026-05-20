@@ -264,6 +264,34 @@ describe('NftImageConsentModal', () => {
 		expect(hideButton).toBeInTheDocument();
 	});
 
+	it('should render a project_id disclaimer when media URLs include project_id', () => {
+		const caffeineNft = {
+			...nftAzuki1,
+			imageUrl:
+				'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3Aabc&project_id=019de6f2-675c-775e-9eda-2adf4341566c'
+		};
+
+		findTokenSpy.mockReturnValue(mockValidErc721Token);
+		getCollectionUiSpy.mockReturnValue([
+			{
+				collection: nftAzuki1.collection,
+				nfts: [caffeineNft]
+			}
+		]);
+
+		const TEST_ID = 'nft-modal';
+		render(NftImageConsentModal, {
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: false },
+				testId: TEST_ID
+			}
+		});
+
+		expect(screen.getByTestId(`${TEST_ID}-project-id-disclaimer`)).toHaveTextContent(
+			'019de6f2-675c-775e-9eda-2adf4341566c'
+		);
+	});
+
 	it('should not render media link icon if consent has not been given', () => {
 		findTokenSpy.mockReturnValue(mockValidErc721Token);
 		getCollectionUiSpy.mockReturnValue([

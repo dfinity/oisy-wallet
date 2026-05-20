@@ -16,6 +16,7 @@ import {
 	findNft,
 	findNftsByNetwork,
 	findNftsByToken,
+	extractProjectIdsFromMediaUrls,
 	findNonFungibleToken,
 	getEnabledNfts,
 	getMediaStatus,
@@ -720,6 +721,28 @@ describe('nfts.utils', () => {
 
 			expect(res[0]).toBe(nftWithoutDate);
 			expect(res[1]).toBe(nftWithDate);
+		});
+	});
+
+	describe('extractProjectIdsFromMediaUrls', () => {
+		it('should return unique project_id values from media URLs', () => {
+			expect(
+				extractProjectIdsFromMediaUrls([
+					'https://blob.caffeine.ai/v1/blob/?project_id=project-a&blob_hash=sha256%3A1',
+					'https://blob.caffeine.ai/v1/blob/?project_id=project-b&blob_hash=sha256%3A2',
+					'https://blob.caffeine.ai/v1/blob/?project_id=project-a&blob_hash=sha256%3A3'
+				])
+			).toEqual(['project-a', 'project-b']);
+		});
+
+		it('should ignore URLs without project_id', () => {
+			expect(
+				extractProjectIdsFromMediaUrls([
+					'https://example.com/nft.png',
+					'not-a-url',
+					'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A1'
+				])
+			).toEqual([]);
 		});
 	});
 

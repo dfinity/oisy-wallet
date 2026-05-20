@@ -1149,6 +1149,7 @@ interface I18nNfts {
 		open_in_new_tab: string;
 		review_title: string;
 		review_description: string;
+		review_description_project_id: string;
 		learn_more: string;
 		token_id: string;
 		go_to_collection: string;

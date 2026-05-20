@@ -1469,6 +1469,7 @@
 			"open_in_new_tab": "Ouvrir dans un nouvel onglet",
 			"review_title": "Vérifier les sources des médias pour \"$collectionName\"",
 			"review_description": "Attention ! Ces images proviennent d'une source non vérifiée. Les activer pourrait partager votre adresse IP avec un tiers et poser un risque potentiel pour la sécurité.",
+			"review_description_project_id": "",
 			"learn_more": "En savoir plus",
 			"token_id": "ID du token",
 			"go_to_collection": "Aller à la collection",
