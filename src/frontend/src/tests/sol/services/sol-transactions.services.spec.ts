@@ -599,6 +599,7 @@ describe('sol-transactions.services', () => {
 
 			expect(callArg.exitIfFirstSignatureMatches).toBeUndefined();
 			expect(callArg.before).toBe(before);
+			expect(loadSolUserTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should combine stored and new transactions in the store', async () => {
@@ -629,6 +630,138 @@ describe('sol-transactions.services', () => {
 					certified: false
 				}))
 			);
+		});
+
+		it('should filter non-newer RPC transactions when loading head with backend-stored transactions', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `stored-${i}`
+			}));
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: storedTransactions,
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 50n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+
+			const olderRpcTransaction = {
+				...createMockSolTransactionsUi(1)[0],
+				id: 'older-rpc',
+				blockNumber: 99
+			};
+			const newerRpcTransaction = {
+				...createMockSolTransactionsUi(1)[0],
+				id: 'newer-rpc',
+				blockNumber: 101
+			};
+
+			spyGetTransactions.mockResolvedValue([olderRpcTransaction, newerRpcTransaction]);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(
+				[newerRpcTransaction, ...storedTransactions].map((data) => ({
+					data,
+					certified: false
+				}))
+			);
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokenId: { SolNativeMainnet: null },
+				transactions: [newerRpcTransaction]
+			});
+		});
+
+		it('should keep older RPC transactions when paginating with before and backend-stored transactions', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `stored-${i}`
+			}));
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: storedTransactions,
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 50n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+
+			const olderRpcTransaction = {
+				...createMockSolTransactionsUi(1)[0],
+				id: 'older-rpc',
+				blockNumber: 40
+			};
+			const before = mockSolSignature();
+
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			await loadNextSolTransactions(mockParams);
+
+			spyGetTransactions.mockResolvedValueOnce([olderRpcTransaction]);
+			await loadNextSolTransactions({ ...mockParams, before });
+
+			expect(loadSolUserTransactions).toHaveBeenCalledOnce();
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(
+				[...storedTransactions, olderRpcTransaction].map((data) => ({
+					data,
+					certified: false
+				}))
+			);
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokenId: { SolNativeMainnet: null },
+				transactions: [olderRpcTransaction]
+			});
+		});
+
+		it('should load backend pages before RPC when paginating with before', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `stored-${i}`
+			}));
+			const nextStoredTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `next-stored-${i}`
+			}));
+			const before = mockSolSignature();
+
+			vi.mocked(loadSolUserTransactions)
+				.mockResolvedValueOnce({
+					transactions: storedTransactions,
+					newestBlockIndex: 100n,
+					oldestBlockIndex: 50n,
+					nextStart: 2n,
+					totalStored: 4n
+				})
+				.mockResolvedValueOnce({
+					transactions: nextStoredTransactions,
+					newestBlockIndex: 100n,
+					oldestBlockIndex: 10n,
+					nextStart: undefined,
+					totalStored: 4n
+				});
+
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			await loadNextSolTransactions(mockParams);
+			await loadNextSolTransactions({ ...mockParams, before });
+
+			expect(loadSolUserTransactions).toHaveBeenNthCalledWith(2, {
+				identity: mockIdentity,
+				tokenId: { SolNativeMainnet: null },
+				address: mockSolAddress,
+				start: 2n
+			});
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(
+				[...storedTransactions, ...nextStoredTransactions].map((data) => ({
+					data,
+					certified: false
+				}))
+			);
+			expect(saveSolFinalizedTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should set only new transactions when no stored transactions exist', async () => {
