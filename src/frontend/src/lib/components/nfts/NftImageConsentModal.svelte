@@ -31,7 +31,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { getNftDisplayId } from '$lib/utils/nft.utils';
-	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
+	import {
+		extractProjectIdsFromMediaUrls,
+		findNonFungibleToken,
+		getNftCollectionUi
+	} from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollection;
@@ -85,6 +89,16 @@
 		)?.nfts ?? []
 	);
 
+	const mediaProjectIds = $derived(
+		extractProjectIdsFromMediaUrls([
+			...(nonNullish(collection.bannerImageUrl) ? [collection.bannerImageUrl] : []),
+			...collectionNfts.flatMap((nft) => [
+				...(nonNullish(nft.imageUrl) ? [nft.imageUrl] : []),
+				...(nonNullish(nft.thumbnailUrl) ? [nft.thumbnailUrl] : [])
+			])
+		])
+	);
+
 	const onClose = () => {
 		if (!saveLoading) {
 			modalStore.close();
@@ -134,6 +148,15 @@
 					styleClass="font-bold ml-2">{$i18n.nfts.text.learn_more}</ExternalLink
 				>
 			</p>
+
+			{#each mediaProjectIds as projectId (projectId)}
+				<p class="mb-5" data-tid={`${testId}-project-id-disclaimer`}>
+					{replacePlaceholders($i18n.nfts.text.review_description_project_id, {
+						$collectionName: collection.name ?? '',
+						$projectId: projectId
+					})}
+				</p>
+			{/each}
 
 			<div class="flex flex-col gap-2 rounded-lg border border-tertiary bg-secondary p-3 text-sm">
 				<div class="flex items-center gap-2">

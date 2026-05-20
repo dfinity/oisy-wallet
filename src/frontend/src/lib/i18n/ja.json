@@ -1469,6 +1469,7 @@
 			"open_in_new_tab": "新しいタブで開く",
 			"review_title": "\"$collectionName\"のメディアソースを確認",
 			"review_description": "注意! これらの画像は未検証のソースからのものです。有効にすると、IPアドレスが第三者と共有され、潜在的なセキュリティリスクがあります。",
+			"review_description_project_id": "",
 			"learn_more": "詳細を見る",
 			"token_id": "トークンID",
 			"go_to_collection": "コレクションを見る",

@@ -1469,6 +1469,7 @@
 			"open_in_new_tab": "새 탭에서 열기",
 			"review_title": "\"$collectionName\"의 미디어 소스 검토",
 			"review_description": "주의! 이 이미지들은 검증되지 않은 출처에서 가져온 것입니다. 활성화하면 제3자와 IP 주소가 공유될 수 있으며 잠재적인 보안 위험이 있습니다.",
+			"review_description_project_id": "",
 			"learn_more": "자세히 알아보기",
 			"token_id": "토큰 ID",
 			"go_to_collection": "컬렉션으로 이동",

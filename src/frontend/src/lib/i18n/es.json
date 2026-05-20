@@ -1469,6 +1469,7 @@
 			"open_in_new_tab": "Abrir en nueva pestaña",
 			"review_title": "Revisar fuentes de medios para \"$collectionName\"",
 			"review_description": "¡Atención! Estas imágenes provienen de una fuente no verificada. Habilitarlas podría compartir tu dirección IP con un tercero y representa un riesgo potencial de seguridad.",
+			"review_description_project_id": "",
 			"learn_more": "Saber más",
 			"token_id": "ID del Token",
 			"go_to_collection": "Ir a la colección",

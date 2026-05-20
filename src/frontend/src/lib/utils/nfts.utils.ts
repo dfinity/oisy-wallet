@@ -306,6 +306,24 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 	return result;
 };
 
+export const extractProjectIdsFromMediaUrls = (mediaUrls: string[]): string[] => {
+	const projectIds = new Set<string>();
+
+	for (const mediaUrl of mediaUrls) {
+		try {
+			const projectId = new URL(mediaUrl).searchParams.get('project_id');
+
+			if (notEmptyString(projectId)) {
+				projectIds.add(projectId);
+			}
+		} catch (_: unknown) {
+			// Ignore invalid URLs — they are filtered elsewhere before display.
+		}
+	}
+
+	return [...projectIds];
+};
+
 export const findNonFungibleToken = ({
 	tokens,
 	address,
