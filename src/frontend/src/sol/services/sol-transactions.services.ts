@@ -22,6 +22,7 @@ import {
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
+import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,
@@ -93,6 +94,70 @@ const extractBalances = ({
 		preBalance: accountIndex < preBalances.length ? preBalances[accountIndex] : lamports(ZERO),
 		postBalance: accountIndex < postBalances.length ? postBalances[accountIndex] : lamports(ZERO)
 	};
+};
+
+interface SolTokenAccountMetadata {
+	addressToOwner: Record<SolAddress, SolAddress>;
+	addressToToken: Record<SolAddress, SplTokenAddress>;
+}
+
+const emptySolTokenAccountMetadata: SolTokenAccountMetadata = {
+	addressToOwner: {},
+	addressToToken: {}
+};
+
+const extractTokenAccountMetadata = (instruction: SolRpcInstruction): SolTokenAccountMetadata => {
+	if (!('parsed' in instruction)) {
+		return emptySolTokenAccountMetadata;
+	}
+
+	const {
+		parsed: { type, info }
+	} = instruction;
+
+	if (isNullish(info)) {
+		return emptySolTokenAccountMetadata;
+	}
+
+	if (type === 'create' || type === 'createIdempotent') {
+		const {
+			account,
+			wallet: owner,
+			mint
+		} = info as Partial<{
+			account: SolAddress;
+			wallet: SolAddress;
+			mint: SplTokenAddress;
+		}>;
+
+		if (nonNullish(account) && nonNullish(owner) && nonNullish(mint)) {
+			return {
+				addressToOwner: { [account]: owner },
+				addressToToken: { [account]: mint }
+			};
+		}
+	}
+
+	if (
+		type === 'initializeAccount' ||
+		type === 'initializeAccount2' ||
+		type === 'initializeAccount3'
+	) {
+		const { account, owner, mint } = info as Partial<{
+			account: SolAddress;
+			owner: SolAddress;
+			mint: SplTokenAddress;
+		}>;
+
+		if (nonNullish(account) && nonNullish(owner) && nonNullish(mint)) {
+			return {
+				addressToOwner: { [account]: owner },
+				addressToToken: { [account]: mint }
+			};
+		}
+	}
+
+	return emptySolTokenAccountMetadata;
 };
 
 export const fetchSolTransactionsForSignature = async ({
@@ -170,28 +235,50 @@ export const fetchSolTransactionsForSignature = async ({
 			parsedTransactions: SolTransactionUi[];
 			cumulativeBalances: Record<SolAddress, SolMappedTransaction['value']>;
 			addressToToken: Record<SolAddress, SplTokenAddress>;
+			addressToOwner: Record<SolAddress, SolAddress>;
 		}>
 	>(
 		async (acc, instruction, idx) => {
 			const {
 				parsedTransactions,
 				cumulativeBalances: accCumulativeBalances,
-				addressToToken: accAddressToToken
+				addressToToken: accAddressToToken,
+				addressToOwner: accAddressToOwner
 			} = await acc;
+
+			const instructionWithProgramAddress = {
+				...instruction,
+				programAddress: instruction.programId
+			};
+			const {
+				addressToToken: instructionAddressToToken,
+				addressToOwner: instructionAddressToOwner
+			} = extractTokenAccountMetadata(instructionWithProgramAddress);
+
+			const addressToOwner = {
+				...accAddressToOwner,
+				...instructionAddressToOwner
+			};
+			const addressToTokenFromInstruction = {
+				...accAddressToToken,
+				...instructionAddressToToken
+			};
 
 			const mappedTransaction = await mapSolParsedInstruction({
 				identity,
-				instruction: {
-					...instruction,
-					programAddress: instruction.programId
-				},
+				instruction: instructionWithProgramAddress,
 				network,
 				cumulativeBalances: accCumulativeBalances,
-				addressToToken: accAddressToToken
+				addressToToken: addressToTokenFromInstruction
 			});
 
 			if (isNullish(mappedTransaction)) {
-				return acc;
+				return {
+					parsedTransactions,
+					cumulativeBalances: accCumulativeBalances,
+					addressToToken: addressToTokenFromInstruction,
+					addressToOwner
+				};
 			}
 
 			const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
@@ -200,7 +287,7 @@ export const fetchSolTransactionsForSignature = async ({
 			// associated with a certain address. This way, we can skip the call to request the account info
 			// for mapping a certain transaction to its specific token.
 			const addressToToken = {
-				...accAddressToToken,
+				...addressToTokenFromInstruction,
 				...(nonNullish(mappedTokenAddress) && {
 					[from]: mappedTokenAddress,
 					[to]: mappedTokenAddress
@@ -220,24 +307,32 @@ export const fetchSolTransactionsForSignature = async ({
 				})
 			};
 
+			const instructionFromOwner = addressToOwner[from];
+			const instructionToOwner = addressToOwner[to];
+
 			// Ignoring the instruction if the transaction is not related to the address or its associated token account.
-			if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
-				return { parsedTransactions, cumulativeBalances, addressToToken };
+			if (
+				from !== address &&
+				to !== address &&
+				from !== ataAddress &&
+				to !== ataAddress &&
+				instructionFromOwner !== address &&
+				instructionToOwner !== address
+			) {
+				return { parsedTransactions, cumulativeBalances, addressToToken, addressToOwner };
 			}
 
 			// If the token address is not the one we are looking for, we can skip this instruction.
 			// In the case of Solana native tokens, the token address is undefined.
 			if (mappedTokenAddress !== tokenAddress) {
-				return { parsedTransactions, cumulativeBalances, addressToToken };
+				return { parsedTransactions, cumulativeBalances, addressToToken, addressToOwner };
 			}
 
-			const fromOwner: SolTransactionUi['fromOwner'] = await getAccountOwner({
-				address: from,
-				network
-			});
+			const fromOwner: SolTransactionUi['fromOwner'] =
+				instructionFromOwner ?? (await getAccountOwner({ address: from, network }));
 
 			const toOwner: SolTransactionUi['toOwner'] = nonNullish(to)
-				? await getAccountOwner({ address: to, network })
+				? (instructionToOwner ?? (await getAccountOwner({ address: to, network })))
 				: undefined;
 
 			const newTransaction: SolTransactionUi = {
@@ -246,7 +341,7 @@ export const fetchSolTransactionsForSignature = async ({
 				blockNumber: Number(slot),
 				timestamp: blockTime ?? ZERO,
 				value,
-				type: address === from || ataAddress === from ? 'send' : 'receive',
+				type: address === from || ataAddress === from || address === fromOwner ? 'send' : 'receive',
 				from,
 				...(nonNullish(fromOwner) && { fromOwner }),
 				to,
@@ -273,13 +368,15 @@ export const fetchSolTransactionsForSignature = async ({
 						: [])
 				],
 				cumulativeBalances,
-				addressToToken
+				addressToToken,
+				addressToOwner
 			};
 		},
 		Promise.resolve({
 			parsedTransactions: [],
 			cumulativeBalances: initialCumulativeBalances,
-			addressToToken: {}
+			addressToToken: {},
+			addressToOwner: {}
 		})
 	);
 
