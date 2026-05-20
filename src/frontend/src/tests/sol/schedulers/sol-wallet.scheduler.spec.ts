@@ -475,7 +475,6 @@ describe('sol-wallet.scheduler', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
-				address: mockSolAddress,
 				transactions: mockSolTransactions
 			});
 		});
@@ -625,7 +624,6 @@ describe('sol-wallet.scheduler', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
-				address: mockSolAddress,
 				transactions: [correctedTransaction, correctedSameSignatureTransaction]
 			});
 		});

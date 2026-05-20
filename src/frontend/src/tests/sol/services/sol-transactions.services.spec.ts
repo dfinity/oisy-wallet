@@ -48,7 +48,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
-import { address as solAddress } from '@solana/kit';
+import { address as solAddress, stringifiedBigInt, stringifiedNumber } from '@solana/kit';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -242,10 +242,12 @@ describe('sol-transactions.services', () => {
 									[mockSolAddress]: initialBalance - mockValue * BigInt(index),
 									[mockSolAddress2]: mockValue * BigInt(index)
 								},
-					addressToToken: expectedInstructionAddressToToken({
-						instructions: mockAllInstructions,
-						index
-					})
+					addressToToken: expect.objectContaining(
+						expectedInstructionAddressToToken({
+							instructions: mockAllInstructions,
+							index
+						})
+					)
 				});
 			});
 		});
@@ -284,10 +286,12 @@ describe('sol-transactions.services', () => {
 									[mockSolAddress]: initialBalance - mockValue * BigInt(index),
 									[mockSolAddress2]: mockValue * BigInt(index)
 								},
-					addressToToken: expectedInstructionAddressToToken({
-						instructions: innerInstructions,
-						index
-					})
+					addressToToken: expect.objectContaining(
+						expectedInstructionAddressToToken({
+							instructions: innerInstructions,
+							index
+						})
+					)
 				});
 			});
 		});
@@ -424,7 +428,7 @@ describe('sol-transactions.services', () => {
 									[mockSolAddress2]:
 										mockValue * BigInt(index >= indexStartAtaMapping ? index - 1 : index)
 								},
-					addressToToken: {
+					addressToToken: expect.objectContaining({
 						...expectedInstructionAddressToToken({
 							instructions: mockAllInstructions,
 							index
@@ -433,7 +437,7 @@ describe('sol-transactions.services', () => {
 							[mockAtaAddress]: mockSplAddress,
 							[mockAtaAddress2]: mockSplAddress
 						})
-					}
+					})
 				});
 			});
 		});
@@ -448,6 +452,107 @@ describe('sol-transactions.services', () => {
 					toOwner: 'mock-owner-address'
 				}))
 			);
+		});
+
+		it('should preserve token-balance owners for SPL transfers', async () => {
+			const usdtAmount = 39974n;
+			const tokenBalance = {
+				accountIndex: 0,
+				mint: solAddress(mockSplAddress),
+				owner: solAddress(mockSolAddress),
+				programId: solAddress(TOKEN_PROGRAM_ADDRESS),
+				uiTokenAmount: {
+					amount: stringifiedBigInt(usdtAmount.toString()),
+					decimals: 6,
+					uiAmount: 0.039974,
+					uiAmountString: stringifiedNumber('0.039974')
+				}
+			} as NonNullable<NonNullable<SolRpcTransaction['meta']>['postTokenBalances']>[number];
+			const tokenBalanceTo = {
+				...tokenBalance,
+				accountIndex: 1,
+				owner: solAddress(mockSolAddress2)
+			};
+			const mockTransactionDetailWithTokenBalances = {
+				...mockTransactionDetail,
+				transaction: {
+					...mockTransactionDetail.transaction,
+					message: {
+						...mockTransactionDetail.transaction.message,
+						accountKeys: [
+							{
+								pubkey: solAddress(mockAtaAddress),
+								signer: false,
+								source: 'transaction',
+								writable: true
+							},
+							{
+								pubkey: solAddress(mockAtaAddress2),
+								signer: false,
+								source: 'transaction',
+								writable: true
+							},
+							{
+								pubkey: solAddress(mockSolAddress),
+								signer: true,
+								source: 'transaction',
+								writable: true
+							}
+						],
+						instructions: [
+							{
+								parsed: {
+									info: {
+										amount: usdtAmount.toString(),
+										authority: mockSolAddress,
+										destination: mockAtaAddress2,
+										source: mockAtaAddress
+									},
+									type: 'transfer'
+								},
+								program: 'spl-token',
+								programId: solAddress(TOKEN_PROGRAM_ADDRESS),
+								stackHeight: undefined
+							}
+						]
+					}
+				},
+				meta: {
+					...mockTransactionDetail.meta,
+					innerInstructions: [],
+					preTokenBalances: [tokenBalance, tokenBalanceTo],
+					postTokenBalances: [tokenBalance, tokenBalanceTo]
+				}
+			} as SolRpcTransaction;
+
+			spyFetchTransactionDetailForSignature.mockResolvedValue(
+				mockTransactionDetailWithTokenBalances
+			);
+			vi.mocked(getAccountOwner).mockResolvedValue(undefined);
+			spyMapSolParsedInstruction.mockResolvedValue({
+				value: usdtAmount,
+				from: mockAtaAddress,
+				to: mockAtaAddress2,
+				tokenAddress: mockSplAddress
+			});
+
+			await expect(
+				fetchSolTransactionsForSignature({
+					...mockParams,
+					tokenAddress: mockSplAddress,
+					tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
+				})
+			).resolves.toEqual([
+				expect.objectContaining({
+					type: 'send',
+					value: usdtAmount,
+					from: mockAtaAddress,
+					fromOwner: mockSolAddress,
+					to: mockAtaAddress2,
+					toOwner: mockSolAddress2
+				})
+			]);
+			expect(getAccountOwner).not.toHaveBeenCalled();
 		});
 
 		it('should preserve instruction-derived ATA owners for cached SPL transfers', async () => {
@@ -842,7 +947,6 @@ describe('sol-transactions.services', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
-				address: mockSolAddress,
 				transactions: [newerRpcTransaction]
 			});
 		});
@@ -907,7 +1011,6 @@ describe('sol-transactions.services', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokenId: { SplMainnet: BONK_TOKEN.address },
-				address: mockSolAddress,
 				transactions: [correctedTransaction, correctedSameSignatureTransaction]
 			});
 		});
@@ -950,7 +1053,6 @@ describe('sol-transactions.services', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
-				address: mockSolAddress,
 				transactions: [olderRpcTransaction]
 			});
 		});
@@ -1030,7 +1132,6 @@ describe('sol-transactions.services', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
-				address: mockSolAddress,
 				transactions: newTransactions
 			});
 		});

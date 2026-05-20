@@ -132,7 +132,6 @@ describe('sol-user-transactions.services', () => {
 			status: 'finalized',
 			timestamp: 1700000000n
 		};
-		const mockSplMainnetTokenId = { SplMainnet: 'mock-token-address' };
 
 		it('should call saveFinalizedTransactions with correct params', async () => {
 			vi.spyOn(userTransactionsServices, 'saveFinalizedTransactions').mockResolvedValue({
@@ -142,7 +141,6 @@ describe('sol-user-transactions.services', () => {
 			await saveSolFinalizedTransactions({
 				identity: mockIdentity,
 				tokenId: mockSolNativeMainnetTokenId,
-				address: mockSolAddress,
 				transactions: [mockFinalizedTx]
 			});
 
@@ -169,7 +167,6 @@ describe('sol-user-transactions.services', () => {
 			await saveSolFinalizedTransactions({
 				identity: mockIdentity,
 				tokenId: mockSolNativeMainnetTokenId,
-				address: mockSolAddress,
 				transactions: [mockFinalizedTx]
 			});
 
@@ -192,7 +189,6 @@ describe('sol-user-transactions.services', () => {
 			await saveSolFinalizedTransactions({
 				identity: mockIdentity,
 				tokenId: mockSolNativeMainnetTokenId,
-				address: mockSolAddress,
 				transactions: [mockFinalizedTx]
 			});
 
@@ -210,59 +206,6 @@ describe('sol-user-transactions.services', () => {
 			expect(capturedCanSave({ ...mockFinalizedTx, timestamp: undefined })).toBeFalsy();
 		});
 
-		it('should not save SPL transactions with unreliable direction', async () => {
-			let capturedCanSave: ((tx: SolTransactionUi) => boolean) | undefined;
-
-			vi.spyOn(userTransactionsServices, 'saveFinalizedTransactions').mockImplementation(
-				({ canSave }) => {
-					capturedCanSave = canSave as (tx: SolTransactionUi) => boolean;
-					return Promise.resolve({ success: true });
-				}
-			);
-
-			await saveSolFinalizedTransactions({
-				identity: mockIdentity,
-				tokenId: mockSplMainnetTokenId,
-				address: mockSolAddress,
-				transactions: [mockFinalizedTx]
-			});
-
-			assertNonNullish(capturedCanSave);
-
-			expect(
-				capturedCanSave({
-					...mockFinalizedTx,
-					type: 'send',
-					from: mockSolAddress2,
-					fromOwner: mockSolAddress
-				})
-			).toBeTruthy();
-			expect(
-				capturedCanSave({
-					...mockFinalizedTx,
-					type: 'receive',
-					to: mockSolAddress2,
-					toOwner: mockSolAddress
-				})
-			).toBeTruthy();
-			expect(
-				capturedCanSave({
-					...mockFinalizedTx,
-					type: 'send',
-					from: mockSolAddress2,
-					fromOwner: undefined
-				})
-			).toBeFalsy();
-			expect(
-				capturedCanSave({
-					...mockFinalizedTx,
-					type: 'receive',
-					to: mockSolAddress2,
-					toOwner: undefined
-				})
-			).toBeFalsy();
-		});
-
 		it('should provide a mapToBackend that correctly maps SolTransactionUi to UserTransaction', async () => {
 			let capturedMapper: ((tx: SolTransactionUi) => UserTransaction) | undefined;
 
@@ -276,7 +219,6 @@ describe('sol-user-transactions.services', () => {
 			await saveSolFinalizedTransactions({
 				identity: mockIdentity,
 				tokenId: mockSolNativeMainnetTokenId,
-				address: mockSolAddress,
 				transactions: [mockSolUserTransactionUi]
 			});
 
@@ -296,7 +238,6 @@ describe('sol-user-transactions.services', () => {
 			const result = await saveSolFinalizedTransactions({
 				identity: mockIdentity,
 				tokenId: mockSolNativeMainnetTokenId,
-				address: mockSolAddress,
 				transactions: [mockFinalizedTx]
 			});
 

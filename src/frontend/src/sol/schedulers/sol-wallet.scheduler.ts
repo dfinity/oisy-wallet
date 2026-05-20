@@ -225,7 +225,6 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			saveSolFinalizedTransactions({
 				identity,
 				tokenId: backendTokenId,
-				address,
 				transactions: newRpcTransactions.map(({ data }) => data)
 			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
 		}
