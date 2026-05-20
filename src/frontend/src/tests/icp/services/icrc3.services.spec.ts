@@ -1,5 +1,5 @@
 import { getBlocks } from '$icp/api/icrc3.api';
-import { loadIcrc3BlockLog } from '$icp/services/icrc3-block-log.services';
+import { loadIcrc3BlockLog } from '$icp/services/icrc3.services';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
@@ -8,7 +8,7 @@ vi.mock('$icp/api/icrc3.api', () => ({
 	getBlocks: vi.fn()
 }));
 
-describe('icrc3-block-log.services', () => {
+describe('icrc3.services', () => {
 	describe('loadIcrc3BlockLog', () => {
 		const params = {
 			identity: mockIdentity,
