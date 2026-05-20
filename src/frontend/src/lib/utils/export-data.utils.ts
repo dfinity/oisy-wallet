@@ -92,7 +92,9 @@ export interface TransactionCsvRow extends CsvRow {
 	amount: string;
 	fee: string;
 	fee_token: string;
-	fee_token_display: string;
+	credit: string;
+	debit: string;
+	fee_token_debit: string;
 	effective_token: string;
 	effective_fee_token: string;
 	tx_id: string;
@@ -121,23 +123,23 @@ export const TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'exported_at', header: 'exported_at' }
 ];
 
-// Slim variant for the Basic transactions export — 9 spreadsheet-friendly columns.
-// Timestamp is the user-locale, browser-timezone version (matches what the app shows on
-// rows); Type is title-cased; Counterparty resolves the active side (To on outgoing, From
-// on incoming) through the address book — same lookup as the activity page — and falls
-// back to the raw address, so the raw From / To addresses can be dropped here (Extended
-// keeps them). Amount and Fee read from effective_token / effective_fee_token so a
-// per-token column sum already accounts for self-transfer dedup and same-token merge.
-// Headers are title-cased to match the Basic tokens variant.
+// Slim variant for the Basic transactions export — 12 spreadsheet-friendly columns.
+// Amount / Fee / Fee Token are descriptive (raw positive values for human reading); Credit
+// / Debit / Fee Token Debit are signed accounting columns that sum to the user's actual
+// balance change per token. Approves contribute only the fee to Debit since the allowance
+// itself doesn't move the user's balance.
 export const BASIC_TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'timestamp_local', header: 'Timestamp' },
 	{ key: 'network', header: 'Network' },
 	{ key: 'token_symbol', header: 'Token' },
 	{ key: 'type_display', header: 'Type' },
+	{ key: 'amount', header: 'Amount' },
 	{ key: 'counterparty', header: 'Counterparty' },
-	{ key: 'effective_token', header: 'Amount' },
-	{ key: 'fee_token_display', header: 'Fee Token' },
-	{ key: 'effective_fee_token', header: 'Fee' },
+	{ key: 'fee', header: 'Fee' },
+	{ key: 'fee_token', header: 'Fee Token' },
+	{ key: 'credit', header: 'Credit' },
+	{ key: 'debit', header: 'Debit' },
+	{ key: 'fee_token_debit', header: 'Fee Token Debit' },
 	{ key: 'tx_id', header: 'Transaction ID' }
 ];
 
@@ -349,10 +351,12 @@ const toBitcoinRow = ({
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: BTC_DECIMALS }),
 		fee_token: 'BTC',
-		// counterparty + effective_* + fee_token_display are filled in by finalizeRow once
-		// direction + contacts + self-transfer are known.
+		// counterparty + credit/debit/fee_token_debit + effective_* are filled in by
+		// finalizeRow once direction + contacts + self-transfer are known.
 		counterparty: '',
-		fee_token_display: '',
+		credit: '',
+		debit: '',
+		fee_token_debit: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.id,
@@ -412,7 +416,9 @@ const toEthereumRow = ({
 		fee: formatAmount({ value: gasFee, decimals: EVM_NATIVE_DECIMALS }),
 		fee_token: nativeSymbolByNetworkId(token.network.id) ?? '',
 		counterparty: '',
-		fee_token_display: '',
+		credit: '',
+		debit: '',
+		fee_token_debit: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.hash ?? '',
@@ -474,7 +480,9 @@ const toIcRow = ({
 		fee: formatAmount({ value: tx.fee, decimals: token.decimals }),
 		fee_token: token.symbol,
 		counterparty: '',
-		fee_token_display: '',
+		credit: '',
+		debit: '',
+		fee_token_debit: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.id),
@@ -525,7 +533,9 @@ const toSolanaRow = ({
 		fee: formatAmount({ value: tx.fee, decimals: SOL_NATIVE_DECIMALS }),
 		fee_token: 'SOL',
 		counterparty: '',
-		fee_token_display: '',
+		credit: '',
+		debit: '',
+		fee_token_debit: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.signature),
@@ -650,17 +660,32 @@ const finalizeRow = ({
 
 	const fee = userPaidFee ? row.fee : '';
 	const fee_token = userPaidFee ? row.fee_token : '';
-	// On a same-token merge the Basic export's "Fee" column reads effective_fee_token, which
-	// is blank — so naming the fee token there is misleading. The raw fee_token stays
-	// populated for the Extended export, where the "Fee" column still shows the amount.
-	const fee_token_display = mergeColumns ? '' : fee_token;
+
+	// Basic-export accounting columns. Credit/Debit/Fee Token Debit are signed; Amount and
+	// Fee in their own columns stay positive for human readability. Approve rows contribute
+	// only the fee to Debit since the allowance itself doesn't move the user's balance.
+	const credit = isIncoming && row.amount !== '' ? row.amount : '';
+
+	let debit = '';
+	if (isOutgoing) {
+		const assetPortion = isApprove ? '0' : row.amount;
+		const feePortion = mergeColumns ? fee : '';
+		const total = sumDecimals({ a: assetPortion, b: feePortion });
+		if (total !== '' && parseFloat(total) !== 0) {
+			debit = negate(total);
+		}
+	}
+
+	const fee_token_debit = isOutgoing && !mergeColumns && fee !== '' ? negate(fee) : '';
 
 	return {
 		...row,
 		fee,
 		fee_token,
-		fee_token_display,
 		counterparty,
+		credit,
+		debit,
+		fee_token_debit,
 		effective_token,
 		effective_fee_token
 	};

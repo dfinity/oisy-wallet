@@ -321,16 +321,19 @@ describe('export-data.utils', () => {
 	});
 
 	describe('BASIC_TRANSACTION_CSV_COLUMNS', () => {
-		it('lists the 9 basic-export columns in the documented order', () => {
+		it('lists the 12 basic-export columns in the documented order', () => {
 			expect(BASIC_TRANSACTION_CSV_COLUMNS.map(({ key }) => key)).toEqual([
 				'timestamp_local',
 				'network',
 				'token_symbol',
 				'type_display',
+				'amount',
 				'counterparty',
-				'effective_token',
-				'fee_token_display',
-				'effective_fee_token',
+				'fee',
+				'fee_token',
+				'credit',
+				'debit',
+				'fee_token_debit',
 				'tx_id'
 			]);
 		});
@@ -341,10 +344,13 @@ describe('export-data.utils', () => {
 				'Network',
 				'Token',
 				'Type',
-				'Counterparty',
 				'Amount',
-				'Fee Token',
+				'Counterparty',
 				'Fee',
+				'Fee Token',
+				'Credit',
+				'Debit',
+				'Fee Token Debit',
 				'Transaction ID'
 			]);
 		});
@@ -561,11 +567,14 @@ describe('export-data.utils', () => {
 				amount: '0.001',
 				fee: '0.000005',
 				fee_token: 'BTC',
-				// On a same-token merge the Basic export's Fee column is empty, so the
-				// Basic Fee Token reads empty too — that's what fee_token_display surfaces.
-				fee_token_display: '',
-				// Fee and asset share the BTC token symbol, so the signed fee is folded into
-				// effective_token and effective_fee_token is left blank.
+				// Outgoing row with no incoming side, so Credit is empty.
+				credit: '',
+				// Outgoing same-token row: Debit = -(amount + fee).
+				debit: '-0.001005',
+				// Same fee token → no separate fee-token-debit column.
+				fee_token_debit: '',
+				// Extended export still surfaces the signed effective columns. Same-token
+				// merge folds the fee into effective_token here.
 				effective_token: '-0.001005',
 				effective_fee_token: '',
 				tx_id: 'btc-tx-1',
@@ -874,12 +883,14 @@ describe('export-data.utils', () => {
 			expect(row.type).toBe('approve');
 			expect(row.token_symbol).toBe('USDC');
 			expect(row.fee_token).toBe('ETH');
-			// fee_token_display keeps the gas token since the Basic Fee column has a value
-			// to label — only the same-token merge clears it.
-			expect(row.fee_token_display).toBe('ETH');
-			// Asset (USDC) is unchanged by an approve.
+			// Basic accounting columns. Allowance doesn't move USDC, so Debit stays empty;
+			// the gas fee lives in fee_token_debit since the fee token differs from the asset.
+			expect(row.credit).toBe('');
+			expect(row.debit).toBe('');
+			expect(row.fee_token_debit).toBe('-0.00105');
+			// Extended export still surfaces the original effective_* values:
+			// asset (USDC) is unchanged by an approve, fee is in ETH and kept in its own column.
 			expect(row.effective_token).toBe('0');
-			// Fee is in ETH, kept in its own column.
 			expect(row.effective_fee_token).toBe('-0.00105');
 		});
 
@@ -913,8 +924,12 @@ describe('export-data.utils', () => {
 			expect(row.direction).toBe('in');
 			expect(row.fee).toBe('');
 			expect(row.fee_token).toBe('');
-			expect(row.fee_token_display).toBe('');
 			expect(row.effective_fee_token).toBe('');
+			// Basic accounting: Credit carries the received amount; Debit / fee_token_debit empty.
+			expect(row.credit).not.toBe('');
+			expect(row.credit).toBe(row.amount);
+			expect(row.debit).toBe('');
+			expect(row.fee_token_debit).toBe('');
 		});
 
 		it('renders a Solana send with fee in SOL (9 decimals) and direction from owner addresses', () => {
