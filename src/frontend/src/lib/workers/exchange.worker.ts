@@ -94,8 +94,7 @@ const stopTimer = () => {
 };
 
 let syncInProgress = false;
-let syncQueued = false;
-let queuedGeneration: number | undefined = undefined;
+let queuedSyncGeneration: number | undefined = undefined;
 let activeSyncGeneration: number | undefined = undefined;
 
 interface SyncExchangeParams {
@@ -335,28 +334,29 @@ const syncLatestExchange = async (generation: number) => {
 	}
 
 	if (syncInProgress) {
-		syncQueued = true;
-		queuedGeneration = generation;
+		queuedSyncGeneration = generation;
 		return;
 	}
 
-	do {
-		syncQueued = false;
-		queuedGeneration = undefined;
+	syncInProgress = true;
+	activeSyncGeneration = generation;
 
-		syncInProgress = true;
-		activeSyncGeneration = generation;
+	await syncExchange(paramsFromTimerData(latestTimerData)).finally(() => {
+		syncInProgress = false;
+		if (activeSyncGeneration === generation) {
+			activeSyncGeneration = undefined;
+		}
+	});
 
-		await syncExchange(paramsFromTimerData(latestTimerData)).finally(() => {
-			syncInProgress = false;
-			if (activeSyncGeneration === generation) {
-				activeSyncGeneration = undefined;
-			}
-		});
-	} while (syncQueued && generation === timerGeneration);
+	const nextGeneration = queuedSyncGeneration;
+	queuedSyncGeneration = undefined;
 
-	if (syncQueued && queuedGeneration === timerGeneration) {
-		void syncLatestExchange(queuedGeneration);
+	if (
+		nonNullish(nextGeneration) &&
+		nextGeneration !== generation &&
+		nextGeneration === timerGeneration
+	) {
+		void syncLatestExchange(nextGeneration);
 	}
 };
 
