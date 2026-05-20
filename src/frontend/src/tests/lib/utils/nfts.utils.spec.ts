@@ -812,12 +812,32 @@ describe('nfts.utils', () => {
 			expect(global.fetch).not.toHaveBeenCalled();
 		});
 
+		it('returns OK for padded base64 data image URLs without overcounting size', async () => {
+			global.fetch = vi.fn();
+
+			const result = await getMediaStatus('data:image/png;base64,TQ==');
+
+			expect(result).toBe(MediaStatusEnum.OK);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
 		it('returns NON_SUPPORTED_MEDIA_TYPE for non-media data URLs', async () => {
 			global.fetch = vi.fn();
 
 			const result = await getMediaStatus('data:text/html;base64,PGgxPkhlbGxvPC9oMT4=');
 
 			expect(result).toBe(MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('returns FILESIZE_LIMIT_EXCEEDED for oversized data media URLs without fetching', async () => {
+			global.fetch = vi.fn();
+
+			const result = await getMediaStatus(
+				`data:image/png,${'a'.repeat(NFT_MAX_FILESIZE_LIMIT + 1)}`
+			);
+
+			expect(result).toBe(MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
 			expect(global.fetch).not.toHaveBeenCalled();
 		});
 

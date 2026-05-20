@@ -80,11 +80,20 @@ const dataUrlMediaStatus = ({ url }: { url: URL }): MediaStatusEnum | undefined 
 	}
 
 	const isBase64 = metadata.endsWith(';base64');
-	const size = isBase64 ? Math.ceil((data.length * 3) / 4) : decodeURIComponent(data).length;
+	const size = isBase64
+		? base64ByteLength({ data })
+		: new TextEncoder().encode(decodeURIComponent(data)).length;
 
 	return size > NFT_MAX_FILESIZE_LIMIT
 		? MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
 		: MediaStatusEnum.OK;
+};
+
+const base64ByteLength = ({ data }: { data: string }): number => {
+	const sanitizedData = data.replaceAll(/\s/g, '');
+	const padding = sanitizedData.endsWith('==') ? 2 : sanitizedData.endsWith('=') ? 1 : 0;
+
+	return Math.floor((sanitizedData.length * 3) / 4) - padding;
 };
 
 export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: NftError }): URL => {
