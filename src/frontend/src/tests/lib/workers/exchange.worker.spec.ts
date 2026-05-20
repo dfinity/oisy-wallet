@@ -291,12 +291,14 @@ describe('exchange.worker', () => {
 
 				await Promise.all([firstStart, latestStart]);
 
-				expect(simpleTokenPrice).toHaveBeenCalledWith({
-					id: 'internet-computer',
-					vs_currencies: Currency.USD,
-					contract_addresses: ['icrc1'],
-					include_market_cap: true,
-					include_24hr_change: true
+				await vi.waitFor(() => {
+					expect(simpleTokenPrice).toHaveBeenCalledWith({
+						id: 'internet-computer',
+						vs_currencies: Currency.USD,
+						contract_addresses: ['icrc1'],
+						include_market_cap: true,
+						include_24hr_change: true
+					});
 				});
 			});
 

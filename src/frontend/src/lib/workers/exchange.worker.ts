@@ -55,6 +55,10 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 		return;
 	}
 
+	if (syncInProgress && activeSyncGeneration === timerGeneration) {
+		return;
+	}
+
 	latestTimerData = data;
 	const generation = ++timerGeneration;
 
@@ -91,7 +95,8 @@ const stopTimer = () => {
 
 let syncInProgress = false;
 let syncQueued = false;
-let syncCompletion: Promise<void> | undefined = undefined;
+let queuedGeneration: number | undefined = undefined;
+let activeSyncGeneration: number | undefined = undefined;
 
 interface SyncExchangeParams {
 	currentCurrency: Currency;
@@ -325,27 +330,34 @@ const paramsFromTimerData = (
 });
 
 const syncLatestExchange = async (generation: number) => {
-	if (syncInProgress) {
-		syncQueued = true;
-		await syncCompletion;
+	if (generation !== timerGeneration) {
+		return;
 	}
 
-	if (generation !== timerGeneration) {
+	if (syncInProgress) {
+		syncQueued = true;
+		queuedGeneration = generation;
 		return;
 	}
 
 	do {
 		syncQueued = false;
+		queuedGeneration = undefined;
 
 		syncInProgress = true;
+		activeSyncGeneration = generation;
 
-		syncCompletion = syncExchange(paramsFromTimerData(latestTimerData)).finally(() => {
+		await syncExchange(paramsFromTimerData(latestTimerData)).finally(() => {
 			syncInProgress = false;
-			syncCompletion = undefined;
+			if (activeSyncGeneration === generation) {
+				activeSyncGeneration = undefined;
+			}
 		});
-
-		await syncCompletion;
 	} while (syncQueued && generation === timerGeneration);
+
+	if (syncQueued && queuedGeneration === timerGeneration) {
+		void syncLatestExchange(queuedGeneration);
+	}
 };
 
 const syncExchange = async (params: SyncExchangeParams) => {
