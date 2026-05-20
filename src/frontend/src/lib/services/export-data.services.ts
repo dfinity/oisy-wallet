@@ -2,6 +2,7 @@ import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.se
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
+import type { Languages } from '$lib/enums/languages';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
@@ -11,11 +12,13 @@ import { consoleError } from '$lib/utils/console.utils';
 import { downloadCsv, toCsv } from '$lib/utils/csv.utils';
 import {
 	BASIC_TOKEN_CSV_COLUMNS,
+	BASIC_TRANSACTION_CSV_COLUMNS,
 	TOKEN_CSV_COLUMNS,
 	TRANSACTION_CSV_COLUMNS,
 	buildTokenRows,
 	buildTransactionRows,
 	sortBasicTokenRows,
+	sortBasicTransactionRows,
 	type UserAddresses
 } from '$lib/utils/export-data.utils';
 import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
@@ -151,18 +154,34 @@ const loadAllTransactionsHistory = async ({
 	await Promise.allSettled(tokens.map(loadOne));
 };
 
+export type TransactionCsvVariant = 'basic' | 'extended';
+
+const TRANSACTION_CSV_COLUMNS_BY_VARIANT = {
+	basic: BASIC_TRANSACTION_CSV_COLUMNS,
+	extended: TRANSACTION_CSV_COLUMNS
+} as const;
+
+const TRANSACTION_CSV_FILENAME_BASE_BY_VARIANT = {
+	basic: 'oisy-transactions-basic',
+	extended: 'oisy-transactions'
+} as const;
+
 export const exportTransactionsCsv = async ({
 	identity,
 	tokens,
 	buildTransactions,
 	userAddresses,
-	nativeSymbolByNetworkId
+	nativeSymbolByNetworkId,
+	language,
+	variant = 'extended'
 }: {
 	identity: Nullish<Identity>;
 	tokens: Token[];
 	buildTransactions: () => AllTransactionUiWithCmp[];
 	userAddresses: UserAddresses;
 	nativeSymbolByNetworkId: Parameters<typeof buildTransactionRows>[0]['nativeSymbolByNetworkId'];
+	language: Languages;
+	variant?: TransactionCsvVariant;
 }): Promise<boolean> => {
 	const $i18n = get(i18n);
 
@@ -175,15 +194,25 @@ export const exportTransactionsCsv = async ({
 
 		const transactions = buildTransactions();
 		const exportedAt = new Date();
-		const rows = buildTransactionRows({
+		const unsortedRows = buildTransactionRows({
 			transactions,
 			userAddresses,
 			nativeSymbolByNetworkId,
+			language,
 			exportedAt
 		});
-		const csv = toCsv({ columns: TRANSACTION_CSV_COLUMNS, rows });
+		// The Basic export is meant to be skimmed like an activity feed — sort newest first.
+		// The Extended export keeps store order so power users can correlate with the wallet UI.
+		const rows = variant === 'basic' ? sortBasicTransactionRows(unsortedRows) : unsortedRows;
+		const csv = toCsv({ columns: TRANSACTION_CSV_COLUMNS_BY_VARIANT[variant], rows });
 
-		downloadCsv({ filename: csvFilename({ base: 'oisy-transactions', exportedAt }), csv });
+		downloadCsv({
+			filename: csvFilename({
+				base: TRANSACTION_CSV_FILENAME_BASE_BY_VARIANT[variant],
+				exportedAt
+			}),
+			csv
+		});
 
 		toastsShow({
 			text: $i18n.settings.text.export_transactions_success,

@@ -3,11 +3,13 @@ import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import type { Currency } from '$lib/enums/currency';
+import type { Languages } from '$lib/enums/languages';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
+import { formatSecondsToDate } from '$lib/utils/format.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
@@ -73,10 +75,12 @@ export const sortBasicTokenRows = (rows: TokenCsvRow[]): TokenCsvRow[] =>
 
 export interface TransactionCsvRow extends CsvRow {
 	timestamp_iso: string;
+	timestamp_local: string;
 	network: string;
 	token_symbol: string;
 	token_address_or_ledger_id: string;
 	type: string;
+	type_display: string;
 	type_raw: string;
 	direction: string;
 	status: string;
@@ -112,6 +116,44 @@ export const TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'explorer_url', header: 'explorer_url' },
 	{ key: 'exported_at', header: 'exported_at' }
 ];
+
+// Slim variant for the Basic transactions export — 10 spreadsheet-friendly columns. Timestamp
+// is the user-locale, browser-timezone version (matches what the app shows on rows); Type is
+// title-cased; Amount and Fee read from effective_token / effective_fee_token so a per-token
+// column sum already accounts for self-transfer dedup and same-token merge. Headers are
+// title-cased to match the Basic tokens variant.
+export const BASIC_TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
+	{ key: 'timestamp_local', header: 'Timestamp' },
+	{ key: 'network', header: 'Network' },
+	{ key: 'token_symbol', header: 'Symbol' },
+	{ key: 'type_display', header: 'Type' },
+	{ key: 'from', header: 'From' },
+	{ key: 'to', header: 'To' },
+	{ key: 'effective_token', header: 'Amount' },
+	{ key: 'fee_token', header: 'Fee Token' },
+	{ key: 'effective_fee_token', header: 'Fee' },
+	{ key: 'tx_id', header: 'Transaction ID' }
+];
+
+// Sorts the Basic transactions export by timestamp descending — newest first, the natural
+// activity-feed order. Rows without a parseable timestamp sink to the bottom rather than
+// jumping to either end.
+export const sortBasicTransactionRows = (rows: TransactionCsvRow[]): TransactionCsvRow[] =>
+	[...rows].sort((a, b) => {
+		if (a.timestamp_iso === '' && b.timestamp_iso === '') {
+			return 0;
+		}
+
+		if (a.timestamp_iso === '') {
+			return 1;
+		}
+
+		if (b.timestamp_iso === '') {
+			return -1;
+		}
+
+		return b.timestamp_iso.localeCompare(a.timestamp_iso);
+	});
 
 export interface UserAddresses {
 	btc?: Nullish<string>;
@@ -238,6 +280,31 @@ const formatTimestamp = (timestamp: bigint | number | undefined): string => {
 	return new Date(normalizeTimestampToSeconds(timestamp) * 1000).toISOString();
 };
 
+// Same source value as formatTimestamp, rendered with the user's language + the browser's
+// timezone via the shared `formatSecondsToDate` helper — so the Basic export reads the same
+// way as the transaction row in the wallet UI.
+const formatTimestampLocal = ({
+	timestamp,
+	language
+}: {
+	timestamp: bigint | number | undefined;
+	language: Languages;
+}): string => {
+	if (isNullish(timestamp)) {
+		return '';
+	}
+
+	return formatSecondsToDate({
+		seconds: normalizeTimestampToSeconds(timestamp),
+		language
+	});
+};
+
+// Title-cases a normalized transaction type for the human-facing Basic export (e.g.
+// 'send' → 'Send', 'approve' → 'Approve'). Empty input stays empty.
+const formatTypeDisplay = (type: string): string =>
+	type === '' ? '' : type.charAt(0).toUpperCase() + type.slice(1);
+
 const addressesEqual = ({ a, b }: { a: Nullish<string>; b: Nullish<string> }): boolean =>
 	nonNullish(a) && nonNullish(b) && a.toLowerCase() === b.toLowerCase();
 
@@ -245,11 +312,13 @@ const toBitcoinRow = ({
 	transaction: tx,
 	token,
 	userAddress,
+	language,
 	exportedAt
 }: {
 	transaction: BtcTransactionUi;
 	token: Token;
 	userAddress: Nullish<string>;
+	language: Languages;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const type = normalizeType(tx.type);
@@ -266,10 +335,12 @@ const toBitcoinRow = ({
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
+		timestamp_local: formatTimestampLocal({ timestamp: tx.timestamp, language }),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
 		type,
+		type_display: formatTypeDisplay(type),
 		type_raw: tx.type,
 		direction,
 		status: tx.status,
@@ -292,12 +363,14 @@ const toEthereumRow = ({
 	token,
 	userAddress,
 	nativeSymbolByNetworkId,
+	language,
 	exportedAt
 }: {
 	transaction: EthTransactionUi;
 	token: Token;
 	userAddress: Nullish<string>;
 	nativeSymbolByNetworkId: (networkId: NetworkId) => string | undefined;
+	language: Languages;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const type = normalizeType(tx.type);
@@ -323,10 +396,12 @@ const toEthereumRow = ({
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
+		timestamp_local: formatTimestampLocal({ timestamp: tx.timestamp, language }),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
 		type,
+		type_display: formatTypeDisplay(type),
 		type_raw: tx.type,
 		direction,
 		status,
@@ -346,20 +421,25 @@ const toEthereumRow = ({
 const toIcRow = ({
 	transaction: tx,
 	token,
+	language,
 	exportedAt
 }: {
 	transaction: IcTransactionUi;
 	token: Token;
+	language: Languages;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const direction: string = tx.incoming === true ? 'in' : tx.incoming === false ? 'out' : '';
+	const type = normalizeType(tx.type);
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
+		timestamp_local: formatTimestampLocal({ timestamp: tx.timestamp, language }),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
-		type: normalizeType(tx.type),
+		type,
+		type_display: formatTypeDisplay(type),
 		type_raw: tx.type,
 		direction,
 		status: tx.status,
@@ -380,11 +460,13 @@ const toSolanaRow = ({
 	transaction: tx,
 	token,
 	userAddress,
+	language,
 	exportedAt
 }: {
 	transaction: SolTransactionUi;
 	token: Token;
 	userAddress: Nullish<string>;
+	language: Languages;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const type = normalizeType(tx.type);
@@ -403,10 +485,12 @@ const toSolanaRow = ({
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
+		timestamp_local: formatTimestampLocal({ timestamp: tx.timestamp, language }),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
 		type,
+		type_display: formatTypeDisplay(type),
 		type_raw: tx.type,
 		direction,
 		status: tx.status ?? '',
@@ -518,11 +602,13 @@ export const buildTransactionRows = ({
 	transactions,
 	userAddresses,
 	nativeSymbolByNetworkId,
+	language,
 	exportedAt
 }: {
 	transactions: AllTransactionUiWithCmp[];
 	userAddresses: UserAddresses;
 	nativeSymbolByNetworkId: (networkId: NetworkId) => string | undefined;
+	language: Languages;
 	exportedAt: Date;
 }): TransactionCsvRow[] => {
 	const exportedAtIso = exportedAt.toISOString();
@@ -539,6 +625,7 @@ export const buildTransactionRows = ({
 					transaction: entry.transaction,
 					token: entry.token,
 					userAddress: userAddresses.btc,
+					language,
 					exportedAt: exportedAtIso
 				});
 				break;
@@ -548,6 +635,7 @@ export const buildTransactionRows = ({
 					token: entry.token,
 					userAddress: userAddresses.eth,
 					nativeSymbolByNetworkId,
+					language,
 					exportedAt: exportedAtIso
 				});
 				isSelfTransfer = addressesEqual({
@@ -559,6 +647,7 @@ export const buildTransactionRows = ({
 				row = toIcRow({
 					transaction: entry.transaction,
 					token: entry.token,
+					language,
 					exportedAt: exportedAtIso
 				});
 				isSelfTransfer = addressesEqual({
@@ -571,6 +660,7 @@ export const buildTransactionRows = ({
 					transaction: entry.transaction,
 					token: entry.token,
 					userAddress: userAddresses.sol,
+					language,
 					exportedAt: exportedAtIso
 				});
 				isSelfTransfer = addressesEqual({
