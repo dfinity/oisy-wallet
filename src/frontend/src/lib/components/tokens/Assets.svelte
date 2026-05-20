@@ -1,11 +1,8 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { SvelteSet } from 'svelte/reactivity';
+	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
-	import { icrc7CustomTokensNotInitialized, icrc7Tokens } from '$icp/derived/icrc7.derived';
-	import { resolveIcrc7CollectionDeepLinkAction } from '$icp/services/icrc7-deep-link.services';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import GoToEarnButton from '$lib/components/earning/GoToEarnButton.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
@@ -24,14 +21,13 @@
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
+	import type { ManageTokensData } from '$lib/types/manage-tokens';
 
 	interface Props {
 		tab: TokenTypes;
@@ -44,61 +40,12 @@
 	// svelte-ignore state_referenced_locally -- we want to get only the initial value
 	let activeTab = $state(tab);
 
-	const icrc7DeepLinkManageTokensId = Symbol();
-	const handledIcrc7DeepLinkCanisterIds = new SvelteSet<string>();
-
-	let { icrc7CanisterId, initialSearch, message } = $derived(
-		nonNullish($modalManageTokensData)
-			? $modalManageTokensData
-			: { icrc7CanisterId: undefined, initialSearch: undefined, message: undefined }
+	let { initialSearch, message, initialNetwork, initialTokenData, initialStep } = $derived(
+		nonNullish($modalManageTokensData) ? $modalManageTokensData : ({} as ManageTokensData)
 	);
-
-	const icrc7DeepLinkAction = $derived.by(() => {
-		if (tab !== TokenTypes.NFTS || isNullish($authIdentity) || $icrc7CustomTokensNotInitialized) {
-			return undefined;
-		}
-
-		return resolveIcrc7CollectionDeepLinkAction({
-			url: page.url,
-			tokens: $icrc7Tokens
-		});
-	});
 
 	$effect(() => {
 		activeAssetsTabStore.set({ key: 'active-assets-tab', value: activeTab });
-	});
-
-	$effect(() => {
-		const action = icrc7DeepLinkAction;
-
-		if (
-			isNullish(action) ||
-			action.type === 'ready' ||
-			handledIcrc7DeepLinkCanisterIds.has(action.canisterId)
-		) {
-			return;
-		}
-
-		handledIcrc7DeepLinkCanisterIds.add(action.canisterId);
-
-		if (action.type === 'import') {
-			modalStore.openManageTokens({
-				id: icrc7DeepLinkManageTokensId,
-				data: {
-					icrc7CanisterId: action.canisterId,
-					initialSearch: action.canisterId
-				}
-			});
-			return;
-		}
-
-		modalStore.openManageTokens({
-			id: icrc7DeepLinkManageTokensId,
-			data: {
-				initialSearch: action.token.name,
-				message: $i18n.transactions.text.token_needs_enabling
-			}
-		});
 	});
 </script>
 
@@ -193,7 +140,7 @@
 {/if}
 
 {#if $modalManageTokens}
-	<ManageTokensModal {icrc7CanisterId} {initialSearch}>
+	<ManageTokensModal {initialNetwork} {initialSearch} {initialStep} {initialTokenData}>
 		{#snippet infoElement()}
 			{#if nonNullish(message)}
 				<MessageBox level="info">

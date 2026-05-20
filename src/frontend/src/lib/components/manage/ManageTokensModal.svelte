@@ -3,7 +3,6 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
-	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import AddTokenReviewByNetwork from '$lib/components/manage/AddTokenReviewByNetwork.svelte';
@@ -24,12 +23,21 @@
 
 	interface Props {
 		initialSearch?: string;
-		icrc7CanisterId?: string;
+		initialNetwork?: Network;
+		initialTokenData?: Partial<AddTokenData>;
+		initialStep?: WizardStepsManageTokens;
 		onClose?: () => void;
 		infoElement?: Snippet;
 	}
 
-	let { initialSearch, icrc7CanisterId, onClose = () => {}, infoElement }: Props = $props();
+	let {
+		initialSearch,
+		initialNetwork,
+		initialTokenData,
+		initialStep,
+		onClose = () => {},
+		infoElement
+	}: Props = $props();
 
 	const isNftsPage = $derived(isRouteNfts(page));
 
@@ -56,7 +64,7 @@
 
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
-	let initializedIcrc7ReviewStep = false;
+	let initializedInitialStep = false;
 
 	const saveTokens = async (tokens: Token[]) => {
 		await saveAllCustomTokens({
@@ -79,22 +87,25 @@
 		onClose();
 	};
 
-	const initialNetwork = (): Network | undefined =>
-		isNullish(icrc7CanisterId) ? $selectedNetwork : ICP_NETWORK;
+	const initialModalNetwork = (): Network | undefined => initialNetwork ?? $selectedNetwork;
 
-	const initialTokenData = (): Partial<AddTokenData> =>
-		isNullish(icrc7CanisterId) ? {} : { icrc7CanisterId };
+	const initialModalTokenData = (): Partial<AddTokenData> => initialTokenData ?? {};
 
-	let network: Network | undefined = $state(initialNetwork());
-	let tokenData: Partial<AddTokenData> = $state(initialTokenData());
+	let network: Network | undefined = $state(initialModalNetwork());
+	let tokenData: Partial<AddTokenData> = $state(initialModalTokenData());
 
 	$effect(() => {
-		if (initializedIcrc7ReviewStep || isNullish(icrc7CanisterId) || isNullish(modal)) {
+		if (initializedInitialStep || isNullish(initialStep) || isNullish(modal)) {
 			return;
 		}
 
-		initializedIcrc7ReviewStep = true;
-		modal.set(2);
+		initializedInitialStep = true;
+
+		const stepIndex = steps.findIndex(({ name }) => name === initialStep);
+
+		if (stepIndex >= 0) {
+			modal.set(stepIndex);
+		}
 	});
 </script>
 
