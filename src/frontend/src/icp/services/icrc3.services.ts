@@ -2,7 +2,7 @@ import type { GetBlocksResult, Value } from '$declarations/icrc3/icrc3.did';
 import { getBlocks } from '$icp/api/icrc3.api';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NullishIdentity } from '$lib/types/identity';
-import { nonNullish, type QueryParams } from '@dfinity/utils';
+import type { QueryParams } from '@dfinity/utils';
 
 export interface Icrc3Block {
 	id: bigint;
@@ -69,7 +69,7 @@ export const loadIcrc3BlockLog = async ({
 		args: [{ start, length }]
 	});
 
-	const archived = nonNullish(archivedBlocks)
+	const archived = archivedBlocks.length > 0
 		? await loadArchivedBlocks({ identity, certified, archivedBlocks })
 		: [];
 
