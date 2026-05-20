@@ -542,6 +542,7 @@ const loadSolTransactions = async ({
 				: newTransactions;
 
 		const freshSignatures = new Set(freshTransactions.map(({ signature }) => String(signature)));
+		
 		const storedTransactionsToUse = isHeadLoad
 			? storedTransactions.filter(
 					({ id, signature }) =>
