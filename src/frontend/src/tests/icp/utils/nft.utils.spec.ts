@@ -303,6 +303,27 @@ describe('nft.utils', () => {
 			});
 		});
 
+		it('should map data image URLs without fetching them for validation', async () => {
+			const imageUrl = 'data:image/png;base64,iVBORw0KGgo=';
+			vi.mocked(getIcrc7Metadata).mockResolvedValue({
+				name: 'ICRC-7 NFT #50',
+				imageUrl
+			});
+
+			const result = await mapIcrc7Nft({
+				index: mockIndex,
+				token: mockValidIcrc7Token,
+				identity: mockIdentity
+			});
+
+			expect(result.imageUrl).toBe(imageUrl);
+			expect(result.mediaStatus).toStrictEqual({
+				image: MediaStatusEnum.OK,
+				thumbnail: MediaStatusEnum.INVALID_DATA
+			});
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
 		it('should omit invalid metadata URLs and avoid fetching them', async () => {
 			vi.mocked(getIcrc7Metadata).mockResolvedValue({
 				name: 'ICRC-7 NFT #50',

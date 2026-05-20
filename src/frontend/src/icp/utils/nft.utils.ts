@@ -144,9 +144,23 @@ const mapIcrc7Collection = ({ canisterId, ...rest }: Icrc7Token): NftCollection 
 	address: canisterId
 });
 
+const isImageDataUrl = (url: string): boolean => {
+	try {
+		const { protocol, pathname } = new URL(url);
+
+		return protocol === 'data:' && pathname.startsWith('image/');
+	} catch (_: unknown) {
+		return false;
+	}
+};
+
 const mapIcrc7MetadataUrl = (url: string | undefined): string | undefined => {
 	if (!notEmptyString(url)) {
 		return;
+	}
+
+	if (isImageDataUrl(url)) {
+		return url;
 	}
 
 	const parsedUrl = UrlSchema.safeParse(url);
