@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
@@ -11,8 +12,13 @@
 	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SOURCE_LOCATIONS
+	} from '$lib/enums/plausible';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
+	import { trackTokenManage } from '$lib/services/token-manage-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Network } from '$lib/types/network';
@@ -68,7 +74,42 @@
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
+	const trackImportCancel = () => {
+		if (
+			currentStep?.name !== WizardStepsManageTokens.IMPORT &&
+			currentStep?.name !== WizardStepsManageTokens.REVIEW
+		) {
+			return;
+		}
+
+		const address =
+			tokenData.ledgerCanisterId ??
+			tokenData.extCanisterId ??
+			tokenData.dip721CanisterId ??
+			tokenData.icPunksCanisterId ??
+			tokenData.icrc7CanisterId ??
+			tokenData.ethContractAddress ??
+			tokenData.splTokenAddress;
+		const tokenNetwork = network?.id.description;
+
+		if (isNullish(address) || isNullish(tokenNetwork)) {
+			return;
+		}
+
+		trackTokenManage({
+			modifier: 'import',
+			token: {
+				network: tokenNetwork,
+				address
+			},
+			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+		});
+	};
+
 	const close = () => {
+		trackImportCancel();
+
 		modalStore.close();
 
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
