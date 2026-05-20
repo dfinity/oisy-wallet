@@ -185,6 +185,16 @@ describe('nft.services', () => {
 					canisterId
 				});
 			});
+
+			expect(getIcrc7TokensByOwner).toHaveBeenCalledTimes(mockIcrc7Tokens.length);
+
+			mockIcrc7Tokens.forEach(({ canisterId }) => {
+				expect(getIcrc7TokensByOwner).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
+					canisterId
+				});
+			});
 		});
 
 		it('should return the list of NFTs owned by the user', async () => {
@@ -216,6 +226,16 @@ describe('nft.services', () => {
 				expect(getIcPunksTokensByOwner).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					owner: mockPrincipal,
+					canisterId
+				});
+			});
+
+			expect(getIcrc7TokensByOwner).toHaveBeenCalledTimes(mockIcrc7Tokens.length);
+
+			mockIcrc7Tokens.forEach(({ canisterId }) => {
+				expect(getIcrc7TokensByOwner).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
 					canisterId
 				});
 			});
@@ -370,6 +390,37 @@ describe('nft.services', () => {
 					error: mockError.message,
 					canisterId: mockValidIcPunksToken.canisterId,
 					standard: mockValidIcPunksToken.standard.code
+				}
+			});
+		});
+
+		it('should handle ICRC-7 service errors gracefully', async () => {
+			const mockError = new Error('Mock ICRC-7 error');
+			vi.spyOn(icrc7Api, 'getTokensByOwner').mockRejectedValueOnce(mockError);
+
+			await expect(loadNfts(mockParams)).resolves.toEqual([
+				...expected1,
+				...expected2,
+				...expected3,
+				...expected4
+			]);
+
+			expect(getIcrc7TokensByOwner).toHaveBeenCalledTimes(mockIcrc7Tokens.length);
+
+			mockIcrc7Tokens.forEach(({ canisterId }) => {
+				expect(getIcrc7TokensByOwner).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
+					canisterId
+				});
+			});
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR,
+				metadata: {
+					error: mockError.message,
+					canisterId: mockValidIcrc7Token.canisterId,
+					standard: mockValidIcrc7Token.standard.code
 				}
 			});
 		});
