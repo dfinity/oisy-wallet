@@ -67,6 +67,26 @@ const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	return new URL(parsedNewUrl.data);
 };
 
+const dataUrlMediaStatus = ({ url }: { url: URL }): MediaStatusEnum | undefined => {
+	if (url.protocol !== 'data:') {
+		return;
+	}
+
+	const [metadata, data = ''] = url.href.split(',', 2);
+	const [mediaType] = metadata.slice('data:'.length).split(';', 1);
+
+	if (!(mediaType.startsWith('image/') || mediaType.startsWith('video/'))) {
+		return MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
+	}
+
+	const isBase64 = metadata.endsWith(';base64');
+	const size = isBase64 ? Math.ceil((data.length * 3) / 4) : decodeURIComponent(data).length;
+
+	return size > NFT_MAX_FILESIZE_LIMIT
+		? MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
+		: MediaStatusEnum.OK;
+};
+
 export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: NftError }): URL => {
 	const parsedUrl = UrlSchema.safeParse(url);
 
@@ -298,6 +318,12 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<MediaStatusEnum
 
 		if (isNullish(url)) {
 			return MediaStatusEnum.INVALID_DATA;
+		}
+
+		const dataUrlStatus = dataUrlMediaStatus({ url });
+
+		if (nonNullish(dataUrlStatus)) {
+			return dataUrlStatus;
 		}
 
 		const { type, size } = await extractMediaTypeAndSize(url.href);
