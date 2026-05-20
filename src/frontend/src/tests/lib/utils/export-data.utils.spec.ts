@@ -764,12 +764,16 @@ describe('export-data.utils', () => {
 
 		it('zeros effective_token on approve rows but still records the fee', () => {
 			// Same-token approve (ICRC): fee folds into effective_token. amount is descriptive
-			// (the approved allowance), not a balance movement.
+			// (the approved allowance), not a balance movement. The indexer leaves tx.to
+			// undefined on approves and stores the spender in tx.approveSpender — the adapter
+			// must surface that as the To column so the row reads "user → spender" the same
+			// way the activity page does.
 			const sameTokenApprove: IcTransactionUi = {
 				...icTx,
 				type: 'approve',
 				from: 'user-principal',
-				to: 'spender-principal',
+				to: undefined,
+				approveSpender: 'spender-principal',
 				incoming: false
 			};
 
@@ -782,6 +786,9 @@ describe('export-data.utils', () => {
 			});
 
 			expect(row.type).toBe('approve');
+			expect(row.from).toBe('user-principal');
+			// Surfaced from tx.approveSpender since the indexer leaves tx.to empty on approves.
+			expect(row.to).toBe('spender-principal');
 			expect(row.amount).toBe('0.5');
 			expect(row.fee).toBe('0.0000001');
 			// Asset contribution is 0 (approve doesn't move balance) + fee folded in.

@@ -431,6 +431,12 @@ const toIcRow = ({
 }): TransactionCsvRow => {
 	const direction: string = tx.incoming === true ? 'in' : tx.incoming === false ? 'out' : '';
 	const type = normalizeType(tx.type);
+	// ICRC approves store the spender in tx.approveSpender (tx.to is undefined). Surface it
+	// as the To column so the activity page's "approving Alice" reading carries into the
+	// CSV — without this the row would have an empty To and the Counterparty derived from
+	// it would be blank too.
+	const to =
+		type === 'approve' && nonNullish(tx.approveSpender) ? tx.approveSpender : (tx.to ?? '');
 
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
@@ -444,7 +450,7 @@ const toIcRow = ({
 		direction,
 		status: tx.status,
 		from: tx.from ?? '',
-		to: tx.to ?? '',
+		to,
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: token.decimals }),
 		fee_token: token.symbol,
