@@ -79,6 +79,21 @@ export const mapUserTransactionToSolTransaction = ({
 export const isSolTransactionFinalized = (tx: SolTransactionUi): boolean =>
 	tx.status === 'finalized';
 
+export const requiresStoredSplOwnerRefresh = ({
+	transaction: { from, fromOwner, to, toOwner },
+	address,
+	tokenAddress
+}: {
+	transaction: SolTransactionUi;
+	address: SolAddress;
+	tokenAddress?: SplTokenAddress;
+}): boolean =>
+	nonNullish(tokenAddress) &&
+	from !== address &&
+	fromOwner !== address &&
+	to !== address &&
+	toOwner !== address;
+
 /**
  * Derives the backend `TokenId` from the Solana network type and optional SPL token address.
  */
