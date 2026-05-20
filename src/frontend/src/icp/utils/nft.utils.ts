@@ -144,11 +144,25 @@ const mapIcrc7Collection = ({ canisterId, ...rest }: Icrc7Token): NftCollection 
 	address: canisterId
 });
 
-const isImageDataUrl = (url: string): boolean => {
-	try {
-		const { protocol, pathname } = new URL(url);
+const BASE64_DATA_REGEX = /^[A-Za-z0-9+/]*={0,2}$/;
 
-		return protocol === 'data:' && pathname.startsWith('image/');
+const isBase64ImageDataUrl = (url: string): boolean => {
+	try {
+		const { protocol } = new URL(url);
+
+		if (protocol !== 'data:') {
+			return false;
+		}
+
+		const [metadata, data = ''] = url.split(',', 2);
+		const [mediaType, ...parameters] = metadata.slice('data:'.length).toLowerCase().split(';');
+
+		return (
+			mediaType.startsWith('image/') &&
+			parameters.includes('base64') &&
+			data.length % 4 === 0 &&
+			BASE64_DATA_REGEX.test(data)
+		);
 	} catch (_: unknown) {
 		return false;
 	}
@@ -159,7 +173,7 @@ const mapIcrc7MetadataUrl = (url: string | undefined): string | undefined => {
 		return;
 	}
 
-	if (isImageDataUrl(url)) {
+	if (isBase64ImageDataUrl(url)) {
 		return url;
 	}
 

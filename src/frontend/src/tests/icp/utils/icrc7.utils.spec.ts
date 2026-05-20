@@ -10,6 +10,7 @@ import {
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIcrc7CanisterId, mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
+import { uint8ArrayToBase64 } from '@dfinity/utils';
 
 describe('icrc7.utils', () => {
 	describe('isTokenIcrc7', () => {
@@ -182,6 +183,16 @@ describe('icrc7.utils', () => {
 				])
 			).toEqual({
 				imageUrl: 'data:image/png;base64,iVBORw0KGgo='
+			});
+		});
+
+		it('should map SVG blobs with XML and comments into data URLs', () => {
+			const blob = new TextEncoder().encode(
+				'<?xml version="1.0"?>\n<!-- icon -->\n<svg xmlns="http://www.w3.org/2000/svg"/>'
+			);
+
+			expect(mapIcrc7TokenMetadata([['icrc7:image', { Blob: blob }]])).toEqual({
+				imageUrl: `data:image/svg+xml;base64,${uint8ArrayToBase64(blob)}`
 			});
 		});
 

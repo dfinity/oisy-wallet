@@ -143,8 +143,11 @@ const blobImageMimeType = (value: Uint8Array): string | undefined => {
 	}
 
 	const text = new TextDecoder().decode(value.slice(0, 256)).trimStart().toLowerCase();
+	const normalizedText = text
+		.replace(/^(?:<\?xml[\s\S]*?\?>\s*|<!doctype\s+svg[^>]*>\s*|<!--[\s\S]*?-->\s*)*/u, '')
+		.trimStart();
 
-	if (text.startsWith('<svg')) {
+	if (normalizedText.startsWith('<svg')) {
 		return 'image/svg+xml';
 	}
 };
