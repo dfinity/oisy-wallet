@@ -19,12 +19,14 @@
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 	import { enabledFungibleTokens, nativeTokens } from '$lib/derived/tokens.derived';
 	import {
 		exportTokensCsv,
 		exportTransactionsCsv,
-		type TokenCsvVariant
+		type TokenCsvVariant,
+		type TransactionCsvVariant
 	} from '$lib/services/export-data.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -49,7 +51,7 @@
 		}
 	};
 
-	const onExportTransactions = async () => {
+	const onExportTransactions = async (variant: TransactionCsvVariant) => {
 		exportingTransactions = true;
 		try {
 			const nativeSymbolByNetworkId = (networkId: NetworkId): string | undefined =>
@@ -67,6 +69,8 @@
 				tokens: $enabledFungibleTokens,
 				userAddresses,
 				nativeSymbolByNetworkId,
+				language: $currentLanguage,
+				variant,
 				buildTransactions: () =>
 					mapAllTransactionsUi({
 						tokens: $enabledFungibleTokens,
@@ -114,6 +118,26 @@
 		{/snippet}
 	</SettingsCardItem>
 
+	<SettingsCardItem>
+		{#snippet key()}
+			{$i18n.settings.text.export_transactions}
+		{/snippet}
+
+		{#snippet value()}
+			<Button
+				ariaLabel={`${$i18n.settings.text.export_transactions} (${$i18n.settings.text.export_basic})`}
+				disabled={exportingTokens || exportingTransactions}
+				link
+				loading={exportingTransactions}
+				onclick={() => onExportTransactions('basic')}>{$i18n.core.text.download} ></Button
+			>
+		{/snippet}
+
+		{#snippet info()}
+			{$i18n.settings.text.export_transactions_basic_description}
+		{/snippet}
+	</SettingsCardItem>
+
 	<h5 class="mt-5 text-xs font-semibold tracking-wide text-tertiary uppercase">
 		{$i18n.settings.text.export_extended}
 	</h5>
@@ -144,11 +168,11 @@
 
 		{#snippet value()}
 			<Button
-				ariaLabel={$i18n.settings.text.export_transactions}
+				ariaLabel={`${$i18n.settings.text.export_transactions} (${$i18n.settings.text.export_extended})`}
 				disabled={exportingTokens || exportingTransactions}
 				link
 				loading={exportingTransactions}
-				onclick={onExportTransactions}>{$i18n.core.text.download} ></Button
+				onclick={() => onExportTransactions('extended')}>{$i18n.core.text.download} ></Button
 			>
 		{/snippet}
 
