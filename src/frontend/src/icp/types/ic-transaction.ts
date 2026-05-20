@@ -50,6 +50,7 @@ export interface IcTransactionUi {
 	timestamp?: bigint;
 	status: IcTransactionStatus;
 	txExplorerUrl?: string;
+	tokenId?: bigint;
 	approveSpender?: string;
 	approveSpenderExplorerUrl?: string;
 	approveExpiresAt?: bigint;

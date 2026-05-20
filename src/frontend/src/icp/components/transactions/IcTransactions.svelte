@@ -70,10 +70,6 @@
 
 <Info />
 
-{#if !noTransactions}
-	<HiddenMicroTransactionsInfoBox />
-{/if}
-
 <Header>
 	{$i18n.transactions.text.title}
 
@@ -87,6 +83,10 @@
 		</IcIndexCanisterStatus>
 	{/snippet}
 </Header>
+
+{#if !noTransactions}
+	<HiddenMicroTransactionsInfoBox />
+{/if}
 
 <IcTransactionsSkeletons>
 	{#if filteredTransactions.length > 0}

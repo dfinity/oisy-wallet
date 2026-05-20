@@ -588,6 +588,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: UpdateAgreementsError
 	});
 	const Stats = IDL.Record({
+		active_user_transactions_count: IDL.Nat64,
 		user_profile_count: IDL.Nat64,
 		user_transactions_count: IDL.Nat64,
 		custom_token_count: IDL.Nat64,

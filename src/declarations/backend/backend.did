@@ -752,6 +752,7 @@ type SplToken = record {
 	symbol : opt text
 };
 type Stats = record {
+	active_user_transactions_count : nat64;
 	user_profile_count : nat64;
 	user_transactions_count : nat64;
 	custom_token_count : nat64;
