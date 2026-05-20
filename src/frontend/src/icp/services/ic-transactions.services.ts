@@ -101,35 +101,24 @@ const loadNextIcTransactionsRequest = ({
 		identity
 	});
 
-const loadIcrc7TransactionsPage = async ({
+interface Icrc7TransactionsPage {
+	transactions: IcTransactionUi[];
+	reachedStart: boolean;
+}
+
+const loadPreviousIcrc7TransactionsWithMatches = async ({
 	token,
 	identity,
 	certified,
-	lastId,
-	maxResults
+	cursorEnd,
+	length
 }: {
 	token: Icrc7Token;
 	identity: NullishIdentity;
 	certified?: boolean;
-	lastId?: string;
-	maxResults?: bigint;
-}): Promise<{ transactions: IcTransactionUi[]; reachedStart: boolean }> => {
-	const length = maxResults ?? WALLET_PAGINATION;
-	let cursorEnd: bigint;
-
-	if (nonNullish(lastId)) {
-		cursorEnd = BigInt(lastId);
-	} else {
-		const { logLength } = await loadIcrc3BlockLog({
-			identity,
-			canisterId: token.canisterId,
-			start: ZERO,
-			length: ZERO,
-			certified
-		});
-		cursorEnd = logLength;
-	}
-
+	cursorEnd: bigint;
+	length: bigint;
+}): Promise<Icrc7TransactionsPage> => {
 	while (cursorEnd > ZERO) {
 		const start = cursorEnd > length ? cursorEnd - length : ZERO;
 		const { blocks } = await loadIcrc3BlockLog({
@@ -152,6 +141,41 @@ const loadIcrc7TransactionsPage = async ({
 	}
 
 	return { transactions: [], reachedStart: true };
+};
+
+const loadIcrc7TransactionsPage = async ({
+	token,
+	identity,
+	certified,
+	lastId,
+	maxResults
+}: {
+	token: Icrc7Token;
+	identity: NullishIdentity;
+	certified?: boolean;
+	lastId?: string;
+	maxResults?: bigint;
+}): Promise<Icrc7TransactionsPage> => {
+	const length = maxResults ?? WALLET_PAGINATION;
+	const cursorEnd = nonNullish(lastId)
+		? BigInt(lastId)
+		: (
+				await loadIcrc3BlockLog({
+					identity,
+					canisterId: token.canisterId,
+					start: ZERO,
+					length: ZERO,
+					certified
+				})
+			).logLength;
+
+	return loadPreviousIcrc7TransactionsWithMatches({
+		token,
+		identity,
+		certified,
+		cursorEnd,
+		length
+	});
 };
 
 const loadNextIcrc7TransactionsRequest = ({
