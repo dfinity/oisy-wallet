@@ -5,4 +5,5 @@
 </script>
 
 <IcIcrc7DeepLinkHandler />
+
 <Assets tab={TokenTypes.NFTS} />
