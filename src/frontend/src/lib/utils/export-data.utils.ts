@@ -121,12 +121,13 @@ export const TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'exported_at', header: 'exported_at' }
 ];
 
-// Slim variant for the Basic transactions export — 11 spreadsheet-friendly columns.
+// Slim variant for the Basic transactions export — 9 spreadsheet-friendly columns.
 // Timestamp is the user-locale, browser-timezone version (matches what the app shows on
 // rows); Type is title-cased; Counterparty resolves the active side (To on outgoing, From
 // on incoming) through the address book — same lookup as the activity page — and falls
-// back to the raw address. Amount and Fee read from effective_token / effective_fee_token
-// so a per-token column sum already accounts for self-transfer dedup and same-token merge.
+// back to the raw address, so the raw From / To addresses can be dropped here (Extended
+// keeps them). Amount and Fee read from effective_token / effective_fee_token so a
+// per-token column sum already accounts for self-transfer dedup and same-token merge.
 // Headers are title-cased to match the Basic tokens variant.
 export const BASIC_TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'timestamp_local', header: 'Timestamp' },
@@ -134,8 +135,6 @@ export const BASIC_TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'token_symbol', header: 'Symbol' },
 	{ key: 'type_display', header: 'Type' },
 	{ key: 'counterparty', header: 'Counterparty' },
-	{ key: 'from', header: 'From' },
-	{ key: 'to', header: 'To' },
 	{ key: 'effective_token', header: 'Amount' },
 	{ key: 'fee_token_display', header: 'Fee Token' },
 	{ key: 'effective_fee_token', header: 'Fee' },

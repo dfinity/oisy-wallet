@@ -321,15 +321,13 @@ describe('export-data.utils', () => {
 	});
 
 	describe('BASIC_TRANSACTION_CSV_COLUMNS', () => {
-		it('lists the 11 basic-export columns in the documented order', () => {
+		it('lists the 9 basic-export columns in the documented order', () => {
 			expect(BASIC_TRANSACTION_CSV_COLUMNS.map(({ key }) => key)).toEqual([
 				'timestamp_local',
 				'network',
 				'token_symbol',
 				'type_display',
 				'counterparty',
-				'from',
-				'to',
 				'effective_token',
 				'fee_token_display',
 				'effective_fee_token',
@@ -344,8 +342,6 @@ describe('export-data.utils', () => {
 				'Symbol',
 				'Type',
 				'Counterparty',
-				'From',
-				'To',
 				'Amount',
 				'Fee Token',
 				'Fee',
