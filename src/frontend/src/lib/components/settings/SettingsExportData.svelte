@@ -18,6 +18,7 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { allContacts } from '$lib/derived/contacts.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 	import { enabledFungibleTokens, nativeTokens } from '$lib/derived/tokens.derived';
@@ -68,6 +69,7 @@
 				tokens: $enabledFungibleTokens,
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: $allContacts,
 				variant,
 				buildTransactions: () =>
 					mapAllTransactionsUi({

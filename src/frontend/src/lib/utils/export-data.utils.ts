@@ -3,13 +3,15 @@ import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import type { Currency } from '$lib/enums/currency';
+import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
+import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import Decimal from 'decimal.js';
 import { formatUnits } from 'ethers/utils';
@@ -84,6 +86,7 @@ export interface TransactionCsvRow extends CsvRow {
 	status: string;
 	from: string;
 	to: string;
+	counterparty: string;
 	amount: string;
 	fee: string;
 	fee_token: string;
@@ -115,16 +118,19 @@ export const TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'exported_at', header: 'exported_at' }
 ];
 
-// Slim variant for the Basic transactions export — 10 spreadsheet-friendly columns. Timestamp
-// is the user-locale, browser-timezone version (matches what the app shows on rows); Type is
-// title-cased; Amount and Fee read from effective_token / effective_fee_token so a per-token
-// column sum already accounts for self-transfer dedup and same-token merge. Headers are
-// title-cased to match the Basic tokens variant.
+// Slim variant for the Basic transactions export — 11 spreadsheet-friendly columns.
+// Timestamp is the user-locale, browser-timezone version (matches what the app shows on
+// rows); Type is title-cased; Counterparty resolves the active side (To on outgoing, From
+// on incoming) through the address book — same lookup as the activity page — and falls
+// back to the raw address. Amount and Fee read from effective_token / effective_fee_token
+// so a per-token column sum already accounts for self-transfer dedup and same-token merge.
+// Headers are title-cased to match the Basic tokens variant.
 export const BASIC_TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'timestamp_local', header: 'Timestamp' },
 	{ key: 'network', header: 'Network' },
 	{ key: 'token_symbol', header: 'Symbol' },
 	{ key: 'type_display', header: 'Type' },
+	{ key: 'counterparty', header: 'Counterparty' },
 	{ key: 'from', header: 'From' },
 	{ key: 'to', header: 'To' },
 	{ key: 'effective_token', header: 'Amount' },
@@ -341,7 +347,9 @@ const toBitcoinRow = ({
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: BTC_DECIMALS }),
 		fee_token: 'BTC',
-		// effective_* are filled in by finalizeRow once direction + self-transfer are resolved.
+		// counterparty + effective_* are filled in by finalizeRow once direction + contacts +
+		// self-transfer are known.
+		counterparty: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.id,
@@ -400,6 +408,7 @@ const toEthereumRow = ({
 		amount: formatAmount({ value: tx.value as bigint | undefined, decimals: token.decimals }),
 		fee: formatAmount({ value: gasFee, decimals: EVM_NATIVE_DECIMALS }),
 		fee_token: nativeSymbolByNetworkId(token.network.id) ?? '',
+		counterparty: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.hash ?? '',
@@ -436,6 +445,7 @@ const toIcRow = ({
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: token.decimals }),
 		fee_token: token.symbol,
+		counterparty: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.id),
@@ -485,6 +495,7 @@ const toSolanaRow = ({
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
 		fee: formatAmount({ value: tx.fee, decimals: SOL_NATIVE_DECIMALS }),
 		fee_token: 'SOL',
+		counterparty: '',
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.signature),
@@ -525,16 +536,43 @@ const sumDecimals = ({ a, b }: { a: string; b: string }): string => {
 	return new Decimal(a).plus(new Decimal(b)).toFixed();
 };
 
-// Fills in effective_token / effective_fee_token and blanks the fee on incoming rows
-// (where the sender, or — for ICRC self-transfer duplicates — the matching outgoing row
-// already accounts for it). When the asset and fee share the same token symbol, the
-// signed fee is folded into effective_token so a single column sum reconciles.
+// Resolves the active counterparty address (to-address on outgoing, from-address on
+// incoming) through the address book, mirroring the activity page's contact lookup. If a
+// contact matches, returns "Name" — or "Name (Label)" when the specific address has a
+// non-empty label set. Otherwise returns the raw address.
+const formatCounterparty = ({
+	address,
+	contacts
+}: {
+	address: string;
+	contacts: ContactUi[];
+}): string => {
+	if (address === '') {
+		return '';
+	}
+
+	const contact = getContactForAddress({ addressString: address, contactList: contacts });
+	if (isNullish(contact)) {
+		return address;
+	}
+
+	const matched = filterAddressFromContact({ contact, address });
+	const label = matched?.label;
+	return notEmptyString(label) ? `${contact.name} (${label})` : contact.name;
+};
+
+// Fills in counterparty + effective_token / effective_fee_token and blanks the fee on
+// incoming rows (where the sender, or — for ICRC self-transfer duplicates — the matching
+// outgoing row already accounts for it). When the asset and fee share the same token
+// symbol, the signed fee is folded into effective_token so a single column sum reconciles.
 const finalizeRow = ({
 	row,
-	isSelfTransfer
+	isSelfTransfer,
+	contacts
 }: {
 	row: TransactionCsvRow;
 	isSelfTransfer: boolean;
+	contacts: ContactUi[];
 }): TransactionCsvRow => {
 	const isApprove = row.type === 'approve';
 	const isIncoming = row.direction === 'in';
@@ -575,10 +613,14 @@ const finalizeRow = ({
 		: assetSigned;
 	const effective_fee_token = mergeColumns ? '' : feeSigned;
 
+	const counterpartyAddress = isOutgoing ? row.to : isIncoming ? row.from : '';
+	const counterparty = formatCounterparty({ address: counterpartyAddress, contacts });
+
 	return {
 		...row,
 		fee: userPaidFee ? row.fee : '',
 		fee_token: userPaidFee ? row.fee_token : '',
+		counterparty,
 		effective_token,
 		effective_fee_token
 	};
@@ -588,11 +630,13 @@ export const buildTransactionRows = ({
 	transactions,
 	userAddresses,
 	nativeSymbolByNetworkId,
+	contacts,
 	exportedAt
 }: {
 	transactions: AllTransactionUiWithCmp[];
 	userAddresses: UserAddresses;
 	nativeSymbolByNetworkId: (networkId: NetworkId) => string | undefined;
+	contacts: ContactUi[];
 	exportedAt: Date;
 }): TransactionCsvRow[] => {
 	const exportedAtIso = exportedAt.toISOString();
@@ -650,6 +694,6 @@ export const buildTransactionRows = ({
 				break;
 		}
 
-		return finalizeRow({ row, isSelfTransfer });
+		return finalizeRow({ row, isSelfTransfer, contacts });
 	});
 };

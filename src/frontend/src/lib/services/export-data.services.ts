@@ -4,6 +4,7 @@ import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsShow } from '$lib/stores/toasts.store';
+import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
@@ -171,6 +172,7 @@ export const exportTransactionsCsv = async ({
 	buildTransactions,
 	userAddresses,
 	nativeSymbolByNetworkId,
+	contacts,
 	variant = 'extended'
 }: {
 	identity: Nullish<Identity>;
@@ -178,6 +180,7 @@ export const exportTransactionsCsv = async ({
 	buildTransactions: () => AllTransactionUiWithCmp[];
 	userAddresses: UserAddresses;
 	nativeSymbolByNetworkId: Parameters<typeof buildTransactionRows>[0]['nativeSymbolByNetworkId'];
+	contacts: ContactUi[];
 	variant?: TransactionCsvVariant;
 }): Promise<boolean> => {
 	const $i18n = get(i18n);
@@ -195,6 +198,7 @@ export const exportTransactionsCsv = async ({
 			transactions,
 			userAddresses,
 			nativeSymbolByNetworkId,
+			contacts,
 			exportedAt
 		});
 		// The Basic export is meant to be skimmed like an activity feed — sort newest first.

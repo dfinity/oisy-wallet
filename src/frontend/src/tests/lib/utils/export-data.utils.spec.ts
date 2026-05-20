@@ -8,6 +8,7 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
@@ -317,12 +318,13 @@ describe('export-data.utils', () => {
 	});
 
 	describe('BASIC_TRANSACTION_CSV_COLUMNS', () => {
-		it('lists the 10 basic-export columns in the documented order', () => {
+		it('lists the 11 basic-export columns in the documented order', () => {
 			expect(BASIC_TRANSACTION_CSV_COLUMNS.map(({ key }) => key)).toEqual([
 				'timestamp_local',
 				'network',
 				'token_symbol',
 				'type_display',
+				'counterparty',
 				'from',
 				'to',
 				'effective_token',
@@ -338,6 +340,7 @@ describe('export-data.utils', () => {
 				'Network',
 				'Symbol',
 				'Type',
+				'Counterparty',
 				'From',
 				'To',
 				'Amount',
@@ -528,6 +531,7 @@ describe('export-data.utils', () => {
 				transactions,
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -552,6 +556,9 @@ describe('export-data.utils', () => {
 				status: 'confirmed',
 				from: 'bc1quserbtc',
 				to: 'bc1qrecipient',
+				// No contact match (empty contacts list) — falls back to the raw to-address
+				// for an outgoing row.
+				counterparty: 'bc1qrecipient',
 				amount: '0.001',
 				fee: '0.000005',
 				fee_token: 'BTC',
@@ -571,6 +578,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'bitcoin', transaction: tx, token: btcToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -583,6 +591,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: ethTx, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -606,6 +615,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: tx, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -617,6 +627,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: ethTx, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId: () => undefined,
+				contacts: [],
 				exportedAt
 			});
 
@@ -628,6 +639,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ic', transaction: icTx, token: icrcToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -657,6 +669,7 @@ describe('export-data.utils', () => {
 				],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -691,6 +704,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ic', transaction: selfIcTx, token: icrcToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -729,6 +743,7 @@ describe('export-data.utils', () => {
 				],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -759,6 +774,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ic', transaction: sameTokenApprove, token: icrcToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -791,6 +807,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: evmApprove, token: erc20Token }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -808,6 +825,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'solana', transaction: solTx, token: solToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -833,6 +851,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: withdraw, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -849,6 +868,7 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: deposit, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -863,10 +883,91 @@ describe('export-data.utils', () => {
 				transactions: [{ component: 'ethereum', transaction: tx, token: ethToken }],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
 			expect(row.type).toBe('other');
+		});
+
+		describe('counterparty resolution', () => {
+			const aliceContact: ContactUi = {
+				id: BigInt(1),
+				name: 'Alice',
+				updateTimestampNs: ZERO,
+				addresses: [{ address: 'bc1qrecipient', addressType: 'Btc', label: 'Hardware Wallet' }]
+			};
+
+			const bobContact: ContactUi = {
+				id: BigInt(2),
+				name: 'Bob',
+				updateTimestampNs: ZERO,
+				addresses: [{ address: 'recipient-principal', addressType: 'Icrcv2' }]
+			};
+
+			it('renders the contact name with the address label on an outgoing match', () => {
+				const [row] = buildTransactionRows({
+					transactions: [{ component: 'bitcoin', transaction: btcTx, token: btcToken }],
+					userAddresses,
+					nativeSymbolByNetworkId,
+					contacts: [aliceContact],
+					exportedAt
+				});
+
+				expect(row.direction).toBe('out');
+				expect(row.to).toBe('bc1qrecipient');
+				expect(row.counterparty).toBe('Alice (Hardware Wallet)');
+			});
+
+			it('renders just the contact name when no address label is set (incoming)', () => {
+				const outgoingIcTx: IcTransactionUi = {
+					...icTx,
+					type: 'receive',
+					from: 'recipient-principal',
+					to: 'user-principal',
+					incoming: true
+				};
+
+				const [row] = buildTransactionRows({
+					transactions: [{ component: 'ic', transaction: outgoingIcTx, token: icrcToken }],
+					userAddresses,
+					nativeSymbolByNetworkId,
+					contacts: [bobContact],
+					exportedAt
+				});
+
+				expect(row.direction).toBe('in');
+				expect(row.from).toBe('recipient-principal');
+				expect(row.counterparty).toBe('Bob');
+			});
+
+			it('falls back to the raw address when no contact matches', () => {
+				const [row] = buildTransactionRows({
+					transactions: [{ component: 'bitcoin', transaction: btcTx, token: btcToken }],
+					userAddresses,
+					nativeSymbolByNetworkId,
+					contacts: [bobContact], // Bob's address is ICRC, won't match a BTC tx
+					exportedAt
+				});
+
+				expect(row.counterparty).toBe('bc1qrecipient');
+			});
+
+			it('is empty when direction cannot be determined', () => {
+				// IC transaction without incoming flag set → direction stays empty.
+				const ambiguousIcTx: IcTransactionUi = { ...icTx, incoming: undefined };
+
+				const [row] = buildTransactionRows({
+					transactions: [{ component: 'ic', transaction: ambiguousIcTx, token: icrcToken }],
+					userAddresses,
+					nativeSymbolByNetworkId,
+					contacts: [aliceContact, bobContact],
+					exportedAt
+				});
+
+				expect(row.direction).toBe('');
+				expect(row.counterparty).toBe('');
+			});
 		});
 
 		it('writes the same exported_at on every row regardless of network', () => {
@@ -879,6 +980,7 @@ describe('export-data.utils', () => {
 				],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
@@ -891,6 +993,7 @@ describe('export-data.utils', () => {
 				transactions: [],
 				userAddresses,
 				nativeSymbolByNetworkId,
+				contacts: [],
 				exportedAt
 			});
 
