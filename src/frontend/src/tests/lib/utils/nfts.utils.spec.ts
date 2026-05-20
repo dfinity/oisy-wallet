@@ -12,11 +12,11 @@ import { NetworkSchema } from '$lib/schema/network.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft } from '$lib/types/nft';
 import {
+	extractProjectIdsFromMediaUrls,
 	filterSortByCollection,
 	findNft,
 	findNftsByNetwork,
 	findNftsByToken,
-	extractProjectIdsFromMediaUrls,
 	findNonFungibleToken,
 	getEnabledNfts,
 	getMediaStatus,
