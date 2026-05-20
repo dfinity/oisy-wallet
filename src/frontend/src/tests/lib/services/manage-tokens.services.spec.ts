@@ -177,6 +177,30 @@ describe('manage-tokens.services', () => {
 			});
 		});
 
+		it('should support token_manage import modifier override', async () => {
+			const customTokens: SaveCustomTokenWithKey[] = [
+				{
+					enabled: true,
+					networkKey: 'Icrc7',
+					canisterId: mockIcrc7CanisterId
+				}
+			];
+
+			mockSave.mockResolvedValueOnce(undefined);
+
+			await saveTokens({ ...params, tokens: customTokens, tokenManageModifier: 'import' });
+
+			expect(trackTokenManage).toHaveBeenCalledExactlyOnceWith({
+				modifier: 'import',
+				token: {
+					network: ICP_NETWORK_ID.description,
+					address: mockIcrc7CanisterId
+				},
+				sourceLocation: 'manage_tokens',
+				resultStatus: 'success'
+			});
+		});
+
 		it('should handle errors from save', async () => {
 			mockSave.mockRejectedValueOnce(new Error('Save failed'));
 
@@ -197,6 +221,28 @@ describe('manage-tokens.services', () => {
 					error: 'Save failed'
 				}
 			});
+
+			expect(trackTokenManage).toHaveBeenCalledTimes(tokens.length);
+
+			tokens.forEach((token, index) => {
+				expect(trackTokenManage).toHaveBeenNthCalledWith(index + 1, {
+					modifier: token.enabled ? 'enable' : 'disable',
+					token: {
+						network: token.network.id.description,
+						address:
+							'address' in token
+								? token.address
+								: 'ledgerCanisterId' in token
+									? token.ledgerCanisterId
+									: token.id.description,
+						symbol: token.symbol,
+						name: token.name
+					},
+					sourceLocation: 'manage_tokens',
+					resultStatus: 'error',
+					error: 'Save failed'
+				});
+			});
 		});
 
 		it('should show a warning toast on version mismatch error', async () => {
@@ -216,6 +262,29 @@ describe('manage-tokens.services', () => {
 				metadata: {
 					error: 'Version mismatch, token update not allowed'
 				}
+			});
+
+			expect(trackTokenManage).toHaveBeenCalledTimes(tokens.length);
+
+			tokens.forEach((token, index) => {
+				expect(trackTokenManage).toHaveBeenNthCalledWith(index + 1, {
+					modifier: token.enabled ? 'enable' : 'disable',
+					token: {
+						network: token.network.id.description,
+						address:
+							'address' in token
+								? token.address
+								: 'ledgerCanisterId' in token
+									? token.ledgerCanisterId
+									: token.id.description,
+						symbol: token.symbol,
+						name: token.name
+					},
+					sourceLocation: 'manage_tokens',
+					resultStatus: 'error',
+					error: 'Version mismatch, token update not allowed',
+					errorCode: 'version_mismatch'
+				});
 			});
 		});
 
