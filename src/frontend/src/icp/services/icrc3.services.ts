@@ -69,9 +69,10 @@ export const loadIcrc3BlockLog = async ({
 		args: [{ start, length }]
 	});
 
-	const archived = archivedBlocks.length > 0
-		? await loadArchivedBlocks({ identity, certified, archivedBlocks })
-		: [];
+	const archived =
+		archivedBlocks.length > 0
+			? await loadArchivedBlocks({ identity, certified, archivedBlocks })
+			: [];
 
 	return {
 		logLength,
