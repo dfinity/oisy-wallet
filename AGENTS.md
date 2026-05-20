@@ -128,3 +128,44 @@ These are thin layers on top of this file. They never contradict it.
 
 If you add a new agent / tool, add a tiny pointer file (≤ 30 lines) here that
 references this `AGENTS.md` — do **not** duplicate the rules.
+
+---
+
+## Cursor Cloud specific instructions
+
+### System dependencies (pre-installed in snapshot)
+
+- **Node.js 24.11.0** via nvm (matches `.node-version`)
+- **dfx 0.26.1** (IC SDK) — installed at `~/.local/share/dfx/bin/dfx`
+- **Rust 1.95.0** with `wasm32-unknown-unknown` target (from `rust-toolchain.toml`)
+- **candid-extractor** and **ic-wasm** (Cargo-installed; required by `scripts/build.backend.sh`)
+- C++ headers configured for `ic-wasm` compilation: `CXXFLAGS="-I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13"` and `LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13`
+
+### Starting services for local development
+
+1. **Source nvm & dfx PATH** before any command:
+   ```bash
+   export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+   export PATH="$HOME/.local/share/dfx/bin:$PATH"
+   ```
+2. **Start local IC replica:** `dfx start --background` (from repo root)
+3. **Deploy canisters:** At minimum deploy `internet_identity`, `backend`, `icp_ledger`, `icp_index` with `dfx deploy <name>`. The full `scripts/deploy.sh` deploys all canisters.
+4. **Create `.env.development`** from `.env.example` — **critical fix:** set `VITE_AI_ASSISTANT_CONSOLE_ENABLED=false` (an empty string crashes the app via `parseBoolEnvVar`).
+5. **Run `npx svelte-kit sync`** before the first `npm run dev` to generate `.svelte-kit/` types.
+6. **Start frontend:** `npm run dev` → serves at `http://localhost:5173/`
+
+### Gotchas
+
+- The `.env.example` contains `VITE_AI_ASSISTANT_CONSOLE_ENABLED=` (empty string). This **must** be set to `false` in `.env.development` or removed. The `parseBoolEnvVar()` utility in `src/frontend/src/lib/utils/env.utils.ts` throws on empty strings, crashing the app at startup.
+- Backend deployment requires `candid-extractor` and `ic-wasm` to be on PATH. Both are Cargo-installed.
+- `dfx deploy backend` may panic with "Failed to set stderr output color" in non-TTY environments — this is cosmetic and the deployment still succeeds.
+- The full `scripts/deploy.sh` deploys ~20 canisters. For frontend-only work, only `backend` + `internet_identity` are required.
+
+### Quality gates (from `CLAUDE.md`)
+
+```bash
+npm run format          # prettier + eslint --fix
+npm run lint            # prettier --check + eslint
+npm run check           # svelte-kit sync + svelte-check
+npm run test -- --run   # vitest (14k+ tests, ~8 min)
+```
