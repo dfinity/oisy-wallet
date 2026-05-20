@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import AddTokenReviewByNetwork from '$lib/components/manage/AddTokenReviewByNetwork.svelte';
@@ -22,11 +23,12 @@
 
 	interface Props {
 		initialSearch?: string;
+		icrc7CanisterId?: string;
 		onClose?: () => void;
 		infoElement?: Snippet;
 	}
 
-	let { initialSearch, onClose = () => {}, infoElement }: Props = $props();
+	let { initialSearch, icrc7CanisterId, onClose = () => {}, infoElement }: Props = $props();
 
 	const isNftsPage = $derived(isRouteNfts(page));
 
@@ -53,6 +55,7 @@
 
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
+	let initializedIcrc7ReviewStep = false;
 
 	const saveTokens = async (tokens: Token[]) => {
 		await saveAllCustomTokens({
@@ -75,8 +78,23 @@
 		onClose();
 	};
 
-	let network: Network | undefined = $state($selectedNetwork);
-	let tokenData: Partial<AddTokenData> = $state({});
+	const initialNetwork = (): Network | undefined =>
+		icrc7CanisterId === undefined ? $selectedNetwork : ICP_NETWORK;
+
+	const initialTokenData = (): Partial<AddTokenData> =>
+		icrc7CanisterId === undefined ? {} : { icrc7CanisterId };
+
+	let network: Network | undefined = $state(initialNetwork());
+	let tokenData: Partial<AddTokenData> = $state(initialTokenData());
+
+	$effect(() => {
+		if (initializedIcrc7ReviewStep || icrc7CanisterId === undefined || modal === undefined) {
+			return;
+		}
+
+		initializedIcrc7ReviewStep = true;
+		modal.set(2);
+	});
 </script>
 
 <WizardModal
