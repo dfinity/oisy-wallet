@@ -1,15 +1,20 @@
 import { getTransactions as getTransactionsIcp } from '$icp/api/icp-index.api';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
+import { loadIcrc3BlockLog } from '$icp/services/icrc3.services';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCanistersStrict, IcToken } from '$icp/types/ic-token';
 import type { IcTransaction, IcTransactionUi } from '$icp/types/ic-transaction';
+import type { Icrc7Token } from '$icp/types/icrc7-token';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
+import { mapIcrc7BlockToTransactions } from '$icp/utils/icrc7-transactions.utils';
+import { isTokenIcrc7 } from '$icp/utils/icrc7.utils';
 import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
 import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
+import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS,
@@ -96,6 +101,106 @@ const loadNextIcTransactionsRequest = ({
 		identity
 	});
 
+const loadIcrc7TransactionsPage = async ({
+	token,
+	identity,
+	certified,
+	lastId,
+	maxResults
+}: {
+	token: Icrc7Token;
+	identity: NullishIdentity;
+	certified?: boolean;
+	lastId?: string;
+	maxResults?: bigint;
+}): Promise<{ transactions: IcTransactionUi[]; reachedStart: boolean }> => {
+	const length = maxResults ?? WALLET_PAGINATION;
+	let cursorEnd: bigint;
+
+	if (nonNullish(lastId)) {
+		cursorEnd = BigInt(lastId);
+	} else {
+		const { logLength } = await loadIcrc3BlockLog({
+			identity,
+			canisterId: token.canisterId,
+			start: ZERO,
+			length: ZERO,
+			certified
+		});
+		cursorEnd = logLength;
+	}
+
+	while (cursorEnd > ZERO) {
+		const start = cursorEnd > length ? cursorEnd - length : ZERO;
+		const { blocks } = await loadIcrc3BlockLog({
+			identity,
+			canisterId: token.canisterId,
+			start,
+			length: cursorEnd - start,
+			certified
+		});
+
+		const transactions = blocks
+			.toReversed()
+			.flatMap((block) => mapIcrc7BlockToTransactions({ block, identity }));
+
+		if (transactions.length > 0 || start === ZERO) {
+			return { transactions, reachedStart: start === ZERO };
+		}
+
+		cursorEnd = start;
+	}
+
+	return { transactions: [], reachedStart: true };
+};
+
+const loadNextIcrc7TransactionsRequest = ({
+	token,
+	identity,
+	signalEnd,
+	lastId,
+	maxResults
+}: {
+	identity: NullishIdentity;
+	lastId?: string;
+	maxResults?: bigint;
+	token: Icrc7Token;
+	signalEnd: () => void;
+}): Promise<void> =>
+	queryAndUpdate<{ transactions: IcTransactionUi[]; reachedStart: boolean }>({
+		request: ({ certified }) =>
+			loadIcrc7TransactionsPage({
+				token,
+				identity,
+				lastId,
+				maxResults,
+				certified
+			}),
+		onLoad: ({ response: { transactions, reachedStart }, certified }) => {
+			if (transactions.length === 0) {
+				if (reachedStart) {
+					signalEnd();
+				}
+				return;
+			}
+
+			icTransactionsStore.append({
+				tokenId: token.id,
+				transactions: transactions.map((transaction) => ({ data: transaction, certified }))
+			});
+
+			if (reachedStart) {
+				signalEnd();
+			}
+		},
+		onUpdateError: ({ error }) => {
+			onLoadTransactionsError({ tokenId: token.id, error });
+
+			signalEnd();
+		},
+		identity
+	});
+
 export const onLoadTransactionsError = ({
 	tokenId,
 	error: err
@@ -166,7 +271,20 @@ export const loadNextIcTransactions = async ({
 		return;
 	}
 
-	if (isNotIcToken(token) || isNotIcTokenCanistersStrict(token)) {
+	if (isTokenIcrc7(token)) {
+		await loadNextIcrc7TransactionsRequest({
+			lastId: lastIdCleaned,
+			token,
+			...rest
+		});
+		return;
+	}
+
+	if (isNotIcToken(token)) {
+		return;
+	}
+
+	if (isNotIcTokenCanistersStrict(token)) {
 		// On one hand, we assume that the parent component does not mount this component if no transactions can be fetched; on the other hand, we want to avoid displaying an error toast that could potentially appear multiple times.
 		// Therefore, we do not particularly display a visual error. In any case, we cannot load transactions without an Index canister.
 		return;
