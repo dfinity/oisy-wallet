@@ -147,9 +147,9 @@ mod tests {
 
     use super::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
-        ActiveUserTransactionRef, ActiveUserTransactionStatus,
-        CreateActiveUserTransactionRequest, GetActiveUserTransactionsResponse,
-        OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
+        ActiveUserTransactionRef, ActiveUserTransactionStatus, CreateActiveUserTransactionRequest,
+        GetActiveUserTransactionsResponse, OneSecEvmToIcpData, OneSecIcpToEvmData,
+        UpdateActiveUserTransactionRequest,
     };
     use crate::types::token_id::TokenId;
 
