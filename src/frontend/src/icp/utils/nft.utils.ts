@@ -12,6 +12,7 @@ import type { Nft, NftCollection } from '$lib/types/nft';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { UrlSchema } from '$lib/validation/url.validation';
 import { nonNullish, notEmptyString, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -143,6 +144,16 @@ const mapIcrc7Collection = ({ canisterId, ...rest }: Icrc7Token): NftCollection 
 	address: canisterId
 });
 
+const mapIcrc7MetadataUrl = (url: string | undefined): string | undefined => {
+	if (!notEmptyString(url)) {
+		return;
+	}
+
+	const parsedUrl = UrlSchema.safeParse(url);
+
+	return parsedUrl.success ? parsedUrl.data : undefined;
+};
+
 export const mapIcrc7Nft = async ({
 	index: tokenId,
 	token,
@@ -163,17 +174,23 @@ export const mapIcrc7Nft = async ({
 			certified
 		})) ?? {};
 
+	const { imageUrl: rawImageUrl, thumbnailUrl: rawThumbnailUrl, ...metadataRest } = metadata;
+	const imageUrl = mapIcrc7MetadataUrl(rawImageUrl);
+	const thumbnailUrl = mapIcrc7MetadataUrl(rawThumbnailUrl);
+
 	const mediaStatus = {
-		image: nonNullish(metadata.imageUrl)
-			? await getMediaStatusOrCache(metadata.imageUrl)
+		image: nonNullish(imageUrl)
+			? await getMediaStatusOrCache(imageUrl)
 			: MediaStatusEnum.INVALID_DATA,
-		thumbnail: nonNullish(metadata.thumbnailUrl)
-			? await getMediaStatusOrCache(metadata.thumbnailUrl)
+		thumbnail: nonNullish(thumbnailUrl)
+			? await getMediaStatusOrCache(thumbnailUrl)
 			: MediaStatusEnum.INVALID_DATA
 	};
 
 	return {
-		...metadata,
+		...metadataRest,
+		...(nonNullish(imageUrl) && { imageUrl }),
+		...(nonNullish(thumbnailUrl) && { thumbnailUrl }),
 		id: parseNftId(tokenId.toString()),
 		mediaStatus,
 		collection: mapIcrc7Collection(token)
