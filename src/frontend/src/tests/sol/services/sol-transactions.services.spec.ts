@@ -505,7 +505,11 @@ describe('sol-transactions.services', () => {
 						return Promise.resolve(undefined);
 					}
 
-					const { amount, source: from, destination: to } = info as {
+					const {
+						amount,
+						source: from,
+						destination: to
+					} = info as {
 						amount: string;
 						source: SolMappedTransaction['from'];
 						destination: SolMappedTransaction['to'];
@@ -544,7 +548,7 @@ describe('sol-transactions.services', () => {
 			]);
 			expect(
 				vi.mocked(getAccountOwner).mock.calls.some(([{ address }]) => address === mockAtaAddress)
-			).toBe(false);
+			).toBeFalsy();
 
 			const [outboundTransaction] = transactions;
 			const cachedOutboundTransaction = mapUserTransactionToSolTransaction({

@@ -96,10 +96,10 @@ const extractBalances = ({
 	};
 };
 
-type SolTokenAccountMetadata = {
+interface SolTokenAccountMetadata {
 	addressToOwner: Record<SolAddress, SolAddress>;
 	addressToToken: Record<SolAddress, SplTokenAddress>;
-};
+}
 
 const emptySolTokenAccountMetadata: SolTokenAccountMetadata = {
 	addressToOwner: {},
@@ -120,7 +120,11 @@ const extractTokenAccountMetadata = (instruction: SolRpcInstruction): SolTokenAc
 	}
 
 	if (type === 'create' || type === 'createIdempotent') {
-		const { account, wallet: owner, mint } = info as Partial<{
+		const {
+			account,
+			wallet: owner,
+			mint
+		} = info as Partial<{
 			account: SolAddress;
 			wallet: SolAddress;
 			mint: SplTokenAddress;
@@ -134,7 +138,11 @@ const extractTokenAccountMetadata = (instruction: SolRpcInstruction): SolTokenAc
 		}
 	}
 
-	if (type === 'initializeAccount' || type === 'initializeAccount2' || type === 'initializeAccount3') {
+	if (
+		type === 'initializeAccount' ||
+		type === 'initializeAccount2' ||
+		type === 'initializeAccount3'
+	) {
 		const { account, owner, mint } = info as Partial<{
 			account: SolAddress;
 			owner: SolAddress;
