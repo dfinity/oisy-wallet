@@ -21,6 +21,9 @@ export interface LoadIcrc3BlockLogResult {
 	blocks: Icrc3Block[];
 }
 
+const compareIcrc3BlockIds = ({ a, b }: { a: Icrc3Block; b: Icrc3Block }): number =>
+	a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+
 const loadArchivedBlocks = async ({
 	identity,
 	certified,
@@ -72,6 +75,6 @@ export const loadIcrc3BlockLog = async ({
 
 	return {
 		logLength,
-		blocks: [...blocks, ...archived].sort(({ id: a }, { id: b }) => Number(a - b))
+		blocks: [...blocks, ...archived].sort((a, b) => compareIcrc3BlockIds({ a, b }))
 	};
 };

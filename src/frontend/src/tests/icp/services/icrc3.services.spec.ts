@@ -47,6 +47,27 @@ describe('icrc3.services', () => {
 			});
 		});
 
+		it('should sort block ids without number coercion', async () => {
+			const largeBlockId = BigInt(Number.MAX_SAFE_INTEGER) + 1n;
+
+			vi.mocked(getBlocks).mockResolvedValue({
+				log_length: 2n,
+				blocks: [
+					{ id: largeBlockId + 1n, block: { Map: [['btype', { Text: '7burn' }]] } },
+					{ id: largeBlockId, block: { Map: [['btype', { Text: '7mint' }]] } }
+				],
+				archived_blocks: []
+			});
+
+			await expect(loadIcrc3BlockLog(params)).resolves.toEqual({
+				logLength: 2n,
+				blocks: [
+					{ id: largeBlockId, block: { Map: [['btype', { Text: '7mint' }]] } },
+					{ id: largeBlockId + 1n, block: { Map: [['btype', { Text: '7burn' }]] } }
+				]
+			});
+		});
+
 		it('should load archived block ranges when callback method is icrc3_get_blocks', async () => {
 			vi.mocked(getBlocks)
 				.mockResolvedValueOnce({
