@@ -62,4 +62,5 @@ pub struct Stats {
     pub exchange_rates_count: u64,
     pub user_transactions_count: u64,
     pub agreement_history_count: u64,
+    pub active_user_transactions_count: u64,
 }

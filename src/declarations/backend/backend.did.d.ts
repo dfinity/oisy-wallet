@@ -1136,6 +1136,7 @@ export interface SplToken {
 	symbol: [] | [string];
 }
 export interface Stats {
+	active_user_transactions_count: bigint;
 	user_profile_count: bigint;
 	user_transactions_count: bigint;
 	custom_token_count: bigint;

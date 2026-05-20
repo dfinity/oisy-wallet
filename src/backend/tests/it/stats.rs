@@ -62,6 +62,7 @@ fn stats_returns_correct_number_of_users() {
         exchange_rates_count: 0,
         user_transactions_count: 0,
         agreement_history_count: 0,
+        active_user_transactions_count: 0,
     };
 
     let caller = controller();

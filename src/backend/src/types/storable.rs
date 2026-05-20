@@ -121,3 +121,45 @@ impl Storable for UserTransactionKey {
         Self(principal, token_id)
     }
 }
+
+/// Composite key for per-user active-transaction storage.
+///
+/// Encoding mirrors [`UserTransactionKey`]: `[u32 BE principal_len][principal_bytes][id_bytes]`.
+/// The length-prefixed principal lets us range-scan all entries belonging to
+/// a given principal by starting at `(principal, "")` and stopping when the
+/// principal component changes.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ActiveUserTransactionKey(pub StoredPrincipal, pub String);
+
+impl Storable for ActiveUserTransactionKey {
+    const BOUND: Bound = Bound::Unbounded;
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        let principal_bytes = self.0.to_bytes();
+        let id_bytes = self.1.as_bytes();
+        let principal_len =
+            u32::try_from(principal_bytes.len()).expect("principal length should fit in u32");
+        let mut buf = Vec::with_capacity(4 + principal_bytes.len() + id_bytes.len());
+        buf.extend_from_slice(&principal_len.to_be_bytes());
+        buf.extend_from_slice(&principal_bytes);
+        buf.extend_from_slice(id_bytes);
+        Cow::Owned(buf)
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.to_bytes().to_vec()
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        let principal_len = u32::from_be_bytes(
+            bytes[..4]
+                .try_into()
+                .expect("failed to decode principal length"),
+        ) as usize;
+        let principal = StoredPrincipal::from_bytes(Cow::Borrowed(&bytes[4..4 + principal_len]));
+        let id = std::str::from_utf8(&bytes[4 + principal_len..])
+            .expect("active user transaction id should be valid UTF-8")
+            .to_owned();
+        Self(principal, id)
+    }
+}
