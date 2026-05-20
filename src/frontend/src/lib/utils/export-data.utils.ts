@@ -46,6 +46,18 @@ export const TOKEN_CSV_COLUMNS: CsvColumn<TokenCsvRow>[] = [
 	{ key: 'snapshot_at', header: 'snapshot_at' }
 ];
 
+// Slim variant for the Basic tokens export — just the columns a non-technical user needs to
+// answer "what tokens do I hold and what are they worth in my currency". Reuses the same
+// TokenCsvRow shape so the row builder doesn't need to know about the variant.
+export const BASIC_TOKEN_CSV_COLUMNS: CsvColumn<TokenCsvRow>[] = [
+	{ key: 'symbol', header: 'symbol' },
+	{ key: 'name', header: 'name' },
+	{ key: 'network', header: 'network' },
+	{ key: 'balance', header: 'balance' },
+	{ key: 'currency', header: 'currency' },
+	{ key: 'value', header: 'value' }
+];
+
 export interface TransactionCsvRow extends CsvRow {
 	timestamp_iso: string;
 	network: string;

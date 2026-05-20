@@ -12,6 +12,7 @@ import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import {
+	BASIC_TOKEN_CSV_COLUMNS,
 	buildTokenRows,
 	buildTransactionRows,
 	TOKEN_CSV_COLUMNS,
@@ -211,6 +212,26 @@ describe('export-data.utils', () => {
 				'value',
 				'snapshot_at'
 			]);
+		});
+	});
+
+	describe('BASIC_TOKEN_CSV_COLUMNS', () => {
+		it('lists the 6 basic-export columns in order', () => {
+			expect(BASIC_TOKEN_CSV_COLUMNS.map(({ key }) => key)).toEqual([
+				'symbol',
+				'name',
+				'network',
+				'balance',
+				'currency',
+				'value'
+			]);
+		});
+
+		it('is a strict subset of TOKEN_CSV_COLUMNS so the same row builder feeds both', () => {
+			const extendedKeys = new Set(TOKEN_CSV_COLUMNS.map(({ key }) => key));
+			BASIC_TOKEN_CSV_COLUMNS.forEach(({ key }) => {
+				expect(extendedKeys.has(key)).toBeTruthy();
+			});
 		});
 	});
 

@@ -10,6 +10,7 @@ import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import { consoleError } from '$lib/utils/console.utils';
 import { downloadCsv, toCsv } from '$lib/utils/csv.utils';
 import {
+	BASIC_TOKEN_CSV_COLUMNS,
 	TOKEN_CSV_COLUMNS,
 	TRANSACTION_CSV_COLUMNS,
 	buildTokenRows,
@@ -29,14 +30,28 @@ const csvFilename = ({ base, exportedAt }: { base: string; exportedAt: Date }): 
 	return `${base}-${stamp}.csv`;
 };
 
+export type TokenCsvVariant = 'basic' | 'extended';
+
+const TOKEN_CSV_COLUMNS_BY_VARIANT = {
+	basic: BASIC_TOKEN_CSV_COLUMNS,
+	extended: TOKEN_CSV_COLUMNS
+} as const;
+
+const TOKEN_CSV_FILENAME_BASE_BY_VARIANT = {
+	basic: 'oisy-tokens-basic',
+	extended: 'oisy-tokens'
+} as const;
+
 export const exportTokensCsv = ({
 	tokens,
 	currency,
-	exchangeRateToUsd
+	exchangeRateToUsd,
+	variant = 'extended'
 }: {
 	tokens: TokenUi[];
 	currency: Currency;
 	exchangeRateToUsd: number | null;
+	variant?: TokenCsvVariant;
 }): boolean => {
 	const $i18n = get(i18n);
 
@@ -51,9 +66,12 @@ export const exportTokensCsv = ({
 
 	const exportedAt = new Date();
 	const rows = buildTokenRows({ tokens, currency, exchangeRateToUsd, exportedAt });
-	const csv = toCsv({ columns: TOKEN_CSV_COLUMNS, rows });
+	const csv = toCsv({ columns: TOKEN_CSV_COLUMNS_BY_VARIANT[variant], rows });
 
-	downloadCsv({ filename: csvFilename({ base: 'oisy-tokens', exportedAt }), csv });
+	downloadCsv({
+		filename: csvFilename({ base: TOKEN_CSV_FILENAME_BASE_BY_VARIANT[variant], exportedAt }),
+		csv
+	});
 
 	toastsShow({
 		text: $i18n.settings.text.export_tokens_success,
