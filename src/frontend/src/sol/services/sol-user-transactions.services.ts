@@ -41,6 +41,27 @@ export const loadSolUserTransactions = ({
 		mapFromBackend: (transaction) => mapUserTransactionToSolTransaction({ transaction, address })
 	});
 
+const isSplBackendTokenId = (tokenId: BackendTokenId): boolean =>
+	'SplMainnet' in tokenId || 'SplDevnet' in tokenId;
+
+const hasReliableBackendDirection = ({
+	tx: { from, fromOwner, to, toOwner, type },
+	address,
+	tokenId
+}: {
+	tx: SolTransactionUi;
+	address: SolAddress;
+	tokenId: BackendTokenId;
+}): boolean => {
+	if (!isSplBackendTokenId(tokenId)) {
+		return true;
+	}
+
+	return type === 'send'
+		? from === address || fromOwner === address
+		: to === address || toOwner === address;
+};
+
 /**
  * Persists finalized Solana transactions to the backend.
  * Only transactions with `status === 'finalized'` and a valid signature are saved.
@@ -48,10 +69,12 @@ export const loadSolUserTransactions = ({
 export const saveSolFinalizedTransactions = ({
 	identity,
 	tokenId,
+	address,
 	transactions
 }: {
 	identity: NullishIdentity;
 	tokenId: BackendTokenId;
+	address: SolAddress;
 	transactions: SolTransactionUi[];
 }): Promise<ResultSuccess> =>
 	saveFinalizedTransactions({
@@ -60,5 +83,8 @@ export const saveSolFinalizedTransactions = ({
 		transactions,
 		isFinalizedFn: isSolTransactionFinalized,
 		mapToBackend: mapSolTransactionToUserTransaction,
-		canSave: (tx) => nonNullish(tx.signature) && nonNullish(tx.timestamp)
+		canSave: (tx) =>
+			nonNullish(tx.signature) &&
+			nonNullish(tx.timestamp) &&
+			hasReliableBackendDirection({ tx, address, tokenId })
 	});

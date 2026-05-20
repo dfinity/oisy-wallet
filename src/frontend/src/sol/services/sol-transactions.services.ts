@@ -559,6 +559,7 @@ const loadSolTransactions = async ({
 			saveSolFinalizedTransactions({
 				identity,
 				tokenId: backendTokenId,
+				address,
 				transactions: freshTransactions
 			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
 		}

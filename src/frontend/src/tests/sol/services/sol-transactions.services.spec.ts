@@ -842,6 +842,7 @@ describe('sol-transactions.services', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
+				address: mockSolAddress,
 				transactions: [newerRpcTransaction]
 			});
 		});
@@ -906,6 +907,7 @@ describe('sol-transactions.services', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokenId: { SplMainnet: BONK_TOKEN.address },
+				address: mockSolAddress,
 				transactions: [correctedTransaction, correctedSameSignatureTransaction]
 			});
 		});
@@ -948,6 +950,7 @@ describe('sol-transactions.services', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
+				address: mockSolAddress,
 				transactions: [olderRpcTransaction]
 			});
 		});
@@ -1027,6 +1030,7 @@ describe('sol-transactions.services', () => {
 			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
+				address: mockSolAddress,
 				transactions: newTransactions
 			});
 		});
