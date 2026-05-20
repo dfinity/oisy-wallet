@@ -339,7 +339,7 @@ describe('export-data.utils', () => {
 			expect(BASIC_TRANSACTION_CSV_COLUMNS.map(({ header }) => header)).toEqual([
 				'Timestamp',
 				'Network',
-				'Symbol',
+				'Token',
 				'Type',
 				'Counterparty',
 				'Amount',
