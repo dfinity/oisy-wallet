@@ -9,7 +9,7 @@
 	let { children, end }: Props = $props();
 </script>
 
-<div class="mb-6 flex items-center justify-between pb-1">
+<div class="mb-4 flex items-center justify-between">
 	<h2 class="text-base">{@render children()}</h2>
 
 	{@render end?.()}
