@@ -235,7 +235,7 @@ fn records_survive_canister_upgrade() {
     // install rolls out of the rate-limit window before we attempt the
     // upgrade. Mirrors the advance_time + tick-loop idiom used in
     // `tests/it/signer.rs` and `tests/it/status.rs`.
-    pic.pic.advance_time(Duration::from_secs(60));
+    pic.pic.advance_time(Duration::from_mins(1));
     for _ in 0..20 {
         pic.pic.tick();
     }
