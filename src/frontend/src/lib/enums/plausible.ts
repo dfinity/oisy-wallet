@@ -17,7 +17,8 @@ export enum PLAUSIBLE_EVENTS {
 	SIGNER_INTERACTION = 'signer_interaction',
 	NETWORK_FILTER = 'network_filter',
 	NETWORK_MANAGE = 'network_manage',
-	TRANSACTION_FILTER = 'transaction_filter'
+	TRANSACTION_FILTER = 'transaction_filter',
+	TOKEN_MANAGE = 'token_manage'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -83,7 +84,9 @@ export enum PLAUSIBLE_EVENT_SOURCES {
 }
 
 export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
-	ACTIVITY_PAGE = 'activity_page'
+	ACTIVITY_PAGE = 'activity_page',
+	MANAGE_TOKENS = 'manage_tokens',
+	TOKEN_DETAILS = 'token_details'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {

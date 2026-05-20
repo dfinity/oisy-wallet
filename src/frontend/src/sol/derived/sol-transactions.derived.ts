@@ -3,7 +3,7 @@ import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransactionUiWithToken } from '$lib/types/transaction-ui';
 import type { KnownDestinations } from '$lib/types/transactions';
-import { getKnownDestinations } from '$lib/utils/transactions.utils';
+import { getKnownDestinations, sortTransactions } from '$lib/utils/transactions.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
@@ -12,7 +12,9 @@ import { derived, type Readable } from 'svelte/store';
 export const solTransactions: Readable<SolTransactionUi[]> = derived(
 	[tokenWithFallback, solTransactionsStore],
 	([$token, $solTransactionsStore]) =>
-		($solTransactionsStore?.[$token.id] ?? []).map(({ data: transaction }) => transaction)
+		($solTransactionsStore?.[$token.id] ?? [])
+			.map(({ data: transaction }) => transaction)
+			.sort((transactionA, transactionB) => sortTransactions({ transactionA, transactionB }))
 );
 
 export const solTransactionsInitialized: Readable<boolean> = derived(

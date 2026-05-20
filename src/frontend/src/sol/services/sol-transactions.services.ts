@@ -319,14 +319,16 @@ const loadSolTransactions = async ({
 }: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	try {
 		const backendTokenId = solBackendTokenId({ network, tokenAddress });
+		const isHeadLoad = isNullish(before);
 
-		const stored = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED
-			? await loadSolUserTransactions({
-					identity,
-					tokenId: backendTokenId,
-					address
-				})
-			: undefined;
+		const stored =
+			USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && isHeadLoad
+				? await loadSolUserTransactions({
+						identity,
+						tokenId: backendTokenId,
+						address
+					})
+				: undefined;
 
 		const storedTransactions = stored?.transactions ?? [];
 
@@ -349,15 +351,18 @@ const loadSolTransactions = async ({
 		});
 		const newestStoredSlot = stored?.newestBlockIndex;
 
-		// Filter RPC results to only include transactions from slots newer than the stored data.
-		// This avoids overlap by range-partitioning.
-		const freshTransactions = nonNullish(newestStoredSlot)
-			? newTransactions.filter(
-					({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
-				)
-			: newTransactions;
+		// On head loads, keep only RPC transactions newer than the backend cache.
+		// Cursor pagination already asks RPC for older transactions, so those pages must not use this filter.
+		const freshTransactions =
+			nonNullish(newestStoredSlot) && isHeadLoad
+				? newTransactions.filter(
+						({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
+					)
+				: newTransactions;
 
-		const allTransactions = [...freshTransactions, ...storedTransactions];
+		const allTransactions = isHeadLoad
+			? [...freshTransactions, ...storedTransactions]
+			: freshTransactions;
 
 		const certifiedTransactions = allTransactions.map((transaction) => ({
 			data: transaction,

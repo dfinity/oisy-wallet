@@ -1,6 +1,7 @@
 import type { Account, Value } from '$declarations/icrc7/icrc7.did';
 import { Icrc7Canister } from '$icp/canisters/icrc7.canister';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
+import type { NftMetadataWithoutId } from '$lib/types/nft';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -77,6 +78,24 @@ export const tokenMetadata = async ({
 	});
 
 	return await tokenMetadata({ certified, tokenIds });
+};
+
+export const metadata = async ({
+	certified,
+	identity,
+	canisterId,
+	tokenId,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<{ tokenId: bigint } & QueryParams>): Promise<
+	NftMetadataWithoutId | undefined
+> => {
+	const { metadata } = await icrc7Canister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	return await metadata({ certified, tokenId });
 };
 
 export const transfer = async ({
