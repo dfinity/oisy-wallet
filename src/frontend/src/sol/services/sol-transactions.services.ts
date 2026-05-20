@@ -501,7 +501,7 @@ const loadSolTransactions = async ({
 				)
 				.map(({ signature }) => String(signature))
 		);
-		
+
 		const storedRefreshIds = new Set(
 			storedTransactions
 				.filter((transaction) =>
@@ -509,7 +509,7 @@ const loadSolTransactions = async ({
 				)
 				.map(({ id }) => id)
 		);
-		
+
 		const shouldRefreshStoredTransactions = storedRefreshSignatures.size > 0;
 
 		const exitIfFirstSignatureMatches =
@@ -545,7 +545,7 @@ const loadSolTransactions = async ({
 				: newTransactions;
 
 		const freshSignatures = new Set(freshTransactions.map(({ signature }) => String(signature)));
-		
+
 		const storedTransactionsToUse = isHeadLoad
 			? storedTransactions.filter(
 					({ id, signature }) =>
