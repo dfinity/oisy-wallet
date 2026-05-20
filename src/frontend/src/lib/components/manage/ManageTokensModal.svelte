@@ -90,6 +90,7 @@
 			tokenData.icrc7CanisterId ??
 			tokenData.ethContractAddress ??
 			tokenData.splTokenAddress;
+			
 		const tokenNetwork = network?.id.description;
 
 		if (isNullish(address) || isNullish(tokenNetwork)) {
