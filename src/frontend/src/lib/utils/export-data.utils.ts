@@ -48,15 +48,16 @@ export const TOKEN_CSV_COLUMNS: CsvColumn<TokenCsvRow>[] = [
 
 // Slim variant for the Basic tokens export — just the columns a non-technical user needs to
 // answer "what tokens do I hold and what are they worth in my currency". Network comes first
-// so the file groups naturally by chain when sorted. Reuses the same TokenCsvRow shape so the
-// row builder doesn't need to know about the variant.
+// so the file groups naturally by chain when sorted, and headers are title-cased since this
+// CSV is meant to be opened in a spreadsheet by a human. The Extended variant keeps the raw
+// snake_case headers so power users have stable, programmer-friendly column names.
 export const BASIC_TOKEN_CSV_COLUMNS: CsvColumn<TokenCsvRow>[] = [
-	{ key: 'network', header: 'network' },
-	{ key: 'symbol', header: 'symbol' },
-	{ key: 'name', header: 'name' },
-	{ key: 'balance', header: 'balance' },
-	{ key: 'currency', header: 'currency' },
-	{ key: 'value', header: 'value' }
+	{ key: 'network', header: 'Network' },
+	{ key: 'symbol', header: 'Symbol' },
+	{ key: 'name', header: 'Name' },
+	{ key: 'balance', header: 'Balance' },
+	{ key: 'currency', header: 'Currency' },
+	{ key: 'value', header: 'Value' }
 ];
 
 // Sorts the Basic export lexicographically by network → symbol → name. Locale-aware so users

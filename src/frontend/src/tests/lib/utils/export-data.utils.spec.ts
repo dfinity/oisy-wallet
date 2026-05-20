@@ -228,6 +228,17 @@ describe('export-data.utils', () => {
 			]);
 		});
 
+		it('uses title-cased human-readable headers (the CSV is meant for spreadsheet users)', () => {
+			expect(BASIC_TOKEN_CSV_COLUMNS.map(({ header }) => header)).toEqual([
+				'Network',
+				'Symbol',
+				'Name',
+				'Balance',
+				'Currency',
+				'Value'
+			]);
+		});
+
 		it('is a strict subset of TOKEN_CSV_COLUMNS so the same row builder feeds both', () => {
 			const extendedKeys = new Set(TOKEN_CSV_COLUMNS.map(({ key }) => key));
 			BASIC_TOKEN_CSV_COLUMNS.forEach(({ key }) => {
