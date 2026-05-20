@@ -826,6 +826,40 @@ describe('export-data.utils', () => {
 			expect(row.effective_fee_token).toBe('-0.00105');
 		});
 
+		it('leaves the Fee column empty (not "0") on an incoming row with a different fee token', () => {
+			// Receiving an ERC20 like USDC: the sender paid the gas in ETH, so the user
+			// neither paid the asset fee nor the gas fee. The Basic Fee column must read empty,
+			// not "0", to make this unambiguous in spreadsheets.
+			const inboundUsdc: EthTransactionUi = {
+				...ethTx,
+				type: 'receive',
+				from: '0xSomeoneElse',
+				to: '0xUserEth'
+			};
+			const erc20Token: Token = {
+				...ethToken,
+				standard: { code: 'erc20' },
+				name: 'USD Coin',
+				symbol: 'USDC',
+				decimals: 6,
+				...({ address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' } as object)
+			} as Token;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ethereum', transaction: inboundUsdc, token: erc20Token }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.direction).toBe('in');
+			expect(row.fee).toBe('');
+			expect(row.fee_token).toBe('');
+			expect(row.fee_token_display).toBe('');
+			expect(row.effective_fee_token).toBe('');
+		});
+
 		it('renders a Solana send with fee in SOL (9 decimals) and direction from owner addresses', () => {
 			const [row] = buildTransactionRows({
 				transactions: [{ component: 'solana', transaction: solTx, token: solToken }],

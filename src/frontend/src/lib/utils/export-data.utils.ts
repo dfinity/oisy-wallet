@@ -603,11 +603,13 @@ const finalizeRow = ({
 	}
 
 	// Signed change to the fee-token balance for this row.
+	// On incoming rows (and the incoming duplicate of an ICRC self-transfer) the user did
+	// not pay a fee, so the effective fee stays empty — sumDecimals treats `''` the same
+	// as `'0'` when folding into effective_token, so leaving it blank only changes what
+	// shows up in the visible Fee column.
 	let feeSigned = '';
-	if (userPaidFee) {
-		feeSigned = row.fee === '' ? '' : negate(row.fee);
-	} else if (isIncoming) {
-		feeSigned = '0';
+	if (userPaidFee && row.fee !== '') {
+		feeSigned = negate(row.fee);
 	}
 
 	// When the fee is paid in the same token as the asset, fold the two signed values into
