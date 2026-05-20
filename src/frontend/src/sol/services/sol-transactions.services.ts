@@ -69,6 +69,21 @@ const mapSolCertifiedTransactions = (transactions: SolTransactionUi[]): SolCerti
 		certified: false
 	}));
 
+const requiresStoredSplOwnerRefresh = ({
+	transaction: { from, fromOwner, to, toOwner },
+	address,
+	tokenAddress
+}: {
+	transaction: SolTransactionUi;
+	address: SolAddress;
+	tokenAddress?: SplTokenAddress;
+}): boolean =>
+	nonNullish(tokenAddress) &&
+	from !== address &&
+	fromOwner !== address &&
+	to !== address &&
+	toOwner !== address;
+
 const extractBalances = ({
 	address,
 	accountKeys,
@@ -479,8 +494,18 @@ const loadSolTransactions = async ({
 
 		const storedTransactions = stored?.transactions ?? [];
 
+		const storedRefreshSignatures = new Set(
+			storedTransactions
+				.filter((transaction) =>
+					requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress })
+				)
+				.map(({ signature }) => String(signature))
+		);
+		const shouldRefreshStoredTransactions = storedRefreshSignatures.size > 0;
+
 		const exitIfFirstSignatureMatches =
 			USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED &&
+			!shouldRefreshStoredTransactions &&
 			isNullish(before) &&
 			storedTransactions.length > 0 &&
 			nonNullish(storedTransactions[0]?.signature)
@@ -503,12 +528,24 @@ const loadSolTransactions = async ({
 		const freshTransactions =
 			nonNullish(newestStoredSlot) && isHeadLoad
 				? newTransactions.filter(
-						({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
+						({ blockNumber, signature }) =>
+							isNullish(blockNumber) ||
+							blockNumber > Number(newestStoredSlot) ||
+							storedRefreshSignatures.has(String(signature))
 					)
 				: newTransactions;
 
+		const freshSignatures = new Set(freshTransactions.map(({ signature }) => String(signature)));
+		const refreshedSignatures = new Set(
+			[...storedRefreshSignatures].filter((signature) => freshSignatures.has(signature))
+		);
+
+		const storedTransactionsToUse = isHeadLoad
+			? storedTransactions.filter(({ signature }) => !refreshedSignatures.has(String(signature)))
+			: storedTransactions;
+
 		const allTransactions = isHeadLoad
-			? [...freshTransactions, ...storedTransactions]
+			? [...freshTransactions, ...storedTransactionsToUse]
 			: freshTransactions;
 
 		const certifiedTransactions = mapSolCertifiedTransactions(allTransactions);

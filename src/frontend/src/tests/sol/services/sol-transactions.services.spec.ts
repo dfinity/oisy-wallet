@@ -606,6 +606,7 @@ describe('sol-transactions.services', () => {
 			solAddressDevnetStore.set({ data: mockSolAddress2, certified: false });
 
 			solTransactionsStore.reset(mockToken.id);
+			solTransactionsStore.reset(BONK_TOKEN_ID);
 
 			spyGetTransactions.mockResolvedValue(mockTransactions);
 		});
@@ -842,6 +843,70 @@ describe('sol-transactions.services', () => {
 				identity: mockIdentity,
 				tokenId: { SolNativeMainnet: null },
 				transactions: [newerRpcTransaction]
+			});
+		});
+
+		it('should refresh stored SPL transactions that are missing owner context', async () => {
+			const [storedTransaction, storedSameSignatureTransaction] = createMockSolTransactionsUi(
+				2
+			).map((tx, index) => ({
+				...tx,
+				id: `stored-same-signature-transaction-${index}`,
+				blockNumber: 100
+			}));
+			const ownerlessStoredTransaction: SolTransactionUi = {
+				...storedTransaction,
+				id: 'ownerless-stored-transaction',
+				blockNumber: 100,
+				type: 'receive' as const,
+				from: mockAtaAddress,
+				to: mockSolAddress2,
+				fromOwner: undefined,
+				toOwner: undefined
+			};
+			const correctedTransaction: SolTransactionUi = {
+				...ownerlessStoredTransaction,
+				type: 'send',
+				fromOwner: mockSolAddress
+			};
+			const correctedSameSignatureTransaction: SolTransactionUi = {
+				...storedSameSignatureTransaction,
+				id: 'corrected-same-signature-transaction'
+			};
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: [ownerlessStoredTransaction, storedSameSignatureTransaction],
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 100n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+			spyGetTransactions.mockResolvedValue([
+				correctedTransaction,
+				correctedSameSignatureTransaction
+			]);
+
+			await loadNextSolTransactions({ ...mockParams, token: BONK_TOKEN });
+
+			expect(spyGetTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({
+					exitIfFirstSignatureMatches: undefined
+				})
+			);
+			expect(get(solTransactionsStore)?.[BONK_TOKEN_ID]).toEqual([
+				{
+					data: correctedTransaction,
+					certified: false
+				},
+				{
+					data: correctedSameSignatureTransaction,
+					certified: false
+				}
+			]);
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SplMainnet: BONK_TOKEN.address },
+				transactions: [correctedTransaction, correctedSameSignatureTransaction]
 			});
 		});
 
