@@ -21,7 +21,11 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 	import { enabledFungibleTokens, nativeTokens } from '$lib/derived/tokens.derived';
-	import { exportTokensCsv, exportTransactionsCsv } from '$lib/services/export-data.services';
+	import {
+		exportTokensCsv,
+		exportTransactionsCsv,
+		type TokenCsvVariant
+	} from '$lib/services/export-data.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -31,13 +35,14 @@
 	let exportingTokens = $state(false);
 	let exportingTransactions = $state(false);
 
-	const onExportTokens = () => {
+	const onExportTokens = (variant: TokenCsvVariant) => {
 		exportingTokens = true;
 		try {
 			exportTokensCsv({
 				tokens: $enabledFungibleTokensUi,
 				currency: $currentCurrency,
-				exchangeRateToUsd: $currencyExchangeStore.exchangeRateToUsd
+				exchangeRateToUsd: $currencyExchangeStore.exchangeRateToUsd,
+				variant
 			});
 		} finally {
 			exportingTokens = false;
@@ -86,6 +91,10 @@
 <SettingsCard>
 	{#snippet title()}{$i18n.settings.text.export_data}{/snippet}
 
+	<h5 class="text-xs font-semibold tracking-wide text-tertiary uppercase">
+		{$i18n.settings.text.export_basic}
+	</h5>
+
 	<SettingsCardItem>
 		{#snippet key()}
 			{$i18n.settings.text.export_tokens}
@@ -93,10 +102,33 @@
 
 		{#snippet value()}
 			<Button
-				ariaLabel={$i18n.settings.text.export_tokens}
+				ariaLabel={`${$i18n.settings.text.export_tokens} (${$i18n.settings.text.export_basic})`}
 				disabled={exportingTokens || exportingTransactions}
 				link
-				onclick={onExportTokens}>{$i18n.core.text.download} ></Button
+				onclick={() => onExportTokens('basic')}>{$i18n.core.text.download} ></Button
+			>
+		{/snippet}
+
+		{#snippet info()}
+			{$i18n.settings.text.export_tokens_basic_description}
+		{/snippet}
+	</SettingsCardItem>
+
+	<h5 class="mt-5 text-xs font-semibold tracking-wide text-tertiary uppercase">
+		{$i18n.settings.text.export_extended}
+	</h5>
+
+	<SettingsCardItem>
+		{#snippet key()}
+			{$i18n.settings.text.export_tokens}
+		{/snippet}
+
+		{#snippet value()}
+			<Button
+				ariaLabel={`${$i18n.settings.text.export_tokens} (${$i18n.settings.text.export_extended})`}
+				disabled={exportingTokens || exportingTransactions}
+				link
+				onclick={() => onExportTokens('extended')}>{$i18n.core.text.download} ></Button
 			>
 		{/snippet}
 
