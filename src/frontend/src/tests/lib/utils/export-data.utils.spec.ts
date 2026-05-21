@@ -683,6 +683,35 @@ describe('export-data.utils', () => {
 			});
 		});
 
+		it('falls back to <network.explorerUrl>/tx/<id> when BTC tx.txExplorerUrl is missing', () => {
+			const btcTxNoExplorer: BtcTransactionUi = { ...btcTx, txExplorerUrl: undefined };
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'bitcoin', transaction: btcTxNoExplorer, token: btcToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.explorer_url).toBe(`${BTC_MAINNET_NETWORK.explorerUrl}/tx/btc-tx-1`);
+		});
+
+		it('falls back to <network.explorerUrl>/transaction/<id> for ICRC when tx.txExplorerUrl is missing', () => {
+			// mapIcrcTransaction (unlike mapIcpTransaction) doesn't pre-populate txExplorerUrl.
+			// The adapter must reach the same URL the IC modal renders: ICP's dashboard uses
+			// `/transaction/`, not `/tx/`.
+			const icTxNoExplorer: IcTransactionUi = { ...icTx, txExplorerUrl: undefined };
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ic', transaction: icTxNoExplorer, token: icrcToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.explorer_url).toBe(`${ICP_NETWORK.explorerUrl}/transaction/42`);
+		});
+
 		it('joins multiple BTC recipients with a semicolon', () => {
 			const tx: BtcTransactionUi = { ...btcTx, type: 'receive', to: ['a', 'b', 'c'] };
 			const [row] = buildTransactionRows({
@@ -714,6 +743,9 @@ describe('export-data.utils', () => {
 			expect(row.status).toBe('confirmed');
 			expect(row.direction).toBe('out');
 			expect(row.tx_id).toBe('0xeth-tx-1');
+			// EthTransactionUi doesn't pre-populate txExplorerUrl; the adapter falls back
+			// to `<networkExplorerUrl>/tx/<hash>`, same way EthTransactionModal does.
+			expect(row.explorer_url).toBe(`${ETHEREUM_NETWORK.explorerUrl}/tx/0xeth-tx-1`);
 		});
 
 		it('zeros the asset portion of Debit on a non-IC self-transfer (single row, asset returns)', () => {

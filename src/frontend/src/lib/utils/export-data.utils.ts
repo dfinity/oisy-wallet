@@ -363,6 +363,33 @@ const formatTimestampUtc = (timestamp: bigint | number | undefined): string => {
 const formatTypeDisplay = (type: string): string =>
 	type === '' ? '' : type.charAt(0).toUpperCase() + type.slice(1);
 
+// Constructs a block-explorer URL for a transaction from the network's `explorerUrl`
+// template + the chain's tx-path segment. Mirrors what BtcTransactionModal,
+// EthTransactionModal and SolTransactionModal do on the fly when the indexer doesn't
+// pre-populate tx.txExplorerUrl. Handles both URL conventions in `explorers.env.ts`:
+// templated URLs containing `$args` (Solana — substituted with `<txPath>/<id>/`) and
+// plain base URLs (BTC, EVM, IC — appended with `/<txPath>/<id>`). ICP uses
+// `transaction` as its path; the other chains all use `tx`.
+const buildTxExplorerUrl = ({
+	template,
+	txId,
+	txPath = 'tx'
+}: {
+	template: string;
+	txId: string;
+	txPath?: string;
+}): string => {
+	if (template === '' || txId === '') {
+		return '';
+	}
+
+	if (template.includes('$args')) {
+		return replacePlaceholders(template, { $args: `${txPath}/${txId}/` });
+	}
+
+	return `${template}/${txPath}/${txId}`;
+};
+
 const addressesEqual = ({ a, b }: { a: Nullish<string>; b: Nullish<string> }): boolean =>
 	nonNullish(a) && nonNullish(b) && a.toLowerCase() === b.toLowerCase();
 
@@ -420,7 +447,8 @@ const toBitcoinRow = ({
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.id,
-		explorer_url: tx.txExplorerUrl ?? '',
+		explorer_url:
+			tx.txExplorerUrl ?? buildTxExplorerUrl({ template: token.network.explorerUrl, txId: tx.id }),
 		exported_at: exportedAt
 	};
 };
@@ -488,7 +516,10 @@ const toEthereumRow = ({
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.hash ?? '',
-		explorer_url: '',
+		explorer_url: buildTxExplorerUrl({
+			template: token.network.explorerUrl,
+			txId: tx.hash ?? ''
+		}),
 		exported_at: exportedAt
 	};
 };
@@ -558,7 +589,16 @@ const toIcRow = ({
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.id),
-		explorer_url: tx.txExplorerUrl ?? '',
+		// ICRC mapper leaves txExplorerUrl undefined (only native ICP pre-populates it).
+		// Fall back to the network template — IC uses `/transaction/` as the path segment,
+		// not `/tx/`, so override the default.
+		explorer_url:
+			tx.txExplorerUrl ??
+			buildTxExplorerUrl({
+				template: token.network.explorerUrl,
+				txId: String(tx.id),
+				txPath: 'transaction'
+			}),
 		exported_at: exportedAt
 	};
 };
@@ -617,12 +657,15 @@ const toSolanaRow = ({
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.signature),
-		// SolTransactionUi doesn't pre-populate txExplorerUrl. Construct it the same way
-		// SolTransactionModal does — substitute `$args` in the network's explorer template
-		// (e.g. solscan.io/$args → solscan.io/tx/<signature>/).
+		// SolTransactionUi doesn't pre-populate txExplorerUrl. Construct it from the
+		// network template (e.g. solscan.io/$args → solscan.io/tx/<signature>/), same way
+		// SolTransactionModal does.
 		explorer_url:
 			tx.txExplorerUrl ??
-			replacePlaceholders(token.network.explorerUrl, { $args: `tx/${String(tx.signature)}/` }),
+			buildTxExplorerUrl({
+				template: token.network.explorerUrl,
+				txId: String(tx.signature)
+			}),
 		exported_at: exportedAt
 	};
 };
