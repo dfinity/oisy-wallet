@@ -42,7 +42,14 @@ const ICRC7_SYMBOL_KEY = 'icrc7:symbol';
 const ICRC7_DESCRIPTION_KEY = 'icrc7:description';
 const ICRC7_LOGO_KEY = 'icrc7:logo';
 
-const ICRC7_TOKEN_NAME_KEYS = ['icrc7:name', 'icrc7:metadata:name', 'name'];
+const ICRC7_TOKEN_NAME_KEYS = [
+	'icrc7:name',
+	'icrc7:title',
+	'icrc7:metadata:name',
+	'icrc7:metadata:title',
+	'name',
+	'title'
+];
 const ICRC7_TOKEN_DESCRIPTION_KEYS = [
 	'icrc7:description',
 	'icrc7:metadata:description',
@@ -50,21 +57,34 @@ const ICRC7_TOKEN_DESCRIPTION_KEYS = [
 ];
 const ICRC7_TOKEN_IMAGE_KEYS = [
 	'icrc7:image',
+	'icrc7:imageUrl',
 	'icrc7:metadata:image',
+	'icrc7:metadata:imageUrl',
 	'icrc7:image_url',
 	'icrc7:metadata:image_url',
 	'image',
+	'imageUrl',
 	'image_url'
 ];
 const ICRC7_TOKEN_THUMBNAIL_KEYS = [
 	'icrc7:thumbnail',
+	'icrc7:thumbnailUrl',
 	'icrc7:metadata:thumbnail',
+	'icrc7:metadata:thumbnailUrl',
 	'icrc7:thumbnail_url',
 	'icrc7:metadata:thumbnail_url',
 	'thumbnail',
+	'thumbnailUrl',
 	'thumbnail_url'
 ];
 const ICRC7_TOKEN_ATTRIBUTES_KEYS = ['icrc7:attributes', 'icrc7:metadata:attributes', 'attributes'];
+const ICRC7_TOKEN_SCALAR_ATTRIBUTE_KEYS = [
+	{ traitType: 'Edition', keys: ['icrc7:edition', 'icrc7:metadata:edition', 'edition'] },
+	{
+		traitType: 'Rarity Tier',
+		keys: ['icrc7:rarityTier', 'icrc7:metadata:rarityTier', 'rarityTier', 'rarity_tier']
+	}
+];
 
 const lookupText = ({
 	entries,
@@ -254,6 +274,20 @@ const lookupAttributesByKeys = ({
 	}
 };
 
+const lookupScalarAttributes = ({
+	entries
+}: {
+	entries: Array<[string, Value]>;
+}): NftMetadataWithoutId['attributes'] | undefined => {
+	const attributes = ICRC7_TOKEN_SCALAR_ATTRIBUTE_KEYS.flatMap(({ traitType, keys }) => {
+		const value = lookupStringByKeys({ entries, keys });
+
+		return nonNullish(value) ? [{ traitType, value }] : [];
+	});
+
+	return attributes.length > 0 ? attributes : undefined;
+};
+
 /**
  * Maps an ICRC-7 `icrc7_collection_metadata` response into a {@link TokenMetadata}-shaped object
  * (without `decimals`, which is not meaningful for NFT collections).
@@ -302,12 +336,17 @@ export const mapIcrc7TokenMetadata = (entries: Array<[string, Value]>): NftMetad
 		? valueToImageUrl({ value: thumbnailEntry[1] })
 		: undefined;
 	const attributes = lookupAttributesByKeys({ entries, keys: ICRC7_TOKEN_ATTRIBUTES_KEYS });
+	const scalarAttributes = lookupScalarAttributes({ entries });
+	const mergedAttributes =
+		nonNullish(attributes) || nonNullish(scalarAttributes)
+			? [...(attributes ?? []), ...(scalarAttributes ?? [])]
+			: undefined;
 
 	return {
 		...(nonNullish(name) && { name }),
 		...(nonNullish(description) && { description }),
 		...(nonNullish(imageUrl) && { imageUrl }),
 		...(nonNullish(thumbnailUrl) && { thumbnailUrl }),
-		...(nonNullish(attributes) && { attributes })
+		...(nonNullish(mergedAttributes) && { attributes: mergedAttributes })
 	};
 };
