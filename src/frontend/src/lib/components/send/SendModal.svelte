@@ -87,11 +87,18 @@
 			destination === encodeIcrcAccount($token.mintingAccount)
 	);
 
+	// Decouple the reference of `$pageNft` from `steps`: the wizard step list only depends on
+	// whether a page NFT is selected, not on the NFT's identity. The NFT loader re-emits a new
+	// `Nft` reference on every refresh tick (20s), which would otherwise produce a fresh `steps`
+	// array, recreate `WizardStepsState` inside `WizardModal`, and reset the user back to the
+	// first step (DESTINATION) — visible as a flicker / jump-back of the open modal.
+	let hasPageNft = $derived(nonNullish($pageNft));
+
 	let steps = $derived(
 		isTransactionsPage
 			? sendWizardStepsWithQrCodeScan({ i18n: $i18n, minting: $isIcMintingAccount, burning })
 			: isNftsPage
-				? nonNullish($pageNft)
+				? hasPageNft
 					? sendNftsWizardStepsWithQrCodeScan({ i18n: $i18n })
 					: allSendNftsWizardSteps({ i18n: $i18n })
 				: allSendWizardSteps({ i18n: $i18n, minting: $isIcMintingAccount, burning })
