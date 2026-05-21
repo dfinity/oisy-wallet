@@ -47,13 +47,11 @@
 	);
 
 	const previewMediaUrls = $derived(
-		collectionNfts
-			.slice(0, 4)
-			.flatMap((nft) => {
-				const mediaUrl = getNftDisplayImageUrl(nft);
+		collectionNfts.slice(0, 4).flatMap((nft) => {
+			const mediaUrl = getNftDisplayImageUrl(nft);
 
-				return nonNullish(mediaUrl) ? [mediaUrl] : [];
-			})
+			return nonNullish(mediaUrl) ? [mediaUrl] : [];
+		})
 	);
 
 	const onClick = () => {

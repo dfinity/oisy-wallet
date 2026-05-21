@@ -152,7 +152,7 @@
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.display_preference}</span>
 		{#if nonNullish(collection)}
-			<NftImageConsentPreference {collection} {source} mediaUrls={nftImageMediaUrls} />
+			<NftImageConsentPreference {collection} mediaUrls={nftImageMediaUrls} {source} />
 		{:else}
 			<span class="min-w-12">
 				<SkeletonText />

@@ -143,9 +143,7 @@ describe('NftImageConsentModal', () => {
 							chainId: token.network.chainId,
 							networkKey: 'Erc721',
 							allowExternalContentSource: testCase.buttonPrimarySaveCalledWith,
-							allowedExternalContentSourceUrls: testCase.buttonPrimarySaveCalledWith
-								? [nftAzuki1.imageUrl, nftAzuki2.imageUrl]
-								: [],
+							allowedExternalContentSourceUrls: [],
 							enabled: true
 						}
 					]
@@ -163,9 +161,7 @@ describe('NftImageConsentModal', () => {
 							chainId: token.network.chainId,
 							networkKey: 'Erc721',
 							allowExternalContentSource: testCase.buttonSecondarySaveCalledWith,
-							allowedExternalContentSourceUrls: testCase.buttonSecondarySaveCalledWith
-								? [nftAzuki1.imageUrl, nftAzuki2.imageUrl]
-								: [],
+							allowedExternalContentSourceUrls: [],
 							enabled: true
 						}
 					]
@@ -173,6 +169,44 @@ describe('NftImageConsentModal', () => {
 			}
 		}
 	);
+
+	it('should save reviewed media URLs when enabling media', async () => {
+		const token: Erc721Token = {
+			...mockValidErc721Token,
+			allowExternalContentSource: false
+		};
+
+		findTokenSpy.mockReturnValue(token);
+		getCollectionUiSpy.mockReturnValue([
+			{
+				collection: nftAzuki1.collection,
+				nfts: [nftAzuki1, nftAzuki2]
+			}
+		]);
+
+		render(NftImageConsentModal, {
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: false },
+				testId: TEST_ID
+			}
+		});
+
+		await fireEvent.click(screen.getByTestId(testIds.enable));
+
+		expect(saveSpy).toHaveBeenCalledWith({
+			identity: mockIdentity,
+			tokens: [
+				{
+					...token,
+					chainId: token.network.chainId,
+					networkKey: 'Erc721',
+					allowExternalContentSource: true,
+					allowedExternalContentSourceUrls: [nftAzuki1.imageUrl, nftAzuki2.imageUrl],
+					enabled: true
+				}
+			]
+		});
+	});
 
 	it('should disable the primary button if collection is spam', async () => {
 		const token: Erc721Token = {
