@@ -1,4 +1,5 @@
 import type {
+	ActiveUserTransaction,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
@@ -27,6 +28,7 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
+	CreateActiveUserTransactionParams,
 	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
@@ -37,6 +39,7 @@ import type {
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
 	SetUserShowTestnetsParams,
+	UpdateActiveUserTransactionParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
@@ -490,6 +493,76 @@ export class BackendCanister extends Canister<BackendService> {
 
 		if ('Ok' in response) {
 			return;
+		}
+
+		throw response.Err;
+	};
+
+	createActiveUserTransaction = async ({
+		id,
+		data,
+		progressStep,
+		externalRefs
+	}: CreateActiveUserTransactionParams): Promise<ActiveUserTransaction> => {
+		const { create_active_user_transaction } = this.caller({ certified: true });
+
+		const response = await create_active_user_transaction({
+			id,
+			data,
+			progress_step: toNullable(progressStep),
+			external_refs: externalRefs
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw response.Err;
+	};
+
+	updateActiveUserTransaction = async ({
+		id,
+		status,
+		progressStep,
+		externalRefs,
+		error
+	}: UpdateActiveUserTransactionParams): Promise<ActiveUserTransaction> => {
+		const { update_active_user_transaction } = this.caller({ certified: true });
+
+		const response = await update_active_user_transaction({
+			id,
+			status: toNullable(status),
+			progress_step: toNullable(progressStep),
+			external_refs: toNullable(externalRefs),
+			error: toNullable(error)
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw response.Err;
+	};
+
+	deleteActiveUserTransaction = async (id: string): Promise<void> => {
+		const { delete_active_user_transaction } = this.caller({ certified: true });
+
+		const response = await delete_active_user_transaction(id);
+
+		if ('Ok' in response) {
+			return;
+		}
+
+		throw response.Err;
+	};
+
+	getActiveUserTransactions = async (): Promise<ActiveUserTransaction[]> => {
+		const { get_active_user_transactions } = this.caller({ certified: false });
+
+		const response = await get_active_user_transactions();
+
+		if ('Ok' in response) {
+			return response.Ok.transactions;
 		}
 
 		throw response.Err;
