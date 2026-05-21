@@ -26,6 +26,7 @@ static USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static ANOTHER_USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Icrc(IcrcToken {
@@ -36,6 +37,7 @@ static ANOTHER_USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken 
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static USER_TOKEN_NO_INDEX: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Icrc(IcrcToken {
@@ -46,6 +48,7 @@ static USER_TOKEN_NO_INDEX: LazyLock<CustomToken> = LazyLock::new(|| CustomToken
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static SPL_TOKEN_ID: LazyLock<SplTokenId> =
     LazyLock::new(|| SplTokenId("AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM".to_string()));
@@ -59,6 +62,7 @@ static SPL_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static ERC20_TOKEN_ID: LazyLock<ErcTokenId> =
     LazyLock::new(|| ErcTokenId("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string()));
@@ -72,6 +76,7 @@ static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static ERC4626_TOKEN_ID: LazyLock<ErcTokenId> =
     LazyLock::new(|| ErcTokenId("0x0d877dc7c8fa3ad980dfdb18b48ec9f8768359c4".to_string()));
@@ -85,6 +90,7 @@ static ERC4626_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static ERC721_TOKEN_ID: LazyLock<ErcTokenId> =
     LazyLock::new(|| ErcTokenId("0x8821bee2ba0df28761afff119d66390d594cd280".to_string()));
@@ -98,6 +104,7 @@ static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: Some(true),
+    allowed_external_content_source_urls: None,
 });
 static ERC1155_TOKEN_ID: LazyLock<ErcTokenId> =
     LazyLock::new(|| ErcTokenId("0x6a00bfd7f89204721aaf9aec39592cf444bff845".to_string()));
@@ -111,6 +118,7 @@ static ERC1155_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: Some(false),
+    allowed_external_content_source_urls: None,
 });
 static EXT_V2_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::ExtV2(ExtV2Token {
@@ -120,6 +128,7 @@ static EXT_V2_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static DIP721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Dip721(Dip721Token {
@@ -129,6 +138,7 @@ static DIP721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static ICPUNKS_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::IcPunks(IcPunksToken {
@@ -138,6 +148,7 @@ static ICPUNKS_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static ICRC7_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Icrc7(Icrc7Token {
@@ -147,6 +158,7 @@ static ICRC7_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
@@ -325,6 +337,9 @@ fn test_update_custom_token(user_token: &CustomToken) {
         version: results.unwrap().first().unwrap().version,
         section: user_token.section.clone(),
         allow_external_content_source: user_token.allow_external_content_source,
+        allowed_external_content_source_urls: user_token
+            .allowed_external_content_source_urls
+            .clone(),
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
@@ -417,6 +432,9 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
         version: results.clone().unwrap().first().unwrap().version,
         section: user_token.section.clone(),
         allow_external_content_source: user_token.allow_external_content_source,
+        allowed_external_content_source_urls: user_token
+            .allowed_external_content_source_urls
+            .clone(),
     };
 
     let update_another_token: CustomToken = CustomToken {
@@ -425,6 +443,9 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
         version: results.unwrap().get(1).unwrap().version,
         section: user_token.section.clone(),
         allow_external_content_source: user_token.allow_external_content_source,
+        allowed_external_content_source_urls: user_token
+            .allowed_external_content_source_urls
+            .clone(),
     };
 
     let update_tokens: Vec<CustomToken> = vec![update_token.clone(), update_another_token.clone()];
@@ -499,6 +520,9 @@ fn test_cannot_update_custom_token_without_version(user_token: &CustomToken) {
         version: None,
         section: user_token.section.clone(),
         allow_external_content_source: user_token.allow_external_content_source,
+        allowed_external_content_source_urls: user_token
+            .allowed_external_content_source_urls
+            .clone(),
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
@@ -535,6 +559,9 @@ fn test_cannot_update_custom_token_with_invalid_version(user_token: &CustomToken
         version: Some(123_456_789),
         section: user_token.section.clone(),
         allow_external_content_source: user_token.allow_external_content_source,
+        allowed_external_content_source_urls: user_token
+            .allowed_external_content_source_urls
+            .clone(),
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());

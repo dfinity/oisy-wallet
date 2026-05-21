@@ -19,7 +19,8 @@ describe('custom-token.utils', () => {
 			enabled: true,
 			version: [1n],
 			section: [{ Spam: null }],
-			allow_external_content_source: []
+			allow_external_content_source: [],
+			allowed_external_content_source_urls: toNullable()
 		};
 
 		it('should convert to CustomToken with nullish version', () => {

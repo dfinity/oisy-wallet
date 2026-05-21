@@ -88,7 +88,8 @@ describe('icrc.services', () => {
 			version: [1n],
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable(true)
+			allow_external_content_source: toNullable(true),
+			allowed_external_content_source_urls: toNullable()
 		};
 
 		beforeEach(() => {
@@ -182,7 +183,8 @@ describe('icrc.services', () => {
 					version: [1n],
 					enabled: true,
 					section: toNullable(),
-					allow_external_content_source: toNullable(true)
+					allow_external_content_source: toNullable(true),
+					allowed_external_content_source_urls: toNullable()
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
@@ -204,7 +206,8 @@ describe('icrc.services', () => {
 					version: [1n],
 					enabled: true,
 					section: toNullable(),
-					allow_external_content_source: toNullable(false)
+					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable()
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
