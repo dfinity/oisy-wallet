@@ -105,7 +105,7 @@
 	// propagated to subscribers. `steps` is not re-derived, the `steps` array reference stays
 	// stable, `WizardStepsState` is not rebuilt, and `currentStep` is preserved across ticks.
 	//
-	// Pinned by `SendModal.steps-reactivity.spec.ts`.
+	// Pinned by the "steps derivation reactivity" describe block in `SendModal.spec.ts`.
 	let hasPageNft = $derived(nonNullish($pageNft));
 
 	let steps = $derived(
