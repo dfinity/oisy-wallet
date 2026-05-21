@@ -155,6 +155,8 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
     minus testnets / NFTs / ERC-4626), re-marks them as active so the timer
     keeps them warm, and awaits a one-shot refresh for any token whose
     cache is older than `PRICE_STALENESS_THRESHOLD_SEC` (2 min) or missing.
+    Entries that remain stale or missing after the refresh attempt are
+    returned as `None`, so returned prices never exceed the freshness window.
     It's an `update` (mutates `token_activity`, may issue HTTP outcalls).
   - `get_exchange_rate(TokenId)` is a legacy cache-only query for callers
     that already know the token ID and do not need activation or freshness.

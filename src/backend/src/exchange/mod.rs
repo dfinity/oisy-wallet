@@ -217,15 +217,20 @@ pub(crate) fn stale_or_missing_tokens(token_ids: &[StoredTokenId]) -> Vec<Stored
 
 /// Reads the on-canister exchange rate cache for the supplied tokens and
 /// returns one `(TokenId, Option<ExchangeRate>)` entry per input id, in the
-/// same order. `None` means the cache has no entry for that token.
+/// same order. `None` means the cache has no fresh entry for that token.
 pub(crate) fn cached_rates_snapshot(
     token_ids: Vec<StoredTokenId>,
 ) -> Vec<(TokenId, Option<ExchangeRate>)> {
+    let freshness_floor_ns = time().saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * 1_000_000_000);
+
     read_state(|s| {
         token_ids
             .into_iter()
             .map(|stored| {
-                let rate = s.exchange_rates.get(&stored).map(|c| c.0);
+                let rate = s
+                    .exchange_rates
+                    .get(&stored)
+                    .and_then(|c| (c.0.usd.timestamp_ns >= freshness_floor_ns).then_some(c.0));
                 (stored.0, rate)
             })
             .collect()
