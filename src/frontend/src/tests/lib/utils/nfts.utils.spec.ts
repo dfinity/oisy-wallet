@@ -888,6 +888,25 @@ describe('nfts.utils', () => {
 			expect(result).toBe(MediaStatusEnum.OK);
 		});
 
+		it('returns OK for application/octet-stream byte-stream assets under the size limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'application/octet-stream'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus(
+				'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3Aabc&owner_id=sey3i-jyaaa-aaaap-quo3q-cai&project_id=019de6f2-675c-775e-9eda-2adf4341566c'
+			);
+
+			expect(result).toBe(MediaStatusEnum.OK);
+		});
+
 		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image and non-video type', async () => {
 			global.fetch = vi.fn().mockResolvedValueOnce({
 				headers: {
