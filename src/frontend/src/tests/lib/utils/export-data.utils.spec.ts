@@ -121,6 +121,34 @@ describe('export-data.utils', () => {
 			expect(row.value).toBe(0);
 		});
 
+		it('reports value 0 on a zero-balance token even when the price feed has not loaded', () => {
+			// Without the short-circuit, usdBalance would be undefined (calculateTokenUsdBalance
+			// returns undefined when the exchange rate is missing) and the CSV would show an
+			// empty value cell — misleading, since the balance is already known to be zero.
+			const [row] = buildTokenRows({
+				tokens: [{ ...baseToken, balance: ZERO, usdPrice: undefined, usdBalance: undefined }],
+				currency: Currency.EUR,
+				exchangeRateToUsd: 2
+			});
+
+			expect(row.usd_value).toBe(0);
+			expect(row.value).toBe(0);
+			// Price stays unknown — only the value collapses to zero.
+			expect(row.usd_price).toBeUndefined();
+			expect(row.price).toBeUndefined();
+		});
+
+		it('leaves value undefined when the balance has not loaded yet (null)', () => {
+			const [row] = buildTokenRows({
+				tokens: [{ ...baseToken, balance: null, usdBalance: undefined }],
+				currency: Currency.USD,
+				exchangeRateToUsd: 1
+			});
+
+			expect(row.usd_value).toBeUndefined();
+			expect(row.value).toBeUndefined();
+		});
+
 		it('renders an empty balance string when the balance is null', () => {
 			const [row] = buildTokenRows({
 				tokens: [{ ...baseToken, balance: null }],

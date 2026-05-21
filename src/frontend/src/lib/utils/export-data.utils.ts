@@ -3,6 +3,7 @@ import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
+import { ZERO } from '$lib/constants/app.constants';
 import type { Currency } from '$lib/enums/currency';
 import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
@@ -224,24 +225,35 @@ export const buildTokenRows = ({
 	currency: Currency;
 	exchangeRateToUsd: number | null;
 }): TokenCsvRow[] =>
-	tokens.map((token) => ({
-		symbol: token.symbol,
-		name: token.name,
-		network: token.network.name,
-		standard: token.standard.code,
-		address_or_ledger_id: getAddressOrLedgerId(token),
-		decimals: token.decimals,
-		// `balance` stays decimal-formatted for the Basic export (human-readable).
-		// `balance_raw` is the raw integer (smallest unit) the Extended export emits — pair
-		// it with the Decimals column to recover the decimal value with full precision.
-		balance: formatAmount({ value: token.balance, decimals: token.decimals }),
-		balance_raw: nonNullish(token.balance) ? token.balance.toString() : '',
-		usd_price: token.usdPrice,
-		usd_value: token.usdBalance,
-		currency: currency.toUpperCase(),
-		price: toUserCurrencyValue({ usdValue: token.usdPrice, exchangeRateToUsd }),
-		value: toUserCurrencyValue({ usdValue: token.usdBalance, exchangeRateToUsd })
-	}));
+	tokens.map((token) => {
+		// A zero balance is worth zero in every currency regardless of whether the price feed
+		// has loaded — short-circuit the derivation so the export doesn't emit an empty value
+		// cell for a balance the user can already see is empty. Null / undefined balances
+		// stay unknown (the loader hasn't returned yet).
+		const isZeroBalance = token.balance === ZERO;
+
+		return {
+			symbol: token.symbol,
+			name: token.name,
+			network: token.network.name,
+			standard: token.standard.code,
+			address_or_ledger_id: getAddressOrLedgerId(token),
+			decimals: token.decimals,
+			// `balance` stays decimal-formatted for the Basic export (human-readable).
+			// `balance_raw` is the raw integer (smallest unit) the Extended export emits —
+			// pair it with the Decimals column to recover the decimal value with full
+			// precision.
+			balance: formatAmount({ value: token.balance, decimals: token.decimals }),
+			balance_raw: nonNullish(token.balance) ? token.balance.toString() : '',
+			usd_price: token.usdPrice,
+			usd_value: isZeroBalance ? 0 : token.usdBalance,
+			currency: currency.toUpperCase(),
+			price: toUserCurrencyValue({ usdValue: token.usdPrice, exchangeRateToUsd }),
+			value: isZeroBalance
+				? 0
+				: toUserCurrencyValue({ usdValue: token.usdBalance, exchangeRateToUsd })
+		};
+	});
 
 // Decimals of the native chain currency used to pay gas/fees. ETH, BNB, MATIC, AVAX
 // all use 18; SOL uses 9; BTC uses 8.
