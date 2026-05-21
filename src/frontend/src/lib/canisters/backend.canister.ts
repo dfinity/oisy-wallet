@@ -431,12 +431,11 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	getExchangeRates = async ({
-		token_ids,
 		certified
 	}: { token_ids: TokenId[] } & QueryParams): Promise<Map<string, BackendExchangeRate>> => {
 		const { get_exchange_rates } = this.caller({ certified });
 
-		const results = await get_exchange_rates(token_ids);
+		const results = await get_exchange_rates();
 
 		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
 			const unwrapped = this.mapExchangeRate(fromNullable(rate));
