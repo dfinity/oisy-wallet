@@ -116,6 +116,10 @@ interface SolTokenAccountMetadata {
 	addressToToken: Record<SolAddress, SplTokenAddress>;
 }
 
+type SolTokenBalance = NonNullable<
+	NonNullable<SolRpcTransaction['meta']>['preTokenBalances']
+>[number];
+
 const emptySolTokenAccountMetadata: SolTokenAccountMetadata = {
 	addressToOwner: {},
 	addressToToken: {}
@@ -175,6 +179,29 @@ const extractTokenAccountMetadata = (instruction: SolRpcInstruction): SolTokenAc
 	return emptySolTokenAccountMetadata;
 };
 
+const extractTokenBalanceMetadata = ({
+	accountKeys,
+	tokenBalances
+}: {
+	accountKeys: ParsedAccount[];
+	tokenBalances: SolTokenBalance[];
+}): SolTokenAccountMetadata =>
+	tokenBalances.reduce<SolTokenAccountMetadata>(
+		({ addressToOwner, addressToToken }, { accountIndex, mint, owner }) => {
+			const account = accountKeys[Number(accountIndex)]?.pubkey;
+
+			if (isNullish(account) || isNullish(owner)) {
+				return { addressToOwner, addressToToken };
+			}
+
+			return {
+				addressToOwner: { ...addressToOwner, [account]: owner },
+				addressToToken: { ...addressToToken, [account]: mint }
+			};
+		},
+		emptySolTokenAccountMetadata
+	);
+
 export const fetchSolTransactionsForSignature = async ({
 	identity,
 	signature,
@@ -209,13 +236,18 @@ export const fetchSolTransactionsForSignature = async ({
 		meta
 	} = transactionDetail;
 
-	const { fee, preBalances, postBalances } = meta ?? {};
+	const { fee, preBalances, postBalances, preTokenBalances, postTokenBalances } = meta ?? {};
+	const parsedAccountKeys = [...(accountKeys ?? [])];
 	const { pubkey: feePayer } = extractFeePayer([...(accountKeys ?? [])]) ?? {};
 	const { preBalance, postBalance } = extractBalances({
 		address,
-		accountKeys: [...(accountKeys ?? [])],
+		accountKeys: parsedAccountKeys,
 		preBalances: [...(preBalances ?? [])],
 		postBalances: [...(postBalances ?? [])]
+	});
+	const tokenBalanceMetadata = extractTokenBalanceMetadata({
+		accountKeys: parsedAccountKeys,
+		tokenBalances: [...(preTokenBalances ?? []), ...(postTokenBalances ?? [])]
 	});
 
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
@@ -390,8 +422,8 @@ export const fetchSolTransactionsForSignature = async ({
 		Promise.resolve({
 			parsedTransactions: [],
 			cumulativeBalances: initialCumulativeBalances,
-			addressToToken: {},
-			addressToOwner: {}
+			addressToToken: tokenBalanceMetadata.addressToToken,
+			addressToOwner: tokenBalanceMetadata.addressToOwner
 		})
 	);
 

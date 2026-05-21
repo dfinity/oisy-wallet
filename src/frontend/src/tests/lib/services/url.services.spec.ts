@@ -161,6 +161,24 @@ describe('url.services', () => {
 			});
 		});
 
+		it('should treat application/octet-stream as image media', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'application/octet-stream'
+							: h === 'Content-Length'
+								? mockSize.toString()
+								: null
+				}
+			});
+
+			await expect(extractMediaTypeAndSize(mockUrl)).resolves.toStrictEqual({
+				type: MediaType.Img,
+				size: mockSize
+			});
+		});
+
 		it('should handle a missing content size', async () => {
 			global.fetch = vi.fn().mockResolvedValueOnce({
 				headers: {

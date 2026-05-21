@@ -114,12 +114,19 @@ export const extractMediaUrls = async (url: string): Promise<string[]> => {
 };
 
 const getMediaType = (type: string): MediaType => {
-	if (type.startsWith('image/') || type.startsWith('.gif')) {
+	const normalizedType = type.split(';', 1)[0].trim().toLowerCase();
+
+	if (normalizedType.startsWith('image/') || normalizedType.startsWith('.gif')) {
 		return MediaType.Img;
 	}
 
-	if (type.startsWith('video/')) {
+	if (normalizedType.startsWith('video/')) {
 		return MediaType.Video;
+	}
+
+	// Byte-stream blob hosts (e.g. Caffeine) often serve valid JPEG/PNG as octet-stream.
+	if (normalizedType === 'application/octet-stream') {
+		return MediaType.Img;
 	}
 
 	return MediaType.Other;

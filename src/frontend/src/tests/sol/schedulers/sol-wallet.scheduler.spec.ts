@@ -12,10 +12,11 @@ import {
 } from '$sol/services/sol-user-transactions.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/kit';
@@ -551,6 +552,79 @@ describe('sol-wallet.scheduler', () => {
 				identity: mockIdentity,
 				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
 				address: mockSolAddress
+			});
+		});
+
+		it('should refresh ownerless stored SPL transactions', async () => {
+			const splStartData: PostMessageDataRequestSol = {
+				address: {
+					certified: false,
+					data: mockSolAddress
+				},
+				solanaNetwork: SolanaNetworks.devnet,
+				tokenAddress: DEVNET_USDC_TOKEN.address,
+				tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
+			};
+			const [storedTransaction, storedSameSignatureTransaction] = createMockSolTransactionsUi(
+				2
+			).map((tx, index) => ({
+				...tx,
+				id: `stored-same-signature-transaction-${index}`,
+				blockNumber: 100
+			}));
+			const ownerlessStoredTransaction: SolTransactionUi = {
+				...storedTransaction,
+				id: 'ownerless-stored-transaction',
+				blockNumber: 100,
+				type: 'receive',
+				from: mockAtaAddress,
+				to: mockSolAddress2,
+				fromOwner: undefined,
+				toOwner: undefined
+			};
+			const correctedTransaction: SolTransactionUi = {
+				...ownerlessStoredTransaction,
+				type: 'send',
+				fromOwner: mockSolAddress
+			};
+			const correctedSameSignatureTransaction: SolTransactionUi = {
+				...storedSameSignatureTransaction,
+				id: 'corrected-same-signature-transaction'
+			};
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: [ownerlessStoredTransaction, storedSameSignatureTransaction],
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 100n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+			spyLoadTransactions.mockResolvedValue([
+				correctedTransaction,
+				correctedSameSignatureTransaction
+			]);
+
+			await scheduler.trigger(splStartData);
+
+			expect(spyLoadTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({
+					exitIfFirstSignatureMatches: undefined
+				})
+			);
+			expect(scheduler['store'].transactions).toEqual({
+				[correctedTransaction.id]: {
+					data: correctedTransaction,
+					certified: false
+				},
+				[correctedSameSignatureTransaction.id]: {
+					data: correctedSameSignatureTransaction,
+					certified: false
+				}
+			});
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
+				transactions: [correctedTransaction, correctedSameSignatureTransaction]
 			});
 		});
 	});
