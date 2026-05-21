@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { slide } from 'svelte/transition';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
@@ -7,6 +8,7 @@
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -36,6 +38,11 @@
 
 	let exportingTokens = $state(false);
 	let exportingTransactions = $state(false);
+
+	// Section-level help toggles. Each Basic/Extended header gets a single help icon that
+	// reveals one description for the whole section, instead of per-button help icons.
+	let basicInfoExpanded = $state(false);
+	let extendedInfoExpanded = $state(false);
 
 	const onExportTokens = (variant: TokenCsvVariant) => {
 		exportingTokens = true;
@@ -95,9 +102,23 @@
 <SettingsCard>
 	{#snippet title()}{$i18n.settings.text.export_data}{/snippet}
 
-	<h5 class="text-xs font-semibold tracking-wide text-tertiary uppercase">
-		{$i18n.settings.text.export_basic}
-	</h5>
+	<div class="flex flex-row items-center">
+		<h5 class="text-xs font-semibold tracking-wide text-tertiary uppercase">
+			{$i18n.settings.text.export_basic}
+		</h5>
+		<button
+			class="ml-1 flex p-0.5 align-top text-tertiary"
+			onclick={() => (basicInfoExpanded = !basicInfoExpanded)}
+		>
+			<IconHelp size="16" />
+		</button>
+	</div>
+
+	{#if basicInfoExpanded}
+		<span class="mt-1 flex w-full text-sm text-tertiary" transition:slide>
+			{$i18n.settings.text.export_basic_description}
+		</span>
+	{/if}
 
 	<SettingsCardItem>
 		{#snippet key()}
@@ -111,10 +132,6 @@
 				link
 				onclick={() => onExportTokens('basic')}>{$i18n.core.text.download} ></Button
 			>
-		{/snippet}
-
-		{#snippet info()}
-			{$i18n.settings.text.export_tokens_basic_description}
 		{/snippet}
 	</SettingsCardItem>
 
@@ -132,15 +149,25 @@
 				onclick={() => onExportTransactions('basic')}>{$i18n.core.text.download} ></Button
 			>
 		{/snippet}
-
-		{#snippet info()}
-			{$i18n.settings.text.export_transactions_basic_description}
-		{/snippet}
 	</SettingsCardItem>
 
-	<h5 class="mt-5 text-xs font-semibold tracking-wide text-tertiary uppercase">
-		{$i18n.settings.text.export_extended}
-	</h5>
+	<div class="mt-5 flex flex-row items-center">
+		<h5 class="text-xs font-semibold tracking-wide text-tertiary uppercase">
+			{$i18n.settings.text.export_extended}
+		</h5>
+		<button
+			class="ml-1 flex p-0.5 align-top text-tertiary"
+			onclick={() => (extendedInfoExpanded = !extendedInfoExpanded)}
+		>
+			<IconHelp size="16" />
+		</button>
+	</div>
+
+	{#if extendedInfoExpanded}
+		<span class="mt-1 flex w-full text-sm text-tertiary" transition:slide>
+			{$i18n.settings.text.export_extended_description}
+		</span>
+	{/if}
 
 	<SettingsCardItem>
 		{#snippet key()}
@@ -154,10 +181,6 @@
 				link
 				onclick={() => onExportTokens('extended')}>{$i18n.core.text.download} ></Button
 			>
-		{/snippet}
-
-		{#snippet info()}
-			{$i18n.settings.text.export_tokens_description}
 		{/snippet}
 	</SettingsCardItem>
 
@@ -174,10 +197,6 @@
 				loading={exportingTransactions}
 				onclick={() => onExportTransactions('extended')}>{$i18n.core.text.download} ></Button
 			>
-		{/snippet}
-
-		{#snippet info()}
-			{$i18n.settings.text.export_transactions_description}
 		{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
