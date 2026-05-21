@@ -27,7 +27,8 @@
 		to,
 		from,
 		fee,
-		approveSpender
+		approveSpender,
+		tokenId
 	} = $derived(transaction);
 
 	let pending = $derived(transaction?.status === 'pending');
@@ -78,6 +79,7 @@
 	{timestamp}
 	to={listTo}
 	{token}
+	{tokenId}
 	{type}
 >
 	<IcTransactionLabel amount={value} label={transactionTypeLabel} {token} {type} />
