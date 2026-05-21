@@ -1,5 +1,6 @@
 import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 import { i18n } from '$lib/stores/i18n.store';
+import { getNftDisplayName } from '$lib/utils/nft.utils';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -11,8 +12,8 @@ describe('SendNftReview', () => {
 
 		const { getByText } = render(SendNftReview, { props: { nft } });
 
-		// "Send: {name} #{id}"
-		expect(getByText(`${sendLabel}: ${nft.name} #${nft.id}`)).toBeInTheDocument();
+		// "Send: {displayName}"
+		expect(getByText(`${sendLabel}: ${getNftDisplayName(nft)}`)).toBeInTheDocument();
 
 		// Network name
 		expect(getByText(nft.collection.network.name)).toBeInTheDocument();
