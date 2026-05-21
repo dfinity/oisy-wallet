@@ -31,11 +31,12 @@
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
-	// Toasts sit above popovers (so they're never hidden by an open chip
-	// dropdown) but below modals and bottom sheets (so a bottom sheet open
-	// over the activity filters isn't covered by an incoming toast).
+	// Info/success toasts sit above popovers but below modals and bottom sheets
+	// (so a filter bottom sheet is not covered by background notifications).
 	--toast-info-z-index: calc(var(--overlay-z-index) + 1);
-	--toast-error-z-index: calc(var(--overlay-z-index) + 2);
+	// Error/warn toasts sit above modal blur and bottom sheets so in-flow
+	// failures (e.g. duplicate token import) remain visible.
+	--toast-error-z-index: calc(var(--overlay-z-index) + 4);
 
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
