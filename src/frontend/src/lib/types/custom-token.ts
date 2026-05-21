@@ -64,6 +64,7 @@ export type SaveCustomErc721Variant = CustomTokenState & TokenVariant<'Erc721', 
 export type SaveCustomErc1155Variant = CustomTokenState &
 	TokenVariant<'Erc1155', ErcSaveCustomToken>;
 export type SaveCustomExtVariant = CustomTokenState & TokenVariant<'ExtV2', ExtSaveCustomToken>;
+export type SaveCustomIcrc7Variant = CustomTokenState & TokenVariant<'Icrc7', Icrc7SaveCustomToken>;
 
 export type CustomToken<T extends Token> = TokenToggleable<T>;
 

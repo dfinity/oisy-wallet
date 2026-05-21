@@ -1,3 +1,64 @@
+// In-flight high-level user operation, persisted so the FE can resume polling
+// across logout / tab close.
+type ActiveUserTransaction = record {
+	// Frontend-generated identifier (`UUIDv4`). Unique per user.
+	id : text;
+	status : ActiveUserTransactionStatus;
+	// Learned-mid-flow named references, e.g.
+	// `{ key: "tx_hash", value: "0x…" }`. See [`ActiveUserTransactionRef`]
+	// for the field layout exposed on the wire and in TS bindings.
+	external_refs : vec ActiveUserTransactionRef;
+	// Opaque to the backend; the FE writes a flow-specific step name here.
+	progress_step : opt text;
+	data : ActiveUserTransactionData;
+	updated_at_ns : nat64;
+	// Populated when `status = Failed`.
+	error : opt text;
+	created_at_ns : nat64
+};
+// Flow-specific payload, captured once at creation and immutable thereafter.
+//
+// Variants are append-only (Candid evolution rule). Learned-mid-flow values
+// (tx hashes, forwarding addresses, provider request ids, …) go in
+// `ActiveUserTransaction::external_refs` so we don't need to bump candid for
+// every new provider integration.
+type ActiveUserTransactionData = variant {
+	OneSecEvmToIcp : OneSecEvmToIcpData;
+	OneSecIcpToEvm : OneSecIcpToEvmData
+};
+type ActiveUserTransactionError = variant {
+	InvalidId;
+	NotFound;
+	TooManyActiveTransactions;
+	InvalidData : text;
+	AlreadyExists;
+	IllegalStatusTransition
+};
+// Learned-mid-flow `(key, value)` reference attached to an active transaction,
+// e.g. `{ key: "tx_hash", value: "0x…" }`. Modelled as a named record (not a
+// tuple) so the generated TS bindings expose `.key` / `.value` instead of
+// positional `[string, string]` access.
+type ActiveUserTransactionRef = record { key : text; value : text };
+// Shared result for endpoints that return a single `ActiveUserTransaction`
+// (both `create_active_user_transaction` and `update_active_user_transaction`).
+// One type because the wire shape is identical — the candid extractor would
+// dedupe twin variants anyway.
+type ActiveUserTransactionResult = variant {
+	Ok : ActiveUserTransaction;
+	Err : ActiveUserTransactionError
+};
+// Lifecycle status of an active user transaction.
+//
+// Allowed transitions are enforced by the backend:
+// `Pending` → `Pending | Executing | Succeeded | Failed`,
+// `Executing` → `Executing | Succeeded | Failed`,
+// terminal states are immutable (idempotent no-op).
+type ActiveUserTransactionStatus = variant {
+	Failed;
+	Executing;
+	Succeeded;
+	Pending
+};
 type AddDappSettingsError = variant {
 	MaxHiddenDappIds;
 	VersionMismatch;
@@ -343,6 +404,12 @@ type ContactError = variant {
 	TooManyContactsWithImages
 };
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
+type CreateActiveUserTransactionRequest = record {
+	id : text;
+	external_refs : vec ActiveUserTransactionRef;
+	progress_step : opt text;
+	data : ActiveUserTransactionData
+};
 type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant {
 	// The contact was retrieved successfully.
@@ -385,6 +452,10 @@ type Delegation = record {
 	pubkey : blob;
 	targets : opt vec principal;
 	expiration : nat64
+};
+type DeleteActiveUserTransactionResult = variant {
+	Ok;
+	Err : ActiveUserTransactionError
 };
 type DeleteContactResult = variant {
 	// The contact was deleted successfully.
@@ -444,6 +515,13 @@ type ExperimentalFeaturesSettings = record {
 };
 // An EXT v2 compliant token on the Internet Computer.
 type ExtV2Token = record { canister_id : principal };
+type GetActiveUserTransactionsResponse = record {
+	transactions : vec ActiveUserTransaction
+};
+type GetActiveUserTransactionsResult = variant {
+	Ok : GetActiveUserTransactionsResponse;
+	Err : ActiveUserTransactionError
+};
 type GetAgreementHistoryError = variant { UserNotFound };
 type GetAgreementHistoryResult = variant {
 	Ok : vec AgreementHistoryEntry;
@@ -665,6 +743,18 @@ type NetworksSettings = record {
 type NotificationSettings = record {
 	dismissed_notifications : vec DismissedNotification
 };
+type OneSecEvmToIcpData = record {
+	recipient_principal : principal;
+	source_token : TokenId;
+	amount : nat;
+	dest_token : TokenId
+};
+type OneSecIcpToEvmData = record {
+	recipient_evm_address : text;
+	source_token : TokenId;
+	amount : nat;
+	dest_token : TokenId
+};
 // Outpoint.
 type Outpoint = record {
 	// Transaction ID (TxID).
@@ -752,6 +842,7 @@ type SplToken = record {
 	symbol : opt text
 };
 type Stats = record {
+	active_user_transactions_count : nat64;
 	user_profile_count : nat64;
 	user_transactions_count : nat64;
 	custom_token_count : nat64;
@@ -877,6 +968,19 @@ type TransformArgs = record {
 	context : blob;
 	// Raw response from remote service, to be transformed
 	response : HttpRequestResult
+};
+// Partial update. `None` means "leave untouched"; `Some(value)` overwrites
+// the stored value. There is no encoding for "clear back to `None`" — this
+// is intentional: `error` is only ever set on the `Failed` terminal state
+// (immutable by lifecycle), and `progress_step` is forward-only.
+// `external_refs`, when provided, **replaces** the stored list in full —
+// the FE always knows the complete set after each poll.
+type UpdateActiveUserTransactionRequest = record {
+	id : text;
+	status : opt ActiveUserTransactionStatus;
+	external_refs : opt vec ActiveUserTransactionRef;
+	progress_step : opt text;
+	error : opt text
 };
 type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
 type UpdateExperimentalFeaturesSettingsRequest = record {
@@ -1052,6 +1156,13 @@ service : (Arg) -> {
 	);
 	// Gets the canister configuration.
 	config : () -> (Config) query;
+	// Creates a new active user transaction record for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `ActiveUserTransactionError`.
+	create_active_user_transaction : (CreateActiveUserTransactionRequest) -> (
+		ActiveUserTransactionResult
+	);
 	// Creates a new contact for the caller.
 	//
 	// # Errors
@@ -1068,6 +1179,15 @@ service : (Arg) -> {
 	// caller does not already have a profile. Existing users are unaffected and still receive
 	// `Ok(profile)` for idempotent calls.
 	create_user_profile : () -> (CreateUserProfileResult);
+	// Deletes one of the caller's active user transactions. Idempotent: returns
+	// `Ok(())` whether or not the record existed. This is the only path that
+	// removes records — there is no automatic pruning.
+	//
+	// # Errors
+	// Errors are enumerated by: `ActiveUserTransactionError`.
+	delete_active_user_transaction : (text) -> (
+		DeleteActiveUserTransactionResult
+	);
 	// Deletes a contact for the caller.
 	//
 	// # Errors
@@ -1080,6 +1200,10 @@ service : (Arg) -> {
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }
 	) query;
+	// Returns all of the caller's active user transactions (Pending, Executing,
+	// Succeeded, Failed). Records are retained until the FE deletes them on user
+	// acknowledgement, so terminal entries remain in the list until dismissed.
+	get_active_user_transactions : () -> (GetActiveUserTransactionsResult) query;
 	// Retrieves the amount of cycles that the signer canister is allowed to spend
 	// on behalf of the current user.
 	//
@@ -1222,6 +1346,13 @@ service : (Arg) -> {
 	// Error conditions are enumerated by: `TopUpCyclesLedgerError`
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
 		TopUpCyclesLedgerResult
+	);
+	// Applies a partial update to one of the caller's active user transactions.
+	//
+	// # Errors
+	// Errors are enumerated by: `ActiveUserTransactionError`.
+	update_active_user_transaction : (UpdateActiveUserTransactionRequest) -> (
+		ActiveUserTransactionResult
 	);
 	// Updates an existing contact for the caller.
 	//

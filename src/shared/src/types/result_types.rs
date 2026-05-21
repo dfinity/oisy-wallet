@@ -13,6 +13,9 @@ use super::{
     user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
 };
 use crate::types::{
+    active_user_transaction::{
+        ActiveUserTransaction, ActiveUserTransactionError, GetActiveUserTransactionsResponse,
+    },
     agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
     bitcoin::{BtcGetFeePercentilesError, BtcGetFeePercentilesResponse},
     contact::{Contact, ContactError},
@@ -390,6 +393,56 @@ impl From<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>
         match result {
             Ok(entries) => GetAgreementHistoryResult::Ok(entries),
             Err(err) => GetAgreementHistoryResult::Err(err),
+        }
+    }
+}
+
+/// Shared result for endpoints that return a single `ActiveUserTransaction`
+/// (both `create_active_user_transaction` and `update_active_user_transaction`).
+/// One type because the wire shape is identical — the candid extractor would
+/// dedupe twin variants anyway.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum ActiveUserTransactionResult {
+    Ok(Box<ActiveUserTransaction>),
+    Err(ActiveUserTransactionError),
+}
+impl From<Result<ActiveUserTransaction, ActiveUserTransactionError>>
+    for ActiveUserTransactionResult
+{
+    fn from(result: Result<ActiveUserTransaction, ActiveUserTransactionError>) -> Self {
+        match result {
+            Ok(tx) => ActiveUserTransactionResult::Ok(Box::new(tx)),
+            Err(err) => ActiveUserTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetActiveUserTransactionsResult {
+    Ok(GetActiveUserTransactionsResponse),
+    Err(ActiveUserTransactionError),
+}
+impl From<Result<GetActiveUserTransactionsResponse, ActiveUserTransactionError>>
+    for GetActiveUserTransactionsResult
+{
+    fn from(result: Result<GetActiveUserTransactionsResponse, ActiveUserTransactionError>) -> Self {
+        match result {
+            Ok(response) => GetActiveUserTransactionsResult::Ok(response),
+            Err(err) => GetActiveUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum DeleteActiveUserTransactionResult {
+    Ok(()),
+    Err(ActiveUserTransactionError),
+}
+impl From<Result<(), ActiveUserTransactionError>> for DeleteActiveUserTransactionResult {
+    fn from(result: Result<(), ActiveUserTransactionError>) -> Self {
+        match result {
+            Ok(()) => DeleteActiveUserTransactionResult::Ok(()),
+            Err(err) => DeleteActiveUserTransactionResult::Err(err),
         }
     }
 }

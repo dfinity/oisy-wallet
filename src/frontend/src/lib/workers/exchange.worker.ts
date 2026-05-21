@@ -46,6 +46,8 @@ export const onExchangeMessage = async ({
 };
 
 let timer: NodeJS.Timeout | undefined = undefined;
+let timerGeneration = 0;
+let latestTimerData: PostMessageDataRequestExchangeTimer | undefined = undefined;
 
 const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | undefined) => {
 	// This worker has already been started
@@ -53,23 +55,25 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 		return;
 	}
 
-	const sync = async () =>
-		await syncExchange({
-			currentCurrency: data?.currentCurrency ?? Currency.USD,
-			erc20ContractAddresses: data?.erc20Addresses ?? [],
-			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
-			splTokenAddresses: data?.splAddresses ?? [],
-			erc4626TokensExchangeData: data?.erc4626TokensExchangeData ?? []
-		});
+	if (syncInProgress && activeSyncGeneration === timerGeneration) {
+		return;
+	}
+
+	latestTimerData = data;
+	const generation = ++timerGeneration;
 
 	// We sync now but also schedule the update afterward
-	await sync();
+	await syncLatestExchange(generation);
+
+	if (generation !== timerGeneration) {
+		return;
+	}
 
 	const scheduleNext = (): void => {
 		timer = setTimeout(async () => {
-			await sync();
+			await syncLatestExchange(generation);
 
-			if (nonNullish(timer)) {
+			if (generation === timerGeneration) {
 				scheduleNext();
 			}
 		}, SYNC_EXCHANGE_TIMER_INTERVAL);
@@ -79,6 +83,8 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 };
 
 const stopTimer = () => {
+	timerGeneration++;
+
 	if (isNullish(timer)) {
 		return;
 	}
@@ -88,6 +94,8 @@ const stopTimer = () => {
 };
 
 let syncInProgress = false;
+let queuedSyncGeneration: number | undefined = undefined;
+let activeSyncGeneration: number | undefined = undefined;
 
 interface SyncExchangeParams {
 	currentCurrency: Currency;
@@ -310,14 +318,49 @@ const syncExchangeFromProviders = async ({
 	};
 };
 
-const syncExchange = async (params: SyncExchangeParams) => {
-	// Avoid duplicating the sync if already in progress and not yet finished
+const paramsFromTimerData = (
+	data: PostMessageDataRequestExchangeTimer | undefined
+): SyncExchangeParams => ({
+	currentCurrency: data?.currentCurrency ?? Currency.USD,
+	erc20ContractAddresses: data?.erc20Addresses ?? [],
+	icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
+	splTokenAddresses: data?.splAddresses ?? [],
+	erc4626TokensExchangeData: data?.erc4626TokensExchangeData ?? []
+});
+
+const syncLatestExchange = async (generation: number) => {
+	if (generation !== timerGeneration) {
+		return;
+	}
+
 	if (syncInProgress) {
+		queuedSyncGeneration = generation;
 		return;
 	}
 
 	syncInProgress = true;
+	activeSyncGeneration = generation;
 
+	await syncExchange(paramsFromTimerData(latestTimerData)).finally(() => {
+		syncInProgress = false;
+		if (activeSyncGeneration === generation) {
+			activeSyncGeneration = undefined;
+		}
+	});
+
+	const nextGeneration = queuedSyncGeneration;
+	queuedSyncGeneration = undefined;
+
+	if (
+		nonNullish(nextGeneration) &&
+		nextGeneration !== generation &&
+		nextGeneration === timerGeneration
+	) {
+		void syncLatestExchange(nextGeneration);
+	}
+};
+
+const syncExchange = async (params: SyncExchangeParams) => {
 	try {
 		const data = BACKEND_EXCHANGE_ENABLED
 			? await syncExchangeFromBackend(params)
@@ -337,6 +380,4 @@ const syncExchange = async (params: SyncExchangeParams) => {
 			}
 		});
 	}
-
-	syncInProgress = false;
 };

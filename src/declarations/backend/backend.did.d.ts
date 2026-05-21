@@ -10,6 +10,86 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+/**
+ * In-flight high-level user operation, persisted so the FE can resume polling
+ * across logout / tab close.
+ */
+export interface ActiveUserTransaction {
+	/**
+	 * Frontend-generated identifier (`UUIDv4`). Unique per user.
+	 */
+	id: string;
+	status: ActiveUserTransactionStatus;
+	/**
+	 * Learned-mid-flow named references, e.g.
+	 * `{ key: "tx_hash", value: "0x…" }`. See [`ActiveUserTransactionRef`]
+	 * for the field layout exposed on the wire and in TS bindings.
+	 */
+	external_refs: Array<ActiveUserTransactionRef>;
+	/**
+	 * Opaque to the backend; the FE writes a flow-specific step name here.
+	 */
+	progress_step: [] | [string];
+	data: ActiveUserTransactionData;
+	updated_at_ns: bigint;
+	/**
+	 * Populated when `status = Failed`.
+	 */
+	error: [] | [string];
+	created_at_ns: bigint;
+}
+/**
+ * Flow-specific payload, captured once at creation and immutable thereafter.
+ *
+ * Variants are append-only (Candid evolution rule). Learned-mid-flow values
+ * (tx hashes, forwarding addresses, provider request ids, …) go in
+ * `ActiveUserTransaction::external_refs` so we don't need to bump candid for
+ * every new provider integration.
+ */
+export type ActiveUserTransactionData =
+	| {
+			OneSecEvmToIcp: OneSecEvmToIcpData;
+	  }
+	| { OneSecIcpToEvm: OneSecIcpToEvmData };
+export type ActiveUserTransactionError =
+	| { InvalidId: null }
+	| { NotFound: null }
+	| { TooManyActiveTransactions: null }
+	| { InvalidData: string }
+	| { AlreadyExists: null }
+	| { IllegalStatusTransition: null };
+/**
+ * Learned-mid-flow `(key, value)` reference attached to an active transaction,
+ * e.g. `{ key: "tx_hash", value: "0x…" }`. Modelled as a named record (not a
+ * tuple) so the generated TS bindings expose `.key` / `.value` instead of
+ * positional `[string, string]` access.
+ */
+export interface ActiveUserTransactionRef {
+	key: string;
+	value: string;
+}
+/**
+ * Shared result for endpoints that return a single `ActiveUserTransaction`
+ * (both `create_active_user_transaction` and `update_active_user_transaction`).
+ * One type because the wire shape is identical — the candid extractor would
+ * dedupe twin variants anyway.
+ */
+export type ActiveUserTransactionResult =
+	| { Ok: ActiveUserTransaction }
+	| { Err: ActiveUserTransactionError };
+/**
+ * Lifecycle status of an active user transaction.
+ *
+ * Allowed transitions are enforced by the backend:
+ * `Pending` → `Pending | Executing | Succeeded | Failed`,
+ * `Executing` → `Executing | Succeeded | Failed`,
+ * terminal states are immutable (idempotent no-op).
+ */
+export type ActiveUserTransactionStatus =
+	| { Failed: null }
+	| { Executing: null }
+	| { Succeeded: null }
+	| { Pending: null };
 export type AddDappSettingsError =
 	| { MaxHiddenDappIds: null }
 	| { VersionMismatch: null }
@@ -502,6 +582,12 @@ export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
 }
+export interface CreateActiveUserTransactionRequest {
+	id: string;
+	external_refs: Array<ActiveUserTransactionRef>;
+	progress_step: [] | [string];
+	data: ActiveUserTransactionData;
+}
 export interface CreateContactRequest {
 	name: string;
 	image: [] | [ContactImage];
@@ -574,6 +660,7 @@ export interface Delegation {
 	targets: [] | [Array<Principal>];
 	expiration: bigint;
 }
+export type DeleteActiveUserTransactionResult = { Ok: null } | { Err: ActiveUserTransactionError };
 export type DeleteContactResult =
 	| {
 			/**
@@ -660,6 +747,14 @@ export interface ExperimentalFeaturesSettings {
 export interface ExtV2Token {
 	canister_id: Principal;
 }
+export interface GetActiveUserTransactionsResponse {
+	transactions: Array<ActiveUserTransaction>;
+}
+export type GetActiveUserTransactionsResult =
+	| {
+			Ok: GetActiveUserTransactionsResponse;
+	  }
+	| { Err: ActiveUserTransactionError };
 export type GetAgreementHistoryError = { UserNotFound: null };
 export type GetAgreementHistoryResult =
 	| {
@@ -1010,6 +1105,18 @@ export interface NetworksSettings {
 export interface NotificationSettings {
 	dismissed_notifications: Array<DismissedNotification>;
 }
+export interface OneSecEvmToIcpData {
+	recipient_principal: Principal;
+	source_token: TokenId;
+	amount: bigint;
+	dest_token: TokenId;
+}
+export interface OneSecIcpToEvmData {
+	recipient_evm_address: string;
+	source_token: TokenId;
+	amount: bigint;
+	dest_token: TokenId;
+}
 /**
  * Outpoint.
  */
@@ -1136,6 +1243,7 @@ export interface SplToken {
 	symbol: [] | [string];
 }
 export interface Stats {
+	active_user_transactions_count: bigint;
 	user_profile_count: bigint;
 	user_transactions_count: bigint;
 	custom_token_count: bigint;
@@ -1376,6 +1484,21 @@ export interface TransformArgs {
 	 */
 	response: HttpRequestResult;
 }
+/**
+ * Partial update. `None` means "leave untouched"; `Some(value)` overwrites
+ * the stored value. There is no encoding for "clear back to `None`" — this
+ * is intentional: `error` is only ever set on the `Failed` terminal state
+ * (immutable by lifecycle), and `progress_step` is forward-only.
+ * `external_refs`, when provided, **replaces** the stored list in full —
+ * the FE always knows the complete set after each poll.
+ */
+export interface UpdateActiveUserTransactionRequest {
+	id: string;
+	status: [] | [ActiveUserTransactionStatus];
+	external_refs: [] | [Array<ActiveUserTransactionRef>];
+	progress_step: [] | [string];
+	error: [] | [string];
+}
 export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
@@ -1607,6 +1730,16 @@ export interface _SERVICE {
 	 */
 	config: ActorMethod<[], Config>;
 	/**
+	 * Creates a new active user transaction record for the caller.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `ActiveUserTransactionError`.
+	 */
+	create_active_user_transaction: ActorMethod<
+		[CreateActiveUserTransactionRequest],
+		ActiveUserTransactionResult
+	>;
+	/**
 	 * Creates a new contact for the caller.
 	 *
 	 * # Errors
@@ -1627,6 +1760,15 @@ export interface _SERVICE {
 	 */
 	create_user_profile: ActorMethod<[], CreateUserProfileResult>;
 	/**
+	 * Deletes one of the caller's active user transactions. Idempotent: returns
+	 * `Ok(())` whether or not the record existed. This is the only path that
+	 * removes records — there is no automatic pruning.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `ActiveUserTransactionError`.
+	 */
+	delete_active_user_transaction: ActorMethod<[string], DeleteActiveUserTransactionResult>;
+	/**
 	 * Deletes a contact for the caller.
 	 *
 	 * # Errors
@@ -1640,6 +1782,12 @@ export interface _SERVICE {
 	 * Gets account creation timestamps.
 	 */
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
+	/**
+	 * Returns all of the caller's active user transactions (Pending, Executing,
+	 * Succeeded, Failed). Records are retained until the FE deletes them on user
+	 * acknowledgement, so terminal entries remain in the list until dismissed.
+	 */
+	get_active_user_transactions: ActorMethod<[], GetActiveUserTransactionsResult>;
 	/**
 	 * Retrieves the amount of cycles that the signer canister is allowed to spend
 	 * on behalf of the current user.
@@ -1815,6 +1963,16 @@ export interface _SERVICE {
 	 * Error conditions are enumerated by: `TopUpCyclesLedgerError`
 	 */
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
+	/**
+	 * Applies a partial update to one of the caller's active user transactions.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `ActiveUserTransactionError`.
+	 */
+	update_active_user_transaction: ActorMethod<
+		[UpdateActiveUserTransactionRequest],
+		ActiveUserTransactionResult
+	>;
 	/**
 	 * Updates an existing contact for the caller.
 	 *

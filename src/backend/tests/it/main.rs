@@ -1,3 +1,4 @@
+mod active_user_transactions;
 mod agreements;
 mod bitcoin;
 mod config;
