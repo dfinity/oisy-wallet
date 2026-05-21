@@ -12,19 +12,19 @@ user-visible string, picking a colour, or adding an icon.
 ## Voice in one screen
 
 OISY is a browser-native wallet for digital wealth. It targets people
-fluent in Apple Pay, Revolut, brokerage apps — not crypto-natives. The
+fluent in Apple Pay, Revolut, brokerage apps, not crypto-natives. The
 brand should feel like serious financial infrastructure: refined,
 private, available everywhere.
 
 Five attributes:
 
-- **Calm and premium** — a private-banking app with browser speed, not
+- **Calm and premium.** A private-banking app with browser speed, not
   a whitepaper.
-- **Confident and focused** — say fewer things; make each one land.
-- **Human before technical** — start with what the user feels, then
+- **Confident and focused.** Say fewer things; make each one land.
+- **Human before technical.** Start with what the user feels, then
   explain why it is possible.
-- **Empowering** — the user feels capable, in control.
-- **Trustworthy** — quiet confidence, never fear-mongering.
+- **Empowering.** The user feels capable, in control.
+- **Trustworthy.** Quiet confidence, never fear-mongering.
 
 **House sentence:** _Say what is true, in plain words, and stop._ If a
 sentence could appear in any company's marketing, cut it.
@@ -54,10 +54,10 @@ Approved security patterns (stay one layer above implementation; keep
 ## Banned in any user-visible string
 
 - **Em dashes** (`—`, U+2014). Use commas, periods, colons, parens.
-- **`secured by blockchain`** — use `secured by advanced cryptography`.
-- **`OISY token`, `$OISY`** — there is no token; repeating the rumour
+- **`secured by blockchain`.** Use `secured by advanced cryptography`.
+- **`OISY token`, `$OISY`.** There is no token; repeating the rumour
   amplifies a scam.
-- **OISY-owned Telegram references** — OISY has no Telegram channel,
+- **OISY-owned Telegram references.** OISY has no Telegram channel,
   community, or support handle. Don't write copy that implies one
   ("Join us on Telegram", "Telegram support", a Telegram link in the
   footer). Third-party dApp connectors that legitimately open Telegram
@@ -74,7 +74,7 @@ specific. Every error string follows the same shape:
 
 1. **Name what failed.** Plain language, no error codes, no protocol
    names.
-2. **State what was preserved.** Funds, keys, signatures — say so.
+2. **State what was preserved.** Funds, keys, signatures: say so.
 3. **Offer one next step.** Try again, refresh the quote, add funds,
    check the address.
 
@@ -103,7 +103,7 @@ our team…`).
 ## Chain listing
 
 **Canonical order:** Bitcoin, Ethereum, Internet Computer, then the
-remaining supported networks in alphabetical order — currently
+remaining supported networks in alphabetical order. Currently:
 Arbitrum, Base, BNB Smart Chain, Polygon, Solana.
 
 **Short form:** _Bitcoin, Ethereum, Internet Computer, and more._
@@ -127,10 +127,11 @@ and
 
 ### Brand rules to follow now
 
-1. **Logo blue is reserved.** `--color-*-brand-primary` (`$oisy-blue-600`,
-   `#0066FF`) is for the OISY mark and — at most — one expressive serif
-   word per surface. Do **not** paint whole interfaces in logo blue. Use
-   navy, charcoal, and neutrals for the rest.
+1. **Logo blue is reserved.** `--color-*-brand-primary` (the
+   `$oisy-blue-600` SCSS variable) is for the OISY mark and, at most,
+   one expressive serif word per surface. Do **not** paint whole
+   interfaces in logo blue. Use navy, charcoal, and neutrals for the
+   rest.
 2. **Fills vs. text.** Background tokens are for fills; foreground
    tokens are for text. When colour names a state (success, warning,
    error), the _text_ uses `--color-foreground-{success,warning,error}-*`,
@@ -140,7 +141,7 @@ and
    with a glyph and a text label. The a11y rule lives in
    [`i18n-and-a11y.md`](./i18n-and-a11y.md#color--contrast).
 4. **Accents are sparing.** The bright product gradient and sky accent
-   are for wallet UI moments (balance card) and marketing highlights —
+   are for wallet UI moments (balance card) and marketing highlights,
    not every surface.
 5. **No new top-level colour tokens.** If you need a colour the system
    doesn't have, surface it in the PR description and ask. Don't invent
@@ -179,7 +180,7 @@ inventing a third size.
       one next step.
 - [ ] Lead sentences are positively framed.
 - [ ] No degen, casino, or hype language.
-- [ ] Logo blue is on the mark and at most one expressive word — not
+- [ ] Logo blue is on the mark and at most one expressive word, not
       the whole UI.
 - [ ] State is communicated with colour **and** text **and** a glyph.
 - [ ] No hard-coded hex; existing token classes / CSS variables only.
