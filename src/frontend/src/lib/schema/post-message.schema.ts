@@ -170,8 +170,8 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
-	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
+	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
+	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
 	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentArbitrumEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
@@ -195,7 +195,7 @@ export const PostMessageDataResponseWalletSchema = PostMessageDataResponseSchema
 });
 
 export const PostMessageDataResponseErrorSchema = PostMessageDataResponseSchema.extend({
-	error: z.unknown()
+	error: z.unknown().optional()
 });
 
 export const PostMessageDataErrorSchema = z.object({
