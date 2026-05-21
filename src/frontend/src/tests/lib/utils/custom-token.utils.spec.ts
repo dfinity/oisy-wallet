@@ -5,6 +5,7 @@ import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
+import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 describe('custom-token.utils', () => {
