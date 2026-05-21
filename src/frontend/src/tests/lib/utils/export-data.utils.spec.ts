@@ -1054,6 +1054,25 @@ describe('export-data.utils', () => {
 			expect(row.tx_id).toMatch(/^[A-HJ-NP-Za-km-z1-9]{87,88}$/);
 		});
 
+		it('constructs the Solana explorer URL from the network template when txExplorerUrl is missing', () => {
+			// SolTransactionUi doesn't pre-populate txExplorerUrl; the adapter substitutes
+			// `$args` in the network's explorer template the same way SolTransactionModal does.
+			const solTxNoExplorer: SolTransactionUi = { ...solTx, txExplorerUrl: undefined };
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'solana', transaction: solTxNoExplorer, token: solToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.explorer_url).not.toBe('');
+			expect(row.explorer_url).toContain(`tx/${row.tx_id}/`);
+			expect(row.explorer_url).toBe(
+				SOLANA_MAINNET_NETWORK.explorerUrl.replace('$args', `tx/${row.tx_id}/`)
+			);
+		});
+
 		it('maps the ck-minter withdraw raw type to receive (user is receiving back)', () => {
 			// `withdraw` in eth/utils/transactions.utils.ts means the ck-minter is sending funds
 			// to the user — incoming for the user despite the banking-style verb.

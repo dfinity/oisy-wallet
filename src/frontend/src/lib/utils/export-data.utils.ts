@@ -12,6 +12,7 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
@@ -600,7 +601,12 @@ const toSolanaRow = ({
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.signature),
-		explorer_url: tx.txExplorerUrl ?? '',
+		// SolTransactionUi doesn't pre-populate txExplorerUrl. Construct it the same way
+		// SolTransactionModal does — substitute `$args` in the network's explorer template
+		// (e.g. solscan.io/$args → solscan.io/tx/<signature>/).
+		explorer_url:
+			tx.txExplorerUrl ??
+			replacePlaceholders(token.network.explorerUrl, { $args: `tx/${String(tx.signature)}/` }),
 		exported_at: exportedAt
 	};
 };
