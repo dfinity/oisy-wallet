@@ -34,7 +34,10 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
+import {
+	requiresStoredSplOwnerRefresh,
+	solBackendTokenId
+} from '$sol/utils/user-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { lamports, address as solAddress } from '@solana/kit';
@@ -68,21 +71,6 @@ const mapSolCertifiedTransactions = (transactions: SolTransactionUi[]): SolCerti
 		data: transaction,
 		certified: false
 	}));
-
-const requiresStoredSplOwnerRefresh = ({
-	transaction: { from, fromOwner, to, toOwner },
-	address,
-	tokenAddress
-}: {
-	transaction: SolTransactionUi;
-	address: SolAddress;
-	tokenAddress?: SplTokenAddress;
-}): boolean =>
-	nonNullish(tokenAddress) &&
-	from !== address &&
-	fromOwner !== address &&
-	to !== address &&
-	toOwner !== address;
 
 const extractBalances = ({
 	address,
