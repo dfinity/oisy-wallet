@@ -763,7 +763,7 @@ describe('nfts.utils', () => {
 	});
 
 	describe('isNftMediaConsentEnabled', () => {
-		const collection = mockNft1.collection;
+		const {collection} = mockNft1;
 
 		it('should preserve disabled and undecided consent states', () => {
 			expect(
@@ -771,7 +771,7 @@ describe('nfts.utils', () => {
 					collection: { ...collection, allowExternalContentSource: false },
 					mediaUrls: ['https://example.com/nft.png']
 				})
-			).toBe(false);
+			).toBeFalsy();
 
 			expect(
 				isNftMediaConsentEnabled({
@@ -787,7 +787,7 @@ describe('nfts.utils', () => {
 					collection: { ...collection, allowExternalContentSource: true },
 					mediaUrls: ['https://example.com/nft.png']
 				})
-			).toBe(true);
+			).toBeTruthy();
 		});
 
 		it('should allow media only when all current URLs were consented', () => {
@@ -805,14 +805,14 @@ describe('nfts.utils', () => {
 					collection: consentedCollection,
 					mediaUrls: ['https://example.com/nft.png']
 				})
-			).toBe(true);
+			).toBeTruthy();
 
 			expect(
 				isNftMediaConsentEnabled({
 					collection: consentedCollection,
 					mediaUrls: ['https://example.com/nft.png', 'https://example.com/other.png']
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 	});
 
