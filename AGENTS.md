@@ -77,6 +77,7 @@ and `Cargo.toml`. The non-obvious bits:
 | Write Svelte 5 / runes / stores / TS          | [`docs/ai/frontend/stack-and-patterns.md`](./docs/ai/frontend/stack-and-patterns.md)                         |
 | Add UI                                        | [`docs/ai/frontend/reusability.md`](./docs/ai/frontend/reusability.md)                                       |
 | Add user-visible text or interactive elements | [`docs/ai/frontend/i18n-and-a11y.md`](./docs/ai/frontend/i18n-and-a11y.md)                                   |
+| Write copy, pick a colour, or add an icon     | [`docs/ai/frontend/brand-and-copy.md`](./docs/ai/frontend/brand-and-copy.md)                                 |
 | Add a Svelte component                        | [`docs/ai/frontend/workflows/new-component.md`](./docs/ai/frontend/workflows/new-component.md)               |
 | Add an API call / service / store             | [`docs/ai/frontend/workflows/new-service.md`](./docs/ai/frontend/workflows/new-service.md)                   |
 | Split / refactor a component                  | [`docs/ai/frontend/workflows/refactor-split.md`](./docs/ai/frontend/workflows/refactor-split.md)             |
