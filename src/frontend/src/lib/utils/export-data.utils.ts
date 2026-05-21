@@ -26,28 +26,33 @@ export interface TokenCsvRow extends CsvRow {
 	address_or_ledger_id: string;
 	decimals: number;
 	balance: string;
+	balance_raw: string;
 	usd_price: number | undefined;
 	usd_value: number | undefined;
 	currency: string;
 	price: number | undefined;
 	value: number | undefined;
-	snapshot_at: string;
 }
 
+// Extended tokens export. Network / Symbol / Name lead so the file groups by chain at a
+// glance — same order as the Basic variant. Headers are title-cased for spreadsheet
+// readability. Balance is the raw integer (in the token's smallest unit) so a single
+// column can represent any precision without losing significant digits; pair it with the
+// Decimals column to reconstruct the decimal value. The Basic variant keeps the decimal
+// `balance` for human reading.
 export const TOKEN_CSV_COLUMNS: CsvColumn<TokenCsvRow>[] = [
-	{ key: 'symbol', header: 'symbol' },
-	{ key: 'name', header: 'name' },
-	{ key: 'network', header: 'network' },
-	{ key: 'standard', header: 'standard' },
-	{ key: 'address_or_ledger_id', header: 'address_or_ledger_id' },
-	{ key: 'decimals', header: 'decimals' },
-	{ key: 'balance', header: 'balance' },
-	{ key: 'usd_price', header: 'usd_price' },
-	{ key: 'usd_value', header: 'usd_value' },
-	{ key: 'currency', header: 'currency' },
-	{ key: 'price', header: 'price' },
-	{ key: 'value', header: 'value' },
-	{ key: 'snapshot_at', header: 'snapshot_at' }
+	{ key: 'network', header: 'Network' },
+	{ key: 'symbol', header: 'Symbol' },
+	{ key: 'name', header: 'Name' },
+	{ key: 'standard', header: 'Standard' },
+	{ key: 'address_or_ledger_id', header: 'Address / Ledger ID' },
+	{ key: 'decimals', header: 'Decimals' },
+	{ key: 'balance_raw', header: 'Balance' },
+	{ key: 'usd_price', header: 'Price [USD]' },
+	{ key: 'usd_value', header: 'Value [USD]' },
+	{ key: 'currency', header: 'Currency' },
+	{ key: 'price', header: 'Price' },
+	{ key: 'value', header: 'Value' }
 ];
 
 // Slim variant for the Basic tokens export — just the columns a non-technical user needs to
@@ -213,32 +218,30 @@ const toUserCurrencyValue = ({
 export const buildTokenRows = ({
 	tokens,
 	currency,
-	exchangeRateToUsd,
-	exportedAt
+	exchangeRateToUsd
 }: {
 	tokens: TokenUi[];
 	currency: Currency;
 	exchangeRateToUsd: number | null;
-	exportedAt: Date;
-}): TokenCsvRow[] => {
-	const snapshotAt = exportedAt.toISOString();
-
-	return tokens.map((token) => ({
+}): TokenCsvRow[] =>
+	tokens.map((token) => ({
 		symbol: token.symbol,
 		name: token.name,
 		network: token.network.name,
 		standard: token.standard.code,
 		address_or_ledger_id: getAddressOrLedgerId(token),
 		decimals: token.decimals,
+		// `balance` stays decimal-formatted for the Basic export (human-readable).
+		// `balance_raw` is the raw integer (smallest unit) the Extended export emits — pair
+		// it with the Decimals column to recover the decimal value with full precision.
 		balance: formatAmount({ value: token.balance, decimals: token.decimals }),
+		balance_raw: nonNullish(token.balance) ? token.balance.toString() : '',
 		usd_price: token.usdPrice,
 		usd_value: token.usdBalance,
 		currency: currency.toUpperCase(),
 		price: toUserCurrencyValue({ usdValue: token.usdPrice, exchangeRateToUsd }),
-		value: toUserCurrencyValue({ usdValue: token.usdBalance, exchangeRateToUsd }),
-		snapshot_at: snapshotAt
+		value: toUserCurrencyValue({ usdValue: token.usdBalance, exchangeRateToUsd })
 	}));
-};
 
 // Decimals of the native chain currency used to pay gas/fees. ETH, BNB, MATIC, AVAX
 // all use 18; SOL uses 9; BTC uses 8.

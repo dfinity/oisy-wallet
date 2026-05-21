@@ -48,8 +48,6 @@ const baseToken: TokenUi = {
 
 describe('export-data.utils', () => {
 	describe('buildTokenRows', () => {
-		const exportedAt = new Date('2026-05-19T08:30:00Z');
-
 		it('maps a token with full financial data to a row', () => {
 			// exchangeRateToUsd = 2 means "1 EUR = 2 USD" (hypothetical, chosen for clean
 			// arithmetic). To convert USD → EUR we divide: usd / rate.
@@ -63,8 +61,7 @@ describe('export-data.utils', () => {
 					}
 				],
 				currency: Currency.EUR,
-				exchangeRateToUsd: 2,
-				exportedAt
+				exchangeRateToUsd: 2
 			});
 
 			expect(rows).toHaveLength(1);
@@ -75,13 +72,15 @@ describe('export-data.utils', () => {
 				standard: 'icrc',
 				address_or_ledger_id: '',
 				decimals: 8,
+				// `balance` is decimal-formatted for the Basic export.
 				balance: '0.12345678',
+				// `balance_raw` is the raw integer (smallest unit) the Extended export emits.
+				balance_raw: '12345678',
 				usd_price: 10,
 				usd_value: 1.2345678,
 				currency: 'EUR',
 				price: 5,
-				value: 0.6172839,
-				snapshot_at: '2026-05-19T08:30:00.000Z'
+				value: 0.6172839
 			});
 		});
 
@@ -90,8 +89,7 @@ describe('export-data.utils', () => {
 			const [row] = buildTokenRows({
 				tokens: [{ ...baseToken, balance: 1n, usdPrice: 1, usdBalance: 1 }],
 				currency: Currency.EUR,
-				exchangeRateToUsd: 0,
-				exportedAt
+				exchangeRateToUsd: 0
 			});
 
 			expect(row.price).toBeUndefined();
@@ -102,8 +100,7 @@ describe('export-data.utils', () => {
 			const [row] = buildTokenRows({
 				tokens: [{ ...baseToken, balance: 1n, usdPrice: 1, usdBalance: 1 }],
 				currency: Currency.EUR,
-				exchangeRateToUsd: null,
-				exportedAt
+				exchangeRateToUsd: null
 			});
 
 			expect(row.price).toBeUndefined();
@@ -116,8 +113,7 @@ describe('export-data.utils', () => {
 			const [row] = buildTokenRows({
 				tokens: [{ ...baseToken, balance: ZERO, usdPrice: 42, usdBalance: 0 }],
 				currency: Currency.USD,
-				exchangeRateToUsd: 1,
-				exportedAt
+				exchangeRateToUsd: 1
 			});
 
 			expect(row.currency).toBe('USD');
@@ -129,8 +125,7 @@ describe('export-data.utils', () => {
 			const [row] = buildTokenRows({
 				tokens: [{ ...baseToken, balance: null }],
 				currency: Currency.USD,
-				exchangeRateToUsd: 1,
-				exportedAt
+				exchangeRateToUsd: 1
 			});
 
 			expect(row.balance).toBe('');
@@ -146,8 +141,7 @@ describe('export-data.utils', () => {
 					}
 				],
 				currency: Currency.USD,
-				exchangeRateToUsd: 1,
-				exportedAt
+				exchangeRateToUsd: 1
 			});
 
 			expect(row.balance).toBe('1.234567890123456789');
@@ -163,8 +157,7 @@ describe('export-data.utils', () => {
 					} as TokenUi
 				],
 				currency: Currency.USD,
-				exchangeRateToUsd: 1,
-				exportedAt
+				exchangeRateToUsd: 1
 			});
 
 			expect(row.address_or_ledger_id).toBe('mxzaz-hqaaa-aaaar-qaada-cai');
@@ -180,45 +173,73 @@ describe('export-data.utils', () => {
 					} as TokenUi
 				],
 				currency: Currency.USD,
-				exchangeRateToUsd: 1,
-				exportedAt
+				exchangeRateToUsd: 1
 			});
 
 			expect(row.address_or_ledger_id).toBe('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48');
 		});
 
-		it('writes the same snapshot_at on every row', () => {
-			const rows = buildTokenRows({
+		it('emits balance_raw as the bigint balance in its smallest unit', () => {
+			const [row] = buildTokenRows({
 				tokens: [
-					{ ...baseToken, balance: 1n },
-					{ ...baseToken, balance: 2n }
+					{
+						...baseToken,
+						decimals: 18,
+						balance: 1_234_567_890_123_456_789n
+					}
 				],
 				currency: Currency.USD,
-				exchangeRateToUsd: 1,
-				exportedAt
+				exchangeRateToUsd: 1
 			});
 
-			expect(rows[0].snapshot_at).toBe('2026-05-19T08:30:00.000Z');
-			expect(rows[1].snapshot_at).toBe('2026-05-19T08:30:00.000Z');
+			expect(row.balance_raw).toBe('1234567890123456789');
+			// Decimal-formatted balance stays available for the Basic export.
+			expect(row.balance).toBe('1.234567890123456789');
+		});
+
+		it('renders balance_raw as an empty string when the balance is null', () => {
+			const [row] = buildTokenRows({
+				tokens: [{ ...baseToken, balance: null }],
+				currency: Currency.USD,
+				exchangeRateToUsd: 1
+			});
+
+			expect(row.balance_raw).toBe('');
 		});
 	});
 
 	describe('TOKEN_CSV_COLUMNS', () => {
-		it('lists the 13 documented columns in order', () => {
+		it('lists the 12 documented columns with Network/Symbol/Name first', () => {
 			expect(TOKEN_CSV_COLUMNS.map(({ key }) => key)).toEqual([
+				'network',
 				'symbol',
 				'name',
-				'network',
 				'standard',
 				'address_or_ledger_id',
 				'decimals',
-				'balance',
+				'balance_raw',
 				'usd_price',
 				'usd_value',
 				'currency',
 				'price',
-				'value',
-				'snapshot_at'
+				'value'
+			]);
+		});
+
+		it('uses title-cased human-readable headers', () => {
+			expect(TOKEN_CSV_COLUMNS.map(({ header }) => header)).toEqual([
+				'Network',
+				'Symbol',
+				'Name',
+				'Standard',
+				'Address / Ledger ID',
+				'Decimals',
+				'Balance',
+				'Price [USD]',
+				'Value [USD]',
+				'Currency',
+				'Price',
+				'Value'
 			]);
 		});
 	});
@@ -244,13 +265,6 @@ describe('export-data.utils', () => {
 				'Currency',
 				'Value'
 			]);
-		});
-
-		it('is a strict subset of TOKEN_CSV_COLUMNS so the same row builder feeds both', () => {
-			const extendedKeys = new Set(TOKEN_CSV_COLUMNS.map(({ key }) => key));
-			BASIC_TOKEN_CSV_COLUMNS.forEach(({ key }) => {
-				expect(extendedKeys.has(key)).toBeTruthy();
-			});
 		});
 	});
 

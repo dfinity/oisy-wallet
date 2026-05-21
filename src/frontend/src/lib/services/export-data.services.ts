@@ -69,7 +69,7 @@ export const exportTokensCsv = ({
 	}
 
 	const exportedAt = new Date();
-	const unsortedRows = buildTokenRows({ tokens, currency, exchangeRateToUsd, exportedAt });
+	const unsortedRows = buildTokenRows({ tokens, currency, exchangeRateToUsd });
 	// The Basic export is meant to be skimmed by humans — sort it by network → symbol → name
 	// so similar tokens cluster. The Extended export keeps store order so power users can
 	// correlate it with the wallet UI.
