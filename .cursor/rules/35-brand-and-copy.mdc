@@ -1,6 +1,12 @@
 ---
 description: OISY voice, vocabulary, colour usage, and icon rules for any user-visible UI.
-globs: ['src/frontend/**/*.svelte', 'src/frontend/**/*.ts', 'src/frontend/**/*.scss', 'src/frontend/src/lib/i18n/en.json']
+globs:
+  [
+    'src/frontend/**/*.svelte',
+    'src/frontend/**/*.ts',
+    'src/frontend/**/*.scss',
+    'src/frontend/src/lib/i18n/en.json'
+  ]
 ---
 
 # Cursor — Brand & copy
