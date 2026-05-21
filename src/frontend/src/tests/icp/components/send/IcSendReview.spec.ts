@@ -2,6 +2,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidDip721Nft } from '$tests/mocks/nfts.mock';
 import { render } from '@testing-library/svelte';
@@ -58,12 +59,22 @@ describe('IcSendReview', () => {
 		expect(queryByText(en.fee.text.fee)).toBeNull();
 	});
 
-	it('should not render the fee row when sending an NFT', () => {
-		const { queryByText } = render(IcSendReview, {
+	it('should render the fee row as zero when sending an NFT (collections have no transfer fee)', () => {
+		const nftContext = new Map([]);
+		nftContext.set(
+			SEND_CONTEXT_KEY,
+			initSendContext({
+				token: mockValidDip721Token
+			})
+		);
+
+		const { container, getByText } = render(IcSendReview, {
 			props: { ...props, nft: mockValidDip721Nft },
-			context: mockContext
+			context: nftContext
 		});
 
-		expect(queryByText(en.fee.text.fee)).toBeNull();
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+
+		expect(container).toHaveTextContent(`0 ${mockValidDip721Token.symbol}`);
 	});
 });

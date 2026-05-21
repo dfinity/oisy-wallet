@@ -38,7 +38,7 @@
 
 <SendReview {amount} {destination} disabled={invalid} {nft} {onBack} {onSend} {selectedContact}>
 	{#snippet fee()}
-		{#if !$isIcMintingAccount && isNullish(nft)}
+		{#if !$isIcMintingAccount}
 			<IcTokenFee />
 		{/if}
 	{/snippet}
