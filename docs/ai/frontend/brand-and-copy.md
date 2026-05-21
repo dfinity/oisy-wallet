@@ -37,7 +37,6 @@ sentence could appear in any company's marketing, cut it.
 | Sign in the way you unlock your phone   | Seed phrase onboarding   | Lead with the positive experience                              |
 | Works from any browser, on any device   | Extension-free wallet    | Describe the gain, not the absence                             |
 | Network custody                         | Custodial / self-custody | OISY is a third way; naming it precisely is the message        |
-| Chain Fusion                            | Bridging / wrapping      | OISY does not bridge; native integration is the differentiator |
 | Passkey login through Internet Identity | Passwordless login       | Product benefit first, proof layer underneath                  |
 | OISY (in body copy)                     | OISY Wallet (in body)    | The full lockup is for the logo only                           |
 | Digital wealth                          | Crypto only              | OISY covers crypto, stablecoins, tokenized stocks, commodities |
