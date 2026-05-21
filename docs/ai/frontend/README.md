@@ -17,6 +17,8 @@ starting point. Read it once per session.
       with no `any`).
 - [ ] No hard-coded user-visible strings; a11y attributes set —
       [`i18n-and-a11y.md`](./i18n-and-a11y.md).
+- [ ] User-visible copy, colours, and icons follow brand rules —
+      [`brand-and-copy.md`](./brand-and-copy.md).
 - [ ] I have or extended tests where the [`testing.md`](./testing.md) policy
       requires.
 - [ ] No `console.error` / `console.warn` / `0n` / relative imports in
