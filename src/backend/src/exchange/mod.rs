@@ -46,8 +46,8 @@ pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
 const PRICE_FRESHNESS_GRACE_NS: u64 = (PRICE_REFRESH_INTERVAL_SEC / 2) * 1_000_000_000;
 
 /// Maximum age of a cached price, in seconds, that the per-caller
-/// [`get_my_exchange_rates`] endpoint will accept without triggering a
-/// blocking refresh for the token.
+/// `get_exchange_rates` endpoint will accept without triggering a blocking
+/// refresh for the token.
 ///
 /// Anything older — or missing — causes the endpoint to await a one-shot
 /// fetch for that subset before returning, so the caller's response always
@@ -118,7 +118,7 @@ fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
 /// writes the results into the on-canister cache.
 ///
 /// Used by both the recurring refresh timer ([`refresh_exchange_rates`]) and
-/// on-demand caller-driven refreshes (e.g. [`get_my_exchange_rates`]). The
+/// on-demand caller-driven refreshes. The
 /// caller is expected to have already filtered `token_ids` down to the
 /// subset that actually needs a fresh fetch; this function makes no
 /// staleness or activity decisions of its own.
@@ -196,7 +196,7 @@ pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<Stored
 /// Returns the subset of `token_ids` whose cached USD price is either
 /// missing or older than [`PRICE_STALENESS_THRESHOLD_SEC`] seconds.
 ///
-/// Used by [`get_my_exchange_rates`] to decide which tokens require a
+/// Used by `get_exchange_rates` to decide which tokens require a
 /// blocking outcall before the response can satisfy its freshness contract.
 pub(crate) fn stale_or_missing_tokens(token_ids: &[StoredTokenId]) -> Vec<StoredTokenId> {
     let now = time();

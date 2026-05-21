@@ -1831,7 +1831,6 @@ export interface _SERVICE {
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
-	get_exchange_rates: ActorMethod<[Array<TokenId>], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
 	 * Returns the latest USD prices for the caller's priceable tokens.
 	 *
@@ -1849,7 +1848,7 @@ export interface _SERVICE {
 	 * This is an `update` (rather than a `query`) because it mutates state
 	 * (`token_activity`) and may issue HTTP outcalls.
 	 */
-	get_my_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
+	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
 	 * Returns the full agreement consent/rejection history for the caller.
 	 *

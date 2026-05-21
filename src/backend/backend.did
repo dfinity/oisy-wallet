@@ -1237,9 +1237,6 @@ service : (Arg) -> {
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
 	get_exchange_rate : (TokenId) -> (opt ExchangeRate) query;
-	get_exchange_rates : (vec TokenId) -> (
-		vec record { TokenId; opt ExchangeRate }
-	) query;
 	// Returns the latest USD prices for the caller's priceable tokens.
 	//
 	// "Priceable" means the union of:
@@ -1255,7 +1252,7 @@ service : (Arg) -> {
 	//
 	// This is an `update` (rather than a `query`) because it mutates state
 	// (`token_activity`) and may issue HTTP outcalls.
-	get_my_exchange_rates : () -> (vec record { TokenId; opt ExchangeRate });
+	get_exchange_rates : () -> (vec record { TokenId; opt ExchangeRate });
 	// Returns the full agreement consent/rejection history for the caller.
 	//
 	// # Returns

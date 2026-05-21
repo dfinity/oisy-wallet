@@ -12,33 +12,6 @@ use crate::{
     utils::guards::caller_is_not_anonymous,
 };
 
-const MAX_TOKEN_LIST_LENGTH: usize = 1_000;
-
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_exchange_rates(token_ids: Vec<TokenId>) -> Vec<(TokenId, Option<ExchangeRate>)> {
-    if token_ids.len() > MAX_TOKEN_LIST_LENGTH {
-        ic_cdk::trap(format!(
-            "Maximum number of token_ids exceeded: {} > {}",
-            token_ids.len(),
-            MAX_TOKEN_LIST_LENGTH
-        ));
-    }
-
-    read_state(|s| {
-        token_ids
-            .into_iter()
-            .map(|id| {
-                let rate = s
-                    .exchange_rates
-                    .get(&StoredTokenId(id.clone()))
-                    .map(|c| c.0);
-                (id, rate)
-            })
-            .collect()
-    })
-}
-
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_exchange_rate(token_id: TokenId) -> Option<ExchangeRate> {
@@ -62,7 +35,7 @@ pub fn get_exchange_rate(token_id: TokenId) -> Option<ExchangeRate> {
 /// (`token_activity`) and may issue HTTP outcalls.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub async fn get_my_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
+pub async fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     let caller = StoredPrincipal(msg_caller());
 
     let tokens = priceable_tokens_for_caller(caller);
@@ -77,7 +50,7 @@ pub async fn get_my_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     let stale = stale_or_missing_tokens(&tokens);
     if !stale.is_empty() {
         if let Err(err) = fetch_and_update_prices(&stale).await {
-            ic_cdk::println!("get_my_exchange_rates fetch failed: {err:?}");
+            ic_cdk::println!("get_exchange_rates fetch failed: {err:?}");
         }
     }
 
