@@ -20,6 +20,12 @@ import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createTransactionsUiWithCmp } from '$tests/mocks/transactions.mock';
 import { get } from 'svelte/store';
 
+vi.mock('$lib/utils/format.utils', () => ({
+	formatSecondsToNormalizedDate: vi
+		.fn()
+		.mockImplementation(({ seconds }: { seconds: number }): string => `date-${seconds}`)
+}));
+
 describe('transaction.utils', () => {
 	describe('mapIcon', () => {
 		const allNonPendingStatus = TransactionStatusSchema.options.filter(
@@ -91,21 +97,15 @@ describe('transaction.utils', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-
-			vi.mock('$lib/utils/format.utils', () => ({
-				formatSecondsToNormalizedDate: vi
-					.fn()
-					.mockImplementation(({ seconds, currentDate: _ }): string => seconds.toString())
-			}));
 		});
 
 		it('should group transactions by formatted date when they are unique', () => {
 			expect(groupTransactionsByDate(mockTransactions)).toEqual({
-				'1': [mockTransactions[0]],
-				'2': [mockTransactions[1]],
-				'3': [mockTransactions[2]],
-				'4': [mockTransactions[3]],
-				'5': [mockTransactions[4]]
+				'date-1': [mockTransactions[0]],
+				'date-2': [mockTransactions[1]],
+				'date-3': [mockTransactions[2]],
+				'date-4': [mockTransactions[3]],
+				'date-5': [mockTransactions[4]]
 			});
 		});
 
@@ -134,8 +134,8 @@ describe('transaction.utils', () => {
 			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
-				'1': transactions.slice(0, 3),
-				'2': transactions.slice(3)
+				'date-1': transactions.slice(0, 3),
+				'date-2': transactions.slice(3)
 			});
 		});
 
@@ -150,7 +150,7 @@ describe('transaction.utils', () => {
 			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
-				'1': [transactions[0]],
+				'date-1': [transactions[0]],
 				[undefinedKey]: [transactions[1]]
 			});
 		});
@@ -169,8 +169,8 @@ describe('transaction.utils', () => {
 			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
-				[1]: [transactions[0]],
-				[nowInSeconds.toString()]: [transactions[1]]
+				'date-1': [transactions[0]],
+				[`date-${nowInSeconds}`]: [transactions[1]]
 			});
 		});
 
@@ -184,8 +184,8 @@ describe('transaction.utils', () => {
 			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
-				'1': [transactions[0]],
-				[nowInSeconds.toString()]: [transactions[1]]
+				'date-1': [transactions[0]],
+				[`date-${nowInSeconds}`]: [transactions[1]]
 			});
 		});
 
