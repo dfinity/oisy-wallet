@@ -77,12 +77,20 @@ const ICRC7_TOKEN_THUMBNAIL_KEYS = [
 	'thumbnailUrl',
 	'thumbnail_url'
 ];
+const ICRC7_TOKEN_METADATA_URI_KEYS = [
+	'icrc7:uri',
+	'icrc7:metadata:uri',
+	'uri',
+	'metadataUri',
+	'metadata_uri'
+];
 const ICRC7_TOKEN_ATTRIBUTES_KEYS = ['icrc7:attributes', 'icrc7:metadata:attributes', 'attributes'];
 const ICRC7_TOKEN_RESERVED_ATTRIBUTE_KEYS = new Set([
 	...ICRC7_TOKEN_NAME_KEYS,
 	...ICRC7_TOKEN_DESCRIPTION_KEYS,
 	...ICRC7_TOKEN_IMAGE_KEYS,
 	...ICRC7_TOKEN_THUMBNAIL_KEYS,
+	...ICRC7_TOKEN_METADATA_URI_KEYS,
 	...ICRC7_TOKEN_ATTRIBUTES_KEYS
 ]);
 
