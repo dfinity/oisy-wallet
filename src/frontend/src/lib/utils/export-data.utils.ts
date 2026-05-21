@@ -70,10 +70,11 @@ export const BASIC_TOKEN_CSV_COLUMNS: CsvColumn<TokenCsvRow>[] = [
 	{ key: 'value', header: 'Value' }
 ];
 
-// Sorts the Basic export lexicographically by network → symbol → name. Locale-aware so users
-// on non-English locales still see a natural ordering. Returns a new array — the input is
-// not mutated.
-export const sortBasicTokenRows = (rows: TokenCsvRow[]): TokenCsvRow[] =>
+// Sorts a tokens export lexicographically by network → symbol → name. Locale-aware so
+// users on non-English locales still see a natural ordering. Returns a new array — the
+// input is not mutated. Used for both Basic and Extended so the two CSVs line up row by
+// row when opened side by side.
+export const sortTokenRows = (rows: TokenCsvRow[]): TokenCsvRow[] =>
 	[...rows].sort(
 		(a, b) =>
 			a.network.localeCompare(b.network) ||

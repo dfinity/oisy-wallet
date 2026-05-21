@@ -17,8 +17,8 @@ import {
 	TRANSACTION_CSV_COLUMNS,
 	buildTokenRows,
 	buildTransactionRows,
-	sortBasicTokenRows,
 	sortBasicTransactionRows,
+	sortTokenRows,
 	type UserAddresses
 } from '$lib/utils/export-data.utils';
 import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
@@ -69,11 +69,10 @@ export const exportTokensCsv = ({
 	}
 
 	const exportedAt = new Date();
-	const unsortedRows = buildTokenRows({ tokens, currency, exchangeRateToUsd });
-	// The Basic export is meant to be skimmed by humans — sort it by network → symbol → name
-	// so similar tokens cluster. The Extended export keeps store order so power users can
-	// correlate it with the wallet UI.
-	const rows = variant === 'basic' ? sortBasicTokenRows(unsortedRows) : unsortedRows;
+	// Both variants are sorted by network → symbol → name so the two CSVs line up row by
+	// row when opened side by side, and so a human skimming either of them sees tokens
+	// grouped naturally by chain.
+	const rows = sortTokenRows(buildTokenRows({ tokens, currency, exchangeRateToUsd }));
 	const csv = toCsv({ columns: TOKEN_CSV_COLUMNS_BY_VARIANT[variant], rows });
 
 	downloadCsv({

@@ -17,8 +17,8 @@ import {
 	BASIC_TRANSACTION_CSV_COLUMNS,
 	buildTokenRows,
 	buildTransactionRows,
-	sortBasicTokenRows,
 	sortBasicTransactionRows,
+	sortTokenRows,
 	TOKEN_CSV_COLUMNS,
 	TRANSACTION_CSV_COLUMNS,
 	type TokenCsvRow,
@@ -296,12 +296,12 @@ describe('export-data.utils', () => {
 		});
 	});
 
-	describe('sortBasicTokenRows', () => {
+	describe('sortTokenRows', () => {
 		const row = (overrides: Partial<TokenCsvRow>): TokenCsvRow =>
 			({ network: '', symbol: '', name: '', ...overrides }) as TokenCsvRow;
 
 		it('sorts by network ascending first', () => {
-			const sorted = sortBasicTokenRows([
+			const sorted = sortTokenRows([
 				row({ network: 'Solana', symbol: 'ZZZ', name: 'Aaa' }),
 				row({ network: 'Bitcoin', symbol: 'BBB', name: 'Zzz' }),
 				row({ network: 'Ethereum', symbol: 'AAA', name: 'Mmm' })
@@ -311,7 +311,7 @@ describe('export-data.utils', () => {
 		});
 
 		it('breaks network ties by symbol, then by name', () => {
-			const sorted = sortBasicTokenRows([
+			const sorted = sortTokenRows([
 				row({ network: 'Ethereum', symbol: 'USDC', name: 'USD Coin (Bridged)' }),
 				row({ network: 'Ethereum', symbol: 'USDC', name: 'USD Coin' }),
 				row({ network: 'Ethereum', symbol: 'AAA', name: 'Alpha' })
@@ -331,7 +331,7 @@ describe('export-data.utils', () => {
 			];
 			const snapshot = [...input];
 
-			sortBasicTokenRows(input);
+			sortTokenRows(input);
 
 			expect(input).toEqual(snapshot);
 		});
