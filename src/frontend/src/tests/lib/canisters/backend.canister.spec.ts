@@ -1724,7 +1724,7 @@ describe('backend.canister', () => {
 				expect(rate).toEqual(expectedUnwrapped);
 			}
 
-			expect(service.get_exchange_rates).toHaveBeenCalledExactlyOnceWith(tokenIds);
+			expect(service.get_exchange_rates).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should omit entries with no rate from the Map', async () => {

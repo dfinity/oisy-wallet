@@ -15,12 +15,18 @@ use shared::types::{
 use crate::{
     exchange::{
         composite::fetch_all_prices,
-        providers::{coingecko::CoinGeckoProvider, icpswap::IcpSwapProvider},
+        providers::{
+            coingecko::{is_priceable_token_id, CoinGeckoProvider},
+            icpswap::IcpSwapProvider,
+        },
         supplemental::SupplementalPriceProvider,
     },
     read_state,
     state::{mutate_state, with_api_keys},
-    types::storable::{Candid, StoredTokenId},
+    types::{
+        storable::{Candid, StoredTokenId},
+        StoredPrincipal,
+    },
 };
 
 /// How often exchange rates are refreshed (5 minutes).
@@ -38,6 +44,15 @@ pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
 /// bootstrap or a manual refresh has just populated the cache with a price
 /// the provider also reports as recent.
 const PRICE_FRESHNESS_GRACE_NS: u64 = (PRICE_REFRESH_INTERVAL_SEC / 2) * 1_000_000_000;
+
+/// Maximum age of a cached price, in seconds, that the per-caller
+/// `get_exchange_rates` endpoint will accept without triggering a blocking
+/// refresh for the token.
+///
+/// Anything older — or missing — causes the endpoint to await a one-shot
+/// fetch for that subset before returning, so the caller's response always
+/// honours the contract that prices are at most this many seconds old.
+pub const PRICE_STALENESS_THRESHOLD_SEC: u64 = 2 * 60;
 
 /// Native tokens whose prices are always fetched, regardless of user activity.
 fn native_token_ids() -> Vec<StoredTokenId> {
@@ -99,7 +114,26 @@ fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
     vec![Box::new(IcpSwapProvider::default())]
 }
 
-pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
+/// Fetches USD prices for `token_ids` from the configured providers and
+/// writes the results into the on-canister cache.
+///
+/// Used by both the recurring refresh timer ([`refresh_exchange_rates`]) and
+/// on-demand caller-driven refreshes. The
+/// caller is expected to have already filtered `token_ids` down to the
+/// subset that actually needs a fresh fetch; this function makes no
+/// staleness or activity decisions of its own.
+///
+/// Returns:
+/// - `Ok(())` once the (possibly empty) set of fresh prices has been written.
+/// - `Err(ExchangeError::Disabled)` if `exchange_rate_enabled` is `Some(false)`.
+/// - `Err(ExchangeError::ApiKeyNotSet)` if no `CoinGecko` API key is configured.
+pub(crate) async fn fetch_and_update_prices(
+    token_ids: &[StoredTokenId],
+) -> Result<(), ExchangeError> {
+    if token_ids.is_empty() {
+        return Ok(());
+    }
+
     let enabled = with_api_keys(|keys| {
         keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled != Some(false)
     });
@@ -112,7 +146,98 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
         with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
 
     let provider = CoinGeckoProvider::new(api_key);
+    let supplementals = supplemental_price_providers();
 
+    let prices = fetch_all_prices(&provider, &supplementals, token_ids).await;
+
+    for (token_id, exchange_data) in prices {
+        update_price(&token_id, &exchange_data);
+    }
+
+    Ok(())
+}
+
+/// Returns the deduplicated set of priceable tokens associated with `caller`,
+/// in the form expected by the price-fetch helpers.
+///
+/// "Priceable" means: the token variant + chain combination is something we
+/// can ever fetch a USD rate for via the configured providers. NFT
+/// standards, ERC-4626 vaults, testnets, and EVM chains we don't have a
+/// `CoinGecko` mapping for are filtered out so they don't bloat the request
+/// payload or the activity map. The result is the union of:
+///
+/// - the always-on native tokens ([`native_token_ids`]), and
+/// - the caller's custom tokens stored in `s.custom_token`, mapped via [`TokenId::from`] and
+///   filtered through [`is_priceable_token_id`].
+pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<StoredTokenId> {
+    let mut tokens: Vec<StoredTokenId> = native_token_ids();
+
+    let caller_custom_tokens: Vec<StoredTokenId> = read_state(|s| {
+        s.custom_token
+            .get(&caller)
+            .map(|tokens| {
+                tokens
+                    .0
+                    .iter()
+                    .map(|ct| TokenId::from(&ct.token))
+                    .filter(is_priceable_token_id)
+                    .map(StoredTokenId)
+                    .collect()
+            })
+            .unwrap_or_default()
+    });
+
+    tokens.extend(caller_custom_tokens);
+    tokens.sort_unstable();
+    tokens.dedup();
+    tokens
+}
+
+/// Returns the subset of `token_ids` whose cached USD price is either
+/// missing or older than [`PRICE_STALENESS_THRESHOLD_SEC`] seconds.
+///
+/// Used by `get_exchange_rates` to decide which tokens require a
+/// blocking outcall before the response can satisfy its freshness contract.
+pub(crate) fn stale_or_missing_tokens(token_ids: &[StoredTokenId]) -> Vec<StoredTokenId> {
+    let now = time();
+    let staleness_floor_ns = now.saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * 1_000_000_000);
+
+    read_state(|s| {
+        token_ids
+            .iter()
+            .filter(|t| {
+                s.exchange_rates
+                    .get(t)
+                    .is_none_or(|r| r.0.usd.timestamp_ns < staleness_floor_ns)
+            })
+            .cloned()
+            .collect()
+    })
+}
+
+/// Reads the on-canister exchange rate cache for the supplied tokens and
+/// returns one `(TokenId, Option<ExchangeRate>)` entry per input id, in the
+/// same order. `None` means the cache has no fresh entry for that token.
+pub(crate) fn cached_rates_snapshot(
+    token_ids: Vec<StoredTokenId>,
+) -> Vec<(TokenId, Option<ExchangeRate>)> {
+    let freshness_floor_ns = time().saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * 1_000_000_000);
+
+    read_state(|s| {
+        token_ids
+            .into_iter()
+            .map(|stored| {
+                let rate = s
+                    .exchange_rates
+                    .get(&stored)
+                    .and_then(|c| (c.0.usd.timestamp_ns >= freshness_floor_ns).then_some(c.0));
+                (stored.0, rate)
+            })
+            .collect()
+    })
+}
+
+pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     let now = time();
     let threshold = now.saturating_sub(PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000);
 
@@ -139,16 +264,5 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
         });
     });
 
-    if tokens_to_fetch.is_empty() {
-        return Ok(());
-    }
-
-    let supplementals = supplemental_price_providers();
-    let prices = fetch_all_prices(&provider, &supplementals, &tokens_to_fetch).await;
-
-    for (token_id, exchange_data) in prices {
-        update_price(&token_id, &exchange_data);
-    }
-
-    Ok(())
+    fetch_and_update_prices(&tokens_to_fetch).await
 }

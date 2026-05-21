@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 use shared::types::{exchange::ExchangeData, token_id::TokenId};
 
+pub(crate) use self::platform::is_priceable_token_id;
 use self::{
     client::CoinGeckoClient,
     platform::{coingecko_native_coin, coingecko_platform},
