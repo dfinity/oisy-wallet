@@ -3,6 +3,7 @@ import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidDip721Nft } from '$tests/mocks/nfts.mock';
 import { render } from '@testing-library/svelte';
 
 describe('IcSendReview', () => {
@@ -51,6 +52,15 @@ describe('IcSendReview', () => {
 
 		const { queryByText } = render(IcSendReview, {
 			props,
+			context: mockContext
+		});
+
+		expect(queryByText(en.fee.text.fee)).toBeNull();
+	});
+
+	it('should not render the fee row when sending an NFT', () => {
+		const { queryByText } = render(IcSendReview, {
+			props: { ...props, nft: mockValidDip721Nft },
 			context: mockContext
 		});
 
