@@ -3,9 +3,12 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import { icrc7CustomTokensNotInitialized, icrc7Tokens } from '$icp/derived/icrc7.derived';
+	import { extCustomTokensNotInitialized } from '$icp/derived/ext.derived';
+	import { icPunksCustomTokensNotInitialized } from '$icp/derived/icpunks.derived';
+	import { icrc7CustomTokensNotInitialized } from '$icp/derived/icrc7.derived';
 	import { resolveIcrc7CollectionDeepLinkAction } from '$icp/services/icrc7-deep-link.services';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -14,13 +17,18 @@
 	const handledIcrc7DeepLinkCanisterIds = new SvelteSet<string>();
 
 	const icrc7DeepLinkAction = $derived.by(() => {
-		if (isNullish($authIdentity) || $icrc7CustomTokensNotInitialized) {
+		if (
+			isNullish($authIdentity) ||
+			$extCustomTokensNotInitialized ||
+			$icPunksCustomTokensNotInitialized ||
+			$icrc7CustomTokensNotInitialized
+		) {
 			return undefined;
 		}
 
 		return resolveIcrc7CollectionDeepLinkAction({
 			url: page.url,
-			tokens: $icrc7Tokens
+			tokens: $nonFungibleTokens
 		});
 	});
 
