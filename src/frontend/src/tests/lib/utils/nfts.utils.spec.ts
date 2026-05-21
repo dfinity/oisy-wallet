@@ -763,7 +763,7 @@ describe('nfts.utils', () => {
 	});
 
 	describe('isNftMediaConsentEnabled', () => {
-		const {collection} = mockNft1;
+		const { collection } = mockNft1;
 
 		it('should preserve disabled and undecided consent states', () => {
 			expect(
