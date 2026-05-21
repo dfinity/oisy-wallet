@@ -4,6 +4,11 @@ These two are non-negotiable. CI catches some violations
 (`svelte-check`, ESLint a11y rules, `frontend-remove-unused-components`)
 but most are on you. This page is the contract.
 
+> Brand voice, vocabulary, banned phrases, failure-copy structure, and
+> the colour / icon rules live in
+> [`brand-and-copy.md`](./brand-and-copy.md). Read it together with
+> this page whenever you add user-visible strings.
+
 ## i18n
 
 ### Single source of truth — `en.json` only
@@ -138,6 +143,9 @@ Baseline rules; ESLint a11y rules and `svelte-check` catch some violations.
   or shape.
 - Use the project's design tokens / utility classes. Search the closest
   neighbour and follow it; don't hard-code hex.
+- Brand-side rules (logo-blue restraint, accent usage, fill-vs-text
+  semantics) live in
+  [`brand-and-copy.md`](./brand-and-copy.md#colour-rules).
 
 ### Images / media
 

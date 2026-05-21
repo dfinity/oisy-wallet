@@ -3,17 +3,21 @@ import {
 	parseIcrc7CollectionDeepLink,
 	resolveIcrc7CollectionDeepLinkAction
 } from '$icp/services/icrc7-deep-link.services';
-import { COLLECTION_PARAM, NETWORK_PARAM } from '$lib/constants/routes.constants';
+import { COLLECTION_PARAM, NETWORK_PARAM, NFT_PARAM } from '$lib/constants/routes.constants';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIcrc7CanisterId, mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
 import { nonNullish } from '@dfinity/utils';
 
 describe('icrc7-deep-link.services', () => {
 	const urlWithParams = ({
 		collection,
-		network
+		network,
+		nft
 	}: {
 		collection?: string;
 		network?: string;
+		nft?: string;
 	}): URL => {
 		const url = new URL('https://oisy.com/nfts/');
 
@@ -23,6 +27,10 @@ describe('icrc7-deep-link.services', () => {
 
 		if (nonNullish(network)) {
 			url.searchParams.set(NETWORK_PARAM, network);
+		}
+
+		if (nonNullish(nft)) {
+			url.searchParams.set(NFT_PARAM, nft);
 		}
 
 		return url;
@@ -66,6 +74,18 @@ describe('icrc7-deep-link.services', () => {
 			expect(
 				parseIcrc7CollectionDeepLink({
 					url: urlWithParams({ collection: mockIcrc7CanisterId, network: 'ETH' })
+				})
+			).toBeUndefined();
+		});
+
+		it('should return undefined when an NFT is selected', () => {
+			expect(
+				parseIcrc7CollectionDeepLink({
+					url: urlWithParams({
+						collection: mockIcrc7CanisterId,
+						network: 'ICP',
+						nft: '1'
+					})
 				})
 			).toBeUndefined();
 		});
@@ -114,6 +134,18 @@ describe('icrc7-deep-link.services', () => {
 				canisterId: mockIcrc7CanisterId,
 				networkId: ICP_NETWORK_ID
 			});
+		});
+
+		it.each([
+			{ name: 'EXT', token: { ...mockValidExtV2Token, enabled: true } },
+			{ name: 'IC Punks', token: { ...mockValidIcPunksToken, enabled: true } }
+		])('should return undefined for a known $name collection', ({ token }) => {
+			expect(
+				resolveIcrc7CollectionDeepLinkAction({
+					url: urlWithParams({ collection: token.canisterId, network: 'ICP' }),
+					tokens: [token]
+				})
+			).toBeUndefined();
 		});
 
 		it('should return undefined for invalid deep links', () => {
