@@ -7,8 +7,8 @@ import {
 	PLAUSIBLE_EVENT_VALUES
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
-import { parseNftId } from '$lib/validation/nft.validation';
 import { getNftDisplayName } from '$lib/utils/nft.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -229,6 +229,24 @@ describe('NftCard', () => {
 		expect(queryByText(mockValidErc721Nft.collection.name)).toBeNull();
 	});
 
+	it('should not duplicate the NFT id when the name already includes it', () => {
+		const nft = {
+			...mockValidErc721Nft,
+			name: `${mockValidErc721Nft.name} #${mockValidErc721Nft.id}`
+		};
+
+		const { getByText, queryByText } = render(NftCard, {
+			props: {
+				nft,
+				testId,
+				type: 'card-link'
+			}
+		});
+
+		expect(getByText(nft.name)).toBeInTheDocument();
+		expect(queryByText(`${nft.name} #${nft.id}`)).not.toBeInTheDocument();
+	});
+
 	it('should render collection name and nft name when withCollectionLabel is true', () => {
 		const { getByText } = render(NftCard, {
 			props: {
@@ -261,6 +279,8 @@ describe('NftCard', () => {
 			}
 		});
 
-		expect(getByText(getNftDisplayName({ ...mockValidErc721Nft, oisyId: mockOisyId }))).toBeInTheDocument();
+		expect(
+			getByText(getNftDisplayName({ ...mockValidErc721Nft, oisyId: mockOisyId }))
+		).toBeInTheDocument();
 	});
 });

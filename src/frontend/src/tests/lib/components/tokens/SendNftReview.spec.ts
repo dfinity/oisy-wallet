@@ -18,4 +18,17 @@ describe('SendNftReview', () => {
 		// Network name
 		expect(getByText(nft.collection.network.name)).toBeInTheDocument();
 	});
+
+	it('does not duplicate the NFT id when the name already includes it', () => {
+		const nft = {
+			...mockValidErc721Nft,
+			name: `${mockValidErc721Nft.name} #${mockValidErc721Nft.id}`
+		};
+		const sendLabel = get(i18n).send.text.send;
+
+		const { getByText, queryByText } = render(SendNftReview, { props: { nft } });
+
+		expect(getByText(`${sendLabel}: ${nft.name}`)).toBeInTheDocument();
+		expect(queryByText(`${sendLabel}: ${nft.name} #${nft.id}`)).not.toBeInTheDocument();
+	});
 });
