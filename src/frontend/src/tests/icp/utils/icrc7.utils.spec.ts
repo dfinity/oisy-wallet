@@ -173,7 +173,7 @@ describe('icrc7.utils', () => {
 			});
 		});
 
-		it('should map Caffeine-style token metadata keys', () => {
+		it('should map Caffeine-style token metadata keys and extra scalar fields', () => {
 			expect(
 				mapIcrc7TokenMetadata([
 					['title', { Text: 'The CEO' }],
@@ -181,6 +181,7 @@ describe('icrc7.utils', () => {
 					['edition', { Text: '#001' }],
 					['owner', { Text: '32vht-6nko3-fxqgs-z7rrt-b2vs3-hdpnp-3nb5a-rnxjm-citus-uuvqc-zae' }],
 					['rarityTier', { Text: 'TIER1' }],
+					['icrc7:metadata:powerLevel', { Int: 9001n }],
 					['description', { Text: '' }],
 					[
 						'imageUrl',
@@ -195,8 +196,14 @@ describe('icrc7.utils', () => {
 				imageUrl:
 					'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A6fc6a25f4d52e13a80b007aeac3641106587d1f331447ce506a9bb1afd399eeb&owner_id=sey3i-jyaaa-aaaap-quo3q-cai&project_id=019de6f2-675c-775e-9eda-2adf4341566c',
 				attributes: [
-					{ traitType: 'Edition', value: '#001' },
-					{ traitType: 'Rarity Tier', value: 'TIER1' }
+					{ traitType: 'tokenId', value: '1' },
+					{ traitType: 'edition', value: '#001' },
+					{
+						traitType: 'owner',
+						value: '32vht-6nko3-fxqgs-z7rrt-b2vs3-hdpnp-3nb5a-rnxjm-citus-uuvqc-zae'
+					},
+					{ traitType: 'rarityTier', value: 'TIER1' },
+					{ traitType: 'powerLevel', value: '9001' }
 				]
 			});
 		});

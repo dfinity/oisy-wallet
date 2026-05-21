@@ -78,13 +78,13 @@ const ICRC7_TOKEN_THUMBNAIL_KEYS = [
 	'thumbnail_url'
 ];
 const ICRC7_TOKEN_ATTRIBUTES_KEYS = ['icrc7:attributes', 'icrc7:metadata:attributes', 'attributes'];
-const ICRC7_TOKEN_SCALAR_ATTRIBUTE_KEYS = [
-	{ traitType: 'Edition', keys: ['icrc7:edition', 'icrc7:metadata:edition', 'edition'] },
-	{
-		traitType: 'Rarity Tier',
-		keys: ['icrc7:rarityTier', 'icrc7:metadata:rarityTier', 'rarityTier', 'rarity_tier']
-	}
-];
+const ICRC7_TOKEN_RESERVED_ATTRIBUTE_KEYS = new Set([
+	...ICRC7_TOKEN_NAME_KEYS,
+	...ICRC7_TOKEN_DESCRIPTION_KEYS,
+	...ICRC7_TOKEN_IMAGE_KEYS,
+	...ICRC7_TOKEN_THUMBNAIL_KEYS,
+	...ICRC7_TOKEN_ATTRIBUTES_KEYS
+]);
 
 const lookupText = ({
 	entries,
@@ -274,16 +274,27 @@ const lookupAttributesByKeys = ({
 	}
 };
 
-const lookupScalarAttributes = ({
+const tokenMetadataKeyToTraitType = ({ key }: { key: string }): string =>
+	key.replace(/^icrc7:metadata:/u, '').replace(/^icrc7:/u, '');
+
+const lookupAdditionalScalarAttributes = ({
 	entries
 }: {
 	entries: Array<[string, Value]>;
 }): NftMetadataWithoutId['attributes'] | undefined => {
-	const attributes = ICRC7_TOKEN_SCALAR_ATTRIBUTE_KEYS.flatMap(({ traitType, keys }) => {
-		const value = lookupStringByKeys({ entries, keys });
+	const attributes = mapNftAttributes(
+		entries.flatMap(([key, value]) => {
+			if (ICRC7_TOKEN_RESERVED_ATTRIBUTE_KEYS.has(key)) {
+				return [];
+			}
 
-		return nonNullish(value) ? [{ traitType, value }] : [];
-	});
+			const attributeValue = valueToAttributeValue({ value });
+
+			return nonNullish(attributeValue)
+				? [{ trait_type: tokenMetadataKeyToTraitType({ key }), value: attributeValue }]
+				: [];
+		})
+	);
 
 	return attributes.length > 0 ? attributes : undefined;
 };
@@ -336,7 +347,7 @@ export const mapIcrc7TokenMetadata = (entries: Array<[string, Value]>): NftMetad
 		? valueToImageUrl({ value: thumbnailEntry[1] })
 		: undefined;
 	const attributes = lookupAttributesByKeys({ entries, keys: ICRC7_TOKEN_ATTRIBUTES_KEYS });
-	const scalarAttributes = lookupScalarAttributes({ entries });
+	const scalarAttributes = lookupAdditionalScalarAttributes({ entries });
 	const mergedAttributes =
 		nonNullish(attributes) || nonNullish(scalarAttributes)
 			? [...(attributes ?? []), ...(scalarAttributes ?? [])]
