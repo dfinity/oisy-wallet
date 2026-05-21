@@ -338,11 +338,12 @@ describe('export-data.utils', () => {
 	});
 
 	describe('TRANSACTION_CSV_COLUMNS', () => {
-		it('lists the 16 extended-export columns in the documented order', () => {
+		it('lists the 17 extended-export columns in the documented order', () => {
 			expect(TRANSACTION_CSV_COLUMNS.map(({ key }) => key)).toEqual([
 				'timestamp_utc',
 				'network',
 				'token_symbol',
+				'token_address_or_ledger_id',
 				'type_display',
 				'type_raw',
 				'counterparty',
@@ -364,6 +365,7 @@ describe('export-data.utils', () => {
 				'Timestamp UTC',
 				'Network',
 				'Token',
+				'Token Address',
 				'Type',
 				'Native Type',
 				'Counterparty',

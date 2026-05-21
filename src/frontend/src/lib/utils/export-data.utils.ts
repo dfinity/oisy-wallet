@@ -125,6 +125,7 @@ export const TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'timestamp_utc', header: 'Timestamp UTC' },
 	{ key: 'network', header: 'Network' },
 	{ key: 'token_symbol', header: 'Token' },
+	{ key: 'token_address_or_ledger_id', header: 'Token Address' },
 	{ key: 'type_display', header: 'Type' },
 	{ key: 'type_raw', header: 'Native Type' },
 	{ key: 'counterparty', header: 'Counterparty' },
