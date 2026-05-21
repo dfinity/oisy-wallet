@@ -53,7 +53,8 @@
 		}
 
 		const data = {
-			initialSearch: action.token.name,
+			initialNetwork: ICP_NETWORK,
+			initialSearch: action.canisterId,
 			message: $i18n.transactions.text.token_needs_enabling
 		};
 
