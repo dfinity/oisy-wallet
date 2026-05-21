@@ -17,8 +17,8 @@ import {
 	TRANSACTION_CSV_COLUMNS,
 	buildTokenRows,
 	buildTransactionRows,
-	sortBasicTransactionRows,
 	sortTokenRows,
+	sortTransactionRows,
 	type UserAddresses
 } from '$lib/utils/export-data.utils';
 import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
@@ -193,16 +193,18 @@ export const exportTransactionsCsv = async ({
 
 		const transactions = buildTransactions();
 		const exportedAt = new Date();
-		const unsortedRows = buildTransactionRows({
-			transactions,
-			userAddresses,
-			nativeSymbolByNetworkId,
-			contacts,
-			exportedAt
-		});
-		// The Basic export is meant to be skimmed like an activity feed — sort newest first.
-		// The Extended export keeps store order so power users can correlate with the wallet UI.
-		const rows = variant === 'basic' ? sortBasicTransactionRows(unsortedRows) : unsortedRows;
+		// Both transactions variants share the same sort (newest first, tie-breaks on token
+		// and direction) so opening Basic and Extended side by side shows the rows lined
+		// up position-for-position.
+		const rows = sortTransactionRows(
+			buildTransactionRows({
+				transactions,
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts,
+				exportedAt
+			})
+		);
 		const csv = toCsv({ columns: TRANSACTION_CSV_COLUMNS_BY_VARIANT[variant], rows });
 
 		downloadCsv({

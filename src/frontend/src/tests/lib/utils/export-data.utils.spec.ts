@@ -17,8 +17,8 @@ import {
 	BASIC_TRANSACTION_CSV_COLUMNS,
 	buildTokenRows,
 	buildTransactionRows,
-	sortBasicTransactionRows,
 	sortTokenRows,
+	sortTransactionRows,
 	TOKEN_CSV_COLUMNS,
 	TRANSACTION_CSV_COLUMNS,
 	type TokenCsvRow,
@@ -417,12 +417,17 @@ describe('export-data.utils', () => {
 		});
 	});
 
-	describe('sortBasicTransactionRows', () => {
+	describe('sortTransactionRows', () => {
 		const row = (overrides: Partial<TransactionCsvRow>): TransactionCsvRow =>
-			({ timestamp_iso: '', ...overrides }) as TransactionCsvRow;
+			({
+				timestamp_iso: '',
+				token_symbol: '',
+				direction: '',
+				...overrides
+			}) as TransactionCsvRow;
 
 		it('sorts newest first (descending ISO timestamp)', () => {
-			const sorted = sortBasicTransactionRows([
+			const sorted = sortTransactionRows([
 				row({ timestamp_iso: '2026-01-01T00:00:00.000Z' }),
 				row({ timestamp_iso: '2026-05-17T12:00:00.000Z' }),
 				row({ timestamp_iso: '2026-03-15T08:30:00.000Z' })
@@ -435,8 +440,32 @@ describe('export-data.utils', () => {
 			]);
 		});
 
+		it('breaks timestamp ties by token symbol (alphabetical)', () => {
+			const ts = '2026-05-17T12:00:00.000Z';
+			const sorted = sortTransactionRows([
+				row({ timestamp_iso: ts, token_symbol: 'USDC' }),
+				row({ timestamp_iso: ts, token_symbol: 'BTC' }),
+				row({ timestamp_iso: ts, token_symbol: 'ETH' })
+			]);
+
+			expect(sorted.map(({ token_symbol }) => token_symbol)).toEqual(['BTC', 'ETH', 'USDC']);
+		});
+
+		it('breaks token ties by direction with incoming above outgoing', () => {
+			// Self-send pair: two rows with the same timestamp + token but opposite directions.
+			// Reading newest-first top-to-bottom, the IN (asset returning) should sit above the
+			// OUT (the earlier event of sending it).
+			const ts = '2026-05-17T12:00:00.000Z';
+			const sorted = sortTransactionRows([
+				row({ timestamp_iso: ts, token_symbol: 'ckBTC', direction: 'out' }),
+				row({ timestamp_iso: ts, token_symbol: 'ckBTC', direction: 'in' })
+			]);
+
+			expect(sorted.map(({ direction }) => direction)).toEqual(['in', 'out']);
+		});
+
 		it('sinks rows with missing timestamps to the bottom rather than the top', () => {
-			const sorted = sortBasicTransactionRows([
+			const sorted = sortTransactionRows([
 				row({ timestamp_iso: '' }),
 				row({ timestamp_iso: '2026-05-17T12:00:00.000Z' }),
 				row({ timestamp_iso: '' }),
@@ -458,7 +487,7 @@ describe('export-data.utils', () => {
 			];
 			const snapshot = [...input];
 
-			sortBasicTransactionRows(input);
+			sortTransactionRows(input);
 
 			expect(input).toEqual(snapshot);
 		});

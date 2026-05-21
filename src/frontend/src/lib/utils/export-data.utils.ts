@@ -160,24 +160,40 @@ export const BASIC_TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
 	{ key: 'tx_id', header: 'Transaction ID' }
 ];
 
-// Sorts the Basic transactions export by timestamp descending — newest first, the natural
-// activity-feed order. Rows without a parseable timestamp sink to the bottom rather than
-// jumping to either end.
-export const sortBasicTransactionRows = (rows: TransactionCsvRow[]): TransactionCsvRow[] =>
-	[...rows].sort((a, b) => {
-		if (a.timestamp_iso === '' && b.timestamp_iso === '') {
-			return 0;
-		}
+// Direction rank used to break ties when two rows share both the timestamp and the token.
+// 'in' rows are treated as "more recent" than 'out' rows so a self-send pair reads
+// "arrival above departure" in a newest-first sort — the OUT and IN duplicate of an ICRC
+// self-transfer share the same timestamp, and reading top-down (newest first) you walk
+// backward in time, so the IN (which represents the asset coming back) should sit above
+// the OUT (the earlier event of sending it out). Rows without a direction sink below both.
+const directionRank = (direction: string): number =>
+	direction === 'in' ? 2 : direction === 'out' ? 1 : 0;
 
-		if (a.timestamp_iso === '') {
+// Sorts the transactions export by timestamp descending — newest first, the natural
+// activity-feed order. Ties resolve by token symbol (alphabetical), then by direction
+// ('in' before 'out', see directionRank). Rows without a parseable timestamp sink to the
+// bottom rather than jumping to either end. Used for both Basic and Extended variants.
+export const sortTransactionRows = (rows: TransactionCsvRow[]): TransactionCsvRow[] =>
+	[...rows].sort((a, b) => {
+		if (a.timestamp_iso === '' && b.timestamp_iso !== '') {
 			return 1;
 		}
 
-		if (b.timestamp_iso === '') {
+		if (b.timestamp_iso === '' && a.timestamp_iso !== '') {
 			return -1;
 		}
 
-		return b.timestamp_iso.localeCompare(a.timestamp_iso);
+		const tsCompare = b.timestamp_iso.localeCompare(a.timestamp_iso);
+		if (tsCompare !== 0) {
+			return tsCompare;
+		}
+
+		const tokenCompare = a.token_symbol.localeCompare(b.token_symbol);
+		if (tokenCompare !== 0) {
+			return tokenCompare;
+		}
+
+		return directionRank(b.direction) - directionRank(a.direction);
 	});
 
 export interface UserAddresses {
