@@ -12,12 +12,6 @@ use crate::{
     utils::guards::caller_is_not_anonymous,
 };
 
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_exchange_rate(token_id: TokenId) -> Option<ExchangeRate> {
-    read_state(|s| s.exchange_rates.get(&StoredTokenId(token_id)).map(|c| c.0))
-}
-
 /// Returns the latest USD prices for the caller's priceable tokens.
 ///
 /// "Priceable" means the union of:
@@ -55,4 +49,10 @@ pub async fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     }
 
     cached_rates_snapshot(tokens)
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_exchange_rate(token_id: TokenId) -> Option<ExchangeRate> {
+    read_state(|s| s.exchange_rates.get(&StoredTokenId(token_id)).map(|c| c.0))
 }
