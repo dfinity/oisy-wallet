@@ -52,5 +52,5 @@ export const deleteActiveUserTransaction = ({
 	id
 }: {
 	identity: Identity;
-	id: string;
+	id: UpdateActiveUserTransactionParams['id'];
 }): Promise<void> => deleteActiveUserTransactionApi({ identity, id });
