@@ -234,7 +234,7 @@ const buildPostMessageResponseSchema = <T extends z.ZodTypeAny>({
 			.object({
 				...PostMessageCommonSchema.shape,
 				msg: PostMessageResponseSchema,
-				data: z.strictObject(dataSchema).shape.optional()
+				data: dataSchema.optional()
 			})
 			.strict(),
 		z
@@ -250,7 +250,7 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 		z
 			.object({
 				msg: PostMessageRequestSchema,
-				data: z.strictObject(dataSchema).shape.optional()
+				data: dataSchema.optional()
 			})
 			.strict(),
 		buildPostMessageResponseSchema({ dataSchema })
