@@ -1,8 +1,11 @@
 import { ICP_NETWORK_ID, ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import type { Icrc7CustomToken } from '$icp/types/icrc7-custom-token';
-import { COLLECTION_PARAM, NETWORK_PARAM } from '$lib/constants/routes.constants';
+import { isTokenIcrc7CustomToken } from '$icp/utils/icrc7.utils';
+import { COLLECTION_PARAM, NETWORK_PARAM, NFT_PARAM } from '$lib/constants/routes.constants';
 import { CanisterIdTextSchema, type CanisterIdText } from '$lib/types/canister';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { NetworkId } from '$lib/types/network';
+import type { NonFungibleToken } from '$lib/types/nft';
 import { isNullish } from '@dfinity/utils';
 
 export interface Icrc7CollectionDeepLink {
@@ -23,7 +26,7 @@ export const parseIcrc7CollectionDeepLink = ({
 	const collection = url.searchParams.get(COLLECTION_PARAM);
 	const network = url.searchParams.get(NETWORK_PARAM);
 
-	if (network !== ICP_NETWORK_SYMBOL) {
+	if (network !== ICP_NETWORK_SYMBOL || url.searchParams.has(NFT_PARAM)) {
 		return;
 	}
 
@@ -44,7 +47,7 @@ export const resolveIcrc7CollectionDeepLinkAction = ({
 	tokens
 }: {
 	url: URL;
-	tokens: Icrc7CustomToken[];
+	tokens: CustomToken<NonFungibleToken>[];
 }): Icrc7CollectionDeepLinkAction | undefined => {
 	const deepLink = parseIcrc7CollectionDeepLink({ url });
 
@@ -52,10 +55,16 @@ export const resolveIcrc7CollectionDeepLinkAction = ({
 		return;
 	}
 
-	const token = tokens.find(({ canisterId }) => canisterId === deepLink.canisterId);
+	const token = tokens.find(
+		(token) => 'canisterId' in token && token.canisterId === deepLink.canisterId
+	);
 
 	if (isNullish(token)) {
 		return { type: 'import', ...deepLink };
+	}
+
+	if (!isTokenIcrc7CustomToken(token)) {
+		return;
 	}
 
 	return { type: token.enabled ? 'ready' : 'enable', token, ...deepLink };
