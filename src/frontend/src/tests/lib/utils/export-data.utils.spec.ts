@@ -338,26 +338,45 @@ describe('export-data.utils', () => {
 	});
 
 	describe('TRANSACTION_CSV_COLUMNS', () => {
-		it('lists the 18 documented columns in order', () => {
+		it('lists the 16 extended-export columns in the documented order', () => {
 			expect(TRANSACTION_CSV_COLUMNS.map(({ key }) => key)).toEqual([
-				'timestamp_iso',
+				'timestamp_utc',
 				'network',
 				'token_symbol',
-				'token_address_or_ledger_id',
-				'type',
+				'type_display',
 				'type_raw',
-				'direction',
-				'status',
+				'counterparty',
 				'from',
 				'to',
-				'amount',
-				'fee',
+				'amount_raw',
+				'fee_raw',
 				'fee_token',
-				'effective_token',
-				'effective_fee_token',
+				'credit_raw',
+				'debit_raw',
+				'fee_token_debit_raw',
 				'tx_id',
-				'explorer_url',
-				'exported_at'
+				'explorer_url'
+			]);
+		});
+
+		it('uses title-cased human-readable headers for the extended export', () => {
+			expect(TRANSACTION_CSV_COLUMNS.map(({ header }) => header)).toEqual([
+				'Timestamp UTC',
+				'Network',
+				'Token',
+				'Type',
+				'Native Type',
+				'Counterparty',
+				'From',
+				'To',
+				'Amount',
+				'Fee',
+				'Fee Token',
+				'Credit',
+				'Debit',
+				'Fee Token Debit',
+				'Transaction ID',
+				'Explorer URL'
 			]);
 		});
 	});
@@ -569,7 +588,7 @@ describe('export-data.utils', () => {
 			txExplorerUrl: 'https://solscan.io/tx/sol-tx-1'
 		};
 
-		it('renders a Bitcoin send with all 20 columns populated', () => {
+		it('renders a Bitcoin send with all row fields populated', () => {
 			const transactions: AllTransactionUiWithCmp[] = [
 				{ component: 'bitcoin', transaction: btcTx, token: btcToken }
 			];
@@ -582,17 +601,22 @@ describe('export-data.utils', () => {
 				exportedAt
 			});
 
-			// Computed at test time so the assertion holds regardless of the host timezone —
-			// the helper renders the date in whatever timezone the test environment is in.
+			// Computed at test time so the assertions hold regardless of the host timezone —
+			// the helpers render the date in whatever timezone the test environment is in.
+			const pad = (n: number): string => String(n).padStart(2, '0');
 			const expectedTimestampLocal = (() => {
 				const d = new Date(TIMESTAMP_S * 1000);
-				const pad = (n: number): string => String(n).padStart(2, '0');
 				return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+			})();
+			const expectedTimestampUtc = (() => {
+				const d = new Date(TIMESTAMP_S * 1000);
+				return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
 			})();
 
 			expect(row).toEqual({
 				timestamp_iso: TIMESTAMP_ISO,
 				timestamp_local: expectedTimestampLocal,
+				timestamp_utc: expectedTimestampUtc,
 				network: BTC_MAINNET_NETWORK.name,
 				token_symbol: 'BTC',
 				token_address_or_ledger_id: '',
@@ -607,16 +631,21 @@ describe('export-data.utils', () => {
 				// for an outgoing row.
 				counterparty: 'bc1qrecipient',
 				amount: '0.001',
+				// Bigint twin used by the Extended export — raw smallest-unit value.
+				amount_raw: 100_000n,
 				fee: '0.000005',
+				fee_raw: 500n,
 				fee_token: 'BTC',
 				// Outgoing row with no incoming side, so Credit is empty.
 				credit: '',
-				// Outgoing same-token row: Debit = -(amount + fee).
+				credit_raw: undefined,
+				// Outgoing same-token row: Debit = -(amount + fee) = -(100_000 + 500) sats.
 				debit: '-0.001005',
+				debit_raw: -100_500n,
 				// Same fee token → no separate fee-token-debit column.
 				fee_token_debit: '',
-				// Extended export still surfaces the signed effective columns. Same-token
-				// merge folds the fee into effective_token here.
+				fee_token_debit_raw: undefined,
+				// Extended-only signed-decimal twins (kept for backward compat, not exported).
 				effective_token: '-0.001005',
 				effective_fee_token: '',
 				tx_id: 'btc-tx-1',

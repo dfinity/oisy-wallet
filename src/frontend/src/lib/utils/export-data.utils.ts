@@ -85,6 +85,7 @@ export const sortTokenRows = (rows: TokenCsvRow[]): TokenCsvRow[] =>
 export interface TransactionCsvRow extends CsvRow {
 	timestamp_iso: string;
 	timestamp_local: string;
+	timestamp_utc: string;
 	network: string;
 	token_symbol: string;
 	token_address_or_ledger_id: string;
@@ -97,11 +98,16 @@ export interface TransactionCsvRow extends CsvRow {
 	to: string;
 	counterparty: string;
 	amount: string;
+	amount_raw: bigint | undefined;
 	fee: string;
+	fee_raw: bigint | undefined;
 	fee_token: string;
 	credit: string;
+	credit_raw: bigint | undefined;
 	debit: string;
+	debit_raw: bigint | undefined;
 	fee_token_debit: string;
+	fee_token_debit_raw: bigint | undefined;
 	effective_token: string;
 	effective_fee_token: string;
 	tx_id: string;
@@ -109,25 +115,28 @@ export interface TransactionCsvRow extends CsvRow {
 	exported_at: string;
 }
 
+// Extended transactions export — like the Basic but with raw-integer accounting columns
+// (mirrors Balance in the Extended tokens variant), the chain-native type alongside the
+// normalized one, and the raw From / To addresses + Explorer URL for power users. Timestamp
+// is in UTC ("Zulu time") so two users in different timezones can compare exports row by
+// row.
 export const TRANSACTION_CSV_COLUMNS: CsvColumn<TransactionCsvRow>[] = [
-	{ key: 'timestamp_iso', header: 'timestamp_iso' },
-	{ key: 'network', header: 'network' },
-	{ key: 'token_symbol', header: 'token_symbol' },
-	{ key: 'token_address_or_ledger_id', header: 'token_address_or_ledger_id' },
-	{ key: 'type', header: 'type' },
-	{ key: 'type_raw', header: 'type_raw' },
-	{ key: 'direction', header: 'direction' },
-	{ key: 'status', header: 'status' },
-	{ key: 'from', header: 'from' },
-	{ key: 'to', header: 'to' },
-	{ key: 'amount', header: 'amount' },
-	{ key: 'fee', header: 'fee' },
-	{ key: 'fee_token', header: 'fee_token' },
-	{ key: 'effective_token', header: 'effective_token' },
-	{ key: 'effective_fee_token', header: 'effective_fee_token' },
-	{ key: 'tx_id', header: 'tx_id' },
-	{ key: 'explorer_url', header: 'explorer_url' },
-	{ key: 'exported_at', header: 'exported_at' }
+	{ key: 'timestamp_utc', header: 'Timestamp UTC' },
+	{ key: 'network', header: 'Network' },
+	{ key: 'token_symbol', header: 'Token' },
+	{ key: 'type_display', header: 'Type' },
+	{ key: 'type_raw', header: 'Native Type' },
+	{ key: 'counterparty', header: 'Counterparty' },
+	{ key: 'from', header: 'From' },
+	{ key: 'to', header: 'To' },
+	{ key: 'amount_raw', header: 'Amount' },
+	{ key: 'fee_raw', header: 'Fee' },
+	{ key: 'fee_token', header: 'Fee Token' },
+	{ key: 'credit_raw', header: 'Credit' },
+	{ key: 'debit_raw', header: 'Debit' },
+	{ key: 'fee_token_debit_raw', header: 'Fee Token Debit' },
+	{ key: 'tx_id', header: 'Transaction ID' },
+	{ key: 'explorer_url', header: 'Explorer URL' }
 ];
 
 // Slim variant for the Basic transactions export — 12 spreadsheet-friendly columns.
@@ -320,6 +329,18 @@ const formatTimestampLocal = (timestamp: bigint | number | undefined): string =>
 	return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())} ${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`;
 };
 
+// UTC counterpart of formatTimestampLocal — same format, but the values are taken from
+// the date's UTC components ("Zulu" time). Used by the Extended export so a user can
+// share their CSV with someone in another timezone and the rows still compare cleanly.
+const formatTimestampUtc = (timestamp: bigint | number | undefined): string => {
+	if (isNullish(timestamp)) {
+		return '';
+	}
+
+	const date = new Date(normalizeTimestampToSeconds(timestamp) * 1000);
+	return `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())} ${pad2(date.getUTCHours())}:${pad2(date.getUTCMinutes())}:${pad2(date.getUTCSeconds())}`;
+};
+
 // Title-cases a normalized transaction type for the human-facing Basic export (e.g.
 // 'send' → 'Send', 'approve' → 'Approve'). Empty input stays empty.
 const formatTypeDisplay = (type: string): string =>
@@ -354,6 +375,7 @@ const toBitcoinRow = ({
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
 		timestamp_local: formatTimestampLocal(tx.timestamp),
+		timestamp_utc: formatTimestampUtc(tx.timestamp),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
@@ -365,14 +387,19 @@ const toBitcoinRow = ({
 		from: tx.from ?? '',
 		to: recipients.join(';'),
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
+		amount_raw: tx.value ?? undefined,
 		fee: formatAmount({ value: tx.fee, decimals: BTC_DECIMALS }),
+		fee_raw: tx.fee ?? undefined,
 		fee_token: 'BTC',
-		// counterparty + credit/debit/fee_token_debit + effective_* are filled in by
-		// finalizeRow once direction + contacts + self-transfer are known.
+		// counterparty + credit/debit/fee_token_debit (and their *_raw twins) + effective_*
+		// are filled in by finalizeRow once direction + contacts + self-transfer are known.
 		counterparty: '',
 		credit: '',
+		credit_raw: undefined,
 		debit: '',
+		debit_raw: undefined,
 		fee_token_debit: '',
+		fee_token_debit_raw: undefined,
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.id,
@@ -418,6 +445,7 @@ const toEthereumRow = ({
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
 		timestamp_local: formatTimestampLocal(tx.timestamp),
+		timestamp_utc: formatTimestampUtc(tx.timestamp),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
@@ -429,12 +457,17 @@ const toEthereumRow = ({
 		from: tx.from,
 		to: tx.to ?? '',
 		amount: formatAmount({ value: tx.value as bigint | undefined, decimals: token.decimals }),
+		amount_raw: (tx.value as bigint | undefined) ?? undefined,
 		fee: formatAmount({ value: gasFee, decimals: EVM_NATIVE_DECIMALS }),
+		fee_raw: gasFee,
 		fee_token: nativeSymbolByNetworkId(token.network.id) ?? '',
 		counterparty: '',
 		credit: '',
+		credit_raw: undefined,
 		debit: '',
+		debit_raw: undefined,
 		fee_token_debit: '',
+		fee_token_debit_raw: undefined,
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: tx.hash ?? '',
@@ -482,6 +515,7 @@ const toIcRow = ({
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
 		timestamp_local: formatTimestampLocal(tx.timestamp),
+		timestamp_utc: formatTimestampUtc(tx.timestamp),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
@@ -493,12 +527,17 @@ const toIcRow = ({
 		from,
 		to,
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
+		amount_raw: tx.value ?? undefined,
 		fee: formatAmount({ value: tx.fee, decimals: token.decimals }),
+		fee_raw: tx.fee ?? undefined,
 		fee_token: token.symbol,
 		counterparty: '',
 		credit: '',
+		credit_raw: undefined,
 		debit: '',
+		debit_raw: undefined,
 		fee_token_debit: '',
+		fee_token_debit_raw: undefined,
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.id),
@@ -535,6 +574,7 @@ const toSolanaRow = ({
 	return {
 		timestamp_iso: formatTimestamp(tx.timestamp),
 		timestamp_local: formatTimestampLocal(tx.timestamp),
+		timestamp_utc: formatTimestampUtc(tx.timestamp),
 		network: token.network.name,
 		token_symbol: token.symbol,
 		token_address_or_ledger_id: getAddressOrLedgerId(token),
@@ -546,12 +586,17 @@ const toSolanaRow = ({
 		from: from ?? '',
 		to: to ?? '',
 		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
+		amount_raw: tx.value ?? undefined,
 		fee: formatAmount({ value: tx.fee, decimals: SOL_NATIVE_DECIMALS }),
+		fee_raw: tx.fee ?? undefined,
 		fee_token: 'SOL',
 		counterparty: '',
 		credit: '',
+		credit_raw: undefined,
 		debit: '',
+		debit_raw: undefined,
 		fee_token_debit: '',
+		fee_token_debit_raw: undefined,
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.signature),
@@ -703,14 +748,36 @@ const finalizeRow = ({
 
 	const fee_token_debit = isOutgoing && !mergeColumns && fee !== '' ? negate(fee) : '';
 
+	// Bigint twins of the accounting columns for the Extended export, which emits raw
+	// integers (no decimal point) — mirrors the Basic-vs-Extended balance split on tokens.
+	const credit_raw = isIncoming && nonNullish(row.amount_raw) ? row.amount_raw : undefined;
+
+	let debit_raw: bigint | undefined;
+	if (isOutgoing) {
+		const assetPortionRaw = isApprove || isStandaloneRoundTrip ? ZERO : (row.amount_raw ?? ZERO);
+		const feePortionRaw = mergeColumns ? (row.fee_raw ?? ZERO) : ZERO;
+		const totalRaw = assetPortionRaw + feePortionRaw;
+		if (totalRaw !== ZERO) {
+			debit_raw = -totalRaw;
+		}
+	}
+
+	const fee_token_debit_raw =
+		isOutgoing && !mergeColumns && nonNullish(row.fee_raw) && row.fee_raw !== ZERO
+			? -row.fee_raw
+			: undefined;
+
 	return {
 		...row,
 		fee,
 		fee_token,
 		counterparty,
 		credit,
+		credit_raw,
 		debit,
+		debit_raw,
 		fee_token_debit,
+		fee_token_debit_raw,
 		effective_token,
 		effective_fee_token
 	};
