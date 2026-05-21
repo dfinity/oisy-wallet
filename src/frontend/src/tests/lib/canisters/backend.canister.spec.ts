@@ -13,6 +13,15 @@ import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddPendingTransactionParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import {
+	mockActiveUserTransaction,
+	mockActiveUserTransactionData,
+	mockActiveUserTransactionErrorNotFound,
+	mockActiveUserTransactionId,
+	mockActiveUserTransactionRef,
+	mockCreateActiveUserTransactionParams,
+	mockUpdateActiveUserTransactionParams
+} from '$tests/mocks/active-user-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
@@ -1743,6 +1752,211 @@ describe('backend.canister', () => {
 			await expect(getExchangeRates({ token_ids: tokenIds, certified: false })).rejects.toThrow(
 				mockResponseError
 			);
+		});
+	});
+
+	describe('createActiveUserTransaction', () => {
+		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+
+		it('should create the record and return the unwrapped value', async () => {
+			service.create_active_user_transaction.mockResolvedValue({
+				Ok: mockActiveUserTransaction
+			});
+
+			const { createActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await createActiveUserTransaction(mockCreateActiveUserTransactionParams);
+
+			expect(service.create_active_user_transaction).toHaveBeenCalledExactlyOnceWith({
+				id: mockActiveUserTransactionId,
+				data: mockActiveUserTransactionData,
+				progress_step: ['submitting'],
+				external_refs: []
+			});
+			expect(res).toEqual(mockActiveUserTransaction);
+		});
+
+		it('should pass empty array for progress_step when undefined', async () => {
+			service.create_active_user_transaction.mockResolvedValue({
+				Ok: mockActiveUserTransaction
+			});
+
+			const { createActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await createActiveUserTransaction({
+				id: mockActiveUserTransactionId,
+				data: mockActiveUserTransactionData,
+				externalRefs: []
+			});
+
+			expect(service.create_active_user_transaction).toHaveBeenCalledExactlyOnceWith({
+				id: mockActiveUserTransactionId,
+				data: mockActiveUserTransactionData,
+				progress_step: [],
+				external_refs: []
+			});
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			service.create_active_user_transaction.mockResolvedValue(errorResponse);
+
+			const { createActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				createActiveUserTransaction(mockCreateActiveUserTransactionParams)
+			).rejects.toEqual(errorResponse.Err);
+		});
+
+		it('should rethrow if the canister call throws', async () => {
+			service.create_active_user_transaction.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { createActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				createActiveUserTransaction(mockCreateActiveUserTransactionParams)
+			).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('updateActiveUserTransaction', () => {
+		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+
+		it('should pass populated optionals through to the canister', async () => {
+			service.update_active_user_transaction.mockResolvedValue({
+				Ok: mockActiveUserTransaction
+			});
+
+			const { updateActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateActiveUserTransaction(mockUpdateActiveUserTransactionParams);
+
+			expect(service.update_active_user_transaction).toHaveBeenCalledExactlyOnceWith({
+				id: mockActiveUserTransactionId,
+				status: [{ Executing: null }],
+				progress_step: ['settling'],
+				external_refs: [[mockActiveUserTransactionRef]],
+				error: []
+			});
+			expect(res).toEqual(mockActiveUserTransaction);
+		});
+
+		it('should pass empty arrays for all unset partial fields', async () => {
+			service.update_active_user_transaction.mockResolvedValue({
+				Ok: mockActiveUserTransaction
+			});
+
+			const { updateActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await updateActiveUserTransaction({ id: mockActiveUserTransactionId });
+
+			expect(service.update_active_user_transaction).toHaveBeenCalledExactlyOnceWith({
+				id: mockActiveUserTransactionId,
+				status: [],
+				progress_step: [],
+				external_refs: [],
+				error: []
+			});
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			service.update_active_user_transaction.mockResolvedValue(errorResponse);
+
+			const { updateActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				updateActiveUserTransaction(mockUpdateActiveUserTransactionParams)
+			).rejects.toEqual(errorResponse.Err);
+		});
+	});
+
+	describe('deleteActiveUserTransaction', () => {
+		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+
+		it('should resolve to void on Ok', async () => {
+			service.delete_active_user_transaction.mockResolvedValue({ Ok: null });
+
+			const { deleteActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await deleteActiveUserTransaction(mockActiveUserTransactionId);
+
+			expect(service.delete_active_user_transaction).toHaveBeenCalledExactlyOnceWith(
+				mockActiveUserTransactionId
+			);
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			service.delete_active_user_transaction.mockResolvedValue(errorResponse);
+
+			const { deleteActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(deleteActiveUserTransaction(mockActiveUserTransactionId)).rejects.toEqual(
+				errorResponse.Err
+			);
+		});
+	});
+
+	describe('getActiveUserTransactions', () => {
+		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+
+		it('should return the unwrapped list of transactions', async () => {
+			service.get_active_user_transactions.mockResolvedValue({
+				Ok: { transactions: [mockActiveUserTransaction] }
+			});
+
+			const { getActiveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getActiveUserTransactions();
+
+			expect(service.get_active_user_transactions).toHaveBeenCalledExactlyOnceWith();
+			expect(res).toEqual([mockActiveUserTransaction]);
+		});
+
+		it('should return an empty array when the user has no records', async () => {
+			service.get_active_user_transactions.mockResolvedValue({
+				Ok: { transactions: [] }
+			});
+
+			const { getActiveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getActiveUserTransactions();
+
+			expect(res).toEqual([]);
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			service.get_active_user_transactions.mockResolvedValue(errorResponse);
+
+			const { getActiveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getActiveUserTransactions()).rejects.toEqual(errorResponse.Err);
 		});
 	});
 });

@@ -29,11 +29,21 @@
 
 	interface Props {
 		initialSearch?: string;
+		initialNetwork?: Network;
+		initialTokenData?: Partial<AddTokenData>;
+		initialStep?: WizardStepsManageTokens;
 		onClose?: () => void;
 		infoElement?: Snippet;
 	}
 
-	let { initialSearch, onClose = () => {}, infoElement }: Props = $props();
+	let {
+		initialSearch,
+		initialNetwork,
+		initialTokenData,
+		initialStep,
+		onClose = () => {},
+		infoElement
+	}: Props = $props();
 
 	const isNftsPage = $derived(isRouteNfts(page));
 
@@ -60,6 +70,7 @@
 
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
+	let initializedInitialStep = false;
 
 	const saveTokens = async (tokens: Token[]) => {
 		await saveAllCustomTokens({
@@ -118,8 +129,26 @@
 		onClose();
 	};
 
-	let network: Network | undefined = $state($selectedNetwork);
-	let tokenData: Partial<AddTokenData> = $state({});
+	const initialModalNetwork = (): Network | undefined => initialNetwork ?? $selectedNetwork;
+
+	const initialModalTokenData = (): Partial<AddTokenData> => initialTokenData ?? {};
+
+	let network: Network | undefined = $state(initialModalNetwork());
+	let tokenData: Partial<AddTokenData> = $state(initialModalTokenData());
+
+	$effect(() => {
+		if (initializedInitialStep || isNullish(initialStep) || isNullish(modal)) {
+			return;
+		}
+
+		initializedInitialStep = true;
+
+		const stepIndex = steps.findIndex(({ name }) => name === initialStep);
+
+		if (stepIndex >= 0) {
+			modal.set(stepIndex);
+		}
+	});
 </script>
 
 <WizardModal

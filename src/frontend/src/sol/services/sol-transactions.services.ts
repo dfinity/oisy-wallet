@@ -34,7 +34,10 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
+import {
+	requiresStoredSplOwnerRefresh,
+	solBackendTokenId
+} from '$sol/utils/user-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { lamports, address as solAddress } from '@solana/kit';
@@ -69,21 +72,6 @@ const mapSolCertifiedTransactions = (transactions: SolTransactionUi[]): SolCerti
 		certified: false
 	}));
 
-const requiresStoredSplOwnerRefresh = ({
-	transaction: { from, fromOwner, to, toOwner },
-	address,
-	tokenAddress
-}: {
-	transaction: SolTransactionUi;
-	address: SolAddress;
-	tokenAddress?: SplTokenAddress;
-}): boolean =>
-	nonNullish(tokenAddress) &&
-	from !== address &&
-	fromOwner !== address &&
-	to !== address &&
-	toOwner !== address;
-
 const extractBalances = ({
 	address,
 	accountKeys,
@@ -115,6 +103,10 @@ interface SolTokenAccountMetadata {
 	addressToOwner: Record<SolAddress, SolAddress>;
 	addressToToken: Record<SolAddress, SplTokenAddress>;
 }
+
+type SolTokenBalance = NonNullable<
+	NonNullable<SolRpcTransaction['meta']>['preTokenBalances']
+>[number];
 
 const emptySolTokenAccountMetadata: SolTokenAccountMetadata = {
 	addressToOwner: {},
@@ -175,6 +167,29 @@ const extractTokenAccountMetadata = (instruction: SolRpcInstruction): SolTokenAc
 	return emptySolTokenAccountMetadata;
 };
 
+const extractTokenBalanceMetadata = ({
+	accountKeys,
+	tokenBalances
+}: {
+	accountKeys: ParsedAccount[];
+	tokenBalances: SolTokenBalance[];
+}): SolTokenAccountMetadata =>
+	tokenBalances.reduce<SolTokenAccountMetadata>(
+		({ addressToOwner, addressToToken }, { accountIndex, mint, owner }) => {
+			const account = accountKeys[Number(accountIndex)]?.pubkey;
+
+			if (isNullish(account) || isNullish(owner)) {
+				return { addressToOwner, addressToToken };
+			}
+
+			return {
+				addressToOwner: { ...addressToOwner, [account]: owner },
+				addressToToken: { ...addressToToken, [account]: mint }
+			};
+		},
+		emptySolTokenAccountMetadata
+	);
+
 export const fetchSolTransactionsForSignature = async ({
 	identity,
 	signature,
@@ -209,13 +224,18 @@ export const fetchSolTransactionsForSignature = async ({
 		meta
 	} = transactionDetail;
 
-	const { fee, preBalances, postBalances } = meta ?? {};
+	const { fee, preBalances, postBalances, preTokenBalances, postTokenBalances } = meta ?? {};
+	const parsedAccountKeys = [...(accountKeys ?? [])];
 	const { pubkey: feePayer } = extractFeePayer([...(accountKeys ?? [])]) ?? {};
 	const { preBalance, postBalance } = extractBalances({
 		address,
-		accountKeys: [...(accountKeys ?? [])],
+		accountKeys: parsedAccountKeys,
 		preBalances: [...(preBalances ?? [])],
 		postBalances: [...(postBalances ?? [])]
+	});
+	const tokenBalanceMetadata = extractTokenBalanceMetadata({
+		accountKeys: parsedAccountKeys,
+		tokenBalances: [...(preTokenBalances ?? []), ...(postTokenBalances ?? [])]
 	});
 
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
@@ -390,8 +410,8 @@ export const fetchSolTransactionsForSignature = async ({
 		Promise.resolve({
 			parsedTransactions: [],
 			cumulativeBalances: initialCumulativeBalances,
-			addressToToken: {},
-			addressToOwner: {}
+			addressToToken: tokenBalanceMetadata.addressToToken,
+			addressToOwner: tokenBalanceMetadata.addressToOwner
 		})
 	);
 

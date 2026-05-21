@@ -1,5 +1,8 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
+	ActiveUserTransactionData,
+	ActiveUserTransactionRef,
+	ActiveUserTransactionStatus,
 	AllowSigningResponse,
 	TokenId as BackendTokenId,
 	Network as BitcoinNetwork,
@@ -229,4 +232,19 @@ export interface GetUserTransactionsResponse {
 export interface SaveUserTransactionsParams {
 	tokenId: BackendTokenId;
 	transactions: UserTransaction[];
+}
+
+export interface CreateActiveUserTransactionParams {
+	id: string;
+	data: ActiveUserTransactionData;
+	progressStep?: string;
+	externalRefs: ActiveUserTransactionRef[];
+}
+
+export interface UpdateActiveUserTransactionParams {
+	id: string;
+	status?: ActiveUserTransactionStatus;
+	progressStep?: string;
+	externalRefs?: ActiveUserTransactionRef[];
+	error?: string;
 }
