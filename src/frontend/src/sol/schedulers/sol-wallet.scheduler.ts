@@ -23,6 +23,7 @@ import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
@@ -45,6 +46,21 @@ interface SolWalletData {
 	balance: CertifiedData<SolBalance | null>;
 	transactions: SolCertifiedTransaction[];
 }
+
+const requiresStoredSplOwnerRefresh = ({
+	transaction: { from, fromOwner, to, toOwner },
+	address,
+	tokenAddress
+}: {
+	transaction: SolTransactionUi;
+	address: SolAddress;
+	tokenAddress?: SplTokenAddress;
+}): boolean =>
+	nonNullish(tokenAddress) &&
+	from !== address &&
+	fromOwner !== address &&
+	to !== address &&
+	toOwner !== address;
 
 export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> {
 	#ref: PostMessageCommon['ref'] | undefined;
@@ -148,8 +164,18 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			}
 		}
 
+		const storedRefreshSignatures = new Set(
+			storedTransactions
+				.filter(({ data: transaction }) =>
+					requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress })
+				)
+				.map(({ data: { signature } }) => String(signature))
+		);
+
 		const exitIfFirstSignatureMatches =
-			storedTransactions.length > 0 && nonNullish(storedTransactions[0]?.data.signature)
+			storedRefreshSignatures.size === 0 &&
+			storedTransactions.length > 0 &&
+			nonNullish(storedTransactions[0]?.data.signature)
 				? String(storedTransactions[0].data.signature)
 				: undefined;
 
@@ -167,8 +193,31 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			certified: false
 		}));
 
-		const newRpcTransactions = rpcCertified.filter(({ data: { id } }) =>
-			isNullish(this.store.transactions[`${id}`])
+		const rpcSignatures = new Set(rpcCertified.map(({ data: { signature } }) => String(signature)));
+		const refreshedSignatures = new Set(
+			[...storedRefreshSignatures].filter((signature) => rpcSignatures.has(signature))
+		);
+
+		if (refreshedSignatures.size > 0) {
+			storedTransactions = storedTransactions.filter(
+				({ data: { signature } }) => !refreshedSignatures.has(String(signature))
+			);
+
+			this.store.transactions = Object.fromEntries(
+				Object.entries(this.store.transactions).filter(
+					([
+						_,
+						{
+							data: { signature }
+						}
+					]) => !refreshedSignatures.has(String(signature))
+				)
+			);
+		}
+
+		const newRpcTransactions = rpcCertified.filter(
+			({ data: { id, signature } }) =>
+				refreshedSignatures.has(String(signature)) || isNullish(this.store.transactions[`${id}`])
 		);
 
 		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newRpcTransactions.length > 0) {

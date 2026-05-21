@@ -5,6 +5,7 @@ use candid::{CandidType, Deserialize};
 pub type Timestamp = u64;
 
 pub mod account;
+pub mod active_user_transaction;
 pub mod agreement;
 pub mod api_keys;
 pub mod backend_config;
@@ -61,4 +62,5 @@ pub struct Stats {
     pub exchange_rates_count: u64,
     pub user_transactions_count: u64,
     pub agreement_history_count: u64,
+    pub active_user_transactions_count: u64,
 }

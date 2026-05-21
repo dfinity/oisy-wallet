@@ -23,6 +23,7 @@ pub(crate) const API_KEYS_MEMORY_ID: MemoryId = MemoryId::new(9);
 pub(crate) const EXCHANGE_RATE_MEMORY_ID: MemoryId = MemoryId::new(10);
 pub(crate) const USER_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(11);
 pub(crate) const AGREEMENT_HISTORY_MEMORY_ID: MemoryId = MemoryId::new(12);
+pub(crate) const ACTIVE_USER_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(13);
 
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(

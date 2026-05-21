@@ -803,6 +803,44 @@ describe('nfts.utils', () => {
 			expect(result).toBe(MediaStatusEnum.OK);
 		});
 
+		it('returns OK for data image URLs without fetching', async () => {
+			global.fetch = vi.fn();
+
+			const result = await getMediaStatus('data:image/png;base64,iVBORw0KGgo=');
+
+			expect(result).toBe(MediaStatusEnum.OK);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('returns OK for padded base64 data image URLs without overcounting size', async () => {
+			global.fetch = vi.fn();
+
+			const result = await getMediaStatus('data:image/png;base64,TQ==');
+
+			expect(result).toBe(MediaStatusEnum.OK);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('returns NON_SUPPORTED_MEDIA_TYPE for non-media data URLs', async () => {
+			global.fetch = vi.fn();
+
+			const result = await getMediaStatus('data:text/html;base64,PGgxPkhlbGxvPC9oMT4=');
+
+			expect(result).toBe(MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('returns FILESIZE_LIMIT_EXCEEDED for oversized data media URLs without fetching', async () => {
+			global.fetch = vi.fn();
+
+			const result = await getMediaStatus(
+				`data:image/png,${'a'.repeat(NFT_MAX_FILESIZE_LIMIT + 1)}`
+			);
+
+			expect(result).toBe(MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
 		it('returns INVALID_DATA for invalid URL', async () => {
 			const result = await getMediaStatus('not-a-url');
 
@@ -823,6 +861,25 @@ describe('nfts.utils', () => {
 			});
 
 			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(MediaStatusEnum.OK);
+		});
+
+		it('returns OK for application/octet-stream byte-stream assets under the size limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'application/octet-stream'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus(
+				'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3Aabc&owner_id=sey3i-jyaaa-aaaap-quo3q-cai&project_id=019de6f2-675c-775e-9eda-2adf4341566c'
+			);
 
 			expect(result).toBe(MediaStatusEnum.OK);
 		});

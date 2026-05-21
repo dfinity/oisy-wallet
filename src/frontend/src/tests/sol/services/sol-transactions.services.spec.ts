@@ -5,7 +5,10 @@ import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnetStore, solAddressMainnetStore } from '$lib/stores/address.store';
 import * as solanaApi from '$sol/api/solana.api';
 import { getAccountOwner } from '$sol/api/solana.api';
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import {
 	fetchSolTransactionsForSignature,
@@ -26,6 +29,10 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
+import {
+	mapSolTransactionToUserTransaction,
+	mapUserTransactionToSolTransaction
+} from '$sol/utils/user-transactions.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
@@ -41,6 +48,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
+import { address as solAddress, stringifiedBigInt, stringifiedNumber } from '@solana/kit';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -154,6 +162,23 @@ describe('sol-transactions.services', () => {
 		};
 
 		const indexStartAtaMapping = Math.floor(mockAllInstructions.length / 3);
+		const mockInitializedTokenAccount = 'F5Qu5Lx2aDwis6KwtpXBuHWHh2VGWewQAVEaatAKfir3';
+		const mockInitializedTokenAddress = 'So11111111111111111111111111111111111111112';
+		const expectedInstructionAddressToToken = ({
+			instructions,
+			index
+		}: {
+			instructions: ReadonlyArray<(typeof mockAllInstructions)[number]>;
+			index: number;
+		}): Record<string, string> => {
+			const indexStartInstructionTokenMapping = instructions.findIndex(
+				(instruction) => 'parsed' in instruction && instruction.parsed.type === 'initializeAccount3'
+			);
+
+			return indexStartInstructionTokenMapping >= 0 && index >= indexStartInstructionTokenMapping
+				? { [mockInitializedTokenAccount]: mockInitializedTokenAddress }
+				: {};
+		};
 
 		const expectedResults: SolTransactionUi[] = Array.from(
 			{ length: nInstructions },
@@ -217,7 +242,12 @@ describe('sol-transactions.services', () => {
 									[mockSolAddress]: initialBalance - mockValue * BigInt(index),
 									[mockSolAddress2]: mockValue * BigInt(index)
 								},
-					addressToToken: {}
+					addressToToken: expect.objectContaining(
+						expectedInstructionAddressToToken({
+							instructions: mockAllInstructions,
+							index
+						})
+					)
 				});
 			});
 		});
@@ -256,7 +286,12 @@ describe('sol-transactions.services', () => {
 									[mockSolAddress]: initialBalance - mockValue * BigInt(index),
 									[mockSolAddress2]: mockValue * BigInt(index)
 								},
-					addressToToken: {}
+					addressToToken: expect.objectContaining(
+						expectedInstructionAddressToToken({
+							instructions: innerInstructions,
+							index
+						})
+					)
 				});
 			});
 		});
@@ -393,13 +428,16 @@ describe('sol-transactions.services', () => {
 									[mockSolAddress2]:
 										mockValue * BigInt(index >= indexStartAtaMapping ? index - 1 : index)
 								},
-					addressToToken:
-						index >= indexStartAtaMapping
-							? {
-									[mockAtaAddress]: mockSplAddress,
-									[mockAtaAddress2]: mockSplAddress
-								}
-							: {}
+					addressToToken: expect.objectContaining({
+						...expectedInstructionAddressToToken({
+							instructions: mockAllInstructions,
+							index
+						}),
+						...(index >= indexStartAtaMapping && {
+							[mockAtaAddress]: mockSplAddress,
+							[mockAtaAddress2]: mockSplAddress
+						})
+					})
 				});
 			});
 		});
@@ -414,6 +452,244 @@ describe('sol-transactions.services', () => {
 					toOwner: 'mock-owner-address'
 				}))
 			);
+		});
+
+		it('should preserve token-balance owners for SPL transfers', async () => {
+			const usdtAmount = 39974n;
+			const tokenBalance = {
+				accountIndex: 0,
+				mint: solAddress(mockSplAddress),
+				owner: solAddress(mockSolAddress),
+				programId: solAddress(TOKEN_PROGRAM_ADDRESS),
+				uiTokenAmount: {
+					amount: stringifiedBigInt(usdtAmount.toString()),
+					decimals: 6,
+					uiAmount: 0.039974,
+					uiAmountString: stringifiedNumber('0.039974')
+				}
+			} as NonNullable<NonNullable<SolRpcTransaction['meta']>['postTokenBalances']>[number];
+			const tokenBalanceTo = {
+				...tokenBalance,
+				accountIndex: 1,
+				owner: solAddress(mockSolAddress2)
+			};
+			const mockTransactionDetailWithTokenBalances = {
+				...mockTransactionDetail,
+				transaction: {
+					...mockTransactionDetail.transaction,
+					message: {
+						...mockTransactionDetail.transaction.message,
+						accountKeys: [
+							{
+								pubkey: solAddress(mockAtaAddress),
+								signer: false,
+								source: 'transaction',
+								writable: true
+							},
+							{
+								pubkey: solAddress(mockAtaAddress2),
+								signer: false,
+								source: 'transaction',
+								writable: true
+							},
+							{
+								pubkey: solAddress(mockSolAddress),
+								signer: true,
+								source: 'transaction',
+								writable: true
+							}
+						],
+						instructions: [
+							{
+								parsed: {
+									info: {
+										amount: usdtAmount.toString(),
+										authority: mockSolAddress,
+										destination: mockAtaAddress2,
+										source: mockAtaAddress
+									},
+									type: 'transfer'
+								},
+								program: 'spl-token',
+								programId: solAddress(TOKEN_PROGRAM_ADDRESS),
+								stackHeight: undefined
+							}
+						]
+					}
+				},
+				meta: {
+					...mockTransactionDetail.meta,
+					innerInstructions: [],
+					preTokenBalances: [tokenBalance, tokenBalanceTo],
+					postTokenBalances: [tokenBalance, tokenBalanceTo]
+				}
+			} as SolRpcTransaction;
+
+			spyFetchTransactionDetailForSignature.mockResolvedValue(
+				mockTransactionDetailWithTokenBalances
+			);
+			vi.mocked(getAccountOwner).mockResolvedValue(undefined);
+			spyMapSolParsedInstruction.mockResolvedValue({
+				value: usdtAmount,
+				from: mockAtaAddress,
+				to: mockAtaAddress2,
+				tokenAddress: mockSplAddress
+			});
+
+			await expect(
+				fetchSolTransactionsForSignature({
+					...mockParams,
+					tokenAddress: mockSplAddress,
+					tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
+				})
+			).resolves.toEqual([
+				expect.objectContaining({
+					type: 'send',
+					value: usdtAmount,
+					from: mockAtaAddress,
+					fromOwner: mockSolAddress,
+					to: mockAtaAddress2,
+					toOwner: mockSolAddress2
+				})
+			]);
+			expect(getAccountOwner).not.toHaveBeenCalled();
+		});
+
+		it('should preserve instruction-derived ATA owners for cached SPL transfers', async () => {
+			const usdtAmount = 39974n;
+			const mockTransactionDetailWithClosedAta = {
+				...mockTransactionDetail,
+				transaction: {
+					...mockTransactionDetail.transaction,
+					message: {
+						...mockTransactionDetail.transaction.message,
+						instructions: [
+							{
+								parsed: {
+									info: {
+										account: mockAtaAddress,
+										mint: mockSplAddress,
+										source: mockSolAddress,
+										tokenProgram: TOKEN_PROGRAM_ADDRESS,
+										wallet: mockSolAddress
+									},
+									type: 'createIdempotent'
+								},
+								program: 'spl-associated-token-account',
+								programId: solAddress(ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS),
+								stackHeight: undefined
+							},
+							{
+								parsed: {
+									info: {
+										amount: usdtAmount.toString(),
+										authority: mockSolAddress2,
+										destination: mockAtaAddress,
+										source: mockSolAddress2
+									},
+									type: 'transfer'
+								},
+								program: 'spl-token',
+								programId: solAddress(TOKEN_PROGRAM_ADDRESS),
+								stackHeight: undefined
+							},
+							{
+								parsed: {
+									info: {
+										amount: usdtAmount.toString(),
+										authority: mockSolAddress,
+										destination: mockSolAddress2,
+										source: mockAtaAddress
+									},
+									type: 'transfer'
+								},
+								program: 'spl-token',
+								programId: solAddress(TOKEN_PROGRAM_ADDRESS),
+								stackHeight: undefined
+							}
+						]
+					}
+				},
+				meta: {
+					...mockTransactionDetail.meta,
+					innerInstructions: []
+				}
+			};
+
+			spyFetchTransactionDetailForSignature.mockResolvedValue(mockTransactionDetailWithClosedAta);
+			spyFindAssociatedTokenPda.mockResolvedValue([mockAtaAddress]);
+			vi.mocked(getAccountOwner).mockResolvedValue(undefined);
+			spyMapSolParsedInstruction.mockImplementation(
+				({
+					instruction
+				}: Parameters<typeof solInstructionsUtils.mapSolParsedInstruction>[0]): Promise<
+					SolMappedTransaction | undefined
+				> => {
+					if (!('parsed' in instruction)) {
+						return Promise.resolve(undefined);
+					}
+
+					const {
+						parsed: { type, info }
+					} = instruction;
+
+					if (type !== 'transfer') {
+						return Promise.resolve(undefined);
+					}
+
+					const {
+						amount,
+						source: from,
+						destination: to
+					} = info as {
+						amount: string;
+						source: SolMappedTransaction['from'];
+						destination: SolMappedTransaction['to'];
+					};
+
+					return Promise.resolve({
+						value: BigInt(amount),
+						from,
+						to,
+						tokenAddress: mockSplAddress
+					});
+				}
+			);
+
+			const transactions = await fetchSolTransactionsForSignature({
+				...mockParams,
+				tokenAddress: mockSplAddress,
+				tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
+			});
+
+			expect(transactions).toEqual([
+				expect.objectContaining({
+					type: 'send',
+					value: usdtAmount,
+					from: mockAtaAddress,
+					fromOwner: mockSolAddress,
+					to: mockSolAddress2
+				}),
+				expect.objectContaining({
+					type: 'receive',
+					value: usdtAmount,
+					from: mockSolAddress2,
+					to: mockAtaAddress,
+					toOwner: mockSolAddress
+				})
+			]);
+			expect(
+				vi.mocked(getAccountOwner).mock.calls.some(([{ address }]) => address === mockAtaAddress)
+			).toBeFalsy();
+
+			const [outboundTransaction] = transactions;
+			const cachedOutboundTransaction = mapUserTransactionToSolTransaction({
+				transaction: mapSolTransactionToUserTransaction(outboundTransaction),
+				address: mockSolAddress
+			});
+
+			expect(cachedOutboundTransaction.type).toBe('send');
+			expect(cachedOutboundTransaction.fromOwner).toBe(mockSolAddress);
 		});
 	});
 
@@ -435,6 +711,7 @@ describe('sol-transactions.services', () => {
 			solAddressDevnetStore.set({ data: mockSolAddress2, certified: false });
 
 			solTransactionsStore.reset(mockToken.id);
+			solTransactionsStore.reset(BONK_TOKEN_ID);
 
 			spyGetTransactions.mockResolvedValue(mockTransactions);
 		});
@@ -674,6 +951,70 @@ describe('sol-transactions.services', () => {
 			});
 		});
 
+		it('should refresh stored SPL transactions that are missing owner context', async () => {
+			const [storedTransaction, storedSameSignatureTransaction] = createMockSolTransactionsUi(
+				2
+			).map((tx, index) => ({
+				...tx,
+				id: `stored-same-signature-transaction-${index}`,
+				blockNumber: 100
+			}));
+			const ownerlessStoredTransaction: SolTransactionUi = {
+				...storedTransaction,
+				id: 'ownerless-stored-transaction',
+				blockNumber: 100,
+				type: 'receive' as const,
+				from: mockAtaAddress,
+				to: mockSolAddress2,
+				fromOwner: undefined,
+				toOwner: undefined
+			};
+			const correctedTransaction: SolTransactionUi = {
+				...ownerlessStoredTransaction,
+				type: 'send',
+				fromOwner: mockSolAddress
+			};
+			const correctedSameSignatureTransaction: SolTransactionUi = {
+				...storedSameSignatureTransaction,
+				id: 'corrected-same-signature-transaction'
+			};
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: [ownerlessStoredTransaction, storedSameSignatureTransaction],
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 100n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+			spyGetTransactions.mockResolvedValue([
+				correctedTransaction,
+				correctedSameSignatureTransaction
+			]);
+
+			await loadNextSolTransactions({ ...mockParams, token: BONK_TOKEN });
+
+			expect(spyGetTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({
+					exitIfFirstSignatureMatches: undefined
+				})
+			);
+			expect(get(solTransactionsStore)?.[BONK_TOKEN_ID]).toEqual([
+				{
+					data: correctedTransaction,
+					certified: false
+				},
+				{
+					data: correctedSameSignatureTransaction,
+					certified: false
+				}
+			]);
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SplMainnet: BONK_TOKEN.address },
+				transactions: [correctedTransaction, correctedSameSignatureTransaction]
+			});
+		});
+
 		it('should keep older RPC transactions when paginating with before and backend-stored transactions', async () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
@@ -714,6 +1055,54 @@ describe('sol-transactions.services', () => {
 				tokenId: { SolNativeMainnet: null },
 				transactions: [olderRpcTransaction]
 			});
+		});
+
+		it('should load backend pages before RPC when paginating with before', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `stored-${i}`
+			}));
+			const nextStoredTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `next-stored-${i}`
+			}));
+			const before = mockSolSignature();
+
+			vi.mocked(loadSolUserTransactions)
+				.mockResolvedValueOnce({
+					transactions: storedTransactions,
+					newestBlockIndex: 100n,
+					oldestBlockIndex: 50n,
+					nextStart: 2n,
+					totalStored: 4n
+				})
+				.mockResolvedValueOnce({
+					transactions: nextStoredTransactions,
+					newestBlockIndex: 100n,
+					oldestBlockIndex: 10n,
+					nextStart: undefined,
+					totalStored: 4n
+				});
+
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			await loadNextSolTransactions(mockParams);
+			await loadNextSolTransactions({ ...mockParams, before });
+
+			expect(loadSolUserTransactions).toHaveBeenNthCalledWith(2, {
+				identity: mockIdentity,
+				tokenId: { SolNativeMainnet: null },
+				address: mockSolAddress,
+				start: 2n
+			});
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(
+				[...storedTransactions, ...nextStoredTransactions].map((data) => ({
+					data,
+					certified: false
+				}))
+			);
+			expect(saveSolFinalizedTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should set only new transactions when no stored transactions exist', async () => {
