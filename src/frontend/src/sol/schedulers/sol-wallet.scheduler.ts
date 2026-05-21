@@ -23,6 +23,7 @@ import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
 	requiresStoredSplOwnerRefresh,
@@ -48,6 +49,21 @@ interface SolWalletData {
 	balance: CertifiedData<SolBalance | null>;
 	transactions: SolCertifiedTransaction[];
 }
+
+const requiresStoredSplOwnerRefresh = ({
+	transaction: { from, fromOwner, to, toOwner },
+	address,
+	tokenAddress
+}: {
+	transaction: SolTransactionUi;
+	address: SolAddress;
+	tokenAddress?: SplTokenAddress;
+}): boolean =>
+	nonNullish(tokenAddress) &&
+	from !== address &&
+	fromOwner !== address &&
+	to !== address &&
+	toOwner !== address;
 
 export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> {
 	#ref: PostMessageCommon['ref'] | undefined;

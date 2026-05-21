@@ -10,6 +10,9 @@ use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
     types::{
+        active_user_transaction::{
+            CreateActiveUserTransactionRequest, UpdateActiveUserTransactionRequest,
+        },
         agreement::{UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest},
         api_keys::ApiKeys,
         backend_config::{Arg, Config},
@@ -25,10 +28,11 @@ use shared::{
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         notification::AddDismissedNotificationRequest,
         result_types::{
-            AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, AllowSigningResult,
-            BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
-            BtcGetPendingTransactionsResult, CreateContactResult, CreateUserProfileResult,
-            DeleteContactResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
+            ActiveUserTransactionResult, AddUserDismissedNotificationResult,
+            AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
+            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult, CreateContactResult,
+            CreateUserProfileResult, DeleteActiveUserTransactionResult, DeleteContactResult,
+            GetActiveUserTransactionsResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
             GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
             SaveUserTransactionsResult, SetUserShowTestnetsResult, UpdateContactResult,
             UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
@@ -49,6 +53,7 @@ use shared::{
 
 use crate::state::{read_state, set_config};
 
+mod active_user_transactions;
 mod api;
 mod bitcoin;
 mod contacts;
