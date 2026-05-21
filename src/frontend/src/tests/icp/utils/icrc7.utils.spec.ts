@@ -179,10 +179,7 @@ describe('icrc7.utils', () => {
 					['title', { Text: 'The CEO' }],
 					['tokenId', { Nat: 1n }],
 					['edition', { Text: '#001' }],
-					[
-						'owner',
-						{ Text: '32vht-6nko3-fxqgs-z7rrt-b2vs3-hdpnp-3nb5a-rnxjm-citus-uuvqc-zae' }
-					],
+					['owner', { Text: '32vht-6nko3-fxqgs-z7rrt-b2vs3-hdpnp-3nb5a-rnxjm-citus-uuvqc-zae' }],
 					['rarityTier', { Text: 'TIER1' }],
 					['description', { Text: '' }],
 					[
