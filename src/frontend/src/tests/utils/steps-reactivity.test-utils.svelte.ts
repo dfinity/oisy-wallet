@@ -13,6 +13,10 @@
 // uses `safe_not_equal` on its output value as a propagation gate: a
 // primitive boolean intermediate that stays `true` does NOT propagate, even
 // if the underlying object reference it was computed from changed.
+//
+// Lives in `tests/utils` (not next to the spec) because it mirrors the
+// existing `*.test-utils` convention in this folder. The `.svelte.ts`
+// extension is required because the harness uses runes (`$state`, `$derived`).
 
 import { nonNullish } from '@dfinity/utils';
 

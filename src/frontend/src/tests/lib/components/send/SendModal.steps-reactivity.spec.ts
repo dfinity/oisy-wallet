@@ -1,4 +1,4 @@
-import { createStepsHarness } from '$tests/lib/components/send/_steps-reactivity.svelte';
+import { createStepsHarness } from '$tests/utils/steps-reactivity.test-utils.svelte';
 import { flushSync } from 'svelte';
 
 describe('SendModal steps derivation reactivity (regression coverage)', () => {
