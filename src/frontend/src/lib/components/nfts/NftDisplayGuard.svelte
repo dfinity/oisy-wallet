@@ -7,7 +7,8 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
-	import { getNftDisplayMediaStatus } from '$lib/utils/nft.utils';
+	import { getNftDisplayImageUrl, getNftDisplayMediaStatus } from '$lib/utils/nft.utils';
+	import { isNftMediaConsentEnabled } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		nft?: Nft;
@@ -15,16 +16,29 @@
 		showMessage?: boolean;
 		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display' | 'nft-logo';
 		location?: { source: string; subSource: string };
+		mediaUrls?: string[];
 	}
 
-	const { nft, children, showMessage = true, type, location }: Props = $props();
+	const { nft, children, showMessage = true, type, location, mediaUrls }: Props = $props();
 
 	const mediaStatus = $derived(
 		nonNullish(nft) ? getNftDisplayMediaStatus(nft) : MediaStatusEnum.INVALID_DATA
 	);
 
+	const currentMediaUrls = $derived.by(() => {
+		if (nonNullish(mediaUrls)) {
+			return mediaUrls;
+		}
+
+		const mediaUrl = nonNullish(nft) ? getNftDisplayImageUrl(nft) : undefined;
+
+		return nonNullish(mediaUrl) ? [mediaUrl] : [];
+	});
+
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(nft) ? nft.collection.allowExternalContentSource : false
+		nonNullish(nft)
+			? isNftMediaConsentEnabled({ collection: nft.collection, mediaUrls: currentMediaUrls })
+			: false
 	);
 
 	const handleConsent = () => {

@@ -309,6 +309,48 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 	return result;
 };
 
+export const getAllowedExternalContentSourceUrls = (mediaUrls: string[]): string[] => {
+	const allowedUrls = new Set<string>();
+
+	for (const mediaUrl of mediaUrls) {
+		try {
+			allowedUrls.add(new URL(mediaUrl).href);
+		} catch (_: unknown) {
+			// Invalid media URLs are handled by the existing media-status validation.
+		}
+	}
+
+	return [...allowedUrls];
+};
+
+export const isNftMediaConsentEnabled = ({
+	collection: { allowExternalContentSource, allowedExternalContentSourceUrls },
+	mediaUrls
+}: {
+	collection: NftCollection;
+	mediaUrls: string[];
+}): boolean | undefined => {
+	if (allowExternalContentSource !== true) {
+		return allowExternalContentSource;
+	}
+
+	if (isNullish(allowedExternalContentSourceUrls)) {
+		return true;
+	}
+
+	const currentMediaUrls = getAllowedExternalContentSourceUrls(mediaUrls);
+
+	if (currentMediaUrls.length === 0) {
+		return true;
+	}
+
+	const allowedMediaUrls = new Set(
+		getAllowedExternalContentSourceUrls(allowedExternalContentSourceUrls)
+	);
+
+	return currentMediaUrls.every((mediaUrl) => allowedMediaUrls.has(mediaUrl));
+};
+
 export const findNonFungibleToken = ({
 	tokens,
 	address,

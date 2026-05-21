@@ -14,7 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
-	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken, isNftMediaConsentEnabled } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection?: NftCollection;
@@ -33,7 +33,9 @@
 	);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(collection) ? collection.allowExternalContentSource : false
+		nonNullish(collection) && nonNullish(collection.bannerImageUrl)
+			? isNftMediaConsentEnabled({ collection, mediaUrls: [collection.bannerImageUrl] })
+			: false
 	);
 
 	const gotoCollection = (): void => {

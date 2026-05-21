@@ -17,10 +17,12 @@ import {
 	findNftsByNetwork,
 	findNftsByToken,
 	findNonFungibleToken,
+	getAllowedExternalContentSourceUrls,
 	getEnabledNfts,
 	getMediaStatus,
 	getMediaStatusOrCache,
 	getNftCollectionUi,
+	isNftMediaConsentEnabled,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
 } from '$lib/utils/nfts.utils';
@@ -744,6 +746,73 @@ describe('nfts.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('getAllowedExternalContentSourceUrls', () => {
+		it('should return unique normalized URL values', () => {
+			expect(
+				getAllowedExternalContentSourceUrls([
+					'https://example.com/nft.png',
+					'https://example.com/nft.png',
+					'https://example.com/path/../nft.png',
+					'not-a-url'
+				])
+			).toEqual(['https://example.com/nft.png']);
+		});
+	});
+
+	describe('isNftMediaConsentEnabled', () => {
+		const collection = mockNft1.collection;
+
+		it('should preserve disabled and undecided consent states', () => {
+			expect(
+				isNftMediaConsentEnabled({
+					collection: { ...collection, allowExternalContentSource: false },
+					mediaUrls: ['https://example.com/nft.png']
+				})
+			).toBe(false);
+
+			expect(
+				isNftMediaConsentEnabled({
+					collection: { ...collection, allowExternalContentSource: undefined },
+					mediaUrls: ['https://example.com/nft.png']
+				})
+			).toBeUndefined();
+		});
+
+		it('should allow legacy boolean-only consent', () => {
+			expect(
+				isNftMediaConsentEnabled({
+					collection: { ...collection, allowExternalContentSource: true },
+					mediaUrls: ['https://example.com/nft.png']
+				})
+			).toBe(true);
+		});
+
+		it('should allow media only when all current URLs were consented', () => {
+			const consentedCollection = {
+				...collection,
+				allowExternalContentSource: true,
+				allowedExternalContentSourceUrls: [
+					'https://example.com/nft.png',
+					'https://example.com/thumbnail.png'
+				]
+			};
+
+			expect(
+				isNftMediaConsentEnabled({
+					collection: consentedCollection,
+					mediaUrls: ['https://example.com/nft.png']
+				})
+			).toBe(true);
+
+			expect(
+				isNftMediaConsentEnabled({
+					collection: consentedCollection,
+					mediaUrls: ['https://example.com/nft.png', 'https://example.com/other.png']
+				})
+			).toBe(false);
 		});
 	});
 

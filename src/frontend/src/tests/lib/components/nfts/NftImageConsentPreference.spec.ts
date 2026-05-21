@@ -50,6 +50,22 @@ describe('NftImageConsentPreference', () => {
 		expect(getByText(get(i18n).nfts.text.media_disabled)).toBeInTheDocument();
 	});
 
+	it('renders media_disabled text when provided media URLs were not consented', () => {
+		const { getByText } = render(NftImageConsentPreference, {
+			props: {
+				...props,
+				collection: {
+					...nftAzuki.collection,
+					allowExternalContentSource: true,
+					allowedExternalContentSourceUrls: ['https://example.com/other.png']
+				},
+				mediaUrls: [nftAzuki.imageUrl]
+			}
+		});
+
+		expect(getByText(get(i18n).nfts.text.media_disabled)).toBeInTheDocument();
+	});
+
 	it('opens the consent modal with the collection when clicking the button', async () => {
 		const { getByRole } = render(NftImageConsentPreference, {
 			props: { ...props, collection: { ...nftAzuki.collection, allowExternalContentSource: true } }

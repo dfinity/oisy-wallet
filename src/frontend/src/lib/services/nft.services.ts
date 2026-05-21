@@ -18,6 +18,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdICP } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
+import { getAllowedExternalContentSourceUrls } from '$lib/utils/nfts.utils';
 import { isNullish, type QueryParams } from '@dfinity/utils';
 
 export const loadNftsByNetwork = async ({
@@ -172,11 +173,13 @@ export const updateNftSection = async ({
 
 export const updateNftMediaConsent = async ({
 	allowMedia,
+	allowedExternalContentSourceUrls,
 	$authIdentity,
 	token,
 	$ethAddress
 }: {
 	allowMedia: boolean;
+	allowedExternalContentSourceUrls?: string[];
 	$authIdentity: NullishIdentity;
 	token: NonFungibleToken;
 	$ethAddress: OptionEthAddress;
@@ -184,7 +187,10 @@ export const updateNftMediaConsent = async ({
 	const saveToken = {
 		...token,
 		enabled: true, // must be true otherwise we couldn't see it at this point
-		allowExternalContentSource: allowMedia
+		allowExternalContentSource: allowMedia,
+		allowedExternalContentSourceUrls: allowMedia
+			? getAllowedExternalContentSourceUrls(allowedExternalContentSourceUrls ?? [])
+			: []
 	};
 
 	await saveNftCustomToken({ identity: $authIdentity, token: saveToken, $ethAddress });

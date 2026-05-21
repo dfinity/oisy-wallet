@@ -143,6 +143,9 @@ describe('NftImageConsentModal', () => {
 							chainId: token.network.chainId,
 							networkKey: 'Erc721',
 							allowExternalContentSource: testCase.buttonPrimarySaveCalledWith,
+							allowedExternalContentSourceUrls: testCase.buttonPrimarySaveCalledWith
+								? [nftAzuki1.imageUrl, nftAzuki2.imageUrl]
+								: [],
 							enabled: true
 						}
 					]
@@ -160,6 +163,9 @@ describe('NftImageConsentModal', () => {
 							chainId: token.network.chainId,
 							networkKey: 'Erc721',
 							allowExternalContentSource: testCase.buttonSecondarySaveCalledWith,
+							allowedExternalContentSourceUrls: testCase.buttonSecondarySaveCalledWith
+								? [nftAzuki1.imageUrl, nftAzuki2.imageUrl]
+								: [],
 							enabled: true
 						}
 					]
