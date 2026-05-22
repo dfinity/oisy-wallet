@@ -1,7 +1,6 @@
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 
-// TODO: Enable (or remove this flag?) when OnRamper is functional again
-export const ONRAMPER_ENABLED = false as boolean;
+export const ONRAMPER_ENABLED = true as boolean;
 
 const ONRAMPER_ENV: 'dev' | 'prod' = LOCAL || STAGING ? 'dev' : 'prod';
 
