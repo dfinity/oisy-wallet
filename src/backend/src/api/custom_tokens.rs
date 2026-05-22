@@ -17,14 +17,14 @@ use crate::{
 /// These are user-consented origins/URLs for fetching external NFT media; even
 /// large collections only have a handful of distinct providers, so a small cap
 /// is sufficient and keeps stable memory usage bounded.
-pub const MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URLS: usize = 20;
+const MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URLS: usize = 20;
 
 /// Maximum byte length of any single entry in
 /// [`CustomToken::allowed_external_content_source_urls`].
 ///
 /// Aligns with the widely-used 2048-byte URL limit; longer values almost
 /// certainly indicate malformed or abusive input.
-pub const MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URL_LENGTH: usize = 2048;
+const MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URL_LENGTH: usize = 2048;
 
 /// Validates the user-controlled
 /// [`CustomToken::allowed_external_content_source_urls`] field before
