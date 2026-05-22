@@ -25,6 +25,11 @@ import type {
 } from '$declarations/signer/signer.did';
 import type { IcToken } from '$icp/types/ic-token';
 import type { Address } from '$lib/types/address';
+import type {
+	OnramperCryptoWallet,
+	OnramperId,
+	OnramperNetworkWallet
+} from '$lib/types/onramper';
 import type { Token } from '$lib/types/token';
 import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';
@@ -55,6 +60,17 @@ export interface GetPendingTransactionsOutcome {
 
 export interface AllowSigningParams {
 	iiDelegationChain: Nullable<IIDelegationChain>;
+}
+
+export interface OnramperWalletAddressTagEntry {
+	cryptoId: OnramperId;
+	tag: string;
+}
+
+export interface SignOnramperWidgetUrlParams {
+	wallets: OnramperCryptoWallet[];
+	networkWallets: OnramperNetworkWallet[];
+	walletAddressTags?: OnramperWalletAddressTagEntry[];
 }
 
 export interface AllowSigningOutcome {

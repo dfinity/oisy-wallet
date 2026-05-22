@@ -4,7 +4,8 @@ import type {
 	BtcGetFeePercentilesError,
 	BtcGetPendingTransactionsError,
 	GetAllowedCyclesError,
-	RateLimitError
+	RateLimitError,
+	SignOnramperWidgetUrlError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
@@ -151,4 +152,16 @@ export const mapAllowSigningError = (
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown AllowSigningError'));
+};
+
+export const mapSignOnramperWidgetUrlError = (
+	err: SignOnramperWidgetUrlError
+): CanisterInternalError => {
+	if ('SecretNotConfigured' in err) {
+		return new CanisterInternalError(
+			'OnRamper signing secret is not configured on the backend canister.'
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown SignOnramperWidgetUrlError'));
 };
