@@ -25,7 +25,7 @@ export interface ActiveUserTransaction {
 	 * `{ key: "tx_hash", value: "0x…" }`. See [`ActiveUserTransactionRef`]
 	 * for the field layout exposed on the wire and in TS bindings.
 	 */
-	external_refs: Array<ActiveUserTransactionRef>;
+	external_refs: Array<OnramperSignedEntry>;
 	/**
 	 * Opaque to the backend; the FE writes a flow-specific step name here.
 	 */
@@ -210,6 +210,12 @@ export interface ApiKeys {
 	alchemy_api_key: [] | [string];
 	etherscan_api_key: [] | [string];
 	coingecko_api_key: [] | [string];
+	/**
+	 * HMAC-SHA256 secret used to sign OnRamper widget URLs. Provided by OnRamper support and
+	 * rotated via `set_api_keys`. When `None`, the signing endpoint reports the secret as
+	 * missing and the OnRamper widget cannot be loaded.
+	 */
+	onramper_signing_secret: [] | [string];
 	infura_api_key: [] | [string];
 }
 export type ApproveError =
@@ -1119,6 +1125,15 @@ export interface OneSecIcpToEvmData {
 	dest_token: TokenId;
 }
 /**
+ * A `(key, value)` entry of an OnRamper signed parameter — e.g. `(btc, <address>)` inside
+ * `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
+ * `key` to lowercase before signing.
+ */
+export interface OnramperSignedEntry {
+	key: string;
+	value: string;
+}
+/**
  * Outpoint.
  */
 export interface Outpoint {
@@ -1213,6 +1228,43 @@ export interface Settings {
 	experimental_features: ExperimentalFeaturesSettings;
 	transactions: [] | [TransactionSettings];
 }
+/**
+ * Errors returned by `sign_onramper_widget_url`.
+ */
+export type SignOnramperWidgetUrlError = {
+	/**
+	 * Controllers have not yet provisioned the OnRamper signing secret via `set_api_keys`. The
+	 * frontend should treat this the same as a hard failure: the widget cannot be opened until
+	 * the secret is configured.
+	 */
+	SecretNotConfigured: null;
+};
+/**
+ * Request body for `sign_onramper_widget_url`. Each field maps directly to one of OnRamper's
+ * signed query parameters. Empty fields are omitted from the canonicalized sign-content.
+ */
+export interface SignOnramperWidgetUrlRequest {
+	/**
+	 * `<networkId>:<address>` pairs that map to the `networkWallets=` query parameter.
+	 */
+	network_wallets: Array<OnramperSignedEntry>;
+	/**
+	 * `<cryptoId>:<address>` pairs that map to the `wallets=` query parameter.
+	 */
+	wallets: Array<OnramperSignedEntry>;
+	/**
+	 * `<cryptoId>:<tag>` pairs that map to the `walletAddressTags=` query parameter.
+	 */
+	wallet_address_tags: Array<OnramperSignedEntry>;
+}
+export type SignOnramperWidgetUrlResult =
+	| {
+			/**
+			 * Hex-encoded HMAC-SHA256 signature over the canonicalized signed parameters.
+			 */
+			Ok: string;
+	  }
+	| { Err: SignOnramperWidgetUrlError };
 /**
  * A signed delegation from the delegation chain.
  */
@@ -1496,7 +1548,7 @@ export interface TransformArgs {
 export interface UpdateActiveUserTransactionRequest {
 	id: string;
 	status: [] | [ActiveUserTransactionStatus];
-	external_refs: [] | [Array<ActiveUserTransactionRef>];
+	external_refs: [] | [Array<OnramperSignedEntry>];
 	progress_step: [] | [string];
 	error: [] | [string];
 }
@@ -1968,6 +2020,16 @@ export interface _SERVICE {
 	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	 */
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
+	/**
+	 * Sign the three sensitive OnRamper widget parameters with the controller-managed HMAC secret.
+	 *
+	 * Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
+	 * Authenticated callers only: anonymous principals cannot extract signatures.
+	 */
+	sign_onramper_widget_url: ActorMethod<
+		[SignOnramperWidgetUrlRequest],
+		SignOnramperWidgetUrlResult
+	>;
 	/**
 	 * Gets statistics about the canister.
 	 *

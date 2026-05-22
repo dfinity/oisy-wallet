@@ -7,7 +7,7 @@ type ActiveUserTransaction = record {
 	// Learned-mid-flow named references, e.g.
 	// `{ key: "tx_hash", value: "0x…" }`. See [`ActiveUserTransactionRef`]
 	// for the field layout exposed on the wire and in TS bindings.
-	external_refs : vec ActiveUserTransactionRef;
+	external_refs : vec OnramperSignedEntry;
 	// Opaque to the backend; the FE writes a flow-specific step name here.
 	progress_step : opt text;
 	data : ActiveUserTransactionData;
@@ -146,6 +146,10 @@ type ApiKeys = record {
 	alchemy_api_key : opt text;
 	etherscan_api_key : opt text;
 	coingecko_api_key : opt text;
+	// HMAC-SHA256 secret used to sign OnRamper widget URLs. Provided by OnRamper support and
+	// rotated via `set_api_keys`. When `None`, the signing endpoint reports the secret as
+	// missing and the OnRamper widget cannot be loaded.
+	onramper_signing_secret : opt text;
 	infura_api_key : opt text
 };
 type ApproveError = variant {
@@ -756,6 +760,10 @@ type OneSecIcpToEvmData = record {
 	amount : nat;
 	dest_token : TokenId
 };
+// A `(key, value)` entry of an OnRamper signed parameter — e.g. `(btc, <address>)` inside
+// `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
+// `key` to lowercase before signing.
+type OnramperSignedEntry = record { key : text; value : text };
 // Outpoint.
 type Outpoint = record {
 	// Transaction ID (TxID).
@@ -821,6 +829,28 @@ type Settings = record {
 	dapp : DappSettings;
 	experimental_features : ExperimentalFeaturesSettings;
 	transactions : opt TransactionSettings
+};
+// Errors returned by `sign_onramper_widget_url`.
+type SignOnramperWidgetUrlError = variant {
+	// Controllers have not yet provisioned the OnRamper signing secret via `set_api_keys`. The
+	// frontend should treat this the same as a hard failure: the widget cannot be opened until
+	// the secret is configured.
+	SecretNotConfigured
+};
+// Request body for `sign_onramper_widget_url`. Each field maps directly to one of OnRamper's
+// signed query parameters. Empty fields are omitted from the canonicalized sign-content.
+type SignOnramperWidgetUrlRequest = record {
+	// `<networkId>:<address>` pairs that map to the `networkWallets=` query parameter.
+	network_wallets : vec OnramperSignedEntry;
+	// `<cryptoId>:<address>` pairs that map to the `wallets=` query parameter.
+	wallets : vec OnramperSignedEntry;
+	// `<cryptoId>:<tag>` pairs that map to the `walletAddressTags=` query parameter.
+	wallet_address_tags : vec OnramperSignedEntry
+};
+type SignOnramperWidgetUrlResult = variant {
+	// Hex-encoded HMAC-SHA256 signature over the canonicalized signed parameters.
+	Ok : text;
+	Err : SignOnramperWidgetUrlError
 };
 // A signed delegation from the delegation chain.
 type SignedDelegation = record { signature : blob; delegation : Delegation };
@@ -979,7 +1009,7 @@ type TransformArgs = record {
 type UpdateActiveUserTransactionRequest = record {
 	id : text;
 	status : opt ActiveUserTransactionStatus;
-	external_refs : opt vec ActiveUserTransactionRef;
+	external_refs : opt vec OnramperSignedEntry;
 	progress_step : opt text;
 	error : opt text
 };
@@ -1350,6 +1380,13 @@ service : (Arg) -> {
 	set_user_show_testnets : (SetShowTestnetsRequest) -> (
 		SetUserShowTestnetsResult
 	);
+	// Sign the three sensitive OnRamper widget parameters with the controller-managed HMAC secret.
+	//
+	// Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
+	// Authenticated callers only: anonymous principals cannot extract signatures.
+	sign_onramper_widget_url : (SignOnramperWidgetUrlRequest) -> (
+		SignOnramperWidgetUrlResult
+	) query;
 	// Gets statistics about the canister.
 	//
 	// Note: This is a private method, restricted to authorized users, as some stats may not be

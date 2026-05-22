@@ -245,10 +245,14 @@ export const idlFactory = ({ IDL }) => {
 		Succeeded: IDL.Null,
 		Pending: IDL.Null
 	});
+	const OnramperSignedEntry = IDL.Record({
+		key: IDL.Text,
+		value: IDL.Text
+	});
 	const ActiveUserTransaction = IDL.Record({
 		id: IDL.Text,
 		status: ActiveUserTransactionStatus,
-		external_refs: IDL.Vec(ActiveUserTransactionRef),
+		external_refs: IDL.Vec(OnramperSignedEntry),
 		progress_step: IDL.Opt(IDL.Text),
 		data: ActiveUserTransactionData,
 		updated_at_ns: IDL.Nat64,
@@ -449,6 +453,7 @@ export const idlFactory = ({ IDL }) => {
 		alchemy_api_key: IDL.Opt(IDL.Text),
 		etherscan_api_key: IDL.Opt(IDL.Text),
 		coingecko_api_key: IDL.Opt(IDL.Text),
+		onramper_signing_secret: IDL.Opt(IDL.Text),
 		infura_api_key: IDL.Opt(IDL.Text)
 	});
 	const CanisterStatusType = IDL.Variant({
@@ -653,6 +658,18 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: UpdateAgreementsError
 	});
+	const SignOnramperWidgetUrlRequest = IDL.Record({
+		network_wallets: IDL.Vec(OnramperSignedEntry),
+		wallets: IDL.Vec(OnramperSignedEntry),
+		wallet_address_tags: IDL.Vec(OnramperSignedEntry)
+	});
+	const SignOnramperWidgetUrlError = IDL.Variant({
+		SecretNotConfigured: IDL.Null
+	});
+	const SignOnramperWidgetUrlResult = IDL.Variant({
+		Ok: IDL.Text,
+		Err: SignOnramperWidgetUrlError
+	});
 	const Stats = IDL.Record({
 		active_user_transactions_count: IDL.Nat64,
 		user_profile_count: IDL.Nat64,
@@ -693,7 +710,7 @@ export const idlFactory = ({ IDL }) => {
 	const UpdateActiveUserTransactionRequest = IDL.Record({
 		id: IDL.Text,
 		status: IDL.Opt(ActiveUserTransactionStatus),
-		external_refs: IDL.Opt(IDL.Vec(ActiveUserTransactionRef)),
+		external_refs: IDL.Opt(IDL.Vec(OnramperSignedEntry)),
 		progress_step: IDL.Opt(IDL.Text),
 		error: IDL.Opt(IDL.Text)
 	});
@@ -780,6 +797,10 @@ export const idlFactory = ({ IDL }) => {
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
+		sign_onramper_widget_url: IDL.Func(
+			[SignOnramperWidgetUrlRequest],
+			[SignOnramperWidgetUrlResult]
+		),
 		stats: IDL.Func([], [Stats]),
 		top_up_cycles_ledger: IDL.Func(
 			[IDL.Opt(TopUpCyclesLedgerRequest)],
