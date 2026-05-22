@@ -7,8 +7,8 @@ use crate::{
     types::{StoredTokenId, VMem},
 };
 
-/// How long an inactive token's activity record is kept before housekeeping
-/// evicts it (30 minutes).
+/// How old an inactive token's activity record must be before housekeeping
+/// may evict it (30 minutes).
 ///
 /// Comfortably larger than `PRICE_ACTIVITY_THRESHOLD_SEC` (10 minutes) so any
 /// token that is still being refreshed is never accidentally removed; the
