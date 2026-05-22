@@ -11,8 +11,8 @@ import type {
 	OnramperWalletAddress
 } from '$lib/types/onramper';
 import { nonNullish } from '@dfinity/utils';
-import type { Identity } from '@icp-sdk/core/agent';
 import type { Nullish } from '@dfinity/zod-schemas';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export interface BuildOnramperLinkParams {
 	identity: Identity;

@@ -24,7 +24,7 @@ describe('BuyModalContent', () => {
 		const { findByTestId } = render(BuyModalContent);
 
 		// The iframe is rendered only after the async signing call resolves.
-		expect(await findByTestId(BUY_MODAL_ONRAMPER_IFRAME)).toBeInTheDocument();
+		await expect(findByTestId(BUY_MODAL_ONRAMPER_IFRAME)).resolves.toBeInTheDocument();
 	});
 
 	it('renders the unavailable notice when ONRAMPER_ENABLED is false', () => {
@@ -44,9 +44,8 @@ describe('BuyModalContent', () => {
 
 		const { findByText, queryByTestId } = render(BuyModalContent);
 
-		expect(await findByText(en.buy.text.unavailable_title)).toBeInTheDocument();
-		await waitFor(() =>
-			expect(queryByTestId(BUY_MODAL_ONRAMPER_IFRAME)).not.toBeInTheDocument()
-		);
+		await expect(findByText(en.buy.text.unavailable_title)).resolves.toBeInTheDocument();
+
+		await waitFor(() => expect(queryByTestId(BUY_MODAL_ONRAMPER_IFRAME)).not.toBeInTheDocument());
 	});
 });
