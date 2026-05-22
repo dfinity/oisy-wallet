@@ -114,6 +114,7 @@ pub struct CustomToken {
     pub version: Option<Version>,
     pub section: Option<TokenSection>,
     pub allow_external_content_source: Option<bool>,
+    pub allowed_external_content_source_urls: Option<Vec<String>>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

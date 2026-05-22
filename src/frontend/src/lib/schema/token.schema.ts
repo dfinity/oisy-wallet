@@ -53,7 +53,8 @@ export const TokenAppearanceSchema = z.object({
 	oisySymbol: TokenOisySymbolSchema.optional(),
 	oisyName: TokenOisyNameSchema.optional(),
 	neverCollapseInTokenGroup: z.boolean().optional(),
-	allowExternalContentSource: z.boolean().optional()
+	allowExternalContentSource: z.boolean().optional(),
+	allowedExternalContentSourceUrls: z.array(z.string()).optional()
 });
 
 const TokenBuySchema = z.object({

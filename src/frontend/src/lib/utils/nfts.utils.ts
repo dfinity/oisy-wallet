@@ -124,6 +124,9 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		...(notEmptyString(token.description) && { description: token.description }),
 		...(nonNullish(token.allowExternalContentSource) && {
 			allowExternalContentSource: token.allowExternalContentSource
+		}),
+		...(nonNullish(token.allowedExternalContentSourceUrls) && {
+			allowedExternalContentSourceUrls: token.allowedExternalContentSourceUrls
 		})
 	});
 

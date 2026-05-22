@@ -116,6 +116,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];
@@ -139,6 +140,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];
@@ -175,6 +177,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];
@@ -206,6 +209,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];
@@ -234,6 +238,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];

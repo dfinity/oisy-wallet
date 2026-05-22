@@ -68,7 +68,8 @@ const mapIcrc7CustomToken = async ({
 		enabled,
 		version: versionNullable,
 		section: sectionNullable,
-		allow_external_content_source: allowExternalContentSourceNullable
+		allow_external_content_source: allowExternalContentSourceNullable,
+		allowed_external_content_source_urls: allowedExternalContentSourceUrlsNullable
 	},
 	identity,
 	certified
@@ -79,6 +80,7 @@ const mapIcrc7CustomToken = async ({
 	const section = fromNullable(sectionNullable);
 	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
 	const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+	const allowedExternalContentSourceUrls = fromNullable(allowedExternalContentSourceUrlsNullable);
 
 	const {
 		Icrc7: { canister_id: rawCanisterId }
@@ -104,7 +106,8 @@ const mapIcrc7CustomToken = async ({
 			...(nonNullish(mappedSection) && {
 				section: mappedSection
 			}),
-			allowExternalContentSource
+			allowExternalContentSource,
+			allowedExternalContentSourceUrls
 		};
 	}
 
@@ -132,7 +135,8 @@ const mapIcrc7CustomToken = async ({
 		...(nonNullish(mappedSection) && {
 			section: mappedSection
 		}),
-		allowExternalContentSource
+		allowExternalContentSource,
+		allowedExternalContentSourceUrls
 	};
 };
 

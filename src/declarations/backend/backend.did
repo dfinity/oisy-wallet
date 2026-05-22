@@ -435,7 +435,8 @@ type CustomToken = record {
 	allow_external_content_source : opt bool;
 	section : opt TokenSection;
 	version : opt nat64;
-	enabled : bool
+	enabled : bool;
+	allowed_external_content_source_urls : opt vec text
 };
 type DappCarouselSettings = record { hidden_dapp_ids : vec text };
 type DappSettings = record { dapp_carousel : DappCarouselSettings };

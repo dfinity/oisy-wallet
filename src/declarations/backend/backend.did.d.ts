@@ -635,6 +635,7 @@ export interface CustomToken {
 	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
+	allowed_external_content_source_urls: [] | [Array<string>];
 }
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
