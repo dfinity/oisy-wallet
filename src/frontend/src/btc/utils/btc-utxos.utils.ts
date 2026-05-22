@@ -1,7 +1,7 @@
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
-import { utxoTxIdToString } from '$icp/utils/btc.utils';
+import { outpointToKey } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
@@ -14,39 +14,53 @@ export interface UtxoSelectionResult {
 }
 
 /**
- * Extracts transaction IDs from an array of UTXOs
+ * Extracts outpoint keys (txid + vout) from an array of UTXOs.
+ * Outpoints uniquely identify a UTXO; matching on txid alone over-filters
+ * UTXOs that share a parent transaction.
  */
-export const extractUtxoTxIds = (utxos: CkBtcMinterDid.Utxo[]): string[] =>
-	utxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
+export const extractUtxoOutpoints = (utxos: CkBtcMinterDid.Utxo[]): string[] =>
+	utxos.map(({ outpoint }) => outpointToKey(outpoint));
 
 /**
- * Estimates transaction size in bytes based on number of inputs and outputs
- * This is a simplified calculation for P2WPKH transactions
+ * Estimates transaction virtual size (vbytes) based on number of inputs and outputs.
+ * This is a simplified calculation for P2WPKH transactions.
+ *
+ * All constants are in vbytes: witness data is discounted to 1/4 weight per BIP-141,
+ * so the result must be multiplied by a sat/vbyte fee rate, not a sat/byte rate.
  */
-export const estimateTransactionSize = ({
+export const estimateTransactionVSize = ({
 	numInputs,
 	numOutputs
 }: {
 	numInputs: number;
 	numOutputs: number;
 }): number => {
-	// version (4) and locktime (4) and input count (1), output count (1) and SegWit marker + flag (0.5 -> rounding to 1)
-	const baseSize = 11;
+	// version (4) + locktime (4) + input count (1) + output count (1) + SegWit marker+flag (0.5 → 1) = 11 vbytes
+	const BASE_VSIZE = 11;
 
-	// P2WPKH input size: outpoint (36) and scriptSig length (1) and scriptSig (0) and sequence (4) = 41 bytes
-	// Plus witness data: witness stack items (1) and signature (72) and pubkey (33) = 106 bytes
-	// But witness data is counted as 1/4 for fee calculation, so effective size is 41 and 106/4 = 67.5 bytes
-	const inputSize = 68;
+	// P2WPKH input: non-witness outpoint (36) + scriptSig length (1) + empty scriptSig (0) + sequence (4) = 41 vbytes
+	// witness: stack item count (1) + signature (72) + pubkey (33) = 106 bytes → 106/4 = 26.5 vbytes
+	// total: 41 + 26.5 = 67.5 → 68 vbytes
+	const INPUT_VSIZE = 68;
 
-	// P2WPKH output size: value (8) and scriptPubKey length (1) and scriptPubKey (22) = 31 bytes
-	const outputSize = 31;
+	// P2WPKH output: value (8) + scriptPubKey length (1) + scriptPubKey (22) = 31 vbytes
+	const OUTPUT_VSIZE = 31;
 
-	return baseSize + numInputs * inputSize + numOutputs * outputSize;
+	return BASE_VSIZE + numInputs * INPUT_VSIZE + numOutputs * OUTPUT_VSIZE;
 };
 
 /**
- * Main function to select UTXOs for a transaction with fee consideration
- * This function iteratively selects UTXOs and calculates fees until sufficient funds are found
+ * Main function to select UTXOs for a transaction with fee consideration.
+ *
+ * Algorithm (greedy, smallest-sufficient):
+ * 1. Compute how many satoshis are still needed: amount + fee(N+1 inputs) - accumulated total.
+ * 2. Pick the smallest UTXO whose value alone covers that need → minimises change and input count.
+ * 3. If no such UTXO exists, pick the largest available UTXO to reduce the gap as fast as
+ *    possible, then restart from step 1 with the updated totals.
+ *
+ * The fee is recalculated after every pick because each additional input increases transaction
+ * size.  Using fee(N+1) as the target when searching for the next UTXO ensures the selected
+ * set will remain sufficient once the UTXO is added.
  */
 export const calculateUtxoSelection = ({
 	availableUtxos,
@@ -67,73 +81,90 @@ export const calculateUtxoSelection = ({
 		};
 	}
 
-	// Sort UTXOs by value in descending order
-	const sortedUtxos = [...availableUtxos].sort((a, b) => {
-		const aValue = BigInt(a.value);
-		const bValue = BigInt(b.value);
-		return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-	});
+	const calcFee = (numInputs: number): bigint => {
+		const txVSize = estimateTransactionVSize({ numInputs, numOutputs: 2 });
+		return (BigInt(txVSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
+	};
 
 	const selectedUtxos: CkBtcMinterDid.Utxo[] = [];
 	let totalInputValue = ZERO;
-	let estimatedFee = ZERO;
+	const remaining = [...availableUtxos];
 
-	// Iteratively add UTXOs until we have enough to cover amount and fee
-	for (const utxo of sortedUtxos) {
-		selectedUtxos.push(utxo);
-		totalInputValue += BigInt(utxo.value);
+	while (remaining.length > 0) {
+		// Fee for the transaction once we add one more input.
+		const fee = calcFee(selectedUtxos.length + 1);
+		const needed = amountSatoshis + fee - totalInputValue;
 
-		// Calculate current transaction size and fee
-		// 2 outputs: one for recipient, one for change (if needed)
-		const txSize = estimateTransactionSize({
-			numInputs: selectedUtxos.length,
-			numOutputs: 2
-		});
-		// Round up to ensure fee meets minimum rate requirements
-		estimatedFee = (BigInt(txSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
-		const totalRequired = amountSatoshis + estimatedFee;
+		// Step 1: find the smallest UTXO that alone covers the remaining need.
+		let smallestSufficient: CkBtcMinterDid.Utxo | undefined;
+		let smallestSufficientValue = ZERO;
+		for (const utxo of remaining) {
+			const val = BigInt(utxo.value);
+			if (val >= needed && (smallestSufficient === undefined || val < smallestSufficientValue)) {
+				smallestSufficient = utxo;
+				smallestSufficientValue = val;
+			}
+		}
 
-		// Check if we have enough to cover amount and fee
-		if (totalInputValue >= totalRequired) {
-			const changeAmount = totalInputValue - totalRequired;
-
+		if (smallestSufficient !== undefined) {
+			selectedUtxos.push(smallestSufficient);
+			totalInputValue += smallestSufficientValue;
+			const feeSatoshis = calcFee(selectedUtxos.length);
 			return {
 				selectedUtxos,
 				totalInputValue,
-				changeAmount,
+				changeAmount: totalInputValue - amountSatoshis - feeSatoshis,
 				sufficientFunds: true,
-				feeSatoshis: estimatedFee
+				feeSatoshis
 			};
 		}
+
+		// Step 2: no single UTXO covers the need; pick the largest to reduce the gap.
+		let largestIndex = 0;
+		let largestValue = BigInt(remaining[0].value);
+		for (let i = 1; i < remaining.length; i++) {
+			const val = BigInt(remaining[i].value);
+			if (val > largestValue) {
+				largestValue = val;
+				largestIndex = i;
+			}
+		}
+		selectedUtxos.push(remaining[largestIndex]);
+		totalInputValue += largestValue;
+		remaining.splice(largestIndex, 1);
 	}
 
-	// If we get here, we don't have sufficient funds
+	// Insufficient funds.
 	return {
 		selectedUtxos,
 		totalInputValue,
 		changeAmount: ZERO,
 		sufficientFunds: false,
-		feeSatoshis: estimatedFee
+		feeSatoshis: calcFee(selectedUtxos.length)
 	};
 };
 
 /**
- * Filters out UTXOs that are locked by pending transactions
+ * Filters out UTXOs that are reserved by pending transactions.
+ *
+ * Matching is at the outpoint level (txid + vout) so that unrelated UTXOs
+ * sharing a parent txid stay available — this is what allows a user to keep
+ * sending while a previous unconfirmed send is still pending.
  */
 export const filterLockedUtxos = ({
 	utxos,
-	pendingUtxoTxIds
+	pendingUtxoOutpoints
 }: {
 	utxos: CkBtcMinterDid.Utxo[];
-	pendingUtxoTxIds: string[];
-}): CkBtcMinterDid.Utxo[] =>
-	utxos.filter((utxo) => {
-		const txIdHex = utxoTxIdToString(utxo.outpoint.txid);
-		return !pendingUtxoTxIds.includes(txIdHex);
-	});
+	pendingUtxoOutpoints: string[];
+}): CkBtcMinterDid.Utxo[] => {
+	const reserved = new Set(pendingUtxoOutpoints);
+
+	return utxos.filter((utxo) => !reserved.has(outpointToKey(utxo.outpoint)));
+};
 
 /**
- * Filters UTXOs based on confirmations and excludes those locked by pending transactions
+ * Filters UTXOs based on confirmations and excludes those reserved by pending transactions
  */
 export const filterAvailableUtxos = ({
 	utxos,
@@ -142,10 +173,10 @@ export const filterAvailableUtxos = ({
 	utxos: CkBtcMinterDid.Utxo[];
 	options: {
 		minConfirmations: number;
-		pendingUtxoTxIds: string[];
+		pendingUtxoOutpoints: string[];
 	};
 }): CkBtcMinterDid.Utxo[] => {
-	const { minConfirmations, pendingUtxoTxIds } = options;
+	const { minConfirmations, pendingUtxoOutpoints } = options;
 
 	// First filter by confirmations to ensure transaction security
 	// Note: UTXOs are pre-filtered by the Bitcoin canister endpoint
@@ -162,7 +193,7 @@ export const filterAvailableUtxos = ({
 	// Then filter out locked UTXOs
 	return filterLockedUtxos({
 		utxos: confirmedUtxos,
-		pendingUtxoTxIds
+		pendingUtxoOutpoints
 	});
 };
 

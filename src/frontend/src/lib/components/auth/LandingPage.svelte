@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import FeatureCards from '$lib/components/auth/FeatureCards.svelte';
+	import SignupsClosedBanner from '$lib/components/auth/SignupsClosedBanner.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
@@ -16,12 +17,14 @@
 	class="mx-auto flex w-full max-w-screen-xl flex-1 flex-col items-center gap-8 px-5 md:gap-12 md:px-8"
 >
 	<div class="flex w-full max-w-screen-md flex-col items-center">
+		<SignupsClosedBanner />
+
 		<HeroSignIn />
 	</div>
 
 	<div class="flex w-full justify-center">
 		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
-			<Img alt={ariaLabel} {src} styleClass="h-full w-full object-cover" />
+			<Img alt={ariaLabel} {src} styleClass="h-full w-[90%] object-cover" />
 		{/await}
 	</div>
 

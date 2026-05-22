@@ -26,11 +26,31 @@ export type SwapSelectTokenType = 'source' | 'destination';
 
 export type DisplayUnit = 'token' | 'usd';
 
+export type SwapTokenCategory = 'icp' | 'evm' | 'sol';
+
+export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string>>>;
+
+export type FindProviderSourceTokens = (params: {
+	key: SwapProvider;
+	category: SwapTokenCategory;
+}) => Set<string> | undefined;
+
+export interface SwapDestinationsContext {
+	sourceToken: Token;
+	supportedSourceTokens: Set<string> | undefined;
+	findProviderSourceTokens: FindProviderSourceTokens;
+}
+
+export type GetSupportedDestinationsFn = (
+	ctx: SwapDestinationsContext
+) => SwapCategorizedTokenIds | undefined;
+
 export enum SwapProvider {
 	ICP_SWAP = 'icpSwap',
 	KONG_SWAP = 'kongSwap',
 	VELORA = 'velora',
-	NEAR_INTENTS = 'nearIntents'
+	NEAR_INTENTS = 'nearIntents',
+	ONE_SEC = 'oneSec'
 }
 
 export enum VeloraSwapTypes {
@@ -102,6 +122,13 @@ export type SwapMappedResult =
 			receiveOutMinimum?: bigint;
 			swapDetails: NearIntentsQuoteResponse;
 			type?: string;
+	  }
+	| {
+			provider: SwapProvider.ONE_SEC;
+			receiveAmount: bigint;
+			receiveOutMinimum?: bigint;
+			swapDetails: OneSecSwapDetails;
+			type?: string;
 	  };
 
 interface KongQuoteParams {
@@ -127,6 +154,7 @@ interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> 
 	mapQuoteResult: (params: QuoteMapParams) => SwapMappedResult;
 	isEnabled: boolean;
 	getSupportedTokens?: (params: { identity: Identity }) => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
 type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsReply, KongQuoteParams>;
@@ -140,6 +168,7 @@ export interface EvmSwapProviderConfig {
 	getQuote: (params: EvmQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
 	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
 export interface SolSwapProviderConfig {
@@ -147,6 +176,7 @@ export interface SolSwapProviderConfig {
 	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
 	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
 export interface SwapParams {
@@ -205,7 +235,7 @@ export interface GetQuoteParams extends QuoteParams<'all'> {
 
 export interface EvmQuoteParams {
 	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
+	destinationToken: Erc20Token | IcToken;
 	amount: bigint;
 	userAddress: OptionEthAddress;
 	slippage: Slippage;
@@ -224,6 +254,47 @@ export interface GetWithdrawableTokenParams {
 	tokenAddress: string;
 	sourceToken: IcTokenToggleable;
 	destinationToken: IcTokenToggleable;
+}
+
+export interface OneSecSwapDetails {
+	transferFeeInUnits: bigint;
+	protocolFeeInPercent: number;
+}
+
+export interface OneSecIcpToEvmParams {
+	identity: Identity;
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: IcToken;
+	destinationToken: Erc20Token;
+	swapAmount: Amount;
+	userEthAddress: EthAddress;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+}
+
+export interface OneSecEvmToIcpParams extends RequiredTransactionFeeData {
+	identity: Identity;
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: Erc20Token;
+	destinationToken: IcToken;
+	swapAmount: Amount;
+	userEthAddress: EthAddress;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+}
+
+export interface IcpBridgeQuoteParams {
+	sourceToken: Token;
+	destinationToken: Token;
+	amount: bigint;
+	userEthAddress: OptionEthAddress;
+	slippage: Slippage;
+}
+
+export interface IcpBridgeSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: IcpBridgeQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
 export interface SwapProvidersConfig {

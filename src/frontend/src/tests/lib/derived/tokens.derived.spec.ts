@@ -51,7 +51,8 @@ import {
 	enabledNonFungibleTokensWithoutSpam,
 	enabledUniqueTokensSymbols,
 	fungibleTokens,
-	tokens
+	tokens,
+	tokensToPin
 } from '$lib/derived/tokens.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -470,6 +471,31 @@ describe('tokens.derived', () => {
 			erc1155CustomTokensStore.resetAll();
 
 			expect(get(enabledNonFungibleTokensWithoutSpam)).toStrictEqual([]);
+		});
+	});
+
+	describe('tokensToPin', () => {
+		it('should pin the seven native tokens in the expected order, followed by the remaining EVM tokens, with no chain-fusion ICRC tokens', () => {
+			expect(get(tokensToPin)).toEqual([
+				BTC_MAINNET_TOKEN,
+				ETHEREUM_TOKEN,
+				ICP_TOKEN,
+				TESTICP_TOKEN,
+				BNB_MAINNET_TOKEN,
+				POL_MAINNET_TOKEN,
+				SOLANA_TOKEN,
+				BASE_ETH_TOKEN,
+				ARBITRUM_ETH_TOKEN
+			]);
+		});
+
+		it('should dedupe native EVM tokens that also appear via the enabled-EVM-tokens spread', () => {
+			const result = get(tokensToPin);
+
+			expect(result.filter((token) => token.id === BNB_MAINNET_TOKEN.id)).toHaveLength(1);
+			expect(result.filter((token) => token.id === POL_MAINNET_TOKEN.id)).toHaveLength(1);
+			expect(result[4]).toBe(BNB_MAINNET_TOKEN);
+			expect(result[5]).toBe(POL_MAINNET_TOKEN);
 		});
 	});
 });

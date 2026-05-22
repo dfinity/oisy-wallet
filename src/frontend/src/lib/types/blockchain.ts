@@ -27,7 +27,7 @@ interface BitcoinPrevOut {
 	addr: string;
 }
 
-interface BitcoinInput {
+export interface BitcoinInput {
 	sequence: number;
 	witness: string;
 	script: string;

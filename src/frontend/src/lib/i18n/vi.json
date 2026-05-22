@@ -46,7 +46,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short bảo vệ bạn!"
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -123,14 +124,16 @@
 		"text": {
 			"title_part_1": "Tài sản số của bạn",
 			"title_part_2": "Riêng tư và An toàn",
+			"description": "Mở ví của bạn hoặc tạo ví mới chỉ trong vài giây",
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
+			"sign_in_or_sign_up": "Đăng nhập hoặc đăng ký",
 			"internet_identity": "",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
 			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
-			"social_login": "Truy cập tức thì và riêng tư + đăng nhập bằng tài khoản mạng xã hội"
+			"move_swap_grow": "Di chuyển, hoán đổi và tăng trưởng tài sản của bạn trên nhiều mạng"
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động",
@@ -140,6 +143,12 @@
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": "Đăng ký mới hiện đang bị hạn chế. Vui lòng thử lại sau."
+		},
+		"banner": {
+			"signups_closed": "Hiện tại, việc đăng ký người dùng mới không thể thực hiện được. Người dùng hiện tại có thể sử dụng $oisy_short bình thường."
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
@@ -262,10 +271,10 @@
 				"description": "Trung tâm của tài chính Phi tập trung tương lai!<br/>Tái định nghĩa sàn giao dịch thành một trung tâm, ICPSwap cung cấp các dịch vụ tài chính, thị trường và DAO đầy đủ trên Internet Computer. Dựa trên công nghệ nền tảng của Internet Computer của DFINITY, ICPSwap thiết lập một hệ sinh thái tài chính phi tập trung thực sự bằng cách tái cấu trúc cách người dùng và nhà phát triển cùng nhau xây dựng các dự án."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "Ứng dụng dapp giao diện người dùng NNS cho phép bất kỳ ai tương tác với Network Nervous System của Internet Computer bằng giao diện người dùng thân thiện.",
-				"call_to_action": "Tham gia",
-				"description": "Ứng dụng dapp giao diện người dùng NNS cho phép bất kỳ ai tương tác với Network Nervous System của Internet Computer bằng giao diện người dùng thân thiện. Được phục vụ hoàn toàn từ đầu đến cuối thông qua chuỗi khối, ứng dụng dapp phi tập trung này cho phép bạn dễ dàng thực hiện các hành động sau:<br/><ul><li>Gửi và nhận token (ICP, ckBTC, CHAT, v.v.)</li><li>Đặt cược và quản lý các nơ-ron</li><li>Bỏ phiếu về quản trị của Internet Computer và các SNS</li><li>Tham gia vào các giao dịch hoán đổi phi tập trung</li><li>Tạo và nạp tiền vào các canister</li><li>Kiếm phần thưởng quản trị</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Nền tảng quản trị cho Internet Computer giúp người dùng có thể stake, bỏ phiếu và theo dõi hoạt động mạng.",
+				"call_to_action": "Tham gia quản trị ICP",
+				"description": "Ứng dụng NNS là nền tảng quản trị cho Internet Computer (ICP) giúp người dùng stake token, tham gia bỏ phiếu và theo dõi hoạt động mạng.<br/><br/>Nó mang lại khả năng hiển thị cao hơn cho các hành động của người dùng và hoạt động quản trị, giúp người dùng hiểu cách stake, bỏ phiếu và tham gia đóng góp cho hệ sinh thái rộng lớn hơn."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -468,6 +477,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -726,6 +740,7 @@
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
@@ -1148,13 +1163,17 @@
 			"select_token": "Chọn token",
 			"select_network_filter": "Chọn mạng",
 			"withdrawing": "Đang rút...",
+			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến 2 phút.)",
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
-			"value_difference_error_confirmation": ""
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Không thể truy xuất giá của ít nhất một trong các token. Vui lòng <strong>xác minh độc lập</strong> rằng giao dịch swap này là một thỏa thuận công bằng.<br>Lưu ý rằng cài đặt trượt giá <strong>không</strong> bảo vệ bạn khỏi giao dịch với giá trị nhận thấp hơn nhiều!"
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
@@ -1179,7 +1198,13 @@
 	"buy": {
 		"text": {
 			"buy": "Mua",
-			"buy_dev": "Mua (Dev Environment)"
+			"buy_dev": "Mua (Dev Environment)",
+			"unavailable_title": "Mua token tạm thời không khả dụng",
+			"unavailable_description": "Việc mua token hiện đang tắt trong khi chúng tôi tiếp tục cải thiện bảo mật cho quy trình này bằng cách giới thiệu ký URL. Nó sẽ được bật lại ngay khi công việc hoàn tất.",
+			"unavailable_fallback_hint": "Trong thời gian chờ đợi, bạn vẫn có thể nhận token bằng cách chia sẻ địa chỉ ví của mình."
+		},
+		"actions": {
+			"close": "Đã hiểu"
 		},
 		"onramper": {
 			"title": "Mua qua Onramper"
@@ -1616,6 +1641,23 @@
 			"burn": "Đốt",
 			"mint": "Tạo"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "Bạn chưa thêm liên hệ nào",
+			"contacts_empty_description": "Lưu các địa chỉ đã biết vào Danh bạ để giảm rủi ro vô tình dùng nhầm địa chỉ.",
+			"contacts_empty_cta": "Thêm liên hệ đầu tiên"
+		},
 		"label": {
 			"reimbursement": "Hoàn tiền",
 			"twin_token_converted": "Đã chuyển đổi từ $twinToken",
@@ -1838,8 +1880,9 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Truy cập ví $oisy_name của bạn",
-				"open_or_create": "Mở hoặc tạo ví của bạn để kết nối an toàn với dApp và bắt đầu quản lý tài sản của bạn."
+				"open_or_create": "Mở hoặc tạo ví của bạn để tương tác an toàn với ứng dụng.",
+				"connect_your_wallet": "Kết nối ví $oisy_name của bạn",
+				"oisy_protects_you_description": "Các ứng dụng không thể trực tiếp truy cập vào quỹ của bạn, và mỗi giao dịch phải được bạn xác nhận."
 			}
 		},
 		"idle": {
@@ -1961,7 +2004,7 @@
 		},
 		"info": {
 			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
-			"hidden_micro_transactions": "<strong>OISY bảo vệ bạn!</strong> Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
+			"hidden_micro_transactions": "Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
 		},
 		"warning": {
 			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",

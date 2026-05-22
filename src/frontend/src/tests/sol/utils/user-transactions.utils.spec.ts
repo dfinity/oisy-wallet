@@ -5,6 +5,7 @@ import {
 	isSolTransactionFinalized,
 	mapSolTransactionToUserTransaction,
 	mapUserTransactionToSolTransaction,
+	requiresStoredSplOwnerRefresh,
 	solBackendTokenId
 } from '$sol/utils/user-transactions.utils';
 import { mockSignature } from '$tests/mocks/sol-transactions.mock';
@@ -12,7 +13,7 @@ import {
 	mockSolBackendUserTransaction,
 	mockSolUserTransactionUi
 } from '$tests/mocks/sol-user-transactions.mock';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { toNullable } from '@dfinity/utils';
 import { signature } from '@solana/kit';
 
@@ -273,6 +274,80 @@ describe('user-transactions.utils', () => {
 
 		it('should return false when status is null', () => {
 			expect(isSolTransactionFinalized({ ...mockSolUserTransactionUi, status: null })).toBeFalsy();
+		});
+	});
+
+	describe('requiresStoredSplOwnerRefresh', () => {
+		const mockTokenAddress = 'mock-token-address';
+		const ownerlessSplTransaction: SolTransactionUi = {
+			...mockSolUserTransactionUi,
+			from: 'mock-source-token-account',
+			to: 'mock-destination-token-account',
+			fromOwner: undefined,
+			toOwner: undefined
+		};
+
+		it('should request a refresh for SPL transactions without wallet address or owner context', () => {
+			expect(
+				requiresStoredSplOwnerRefresh({
+					transaction: ownerlessSplTransaction,
+					address: mockSolAddress,
+					tokenAddress: mockTokenAddress
+				})
+			).toBeTruthy();
+		});
+
+		it('should not request a refresh for native SOL transactions', () => {
+			expect(
+				requiresStoredSplOwnerRefresh({
+					transaction: ownerlessSplTransaction,
+					address: mockSolAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should not request a refresh when the wallet address matches the source address', () => {
+			expect(
+				requiresStoredSplOwnerRefresh({
+					transaction: { ...ownerlessSplTransaction, from: mockSolAddress },
+					address: mockSolAddress,
+					tokenAddress: mockTokenAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should not request a refresh when the wallet address matches the source owner', () => {
+			expect(
+				requiresStoredSplOwnerRefresh({
+					transaction: { ...ownerlessSplTransaction, fromOwner: mockSolAddress },
+					address: mockSolAddress,
+					tokenAddress: mockTokenAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should not request a refresh when the wallet address matches the destination address', () => {
+			expect(
+				requiresStoredSplOwnerRefresh({
+					transaction: { ...ownerlessSplTransaction, to: mockSolAddress },
+					address: mockSolAddress,
+					tokenAddress: mockTokenAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should not request a refresh when the wallet address matches the destination owner', () => {
+			expect(
+				requiresStoredSplOwnerRefresh({
+					transaction: {
+						...ownerlessSplTransaction,
+						to: mockSolAddress2,
+						toOwner: mockSolAddress
+					},
+					address: mockSolAddress,
+					tokenAddress: mockTokenAddress
+				})
+			).toBeFalsy();
 		});
 	});
 

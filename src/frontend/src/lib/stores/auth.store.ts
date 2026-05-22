@@ -25,6 +25,100 @@ export interface AuthStoreData {
 
 let authClient: Nullish<AuthClient>;
 
+// Polling rate (ms) for the signer window's `closed` flag while the user is
+// signing in through One-Click OpenID / Internet Identity. Kept short so the
+// landing page exits its busy state promptly when the user closes the popup
+// or tab without completing authentication.
+const SIGNER_WINDOW_CLOSED_POLLING_RATE = 500;
+
+// `PostMessageTransport` (used internally by `@icp-sdk/auth` v6) opens its
+// signer popup with this fixed window name, derived from the identity
+// provider's origin. By pre-opening a window with the same name, the
+// browser's named-targeting semantics make the SDK's subsequent
+// `window.open(url, sameName, features)` call reuse our window — giving us
+// a reference to the popup without intercepting any global API.
+const buildSignerWindowName = (identityProvider: string): string =>
+	`${new URL(identityProvider).origin}-signer-window`;
+
+// TODO: remove `signInWithUserInterruptDetection` once `@icp-sdk/auth`
+// (Internet Identity SDK) ships native "user closed the popup" detection.
+//
+// `@dfinity/auth-client` v4 polled `idpWindow.closed` internally and called
+// `onError('UserInterrupt')` when the user dismissed the popup. The v6
+// rewrite swapped that mechanism for the generic ICRC-29
+// `PostMessageTransport` heartbeat, which only detects a missing signer via
+// ping/pong timeouts (`disconnectTimeout: 2000ms`, `pendingTimeout:
+// 300000ms`). When id.ai reports `"pending"` — e.g. while redirecting to
+// Google for One-Click sign-in — right before the user closes the tab, our
+// sign-in promise can stay pending for up to 5 minutes, leaving the UI
+// stuck on the busy spinner.
+//
+// The II team has acknowledged the gap but it isn't on their short-term
+// roadmap, so we polyfill the behaviour here. When the SDK exposes a
+// first-class signal (e.g. a dedicated user-cancelled rejection, or a
+// `PostMessageTransport` option), this helper can be deleted and
+// `client.signIn(...)` called directly — the existing catch in
+// `auth.services.signIn` already maps `'UserInterrupt'` to a `cancelled`
+// outcome.
+//
+// Known limitation: some PWA / standalone-mode contexts (notably iOS "Add
+// to Home Screen") return a popup reference whose `.closed` flag never
+// updates. The poll then silently falls back to the SDK's heartbeat
+// behaviour; the Cancel button on the busy overlay (`busy.show()` sets
+// `close: true`) remains the user's escape hatch there.
+const signInWithUserInterruptDetection = async ({
+	client,
+	identityProvider,
+	windowOpenerFeatures
+}: {
+	client: AuthClient;
+	identityProvider: string;
+	windowOpenerFeatures?: string;
+}): Promise<Identity> => {
+	// Pre-open the popup synchronously, inside the same user-gesture call
+	// stack the SDK relies on, so popup blockers don't kick in. The SDK will
+	// then reuse this window via the matching name.
+	const signerWindow = globalThis.window.open(
+		'',
+		buildSignerWindowName(identityProvider),
+		windowOpenerFeatures
+	);
+
+	let pollHandle: ReturnType<typeof setInterval> | undefined;
+
+	const userInterruptPromise = new Promise<never>((_, reject) => {
+		// If `window.open` returned `null` (popup blocked, sandbox, etc.) the
+		// SDK's own `window.open` call will fail too and reject with a
+		// transport error — we just opt out of the poll in that case.
+		if (isNullish(signerWindow)) {
+			return;
+		}
+
+		pollHandle = setInterval(() => {
+			if (signerWindow.closed) {
+				reject('UserInterrupt');
+			}
+		}, SIGNER_WINDOW_CLOSED_POLLING_RATE);
+	});
+
+	const signInPromise = client.signIn({
+		maxTimeToLive: AUTH_MAX_TIME_TO_LIVE
+	});
+
+	// Once the user-interrupt poll wins the race, the SDK promise only
+	// settles much later via its heartbeat disconnect. Silence that rejection
+	// so the runtime doesn't flag it as unhandled.
+	signInPromise.catch(() => undefined);
+
+	try {
+		return await Promise.race([signInPromise, userInterruptPromise]);
+	} finally {
+		if (nonNullish(pollHandle)) {
+			clearInterval(pollHandle);
+		}
+	}
+};
+
 export interface AuthSignInParams {
 	domain?: InternetIdentityDomain;
 	asPopup?: boolean;
@@ -108,17 +202,21 @@ const initAuthStore = (): AuthStore => {
 					? InternetIdentityDomain.VERSION_2_0
 					: domain;
 
-			// `@icp-sdk/auth` v6 relies on ICRC-29 `PostMessageTransport` (heartbeat
-			// + JSON-RPC), which Internet Identity serves from `/authorize`. The
-			// root `/` on `id.ai` returns the marketing landing page and the
-			// heartbeat handshake silently times out there, which is why sign-in
-			// appeared to do nothing after the v4 → v6 migration.
+			// II only mounts the ICRC-29 handler on `/authorize`; the root path
+			// silently times out the heartbeat handshake.
 			const identityProvider =
 				nonNullish(INTERNET_IDENTITY_CANISTER_ID) && isNullish(openIdProvider)
 					? /apple/i.test(navigator?.vendor)
-						? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
-						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
+						? `http://localhost:4943/authorize?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
+						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943/authorize`
 					: `https://${effectiveDomain ?? InternetIdentityDomain.VERSION_1_0}/authorize${effectiveDomain === InternetIdentityDomain.VERSION_2_0 ? '?feature_flag_min_guided_upgrade=true' : ''}`;
+
+			const windowOpenerFeatures = asPopup
+				? popupCenter({
+						width: AUTH_POPUP_WIDTH,
+						height: AUTH_POPUP_HEIGHT
+					})
+				: undefined;
 
 			// In `@icp-sdk/auth` v6, `identityProvider`, `windowOpenerFeatures`,
 			// `derivationOrigin` and `openIdProvider` are constructor-bound rather
@@ -127,22 +225,17 @@ const initAuthStore = (): AuthStore => {
 			// preserved up to the `signIn()` call that opens the popup.
 			const client = AuthClientProvider.getInstance().createAuthClientForSignIn({
 				identityProvider,
-				...(asPopup
-					? {
-							windowOpenerFeatures: popupCenter({
-								width: AUTH_POPUP_WIDTH,
-								height: AUTH_POPUP_HEIGHT
-							})
-						}
-					: {}),
+				...(nonNullish(windowOpenerFeatures) ? { windowOpenerFeatures } : {}),
 				...(nonNullish(openIdProvider) ? { openIdProvider } : {}),
 				...getOptionalDerivationOrigin()
 			});
 
 			authClient = client;
 
-			const identity = await client.signIn({
-				maxTimeToLive: AUTH_MAX_TIME_TO_LIVE
+			const identity = await signInWithUserInterruptDetection({
+				client,
+				identityProvider,
+				windowOpenerFeatures
 			});
 
 			set({ identity });

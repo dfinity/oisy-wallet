@@ -7,6 +7,7 @@ import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import {
 	loadEthUserTransactions,
 	saveEthFinalizedTransactions
@@ -77,6 +78,82 @@ export const reloadEthereumTransactions = (params: {
 	silent?: boolean;
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
+const maxEthNativeBlockNumberInStore = (tokenId: TokenId): number | undefined => {
+	const rows = get(ethTransactionsStore)?.[tokenId];
+
+	if (isNullish(rows) || rows.length === 0) {
+		return;
+	}
+
+	const blocks = rows.map(({ data }) => data.blockNumber).filter(nonNullish);
+
+	if (blocks.length === 0) {
+		return;
+	}
+
+	return Math.max(...blocks);
+};
+
+/**
+ * Next Etherscan `startBlock` after the newest known height; backend cursor wins over the store.
+ */
+const resolveEthIncrementalStartBlock = ({
+	newestStoredBlockIndex,
+	maxBlockFromTransactionsStore
+}: {
+	newestStoredBlockIndex: bigint | undefined;
+	maxBlockFromTransactionsStore: number | undefined;
+}): number => {
+	if (nonNullish(newestStoredBlockIndex)) {
+		return Number(newestStoredBlockIndex) + 1;
+	}
+
+	if (nonNullish(maxBlockFromTransactionsStore)) {
+		return maxBlockFromTransactionsStore + 1;
+	}
+
+	return 0;
+};
+
+/**
+ * Fetches native ETH history from Etherscan after `startBlock` (exclusive lower bound in API terms).
+ * For incremental loads, skips the request when Infura reports the chain tip is still below `startBlock`.
+ */
+const loadNewEthNativeTransactionsAfterStartBlock = async ({
+	networkId,
+	address,
+	startBlock
+}: {
+	networkId: NetworkId;
+	address: Address;
+	startBlock: number;
+}): Promise<Transaction[]> => {
+	const { transactions: transactionsProvider } = etherscanProviders(networkId);
+
+	if (startBlock === 0) {
+		return transactionsProvider({ address, startBlock: 0, sort: 'desc' });
+	}
+
+	const tipReachesStartBlock = await (async (): Promise<boolean> => {
+		try {
+			const { getBlockNumber } = infuraProviders(networkId);
+
+			const latestBlockNumber = await getBlockNumber();
+
+			return latestBlockNumber >= startBlock;
+		} catch (_: unknown) {
+			// If we cannot read the tip, still query Etherscan rather than leave the UI stale.
+			return true;
+		}
+	})();
+
+	if (!tipReachesStartBlock) {
+		return [];
+	}
+
+	return transactionsProvider({ address, startBlock, sort: 'desc' });
+};
+
 const loadEthTransactions = async ({
 	identity,
 	networkId,
@@ -105,13 +182,18 @@ const loadEthTransactions = async ({
 			? await loadEthUserTransactions({ identity, tokenId: transactionTokenId })
 			: undefined;
 
-		// Fetch from Etherscan starting after the newest stored block (incremental loading)
-		const startBlock = nonNullish(stored?.newestBlockIndex)
-			? Number(stored.newestBlockIndex) + 1
-			: 0;
+		const startBlock = resolveEthIncrementalStartBlock({
+			newestStoredBlockIndex: stored?.newestBlockIndex,
+			maxBlockFromTransactionsStore: nonNullish(stored?.newestBlockIndex)
+				? undefined
+				: maxEthNativeBlockNumberInStore(tokenId)
+		});
 
-		const { transactions: transactionsProvider } = etherscanProviders(networkId);
-		const newTransactions = await transactionsProvider({ address, startBlock, sort: 'desc' });
+		const newTransactions = await loadNewEthNativeTransactionsAfterStartBlock({
+			networkId,
+			address,
+			startBlock
+		});
 
 		// Combine newest-first: new transactions (desc) then stored (desc from backend)
 		const allTransactions = [...newTransactions, ...(stored?.transactions ?? [])];

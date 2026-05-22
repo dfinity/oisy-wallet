@@ -8,7 +8,7 @@ use shared::types::user_profile::{
 
 use crate::utils::{
     mock::CALLER,
-    pocketic::{setup, PicCanisterTrait},
+    pocketic::{controller, setup, PicCanisterTrait},
 };
 
 #[test]
@@ -168,4 +168,91 @@ fn test_new_user_signups_allowed_defaults_to_true() {
         response.expect("Call to new_user_signups_allowed failed"),
         true
     );
+}
+
+#[test]
+fn test_set_new_user_signups_allowed_requires_controller() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let non_controller_response =
+        pic_setup.update::<()>(caller, "set_new_user_signups_allowed", false);
+    assert!(
+        non_controller_response.is_err(),
+        "Non-controller should not be able to toggle signups"
+    );
+
+    let controller_response =
+        pic_setup.update::<()>(controller(), "set_new_user_signups_allowed", false);
+    assert!(
+        controller_response.is_ok(),
+        "Controller should be able to toggle signups: {controller_response:?}"
+    );
+
+    let flag = pic_setup
+        .query::<bool>(caller, "new_user_signups_allowed", ())
+        .expect("Call to new_user_signups_allowed failed");
+    assert_eq!(flag, false);
+}
+
+#[test]
+fn test_create_user_profile_is_rejected_when_signups_are_closed() {
+    let pic_setup = setup();
+
+    pic_setup
+        .update::<()>(controller(), "set_new_user_signups_allowed", false)
+        .expect("Failed to disable signups");
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let response = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Canister call to create_user_profile failed");
+
+    assert_eq!(response, Err(CreateUserProfileError::SignupsClosed));
+}
+
+#[test]
+fn test_existing_user_can_still_create_user_profile_when_signups_are_closed() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let first_create = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Canister call to create_user_profile failed")
+        .expect("create_user_profile should succeed while signups are open");
+
+    pic_setup
+        .update::<()>(controller(), "set_new_user_signups_allowed", false)
+        .expect("Failed to disable signups");
+
+    // Existing users still get their profile back (idempotent).
+    let second_create = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Canister call to create_user_profile failed")
+        .expect("Existing users must still be able to fetch their profile via create");
+
+    assert_eq!(first_create, second_create);
+}
+
+#[test]
+fn test_set_new_user_signups_allowed_re_enables_signups() {
+    let pic_setup = setup();
+
+    pic_setup
+        .update::<()>(controller(), "set_new_user_signups_allowed", false)
+        .expect("Failed to disable signups");
+    pic_setup
+        .update::<()>(controller(), "set_new_user_signups_allowed", true)
+        .expect("Failed to re-enable signups");
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let response = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Canister call to create_user_profile failed");
+
+    assert!(response.is_ok());
 }

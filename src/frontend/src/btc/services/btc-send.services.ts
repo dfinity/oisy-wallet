@@ -4,9 +4,9 @@ import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
+import { estimateTransactionVSize, extractUtxoOutpoints } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse, SignBtcResponse } from '$declarations/signer/signer.did';
-import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/utils/btc.utils';
+import { getPendingTransactionUtxoOutpoints, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi, signBtc as signBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -171,17 +171,19 @@ export const validateBtcSend = async ({
 		address: source
 	});
 
-	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
+	const pendingUtxoOutpoints = getPendingTransactionUtxoOutpoints(source);
 
-	if (isNullish(pendingUtxoTxIds)) {
+	if (isNullish(pendingUtxoOutpoints)) {
 		// when no pending transactions have been initiated, we cannot validate UTXO's and therefore, validation must fail
 		throw new BtcValidationError(BtcSendValidationError.PendingTransactionsNotAvailable);
 	}
 
-	if (pendingUtxoTxIds.length > 0) {
-		const providedUtxoTxIds = extractUtxoTxIds(utxos);
-		for (const utxoTxId of providedUtxoTxIds) {
-			if (pendingUtxoTxIds.includes(utxoTxId)) {
+	if (pendingUtxoOutpoints.length > 0) {
+		const reserved = new Set(pendingUtxoOutpoints);
+		const providedOutpoints = extractUtxoOutpoints(utxos);
+
+		for (const outpointKey of providedOutpoints) {
+			if (reserved.has(outpointKey)) {
 				throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 			}
 		}
@@ -198,11 +200,11 @@ export const validateBtcSend = async ({
 		network,
 		identity
 	});
-	const estimatedTxSize = estimateTransactionSize({
+	const estimatedTxVSize = estimateTransactionVSize({
 		numInputs: utxos.length,
 		numOutputs: 2
 	});
-	const expectedMinFee = (BigInt(estimatedTxSize) * feeRateMiliSatoshisPerVByte) / 1000n;
+	const expectedMinFee = (BigInt(estimatedTxVSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 
 	// Allow some tolerance for fee calculation differences (±10%)
 	const feeToleranceRange = expectedMinFee / BTC_SEND_FEE_TOLERANCE_PERCENTAGE;

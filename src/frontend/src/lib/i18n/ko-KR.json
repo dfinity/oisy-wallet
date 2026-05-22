@@ -46,7 +46,8 @@
 			"unlimited": "무제한 $items",
 			"info": "정보",
 			"asset": "자산",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short가 당신을 보호합니다!"
 		},
 		"info": {
 			"test_banner": "테스트 목적으로만 사용하세요!",
@@ -123,14 +124,16 @@
 		"text": {
 			"title_part_1": "나의 디지털 자산",
 			"title_part_2": "안전하고 프라이빗하게",
+			"description": "지갑을 열거나 몇 초 만에 새로 만들 수 있습니다",
 			"logout": "로그아웃",
 			"lock": "잠금",
 			"authenticate": "열기 또는 만들기",
+			"sign_in_or_sign_up": "로그인 또는 회원가입",
 			"internet_identity": "",
 			"asset_types": "비트코인, 솔라나, 이더리움, ICP 등 다양한 자산 관리",
 			"instant_and_private": "개인정보 보호가 기본인 내장 AI 어시스턴트",
 			"advanced_cryptography": "고급 암호화 기술로 보호 - 100% 온체인",
-			"social_login": "즉각적이고 프라이빗한 액세스 + 소셜 로그인"
+			"move_swap_grow": "네트워크 전반에서 자산을 이동, 스왑하고 성장시키세요"
 		},
 		"alt": {
 			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기",
@@ -140,6 +143,12 @@
 		},
 		"message": {
 			"session_locked": "다른 탭에서 세션이 잠겼습니다."
+		},
+		"info": {
+			"signups_closed": "현재 신규 가입이 제한되어 있습니다. 나중에 다시 시도해 주세요."
+		},
+		"banner": {
+			"signups_closed": "현재 신규 사용자 가입이 불가능합니다. 기존 사용자는 $oisy_short를 정상적으로 이용할 수 있습니다."
 		},
 		"warning": {
 			"not_signed_in": "로그인되어 있지 않습니다. 계속하려면 로그인해 주세요.",
@@ -158,7 +167,7 @@
 				"login_page_looks_different": "로그인 페이지가 왜 다르게 보이나요?",
 				"use_identity_number": "인터넷 아이덴티티 번호를 사용하고 싶습니다",
 				"feedback_text": "여러분의 피드백은 $oisy_short을 더 좋게 만드는 데 도움이 됩니다.",
-				"thanks_text": "감사합니다!",
+				"thanks_text": "감사합니다.",
 				"useful_links": "유용한 링크",
 				"identity_new_identity": "$oisy_short 지갑은 인터넷 아이덴티티 도메인을 <span class=\"font-bold\">identity.internetcomputer.org</span>로 전환합니다",
 				"switch_to_new_internet_identity": "$oisy_name이 인터넷 아이덴티티 2.0으로 전환합니다",
@@ -262,10 +271,10 @@
 				"description": "미래 탈중앙화 금융의 허브!<br/>ICPSwap은 거래소를 허브로 재정의하여 인터넷 컴퓨터 위에서 풀스택 금융, 시장 및 DAO 서비스를 제공합니다. DFINITY의 인터넷 컴퓨터 기반 기술을 바탕으로 ICPSwap은 사용자와 개발자가 함께 프로젝트를 구축하는 방식을 재구성하여 진정한 탈중앙화 금융 생태계를 구축합니다."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "NNS 프론트엔드 dapp을 통해 누구나 사용자 친화적인 UI로 인터넷 컴퓨터의 네트워크 신경 시스템과 상호작용할 수 있습니다.",
-				"call_to_action": "참여하기",
-				"description": "NNS 프론트엔드 dapp을 통해 누구나 사용자 친화적인 UI로 인터넷 컴퓨터의 네트워크 신경 시스템과 상호작용할 수 있습니다. 블록체인을 통해 완전한 엔드투엔드로 제공되는 이 탈중앙화 dapp을 통해 다음 작업을 쉽게 수행할 수 있습니다:<br/><ul><li>토큰 송수신 (ICP, ckBTC, CHAT 등)</li><li>뉴런 스테이킹 및 관리</li><li>인터넷 컴퓨터 및 SNS 거버넌스 투표</li><li>탈중앙화 스왑 참여</li><li>캐니스터 생성 및 충전</li><li>거버넌스 보상 수령</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Internet Computer를 위한 거버넌스 플랫폼으로, 사용자가 스테이킹, 투표, 네트워크 활동 팔로우를 할 수 있습니다.",
+				"call_to_action": "ICP 거버넌스에 참여하기",
+				"description": "NNS 애플리케이션은 Internet Computer(ICP)를 위한 거버넌스 플랫폼으로, 사용자가 토큰 스테이킹, 투표 참여, 네트워크 활동 팔로우를 할 수 있습니다.<br/><br/>사용자 행동과 거버넌스 활동에 대한 더 큰 가시성을 제공하며, 스테이킹, 투표 및 참여가 더 넓은 생태계에 어떻게 기여하는지 사용자가 이해할 수 있도록 돕습니다."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -468,6 +477,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -726,6 +740,7 @@
 			"icrc_custom_token": "ICRC 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"ext_custom_tokens": "EXT 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"icpunks_custom_tokens": "ICPunks 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "지갑에 필요한 초기 데이터가 아직 로드되지 않았습니다. 다시 시도해 주세요.",
 			"allow_signing": "서명을 위한 지갑 설정 중 문제가 발생하여 로그아웃되었습니다. 문제가 지속되면 지원팀에 문의하세요.",
@@ -1148,13 +1163,17 @@
 			"select_token": "토큰 선택",
 			"select_network_filter": "네트워크 선택",
 			"withdrawing": "출금 중...",
+			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 2분 정도 소요될 수 있습니다.)",
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
-			"value_difference_error_confirmation": ""
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "토큰 중 하나 이상의 가격을 가져올 수 없습니다. 이 스왑 제안이 공정한 거래인지 <strong>독립적으로 확인</strong>해 주세요.<br>슬리피지 설정은 받는 가치가 훨씬 낮은 제안으로부터 사용자를 보호하지 <strong>않습니다</strong>!"
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",
@@ -1179,7 +1198,13 @@
 	"buy": {
 		"text": {
 			"buy": "구매",
-			"buy_dev": "구매 (개발 환경)"
+			"buy_dev": "구매 (개발 환경)",
+			"unavailable_title": "토큰 구매는 일시적으로 사용할 수 없습니다",
+			"unavailable_description": "URL 서명을 도입하여 이 프로세스의 보안을 더욱 개선하는 동안 토큰 구매가 현재 꺼져 있습니다. 작업이 완료되는 즉시 다시 켜집니다.",
+			"unavailable_fallback_hint": "그동안에도 지갑 주소를 공유하여 토큰을 받을 수 있습니다."
+		},
+		"actions": {
+			"close": "확인"
 		},
 		"onramper": {
 			"title": "Onramper를 통해 구매"
@@ -1616,6 +1641,23 @@
 			"burn": "소각",
 			"mint": "민트"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "아직 연락처를 추가하지 않으셨습니다",
+			"contacts_empty_description": "알고 있는 주소를 연락처에 저장하여 실수로 잘못된 주소를 사용할 위험을 줄이세요.",
+			"contacts_empty_cta": "첫 연락처 추가"
+		},
 		"label": {
 			"reimbursement": "환불",
 			"twin_token_converted": "$twinToken에서 전환됨",
@@ -1838,8 +1880,9 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "$oisy_name에 접근",
-				"open_or_create": "지갑을 열거나 만들어 dApp에 안전하게 연결하고 자산 관리를 시작하세요."
+				"open_or_create": "애플리케이션과 안전하게 상호작용하려면 지갑을 열거나 생성하세요.",
+				"connect_your_wallet": "$oisy_name에 연결",
+				"oisy_protects_you_description": "애플리케이션은 귀하의 자금에 직접 접근할 수 없으며, 모든 거래는 귀하의 확인이 필요합니다!"
 			}
 		},
 		"idle": {
@@ -1961,7 +2004,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC 거래 정보는 중앙 집중식 제3자로부터 제공되므로 독립적으로 검증해야 합니다.",
-			"hidden_micro_transactions": "<strong>OISY가 당신을 보호합니다!</strong> 매우 작은 토큰 가치의 거래가 현재 숨겨져 있습니다. 표시하려면 <a href=\"/settings/\">설정</a>으로 이동하세요.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">자세히 알아보기</a>"
+			"hidden_micro_transactions": "매우 작은 토큰 가치의 거래가 현재 숨겨져 있습니다. 표시하려면 <a href=\"/settings/\">설정</a>으로 이동하세요.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">자세히 알아보기</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 사용 가능한 인덱스 캐니스터가 없습니다.",

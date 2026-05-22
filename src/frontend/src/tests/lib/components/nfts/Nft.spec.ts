@@ -1,5 +1,6 @@
 import Nft from '$lib/components/nfts/Nft.svelte';
 import { nftStore } from '$lib/stores/nft.store';
+import { getNftDisplayName } from '$lib/utils/nft.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -18,7 +19,7 @@ describe('Nft', () => {
 	it('should render the nft', () => {
 		const { container, getByText } = render(Nft);
 
-		const name: HTMLElement | null = getByText(`${mockNft.name} #${mockNft.id}`);
+		const name: HTMLElement | null = getByText(getNftDisplayName(mockNft));
 
 		expect(name).toBeInTheDocument();
 

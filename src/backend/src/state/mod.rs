@@ -8,23 +8,24 @@ use shared::types::{
 
 use crate::{
     state::memory::{
-        AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID,
-        CONFIG_MEMORY_ID, CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER,
-        TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
-        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
+        ACTIVE_USER_TRANSACTIONS_MEMORY_ID, AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID,
+        BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_MEMORY_ID,
+        EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, TOKEN_ACTIVITY_MEMORY_ID,
+        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
+        USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
         maps::{
-            AgreementHistoryMap, ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell,
-            ContactMap, CustomTokenMap, ExchangeRateMap, TokenActivityMap, UserProfileMap,
-            UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
+            ActiveUserTransactionsMap, AgreementHistoryMap, ApiKeysCell,
+            BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, ExchangeRateMap,
+            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
+            UserTransactionsMap,
         },
         storable::Candid,
     },
 };
 
 pub(crate) mod memory;
-pub(crate) mod stored_token_migration;
 
 pub(crate) struct State {
     pub(crate) config: ConfigCell,
@@ -39,13 +40,15 @@ pub(crate) struct State {
     pub(crate) user_profile_updated: UserProfileUpdatedMap,
     pub(crate) contact: ContactMap,
     pub(crate) btc_user_pending_transactions: BtcUserPendingTransactionsMap,
-    // TODO: implement a periodic cleanup of old entries
     // TODO: limit the map size with an eviction policy
     pub(crate) token_activity: TokenActivityMap,
     pub(crate) exchange_rates: ExchangeRateMap,
     pub(crate) user_transactions: UserTransactionsMap,
     /// Per-user audit trail of agreement consent/rejection events.
     pub(crate) agreement_history: AgreementHistoryMap,
+    /// Per-user in-flight high-level operations (swaps, converts, …). Survives
+    /// canister upgrades; the FE polls and updates these records.
+    pub(crate) active_user_transactions: ActiveUserTransactionsMap,
 }
 
 impl From<&State> for Stats {
@@ -59,6 +62,7 @@ impl From<&State> for Stats {
             exchange_rates_count: state.exchange_rates.len(),
             user_transactions_count: state.user_transactions.len(),
             agreement_history_count: state.agreement_history.len(),
+            active_user_transactions_count: state.active_user_transactions.len(),
         }
     }
 }
@@ -81,6 +85,7 @@ thread_local! {
             exchange_rates: ExchangeRateMap::init(mm.borrow().get(EXCHANGE_RATE_MEMORY_ID)),
             user_transactions: UserTransactionsMap::init(mm.borrow().get(USER_TRANSACTIONS_MEMORY_ID)),
             agreement_history: AgreementHistoryMap::init(mm.borrow().get(AGREEMENT_HISTORY_MEMORY_ID)),
+            active_user_transactions: ActiveUserTransactionsMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_MEMORY_ID)),
         })
     );
 }
@@ -123,6 +128,23 @@ pub(crate) fn set_config(arg: InitArg) {
 /// - If the `STATE.config` is not initialized.
 pub(crate) fn read_new_user_signups_allowed() -> bool {
     read_config(|c| c.new_user_signups_allowed.unwrap_or(true))
+}
+
+/// Sets the "new user sign-ups allowed" flag, preserving all other `Config` fields.
+///
+/// # Panics
+/// - If the `STATE.config` is not initialized.
+pub(crate) fn set_new_user_signups_allowed(allowed: bool) {
+    mutate_state(|state| {
+        let mut config = state
+            .config
+            .get()
+            .as_ref()
+            .map(|Candid(c)| c.clone())
+            .expect("config is not initialized");
+        config.new_user_signups_allowed = Some(allowed);
+        state.config.set(Some(Candid(config)));
+    });
 }
 
 pub(crate) fn with_api_keys<R>(f: impl FnOnce(&ApiKeys) -> R) -> R {

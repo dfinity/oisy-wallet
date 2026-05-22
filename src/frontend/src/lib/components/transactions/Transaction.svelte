@@ -39,7 +39,7 @@
 		iconType: 'token' | 'transaction';
 		to?: string;
 		from?: string;
-		tokenId?: number;
+		tokenId?: number | bigint | string;
 		children: Snippet;
 		onClick?: () => void;
 		approveSpender?: string;

@@ -1,4 +1,5 @@
 import type {
+	ActiveUserTransaction,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
@@ -13,8 +14,8 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
+	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
-	mapBtcSelectUserUtxosFeeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
@@ -27,7 +28,7 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
-	BtcSelectUserUtxosFeeParams,
+	CreateActiveUserTransactionParams,
 	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
@@ -37,16 +38,16 @@ import type {
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
-	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
+	UpdateActiveUserTransactionParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { SignupsClosedError } from '$lib/types/errors';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
 import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
-import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import {
@@ -101,16 +102,28 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<CreateUserProfileResponse> => {
+	createUserProfile = async (): Promise<CreateUserProfileResponse> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
-		return create_user_profile();
+		const response = await create_user_profile();
+
+		if ('Err' in response && 'SignupsClosed' in response.Err) {
+			throw new SignupsClosedError();
+		}
+
+		return response;
 	};
 
 	getUserProfile = ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
 		const { get_user_profile } = this.caller({ certified });
 
 		return get_user_profile();
+	};
+
+	newUserSignupsAllowed = ({ certified }: QueryParams): Promise<boolean> => {
+		const { new_user_signups_allowed } = this.caller({ certified });
+
+		return new_user_signups_allowed();
 	};
 
 	btcAddPendingTransaction = async ({
@@ -180,43 +193,6 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcGetPendingTransactionsError(response.Err);
 	};
 
-	btcSelectUserUtxosFee = async ({
-		network,
-		minConfirmations,
-		amountSatoshis,
-		iiDelegationChain
-	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeOutcome> => {
-		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
-
-		const response = await btc_select_user_utxos_fee({
-			network,
-			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis,
-			ii_delegation_chain: iiDelegationChain
-		});
-
-		if ('Ok' in response) {
-			return { response: response.Ok };
-		}
-
-		// In case of rate limit reached, we ignore the error and let the user continue (for now).
-		// TODO: improve placeholder with significant data, for now we do not use them
-		if ('RateLimited' in response.Err) {
-			return {
-				response: {
-					fee_satoshis: ZERO,
-					utxos: []
-				},
-				rateLimitInfo: {
-					endpoint: 'btc_select_user_utxos_fee',
-					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
-				}
-			};
-		}
-
-		throw mapBtcSelectUserUtxosFeeError(response.Err);
-	};
-
 	btcGetCurrentFeePercentiles = async ({
 		network
 	}: BtcGetFeePercentilesParams): Promise<BtcGetFeePercentilesResponse> => {
@@ -231,8 +207,7 @@ export class BackendCanister extends Canister<BackendService> {
 			return Ok;
 		}
 
-		// Reuse the same error mapping as other BTC methods since they share the same error type
-		throw mapBtcSelectUserUtxosFeeError(response.Err);
+		throw mapBtcGetFeePercentilesError(response.Err);
 	};
 
 	getAllowedCycles = async (): Promise<GetAllowedCyclesResponse> => {
@@ -454,25 +429,14 @@ export class BackendCanister extends Canister<BackendService> {
 		return this.mapExchangeRate(fromNullable(response));
 	};
 
-	getExchangeRates = async ({
-		token_ids,
-		certified
-	}: { token_ids: TokenId[] } & QueryParams): Promise<Map<string, BackendExchangeRate>> => {
-		const { get_exchange_rates } = this.caller({ certified });
+	getExchangeRates = async (): Promise<Array<[TokenId, BackendExchangeRate | undefined]>> => {
+		// `get_exchange_rates` is an update on the backend (mutates token_activity, may issue
+		// HTTP outcalls), so it always goes through the certified service.
+		const { get_exchange_rates } = this.caller({ certified: true });
 
-		const results = await get_exchange_rates(token_ids);
+		const results = await get_exchange_rates();
 
-		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
-			const unwrapped = this.mapExchangeRate(fromNullable(rate));
-
-			const key = tokenIdKey(id);
-
-			if (nonNullish(unwrapped) && nonNullish(key)) {
-				acc.set(key, unwrapped);
-			}
-
-			return acc;
-		}, new Map());
+		return results.map(([id, rate]) => [id, this.mapExchangeRate(fromNullable(rate))]);
 	};
 
 	getUserTransactions = async ({
@@ -517,6 +481,76 @@ export class BackendCanister extends Canister<BackendService> {
 
 		if ('Ok' in response) {
 			return;
+		}
+
+		throw response.Err;
+	};
+
+	createActiveUserTransaction = async ({
+		id,
+		data,
+		progressStep,
+		externalRefs
+	}: CreateActiveUserTransactionParams): Promise<ActiveUserTransaction> => {
+		const { create_active_user_transaction } = this.caller({ certified: true });
+
+		const response = await create_active_user_transaction({
+			id,
+			data,
+			progress_step: toNullable(progressStep),
+			external_refs: externalRefs
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw response.Err;
+	};
+
+	updateActiveUserTransaction = async ({
+		id,
+		status,
+		progressStep,
+		externalRefs,
+		error
+	}: UpdateActiveUserTransactionParams): Promise<ActiveUserTransaction> => {
+		const { update_active_user_transaction } = this.caller({ certified: true });
+
+		const response = await update_active_user_transaction({
+			id,
+			status: toNullable(status),
+			progress_step: toNullable(progressStep),
+			external_refs: toNullable(externalRefs),
+			error: toNullable(error)
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw response.Err;
+	};
+
+	deleteActiveUserTransaction = async (id: string): Promise<void> => {
+		const { delete_active_user_transaction } = this.caller({ certified: true });
+
+		const response = await delete_active_user_transaction(id);
+
+		if ('Ok' in response) {
+			return;
+		}
+
+		throw response.Err;
+	};
+
+	getActiveUserTransactions = async (): Promise<ActiveUserTransaction[]> => {
+		const { get_active_user_transactions } = this.caller({ certified: false });
+
+		const response = await get_active_user_transactions();
+
+		if ('Ok' in response) {
+			return response.Ok.transactions;
 		}
 
 		throw response.Err;

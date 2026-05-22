@@ -41,12 +41,13 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "Aprender mas",
+			"learn_more": "Aprender más",
 			"sorting": "Ordenar",
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "¡$oisy_short te protege!"
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -123,14 +124,16 @@
 		"text": {
 			"title_part_1": "Tus Activos Digitales",
 			"title_part_2": "Privados y Seguros",
+			"description": "Abre tu billetera o crea una en segundos",
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
+			"sign_in_or_sign_up": "Inicia sesión o regístrate",
 			"internet_identity": "",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena",
-			"social_login": "Acceso instantáneo y privado + inicio de sesión social"
+			"move_swap_grow": "Mueve, intercambia y haz crecer tus activos entre redes"
 		},
 		"alt": {
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil",
@@ -140,6 +143,12 @@
 		},
 		"message": {
 			"session_locked": "Tu sesión fue bloqueada."
+		},
+		"info": {
+			"signups_closed": "Los nuevos registros están restringidos actualmente. Por favor, inténtalo de nuevo más tarde."
+		},
+		"banner": {
+			"signups_closed": "Actualmente, el registro de nuevos usuarios no es posible. Los usuarios existentes pueden usar $oisy_short con normalidad."
 		},
 		"warning": {
 			"not_signed_in": "No has iniciado sesión. Por favor, inicia sesión para continuar.",
@@ -262,10 +271,10 @@
 				"description": "¡El Centro de las Finanzas Descentralizadas del Futuro!<br/>Reinventando el Exchange como un Hub, ICPSwap proporciona servicios financieros, de mercado y de DAO de pila completa en Internet Computer. Basado en la tecnología subyacente de Internet Computer de DFINITY, ICPSwap establece un ecosistema de finanzas verdaderamente descentralizadas al refactorizar la forma en que los usuarios y desarrolladores construyen proyectos conjuntamente."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "La dapp de frontend de NNS permite a cualquiera interactuar con el Sistema Nervioso de Red de Internet Computer con una interfaz de usuario amigable.",
-				"call_to_action": "Participa",
-				"description": "La dapp de frontend de NNS permite a cualquiera interactuar con el Sistema Nervioso de Red de Internet Computer con una interfaz de usuario amigable. Servida completamente de extremo a extremo a través de la blockchain, esta dapp descentralizada te permite realizar fácilmente las siguientes acciones:<br/><ul><li>Enviar y recibir tokens (ICP, ckBTC, CHAT, etc.)</li><li>Hacer staking y gestionar neuronas</li><li>Votar en la gobernanza de Internet Computer y las SNSes</li><li>Participar en intercambios de descentralización</li><li>Crear y recargar canisters</li><li>Ganar recompensas de gobernanza</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Plataforma de gobernanza para Internet Computer que permite a los usuarios hacer staking, votar y seguir la actividad de la red.",
+				"call_to_action": "Participar en la gobernanza de ICP",
+				"description": "La aplicación NNS es una plataforma de gobernanza para Internet Computer (ICP) que permite a los usuarios hacer staking de tokens, participar en votaciones y seguir la actividad de la red.<br/><br/>Aporta mayor visibilidad a las acciones de los usuarios y la actividad de gobernanza, ayudando a los usuarios a comprender cómo el staking, la votación y la participación contribuyen al ecosistema más amplio."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -468,6 +477,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -726,6 +740,7 @@
 			"icrc_custom_token": "Error al cargar el token ICRC personalizado.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Tu billetera requiere algunos datos iniciales que aún no se han cargado. Por favor, inténtalo de nuevo.",
 			"allow_signing": "Ocurrió un problema al configurar tu billetera para firmar. Has sido desconectado. Si el problema persiste, contacta con el soporte.",
@@ -1148,13 +1163,17 @@
 			"select_token": "Seleccionar token",
 			"select_network_filter": "Seleccionar red",
 			"withdrawing": "Retirando...",
+			"bridging": "Realizando el bridge... (Por favor, ten paciencia, esto puede tardar hasta 2 minutos.)",
 			"network_cost": "Costo de red",
 			"gasless": "Sin gas",
 			"swap_fees": "Comisiones de Intercambio",
 			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
-			"value_difference_error_confirmation": ""
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "No se pudo obtener el precio de al menos uno de los tokens. Por favor, <strong>verifica de forma independiente</strong> que esta oferta de intercambio sea justa.<br>Ten en cuenta que la configuración de slippage <strong>no</strong> te protege de una oferta con un valor de recepción mucho menor."
 		},
 		"error": {
 			"kong_not_available": "Actualmente no hay ningún exchange disponible para intercambiar tokens. Por favor, inténtalo de nuevo más tarde.",
@@ -1179,7 +1198,13 @@
 	"buy": {
 		"text": {
 			"buy": "Comprar",
-			"buy_dev": "Comprar (Entorno de Desarrollo)"
+			"buy_dev": "Comprar (Entorno de Desarrollo)",
+			"unavailable_title": "La compra de tokens no está disponible temporalmente",
+			"unavailable_description": "La compra de tokens está desactivada actualmente mientras seguimos mejorando la seguridad de este proceso mediante la introducción de la firma de URL. Se reactivará en cuanto se complete el trabajo.",
+			"unavailable_fallback_hint": "Mientras tanto, aún puedes recibir tokens compartiendo la dirección de tu billetera."
+		},
+		"actions": {
+			"close": "Entendido"
 		},
 		"onramper": {
 			"title": "Comprar a través de Onramper"
@@ -1616,6 +1641,23 @@
 			"burn": "Quemar",
 			"mint": "Acuñar"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "Aún no has añadido contactos",
+			"contacts_empty_description": "Guarda direcciones conocidas en Contactos y reduce el riesgo de usar accidentalmente una dirección incorrecta.",
+			"contacts_empty_cta": "Añadir tu primer contacto"
+		},
 		"label": {
 			"reimbursement": "Reembolso",
 			"twin_token_converted": "Convertido desde $twinToken",
@@ -1838,8 +1880,9 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Accede a tu $oisy_name",
-				"open_or_create": "Abre o crea tu billetera para conectarte de forma segura a la dApp y empezar a gestionar tus activos."
+				"open_or_create": "Abre o crea tu wallet para interactuar de forma segura con la aplicación.",
+				"connect_your_wallet": "Conecta tu $oisy_name",
+				"oisy_protects_you_description": "Las aplicaciones no pueden acceder directamente a tus fondos, y cada transacción tiene que ser confirmada por ti."
 			}
 		},
 		"idle": {
@@ -1961,7 +2004,7 @@
 		},
 		"info": {
 			"btc_transactions": "La información de las transacciones de BTC se obtiene de terceros centralizados y debe verificarse de forma independiente.",
-			"hidden_micro_transactions": "<strong>¡OISY te protege!</strong> Las transacciones con valores de token muy pequeños están actualmente ocultas. Para mostrarlas, ve a <a href=\"/settings/\">Configuración</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Más información</a>"
+			"hidden_micro_transactions": "Las transacciones con valores de token muy pequeños están actualmente ocultas. Para mostrarlas, ve a <a href=\"/settings/\">Configuración</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Más información</a>"
 		},
 		"warning": {
 			"no_index_canister": "",

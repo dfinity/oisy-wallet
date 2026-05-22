@@ -1,3 +1,4 @@
+mod active_user_transactions;
 mod agreements;
 mod bitcoin;
 mod config;
@@ -6,6 +7,7 @@ mod custom_token;
 mod settings;
 mod signer;
 mod stats;
+mod status;
 mod transactions;
 mod user_profile;
 mod utils;
