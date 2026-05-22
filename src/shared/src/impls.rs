@@ -1012,7 +1012,7 @@ mod tests {
                 },
             );
 
-            let result = profile.with_provider_agreements(Some(999), 2_000, &request);
+            let result = profile.with_provider_agreements(Some(999), 2_000, request);
             assert_eq!(result, Err(UpdateAgreementsError::VersionMismatch));
         }
 
@@ -1028,7 +1028,7 @@ mod tests {
             )]);
 
             let result = profile
-                .with_provider_agreements(profile.version, 2_000, &request)
+                .with_provider_agreements(profile.version, 2_000, request)
                 .unwrap();
             assert_eq!(result.version, profile.version);
             assert_eq!(result.agreements, profile.agreements);
@@ -1047,7 +1047,7 @@ mod tests {
             )]);
 
             let result = profile
-                .with_provider_agreements(profile.version, 2_000, &request)
+                .with_provider_agreements(profile.version, 2_000, request)
                 .unwrap();
             assert_eq!(result.version, profile.version);
         }
@@ -1064,7 +1064,7 @@ mod tests {
             )]);
 
             let result = profile
-                .with_provider_agreements(profile.version, 2_000, &request)
+                .with_provider_agreements(profile.version, 2_000, request)
                 .unwrap();
             let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
             let agreement = provider_agreements.get(&swap_key()).unwrap();
@@ -1085,7 +1085,7 @@ mod tests {
             )]);
 
             let result = profile
-                .with_provider_agreements(profile.version, 2_000, &request)
+                .with_provider_agreements(profile.version, 2_000, request)
                 .unwrap();
             let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
             let agreement = provider_agreements.get(&swap_key()).unwrap();
@@ -1126,7 +1126,7 @@ mod tests {
             )]);
 
             let result = profile
-                .with_provider_agreements(profile.version, 5_000, &request)
+                .with_provider_agreements(profile.version, 5_000, request)
                 .unwrap();
             let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
             let agreement = provider_agreements.get(&existing_key).unwrap();
@@ -1149,7 +1149,7 @@ mod tests {
             )]);
 
             let result = profile
-                .with_provider_agreements(profile.version, 2_000, &request)
+                .with_provider_agreements(profile.version, 2_000, request)
                 .unwrap();
             assert_eq!(result.version, Some(1));
         }
@@ -1160,7 +1160,7 @@ mod tests {
             let request = BTreeMap::new();
 
             let result = profile
-                .with_provider_agreements(profile.version, 2_000, &request)
+                .with_provider_agreements(profile.version, 2_000, request)
                 .unwrap();
             assert_eq!(result.version, profile.version);
             assert_eq!(result.agreements, profile.agreements);
