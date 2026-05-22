@@ -15,6 +15,8 @@ use crate::{
 /// time, not to gate refreshes.
 pub(crate) const TOKEN_ACTIVITY_RETENTION_SEC: u64 = 30 * 60;
 
+const _: () = assert!(TOKEN_ACTIVITY_RETENTION_SEC > crate::exchange::PRICE_ACTIVITY_THRESHOLD_SEC);
+
 fn add_to_token_activity(
     token_id: StoredTokenId,
     token_activity: &mut TokenActivityMap,
@@ -98,11 +100,6 @@ mod tests {
 
     fn token(chain_id: u64) -> StoredTokenId {
         StoredTokenId(TokenId::EvmNative(chain_id))
-    }
-
-    #[test]
-    fn token_activity_retention_stays_above_price_activity_threshold() {
-        assert!(TOKEN_ACTIVITY_RETENTION_SEC > PRICE_ACTIVITY_THRESHOLD_SEC);
     }
 
     #[test]
