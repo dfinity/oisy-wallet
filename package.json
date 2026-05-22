@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "2.0.4",
+	"version": "2.0.8",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -37,10 +37,10 @@
 		"test:merge": "tsc --project tsconfig.spec.json --noEmit && vitest run --coverage --merge-reports",
 		"cargo:test": "./scripts/test.backend.sh",
 		"clippy": "./scripts/lint.rust.sh",
-		"lint": "prettier --check --cache ${CI:+--cache-strategy content} './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint --concurrency=auto --cache ${CI:+--cache-strategy content} .",
+		"lint": "prettier --check --cache ${CI:+--cache-strategy content} './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,mdc,yml,did}' && eslint --concurrency=auto --cache ${CI:+--cache-strategy content} .",
 		"lint:lockfile": "lockfile-lint --type npm --path package-lock.json --validate-https --allowed-hosts registry.npmjs.org --validate-integrity --validate-package-urls --validate-registry",
 		"format:file": "prettier --write \"${npm_config_file}\" && eslint --fix \"${npm_config_file}\"",
-		"format": "prettier --write --cache ${CI:+--cache-strategy content} './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint --fix --concurrency=auto --cache ${CI:+--cache-strategy content} .",
+		"format": "prettier --write --cache ${CI:+--cache-strategy content} './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,mdc,yml,did}' && eslint --fix --concurrency=auto --cache ${CI:+--cache-strategy content} .",
 		"format:backend": "./scripts/format.sh",
 		"generate": "scripts/generate.sh",
 		"deploy": "scripts/deploy.sh",
@@ -51,7 +51,7 @@
 		"playwright:install": "playwright install --with-deps",
 		"e2e": "npm run playwright:install && playwright test",
 		"e2e:dev": "npm run playwright:install && NODE_ENV=development playwright test",
-		"e2e:ci": "npm run playwright:install && playwright test --update-snapshots=changed --reporter=html,list",
+		"e2e:ci": "playwright test --update-snapshots=changed --reporter=html,list",
 		"e2e:snapshots": "npm run playwright:install && npx playwright test --update-snapshots=changed --reporter=list",
 		"e2e:snapshots:dev": "npm run playwright:install && NODE_ENV=development npx playwright test --update-snapshots=changed --reporter=list",
 		"e2e:report": "npx playwright show-report",
@@ -70,8 +70,8 @@
 		"benchmark": "canbench --persist --show-summary"
 	},
 	"dependencies": {
-		"@dfinity/gix-components": "^10.0.0",
-		"@dfinity/ic-pub-key": "^1.0.1-next-2026-01-28",
+		"@dfinity/gix-components": "^10.0.2",
+		"@dfinity/ic-pub-key": "^1.0.2",
 		"@dfinity/oisy-wallet-signer": "^4.0.0",
 		"@dfinity/utils": "^4.0.3",
 		"@dfinity/verifiable-credentials": "^1.2.0",
@@ -84,7 +84,7 @@
 		"@reown/walletkit": "^1.5.5",
 		"@solana-program/compute-budget": "^0.15.0",
 		"@solana-program/system": "^0.12.0",
-		"@solana-program/token": "^0.12.0",
+		"@solana-program/token": "^0.13.0",
 		"@solana-program/token-2022": "^0.9.0",
 		"@solana/kit": "^6.0.1",
 		"@velora-dex/sdk": "^9.3.3",
@@ -95,7 +95,7 @@
 		"buffer": "^6.0.3",
 		"decimal.js": "^10.6.0",
 		"ethers": "^6.16.0",
-		"idb-keyval": "^6.2.2",
+		"idb-keyval": "6.2.2",
 		"onesec-bridge": "^0.12.0",
 		"svelte-confetti": "^2.3.2",
 		"viem": "^2.47.6",
@@ -103,7 +103,7 @@
 	},
 	"devDependencies": {
 		"@dfinity/eslint-config-oisy-wallet": "^0.3.0",
-		"@dfinity/internet-identity-playwright": "^0.0.5",
+		"@dfinity/internet-identity-playwright": "^3.0.0",
 		"@icp-sdk/bindgen": "^0.2.0",
 		"@playwright/test": "^1.58.2",
 		"@rollup/plugin-inject": "^5.0.5",
@@ -129,7 +129,7 @@
 		"prettier-plugin-svelte": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",
 		"sass": "^1.98.0",
-		"svelte": "^5.55.0",
+		"svelte": "^5.55.7",
 		"svelte-check": "^4.4.5",
 		"tailwindcss": "4.2.2",
 		"tslib": "^2.8.1",
@@ -137,7 +137,7 @@
 		"vite": "^7.3.2",
 		"vite-node": "^6.0.0",
 		"vitest": "^4.0.10",
-		"vitest-mock-extended": "^3.1.0"
+		"vitest-mock-extended": "^4.0.0"
 	},
 	"type": "module",
 	"overrides": {

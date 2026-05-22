@@ -93,7 +93,6 @@
 
 	{#snippet info()}
 		<div class="mt-8">
-			<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
 			<BtcSendWarnings {pendingTransactionsStatus} utxosFee={$storeUtxosFeeData?.utxosFee} />
 		</div>
 	{/snippet}

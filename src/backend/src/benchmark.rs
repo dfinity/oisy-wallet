@@ -72,6 +72,7 @@ fn make_custom_token(chain_id: u64, suffix: u64) -> CustomToken {
         version: None,
         section: None,
         allow_external_content_source: None,
+        allowed_external_content_source_urls: None,
     }
 }
 

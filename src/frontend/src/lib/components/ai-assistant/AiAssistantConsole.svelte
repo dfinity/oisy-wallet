@@ -2,8 +2,8 @@
 	import { IconClose } from '@dfinity/gix-components';
 	import { fade } from 'svelte/transition';
 	import AiAssistantChat from '$lib/components/ai-assistant/AiAssistantChat.svelte';
+	import AiAssistantResetButton from '$lib/components/ai-assistant/AiAssistantResetButton.svelte';
 	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
-	import IconRepeat from '$lib/components/icons/IconRepeat.svelte';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -20,17 +20,9 @@
 
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
 
-		<button
-			class="mr-2 transition-colors"
-			class:hover:text-primary={!loading}
-			class:text-tertiary={!loading}
-			class:text-tertiary-inverted={loading}
-			aria-label={$i18n.ai_assistant.text.reset_chat_history}
-			disabled={loading}
-			onclick={aiAssistantStore.resetChatHistory}
-		>
-			<IconRepeat size="18" />
-		</button>
+		<div class="mr-2">
+			<AiAssistantResetButton {loading} />
+		</div>
 
 		<button
 			class="text-tertiary transition-colors hover:text-primary"

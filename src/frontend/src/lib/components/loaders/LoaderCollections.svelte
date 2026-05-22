@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, toNullable } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
 	import { page } from '$app/state';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
+	import { ICRC7_BUILTIN_TOKENS } from '$env/tokens/tokens-icrc7/tokens.icrc7.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { buildNewErcTokens } from '$eth/services/erc-custom-tokens.services';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
+	import { getTokensByOwner as getIcrc7TokensByOwner } from '$icp/api/icrc7.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import {
 		COLLECTION_TIMER_INTERVAL_MILLIS,
@@ -25,7 +27,8 @@
 	import type {
 		SaveCustomErc1155Variant,
 		SaveCustomErc721Variant,
-		SaveCustomExtVariant
+		SaveCustomExtVariant,
+		SaveCustomIcrc7Variant
 	} from '$lib/types/custom-token';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
@@ -122,7 +125,55 @@
 		});
 	};
 
-	const load = async ({ extTokens }: { extTokens: boolean }) => {
+	const loadIcrc7Tokens = async ({ identity, customTokens }: LoadTokensParams) => {
+		const icrc7EnabledCustomToken = customTokens.reduce<CanisterIdText[]>(
+			(acc, { token, enabled }) =>
+				'Icrc7' in token && enabled ? [...acc, token.Icrc7.canister_id.toText()] : acc,
+			[]
+		);
+
+		const owner = { owner: identity.getPrincipal(), subaccount: toNullable<Uint8Array>() };
+
+		const canisterIdPromises = ICRC7_BUILTIN_TOKENS.map(async ({ canisterId }) => {
+			if (icrc7EnabledCustomToken.includes(canisterId)) {
+				return [];
+			}
+
+			try {
+				const tokens = await getIcrc7TokensByOwner({
+					identity,
+					owner,
+					canisterId,
+					certified: false
+				});
+
+				return tokens.length > 0 ? [canisterId] : [];
+			} catch (error: unknown) {
+				consoleWarn(`Error fetching ICRC-7 tokens from canister ${canisterId}:`, error);
+
+				return [];
+			}
+		});
+
+		const canisterIds = (await Promise.all(canisterIdPromises)).flat();
+
+		if (canisterIds.length === 0) {
+			return;
+		}
+
+		const icrc7Tokens: SaveCustomIcrc7Variant[] = canisterIds.map((canisterId) => ({
+			canisterId,
+			networkKey: 'Icrc7',
+			enabled: true
+		}));
+
+		await saveCustomTokens({
+			tokens: icrc7Tokens as NonEmptyArray<SaveCustomIcrc7Variant>,
+			identity
+		});
+	};
+
+	const load = async ({ reloadCollections }: { reloadCollections: boolean }) => {
 		if (isNullish($authIdentity)) {
 			return;
 		}
@@ -135,7 +186,8 @@
 		try {
 			await Promise.all([
 				loadErcTokens(params),
-				extTokens ? loadExtTokens(params) : Promise.resolve()
+				reloadCollections ? loadExtTokens(params) : Promise.resolve(),
+				reloadCollections ? loadIcrc7Tokens(params) : Promise.resolve()
 			]);
 		} catch (_: unknown) {
 			// no need to raise the error, but we should reload the custom tokens, just to avoid that it is caused by outdated tokens
@@ -147,11 +199,11 @@
 	};
 
 	const onLoad = async () => {
-		await load({ extTokens: false });
+		await load({ reloadCollections: false });
 	};
 
 	const reload = async (event?: CustomEvent<OisyReloadCollectionsEvent>) => {
-		await load({ extTokens: true });
+		await load({ reloadCollections: true });
 
 		event?.detail.callback?.();
 	};

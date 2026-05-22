@@ -15,7 +15,7 @@ use crate::{
         },
         custom_token::{
             CustomToken, CustomTokenId, Dip721Token, ErcToken, ErcTokenId, ExtV2Token,
-            IcPunksToken, IcrcToken, SplToken, SplTokenId, Token,
+            IcPunksToken, Icrc7Token, IcrcToken, SplToken, SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         exchange::{ExchangeData, ExchangeRate},
@@ -136,6 +136,7 @@ impl From<&Token> for CustomTokenId {
             Token::ExtV2(token) => CustomTokenId::ExtV2(token.canister_id),
             Token::Dip721(token) => CustomTokenId::Dip721(token.canister_id),
             Token::IcPunks(token) => CustomTokenId::IcPunks(token.canister_id),
+            Token::Icrc7(token) => CustomTokenId::Icrc7(token.canister_id),
         }
     }
 }
@@ -683,7 +684,8 @@ impl Validate for CustomTokenId {
             CustomTokenId::Icrc(_)
             | CustomTokenId::ExtV2(_)
             | CustomTokenId::Dip721(_)
-            | CustomTokenId::IcPunks(_) => Ok(()), /* This is a principal. */
+            | CustomTokenId::IcPunks(_)
+            | CustomTokenId::Icrc7(_) => Ok(()), /* This is a principal. */
             // In principle, we
             // could check the exact
             // type of principal.
@@ -713,6 +715,7 @@ impl Validate for Token {
             Token::ExtV2(token) => token.validate(),
             Token::Dip721(token) => token.validate(),
             Token::IcPunks(token) => token.validate(),
+            Token::Icrc7(token) => token.validate(),
         }
     }
 }
@@ -802,6 +805,21 @@ impl Validate for IcPunksToken {
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
     fn validate(&self) -> Result<(), Error> {
         let IcPunksToken { canister_id } = self;
+        // The canister_id should be appropriate for a canister.
+        if canister_id.as_slice().last() != Some(&1) {
+            return Err(Error::msg("Canister ID is not a canister"));
+        }
+        Ok(())
+    }
+}
+
+impl Validate for Icrc7Token {
+    /// Verifies that an ICRC-7 token is valid.
+    ///
+    /// - Checks that the canister principal is the type of principal used for a canister.
+    ///   - <https://wiki.internetcomputer.org/wiki/Principal>
+    fn validate(&self) -> Result<(), Error> {
+        let Icrc7Token { canister_id } = self;
         // The canister_id should be appropriate for a canister.
         if canister_id.as_slice().last() != Some(&1) {
             return Err(Error::msg("Canister ID is not a canister"));
@@ -1207,6 +1225,7 @@ validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(ExtV2Token);
 validate_on_deserialize!(Dip721Token);
 validate_on_deserialize!(IcPunksToken);
+validate_on_deserialize!(Icrc7Token);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(ErcToken);

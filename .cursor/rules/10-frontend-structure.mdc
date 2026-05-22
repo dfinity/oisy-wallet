@@ -1,0 +1,12 @@
+---
+description: Frontend folder taxonomy and naming. Apply to any change under src/frontend/.
+globs: ['src/frontend/**/*']
+---
+
+# Cursor — Frontend Structure
+
+Authoritative source: [docs/ai/frontend/structure.md](mdc:docs/ai/frontend/structure.md).
+
+Read it before adding or moving files under `src/frontend/src/`. The
+top-level taxonomy is **closed** — no new top-level folders without
+explicit approval.

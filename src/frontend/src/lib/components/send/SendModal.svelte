@@ -87,11 +87,32 @@
 			destination === encodeIcrcAccount($token.mintingAccount)
 	);
 
+	// IMPORTANT: do NOT inline `nonNullish($pageNft)` into the `steps` derivation below.
+	//
+	// `LoaderNfts` re-emits a fresh `Nft` reference for the same logical NFT every
+	// `NFT_TIMER_INTERVAL_MILLIS` (20s) while the user is on the `/nfts` page. Reading that
+	// reference directly inside `steps` would make `steps` re-derive on every tick and return a
+	// fresh array literal, because Svelte 5's `$derived` uses `safe_not_equal` on its OUTPUT to
+	// gate downstream propagation: two distinct array references are never equal, so every tick
+	// would propagate. `WizardModal` (gix-components) reacts to that by rebuilding
+	// `WizardStepsState`, whose constructor unconditionally resets `currentStep = steps[0]` —
+	// silently jumping the open modal back to the DESTINATION step and replaying
+	// `WizardTransition`'s `fly`. That's the visible flicker / "saltare" on form + review.
+	//
+	// Funnelling `$pageNft` through a primitive boolean intermediate inverts that gate: when the
+	// underlying reference changes but `nonNullish(...)` stays `true`, this `$derived`
+	// recomputes to `true`, `safe_not_equal(true, true)` is `false`, and the change is NOT
+	// propagated to subscribers. `steps` is not re-derived, the `steps` array reference stays
+	// stable, `WizardStepsState` is not rebuilt, and `currentStep` is preserved across ticks.
+	//
+	// Pinned by the "steps derivation reactivity" describe block in `SendModal.spec.ts`.
+	let hasPageNft = $derived(nonNullish($pageNft));
+
 	let steps = $derived(
 		isTransactionsPage
 			? sendWizardStepsWithQrCodeScan({ i18n: $i18n, minting: $isIcMintingAccount, burning })
 			: isNftsPage
-				? nonNullish($pageNft)
+				? hasPageNft
 					? sendNftsWizardStepsWithQrCodeScan({ i18n: $i18n })
 					: allSendNftsWizardSteps({ i18n: $i18n })
 				: allSendWizardSteps({ i18n: $i18n, minting: $isIcMintingAccount, burning })

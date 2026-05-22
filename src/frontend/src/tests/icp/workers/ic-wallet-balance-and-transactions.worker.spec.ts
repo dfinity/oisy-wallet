@@ -21,7 +21,13 @@ import type {
 import * as eventsUtils from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
+import {
+	arrayOfNumberToUint8Array,
+	isNullish,
+	jsonReplacer,
+	nonNullish,
+	toNullable
+} from '@dfinity/utils';
 import { IcpIndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import {
 	IcrcIndexCanister,
@@ -248,6 +254,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		startData = undefined,
 		initCleanupMock,
 		initErrorMock,
+		initSuccessMock,
 		msg
 	}: {
 		initScheduler: (
@@ -256,6 +263,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		startData?: PostMessageDataRequest | undefined;
 		initCleanupMock: (mockRogueId: bigint) => void;
 		initErrorMock: (err: Error) => void;
+		initSuccessMock?: () => void;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
@@ -321,6 +329,38 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 						}
 					});
 				});
+
+				if (nonNullish(initSuccessMock)) {
+					// Implicitly covers the in-memory store reset on error: a successful sync after
+					// a fatal error can only re-emit the wallet payload (rather than just status
+					// messages) when the scheduler's internal store and initialized flag were cleared.
+					it('should re-emit the wallet payload on the next successful sync after an error', async () => {
+						const err = new Error('Failed to fetch');
+						initErrorMock(err);
+
+						await scheduler.start(startData);
+
+						await awaitJobExecution();
+
+						expect(postMessageMock).toHaveBeenCalledWith({
+							ref,
+							msg: `${msg}Error`,
+							data: { error: err }
+						});
+
+						initSuccessMock();
+						postMessageMock.mockClear();
+
+						await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+						expect(postMessageMock).toHaveBeenCalledWith(
+							expect.objectContaining({
+								ref,
+								msg
+							})
+						);
+					});
+				}
 			}
 		};
 	};
@@ -805,6 +845,14 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					startData,
 					initCleanupMock,
 					initErrorMock: (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err),
+					initSuccessMock: () => {
+						ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
+						indexCanisterMock.getTransactions.mockResolvedValue({
+							balance: mockBalanceFromTransactions(),
+							transactions: [mockTransaction],
+							oldest_tx_id: [mockOldestTxId]
+						});
+					},
 					msg: 'syncIcrcWallet'
 				});
 

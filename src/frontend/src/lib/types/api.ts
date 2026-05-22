@@ -1,5 +1,8 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
+	ActiveUserTransactionData,
+	ActiveUserTransactionRef,
+	ActiveUserTransactionStatus,
 	AllowSigningResponse,
 	TokenId as BackendTokenId,
 	Network as BitcoinNetwork,
@@ -9,7 +12,6 @@ import type {
 	GetUserProfileError,
 	IIDelegationChain,
 	PendingTransaction,
-	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserTransaction,
 	Utxo
@@ -51,11 +53,6 @@ export interface GetPendingTransactionsOutcome {
 	rateLimitInfo?: RateLimitInfo;
 }
 
-export interface SelectedUtxosFeeOutcome {
-	response: SelectedUtxosFeeResponse;
-	rateLimitInfo?: RateLimitInfo;
-}
-
 export interface AllowSigningParams {
 	iiDelegationChain: Nullable<IIDelegationChain>;
 }
@@ -63,13 +60,6 @@ export interface AllowSigningParams {
 export interface AllowSigningOutcome {
 	response: AllowSigningResponse;
 	rateLimitInfo?: RateLimitInfo;
-}
-
-export interface BtcSelectUserUtxosFeeParams {
-	network: BitcoinNetwork;
-	amountSatoshis: bigint;
-	minConfirmations: [number];
-	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
 export interface BtcGetPendingTransactionParams {
@@ -242,4 +232,19 @@ export interface GetUserTransactionsResponse {
 export interface SaveUserTransactionsParams {
 	tokenId: BackendTokenId;
 	transactions: UserTransaction[];
+}
+
+export interface CreateActiveUserTransactionParams {
+	id: string;
+	data: ActiveUserTransactionData;
+	progressStep?: string;
+	externalRefs: ActiveUserTransactionRef[];
+}
+
+export interface UpdateActiveUserTransactionParams {
+	id: string;
+	status?: ActiveUserTransactionStatus;
+	progressStep?: string;
+	externalRefs?: ActiveUserTransactionRef[];
+	error?: string;
 }

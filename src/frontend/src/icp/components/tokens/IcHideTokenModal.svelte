@@ -66,6 +66,7 @@
 				version: toNullable(version),
 				section: toNullable(),
 				allow_external_content_source: toNullable(),
+				allowed_external_content_source_urls: toNullable(),
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),

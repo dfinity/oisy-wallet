@@ -3,7 +3,7 @@ use candid::{CandidType, Deserialize};
 use super::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcGetPendingTransactionsError,
-        BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
+        BtcGetPendingTransactionsReponse,
     },
     dapp::AddDappSettingsError,
     notification::AddDismissedNotificationError,
@@ -13,8 +13,11 @@ use super::{
     user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
 };
 use crate::types::{
+    active_user_transaction::{
+        ActiveUserTransaction, ActiveUserTransactionError, GetActiveUserTransactionsResponse,
+    },
     agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
-    bitcoin::BtcGetFeePercentilesResponse,
+    bitcoin::{BtcGetFeePercentilesError, BtcGetFeePercentilesResponse},
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
@@ -185,32 +188,16 @@ impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowe
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum BtcSelectUserUtxosFeeResult {
-    /// The fee was selected successfully.
-    Ok(SelectedUtxosFeeResponse),
-    /// The fee was not selected due to an error.
-    Err(SelectedUtxosFeeError),
-}
-impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelectUserUtxosFeeResult {
-    fn from(result: Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>) -> Self {
-        match result {
-            Ok(response) => BtcSelectUserUtxosFeeResult::Ok(response),
-            Err(err) => BtcSelectUserUtxosFeeResult::Err(err),
-        }
-    }
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetFeePercentilesResult {
     /// The fee was selected successfully.
     Ok(BtcGetFeePercentilesResponse),
     /// The fee was not selected due to an error.
-    Err(SelectedUtxosFeeError),
+    Err(BtcGetFeePercentilesError),
 }
-impl From<Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>>
+impl From<Result<BtcGetFeePercentilesResponse, BtcGetFeePercentilesError>>
     for BtcGetFeePercentilesResult
 {
-    fn from(result: Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>) -> Self {
+    fn from(result: Result<BtcGetFeePercentilesResponse, BtcGetFeePercentilesError>) -> Self {
         match result {
             Ok(response) => BtcGetFeePercentilesResult::Ok(response),
             Err(err) => BtcGetFeePercentilesResult::Err(err),
@@ -406,6 +393,56 @@ impl From<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>
         match result {
             Ok(entries) => GetAgreementHistoryResult::Ok(entries),
             Err(err) => GetAgreementHistoryResult::Err(err),
+        }
+    }
+}
+
+/// Shared result for endpoints that return a single `ActiveUserTransaction`
+/// (both `create_active_user_transaction` and `update_active_user_transaction`).
+/// One type because the wire shape is identical — the candid extractor would
+/// dedupe twin variants anyway.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum ActiveUserTransactionResult {
+    Ok(Box<ActiveUserTransaction>),
+    Err(ActiveUserTransactionError),
+}
+impl From<Result<ActiveUserTransaction, ActiveUserTransactionError>>
+    for ActiveUserTransactionResult
+{
+    fn from(result: Result<ActiveUserTransaction, ActiveUserTransactionError>) -> Self {
+        match result {
+            Ok(tx) => ActiveUserTransactionResult::Ok(Box::new(tx)),
+            Err(err) => ActiveUserTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetActiveUserTransactionsResult {
+    Ok(GetActiveUserTransactionsResponse),
+    Err(ActiveUserTransactionError),
+}
+impl From<Result<GetActiveUserTransactionsResponse, ActiveUserTransactionError>>
+    for GetActiveUserTransactionsResult
+{
+    fn from(result: Result<GetActiveUserTransactionsResponse, ActiveUserTransactionError>) -> Self {
+        match result {
+            Ok(response) => GetActiveUserTransactionsResult::Ok(response),
+            Err(err) => GetActiveUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum DeleteActiveUserTransactionResult {
+    Ok(()),
+    Err(ActiveUserTransactionError),
+}
+impl From<Result<(), ActiveUserTransactionError>> for DeleteActiveUserTransactionResult {
+    fn from(result: Result<(), ActiveUserTransactionError>) -> Self {
+        match result {
+            Ok(()) => DeleteActiveUserTransactionResult::Ok(()),
+            Err(err) => DeleteActiveUserTransactionResult::Err(err),
         }
     }
 }

@@ -75,8 +75,7 @@
 			const baseTokens = prepareBasePayableTokens({
 				transferAmounts: paymentData.transferAmounts,
 				networks: $networksMainnets,
-				availableTokens: $enabledTokens,
-				btcAddressMainnet: $btcAddressMainnet
+				availableTokens: $enabledTokens
 			});
 
 			const tokensWithFees = await calculateTokensWithFees(baseTokens);

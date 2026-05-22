@@ -19,6 +19,20 @@
 		}
 	},
 	{
+		"id": "nnsdapp",
+		"name": "dapps.descriptions.nnsdapp.name",
+		"oneLiner": "dapps.descriptions.nnsdapp.one_liner",
+		"callToAction": "dapps.descriptions.nnsdapp.call_to_action",
+		"website": "https://nns.internetcomputer.org/",
+		"github": "https://github.com/dfinity/nns-dapp",
+		"tags": ["dapps.categories.staking", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "dapps.descriptions.nnsdapp.description",
+		"logo": "/images/dapps/nns-logo.webp",
+		"screenshots": ["/images/dapps/nns-screenshot.webp"]
+	},
+	{
 		"id": "icpswap",
 		"name": "dapps.descriptions.icpswap.name",
 		"oneLiner": "dapps.descriptions.icpswap.one_liner",
@@ -145,7 +159,7 @@
 		"website": "https://motokotokyogame.net/",
 		"twitter": "https://x.com/NightscrollerEX",
 		"discord": "https://discord.gg/d3WnbPPkes",
-		"tags": ["dapps.categories.ab_icp", "dapps.categories.game", "dapps.categories.aa_new"],
+		"tags": ["dapps.categories.ab_icp", "dapps.categories.game"],
 		"description": "dapps.descriptions.motoko_tokyo.description",
 		"usesInternetIdentity": true,
 		"stats": "",
@@ -183,18 +197,17 @@
 		"screenshots": ["/images/dapps/decide-ai.webp"]
 	},
 	{
-		"id": "nnsdapp",
-		"name": "dapps.descriptions.nnsdapp.name",
-		"oneLiner": "dapps.descriptions.nnsdapp.one_liner",
-		"callToAction": "dapps.descriptions.nnsdapp.call_to_action",
-		"website": "https://nns.ic0.app/",
-		"github": "https://github.com/dfinity/nns-dapp",
-		"tags": ["dapps.categories.staking", "dapps.categories.ab_icp"],
+		"id": "icp-flags",
+		"name": "dapps.descriptions.icp_flags.name",
+		"oneLiner": "dapps.descriptions.icp_flags.one_liner",
+		"website": "https://icp-flags.fans/",
+		"openChat": "https://oc.app/community/uhnd7-niaaa-aaaac-becgq-cai/channel/1043641175/?ref=meaay-cyaaa-aaaar-azo3a-cai",
+		"tags": ["dapps.categories.defi", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
 		"stats": "",
+		"description": "dapps.descriptions.icp_flags.description",
 		"usesInternetIdentity": true,
-		"description": "dapps.descriptions.nnsdapp.description",
-		"logo": "/images/dapps/nns-dapp-logo.svg",
-		"screenshots": ["/images/dapps/nns-dapp.webp"]
+		"logo": "/images/dapps/icp-flags-logo.svg",
+		"screenshots": ["/images/dapps/icp-flags-screenshot.webp"]
 	},
 	{
 		"id": "uniswap",

@@ -10,12 +10,15 @@ use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
     types::{
+        active_user_transaction::{
+            CreateActiveUserTransactionRequest, UpdateActiveUserTransactionRequest,
+        },
         agreement::{UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest},
         api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
             BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
-            BtcGetPendingTransactionsRequest, SelectedUtxosFeeRequest,
+            BtcGetPendingTransactionsRequest,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::CustomToken,
@@ -25,15 +28,16 @@ use shared::{
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         notification::AddDismissedNotificationRequest,
         result_types::{
-            AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, AllowSigningResult,
-            BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
-            BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            CreateUserProfileResult, DeleteContactResult, GetAgreementHistoryResult,
-            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
-            GetUserTransactionsResult, SaveUserTransactionsResult, SetUserShowTestnetsResult,
-            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
-            UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
-            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+            ActiveUserTransactionResult, AddUserDismissedNotificationResult,
+            AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
+            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult, CreateContactResult,
+            CreateUserProfileResult, DeleteActiveUserTransactionResult, DeleteContactResult,
+            GetActiveUserTransactionsResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
+            SaveUserTransactionsResult, SetUserShowTestnetsResult, UpdateContactResult,
+            UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
+            UpdateTransactionFilterSettingsResult, UpdateUserAgreementsResult,
+            UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -49,6 +53,7 @@ use shared::{
 
 use crate::state::{read_state, set_config};
 
+mod active_user_transactions;
 mod api;
 mod bitcoin;
 mod contacts;
@@ -88,10 +93,6 @@ pub fn init(arg: Arg) {
 ///   new installation?
 #[post_upgrade]
 pub fn post_upgrade(arg: Option<Arg>) {
-    // TODO: remove migration after all canisters have been upgraded past this release.
-    // Phase 1: extract old CustomTokenId-keyed entries BEFORE STATE is initialised.
-    let migrated_entries = state::stored_token_migration::extract_legacy_token_activity();
-
     match arg {
         Some(Arg::Init(arg)) => set_config(arg),
         _ => {
@@ -102,9 +103,6 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
-
-    // Phase 2: insert converted entries now that STATE owns the (empty) map.
-    state::stored_token_migration::insert_migrated_token_activity(migrated_entries);
 
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();

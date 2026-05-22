@@ -212,6 +212,15 @@ export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-c
 export const TRANSACTIONS_DATE_GROUP_PREFIX = 'transactions-date-group-';
 export const TRANSACTION_CHILDREN_CONTAINER = 'transaction-children-container';
 
+export const MULTI_SELECT_DROPDOWN_PANEL_SHELL = 'multi-select-dropdown-panel-shell';
+
+export const TRANSACTIONS_FILTER_TOOLBAR = 'transactions-filter-toolbar';
+export const TRANSACTIONS_FILTER_TYPES_DROPDOWN = 'transactions-filter-types-dropdown';
+export const TRANSACTIONS_FILTER_TOKENS_DROPDOWN = 'transactions-filter-tokens-dropdown';
+export const TRANSACTIONS_FILTER_CONTACTS_DROPDOWN = 'transactions-filter-contacts-dropdown';
+export const TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA = 'transactions-filter-contacts-empty-cta';
+export const TRANSACTIONS_FILTER_CLEAR_BUTTON = 'transactions-filter-clear-button';
+
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
