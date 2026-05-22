@@ -48,7 +48,6 @@ import { SignupsClosedError } from '$lib/types/errors';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
 import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
-import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import {
@@ -430,25 +429,14 @@ export class BackendCanister extends Canister<BackendService> {
 		return this.mapExchangeRate(fromNullable(response));
 	};
 
-	getExchangeRates = async ({
-		token_ids,
-		certified
-	}: { token_ids: TokenId[] } & QueryParams): Promise<Map<string, BackendExchangeRate>> => {
-		const { get_exchange_rates } = this.caller({ certified });
+	getExchangeRates = async (): Promise<Array<[TokenId, BackendExchangeRate | undefined]>> => {
+		// `get_exchange_rates` is an update on the backend (mutates token_activity, may issue
+		// HTTP outcalls), so it always goes through the certified service.
+		const { get_exchange_rates } = this.caller({ certified: true });
 
-		const results = await get_exchange_rates(token_ids);
+		const results = await get_exchange_rates();
 
-		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
-			const unwrapped = this.mapExchangeRate(fromNullable(rate));
-
-			const key = tokenIdKey(id);
-
-			if (nonNullish(unwrapped) && nonNullish(key)) {
-				acc.set(key, unwrapped);
-			}
-
-			return acc;
-		}, new Map());
+		return results.map(([id, rate]) => [id, this.mapExchangeRate(fromNullable(rate))]);
 	};
 
 	getUserTransactions = async ({

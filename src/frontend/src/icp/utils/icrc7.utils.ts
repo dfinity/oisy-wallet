@@ -42,7 +42,14 @@ const ICRC7_SYMBOL_KEY = 'icrc7:symbol';
 const ICRC7_DESCRIPTION_KEY = 'icrc7:description';
 const ICRC7_LOGO_KEY = 'icrc7:logo';
 
-const ICRC7_TOKEN_NAME_KEYS = ['icrc7:name', 'icrc7:metadata:name', 'name'];
+const ICRC7_TOKEN_NAME_KEYS = [
+	'icrc7:name',
+	'icrc7:title',
+	'icrc7:metadata:name',
+	'icrc7:metadata:title',
+	'name',
+	'title'
+];
 const ICRC7_TOKEN_DESCRIPTION_KEYS = [
 	'icrc7:description',
 	'icrc7:metadata:description',
@@ -50,21 +57,42 @@ const ICRC7_TOKEN_DESCRIPTION_KEYS = [
 ];
 const ICRC7_TOKEN_IMAGE_KEYS = [
 	'icrc7:image',
+	'icrc7:imageUrl',
 	'icrc7:metadata:image',
+	'icrc7:metadata:imageUrl',
 	'icrc7:image_url',
 	'icrc7:metadata:image_url',
 	'image',
+	'imageUrl',
 	'image_url'
 ];
 const ICRC7_TOKEN_THUMBNAIL_KEYS = [
 	'icrc7:thumbnail',
+	'icrc7:thumbnailUrl',
 	'icrc7:metadata:thumbnail',
+	'icrc7:metadata:thumbnailUrl',
 	'icrc7:thumbnail_url',
 	'icrc7:metadata:thumbnail_url',
 	'thumbnail',
+	'thumbnailUrl',
 	'thumbnail_url'
 ];
+const ICRC7_TOKEN_METADATA_URI_KEYS = [
+	'icrc7:uri',
+	'icrc7:metadata:uri',
+	'uri',
+	'metadataUri',
+	'metadata_uri'
+];
 const ICRC7_TOKEN_ATTRIBUTES_KEYS = ['icrc7:attributes', 'icrc7:metadata:attributes', 'attributes'];
+const ICRC7_TOKEN_RESERVED_ATTRIBUTE_KEYS = new Set([
+	...ICRC7_TOKEN_NAME_KEYS,
+	...ICRC7_TOKEN_DESCRIPTION_KEYS,
+	...ICRC7_TOKEN_IMAGE_KEYS,
+	...ICRC7_TOKEN_THUMBNAIL_KEYS,
+	...ICRC7_TOKEN_METADATA_URI_KEYS,
+	...ICRC7_TOKEN_ATTRIBUTES_KEYS
+]);
 
 const lookupText = ({
 	entries,
@@ -254,6 +282,31 @@ const lookupAttributesByKeys = ({
 	}
 };
 
+const tokenMetadataKeyToTraitType = ({ key }: { key: string }): string =>
+	key.replace(/^icrc7:metadata:/u, '').replace(/^icrc7:/u, '');
+
+const lookupAdditionalScalarAttributes = ({
+	entries
+}: {
+	entries: Array<[string, Value]>;
+}): NftMetadataWithoutId['attributes'] | undefined => {
+	const attributes = mapNftAttributes(
+		entries.flatMap(([key, value]) => {
+			if (ICRC7_TOKEN_RESERVED_ATTRIBUTE_KEYS.has(key)) {
+				return [];
+			}
+
+			const attributeValue = valueToAttributeValue({ value });
+
+			return nonNullish(attributeValue)
+				? [{ trait_type: tokenMetadataKeyToTraitType({ key }), value: attributeValue }]
+				: [];
+		})
+	);
+
+	return attributes.length > 0 ? attributes : undefined;
+};
+
 /**
  * Maps an ICRC-7 `icrc7_collection_metadata` response into a {@link TokenMetadata}-shaped object
  * (without `decimals`, which is not meaningful for NFT collections).
@@ -302,12 +355,17 @@ export const mapIcrc7TokenMetadata = (entries: Array<[string, Value]>): NftMetad
 		? valueToImageUrl({ value: thumbnailEntry[1] })
 		: undefined;
 	const attributes = lookupAttributesByKeys({ entries, keys: ICRC7_TOKEN_ATTRIBUTES_KEYS });
+	const scalarAttributes = lookupAdditionalScalarAttributes({ entries });
+	const mergedAttributes =
+		nonNullish(attributes) || nonNullish(scalarAttributes)
+			? [...(attributes ?? []), ...(scalarAttributes ?? [])]
+			: undefined;
 
 	return {
 		...(nonNullish(name) && { name }),
 		...(nonNullish(description) && { description }),
 		...(nonNullish(imageUrl) && { imageUrl }),
 		...(nonNullish(thumbnailUrl) && { thumbnailUrl }),
-		...(nonNullish(attributes) && { attributes })
+		...(nonNullish(mergedAttributes) && { attributes: mergedAttributes })
 	};
 };
