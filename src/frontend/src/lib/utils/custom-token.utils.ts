@@ -81,6 +81,7 @@ export const toCustomToken = ({
 	version,
 	section,
 	allowExternalContentSource,
+	allowedExternalContentSourceUrls,
 	...rest
 }: SaveCustomTokenWithKey): CustomToken => {
 	const toCustomTokenMap = (): Token => {
@@ -138,7 +139,8 @@ export const toCustomToken = ({
 		version: toNullable(version),
 		token: toCustomTokenMap(),
 		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined),
-		allow_external_content_source: toNullable(allowExternalContentSource)
+		allow_external_content_source: toNullable(allowExternalContentSource),
+		allowed_external_content_source_urls: toNullable(allowedExternalContentSourceUrls)
 	};
 };
 

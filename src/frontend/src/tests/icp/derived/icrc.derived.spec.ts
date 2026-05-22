@@ -73,7 +73,8 @@ describe('icrc.derived', () => {
 					enabled: true,
 					version: 3n,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				mockIcrcCustomToken1,
 				mockIcrcCustomToken3
@@ -89,7 +90,8 @@ describe('icrc.derived', () => {
 						enabled: true,
 						version: 1n,
 						section: undefined,
-						allowExternalContentSource: undefined
+						allowExternalContentSource: undefined,
+						allowedExternalContentSourceUrls: undefined
 					},
 					certified: false
 				}
@@ -103,14 +105,16 @@ describe('icrc.derived', () => {
 					enabled: true,
 					version: 1n,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				{
 					...mockIcrcDefaultToken1,
 					enabled: true,
 					version: 1n,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				}
 			]);
 		});

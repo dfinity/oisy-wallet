@@ -307,7 +307,8 @@ describe('erc20.services', () => {
 					}
 				},
 				section: toNullable(),
-				allow_external_content_source: toNullable()
+				allow_external_content_source: toNullable(),
+				allowed_external_content_source_urls: toNullable()
 			};
 			assert('Erc20' in additionalCustomToken.token);
 
@@ -387,7 +388,8 @@ describe('erc20.services', () => {
 					}
 				},
 				section: toNullable(),
-				allow_external_content_source: toNullable()
+				allow_external_content_source: toNullable(),
+				allowed_external_content_source_urls: toNullable()
 			};
 
 			vi.mocked(listCustomTokens).mockResolvedValue([
