@@ -248,7 +248,8 @@ describe('LoaderCollections', () => {
 			version: toNullable(1n),
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable(false)
+			allow_external_content_source: toNullable(false),
+			allowed_external_content_source_urls: toNullable()
 		}));
 		const existingErc1155CustomTokens: CustomToken[] = networks.map((network) => ({
 			token: {
@@ -260,7 +261,8 @@ describe('LoaderCollections', () => {
 			version: toNullable(1n),
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable(true)
+			allow_external_content_source: toNullable(true),
+			allowed_external_content_source_urls: toNullable()
 		}));
 
 		backendCustomTokens.set([...existingErc721CustomTokens, ...existingErc1155CustomTokens]);
@@ -289,7 +291,8 @@ describe('LoaderCollections', () => {
 			version: toNullable(1n),
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable(false)
+			allow_external_content_source: toNullable(false),
+			allowed_external_content_source_urls: toNullable()
 		};
 
 		backendCustomTokens.set([existingExtCustomToken]);
@@ -326,7 +329,8 @@ describe('LoaderCollections', () => {
 			version: toNullable(1n),
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable(false)
+			allow_external_content_source: toNullable(false),
+			allowed_external_content_source_urls: toNullable()
 		};
 
 		backendCustomTokens.set([existingIcrc7CustomToken]);

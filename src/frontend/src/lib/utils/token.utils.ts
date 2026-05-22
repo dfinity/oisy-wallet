@@ -108,7 +108,8 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 			customToken?.enabled === true,
 		version: customToken?.version,
 		section: customToken?.section,
-		allowExternalContentSource: customToken?.allowExternalContentSource
+		allowExternalContentSource: customToken?.allowExternalContentSource,
+		allowedExternalContentSourceUrls: customToken?.allowedExternalContentSourceUrls
 	};
 };
 

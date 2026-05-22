@@ -5,6 +5,7 @@ import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
+import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 describe('custom-token.utils', () => {
@@ -19,7 +20,8 @@ describe('custom-token.utils', () => {
 			enabled: true,
 			version: [1n],
 			section: [{ Spam: null }],
-			allow_external_content_source: []
+			allow_external_content_source: [],
+			allowed_external_content_source_urls: toNullable()
 		};
 
 		it('should convert to CustomToken with nullish version', () => {

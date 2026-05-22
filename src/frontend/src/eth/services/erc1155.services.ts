@@ -98,7 +98,8 @@ const mapErc1155CustomToken = async ({
 		enabled,
 		version: versionNullable,
 		section: sectionNullable,
-		allow_external_content_source: allowExternalContentSourceNullable
+		allow_external_content_source: allowExternalContentSourceNullable,
+		allowed_external_content_source_urls: allowedExternalContentSourceUrlsNullable
 	}
 }: {
 	token: CustomTokenErc1155Variant;
@@ -107,6 +108,7 @@ const mapErc1155CustomToken = async ({
 	const section = fromNullable(sectionNullable);
 	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
 	const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+	const allowedExternalContentSourceUrls = fromNullable(allowedExternalContentSourceUrlsNullable);
 
 	const {
 		Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
@@ -144,7 +146,8 @@ const mapErc1155CustomToken = async ({
 			...(nonNullish(mappedSection) && {
 				section: mappedSection
 			}),
-			allowExternalContentSource
+			allowExternalContentSource,
+			allowedExternalContentSourceUrls
 		},
 		...metadata
 	};
