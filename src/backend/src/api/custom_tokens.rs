@@ -11,9 +11,51 @@ use crate::{
     utils::guards::caller_is_registered_user,
 };
 
+/// Maximum number of entries allowed in
+/// [`CustomToken::allowed_external_content_source_urls`].
+///
+/// These are user-consented origins/URLs for fetching external NFT media; even
+/// large collections only have a handful of distinct providers, so a small cap
+/// is sufficient and keeps stable memory usage bounded.
+pub const MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URLS: usize = 20;
+
+/// Maximum byte length of any single entry in
+/// [`CustomToken::allowed_external_content_source_urls`].
+///
+/// Aligns with the widely-used 2048-byte URL limit; longer values almost
+/// certainly indicate malformed or abusive input.
+pub const MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URL_LENGTH: usize = 2048;
+
+/// Validates the user-controlled
+/// [`CustomToken::allowed_external_content_source_urls`] field before
+/// persisting it, to prevent unbounded growth of stable memory and cycle
+/// costs on `set_custom_token` / `set_many_custom_tokens`.
+fn validate_allowed_external_content_source_urls(token: &CustomToken) {
+    let Some(urls) = token.allowed_external_content_source_urls.as_ref() else {
+        return;
+    };
+
+    if urls.len() > MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URLS {
+        ic_cdk::trap(format!(
+            "allowed_external_content_source_urls length should not exceed {MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URLS}"
+        ));
+    }
+
+    if urls
+        .iter()
+        .any(|url| url.len() > MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URL_LENGTH)
+    {
+        ic_cdk::trap(format!(
+            "allowed_external_content_source_urls entry length should not exceed {MAX_ALLOWED_EXTERNAL_CONTENT_SOURCE_URL_LENGTH}"
+        ));
+    }
+}
+
 /// Add or update custom token for the user.
 #[update(guard = "caller_is_registered_user")]
 pub fn set_custom_token(token: CustomToken) {
+    validate_allowed_external_content_source_urls(&token);
+
     let stored_principal = StoredPrincipal(msg_caller());
 
     mutate_state(|s| {
@@ -38,6 +80,10 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
         ic_cdk::trap(format!(
             "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
         ));
+    }
+
+    for token in &tokens {
+        validate_allowed_external_content_source_urls(token);
     }
 
     let stored_principal = StoredPrincipal(msg_caller());
