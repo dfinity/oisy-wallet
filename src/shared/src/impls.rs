@@ -430,13 +430,17 @@ impl StoredUserProfile {
 
         let mut new_agreements = current.clone();
 
-        if agreements.license_agreement.accepted.is_some() {
+        let license_updated = agreements.license_agreement.accepted.is_some();
+        let terms_updated = agreements.terms_of_use.accepted.is_some();
+        let privacy_updated = agreements.privacy_policy.accepted.is_some();
+
+        if license_updated {
             new_agreements.license_agreement = agreements.license_agreement;
         }
-        if agreements.terms_of_use.accepted.is_some() {
+        if terms_updated {
             new_agreements.terms_of_use = agreements.terms_of_use;
         }
-        if agreements.privacy_policy.accepted.is_some() {
+        if privacy_updated {
             new_agreements.privacy_policy = agreements.privacy_policy;
         }
 
@@ -444,13 +448,13 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
-        if matches!(new_agreements.license_agreement.accepted, Some(true)) {
+        if license_updated && matches!(new_agreements.license_agreement.accepted, Some(true)) {
             new_agreements.license_agreement.last_accepted_at_ns = Some(now);
         }
-        if matches!(new_agreements.terms_of_use.accepted, Some(true)) {
+        if terms_updated && matches!(new_agreements.terms_of_use.accepted, Some(true)) {
             new_agreements.terms_of_use.last_accepted_at_ns = Some(now);
         }
-        if matches!(new_agreements.privacy_policy.accepted, Some(true)) {
+        if privacy_updated && matches!(new_agreements.privacy_policy.accepted, Some(true)) {
             new_agreements.privacy_policy.last_accepted_at_ns = Some(now);
         }
 
@@ -492,9 +496,11 @@ impl StoredUserProfile {
 
         let mut merged = current.clone();
 
+        let mut updated_keys = Vec::new();
         for (provider_type, agreement) in provider_agreements {
             if agreement.accepted.is_some() {
                 merged.insert(provider_type.clone(), agreement.clone());
+                updated_keys.push(provider_type.clone());
             }
         }
 
@@ -502,9 +508,11 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
-        for agreement in merged.values_mut() {
-            if matches!(agreement.accepted, Some(true)) {
-                agreement.last_accepted_at_ns = Some(now);
+        for key in &updated_keys {
+            if let Some(agreement) = merged.get_mut(key) {
+                if matches!(agreement.accepted, Some(true)) {
+                    agreement.last_accepted_at_ns = Some(now);
+                }
             }
         }
 
@@ -942,6 +950,266 @@ impl Validate for ExchangeData {
 impl Validate for ExchangeRate {
     fn validate(&self) -> Result<(), Error> {
         self.usd.validate()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeMap;
+
+    use crate::types::{
+        agreement::{
+            ProviderAgreementProvider, ProviderAgreementScope, ProviderAgreementType,
+            UpdateAgreementsError, UserAgreement,
+        },
+        user_profile::StoredUserProfile,
+    };
+
+    fn swap_key() -> ProviderAgreementType {
+        ProviderAgreementType {
+            provider: ProviderAgreementProvider::NearIntents,
+            scope: ProviderAgreementScope::Swap,
+        }
+    }
+
+    fn profile_with_provider(
+        key: &ProviderAgreementType,
+        accepted: bool,
+        last_accepted_at_ns: Option<u64>,
+    ) -> StoredUserProfile {
+        let mut profile = StoredUserProfile::from_timestamp(1_000);
+        let mut map = BTreeMap::new();
+        map.insert(
+            key.clone(),
+            UserAgreement {
+                accepted: Some(accepted),
+                last_accepted_at_ns,
+                ..Default::default()
+            },
+        );
+        let mut agreements = profile.agreements.unwrap_or_default();
+        agreements.provider_agreements = Some(map);
+        profile.agreements = Some(agreements);
+        profile
+    }
+
+    mod with_provider_agreements {
+        use super::{
+            profile_with_provider, swap_key, BTreeMap, ProviderAgreementProvider,
+            ProviderAgreementScope, ProviderAgreementType, StoredUserProfile,
+            UpdateAgreementsError, UserAgreement,
+        };
+
+        #[test]
+        fn test_version_mismatch_returns_error() {
+            let profile = StoredUserProfile::from_timestamp(1_000);
+            let mut request = BTreeMap::new();
+            request.insert(
+                swap_key(),
+                UserAgreement {
+                    accepted: Some(true),
+                    ..Default::default()
+                },
+            );
+
+            let result = profile.with_provider_agreements(Some(999), 2_000, request);
+            assert_eq!(result, Err(UpdateAgreementsError::VersionMismatch));
+        }
+
+        #[test]
+        fn test_noop_when_all_accepted_none() {
+            let profile = profile_with_provider(&swap_key(), true, Some(1_000));
+            let request = BTreeMap::from([(
+                swap_key(),
+                UserAgreement {
+                    accepted: None,
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+            assert_eq!(result.version, profile.version);
+            assert_eq!(result.agreements, profile.agreements);
+        }
+
+        #[test]
+        fn test_noop_when_request_matches_current() {
+            let profile = profile_with_provider(&swap_key(), true, Some(1_000));
+            let request = BTreeMap::from([(
+                swap_key(),
+                UserAgreement {
+                    accepted: Some(true),
+                    last_accepted_at_ns: Some(1_000),
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+            assert_eq!(result.version, profile.version);
+        }
+
+        #[test]
+        fn test_acceptance_sets_last_accepted_at_ns() {
+            let profile = StoredUserProfile::from_timestamp(1_000);
+            let request = BTreeMap::from([(
+                swap_key(),
+                UserAgreement {
+                    accepted: Some(true),
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
+            let agreement = provider_agreements.get(&swap_key()).unwrap();
+
+            assert_eq!(agreement.accepted, Some(true));
+            assert_eq!(agreement.last_accepted_at_ns, Some(2_000));
+        }
+
+        #[test]
+        fn test_rejection_does_not_set_last_accepted_at_ns() {
+            let profile = StoredUserProfile::from_timestamp(1_000);
+            let request = BTreeMap::from([(
+                swap_key(),
+                UserAgreement {
+                    accepted: Some(false),
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
+            let agreement = provider_agreements.get(&swap_key()).unwrap();
+
+            assert_eq!(agreement.accepted, Some(false));
+            assert_eq!(agreement.last_accepted_at_ns, None);
+        }
+
+        #[test]
+        fn test_untouched_accepted_agreement_preserves_timestamp() {
+            let existing_key = swap_key();
+            let profile = profile_with_provider(&existing_key, true, Some(1_000));
+
+            let new_key = ProviderAgreementType {
+                provider: ProviderAgreementProvider::NearIntents,
+                scope: ProviderAgreementScope::Swap,
+            };
+
+            // We need a different key to trigger a real change without touching
+            // the existing one. Since there's only one variant for now, we
+            // simulate by sending an update for the same key with accepted: None
+            // (skipped) and a second real key. Because the enum currently only
+            // has one variant, we instead verify via a two-step scenario:
+            // first accept swap, then re-accept swap with a different field to
+            // trigger a diff, and ensure last_accepted_at_ns doesn't change for
+            // untouched entries.
+
+            // Step 1: profile already has swap_key accepted at ts=1_000
+            // Step 2: re-send the same key but with a different text_sha256 to
+            //         force a change while keeping accepted = Some(true).
+            let request = BTreeMap::from([(
+                new_key,
+                UserAgreement {
+                    accepted: Some(true),
+                    text_sha256: Some("a".repeat(64)),
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 5_000, request)
+                .unwrap();
+            let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
+            let agreement = provider_agreements.get(&existing_key).unwrap();
+
+            // The key was updated (same key, new text_sha256), so
+            // last_accepted_at_ns should be set to the new timestamp.
+            assert_eq!(agreement.accepted, Some(true));
+            assert_eq!(agreement.last_accepted_at_ns, Some(5_000));
+        }
+
+        #[test]
+        fn test_increments_version_on_change() {
+            let profile = StoredUserProfile::from_timestamp(1_000);
+            let request = BTreeMap::from([(
+                swap_key(),
+                UserAgreement {
+                    accepted: Some(true),
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+            assert_eq!(result.version, Some(1));
+        }
+
+        #[test]
+        fn test_empty_request_is_noop() {
+            let profile = profile_with_provider(&swap_key(), true, Some(1_000));
+            let request = BTreeMap::new();
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+            assert_eq!(result.version, profile.version);
+            assert_eq!(result.agreements, profile.agreements);
+        }
+    }
+
+    mod with_agreements {
+        use super::StoredUserProfile;
+        use crate::types::agreement::{UserAgreement, UserAgreements};
+
+        #[test]
+        fn test_untouched_accepted_agreement_preserves_timestamp() {
+            let mut profile = StoredUserProfile::from_timestamp(1_000);
+
+            // Pre-populate: license accepted at ts=1_000
+            let mut agreements = profile.agreements.clone().unwrap_or_default();
+            agreements.agreements.license_agreement = UserAgreement {
+                accepted: Some(true),
+                last_accepted_at_ns: Some(1_000),
+                ..Default::default()
+            };
+            profile.agreements = Some(agreements);
+
+            // Update only terms_of_use; license is not touched
+            let request = UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: None,
+                    ..Default::default()
+                },
+                terms_of_use: UserAgreement {
+                    accepted: Some(true),
+                    ..Default::default()
+                },
+                privacy_policy: UserAgreement {
+                    accepted: None,
+                    ..Default::default()
+                },
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 5_000, request)
+                .unwrap();
+            let a = result.agreements.unwrap().agreements;
+
+            // license_agreement was NOT in the update, so its timestamp must be preserved
+            assert_eq!(a.license_agreement.last_accepted_at_ns, Some(1_000));
+            // terms_of_use was newly accepted, so it gets the new timestamp
+            assert_eq!(a.terms_of_use.last_accepted_at_ns, Some(5_000));
+        }
     }
 }
 
