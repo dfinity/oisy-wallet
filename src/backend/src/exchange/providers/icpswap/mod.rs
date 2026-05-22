@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn parse_icpswap_body_filters_non_finite_price_change() {
         let json =
-            br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.0","priceChange24H":"NaN","tvlUSD":"100"}}"#;
+            br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.0","priceChange24H":"NaN","tvlUSD":"1000"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         let d = exchange_data_from_icpswap_envelope(parsed, 0).unwrap();
         assert_eq!(d.price, Some(1.0));
