@@ -7,11 +7,10 @@
 //!    byte sequence OnRamper expects to verify (alphabetically sorted top-level + nested keys,
 //!    lowercase crypto / network ids, no URL encoding).
 //! 2. [`hmac_sha256`] computes the HMAC-SHA256 of that byte sequence using the controller-provided
-//!    secret. Implementation follows RFC 2104; we hand-roll on top of the workspace-pinned
-//!    `sha2 = "0.11"` to avoid pulling in a pre-release `hmac` crate just for one MAC.
+//!    secret. Implementation follows RFC 2104; we hand-roll on top of the workspace-pinned `sha2 =
+//!    "0.11"` to avoid pulling in a pre-release `hmac` crate just for one MAC.
 
 use sha2::{Digest, Sha256};
-
 use shared::types::onramper::OnramperSignedEntry;
 
 /// SHA-256 block size (RFC 6234 §5.3.3). HMAC pads the key out to this length.
@@ -65,8 +64,8 @@ pub(crate) fn hmac_sha256(key: &[u8], message: &[u8]) -> [u8; SHA256_OUTPUT_SIZE
 /// - Only `wallets`, `networkWallets`, `walletAddressTags` are signed. Empty fields are omitted
 ///   entirely (no trailing `&`, no `key=` with empty value).
 /// - Top-level parameter keys are emitted in alphabetical order.
-/// - Within each parameter, the nested `<id>:<value>` pairs are emitted in alphabetical order
-///   of `<id>`.
+/// - Within each parameter, the nested `<id>:<value>` pairs are emitted in alphabetical order of
+///   `<id>`.
 /// - All `<id>` segments (crypto ids in `wallets` / `walletAddressTags`, network ids in
 ///   `networkWallets`) are lowercased.
 /// - No URL encoding: `:` stays `:`, `&` stays `&`.
