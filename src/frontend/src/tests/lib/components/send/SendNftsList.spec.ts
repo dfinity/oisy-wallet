@@ -2,7 +2,6 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
-import { getNftDisplayName } from '$lib/utils/nft.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import SendNftsListTestHost from '$tests/lib/components/send/SendNftsListTestHost.svelte';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
@@ -29,7 +28,7 @@ describe('SendNftsList.spec', () => {
 		});
 
 		for (const nft of mockNfts) {
-			expect(getByText(getNftDisplayName(nft))).toBeInTheDocument();
+			expect(getByText(`#${nft.id} – ${nft.name}`)).toBeInTheDocument();
 		}
 
 		const networkBtn = getByRole('button', { name: get(i18n).networks.chain_fusion });
@@ -49,9 +48,9 @@ describe('SendNftsList.spec', () => {
 
 		await fireEvent.input(input, { target: { value: 'ein' } });
 
-		expect(queryByText(getNftDisplayName(mockNfts[0]))).not.toBeInTheDocument();
-		expect(getByText(getNftDisplayName(mockNfts[1]))).toBeInTheDocument();
-		expect(queryByText(getNftDisplayName(mockNfts[2]))).not.toBeInTheDocument();
+		expect(queryByText('#0 – Null')).not.toBeInTheDocument();
+		expect(getByText(`#1 – Eins`)).toBeInTheDocument();
+		expect(queryByText('#2 – Zwei')).not.toBeInTheDocument();
 	});
 
 	it('shows empty-state when no matches', async () => {
@@ -100,7 +99,7 @@ describe('SendNftsList.spec', () => {
 			onSelectNetwork: vi.fn()
 		});
 
-		const nftCard = getByText(getNftDisplayName(mockNfts[1]));
+		const nftCard = getByText('#1 – Eins');
 
 		await fireEvent.click(nftCard);
 

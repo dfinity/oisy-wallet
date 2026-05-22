@@ -7,7 +7,6 @@ import {
 	PLAUSIBLE_EVENT_VALUES
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
-import { getNftDisplayName } from '$lib/utils/nft.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -56,7 +55,8 @@ describe('NftCard', () => {
 
 		assertNonNullish(mockValidErc1155Nft?.name);
 
-		expect(getByText(getNftDisplayName(mockValidErc1155Nft))).toBeInTheDocument();
+		expect(getByText(mockValidErc1155Nft.name)).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc1155Nft.id}`)).toBeInTheDocument();
 	});
 
 	it('should render image placeholder if no image is defined', () => {
@@ -80,7 +80,7 @@ describe('NftCard', () => {
 		assertNonNullish(mockValidErc721Nft.name);
 		assertNonNullish(mockValidErc721Nft.collection.name);
 
-		expect(getByText(getNftDisplayName(mockValidErc721Nft))).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
 	});
 
 	it('should render the correct styles for each type', async () => {
@@ -222,29 +222,15 @@ describe('NftCard', () => {
 		assertNonNullish(mockValidErc721Nft.name);
 		assertNonNullish(mockValidErc721Nft.collection.name);
 
-		// Should show the canonical NFT display name as the main label
-		expect(getByText(getNftDisplayName(mockValidErc721Nft))).toBeInTheDocument();
+		// Should show nft.name as the main label
+		expect(getByText(mockValidErc721Nft.name)).toBeInTheDocument();
 
 		// Should NOT show collection name in title
 		expect(queryByText(mockValidErc721Nft.collection.name)).toBeNull();
-	});
 
-	it('should not duplicate the NFT id when the name already includes it', () => {
-		const nft = {
-			...mockValidErc721Nft,
-			name: `${mockValidErc721Nft.name} #${mockValidErc721Nft.id}`
-		};
-
-		const { getByText, queryByText } = render(NftCard, {
-			props: {
-				nft,
-				testId,
-				type: 'card-link'
-			}
-		});
-
-		expect(getByText(nft.name)).toBeInTheDocument();
-		expect(queryByText(`${nft.name} #${nft.id}`)).not.toBeInTheDocument();
+		// Subtitle should just be the id
+		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
+		expect(queryByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeNull();
 	});
 
 	it('should render collection name and nft name when withCollectionLabel is true', () => {
@@ -263,8 +249,8 @@ describe('NftCard', () => {
 		// Should show collection name instead of nft name as title
 		expect(getByText(mockValidErc721Nft.collection.name)).toBeInTheDocument();
 
-		// Subtitle should show the canonical NFT display name
-		expect(getByText(getNftDisplayName(mockValidErc721Nft))).toBeInTheDocument();
+		// Subtitle should show both id and nft name
+		expect(getByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
 	});
 
 	it('should render first the OISY NFT ID', () => {
@@ -279,8 +265,6 @@ describe('NftCard', () => {
 			}
 		});
 
-		expect(
-			getByText(getNftDisplayName({ ...mockValidErc721Nft, oisyId: mockOisyId }))
-		).toBeInTheDocument();
+		expect(getByText(`#${mockOisyId} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
 	});
 });
