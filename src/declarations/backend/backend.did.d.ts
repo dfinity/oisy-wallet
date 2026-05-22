@@ -1832,7 +1832,25 @@ export interface _SERVICE {
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
-	get_exchange_rates: ActorMethod<[Array<TokenId>], Array<[TokenId, [] | [ExchangeRate]]>>;
+	/**
+	 * Returns the latest USD prices for the caller's priceable tokens.
+	 *
+	 * "Priceable" means the union of:
+	 * - the always-on native tokens (BTC, ICP, SOL, ETH on the supported EVM mainnets), and
+	 * - the caller's custom tokens, filtered to variants the configured providers can actually price
+	 * (testnets, NFTs and ERC-4626 vaults are excluded).
+	 *
+	 * The endpoint also re-marks the returned tokens as active so the
+	 * background refresh timer keeps them warm. If any cached price is older
+	 * than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`] seconds or
+	 * missing, the endpoint awaits a one-shot fetch for that subset before
+	 * responding. Entries that remain stale or missing after that attempt are
+	 * returned as `None` so returned prices honour the freshness contract.
+	 *
+	 * This is an `update` (rather than a `query`) because it mutates state
+	 * (`token_activity`) and may issue HTTP outcalls.
+	 */
+	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
 	 * Returns the full agreement consent/rejection history for the caller.
 	 *
