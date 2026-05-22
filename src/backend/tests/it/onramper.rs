@@ -8,9 +8,7 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
     api_keys::ApiKeys,
-    onramper::{
-        OnramperSignedEntry, SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest,
-    },
+    onramper::{OnramperSignedEntry, SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest},
     result_types::SignOnramperWidgetUrlResult,
 };
 
@@ -106,7 +104,9 @@ fn sign_onramper_widget_url_returns_deterministic_signature_for_known_input() {
     // Sanity check: HMAC-SHA256 hex digest is 64 lowercase hex characters.
     assert_eq!(signature.len(), 64);
     assert!(
-        signature.chars().all(|c| c.is_ascii_hexdigit() && !c.is_ascii_uppercase()),
+        signature
+            .chars()
+            .all(|c| c.is_ascii_hexdigit() && !c.is_ascii_uppercase()),
         "signature should be lowercase hex; got {signature}"
     );
 }
