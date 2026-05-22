@@ -13,7 +13,7 @@ const DEFAULT_BASE_URL: &str = "https://api.icpswap.com";
 /// `ICPSwap` token info responses are small JSON objects; keep the cap tight for cycle costs.
 const MAX_RESPONSE_BYTES: u64 = 8_192;
 /// Pools with TVL at or below this threshold are considered stale and their prices are discarded.
-const MIN_TVL_USD: f64 = 10.0;
+const MIN_TVL_USD: f64 = 500.0;
 
 #[derive(Debug, Deserialize)]
 struct IcpSwapEnvelope {
@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn parse_icpswap_body_filters_non_finite_price_change() {
         let json =
-            br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.0","priceChange24H":"NaN","tvlUSD":"100"}}"#;
+            br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.0","priceChange24H":"NaN","tvlUSD":"1000"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         let d = exchange_data_from_icpswap_envelope(parsed, 0).unwrap();
         assert_eq!(d.price, Some(1.0));
@@ -179,8 +179,8 @@ mod tests {
     }
 
     #[test]
-    fn parse_icpswap_body_rejects_stale_pool() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"1.78"}}"#;
+    fn parse_icpswap_body_rejects_tvl_below_threshold() {
+        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"100"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
@@ -194,14 +194,14 @@ mod tests {
 
     #[test]
     fn parse_icpswap_body_rejects_tvl_at_threshold() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"10"}}"#;
+        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"500"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
 
     #[test]
     fn parse_icpswap_body_accepts_tvl_above_threshold() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"10.01"}}"#;
+        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"500.01"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         let d = exchange_data_from_icpswap_envelope(parsed, 0).unwrap();
         assert_eq!(d.price, Some(1.25));
