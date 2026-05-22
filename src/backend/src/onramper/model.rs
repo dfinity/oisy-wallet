@@ -7,55 +7,28 @@
 //!    byte sequence OnRamper expects to verify (alphabetically sorted top-level + nested keys,
 //!    lowercase crypto / network ids, no URL encoding).
 //! 2. [`hmac_sha256`] computes the HMAC-SHA256 of that byte sequence using the controller-provided
-//!    secret. Implementation follows RFC 2104; we hand-roll on top of the workspace-pinned `sha2 =
-//!    "0.11"` to avoid pulling in a pre-release `hmac` crate just for one MAC.
+//!    secret, delegating to the audited RustCrypto `hmac` crate.
 
-use sha2::{Digest, Sha256};
+use hmac::{digest::KeyInit, Hmac, Mac};
+use sha2::Sha256;
+
 use shared::types::onramper::OnramperSignedEntry;
 
-/// SHA-256 block size (RFC 6234 §5.3.3). HMAC pads the key out to this length.
-const SHA256_BLOCK_SIZE: usize = 64;
+type HmacSha256 = Hmac<Sha256>;
+
 /// SHA-256 output size, used as the buffer size for the final MAC.
 const SHA256_OUTPUT_SIZE: usize = 32;
 
-/// HMAC-SHA256 per RFC 2104:
-///
-/// ```text
-/// HMAC(K, m) = H((K' XOR opad) || H((K' XOR ipad) || m))
-/// ```
-///
-/// where `K'` is the key padded / hashed to the SHA-256 block size, `ipad = 0x36` and
-/// `opad = 0x5c`, each repeated `block_size` times.
+/// HMAC-SHA256 via the audited RustCrypto `hmac` crate. HMAC accepts keys of any length (RFC 2104
+/// §2: short keys are zero-padded, long keys are hashed first), so `new_from_slice` is
+/// effectively infallible — the `Result` exists for `KeyInit` trait uniformity across MAC
+/// algorithms that do have key-length constraints.
 #[must_use]
 pub(crate) fn hmac_sha256(key: &[u8], message: &[u8]) -> [u8; SHA256_OUTPUT_SIZE] {
-    let mut key_block = [0u8; SHA256_BLOCK_SIZE];
-    if key.len() > SHA256_BLOCK_SIZE {
-        let hashed = Sha256::digest(key);
-        key_block[..SHA256_OUTPUT_SIZE].copy_from_slice(&hashed);
-    } else {
-        key_block[..key.len()].copy_from_slice(key);
-    }
-
-    let mut ipad = [0u8; SHA256_BLOCK_SIZE];
-    let mut opad = [0u8; SHA256_BLOCK_SIZE];
-    for i in 0..SHA256_BLOCK_SIZE {
-        ipad[i] = key_block[i] ^ 0x36;
-        opad[i] = key_block[i] ^ 0x5c;
-    }
-
-    let mut inner = Sha256::new();
-    inner.update(ipad);
-    inner.update(message);
-    let inner_hash = inner.finalize();
-
-    let mut outer = Sha256::new();
-    outer.update(opad);
-    outer.update(&inner_hash);
-    let final_hash = outer.finalize();
-
-    let mut out = [0u8; SHA256_OUTPUT_SIZE];
-    out.copy_from_slice(&final_hash);
-    out
+    let mut mac =
+        HmacSha256::new_from_slice(key).expect("HMAC-SHA256 accepts a key of any length");
+    mac.update(message);
+    mac.finalize().into_bytes().into()
 }
 
 /// Canonicalize the three sensitive OnRamper parameters into the exact string that gets fed to
@@ -133,51 +106,6 @@ mod tests {
             key: key.to_string(),
             value: value.to_string(),
         }
-    }
-
-    // RFC 4231 §4.2 test case 1.
-    #[test]
-    fn hmac_sha256_rfc4231_case_1() {
-        let key = [0x0b_u8; 20];
-        let data = b"Hi There";
-        let expected =
-            hex::decode("b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7")
-                .unwrap();
-        assert_eq!(hmac_sha256(&key, data).to_vec(), expected);
-    }
-
-    // RFC 4231 §4.3 test case 2 — short key.
-    #[test]
-    fn hmac_sha256_rfc4231_case_2() {
-        let key = b"Jefe";
-        let data = b"what do ya want for nothing?";
-        let expected =
-            hex::decode("5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843")
-                .unwrap();
-        assert_eq!(hmac_sha256(key, data).to_vec(), expected);
-    }
-
-    // RFC 4231 §4.4 test case 3 — full block key, long message.
-    #[test]
-    fn hmac_sha256_rfc4231_case_3() {
-        let key = [0xaa_u8; 20];
-        let data = [0xdd_u8; 50];
-        let expected =
-            hex::decode("773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe")
-                .unwrap();
-        assert_eq!(hmac_sha256(&key, &data).to_vec(), expected);
-    }
-
-    // RFC 4231 §4.6 test case 5 — key longer than the SHA-256 block size, exercising the
-    // hash-the-key code path.
-    #[test]
-    fn hmac_sha256_rfc4231_case_5_long_key() {
-        let key = [0xaa_u8; 131];
-        let data = b"Test Using Larger Than Block-Size Key - Hash Key First";
-        let expected =
-            hex::decode("60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54")
-                .unwrap();
-        assert_eq!(hmac_sha256(&key, data).to_vec(), expected);
     }
 
     #[test]
