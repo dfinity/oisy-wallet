@@ -11,7 +11,6 @@
 
 use hmac::{digest::KeyInit, Hmac, Mac};
 use sha2::Sha256;
-
 use shared::types::onramper::OnramperSignedEntry;
 
 type HmacSha256 = Hmac<Sha256>;
@@ -25,8 +24,7 @@ const SHA256_OUTPUT_SIZE: usize = 32;
 /// algorithms that do have key-length constraints.
 #[must_use]
 pub(crate) fn hmac_sha256(key: &[u8], message: &[u8]) -> [u8; SHA256_OUTPUT_SIZE] {
-    let mut mac =
-        HmacSha256::new_from_slice(key).expect("HMAC-SHA256 accepts a key of any length");
+    let mut mac = HmacSha256::new_from_slice(key).expect("HMAC-SHA256 accepts a key of any length");
     mac.update(message);
     mac.finalize().into_bytes().into()
 }
