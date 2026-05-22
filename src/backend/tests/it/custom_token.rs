@@ -200,6 +200,96 @@ fn test_set_custom_token_requires_registered_user() {
     );
 }
 
+#[test]
+fn test_set_custom_token_rejects_too_many_allowed_external_content_source_urls() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let too_many_urls: Vec<String> = (0..21)
+        .map(|i| format!("https://example.com/asset/{i}"))
+        .collect();
+    let token = CustomToken {
+        allowed_external_content_source_urls: Some(too_many_urls),
+        ..USER_TOKEN.clone()
+    };
+
+    let result = pic_setup.update::<()>(caller, "set_custom_token", token);
+
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .contains("allowed_external_content_source_urls length should not exceed 20"));
+}
+
+#[test]
+fn test_set_custom_token_rejects_overlong_allowed_external_content_source_url() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let overlong_url = format!("https://example.com/{}", "a".repeat(2049));
+    let token = CustomToken {
+        allowed_external_content_source_urls: Some(vec![overlong_url]),
+        ..USER_TOKEN.clone()
+    };
+
+    let result = pic_setup.update::<()>(caller, "set_custom_token", token);
+
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .contains("allowed_external_content_source_urls entry length should not exceed 2048"));
+}
+
+#[test]
+fn test_set_many_custom_tokens_rejects_too_many_allowed_external_content_source_urls() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let too_many_urls: Vec<String> = (0..21)
+        .map(|i| format!("https://example.com/asset/{i}"))
+        .collect();
+    let tokens = vec![
+        USER_TOKEN.clone(),
+        CustomToken {
+            allowed_external_content_source_urls: Some(too_many_urls),
+            ..ANOTHER_USER_TOKEN.clone()
+        },
+    ];
+
+    let result = pic_setup.update::<()>(caller, "set_many_custom_tokens", tokens);
+
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .contains("allowed_external_content_source_urls length should not exceed 20"));
+}
+
+#[test]
+fn test_set_custom_token_accepts_allowed_external_content_source_urls_at_limit() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let urls_at_limit: Vec<String> = (0..20)
+        .map(|i| format!("https://example.com/asset/{i}"))
+        .collect();
+    let token = CustomToken {
+        allowed_external_content_source_urls: Some(urls_at_limit),
+        ..USER_TOKEN.clone()
+    };
+
+    let result = pic_setup.update::<()>(caller, "set_custom_token", token);
+
+    assert_eq!(result, Ok(()));
+}
+
 fn test_add_custom_token(user_token: &CustomToken) {
     let pic_setup = setup();
 
