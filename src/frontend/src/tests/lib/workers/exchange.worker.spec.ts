@@ -18,13 +18,11 @@ import type {
 } from '$lib/types/coingecko';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
-import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
 import { Principal } from '@dfinity/principal';
-import { nonNullish } from '@dfinity/utils';
 
 const { backendExchangeEnabled } = vi.hoisted(() => ({
 	backendExchangeEnabled: { current: false }
@@ -1155,15 +1153,9 @@ describe('exchange.worker', () => {
 				}
 			};
 
-			const mockRatesMap = (
+			const mockMyRates = (
 				...entries: [TokenId, BackendExchangeRate][]
-			): Map<string, BackendExchangeRate> =>
-				new Map(
-					entries.reduce<[string, BackendExchangeRate][]>((acc, [id, rate]) => {
-						const key = tokenIdKey(id);
-						return nonNullish(key) ? [...acc, [key, rate]] : acc;
-					}, [])
-				);
+			): Array<[TokenId, BackendExchangeRate | undefined]> => entries;
 
 			beforeEach(() => {
 				backendExchangeEnabled.current = true;
@@ -1174,7 +1166,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should fetch prices from backend instead of CoinGecko', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+				vi.mocked(getExchangeRates).mockResolvedValue([]);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
 					...createEvent(msg),
@@ -1203,7 +1195,7 @@ describe('exchange.worker', () => {
 				};
 
 				vi.mocked(getExchangeRates).mockResolvedValue(
-					mockRatesMap([erc20TokenId, mockExchangeRate], [icrcTokenId, mockExchangeRate])
+					mockMyRates([erc20TokenId, mockExchangeRate], [icrcTokenId, mockExchangeRate])
 				);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
@@ -1243,7 +1235,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should return native prices as undefined when backend has no data for them', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+				vi.mocked(getExchangeRates).mockResolvedValue([]);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
 					...createEvent(msg),
@@ -1273,7 +1265,7 @@ describe('exchange.worker', () => {
 
 			it('should include native token prices when backend provides them', async () => {
 				vi.mocked(getExchangeRates).mockResolvedValue(
-					mockRatesMap(
+					mockMyRates(
 						[{ EvmNative: 1n }, mockExchangeRate],
 						[{ BtcNativeMainnet: null }, mockExchangeRate],
 						[{ IcpNative: null }, mockExchangeRate],
@@ -1318,7 +1310,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should still fetch currency exchange rate from CoinGecko for non-USD currencies', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+				vi.mocked(getExchangeRates).mockResolvedValue([]);
 				vi.mocked(simplePrice).mockResolvedValue({
 					bitcoin: { usd: 60000, eur: 55000, usd_24h_change: 2, eur_24h_change: 1.5 }
 				});
