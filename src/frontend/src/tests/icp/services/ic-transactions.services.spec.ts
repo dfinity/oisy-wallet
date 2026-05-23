@@ -456,19 +456,55 @@ describe('ic-transactions.services', () => {
 			expect(signalEnd).toHaveBeenCalledTimes(2);
 		});
 
-		it('should reset the store if loading transactions raises an error', async () => {
+		it('should keep loaded transactions and balance if loading the next ICP page raises an error', async () => {
 			const initialTransactions = createMockIcTransactionsUi(11).map((transaction) => ({
 				data: transaction,
 				certified: false
 			}));
 			icTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
+			balancesStore.set({ id: mockToken.id, data: { data: bn1Bi, certified: false } });
 
 			const mockError = new Error('Test error');
 			vi.spyOn(icpIndexApi, 'getTransactions').mockRejectedValue(mockError);
 
 			await loadNextIcTransactions(mockParams);
 
-			expect(get(icTransactionsStore)?.[mockToken.id]).toBeNull();
+			expect(get(icTransactionsStore)?.[mockToken.id]).toStrictEqual(initialTransactions);
+			expect(get(balancesStore)?.[mockToken.id]).toStrictEqual({
+				data: bn1Bi,
+				certified: false
+			});
+
+			expect(signalEnd).toHaveBeenCalledOnce();
+		});
+
+		it('should keep loaded transactions and balance if loading the next ICRC-7 page raises an error', async () => {
+			const initialTransactions = createMockIcTransactionsUi(11).map((transaction) => ({
+				data: transaction,
+				certified: false
+			}));
+			icTransactionsStore.append({
+				tokenId: mockValidIcrc7Token.id,
+				transactions: initialTransactions
+			});
+			balancesStore.set({
+				id: mockValidIcrc7Token.id,
+				data: { data: bn1Bi, certified: false }
+			});
+
+			vi.mocked(loadIcrc3BlockLog).mockRejectedValue(new Error('Test error'));
+
+			await loadNextIcTransactions({
+				...mockParams,
+				lastId: undefined,
+				token: mockValidIcrc7Token
+			});
+
+			expect(get(icTransactionsStore)?.[mockValidIcrc7Token.id]).toStrictEqual(initialTransactions);
+			expect(get(balancesStore)?.[mockValidIcrc7Token.id]).toStrictEqual({
+				data: bn1Bi,
+				certified: false
+			});
 
 			expect(signalEnd).toHaveBeenCalledOnce();
 		});
