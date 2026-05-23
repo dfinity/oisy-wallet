@@ -210,6 +210,7 @@ describe('ic-transactions.services', () => {
 			mockAuthStore();
 
 			icTransactionsStore.reset(mockToken.id);
+			icTransactionsStore.reset(mockValidIcrc7Token.id);
 
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
 				transactions: mockTransactions.map(
