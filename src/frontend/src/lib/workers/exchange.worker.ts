@@ -199,21 +199,22 @@ const syncExchangeFromBackend = async ({
 		currentErc20Prices,
 		currentIcrcPrices,
 		currentSplPrices
-	} = backendPricesResult.status === 'fulfilled'
-		? backendPricesResult.value
-		: {
-				currentEthPrice: undefined,
-				currentBtcPrice: undefined,
-				currentIcpPrice: undefined,
-				currentSolPrice: undefined,
-				currentBnbPrice: undefined,
-				currentPolPrice: undefined,
-				currentArbitrumEthPrice: undefined,
-				currentBaseEthPrice: undefined,
-				currentErc20Prices: {},
-				currentIcrcPrices: {},
-				currentSplPrices: {}
-			};
+	} =
+		backendPricesResult.status === 'fulfilled'
+			? backendPricesResult.value
+			: {
+					currentEthPrice: undefined,
+					currentBtcPrice: undefined,
+					currentIcpPrice: undefined,
+					currentSolPrice: undefined,
+					currentBnbPrice: undefined,
+					currentPolPrice: undefined,
+					currentArbitrumEthPrice: undefined,
+					currentBaseEthPrice: undefined,
+					currentErc20Prices: {},
+					currentIcrcPrices: {},
+					currentSplPrices: {}
+				};
 
 	const currentErc4626Prices = await calculateErc4626Prices({
 		erc20Prices: currentErc20Prices,
