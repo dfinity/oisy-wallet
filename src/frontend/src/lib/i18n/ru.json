@@ -478,6 +478,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -735,6 +740,7 @@
 			"icrc_custom_token": "Ошибка при загрузке пользовательского токена ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Вашему кошельку требуются некоторые начальные данные, которые еще не загружены. Пожалуйста, попробуйте еще раз.",
 			"allow_signing": "Проблема с настройкой вашего кошелька для подписи. Вы были выведены из системы. Если проблема не исчезнет, обратитесь в службу поддержки.",
@@ -1647,7 +1653,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "Вы ещё не добавили контакты",
+			"contacts_empty_description": "Сохраняйте известные адреса в Контактах, чтобы снизить риск случайно использовать неправильный адрес.",
+			"contacts_empty_cta": "Добавить первый контакт"
 		},
 		"label": {
 			"reimbursement": "Возмещение",

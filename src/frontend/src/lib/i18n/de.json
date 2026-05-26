@@ -478,6 +478,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -735,6 +740,7 @@
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
@@ -1647,7 +1653,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "Du hast noch keine Kontakte hinzugefügt",
+			"contacts_empty_description": "Speichere bekannte Adressen in den Kontakten und verringere das Risiko, versehentlich eine falsche Adresse zu verwenden.",
+			"contacts_empty_cta": "Ersten Kontakt hinzufügen"
 		},
 		"label": {
 			"reimbursement": "Rückerstattung",

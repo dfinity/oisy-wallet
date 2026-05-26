@@ -24,7 +24,10 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
+import {
+	requiresStoredSplOwnerRefresh,
+	solBackendTokenId
+} from '$sol/utils/user-transactions.utils';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 
@@ -148,12 +151,28 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			}
 		}
 
+		const storedRefreshSignatures = new Set(
+			storedTransactions
+				.filter(({ data: transaction }) =>
+					requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress })
+				)
+				.map(({ data: { signature } }) => String(signature))
+		);
+
+		const exitIfFirstSignatureMatches =
+			storedRefreshSignatures.size === 0 &&
+			storedTransactions.length > 0 &&
+			nonNullish(storedTransactions[0]?.data.signature)
+				? String(storedTransactions[0].data.signature)
+				: undefined;
+
 		const rpcTransactions = await getSolTransactions({
 			network,
 			identity,
 			address,
 			tokenAddress,
-			tokenOwnerAddress
+			tokenOwnerAddress,
+			exitIfFirstSignatureMatches
 		});
 
 		const rpcCertified = rpcTransactions.map((transaction) => ({
@@ -161,8 +180,31 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			certified: false
 		}));
 
-		const newRpcTransactions = rpcCertified.filter(({ data: { id } }) =>
-			isNullish(this.store.transactions[`${id}`])
+		const rpcSignatures = new Set(rpcCertified.map(({ data: { signature } }) => String(signature)));
+		const refreshedSignatures = new Set(
+			[...storedRefreshSignatures].filter((signature) => rpcSignatures.has(signature))
+		);
+
+		if (refreshedSignatures.size > 0) {
+			storedTransactions = storedTransactions.filter(
+				({ data: { signature } }) => !refreshedSignatures.has(String(signature))
+			);
+
+			this.store.transactions = Object.fromEntries(
+				Object.entries(this.store.transactions).filter(
+					([
+						_,
+						{
+							data: { signature }
+						}
+					]) => !refreshedSignatures.has(String(signature))
+				)
+			);
+		}
+
+		const newRpcTransactions = rpcCertified.filter(
+			({ data: { id, signature } }) =>
+				refreshedSignatures.has(String(signature)) || isNullish(this.store.transactions[`${id}`])
 		);
 
 		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newRpcTransactions.length > 0) {
@@ -211,6 +253,11 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				maxRetries: 10
 			});
 		} catch (error: unknown) {
+			// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
+			this.store = {
+				balance: undefined,
+				transactions: {}
+			};
 			this.postMessageWalletError({ error });
 		}
 	};

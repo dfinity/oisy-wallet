@@ -3,7 +3,10 @@ import {
 	addPendingBtcTransaction,
 	addUserDismissedNotification,
 	allowSigning,
+	createActiveUserTransaction,
 	createUserProfile,
+	deleteActiveUserTransaction,
+	getActiveUserTransactions,
 	getExchangeRate,
 	getExchangeRates,
 	getPendingBtcTransactions,
@@ -15,6 +18,7 @@ import {
 	saveUserTransactions,
 	setCustomToken,
 	setManyCustomTokens,
+	updateActiveUserTransaction,
 	updateUserExperimentalFeatureSettings,
 	updateUserTransactionFilterSettings
 } from '$lib/api/backend.api';
@@ -26,15 +30,23 @@ import type {
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
+	CreateActiveUserTransactionParams,
 	CreateUserProfileResponse,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
 	SaveUserTransactionsParams,
+	UpdateActiveUserTransactionParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
+import {
+	mockActiveUserTransaction,
+	mockActiveUserTransactionId,
+	mockCreateActiveUserTransactionParams,
+	mockUpdateActiveUserTransactionParams
+} from '$tests/mocks/active-user-transactions.mock';
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -670,10 +682,7 @@ describe('backend.api', () => {
 	});
 
 	describe('getExchangeRates', () => {
-		const tokenIds: TokenId[] = [
-			{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
-			{ Erc20: ['0xabc', 1n] }
-		];
+		const tokenId: TokenId = { Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
 		const mockRate: BackendExchangeRate = {
 			usd: {
 				price: 42000,
@@ -682,35 +691,21 @@ describe('backend.api', () => {
 				timestampNs: 1_000_000_000n
 			}
 		};
-
-		const mockMap = new Map([
-			['Icrc:ryjl3-tyaaa-aaaaa-aaaba-cai', mockRate],
-			['Erc20:0xabc:1', mockRate]
-		]);
+		const mockResponse: Array<[TokenId, BackendExchangeRate | undefined]> = [[tokenId, mockRate]];
 
 		beforeEach(() => {
-			backendCanisterMock.getExchangeRates.mockResolvedValue(mockMap);
+			backendCanisterMock.getExchangeRates.mockResolvedValue(mockResponse);
 		});
 
 		it('should successfully call getExchangeRates endpoint', async () => {
-			const result = await getExchangeRates({
-				...baseParams,
-				token_ids: tokenIds,
-				certified: false
-			});
+			const result = await getExchangeRates({ ...baseParams });
 
-			expect(result).toBeInstanceOf(Map);
-			expect(result.size).toBe(2);
-			expect(backendCanisterMock.getExchangeRates).toHaveBeenCalledExactlyOnceWith({
-				token_ids: tokenIds,
-				certified: false
-			});
+			expect(result).toEqual(mockResponse);
+			expect(backendCanisterMock.getExchangeRates).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(
-				getExchangeRates({ identity: undefined, token_ids: tokenIds, certified: false })
-			).rejects.toThrow();
+			await expect(getExchangeRates({ identity: undefined })).rejects.toThrow();
 		});
 
 		it('should throw an error if getExchangeRates throws', async () => {
@@ -718,9 +713,138 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
+			await expect(getExchangeRates({ ...baseParams })).rejects.toThrow();
+		});
+	});
+
+	describe('createActiveUserTransaction', () => {
+		const mockParams: CanisterApiFunctionParams<CreateActiveUserTransactionParams> = {
+			...baseParams,
+			...mockCreateActiveUserTransactionParams
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.createActiveUserTransaction.mockResolvedValue(mockActiveUserTransaction);
+		});
+
+		it('should successfully call createActiveUserTransaction endpoint', async () => {
+			const result = await createActiveUserTransaction(mockParams);
+
+			expect(result).toEqual(mockActiveUserTransaction);
+			expect(backendCanisterMock.createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				mockCreateActiveUserTransactionParams
+			);
+		});
+
+		it('should throw an error if identity is undefined', async () => {
 			await expect(
-				getExchangeRates({ ...baseParams, token_ids: tokenIds, certified: false })
+				createActiveUserTransaction({ ...mockParams, identity: undefined })
 			).rejects.toThrow();
+		});
+
+		it('should throw an error if createActiveUserTransaction throws', async () => {
+			backendCanisterMock.createActiveUserTransaction.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(createActiveUserTransaction(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('updateActiveUserTransaction', () => {
+		const mockParams: CanisterApiFunctionParams<UpdateActiveUserTransactionParams> = {
+			...baseParams,
+			...mockUpdateActiveUserTransactionParams
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.updateActiveUserTransaction.mockResolvedValue(mockActiveUserTransaction);
+		});
+
+		it('should successfully call updateActiveUserTransaction endpoint', async () => {
+			const result = await updateActiveUserTransaction(mockParams);
+
+			expect(result).toEqual(mockActiveUserTransaction);
+			expect(backendCanisterMock.updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				mockUpdateActiveUserTransactionParams
+			);
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				updateActiveUserTransaction({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if updateActiveUserTransaction throws', async () => {
+			backendCanisterMock.updateActiveUserTransaction.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(updateActiveUserTransaction(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('deleteActiveUserTransaction', () => {
+		const mockParams: CanisterApiFunctionParams<{ id: string }> = {
+			...baseParams,
+			id: mockActiveUserTransactionId
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.deleteActiveUserTransaction.mockResolvedValue();
+		});
+
+		it('should successfully call deleteActiveUserTransaction endpoint', async () => {
+			const result = await deleteActiveUserTransaction(mockParams);
+
+			expect(result).toBeUndefined();
+			expect(backendCanisterMock.deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				mockActiveUserTransactionId
+			);
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				deleteActiveUserTransaction({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if deleteActiveUserTransaction throws', async () => {
+			backendCanisterMock.deleteActiveUserTransaction.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(deleteActiveUserTransaction(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('getActiveUserTransactions', () => {
+		const mockParams: CanisterApiFunctionParams = baseParams;
+
+		beforeEach(() => {
+			backendCanisterMock.getActiveUserTransactions.mockResolvedValue([mockActiveUserTransaction]);
+		});
+
+		it('should successfully call getActiveUserTransactions endpoint', async () => {
+			const result = await getActiveUserTransactions(mockParams);
+
+			expect(result).toEqual([mockActiveUserTransaction]);
+			expect(backendCanisterMock.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				getActiveUserTransactions({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if getActiveUserTransactions throws', async () => {
+			backendCanisterMock.getActiveUserTransactions.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(getActiveUserTransactions(mockParams)).rejects.toThrow();
 		});
 	});
 });

@@ -11,6 +11,7 @@ import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/e
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
+import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
 import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -25,7 +26,8 @@ export const mockCustomTokens: CustomToken[] = [
 		version: toNullable(2n),
 		enabled: true,
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		token: {
@@ -37,7 +39,8 @@ export const mockCustomTokens: CustomToken[] = [
 		version: toNullable(1n),
 		enabled: false,
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		token: {
@@ -48,7 +51,8 @@ export const mockCustomTokens: CustomToken[] = [
 		version: toNullable(10n),
 		enabled: false,
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		token: {
@@ -59,7 +63,8 @@ export const mockCustomTokens: CustomToken[] = [
 		version: toNullable(123n),
 		enabled: false,
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		token: {
@@ -70,7 +75,20 @@ export const mockCustomTokens: CustomToken[] = [
 		version: toNullable(999n),
 		enabled: false,
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
+	},
+	{
+		token: {
+			Icrc7: {
+				canister_id: Principal.fromText(mockIcrc7CanisterId)
+			}
+		},
+		version: toNullable(7n),
+		enabled: true,
+		section: toNullable(),
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		token: {
@@ -83,7 +101,8 @@ export const mockCustomTokens: CustomToken[] = [
 		version: toNullable(),
 		enabled: true,
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	}
 ];
 
@@ -98,7 +117,8 @@ export const mockCustomTokensErc20: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(2n),
@@ -110,7 +130,8 @@ export const mockCustomTokensErc20: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable(true)
+		allow_external_content_source: toNullable(true),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(),
@@ -122,7 +143,8 @@ export const mockCustomTokensErc20: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable(false)
+		allow_external_content_source: toNullable(false),
+		allowed_external_content_source_urls: toNullable()
 	}
 ];
 
@@ -137,7 +159,8 @@ export const mockCustomTokensErc4626: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(2n),
@@ -149,7 +172,8 @@ export const mockCustomTokensErc4626: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable(true)
+		allow_external_content_source: toNullable(true),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(),
@@ -161,7 +185,8 @@ export const mockCustomTokensErc4626: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable(false)
+		allow_external_content_source: toNullable(false),
+		allowed_external_content_source_urls: toNullable()
 	}
 ];
 
@@ -176,7 +201,8 @@ export const mockCustomTokensErc721: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(2n),
@@ -188,7 +214,8 @@ export const mockCustomTokensErc721: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(),
@@ -200,7 +227,8 @@ export const mockCustomTokensErc721: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	}
 ];
 
@@ -215,7 +243,8 @@ export const mockCustomTokensErc1155: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(2n),
@@ -227,7 +256,8 @@ export const mockCustomTokensErc1155: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(),
@@ -239,7 +269,8 @@ export const mockCustomTokensErc1155: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	}
 ];
 
@@ -253,7 +284,8 @@ export const mockCustomTokensExt: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(2n),
@@ -264,7 +296,8 @@ export const mockCustomTokensExt: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	},
 	{
 		version: toNullable(),
@@ -275,7 +308,8 @@ export const mockCustomTokensExt: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	}
 ];
 
@@ -289,6 +323,22 @@ export const mockCustomTokensIcPunks: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
+	}
+];
+
+export const mockCustomTokensIcrc7: CustomToken[] = [
+	{
+		version: toNullable(1n),
+		enabled: true,
+		token: {
+			Icrc7: {
+				canister_id: Principal.fromText(mockIcrc7CanisterId)
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable(),
+		allowed_external_content_source_urls: toNullable()
 	}
 ];

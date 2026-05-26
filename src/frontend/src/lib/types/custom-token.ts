@@ -7,6 +7,7 @@ import type { Dip721Token } from '$icp/types/dip721-token';
 import type { ExtToken } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcPunksToken } from '$icp/types/icpunks-token';
+import type { Icrc7Token } from '$icp/types/icrc7-token';
 import type { Token } from '$lib/types/token';
 import type { CustomTokenState, TokenToggleable } from '$lib/types/token-toggleable';
 import type { SplToken } from '$sol/types/spl';
@@ -28,6 +29,8 @@ export type Dip721SaveCustomToken = Pick<Dip721Token, 'canisterId'>;
 
 export type IcPunksSaveCustomToken = Pick<IcPunksToken, 'canisterId'>;
 
+export type Icrc7SaveCustomToken = Pick<Icrc7Token, 'canisterId'>;
+
 export type ErcSaveCustomToken = Pick<Erc20Token, 'address'> &
 	Pick<Erc20Token['network'], 'chainId'>;
 
@@ -39,6 +42,7 @@ export type SaveCustomToken = CustomTokenState &
 		| ExtSaveCustomToken
 		| Dip721SaveCustomToken
 		| IcPunksSaveCustomToken
+		| Icrc7SaveCustomToken
 		| ErcSaveCustomToken
 		| SplSaveCustomToken
 	);
@@ -51,6 +55,7 @@ export type SaveCustomTokenWithKey = CustomTokenState &
 		| TokenVariant<'ExtV2', ExtSaveCustomToken>
 		| TokenVariant<'Dip721', Dip721SaveCustomToken>
 		| TokenVariant<'IcPunks', IcPunksSaveCustomToken>
+		| TokenVariant<'Icrc7', Icrc7SaveCustomToken>
 	);
 
 export type SaveCustomErcVariant = CustomTokenState &
@@ -59,6 +64,7 @@ export type SaveCustomErc721Variant = CustomTokenState & TokenVariant<'Erc721', 
 export type SaveCustomErc1155Variant = CustomTokenState &
 	TokenVariant<'Erc1155', ErcSaveCustomToken>;
 export type SaveCustomExtVariant = CustomTokenState & TokenVariant<'ExtV2', ExtSaveCustomToken>;
+export type SaveCustomIcrc7Variant = CustomTokenState & TokenVariant<'Icrc7', Icrc7SaveCustomToken>;
 
 export type CustomToken<T extends Token> = TokenToggleable<T>;
 

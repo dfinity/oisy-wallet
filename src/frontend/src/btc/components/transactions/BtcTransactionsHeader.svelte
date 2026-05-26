@@ -13,7 +13,7 @@
 	let isNetworkMainnet = $derived(isNetworkIdBTCMainnet($networkId));
 </script>
 
-<div class="mb-6">
+<div class="mb-4">
 	<div class="flex items-center">
 		<h2 class="text-base">{$i18n.transactions.text.title}</h2>
 

@@ -77,9 +77,11 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 			return {};
 		}
 
+		const tokenById = new Map($tokens.map((token) => [token.id, token]));
+
 		const mappedTransactions: AnyTransactionUiWithToken[] = [];
 		Object.getOwnPropertySymbols($ethTransactionsStore ?? {}).forEach((tokenId) => {
-			const token = $tokens.find(({ id }) => id === tokenId);
+			const token = tokenById.get(tokenId as TokenId);
 
 			if (nonNullish(token) && token.network.id === $tokenWithFallback.network.id) {
 				($ethTransactionsStore?.[tokenId as TokenId] ?? []).forEach(({ data: transaction }) => {

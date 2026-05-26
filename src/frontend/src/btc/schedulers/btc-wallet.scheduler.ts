@@ -305,6 +305,12 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			onUpdateError: ({ error }) => {
 				this.failedSyncCounter++;
 				if (FAILURE_THRESHOLD <= this.failedSyncCounter) {
+					// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
+					this.store = {
+						balance: undefined,
+						transactions: {},
+						latestBitcoinBlockHeight: undefined
+					};
 					this.postMessageWalletError({ error });
 				}
 			}

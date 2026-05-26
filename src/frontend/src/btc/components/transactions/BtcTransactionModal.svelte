@@ -32,7 +32,7 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { from, value, timestamp, id, blockNumber, to, type, status, confirmations } =
+	let { from, value, fee, timestamp, id, blockNumber, to, type, status, confirmations } =
 		$derived(transaction);
 
 	let explorerUrl: string | undefined = $derived(
@@ -150,6 +150,22 @@
 						{$i18n.transaction.text.confirmations}
 					</span>
 					<span>{confirmations}</span>
+				</ListItem>
+			{/if}
+
+			{#if nonNullish(fee) && nonNullish(token)}
+				<ListItem>
+					<span>
+						{$i18n.fee.text.fee}
+					</span>
+					<output>
+						{formatToken({
+							value: fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
 				</ListItem>
 			{/if}
 

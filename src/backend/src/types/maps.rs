@@ -4,13 +4,15 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    agreement::AgreementHistoryEntry, api_keys::ApiKeys, backend_config::Config,
-    bitcoin::StoredPendingTransaction, contact::StoredContacts, custom_token::CustomToken,
-    exchange::ExchangeRate, token::UserToken, user_profile::StoredUserProfile,
-    user_transaction::UserTransaction, Timestamp,
+    active_user_transaction::ActiveUserTransaction, agreement::AgreementHistoryEntry,
+    api_keys::ApiKeys, backend_config::Config, bitcoin::StoredPendingTransaction,
+    contact::StoredContacts, custom_token::CustomToken, exchange::ExchangeRate, token::UserToken,
+    user_profile::StoredUserProfile, user_transaction::UserTransaction, Timestamp,
 };
 
-use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId, UserTransactionKey};
+use crate::types::storable::{
+    ActiveUserTransactionKey, Candid, StoredPrincipal, StoredTokenId, UserTransactionKey,
+};
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 
@@ -49,3 +51,9 @@ pub type UserTransactionsMap =
 /// Per-user audit trail of agreement consent/rejection events.
 pub type AgreementHistoryMap =
     StableBTreeMap<StoredPrincipal, Candid<Vec<AgreementHistoryEntry>>, VMem>;
+
+/// Per-record storage of in-flight user transactions (Active Transactions).
+/// Key: `(principal, frontend-generated UUID)`. One row per operation so that
+/// partial updates during polling do not rewrite a whole `Vec`.
+pub type ActiveUserTransactionsMap =
+    StableBTreeMap<ActiveUserTransactionKey, Candid<ActiveUserTransaction>, VMem>;

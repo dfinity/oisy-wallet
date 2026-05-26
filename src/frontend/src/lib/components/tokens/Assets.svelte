@@ -27,6 +27,7 @@
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
+	import type { ManageTokensData } from '$lib/types/manage-tokens';
 
 	interface Props {
 		tab: TokenTypes;
@@ -39,10 +40,8 @@
 	// svelte-ignore state_referenced_locally -- we want to get only the initial value
 	let activeTab = $state(tab);
 
-	let { initialSearch, message } = $derived(
-		nonNullish($modalManageTokensData)
-			? $modalManageTokensData
-			: { initialSearch: undefined, message: undefined }
+	let { initialSearch, message, initialNetwork, initialTokenData, initialStep } = $derived(
+		nonNullish($modalManageTokensData) ? $modalManageTokensData : ({} as ManageTokensData)
 	);
 
 	$effect(() => {
@@ -138,16 +137,16 @@
 			{/if}
 		</div>
 	</div>
+{/if}
 
-	{#if $modalManageTokens}
-		<ManageTokensModal {initialSearch}>
-			{#snippet infoElement()}
-				{#if nonNullish(message)}
-					<MessageBox level="info">
-						{message}
-					</MessageBox>
-				{/if}
-			{/snippet}
-		</ManageTokensModal>
-	{/if}
+{#if $modalManageTokens}
+	<ManageTokensModal {initialNetwork} {initialSearch} {initialStep} {initialTokenData}>
+		{#snippet infoElement()}
+			{#if nonNullish(message)}
+				<MessageBox level="info">
+					{message}
+				</MessageBox>
+			{/if}
+		{/snippet}
+	</ManageTokensModal>
 {/if}

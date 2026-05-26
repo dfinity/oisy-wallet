@@ -478,6 +478,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -735,6 +740,7 @@
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"ext_custom_tokens": "加载 EXT 自定义代币时出错。",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
@@ -1647,7 +1653,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "你还没有添加联系人",
+			"contacts_empty_description": "将已知地址保存到联系人中，降低意外使用错误地址的风险。",
+			"contacts_empty_cta": "添加你的第一个联系人"
 		},
 		"label": {
 			"reimbursement": "报销",

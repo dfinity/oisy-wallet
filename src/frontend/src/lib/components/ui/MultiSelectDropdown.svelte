@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
@@ -18,6 +18,7 @@
 		triggerIcon?: Snippet;
 		panel: Snippet;
 		panelWidthClass?: string;
+		onToggle?: (visible: boolean) => void;
 	}
 
 	let {
@@ -30,7 +31,8 @@
 		testId,
 		triggerIcon,
 		panel,
-		panelWidthClass
+		panelWidthClass,
+		onToggle
 	}: Props = $props();
 
 	let visible = $state(false);
@@ -39,6 +41,20 @@
 	const onTriggerClick = () => {
 		visible = !visible;
 	};
+
+	let initialised = false;
+
+	$effect(() => {
+		const next = visible;
+
+		if (!initialised) {
+			initialised = true;
+
+			return;
+		}
+
+		untrack(() => onToggle?.(next));
+	});
 </script>
 
 <button

@@ -17,6 +17,7 @@ import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
 import { icPunksTokens } from '$icp/derived/icpunks.derived';
 import { icrcTokens } from '$icp/derived/icrc.derived';
+import { icrc7Tokens } from '$icp/derived/icrc7.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
@@ -69,12 +70,13 @@ export const fungibleTokens: Readable<Token[]> = derivedMemo(
 );
 
 export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = derived(
-	[erc721Tokens, erc1155Tokens, extTokens, icPunksTokens],
-	([$erc721Tokens, $erc1155Tokens, $extTokens, $icPunksTokens]) => [
+	[erc721Tokens, erc1155Tokens, extTokens, icPunksTokens, icrc7Tokens],
+	([$erc721Tokens, $erc1155Tokens, $extTokens, $icPunksTokens, $icrc7Tokens]) => [
 		...$erc721Tokens,
 		...$erc1155Tokens,
 		...$extTokens,
-		...$icPunksTokens
+		...$icPunksTokens,
+		...$icrc7Tokens
 	]
 );
 

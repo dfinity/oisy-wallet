@@ -6,6 +6,8 @@ import type {
 	ExtV2Token,
 	// The backend declarations are not exporting IcPunksToken because it is structurally identical to ExtV2Token
 	ExtV2Token as IcPunksToken,
+	// The backend declarations are not exporting Icrc7Token because it is structurally identical to ExtV2Token
+	ExtV2Token as Icrc7Token,
 	IcrcToken,
 	SplToken,
 	Token
@@ -17,6 +19,7 @@ import type {
 	ErcSaveCustomToken,
 	ExtSaveCustomToken,
 	IcPunksSaveCustomToken,
+	Icrc7SaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
@@ -51,6 +54,10 @@ const toIcPunksCustomToken = ({ canisterId }: IcPunksSaveCustomToken): IcPunksTo
 	canister_id: Principal.fromText(canisterId)
 });
 
+const toIcrc7CustomToken = ({ canisterId }: Icrc7SaveCustomToken): Icrc7Token => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
 const toErcCustomToken = ({
 	address: token_address,
 	chainId: chain_id
@@ -74,6 +81,7 @@ export const toCustomToken = ({
 	version,
 	section,
 	allowExternalContentSource,
+	allowedExternalContentSourceUrls,
 	...rest
 }: SaveCustomTokenWithKey): CustomToken => {
 	const toCustomTokenMap = (): Token => {
@@ -93,6 +101,10 @@ export const toCustomToken = ({
 
 		if (networkKey === 'IcPunks') {
 			return { IcPunks: toIcPunksCustomToken(rest) };
+		}
+
+		if (networkKey === 'Icrc7') {
+			return { Icrc7: toIcrc7CustomToken(rest) };
 		}
 
 		if (networkKey === 'Erc20') {
@@ -127,7 +139,8 @@ export const toCustomToken = ({
 		version: toNullable(version),
 		token: toCustomTokenMap(),
 		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined),
-		allow_external_content_source: toNullable(allowExternalContentSource)
+		allow_external_content_source: toNullable(allowExternalContentSource),
+		allowed_external_content_source_urls: toNullable(allowedExternalContentSourceUrls)
 	};
 };
 

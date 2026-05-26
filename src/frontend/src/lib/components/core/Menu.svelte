@@ -11,6 +11,7 @@
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
+	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
@@ -232,10 +233,20 @@
 				asMenuItemCondensed
 				href={OISY_SUPPORT_URL}
 				iconVisible={false}
+				styleClass="group"
 				testId={NAVIGATION_MENU_SUPPORT_BUTTON}
 			>
 				<IconHelpCircle />
-				{$i18n.navigation.text.support}
+
+				<span class="flex w-full items-center justify-between">
+					{$i18n.navigation.text.support}
+
+					<span
+						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
+					>
+						<IconExternalLink size="16" />
+					</span>
+				</span>
 			</ExternalLink>
 
 			<Hr />

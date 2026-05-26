@@ -478,6 +478,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -735,6 +740,7 @@
 			"icrc_custom_token": "ICRC 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"ext_custom_tokens": "EXT 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"icpunks_custom_tokens": "ICPunks 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "지갑에 필요한 초기 데이터가 아직 로드되지 않았습니다. 다시 시도해 주세요.",
 			"allow_signing": "서명을 위한 지갑 설정 중 문제가 발생하여 로그아웃되었습니다. 문제가 지속되면 지원팀에 문의하세요.",
@@ -1647,7 +1653,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "아직 연락처를 추가하지 않으셨습니다",
+			"contacts_empty_description": "알고 있는 주소를 연락처에 저장하여 실수로 잘못된 주소를 사용할 위험을 줄이세요.",
+			"contacts_empty_cta": "첫 연락처 추가"
 		},
 		"label": {
 			"reimbursement": "환불",

@@ -258,18 +258,3 @@ fn initialize_default_fee_percentiles(network: BitcoinNetwork) -> Vec<u64> {
 
     percentiles
 }
-
-/// Returns the 50th percentile for sending fees.
-pub fn get_fee_per_byte(network: BitcoinNetwork) -> u64 {
-    // Get fee percentiles from previous transactions to estimate our own fee.
-    let fee_percentiles = get_current_fee_percentiles(network);
-
-    if fee_percentiles.is_empty() {
-        // This case should rarely happen due to default values,
-        // but keeping as a fallback
-        get_default_fee_for_network(network)
-    } else {
-        let middle = fee_percentiles.len() / 2;
-        fee_percentiles[middle]
-    }
-}

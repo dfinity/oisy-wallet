@@ -1,7 +1,8 @@
 import { metadata as getIcPunksMetadata } from '$icp/api/icpunks.api';
+import { metadata as getIcrc7Metadata } from '$icp/api/icrc7.api';
 import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
-import { mapDip721Nft, mapExtNft, mapIcPunksNft } from '$icp/utils/nft.utils';
+import { mapDip721Nft, mapExtNft, mapIcPunksNft, mapIcrc7Nft } from '$icp/utils/nft.utils';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import type { NftMetadataWithoutId } from '$lib/types/nft';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
@@ -9,6 +10,7 @@ import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockIcPunksMetadata } from '$tests/mocks/icpunks-token.mock';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
+import { mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { SvelteMap } from 'svelte/reactivity';
@@ -22,6 +24,14 @@ vi.mock(import('$icp/services/ext-metadata.services'), async (importOriginal) =>
 });
 
 vi.mock(import('$icp/api/icpunks.api'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		metadata: vi.fn()
+	};
+});
+
+vi.mock(import('$icp/api/icrc7.api'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
@@ -217,6 +227,174 @@ describe('nft.utils', () => {
 				collection: {
 					...rest,
 					address: mockValidIcPunksToken.canisterId
+				}
+			});
+		});
+	});
+
+	describe('mapIcrc7Nft', () => {
+		const mockIndex = 50n;
+		const mockMetadata: NftMetadataWithoutId = {
+			name: 'ICRC-7 NFT #50',
+			description: 'A byte-stream-backed NFT',
+			imageUrl:
+				'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A3dafe45&owner_id=sey3i-jyaaa-aaaap-quo3q-cai',
+			attributes: [{ traitType: 'Level', value: '50' }]
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(SvelteMap.prototype, 'get').mockReturnValue(undefined); // invalidate cache
+
+			global.fetch = vi.fn().mockResolvedValue({
+				headers: {
+					get: () => null
+				}
+			});
+
+			vi.mocked(getIcrc7Metadata).mockResolvedValue(mockMetadata);
+		});
+
+		it('should map correctly an ICRC-7 NFT', async () => {
+			const result = await mapIcrc7Nft({
+				index: mockIndex,
+				token: mockValidIcrc7Token,
+				identity: mockIdentity
+			});
+
+			const { canisterId: _, ...rest } = mockValidIcrc7Token;
+
+			expect(result).toStrictEqual({
+				id: result.id,
+				...mockMetadata,
+				mediaStatus: {
+					image: MediaStatusEnum.OK,
+					thumbnail: MediaStatusEnum.INVALID_DATA
+				},
+				collection: {
+					...rest,
+					address: mockValidIcrc7Token.canisterId
+				}
+			});
+
+			expect(getIcrc7Metadata).toHaveBeenCalledExactlyOnceWith({
+				canisterId: mockValidIcrc7Token.canisterId,
+				tokenId: mockIndex,
+				identity: mockIdentity,
+				certified: undefined
+			});
+		});
+
+		it('should use invalid media statuses when metadata has no image URLs', async () => {
+			vi.mocked(getIcrc7Metadata).mockResolvedValue({
+				name: 'ICRC-7 NFT #50'
+			});
+
+			const result = await mapIcrc7Nft({
+				index: mockIndex,
+				token: mockValidIcrc7Token,
+				identity: mockIdentity
+			});
+
+			expect(result.mediaStatus).toStrictEqual({
+				image: MediaStatusEnum.INVALID_DATA,
+				thumbnail: MediaStatusEnum.INVALID_DATA
+			});
+		});
+
+		it('should map data image URLs without fetching them for validation', async () => {
+			const imageUrl = 'data:image/png;base64,iVBORw0KGgo=';
+			vi.mocked(getIcrc7Metadata).mockResolvedValue({
+				name: 'ICRC-7 NFT #50',
+				imageUrl
+			});
+
+			const result = await mapIcrc7Nft({
+				index: mockIndex,
+				token: mockValidIcrc7Token,
+				identity: mockIdentity
+			});
+
+			expect(result.imageUrl).toBe(imageUrl);
+			expect(result.mediaStatus).toStrictEqual({
+				image: MediaStatusEnum.OK,
+				thumbnail: MediaStatusEnum.INVALID_DATA
+			});
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('should omit non-base64 data image URLs and avoid fetching them', async () => {
+			vi.mocked(getIcrc7Metadata).mockResolvedValue({
+				name: 'ICRC-7 NFT #50',
+				imageUrl: 'data:image/svg+xml;utf8,<svg/>'
+			});
+
+			const result = await mapIcrc7Nft({
+				index: mockIndex,
+				token: mockValidIcrc7Token,
+				identity: mockIdentity
+			});
+
+			expect(result.imageUrl).toBeUndefined();
+			expect(result.mediaStatus).toStrictEqual({
+				image: MediaStatusEnum.INVALID_DATA,
+				thumbnail: MediaStatusEnum.INVALID_DATA
+			});
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('should omit invalid metadata URLs and avoid fetching them', async () => {
+			vi.mocked(getIcrc7Metadata).mockResolvedValue({
+				name: 'ICRC-7 NFT #50',
+				imageUrl: '',
+				thumbnailUrl: 'http://localhost/token-50.png'
+			});
+
+			const result = await mapIcrc7Nft({
+				index: mockIndex,
+				token: mockValidIcrc7Token,
+				identity: mockIdentity
+			});
+
+			const { canisterId: _, ...rest } = mockValidIcrc7Token;
+
+			expect(result).toStrictEqual({
+				id: result.id,
+				name: 'ICRC-7 NFT #50',
+				mediaStatus: {
+					image: MediaStatusEnum.INVALID_DATA,
+					thumbnail: MediaStatusEnum.INVALID_DATA
+				},
+				collection: {
+					...rest,
+					address: mockValidIcrc7Token.canisterId
+				}
+			});
+
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('should handle missing metadata from the service', async () => {
+			vi.mocked(getIcrc7Metadata).mockResolvedValue(undefined);
+
+			const result = await mapIcrc7Nft({
+				index: mockIndex,
+				token: mockValidIcrc7Token,
+				identity: mockIdentity
+			});
+
+			const { canisterId: _, ...rest } = mockValidIcrc7Token;
+
+			expect(result).toStrictEqual({
+				id: result.id,
+				mediaStatus: {
+					image: MediaStatusEnum.INVALID_DATA,
+					thumbnail: MediaStatusEnum.INVALID_DATA
+				},
+				collection: {
+					...rest,
+					address: mockValidIcrc7Token.canisterId
 				}
 			});
 		});
