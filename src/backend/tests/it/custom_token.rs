@@ -1,4 +1,4 @@
-use std::sync::LazyLock;
+use std::{sync::LazyLock, time::Duration};
 
 use candid::Principal;
 use pretty_assertions::assert_eq;
@@ -796,4 +796,31 @@ fn test_set_custom_token_updates_activity_for_same_token() {
         stats.token_activity_count, 1,
         "Updating the same token should not create a new activity entry"
     );
+}
+
+#[test]
+fn test_housekeeping_evicts_stale_token_activity() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    pic_setup
+        .update::<()>(caller, "set_custom_token", USER_TOKEN.clone())
+        .expect("Failed to set custom token");
+
+    let stats_before = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+    assert_eq!(stats_before.token_activity_count, 1);
+
+    pic_setup.pic.advance_time(Duration::from_secs(60 * 60 + 1));
+    for _ in 0..10 {
+        pic_setup.pic.tick();
+    }
+
+    let stats_after = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+    assert_eq!(stats_after.token_activity_count, 0);
 }
