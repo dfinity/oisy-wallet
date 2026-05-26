@@ -7,6 +7,6 @@ export const EarningProviderConfigSchema = z.object({
 	titles: z.array(z.string()),
 	description: z.string(),
 	logo: z.string(),
-	fields: z.array(z.enum(EarningCardFields)),
+	fields: z.array(z.nativeEnum(EarningCardFields)),
 	actionText: z.string()
 });
