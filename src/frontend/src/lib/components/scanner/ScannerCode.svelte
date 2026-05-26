@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
 	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
@@ -15,6 +16,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { btcAddressMainnet } from '$lib/derived/address.derived';
 	import { networksMainnets } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
@@ -27,6 +29,7 @@
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import type { QrStatus } from '$lib/types/qr-code';
 	import { ScannerResults } from '$lib/types/scanner';
+	import { isMobile } from '$lib/utils/device.utils';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
 
@@ -39,10 +42,14 @@
 
 	const WALLET_CONNECT_URI_PREFIX = 'wc:';
 
+	const MOBILE_ERROR_BANNER_DURATION = 3500;
+
 	let openBottomSheet = $state(false);
 	let openInfoBottomSheet = $state(false);
 	let uri = $state('');
 	let error = $state('');
+	let showMobileError = $state(false);
+	let mobileErrorTimeout: ReturnType<typeof setTimeout> | undefined;
 	let isEmptyUri = $derived(isEmptyString(uri));
 
 	const { setData, setAvailableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
@@ -84,7 +91,15 @@
 
 			onNext({ results: ScannerResults.PAY });
 		} catch (_: unknown) {
-			error = $i18n.scanner.error.code_link_is_not_valid;
+			if (isMobile()) {
+				showMobileError = true;
+				clearTimeout(mobileErrorTimeout);
+				mobileErrorTimeout = setTimeout(() => {
+					showMobileError = false;
+				}, MOBILE_ERROR_BANNER_DURATION);
+			} else {
+				error = $i18n.scanner.error.code_link_is_not_valid;
+			}
 		} finally {
 			busy.stop();
 		}
@@ -111,6 +126,15 @@
 
 <div class="relative flex w-full flex-col bg-tertiary">
 	<QrCodeScanner onScan={handleScan} universalScanner />
+
+	{#if showMobileError}
+		<div
+			class="absolute top-4 right-0 left-0 mx-auto w-[90%] rounded-lg border border-error-solid bg-error-subtle-10 p-3 text-center text-sm font-bold text-error-primary"
+			transition:slide={SLIDE_DURATION}
+		>
+			{$i18n.scanner.error.code_link_is_not_valid}
+		</div>
+	{/if}
 
 	<Responsive up="md">
 		<ScannerCodeInput

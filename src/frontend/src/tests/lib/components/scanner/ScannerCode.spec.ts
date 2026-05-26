@@ -11,6 +11,7 @@ import type {
 	PayableTokenWithFees
 } from '$lib/types/open-crypto-pay';
 import { ScannerResults } from '$lib/types/scanner';
+import * as deviceUtils from '$lib/utils/device.utils';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
@@ -490,6 +491,38 @@ describe('ScannerCode.svelte', () => {
 				expect(mockSetsetAvailableTokens).toHaveBeenCalledExactlyOnceWith([]);
 				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({ results: ScannerResults.PAY });
 			});
+		});
+	});
+
+	describe('mobile error overlay', () => {
+		beforeEach(() => {
+			vi.spyOn(deviceUtils, 'isMobile').mockReturnValue(true);
+		});
+
+		it('should show overlay banner and not inline field error when processOpenCryptoPayCode rejects', async () => {
+			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+			const { container } = renderWithContext();
+
+			await openManualEntry();
+
+			const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+			await fireEvent.input(input, { target: { value: 'invalid' } });
+
+			const button = screen.getByRole('button', { name: en.core.text.continue });
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				const matches = screen.getAllByText(en.scanner.error.code_link_is_not_valid);
+
+				expect(matches).toHaveLength(1);
+				expect(matches[0].tagName).toBe('DIV');
+				expect(matches[0]).toHaveClass('text-error-primary');
+			});
+
+			const styledDiv = container.querySelector('[style*="--input-custom-border-color"]');
+
+			expect(styledDiv?.getAttribute('style')).toContain('inherit');
 		});
 	});
 
