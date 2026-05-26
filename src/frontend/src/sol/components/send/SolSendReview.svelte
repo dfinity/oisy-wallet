@@ -3,7 +3,7 @@
 	import { getContext } from 'svelte';
 	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
-	import ScannedAddressNotice from '$lib/components/send/ScannedAddressNotice.svelte';
+	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -54,7 +54,7 @@
 	let disableSend = $derived(insufficientFundsForFee || invalid);
 </script>
 
-<ScannedAddressNotice />
+<ScannedPlainAddressNotice />
 
 <SendReview {amount} {destination} disabled={disableSend} {onBack} {onSend} {selectedContact}>
 	{#snippet network()}

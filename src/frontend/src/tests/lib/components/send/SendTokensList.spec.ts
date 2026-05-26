@@ -1,6 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import SendTokensList from '$lib/components/send/SendTokensList.svelte';
-import { SEND_SCANNED_ADDRESS_NOTICE } from '$lib/constants/test-ids.constants';
+import { SEND_SCANNED_PLAIN_ADDRESS_NOTICE } from '$lib/constants/test-ids.constants';
 import en from '$lib/i18n/en.json';
 import {
 	initModalTokensListContext,
@@ -33,14 +33,14 @@ describe('SendTokensList', () => {
 	it('does not render the scanned-address notice by default', () => {
 		const { queryByTestId, queryByText } = renderSendTokensList();
 
-		expect(queryByTestId(SEND_SCANNED_ADDRESS_NOTICE)).not.toBeInTheDocument();
+		expect(queryByTestId(SEND_SCANNED_PLAIN_ADDRESS_NOTICE)).not.toBeInTheDocument();
 		expect(queryByText(en.send.info.scanned_address_only_destination)).not.toBeInTheDocument();
 	});
 
 	it('renders the scanned-address notice when the scanner-driven context flag is true', () => {
 		const { getByTestId, getByText } = renderSendTokensList({ scannerDriven: true });
 
-		expect(getByTestId(SEND_SCANNED_ADDRESS_NOTICE)).toBeInTheDocument();
+		expect(getByTestId(SEND_SCANNED_PLAIN_ADDRESS_NOTICE)).toBeInTheDocument();
 		expect(getByText(en.send.info.scanned_address_only_destination)).toBeInTheDocument();
 	});
 });

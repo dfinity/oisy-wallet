@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { SEND_SCANNED_ADDRESS_NOTICE } from '$lib/constants/test-ids.constants';
+	import { SEND_SCANNED_PLAIN_ADDRESS_NOTICE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 
@@ -9,7 +9,7 @@
 </script>
 
 {#if show}
-	<MessageBox level="warning" testId={SEND_SCANNED_ADDRESS_NOTICE}>
+	<MessageBox level="warning" testId={SEND_SCANNED_PLAIN_ADDRESS_NOTICE}>
 		{$i18n.send.info.scanned_address_only_destination}
 	</MessageBox>
 {/if}
