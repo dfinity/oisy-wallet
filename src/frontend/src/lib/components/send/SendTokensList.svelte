@@ -3,6 +3,8 @@
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { SEND_TOKENS_LIST_SCANNED_ADDRESS_NOTICE } from '$lib/constants/test-ids.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -12,9 +14,15 @@
 		onSendToken: (token: Token) => void;
 		onSelectNetworkFilter: () => void;
 		lockedNetwork?: Network;
+		showScannedAddressNotice?: boolean;
 	}
 
-	let { onSendToken, onSelectNetworkFilter, lockedNetwork }: Props = $props();
+	let {
+		onSendToken,
+		onSelectNetworkFilter,
+		lockedNetwork,
+		showScannedAddressNotice = false
+	}: Props = $props();
 
 	const onTokenButtonClick = (token: Token) => {
 		onSendToken(token);
@@ -26,6 +34,13 @@
 	{onSelectNetworkFilter}
 	{onTokenButtonClick}
 >
+	{#snippet topBanner()}
+		{#if showScannedAddressNotice}
+			<MessageBox level="warning" testId={SEND_TOKENS_LIST_SCANNED_ADDRESS_NOTICE}>
+				{$i18n.send.info.scanned_address_only_destination}
+			</MessageBox>
+		{/if}
+	{/snippet}
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />
 	{/snippet}

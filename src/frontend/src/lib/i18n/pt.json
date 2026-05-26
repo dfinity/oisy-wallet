@@ -956,7 +956,8 @@
 			"pending_bitcoin_transaction": "Você pode enviar outra transação Bitcoin assim que a pendente for concluída.",
 			"no_available_utxos": "Você não terá UTXOs disponíveis para realizar esta transação.",
 			"unknown_destination": "Você ainda não interagiu com este endereço. Por favor, certifique-se de conhecer o destinatário.",
-			"fee_info": "A taxa será paga em $feeSymbol. Disponível: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "A taxa será paga em $feeSymbol. Disponível: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Endereço de destino inválido",

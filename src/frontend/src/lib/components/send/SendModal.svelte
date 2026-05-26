@@ -262,6 +262,7 @@
 					{lockedNetwork}
 					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 					{onSendToken}
+					showScannedAddressNotice={nonNullish(initialModalData)}
 				/>
 			{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
 				<SendNftsList

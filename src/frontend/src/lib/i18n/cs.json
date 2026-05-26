@@ -956,7 +956,8 @@
 			"pending_bitcoin_transaction": "Po dokončení čekající transakce můžete odeslat další transakci Bitcoin.",
 			"no_available_utxos": "Nebudete mít k dispozici žádné UTXO k provedení této transakce.",
 			"unknown_destination": "S touto adresou jste dosud neinteragovali. Ujistěte se, že znáte příjemce.",
-			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Neplatná cílová adresa",
