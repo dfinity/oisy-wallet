@@ -146,6 +146,7 @@ const mapTokenManageToken = <T extends SaveTokensToken>({
 	return {
 		network: tokenNetwork,
 		address,
+		...('standard' in token && nonNullish(token.standard) && { standard: token.standard.code }),
 		...('symbol' in token && nonNullish(token.symbol) && { symbol: token.symbol }),
 		...('name' in token && nonNullish(token.name) && { name: token.name })
 	};
@@ -252,6 +253,9 @@ export const saveTokens = async <
 			const indexCanisterId = 'indexCanisterId' in token ? token.indexCanisterId : undefined;
 			const tokenId = 'id' in token ? token.id : undefined;
 			const tokenSymbol = 'symbol' in token ? token.symbol : undefined;
+			const tokenName = 'name' in token ? token.name : undefined;
+			const tokenStandard =
+				'standard' in token && nonNullish(token.standard) ? token.standard.code : undefined;
 			const network = 'network' in token ? token.network : undefined;
 
 			trackEvent({
@@ -264,6 +268,8 @@ export const saveTokens = async <
 					...(nonNullish(indexCanisterId) && { indexCanisterId }),
 					...(nonNullish(tokenId) && { tokenId: `${tokenId.description}` }),
 					...(nonNullish(tokenSymbol) && { tokenSymbol }),
+					...(nonNullish(tokenName) && { tokenName }),
+					...(nonNullish(tokenStandard) && { tokenStandard }),
 					...(nonNullish(network) && { networkId: `${network.id.description}` }),
 					...{ source: MANAGE_TOKENS_MODAL_ROUTE }
 				}
