@@ -31,7 +31,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { getNftDisplayId } from '$lib/utils/nft.utils';
-	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
+	import {
+		findNonFungibleToken,
+		getNftCollectionUi,
+		isNftMediaConsentEnabled
+	} from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollection;
@@ -39,8 +43,6 @@
 	}
 
 	const { collection, testId }: Props = $props();
-
-	const allowMedia = $derived(collection.allowExternalContentSource);
 
 	const shortCollectionName = $derived(
 		nonNullish(collection.name)
@@ -69,6 +71,7 @@
 				token,
 				$authIdentity,
 				allowMedia,
+				...(allowMedia && { allowedExternalContentSourceUrls: reviewedMediaUrls }),
 				$ethAddress
 			});
 		}
@@ -83,6 +86,22 @@
 			(coll) =>
 				coll.collection.id === collection.id && coll.collection.address === collection.address
 		)?.nfts ?? []
+	);
+
+	const reviewedMediaUrls = $derived(
+		Array.from(
+			new Set([
+				...(nonNullish(collection.bannerImageUrl) ? [collection.bannerImageUrl] : []),
+				...collectionNfts.flatMap(({ imageUrl, thumbnailUrl }) => [
+					...(nonNullish(imageUrl) ? [imageUrl] : []),
+					...(nonNullish(thumbnailUrl) ? [thumbnailUrl] : [])
+				])
+			])
+		)
+	);
+
+	const allowMedia = $derived(
+		isNftMediaConsentEnabled({ collection, mediaUrls: reviewedMediaUrls })
 	);
 
 	const onClose = () => {
@@ -215,24 +234,24 @@
 							</span>
 						{/if}
 						{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
-							{#if nonNullish(nft?.imageUrl)}
+							{#each [nft.imageUrl, nft.thumbnailUrl].filter(nonNullish) as mediaUrl (mediaUrl)}
 								<span class="flex w-full items-start justify-end md:items-center">
 									#{getNftDisplayId(nft)} &nbsp;
 									<output class="truncate text-tertiary"
-										>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
+										>{shortenWithMiddleEllipsis({ text: mediaUrl, splitLength: 20 })}</output
 									>
 									<AddressActions
-										copyAddress={nft.imageUrl}
+										copyAddress={mediaUrl}
 										copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-											$address: nft.imageUrl
+											$address: mediaUrl
 										})}
 										{...allowMedia && {
-											externalLink: nft.imageUrl,
+											externalLink: mediaUrl,
 											externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
 										}}
 									/>
 								</span>
-							{/if}
+							{/each}
 						{/each}
 					</span>
 				</div>

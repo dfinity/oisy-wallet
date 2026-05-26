@@ -22,7 +22,10 @@ vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
 }));
 
-const getNftAzuki = (allowMedia?: boolean) => ({
+const getNftAzuki = ({
+	allowMedia,
+	allowedMediaUrls
+}: { allowMedia?: boolean; allowedMediaUrls?: string[] } = {}) => ({
 	...mockValidErc721Nft,
 	id: parseNftId('1'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/1.png',
@@ -31,7 +34,8 @@ const getNftAzuki = (allowMedia?: boolean) => ({
 		name: 'Azuki Elemental Beans',
 		address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 		network: POLYGON_AMOY_NETWORK,
-		allowExternalContentSource: allowMedia
+		allowExternalContentSource: allowMedia,
+		allowedExternalContentSourceUrls: allowedMediaUrls
 	}
 });
 
@@ -63,7 +67,7 @@ describe('NftDisplayGuard', () => {
 
 	it('should render the review consent with a different text when hasConsent is false', () => {
 		const { getByRole, getByText } = render(NftDisplayGuard, {
-			nft: getNftAzuki(false),
+			nft: getNftAzuki({ allowMedia: false }),
 			children: mockSnippet,
 			showMessage: true,
 			type: 'card',
@@ -133,7 +137,7 @@ describe('NftDisplayGuard', () => {
 
 	it('should render the children if hasConsent is true', () => {
 		const { queryAllByRole, queryByText, getByTestId } = render(NftDisplayGuard, {
-			nft: getNftAzuki(true),
+			nft: getNftAzuki({ allowMedia: true }),
 			children: mockSnippet,
 			showMessage: true,
 			type: 'card',
@@ -150,9 +154,25 @@ describe('NftDisplayGuard', () => {
 		expect(children).toBeInTheDocument();
 	});
 
+	it('should render the review consent if the current media URL was not consented', () => {
+		const { getByRole, getByText } = render(NftDisplayGuard, {
+			nft: getNftAzuki({
+				allowMedia: true,
+				allowedMediaUrls: ['https://example.com/other.png']
+			}),
+			children: mockSnippet,
+			showMessage: true,
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
+		});
+
+		expect(getByText(get(i18n).nfts.text.img_consent_disabled)).toBeInTheDocument();
+		expect(getByRole('button')).toBeInTheDocument();
+	});
+
 	it('should not show the text and button if showMessage is false', () => {
 		const { queryAllByRole, queryByText } = render(NftDisplayGuard, {
-			nft: getNftAzuki(false),
+			nft: getNftAzuki({ allowMedia: false }),
 			children: mockSnippet,
 			showMessage: false,
 			type: 'card',
@@ -168,7 +188,7 @@ describe('NftDisplayGuard', () => {
 	it('should render the different placeholders if mediaStatus of nft is INVALID_DATA', () => {
 		const { getByTestId } = render(NftDisplayGuard, {
 			nft: {
-				...getNftAzuki(true),
+				...getNftAzuki({ allowMedia: true }),
 				mediaStatus: {
 					image: MediaStatusEnum.INVALID_DATA,
 					thumbnail: MediaStatusEnum.INVALID_DATA
@@ -188,7 +208,7 @@ describe('NftDisplayGuard', () => {
 	it('should render the different placeholders if mediaStatus of nft is FILESIZE_LIMIT_EXCEEDED', () => {
 		const { getByTestId } = render(NftDisplayGuard, {
 			nft: {
-				...getNftAzuki(true),
+				...getNftAzuki({ allowMedia: true }),
 				mediaStatus: {
 					image: MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED,
 					thumbnail: MediaStatusEnum.INVALID_DATA
@@ -208,7 +228,7 @@ describe('NftDisplayGuard', () => {
 	it('should render the different placeholders if mediaStatus of nft is NON_SUPPORTED_MEDIA_TYPE', () => {
 		const { getByTestId } = render(NftDisplayGuard, {
 			nft: {
-				...getNftAzuki(true),
+				...getNftAzuki({ allowMedia: true }),
 				mediaStatus: {
 					image: MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE,
 					thumbnail: MediaStatusEnum.INVALID_DATA

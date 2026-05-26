@@ -611,6 +611,7 @@ describe('nft.services', () => {
 		it('updates ERC721 token with allowExternalContentSource=true', async () => {
 			await updateNftMediaConsent({
 				allowMedia: true,
+				allowedExternalContentSourceUrls: ['https://example.com/path/../nft.png', 'not-a-url'],
 				token: base721,
 				$authIdentity: mockIdentity,
 				$ethAddress: mockEthAddress
@@ -624,7 +625,8 @@ describe('nft.services', () => {
 						chainId: base721.network.chainId,
 						networkKey: 'Erc721',
 						enabled: true,
-						allowExternalContentSource: true
+						allowExternalContentSource: true,
+						allowedExternalContentSourceUrls: ['https://example.com/nft.png']
 					}
 				]
 			});
@@ -646,7 +648,8 @@ describe('nft.services', () => {
 						chainId: base721.network.chainId,
 						networkKey: 'Erc721',
 						enabled: true,
-						allowExternalContentSource: false
+						allowExternalContentSource: false,
+						allowedExternalContentSourceUrls: []
 					}
 				]
 			});
@@ -668,7 +671,8 @@ describe('nft.services', () => {
 						chainId: base1155.network.chainId,
 						networkKey: 'Erc1155',
 						enabled: true,
-						allowExternalContentSource: true
+						allowExternalContentSource: true,
+						allowedExternalContentSourceUrls: []
 					}
 				]
 			});
@@ -690,7 +694,8 @@ describe('nft.services', () => {
 						chainId: base1155.network.chainId,
 						networkKey: 'Erc1155',
 						enabled: true,
-						allowExternalContentSource: false
+						allowExternalContentSource: false,
+						allowedExternalContentSourceUrls: []
 					}
 				]
 			});

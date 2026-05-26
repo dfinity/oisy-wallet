@@ -10,17 +10,25 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { NftCollection } from '$lib/types/nft';
+	import { isNftMediaConsentEnabled } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollection;
 		source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE | PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION;
+		mediaUrls?: string[];
 	}
 
-	const { collection, source }: Props = $props();
+	const { collection, source, mediaUrls: providedMediaUrls }: Props = $props();
 
-	const hasConsent = $derived(
-		nonNullish(collection) ? collection.allowExternalContentSource : false
+	const mediaUrls = $derived(
+		nonNullish(providedMediaUrls)
+			? providedMediaUrls
+			: nonNullish(collection.bannerImageUrl)
+				? [collection.bannerImageUrl]
+				: []
 	);
+
+	const hasConsent = $derived(isNftMediaConsentEnabled({ collection, mediaUrls }));
 
 	const openConsentModal = () => {
 		if (nonNullish(collection)) {

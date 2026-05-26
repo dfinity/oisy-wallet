@@ -68,6 +68,7 @@
 				source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION,
 				subSource: 'hero'
 			}}
+			mediaUrls={nonNullish(displayImageUrl) ? [displayImageUrl] : []}
 			nft={firstNft}
 			type="hero-banner"
 		>

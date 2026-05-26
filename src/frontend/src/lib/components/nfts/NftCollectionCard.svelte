@@ -46,6 +46,14 @@
 			collection.nfts[0]
 	);
 
+	const previewMediaUrls = $derived(
+		collectionNfts.slice(0, 4).flatMap((nft) => {
+			const mediaUrl = getNftDisplayImageUrl(nft);
+
+			return nonNullish(mediaUrl) ? [mediaUrl] : [];
+		})
+	);
+
 	const onClick = () => {
 		trackEvent({
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
@@ -81,6 +89,7 @@
 				source: PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE,
 				subSource: 'card'
 			}}
+			mediaUrls={previewMediaUrls}
 			nft={previewNft}
 			type="card"
 		>

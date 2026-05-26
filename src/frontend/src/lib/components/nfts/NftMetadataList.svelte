@@ -20,7 +20,7 @@
 	import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import { isNftMediaConsentEnabled, mapTokenToCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		nft?: Nft;
@@ -34,7 +34,15 @@
 		nft?.collection ?? (nonNullish(token) ? mapTokenToCollection(token) : undefined)
 	);
 
-	const allowMedia = $derived(collection?.allowExternalContentSource);
+	const nftImageMediaUrls = $derived(nonNullish(nft?.imageUrl) ? [nft.imageUrl] : undefined);
+
+	const allowNftMedia = $derived.by(() => {
+		if (isNullish(collection) || isNullish(nft?.imageUrl)) {
+			return false;
+		}
+
+		return isNftMediaConsentEnabled({ collection, mediaUrls: [nft.imageUrl] });
+	});
 
 	const sortedAttributes = $derived(
 		nonNullish(nft?.attributes)
@@ -45,8 +53,16 @@
 
 	let additionalMediaUrl = $state<string | undefined>();
 
+	const allowAdditionalMedia = $derived.by(() => {
+		if (isNullish(collection) || isNullish(additionalMediaUrl)) {
+			return false;
+		}
+
+		return isNftMediaConsentEnabled({ collection, mediaUrls: [additionalMediaUrl] });
+	});
+
 	const updateAdditionalMediaUrl = async () => {
-		if (isNullish(nft?.imageUrl) || !allowMedia) {
+		if (isNullish(nft?.imageUrl) || !allowNftMedia) {
 			additionalMediaUrl = undefined;
 
 			return;
@@ -56,7 +72,7 @@
 	};
 
 	$effect(() => {
-		[nft, allowMedia];
+		[nft, allowNftMedia];
 
 		untrack(() => updateAdditionalMediaUrl());
 	});
@@ -136,7 +152,7 @@
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.display_preference}</span>
 		{#if nonNullish(collection)}
-			<NftImageConsentPreference {collection} {source} />
+			<NftImageConsentPreference {collection} mediaUrls={nftImageMediaUrls} {source} />
 		{:else}
 			<span class="min-w-12">
 				<SkeletonText />
@@ -187,7 +203,7 @@
 						copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
 							$address: nft.imageUrl
 						})}
-						{...allowMedia && {
+						{...allowNftMedia && {
 							externalLink: nft.imageUrl,
 							externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
 						}}
@@ -216,7 +232,7 @@
 								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
 									$address: additionalMediaUrl
 								})}
-								{...allowMedia && {
+								{...allowAdditionalMedia && {
 									externalLink: additionalMediaUrl,
 									externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
 								}}
