@@ -18,6 +18,7 @@ import { mockValidToken } from '$tests/mocks/tokens.mock';
 // Real values from onesec-bridge DEFAULT_CONFIG
 const USDC_LEDGER = '53nhb-haaaa-aaaar-qbn5q-cai';
 const USDT_LEDGER = 'ij33n-oiaaa-aaaar-qbooa-cai';
+const CBBTC_LEDGER = 'io25z-dqaaa-aaaar-qbooq-cai';
 const ICP_LEDGER = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 const USDC_ETHEREUM = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const USDC_ARBITRUM = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
@@ -144,12 +145,16 @@ describe('onesec-swap.utils', () => {
 	});
 
 	describe('oneSecIcpSupportedTokens', () => {
-		it('returns a Set containing all known ICP ledger canister IDs', async () => {
+		it('returns ledger canister IDs only for USDC, USDT and cbBTC', async () => {
 			const result = await oneSecIcpSupportedTokens();
 
-			expect(result).toContain(USDC_LEDGER);
-			expect(result).toContain(USDT_LEDGER);
-			expect(result).toContain(ICP_LEDGER);
+			expect(result).toEqual(new Set([USDC_LEDGER, USDT_LEDGER, CBBTC_LEDGER]));
+		});
+
+		it('excludes ICP and other tokens not in the enabled set', async () => {
+			const result = await oneSecIcpSupportedTokens();
+
+			expect(result.has(ICP_LEDGER)).toBeFalsy();
 		});
 
 		it('contains no empty strings', async () => {

@@ -25,6 +25,12 @@ const buildIcpLedgerMap = (): Record<string, IcpLedgerEntry> =>
 
 export const ICP_LEDGER_TO_TOKEN = buildIcpLedgerMap();
 
+const ONESEC_ENABLED_ICP_TOKEN_SYMBOLS: ReadonlySet<Token> = new Set<Token>([
+	'USDC',
+	'USDT',
+	'cbBTC'
+]);
+
 export const computeReceiveAmount = ({
 	amount,
 	transferFeeInUnits,
@@ -61,7 +67,13 @@ const getEvmAddressForNetwork = ({
  * Returns ICP ledger canister IDs of tokens supported by OneSec on the ICP side.
  */
 export const oneSecIcpSupportedTokens = (): Promise<Set<string>> =>
-	Promise.resolve(new Set(Object.keys(ICP_LEDGER_TO_TOKEN)));
+	Promise.resolve(
+		new Set(
+			Object.entries(ICP_LEDGER_TO_TOKEN)
+				.filter(([, { token }]) => ONESEC_ENABLED_ICP_TOKEN_SYMBOLS.has(token))
+				.map(([ledger]) => ledger)
+		)
+	);
 
 /**
  * Returns ERC20 addresses (lowercased) of tokens supported by OneSec on the given EVM networks.
