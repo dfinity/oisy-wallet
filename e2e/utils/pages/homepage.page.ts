@@ -9,6 +9,7 @@ import {
 	MANAGE_TOKENS_MODAL_SAVE,
 	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
 	MOBILE_NAVIGATION_MENU,
+	MODAL_BACKDROP,
 	NAVIGATION_ITEM_HOMEPAGE,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
@@ -270,7 +271,7 @@ abstract class Homepage {
 		// button. The backdrop sits behind the modal wrapper so a normal click on
 		// it is intercepted by the dialog content — press Escape to trigger the
 		// Modal's own close handler.
-		const backdrop = this.#page.getByTestId('backdrop').filter({ visible: true });
+		const backdrop = this.#page.getByTestId(MODAL_BACKDROP).filter({ visible: true });
 		if ((await backdrop.count()) === 0) {
 			return;
 		}
