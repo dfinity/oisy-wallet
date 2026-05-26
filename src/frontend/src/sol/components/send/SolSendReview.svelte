@@ -54,9 +54,11 @@
 	let disableSend = $derived(insufficientFundsForFee || invalid);
 </script>
 
-<ScannedPlainAddressNotice />
-
 <SendReview {amount} {destination} disabled={disableSend} {onBack} {onSend} {selectedContact}>
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice />
+	{/snippet}
+
 	{#snippet network()}
 		<ReviewNetwork {sourceNetwork} />
 	{/snippet}

@@ -45,8 +45,6 @@
 	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
 </script>
 
-<ScannedPlainAddressNotice />
-
 <SendForm
 	{cancel}
 	{destination}
@@ -56,6 +54,10 @@
 	{onNext}
 	{selectedContact}
 >
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice />
+	{/snippet}
+
 	{#snippet sendAmount()}
 		<SolSendAmount {onTokensList} bind:amount bind:amountError />
 	{/snippet}
