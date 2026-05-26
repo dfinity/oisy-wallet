@@ -46,7 +46,8 @@ export const evmSwapProviders: EvmSwapProviderConfig[] = [
 				{
 					key: SwapProvider.ONE_SEC,
 					getQuote: fetchOneSecEvmToIcpQuote,
-					isEnabled: ONESEC_SWAP_ENABLED,
+					// TODO: enable it back after the issue with EVM -> ICP swaps is fixed on the SDK side
+					isEnabled: false,
 					getSupportedTokens: () =>
 						oneSecEvmSupportedTokens({ networkIds: ONESEC_EVM_NETWORK_IDS }),
 					getSupportedDestinations: ({ sourceToken }) =>
