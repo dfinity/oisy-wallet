@@ -32,7 +32,7 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY
 	);
 
-	const campaignEligibility = $derived(getCampaignEligibility(currentReward.id));
+	const campaignEligibility = $derived(getCampaignEligibility(currentReward?.id ?? ''));
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
 	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
 	const networkBonusMultiplier = $derived(
