@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { earningCards } from '$env/earning-cards.env';
-	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import DefaultEarningOpportunityCard from '$lib/components/earning/DefaultEarningOpportunityCard.svelte';
 	import RewardsEarningOpportunityCard from '$lib/components/earning/RewardsEarningOpportunityCard.svelte';
 	import { earningData } from '$lib/derived/earning.derived';
-
-	let currentReward = $derived(rewardCampaigns[rewardCampaigns.length - 1]);
+	import { earningProviders } from '$lib/providers/earning.providers';
 </script>
 
 <div class="mt-5 flex grid grid-cols-1 gap-3 sm:grid-cols-2 md:flex-row">
-	{#each earningCards as card, i (`${card.id}-${i}`)}
-		{#if card.id === currentReward?.id}
-			<RewardsEarningOpportunityCard />
-		{:else if nonNullish($earningData[card.id])}
-			<DefaultEarningOpportunityCard cardData={card} cardFields={$earningData[card.id]} />
+	{#each earningProviders as provider, i (`${provider.id}-${i}`)}
+		{#if provider.type === 'reward'}
+			<RewardsEarningOpportunityCard card={provider.card} />
+		{:else if nonNullish($earningData[provider.id])}
+			<DefaultEarningOpportunityCard
+				cardData={provider.card}
+				cardFields={$earningData[provider.id]}
+			/>
 		{/if}
 	{/each}
 </div>
