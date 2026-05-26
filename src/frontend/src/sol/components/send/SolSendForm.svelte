@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import ScannedAddressNotice from '$lib/components/send/ScannedAddressNotice.svelte';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import type { ContactUi } from '$lib/types/contact';
@@ -43,6 +44,8 @@
 
 	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
 </script>
+
+<ScannedAddressNotice />
 
 <SendForm
 	{cancel}

@@ -47,6 +47,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { SCANNED_ADDRESS_NOTICE_CONTEXT_KEY } from '$lib/stores/scanned-address-notice.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
@@ -141,6 +142,8 @@
 			filterNetwork: lockedNetwork ?? $selectedNetwork
 		})
 	);
+
+	setContext<boolean>(SCANNED_ADDRESS_NOTICE_CONTEXT_KEY, nonNullish(initialModalData));
 
 	const reset = () => {
 		destination = '';
@@ -261,7 +264,6 @@
 					{lockedNetwork}
 					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 					{onSendToken}
-					showScannedAddressNotice={nonNullish(initialModalData)}
 				/>
 			{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
 				<SendNftsList
