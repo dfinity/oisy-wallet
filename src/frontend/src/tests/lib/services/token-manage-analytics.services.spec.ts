@@ -23,6 +23,7 @@ describe('token-manage-analytics.services', () => {
 				token: {
 					network: 'ICP',
 					address: 'sey3i-jyaaa-aaaap-quo3q-cai',
+					standard: 'icrc7',
 					symbol: 'CCC',
 					name: 'CCC NFT Platform'
 				}
@@ -34,6 +35,7 @@ describe('token-manage-analytics.services', () => {
 					event_modifier: 'import',
 					token_network: 'ICP',
 					token_address: 'sey3i-jyaaa-aaaap-quo3q-cai',
+					token_standard: 'icrc7',
 					token_symbol: 'CCC',
 					token_name: 'CCC NFT Platform',
 					source_location: 'manage_tokens',
