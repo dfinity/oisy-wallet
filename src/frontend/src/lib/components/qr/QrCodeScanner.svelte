@@ -36,6 +36,11 @@
 
 		if (result.status === 'success') {
 			onScan(result);
+
+			if (isMobile() && universalScanner) {
+				await scanQrCode();
+				return;
+			}
 		}
 
 		if (!cameraPermissionDenied) {
