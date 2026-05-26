@@ -13,6 +13,7 @@ import type {
 import { ScannerResults } from '$lib/types/scanner';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -319,6 +320,46 @@ describe('ScannerCode.svelte', () => {
 		});
 
 		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should call onNext with SOL_SEND result for a bare Solana address', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: mockSolAddress } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.SOL_SEND,
+				code: mockSolAddress
+			});
+		});
+
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should trim surrounding whitespace when forwarding a Solana address', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: `  ${mockSolAddress}  ` } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.SOL_SEND,
+				code: mockSolAddress
+			});
+		});
 	});
 
 	it('should not treat non-wc: URIs as WalletConnect', async () => {

@@ -10,6 +10,7 @@
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import ScannerModal from '$lib/components/scanner/ScannerModal.svelte';
+	import SendModal from '$lib/components/send/SendModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
@@ -35,6 +36,8 @@
 		modalReceive,
 		modalReceiveId,
 		modalPayDialogOpen,
+		modalSend,
+		modalSendData,
 		modalUniversalScannerOpen,
 		modalWalletConnectSessions
 	} from '$lib/derived/modal.derived';
@@ -71,6 +74,8 @@
 		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
 	{:else if $modalPayDialogOpen}
 		<PayDialog />
+	{:else if $modalSend && nonNullish($modalSendData)}
+		<SendModal isNftsPage={false} isTransactionsPage={false} />
 	{:else if $modalUniversalScannerOpen}
 		<ScannerModal />
 	{:else if $modalWalletConnectSessions}

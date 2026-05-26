@@ -29,6 +29,7 @@
 	import { ScannerResults } from '$lib/types/scanner';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import { isBareSolAddressCode } from '$sol/utils/sol-qr-code.utils';
 
 	interface Props {
 		onNext: (params: { results: ScannerResults; code?: string }) => void;
@@ -50,6 +51,11 @@
 	const processCode = async (code: string) => {
 		if (code.startsWith(WALLET_CONNECT_URI_PREFIX)) {
 			onNext({ results: ScannerResults.WALLET_CONNECT, code });
+			return;
+		}
+
+		if (isBareSolAddressCode(code)) {
+			onNext({ results: ScannerResults.SOL_SEND, code: code.trim() });
 			return;
 		}
 
