@@ -143,7 +143,7 @@ describe('icrc7.utils', () => {
 					[
 						'icrc7:image',
 						{
-							Text: 'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A3dafe45&owner_id=sey3i-jyaaa-aaaap-quo3q-cai'
+							Text: 'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A3dafe45&owner_id=ipchn-lqaaa-aaaam-qizkq-cai'
 						}
 					],
 					['icrc7:attributes', { Map: [['Background', { Text: 'Blue' }]] }]
@@ -152,7 +152,7 @@ describe('icrc7.utils', () => {
 				name: 'Token #50',
 				description: 'The test NFT',
 				imageUrl:
-					'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A3dafe45&owner_id=sey3i-jyaaa-aaaap-quo3q-cai',
+					'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A3dafe45&owner_id=ipchn-lqaaa-aaaam-qizkq-cai',
 				attributes: [{ traitType: 'Background', value: 'Blue' }]
 			});
 		});
@@ -187,7 +187,7 @@ describe('icrc7.utils', () => {
 					[
 						'imageUrl',
 						{
-							Text: 'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A6fc6a25f4d52e13a80b007aeac3641106587d1f331447ce506a9bb1afd399eeb&owner_id=sey3i-jyaaa-aaaap-quo3q-cai&project_id=019de6f2-675c-775e-9eda-2adf4341566c'
+							Text: 'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A6fc6a25f4d52e13a80b007aeac3641106587d1f331447ce506a9bb1afd399eeb&owner_id=ipchn-lqaaa-aaaam-qizkq-cai&project_id=019de6f2-675c-775e-9eda-2adf4341566c'
 						}
 					]
 				])
@@ -195,7 +195,7 @@ describe('icrc7.utils', () => {
 				name: 'The CEO',
 				description: '',
 				imageUrl:
-					'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A6fc6a25f4d52e13a80b007aeac3641106587d1f331447ce506a9bb1afd399eeb&owner_id=sey3i-jyaaa-aaaap-quo3q-cai&project_id=019de6f2-675c-775e-9eda-2adf4341566c',
+					'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A6fc6a25f4d52e13a80b007aeac3641106587d1f331447ce506a9bb1afd399eeb&owner_id=ipchn-lqaaa-aaaam-qizkq-cai&project_id=019de6f2-675c-775e-9eda-2adf4341566c',
 				attributes: [
 					{ traitType: 'tokenId', value: '1' },
 					{ traitType: 'edition', value: '#001' },
