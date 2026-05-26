@@ -78,9 +78,10 @@
 	let { isTransactionsPage, isNftsPage }: Props = $props();
 
 	const initialModalData = $modalSendData;
-	const lockedNetwork = nonNullish(initialModalData?.lockedNetworkId)
-		? $networks.find(({ id }) => id === initialModalData.lockedNetworkId)
-		: undefined;
+	const lockedNetworkId = initialModalData?.lockedNetworkId;
+	let lockedNetwork = $derived(
+		nonNullish(lockedNetworkId) ? $networks.find(({ id }) => id === lockedNetworkId) : undefined
+	);
 
 	let destination = $state(initialModalData?.destination ?? '');
 	let activeSendDestinationTab = $state<SendDestinationTab>('recentlyUsed');
