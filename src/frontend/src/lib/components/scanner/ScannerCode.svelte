@@ -29,7 +29,7 @@
 	import { ScannerResults } from '$lib/types/scanner';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
-	import { isBareSolAddressCode } from '$sol/utils/sol-qr-code.utils';
+	import { isSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {
 		onNext: (params: { results: ScannerResults; code?: string }) => void;
@@ -54,8 +54,9 @@
 			return;
 		}
 
-		if (isBareSolAddressCode(code)) {
-			onNext({ results: ScannerResults.SOL_SEND, code: code.trim() });
+		const trimmed = code.trim();
+		if (isSolAddress(trimmed)) {
+			onNext({ results: ScannerResults.SOL_SEND, code: trimmed });
 			return;
 		}
 
