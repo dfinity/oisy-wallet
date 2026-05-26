@@ -17,6 +17,7 @@ import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/open-crypto-pay.services', () => ({
 	processOpenCryptoPayCode: vi.fn(),
@@ -215,7 +216,7 @@ describe('ScannerCode.svelte', () => {
 	// history between tests but leaves the spy installed; restoreAllMocks at the
 	// end puts the original implementation back. Per-test return values are set
 	// via isMobileSpy.mockReturnValue(...) rather than re-spying.
-	let isMobileSpy: ReturnType<typeof vi.spyOn<typeof deviceUtils, 'isMobile'>>;
+	let isMobileSpy: MockInstance<typeof deviceUtils.isMobile>;
 
 	beforeAll(() => {
 		isMobileSpy = vi.spyOn(deviceUtils, 'isMobile');

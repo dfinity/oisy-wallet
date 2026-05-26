@@ -5,9 +5,10 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as deviceUtils from '$lib/utils/device.utils';
 import { fireEvent, render } from '@testing-library/svelte';
+import type { MockInstance } from 'vitest';
 
 describe('PwaBanner', () => {
-	let isPWAStandaloneSpy: ReturnType<typeof vi.spyOn<typeof deviceUtils, 'isPWAStandalone'>>;
+	let isPWAStandaloneSpy: MockInstance<typeof deviceUtils.isPWAStandalone>;
 
 	beforeAll(() => {
 		isPWAStandaloneSpy = vi.spyOn(deviceUtils, 'isPWAStandalone');
