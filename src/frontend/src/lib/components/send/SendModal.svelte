@@ -47,7 +47,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import { SCANNED_ADDRESS_NOTICE_CONTEXT_KEY } from '$lib/stores/scanned-address-notice.store';
+	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
@@ -143,7 +143,7 @@
 		})
 	);
 
-	setContext<boolean>(SCANNED_ADDRESS_NOTICE_CONTEXT_KEY, nonNullish(initialModalData));
+	setContext<boolean>(SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, nonNullish(initialModalData));
 
 	const reset = () => {
 		destination = '';

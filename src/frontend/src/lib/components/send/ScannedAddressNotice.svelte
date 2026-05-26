@@ -3,9 +3,9 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { SEND_SCANNED_ADDRESS_NOTICE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SCANNED_ADDRESS_NOTICE_CONTEXT_KEY } from '$lib/stores/scanned-address-notice.store';
+	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 
-	const show = getContext<boolean>(SCANNED_ADDRESS_NOTICE_CONTEXT_KEY) ?? false;
+	const show = getContext<boolean>(SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY) ?? false;
 </script>
 
 {#if show}

@@ -1,7 +1,7 @@
 import ScannedAddressNotice from '$lib/components/send/ScannedAddressNotice.svelte';
 import { SEND_SCANNED_ADDRESS_NOTICE } from '$lib/constants/test-ids.constants';
 import en from '$lib/i18n/en.json';
-import { SCANNED_ADDRESS_NOTICE_CONTEXT_KEY } from '$lib/stores/scanned-address-notice.store';
+import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 import { render } from '@testing-library/svelte';
 
 describe('ScannedAddressNotice', () => {
@@ -13,7 +13,7 @@ describe('ScannedAddressNotice', () => {
 
 	it('renders nothing when the context flag is false', () => {
 		const { queryByTestId } = render(ScannedAddressNotice, {
-			context: new Map<symbol, unknown>([[SCANNED_ADDRESS_NOTICE_CONTEXT_KEY, false]])
+			context: new Map<symbol, unknown>([[SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, false]])
 		});
 
 		expect(queryByTestId(SEND_SCANNED_ADDRESS_NOTICE)).not.toBeInTheDocument();
@@ -21,7 +21,7 @@ describe('ScannedAddressNotice', () => {
 
 	it('renders the warning box when the context flag is true', () => {
 		const { getByTestId, getByText } = render(ScannedAddressNotice, {
-			context: new Map<symbol, unknown>([[SCANNED_ADDRESS_NOTICE_CONTEXT_KEY, true]])
+			context: new Map<symbol, unknown>([[SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, true]])
 		});
 
 		expect(getByTestId(SEND_SCANNED_ADDRESS_NOTICE)).toBeInTheDocument();
