@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "2.0.8",
+	"version": "2.0.9",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -72,12 +72,12 @@
 	"dependencies": {
 		"@dfinity/gix-components": "^10.0.2",
 		"@dfinity/ic-pub-key": "^1.0.2",
-		"@dfinity/oisy-wallet-signer": "^4.0.0",
-		"@dfinity/utils": "^4.0.3",
+		"@dfinity/oisy-wallet-signer": "^6.0.0",
+		"@dfinity/utils": "~4.0.3",
 		"@dfinity/verifiable-credentials": "^1.2.0",
 		"@dfinity/zod-schemas": "^3.2.0",
 		"@icp-sdk/auth": "^6.2.0",
-		"@icp-sdk/canisters": "^3.0.0",
+		"@icp-sdk/canisters": "~3.1.0",
 		"@icp-sdk/core": "^4.2.1",
 		"@metamask/detect-provider": "^2.0.0",
 		"@plausible-analytics/tracker": "^0.4.4",
@@ -86,7 +86,7 @@
 		"@solana-program/system": "^0.12.0",
 		"@solana-program/token": "^0.13.0",
 		"@solana-program/token-2022": "^0.9.0",
-		"@solana/kit": "^6.0.1",
+		"@solana/kit": "^6.9.0",
 		"@velora-dex/sdk": "^9.3.3",
 		"barcode-detector": "^3.1.1",
 		"bech32": "^1.1.4",
@@ -143,7 +143,8 @@
 	"overrides": {
 		"cookie": "^0.7.0",
 		"@icp-sdk/core": "^4.2.1",
-		"@dfinity/utils": "^4.0.3"
+		"@icp-sdk/canisters": "~3.1.0",
+		"@dfinity/utils": "~4.0.3"
 	},
 	"engines": {
 		"node": ">=24",
