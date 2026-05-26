@@ -60,15 +60,14 @@
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdBTCRegtest,
-		isNetworkIdSolana,
 		isNetworkIdSOLMainnet,
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
+	import { shouldSkipDestinationStep } from '$lib/utils/send.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {
 		isTransactionsPage: boolean;
@@ -183,14 +182,11 @@
 			}
 		}
 
-		const skipDestination =
-			notEmptyString(destination) &&
-			isNetworkIdSolana(token.network.id) &&
-			!invalidSolAddress(destination);
+		const skip = shouldSkipDestinationStep({ destination, token });
 
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			goToStep(skipDestination ? WizardStepsSend.SEND : WizardStepsSend.DESTINATION);
+			goToStep(skip ? WizardStepsSend.SEND : WizardStepsSend.DESTINATION);
 		};
 
 		await loadTokenAndRun({ token, callback });
