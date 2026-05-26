@@ -957,7 +957,7 @@
 			"no_available_utxos": "Bạn sẽ không có UTXO khả dụng để thực hiện giao dịch này.",
 			"unknown_destination": "Bạn chưa tương tác với địa chỉ này trước đây. Vui lòng đảm bảo bạn biết người nhận.",
 			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>",
-			"scanned_address_only_destination": ""
+			"scanned_address_only_destination": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn chọn đúng token, nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Địa chỉ ví không hợp lệ",
