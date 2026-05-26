@@ -267,13 +267,14 @@ abstract class Homepage {
 	private async dismissModalBackdropIfPresent(): Promise<void> {
 		// Post-login RewardGuard can open WelcomeModal on a fresh identity, leaving
 		// a backdrop overlay that intercepts pointer events on the navigation menu
-		// button. Click the backdrop (its onClose closes the modal) before
-		// interacting with the nav drawer.
+		// button. The backdrop sits behind the modal wrapper so a normal click on
+		// it is intercepted by the dialog content — press Escape to trigger the
+		// Modal's own close handler.
 		const backdrop = this.#page.getByTestId('backdrop').filter({ visible: true });
 		if ((await backdrop.count()) === 0) {
 			return;
 		}
-		await backdrop.first().click();
+		await this.#page.keyboard.press('Escape');
 		await backdrop.first().waitFor({ state: 'hidden' });
 	}
 
