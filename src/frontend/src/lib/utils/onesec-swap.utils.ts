@@ -66,6 +66,7 @@ const getEvmAddressForNetwork = ({
 /**
  * Returns ICP ledger canister IDs of tokens supported by OneSec on the ICP side.
  */
+// TODO: enable all tokens back after the issue with EVM -> ICP swaps is fixed on the SDK side
 export const oneSecIcpSupportedTokens = (): Promise<Set<string>> =>
 	Promise.resolve(
 		new Set(
