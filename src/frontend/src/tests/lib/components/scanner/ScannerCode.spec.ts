@@ -211,16 +211,30 @@ describe('ScannerCode.svelte', () => {
 		await fireEvent.click(enterManuallyButton);
 	};
 
+	// Create the isMobile spy once for the suite. clearAllMocks resets its call
+	// history between tests but leaves the spy installed; restoreAllMocks at the
+	// end puts the original implementation back. Per-test return values are set
+	// via isMobileSpy.mockReturnValue(...) rather than re-spying.
+	let isMobileSpy: ReturnType<typeof vi.spyOn<typeof deviceUtils, 'isMobile'>>;
+
+	beforeAll(() => {
+		isMobileSpy = vi.spyOn(deviceUtils, 'isMobile');
+	});
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(deviceUtils, 'isMobile').mockReturnValue(true);
+		isMobileSpy.mockReturnValue(true);
 		// Default to a narrow viewport so the mobile bottom-sheet branch renders.
 		// Tests covering the wide-viewport-mobile case override this explicitly.
 		screensStore.set('xs');
 
 		vi.mocked(openCryptoPayUtils.prepareBasePayableTokens).mockReturnValue(mockBaseTokens);
 		vi.mocked(openCryptoPayServices.calculateTokensWithFees).mockResolvedValue(mockTokensWithFees);
+	});
+
+	afterAll(() => {
+		vi.restoreAllMocks();
 	});
 
 	it('should render QR scanner', () => {
@@ -237,7 +251,7 @@ describe('ScannerCode.svelte', () => {
 
 	describe('layout gate', () => {
 		it('should render the inline input (not the bottom-sheet branch) on desktop', () => {
-			vi.spyOn(deviceUtils, 'isMobile').mockReturnValue(false);
+			isMobileSpy.mockReturnValue(false);
 
 			renderWithContext();
 
