@@ -32,7 +32,9 @@
 		solAddressDevnetNotLoaded,
 		solAddressMainnetNotLoaded
 	} from '$lib/derived/address.derived';
+	import { modalSendData } from '$lib/derived/modal.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { networks } from '$lib/derived/networks.derived';
 	import { pageNft } from '$lib/derived/page-nft.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -58,6 +60,7 @@
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdBTCRegtest,
+		isNetworkIdSolana,
 		isNetworkIdSOLMainnet,
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal
@@ -65,6 +68,7 @@
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {
 		isTransactionsPage: boolean;
@@ -73,7 +77,12 @@
 
 	let { isTransactionsPage, isNftsPage }: Props = $props();
 
-	let destination = $state('');
+	const initialModalData = $modalSendData;
+	const lockedNetwork = nonNullish(initialModalData?.lockedNetworkId)
+		? $networks.find(({ id }) => id === initialModalData.lockedNetworkId)
+		: undefined;
+
+	let destination = $state(initialModalData?.destination ?? '');
 	let activeSendDestinationTab = $state<SendDestinationTab>('recentlyUsed');
 	let selectedContact = $state<ContactUi | undefined>();
 	let amount = $state<number | undefined>();
@@ -127,7 +136,7 @@
 		initModalTokensListContext({
 			tokens: $enabledTokens,
 			filterZeroBalance: true,
-			filterNetwork: $selectedNetwork
+			filterNetwork: lockedNetwork ?? $selectedNetwork
 		})
 	);
 
@@ -173,9 +182,14 @@
 			}
 		}
 
+		const skipDestination =
+			notEmptyString(destination) &&
+			isNetworkIdSolana(token.network.id) &&
+			!invalidSolAddress(destination);
+
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			goToStep(WizardStepsSend.DESTINATION);
+			goToStep(skipDestination ? WizardStepsSend.SEND : WizardStepsSend.DESTINATION);
 		};
 
 		await loadTokenAndRun({ token, callback });
@@ -245,6 +259,7 @@
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 				<SendTokensList
+					{lockedNetwork}
 					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 					{onSendToken}
 				/>

@@ -5,14 +5,16 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 
 	interface Props {
 		onSendToken: (token: Token) => void;
 		onSelectNetworkFilter: () => void;
+		lockedNetwork?: Network;
 	}
 
-	let { onSendToken, onSelectNetworkFilter }: Props = $props();
+	let { onSendToken, onSelectNetworkFilter, lockedNetwork }: Props = $props();
 
 	const onTokenButtonClick = (token: Token) => {
 		onSendToken(token);
@@ -20,7 +22,7 @@
 </script>
 
 <ModalTokensList
-	networkSelectorViewOnly={nonNullish($selectedNetwork)}
+	networkSelectorViewOnly={nonNullish(lockedNetwork) || nonNullish($selectedNetwork)}
 	{onSelectNetworkFilter}
 	{onTokenButtonClick}
 >
