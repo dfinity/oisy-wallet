@@ -5,11 +5,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 
+	interface Props {
+		styleClass?: string;
+	}
+
+	let { styleClass }: Props = $props();
+
 	const show = getContext<boolean>(SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY) ?? false;
 </script>
 
 {#if show}
-	<MessageBox level="warning" testId={SEND_SCANNED_PLAIN_ADDRESS_NOTICE}>
+	<MessageBox level="warning" {styleClass} testId={SEND_SCANNED_PLAIN_ADDRESS_NOTICE}>
 		{$i18n.send.info.scanned_address_only_destination}
 	</MessageBox>
 {/if}

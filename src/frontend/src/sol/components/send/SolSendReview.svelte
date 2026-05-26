@@ -56,7 +56,7 @@
 
 <SendReview {amount} {destination} disabled={disableSend} {onBack} {onSend} {selectedContact}>
 	{#snippet topBanner()}
-		<ScannedPlainAddressNotice />
+		<ScannedPlainAddressNotice styleClass="mb-6!" />
 	{/snippet}
 
 	{#snippet network()}

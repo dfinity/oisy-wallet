@@ -55,7 +55,7 @@
 	{selectedContact}
 >
 	{#snippet topBanner()}
-		<ScannedPlainAddressNotice />
+		<ScannedPlainAddressNotice styleClass="mb-6!" />
 	{/snippet}
 
 	{#snippet sendAmount()}
