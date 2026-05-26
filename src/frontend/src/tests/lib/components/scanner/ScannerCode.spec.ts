@@ -11,6 +11,7 @@ import type {
 	PayableTokenWithFees
 } from '$lib/types/open-crypto-pay';
 import { ScannerResults } from '$lib/types/scanner';
+import * as deviceUtils from '$lib/utils/device.utils';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
@@ -211,6 +212,8 @@ describe('ScannerCode.svelte', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.spyOn(deviceUtils, 'isMobile').mockReturnValue(true);
 
 		vi.mocked(openCryptoPayUtils.prepareBasePayableTokens).mockReturnValue(mockBaseTokens);
 		vi.mocked(openCryptoPayServices.calculateTokensWithFees).mockResolvedValue(mockTokensWithFees);

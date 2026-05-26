@@ -27,6 +27,7 @@
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import type { QrStatus } from '$lib/types/qr-code';
 	import { ScannerResults } from '$lib/types/scanner';
+	import { isMobile } from '$lib/utils/device.utils';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
 
@@ -112,7 +113,7 @@
 <div class="relative flex w-full flex-col bg-tertiary">
 	<QrCodeScanner onScan={handleScan} universalScanner />
 
-	<Responsive up="md">
+	{#if !isMobile()}
 		<ScannerCodeInput
 			name="uri"
 			{error}
@@ -125,9 +126,7 @@
 				{$i18n.core.text.continue}
 			</Button>
 		</ScannerCodeInput>
-	</Responsive>
-
-	<Responsive down="sm">
+	{:else}
 		<BottomSheet contentClass="min-h-[10vh]" bind:visible={openBottomSheet}>
 			{#snippet content()}
 				<ScannerCodeInput
@@ -160,7 +159,7 @@
 				<IconChain />
 			</Button>
 		</div>
-	</Responsive>
+	{/if}
 
 	<Responsive up="md">
 		<ScannerCodeInfoButton onclick={onOpenInfo} />
