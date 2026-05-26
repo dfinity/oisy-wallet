@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
@@ -19,7 +19,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
-	import { getNftDisplayId, getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
+	import { getNftDisplayId, getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 
 	interface Props {
 		nft: Nft;
@@ -44,8 +44,6 @@
 		source = 'default',
 		withCollectionLabel = false
 	}: Props = $props();
-
-	const nftDisplayName = $derived(getNftDisplayName(nft));
 
 	const onClick = () => {
 		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
@@ -136,12 +134,13 @@
 
 	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
 		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
-			{withCollectionLabel ? nft.collection.name : nftDisplayName}
+			{withCollectionLabel || isNullish(nft.name) ? nft.collection.name : nft.name}
 		</span>
-		{#if withCollectionLabel}
-			<span class="truncate text-xs" class:text-tertiary={!disabled}>
-				{nonNullish(nft.name) ? nftDisplayName : `#${getNftDisplayId(nft)}`}
-			</span>
-		{/if}
+		<span class="truncate text-xs" class:text-tertiary={!disabled}>
+			#{getNftDisplayId(nft)}
+			{#if withCollectionLabel && nonNullish(nft.name)}
+				&ndash; {nft.name}
+			{/if}
+		</span>
 	</span>
 </button>
