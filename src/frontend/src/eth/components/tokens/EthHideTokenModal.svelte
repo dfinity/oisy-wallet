@@ -49,6 +49,8 @@
 			metadata: {
 				tokenId: `${selectedToken.id.description}`,
 				tokenSymbol: selectedToken.symbol,
+				tokenName: selectedToken.name,
+				tokenStandard: selectedToken.standard.code,
 				address: selectedToken.address,
 				networkId: `${selectedToken.network.id.description}`,
 				source: HIDE_TOKEN_MODAL_ROUTE
