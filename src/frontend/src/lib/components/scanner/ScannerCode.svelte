@@ -25,10 +25,12 @@
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import { screensStore } from '$lib/stores/screens.store';
 	import type { QrStatus } from '$lib/types/qr-code';
 	import { ScannerResults } from '$lib/types/scanner';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
+	import { AVAILABLE_SCREENS, filterScreens, MIN_SCREEN } from '$lib/utils/screens.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
 
 	interface Props {
@@ -45,6 +47,18 @@
 	let uri = $state('');
 	let error = $state('');
 	let isEmptyUri = $derived(isEmptyString(uri));
+
+	// The bottom-sheet branch requires both a mobile device (continuous-scan ergonomics)
+	// and a viewport below `lg` (1024px) — gix-components' BottomSheet drops its sticky
+	// `position: fixed` styling at >=1024px, so a wide-viewport mobile (dev-tools
+	// emulation, landscape phablets, some Android tablets) would render the sheet
+	// inline in the document flow and the "Enter manually" trigger would appear broken.
+	const MOBILE_LAYOUT_SCREENS = filterScreens({
+		availableScreens: AVAILABLE_SCREENS,
+		up: MIN_SCREEN,
+		down: 'lg'
+	});
+	let isMobileLayout = $derived(isMobile() && MOBILE_LAYOUT_SCREENS.includes($screensStore));
 
 	const { setData, setAvailableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
@@ -113,7 +127,7 @@
 <div class="relative flex w-full flex-col bg-tertiary">
 	<QrCodeScanner onScan={handleScan} universalScanner />
 
-	{#if !isMobile()}
+	{#if !isMobileLayout}
 		<ScannerCodeInput
 			name="uri"
 			{error}

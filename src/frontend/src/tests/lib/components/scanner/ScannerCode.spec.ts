@@ -5,6 +5,7 @@ import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.c
 import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
+import { screensStore } from '$lib/stores/screens.store';
 import type {
 	OpenCryptoPayResponse,
 	PayableToken,
@@ -214,6 +215,9 @@ describe('ScannerCode.svelte', () => {
 		vi.clearAllMocks();
 
 		vi.spyOn(deviceUtils, 'isMobile').mockReturnValue(true);
+		// Default to a narrow viewport so the mobile bottom-sheet branch renders.
+		// Tests covering the wide-viewport-mobile case override this explicitly.
+		screensStore.set('xs');
 
 		vi.mocked(openCryptoPayUtils.prepareBasePayableTokens).mockReturnValue(mockBaseTokens);
 		vi.mocked(openCryptoPayServices.calculateTokensWithFees).mockResolvedValue(mockTokensWithFees);
@@ -229,6 +233,29 @@ describe('ScannerCode.svelte', () => {
 		renderWithContext();
 
 		expect(screen.getByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON)).toBeInTheDocument();
+	});
+
+	describe('layout gate', () => {
+		it('should render the inline input (not the bottom-sheet branch) on desktop', () => {
+			vi.spyOn(deviceUtils, 'isMobile').mockReturnValue(false);
+
+			renderWithContext();
+
+			expect(screen.queryByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON)).not.toBeInTheDocument();
+			expect(screen.getByPlaceholderText(en.scanner.text.enter_or_paste_code)).toBeInTheDocument();
+		});
+
+		it('should render the inline input on a mobile device with a viewport >= lg', () => {
+			// e.g. dev-tools mobile emulation at 1280px, or a landscape phablet -
+			// gix-components' BottomSheet drops its `position: fixed` styling at >=1024px,
+			// so we must fall back to the inline-input layout even when isMobile() is true.
+			screensStore.set('xl');
+
+			renderWithContext();
+
+			expect(screen.queryByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON)).not.toBeInTheDocument();
+			expect(screen.getByPlaceholderText(en.scanner.text.enter_or_paste_code)).toBeInTheDocument();
+		});
 	});
 
 	it('should show input after clicking enter manually', async () => {
