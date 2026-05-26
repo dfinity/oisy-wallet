@@ -1,6 +1,10 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import {
+	allHarvestAutopilots,
+	allHarvestAutopilotsMaxApy,
+	allHarvestAutopilotTokens,
 	disabledHarvestAutopilotTokens,
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots,
@@ -9,7 +13,10 @@ import {
 	harvestAutopilotsUsdBalance,
 	harvestAutopilotTokens
 } from '$eth/derived/harvest-autopilots.derived';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
+import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
+import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 import { harvestVaultsStore } from '$lib/stores/harvest.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -159,6 +166,90 @@ describe('harvest-autopilots.derived', () => {
 			mockErc4626TokensStore([mockDisabledHarvestToken]);
 
 			expect(get(enabledHarvestAutopilotsUsdBalance)).toBe(0);
+		});
+	});
+
+	describe('all-harvest-autopilots (network-independent)', () => {
+		const expectedHarvestTokens = ERC4626_TOKENS.filter((token) => isTokenHarvestAutopilot(token));
+
+		beforeEach(() => {
+			harvestVaultsStore.reset();
+		});
+
+		describe('allHarvestAutopilotTokens', () => {
+			it('should include all harvest autopilot tokens from the static env regardless of enabled networks', () => {
+				const result = get(allHarvestAutopilotTokens);
+
+				expect(result).toHaveLength(expectedHarvestTokens.length);
+				expect(result.map(({ address }) => address.toLowerCase())).toEqual(
+					expect.arrayContaining(expectedHarvestTokens.map(({ address }) => address.toLowerCase()))
+				);
+			});
+
+			it('should return tokens even when the erc4626 token stores are empty (no ETH/EVM network enabled)', () => {
+				erc4626DefaultTokensStore.reset();
+				erc4626CustomTokensStore.resetAll();
+
+				expect(get(allHarvestAutopilotTokens)).toHaveLength(expectedHarvestTokens.length);
+			});
+		});
+
+		describe('allHarvestAutopilots', () => {
+			it('should include vaults regardless of enabled networks', () => {
+				expect(get(allHarvestAutopilots)).toHaveLength(expectedHarvestTokens.length);
+			});
+
+			it('should include vaults even when the erc4626 token stores are empty (no ETH/EVM network enabled)', () => {
+				erc4626DefaultTokensStore.reset();
+				erc4626CustomTokensStore.resetAll();
+
+				expect(get(allHarvestAutopilots)).toHaveLength(expectedHarvestTokens.length);
+			});
+		});
+
+		describe('allHarvestAutopilotsMaxApy', () => {
+			it('should return the max APY across all vaults', () => {
+				const [first, second] = expectedHarvestTokens;
+
+				harvestVaultsStore.set([
+					{
+						id: 'vault-1',
+						vaultAddress: first.address,
+						estimatedApy: '5.5',
+						totalValueLocked: '1000000'
+					},
+					{
+						id: 'vault-2',
+						vaultAddress: second.address,
+						estimatedApy: '9.25',
+						totalValueLocked: '2000000'
+					}
+				]);
+
+				expect(get(allHarvestAutopilotsMaxApy)).toBe('9.25');
+			});
+
+			it('should return the max APY even when the erc4626 token stores are empty (no ETH/EVM network enabled)', () => {
+				erc4626DefaultTokensStore.reset();
+				erc4626CustomTokensStore.resetAll();
+
+				const [first] = expectedHarvestTokens;
+
+				harvestVaultsStore.set([
+					{
+						id: 'vault-1',
+						vaultAddress: first.address,
+						estimatedApy: '7.75',
+						totalValueLocked: '1000000'
+					}
+				]);
+
+				expect(get(allHarvestAutopilotsMaxApy)).toBe('7.75');
+			});
+
+			it('should return "0" when the vault store is empty', () => {
+				expect(get(allHarvestAutopilotsMaxApy)).toBe('0');
+			});
 		});
 	});
 });

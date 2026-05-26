@@ -1,3 +1,4 @@
+import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
@@ -6,9 +7,9 @@ import { stakeBalances } from '$lib/derived/stake.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { harvestVaultsStore } from '$lib/stores/harvest.store';
 import type { Vault } from '$lib/types/vaults';
-import { mapTokenUi } from '$lib/utils/token.utils';
+import { mapDefaultTokenToToggleable, mapTokenUi } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
-import { derived, type Readable } from 'svelte/store';
+import { derived, readable, type Readable } from 'svelte/store';
 
 export const harvestAutopilotTokens: Readable<Erc4626CustomToken[]> = derived(
 	[erc4626Tokens],
@@ -74,5 +75,39 @@ export const enabledHarvestAutopilotsUsdBalance: Readable<number> = derived(
 			(acc, { token: { usdBalance, enabled } }) =>
 				nonNullish(usdBalance) && enabled ? acc + usdBalance : acc,
 			0
+		)
+);
+
+export const allHarvestAutopilotTokens: Readable<Erc4626CustomToken[]> = readable(
+	ERC4626_TOKENS.filter((token) => isTokenHarvestAutopilot(token)).map((defaultToken) =>
+		mapDefaultTokenToToggleable({ defaultToken, customToken: undefined })
+	)
+);
+
+export const allHarvestAutopilots: Readable<Vault[]> = derived(
+	[allHarvestAutopilotTokens, balancesStore, stakeBalances, exchanges, harvestVaultsStore],
+	([$allHarvestAutopilotTokens, $balances, $stakeBalances, $exchanges, $harvestVaultsStore]) =>
+		$allHarvestAutopilotTokens.map((token) => {
+			const tokenUi = mapTokenUi({
+				token,
+				$balances,
+				$stakeBalances,
+				$exchanges
+			});
+
+			return {
+				token: tokenUi,
+				apy: $harvestVaultsStore[tokenUi.address.toLowerCase()]?.estimatedApy,
+				totalValueLocked: $harvestVaultsStore[tokenUi.address.toLowerCase()]?.totalValueLocked
+			};
+		})
+);
+
+export const allHarvestAutopilotsMaxApy: Readable<string> = derived(
+	[allHarvestAutopilots],
+	([$allHarvestAutopilots]) =>
+		$allHarvestAutopilots.reduce<string>(
+			(acc, { apy }) => (nonNullish(apy) ? `${Math.max(Number(acc), Number(apy))}` : acc),
+			'0'
 		)
 );
