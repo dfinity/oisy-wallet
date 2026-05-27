@@ -5,26 +5,5 @@
 			"symbol": "CCC",
 			"name": "CCC NFT Platform"
 		}
-	},
-	{
-		"canisterId": "sey3i-jyaaa-aaaap-quo3q-cai",
-		"metadata": {
-			"symbol": "CCC - depr.",
-			"name": "CCC NFT Platform (sey3i-jyaaa-aaaap-quo3q-cai) - DEPRECATED"
-		}
-	},
-	{
-		"canisterId": "xea2t-daaaa-aaaaj-qnp2a-cai",
-		"metadata": {
-			"symbol": "CSA",
-			"name": "Cosmicrafts Avatars"
-		}
-	},
-	{
-		"canisterId": "ghxmp-xiaaa-aaaao-ba4sq-cai",
-		"metadata": {
-			"symbol": "ICSPICY",
-			"name": "IC SPICY"
-		}
 	}
 ]
