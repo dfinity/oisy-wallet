@@ -15,6 +15,7 @@ import { ScannerResults } from '$lib/types/scanner';
 import * as deviceUtils from '$lib/utils/device.utils';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -364,6 +365,96 @@ describe('ScannerCode.svelte', () => {
 		});
 
 		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should call onNext with SOL_SEND result for a bare Solana address', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: mockSolAddress } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.SOL_SEND,
+				code: mockSolAddress
+			});
+		});
+
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should trim surrounding whitespace when forwarding a Solana address', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: `  ${mockSolAddress}  ` } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.SOL_SEND,
+				code: mockSolAddress
+			});
+		});
+	});
+
+	it('should not dispatch SOL_SEND for a solana: URI (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const solanaUri = `solana:${mockSolAddress}`;
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: solanaUri } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				solanaUri
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.SOL_SEND })
+		);
+	});
+
+	it('should not dispatch SOL_SEND for a bare address with query parameters (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const codeWithQuery = `${mockSolAddress}?amount=1`;
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: codeWithQuery } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				codeWithQuery
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.SOL_SEND })
+		);
 	});
 
 	it('should not treat non-wc: URIs as WalletConnect', async () => {
