@@ -69,28 +69,49 @@ fn native_token_ids() -> Vec<StoredTokenId> {
 }
 
 thread_local! {
-    /// Set to `true` while a `refresh_exchange_rates` future is awaiting
-    /// outcalls. Used by the timer to skip a tick when the previous refresh
-    /// hasn't finished — otherwise a slow refresh (e.g. transient provider
-    /// latency) would let subsequent ticks pile up concurrent in-flight
-    /// refreshes, multiplying outcall load instead of catching up.
+    /// Set to `true` while *any* provider refresh (timer-driven or
+    /// caller-triggered background refresh from `get_exchange_rates`) is
+    /// awaiting outcalls. Both call sites cooperate via this single flag so
+    /// they don't duplicate outcalls for the same tokens — if the timer is
+    /// refreshing, a concurrent on-demand call is a no-op (the timer is
+    /// already fetching the superset); if an on-demand refresh is in
+    /// flight, the next timer tick is a no-op until it completes.
     static REFRESH_IN_FLIGHT: Cell<bool> = const { Cell::new(false) };
 }
 
-/// Wraps [`refresh_exchange_rates`] with an in-flight guard so concurrent
-/// invocations (e.g. overlapping timer ticks) become no-ops rather than
+/// Tries to set [`REFRESH_IN_FLIGHT`]; returns `true` if the caller acquired
+/// the lock, `false` if a refresh was already in flight. Callers that
+/// acquire the lock are responsible for calling [`release_refresh_lock`] in
+/// every completion path.
+pub(crate) fn try_acquire_refresh_lock() -> bool {
+    REFRESH_IN_FLIGHT.with(|f| {
+        if f.get() {
+            false
+        } else {
+            f.set(true);
+            true
+        }
+    })
+}
+
+/// Clears [`REFRESH_IN_FLIGHT`]. Must only be called by the holder of the
+/// lock (i.e. after a successful [`try_acquire_refresh_lock`]).
+pub(crate) fn release_refresh_lock() {
+    REFRESH_IN_FLIGHT.with(|f| f.set(false));
+}
+
+/// Wraps [`refresh_exchange_rates`] with the in-flight guard so concurrent
+/// timer invocations (e.g. overlapping ticks) become no-ops rather than
 /// starting a parallel refresh.
 async fn refresh_exchange_rates_guarded(source: &'static str) {
-    if REFRESH_IN_FLIGHT.with(Cell::get) {
+    if !try_acquire_refresh_lock() {
         ic_cdk::println!("Exchange rate {source} skipped: previous refresh still in flight");
         return;
     }
 
-    REFRESH_IN_FLIGHT.with(|f| f.set(true));
-
     let outcome = refresh_exchange_rates().await;
 
-    REFRESH_IN_FLIGHT.with(|f| f.set(false));
+    release_refresh_lock();
 
     if let Err(err) = outcome {
         ic_cdk::println!("Exchange rate {source} failed: {err:?}");
