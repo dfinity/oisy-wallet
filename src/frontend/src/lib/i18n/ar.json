@@ -1266,6 +1266,7 @@
 			"hide_asset_types": "",
 			"asset_type": "",
 			"asset_type_all": "",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "",
 			"no_tokens_for_asset_type_zero_tokens": "",
 			"no_tokens_for_asset_type_description": ""

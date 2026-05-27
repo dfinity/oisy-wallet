@@ -1266,6 +1266,7 @@
 			"hide_asset_types": "隐藏资产类型",
 			"asset_type": "$oisy_name 中的资产类型",
 			"asset_type_all": "所有资产类型",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "您的钱包中没有 $asset_type",
 			"no_tokens_for_asset_type_zero_tokens": "所选网络中没有 $asset_type",
 			"no_tokens_for_asset_type_description": "从 <strong>$count 个支持的代币</strong>中选择，自定义您的投资组合视图。"

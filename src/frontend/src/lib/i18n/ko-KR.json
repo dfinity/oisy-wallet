@@ -1266,6 +1266,7 @@
 			"hide_asset_types": "자산 유형 숨기기",
 			"asset_type": "$oisy_name의 자산 유형",
 			"asset_type_all": "모든 자산 유형",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "지갑에 $asset_type 자산이 없습니다",
 			"no_tokens_for_asset_type_zero_tokens": "선택한 네트워크에 $asset_type이(가) 없습니다",
 			"no_tokens_for_asset_type_description": "<strong>$count개의 지원 토큰</strong> 중에서 선택하여 포트폴리오 보기를 맞춤 설정하세요."

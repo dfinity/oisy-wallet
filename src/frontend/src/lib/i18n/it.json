@@ -1266,6 +1266,7 @@
 			"hide_asset_types": "Nascondi tipi di asset",
 			"asset_type": "Tipo di asset in $oisy_name",
 			"asset_type_all": "Tutti i tipi di asset",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "Non ci sono $asset_type nel tuo portafoglio",
 			"no_tokens_for_asset_type_zero_tokens": "Non ci sono $asset_type nella rete selezionata",
 			"no_tokens_for_asset_type_description": "Scegli tra <strong>$count token supportati</strong> per personalizzare la visualizzazione del tuo portafoglio."

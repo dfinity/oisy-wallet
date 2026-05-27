@@ -1266,6 +1266,7 @@
 			"hide_asset_types": "Ocultar tipos de activos",
 			"asset_type": "Tipo de activo en $oisy_name",
 			"asset_type_all": "Todos los tipos de activos",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "No hay $asset_type en tu cartera",
 			"no_tokens_for_asset_type_zero_tokens": "No hay $asset_type en la red seleccionada",
 			"no_tokens_for_asset_type_description": "Elige entre <strong>$count tokens compatibles</strong> para personalizar tu vista de cartera."
