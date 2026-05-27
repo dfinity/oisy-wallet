@@ -47,65 +47,83 @@ const SENTINEL_START = '<!-- AUTO-GENERATED:agent-rules:start -->';
 const SENTINEL_END = '<!-- AUTO-GENERATED:agent-rules:end -->';
 const BLOCK_START_RE = /<!--\s*agent-rules:start\s+id="([^"]+)"\s*-->/g;
 const BLOCK_END_RE = /<!--\s*agent-rules:end(?:\s+id="[^"]+")?\s*-->/;
+const FENCE_RE = /^(\s*)(`{3,}|~{3,})/;
+const FENCE_CLOSE_RE = /^\s*(`{3,}|~{3,})\s*$/;
 
-async function walk(dir) {
+const walk = async (dir) => {
 	const out = [];
 	for (const entry of await readdir(dir, { withFileTypes: true })) {
 		const p = join(dir, entry.name);
-		if (entry.isDirectory()) out.push(...(await walk(p)));
-		else if (entry.isFile() && entry.name.endsWith('.md')) out.push(p);
+		if (entry.isDirectory()) {
+			out.push(...(await walk(p)));
+		} else if (entry.isFile() && entry.name.endsWith('.md')) {
+			out.push(p);
+		}
 	}
 	return out;
-}
+};
 
-async function collectSourceFiles() {
-	const files = [];
-	for (const s of SOURCES) {
-		const abs = join(REPO_ROOT, s);
-		let info;
-		try {
-			info = await stat(abs);
-		} catch {
-			continue;
-		}
-		if (info.isDirectory()) files.push(...(await walk(abs)));
-		else if (info.isFile() && abs.endsWith('.md')) files.push(abs);
+const safeStat = async (abs) => {
+	try {
+		return await stat(abs);
+	} catch {
+		return null;
 	}
-	return files;
-}
+};
 
-function stripFencedCode(text) {
-	// Blank out fenced code blocks (``` … ``` and ~~~ … ~~~) so a documentation
-	// example of the marker syntax inside a fence is not treated as a real
-	// block. Lines are blanked individually so byte offsets line up with the
-	// original text.
+const collectSourceFiles = async () => {
+	const results = await Promise.all(
+		SOURCES.map(async (s) => {
+			const abs = join(REPO_ROOT, s);
+			const info = await safeStat(abs);
+			if (info === null) {
+				return [];
+			}
+			if (info.isDirectory()) {
+				return walk(abs);
+			}
+			if (info.isFile() && abs.endsWith('.md')) {
+				return [abs];
+			}
+			return [];
+		})
+	);
+	return results.flat();
+};
+
+// Blank out fenced code blocks (``` … ``` and ~~~ … ~~~) so a documentation
+// example of the marker syntax inside a fence is not treated as a real block.
+// Lines are blanked individually so byte offsets line up with the original text.
+const stripFencedCode = (text) => {
 	const lines = text.split('\n');
 	let openFence = null;
 	for (let i = 0; i < lines.length; i++) {
-		const fenceMatch = lines[i].match(/^(\s*)(`{3,}|~{3,})/);
+		const fenceMatch = lines[i].match(FENCE_RE);
+		const [fenceChar] = fenceMatch ? fenceMatch[2] : [null];
 		if (openFence === null) {
 			if (fenceMatch) {
-				openFence = fenceMatch[2][0];
+				openFence = fenceChar;
 				lines[i] = ''.padEnd(lines[i].length);
 			}
 		} else {
-			const isClose =
-				fenceMatch && fenceMatch[2][0] === openFence && /^\s*(`{3,}|~{3,})\s*$/.test(lines[i]);
+			const isClose = fenceChar === openFence && FENCE_CLOSE_RE.test(lines[i]);
 			lines[i] = ''.padEnd(lines[i].length);
-			if (isClose) openFence = null;
+			if (isClose) {
+				openFence = null;
+			}
 		}
 	}
 	return lines.join('\n');
-}
+};
 
-function extractBlocks(text, sourcePath) {
+const extractBlocks = ({ text, sourcePath }) => {
 	const scanText = stripFencedCode(text);
 	const blocks = [];
 	BLOCK_START_RE.lastIndex = 0;
-	let match;
-	while ((match = BLOCK_START_RE.exec(scanText)) !== null) {
-		const id = match[1];
-		const afterOpen = match.index + match[0].length;
+	let match = BLOCK_START_RE.exec(scanText);
+	while (match !== null) {
+		const [openTag, id] = match;
+		const afterOpen = match.index + openTag.length;
 		const rest = scanText.slice(afterOpen);
 		const endMatch = rest.match(BLOCK_END_RE);
 		if (!endMatch) {
@@ -113,20 +131,19 @@ function extractBlocks(text, sourcePath) {
 		}
 		// Pull the *original* (un-stripped) content slice so code samples inside
 		// a real block are preserved verbatim.
-		const contentStart = afterOpen;
-		const contentEnd = afterOpen + endMatch.index;
-		const raw = text.slice(contentStart, contentEnd);
+		const raw = text.slice(afterOpen, afterOpen + endMatch.index);
 		blocks.push({ id, source: sourcePath, content: raw.trim() });
+		match = BLOCK_START_RE.exec(scanText);
 	}
 	return blocks;
-}
+};
 
-async function buildBlockMap() {
+const buildBlockMap = async () => {
 	const files = await collectSourceFiles();
 	const map = new Map();
 	for (const f of files) {
 		const text = await readFile(f, 'utf8');
-		for (const b of extractBlocks(text, relative(REPO_ROOT, f))) {
+		for (const b of extractBlocks({ text, sourcePath: relative(REPO_ROOT, f) })) {
 			if (map.has(b.id)) {
 				const existing = map.get(b.id);
 				throw new Error(
@@ -137,9 +154,9 @@ async function buildBlockMap() {
 		}
 	}
 	return map;
-}
+};
 
-function renderSection(destination, blockMap) {
+const renderSection = ({ destination, blockMap }) => {
 	const lines = [SENTINEL_START, '', `## ${destination.heading}`, '', destination.intro, ''];
 	for (const id of destination.blockIds) {
 		const b = blockMap.get(id);
@@ -150,9 +167,9 @@ function renderSection(destination, blockMap) {
 	}
 	lines.push(SENTINEL_END);
 	return lines.join('\n');
-}
+};
 
-function spliceSection(current, newSection, destPath) {
+const spliceSection = ({ current, newSection, destPath }) => {
 	const startIdx = current.indexOf(SENTINEL_START);
 	const endIdx = current.indexOf(SENTINEL_END);
 	if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
@@ -164,23 +181,24 @@ function spliceSection(current, newSection, destPath) {
 	const before = current.slice(0, startIdx);
 	const after = current.slice(endIdx + SENTINEL_END.length);
 	return before + newSection + after;
-}
+};
 
-async function main() {
+const main = async () => {
 	const check = process.argv.includes('--check');
 	const blockMap = await buildBlockMap();
 	const drift = [];
 	for (const dest of DESTINATIONS) {
 		const abs = join(REPO_ROOT, dest.path);
 		const current = await readFile(abs, 'utf8');
-		const section = renderSection(dest, blockMap);
-		const next = spliceSection(current, section, dest.path);
-		if (next === current) continue;
-		if (check) {
-			drift.push(dest.path);
-		} else {
-			await writeFile(abs, next);
-			console.log(`updated ${dest.path}`);
+		const newSection = renderSection({ destination: dest, blockMap });
+		const next = spliceSection({ current, newSection, destPath: dest.path });
+		if (next !== current) {
+			if (check) {
+				drift.push(dest.path);
+			} else {
+				await writeFile(abs, next);
+				console.log(`updated ${dest.path}`);
+			}
 		}
 	}
 	if (check && drift.length > 0) {
@@ -190,7 +208,7 @@ async function main() {
 		);
 		process.exit(1);
 	}
-}
+};
 
 main().catch((err) => {
 	console.error(err.message ?? err);
