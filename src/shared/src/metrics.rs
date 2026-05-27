@@ -5,7 +5,7 @@ use core::arch::wasm32::memory_size as wasm_memory_size;
 
 #[cfg(target_arch = "wasm32")]
 use ic_cdk::stable::stable_size;
-use ic_metrics_encoder::MetricsEncoder;
+pub use ic_metrics_encoder::MetricsEncoder;
 use serde_bytes::ByteBuf;
 
 use crate::http::HttpResponse;
@@ -15,15 +15,21 @@ const WASM_PAGE_SIZE: u64 = 65536;
 const GIBIBYTE: u32 = 1 << 30;
 
 /// Returns the metrics in the Prometheus format.
-#[must_use]
-pub fn get_metrics() -> HttpResponse {
+///
+/// `extend` is a callback invoked after the shared canister metrics are
+/// emitted, so the caller can append crate-local counters / gauges to
+/// the same response. Pass `|_| Ok(())` if there are none.
+pub fn get_metrics<F>(extend: F) -> HttpResponse
+where
+    F: FnOnce(&mut MetricsEncoder<Vec<u8>>) -> std::io::Result<()>,
+{
     let now = ic_cdk::api::time();
     let mut writer = MetricsEncoder::new(
         vec![],
         i64::try_from(now / 1_000_000)
             .unwrap_or_else(|_| unreachable!("u64::MAX / 1_000_000 is smaller than i64::MAX")),
     );
-    match encode_metrics(&mut writer) {
+    match encode_metrics(&mut writer).and_then(|()| extend(&mut writer)) {
         Ok(()) => {
             let body = writer.into_inner();
             HttpResponse {

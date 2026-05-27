@@ -4,7 +4,7 @@ use ic_cdk::{api::time, management_canister::HttpHeader};
 use serde::Deserialize;
 use shared::types::exchange::ExchangeData;
 
-use crate::utils::http_outcall::get;
+use crate::utils::http_outcall::{get_tagged, OutcallTag};
 
 const DEFAULT_BASE_URL: &str = "https://pro-api.coingecko.com/api/v3";
 const SIMPLE_PRICE_PATH: &str = "/simple/price";
@@ -61,8 +61,25 @@ impl CoinGeckoClient {
         }
     }
 
-    async fn fetch_prices(&self, url: &str) -> Result<HashMap<String, ExchangeData>, String> {
-        let response = get(url, vec![self.auth_header()], MAX_RESPONSE_BYTES).await?;
+    async fn fetch_prices(
+        &self,
+        url: &str,
+        provider_tag: &'static str,
+        requested_tokens: &[String],
+    ) -> Result<HashMap<String, ExchangeData>, String> {
+        let path_for_log = url.strip_prefix(&self.base_url).unwrap_or(url).to_string();
+
+        let response = get_tagged(
+            url,
+            vec![self.auth_header()],
+            MAX_RESPONSE_BYTES,
+            OutcallTag {
+                provider: provider_tag,
+                path_for_log,
+                requested_tokens,
+            },
+        )
+        .await?;
 
         let prices: HashMap<String, CoinGeckoPrice> = serde_json::from_slice(&response.body)
             .map_err(|e| format!("Failed to parse CoinGecko response: {e}"))?;
@@ -89,7 +106,10 @@ impl CoinGeckoClient {
             self.base_url
         );
 
-        self.fetch_prices(&url).await
+        let requested_tokens: Vec<String> = coin_ids.iter().map(|s| (*s).to_string()).collect();
+
+        self.fetch_prices(&url, "coingecko_simple", &requested_tokens)
+            .await
     }
 
     /// Fetches token prices from the `CoinGecko`
@@ -106,6 +126,15 @@ impl CoinGeckoClient {
             self.base_url
         );
 
-        self.fetch_prices(&url).await
+        // Prefix every requested-token entry with the platform so the
+        // controller-facing log preserves which chain each address
+        // belongs to (the same address can appear on multiple chains).
+        let requested_tokens: Vec<String> = addresses
+            .iter()
+            .map(|a| format!("{platform}:{a}"))
+            .collect();
+
+        self.fetch_prices(&url, "coingecko_token", &requested_tokens)
+            .await
     }
 }

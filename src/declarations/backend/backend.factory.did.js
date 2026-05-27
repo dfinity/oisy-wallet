@@ -427,6 +427,39 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Nat64,
 		Err: ContactError
 	});
+	const ExchangeOutcallRecord = IDL.Record({
+		status: IDL.Nat32,
+		max_response_bytes: IDL.Nat64,
+		timestamp_ns: IDL.Nat64,
+		provider: IDL.Text,
+		cycles_charged: IDL.Nat,
+		requested_tokens: IDL.Vec(IDL.Text),
+		url_path: IDL.Text,
+		duration_ns: IDL.Nat64,
+		response_bytes: IDL.Nat64
+	});
+	const ExchangeProviderWindowStats = IDL.Record({
+		error_count: IDL.Nat64,
+		bytes_total: IDL.Nat64,
+		provider: IDL.Text,
+		call_count: IDL.Nat64,
+		duration_ns_avg: IDL.Nat64,
+		duration_ns_p95: IDL.Nat64,
+		cycles_avg: IDL.Nat,
+		cycles_p95: IDL.Nat,
+		cycles_total: IDL.Nat
+	});
+	const ExchangeCostWindow = IDL.Record({
+		providers: IDL.Vec(ExchangeProviderWindowStats),
+		window_seconds: IDL.Nat64
+	});
+	const ExchangeCostSummary = IDL.Record({
+		now_ns: IDL.Nat64,
+		buffer_capacity: IDL.Nat64,
+		buffer_len: IDL.Nat64,
+		cycles_total_buffered: IDL.Nat,
+		windows: IDL.Vec(ExchangeCostWindow)
+	});
 	const GetActiveUserTransactionsResponse = IDL.Record({
 		transactions: IDL.Vec(ActiveUserTransaction)
 	});
@@ -753,7 +786,8 @@ export const idlFactory = ({ IDL }) => {
 		create_user_profile: IDL.Func([], [CreateUserProfileResult], []),
 		delete_active_user_transaction: IDL.Func([IDL.Text], [DeleteActiveUserTransactionResult], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
-		exchange_rate_enabled: IDL.Func([], [IDL.Bool], ['query']),
+		exchange_rate_cost_log: IDL.Func([], [IDL.Vec(ExchangeOutcallRecord)], ['query']),
+		exchange_rate_cost_summary: IDL.Func([], [ExchangeCostSummary], ['query']),
 		get_account_creation_timestamps: IDL.Func(
 			[],
 			[IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))],

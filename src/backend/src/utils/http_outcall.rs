@@ -1,11 +1,15 @@
 use candid::Nat;
 use ic_cdk::{
+    api::{canister_cycle_balance, time},
     management_canister::{
         http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
         HttpRequestResult, TransformArgs,
     },
     query,
 };
+use shared::types::exchange_cost::ExchangeOutcallRecord;
+
+use crate::exchange::cost_log;
 
 const USER_AGENT: &str = "OisyWalletBackend";
 
@@ -101,6 +105,73 @@ pub(crate) async fn get(
     ));
 
     execute(request).await
+}
+
+/// Telemetry tag for an outgoing exchange-rate outcall. Threaded into
+/// [`get_tagged`] so the per-call cost ends up attributed to the right
+/// provider in the [`crate::exchange::cost_log`] ring buffer.
+///
+/// `requested_tokens` is the slice of token-id debug strings the caller
+/// is asking the provider for. `path_for_log` is the URL path + query
+/// **without** the base host and **without** any API key — already
+/// safe to surface to a controller.
+pub(crate) struct OutcallTag<'a> {
+    pub provider: &'static str,
+    pub path_for_log: String,
+    pub requested_tokens: &'a [String],
+}
+
+/// Same as [`get`] but records a per-call entry in
+/// [`crate::exchange::cost_log`]. Used by the exchange-rate fetcher so
+/// the controller-facing report can attribute cycle cost to each
+/// provider call.
+///
+/// Cycle cost is measured as the delta of
+/// [`canister_cycle_balance()`] across the `await`. The IC charges the
+/// canister synchronously at `http_request` dispatch, so this delta is
+/// dominated by the management-canister outcall fee plus any cycles
+/// the caller incidentally spent in the same gap. For the exchange
+/// path the gap is the `await` only — no other state-mutating work
+/// runs in between — so the delta is a good proxy for the outcall fee.
+pub(crate) async fn get_tagged(
+    url: &str,
+    headers: Vec<HttpHeader>,
+    max_response_bytes: u64,
+    tag: OutcallTag<'_>,
+) -> Result<HttpRequestResult, String> {
+    let started_ns = time();
+    let cycles_before = canister_cycle_balance();
+
+    let outcome = get(url, headers, max_response_bytes).await;
+
+    let cycles_after = canister_cycle_balance();
+    let ended_ns = time();
+
+    let (status, response_bytes) = match &outcome {
+        Ok(resp) => (status_to_u32(&resp.status), resp.body.len() as u64),
+        Err(_) => (0, 0),
+    };
+
+    cost_log::record(ExchangeOutcallRecord {
+        timestamp_ns: started_ns,
+        provider: tag.provider.to_string(),
+        url_path: tag.path_for_log,
+        requested_tokens: tag.requested_tokens.to_vec(),
+        cycles_charged: cycles_before.saturating_sub(cycles_after),
+        response_bytes,
+        max_response_bytes,
+        status,
+        duration_ns: ended_ns.saturating_sub(started_ns),
+    });
+
+    outcome
+}
+
+fn status_to_u32(status: &Nat) -> u32 {
+    // HTTP status codes are always in 100..600, so parsing the Nat's
+    // decimal representation as a `u32` is always sufficient. Saturate
+    // defensively rather than panicking inside the telemetry path.
+    status.0.to_string().parse::<u32>().unwrap_or(u32::MAX)
 }
 
 /// Performs an HTTP POST outcall with a JSON body.

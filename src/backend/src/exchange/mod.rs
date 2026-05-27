@@ -1,4 +1,5 @@
 mod composite;
+pub(crate) mod cost_log;
 pub(crate) mod provider;
 mod providers;
 mod supplemental;
