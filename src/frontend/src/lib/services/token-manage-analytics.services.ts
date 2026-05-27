@@ -17,6 +17,7 @@ export type TokenManageSourceLocation =
 export interface TokenManageEventToken {
 	network: string;
 	address: string;
+	standard?: string;
 	symbol?: string;
 	name?: string;
 }
@@ -50,6 +51,7 @@ export const trackTokenManage = ({
 			...(nonNullish(value) && { event_value: value }),
 			token_network: token.network,
 			token_address: token.address,
+			...(nonNullish(token.standard) && { token_standard: token.standard }),
 			...(nonNullish(token.symbol) && { token_symbol: token.symbol }),
 			...(nonNullish(token.name) && { token_name: token.name }),
 			source_location: sourceLocation,

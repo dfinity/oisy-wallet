@@ -1,6 +1,7 @@
 [
 	{
 		"id": "sprinkles_s1e6",
+		"type": "reward",
 		"titles": ["earning.cards.sprinkles.title"],
 		"description": "earning.cards.sprinkles.description",
 		"logo": "/images/rewards/oisy-reward-logo.svg",
@@ -9,6 +10,7 @@
 	},
 	{
 		"id": "harvest-autopilot",
+		"type": "stake",
 		"titles": ["earning.cards.harvest_autopilot.title"],
 		"description": "earning.cards.harvest_autopilot.description",
 		"logo": "/images/dapps/harvest-autopilot-logo.svg",
