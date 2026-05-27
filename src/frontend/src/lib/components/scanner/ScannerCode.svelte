@@ -25,9 +25,12 @@
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import { screensStore } from '$lib/stores/screens.store';
 	import type { QrStatus } from '$lib/types/qr-code';
 	import { ScannerResults } from '$lib/types/scanner';
+	import { isMobile } from '$lib/utils/device.utils';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
+	import { AVAILABLE_SCREENS, filterScreens, MIN_SCREEN } from '$lib/utils/screens.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
 	import { isSolAddress } from '$sol/utils/sol-address.utils';
 
@@ -45,6 +48,28 @@
 	let uri = $state('');
 	let error = $state('');
 	let isEmptyUri = $derived(isEmptyString(uri));
+
+	// Whether to render the address input inside a bottom sheet (with an "Enter
+	// manually" trigger) instead of inline next to the camera. Requires both a
+	// mobile device (touch-first ergonomics) and a viewport below `lg` (1024px):
+	// gix-components' BottomSheet drops its sticky `position: fixed` styling at
+	// >=1024px, so a wide-viewport mobile (dev-tools emulation, landscape
+	// phablets, some Android tablets) would render the sheet inline in the
+	// document flow and the trigger would appear broken — fall back to the
+	// inline input in that case.
+	//
+	// Note: this is intentionally *not* the same predicate as the scanner
+	// auto-start in QrCodeScanner.svelte, which uses `isMobile()` alone (no
+	// viewport gate) because auto-starting the camera is a device-ergonomic
+	// decision and the camera area has no layout constraint at >=lg.
+	const BOTTOM_SHEET_INPUT_SCREENS = filterScreens({
+		availableScreens: AVAILABLE_SCREENS,
+		up: MIN_SCREEN,
+		down: 'lg'
+	});
+	let useBottomSheetInput = $derived(
+		isMobile() && BOTTOM_SHEET_INPUT_SCREENS.includes($screensStore)
+	);
 
 	const { setData, setAvailableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
@@ -119,7 +144,7 @@
 <div class="relative flex w-full flex-col bg-tertiary">
 	<QrCodeScanner onScan={handleScan} universalScanner />
 
-	<Responsive up="md">
+	{#if !useBottomSheetInput}
 		<ScannerCodeInput
 			name="uri"
 			{error}
@@ -132,9 +157,7 @@
 				{$i18n.core.text.continue}
 			</Button>
 		</ScannerCodeInput>
-	</Responsive>
-
-	<Responsive down="sm">
+	{:else}
 		<BottomSheet contentClass="min-h-[10vh]" bind:visible={openBottomSheet}>
 			{#snippet content()}
 				<ScannerCodeInput
@@ -167,7 +190,7 @@
 				<IconChain />
 			</Button>
 		</div>
-	</Responsive>
+	{/if}
 
 	<Responsive up="md">
 		<ScannerCodeInfoButton onclick={onOpenInfo} />
