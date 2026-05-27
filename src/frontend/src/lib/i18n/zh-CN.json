@@ -746,7 +746,8 @@
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
 			"waiting_for_allowed_cycles_aborted": "已中止周期账本准备。请稍后尝试登录。",
 			"btc_wallet_error": "加载 BTC 钱包信息时出错。",
-			"sol_wallet_error": "加载 SOL 钱包信息时出错。"
+			"sol_wallet_error": "加载 SOL 钱包信息时出错。",
+			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。"
 		}
 	},
 	"hero": {
@@ -801,9 +802,6 @@
 			"appearance_light": "启用浅色模式",
 			"appearance_dark": "启用深色模式",
 			"appearance_system": "启用操作系统的颜色模式"
-		},
-		"error": {
-			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。"
 		}
 	},
 	"shortcuts": {

@@ -746,7 +746,8 @@
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
 			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
 			"btc_wallet_error": "Error while loading BTC wallet information.",
-			"sol_wallet_error": "Error while loading SOL wallet information."
+			"sol_wallet_error": "Error while loading SOL wallet information.",
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
 	},
 	"hero": {
@@ -801,9 +802,6 @@
 			"appearance_light": "Enables light mode",
 			"appearance_dark": "Enables dark mode",
 			"appearance_system": "Enables your operating systems color mode"
-		},
-		"error": {
-			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
 	},
 	"shortcuts": {

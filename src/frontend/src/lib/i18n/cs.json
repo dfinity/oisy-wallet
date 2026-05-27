@@ -746,7 +746,8 @@
 			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
 			"waiting_for_allowed_cycles_aborted": "Příprava cyklů účetní knihy byla přerušena. Zkuste se prosím přihlásit později.",
 			"btc_wallet_error": "Chyba při načítání informací o peněžence BTC.",
-			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL."
+			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL.",
+			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku."
 		}
 	},
 	"hero": {
@@ -801,9 +802,6 @@
 			"appearance_light": "Povolí světlý režim",
 			"appearance_dark": "Povolí tmavý režim",
 			"appearance_system": "Povolí barevný režim vašeho operačního systému"
-		},
-		"error": {
-			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku."
 		}
 	},
 	"shortcuts": {

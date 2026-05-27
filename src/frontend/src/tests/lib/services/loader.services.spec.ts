@@ -160,12 +160,13 @@ describe('loader.services', () => {
 			expect(loadUserProfile).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 		});
 
-		it('should sign out if the user profile is not loaded', async () => {
+		it('should delegate sign-out to loadUserProfile when the profile is not loaded', async () => {
 			vi.mocked(loadUserProfile).mockResolvedValueOnce({ success: false, err: 'unknown' });
 
 			await initLoader(mockParams);
 
-			expect(signOut).toHaveBeenCalledOnce();
+			expect(signOut).not.toHaveBeenCalled();
+			expect(infoSignOut).not.toHaveBeenCalled();
 		});
 
 		it('should sign out via infoSignOut when signups are closed', async () => {

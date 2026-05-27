@@ -100,7 +100,7 @@ export const initLoader = async ({
 			return;
 		}
 
-		await signOut({});
+		// Sign-out is handled within `loadUserProfile`.
 		return;
 	}
 

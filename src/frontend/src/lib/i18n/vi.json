@@ -746,7 +746,8 @@
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
 			"waiting_for_allowed_cycles_aborted": "Đã hủy bỏ quá trình chuẩn bị cycles ledger. Vui lòng thử đăng nhập lại sau.",
 			"btc_wallet_error": "Lỗi khi tải thông tin ví BTC.",
-			"sol_wallet_error": "Lỗi khi tải thông tin ví SOL."
+			"sol_wallet_error": "Lỗi khi tải thông tin ví SOL.",
+			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ."
 		}
 	},
 	"hero": {
@@ -801,9 +802,6 @@
 			"appearance_light": "Bật chế độ sáng",
 			"appearance_dark": "Bật chế độ tối",
 			"appearance_system": "Bật chế độ màu theo hệ điều hành của bạn"
-		},
-		"error": {
-			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ."
 		}
 	},
 	"shortcuts": {
