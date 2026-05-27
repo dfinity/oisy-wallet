@@ -1782,9 +1782,8 @@ export interface _SERVICE {
 	/**
 	 * Returns whether the backend is currently fetching and caching exchange rates.
 	 *
-	 * This is the *effective* state: it mirrors the predicate used by the refresh timer
-	 * (see `crate::exchange::fetch_and_update_prices`) — `true` only when a `CoinGecko` API
-	 * key is configured and `exchange_rate_enabled` is not explicitly disabled.
+	 * Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
+	 * actual refresh predicate used by [`fetch_and_update_prices`].
 	 *
 	 * Exposed as an unauthenticated query so the frontend worker can decide whether to read
 	 * cached rates from the backend or fetch directly from public providers.
