@@ -794,15 +794,15 @@
 			"enable_hide_micro_transactions": "Włącz ukrywanie transakcji o bardzo małych wartościach",
 			"disable_hide_micro_transactions": "Wyłącz ukrywanie transakcji o bardzo małych wartościach",
 			"save_spam_filter_success": "Ustawienia filtra spamu zostały zaktualizowane.",
-			"export_data": "",
-			"export_data_description": "",
-			"export_basic": "",
-			"export_extended": "",
-			"export_tokens": "",
-			"export_transactions": "",
-			"export_tokens_success": "",
-			"export_transactions_success": "",
-			"learn_more": ""
+			"export_data": "Eksportuj dane",
+			"export_data_description": "Pobierz swoje tokeny i transakcje w formacie CSV — Basic dla najważniejszych informacji, Extended dla dodatkowych atrybutów.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Eksportuj tokeny",
+			"export_transactions": "Eksportuj transakcje",
+			"export_tokens_success": "Pobrano plik CSV z tokenami.",
+			"export_transactions_success": "Pobrano plik CSV z transakcjami.",
+			"learn_more": "Dowiedz się więcej"
 		},
 		"alt": {
 			"testnets_toggle": "Przełącz, aby pokazać lub ukryć sieci testowe",
@@ -813,8 +813,8 @@
 		},
 		"error": {
 			"loading_profile": "Błąd podczas ładowania profilu. Odśwież stronę, aby uzyskać pełne wrażenia.",
-			"export_exchange_rate_unavailable": "",
-			"export_failed": ""
+			"export_exchange_rate_unavailable": "Kursy wymiany wciąż się ładują. Spróbuj ponownie za chwilę.",
+			"export_failed": "Nie udało się wygenerować eksportu. Spróbuj ponownie."
 		}
 	},
 	"shortcuts": {

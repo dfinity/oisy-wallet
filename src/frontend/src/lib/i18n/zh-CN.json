@@ -794,15 +794,15 @@
 			"enable_hide_micro_transactions": "启用隐藏价值非常小的交易",
 			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
 			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
-			"export_data": "",
-			"export_data_description": "",
-			"export_basic": "",
-			"export_extended": "",
-			"export_tokens": "",
-			"export_transactions": "",
-			"export_tokens_success": "",
-			"export_transactions_success": "",
-			"learn_more": ""
+			"export_data": "导出数据",
+			"export_data_description": "将您的代币和交易下载为 CSV — Basic 包含基础信息，Extended 包含更多属性。",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "导出代币",
+			"export_transactions": "导出交易",
+			"export_tokens_success": "代币 CSV 已下载。",
+			"export_transactions_success": "交易 CSV 已下载。",
+			"learn_more": "了解更多"
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -813,8 +813,8 @@
 		},
 		"error": {
 			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。",
-			"export_exchange_rate_unavailable": "",
-			"export_failed": ""
+			"export_exchange_rate_unavailable": "汇率仍在加载。请稍后重试。",
+			"export_failed": "无法生成您的导出文件。请重试。"
 		}
 	},
 	"shortcuts": {

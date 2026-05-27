@@ -794,15 +794,15 @@
 			"enable_hide_micro_transactions": "Ativar a ocultação de transações com valores muito pequenos",
 			"disable_hide_micro_transactions": "Desativar a ocultação de transações com valores muito pequenos",
 			"save_spam_filter_success": "As configurações do seu filtro de spam foram atualizadas.",
-			"export_data": "",
-			"export_data_description": "",
-			"export_basic": "",
-			"export_extended": "",
-			"export_tokens": "",
-			"export_transactions": "",
-			"export_tokens_success": "",
-			"export_transactions_success": "",
-			"learn_more": ""
+			"export_data": "Exportar dados",
+			"export_data_description": "Baixe seus tokens e transações como CSV — Basic para o essencial, Extended para atributos adicionais.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Exportar tokens",
+			"export_transactions": "Exportar transações",
+			"export_tokens_success": "CSV de tokens baixado.",
+			"export_transactions_success": "CSV de transações baixado.",
+			"learn_more": "Saber mais"
 		},
 		"alt": {
 			"testnets_toggle": "Alternar para mostrar ou ocultar testnets",
@@ -813,8 +813,8 @@
 		},
 		"error": {
 			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa.",
-			"export_exchange_rate_unavailable": "",
-			"export_failed": ""
+			"export_exchange_rate_unavailable": "As taxas de câmbio ainda estão carregando. Tente novamente em alguns instantes.",
+			"export_failed": "Não foi possível gerar sua exportação. Tente novamente."
 		}
 	},
 	"shortcuts": {

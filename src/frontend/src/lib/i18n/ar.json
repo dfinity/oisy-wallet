@@ -794,15 +794,15 @@
 			"enable_hide_micro_transactions": "تمكين إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
-			"export_data": "",
-			"export_data_description": "",
-			"export_basic": "",
-			"export_extended": "",
-			"export_tokens": "",
-			"export_transactions": "",
-			"export_tokens_success": "",
-			"export_transactions_success": "",
-			"learn_more": ""
+			"export_data": "تصدير البيانات",
+			"export_data_description": "قم بتنزيل الرموز والمعاملات الخاصة بك كملف CSV — Basic للأساسيات، Extended للسمات الإضافية.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "تصدير الرموز",
+			"export_transactions": "تصدير المعاملات",
+			"export_tokens_success": "تم تنزيل ملف CSV للرموز.",
+			"export_transactions_success": "تم تنزيل ملف CSV للمعاملات.",
+			"learn_more": "اعرف المزيد"
 		},
 		"alt": {
 			"testnets_toggle": "تبديل لإظهار أو إخفاء شبكات الاختبار",
@@ -813,8 +813,8 @@
 		},
 		"error": {
 			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة.",
-			"export_exchange_rate_unavailable": "",
-			"export_failed": ""
+			"export_exchange_rate_unavailable": "لا تزال أسعار الصرف قيد التحميل. حاول مرة أخرى بعد لحظة.",
+			"export_failed": "لم نتمكن من إنشاء التصدير الخاص بك. يرجى المحاولة مرة أخرى."
 		}
 	},
 	"shortcuts": {
