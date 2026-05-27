@@ -12,6 +12,8 @@
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_EXPORT_DATA_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressTestnet,
@@ -39,10 +41,10 @@
 	let exportingTokens = $state(false);
 	let exportingTransactions = $state(false);
 
-	// Section-level help toggles. Each Basic/Extended header gets a single help icon that
-	// reveals one description for the whole section, instead of per-button help icons.
-	let basicInfoExpanded = $state(false);
-	let extendedInfoExpanded = $state(false);
+	// Single help toggle on the card title — reveals one description for the whole feature
+	// with a "Learn more" external link to the OISY docs (same pattern as the hide-micro
+	// row in Settings.svelte).
+	let helpExpanded = $state(false);
 
 	const onExportTokens = (variant: TokenCsvVariant) => {
 		exportingTokens = true;
@@ -100,25 +102,35 @@
 </script>
 
 <SettingsCard>
-	{#snippet title()}{$i18n.settings.text.export_data}{/snippet}
+	{#snippet title()}
+		<span class="inline-flex items-center">
+			{$i18n.settings.text.export_data}
+			<button
+				class="ml-1 flex p-0.5 align-top text-tertiary"
+				onclick={() => (helpExpanded = !helpExpanded)}
+			>
+				<IconHelp size="18" />
+			</button>
+		</span>
+	{/snippet}
 
-	<div class="flex flex-row items-center">
-		<h5 class="text-xs font-semibold tracking-wide text-tertiary uppercase">
-			{$i18n.settings.text.export_basic}
-		</h5>
-		<button
-			class="ml-1 flex p-0.5 align-top text-tertiary"
-			onclick={() => (basicInfoExpanded = !basicInfoExpanded)}
-		>
-			<IconHelp size="16" />
-		</button>
-	</div>
+	{#if helpExpanded}
+		<span class="-mt-3 mb-3 flex w-full text-sm text-tertiary" transition:slide>
+			<span>
+				{$i18n.settings.text.export_data_description}
 
-	{#if basicInfoExpanded}
-		<span class="mt-1 flex w-full text-sm text-tertiary" transition:slide>
-			{$i18n.settings.text.export_basic_description}
+				<ExternalLink
+					ariaLabel={$i18n.settings.text.learn_more}
+					href={OISY_EXPORT_DATA_DOCS_URL}
+					iconVisible={false}>{$i18n.settings.text.learn_more}</ExternalLink
+				>
+			</span>
 		</span>
 	{/if}
+
+	<h5 class="text-xs font-semibold tracking-wide text-tertiary uppercase">
+		{$i18n.settings.text.export_basic}
+	</h5>
 
 	<SettingsCardItem>
 		{#snippet key()}
@@ -151,23 +163,9 @@
 		{/snippet}
 	</SettingsCardItem>
 
-	<div class="mt-5 flex flex-row items-center">
-		<h5 class="text-xs font-semibold tracking-wide text-tertiary uppercase">
-			{$i18n.settings.text.export_extended}
-		</h5>
-		<button
-			class="ml-1 flex p-0.5 align-top text-tertiary"
-			onclick={() => (extendedInfoExpanded = !extendedInfoExpanded)}
-		>
-			<IconHelp size="16" />
-		</button>
-	</div>
-
-	{#if extendedInfoExpanded}
-		<span class="mt-1 flex w-full text-sm text-tertiary" transition:slide>
-			{$i18n.settings.text.export_extended_description}
-		</span>
-	{/if}
+	<h5 class="mt-5 text-xs font-semibold tracking-wide text-tertiary uppercase">
+		{$i18n.settings.text.export_extended}
+	</h5>
 
 	<SettingsCardItem>
 		{#snippet key()}
