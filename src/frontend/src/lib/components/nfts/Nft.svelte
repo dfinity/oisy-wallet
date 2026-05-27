@@ -7,6 +7,7 @@
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { pageNft } from '$lib/derived/page-nft.derived';
 	import { pageNonFungibleToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -23,6 +24,10 @@
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(nft)) {
+				// Don't redirect while an enable/import flow (e.g. ICRC7 deep link) is in progress.
+				if ($modalManageTokens) {
+					return;
+				}
 				goto(`${AppPath.Nfts}${page.url.search}`);
 				toastsError({ msg: { text: $i18n.nfts.text.nft_not_loaded } });
 			}

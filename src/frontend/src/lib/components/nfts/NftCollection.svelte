@@ -9,6 +9,7 @@
 	import { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { pageCollectionNfts } from '$lib/derived/page-nft.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -35,6 +36,10 @@
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(collection)) {
+				// Don't redirect while an enable/import flow (e.g. ICRC7 deep link) is in progress.
+				if ($modalManageTokens) {
+					return;
+				}
 				goto(`${AppPath.Nfts}${page.url.search}`);
 				toastsError({ msg: { text: $i18n.nfts.text.collection_not_loaded } });
 			}
