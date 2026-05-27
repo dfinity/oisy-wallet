@@ -24,7 +24,7 @@
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(nft)) {
-				// Don't redirect while an enable/import flow (e.g. ICRC7 deep link) is in progress.
+				// Don't redirect while an enable/import flow is in progress.
 				if ($modalManageTokens) {
 					return;
 				}
