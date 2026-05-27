@@ -6,7 +6,7 @@ import { tokensToPin } from '$lib/derived/tokens.derived';
 import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Network, NetworkId } from '$lib/types/network';
-import type { Token, TokenStandardCode } from '$lib/types/token';
+import type { Token, TokenStandard } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import {
 	filterTokensForSelectedNetwork,
@@ -26,7 +26,7 @@ export interface ModalTokensListData {
 	filterNetworksIds?: NetworkId[];
 	filterNfts?: boolean;
 	filterCategoryTag?: TokenCategoryTagValue;
-	filterStandard?: TokenStandardCode;
+	filterStandard?: TokenStandard;
 }
 
 export const initModalTokensListContext = (
@@ -152,7 +152,7 @@ export const initModalTokensListContext = (
 				...state,
 				filterCategoryTag: categoryTag
 			})),
-		setFilterStandard: (standard: TokenStandardCode | undefined) =>
+		setFilterStandard: (standard: TokenStandard | undefined) =>
 			update((state) => ({
 				...state,
 				filterStandard: standard
@@ -177,14 +177,14 @@ export interface ModalTokensListContext {
 	filterQuery: Readable<string | undefined>;
 	filterNetwork: Readable<Network | undefined>;
 	filterCategoryTag: Readable<TokenCategoryTagValue | undefined>;
-	filterStandard: Readable<TokenStandardCode | undefined>;
+	filterStandard: Readable<TokenStandard | undefined>;
 	filteredTokens: Readable<TokenUi[]>;
 	setTokens: (tokens: Token[]) => void;
 	setFilterQuery: (query: string) => void;
 	setFilterNetwork: (network: Network | undefined) => void;
 	setFilterNetworksIds: (networksIds: NetworkId[] | undefined) => void;
 	setFilterCategoryTag: (categoryTag: TokenCategoryTagValue | undefined) => void;
-	setFilterStandard: (standard: TokenStandardCode | undefined) => void;
+	setFilterStandard: (standard: TokenStandard | undefined) => void;
 	resetFilters: () => void;
 }
 

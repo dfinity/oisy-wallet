@@ -18,9 +18,10 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenStandard } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
+	import { tokenStandardKey, tokenStandardsEqual } from '$lib/utils/token.utils';
 
 	interface Props {
 		networkSelectorViewOnly?: boolean;
@@ -77,9 +78,18 @@
 			: $filteredTokens
 	);
 
-	let availableStandards = $derived(
-		Array.from(new Set(categoryFilteredTokens.map(({ standard }) => standard.code))).sort()
-	);
+	let availableStandards = $derived.by<TokenStandard[]>(() => {
+		const byKey: Record<string, TokenStandard> = {};
+		for (const { standard } of categoryFilteredTokens) {
+			const key = tokenStandardKey(standard);
+			if (!(key in byKey)) {
+				byKey[key] = { code: standard.code, version: standard.version };
+			}
+		}
+		return Object.values(byKey).sort((a, b) =>
+			tokenStandardKey(a).localeCompare(tokenStandardKey(b))
+		);
+	});
 
 	$effect(() => {
 		const selected = $filterStandard;
@@ -90,7 +100,11 @@
 			// selected one isn't one of them (e.g. user switched network).
 			// When the set is transiently empty (e.g. search clears the list),
 			// keep the user's selection so it returns once the list rehydrates.
-			if (selected !== undefined && standards.length > 0 && !standards.includes(selected)) {
+			if (
+				selected !== undefined &&
+				standards.length > 0 &&
+				!standards.some((standard) => tokenStandardsEqual({ a: standard, b: selected }))
+			) {
 				setFilterStandard(undefined);
 			}
 		});
@@ -99,7 +113,11 @@
 	let displayTokens = $derived(
 		$filterStandard === undefined
 			? categoryFilteredTokens
-			: categoryFilteredTokens.filter(({ standard }) => standard.code === $filterStandard)
+			: categoryFilteredTokens.filter(
+					({ standard }) =>
+						$filterStandard !== undefined &&
+						tokenStandardsEqual({ a: standard, b: $filterStandard })
+				)
 	);
 
 	let noTokensMatch = $derived(displayTokens.length === 0);
