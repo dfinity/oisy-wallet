@@ -3,7 +3,7 @@ pub(crate) mod provider;
 mod providers;
 mod supplemental;
 
-use std::{cell::Cell, time::Duration};
+use std::{cell::Cell, future::Future, time::Duration};
 
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
@@ -77,10 +77,11 @@ thread_local! {
     static REFRESH_IN_FLIGHT: Cell<bool> = const { Cell::new(false) };
 }
 
-/// Wraps [`refresh_exchange_rates`] with an in-flight guard so concurrent
-/// invocations (e.g. overlapping timer ticks) become no-ops rather than
-/// starting a parallel refresh.
-async fn refresh_exchange_rates_guarded(source: &'static str) {
+async fn refresh_exchange_rates_guarded_with<F, Fut>(source: &'static str, refresh: F)
+where
+    F: FnOnce() -> Fut,
+    Fut: Future<Output = Result<(), ExchangeError>>,
+{
     if REFRESH_IN_FLIGHT.with(Cell::get) {
         ic_cdk::println!("Exchange rate {source} skipped: previous refresh still in flight");
         return;
@@ -88,13 +89,20 @@ async fn refresh_exchange_rates_guarded(source: &'static str) {
 
     REFRESH_IN_FLIGHT.with(|f| f.set(true));
 
-    let outcome = refresh_exchange_rates().await;
+    let outcome = refresh().await;
 
     REFRESH_IN_FLIGHT.with(|f| f.set(false));
 
     if let Err(err) = outcome {
         ic_cdk::println!("Exchange rate {source} failed: {err:?}");
     }
+}
+
+/// Wraps [`refresh_exchange_rates`] with an in-flight guard so concurrent
+/// invocations (e.g. overlapping timer ticks) become no-ops rather than
+/// starting a parallel refresh.
+async fn refresh_exchange_rates_guarded(source: &'static str) {
+    refresh_exchange_rates_guarded_with(source, refresh_exchange_rates).await;
 }
 
 /// Starts a recurring timer that refreshes exchange rates for active tokens
@@ -286,4 +294,76 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     });
 
     fetch_and_update_prices(&tokens_to_fetch).await
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{cell::Cell, future::Future as _, rc::Rc, task::Poll};
+
+    use futures::{channel::oneshot, executor::block_on, future::poll_fn};
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+
+    #[test]
+    fn guarded_refresh_skips_overlap_and_resets_after_completion() {
+        REFRESH_IN_FLIGHT.with(|f| f.set(false));
+
+        let first_refresh_calls = Rc::new(Cell::new(0));
+        let overlapping_refresh_calls = Rc::new(Cell::new(0));
+        let after_reset_refresh_calls = Rc::new(Cell::new(0));
+        let (complete_first_refresh, first_refresh_complete) = oneshot::channel::<()>();
+
+        let first_refresh_calls_for_refresh = Rc::clone(&first_refresh_calls);
+        let mut first_refresh = Box::pin(refresh_exchange_rates_guarded_with(
+            "first refresh",
+            move || async move {
+                first_refresh_calls_for_refresh.set(first_refresh_calls_for_refresh.get() + 1);
+
+                if first_refresh_complete.await.is_err() {
+                    return Err(ExchangeError::Disabled);
+                }
+
+                Ok(())
+            },
+        ));
+
+        block_on(poll_fn(|cx| {
+            assert!(first_refresh.as_mut().poll(cx).is_pending());
+            Poll::Ready(())
+        }));
+
+        assert_eq!(first_refresh_calls.get(), 1);
+        assert!(REFRESH_IN_FLIGHT.with(Cell::get));
+
+        let overlapping_refresh_calls_for_refresh = Rc::clone(&overlapping_refresh_calls);
+        block_on(refresh_exchange_rates_guarded_with(
+            "overlapping refresh",
+            move || async move {
+                overlapping_refresh_calls_for_refresh
+                    .set(overlapping_refresh_calls_for_refresh.get() + 1);
+                Ok(())
+            },
+        ));
+
+        assert_eq!(overlapping_refresh_calls.get(), 0);
+        assert!(REFRESH_IN_FLIGHT.with(Cell::get));
+
+        assert!(complete_first_refresh.send(()).is_ok());
+        block_on(first_refresh);
+
+        assert!(!REFRESH_IN_FLIGHT.with(Cell::get));
+
+        let after_reset_refresh_calls_for_refresh = Rc::clone(&after_reset_refresh_calls);
+        block_on(refresh_exchange_rates_guarded_with(
+            "after reset refresh",
+            move || async move {
+                after_reset_refresh_calls_for_refresh
+                    .set(after_reset_refresh_calls_for_refresh.get() + 1);
+                Ok(())
+            },
+        ));
+
+        assert_eq!(after_reset_refresh_calls.get(), 1);
+    }
 }
