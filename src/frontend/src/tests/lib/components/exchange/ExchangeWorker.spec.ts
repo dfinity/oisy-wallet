@@ -1,5 +1,6 @@
 import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 import { Currency } from '$lib/enums/currency';
+import * as backendExchangeEnabledServices from '$lib/services/backend-exchange-enabled.services';
 import { ExchangeWorker as ExchangeWorkerObj } from '$lib/services/worker.exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { currencyStore } from '$lib/stores/currency.store';
@@ -23,6 +24,7 @@ describe('ExchangeWorker', () => {
 		vi.clearAllMocks();
 
 		vi.spyOn(ExchangeWorkerObj, 'init').mockResolvedValue(mockWorker);
+		vi.spyOn(backendExchangeEnabledServices, 'loadBackendExchangeEnabled').mockResolvedValue(false);
 	});
 
 	afterEach(() => {
@@ -49,7 +51,8 @@ describe('ExchangeWorker', () => {
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: [],
-			erc4626TokensExchangeData: []
+			erc4626TokensExchangeData: [],
+			backendExchangeEnabled: false
 		});
 	});
 
@@ -65,7 +68,8 @@ describe('ExchangeWorker', () => {
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: [],
-			erc4626TokensExchangeData: []
+			erc4626TokensExchangeData: [],
+			backendExchangeEnabled: false
 		});
 
 		currencyStore.switchCurrency(Currency.CHF);
@@ -80,7 +84,8 @@ describe('ExchangeWorker', () => {
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: [],
-			erc4626TokensExchangeData: []
+			erc4626TokensExchangeData: [],
+			backendExchangeEnabled: false
 		});
 
 		currencyStore.switchCurrency(Currency.USD);
@@ -95,7 +100,8 @@ describe('ExchangeWorker', () => {
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: [],
-			erc4626TokensExchangeData: []
+			erc4626TokensExchangeData: [],
+			backendExchangeEnabled: false
 		});
 	});
 
