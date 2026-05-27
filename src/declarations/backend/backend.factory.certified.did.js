@@ -630,7 +630,8 @@ export const idlFactory = ({ IDL }) => {
 		allow_external_content_source: IDL.Opt(IDL.Bool),
 		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
-		enabled: IDL.Bool
+		enabled: IDL.Bool,
+		allowed_external_content_source_urls: IDL.Opt(IDL.Vec(IDL.Text))
 	});
 	const SaveUserTransactionsRequest = IDL.Record({
 		token_id: TokenId,
@@ -759,10 +760,7 @@ export const idlFactory = ({ IDL }) => {
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult]),
 		get_contacts: IDL.Func([], [GetContactsResult]),
 		get_exchange_rate: IDL.Func([TokenId], [IDL.Opt(ExchangeRate)]),
-		get_exchange_rates: IDL.Func(
-			[IDL.Vec(TokenId)],
-			[IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))]
-		),
+		get_exchange_rates: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))], []),
 		get_user_agreement_history: IDL.Func([], [GetAgreementHistoryResult]),
 		get_user_profile: IDL.Func([], [GetUserProfileResult]),
 		get_user_transactions: IDL.Func([GetUserTransactionsRequest], [GetUserTransactionsResult]),

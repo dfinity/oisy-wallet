@@ -25,6 +25,7 @@ static USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static ANOTHER_USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Icrc(IcrcToken {
@@ -35,6 +36,7 @@ static ANOTHER_USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken 
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 
 #[test]

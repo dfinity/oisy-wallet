@@ -1,33 +1,55 @@
-use ic_cdk::query;
+use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 
-use crate::{state::read_state, types::StoredTokenId, utils::guards::caller_is_not_anonymous};
+use crate::{
+    exchange::{
+        cached_rates_snapshot, fetch_and_update_prices, priceable_tokens_for_caller,
+        stale_or_missing_tokens,
+    },
+    state::read_state,
+    token,
+    types::{StoredPrincipal, StoredTokenId},
+    utils::guards::caller_is_not_anonymous,
+};
 
-const MAX_TOKEN_LIST_LENGTH: usize = 1_000;
-
-#[query(guard = "caller_is_not_anonymous")]
+/// Returns the latest USD prices for the caller's priceable tokens.
+///
+/// "Priceable" means the union of:
+/// - the always-on native tokens (BTC, ICP, SOL, ETH on the supported EVM mainnets), and
+/// - the caller's custom tokens, filtered to variants the configured providers can actually price
+///   (testnets, NFTs and ERC-4626 vaults are excluded).
+///
+/// The endpoint also re-marks the returned tokens as active so the
+/// background refresh timer keeps them warm. If any cached price is older
+/// than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`] seconds or
+/// missing, the endpoint awaits a one-shot fetch for that subset before
+/// responding. Entries that remain stale or missing after that attempt are
+/// returned as `None` so returned prices honour the freshness contract.
+///
+/// This is an `update` (rather than a `query`) because it mutates state
+/// (`token_activity`) and may issue HTTP outcalls.
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn get_exchange_rates(token_ids: Vec<TokenId>) -> Vec<(TokenId, Option<ExchangeRate>)> {
-    if token_ids.len() > MAX_TOKEN_LIST_LENGTH {
-        ic_cdk::trap(format!(
-            "Maximum number of token_ids exceeded: {} > {}",
-            token_ids.len(),
-            MAX_TOKEN_LIST_LENGTH
-        ));
+pub async fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
+    let caller = StoredPrincipal(msg_caller());
+
+    let tokens = priceable_tokens_for_caller(caller);
+
+    if tokens.is_empty() {
+        return Vec::new();
     }
 
-    read_state(|s| {
-        token_ids
-            .into_iter()
-            .map(|id| {
-                let rate = s
-                    .exchange_rates
-                    .get(&StoredTokenId(id.clone()))
-                    .map(|c| c.0);
-                (id, rate)
-            })
-            .collect()
-    })
+    let active_ids: Vec<TokenId> = tokens.iter().map(|s| s.0.clone()).collect();
+    token::mark_tokens_active(&active_ids);
+
+    let stale = stale_or_missing_tokens(&tokens);
+    if !stale.is_empty() {
+        if let Err(err) = fetch_and_update_prices(&stale).await {
+            ic_cdk::println!("get_exchange_rates fetch failed: {err:?}");
+        }
+    }
+
+    cached_rates_snapshot(tokens)
 }
 
 #[query(guard = "caller_is_not_anonymous")]

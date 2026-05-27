@@ -1,0 +1,19 @@
+---
+description: OISY voice, vocabulary, colour usage, and icon rules for any user-visible UI.
+globs:
+  [
+    'src/frontend/**/*.svelte',
+    'src/frontend/**/*.ts',
+    'src/frontend/**/*.scss',
+    'src/frontend/src/lib/i18n/en.json'
+  ]
+---
+
+# Cursor — Brand & copy
+
+Authoritative source: [docs/ai/frontend/brand-and-copy.md](mdc:docs/ai/frontend/brand-and-copy.md).
+
+Read it before writing any user-visible string, choosing a colour, or
+adding an icon. Covers the OISY voice, the "use this, not that" table,
+banned vocabulary, the failure-copy structure, the canonical chain
+listing, brand-side colour rules, and the iconography rules.
