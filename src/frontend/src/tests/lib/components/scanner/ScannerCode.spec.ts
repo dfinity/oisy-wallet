@@ -495,8 +495,14 @@ describe('ScannerCode.svelte', () => {
 	});
 
 	describe('mobile error overlay', () => {
+		let isMobileSpy: ReturnType<typeof vi.spyOn>;
+
 		beforeEach(() => {
-			vi.spyOn(deviceUtils, 'isMobile').mockReturnValue(true);
+			isMobileSpy = vi.spyOn(deviceUtils, 'isMobile').mockReturnValue(true);
+		});
+
+		afterEach(() => {
+			isMobileSpy.mockRestore();
 		});
 
 		it('should show overlay banner and not inline field error when processOpenCryptoPayCode rejects', async () => {
