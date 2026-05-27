@@ -30,16 +30,19 @@
 	});
 
 	const scanQrCode = async () => {
-		const result = await new Promise<{ status: QrStatus; code?: string | undefined }>((resolve) => {
-			resolveQrCodePromise = resolve;
-		});
+		let keepScanning = true;
+		while (keepScanning) {
+			const result = await new Promise<{ status: QrStatus; code?: string | undefined }>(
+				(resolve) => {
+					resolveQrCodePromise = resolve;
+				}
+			);
 
-		if (result.status === 'success') {
-			onScan(result);
-
-			if (isMobile() && universalScanner) {
-				await scanQrCode();
-				return;
+			if (result.status === 'success') {
+				onScan(result);
+				keepScanning = isMobile() && universalScanner;
+			} else {
+				keepScanning = false;
 			}
 		}
 
