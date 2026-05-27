@@ -686,6 +686,7 @@ interface I18nSend {
 		no_available_utxos: string;
 		unknown_destination: string;
 		fee_info: string;
+		scanned_address_only_destination: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
