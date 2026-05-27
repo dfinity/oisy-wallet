@@ -1,4 +1,3 @@
-use futures::future::join_all;
 use ic_cdk::{api::time, management_canister::HttpHeader};
 use serde::Deserialize;
 use serde_json::from_slice;
@@ -118,28 +117,17 @@ impl SupplementalPriceProvider for IcpSwapProvider {
 
     fn supplement<'a>(&'a self, missing: &'a [StoredTokenId]) -> SupplementalPricesFuture<'a> {
         Box::pin(async move {
-            // ICPSwap exposes one URL per token — there is no batch endpoint.
-            // Issuing the per-token outcalls in parallel turns N sequential
-            // round trips into a single fan-out.
-            let outcomes = join_all(missing.iter().filter_map(|stored| {
+            let mut out = Vec::new();
+
+            for stored in missing {
                 let StoredTokenId(TokenId::Icrc(ledger_id)) = stored else {
-                    return None;
+                    continue;
                 };
 
                 let ledger_text = ledger_id.to_text();
 
-                Some(async move {
-                    let outcome = self.fetch_icrc_token_usd(&ledger_text).await;
-                    (stored.clone(), ledger_text, outcome)
-                })
-            }))
-            .await;
-
-            let mut out = Vec::new();
-
-            for (stored, ledger_text, outcome) in outcomes {
-                match outcome {
-                    Ok(Some(data)) => out.push((stored, data)),
+                match self.fetch_icrc_token_usd(&ledger_text).await {
+                    Ok(Some(data)) => out.push((stored.clone(), data)),
                     Ok(None) => {}
                     Err(err) => {
                         ic_cdk::println!("ICPSwap price fetch for {ledger_text} failed: {err}");
