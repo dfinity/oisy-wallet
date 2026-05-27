@@ -84,7 +84,11 @@
 		const standards = availableStandards;
 
 		untrack(() => {
-			if (selected !== undefined && !standards.includes(selected)) {
+			// Only auto-clear when there *are* standards to pick from but the
+			// selected one isn't one of them (e.g. user switched network).
+			// When the set is transiently empty (e.g. search clears the list),
+			// keep the user's selection so it returns once the list rehydrates.
+			if (selected !== undefined && standards.length > 0 && !standards.includes(selected)) {
 				setFilterStandard(undefined);
 			}
 		});
@@ -125,13 +129,11 @@
 			/>
 		{/if}
 
-		{#if availableStandards.length >= 2}
-			<TokenStandardFilterDropdown
-				{availableStandards}
-				onSelect={setFilterStandard}
-				selectedStandard={$filterStandard}
-			/>
-		{/if}
+		<TokenStandardFilterDropdown
+			{availableStandards}
+			onSelect={setFilterStandard}
+			selectedStandard={$filterStandard}
+		/>
 	</div>
 </div>
 
