@@ -9,6 +9,7 @@
 	import { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { pageCollectionNfts } from '$lib/derived/page-nft.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -34,7 +35,10 @@
 
 	onMount(() => {
 		timeout = setTimeout(() => {
-			if (isNullish(collection)) {
+			// Skip the fallback while the manage-tokens modal is open: a deep link
+			// (e.g. `?collection=…&network=…`) opens it for import / enable, and the
+			// collection is expected to be absent until the user completes the flow.
+			if (isNullish(collection) && !$modalManageTokens) {
 				goto(`${AppPath.Nfts}${page.url.search}`);
 				toastsError({ msg: { text: $i18n.nfts.text.collection_not_loaded } });
 			}
