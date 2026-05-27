@@ -12,8 +12,7 @@ export const mockPendingUtxo: CkBtcMinterDid.PendingUtxo = {
 export const mockCkBtcMinterInfo: CkBtcMinterDid.MinterInfo = {
 	kyt_fee: 100n,
 	retrieve_btc_min_amount: 100_000n,
-	min_confirmations: 6,
-	deposit_btc_min_amount: []
+	min_confirmations: 6
 };
 
 export const mockCkBtcPendingUtxoTransaction: IcTransactionUi = {

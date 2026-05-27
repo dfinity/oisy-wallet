@@ -630,7 +630,8 @@ export const idlFactory = ({ IDL }) => {
 		allow_external_content_source: IDL.Opt(IDL.Bool),
 		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
-		enabled: IDL.Bool
+		enabled: IDL.Bool,
+		allowed_external_content_source_urls: IDL.Opt(IDL.Vec(IDL.Text))
 	});
 	const SaveUserTransactionsRequest = IDL.Record({
 		token_id: TokenId,

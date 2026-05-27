@@ -17,7 +17,7 @@ import {
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency,
-	fetchAllExchangeRatesFromBackend
+	fetchExchangeRatesFromBackend
 } from '$lib/services/exchange.services';
 import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
@@ -138,9 +138,6 @@ const buildErc20PriceParams = (
 
 const syncExchangeFromBackend = async ({
 	currentCurrency,
-	erc20ContractAddresses,
-	icrcLedgerCanisterIds,
-	splTokenAddresses,
 	erc4626TokensExchangeData
 }: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
 	const identity = await AuthClientProvider.getInstance().loadIdentity();
@@ -170,15 +167,25 @@ const syncExchangeFromBackend = async ({
 		};
 	}
 
-	const [currentExchangeRate, backendPrices] = await Promise.all([
+	const [currentExchangeRateResult, backendPricesResult] = await Promise.allSettled([
 		exchangeRateUsdToCurrency(currentCurrency),
-		fetchAllExchangeRatesFromBackend({
-			identity,
-			erc20Addresses: erc20ContractAddresses,
-			icrcCanisterIds: icrcLedgerCanisterIds,
-			splTokenAddresses
-		})
+		fetchExchangeRatesFromBackend({ identity })
 	]);
+
+	if (currentExchangeRateResult.status === 'rejected') {
+		consoleError('Error while fetching exchange rate:', currentExchangeRateResult.reason);
+	}
+
+	if (backendPricesResult.status === 'rejected') {
+		consoleError(
+			'Error while fetching exchange rate:',
+			'Failed to fetch backend exchange rates:',
+			backendPricesResult.reason
+		);
+	}
+
+	const currentExchangeRate =
+		currentExchangeRateResult.status === 'fulfilled' ? currentExchangeRateResult.value : undefined;
 
 	const {
 		currentEthPrice,
@@ -192,7 +199,22 @@ const syncExchangeFromBackend = async ({
 		currentErc20Prices,
 		currentIcrcPrices,
 		currentSplPrices
-	} = backendPrices;
+	} =
+		backendPricesResult.status === 'fulfilled'
+			? backendPricesResult.value
+			: {
+					currentEthPrice: undefined,
+					currentBtcPrice: undefined,
+					currentIcpPrice: undefined,
+					currentSolPrice: undefined,
+					currentBnbPrice: undefined,
+					currentPolPrice: undefined,
+					currentArbitrumEthPrice: undefined,
+					currentBaseEthPrice: undefined,
+					currentErc20Prices: {},
+					currentIcrcPrices: {},
+					currentSplPrices: {}
+				};
 
 	const currentErc4626Prices = await calculateErc4626Prices({
 		erc20Prices: currentErc20Prices,

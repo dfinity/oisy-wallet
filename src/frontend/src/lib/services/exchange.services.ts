@@ -6,7 +6,6 @@ import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICPSWAP_PROVIDER_ENABLED } from '$env/rest/icpswap.env';
 import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
-import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
 import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
@@ -32,7 +31,6 @@ import {
 } from '$lib/utils/exchange.utils';
 import { tokenIdKey } from '$lib/utils/token-id.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
@@ -293,74 +291,22 @@ const BASE_ETH_NATIVE_ENTRY: NativeTokenEntry = {
 	tokenId: { EvmNative: BASE_NETWORK.chainId },
 	coingeckoKey: 'ethereum'
 };
-const NATIVE_TOKEN_IDS: NativeTokenEntry[] = [
-	ETH_NATIVE_ENTRY,
-	BTC_NATIVE_ENTRY,
-	ICP_NATIVE_ENTRY,
-	SOL_NATIVE_ENTRY,
-	BNB_NATIVE_ENTRY,
-	POL_NATIVE_ENTRY,
-	ARBITRUM_ETH_NATIVE_ENTRY,
-	BASE_ETH_NATIVE_ENTRY
-];
-
-const collectTokenPairs = <T>({
-	items,
-	toTokenId,
-	toIdentifier
-}: {
-	items: T[];
-	toTokenId: (item: T) => TokenId;
-	toIdentifier: (item: T) => string;
-}): { pairs: { identifier: string; key: string }[]; tokenIds: TokenId[] } =>
-	items.reduce<{ pairs: { identifier: string; key: string }[]; tokenIds: TokenId[] }>(
-		(acc, item) => {
-			const tokenId = toTokenId(item);
-			const key = tokenIdKey(tokenId);
-
-			if (isNullish(key)) {
-				return acc;
-			}
-
-			acc.tokenIds.push(tokenId);
-			acc.pairs.push({ identifier: toIdentifier(item), key });
-
-			return acc;
-		},
-		{ pairs: [], tokenIds: [] }
-	);
-
-const buildPriceMap = ({
-	pairs,
-	rates,
-	normalizeId
-}: {
-	pairs: { identifier: string; key: string }[];
-	rates: Map<string, CoingeckoSimpleTokenPrice>;
-	normalizeId?: (id: string) => string;
-}): CoingeckoSimpleTokenPriceResponse =>
-	pairs.reduce<CoingeckoSimpleTokenPriceResponse>((acc, { identifier, key }) => {
-		const rate = rates.get(key);
-
-		if (nonNullish(rate)) {
-			acc[normalizeId?.(identifier) ?? identifier] = rate;
-		}
-
-		return acc;
-	}, {});
-
-const lower = (id: string) => id.toLowerCase();
-
-export const fetchAllExchangeRatesFromBackend = async ({
-	identity,
-	erc20Addresses,
-	icrcCanisterIds,
-	splTokenAddresses
+/**
+ * Calls the per-caller `get_exchange_rates` endpoint, which derives the
+ * relevant token list server-side (native + the caller's custom tokens,
+ * filtered to priceable variants) and guarantees the response is at most
+ * ~2 minutes stale. The frontend therefore no longer has to assemble the
+ * token list itself, and no longer has to keep `erc20Addresses /
+ * icrcCanisterIds / splTokenAddresses` in sync with whatever the backend
+ * considers "the user's tokens".
+ *
+ * The returned shape is identical to the provider branch output so the worker
+ * doesn't care which source produced it.
+ */
+export const fetchExchangeRatesFromBackend = async ({
+	identity
 }: {
 	identity: Identity;
-	erc20Addresses: Erc20ContractAddressWithNetwork[];
-	icrcCanisterIds: LedgerCanisterIdText[];
-	splTokenAddresses: SplTokenAddress[];
 }): Promise<{
 	currentEthPrice: CoingeckoSimplePriceResponse | undefined;
 	currentBtcPrice: CoingeckoSimplePriceResponse | undefined;
@@ -374,40 +320,31 @@ export const fetchAllExchangeRatesFromBackend = async ({
 	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
 	currentSplPrices: CoingeckoSimpleTokenPriceResponse;
 }> => {
-	const nativeTokenIds = NATIVE_TOKEN_IDS.map(({ tokenId }) => tokenId);
-
-	const erc20 = collectTokenPairs({
-		items: erc20Addresses,
-		toTokenId: (t) => ({ Erc20: [t.address, t.chainId] }),
-		toIdentifier: (t) => t.address
-	});
-
-	const icrc = collectTokenPairs({
-		items: icrcCanisterIds,
-		toTokenId: (id) => ({ Icrc: Principal.fromText(id) }),
-		toIdentifier: (id) => id
-	});
-
-	const spl = collectTokenPairs({
-		items: splTokenAddresses,
-		toTokenId: (addr) => ({ SplMainnet: addr }),
-		toIdentifier: (addr) => addr
-	});
-
-	const ratesByKey = await getExchangeRates({
-		token_ids: [...nativeTokenIds, ...erc20.tokenIds, ...icrc.tokenIds, ...spl.tokenIds],
-		certified: true,
-		identity
-	});
+	const rates = await getExchangeRates({ identity });
 
 	const coingeckoRates = new Map<string, CoingeckoSimpleTokenPrice>();
-	ratesByKey.forEach((rate, key) => {
-		const mapped = mapExchangeRateToCoingecko(rate);
+	const currentErc20Prices: CoingeckoSimpleTokenPriceResponse = {};
+	const currentIcrcPrices: CoingeckoSimpleTokenPriceResponse = {};
+	const currentSplPrices: CoingeckoSimpleTokenPriceResponse = {};
 
+	for (const [tokenId, rate] of rates) {
+		const mapped = mapExchangeRateToCoingecko(rate);
 		if (nonNullish(mapped)) {
-			coingeckoRates.set(key, mapped);
+			const key = tokenIdKey(tokenId);
+			if (nonNullish(key)) {
+				coingeckoRates.set(key, mapped);
+			}
+
+			if ('Erc20' in tokenId) {
+				const [address] = tokenId.Erc20;
+				currentErc20Prices[address.toLowerCase()] = mapped;
+			} else if ('Icrc' in tokenId) {
+				currentIcrcPrices[tokenId.Icrc.toText().toLowerCase()] = mapped;
+			} else if ('SplMainnet' in tokenId) {
+				currentSplPrices[tokenId.SplMainnet] = mapped;
+			}
 		}
-	});
+	}
 
 	return {
 		currentEthPrice: nativePrice({ ...ETH_NATIVE_ENTRY, coingeckoRates }),
@@ -418,17 +355,9 @@ export const fetchAllExchangeRatesFromBackend = async ({
 		currentPolPrice: nativePrice({ ...POL_NATIVE_ENTRY, coingeckoRates }),
 		currentArbitrumEthPrice: nativePrice({ ...ARBITRUM_ETH_NATIVE_ENTRY, coingeckoRates }),
 		currentBaseEthPrice: nativePrice({ ...BASE_ETH_NATIVE_ENTRY, coingeckoRates }),
-		currentErc20Prices: buildPriceMap({
-			pairs: erc20.pairs,
-			rates: coingeckoRates,
-			normalizeId: lower
-		}),
-		currentIcrcPrices: buildPriceMap({
-			pairs: icrc.pairs,
-			rates: coingeckoRates,
-			normalizeId: lower
-		}),
-		currentSplPrices: buildPriceMap({ pairs: spl.pairs, rates: coingeckoRates })
+		currentErc20Prices,
+		currentIcrcPrices,
+		currentSplPrices
 	};
 };
 

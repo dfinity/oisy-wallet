@@ -38,6 +38,7 @@ export const NftCollectionSchema = z.object({
 	description: z.string().optional(),
 	newestAcquiredAt: z.date().optional(),
 	allowExternalContentSource: z.boolean().optional(),
+	allowedExternalContentSourceUrls: z.array(z.string()).optional(),
 	section: z.enum(CustomTokenSection).optional()
 });
 
