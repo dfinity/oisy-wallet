@@ -4,7 +4,7 @@ use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 use crate::{
     exchange::{
         cached_rates_snapshot, fetch_and_update_prices, priceable_tokens_for_caller,
-        stale_or_missing_tokens,
+        release_refresh_lock, stale_or_missing_tokens, try_acquire_refresh_lock,
     },
     state::read_state,
     token,
@@ -53,13 +53,22 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     token::mark_tokens_active(&active_ids);
 
     let stale = stale_or_missing_tokens(&tokens);
-    if !stale.is_empty() {
+    if !stale.is_empty() && try_acquire_refresh_lock() {
         // Background-spawn the refresh so the response isn't gated on the
         // outcall round-trip. The 60s recurring refresh will also pick these
         // up; this spawn just shortens the convergence window for tokens the
         // recurring refresh hasn't gotten to yet.
+        //
+        // We share the in-flight lock with the timer-driven refresh: if a
+        // refresh is already running (timer or another caller), this call
+        // doesn't spawn its own — the in-flight one will write the cache,
+        // and the next call will pick up the fresh values. This deduplicates
+        // outcalls under concurrent load (e.g. many users calling on a cold
+        // cache).
         ic_cdk::futures::spawn(async move {
-            if let Err(err) = fetch_and_update_prices(&stale).await {
+            let outcome = fetch_and_update_prices(&stale).await;
+            release_refresh_lock();
+            if let Err(err) = outcome {
                 ic_cdk::println!("get_exchange_rates background refresh failed: {err:?}");
             }
         });
