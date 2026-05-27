@@ -93,7 +93,7 @@ async fn refresh_exchange_rates_guarded(source: &'static str) {
     REFRESH_IN_FLIGHT.with(|f| f.set(false));
 
     if let Err(err) = outcome {
-        ic_cdk::println!("Exchange rate {source} skipped: {err:?}");
+        ic_cdk::println!("Exchange rate {source} failed: {err:?}");
     }
 }
 
