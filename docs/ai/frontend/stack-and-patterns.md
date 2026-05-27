@@ -192,6 +192,16 @@ layer and let the service own caching.
   bikeshed it.
 - **Variants & responsive:** prefer Tailwind variants (`md:`, `dark:`,
   `data-[active=true]:`) over JS branches.
+
+<!-- agent-rules:start id="tailwind-v4-important" -->
+
+- **Important modifier is a suffix in v4.** Write `mb-6!`, not the v3
+  `!mb-6` — the position inverted in Tailwind 4. The repo runs
+  `tailwindcss@4.2.2`; the v3 prefix form will not apply. Same for
+  arbitrary values (`[mask-type:luminance]!`).
+
+<!-- agent-rules:end -->
+
 - The route-level prerendered backgrounds described in
   [HACKING.md "Routes Styles"](../../../HACKING.md#routes-styles) are the
   preferred way to set route-specific colours.
