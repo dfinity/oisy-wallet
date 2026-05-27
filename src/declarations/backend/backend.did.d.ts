@@ -1780,6 +1780,17 @@ export interface _SERVICE {
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	/**
+	 * Returns whether the backend is currently fetching and caching exchange rates.
+	 *
+	 * This is the *effective* state: it mirrors the predicate used by the refresh timer
+	 * (see `crate::exchange::fetch_and_update_prices`) — `true` only when a CoinGecko API
+	 * key is configured and `exchange_rate_enabled` is not explicitly disabled.
+	 *
+	 * Exposed as an unauthenticated query so the frontend worker can decide whether to read
+	 * cached rates from the backend or fetch directly from public providers.
+	 */
+	exchange_rate_enabled: ActorMethod<[], boolean>;
+	/**
 	 * Gets account creation timestamps.
 	 */
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;

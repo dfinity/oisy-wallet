@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
-	import { EXCHANGE_DISABLED } from '$env/exchange.env';
+	import { BACKEND_EXCHANGE_ENABLED, EXCHANGE_DISABLED } from '$env/exchange.env';
 	import { erc4626TokensExchangeData } from '$eth/derived/erc4626.derived';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { loadBackendExchangeEnabled } from '$lib/services/backend-exchange-enabled.services';
 	import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
 
 	let worker = $state<ExchangeWorker | undefined>();
+	let backendExchangeEnabled = $state<boolean>(BACKEND_EXCHANGE_ENABLED);
 
 	onMount(async () => {
 		if (EXCHANGE_DISABLED) {
@@ -18,7 +20,12 @@
 			return;
 		}
 
-		worker = await ExchangeWorker.init();
+		// Resolve the effective backend flag in parallel with worker init so the first
+		// timer tick already uses the runtime value when it is available.
+		[worker, backendExchangeEnabled] = await Promise.all([
+			ExchangeWorker.init(),
+			loadBackendExchangeEnabled()
+		]);
 	});
 
 	onDestroy(() => worker?.destroy());
@@ -30,7 +37,8 @@
 			erc20Addresses: $enabledMergedErc20TokensAddresses,
 			icrcCanisterIds: $enabledIcrcLedgerCanisterIdsNoCk,
 			splAddresses: $enabledSplTokenAddresses,
-			erc4626TokensExchangeData: $erc4626TokensExchangeData
+			erc4626TokensExchangeData: $erc4626TokensExchangeData,
+			backendExchangeEnabled
 		});
 	};
 
@@ -39,6 +47,7 @@
 	$effect(() => {
 		[
 			worker,
+			backendExchangeEnabled,
 			$authIdentity,
 			$currentCurrency,
 			$enabledMergedErc20TokensAddresses,
