@@ -3,7 +3,7 @@ pub(crate) mod provider;
 mod providers;
 mod supplemental;
 
-use std::{cell::Cell, time::Duration};
+use std::time::Duration;
 
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
@@ -68,35 +68,6 @@ fn native_token_ids() -> Vec<StoredTokenId> {
     ]
 }
 
-thread_local! {
-    /// Set to `true` while a `refresh_exchange_rates` future is awaiting
-    /// outcalls. Used by the timer to skip a tick when the previous refresh
-    /// hasn't finished — otherwise a slow refresh (e.g. transient provider
-    /// latency) would let subsequent ticks pile up concurrent in-flight
-    /// refreshes, multiplying outcall load instead of catching up.
-    static REFRESH_IN_FLIGHT: Cell<bool> = const { Cell::new(false) };
-}
-
-/// Wraps [`refresh_exchange_rates`] with an in-flight guard so concurrent
-/// invocations (e.g. overlapping timer ticks) become no-ops rather than
-/// starting a parallel refresh.
-async fn refresh_exchange_rates_guarded(source: &'static str) {
-    if REFRESH_IN_FLIGHT.with(Cell::get) {
-        ic_cdk::println!("Exchange rate {source} skipped: previous refresh still in flight");
-        return;
-    }
-
-    REFRESH_IN_FLIGHT.with(|f| f.set(true));
-
-    let outcome = refresh_exchange_rates().await;
-
-    REFRESH_IN_FLIGHT.with(|f| f.set(false));
-
-    if let Err(err) = outcome {
-        ic_cdk::println!("Exchange rate {source} failed: {err:?}");
-    }
-}
-
 /// Starts a recurring timer that refreshes exchange rates for active tokens
 /// every [`PRICE_REFRESH_INTERVAL_SEC`] seconds.
 ///
@@ -104,13 +75,21 @@ async fn refresh_exchange_rates_guarded(source: &'static str) {
 /// after canister init / upgrade instead of waiting for the first interval tick.
 pub(crate) fn start_exchange_rate_timer() {
     set_timer(Duration::ZERO, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("initial refresh"));
+        ic_cdk::futures::spawn(async {
+            if let Err(err) = refresh_exchange_rates().await {
+                ic_cdk::println!("Exchange rate initial refresh skipped: {err:?}");
+            }
+        });
     });
 
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
 
     let _ = set_timer_interval(refresh_interval, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("refresh"));
+        ic_cdk::futures::spawn(async {
+            if let Err(err) = refresh_exchange_rates().await {
+                ic_cdk::println!("Exchange rate refresh skipped: {err:?}");
+            }
+        });
     });
 }
 
