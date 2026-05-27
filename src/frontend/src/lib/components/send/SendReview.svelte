@@ -25,6 +25,7 @@
 		network?: Snippet;
 		fee?: Snippet;
 		info?: Snippet;
+		topBanner?: Snippet;
 	}
 
 	type Props = BaseProps &
@@ -47,6 +48,7 @@
 		network,
 		fee,
 		info,
+		topBanner,
 		...rest
 	}: Props = $props();
 
@@ -55,6 +57,8 @@
 </script>
 
 <ContentWithToolbar>
+	{@render topBanner?.()}
+
 	{#if isNullish(nft)}
 		<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken}>
 			{#snippet subtitle()}

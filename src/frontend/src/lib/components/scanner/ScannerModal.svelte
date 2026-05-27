@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext, untrack } from 'svelte';
+	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 	import OpenCryptoPayWizard from '$lib/components/open-crypto-pay/OpenCryptoPayWizard.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import ScannerInfo from '$lib/components/scanner/ScannerInfo.svelte';
@@ -97,6 +98,22 @@
 			}
 
 			await startWalletConnect(code);
+
+			return;
+		}
+
+		if (results === ScannerResults.SOL_SEND) {
+			if (isNullish(code)) {
+				return;
+			}
+
+			modalStore.openSend({
+				id: Symbol(),
+				data: {
+					destination: code,
+					lockedNetworkId: SOLANA_MAINNET_NETWORK_ID
+				}
+			});
 
 			return;
 		}

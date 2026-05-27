@@ -27,6 +27,7 @@
 		tokenListItem: Snippet<[Token, () => void]>;
 		toolbar: Snippet;
 		noResults?: Snippet;
+		topBanner?: Snippet;
 		onSelectNetworkFilter: () => void;
 		onTokenButtonClick?: (token: Token) => void;
 	}
@@ -36,6 +37,7 @@
 		tokenListItem,
 		toolbar,
 		noResults,
+		topBanner,
 		onSelectNetworkFilter,
 		onTokenButtonClick
 	}: Props = $props();
@@ -100,6 +102,10 @@
 </script>
 
 <div data-tid={MODAL_TOKENS_LIST}>
+	{#if topBanner}
+		{@render topBanner()}
+	{/if}
+
 	<div class="input-field condensed mb-4 flex-1">
 		<InputSearch
 			autofocus={isDesktop()}

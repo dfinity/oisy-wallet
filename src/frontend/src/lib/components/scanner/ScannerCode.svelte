@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
 	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
@@ -15,6 +16,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { btcAddressMainnet } from '$lib/derived/address.derived';
 	import { networksMainnets } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
@@ -32,6 +34,7 @@
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 	import { AVAILABLE_SCREENS, filterScreens, MIN_SCREEN } from '$lib/utils/screens.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import { isSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {
 		onNext: (params: { results: ScannerResults; code?: string }) => void;
@@ -42,10 +45,14 @@
 
 	const WALLET_CONNECT_URI_PREFIX = 'wc:';
 
+	const MOBILE_ERROR_BANNER_DURATION = 3500;
+
 	let openBottomSheet = $state(false);
 	let openInfoBottomSheet = $state(false);
 	let uri = $state('');
 	let error = $state('');
+	let showMobileError = $state(false);
+	let mobileErrorTimeout: ReturnType<typeof setTimeout> | undefined;
 	let isEmptyUri = $derived(isEmptyString(uri));
 
 	// Whether to render the address input inside a bottom sheet (with an "Enter
@@ -75,6 +82,12 @@
 	const processCode = async (code: string) => {
 		if (code.startsWith(WALLET_CONNECT_URI_PREFIX)) {
 			onNext({ results: ScannerResults.WALLET_CONNECT, code });
+			return;
+		}
+
+		const trimmed = code.trim();
+		if (isSolAddress(trimmed)) {
+			onNext({ results: ScannerResults.SOL_SEND, code: trimmed });
 			return;
 		}
 
@@ -109,7 +122,15 @@
 
 			onNext({ results: ScannerResults.PAY });
 		} catch (_: unknown) {
-			error = $i18n.scanner.error.code_link_is_not_valid;
+			if (isMobile()) {
+				showMobileError = true;
+				clearTimeout(mobileErrorTimeout);
+				mobileErrorTimeout = setTimeout(() => {
+					showMobileError = false;
+				}, MOBILE_ERROR_BANNER_DURATION);
+			} else {
+				error = $i18n.scanner.error.code_link_is_not_valid;
+			}
 		} finally {
 			busy.stop();
 		}
@@ -130,12 +151,24 @@
 	$effect(() => {
 		if (isEmptyUri) {
 			error = '';
+			showMobileError = false;
 		}
 	});
+
+	onDestroy(() => clearTimeout(mobileErrorTimeout));
 </script>
 
 <div class="relative flex w-full flex-col bg-tertiary">
 	<QrCodeScanner onScan={handleScan} universalScanner />
+
+	{#if showMobileError}
+		<div
+			class="absolute top-4 right-0 left-0 mx-auto w-[90%] rounded-lg border border-error-solid bg-error-subtle-10 p-3 text-center text-sm font-bold text-error-primary"
+			transition:slide={SLIDE_DURATION}
+		>
+			{$i18n.scanner.error.code_link_is_not_valid}
+		</div>
+	{/if}
 
 	{#if !useBottomSheetInput}
 		<ScannerCodeInput
