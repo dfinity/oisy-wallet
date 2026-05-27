@@ -129,20 +129,24 @@ fn classify_tokens<'a>(token_ids: &'a [StoredTokenId]) -> ClassifiedTokens<'a> {
     }
 }
 
-/// One unit of work for the parallel fan-out: either the single batched
-/// native-coin call, or a per-platform chunk of token contract addresses.
-///
-/// We materialise this as an enum (rather than two separate `join_all`
-/// passes) so all outcalls run as one wave: the native-coin call has no
-/// reason to block the per-platform calls and vice-versa.
-enum FetchUnit<'a> {
-    Native {
-        coin_ids: Vec<&'a str>,
-    },
+/// Input to one parallel fan-out branch: the native-coin batch carries the
+/// list of coin IDs to fetch; the per-chunk branch carries the platform name
+/// and an address slice.
+enum FetchInput<'a> {
+    Native(Vec<&'a str>),
     Chunk {
         platform: &'a str,
         addresses: &'a [String],
     },
+}
+
+/// Lightweight tag returned alongside each outcome so the post-`join_all`
+/// loop knows how to interpret the result. `Chunk` re-borrows the platform
+/// name (the original lives in `contract_platforms`, which outlives the
+/// futures) so we don't need to clone strings.
+enum FetchTag<'a> {
+    Native,
+    Chunk(&'a str),
 }
 
 impl ExchangePriceProvider for CoinGeckoProvider {
@@ -156,58 +160,49 @@ impl ExchangePriceProvider for CoinGeckoProvider {
             address_to_token_id,
         } = classify_tokens(token_ids);
 
-        // Collect all the independent HTTP outcalls into a single set of
-        // futures so they can be issued concurrently.
-        //
-        // On the IC each outcall goes through consensus independently, so
-        // sequentialising the loop (the prior shape) added up to multi-second
-        // wall-time penalties for users with tokens spread across several
-        // chains. `join_all` polls each future together, so the total wait is
-        // the slowest single outcall instead of the sum of all of them.
-        let mut units: Vec<FetchUnit<'_>> = Vec::new();
+        // Issue all independent HTTP outcalls concurrently. On the IC each
+        // outcall goes through consensus independently, so the prior
+        // sequential loop added up to multi-second wall-time penalties for
+        // users with tokens spread across several chains. `join_all` polls
+        // each future together, so the total wait is the slowest single
+        // outcall instead of the sum of all of them.
+        let mut inputs: Vec<FetchInput<'_>> = Vec::new();
 
         if !native_coins.is_empty() {
-            units.push(FetchUnit::Native {
-                coin_ids: native_coins.keys().copied().collect(),
-            });
+            inputs.push(FetchInput::Native(native_coins.keys().copied().collect()));
         }
 
         for (platform, addresses) in &contract_platforms {
             for chunk in addresses.chunks(CHUNK_SIZE) {
-                units.push(FetchUnit::Chunk {
+                inputs.push(FetchInput::Chunk {
                     platform: platform.as_str(),
                     addresses: chunk,
                 });
             }
         }
 
-        let outcomes = join_all(units.into_iter().map(|unit| async move {
-            match unit {
-                FetchUnit::Native { coin_ids } => (
-                    FetchUnit::Native {
-                        coin_ids: coin_ids.clone(),
-                    },
-                    self.client.fetch_coin_prices(&coin_ids).await,
-                ),
-                FetchUnit::Chunk {
+        let outcomes = join_all(inputs.into_iter().map(|input| async move {
+            match input {
+                FetchInput::Native(coin_ids) => {
+                    let outcome = self.client.fetch_coin_prices(&coin_ids).await;
+                    (FetchTag::Native, outcome)
+                }
+                FetchInput::Chunk {
                     platform,
                     addresses,
-                } => (
-                    FetchUnit::Chunk {
-                        platform,
-                        addresses,
-                    },
-                    self.client.fetch_token_prices(platform, addresses).await,
-                ),
+                } => {
+                    let outcome = self.client.fetch_token_prices(platform, addresses).await;
+                    (FetchTag::Chunk(platform), outcome)
+                }
             }
         }))
         .await;
 
         let mut result = Vec::new();
 
-        for (unit, outcome) in outcomes {
-            match (unit, outcome) {
-                (FetchUnit::Native { .. }, Ok(prices)) => {
+        for (tag, outcome) in outcomes {
+            match (tag, outcome) {
+                (FetchTag::Native, Ok(prices)) => {
                     for (coin_id, exchange_data) in &prices {
                         if let Some(token_ids) = native_coins.get(coin_id.as_str()) {
                             for token_id in token_ids {
@@ -216,10 +211,10 @@ impl ExchangePriceProvider for CoinGeckoProvider {
                         }
                     }
                 }
-                (FetchUnit::Native { .. }, Err(err)) => {
+                (FetchTag::Native, Err(err)) => {
                     ic_cdk::println!("Failed to fetch native coin prices: {err}");
                 }
-                (FetchUnit::Chunk { platform, .. }, Ok(prices)) => {
+                (FetchTag::Chunk(platform), Ok(prices)) => {
                     for (address, exchange_data) in prices {
                         if let Some(token_id) =
                             address_to_token_id.get(&(platform.to_string(), address.to_lowercase()))
@@ -228,7 +223,7 @@ impl ExchangePriceProvider for CoinGeckoProvider {
                         }
                     }
                 }
-                (FetchUnit::Chunk { platform, .. }, Err(err)) => {
+                (FetchTag::Chunk(platform), Err(err)) => {
                     ic_cdk::println!("Failed to fetch prices for {platform}: {err}");
                 }
             }
