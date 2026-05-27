@@ -3,6 +3,7 @@ mod platform;
 
 use std::collections::HashMap;
 
+use futures::future::join_all;
 use shared::types::{exchange::ExchangeData, token_id::TokenId};
 
 pub(crate) use self::platform::is_priceable_token_id;
@@ -128,24 +129,80 @@ fn classify_tokens<'a>(token_ids: &'a [StoredTokenId]) -> ClassifiedTokens<'a> {
     }
 }
 
+/// Input to one parallel fan-out branch: the native-coin batch carries the
+/// list of coin IDs to fetch; the per-chunk branch carries the platform name
+/// and an address slice.
+enum FetchInput<'a> {
+    Native(Vec<&'a str>),
+    Chunk {
+        platform: &'a str,
+        addresses: &'a [String],
+    },
+}
+
+/// Lightweight tag returned alongside each outcome so the post-`join_all`
+/// loop knows how to interpret the result. `Chunk` re-borrows the platform
+/// name (the original lives in `contract_platforms`, which outlives the
+/// futures) so we don't need to clone strings.
+enum FetchTag<'a> {
+    Native,
+    Chunk(&'a str),
+}
+
 impl ExchangePriceProvider for CoinGeckoProvider {
     async fn fetch_prices(
         &self,
         token_ids: &[StoredTokenId],
     ) -> Result<Vec<(StoredTokenId, ExchangeData)>, String> {
-        let mut result = Vec::new();
-
         let ClassifiedTokens {
             native_coins,
             contract_platforms,
             address_to_token_id,
         } = classify_tokens(token_ids);
 
-        if !native_coins.is_empty() {
-            let coin_ids: Vec<&str> = native_coins.keys().copied().collect();
+        // Issue all independent HTTP outcalls concurrently. On the IC each
+        // outcall goes through consensus independently, so the prior
+        // sequential loop added up to multi-second wall-time penalties for
+        // users with tokens spread across several chains. `join_all` polls
+        // each future together, so the total wait is the slowest single
+        // outcall instead of the sum of all of them.
+        let mut inputs: Vec<FetchInput<'_>> = Vec::new();
 
-            match self.client.fetch_coin_prices(&coin_ids).await {
-                Ok(prices) => {
+        if !native_coins.is_empty() {
+            inputs.push(FetchInput::Native(native_coins.keys().copied().collect()));
+        }
+
+        for (platform, addresses) in &contract_platforms {
+            for chunk in addresses.chunks(CHUNK_SIZE) {
+                inputs.push(FetchInput::Chunk {
+                    platform: platform.as_str(),
+                    addresses: chunk,
+                });
+            }
+        }
+
+        let outcomes = join_all(inputs.into_iter().map(|input| async move {
+            match input {
+                FetchInput::Native(coin_ids) => {
+                    let outcome = self.client.fetch_coin_prices(&coin_ids).await;
+                    (FetchTag::Native, outcome)
+                }
+                FetchInput::Chunk {
+                    platform,
+                    addresses,
+                } => {
+                    let outcome = self.client.fetch_token_prices(platform, addresses).await;
+                    (FetchTag::Chunk(platform), outcome)
+                }
+            }
+        }))
+        .await;
+
+        let mut result = Vec::new();
+
+        for (tag, outcome) in outcomes {
+            match (tag, outcome) {
+                (FetchTag::Native, Ok(prices)) => {
                     for (coin_id, exchange_data) in &prices {
                         if let Some(token_ids) = native_coins.get(coin_id.as_str()) {
                             for token_id in token_ids {
@@ -154,27 +211,20 @@ impl ExchangePriceProvider for CoinGeckoProvider {
                         }
                     }
                 }
-                Err(err) => {
+                (FetchTag::Native, Err(err)) => {
                     ic_cdk::println!("Failed to fetch native coin prices: {err}");
                 }
-            }
-        }
-
-        for (platform, addresses) in &contract_platforms {
-            for chunk in addresses.chunks(CHUNK_SIZE) {
-                match self.client.fetch_token_prices(platform, chunk).await {
-                    Ok(prices) => {
-                        for (address, exchange_data) in prices {
-                            if let Some(token_id) =
-                                address_to_token_id.get(&(platform.clone(), address.to_lowercase()))
-                            {
-                                result.push((token_id.clone(), exchange_data));
-                            }
+                (FetchTag::Chunk(platform), Ok(prices)) => {
+                    for (address, exchange_data) in prices {
+                        if let Some(token_id) =
+                            address_to_token_id.get(&(platform.to_string(), address.to_lowercase()))
+                        {
+                            result.push((token_id.clone(), exchange_data));
                         }
                     }
-                    Err(err) => {
-                        ic_cdk::println!("Failed to fetch prices for {platform}: {err}");
-                    }
+                }
+                (FetchTag::Chunk(platform), Err(err)) => {
+                    ic_cdk::println!("Failed to fetch prices for {platform}: {err}");
                 }
             }
         }

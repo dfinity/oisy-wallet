@@ -3,7 +3,7 @@ pub(crate) mod provider;
 mod providers;
 mod supplemental;
 
-use std::time::Duration;
+use std::{cell::Cell, time::Duration};
 
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
@@ -68,6 +68,56 @@ fn native_token_ids() -> Vec<StoredTokenId> {
     ]
 }
 
+thread_local! {
+    /// Set to `true` while *any* provider refresh (timer-driven or
+    /// caller-triggered background refresh from `get_exchange_rates`) is
+    /// awaiting outcalls. Both call sites cooperate via this single flag so
+    /// they don't duplicate outcalls for the same tokens — if the timer is
+    /// refreshing, a concurrent on-demand call is a no-op (the timer is
+    /// already fetching the superset); if an on-demand refresh is in
+    /// flight, the next timer tick is a no-op until it completes.
+    static REFRESH_IN_FLIGHT: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Tries to set [`REFRESH_IN_FLIGHT`]; returns `true` if the caller acquired
+/// the lock, `false` if a refresh was already in flight. Callers that
+/// acquire the lock are responsible for calling [`release_refresh_lock`] in
+/// every completion path.
+pub(crate) fn try_acquire_refresh_lock() -> bool {
+    REFRESH_IN_FLIGHT.with(|f| {
+        if f.get() {
+            false
+        } else {
+            f.set(true);
+            true
+        }
+    })
+}
+
+/// Clears [`REFRESH_IN_FLIGHT`]. Must only be called by the holder of the
+/// lock (i.e. after a successful [`try_acquire_refresh_lock`]).
+pub(crate) fn release_refresh_lock() {
+    REFRESH_IN_FLIGHT.with(|f| f.set(false));
+}
+
+/// Wraps [`refresh_exchange_rates`] with the in-flight guard so concurrent
+/// timer invocations (e.g. overlapping ticks) become no-ops rather than
+/// starting a parallel refresh.
+async fn refresh_exchange_rates_guarded(source: &'static str) {
+    if !try_acquire_refresh_lock() {
+        ic_cdk::println!("Exchange rate {source} skipped: previous refresh still in flight");
+        return;
+    }
+
+    let outcome = refresh_exchange_rates().await;
+
+    release_refresh_lock();
+
+    if let Err(err) = outcome {
+        ic_cdk::println!("Exchange rate {source} failed: {err:?}");
+    }
+}
+
 /// Starts a recurring timer that refreshes exchange rates for active tokens
 /// every [`PRICE_REFRESH_INTERVAL_SEC`] seconds.
 ///
@@ -75,21 +125,13 @@ fn native_token_ids() -> Vec<StoredTokenId> {
 /// after canister init / upgrade instead of waiting for the first interval tick.
 pub(crate) fn start_exchange_rate_timer() {
     set_timer(Duration::ZERO, || {
-        ic_cdk::futures::spawn(async {
-            if let Err(err) = refresh_exchange_rates().await {
-                ic_cdk::println!("Exchange rate initial refresh skipped: {err:?}");
-            }
-        });
+        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("initial refresh"));
     });
 
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
 
     let _ = set_timer_interval(refresh_interval, || {
-        ic_cdk::futures::spawn(async {
-            if let Err(err) = refresh_exchange_rates().await {
-                ic_cdk::println!("Exchange rate refresh skipped: {err:?}");
-            }
-        });
+        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("refresh"));
     });
 }
 
