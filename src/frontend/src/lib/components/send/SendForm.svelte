@@ -19,6 +19,7 @@
 		fee?: Snippet;
 		info?: Snippet;
 		cancel: Snippet;
+		topBanner?: Snippet;
 	}
 
 	let {
@@ -31,7 +32,8 @@
 		sendAmount,
 		fee,
 		info,
-		cancel
+		cancel,
+		topBanner
 	}: Props = $props();
 
 	const back = () => onBack();
@@ -39,6 +41,8 @@
 
 <form method="POST" onsubmit={preventDefault(onNext)}>
 	<ContentWithToolbar>
+		{@render topBanner?.()}
+
 		{@render sendAmount()}
 
 		<SendDestination
