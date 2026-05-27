@@ -32,7 +32,9 @@
 		solAddressDevnetNotLoaded,
 		solAddressMainnetNotLoaded
 	} from '$lib/derived/address.derived';
+	import { modalSendData } from '$lib/derived/modal.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { networks } from '$lib/derived/networks.derived';
 	import { pageNft } from '$lib/derived/page-nft.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -45,6 +47,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
@@ -64,6 +67,7 @@
 	} from '$lib/utils/network.utils';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
+	import { shouldSkipDestinationStep } from '$lib/utils/send.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
@@ -73,7 +77,13 @@
 
 	let { isTransactionsPage, isNftsPage }: Props = $props();
 
-	let destination = $state('');
+	const initialModalData = $modalSendData;
+	const lockedNetworkId = initialModalData?.lockedNetworkId;
+	let lockedNetwork = $derived(
+		nonNullish(lockedNetworkId) ? $networks.find(({ id }) => id === lockedNetworkId) : undefined
+	);
+
+	let destination = $state(initialModalData?.destination ?? '');
 	let activeSendDestinationTab = $state<SendDestinationTab>('recentlyUsed');
 	let selectedContact = $state<ContactUi | undefined>();
 	let amount = $state<number | undefined>();
@@ -127,9 +137,13 @@
 		initModalTokensListContext({
 			tokens: $enabledTokens,
 			filterZeroBalance: true,
-			filterNetwork: $selectedNetwork
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
+			filterNetwork: lockedNetwork ?? $selectedNetwork
 		})
 	);
+
+	setContext<boolean>(SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, nonNullish(initialModalData));
 
 	const reset = () => {
 		destination = '';
@@ -173,9 +187,11 @@
 			}
 		}
 
+		const skip = shouldSkipDestinationStep({ destination, token });
+
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			goToStep(WizardStepsSend.DESTINATION);
+			goToStep(skip ? WizardStepsSend.SEND : WizardStepsSend.DESTINATION);
 		};
 
 		await loadTokenAndRun({ token, callback });
@@ -245,6 +261,7 @@
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 				<SendTokensList
+					{lockedNetwork}
 					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 					{onSendToken}
 				/>
