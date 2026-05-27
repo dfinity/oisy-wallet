@@ -4,7 +4,7 @@ use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 use crate::{
     exchange::{
         cached_rates_snapshot, fetch_and_update_prices, priceable_tokens_for_caller,
-        stale_or_missing_tokens,
+        release_refresh_lock, stale_or_missing_tokens, try_acquire_refresh_lock,
     },
     state::{read_state, with_api_keys},
     token,
@@ -20,17 +20,27 @@ use crate::{
 ///   (testnets, NFTs and ERC-4626 vaults are excluded).
 ///
 /// The endpoint also re-marks the returned tokens as active so the
-/// background refresh timer keeps them warm. If any cached price is older
-/// than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`] seconds or
-/// missing, the endpoint awaits a one-shot fetch for that subset before
-/// responding. Entries that remain stale or missing after that attempt are
-/// returned as `None` so returned prices honour the freshness contract.
+/// background refresh timer keeps them warm. If any cached price is
+/// missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
+/// seconds, the endpoint kicks off a refresh for that subset **in the
+/// background** (via `ic_cdk::futures::spawn`) and returns the current cache
+/// snapshot immediately. Entries that are still missing or stale at the
+/// moment of the call are returned as `None`; subsequent calls will pick up
+/// the refreshed values once the spawned fetch lands.
 ///
-/// This is an `update` (rather than a `query`) because it mutates state
-/// (`token_activity`) and may issue HTTP outcalls.
+/// This trade-off (return fast, refresh async) is intentional: under the
+/// previous "await-the-fetch" shape, a cold-cache caller could wait on the
+/// full outcall fan-in before getting any response. The frontend already
+/// tolerates `None` entries (renders no value rather than blocking), and
+/// the background refresh + the 60s recurring timer together converge the
+/// cache to fresh within ~one outcall round.
+///
+/// This is still an `update` (rather than a `query`) because it mutates
+/// state (`token_activity`) and may need an update context to schedule the
+/// background fetch.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub async fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
+pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     let caller = StoredPrincipal(msg_caller());
 
     let tokens = priceable_tokens_for_caller(caller);
@@ -43,10 +53,25 @@ pub async fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     token::mark_tokens_active(&active_ids);
 
     let stale = stale_or_missing_tokens(&tokens);
-    if !stale.is_empty() {
-        if let Err(err) = fetch_and_update_prices(&stale).await {
-            ic_cdk::println!("get_exchange_rates fetch failed: {err:?}");
-        }
+    if !stale.is_empty() && try_acquire_refresh_lock() {
+        // Background-spawn the refresh so the response isn't gated on the
+        // outcall round-trip. The 60s recurring refresh will also pick these
+        // up; this spawn just shortens the convergence window for tokens the
+        // recurring refresh hasn't gotten to yet.
+        //
+        // We share the in-flight lock with the timer-driven refresh: if a
+        // refresh is already running (timer or another caller), this call
+        // doesn't spawn its own — the in-flight one will write the cache,
+        // and the next call will pick up the fresh values. This deduplicates
+        // outcalls under concurrent load (e.g. many users calling on a cold
+        // cache).
+        ic_cdk::futures::spawn(async move {
+            let outcome = fetch_and_update_prices(&stale).await;
+            release_refresh_lock();
+            if let Err(err) = outcome {
+                ic_cdk::println!("get_exchange_rates background refresh failed: {err:?}");
+            }
+        });
     }
 
     cached_rates_snapshot(tokens)
