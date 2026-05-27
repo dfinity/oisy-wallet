@@ -29,6 +29,7 @@
 			"not_available": "해당 없음",
 			"new": "새로 만들기",
 			"edit": "편집",
+			"download": "다운로드",
 			"no_results": "결과 없음",
 			"paste": "붙여넣기",
 			"to": "받는 사람",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 활성화",
 			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
 			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
-			"learn_more": ""
+			"export_data": "데이터 내보내기",
+			"export_data_description": "토큰과 거래를 CSV로 다운로드하세요 — 기본 항목은 Basic, 추가 속성은 Extended로 확인할 수 있습니다.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "토큰 내보내기",
+			"export_transactions": "거래 내보내기",
+			"export_tokens_success": "토큰 CSV가 다운로드되었습니다.",
+			"export_transactions_success": "거래 CSV가 다운로드되었습니다.",
+			"learn_more": "자세히 알아보기"
 		},
 		"alt": {
 			"testnets_toggle": "테스트넷 표시 또는 숨기기 토글",
@@ -803,7 +812,9 @@
 			"appearance_system": "운영 체제의 색상 모드 활성화"
 		},
 		"error": {
-			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요."
+			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요.",
+			"export_exchange_rate_unavailable": "환율을 아직 불러오는 중입니다. 잠시 후 다시 시도해 주세요.",
+			"export_failed": "내보내기를 생성하지 못했습니다. 다시 시도해 주세요."
 		}
 	},
 	"shortcuts": {

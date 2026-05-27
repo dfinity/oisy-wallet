@@ -29,6 +29,7 @@
 			"not_available": "Không có",
 			"new": "Mới",
 			"edit": "Chỉnh sửa",
+			"download": "Tải xuống",
 			"no_results": "Không có kết quả",
 			"paste": "Dán",
 			"to": "Đến",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "Bật ẩn các giao dịch có giá trị rất nhỏ",
 			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
 			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
-			"learn_more": ""
+			"export_data": "Xuất dữ liệu",
+			"export_data_description": "Tải xuống token và giao dịch của bạn dưới dạng CSV — Basic cho thông tin cơ bản, Extended cho các thuộc tính bổ sung.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Xuất token",
+			"export_transactions": "Xuất giao dịch",
+			"export_tokens_success": "Đã tải xuống CSV token.",
+			"export_transactions_success": "Đã tải xuống CSV giao dịch.",
+			"learn_more": "Tìm hiểu thêm"
 		},
 		"alt": {
 			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
@@ -803,7 +812,9 @@
 			"appearance_system": "Bật chế độ màu theo hệ điều hành của bạn"
 		},
 		"error": {
-			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ."
+			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ.",
+			"export_exchange_rate_unavailable": "Tỷ giá hối đoái vẫn đang được tải. Vui lòng thử lại sau ít phút.",
+			"export_failed": "Chúng tôi không thể tạo bản xuất của bạn. Vui lòng thử lại."
 		}
 	},
 	"shortcuts": {

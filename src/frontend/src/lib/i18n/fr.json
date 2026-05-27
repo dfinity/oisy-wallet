@@ -29,6 +29,7 @@
 			"not_available": "n/a",
 			"new": "Nouveau",
 			"edit": "Modifier",
+			"download": "Télécharger",
 			"no_results": "Aucun résultat",
 			"paste": "Coller",
 			"to": "À",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "Activer le masquage des transactions de très petites valeurs",
 			"disable_hide_micro_transactions": "Désactiver le masquage des transactions de très petites valeurs",
 			"save_spam_filter_success": "Les paramètres de votre filtre anti-spam ont été mis à jour.",
-			"learn_more": ""
+			"export_data": "Exporter les données",
+			"export_data_description": "Téléchargez vos tokens et transactions au format CSV — Basic pour l'essentiel, Extended pour des attributs supplémentaires.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Exporter les tokens",
+			"export_transactions": "Exporter les transactions",
+			"export_tokens_success": "CSV des tokens téléchargé.",
+			"export_transactions_success": "CSV des transactions téléchargé.",
+			"learn_more": "En savoir plus"
 		},
 		"alt": {
 			"testnets_toggle": "Basculer pour afficher ou masquer les testnets",
@@ -803,7 +812,9 @@
 			"appearance_system": "Active le mode couleur de votre système d'exploitation"
 		},
 		"error": {
-			"loading_profile": "Erreur lors du chargement du profil. Veuillez actualiser la page pour profiter de l'expérience complète."
+			"loading_profile": "Erreur lors du chargement du profil. Veuillez actualiser la page pour profiter de l'expérience complète.",
+			"export_exchange_rate_unavailable": "Les taux de change sont encore en cours de chargement. Réessayez dans un instant.",
+			"export_failed": "Nous n'avons pas pu générer votre export. Veuillez réessayer."
 		}
 	},
 	"shortcuts": {

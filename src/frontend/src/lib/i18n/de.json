@@ -29,6 +29,7 @@
 			"not_available": "k. A.",
 			"new": "Neu",
 			"edit": "Bearbeiten",
+			"download": "Herunterladen",
 			"no_results": "Keine Ergebnisse",
 			"paste": "Einfügen",
 			"to": "An",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "Ausblenden von Transaktionen mit sehr kleinen Werten aktivieren",
 			"disable_hide_micro_transactions": "Ausblenden von Transaktionen mit sehr kleinen Werten deaktivieren",
 			"save_spam_filter_success": "Ihre Spam-Filter-Einstellungen wurden aktualisiert.",
-			"learn_more": ""
+			"export_data": "Daten exportieren",
+			"export_data_description": "Lade deine Tokens und Transaktionen als CSV herunter — Basic für das Wesentliche, Extended für zusätzliche Attribute.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Tokens exportieren",
+			"export_transactions": "Transaktionen exportieren",
+			"export_tokens_success": "CSV mit Tokens heruntergeladen.",
+			"export_transactions_success": "CSV mit Transaktionen heruntergeladen.",
+			"learn_more": "Erfahre mehr"
 		},
 		"alt": {
 			"testnets_toggle": "Umschalten, um Testnetzwerke anzuzeigen oder zu verbergen",
@@ -803,7 +812,9 @@
 			"appearance_system": "Aktiviert den Farbmodus deines Betriebssystems"
 		},
 		"error": {
-			"loading_profile": "Fehler beim Laden des Profils. Bitte aktualisiere die Seite, um das volle Erlebnis zu haben."
+			"loading_profile": "Fehler beim Laden des Profils. Bitte aktualisiere die Seite, um das volle Erlebnis zu haben.",
+			"export_exchange_rate_unavailable": "Wechselkurse werden noch geladen. Versuche es in einem Moment erneut.",
+			"export_failed": "Wir konnten deinen Export nicht erstellen. Bitte versuche es erneut."
 		}
 	},
 	"shortcuts": {

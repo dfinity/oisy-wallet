@@ -29,6 +29,7 @@
 			"not_available": "Недоступно",
 			"new": "New",
 			"edit": "Изменить",
+			"download": "Скачать",
 			"no_results": "Нет результатов",
 			"paste": "Вставить",
 			"to": "Кому",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "Включить скрытие транзакций с очень маленькими значениями",
 			"disable_hide_micro_transactions": "Отключить скрытие транзакций с очень маленькими значениями",
 			"save_spam_filter_success": "Настройки вашего спам-фильтра были обновлены.",
-			"learn_more": ""
+			"export_data": "Экспорт данных",
+			"export_data_description": "Скачивайте свои токены и транзакции в формате CSV — Basic для основной информации, Extended для дополнительных атрибутов.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Экспорт токенов",
+			"export_transactions": "Экспорт транзакций",
+			"export_tokens_success": "CSV с токенами загружен.",
+			"export_transactions_success": "CSV с транзакциями загружен.",
+			"learn_more": "Узнать больше"
 		},
 		"alt": {
 			"testnets_toggle": "Переключить, чтобы показать или скрыть тестовые сети",
@@ -803,7 +812,9 @@
 			"appearance_system": "Включает цветовой режим вашей операционной системы"
 		},
 		"error": {
-			"loading_profile": "Ошибка при загрузке профиля. Пожалуйста, обновите страницу для полного опыта."
+			"loading_profile": "Ошибка при загрузке профиля. Пожалуйста, обновите страницу для полного опыта.",
+			"export_exchange_rate_unavailable": "Курсы валют ещё загружаются. Попробуйте через мгновение.",
+			"export_failed": "Не удалось создать экспорт. Пожалуйста, попробуйте ещё раз."
 		}
 	},
 	"shortcuts": {
