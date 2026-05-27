@@ -33,23 +33,37 @@
 	// Redirect to the assets' page if the collection can't be loaded within 10 seconds
 	let timeout: NodeJS.Timeout | undefined = $state();
 
-	onMount(() => {
+	const armTimeout = () => {
+		if (nonNullish(timeout)) {
+			clearTimeout(timeout);
+		}
 		timeout = setTimeout(() => {
 			if (isNullish(collection)) {
-				// Don't redirect while an enable/import flow is in progress.
+				// Don't redirect while an enable/import flow is in progress; the effect below re-arms us once it closes.
 				if ($modalManageTokens) {
+					timeout = undefined;
 					return;
 				}
 				goto(`${AppPath.Nfts}${page.url.search}`);
 				toastsError({ msg: { text: $i18n.nfts.text.collection_not_loaded } });
 			}
 		}, FALLBACK_TIMEOUT);
+	};
+
+	onMount(() => {
+		armTimeout();
 
 		return () => {
 			if (nonNullish(timeout)) {
 				clearTimeout(timeout);
 			}
 		};
+	});
+
+	$effect(() => {
+		if (!$modalManageTokens && isNullish(collection) && isNullish(timeout)) {
+			armTimeout();
+		}
 	});
 </script>
 
