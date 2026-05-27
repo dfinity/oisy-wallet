@@ -537,11 +537,7 @@ interface I18nSettings {
 		export_basic: string;
 		export_extended: string;
 		export_tokens: string;
-		export_tokens_basic_description: string;
-		export_tokens_description: string;
 		export_transactions: string;
-		export_transactions_basic_description: string;
-		export_transactions_description: string;
 		export_tokens_success: string;
 		export_transactions_success: string;
 		learn_more: string;
