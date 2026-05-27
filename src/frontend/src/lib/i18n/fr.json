@@ -967,7 +967,8 @@
 			"pending_bitcoin_transaction": "Vous pourrez envoyer une autre transaction Bitcoin une fois celle en attente terminée.",
 			"no_available_utxos": "Vous n'aurez pas d'utxos disponibles pour effectuer cette transaction.",
 			"unknown_destination": "Vous n'avez pas interagi avec cette adresse auparavant. Veuillez vous assurer de connaître le destinataire.",
-			"fee_info": "Les frais seront payés en $feeSymbol. Disponible : <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Les frais seront payés en $feeSymbol. Disponible : <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Le code scanné ne contenait qu'une adresse de destination. Assurez-vous de sélectionner le bon token, de saisir le bon montant et de vérifier attentivement l'adresse de destination !"
 		},
 		"assertion": {
 			"invalid_destination_address": "Adresse de destination invalide",

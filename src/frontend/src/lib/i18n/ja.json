@@ -967,7 +967,8 @@
 			"pending_bitcoin_transaction": "現在のBTCトランザクションが完了するまで、新たな送信はできません。",
 			"no_available_utxos": "このトランザクションを行うための利用可能なUTXOが不足しています。",
 			"unknown_destination": "このアドレスとやり取りは初めてです。送信先を確認してください。",
-			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "スキャンしたコードには宛先アドレスのみが含まれていました。正しいトークンを選択し、正しい数量を入力し、宛先アドレスを慎重に確認してください！"
 		},
 		"assertion": {
 			"invalid_destination_address": "送信先アドレスが無効です",
