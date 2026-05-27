@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
+	import { getContext, untrack, type Snippet } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import TokenCategoryFilterDropdown from '$lib/components/tokens/TokenCategoryFilterDropdown.svelte';
+	import TokenStandardFilterDropdown from '$lib/components/tokens/TokenStandardFilterDropdown.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import ModalFilterButton from '$lib/components/ui/ModalFilterButton.svelte';
@@ -45,7 +46,9 @@
 		filterQuery,
 		setFilterQuery,
 		filterCategoryTag,
-		setFilterCategoryTag
+		setFilterCategoryTag,
+		filterStandard,
+		setFilterStandard
 	} = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
 	let filter = $state('');
@@ -66,10 +69,31 @@
 		setFilterQuery(filter);
 	});
 
-	let displayTokens = $derived(
+	let categoryFilteredTokens = $derived(
 		$showTokenCategoryFilter
 			? filterTokensUiByCategory({ tokens: $filteredTokens, category: $filterCategoryTag })
 			: $filteredTokens
+	);
+
+	let availableStandards = $derived(
+		Array.from(new Set(categoryFilteredTokens.map(({ standard }) => standard.code))).sort()
+	);
+
+	$effect(() => {
+		const selected = $filterStandard;
+		const standards = availableStandards;
+
+		untrack(() => {
+			if (selected !== undefined && !standards.includes(selected)) {
+				setFilterStandard(undefined);
+			}
+		});
+	});
+
+	let displayTokens = $derived(
+		$filterStandard === undefined
+			? categoryFilteredTokens
+			: categoryFilteredTokens.filter(({ standard }) => standard.code === $filterStandard)
 	);
 
 	let noTokensMatch = $derived(displayTokens.length === 0);
@@ -98,6 +122,14 @@
 			<TokenCategoryFilterDropdown
 				onSelect={setFilterCategoryTag}
 				selectedCategory={$filterCategoryTag}
+			/>
+		{/if}
+
+		{#if availableStandards.length >= 2}
+			<TokenStandardFilterDropdown
+				{availableStandards}
+				onSelect={setFilterStandard}
+				selectedStandard={$filterStandard}
 			/>
 		{/if}
 	</div>
