@@ -21,6 +21,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import { compareNatural } from '$lib/utils/string.utils';
 
 	interface Props {
 		nft?: Nft;
@@ -39,7 +40,7 @@
 	const sortedAttributes = $derived(
 		nonNullish(nft?.attributes)
 			? // eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
-				nft.attributes.toSorted((a, b) => a.traitType.localeCompare(b.traitType))
+				nft.attributes.toSorted((a, b) => compareNatural(a.traitType, b.traitType))
 			: []
 	);
 

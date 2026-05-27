@@ -32,6 +32,7 @@
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 	import { AVAILABLE_SCREENS, filterScreens, MIN_SCREEN } from '$lib/utils/screens.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import { isSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {
 		onNext: (params: { results: ScannerResults; code?: string }) => void;
@@ -75,6 +76,12 @@
 	const processCode = async (code: string) => {
 		if (code.startsWith(WALLET_CONNECT_URI_PREFIX)) {
 			onNext({ results: ScannerResults.WALLET_CONNECT, code });
+			return;
+		}
+
+		const trimmed = code.trim();
+		if (isSolAddress(trimmed)) {
+			onNext({ results: ScannerResults.SOL_SEND, code: trimmed });
 			return;
 		}
 
