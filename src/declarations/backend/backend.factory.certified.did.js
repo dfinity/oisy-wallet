@@ -787,6 +787,7 @@ export const idlFactory = ({ IDL }) => {
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
 		exchange_rate_cost_log: IDL.Func([], [IDL.Vec(ExchangeOutcallRecord)]),
 		exchange_rate_cost_summary: IDL.Func([], [ExchangeCostSummary]),
+		exchange_rate_enabled: IDL.Func([], [IDL.Bool]),
 		get_account_creation_timestamps: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))]),
 		get_active_user_transactions: IDL.Func([], [GetActiveUserTransactionsResult]),
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
