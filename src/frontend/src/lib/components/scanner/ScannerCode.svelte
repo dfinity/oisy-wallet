@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
@@ -122,6 +122,8 @@
 			error = '';
 		}
 	});
+
+	onDestroy(() => clearTimeout(mobileErrorTimeout));
 </script>
 
 <div class="relative flex w-full flex-col bg-tertiary">
