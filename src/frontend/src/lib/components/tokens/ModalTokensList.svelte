@@ -109,7 +109,7 @@
 		/>
 	</div>
 
-	<div class="flex items-center gap-2">
+	<div class="flex items-stretch gap-2">
 		<ModalFilterButton
 			ariaLabel={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			disabled={networkSelectorViewOnly}
