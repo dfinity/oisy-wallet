@@ -5,6 +5,7 @@ import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.c
 import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
+import { screensStore } from '$lib/stores/screens.store';
 import type {
 	OpenCryptoPayResponse,
 	PayableToken,
@@ -16,6 +17,7 @@ import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/open-crypto-pay.services', () => ({
 	processOpenCryptoPayCode: vi.fn(),
@@ -210,11 +212,30 @@ describe('ScannerCode.svelte', () => {
 		await fireEvent.click(enterManuallyButton);
 	};
 
+	// Create the isMobile spy once for the suite. clearAllMocks resets its call
+	// history between tests but leaves the spy installed; restoreAllMocks at the
+	// end puts the original implementation back. Per-test return values are set
+	// via isMobileSpy.mockReturnValue(...) rather than re-spying.
+	let isMobileSpy: MockInstance<typeof deviceUtils.isMobile>;
+
+	beforeAll(() => {
+		isMobileSpy = vi.spyOn(deviceUtils, 'isMobile');
+	});
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		isMobileSpy.mockReturnValue(true);
+		// Default to a narrow viewport so the mobile bottom-sheet branch renders.
+		// Tests covering the wide-viewport-mobile case override this explicitly.
+		screensStore.set('xs');
+
 		vi.mocked(openCryptoPayUtils.prepareBasePayableTokens).mockReturnValue(mockBaseTokens);
 		vi.mocked(openCryptoPayServices.calculateTokensWithFees).mockResolvedValue(mockTokensWithFees);
+	});
+
+	afterAll(() => {
+		vi.restoreAllMocks();
 	});
 
 	it('should render QR scanner', () => {
@@ -227,6 +248,29 @@ describe('ScannerCode.svelte', () => {
 		renderWithContext();
 
 		expect(screen.getByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON)).toBeInTheDocument();
+	});
+
+	describe('layout gate', () => {
+		it('should render the inline input (not the bottom-sheet branch) on desktop', () => {
+			isMobileSpy.mockReturnValue(false);
+
+			renderWithContext();
+
+			expect(screen.queryByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON)).not.toBeInTheDocument();
+			expect(screen.getByPlaceholderText(en.scanner.text.enter_or_paste_code)).toBeInTheDocument();
+		});
+
+		it('should render the inline input on a mobile device with a viewport >= lg', () => {
+			// e.g. dev-tools mobile emulation at 1280px, or a landscape phablet -
+			// gix-components' BottomSheet drops its `position: fixed` styling at >=1024px,
+			// so we must fall back to the inline-input layout even when isMobile() is true.
+			screensStore.set('xl');
+
+			renderWithContext();
+
+			expect(screen.queryByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON)).not.toBeInTheDocument();
+			expect(screen.getByPlaceholderText(en.scanner.text.enter_or_paste_code)).toBeInTheDocument();
+		});
 	});
 
 	it('should show input after clicking enter manually', async () => {
@@ -495,16 +539,6 @@ describe('ScannerCode.svelte', () => {
 	});
 
 	describe('mobile error overlay', () => {
-		let isMobileSpy: ReturnType<typeof vi.spyOn>;
-
-		beforeEach(() => {
-			isMobileSpy = vi.spyOn(deviceUtils, 'isMobile').mockReturnValue(true);
-		});
-
-		afterEach(() => {
-			isMobileSpy.mockRestore();
-		});
-
 		it('should show overlay banner and not inline field error when processOpenCryptoPayCode rejects', async () => {
 			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
 
