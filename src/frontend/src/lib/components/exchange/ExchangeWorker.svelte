@@ -20,12 +20,15 @@
 			return;
 		}
 
-		// Resolve the effective backend flag in parallel with worker init so the first
-		// timer tick already uses the runtime value when it is available.
-		[worker, backendExchangeEnabled] = await Promise.all([
-			ExchangeWorker.init(),
-			loadBackendExchangeEnabled()
-		]);
+		// Start the worker on the build-time fallback flag straight away so syncing
+		// is not gated on the backend query. When the runtime value resolves, the
+		// `$effect` below picks up the new `backendExchangeEnabled` and restarts
+		// the timer with the correct cadence and source.
+		worker = await ExchangeWorker.init();
+
+		void loadBackendExchangeEnabled().then((enabled) => {
+			backendExchangeEnabled = enabled;
+		});
 	});
 
 	onDestroy(() => worker?.destroy());

@@ -3,10 +3,11 @@ use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 
 use crate::{
     exchange::{
-        cached_rates_snapshot, fetch_and_update_prices, priceable_tokens_for_caller,
-        release_refresh_lock, stale_or_missing_tokens, try_acquire_refresh_lock,
+        cached_rates_snapshot, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
+        priceable_tokens_for_caller, release_refresh_lock, stale_or_missing_tokens,
+        try_acquire_refresh_lock,
     },
-    state::{read_state, with_api_keys},
+    state::read_state,
     token,
     types::{StoredPrincipal, StoredTokenId},
     utils::guards::caller_is_not_anonymous,
@@ -85,16 +86,13 @@ pub fn get_exchange_rate(token_id: TokenId) -> Option<ExchangeRate> {
 
 /// Returns whether the backend is currently fetching and caching exchange rates.
 ///
-/// This is the *effective* state: it mirrors the predicate used by the refresh timer
-/// (see `crate::exchange::fetch_and_update_prices`) — `true` only when a `CoinGecko` API
-/// key is configured and `exchange_rate_enabled` is not explicitly disabled.
+/// Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
+/// actual refresh predicate used by [`fetch_and_update_prices`].
 ///
 /// Exposed as an unauthenticated query so the frontend worker can decide whether to read
 /// cached rates from the backend or fetch directly from public providers.
 #[query]
 #[must_use]
 pub fn exchange_rate_enabled() -> bool {
-    with_api_keys(|keys| {
-        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled != Some(false)
-    })
+    is_exchange_rate_refresh_enabled()
 }
