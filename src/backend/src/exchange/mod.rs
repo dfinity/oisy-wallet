@@ -169,6 +169,18 @@ fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
 /// - `Ok(())` once the (possibly empty) set of fresh prices has been written.
 /// - `Err(ExchangeError::Disabled)` if `exchange_rate_enabled` is `Some(false)`.
 /// - `Err(ExchangeError::ApiKeyNotSet)` if no `CoinGecko` API key is configured.
+///
+/// Returns whether the backend will actually issue exchange-rate refresh outcalls.
+///
+/// `true` iff a `CoinGecko` API key is configured and `exchange_rate_enabled` is not
+/// explicitly set to `Some(false)`. Single source of truth for both the refresh
+/// timer ([`fetch_and_update_prices`]) and the public `exchange_rate_enabled` query.
+pub(crate) fn is_exchange_rate_refresh_enabled() -> bool {
+    with_api_keys(|keys| {
+        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled != Some(false)
+    })
+}
+
 pub(crate) async fn fetch_and_update_prices(
     token_ids: &[StoredTokenId],
 ) -> Result<(), ExchangeError> {
@@ -176,11 +188,7 @@ pub(crate) async fn fetch_and_update_prices(
         return Ok(());
     }
 
-    let enabled = with_api_keys(|keys| {
-        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled != Some(false)
-    });
-
-    if !enabled {
+    if !is_exchange_rate_refresh_enabled() {
         return Err(ExchangeError::Disabled);
     }
 

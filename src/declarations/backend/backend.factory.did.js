@@ -753,6 +753,7 @@ export const idlFactory = ({ IDL }) => {
 		create_user_profile: IDL.Func([], [CreateUserProfileResult], []),
 		delete_active_user_transaction: IDL.Func([IDL.Text], [DeleteActiveUserTransactionResult], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
+		exchange_rate_enabled: IDL.Func([], [IDL.Bool], ['query']),
 		get_account_creation_timestamps: IDL.Func(
 			[],
 			[IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))],
