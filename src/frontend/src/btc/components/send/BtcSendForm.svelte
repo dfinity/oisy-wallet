@@ -11,6 +11,7 @@
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
+	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -83,6 +84,10 @@
 	{onNext}
 	{selectedContact}
 >
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice styleClass="mb-6!" />
+	{/snippet}
+
 	{#snippet sendAmount()}
 		<BtcSendAmount {onTokensList} bind:amount bind:amountError />
 	{/snippet}
