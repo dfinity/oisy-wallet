@@ -28,9 +28,9 @@ describe('ScannedPlainAddressNotice', () => {
 		expect(getByText(en.send.info.scanned_address_only_destination)).toBeInTheDocument();
 	});
 
-	it('renders the single-token variant copy when singleToken is true', () => {
+	it('renders the single-token variant copy when variant is "single-token"', () => {
 		const { getByTestId, getByText, queryByText } = render(ScannedPlainAddressNotice, {
-			props: { singleToken: true },
+			props: { variant: 'single-token' },
 			context: new Map<symbol, unknown>([[SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, true]])
 		});
 
@@ -41,9 +41,9 @@ describe('ScannedPlainAddressNotice', () => {
 		expect(queryByText(en.send.info.scanned_address_only_destination)).not.toBeInTheDocument();
 	});
 
-	it('renders the multi-token copy when singleToken is false', () => {
+	it('renders the multi-token copy when variant is "multi-token"', () => {
 		const { getByText, queryByText } = render(ScannedPlainAddressNotice, {
-			props: { singleToken: false },
+			props: { variant: 'multi-token' },
 			context: new Map<symbol, unknown>([[SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, true]])
 		});
 

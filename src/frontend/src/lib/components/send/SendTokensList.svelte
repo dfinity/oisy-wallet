@@ -36,7 +36,7 @@
 	{onTokenButtonClick}
 >
 	{#snippet topBanner()}
-		<ScannedPlainAddressNotice singleToken={lockedSingleToken} />
+		<ScannedPlainAddressNotice variant={lockedSingleToken ? 'single-token' : 'multi-token'} />
 	{/snippet}
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />
