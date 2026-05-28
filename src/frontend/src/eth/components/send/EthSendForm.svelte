@@ -6,6 +6,7 @@
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isEthAddress } from '$eth/utils/account.utils';
+	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -55,6 +56,10 @@
 	{onNext}
 	{selectedContact}
 >
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice styleClass="mb-6!" />
+	{/snippet}
+
 	{#snippet sendAmount()}
 		<EthSendAmount {nativeEthereumToken} {onTokensList} bind:amount bind:insufficientFunds />
 	{/snippet}
