@@ -5,7 +5,7 @@ import { stakeBalances } from '$lib/derived/stake.derived';
 import { tokensToPin } from '$lib/derived/tokens.derived';
 import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { Network, NetworkId } from '$lib/types/network';
+import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import {
@@ -23,7 +23,7 @@ export interface ModalTokensListData {
 	selectedFilterNetwork?: Network;
 	filterZeroBalance?: boolean;
 	sortByBalance?: boolean;
-	filterNetworksIds?: NetworkId[];
+	availableFilterNetworks?: Network[];
 	filterNfts?: boolean;
 	filterCategoryTag?: TokenCategoryTagValue;
 }
@@ -42,7 +42,10 @@ export const initModalTokensListContext = (
 	);
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
 	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
-	const filterNetworksIds = derived([data], ([{ filterNetworksIds }]) => filterNetworksIds);
+	const availableFilterNetworks = derived(
+		[data],
+		([{ availableFilterNetworks }]) => availableFilterNetworks
+	);
 	const filterNfts = derived([data], ([{ filterNfts }]) => filterNfts);
 	const filterCategoryTag = derived([data], ([{ filterCategoryTag }]) => filterCategoryTag);
 
@@ -58,7 +61,7 @@ export const initModalTokensListContext = (
 			stakeBalances,
 			tokensToPin,
 			networks,
-			filterNetworksIds,
+			availableFilterNetworks,
 			filterNfts
 		],
 		([
@@ -72,17 +75,17 @@ export const initModalTokensListContext = (
 			$stakeBalances,
 			$tokensToPin,
 			$networksToPin,
-			$filterNetworksIds,
+			$availableFilterNetworks,
 			$filterNfts
 		]) => {
 			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
 
 			const filteredByNetworkIds =
-				nonNullish($filterNetworksIds) && $filterNetworksIds.length > 0
+				nonNullish($availableFilterNetworks) && $availableFilterNetworks.length > 0
 					? filterTokensForSelectedNetworks([
 							filteredByQuery,
-							$filterNetworksIds,
-							isNullish($filterNetworksIds)
+							$availableFilterNetworks.map(({ id }) => id),
+							isNullish($availableFilterNetworks)
 						])
 					: filteredByQuery;
 
@@ -142,10 +145,10 @@ export const initModalTokensListContext = (
 				...state,
 				selectedFilterNetwork: network
 			})),
-		setFilterNetworksIds: (networksIds: NetworkId[] | undefined) =>
+		setAvailableFilterNetworks: (availableNetworks: Network[] | undefined) =>
 			update((state) => ({
 				...state,
-				filterNetworksIds: networksIds
+				availableFilterNetworks: availableNetworks
 			})),
 		setFilterCategoryTag: (categoryTag: TokenCategoryTagValue | undefined) =>
 			update((state) => ({
@@ -159,7 +162,7 @@ export const initModalTokensListContext = (
 				selectedFilterNetwork: undefined,
 				filterZeroBalance: undefined,
 				sortByBalance: undefined,
-				filterNetworksIds: undefined,
+				availableFilterNetworks: undefined,
 				filterNfts: undefined,
 				filterCategoryTag: undefined
 			}));
@@ -175,7 +178,7 @@ export interface ModalTokensListContext {
 	setTokens: (tokens: Token[]) => void;
 	setFilterQuery: (query: string) => void;
 	setSelectedFilterNetwork: (network: Network | undefined) => void;
-	setFilterNetworksIds: (networksIds: NetworkId[] | undefined) => void;
+	setAvailableFilterNetworks: (availableNetworks: Network[] | undefined) => void;
 	setFilterCategoryTag: (categoryTag: TokenCategoryTagValue | undefined) => void;
 	resetFilters: () => void;
 }

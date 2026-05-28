@@ -82,7 +82,7 @@ describe('SwapContexts', () => {
 					setTokens: expect.any(Function),
 					setFilterQuery: expect.any(Function),
 					setSelectedFilterNetwork: expect.any(Function),
-					setFilterNetworksIds: expect.any(Function),
+					setAvailableFilterNetworks: expect.any(Function),
 					resetFilters: expect.any(Function)
 				})
 			);

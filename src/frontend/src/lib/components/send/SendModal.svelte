@@ -156,10 +156,9 @@
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `allowedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
 			selectedFilterNetwork: allowedNetwork,
-			filterNetworksIds:
-				nonNullish(allowedNetworkIds) && allowedNetworkIds.length > 1
-					? allowedNetworkIds
-					: undefined
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally -- same as above for the array form
+			availableFilterNetworks: allowedNetworks
 		})
 	);
 
