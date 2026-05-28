@@ -1,8 +1,8 @@
-import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
-import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
-import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 import { SEND_SCANNED_PLAIN_ADDRESS_NOTICE } from '$lib/constants/test-ids.constants';
@@ -12,23 +12,23 @@ import {
 	MODAL_TOKENS_LIST_CONTEXT_KEY
 } from '$lib/stores/modal-tokens-list.store';
 import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
-import type { NetworkId } from '$lib/types/network';
+import type { Network } from '$lib/types/network';
 import { fireEvent, render } from '@testing-library/svelte';
 
 const renderSendTokensList = ({
 	scannerDriven = false,
-	allowedNetworkIds,
+	allowedNetworks,
 	onSelectNetworkFilter = vi.fn()
 }: {
 	scannerDriven?: boolean;
-	allowedNetworkIds?: NetworkId[];
+	allowedNetworks?: Network[];
 	onSelectNetworkFilter?: () => void;
 } = {}) =>
 	render(SendTokensList, {
 		props: {
 			onSendToken: vi.fn(),
 			onSelectNetworkFilter,
-			allowedNetworkIds
+			allowedNetworks
 		},
 		context: new Map<symbol, unknown>([
 			[
@@ -63,7 +63,7 @@ describe('SendTokensList', () => {
 		it('disables the filter button when locked to a single network (BTC mainnet)', async () => {
 			const onSelectNetworkFilter = vi.fn();
 			const { getByRole } = renderSendTokensList({
-				allowedNetworkIds: [BTC_MAINNET_NETWORK_ID],
+				allowedNetworks: [BTC_MAINNET_NETWORK],
 				onSelectNetworkFilter
 			});
 
@@ -78,7 +78,7 @@ describe('SendTokensList', () => {
 
 		it('disables the filter button when locked to a single network (Ethereum, URL-route case)', () => {
 			const { getByRole } = renderSendTokensList({
-				allowedNetworkIds: [ETHEREUM_NETWORK_ID]
+				allowedNetworks: [ETHEREUM_NETWORK]
 			});
 
 			expect(getByRole('button', { name: en.networks.chain_fusion })).toBeDisabled();
@@ -87,7 +87,7 @@ describe('SendTokensList', () => {
 		it('keeps the filter button interactive when multiple networks are allowed', async () => {
 			const onSelectNetworkFilter = vi.fn();
 			const { getByRole } = renderSendTokensList({
-				allowedNetworkIds: [ETHEREUM_NETWORK_ID, BASE_NETWORK_ID, ARBITRUM_MAINNET_NETWORK_ID],
+				allowedNetworks: [ETHEREUM_NETWORK, BASE_NETWORK, ARBITRUM_MAINNET_NETWORK],
 				onSelectNetworkFilter
 			});
 
@@ -118,7 +118,7 @@ describe('SendTokensList', () => {
 		it('renders the single-token copy when locked to BTC mainnet', () => {
 			const { getByText, queryByText } = renderSendTokensList({
 				scannerDriven: true,
-				allowedNetworkIds: [BTC_MAINNET_NETWORK_ID]
+				allowedNetworks: [BTC_MAINNET_NETWORK]
 			});
 
 			expect(
@@ -130,7 +130,7 @@ describe('SendTokensList', () => {
 		it('renders the default multi-token copy when locked to a non-BTC network', () => {
 			const { getByText, queryByText } = renderSendTokensList({
 				scannerDriven: true,
-				allowedNetworkIds: [ICP_NETWORK_ID]
+				allowedNetworks: [ICP_NETWORK]
 			});
 
 			expect(getByText(en.send.info.scanned_address_only_destination)).toBeInTheDocument();

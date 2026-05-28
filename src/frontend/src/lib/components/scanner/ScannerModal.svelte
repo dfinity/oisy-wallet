@@ -2,9 +2,9 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext, untrack } from 'svelte';
-	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
-	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+	import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+	import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 	import OpenCryptoPayWizard from '$lib/components/open-crypto-pay/OpenCryptoPayWizard.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import ScannerInfo from '$lib/components/scanner/ScannerInfo.svelte';
@@ -113,7 +113,7 @@
 				id: Symbol(),
 				data: {
 					destination: code,
-					allowedNetworkIds: [SOLANA_MAINNET_NETWORK_ID]
+					allowedNetworks: [SOLANA_MAINNET_NETWORK]
 				}
 			});
 
@@ -129,7 +129,7 @@
 				id: Symbol(),
 				data: {
 					destination: code,
-					allowedNetworkIds: [BTC_MAINNET_NETWORK_ID]
+					allowedNetworks: [BTC_MAINNET_NETWORK]
 				}
 			});
 
@@ -145,7 +145,7 @@
 				id: Symbol(),
 				data: {
 					destination: code,
-					allowedNetworkIds: [ICP_NETWORK_ID]
+					allowedNetworks: [ICP_NETWORK]
 				}
 			});
 

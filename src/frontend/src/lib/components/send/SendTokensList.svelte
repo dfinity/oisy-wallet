@@ -5,29 +5,29 @@
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { NetworkId } from '$lib/types/network';
+	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
 	interface Props {
 		onSendToken: (token: Token) => void;
 		onSelectNetworkFilter: () => void;
-		allowedNetworkIds?: NetworkId[];
+		allowedNetworks?: Network[];
 	}
 
-	let { onSendToken, onSelectNetworkFilter, allowedNetworkIds }: Props = $props();
+	let { onSendToken, onSelectNetworkFilter, allowedNetworks }: Props = $props();
 
 	let lockedSingleToken = $derived(
-		nonNullish(allowedNetworkIds) &&
-			allowedNetworkIds.length === 1 &&
-			isNetworkIdBTCMainnet(allowedNetworkIds[0])
+		nonNullish(allowedNetworks) &&
+			allowedNetworks.length === 1 &&
+			isNetworkIdBTCMainnet(allowedNetworks[0].id)
 	);
 
 	// Auto-lock when exactly one network is allowed (nothing to drill into); leave the
 	// picker interactive when multiple networks are allowed so the user can narrow further,
 	// or when no restriction is set (Chain Fusion default).
 	let networkSelectorViewOnly = $derived(
-		nonNullish(allowedNetworkIds) && allowedNetworkIds.length === 1
+		nonNullish(allowedNetworks) && allowedNetworks.length === 1
 	);
 
 	const onTokenButtonClick = (token: Token) => {

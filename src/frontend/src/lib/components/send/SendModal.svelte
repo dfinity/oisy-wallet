@@ -34,7 +34,6 @@
 	} from '$lib/derived/address.derived';
 	import { modalSendData } from '$lib/derived/modal.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { networks } from '$lib/derived/networks.derived';
 	import { pageNft } from '$lib/derived/page-nft.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -50,7 +49,7 @@
 	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import type { NetworkId } from '$lib/types/network';
+	import type { Network } from '$lib/types/network';
 	import type { Nft } from '$lib/types/nft';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
@@ -83,20 +82,11 @@
 	// Scanner-driven dispatches (Sol/BTC/IC, future EVM) populate it via `SendModalData`;
 	// the URL-route filter (`$selectedNetwork`, e.g. `/tokens?network=ethereum`) folds in
 	// as a single-element array fallback so downstream code only needs to read one field.
-	const allowedNetworkIds: NetworkId[] | undefined =
-		initialModalData?.allowedNetworkIds ??
-		(nonNullish($selectedNetwork) ? [$selectedNetwork.id] : undefined);
+	const allowedNetworks: Network[] | undefined =
+		initialModalData?.allowedNetworks ??
+		(nonNullish($selectedNetwork) ? [$selectedNetwork] : undefined);
 	let allowedNetwork = $derived(
-		nonNullish(allowedNetworkIds) && allowedNetworkIds.length === 1
-			? $networks.find(({ id }) => id === allowedNetworkIds[0])
-			: undefined
-	);
-	let allowedNetworks = $derived(
-		nonNullish(allowedNetworkIds) && allowedNetworkIds.length > 1
-			? allowedNetworkIds
-					.map((id) => $networks.find(({ id: networkId }) => networkId === id))
-					.filter((n): n is NonNullable<typeof n> => nonNullish(n))
-			: undefined
+		nonNullish(allowedNetworks) && allowedNetworks.length === 1 ? allowedNetworks[0] : undefined
 	);
 
 	let destination = $state(initialModalData?.destination ?? '');
@@ -280,7 +270,7 @@
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 				<SendTokensList
-					{allowedNetworkIds}
+					{allowedNetworks}
 					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 					{onSendToken}
 				/>
