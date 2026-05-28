@@ -12,16 +12,21 @@ import {
 } from '$lib/stores/modal-tokens-list.store';
 import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 import type { NetworkId } from '$lib/types/network';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 const renderSendTokensList = ({
 	scannerDriven = false,
-	lockedNetworkIds
-}: { scannerDriven?: boolean; lockedNetworkIds?: NetworkId[] } = {}) =>
+	lockedNetworkIds,
+	onSelectNetworkFilter = vi.fn()
+}: {
+	scannerDriven?: boolean;
+	lockedNetworkIds?: NetworkId[];
+	onSelectNetworkFilter?: () => void;
+} = {}) =>
 	render(SendTokensList, {
 		props: {
 			onSendToken: vi.fn(),
-			onSelectNetworkFilter: vi.fn(),
+			onSelectNetworkFilter,
 			lockedNetworkIds
 		},
 		context: new Map<symbol, unknown>([
@@ -93,5 +98,54 @@ describe('SendTokensList', () => {
 		expect(
 			queryByText(en.send.info.scanned_address_only_destination_single_token)
 		).not.toBeInTheDocument();
+	});
+
+	describe('network filter button interactivity', () => {
+		it('disables the filter button when locked to a single network', async () => {
+			const onSelectNetworkFilter = vi.fn();
+			const { getByRole } = renderSendTokensList({
+				scannerDriven: true,
+				lockedNetworkIds: [BTC_MAINNET_NETWORK_ID],
+				onSelectNetworkFilter
+			});
+
+			const button = getByRole('button', { name: en.networks.chain_fusion });
+
+			expect(button).toBeDisabled();
+
+			await fireEvent.click(button);
+
+			expect(onSelectNetworkFilter).not.toHaveBeenCalled();
+		});
+
+		it('keeps the filter button interactive when locked to multiple networks so the user can drill down', async () => {
+			const onSelectNetworkFilter = vi.fn();
+			const { getByRole } = renderSendTokensList({
+				scannerDriven: true,
+				lockedNetworkIds: [ETHEREUM_NETWORK_ID, ...SUPPORTED_EVM_MAINNET_NETWORK_IDS],
+				onSelectNetworkFilter
+			});
+
+			const button = getByRole('button', { name: en.networks.chain_fusion });
+
+			expect(button).toBeEnabled();
+
+			await fireEvent.click(button);
+
+			expect(onSelectNetworkFilter).toHaveBeenCalledOnce();
+		});
+
+		it('keeps the filter button interactive when no lock is set', async () => {
+			const onSelectNetworkFilter = vi.fn();
+			const { getByRole } = renderSendTokensList({ onSelectNetworkFilter });
+
+			const button = getByRole('button', { name: en.networks.chain_fusion });
+
+			expect(button).toBeEnabled();
+
+			await fireEvent.click(button);
+
+			expect(onSelectNetworkFilter).toHaveBeenCalledOnce();
+		});
 	});
 });
