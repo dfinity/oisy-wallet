@@ -33,6 +33,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const { update, set } = data;
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
+	const failedSwapError = writable<SwapError | undefined>(undefined);
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -112,7 +113,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		isSourceTokenIcrc2,
 		isSourceTokenPermitSupported,
 		receiveSupportedData,
-		failedSwapError: writable<SwapError | undefined>(undefined),
+		failedSwapError,
 		setSourceToken: (token: Token) =>
 			update((state) => ({
 				...state,
@@ -162,6 +163,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				sourceToken: undefined,
 				destinationToken: undefined
 			});
+			failedSwapError.set(undefined);
 		}
 	};
 };
