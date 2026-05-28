@@ -1,7 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
-import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
 import { Currency } from '$lib/enums/currency';
 import { exportTokensCsv, exportTransactionsCsv } from '$lib/services/export-data.services';
 import { toastsShow } from '$lib/stores/toasts.store';
@@ -15,6 +14,7 @@ import {
 	type TokenCsvRow,
 	type TransactionCsvRow
 } from '$lib/utils/export-data.utils';
+import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
@@ -147,7 +147,7 @@ describe('export-data.services', () => {
 				exchangeRateToUsd: null
 			});
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 			expect(mockBuildTokenRows).not.toHaveBeenCalled();
 			expect(mockDownloadCsv).not.toHaveBeenCalled();
 			expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
@@ -165,7 +165,7 @@ describe('export-data.services', () => {
 				variant: 'basic'
 			});
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 			expect(mockDownloadCsv).toHaveBeenCalledExactlyOnceWith({
 				filename: 'oisy-tokens-basic-2026-05-28T10-00-00-000Z.csv',
 				csv: 'Network,Symbol,Name,Balance,Currency,Value\r\nInternet Computer,ICP,Internet Computer,1.0,USD,1'
@@ -188,7 +188,7 @@ describe('export-data.services', () => {
 				buildTransactions
 			});
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 			expect(mockLoadNextIcTransactionsByOldest).not.toHaveBeenCalled();
 			expect(mockLoadNextSolTransactionsByOldest).not.toHaveBeenCalled();
 			expect(buildTransactions).not.toHaveBeenCalled();
@@ -200,14 +200,14 @@ describe('export-data.services', () => {
 			let icLoaderCalls = 0;
 			const buildTransactions = vi.fn(() => []);
 
-			mockLoadNextIcTransactionsByOldest.mockImplementation(async ({ signalEnd }) => {
+			mockLoadNextIcTransactionsByOldest.mockImplementation(({ signalEnd }) => {
 				icLoaderCalls += 1;
 
 				if (icLoaderCalls === 2) {
 					signalEnd();
 				}
 
-				return { success: true };
+				return Promise.resolve({ success: true });
 			});
 			mockLoadNextSolTransactionsByOldest.mockRejectedValue(new Error('sol loader failed'));
 
@@ -218,7 +218,7 @@ describe('export-data.services', () => {
 				variant: 'basic'
 			});
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 			expect(mockLoadNextIcTransactionsByOldest).toHaveBeenCalledTimes(2);
 			expect(mockLoadNextSolTransactionsByOldest).toHaveBeenCalledOnce();
 			expect(buildTransactions).toHaveBeenCalledOnce();
@@ -242,7 +242,7 @@ describe('export-data.services', () => {
 
 			const result = await exportTransactionsCsv(defaultTransactionParams());
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 			expect(mockConsoleError).toHaveBeenCalledExactlyOnceWith(error);
 			expect(mockDownloadCsv).not.toHaveBeenCalled();
 			expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
