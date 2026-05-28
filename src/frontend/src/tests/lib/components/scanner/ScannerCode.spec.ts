@@ -15,7 +15,10 @@ import { ScannerResults } from '$lib/types/scanner';
 import * as deviceUtils from '$lib/utils/device.utils';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockPrincipal, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -454,6 +457,192 @@ describe('ScannerCode.svelte', () => {
 
 		expect(mockOnNext).not.toHaveBeenCalledWith(
 			expect.objectContaining({ results: ScannerResults.SOL_SEND })
+		);
+	});
+
+	it('should call onNext with BTC_SEND result for a bare BTC mainnet address', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: mockBtcAddress } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.BTC_SEND,
+				code: mockBtcAddress
+			});
+		});
+
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should trim surrounding whitespace when forwarding a BTC address', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: `  ${mockBtcAddress}  ` } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.BTC_SEND,
+				code: mockBtcAddress
+			});
+		});
+	});
+
+	it('should not dispatch BTC_SEND for a bitcoin: URI (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const bitcoinUri = `bitcoin:${mockBtcAddress}`;
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: bitcoinUri } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				bitcoinUri
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.BTC_SEND })
+		);
+	});
+
+	it('should not dispatch BTC_SEND for a BTC address with query parameters (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const codeWithQuery = `${mockBtcAddress}?amount=1`;
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: codeWithQuery } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				codeWithQuery
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.BTC_SEND })
+		);
+	});
+
+	it('should not dispatch BTC_SEND for whitespace-only input (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const whitespace = '   ';
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: whitespace } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				whitespace
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.BTC_SEND })
+		);
+	});
+
+	it('should call onNext with IC_SEND result for a bare IC principal', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: mockPrincipalText } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.IC_SEND,
+				code: mockPrincipalText
+			});
+		});
+
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should trim surrounding whitespace when forwarding an IC principal', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: `  ${mockPrincipalText}  ` } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.IC_SEND,
+				code: mockPrincipalText
+			});
+		});
+	});
+
+	it('should not dispatch IC_SEND for an ICRC account string with subaccount (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		// A real encoded ICRC account string (principal + checksum + subaccount) is a
+		// valid IC destination but not a bare principal — Principal.fromText rejects
+		// it, so the scanner must fall through to OpenCryptoPay rather than
+		// dispatching IC_SEND.
+		const subaccount = new Uint8Array(32);
+		subaccount[31] = 1;
+		const icrcAccount = encodeIcrcAccount({ owner: mockPrincipal, subaccount });
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: icrcAccount } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				icrcAccount
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.IC_SEND })
 		);
 	});
 
