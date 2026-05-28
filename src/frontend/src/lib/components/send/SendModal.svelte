@@ -134,6 +134,8 @@
 	let modal = $state<WizardModal<WizardStepsSend>>();
 	let selectedNft = $derived($pageNft);
 
+	const isLockedToMultipleNetworks = nonNullish(lockedNetworkIds) && lockedNetworkIds.length > 1;
+
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
@@ -141,7 +143,9 @@
 			filterZeroBalance: true,
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
-			filterNetwork: lockedNetwork ?? $selectedNetwork
+			filterNetwork: isLockedToMultipleNetworks ? undefined : (lockedNetwork ?? $selectedNetwork),
+			filterNetworksIds: isLockedToMultipleNetworks ? lockedNetworkIds : undefined,
+			filterNetworksLabel: isLockedToMultipleNetworks ? $i18n.networks.evm_networks : undefined
 		})
 	);
 

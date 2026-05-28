@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
+	import ScannedPlainAddressNotice, {
+		type ScannedPlainAddressNoticeVariant
+	} from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -18,11 +20,15 @@
 
 	let { onSendToken, onSelectNetworkFilter, lockedNetworkIds }: Props = $props();
 
-	let lockedSingleToken = $derived(
-		nonNullish(lockedNetworkIds) &&
-			lockedNetworkIds.length === 1 &&
-			isNetworkIdBTCMainnet(lockedNetworkIds[0])
-	);
+	let noticeVariant: ScannedPlainAddressNoticeVariant = $derived.by(() => {
+		if (!nonNullish(lockedNetworkIds) || lockedNetworkIds.length === 0) {
+			return 'multi-token';
+		}
+		if (lockedNetworkIds.length > 1) {
+			return 'multi-network';
+		}
+		return isNetworkIdBTCMainnet(lockedNetworkIds[0]) ? 'single-token' : 'multi-token';
+	});
 
 	const onTokenButtonClick = (token: Token) => {
 		onSendToken(token);
@@ -36,7 +42,7 @@
 	{onTokenButtonClick}
 >
 	{#snippet topBanner()}
-		<ScannedPlainAddressNotice variant={lockedSingleToken ? 'single-token' : 'multi-token'} />
+		<ScannedPlainAddressNotice variant={noticeVariant} />
 	{/snippet}
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />
