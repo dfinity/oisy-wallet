@@ -474,7 +474,9 @@ describe('SwapEthWizard', () => {
 
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();
-			expect(toasts.toastsError).toHaveBeenCalled();
+			expect(toasts.toastsError).not.toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.swap.error.unexpected } })
+			);
 			expect(get(failedSwapError)).toEqual({
 				message: 'Swap failed',
 				variant: 'error'
