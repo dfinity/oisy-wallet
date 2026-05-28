@@ -27,4 +27,29 @@ describe('ScannedPlainAddressNotice', () => {
 		expect(getByTestId(SEND_SCANNED_PLAIN_ADDRESS_NOTICE)).toBeInTheDocument();
 		expect(getByText(en.send.info.scanned_address_only_destination)).toBeInTheDocument();
 	});
+
+	it('renders the single-token variant copy when singleToken is true', () => {
+		const { getByTestId, getByText, queryByText } = render(ScannedPlainAddressNotice, {
+			props: { singleToken: true },
+			context: new Map<symbol, unknown>([[SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, true]])
+		});
+
+		expect(getByTestId(SEND_SCANNED_PLAIN_ADDRESS_NOTICE)).toBeInTheDocument();
+		expect(
+			getByText(en.send.info.scanned_address_only_destination_single_token)
+		).toBeInTheDocument();
+		expect(queryByText(en.send.info.scanned_address_only_destination)).not.toBeInTheDocument();
+	});
+
+	it('renders the multi-token copy when singleToken is false', () => {
+		const { getByText, queryByText } = render(ScannedPlainAddressNotice, {
+			props: { singleToken: false },
+			context: new Map<symbol, unknown>([[SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, true]])
+		});
+
+		expect(getByText(en.send.info.scanned_address_only_destination)).toBeInTheDocument();
+		expect(
+			queryByText(en.send.info.scanned_address_only_destination_single_token)
+		).not.toBeInTheDocument();
+	});
 });
