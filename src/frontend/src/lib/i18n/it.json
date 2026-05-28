@@ -1191,6 +1191,7 @@
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
 			"unexpected": "Qualcosa è andato storto durante lo scambio dei token.",
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di scambio.",
+			"failed_unexpectedly": "",
 			"slippage_exceeded": "$oisy_short ti protegge: la transazione è al di fuori della tua tolleranza di slippage del $maxSlippage%. Per favore, regola lo slippage massimo e riprova.",
 			"pool_not_found": "Scambio fallito. Pool non trovata.",
 			"deposit_error": "Il deposito dei fondi per lo swap non è riuscito. Riprova oppure cambia il provider dello swap.",

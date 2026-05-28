@@ -478,7 +478,7 @@ describe('SwapEthWizard', () => {
 				expect.objectContaining({ msg: { text: en.swap.error.unexpected } })
 			);
 			expect(get(failedSwapError)).toEqual({
-				message: 'Swap failed',
+				message: en.swap.error.failed_unexpectedly,
 				variant: 'error'
 			});
 		});

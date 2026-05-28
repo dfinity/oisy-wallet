@@ -1191,6 +1191,7 @@
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
+			"failed_unexpectedly": "The swap could not be completed. Please check your wallet balance and try again, or choose a different provider.",
 			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
 			"pool_not_found": "Swap failed. Pool not found.",
 			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",
