@@ -54,6 +54,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
 
 	interface Props {
@@ -387,20 +388,37 @@
 				}
 			}, 750);
 		} catch (err: unknown) {
+			const errorDetail = errorDetailToString(err);
+
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					...swapTrackingMetadata,
-					error: errorDetailToString(err) ?? ''
+					error: errorDetail ?? ''
 				}
 			});
 
-			failedSwapError.set(undefined);
+			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: slippageValue.toString()
+						}
+					),
+					variant: 'info'
+				});
+			} else {
+				failedSwapError.set({
+					message: nonNullish(errorDetail) ? errorDetail : $i18n.swap.error.unexpected,
+					variant: 'error'
+				});
 
-			toastsError({
-				msg: { text: $i18n.swap.error.unexpected },
-				err
-			});
+				toastsError({
+					msg: { text: $i18n.swap.error.unexpected },
+					err
+				});
+			}
 
 			onBack();
 			onStartTriggerAmount();
