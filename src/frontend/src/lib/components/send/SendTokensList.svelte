@@ -6,19 +6,23 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Network } from '$lib/types/network';
+	import type { NetworkId } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
 	interface Props {
 		onSendToken: (token: Token) => void;
 		onSelectNetworkFilter: () => void;
-		lockedNetwork?: Network;
+		allowedNetworkIds?: NetworkId[];
 	}
 
-	let { onSendToken, onSelectNetworkFilter, lockedNetwork }: Props = $props();
+	let { onSendToken, onSelectNetworkFilter, allowedNetworkIds }: Props = $props();
 
-	let lockedSingleToken = $derived(isNetworkIdBTCMainnet(lockedNetwork?.id));
+	let lockedSingleToken = $derived(
+		nonNullish(allowedNetworkIds) &&
+			allowedNetworkIds.length === 1 &&
+			isNetworkIdBTCMainnet(allowedNetworkIds[0])
+	);
 
 	const onTokenButtonClick = (token: Token) => {
 		onSendToken(token);
@@ -26,7 +30,8 @@
 </script>
 
 <ModalTokensList
-	networkSelectorViewOnly={nonNullish(lockedNetwork) || nonNullish($selectedNetwork)}
+	networkSelectorViewOnly={(nonNullish(allowedNetworkIds) && allowedNetworkIds.length > 0) ||
+		nonNullish($selectedNetwork)}
 	{onSelectNetworkFilter}
 	{onTokenButtonClick}
 >

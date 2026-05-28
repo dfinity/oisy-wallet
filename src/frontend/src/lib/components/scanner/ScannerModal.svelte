@@ -113,7 +113,7 @@
 				id: Symbol(),
 				data: {
 					destination: code,
-					lockedNetworkId: SOLANA_MAINNET_NETWORK_ID
+					allowedNetworkIds: [SOLANA_MAINNET_NETWORK_ID]
 				}
 			});
 
@@ -129,7 +129,7 @@
 				id: Symbol(),
 				data: {
 					destination: code,
-					lockedNetworkId: BTC_MAINNET_NETWORK_ID
+					allowedNetworkIds: [BTC_MAINNET_NETWORK_ID]
 				}
 			});
 
@@ -145,7 +145,7 @@
 				id: Symbol(),
 				data: {
 					destination: code,
-					lockedNetworkId: ICP_NETWORK_ID
+					allowedNetworkIds: [ICP_NETWORK_ID]
 				}
 			});
 

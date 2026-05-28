@@ -78,9 +78,11 @@
 	let { isTransactionsPage, isNftsPage }: Props = $props();
 
 	const initialModalData = $modalSendData;
-	const lockedNetworkId = initialModalData?.lockedNetworkId;
-	let lockedNetwork = $derived(
-		nonNullish(lockedNetworkId) ? $networks.find(({ id }) => id === lockedNetworkId) : undefined
+	const allowedNetworkIds = initialModalData?.allowedNetworkIds;
+	let allowedNetwork = $derived(
+		nonNullish(allowedNetworkIds) && allowedNetworkIds.length === 1
+			? $networks.find(({ id }) => id === allowedNetworkIds[0])
+			: undefined
 	);
 
 	let destination = $state(initialModalData?.destination ?? '');
@@ -138,8 +140,8 @@
 			tokens: $enabledTokens,
 			filterZeroBalance: true,
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
-			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
-			filterNetwork: lockedNetwork ?? $selectedNetwork
+			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `allowedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
+			filterNetwork: allowedNetwork ?? $selectedNetwork
 		})
 	);
 
@@ -261,7 +263,7 @@
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 				<SendTokensList
-					{lockedNetwork}
+					{allowedNetworkIds}
 					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 					{onSendToken}
 				/>
