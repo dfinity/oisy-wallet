@@ -3,13 +3,14 @@ import {
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.btc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { isInvalidDestinationBtc, shouldSkipDestinationStep } from '$lib/utils/send.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 
@@ -111,9 +112,60 @@ describe('send.utils', () => {
 			).toBeFalsy();
 		});
 
-		it('returns false when the chosen token is on Ethereum (unsupported by skip)', () => {
+		it('returns true when destination is a valid EVM address and the token is on Ethereum', () => {
+			expect(
+				shouldSkipDestinationStep({ destination: mockEthAddress3, token: ETHEREUM_TOKEN })
+			).toBeTruthy();
+		});
+
+		it('returns true when destination is a valid EVM address and the token is on a non-Ethereum EVM mainnet', () => {
+			// `mockEthAddress3` is a 0x-prefixed 40-hex address with a valid mixed-case
+			// checksum, so it satisfies `isEthAddress` regardless of which EVM chain the
+			// token lives on. Base is exercised here as a representative non-Ethereum
+			// EVM mainnet; the underlying predicate is `isNetworkIdEvm`, which captures
+			// every entry in `SUPPORTED_EVM_NETWORK_IDS` (Base / BSC / Polygon / Arbitrum).
+			expect(
+				shouldSkipDestinationStep({ destination: mockEthAddress3, token: BASE_ETH_TOKEN })
+			).toBeTruthy();
+		});
+
+		it('returns false when destination is the wrong length to be an EVM address', () => {
+			// `mockEthAddress` is 64 hex chars (transaction-hash sized) rather than the
+			// 40 hex chars of a 20-byte EVM address, so ethers' `isAddress` rejects it.
 			expect(
 				shouldSkipDestinationStep({ destination: mockEthAddress, token: ETHEREUM_TOKEN })
+			).toBeFalsy();
+
+			expect(
+				shouldSkipDestinationStep({ destination: mockEthAddress, token: BASE_ETH_TOKEN })
+			).toBeFalsy();
+		});
+
+		it('returns false when destination is a non-EVM address but the token is on an EVM network', () => {
+			expect(
+				shouldSkipDestinationStep({ destination: mockBtcAddress, token: ETHEREUM_TOKEN })
+			).toBeFalsy();
+
+			expect(
+				shouldSkipDestinationStep({ destination: mockSolAddress, token: ETHEREUM_TOKEN })
+			).toBeFalsy();
+
+			expect(
+				shouldSkipDestinationStep({ destination: mockPrincipalText, token: BASE_ETH_TOKEN })
+			).toBeFalsy();
+		});
+
+		it('returns false when destination is a valid EVM address but the token is not on an EVM network', () => {
+			expect(
+				shouldSkipDestinationStep({ destination: mockEthAddress3, token: BTC_MAINNET_TOKEN })
+			).toBeFalsy();
+
+			expect(
+				shouldSkipDestinationStep({ destination: mockEthAddress3, token: ICP_TOKEN })
+			).toBeFalsy();
+
+			expect(
+				shouldSkipDestinationStep({ destination: mockEthAddress3, token: SOLANA_TOKEN })
 			).toBeFalsy();
 		});
 	});
