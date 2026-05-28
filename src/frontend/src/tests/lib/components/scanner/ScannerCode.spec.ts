@@ -16,8 +16,9 @@ import * as deviceUtils from '$lib/utils/device.utils';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockPrincipalText } from '$tests/mocks/identity.mock';
+import { mockPrincipal, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -621,10 +622,13 @@ describe('ScannerCode.svelte', () => {
 
 		await openManualEntry();
 
-		// A principal with a checksum + subaccount suffix is a valid ICRC account
-		// string but not a bare principal — Principal.fromText rejects it, so the
-		// scanner falls through to OpenCryptoPay rather than dispatching IC_SEND.
-		const icrcAccount = `${mockPrincipalText}-checksum.subaccount`;
+		// A real encoded ICRC account string (principal + checksum + subaccount) is a
+		// valid IC destination but not a bare principal — Principal.fromText rejects
+		// it, so the scanner must fall through to OpenCryptoPay rather than
+		// dispatching IC_SEND.
+		const subaccount = new Uint8Array(32);
+		subaccount[31] = 1;
+		const icrcAccount = encodeIcrcAccount({ owner: mockPrincipal, subaccount });
 		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
 		await fireEvent.input(input, { target: { value: icrcAccount } });
 
