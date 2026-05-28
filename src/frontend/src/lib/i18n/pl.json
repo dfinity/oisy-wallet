@@ -824,6 +824,7 @@
 		"title": "Bieżąca sieć. Dostęp do wyboru.",
 		"test_networks": "Sieci testowe",
 		"chain_fusion": "Wszystkie sieci",
+		"evm_networks": "Sieci EVM",
 		"network": "Sieć",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled z $numNetworksTotal włączonych",

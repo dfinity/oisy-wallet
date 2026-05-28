@@ -824,6 +824,7 @@
 		"title": "الشبكة الحالية. الوصول إلى التحديد.",
 		"test_networks": "شبكات الاختبار",
 		"chain_fusion": "جميع الشبكات",
+		"evm_networks": "شبكات EVM",
 		"network": "الشبكة",
 		"testnet": "شبكة اختبار",
 		"number_of_enabled": "$numNetworksEnabled من $numNetworksTotal مفعلة",

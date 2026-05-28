@@ -824,6 +824,7 @@
 		"title": "वर्तमान नेटवर्क। चयन तक पहुंच।",
 		"test_networks": "परीक्षण नेटवर्क",
 		"chain_fusion": "सभी नेटवर्क",
+		"evm_networks": "EVM नेटवर्क",
 		"network": "नेटवर्क",
 		"testnet": "टेस्टनेट",
 		"number_of_enabled": "$numNetworksTotal सक्षम में से $numNetworksEnabled",

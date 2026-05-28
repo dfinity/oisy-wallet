@@ -824,6 +824,7 @@
 		"title": "Red actual. Acceso a la selección.",
 		"test_networks": "Redes de prueba",
 		"chain_fusion": "Todas las redes",
+		"evm_networks": "Redes EVM",
 		"network": "Red",
 		"testnet": "Testnet",
 		"number_of_enabled": "número_de_habilitados",

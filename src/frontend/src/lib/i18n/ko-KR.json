@@ -824,6 +824,7 @@
 		"title": "현재 네트워크. 선택 화면으로 이동.",
 		"test_networks": "테스트 네트워크",
 		"chain_fusion": "모든 네트워크",
+		"evm_networks": "EVM 네트워크",
 		"network": "네트워크",
 		"testnet": "테스트넷",
 		"number_of_enabled": "$numNetworksTotal개 중 $numNetworksEnabled개 활성화됨",

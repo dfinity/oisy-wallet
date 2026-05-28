@@ -824,6 +824,7 @@
 		"title": "現在のネットワーク（選択可）",
 		"test_networks": "テストネットワーク",
 		"chain_fusion": "すべてのネットワーク",
+		"evm_networks": "EVM ネットワーク",
 		"network": "ネットワーク",
 		"testnet": "テストネット",
 		"number_of_enabled": "$numNetworksTotalのうち$numNetworksEnabledが有効",

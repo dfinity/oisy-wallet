@@ -824,6 +824,7 @@
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
 		"chain_fusion": "All networks",
+		"evm_networks": "EVM Networks",
 		"network": "Network",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled",

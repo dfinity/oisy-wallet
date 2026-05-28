@@ -824,6 +824,7 @@
 		"title": "Текущая сеть. Доступ к выбору.",
 		"test_networks": "Тестовые сети",
 		"chain_fusion": "Все сети",
+		"evm_networks": "Сети EVM",
 		"network": "Сеть",
 		"testnet": "Тестовая сеть",
 		"number_of_enabled": "$numNetworksEnabled из $numNetworksTotal включены",

@@ -564,6 +564,7 @@ interface I18nNetworks {
 	title: string;
 	test_networks: string;
 	chain_fusion: string;
+	evm_networks: string;
 	network: string;
 	testnet: string;
 	number_of_enabled: string;

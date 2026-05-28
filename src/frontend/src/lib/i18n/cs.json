@@ -824,6 +824,7 @@
 		"title": "Aktuální síť. Přístup k výběru.",
 		"test_networks": "Testovací sítě",
 		"chain_fusion": "Všechny sítě",
+		"evm_networks": "Sítě EVM",
 		"network": "Síť",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled z $numNetworksTotal povoleno",

@@ -824,6 +824,7 @@
 		"title": "当前网络。点击可更换选择。",
 		"test_networks": "测试网络",
 		"chain_fusion": "所有网络",
+		"evm_networks": "EVM 网络",
 		"network": "网络",
 		"testnet": "测试网",
 		"number_of_enabled": "$numNetworksTotal 个网络中已启用 $numNetworksEnabled 个",

@@ -824,6 +824,7 @@
 		"title": "Rede atual. Acesso à seleção.",
 		"test_networks": "Redes de teste",
 		"chain_fusion": "Todas as redes",
+		"evm_networks": "Redes EVM",
 		"network": "Rede",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled de $numNetworksTotal habilitadas",

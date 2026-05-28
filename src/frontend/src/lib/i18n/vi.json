@@ -824,6 +824,7 @@
 		"title": "Mạng hiện tại. Truy cập để lựa chọn.",
 		"test_networks": "Mạng thử nghiệm",
 		"chain_fusion": "Tất cả các mạng",
+		"evm_networks": "Mạng EVM",
 		"network": "Mạng",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled trong số $numNetworksTotal được bật",
