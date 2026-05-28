@@ -911,6 +911,7 @@ interface I18nSwap {
 		kong_not_available: string;
 		unexpected: string;
 		unexpected_missing_data: string;
+		failed_unexpectedly: string;
 		slippage_exceeded: string;
 		pool_not_found: string;
 		deposit_error: string;

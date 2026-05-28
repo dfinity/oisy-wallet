@@ -1194,6 +1194,7 @@
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
 			"unexpected": "Při výměně tokenů se něco pokazilo.",
 			"unexpected_missing_data": "Při zahájení transakce výměny se něco pokazilo.",
+			"failed_unexpectedly": "Swap se nepodařilo dokončit. Zkontrolujte prosím zůstatek své peněženky a zkuste to znovu, nebo zvolte jiného poskytovatele.",
 			"slippage_exceeded": "$oisy_short vás chrání: Obchod je mimo vaši toleranci skluzu $maxSlippage%. Upravte prosím maximální skluz a zkuste to znovu.",
 			"pool_not_found": "Výměna se nezdařila. Pool nebyl nalezen.",
 			"deposit_error": "Vklad finančních prostředků na váš swap selhal. Zkuste to prosím znovu nebo změňte poskytovatele swapu.",

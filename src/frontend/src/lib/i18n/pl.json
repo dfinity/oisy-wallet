@@ -1194,6 +1194,7 @@
 			"kong_not_available": "Obecnie nie ma dostępnej giełdy do wymiany tokenów. Spróbuj ponownie później.",
 			"unexpected": "Coś poszło nie tak podczas wymiany tokenów.",
 			"unexpected_missing_data": "Coś poszło nie tak podczas inicjowania transakcji wymiany.",
+			"failed_unexpectedly": "Nie udało się zrealizować wymiany. Sprawdź saldo portfela i spróbuj ponownie lub wybierz innego dostawcę.",
 			"slippage_exceeded": "$oisy_short chroni Cię: Transakcja jest poza Twoją tolerancją poślizgu wynoszącą $maxSlippage%. Dostosuj maksymalny poślizg i spróbuj ponownie.",
 			"pool_not_found": "Wymiana nie powiodła się. Nie znaleziono puli.",
 			"deposit_error": "Wpłata środków na wymianę nie powiodła się. Spróbuj ponownie lub zmień dostawcę wymiany.",
