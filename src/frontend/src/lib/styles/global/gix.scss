@@ -31,8 +31,12 @@
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
-	--toast-info-z-index: calc(var(--overlay-z-index) + 4);
-	--toast-error-z-index: calc(var(--overlay-z-index) + 5);
+	// Info/success toasts sit above popovers but below modals and bottom sheets
+	// (so a filter bottom sheet is not covered by background notifications).
+	--toast-info-z-index: calc(var(--overlay-z-index) + 1);
+	// Error/warn toasts sit above modal blur and bottom sheets so in-flow
+	// failures (e.g. duplicate token import) remain visible.
+	--toast-error-z-index: calc(var(--overlay-z-index) + 4);
 
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
@@ -371,16 +375,13 @@ div.radio {
 
 	input[type='checkbox'],
 	input[type='radio'] {
-		--secondary: var(--color-primary);
 		--focus-background: var(--color-background-primary);
 
 		&:focus {
-			--secondary: var(--color-primary);
 			--focus-background: var(--color-background-primary);
 		}
 
 		&:checked {
-			--secondary: var(--color-primary);
 			--focus-background: var(--color-background-brand-primary-alt);
 			--input-custom-border-color: var(--color-background-brand-primary-alt);
 			--input-background: var(--color-background-brand-primary-alt);

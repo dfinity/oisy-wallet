@@ -1,11 +1,12 @@
 import * as navModule from '$app/navigation';
-import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import EarningOpportunitiesPage from '$lib/components/earning/Earning.svelte';
 import * as earningDerived from '$lib/derived/earning.derived';
+import * as earningRegistry from '$lib/providers/earning.providers';
 import { i18n } from '$lib/stores/i18n.store';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
+import { mockHarvestProvider, mockRewardsProvider } from '$tests/mocks/earning-providers.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, screen } from '@testing-library/svelte';
 import { get, readable, writable } from 'svelte/store';
@@ -38,26 +39,11 @@ describe('EarningOpportunitiesPage', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 
-		// mock reward + earning cards
 		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue(mockRewardCampaigns);
 
-		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
-			{
-				id: mockRewardCampaigns[mockRewardCampaigns.length - 1].id,
-				titles: ['mock.rewards.title'],
-				description: 'mock.rewards.description',
-				logo: '/img/logo1.svg',
-				fields: [],
-				actionText: 'mock.rewards.action'
-			},
-			{
-				id: 'harvest-autopilot',
-				titles: ['mock.harvest.title'],
-				description: 'mock.harvest.description',
-				logo: '/mock/logo.svg',
-				fields: [EarningCardFields.NETWORKS, EarningCardFields.CURRENT_EARNING],
-				actionText: 'mock.harvest.action'
-			}
+		vi.spyOn(earningRegistry, 'earningProviders', 'get').mockReturnValue([
+			mockRewardsProvider,
+			mockHarvestProvider
 		]);
 
 		vi.spyOn(navModule, 'goto').mockResolvedValue();
@@ -84,10 +70,8 @@ describe('EarningOpportunitiesPage', () => {
 			])
 		});
 
-		// The page heading snippet
 		expect(screen.getByText(get(i18n).earning.text.earning_opportunities)).toBeInTheDocument();
 
-		// Child components should show content from earning cards
 		expect(screen.getByText('mock.rewards.title')).toBeInTheDocument();
 		expect(screen.getByText('mock.harvest.title')).toBeInTheDocument();
 	});

@@ -29,6 +29,7 @@
 			"not_available": "n/a",
 			"new": "New",
 			"edit": "Edit",
+			"download": "Download",
 			"no_results": "No results",
 			"paste": "Paste",
 			"to": "To",
@@ -46,7 +47,8 @@
 			"unlimited": "Unlimited $items",
 			"info": "Info",
 			"asset": "Asset",
-			"got_it": "Got it"
+			"got_it": "Got it",
+			"oisy_protects_you": "$oisy_short protects you!"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -127,6 +129,7 @@
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
+			"sign_in_or_sign_up": "Log in or sign up",
 			"internet_identity": "Internet Identity",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
@@ -269,10 +272,10 @@
 				"description": "The Hub of Future Decentralized Finance!<br/>Reinventing the Exchange as a Hub, ICPSwap provides full-stack financial, market, and DAO services on the Internet Computer. Based on the underlying technology of DFINITY's Internet Computer, ICPSwap establishes an ecosystem of genuinely decentralized finance by refactoring the way users and developers build projects jointly."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI.",
-				"call_to_action": "Get engaged",
-				"description": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI. Served completely end-to-end through blockchain, this decentralized dapp allows you to easily perform the following actions:<br/><ul><li>Send and receive tokens (ICP, ckBTC, CHAT, etc.)</li><li>Stake and manage neurons</li><li>Vote on the governance of the Internet Computer and SNSes</li><li>Participate in decentralization swaps</li><li>Create and top up canisters</li><li>Earn governance rewards</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Governance platform for the Internet Computer that enables users to stake, vote, and follow network activity.",
+				"call_to_action": "Participate in ICP governance",
+				"description": "The NNS application is a governance platform for the Internet Computer (ICP) that enables users to stake tokens, participate in voting, and follow network activity.<br/><br/>It brings greater visibility to user actions and governance activity, helping users understand how staking, voting, and participation contribute to the broader ecosystem."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -476,6 +479,11 @@
 				"one_liner": "The hunt has begun in search of the elusive Motoko Tokyo and the Nightscroller Syndicate can use your help...",
 				"call_to_action": "Come find me when you're ready...",
 				"description": "Where in the World is Motoko Tokyo is a global, blockchain‑powered puzzle adventure built on the Internet Computer Protocol (ICP). Join an exclusive agency and collaborate with players worldwide to unravel a series of cryptic riddles. Every successful solution brings you one step closer to tracking down Motoko Tokyo. In each round, the first player to solve all riddles claims the bounty and secures a coveted spot on the leaderboard."
+			},
+			"icp_flags": {
+				"name": "icp-flags",
+				"one_liner": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions.",
+				"description": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions. Control over each position is determined exclusively by deterministic smart contract logic. There is no administrator discretion, no off-chain settlement layer, and no manual intervention.<br/>Each flag represents a single, indivisible on-chain position controlled by exactly one principal at a time. Control is transferred only through a valid higher bid that satisfies the contract’s escalation formula."
 			}
 		}
 	},
@@ -733,6 +741,7 @@
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"ext_custom_tokens": "Error while loading the EXT custom tokens.",
 			"icpunks_custom_tokens": "Error while loading the ICPunks custom tokens.",
+			"icrc7_custom_tokens": "Error while loading the ICRC-7 custom tokens.",
 			"custom_tokens": "Error while loading the custom tokens.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
@@ -785,6 +794,14 @@
 			"enable_hide_micro_transactions": "Enable hiding of transactions with very small values",
 			"disable_hide_micro_transactions": "Disable hiding of transactions with very small values",
 			"save_spam_filter_success": "Your spam filter settings have been updated.",
+			"export_data": "Export data",
+			"export_data_description": "Download your tokens and transactions as CSV — Basic for the essentials, Extended for additional attributes.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Export tokens",
+			"export_transactions": "Export transactions",
+			"export_tokens_success": "Tokens CSV downloaded.",
+			"export_transactions_success": "Transactions CSV downloaded.",
 			"learn_more": "Learn more"
 		},
 		"alt": {
@@ -795,7 +812,9 @@
 			"appearance_system": "Enables your operating systems color mode"
 		},
 		"error": {
-			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience.",
+			"export_exchange_rate_unavailable": "Exchange rates are still loading. Try again in a moment.",
+			"export_failed": "We couldn't generate your export. Please try again."
 		}
 	},
 	"shortcuts": {
@@ -948,7 +967,8 @@
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
-			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -1155,7 +1175,7 @@
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
 			"withdrawing": "Withdrawing...",
-			"bridging": "Bridging... (Please be patient, this can take up to a minute.)",
+			"bridging": "Bridging... (Please be patient, this can take up to 2 minutes.)",
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
@@ -1164,7 +1184,8 @@
 			"near_intents_tos": "By clicking the \"Swap now\" button, you agree to the <a href=\"$link\" target=\"_blank\" rel=\"external noopener noreferrer\" class=\"underline\">Terms of Service</a> of 1Click Swap API. If you do not agree with those terms, do not use this swap provider.",
 			"onesec_transfer_fee": "Transfer fee",
 			"onesec_protocol_fee": "Protocol fee",
-			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed."
+			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed.",
+			"value_difference_missing_price_confirmation": "The price for at least one of the tokens could not be retrieved. Please <strong>verify independently</strong> that this swap offer provides a fair deal.<br>Note that the slippage setting does <strong>not</strong> protect you from an offer with a much lower receive value!"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -1189,7 +1210,13 @@
 	"buy": {
 		"text": {
 			"buy": "Buy",
-			"buy_dev": "Buy (Dev Environment)"
+			"buy_dev": "Buy (Dev Environment)",
+			"unavailable_title": "Buying tokens is temporarily unavailable",
+			"unavailable_description": "Buying tokens is currently turned off while we further improve the security of this process by introducing URL signing. It will be turned back on as soon as the work is complete.",
+			"unavailable_fallback_hint": "In the meantime, you can still receive tokens by sharing your wallet address."
+		},
+		"actions": {
+			"close": "Got it"
 		},
 		"onramper": {
 			"title": "Buy through Onramper"
@@ -1626,6 +1653,23 @@
 			"burn": "Burn",
 			"mint": "Mint"
 		},
+		"filter": {
+			"types_label": "Type",
+			"tokens_label": "Token",
+			"contacts_label": "Contacts",
+			"types_aria_label": "Filter by transaction type",
+			"tokens_aria_label": "Filter by token",
+			"contacts_aria_label": "Filter by contact",
+			"search_tokens_placeholder": "Start typing...",
+			"search_contacts_placeholder": "Start typing name...",
+			"clear": "Clear",
+			"sheet_title": "Filter activity",
+			"open_filters_aria_label": "Open activity filters",
+			"showing_partial": "Showing $shown of $total · type to search",
+			"contacts_empty_title": "You haven't added contacts yet",
+			"contacts_empty_description": "Save known addresses in Contacts and reduce the risk of accidentally using a wrong address.",
+			"contacts_empty_cta": "Add your first contact"
+		},
 		"label": {
 			"reimbursement": "Reimbursement",
 			"twin_token_converted": "Converted from $twinToken",
@@ -1850,7 +1894,6 @@
 			"text": {
 				"open_or_create": "Open or create your wallet to securely interact with the application.",
 				"connect_your_wallet": "Connect your $oisy_name",
-				"oisy_protects_you": "OISY protects you!",
 				"oisy_protects_you_description": "Applications can't directly access your funds, and each transaction has to be confirmed by you."
 			}
 		},
@@ -1973,7 +2016,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified.",
-			"hidden_micro_transactions": "<strong>OISY protects you!</strong> Transactions with very small token values are currently hidden. To show them, go to <a href=\"/settings/\">Settings</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>"
+			"hidden_micro_transactions": "Transactions with very small token values are currently hidden. To show them, go to <a href=\"/settings/\">Settings</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",

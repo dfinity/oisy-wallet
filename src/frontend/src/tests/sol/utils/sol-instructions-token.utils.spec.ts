@@ -8,6 +8,7 @@ import {
 	parseAmountToUiAmountInstruction,
 	parseApproveCheckedInstruction,
 	parseApproveInstruction,
+	parseBatchInstruction,
 	parseBurnCheckedInstruction,
 	parseBurnInstruction,
 	parseCloseAccountInstruction,
@@ -29,7 +30,9 @@ import {
 	parseThawAccountInstruction,
 	parseTransferCheckedInstruction,
 	parseTransferInstruction,
-	parseUiAmountToAmountInstruction
+	parseUiAmountToAmountInstruction,
+	parseUnwrapLamportsInstruction,
+	parseWithdrawExcessLamportsInstruction
 } from '@solana-program/token';
 import { address } from '@solana/kit';
 
@@ -62,7 +65,10 @@ vi.mock(import('@solana-program/token'), async (importOriginal) => {
 		parseThawAccountInstruction: vi.fn(),
 		parseTransferCheckedInstruction: vi.fn(),
 		parseTransferInstruction: vi.fn(),
-		parseUiAmountToAmountInstruction: vi.fn()
+		parseUiAmountToAmountInstruction: vi.fn(),
+		parseUnwrapLamportsInstruction: vi.fn(),
+		parseWithdrawExcessLamportsInstruction: vi.fn(),
+		parseBatchInstruction: vi.fn()
 	};
 });
 
@@ -346,6 +352,38 @@ describe('sol-instructions-token.utils', () => {
 			});
 
 			expect(parseUiAmountToAmountInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse a WithdrawExcessLamports instruction', () => {
+			vi.mocked(identifyTokenInstruction).mockReturnValue(TokenInstruction.WithdrawExcessLamports);
+
+			expect(parseSolTokenInstruction(mockInstruction)).toStrictEqual({
+				instructionType: TokenInstruction.WithdrawExcessLamports
+			});
+
+			expect(parseWithdrawExcessLamportsInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
+		it('should parse an UnwrapLamports instruction', () => {
+			vi.mocked(identifyTokenInstruction).mockReturnValue(TokenInstruction.UnwrapLamports);
+
+			expect(parseSolTokenInstruction(mockInstruction)).toStrictEqual({
+				instructionType: TokenInstruction.UnwrapLamports
+			});
+
+			expect(parseUnwrapLamportsInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse a Batch instruction', () => {
+			vi.mocked(identifyTokenInstruction).mockReturnValue(TokenInstruction.Batch);
+
+			expect(parseSolTokenInstruction(mockInstruction)).toStrictEqual({
+				instructionType: TokenInstruction.Batch
+			});
+
+			expect(parseBatchInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
 		});
 
 		it('should raise an error if it is not a recognised Token instruction', () => {

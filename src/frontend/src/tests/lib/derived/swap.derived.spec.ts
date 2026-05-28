@@ -148,9 +148,12 @@ describe('swap.derived', () => {
 				mockPage.mockToken(SOLANA_TOKEN);
 
 				swapSupportedTokensStore.set({
-					icp: { coverage: 'none', supportedTokenIds: new Set() },
-					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'all', supportedTokenIds: new Set(['some-other-token']) }
+					aggregated: {
+						icp: { coverage: 'none', supportedTokenIds: new Set() },
+						evm: { coverage: 'none', supportedTokenIds: new Set() },
+						sol: { coverage: 'all', supportedTokenIds: new Set(['some-other-token']) }
+					},
+					providers: []
 				});
 
 				expect(get(isPageTokenSwappable)).toBeFalsy();
@@ -160,12 +163,15 @@ describe('swap.derived', () => {
 				mockPage.mockToken(SOLANA_TOKEN);
 
 				swapSupportedTokensStore.set({
-					icp: { coverage: 'none', supportedTokenIds: new Set() },
-					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: {
-						coverage: 'all',
-						supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
-					}
+					aggregated: {
+						icp: { coverage: 'none', supportedTokenIds: new Set() },
+						evm: { coverage: 'none', supportedTokenIds: new Set() },
+						sol: {
+							coverage: 'all',
+							supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
+						}
+					},
+					providers: []
 				});
 
 				expect(get(isPageTokenSwappable)).toBeTruthy();
@@ -175,9 +181,12 @@ describe('swap.derived', () => {
 				mockPage.mockToken(ETHEREUM_TOKEN);
 
 				swapSupportedTokensStore.set({
-					icp: { coverage: 'none', supportedTokenIds: new Set() },
-					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'all', supportedTokenIds: new Set() }
+					aggregated: {
+						icp: { coverage: 'none', supportedTokenIds: new Set() },
+						evm: { coverage: 'none', supportedTokenIds: new Set() },
+						sol: { coverage: 'all', supportedTokenIds: new Set() }
+					},
+					providers: []
 				});
 
 				expect(get(isPageTokenSwappable)).toBeTruthy();
@@ -203,9 +212,12 @@ describe('swap.derived', () => {
 
 				vi.spyOn(swapSupportedTokensStore, 'subscribe').mockImplementation((fn) => {
 					fn({
-						icp: { coverage: 'none', supportedTokenIds: new Set() },
-						evm: { coverage: 'none', supportedTokenIds: new Set() },
-						sol: { coverage: 'all', supportedTokenIds: new Set(['different-address']) }
+						aggregated: {
+							icp: { coverage: 'none', supportedTokenIds: new Set() },
+							evm: { coverage: 'none', supportedTokenIds: new Set() },
+							sol: { coverage: 'all', supportedTokenIds: new Set(['different-address']) }
+						},
+						providers: []
 					});
 					return () => {};
 				});
@@ -219,20 +231,26 @@ describe('swap.derived', () => {
 				expect(get(isPageTokenSwappable)).toBeTruthy();
 
 				swapSupportedTokensStore.set({
-					icp: { coverage: 'none', supportedTokenIds: new Set() },
-					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'all', supportedTokenIds: new Set(['not-sol']) }
+					aggregated: {
+						icp: { coverage: 'none', supportedTokenIds: new Set() },
+						evm: { coverage: 'none', supportedTokenIds: new Set() },
+						sol: { coverage: 'all', supportedTokenIds: new Set(['not-sol']) }
+					},
+					providers: []
 				});
 
 				expect(get(isPageTokenSwappable)).toBeFalsy();
 
 				swapSupportedTokensStore.set({
-					icp: { coverage: 'none', supportedTokenIds: new Set() },
-					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: {
-						coverage: 'all',
-						supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
-					}
+					aggregated: {
+						icp: { coverage: 'none', supportedTokenIds: new Set() },
+						evm: { coverage: 'none', supportedTokenIds: new Set() },
+						sol: {
+							coverage: 'all',
+							supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
+						}
+					},
+					providers: []
 				});
 
 				expect(get(isPageTokenSwappable)).toBeTruthy();

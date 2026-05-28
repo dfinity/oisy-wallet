@@ -6,6 +6,7 @@ import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
+import type { SendModalData } from '$lib/types/send';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
@@ -48,6 +49,11 @@ export const modalReceiveId: Readable<symbol | undefined> = derived(
 export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
+);
+export const modalSendData: Readable<SendModalData | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'send' ? ($modalStore?.data as SendModalData | undefined) : undefined
 );
 export const modalGetToken: Readable<boolean> = derived(
 	modalStore,

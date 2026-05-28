@@ -32,7 +32,9 @@
 		solAddressDevnetNotLoaded,
 		solAddressMainnetNotLoaded
 	} from '$lib/derived/address.derived';
+	import { modalSendData } from '$lib/derived/modal.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { networks } from '$lib/derived/networks.derived';
 	import { pageNft } from '$lib/derived/page-nft.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -45,6 +47,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
@@ -64,6 +67,7 @@
 	} from '$lib/utils/network.utils';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
+	import { shouldSkipDestinationStep } from '$lib/utils/send.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
@@ -73,7 +77,13 @@
 
 	let { isTransactionsPage, isNftsPage }: Props = $props();
 
-	let destination = $state('');
+	const initialModalData = $modalSendData;
+	const lockedNetworkId = initialModalData?.lockedNetworkId;
+	let lockedNetwork = $derived(
+		nonNullish(lockedNetworkId) ? $networks.find(({ id }) => id === lockedNetworkId) : undefined
+	);
+
+	let destination = $state(initialModalData?.destination ?? '');
 	let activeSendDestinationTab = $state<SendDestinationTab>('recentlyUsed');
 	let selectedContact = $state<ContactUi | undefined>();
 	let amount = $state<number | undefined>();
@@ -87,11 +97,32 @@
 			destination === encodeIcrcAccount($token.mintingAccount)
 	);
 
+	// IMPORTANT: do NOT inline `nonNullish($pageNft)` into the `steps` derivation below.
+	//
+	// `LoaderNfts` re-emits a fresh `Nft` reference for the same logical NFT every
+	// `NFT_TIMER_INTERVAL_MILLIS` (20s) while the user is on the `/nfts` page. Reading that
+	// reference directly inside `steps` would make `steps` re-derive on every tick and return a
+	// fresh array literal, because Svelte 5's `$derived` uses `safe_not_equal` on its OUTPUT to
+	// gate downstream propagation: two distinct array references are never equal, so every tick
+	// would propagate. `WizardModal` (gix-components) reacts to that by rebuilding
+	// `WizardStepsState`, whose constructor unconditionally resets `currentStep = steps[0]` —
+	// silently jumping the open modal back to the DESTINATION step and replaying
+	// `WizardTransition`'s `fly`. That's the visible flicker / "saltare" on form + review.
+	//
+	// Funnelling `$pageNft` through a primitive boolean intermediate inverts that gate: when the
+	// underlying reference changes but `nonNullish(...)` stays `true`, this `$derived`
+	// recomputes to `true`, `safe_not_equal(true, true)` is `false`, and the change is NOT
+	// propagated to subscribers. `steps` is not re-derived, the `steps` array reference stays
+	// stable, `WizardStepsState` is not rebuilt, and `currentStep` is preserved across ticks.
+	//
+	// Pinned by the "steps derivation reactivity" describe block in `SendModal.spec.ts`.
+	let hasPageNft = $derived(nonNullish($pageNft));
+
 	let steps = $derived(
 		isTransactionsPage
 			? sendWizardStepsWithQrCodeScan({ i18n: $i18n, minting: $isIcMintingAccount, burning })
 			: isNftsPage
-				? nonNullish($pageNft)
+				? hasPageNft
 					? sendNftsWizardStepsWithQrCodeScan({ i18n: $i18n })
 					: allSendNftsWizardSteps({ i18n: $i18n })
 				: allSendWizardSteps({ i18n: $i18n, minting: $isIcMintingAccount, burning })
@@ -106,9 +137,13 @@
 		initModalTokensListContext({
 			tokens: $enabledTokens,
 			filterZeroBalance: true,
-			filterNetwork: $selectedNetwork
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
+			filterNetwork: lockedNetwork ?? $selectedNetwork
 		})
 	);
+
+	setContext<boolean>(SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, nonNullish(initialModalData));
 
 	const reset = () => {
 		destination = '';
@@ -152,9 +187,11 @@
 			}
 		}
 
+		const skip = shouldSkipDestinationStep({ destination, token });
+
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			goToStep(WizardStepsSend.DESTINATION);
+			goToStep(skip ? WizardStepsSend.SEND : WizardStepsSend.DESTINATION);
 		};
 
 		await loadTokenAndRun({ token, callback });
@@ -224,6 +261,7 @@
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 				<SendTokensList
+					{lockedNetwork}
 					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 					{onSendToken}
 				/>

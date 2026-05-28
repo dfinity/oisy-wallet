@@ -12,10 +12,11 @@ import {
 } from '$sol/services/sol-user-transactions.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/kit';
@@ -272,6 +273,56 @@ describe('sol-wallet.scheduler', () => {
 					});
 				});
 
+				it('should reset the internal store after a fatal error so the next successful sync re-emits the full state', async () => {
+					await scheduler.start(startData);
+
+					await awaitJobExecution();
+
+					// Sanity check: the first sync populated the internal store.
+					expect(scheduler['store'].transactions).toEqual(
+						expectedSoLTransactions.reduce(
+							(acc, transaction) => ({
+								...acc,
+								[transaction.data.id]: transaction
+							}),
+							{}
+						)
+					);
+					expect(scheduler['store'].balance).toBeDefined();
+
+					// Force the next iteration to fail and exhaust retries.
+					const err = new Error('Failed to fetch');
+					spyLoadBalance.mockRejectedValue(err);
+
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+
+					expect(postMessageMock).toHaveBeenCalledWith({
+						msg: 'syncSolWalletError',
+						ref,
+						data: {
+							error: err
+						}
+					});
+
+					// After the fatal error, the in-memory store must be cleared so the worker
+					// can start fresh on the next tick (mirroring the listener-side UI reset).
+					expect(scheduler['store']).toEqual({
+						balance: undefined,
+						transactions: {}
+					});
+
+					// Recovery: the next successful sync must emit the wallet payload again,
+					// not just status messages, so the previously reset UI store is repopulated.
+					spyLoadBalance.mockResolvedValue(isSpl ? mockSplBalance : mockSolBalance);
+					postMessageMock.mockClear();
+
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+
+					expect(postMessageMock).toHaveBeenCalledWith(
+						mockPostMessage({ withTransactions: true, isSpl, ref })
+					);
+				});
+
 				it('should not post message when no new transactions or balance changes', async () => {
 					await scheduler.start(startData);
 
@@ -501,6 +552,79 @@ describe('sol-wallet.scheduler', () => {
 				identity: mockIdentity,
 				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
 				address: mockSolAddress
+			});
+		});
+
+		it('should refresh ownerless stored SPL transactions', async () => {
+			const splStartData: PostMessageDataRequestSol = {
+				address: {
+					certified: false,
+					data: mockSolAddress
+				},
+				solanaNetwork: SolanaNetworks.devnet,
+				tokenAddress: DEVNET_USDC_TOKEN.address,
+				tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
+			};
+			const [storedTransaction, storedSameSignatureTransaction] = createMockSolTransactionsUi(
+				2
+			).map((tx, index) => ({
+				...tx,
+				id: `stored-same-signature-transaction-${index}`,
+				blockNumber: 100
+			}));
+			const ownerlessStoredTransaction: SolTransactionUi = {
+				...storedTransaction,
+				id: 'ownerless-stored-transaction',
+				blockNumber: 100,
+				type: 'receive',
+				from: mockAtaAddress,
+				to: mockSolAddress2,
+				fromOwner: undefined,
+				toOwner: undefined
+			};
+			const correctedTransaction: SolTransactionUi = {
+				...ownerlessStoredTransaction,
+				type: 'send',
+				fromOwner: mockSolAddress
+			};
+			const correctedSameSignatureTransaction: SolTransactionUi = {
+				...storedSameSignatureTransaction,
+				id: 'corrected-same-signature-transaction'
+			};
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: [ownerlessStoredTransaction, storedSameSignatureTransaction],
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 100n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+			spyLoadTransactions.mockResolvedValue([
+				correctedTransaction,
+				correctedSameSignatureTransaction
+			]);
+
+			await scheduler.trigger(splStartData);
+
+			expect(spyLoadTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({
+					exitIfFirstSignatureMatches: undefined
+				})
+			);
+			expect(scheduler['store'].transactions).toEqual({
+				[correctedTransaction.id]: {
+					data: correctedTransaction,
+					certified: false
+				},
+				[correctedSameSignatureTransaction.id]: {
+					data: correctedSameSignatureTransaction,
+					certified: false
+				}
+			});
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
+				transactions: [correctedTransaction, correctedSameSignatureTransaction]
 			});
 		});
 	});

@@ -63,6 +63,10 @@ DFX_NETWORK=ic ./scripts/build.ext_v2_token.sh
 DFX_NETWORK=ic ./scripts/build.dip721.sh
 # .. downloads candid for the icpunks
 DFX_NETWORK=ic ./scripts/build.icpunks.sh
+# .. downloads candid for icrc7
+DFX_NETWORK=ic ./scripts/build.icrc7.sh
+# .. creates candid for icrc3
+DFX_NETWORK=ic ./scripts/build.icrc3.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
@@ -84,6 +88,13 @@ generate_declarations() {
 
   if [ -f "$didfile" ]; then
     mkdir -p "$didfolder"
+
+    # Keep the .did file checked in under src/declarations/<canister>/ in lockstep
+    # with the source the bindings below are generated from. Without this copy the
+    # .did is a manual snapshot that can silently drift from the generated
+    # .did.d.ts / .factory.did.js, since icp-bindgen consumes a .did but never
+    # emits one.
+    cp "${didfile}" "${didfolder}/${canister}.did"
 
     # --actor-disabled: skip generating actor files, since we handle those ourselves
     # --force: overwrite files. Required; otherwise, icp-bindgen would delete files at preprocess,

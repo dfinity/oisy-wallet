@@ -67,6 +67,35 @@ const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	return new URL(parsedNewUrl.data);
 };
 
+const dataUrlMediaStatus = ({ url }: { url: URL }): MediaStatusEnum | undefined => {
+	if (url.protocol !== 'data:') {
+		return;
+	}
+
+	const [metadata, data = ''] = url.href.split(',', 2);
+	const [mediaType] = metadata.slice('data:'.length).split(';', 1);
+
+	if (!(mediaType.startsWith('image/') || mediaType.startsWith('video/'))) {
+		return MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
+	}
+
+	const isBase64 = metadata.endsWith(';base64');
+	const size = isBase64
+		? base64ByteLength({ data })
+		: new TextEncoder().encode(decodeURIComponent(data)).length;
+
+	return size > NFT_MAX_FILESIZE_LIMIT
+		? MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
+		: MediaStatusEnum.OK;
+};
+
+const base64ByteLength = ({ data }: { data: string }): number => {
+	const sanitizedData = data.replaceAll(/\s/g, '');
+	const padding = sanitizedData.endsWith('==') ? 2 : sanitizedData.endsWith('=') ? 1 : 0;
+
+	return Math.floor((sanitizedData.length * 3) / 4) - padding;
+};
+
 export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: NftError }): URL => {
 	const parsedUrl = UrlSchema.safeParse(url);
 
@@ -95,6 +124,9 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		...(notEmptyString(token.description) && { description: token.description }),
 		...(nonNullish(token.allowExternalContentSource) && {
 			allowExternalContentSource: token.allowExternalContentSource
+		}),
+		...(nonNullish(token.allowedExternalContentSourceUrls) && {
+			allowedExternalContentSourceUrls: token.allowedExternalContentSourceUrls
 		})
 	});
 
@@ -298,6 +330,12 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<MediaStatusEnum
 
 		if (isNullish(url)) {
 			return MediaStatusEnum.INVALID_DATA;
+		}
+
+		const dataUrlStatus = dataUrlMediaStatus({ url });
+
+		if (nonNullish(dataUrlStatus)) {
+			return dataUrlStatus;
 		}
 
 		const { type, size } = await extractMediaTypeAndSize(url.href);

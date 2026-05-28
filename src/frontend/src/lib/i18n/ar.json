@@ -29,6 +29,7 @@
 			"not_available": "غير متاح",
 			"new": "جديد",
 			"edit": "تعديل",
+			"download": "تنزيل",
 			"no_results": "لا توجد نتائج",
 			"paste": "لصق",
 			"to": "إلى",
@@ -46,7 +47,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short يحميك!"
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -127,6 +129,7 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
+			"sign_in_or_sign_up": "تسجيل الدخول أو إنشاء حساب",
 			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
@@ -269,10 +272,10 @@
 				"description": "محور التمويل اللامركزي المستقبلي!<br/>إعادة ابتكار البورصة كمركز، يوفر ICPSwap خدمات مالية وسوقية وDAO متكاملة على Internet Computer. استنادًا إلى التكنولوجيا الأساسية لـ DFINITY's Internet Computer، ينشئ ICPSwap نظامًا بيئيًا للتمويل اللامركزي الحقيقي من خلال إعادة هيكلة طريقة بناء المستخدمين والمطورين للمشاريع بشكل مشترك."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "تطبيق الواجهة الأمامية لـ NNS يسمح لأي شخص بالتفاعل مع نظام الشبكة العصبية لـ Internet Computer بواجهة مستخدم سهلة الاستخدام.",
-				"call_to_action": "شارك",
-				"description": "تطبيق الواجهة الأمامية لـ NNS يسمح لأي شخص بالتفاعل مع نظام الشبكة العصبية لـ Internet Computer بواجهة مستخدم سهلة الاستخدام. يتم تقديمه بالكامل من طرف إلى طرف من خلال البلوكتشين، يتيح لك هذا التطبيق اللامركزي القيام بالإجراءات التالية بسهولة:<br/><ul><li>إرسال واستلام التوكنات (ICP, ckBTC, CHAT, إلخ)</li><li>تخزين وإدارة الخلايا العصبية</li><li>التصويت على حوكمة Internet Computer و SNSes</li><li>المشاركة في تبادلات اللامركزية</li><li>إنشاء وتعبئة الحاويات</li><li>كسب مكافآت الحوكمة</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "منصة حوكمة لـ Internet Computer تمكّن المستخدمين من الرهان والتصويت ومتابعة نشاط الشبكة.",
+				"call_to_action": "المشاركة في حوكمة ICP",
+				"description": "تطبيق NNS هو منصة حوكمة لـ Internet Computer (ICP) تمكّن المستخدمين من رهان الرموز والمشاركة في التصويت ومتابعة نشاط الشبكة.<br/><br/>يوفر رؤية أوسع لإجراءات المستخدمين وأنشطة الحوكمة، ويساعد المستخدمين على فهم كيفية إسهام الرهان والتصويت والمشاركة في النظام البيئي الأشمل."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -475,6 +478,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -733,6 +741,7 @@
 			"icrc_custom_token": "خطأ أثناء تحميل التوكن المخصص ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "تتطلب محفظتك بعض البيانات الأولية التي لم يتم تحميلها بعد. يرجى المحاولة مرة أخرى.",
 			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
@@ -785,7 +794,15 @@
 			"enable_hide_micro_transactions": "تمكين إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
-			"learn_more": ""
+			"export_data": "تصدير البيانات",
+			"export_data_description": "قم بتنزيل الرموز والمعاملات الخاصة بك كملف CSV — Basic للأساسيات، Extended للسمات الإضافية.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "تصدير الرموز",
+			"export_transactions": "تصدير المعاملات",
+			"export_tokens_success": "تم تنزيل ملف CSV للرموز.",
+			"export_transactions_success": "تم تنزيل ملف CSV للمعاملات.",
+			"learn_more": "اعرف المزيد"
 		},
 		"alt": {
 			"testnets_toggle": "تبديل لإظهار أو إخفاء شبكات الاختبار",
@@ -795,7 +812,9 @@
 			"appearance_system": "يمكّن وضع الألوان لنظام التشغيل الخاص بك"
 		},
 		"error": {
-			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة."
+			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة.",
+			"export_exchange_rate_unavailable": "لا تزال أسعار الصرف قيد التحميل. حاول مرة أخرى بعد لحظة.",
+			"export_failed": "لم نتمكن من إنشاء التصدير الخاص بك. يرجى المحاولة مرة أخرى."
 		}
 	},
 	"shortcuts": {
@@ -948,7 +967,8 @@
 			"pending_bitcoin_transaction": "يمكنك إرسال معاملة بيتكوين أخرى بمجرد اكتمال المعاملة المعلقة.",
 			"no_available_utxos": "لن يكون لديك UTXOs متاحة لإجراء هذه المعاملة.",
 			"unknown_destination": "لم تتفاعل مع هذا العنوان من قبل. يرجى التأكد من معرفة المستلم.",
-			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من اختيار التوكن الصحيح، وإدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!"
 		},
 		"assertion": {
 			"invalid_destination_address": "عنوان الوجهة غير صالح",
@@ -1155,7 +1175,7 @@
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
 			"withdrawing": "",
-			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقة واحدة.)",
+			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقتين.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
@@ -1164,7 +1184,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "تعذر استرجاع سعر واحد على الأقل من الرموز. يرجى <strong>التحقق بشكل مستقل</strong> من أن عرض المبادلة هذا يقدم صفقة عادلة.<br>لاحظ أن إعداد الانزلاق السعري <strong>لا</strong> يحميك من عرض بقيمة استلام أقل بكثير!"
 		},
 		"error": {
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",
@@ -1189,7 +1210,13 @@
 	"buy": {
 		"text": {
 			"buy": "شراء",
-			"buy_dev": "شراء (بيئة تطوير)"
+			"buy_dev": "شراء (بيئة تطوير)",
+			"unavailable_title": "شراء الرموز غير متاح مؤقتًا",
+			"unavailable_description": "شراء الرموز معطل حاليًا بينما نواصل تحسين أمان هذه العملية من خلال إضافة توقيع عناوين URL. ستتم إعادة تفعيله بمجرد اكتمال العمل.",
+			"unavailable_fallback_hint": "في غضون ذلك، لا يزال بإمكانك استلام الرموز عن طريق مشاركة عنوان محفظتك."
+		},
+		"actions": {
+			"close": "حسنًا"
 		},
 		"onramper": {
 			"title": "شراء عبر Onramper"
@@ -1626,6 +1653,23 @@
 			"burn": "حرق",
 			"mint": "إنشاء"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "لم تضف أي جهات اتصال بعد",
+			"contacts_empty_description": "احفظ العناوين المعروفة في جهات الاتصال وقلّل من خطر استخدام عنوان خاطئ عن طريق الخطأ.",
+			"contacts_empty_cta": "أضف أول جهة اتصال لك"
+		},
 		"label": {
 			"reimbursement": "تعويض",
 			"twin_token_converted": "تم التحويل من $twinToken",
@@ -1850,7 +1894,6 @@
 			"text": {
 				"open_or_create": "افتح أو أنشئ محفظتك للتفاعل بأمان مع التطبيق.",
 				"connect_your_wallet": "اتصل بمحفظة $oisy_name الخاصة بك",
-				"oisy_protects_you": "OISY يحميك!",
 				"oisy_protects_you_description": "لا يمكن للتطبيقات الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة."
 			}
 		},
@@ -1973,7 +2016,7 @@
 		},
 		"info": {
 			"btc_transactions": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
-			"hidden_micro_transactions": "<strong>OISY يحميك!</strong> المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">معرفة المزيد</a>"
+			"hidden_micro_transactions": "المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">معرفة المزيد</a>"
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",

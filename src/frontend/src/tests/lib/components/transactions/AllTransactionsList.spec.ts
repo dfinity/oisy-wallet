@@ -9,6 +9,7 @@ import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
+import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import * as transactionsUtils from '$lib/utils/transactions.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
@@ -17,9 +18,11 @@ import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import {
 	IntersectionObserverActive,
+	IntersectionObserverOnce,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
 import { render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 describe('AllTransactionsList', () => {
 	beforeAll(() => {
@@ -168,6 +171,123 @@ describe('AllTransactionsList', () => {
 			expect(transactionComponents).toHaveLength(
 				btcTransactionsNumber + ethTransactionsNumber + icTransactionsNumber
 			);
+		});
+	});
+
+	// Regression: clearing a narrow filter used to leave `AllTransactionsScroll`
+	// stuck at `pages = 1` because the upstream `InfiniteScroll` observer never
+	// re-fires for a sentinel that stays in view.
+	describe('when the persisted filter changes', () => {
+		const todayTimestamp = new Date().getTime();
+		const sendCount = 2;
+		const receiveCount = 15;
+
+		beforeAll(() => {
+			Object.defineProperty(window, 'IntersectionObserver', {
+				writable: true,
+				configurable: true,
+				value: IntersectionObserverOnce
+			});
+		});
+
+		beforeEach(() => {
+			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
+			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
+			icTransactionsStore.reset(ICP_TOKEN_ID);
+			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+
+			btcTransactionsStore.append({
+				tokenId: BTC_MAINNET_TOKEN_ID,
+				transactions: createMockBtcTransactionsUi(sendCount).map((transaction) => ({
+					data: { ...transaction, type: 'send', timestamp: BigInt(todayTimestamp) },
+					certified: false
+				}))
+			});
+
+			btcTransactionsStore.append({
+				tokenId: BTC_MAINNET_TOKEN_ID,
+				transactions: createMockBtcTransactionsUi(receiveCount).map((transaction) => ({
+					data: { ...transaction, type: 'receive', timestamp: BigInt(todayTimestamp) },
+					certified: false
+				}))
+			});
+
+			localStorage.clear();
+			transactionsFilterStore.clear();
+		});
+
+		afterEach(() => {
+			transactionsFilterStore.clear();
+		});
+
+		afterAll(() => {
+			Object.defineProperty(window, 'IntersectionObserver', {
+				writable: true,
+				configurable: true,
+				value: IntersectionObserverActive
+			});
+		});
+
+		it('creates a new IntersectionObserver when the filter signature changes', async () => {
+			let constructorCalls = 0;
+
+			class TrackedIntersectionObserver extends IntersectionObserverOnce {
+				constructor(callback: IntersectionObserverCallback) {
+					super(callback);
+					constructorCalls++;
+				}
+			}
+
+			Object.defineProperty(window, 'IntersectionObserver', {
+				writable: true,
+				configurable: true,
+				value: TrackedIntersectionObserver
+			});
+
+			try {
+				render(AllTransactionsList);
+				await tick();
+
+				const initialCalls = constructorCalls;
+
+				expect(initialCalls).toBeGreaterThan(0);
+
+				transactionsFilterStore.toggleType('send');
+				await tick();
+
+				expect(constructorCalls).toBeGreaterThan(initialCalls);
+
+				const callsAfterApply = constructorCalls;
+
+				transactionsFilterStore.clear();
+				await tick();
+
+				expect(constructorCalls).toBeGreaterThan(callsAfterApply);
+			} finally {
+				Object.defineProperty(window, 'IntersectionObserver', {
+					writable: true,
+					configurable: true,
+					value: IntersectionObserverOnce
+				});
+			}
+		});
+
+		it('re-runs the pagination cycle after clearing a narrow filter', async () => {
+			transactionsFilterStore.toggleType('send');
+
+			const { container } = render(AllTransactionsList);
+			await tick();
+
+			const filteredRows = container.querySelectorAll('button.contents');
+
+			expect(filteredRows).toHaveLength(sendCount);
+
+			transactionsFilterStore.clear();
+			await tick();
+
+			const rowsAfterClear = container.querySelectorAll('button.contents');
+
+			expect(rowsAfterClear).toHaveLength(sendCount + receiveCount);
 		});
 	});
 });

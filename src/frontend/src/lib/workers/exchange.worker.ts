@@ -3,7 +3,7 @@ import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services'
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
+import { getSyncExchangeTimerInterval } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import {
@@ -17,7 +17,7 @@ import {
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency,
-	fetchAllExchangeRatesFromBackend
+	fetchExchangeRatesFromBackend
 } from '$lib/services/exchange.services';
 import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
@@ -46,6 +46,8 @@ export const onExchangeMessage = async ({
 };
 
 let timer: NodeJS.Timeout | undefined = undefined;
+let timerGeneration = 0;
+let latestTimerData: PostMessageDataRequestExchangeTimer | undefined = undefined;
 
 const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | undefined) => {
 	// This worker has already been started
@@ -53,32 +55,39 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 		return;
 	}
 
-	const sync = async () =>
-		await syncExchange({
-			currentCurrency: data?.currentCurrency ?? Currency.USD,
-			erc20ContractAddresses: data?.erc20Addresses ?? [],
-			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
-			splTokenAddresses: data?.splAddresses ?? [],
-			erc4626TokensExchangeData: data?.erc4626TokensExchangeData ?? []
-		});
+	if (syncInProgress && activeSyncGeneration === timerGeneration) {
+		return;
+	}
+
+	latestTimerData = data;
+	const generation = ++timerGeneration;
 
 	// We sync now but also schedule the update afterward
-	await sync();
+	await syncLatestExchange(generation);
+
+	if (generation !== timerGeneration) {
+		return;
+	}
 
 	const scheduleNext = (): void => {
-		timer = setTimeout(async () => {
-			await sync();
+		timer = setTimeout(
+			async () => {
+				await syncLatestExchange(generation);
 
-			if (nonNullish(timer)) {
-				scheduleNext();
-			}
-		}, SYNC_EXCHANGE_TIMER_INTERVAL);
+				if (generation === timerGeneration) {
+					scheduleNext();
+				}
+			},
+			getSyncExchangeTimerInterval(backendExchangeEnabledFromTimerData(latestTimerData))
+		);
 	};
 
 	scheduleNext();
 };
 
 const stopTimer = () => {
+	timerGeneration++;
+
 	if (isNullish(timer)) {
 		return;
 	}
@@ -88,6 +97,8 @@ const stopTimer = () => {
 };
 
 let syncInProgress = false;
+let queuedSyncGeneration: number | undefined = undefined;
+let activeSyncGeneration: number | undefined = undefined;
 
 interface SyncExchangeParams {
 	currentCurrency: Currency;
@@ -130,9 +141,6 @@ const buildErc20PriceParams = (
 
 const syncExchangeFromBackend = async ({
 	currentCurrency,
-	erc20ContractAddresses,
-	icrcLedgerCanisterIds,
-	splTokenAddresses,
 	erc4626TokensExchangeData
 }: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
 	const identity = await AuthClientProvider.getInstance().loadIdentity();
@@ -162,15 +170,25 @@ const syncExchangeFromBackend = async ({
 		};
 	}
 
-	const [currentExchangeRate, backendPrices] = await Promise.all([
+	const [currentExchangeRateResult, backendPricesResult] = await Promise.allSettled([
 		exchangeRateUsdToCurrency(currentCurrency),
-		fetchAllExchangeRatesFromBackend({
-			identity,
-			erc20Addresses: erc20ContractAddresses,
-			icrcCanisterIds: icrcLedgerCanisterIds,
-			splTokenAddresses
-		})
+		fetchExchangeRatesFromBackend({ identity })
 	]);
+
+	if (currentExchangeRateResult.status === 'rejected') {
+		consoleError('Error while fetching exchange rate:', currentExchangeRateResult.reason);
+	}
+
+	if (backendPricesResult.status === 'rejected') {
+		consoleError(
+			'Error while fetching exchange rate:',
+			'Failed to fetch backend exchange rates:',
+			backendPricesResult.reason
+		);
+	}
+
+	const currentExchangeRate =
+		currentExchangeRateResult.status === 'fulfilled' ? currentExchangeRateResult.value : undefined;
 
 	const {
 		currentEthPrice,
@@ -184,7 +202,22 @@ const syncExchangeFromBackend = async ({
 		currentErc20Prices,
 		currentIcrcPrices,
 		currentSplPrices
-	} = backendPrices;
+	} =
+		backendPricesResult.status === 'fulfilled'
+			? backendPricesResult.value
+			: {
+					currentEthPrice: undefined,
+					currentBtcPrice: undefined,
+					currentIcpPrice: undefined,
+					currentSolPrice: undefined,
+					currentBnbPrice: undefined,
+					currentPolPrice: undefined,
+					currentArbitrumEthPrice: undefined,
+					currentBaseEthPrice: undefined,
+					currentErc20Prices: {},
+					currentIcrcPrices: {},
+					currentSplPrices: {}
+				};
 
 	const currentErc4626Prices = await calculateErc4626Prices({
 		erc20Prices: currentErc20Prices,
@@ -310,16 +343,55 @@ const syncExchangeFromProviders = async ({
 	};
 };
 
-const syncExchange = async (params: SyncExchangeParams) => {
-	// Avoid duplicating the sync if already in progress and not yet finished
+const paramsFromTimerData = (
+	data: PostMessageDataRequestExchangeTimer | undefined
+): SyncExchangeParams => ({
+	currentCurrency: data?.currentCurrency ?? Currency.USD,
+	erc20ContractAddresses: data?.erc20Addresses ?? [],
+	icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
+	splTokenAddresses: data?.splAddresses ?? [],
+	erc4626TokensExchangeData: data?.erc4626TokensExchangeData ?? []
+});
+
+const backendExchangeEnabledFromTimerData = (
+	data: PostMessageDataRequestExchangeTimer | undefined
+): boolean => data?.backendExchangeEnabled ?? BACKEND_EXCHANGE_ENABLED;
+
+const syncLatestExchange = async (generation: number) => {
+	if (generation !== timerGeneration) {
+		return;
+	}
+
 	if (syncInProgress) {
+		queuedSyncGeneration = generation;
 		return;
 	}
 
 	syncInProgress = true;
+	activeSyncGeneration = generation;
 
+	await syncExchange(paramsFromTimerData(latestTimerData)).finally(() => {
+		syncInProgress = false;
+		if (activeSyncGeneration === generation) {
+			activeSyncGeneration = undefined;
+		}
+	});
+
+	const nextGeneration = queuedSyncGeneration;
+	queuedSyncGeneration = undefined;
+
+	if (
+		nonNullish(nextGeneration) &&
+		nextGeneration !== generation &&
+		nextGeneration === timerGeneration
+	) {
+		void syncLatestExchange(nextGeneration);
+	}
+};
+
+const syncExchange = async (params: SyncExchangeParams) => {
 	try {
-		const data = BACKEND_EXCHANGE_ENABLED
+		const data = backendExchangeEnabledFromTimerData(latestTimerData)
 			? await syncExchangeFromBackend(params)
 			: await syncExchangeFromProviders(params);
 
@@ -337,6 +409,4 @@ const syncExchange = async (params: SyncExchangeParams) => {
 			}
 		});
 	}
-
-	syncInProgress = false;
 };

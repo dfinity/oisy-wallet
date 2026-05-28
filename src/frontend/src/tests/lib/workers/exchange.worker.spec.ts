@@ -18,13 +18,11 @@ import type {
 } from '$lib/types/coingecko';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
-import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
 import { Principal } from '@dfinity/principal';
-import { nonNullish } from '@dfinity/utils';
 
 const { backendExchangeEnabled } = vi.hoisted(() => ({
 	backendExchangeEnabled: { current: false }
@@ -238,6 +236,68 @@ describe('exchange.worker', () => {
 				await onExchangeMessage(event);
 
 				expect(postMessageMock).toHaveBeenCalledOnce();
+			});
+
+			it('should sync the latest payload when restarted during the immediate sync', async () => {
+				let resolveFirstSync: ((v: CoingeckoSimpleErc4626TokenPriceResponse) => void) | undefined;
+				vi.mocked(calculateErc4626Prices)
+					.mockImplementationOnce(
+						() =>
+							new Promise((resolve) => {
+								resolveFirstSync = resolve;
+							})
+					)
+					.mockResolvedValue({});
+
+				const firstEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				const latestEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: ['icrc1'],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				const firstStart = onExchangeMessage(firstEvent);
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(resolveFirstSync).toBeDefined();
+
+				await onExchangeMessage(createEvent('stopExchangeTimer'));
+				const latestStart = onExchangeMessage(latestEvent);
+
+				resolveFirstSync?.({});
+
+				await Promise.all([firstStart, latestStart]);
+
+				await vi.waitFor(() => {
+					expect(simpleTokenPrice).toHaveBeenCalledWith({
+						id: 'internet-computer',
+						vs_currencies: Currency.USD,
+						contract_addresses: ['icrc1'],
+						include_market_cap: true,
+						include_24hr_change: true
+					});
+				});
 			});
 
 			it('should sync prices at the correct interval', async () => {
@@ -1093,15 +1153,9 @@ describe('exchange.worker', () => {
 				}
 			};
 
-			const mockRatesMap = (
+			const mockMyRates = (
 				...entries: [TokenId, BackendExchangeRate][]
-			): Map<string, BackendExchangeRate> =>
-				new Map(
-					entries.reduce<[string, BackendExchangeRate][]>((acc, [id, rate]) => {
-						const key = tokenIdKey(id);
-						return nonNullish(key) ? [...acc, [key, rate]] : acc;
-					}, [])
-				);
+			): Array<[TokenId, BackendExchangeRate | undefined]> => entries;
 
 			beforeEach(() => {
 				backendExchangeEnabled.current = true;
@@ -1112,7 +1166,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should fetch prices from backend instead of CoinGecko', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+				vi.mocked(getExchangeRates).mockResolvedValue([]);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
 					...createEvent(msg),
@@ -1141,7 +1195,7 @@ describe('exchange.worker', () => {
 				};
 
 				vi.mocked(getExchangeRates).mockResolvedValue(
-					mockRatesMap([erc20TokenId, mockExchangeRate], [icrcTokenId, mockExchangeRate])
+					mockMyRates([erc20TokenId, mockExchangeRate], [icrcTokenId, mockExchangeRate])
 				);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
@@ -1163,7 +1217,8 @@ describe('exchange.worker', () => {
 				const expectedPrice = {
 					usd: 42000,
 					usd_24h_change: 1.5,
-					usd_market_cap: 800_000_000_000
+					usd_market_cap: 800_000_000_000,
+					last_updated_at: 1000
 				};
 
 				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
@@ -1180,7 +1235,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should return native prices as undefined when backend has no data for them', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+				vi.mocked(getExchangeRates).mockResolvedValue([]);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
 					...createEvent(msg),
@@ -1210,7 +1265,7 @@ describe('exchange.worker', () => {
 
 			it('should include native token prices when backend provides them', async () => {
 				vi.mocked(getExchangeRates).mockResolvedValue(
-					mockRatesMap(
+					mockMyRates(
 						[{ EvmNative: 1n }, mockExchangeRate],
 						[{ BtcNativeMainnet: null }, mockExchangeRate],
 						[{ IcpNative: null }, mockExchangeRate],
@@ -1240,7 +1295,8 @@ describe('exchange.worker', () => {
 				const expectedPrice = {
 					usd: 42000,
 					usd_24h_change: 1.5,
-					usd_market_cap: 800_000_000_000
+					usd_market_cap: 800_000_000_000,
+					last_updated_at: 1000
 				};
 
 				expect(postedData.currentEthPrice).toEqual({ ethereum: expectedPrice });
@@ -1254,7 +1310,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should still fetch currency exchange rate from CoinGecko for non-USD currencies', async () => {
-				vi.mocked(getExchangeRates).mockResolvedValue(new Map());
+				vi.mocked(getExchangeRates).mockResolvedValue([]);
 				vi.mocked(simplePrice).mockResolvedValue({
 					bitcoin: { usd: 60000, eur: 55000, usd_24h_change: 2, eur_24h_change: 1.5 }
 				});
@@ -1292,9 +1348,96 @@ describe('exchange.worker', () => {
 				});
 			});
 
-			it('should post syncExchangeError when backend call fails', async () => {
+			it('should still post a sync success message when only the FX call fails', async () => {
+				vi.mocked(simplePrice).mockRejectedValueOnce(new Error('Coingecko unavailable'));
+				vi.mocked(getExchangeRates).mockResolvedValue(
+					mockMyRates([{ EvmNative: 1n } as TokenId, mockExchangeRate])
+				);
+				vi.mocked(calculateErc4626Prices).mockResolvedValue({});
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.EUR,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.objectContaining({
+						currentExchangeRate: {
+							exchangeRateToUsd: null,
+							exchangeRate24hChangeMultiplier: null,
+							currency: Currency.EUR
+						},
+						currentEthPrice: {
+							ethereum: {
+								usd: 42000,
+								usd_24h_change: 1.5,
+								usd_market_cap: 800_000_000_000,
+								last_updated_at: 1000
+							}
+						}
+					})
+				});
+			});
+
+			it('should still post a sync success message when only the backend call fails', async () => {
 				vi.mocked(getExchangeRates).mockRejectedValue(new Error('Backend unavailable'));
 				vi.mocked(calculateErc4626Prices).mockResolvedValue({});
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: {
+						currentExchangeRate: {
+							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1,
+							currency: Currency.USD
+						},
+						currentEthPrice: undefined,
+						currentBtcPrice: undefined,
+						currentErc20Prices: {},
+						currentIcpPrice: undefined,
+						currentIcrcPrices: {},
+						currentSolPrice: undefined,
+						currentSplPrices: {},
+						currentErc4626Prices: {},
+						currentBnbPrice: undefined,
+						currentPolPrice: undefined,
+						currentArbitrumEthPrice: undefined,
+						currentBaseEthPrice: undefined
+					}
+				});
+			});
+
+			it('should post syncExchangeError only when an unexpected error occurs', async () => {
+				vi.mocked(getExchangeRates).mockResolvedValue([]);
+				vi.mocked(calculateErc4626Prices).mockRejectedValue(new Error('Unexpected'));
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
 					...createEvent(msg),

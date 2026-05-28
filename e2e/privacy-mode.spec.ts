@@ -12,7 +12,7 @@ testWithII.skip('should display privacy mode on homepage', async ({ page, iiPage
 
 	await homepageLoggedIn.clickTokenGroupCard('ETH');
 
-	await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
+	await homepageLoggedIn.takeScreenshot();
 });
 
 // TODO: E2E tests are failing and/or take too much time, we need to fix them slowly, so we skip them for now
@@ -27,7 +27,7 @@ testWithII.skip(
 
 		await homepageLoggedIn.openNetworkSelector();
 
-		await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
+		await homepageLoggedIn.takeScreenshot();
 	}
 );
 

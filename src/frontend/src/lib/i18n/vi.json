@@ -29,6 +29,7 @@
 			"not_available": "Không có",
 			"new": "Mới",
 			"edit": "Chỉnh sửa",
+			"download": "Tải xuống",
 			"no_results": "Không có kết quả",
 			"paste": "Dán",
 			"to": "Đến",
@@ -46,7 +47,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short bảo vệ bạn!"
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -127,6 +129,7 @@
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
+			"sign_in_or_sign_up": "Đăng nhập hoặc đăng ký",
 			"internet_identity": "",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
@@ -269,10 +272,10 @@
 				"description": "Trung tâm của tài chính Phi tập trung tương lai!<br/>Tái định nghĩa sàn giao dịch thành một trung tâm, ICPSwap cung cấp các dịch vụ tài chính, thị trường và DAO đầy đủ trên Internet Computer. Dựa trên công nghệ nền tảng của Internet Computer của DFINITY, ICPSwap thiết lập một hệ sinh thái tài chính phi tập trung thực sự bằng cách tái cấu trúc cách người dùng và nhà phát triển cùng nhau xây dựng các dự án."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "Ứng dụng dapp giao diện người dùng NNS cho phép bất kỳ ai tương tác với Network Nervous System của Internet Computer bằng giao diện người dùng thân thiện.",
-				"call_to_action": "Tham gia",
-				"description": "Ứng dụng dapp giao diện người dùng NNS cho phép bất kỳ ai tương tác với Network Nervous System của Internet Computer bằng giao diện người dùng thân thiện. Được phục vụ hoàn toàn từ đầu đến cuối thông qua chuỗi khối, ứng dụng dapp phi tập trung này cho phép bạn dễ dàng thực hiện các hành động sau:<br/><ul><li>Gửi và nhận token (ICP, ckBTC, CHAT, v.v.)</li><li>Đặt cược và quản lý các nơ-ron</li><li>Bỏ phiếu về quản trị của Internet Computer và các SNS</li><li>Tham gia vào các giao dịch hoán đổi phi tập trung</li><li>Tạo và nạp tiền vào các canister</li><li>Kiếm phần thưởng quản trị</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Nền tảng quản trị cho Internet Computer giúp người dùng có thể stake, bỏ phiếu và theo dõi hoạt động mạng.",
+				"call_to_action": "Tham gia quản trị ICP",
+				"description": "Ứng dụng NNS là nền tảng quản trị cho Internet Computer (ICP) giúp người dùng stake token, tham gia bỏ phiếu và theo dõi hoạt động mạng.<br/><br/>Nó mang lại khả năng hiển thị cao hơn cho các hành động của người dùng và hoạt động quản trị, giúp người dùng hiểu cách stake, bỏ phiếu và tham gia đóng góp cho hệ sinh thái rộng lớn hơn."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -475,6 +478,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -733,6 +741,7 @@
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
@@ -785,7 +794,15 @@
 			"enable_hide_micro_transactions": "Bật ẩn các giao dịch có giá trị rất nhỏ",
 			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
 			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
-			"learn_more": ""
+			"export_data": "Xuất dữ liệu",
+			"export_data_description": "Tải xuống token và giao dịch của bạn dưới dạng CSV — Basic cho thông tin cơ bản, Extended cho các thuộc tính bổ sung.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Xuất token",
+			"export_transactions": "Xuất giao dịch",
+			"export_tokens_success": "Đã tải xuống CSV token.",
+			"export_transactions_success": "Đã tải xuống CSV giao dịch.",
+			"learn_more": "Tìm hiểu thêm"
 		},
 		"alt": {
 			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
@@ -795,7 +812,9 @@
 			"appearance_system": "Bật chế độ màu theo hệ điều hành của bạn"
 		},
 		"error": {
-			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ."
+			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ.",
+			"export_exchange_rate_unavailable": "Tỷ giá hối đoái vẫn đang được tải. Vui lòng thử lại sau ít phút.",
+			"export_failed": "Chúng tôi không thể tạo bản xuất của bạn. Vui lòng thử lại."
 		}
 	},
 	"shortcuts": {
@@ -948,7 +967,8 @@
 			"pending_bitcoin_transaction": "Bạn có thể gửi một giao dịch Bitcoin khác sau khi giao dịch đang chờ xử lý hoàn tất.",
 			"no_available_utxos": "Bạn sẽ không có UTXO khả dụng để thực hiện giao dịch này.",
 			"unknown_destination": "Bạn chưa tương tác với địa chỉ này trước đây. Vui lòng đảm bảo bạn biết người nhận.",
-			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn chọn đúng token, nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Địa chỉ ví không hợp lệ",
@@ -1155,7 +1175,7 @@
 			"select_token": "Chọn token",
 			"select_network_filter": "Chọn mạng",
 			"withdrawing": "Đang rút...",
-			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến một phút.)",
+			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến 2 phút.)",
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
@@ -1164,7 +1184,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Không thể truy xuất giá của ít nhất một trong các token. Vui lòng <strong>xác minh độc lập</strong> rằng giao dịch swap này là một thỏa thuận công bằng.<br>Lưu ý rằng cài đặt trượt giá <strong>không</strong> bảo vệ bạn khỏi giao dịch với giá trị nhận thấp hơn nhiều!"
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
@@ -1189,7 +1210,13 @@
 	"buy": {
 		"text": {
 			"buy": "Mua",
-			"buy_dev": "Mua (Dev Environment)"
+			"buy_dev": "Mua (Dev Environment)",
+			"unavailable_title": "Mua token tạm thời không khả dụng",
+			"unavailable_description": "Việc mua token hiện đang tắt trong khi chúng tôi tiếp tục cải thiện bảo mật cho quy trình này bằng cách giới thiệu ký URL. Nó sẽ được bật lại ngay khi công việc hoàn tất.",
+			"unavailable_fallback_hint": "Trong thời gian chờ đợi, bạn vẫn có thể nhận token bằng cách chia sẻ địa chỉ ví của mình."
+		},
+		"actions": {
+			"close": "Đã hiểu"
 		},
 		"onramper": {
 			"title": "Mua qua Onramper"
@@ -1626,6 +1653,23 @@
 			"burn": "Đốt",
 			"mint": "Tạo"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "Bạn chưa thêm liên hệ nào",
+			"contacts_empty_description": "Lưu các địa chỉ đã biết vào Danh bạ để giảm rủi ro vô tình dùng nhầm địa chỉ.",
+			"contacts_empty_cta": "Thêm liên hệ đầu tiên"
+		},
 		"label": {
 			"reimbursement": "Hoàn tiền",
 			"twin_token_converted": "Đã chuyển đổi từ $twinToken",
@@ -1850,7 +1894,6 @@
 			"text": {
 				"open_or_create": "Mở hoặc tạo ví của bạn để tương tác an toàn với ứng dụng.",
 				"connect_your_wallet": "Kết nối ví $oisy_name của bạn",
-				"oisy_protects_you": "OISY bảo vệ bạn!",
 				"oisy_protects_you_description": "Các ứng dụng không thể trực tiếp truy cập vào quỹ của bạn, và mỗi giao dịch phải được bạn xác nhận."
 			}
 		},
@@ -1973,7 +2016,7 @@
 		},
 		"info": {
 			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
-			"hidden_micro_transactions": "<strong>OISY bảo vệ bạn!</strong> Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
+			"hidden_micro_transactions": "Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
 		},
 		"warning": {
 			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",

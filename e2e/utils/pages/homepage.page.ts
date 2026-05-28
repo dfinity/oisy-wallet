@@ -33,7 +33,6 @@ import {
 import type { InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
-import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import {
@@ -66,7 +65,6 @@ interface WaitForModalParams {
 }
 
 interface TakeScreenshotParams {
-	freezeCarousel?: boolean;
 	centeredElementTestId?: string;
 	screenshotTarget?: Locator;
 }
@@ -92,8 +90,6 @@ abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
 	readonly #isMobile?: boolean;
-
-	private promotionCarousel?: PromotionCarousel;
 
 	protected constructor({ page, viewportSize, isMobile }: HomepageParams) {
 		this.#page = page;
@@ -177,6 +173,12 @@ abstract class Homepage {
 
 	protected async mockSelectorAll({ selector }: SelectorOperationParams): Promise<void> {
 		const elementsLocator = this.#page.locator(selector);
+
+		// Wait for the first match to render before masking. Otherwise
+		// `evaluateAll` runs against an empty NodeList (silently no-op) and
+		// the screenshot captures the un-mocked, time-sensitive content.
+		await elementsLocator.first().waitFor({ state: 'visible' });
+
 		await elementsLocator.evaluateAll((elements) => {
 			for (const element of elements) {
 				(element as HTMLElement).innerHTML = 'placeholder';
@@ -337,15 +339,6 @@ abstract class Homepage {
 		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
-	// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
-	async setCarouselFirstSlide(): Promise<void> {
-		if (isNullish(this.promotionCarousel)) {
-			this.promotionCarousel = new PromotionCarousel(this.#page);
-		}
-		await this.promotionCarousel.freezeCarouselToSlide(1);
-		await this.waitForLoadState();
-	}
-
 	async waitForLoadState() {
 		await this.#page.waitForLoadState('networkidle');
 	}
@@ -469,16 +462,27 @@ abstract class Homepage {
 	}
 
 	async getStableViewportHeight(): Promise<number> {
+		// Hard cap so a page with an animation, polling worker, or streaming
+		// content that never settles can't burn the entire test timeout. If
+		// the page hasn't stabilised after `MAX_POLLS * POLL_INTERVAL_MS`,
+		// fall back to the latest sample and let the snapshot diff surface
+		// any layout drift instead of hanging.
+		const POLL_INTERVAL_MS = 1_000;
+		const MAX_POLLS = 10;
+
 		let previousHeight: number;
 		let currentHeight: number = await this.#page.evaluate(
 			() => document.documentElement.scrollHeight
 		);
 
-		do {
+		for (let i = 0; i < MAX_POLLS; i++) {
 			previousHeight = currentHeight;
-			await this.#page.waitForTimeout(1000);
+			await this.#page.waitForTimeout(POLL_INTERVAL_MS);
 			currentHeight = await this.#page.evaluate(() => document.documentElement.scrollHeight);
-		} while (currentHeight !== previousHeight);
+			if (currentHeight === previousHeight) {
+				return currentHeight;
+			}
+		}
 
 		return currentHeight;
 	}
@@ -493,25 +497,16 @@ abstract class Homepage {
 		await this.#page.setViewportSize({ height: stablePageHeight, width });
 	}
 
-	async takeScreenshot(
-		{ freezeCarousel: _ = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
-			freezeCarousel: false
-		}
-	): Promise<void> {
+	async takeScreenshot({
+		centeredElementTestId,
+		screenshotTarget
+	}: TakeScreenshotParams = {}): Promise<void> {
 		if (isNullish(screenshotTarget) && !this.#isMobile) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
 			await this.viewportAdjuster();
 		}
 
 		const element = screenshotTarget ?? this.#page;
-
-		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
-		// if (freezeCarousel) {
-		// 	// Freezing the time because the carousel has a timer that resets the animations and the transitions.
-		// 	await this.#page.clock.pauseAt(Date.now());
-		// 	await this.setCarouselFirstSlide();
-		// 	await this.#page.clock.pauseAt(Date.now());
-		// }
 
 		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
@@ -560,12 +555,6 @@ abstract class Homepage {
 			}
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
-
-		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
-		// if (freezeCarousel) {
-		// 	// Resuming the time that we froze because of the carousel animations.
-		// 	await this.#page.clock.resume();
-		// }
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
@@ -606,7 +595,7 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForHomepageReady();
 
-		await this.#iiPage.signInWithNewIdentity();
+		await this.#iiPage.signIn();
 	}
 
 	async checkIfStillLoggedIn(timeout = 10000): Promise<void> {
@@ -669,10 +658,10 @@ export class HomepageLoggedIn extends Homepage {
 	async waitForReady(): Promise<void> {
 		await this.waitForAuthentication();
 
-		await this.waitForLoaderModal();
-
-		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
-
+		// Skip the "wait for `loader-modal` to appear then disappear" pattern:
+		// the loader can render and vanish faster than Playwright's poll, so
+		// waiting for `visible` deadlocks. `waitForContentReady()` checks the
+		// real destination (tokens initialised) directly.
 		await this.waitForContentReady();
 	}
 

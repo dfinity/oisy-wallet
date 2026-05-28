@@ -1,3 +1,4 @@
+use futures::future::join_all;
 use ic_cdk::{api::time, management_canister::HttpHeader};
 use serde::Deserialize;
 use serde_json::from_slice;
@@ -13,7 +14,7 @@ const DEFAULT_BASE_URL: &str = "https://api.icpswap.com";
 /// `ICPSwap` token info responses are small JSON objects; keep the cap tight for cycle costs.
 const MAX_RESPONSE_BYTES: u64 = 8_192;
 /// Pools with TVL at or below this threshold are considered stale and their prices are discarded.
-const MIN_TVL_USD: f64 = 10.0;
+const MIN_TVL_USD: f64 = 500.0;
 
 #[derive(Debug, Deserialize)]
 struct IcpSwapEnvelope {
@@ -117,17 +118,28 @@ impl SupplementalPriceProvider for IcpSwapProvider {
 
     fn supplement<'a>(&'a self, missing: &'a [StoredTokenId]) -> SupplementalPricesFuture<'a> {
         Box::pin(async move {
-            let mut out = Vec::new();
-
-            for stored in missing {
+            // ICPSwap exposes one URL per token — there is no batch endpoint.
+            // Issuing the per-token outcalls in parallel turns N sequential
+            // round trips into a single fan-out.
+            let outcomes = join_all(missing.iter().filter_map(|stored| {
                 let StoredTokenId(TokenId::Icrc(ledger_id)) = stored else {
-                    continue;
+                    return None;
                 };
 
                 let ledger_text = ledger_id.to_text();
 
-                match self.fetch_icrc_token_usd(&ledger_text).await {
-                    Ok(Some(data)) => out.push((stored.clone(), data)),
+                Some(async move {
+                    let outcome = self.fetch_icrc_token_usd(&ledger_text).await;
+                    (stored.clone(), ledger_text, outcome)
+                })
+            }))
+            .await;
+
+            let mut out = Vec::new();
+
+            for (stored, ledger_text, outcome) in outcomes {
+                match outcome {
+                    Ok(Some(data)) => out.push((stored, data)),
                     Ok(None) => {}
                     Err(err) => {
                         ic_cdk::println!("ICPSwap price fetch for {ledger_text} failed: {err}");
@@ -164,7 +176,7 @@ mod tests {
     #[test]
     fn parse_icpswap_body_filters_non_finite_price_change() {
         let json =
-            br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.0","priceChange24H":"NaN","tvlUSD":"100"}}"#;
+            br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.0","priceChange24H":"NaN","tvlUSD":"1000"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         let d = exchange_data_from_icpswap_envelope(parsed, 0).unwrap();
         assert_eq!(d.price, Some(1.0));
@@ -179,8 +191,8 @@ mod tests {
     }
 
     #[test]
-    fn parse_icpswap_body_rejects_stale_pool() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"1.78"}}"#;
+    fn parse_icpswap_body_rejects_tvl_below_threshold() {
+        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"100"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
@@ -194,14 +206,14 @@ mod tests {
 
     #[test]
     fn parse_icpswap_body_rejects_tvl_at_threshold() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"10"}}"#;
+        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"500"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
 
     #[test]
     fn parse_icpswap_body_accepts_tvl_above_threshold() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"10.01"}}"#;
+        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"500.01"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         let d = exchange_data_from_icpswap_envelope(parsed, 0).unwrap();
         assert_eq!(d.price, Some(1.25));

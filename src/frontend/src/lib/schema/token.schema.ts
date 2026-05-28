@@ -19,6 +19,7 @@ export const TokenStandardCodeSchema = z.enum([
 	'dip721',
 	'ext',
 	'icpunks', // This standard can be applied to all NFT IC tokens with a similar interface to ICPunks (for example, ICats)
+	'icrc7',
 	'bitcoin',
 	'solana',
 	'spl'
@@ -52,7 +53,8 @@ export const TokenAppearanceSchema = z.object({
 	oisySymbol: TokenOisySymbolSchema.optional(),
 	oisyName: TokenOisyNameSchema.optional(),
 	neverCollapseInTokenGroup: z.boolean().optional(),
-	allowExternalContentSource: z.boolean().optional()
+	allowExternalContentSource: z.boolean().optional(),
+	allowedExternalContentSourceUrls: z.array(z.string()).optional()
 });
 
 const TokenBuySchema = z.object({

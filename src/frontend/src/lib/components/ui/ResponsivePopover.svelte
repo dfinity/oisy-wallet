@@ -9,13 +9,14 @@
 		visible: boolean;
 		button?: HTMLButtonElement;
 		content: Snippet;
+		direction?: 'rtl' | 'ltr';
 	}
 
-	let { visible = $bindable(), button, content }: Props = $props();
+	let { visible = $bindable(), button, content, direction = 'rtl' }: Props = $props();
 </script>
 
 <Responsive up="sm">
-	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+	<Popover anchor={button} {direction} invisibleBackdrop bind:visible>
 		{@render content()}
 	</Popover>
 </Responsive>

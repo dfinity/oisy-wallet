@@ -91,6 +91,7 @@ export const RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON =
 
 export const SEND_TOKENS_MODAL_OPEN_BUTTON = 'send-tokens-modal-open-button';
 export const SEND_TOKENS_MODAL = 'send-tokens-modal';
+export const SEND_SCANNED_PLAIN_ADDRESS_NOTICE = 'send-scanned-plain-address-notice';
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
@@ -211,6 +212,15 @@ export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 export const TRANSACTIONS_DATE_GROUP_PREFIX = 'transactions-date-group-';
 export const TRANSACTION_CHILDREN_CONTAINER = 'transaction-children-container';
+
+export const MULTI_SELECT_DROPDOWN_PANEL_SHELL = 'multi-select-dropdown-panel-shell';
+
+export const TRANSACTIONS_FILTER_TOOLBAR = 'transactions-filter-toolbar';
+export const TRANSACTIONS_FILTER_TYPES_DROPDOWN = 'transactions-filter-types-dropdown';
+export const TRANSACTIONS_FILTER_TOKENS_DROPDOWN = 'transactions-filter-tokens-dropdown';
+export const TRANSACTIONS_FILTER_CONTACTS_DROPDOWN = 'transactions-filter-contacts-dropdown';
+export const TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA = 'transactions-filter-contacts-empty-cta';
+export const TRANSACTIONS_FILTER_CLEAR_BUTTON = 'transactions-filter-clear-button';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

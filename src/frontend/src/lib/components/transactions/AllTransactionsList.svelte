@@ -19,8 +19,10 @@
 	import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
+	import TransactionsFilterToolbar from '$lib/components/transactions/filter/TransactionsFilterToolbar.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { allContacts } from '$lib/derived/contacts.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		modalBtcTransaction,
@@ -34,8 +36,10 @@
 	} from '$lib/derived/network-tokens.derived';
 	import { hideMicroTransactions } from '$lib/derived/user-profile.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { applyTransactionsFilter } from '$lib/utils/transactions-filter.utils';
 	import {
 		filterReceivedMicroTransactions,
 		mapAllTransactionsUi,
@@ -64,13 +68,21 @@
 	// Filtering is only applied on the display path. The unfiltered `allTransactions` is fed to
 	// `AllTransactionsLoader` so its `transactions.length === 0` short-circuit and `minTimestamp`
 	// pagination anchor remain based on the actual loaded set, not the filtered one.
-	let displayTransactions = $derived(
+	let microFilteredTransactions = $derived(
 		$hideMicroTransactions
 			? filterReceivedMicroTransactions({
 					transactions: allTransactions,
 					exchanges: $exchanges
 				})
 			: allTransactions
+	);
+
+	let displayTransactions = $derived(
+		applyTransactionsFilter({
+			transactions: microFilteredTransactions,
+			filter: $transactionsFilterStore,
+			contacts: $allContacts
+		})
 	);
 
 	let sortedTransactions = $derived(
@@ -111,6 +123,8 @@
 		})
 	);
 </script>
+
+<TransactionsFilterToolbar />
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader transactions={allTransactions}>

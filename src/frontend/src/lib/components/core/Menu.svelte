@@ -11,6 +11,7 @@
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
+	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
@@ -120,6 +121,9 @@
 		role="none"
 	>
 		{#if $authNotSignedIn}
+			<div class="mb-2 text-center text-base font-semibold">
+				{$i18n.auth.text.sign_in_or_sign_up}
+			</div>
 			<span class="mb-2 text-center">
 				<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
 			</span>
@@ -229,10 +233,20 @@
 				asMenuItemCondensed
 				href={OISY_SUPPORT_URL}
 				iconVisible={false}
+				styleClass="group"
 				testId={NAVIGATION_MENU_SUPPORT_BUTTON}
 			>
 				<IconHelpCircle />
-				{$i18n.navigation.text.support}
+
+				<span class="flex w-full items-center justify-between">
+					{$i18n.navigation.text.support}
+
+					<span
+						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
+					>
+						<IconExternalLink size="16" />
+					</span>
+				</span>
 			</ExternalLink>
 
 			<Hr />
@@ -285,7 +299,9 @@
 
 	<Hr />
 
-	<div class="mt-4 flex justify-center gap-2 text-xs text-nowrap text-tertiary">
+	<div
+		class="mt-4 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
+	>
 		<TermsOfUseLink />
 		<PrivacyPolicyLink />
 		<LicenseAgreementLink />

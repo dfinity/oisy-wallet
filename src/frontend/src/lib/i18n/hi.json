@@ -29,6 +29,7 @@
 			"not_available": "उपलब्ध नहीं है",
 			"new": "नया",
 			"edit": "संपादित करें",
+			"download": "डाउनलोड",
 			"no_results": "कोई परिणाम नहीं",
 			"paste": "चिपकाएँ",
 			"to": "को",
@@ -46,7 +47,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short आपकी सुरक्षा करता है!"
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -127,6 +129,7 @@
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"sign_in_or_sign_up": "लॉग इन करें या साइन अप करें",
 			"internet_identity": "",
 			"asset_types": "",
 			"instant_and_private": "",
@@ -269,10 +272,10 @@
 				"description": "भविष्य के विकेन्द्रीकृत वित्त का केंद्र!<br/>एक्सचेंज को एक केंद्र के रूप में फिर से आविष्कार करते हुए, आईसीपीस्वैप इंटरनेट कंप्यूटर पर फुल-स्टैक वित्तीय, बाजार और डीएओ सेवाएं प्रदान करता है। DFINITY के इंटरनेट कंप्यूटर की अंतर्निहित तकनीक के आधार पर, आईसीपीस्वैप उपयोगकर्ताओं और डेवलपर्स द्वारा संयुक्त रूप से परियोजनाओं के निर्माण के तरीके को पुनर्रचना करके वास्तव में विकेन्द्रीकृत वित्त का एक पारिस्थितिकी तंत्र स्थापित करता है।"
 			},
 			"nnsdapp": {
-				"name": "NNS डैप",
-				"one_liner": "NNS फ्रंट-एंड डैप किसी को भी इंटरनेट कंप्यूटर के नेटवर्क नर्वस सिस्टम के साथ उपयोगकर्ता के अनुकूल यूआई के साथ बातचीत करने की अनुमति देता है।",
-				"call_to_action": "शामिल हों",
-				"description": "NNS फ्रंट-एंड डैप किसी को भी इंटरनेट कंप्यूटर के नेटवर्क नर्वस सिस्टम के साथ उपयोगकर्ता के अनुकूल यूआई के साथ बातचीत करने की अनुमति देता है। ब्लॉकचेन के माध्यम से पूरी तरह से एंड-टू-एंड परोसा गया, यह विकेन्द्रीकृत डैप आपको निम्नलिखित कार्यों को आसानी से करने की अनुमति देता है:<br/><ul><li>टोकन भेजें और प्राप्त करें (ICP, ckBTC, CHAT, आदि)</li><li>न्यूरॉन्स को स्टेक और प्रबंधित करें</li><li>इंटरनेट कंप्यूटर और एसएनएस के शासन पर वोट करें</li><li>विकेन्द्रीकरण स्वैप में भाग लें</li><li>कैनिस्टर बनाएँ और टॉप अप करें</li><li>शासन पुरस्कार अर्जित करें</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Internet Computer के लिए एक गवर्नेंस प्लेटफ़ॉर्म जो उपयोगकर्ताओं को स्टेक करने, मतदान करने और नेटवर्क गतिविधि का पालन करने में सक्षम बनाता है।",
+				"call_to_action": "ICP गवर्नेंस में भाग लें",
+				"description": "NNS एप्लिकेशन Internet Computer (ICP) के लिए एक गवर्नेंस प्लेटफ़ॉर्म है जो उपयोगकर्ताओं को टोकन स्टेक करने, मतदान में भाग लेने और नेटवर्क गतिविधि का पालन करने में सक्षम बनाता है।<br/><br/>यह उपयोगकर्ता कार्यों और गवर्नेंस गतिविधि पर अधिक दृश्यता प्रदान करता है, जो उपयोगकर्ताओं को यह समझने में मदद करता है कि स्टेकिंग, मतदान और भागीदारी व्यापक पारिस्थितिकी तंत्र में कैसे योगदान करती है।"
 			},
 			"uniswap": {
 				"name": "यूनिस्वैप",
@@ -475,6 +478,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -733,6 +741,7 @@
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "आपके वॉलेट को कुछ प्रारंभिक डेटा की आवश्यकता है जो अभी तक लोड नहीं हुआ है। कृपया पुनः प्रयास करें।",
 			"allow_signing": "आपके वॉलेट को साइन करने के लिए सेट करते समय एक समस्या हुई। आपको साइन आउट कर दिया गया है। यदि समस्या बनी रहती है, तो सहायता से संपर्क करें।",
@@ -785,7 +794,15 @@
 			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
 			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
 			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
-			"learn_more": ""
+			"export_data": "डेटा निर्यात करें",
+			"export_data_description": "अपने टोकन और लेन-देन को CSV के रूप में डाउनलोड करें — आवश्यक जानकारी के लिए Basic, अतिरिक्त विशेषताओं के लिए Extended।",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "टोकन निर्यात करें",
+			"export_transactions": "लेन-देन निर्यात करें",
+			"export_tokens_success": "टोकन CSV डाउनलोड हो गया।",
+			"export_transactions_success": "लेन-देन CSV डाउनलोड हो गया।",
+			"learn_more": "और जानें"
 		},
 		"alt": {
 			"testnets_toggle": "परीक्षण नेटवर्क दिखाने या छिपाने के लिए टॉगल करें",
@@ -795,7 +812,9 @@
 			"appearance_system": "आपके ऑपरेटिंग सिस्टम के रंग मोड को सक्षम करता है"
 		},
 		"error": {
-			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।"
+			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।",
+			"export_exchange_rate_unavailable": "विनिमय दरें अभी भी लोड हो रही हैं। कृपया कुछ देर बाद पुनः प्रयास करें।",
+			"export_failed": "हम आपका निर्यात नहीं बना सके। कृपया पुनः प्रयास करें।"
 		}
 	},
 	"shortcuts": {
@@ -948,7 +967,8 @@
 			"pending_bitcoin_transaction": "आप लंबित बिटकॉइन लेनदेन पूरा होने के बाद एक और बिटकॉइन लेनदेन भेज सकते हैं।",
 			"no_available_utxos": "आपके पास इस लेनदेन को करने के लिए कोई उपलब्ध utxos नहीं होगा।",
 			"unknown_destination": "आपने पहले इस पते के साथ इंटरैक्ट नहीं किया है। कृपया सुनिश्चित करें कि आप प्राप्तकर्ता को जानते हैं।",
-			"fee_info": "शुल्क का भुगतान $feeSymbol में किया जाएगा। उपलब्ध: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "शुल्क का भुगतान $feeSymbol में किया जाएगा। उपलब्ध: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "स्कैन किए गए कोड में केवल एक गंतव्य पता था। कृपया सुनिश्चित करें कि आप सही टोकन चुनें, सही राशि दर्ज करें, और गंतव्य पते की सावधानीपूर्वक समीक्षा करें!"
 		},
 		"assertion": {
 			"invalid_destination_address": "अमान्य गंतव्य पता",
@@ -1155,7 +1175,7 @@
 			"select_token": "टोकन चुनें",
 			"select_network_filter": "नेटवर्क चुनें",
 			"withdrawing": "निकासी कर रहा है...",
-			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें एक मिनट तक का समय लग सकता है।)",
+			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें 2 मिनट तक का समय लग सकता है।)",
 			"network_cost": "नेटवर्क लागत",
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
@@ -1164,7 +1184,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "कम से कम एक टोकन की कीमत प्राप्त नहीं की जा सकी। कृपया <strong>स्वतंत्र रूप से सत्यापित करें</strong> कि यह स्वैप ऑफर उचित सौदा है।<br>ध्यान दें कि स्लिपेज सेटिंग आपको बहुत कम प्राप्त मूल्य वाले ऑफर से सुरक्षित <strong>नहीं</strong> करती है!"
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
@@ -1189,7 +1210,13 @@
 	"buy": {
 		"text": {
 			"buy": "खरीदें",
-			"buy_dev": "खरीदें (Dev एनवायरनमेंट)"
+			"buy_dev": "खरीदें (Dev एनवायरनमेंट)",
+			"unavailable_title": "टोकन खरीदना अस्थायी रूप से अनुपलब्ध है",
+			"unavailable_description": "टोकन खरीदना वर्तमान में बंद है, क्योंकि हम URL साइनिंग शुरू करके इस प्रक्रिया की सुरक्षा को और बेहतर बना रहे हैं। काम पूरा होते ही इसे फिर से चालू कर दिया जाएगा।",
+			"unavailable_fallback_hint": "इस बीच, आप अभी भी अपने वॉलेट का पता साझा करके टोकन प्राप्त कर सकते हैं।"
+		},
+		"actions": {
+			"close": "समझ गया"
 		},
 		"onramper": {
 			"title": "ऑनराम्पर के माध्यम से खरीदें"
@@ -1626,6 +1653,23 @@
 			"burn": "बर्न",
 			"mint": "मिंट"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "आपने अभी तक कोई संपर्क नहीं जोड़ा है",
+			"contacts_empty_description": "जाने-पहचाने पते संपर्क में सहेजें और गलती से गलत पते का उपयोग करने का जोखिम कम करें।",
+			"contacts_empty_cta": "अपना पहला संपर्क जोड़ें"
+		},
 		"label": {
 			"reimbursement": "प्रतिपूर्ति",
 			"twin_token_converted": "$twinToken से परिवर्तित",
@@ -1850,7 +1894,6 @@
 			"text": {
 				"open_or_create": "एप्लिकेशन के साथ सुरक्षित रूप से इंटरैक्ट करने के लिए अपना वॉलेट खोलें या बनाएं।",
 				"connect_your_wallet": "अपने $oisy_name से कनेक्ट करें",
-				"oisy_protects_you": "OISY आपकी सुरक्षा करता है!",
 				"oisy_protects_you_description": "एप्लिकेशन आपके फंड तक सीधे नहीं पहुंच सकते, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए."
 			}
 		},
@@ -1973,7 +2016,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
-			"hidden_micro_transactions": "<strong>OISY आपकी रक्षा करता है!</strong> बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
+			"hidden_micro_transactions": "बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",

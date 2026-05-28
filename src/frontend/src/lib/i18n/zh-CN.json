@@ -29,6 +29,7 @@
 			"not_available": "不可用",
 			"new": "新建",
 			"edit": "编辑",
+			"download": "下载",
 			"no_results": "无结果",
 			"paste": "粘贴",
 			"to": "至",
@@ -46,7 +47,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short 保护您！"
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
@@ -127,6 +129,7 @@
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
+			"sign_in_or_sign_up": "登录或注册",
 			"internet_identity": "",
 			"asset_types": "跨 Bitcoin、Solana、Ethereum、ICP 等管理资产",
 			"instant_and_private": "内置 AI 助手，隐私保护为默认标准",
@@ -269,10 +272,10 @@
 				"description": "未来去中心化金融的中心！<br/>通过将交易所重塑为中心，ICPSwap 在ICP上提供全栈金融、市场和 DAO 服务。基于 DFINITY 互联网计算机的底层技术，ICPSwap 通过重构用户和开发者共同构建项目的方式，建立了一个真正去中心化的金融生态系统。"
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "NNS 前端 dapp 允许任何人通过用户友好的界面与互联网计算机的网络神经系统进行交互。",
-				"call_to_action": "参与其中",
-				"description": "NNS 前端 dapp 允许任何人通过用户友好的界面与互联网计算机的网络神经系统进行交互。该去中心化 dapp 完全通过区块链端到端提供服务，让您可以轻松执行以下操作：<br/><ul><li>发送和接收代币（ICP、ckBTC、CHAT 等）</li><li>质押和管理神经元</li><li>对互联网计算机和 SNS 的治理进行投票</li><li>参与去中心化交换</li><li>创建和充值容器</li><li>赚取治理奖励</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Internet Computer的治理平台，使用户能够质押、投票并关注网络活动。",
+				"call_to_action": "参与ICP治理",
+				"description": "NNS应用程序是Internet Computer（ICP）的治理平台，使用户能够质押代币、参与投票并关注网络活动。<br/><br/>它为用户行为和治理活动带来更高的可见性，帮助用户理解质押、投票和参与如何为更广泛的生态系统做出贡献。"
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -475,6 +478,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -733,6 +741,7 @@
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"ext_custom_tokens": "加载 EXT 自定义代币时出错。",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
@@ -785,7 +794,15 @@
 			"enable_hide_micro_transactions": "启用隐藏价值非常小的交易",
 			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
 			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
-			"learn_more": ""
+			"export_data": "导出数据",
+			"export_data_description": "将您的代币和交易下载为 CSV — Basic 包含基础信息，Extended 包含更多属性。",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "导出代币",
+			"export_transactions": "导出交易",
+			"export_tokens_success": "代币 CSV 已下载。",
+			"export_transactions_success": "交易 CSV 已下载。",
+			"learn_more": "了解更多"
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -795,7 +812,9 @@
 			"appearance_system": "启用操作系统的颜色模式"
 		},
 		"error": {
-			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。"
+			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。",
+			"export_exchange_rate_unavailable": "汇率仍在加载。请稍后重试。",
+			"export_failed": "无法生成您的导出文件。请重试。"
 		}
 	},
 	"shortcuts": {
@@ -948,7 +967,8 @@
 			"pending_bitcoin_transaction": "待处理的比特币交易完成后，你可以发送另一笔交易。",
 			"no_available_utxos": "你没有可用的 UTXO 来执行此交易。",
 			"unknown_destination": "你之前未与该地址交互，请确认你认识收款人。",
-			"fee_info": "手续费将以 $feeSymbol 支付。可用余额：<strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "手续费将以 $feeSymbol 支付。可用余额：<strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "扫描的内容仅包含接收地址。请确保选择正确的代币、输入正确的金额，并仔细核对接收地址！"
 		},
 		"assertion": {
 			"invalid_destination_address": "目标地址无效",
@@ -1155,7 +1175,7 @@
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
 			"withdrawing": "正在取款",
-			"bridging": "正在跨链桥接... (请耐心等待，这可能需要最多一分钟。)",
+			"bridging": "正在跨链桥接... (请耐心等待，这可能需要最多 2 分钟。)",
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
@@ -1164,7 +1184,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "无法获取至少一种代币的价格。请<strong>独立核实</strong>此次兑换报价是否公平。<br>请注意,滑点设置<strong>不会</strong>保护您免受接收价值大幅降低的报价。"
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -1189,7 +1210,13 @@
 	"buy": {
 		"text": {
 			"buy": "购买",
-			"buy_dev": "购买（开发环境）"
+			"buy_dev": "购买（开发环境）",
+			"unavailable_title": "购买代币暂时不可用",
+			"unavailable_description": "购买代币目前已关闭，我们正在通过引入 URL 签名进一步增强此流程的安全性。工作完成后将立即重新开启。",
+			"unavailable_fallback_hint": "在此期间，您仍然可以通过分享您的钱包地址来接收代币。"
+		},
+		"actions": {
+			"close": "了解"
 		},
 		"onramper": {
 			"title": "通过 Onramper 购买"
@@ -1626,6 +1653,23 @@
 			"burn": "销毁",
 			"mint": "铸造"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "你还没有添加联系人",
+			"contacts_empty_description": "将已知地址保存到联系人中，降低意外使用错误地址的风险。",
+			"contacts_empty_cta": "添加你的第一个联系人"
+		},
 		"label": {
 			"reimbursement": "报销",
 			"twin_token_converted": "从 $twinToken 转换",
@@ -1850,7 +1894,6 @@
 			"text": {
 				"open_or_create": "打开或创建你的钱包，与应用程序安全交互。",
 				"connect_your_wallet": "连接你的 $oisy_name",
-				"oisy_protects_you": "OISY 保护您！",
 				"oisy_protects_you_description": "应用程序无法直接访问您的资金，每笔交易都需要您确认。"
 			}
 		},
@@ -1973,7 +2016,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC 交易信息来自中心化第三方，应自行核实。",
-			"hidden_micro_transactions": "<strong>OISY 保护您！</strong>代币价值非常小的交易当前已被隐藏。要显示它们，请前往<a href=\"/settings/\">设置</a>。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">了解更多</a>"
+			"hidden_micro_transactions": "代币价值非常小的交易当前已被隐藏。要显示它们，请前往<a href=\"/settings/\">设置</a>。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">了解更多</a>"
 		},
 		"warning": {
 			"no_index_canister": "无法显示 $token_list 的交易记录。未提供 Index canister。",

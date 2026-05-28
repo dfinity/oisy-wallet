@@ -29,6 +29,7 @@
 			"not_available": "n/d",
 			"new": "Nuovo",
 			"edit": "Modifica",
+			"download": "Scarica",
 			"no_results": "Nessun risultato",
 			"paste": "Incolla",
 			"to": "A",
@@ -46,7 +47,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short ti protegge!"
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!",
@@ -127,6 +129,7 @@
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
+			"sign_in_or_sign_up": "Accedi o registrati",
 			"internet_identity": "",
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
@@ -269,10 +272,10 @@
 				"description": "L'Hub della Finanza Decentralizzata del Futuro!<br/>Reinventando l'Exchange come un Hub, ICPSwap fornisce servizi finanziari, di mercato e DAO full-stack su Internet Computer. Basato sulla tecnologia sottostante di DFINITY Internet Computer, ICPSwap stabilisce un ecosistema di finanza genuinamente decentralizzata ristrutturando il modo in cui utenti e sviluppatori costruiscono progetti congiuntamente."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "La dapp front-end di NNS consente a chiunque di interagire con il Network Nervous System di Internet Computer con un'interfaccia utente intuitiva.",
-				"call_to_action": "Partecipa",
-				"description": "La dapp front-end di NNS consente a chiunque di interagire con il Network Nervous System di Internet Computer con un'interfaccia utente intuitiva. Servita completamente end-to-end tramite blockchain, questa dapp decentralizzata ti consente di eseguire facilmente le seguenti azioni:<br/><ul><li>Inviare e ricevere token (ICP, ckBTC, CHAT, ecc.)</li><li>Mettere in stake e gestire i neuroni</li><li>Votare sulla governance di Internet Computer e degli SNS</li><li>Partecipare a scambi di decentralizzazione</li><li>Creare e ricaricare canister</li><li>Guadagnare ricompense di governance</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Piattaforma di governance per Internet Computer che consente agli utenti di fare staking, votare e seguire l'attività della rete.",
+				"call_to_action": "Partecipa alla governance ICP",
+				"description": "L'applicazione NNS è una piattaforma di governance per Internet Computer (ICP) che consente agli utenti di fare staking di token, partecipare alle votazioni e seguire l'attività della rete.<br/><br/>Porta maggiore visibilità alle azioni degli utenti e alle attività di governance, aiutando gli utenti a comprendere come lo staking, il voto e la partecipazione contribuiscano all'ecosistema più ampio."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -475,6 +478,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -733,6 +741,7 @@
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
 			"allow_signing": "Si è verificato un problema durante la configurazione del tuo wallet per la firma. Sei stato disconnesso. Se il problema persiste, contatta il supporto.",
@@ -785,7 +794,15 @@
 			"enable_hide_micro_transactions": "Abilita l'occultamento delle transazioni con valori molto piccoli",
 			"disable_hide_micro_transactions": "Disabilita l'occultamento delle transazioni con valori molto piccoli",
 			"save_spam_filter_success": "Le impostazioni del filtro antispam sono state aggiornate.",
-			"learn_more": ""
+			"export_data": "Esporta dati",
+			"export_data_description": "Scarica i tuoi token e le tue transazioni in formato CSV — Basic per l'essenziale, Extended per attributi aggiuntivi.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Esporta token",
+			"export_transactions": "Esporta transazioni",
+			"export_tokens_success": "CSV dei token scaricato.",
+			"export_transactions_success": "CSV delle transazioni scaricato.",
+			"learn_more": "Saperne di più"
 		},
 		"alt": {
 			"testnets_toggle": "Attiva/disattiva per mostrare o nascondere le testnet",
@@ -795,7 +812,9 @@
 			"appearance_system": "Abilita la modalità colore del sistema operativo"
 		},
 		"error": {
-			"loading_profile": "Errore durante il caricamento del profilo. Si prega di aggiornare la pagina per avere l'esperienza completa."
+			"loading_profile": "Errore durante il caricamento del profilo. Si prega di aggiornare la pagina per avere l'esperienza completa.",
+			"export_exchange_rate_unavailable": "I tassi di cambio sono ancora in caricamento. Riprova tra un momento.",
+			"export_failed": "Non siamo riusciti a generare l'esportazione. Riprova."
 		}
 	},
 	"shortcuts": {
@@ -948,7 +967,8 @@
 			"pending_bitcoin_transaction": "Puoi inviare un'altra transazione Bitcoin una volta completata quella in sospeso.",
 			"no_available_utxos": "Non avrai UTXO disponibili per eseguire questa transazione.",
 			"unknown_destination": "Non hai mai interagito con questo indirizzo prima. Assicurati di conoscere il destinatario.",
-			"fee_info": "La fee sarà pagata in $feeSymbol. Disponibile: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "La fee sarà pagata in $feeSymbol. Disponibile: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Il codice scansionato conteneva solo un indirizzo di destinazione. Assicurati di selezionare il token corretto, inserire l'importo giusto e controllare attentamente l'indirizzo di destinazione!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Indirizzo di destinazione non valido",
@@ -1155,7 +1175,7 @@
 			"select_token": "Seleziona il token",
 			"select_network_filter": "Seleziona la rete",
 			"withdrawing": "",
-			"bridging": "Bridge in corso... (Per favore sii paziente, questo può richiedere fino a un minuto.)",
+			"bridging": "Bridge in corso... (Per favore sii paziente, questo può richiedere fino a 2 minuti.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
@@ -1164,7 +1184,8 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Non è stato possibile recuperare il prezzo di almeno uno dei token. <strong>Verifica in modo indipendente</strong> che questa offerta di swap sia equa.<br>Nota che l'impostazione dello slippage <strong>non</strong> ti protegge da un'offerta con un valore di ricezione molto inferiore!"
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -1189,7 +1210,13 @@
 	"buy": {
 		"text": {
 			"buy": "Acquista",
-			"buy_dev": "Acquista (Ambiente di sviluppo)"
+			"buy_dev": "Acquista (Ambiente di sviluppo)",
+			"unavailable_title": "L'acquisto di token è temporaneamente non disponibile",
+			"unavailable_description": "L'acquisto di token è attualmente disattivato mentre continuiamo a migliorare la sicurezza di questo processo introducendo la firma degli URL. Verrà riattivato non appena il lavoro sarà completato.",
+			"unavailable_fallback_hint": "Nel frattempo, puoi comunque ricevere token condividendo l'indirizzo del tuo portafoglio."
+		},
+		"actions": {
+			"close": "Capito"
 		},
 		"onramper": {
 			"title": "Acquista tramite Onramper"
@@ -1626,6 +1653,23 @@
 			"burn": "Burn",
 			"mint": "Mint"
 		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "Non hai ancora aggiunto contatti",
+			"contacts_empty_description": "Salva gli indirizzi conosciuti nei Contatti e riduci il rischio di usare per sbaglio un indirizzo errato.",
+			"contacts_empty_cta": "Aggiungi il tuo primo contatto"
+		},
 		"label": {
 			"reimbursement": "Rimborso",
 			"twin_token_converted": "Convertito da $twinToken",
@@ -1850,7 +1894,6 @@
 			"text": {
 				"open_or_create": "Apri o crea il tuo wallet per interagire in sicurezza con l'applicazione.",
 				"connect_your_wallet": "Connetti il tuo wallet $oisy_name",
-				"oisy_protects_you": "OISY ti protegge!",
 				"oisy_protects_you_description": "Le applicazioni non possono accedere direttamente ai tuoi fondi, e ogni transazione deve essere confermata da te."
 			}
 		},
@@ -1973,7 +2016,7 @@
 		},
 		"info": {
 			"btc_transactions": "Le informazioni sulle transazioni BTC sono ottenute da terze parti centralizzate e devono essere verificate in modo indipendente.",
-			"hidden_micro_transactions": "<strong>OISY ti protegge!</strong> Le transazioni con valori di token molto piccoli sono attualmente nascoste. Per mostrarle, vai su <a href=\"/settings/\">Impostazioni</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Scopri di più</a>"
+			"hidden_micro_transactions": "Le transazioni con valori di token molto piccoli sono attualmente nascoste. Per mostrarle, vai su <a href=\"/settings/\">Impostazioni</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Scopri di più</a>"
 		},
 		"warning": {
 			"no_index_canister": "Le transazioni per $token_list non possono essere visualizzate. Nessun canister Index disponibile.",
