@@ -968,7 +968,8 @@
 			"no_available_utxos": "No tendrás utxos disponibles para realizar esta transacción.",
 			"unknown_destination": "No has interactuado con esta dirección antes. Por favor, asegúrate de que conoces al destinatario.",
 			"fee_info": "La comisión se pagará en $feeSymbol. Disponible: <strong>$feeBalance $feeSymbol</strong>",
-			"scanned_address_only_destination": "El código escaneado solo contenía una dirección de destino. ¡Asegúrate de seleccionar el token correcto, introducir la cantidad adecuada y revisar con atención la dirección de destino!"
+			"scanned_address_only_destination": "El código escaneado solo contenía una dirección de destino. ¡Asegúrate de seleccionar el token correcto, introducir la cantidad adecuada y revisar con atención la dirección de destino!",
+			"scanned_address_only_destination_single_token": "El código escaneado solo contenía una dirección de destino. ¡Asegúrate de introducir la cantidad adecuada y revisar con atención la dirección de destino!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Dirección de destino inválida",
@@ -1191,6 +1192,7 @@
 			"kong_not_available": "Actualmente no hay ningún exchange disponible para intercambiar tokens. Por favor, inténtalo de nuevo más tarde.",
 			"unexpected": "Algo salió mal al intercambiar los tokens.",
 			"unexpected_missing_data": "Algo salió mal al iniciar una transacción de intercambio.",
+			"failed_unexpectedly": "El intercambio no se pudo completar. Por favor, comprueba el saldo de tu billetera e inténtalo de nuevo, o elige un proveedor diferente.",
 			"slippage_exceeded": "$oisy_short te protege: La operación está fuera de tu tolerancia de deslizamiento del $maxSlippage%. Por favor, ajusta el deslizamiento máximo e inténtalo de nuevo.",
 			"pool_not_found": "Intercambio fallido. No se encontró el fondo.",
 			"deposit_error": "El depósito de los fondos para tu intercambio falló. Por favor, inténtalo de nuevo o cambia el proveedor de intercambio.",
