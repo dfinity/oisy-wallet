@@ -1192,6 +1192,7 @@
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
 			"unexpected": "兑换代币时发生错误。",
 			"unexpected_missing_data": "初始化兑换交易时发生错误。",
+			"failed_unexpectedly": "无法完成兑换。请检查您的钱包余额后重试，或选择其他提供商。",
 			"slippage_exceeded": "$oisy_short 已保护你：本次交易超过了你设置的 $maxSlippage% 滑点容忍度。请调整最大滑点后再试。",
 			"pool_not_found": "兑换失败，未找到兑换池。",
 			"deposit_error": "存款错误",
