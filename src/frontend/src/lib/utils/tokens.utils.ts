@@ -477,18 +477,22 @@ export const doesTokenMatchFilter = ({
 		}
 
 		if (isTokenErc20(token) || isTokenErc721(token) || isTokenErc1155(token) || isTokenSpl(token)) {
-			return areAddressesPartiallyEqual({
-				address1: token.address,
-				address2: filter,
-				networkId: token.network.id
-			});
+			return (
+				nonNullish(token.address) &&
+				areAddressesPartiallyEqual({
+					address1: token.address,
+					address2: filter,
+					networkId: token.network.id
+				})
+			);
 		}
 
 		if (isTokenIc(token)) {
 			const { ledgerCanisterId, indexCanisterId } = token;
 
 			return (
-				ledgerCanisterId.toLowerCase().includes(filter.toLowerCase()) ||
+				(nonNullish(ledgerCanisterId) &&
+					ledgerCanisterId.toLowerCase().includes(filter.toLowerCase())) ||
 				(nonNullish(indexCanisterId) &&
 					indexCanisterId.toLowerCase().includes(filter.toLowerCase()))
 			);
@@ -497,7 +501,7 @@ export const doesTokenMatchFilter = ({
 		if (isTokenIcNft(token)) {
 			const { canisterId } = token;
 
-			return canisterId.toLowerCase().includes(filter.toLowerCase());
+			return nonNullish(canisterId) && canisterId.toLowerCase().includes(filter.toLowerCase());
 		}
 
 		return false;
