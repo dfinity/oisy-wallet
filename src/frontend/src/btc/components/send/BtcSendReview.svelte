@@ -23,7 +23,7 @@
 
 <SendReview {amount} {destination} {onBack} {onSend} {selectedContact}>
 	{#snippet topBanner()}
-		<ScannedPlainAddressNotice styleClass="mb-6!" />
+		<ScannedPlainAddressNotice singleToken styleClass="mb-6!" />
 	{/snippet}
 
 	{#snippet network()}
