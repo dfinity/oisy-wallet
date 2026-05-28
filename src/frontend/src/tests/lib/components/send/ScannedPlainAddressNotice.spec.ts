@@ -52,4 +52,20 @@ describe('ScannedPlainAddressNotice', () => {
 			queryByText(en.send.info.scanned_address_only_destination_single_token)
 		).not.toBeInTheDocument();
 	});
+
+	it('renders the multi-network variant copy when variant is "multi-network"', () => {
+		const { getByTestId, getByText, queryByText } = render(ScannedPlainAddressNotice, {
+			props: { variant: 'multi-network' },
+			context: new Map<symbol, unknown>([[SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, true]])
+		});
+
+		expect(getByTestId(SEND_SCANNED_PLAIN_ADDRESS_NOTICE)).toBeInTheDocument();
+		expect(
+			getByText(en.send.info.scanned_address_only_destination_multi_network)
+		).toBeInTheDocument();
+		expect(queryByText(en.send.info.scanned_address_only_destination)).not.toBeInTheDocument();
+		expect(
+			queryByText(en.send.info.scanned_address_only_destination_single_token)
+		).not.toBeInTheDocument();
+	});
 });
