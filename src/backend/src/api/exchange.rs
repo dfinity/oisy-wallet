@@ -3,8 +3,9 @@ use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 
 use crate::{
     exchange::{
-        cached_rates_snapshot, fetch_and_update_prices, priceable_tokens_for_caller,
-        release_refresh_lock, stale_or_missing_tokens, try_acquire_refresh_lock,
+        cached_rates_snapshot, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
+        priceable_tokens_for_caller, release_refresh_lock, stale_or_missing_tokens,
+        try_acquire_refresh_lock,
     },
     state::read_state,
     token,
@@ -81,4 +82,17 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
 #[must_use]
 pub fn get_exchange_rate(token_id: TokenId) -> Option<ExchangeRate> {
     read_state(|s| s.exchange_rates.get(&StoredTokenId(token_id)).map(|c| c.0))
+}
+
+/// Returns whether the backend is currently fetching and caching exchange rates.
+///
+/// Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
+/// actual refresh predicate used by [`fetch_and_update_prices`].
+///
+/// Exposed as an unauthenticated query so the frontend worker can decide whether to read
+/// cached rates from the backend or fetch directly from public providers.
+#[query]
+#[must_use]
+pub fn exchange_rate_enabled() -> bool {
+    is_exchange_rate_refresh_enabled()
 }

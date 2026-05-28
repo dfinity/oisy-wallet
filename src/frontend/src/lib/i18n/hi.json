@@ -29,6 +29,7 @@
 			"not_available": "उपलब्ध नहीं है",
 			"new": "नया",
 			"edit": "संपादित करें",
+			"download": "डाउनलोड",
 			"no_results": "कोई परिणाम नहीं",
 			"paste": "चिपकाएँ",
 			"to": "को",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
 			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
 			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
-			"learn_more": ""
+			"export_data": "डेटा निर्यात करें",
+			"export_data_description": "अपने टोकन और लेन-देन को CSV के रूप में डाउनलोड करें — आवश्यक जानकारी के लिए Basic, अतिरिक्त विशेषताओं के लिए Extended।",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "टोकन निर्यात करें",
+			"export_transactions": "लेन-देन निर्यात करें",
+			"export_tokens_success": "टोकन CSV डाउनलोड हो गया।",
+			"export_transactions_success": "लेन-देन CSV डाउनलोड हो गया।",
+			"learn_more": "और जानें"
 		},
 		"alt": {
 			"testnets_toggle": "परीक्षण नेटवर्क दिखाने या छिपाने के लिए टॉगल करें",
@@ -803,7 +812,9 @@
 			"appearance_system": "आपके ऑपरेटिंग सिस्टम के रंग मोड को सक्षम करता है"
 		},
 		"error": {
-			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।"
+			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।",
+			"export_exchange_rate_unavailable": "विनिमय दरें अभी भी लोड हो रही हैं। कृपया कुछ देर बाद पुनः प्रयास करें।",
+			"export_failed": "हम आपका निर्यात नहीं बना सके। कृपया पुनः प्रयास करें।"
 		}
 	},
 	"shortcuts": {

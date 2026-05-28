@@ -7,6 +7,7 @@
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { pageNft } from '$lib/derived/page-nft.derived';
 	import { pageNonFungibleToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,19 +21,37 @@
 	// Redirect to the assets' page if NFT can't be loaded within 10 seconds
 	let timeout: NodeJS.Timeout | undefined = $state();
 
-	onMount(() => {
+	const armTimeout = () => {
+		if (nonNullish(timeout)) {
+			clearTimeout(timeout);
+		}
 		timeout = setTimeout(() => {
 			if (isNullish(nft)) {
+				// Don't redirect while an enable/import flow is in progress; the effect below re-arms us once it closes.
+				if ($modalManageTokens) {
+					timeout = undefined;
+					return;
+				}
 				goto(`${AppPath.Nfts}${page.url.search}`);
 				toastsError({ msg: { text: $i18n.nfts.text.nft_not_loaded } });
 			}
 		}, FALLBACK_TIMEOUT);
+	};
+
+	onMount(() => {
+		armTimeout();
 
 		return () => {
 			if (nonNullish(timeout)) {
 				clearTimeout(timeout);
 			}
 		};
+	});
+
+	$effect(() => {
+		if (!$modalManageTokens && isNullish(nft) && isNullish(timeout)) {
+			armTimeout();
+		}
 	});
 </script>
 

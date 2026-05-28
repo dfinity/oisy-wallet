@@ -29,6 +29,7 @@
 			"not_available": "n/a",
 			"new": "Nový",
 			"edit": "Upravit",
+			"download": "Stáhnout",
 			"no_results": "Žádné výsledky",
 			"paste": "Vložit",
 			"to": "Do",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "Povolit skrývání transakcí s velmi malými hodnotami",
 			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
 			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
-			"learn_more": ""
+			"export_data": "Exportovat data",
+			"export_data_description": "Stáhněte si své tokeny a transakce jako CSV — Basic pro to nejdůležitější, Extended pro další atributy.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Exportovat tokeny",
+			"export_transactions": "Exportovat transakce",
+			"export_tokens_success": "CSV s tokeny bylo staženo.",
+			"export_transactions_success": "CSV s transakcemi bylo staženo.",
+			"learn_more": "Zjistit více"
 		},
 		"alt": {
 			"testnets_toggle": "Přepnout pro zobrazení nebo skrytí testovacích sítí",
@@ -803,7 +812,9 @@
 			"appearance_system": "Povolí barevný režim vašeho operačního systému"
 		},
 		"error": {
-			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku."
+			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku.",
+			"export_exchange_rate_unavailable": "Směnné kurzy se stále načítají. Zkuste to za chvíli znovu.",
+			"export_failed": "Nepodařilo se nám vygenerovat váš export. Zkuste to prosím znovu."
 		}
 	},
 	"shortcuts": {
