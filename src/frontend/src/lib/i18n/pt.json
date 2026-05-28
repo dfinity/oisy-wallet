@@ -1191,7 +1191,7 @@
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",
 			"unexpected": "Algo deu errado ao trocar tokens.",
 			"unexpected_missing_data": "Algo deu errado ao iniciar uma transação de troca.",
-			"failed_unexpectedly": "",
+			"failed_unexpectedly": "A troca não pôde ser concluída. Verifique o saldo da sua carteira e tente novamente, ou escolha outro provedor.",
 			"slippage_exceeded": "$oisy_short protege você: A negociação está fora da sua tolerância de deslizamento de $maxSlippage%. Por favor, ajuste o deslizamento máximo e tente novamente.",
 			"pool_not_found": "Troca falhou. Pool não encontrada.",
 			"deposit_error": "O depósito dos fundos para a troca falhou. Tente novamente ou altere o provedor da troca.",
