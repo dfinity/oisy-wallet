@@ -549,6 +549,31 @@ describe('ScannerCode.svelte', () => {
 		);
 	});
 
+	it('should not dispatch BTC_SEND for whitespace-only input (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const whitespace = '   ';
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: whitespace } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				whitespace
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.BTC_SEND })
+		);
+	});
+
 	it('should call onNext with IC_SEND result for a bare IC principal', async () => {
 		renderWithContext();
 

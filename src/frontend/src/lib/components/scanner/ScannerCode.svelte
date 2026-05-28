@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
+	import { isEmptyString, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { Principal } from '@icp-sdk/core/principal';
 	import { getContext, onDestroy } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -103,7 +103,10 @@
 			return;
 		}
 
-		if (!isInvalidDestinationBtc({ destination: trimmed, networkId: BTC_MAINNET_NETWORK_ID })) {
+		if (
+			notEmptyString(trimmed) &&
+			!isInvalidDestinationBtc({ destination: trimmed, networkId: BTC_MAINNET_NETWORK_ID })
+		) {
 			onNext({ results: ScannerResults.BTC_SEND, code: trimmed });
 			return;
 		}
