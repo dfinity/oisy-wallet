@@ -422,7 +422,7 @@
 				});
 			} else {
 				failedSwapError.set({
-					message: nonNullish(errorDetail) ? errorDetail : $i18n.swap.error.unexpected,
+					message: $i18n.swap.error.failed_unexpectedly,
 					variant: 'error'
 				});
 			}
