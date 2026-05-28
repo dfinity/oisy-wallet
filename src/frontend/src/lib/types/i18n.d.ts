@@ -701,6 +701,7 @@ interface I18nSend {
 		fee_info: string;
 		scanned_address_only_destination: string;
 		scanned_address_only_destination_single_token: string;
+		scanned_address_only_destination_multi_network: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
