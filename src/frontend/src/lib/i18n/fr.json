@@ -1192,6 +1192,7 @@
 			"kong_not_available": "Il n'y a actuellement aucun échange disponible pour échanger des tokens. Veuillez réessayer plus tard.",
 			"unexpected": "Quelque chose s'est mal passé lors de l'échange des tokens.",
 			"unexpected_missing_data": "Quelque chose s'est mal passé lors de l'initiation d'une transaction d'échange.",
+			"failed_unexpectedly": "L'échange n'a pas pu être effectué. Veuillez vérifier le solde de votre portefeuille et réessayer, ou choisir un autre fournisseur.",
 			"slippage_exceeded": "$oisy_short vous protège : Le trade est en dehors de votre tolérance de slippage de $maxSlippage%. Veuillez ajuster le slippage max et réessayer.",
 			"pool_not_found": "Échec de l'échange. Pool non trouvé.",
 			"deposit_error": "Le dépôt des fonds pour votre échange a échoué. Veuillez réessayer ou changer de fournisseur d'échange.",

@@ -169,7 +169,7 @@
 
 	{#if isWarningConfirmationRequired}
 		<div class="mt-4">
-			<MessageBox level="error">
+			<MessageBox level="error" styleClass="!mb-0">
 				{#snippet icon()}
 					<Checkbox
 						inputId="swap-review-warning-confirmation"
@@ -191,7 +191,7 @@
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
-			<MessageBox level={$failedSwapError.variant}>
+			<MessageBox level={$failedSwapError.variant} styleClass="!mb-0">
 				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isEmptyString($failedSwapError?.message)}
 					<Html
 						text={$failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
