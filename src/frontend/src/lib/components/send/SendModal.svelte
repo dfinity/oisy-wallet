@@ -84,6 +84,13 @@
 			? $networks.find(({ id }) => id === lockedNetworkIds[0])
 			: undefined
 	);
+	let lockedNetworks = $derived(
+		nonNullish(lockedNetworkIds) && lockedNetworkIds.length > 1
+			? lockedNetworkIds
+					.map((id) => $networks.find((n) => n.id === id))
+					.filter((n): n is NonNullable<typeof n> => nonNullish(n))
+			: undefined
+	);
 
 	let destination = $state(initialModalData?.destination ?? '');
 	let activeSendDestinationTab = $state<SendDestinationTab>('recentlyUsed');
@@ -134,6 +141,8 @@
 	let modal = $state<WizardModal<WizardStepsSend>>();
 	let selectedNft = $derived($pageNft);
 
+	const isLockedToMultipleNetworks = nonNullish(lockedNetworkIds) && lockedNetworkIds.length > 1;
+
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
@@ -141,7 +150,9 @@
 			filterZeroBalance: true,
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
-			filterNetwork: lockedNetwork ?? $selectedNetwork
+			filterNetwork: isLockedToMultipleNetworks ? undefined : (lockedNetwork ?? $selectedNetwork),
+			filterNetworksIds: isLockedToMultipleNetworks ? lockedNetworkIds : undefined,
+			filterNetworksLabel: isLockedToMultipleNetworks ? $i18n.networks.evm_networks : undefined
 		})
 	);
 
@@ -274,6 +285,8 @@
 				/>
 			{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 				<ModalNetworksFilter
+					allNetworksLabel={isLockedToMultipleNetworks ? $i18n.networks.evm_networks : undefined}
+					filteredNetworks={lockedNetworks}
 					onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 					showStakeBalance={false}
 				/>

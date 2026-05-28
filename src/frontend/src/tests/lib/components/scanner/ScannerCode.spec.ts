@@ -16,6 +16,7 @@ import * as deviceUtils from '$lib/utils/device.utils';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockPrincipal, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -643,6 +644,149 @@ describe('ScannerCode.svelte', () => {
 
 		expect(mockOnNext).not.toHaveBeenCalledWith(
 			expect.objectContaining({ results: ScannerResults.IC_SEND })
+		);
+	});
+
+	it('should call onNext with EVM_SEND result for a checksummed 0x-prefixed address', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: mockEthAddress3 } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.EVM_SEND,
+				code: mockEthAddress3
+			});
+		});
+
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should call onNext with EVM_SEND result for a lowercase 0x-prefixed address', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const lowercase = mockEthAddress3.toLowerCase();
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: lowercase } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.EVM_SEND,
+				code: lowercase
+			});
+		});
+
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should trim surrounding whitespace when forwarding an EVM address', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: `  ${mockEthAddress3}  ` } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.EVM_SEND,
+				code: mockEthAddress3
+			});
+		});
+	});
+
+	it('should not dispatch EVM_SEND for an ethereum: URI (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		// EIP-681 / chain-prefixed URIs are explicitly out of scope — the bare-only
+		// detection rule means anything with a scheme prefix falls through to
+		// OpenCryptoPay rather than dispatching EVM_SEND.
+		const ethereumUri = `ethereum:${mockEthAddress3}`;
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: ethereumUri } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				ethereumUri
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.EVM_SEND })
+		);
+	});
+
+	it('should not dispatch EVM_SEND for an EVM address with query parameters (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const codeWithQuery = `${mockEthAddress3}?amount=1`;
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: codeWithQuery } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				codeWithQuery
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.EVM_SEND })
+		);
+	});
+
+	it('should not dispatch EVM_SEND for a wrong-length 0x hex string (falls through to OpenCryptoPay)', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		// `mockEthAddress` is a 64-hex-char string with a 0x prefix — i.e. the size
+		// of a transaction hash or storage slot, not a 20-byte address. ethers'
+		// isAddress rejects it on length, so the scanner must fall through to
+		// OpenCryptoPay rather than mis-classifying it as a send destination.
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: mockEthAddress } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledExactlyOnceWith(
+				mockEthAddress
+			);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.EVM_SEND })
 		);
 	});
 

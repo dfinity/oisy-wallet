@@ -6,6 +6,7 @@
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isEthAddress } from '$eth/utils/account.utils';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
+	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -38,6 +39,10 @@
 </script>
 
 <SendReview {amount} {destination} disabled={invalid} {nft} {onBack} {onSend} {selectedContact}>
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice styleClass="mb-6!" />
+	{/snippet}
+
 	{#snippet fee()}
 		<EthFeeDisplay>
 			{#snippet label()}

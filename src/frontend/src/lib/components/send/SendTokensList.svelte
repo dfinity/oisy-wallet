@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
+	import ScannedPlainAddressNotice, {
+		type ScannedPlainAddressNoticeVariant
+	} from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -18,25 +20,38 @@
 
 	let { onSendToken, onSelectNetworkFilter, lockedNetworkIds }: Props = $props();
 
-	let lockedSingleToken = $derived(
-		nonNullish(lockedNetworkIds) &&
-			lockedNetworkIds.length === 1 &&
-			isNetworkIdBTCMainnet(lockedNetworkIds[0])
-	);
+	let noticeVariant: ScannedPlainAddressNoticeVariant = $derived.by(() => {
+		if (!nonNullish(lockedNetworkIds) || lockedNetworkIds.length === 0) {
+			return 'multi-token';
+		}
+		if (lockedNetworkIds.length > 1) {
+			return 'multi-network';
+		}
+		return isNetworkIdBTCMainnet(lockedNetworkIds[0]) ? 'single-token' : 'multi-token';
+	});
+
+	// Multi-network locks (EVM mainnets) leave the filter button interactive so the user
+	// can drill into a specific chain; the popup then restricts the choices to the locked
+	// subset. Single-network locks and URL-route filters keep the historical view-only
+	// behaviour — there's no meaningful drill-down for a single network.
+	let networkSelectorViewOnly = $derived.by(() => {
+		if (nonNullish(lockedNetworkIds) && lockedNetworkIds.length > 1) {
+			return false;
+		}
+		return (
+			(nonNullish(lockedNetworkIds) && lockedNetworkIds.length === 1) ||
+			nonNullish($selectedNetwork)
+		);
+	});
 
 	const onTokenButtonClick = (token: Token) => {
 		onSendToken(token);
 	};
 </script>
 
-<ModalTokensList
-	networkSelectorViewOnly={(nonNullish(lockedNetworkIds) && lockedNetworkIds.length > 0) ||
-		nonNullish($selectedNetwork)}
-	{onSelectNetworkFilter}
-	{onTokenButtonClick}
->
+<ModalTokensList {networkSelectorViewOnly} {onSelectNetworkFilter} {onTokenButtonClick}>
 	{#snippet topBanner()}
-		<ScannedPlainAddressNotice variant={lockedSingleToken ? 'single-token' : 'multi-token'} />
+		<ScannedPlainAddressNotice variant={noticeVariant} />
 	{/snippet}
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />

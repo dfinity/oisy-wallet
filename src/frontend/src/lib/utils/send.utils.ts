@@ -1,4 +1,5 @@
 import { invalidBtcAddress } from '$btc/utils/btc-address.utils';
+import { isEthAddress } from '$eth/utils/account.utils';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -6,6 +7,8 @@ import {
 	isNetworkIdBitcoin,
 	isNetworkIdBTCRegtest,
 	isNetworkIdBTCTestnet,
+	isNetworkIdEthereum,
+	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
@@ -67,6 +70,10 @@ export const shouldSkipDestinationStep = ({
 
 	if (isNetworkIdICP(network.id)) {
 		return isValidPrincipalText(destination);
+	}
+
+	if (isNetworkIdEthereum(network.id) || isNetworkIdEvm(network.id)) {
+		return isEthAddress(destination);
 	}
 
 	return false;
