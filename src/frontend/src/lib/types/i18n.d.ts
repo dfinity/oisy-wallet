@@ -700,6 +700,7 @@ interface I18nSend {
 		unknown_destination: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
+		scanned_address_only_destination_single_token: string;
 	};
 	assertion: {
 		invalid_destination_address: string;

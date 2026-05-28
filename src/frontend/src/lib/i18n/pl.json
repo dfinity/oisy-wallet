@@ -968,7 +968,8 @@
 			"no_available_utxos": "Nie będziesz mieć dostępnych UTXO do wykonania tej transakcji.",
 			"unknown_destination": "Nigdy wcześniej nie wchodziłeś w interakcję z tym adresem. Upewnij się, że znasz odbiorcę.",
 			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>",
-			"scanned_address_only_destination": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wybierasz właściwy token, wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!"
+			"scanned_address_only_destination": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wybierasz właściwy token, wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!",
+			"scanned_address_only_destination_single_token": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Nieprawidłowy adres docelowy",
@@ -1191,7 +1192,7 @@
 			"kong_not_available": "Obecnie nie ma dostępnej giełdy do wymiany tokenów. Spróbuj ponownie później.",
 			"unexpected": "Coś poszło nie tak podczas wymiany tokenów.",
 			"unexpected_missing_data": "Coś poszło nie tak podczas inicjowania transakcji wymiany.",
-			"failed_unexpectedly": "",
+			"failed_unexpectedly": "Nie udało się zrealizować wymiany. Sprawdź saldo portfela i spróbuj ponownie lub wybierz innego dostawcę.",
 			"slippage_exceeded": "$oisy_short chroni Cię: Transakcja jest poza Twoją tolerancją poślizgu wynoszącą $maxSlippage%. Dostosuj maksymalny poślizg i spróbuj ponownie.",
 			"pool_not_found": "Wymiana nie powiodła się. Nie znaleziono puli.",
 			"deposit_error": "Wpłata środków na wymianę nie powiodła się. Spróbuj ponownie lub zmień dostawcę wymiany.",

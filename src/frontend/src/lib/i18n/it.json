@@ -968,7 +968,8 @@
 			"no_available_utxos": "Non avrai UTXO disponibili per eseguire questa transazione.",
 			"unknown_destination": "Non hai mai interagito con questo indirizzo prima. Assicurati di conoscere il destinatario.",
 			"fee_info": "La fee sarà pagata in $feeSymbol. Disponibile: <strong>$feeBalance $feeSymbol</strong>",
-			"scanned_address_only_destination": "Il codice scansionato conteneva solo un indirizzo di destinazione. Assicurati di selezionare il token corretto, inserire l'importo giusto e controllare attentamente l'indirizzo di destinazione!"
+			"scanned_address_only_destination": "Il codice scansionato conteneva solo un indirizzo di destinazione. Assicurati di selezionare il token corretto, inserire l'importo giusto e controllare attentamente l'indirizzo di destinazione!",
+			"scanned_address_only_destination_single_token": "Il codice scansionato conteneva solo un indirizzo di destinazione. Assicurati di inserire l'importo giusto e controllare attentamente l'indirizzo di destinazione!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Indirizzo di destinazione non valido",
@@ -1191,7 +1192,7 @@
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
 			"unexpected": "Qualcosa è andato storto durante lo scambio dei token.",
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di scambio.",
-			"failed_unexpectedly": "",
+			"failed_unexpectedly": "Lo swap non è stato completato. Controlla il saldo del tuo wallet e riprova, oppure scegli un altro provider.",
 			"slippage_exceeded": "$oisy_short ti protegge: la transazione è al di fuori della tua tolleranza di slippage del $maxSlippage%. Per favore, regola lo slippage massimo e riprova.",
 			"pool_not_found": "Scambio fallito. Pool non trovata.",
 			"deposit_error": "Il deposito dei fondi per lo swap non è riuscito. Riprova oppure cambia il provider dello swap.",
