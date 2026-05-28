@@ -21,6 +21,7 @@ export interface ModalTokensListData {
 	tokens: Token[];
 	filterQuery?: string;
 	filterNetwork?: Network;
+	filterNetworksLabel?: string;
 	filterZeroBalance?: boolean;
 	sortByBalance?: boolean;
 	filterNetworksIds?: NetworkId[];
@@ -37,6 +38,7 @@ export const initModalTokensListContext = (
 	const tokens = derived([data], ([{ tokens }]) => tokens);
 	const filterQuery = derived([data], ([{ filterQuery }]) => filterQuery);
 	const filterNetwork = derived([data], ([{ filterNetwork }]) => filterNetwork);
+	const filterNetworksLabel = derived([data], ([{ filterNetworksLabel }]) => filterNetworksLabel);
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
 	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
 	const filterNetworksIds = derived([data], ([{ filterNetworksIds }]) => filterNetworksIds);
@@ -122,6 +124,7 @@ export const initModalTokensListContext = (
 	return {
 		filterQuery,
 		filterNetwork,
+		filterNetworksLabel,
 		filterCategoryTag,
 		filteredTokens,
 		setTokens: (tokens: Token[]) =>
@@ -139,6 +142,11 @@ export const initModalTokensListContext = (
 				...state,
 				filterNetwork: network
 			})),
+		setFilterNetworksLabel: (label: string | undefined) =>
+			update((state) => ({
+				...state,
+				filterNetworksLabel: label
+			})),
 		setFilterNetworksIds: (networksIds: NetworkId[] | undefined) =>
 			update((state) => ({
 				...state,
@@ -154,6 +162,7 @@ export const initModalTokensListContext = (
 				...state,
 				filterQuery: undefined,
 				filterNetwork: undefined,
+				filterNetworksLabel: undefined,
 				filterZeroBalance: undefined,
 				sortByBalance: undefined,
 				filterNetworksIds: undefined,
@@ -167,11 +176,13 @@ export const initModalTokensListContext = (
 export interface ModalTokensListContext {
 	filterQuery: Readable<string | undefined>;
 	filterNetwork: Readable<Network | undefined>;
+	filterNetworksLabel: Readable<string | undefined>;
 	filterCategoryTag: Readable<TokenCategoryTagValue | undefined>;
 	filteredTokens: Readable<TokenUi[]>;
 	setTokens: (tokens: Token[]) => void;
 	setFilterQuery: (query: string) => void;
 	setFilterNetwork: (network: Network | undefined) => void;
+	setFilterNetworksLabel: (label: string | undefined) => void;
 	setFilterNetworksIds: (networksIds: NetworkId[] | undefined) => void;
 	setFilterCategoryTag: (categoryTag: TokenCategoryTagValue | undefined) => void;
 	resetFilters: () => void;
