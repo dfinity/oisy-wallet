@@ -9,6 +9,7 @@
 	import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 	import { OCP_PAY_WITH_BTC_ENABLED } from '$env/open-crypto-pay.env';
+	import { isEthAddress } from '$eth/utils/account.utils';
 	import IconChain from '$lib/components/icons/IconChain.svelte';
 	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
 	import ScannerCodeInfoButton from '$lib/components/scanner/ScannerCodeInfoButton.svelte';
@@ -113,6 +114,11 @@
 
 		if (isIcPrincipal(trimmed)) {
 			onNext({ results: ScannerResults.IC_SEND, code: trimmed });
+			return;
+		}
+
+		if (isEthAddress(trimmed)) {
+			onNext({ results: ScannerResults.EVM_SEND, code: trimmed });
 			return;
 		}
 

@@ -2,7 +2,9 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext, untrack } from 'svelte';
+	import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 	import OpenCryptoPayWizard from '$lib/components/open-crypto-pay/OpenCryptoPayWizard.svelte';
@@ -146,6 +148,22 @@
 				data: {
 					destination: code,
 					lockedNetworkIds: [ICP_NETWORK_ID]
+				}
+			});
+
+			return;
+		}
+
+		if (results === ScannerResults.EVM_SEND) {
+			if (isNullish(code)) {
+				return;
+			}
+
+			modalStore.openSend({
+				id: Symbol(),
+				data: {
+					destination: code,
+					lockedNetworkIds: [ETHEREUM_NETWORK_ID, ...SUPPORTED_EVM_MAINNET_NETWORK_IDS]
 				}
 			});
 
