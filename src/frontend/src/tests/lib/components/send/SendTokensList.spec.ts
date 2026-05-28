@@ -1,3 +1,7 @@
+import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 import { SEND_SCANNED_PLAIN_ADDRESS_NOTICE } from '$lib/constants/test-ids.constants';
@@ -7,13 +11,18 @@ import {
 	MODAL_TOKENS_LIST_CONTEXT_KEY
 } from '$lib/stores/modal-tokens-list.store';
 import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
+import type { NetworkId } from '$lib/types/network';
 import { render } from '@testing-library/svelte';
 
-const renderSendTokensList = ({ scannerDriven = false }: { scannerDriven?: boolean } = {}) =>
+const renderSendTokensList = ({
+	scannerDriven = false,
+	lockedNetworkIds
+}: { scannerDriven?: boolean; lockedNetworkIds?: NetworkId[] } = {}) =>
 	render(SendTokensList, {
 		props: {
 			onSendToken: vi.fn(),
-			onSelectNetworkFilter: vi.fn()
+			onSelectNetworkFilter: vi.fn(),
+			lockedNetworkIds
 		},
 		context: new Map<symbol, unknown>([
 			[
@@ -42,5 +51,47 @@ describe('SendTokensList', () => {
 
 		expect(getByTestId(SEND_SCANNED_PLAIN_ADDRESS_NOTICE)).toBeInTheDocument();
 		expect(getByText(en.send.info.scanned_address_only_destination)).toBeInTheDocument();
+	});
+
+	it('renders the single-token variant when locked to BTC mainnet only', () => {
+		const { getByText, queryByText } = renderSendTokensList({
+			scannerDriven: true,
+			lockedNetworkIds: [BTC_MAINNET_NETWORK_ID]
+		});
+
+		expect(
+			getByText(en.send.info.scanned_address_only_destination_single_token)
+		).toBeInTheDocument();
+		expect(queryByText(en.send.info.scanned_address_only_destination)).not.toBeInTheDocument();
+	});
+
+	it('renders the multi-token variant when locked to a single non-BTC network', () => {
+		const { getByText, queryByText } = renderSendTokensList({
+			scannerDriven: true,
+			lockedNetworkIds: [ICP_NETWORK_ID]
+		});
+
+		expect(getByText(en.send.info.scanned_address_only_destination)).toBeInTheDocument();
+		expect(
+			queryByText(en.send.info.scanned_address_only_destination_single_token)
+		).not.toBeInTheDocument();
+		expect(
+			queryByText(en.send.info.scanned_address_only_destination_multi_network)
+		).not.toBeInTheDocument();
+	});
+
+	it('renders the multi-network variant when locked to multiple EVM mainnets', () => {
+		const { getByText, queryByText } = renderSendTokensList({
+			scannerDriven: true,
+			lockedNetworkIds: [ETHEREUM_NETWORK_ID, ...SUPPORTED_EVM_MAINNET_NETWORK_IDS]
+		});
+
+		expect(
+			getByText(en.send.info.scanned_address_only_destination_multi_network)
+		).toBeInTheDocument();
+		expect(queryByText(en.send.info.scanned_address_only_destination)).not.toBeInTheDocument();
+		expect(
+			queryByText(en.send.info.scanned_address_only_destination_single_token)
+		).not.toBeInTheDocument();
 	});
 });
