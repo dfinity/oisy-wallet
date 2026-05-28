@@ -72,8 +72,10 @@ Tiny but easy to get wrong. Follow these steps in order.
    non-empty values for keys that still exist in `en.json` are
    preserved (see
    [`scripts/i18n.generate.keys.ts`](../../../../scripts/i18n.generate.keys.ts)).
-   Leave new keys blank in your PR unless you can translate them at
-   native quality.
+   Default behaviour: leave new keys blank and let a native-quality
+   translation path fill them in later. An agent (or a human) **may**
+   author translations for non-en locales when the developer explicitly
+   asks for it in that PR — never unprompted, and never as a guess.
 
 9. **Run the gates**:
 
@@ -114,6 +116,8 @@ The setup is **string + placeholder**, no ICU. For pluralisation, either:
 
 - Hard-code English in a component "just for now".
 - Edit the generated `i18n.d.ts` by hand.
-- Edit a non-en locale unless you can translate at native quality (see step 8).
+- Edit a non-en locale unprompted. Only do it when the developer
+  explicitly asks for translations in that PR, and only at native
+  quality (see step 8).
 - Construct keys dynamically.
 - Leave old keys around "in case".
