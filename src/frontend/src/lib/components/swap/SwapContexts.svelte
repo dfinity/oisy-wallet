@@ -75,7 +75,7 @@
 
 	const tokensListContext = initModalTokensListContext({
 		tokens: [],
-		filterNetwork:
+		selectedFilterNetwork:
 			nonNullish($selectedNetwork) &&
 			$crossChainSwapNetworksMainnetsIds.includes($selectedNetwork.id)
 				? $selectedNetwork

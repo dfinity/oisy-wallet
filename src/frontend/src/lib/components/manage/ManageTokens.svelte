@@ -102,7 +102,7 @@
 		initModalTokensListContext({
 			tokens: [],
 			filterZeroBalance: false,
-			filterNetwork: network ?? $selectedNetwork,
+			selectedFilterNetwork: network ?? $selectedNetwork,
 			// TODO: This statement is not reactive. Check if it is intentional or not.
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally
@@ -116,7 +116,7 @@
 		})
 	);
 
-	const { setTokens, filterNetwork } = getContext<ModalTokensListContext>(
+	const { setTokens, selectedFilterNetwork } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
 	);
 
@@ -136,8 +136,8 @@
 	});
 
 	$effect(() => {
-		if (nonNullish($filterNetwork)) {
-			network = $filterNetwork;
+		if (nonNullish($selectedFilterNetwork)) {
+			network = $selectedFilterNetwork;
 		}
 	});
 

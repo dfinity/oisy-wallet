@@ -78,7 +78,7 @@ describe('modalTokensListStore', () => {
 	it('should ensure derived stores update at most once when the store changes', async () => {
 		await testDerivedUpdates(() =>
 			initModalTokensListContext({
-				filterNetwork: ICP_NETWORK,
+				selectedFilterNetwork: ICP_NETWORK,
 				filterQuery: 'test',
 				filterZeroBalance: true,
 				tokens: [mockToken1, mockToken2]
@@ -87,21 +87,21 @@ describe('modalTokensListStore', () => {
 	});
 
 	it('should have all expected values', () => {
-		const { filterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
-			filterNetwork: ICP_NETWORK,
+		const { selectedFilterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
+			selectedFilterNetwork: ICP_NETWORK,
 			filterZeroBalance: true,
 			tokens: [mockToken1, mockToken2]
 		});
 
-		expect(get(filterNetwork)).toBe(ICP_NETWORK);
+		expect(get(selectedFilterNetwork)).toBe(ICP_NETWORK);
 		expect(get(filterQuery)).toBe(undefined);
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
 	});
 
 	it('should reset all filters', () => {
-		const { filterNetwork, filteredTokens, filterQuery, filterCategoryTag, resetFilters } =
+		const { selectedFilterNetwork, filteredTokens, filterQuery, filterCategoryTag, resetFilters } =
 			initModalTokensListContext({
-				filterNetwork: ICP_NETWORK,
+				selectedFilterNetwork: ICP_NETWORK,
 				filterQuery: 'test',
 				filterCategoryTag: TokenCategoryTagValue.STABLECOIN,
 				tokens: [mockToken1, mockToken2]
@@ -109,7 +109,7 @@ describe('modalTokensListStore', () => {
 
 		resetFilters();
 
-		expect(get(filterNetwork)).toBe(undefined);
+		expect(get(selectedFilterNetwork)).toBe(undefined);
 		expect(get(filterQuery)).toBe(undefined);
 		expect(get(filterCategoryTag)).toBe(undefined);
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
@@ -127,52 +127,53 @@ describe('modalTokensListStore', () => {
 		expect(get(filteredTokens)).toHaveLength(1);
 	});
 
-	it('should update filter network via setFilterNetwork', () => {
-		const { filterNetwork, filteredTokens, setFilterNetwork } = initModalTokensListContext({
-			filterZeroBalance: true,
-			tokens: [mockToken1, mockToken2]
-		});
+	it('should update filter network via setSelectedFilterNetwork', () => {
+		const { selectedFilterNetwork, filteredTokens, setSelectedFilterNetwork } =
+			initModalTokensListContext({
+				filterZeroBalance: true,
+				tokens: [mockToken1, mockToken2]
+			});
 
-		expect(get(filterNetwork)).toBeUndefined();
+		expect(get(selectedFilterNetwork)).toBeUndefined();
 
-		setFilterNetwork(ICP_NETWORK);
+		setSelectedFilterNetwork(ICP_NETWORK);
 
-		expect(get(filterNetwork)).toBe(ICP_NETWORK);
+		expect(get(selectedFilterNetwork)).toBe(ICP_NETWORK);
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
 
-		setFilterNetwork(undefined);
+		setSelectedFilterNetwork(undefined);
 
-		expect(get(filterNetwork)).toBeUndefined();
+		expect(get(selectedFilterNetwork)).toBeUndefined();
 	});
 
 	it('should filter tokens by network', () => {
-		const { filterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
-			filterNetwork: ETHEREUM_NETWORK,
+		const { selectedFilterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
+			selectedFilterNetwork: ETHEREUM_NETWORK,
 			filterZeroBalance: true,
 			tokens: [mockToken1, mockToken2]
 		});
 
-		expect(get(filterNetwork)).toBe(ETHEREUM_NETWORK);
+		expect(get(selectedFilterNetwork)).toBe(ETHEREUM_NETWORK);
 		expect(get(filterQuery)).toBe(undefined);
 		expect(get(filteredTokens)).toStrictEqual([]);
 	});
 
 	it('should filter tokens by query', () => {
-		const { filterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
-			filterNetwork: ICP_NETWORK,
+		const { selectedFilterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
+			selectedFilterNetwork: ICP_NETWORK,
 			filterQuery: 'ckBTC',
 			filterZeroBalance: true,
 			tokens: [mockToken1, mockToken2]
 		});
 
-		expect(get(filterNetwork)).toBe(ICP_NETWORK);
+		expect(get(selectedFilterNetwork)).toBe(ICP_NETWORK);
 		expect(get(filterQuery)).toBe('ckBTC');
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi1]);
 	});
 
 	it('should filter zero-balance tokens', () => {
-		const { filterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
-			filterNetwork: ICP_NETWORK,
+		const { selectedFilterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
+			selectedFilterNetwork: ICP_NETWORK,
 			filterZeroBalance: true,
 			tokens: [mockToken1, mockToken2]
 		});
@@ -182,7 +183,7 @@ describe('modalTokensListStore', () => {
 			data: { data: ZERO, certified: true }
 		});
 
-		expect(get(filterNetwork)).toBe(ICP_NETWORK);
+		expect(get(selectedFilterNetwork)).toBe(ICP_NETWORK);
 		expect(get(filterQuery)).toBe(undefined);
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi1]);
 	});
@@ -319,11 +320,11 @@ describe('modalTokensListStore', () => {
 			expect(result).toEqual([mockTokenUi3, mockTokenUi4]);
 		});
 
-		it('should combine filterNetworksIds with filterNetwork', () => {
+		it('should combine filterNetworksIds with selectedFilterNetwork', () => {
 			const { filteredTokens } = initModalTokensListContext({
 				tokens: [mockToken3, mockToken4],
 				filterNetworksIds: [ETHEREUM_NETWORK.id, ARBITRUM_MAINNET_NETWORK.id],
-				filterNetwork: ETHEREUM_NETWORK,
+				selectedFilterNetwork: ETHEREUM_NETWORK,
 				filterZeroBalance: false
 			});
 

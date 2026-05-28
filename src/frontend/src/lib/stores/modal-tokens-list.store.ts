@@ -20,7 +20,7 @@ import { derived, writable, type Readable } from 'svelte/store';
 export interface ModalTokensListData {
 	tokens: Token[];
 	filterQuery?: string;
-	filterNetwork?: Network;
+	selectedFilterNetwork?: Network;
 	filterZeroBalance?: boolean;
 	sortByBalance?: boolean;
 	filterNetworksIds?: NetworkId[];
@@ -36,7 +36,10 @@ export const initModalTokensListContext = (
 
 	const tokens = derived([data], ([{ tokens }]) => tokens);
 	const filterQuery = derived([data], ([{ filterQuery }]) => filterQuery);
-	const filterNetwork = derived([data], ([{ filterNetwork }]) => filterNetwork);
+	const selectedFilterNetwork = derived(
+		[data],
+		([{ selectedFilterNetwork }]) => selectedFilterNetwork
+	);
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
 	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
 	const filterNetworksIds = derived([data], ([{ filterNetworksIds }]) => filterNetworksIds);
@@ -47,7 +50,7 @@ export const initModalTokensListContext = (
 		[
 			tokens,
 			filterQuery,
-			filterNetwork,
+			selectedFilterNetwork,
 			filterZeroBalance,
 			sortByBalance,
 			exchanges,
@@ -61,7 +64,7 @@ export const initModalTokensListContext = (
 		([
 			$tokens,
 			$filterQuery,
-			$filterNetwork,
+			$selectedFilterNetwork,
 			$filterZeroBalance,
 			$sortByBalance,
 			$exchanges,
@@ -85,8 +88,8 @@ export const initModalTokensListContext = (
 
 			const filteredByNetwork = filterTokensForSelectedNetwork([
 				filteredByNetworkIds,
-				$filterNetwork,
-				isNullish($filterNetwork)
+				$selectedFilterNetwork,
+				isNullish($selectedFilterNetwork)
 			]);
 
 			const filteredByNft = filterTokensByNft({
@@ -121,7 +124,7 @@ export const initModalTokensListContext = (
 
 	return {
 		filterQuery,
-		filterNetwork,
+		selectedFilterNetwork,
 		filterCategoryTag,
 		filteredTokens,
 		setTokens: (tokens: Token[]) =>
@@ -134,10 +137,10 @@ export const initModalTokensListContext = (
 				...state,
 				filterQuery: query
 			})),
-		setFilterNetwork: (network: Network | undefined) =>
+		setSelectedFilterNetwork: (network: Network | undefined) =>
 			update((state) => ({
 				...state,
-				filterNetwork: network
+				selectedFilterNetwork: network
 			})),
 		setFilterNetworksIds: (networksIds: NetworkId[] | undefined) =>
 			update((state) => ({
@@ -153,7 +156,7 @@ export const initModalTokensListContext = (
 			update((state) => ({
 				...state,
 				filterQuery: undefined,
-				filterNetwork: undefined,
+				selectedFilterNetwork: undefined,
 				filterZeroBalance: undefined,
 				sortByBalance: undefined,
 				filterNetworksIds: undefined,
@@ -166,12 +169,12 @@ export const initModalTokensListContext = (
 
 export interface ModalTokensListContext {
 	filterQuery: Readable<string | undefined>;
-	filterNetwork: Readable<Network | undefined>;
+	selectedFilterNetwork: Readable<Network | undefined>;
 	filterCategoryTag: Readable<TokenCategoryTagValue | undefined>;
 	filteredTokens: Readable<TokenUi[]>;
 	setTokens: (tokens: Token[]) => void;
 	setFilterQuery: (query: string) => void;
-	setFilterNetwork: (network: Network | undefined) => void;
+	setSelectedFilterNetwork: (network: Network | undefined) => void;
 	setFilterNetworksIds: (networksIds: NetworkId[] | undefined) => void;
 	setFilterCategoryTag: (categoryTag: TokenCategoryTagValue | undefined) => void;
 	resetFilters: () => void;

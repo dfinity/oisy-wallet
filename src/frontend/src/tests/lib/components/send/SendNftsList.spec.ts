@@ -23,7 +23,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(mockNfts);
 		const { getByText, getByRole } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
+			selectedFilterNetwork: undefined,
 			onSelectNetwork: vi.fn()
 		});
 
@@ -40,7 +40,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(mockNfts);
 		const { getByText, queryByText, getByPlaceholderText } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
+			selectedFilterNetwork: undefined,
 			onSelectNetwork: vi.fn()
 		});
 
@@ -57,7 +57,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(mockNfts);
 		const { getByPlaceholderText, getByText, queryByText } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
+			selectedFilterNetwork: undefined,
 			onSelectNetwork: vi.fn()
 		});
 
@@ -77,7 +77,7 @@ describe('SendNftsList.spec', () => {
 		const { getByRole } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
 			onSelectNetwork,
-			filterNetwork: POLYGON_AMOY_NETWORK
+			selectedFilterNetwork: POLYGON_AMOY_NETWORK
 		});
 
 		const btn = getByRole('button', { name: POLYGON_AMOY_NETWORK.name });
@@ -95,7 +95,7 @@ describe('SendNftsList.spec', () => {
 		const onSelect = vi.fn();
 		const { getByText } = render(SendNftsListTestHost, {
 			onSelect,
-			filterNetwork: undefined,
+			selectedFilterNetwork: undefined,
 			onSelectNetwork: vi.fn()
 		});
 
@@ -131,7 +131,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(sectionMockNfts);
 		const { getByPlaceholderText, getByText, queryByText } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
+			selectedFilterNetwork: undefined,
 			onSelectNetwork: vi.fn()
 		});
 

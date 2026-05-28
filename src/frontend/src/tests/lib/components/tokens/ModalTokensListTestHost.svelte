@@ -37,7 +37,7 @@
 			// svelte-ignore state_referenced_locally
 			tokens,
 			filterZeroBalance: false,
-			filterNetwork: undefined,
+			selectedFilterNetwork: undefined,
 			filterQuery: '',
 			// TODO: This statement is not reactive. Check if it is intentional or not.
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore

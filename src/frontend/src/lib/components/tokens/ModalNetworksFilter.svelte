@@ -26,7 +26,7 @@
 		onNetworkFilter
 	}: Props = $props();
 
-	const { setFilterNetwork, filterNetwork } = getContext<ModalTokensListContext>(
+	const { setSelectedFilterNetwork, selectedFilterNetwork } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
 	);
 
@@ -35,7 +35,7 @@
 	const onNetworkSelect = (networkId: OptionNetworkId) => {
 		const network = $networks.find(({ id }) => id === networkId);
 
-		setFilterNetwork(network);
+		setSelectedFilterNetwork(network);
 
 		back();
 	};
@@ -46,7 +46,7 @@
 		{allNetworksEnabled}
 		labelsSize="lg"
 		onSelected={onNetworkSelect}
-		selectedNetworkId={$filterNetwork?.id}
+		selectedNetworkId={$selectedFilterNetwork?.id}
 		{showStakeBalance}
 		showTestnets={false}
 		supportedNetworks={filteredNetworks}

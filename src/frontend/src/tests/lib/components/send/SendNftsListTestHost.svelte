@@ -12,16 +12,16 @@
 	interface Props {
 		onSelect: (nft: Nft) => void;
 		onSelectNetwork: () => void;
-		filterNetwork?: Network;
+		selectedFilterNetwork?: Network;
 	}
 
-	const { onSelect, filterNetwork, onSelectNetwork }: Props = $props();
+	const { onSelect, selectedFilterNetwork, onSelectNetwork }: Props = $props();
 
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, {
 		// TODO: This statement is not reactive. Check if it is intentional or not.
 		// eslint-disable-next-line svelte/no-unused-svelte-ignore
 		// svelte-ignore state_referenced_locally
-		filterNetwork: readable(filterNetwork)
+		selectedFilterNetwork: readable(selectedFilterNetwork)
 	} as unknown as ModalTokensListContext);
 </script>
 

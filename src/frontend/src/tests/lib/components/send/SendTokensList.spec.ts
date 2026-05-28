@@ -36,7 +36,7 @@ const renderSendTokensList = ({
 				initModalTokensListContext({
 					tokens: [BTC_MAINNET_TOKEN],
 					filterZeroBalance: false,
-					filterNetwork: undefined,
+					selectedFilterNetwork: undefined,
 					filterQuery: ''
 				})
 			],
