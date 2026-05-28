@@ -50,6 +50,7 @@
 	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { NetworkId } from '$lib/types/network';
 	import type { Nft } from '$lib/types/nft';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
@@ -78,10 +79,23 @@
 	let { isTransactionsPage, isNftsPage }: Props = $props();
 
 	const initialModalData = $modalSendData;
-	const allowedNetworkIds = initialModalData?.allowedNetworkIds;
+	// Single source of truth for the set of networks the send modal is restricted to.
+	// Scanner-driven dispatches (Sol/BTC/IC, future EVM) populate it via `SendModalData`;
+	// the URL-route filter (`$selectedNetwork`, e.g. `/tokens?network=ethereum`) folds in
+	// as a single-element array fallback so downstream code only needs to read one field.
+	const allowedNetworkIds: NetworkId[] | undefined =
+		initialModalData?.allowedNetworkIds ??
+		(nonNullish($selectedNetwork) ? [$selectedNetwork.id] : undefined);
 	let allowedNetwork = $derived(
 		nonNullish(allowedNetworkIds) && allowedNetworkIds.length === 1
 			? $networks.find(({ id }) => id === allowedNetworkIds[0])
+			: undefined
+	);
+	let allowedNetworks = $derived(
+		nonNullish(allowedNetworkIds) && allowedNetworkIds.length > 1
+			? allowedNetworkIds
+					.map((id) => $networks.find(({ id: networkId }) => networkId === id))
+					.filter((n): n is NonNullable<typeof n> => nonNullish(n))
 			: undefined
 	);
 
@@ -141,7 +155,11 @@
 			filterZeroBalance: true,
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `allowedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
-			filterNetwork: allowedNetwork ?? $selectedNetwork
+			filterNetwork: allowedNetwork,
+			filterNetworksIds:
+				nonNullish(allowedNetworkIds) && allowedNetworkIds.length > 1
+					? allowedNetworkIds
+					: undefined
 		})
 	);
 
@@ -274,6 +292,7 @@
 				/>
 			{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 				<ModalNetworksFilter
+					filteredNetworks={allowedNetworks}
 					onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 					showStakeBalance={false}
 				/>
