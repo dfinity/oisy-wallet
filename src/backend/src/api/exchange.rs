@@ -54,25 +54,27 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     token::mark_tokens_active(&active_ids);
 
     let stale = stale_or_missing_tokens(&tokens);
-    if !stale.is_empty() && let Some(lock) = try_acquire_refresh_lock() {
-        // Background-spawn the refresh so the response isn't gated on the
-        // outcall round-trip. The 60s recurring refresh will also pick these
-        // up; this spawn just shortens the convergence window for tokens the
-        // recurring refresh hasn't gotten to yet.
-        //
-        // We share the in-flight lock with the timer-driven refresh: if a
-        // refresh is already running (timer or another caller), this call
-        // doesn't spawn its own — the in-flight one will write the cache,
-        // and the next call will pick up the fresh values. This deduplicates
-        // outcalls under concurrent load (e.g. many users calling on a cold
-        // cache).
-        ic_cdk::futures::spawn(async move {
-            let outcome = fetch_and_update_prices(&stale).await;
-            release_refresh_lock(lock);
-            if let Err(err) = outcome {
-                ic_cdk::println!("get_exchange_rates background refresh failed: {err:?}");
-            }
-        });
+    if !stale.is_empty() {
+        if let Some(lock) = try_acquire_refresh_lock() {
+            // Background-spawn the refresh so the response isn't gated on the
+            // outcall round-trip. The 60s recurring refresh will also pick these
+            // up; this spawn just shortens the convergence window for tokens the
+            // recurring refresh hasn't gotten to yet.
+            //
+            // We share the in-flight lock with the timer-driven refresh: if a
+            // refresh is already running (timer or another caller), this call
+            // doesn't spawn its own — the in-flight one will write the cache,
+            // and the next call will pick up the fresh values. This deduplicates
+            // outcalls under concurrent load (e.g. many users calling on a cold
+            // cache).
+            ic_cdk::futures::spawn(async move {
+                let outcome = fetch_and_update_prices(&stale).await;
+                release_refresh_lock(lock);
+                if let Err(err) = outcome {
+                    ic_cdk::println!("get_exchange_rates background refresh failed: {err:?}");
+                }
+            });
+        }
     }
 
     cached_rates_snapshot(tokens)
