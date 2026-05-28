@@ -413,11 +413,6 @@
 					message: nonNullish(errorDetail) ? errorDetail : $i18n.swap.error.unexpected,
 					variant: 'error'
 				});
-
-				toastsError({
-					msg: { text: $i18n.swap.error.unexpected },
-					err
-				});
 			}
 
 			onBack();
