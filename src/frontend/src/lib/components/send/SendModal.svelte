@@ -84,6 +84,13 @@
 			? $networks.find(({ id }) => id === lockedNetworkIds[0])
 			: undefined
 	);
+	let lockedNetworks = $derived(
+		nonNullish(lockedNetworkIds) && lockedNetworkIds.length > 1
+			? lockedNetworkIds
+					.map((id) => $networks.find((n) => n.id === id))
+					.filter((n): n is NonNullable<typeof n> => nonNullish(n))
+			: undefined
+	);
 
 	let destination = $state(initialModalData?.destination ?? '');
 	let activeSendDestinationTab = $state<SendDestinationTab>('recentlyUsed');
@@ -278,6 +285,8 @@
 				/>
 			{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 				<ModalNetworksFilter
+					allNetworksLabel={isLockedToMultipleNetworks ? $i18n.networks.evm_networks : undefined}
+					filteredNetworks={lockedNetworks}
 					onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 					showStakeBalance={false}
 				/>

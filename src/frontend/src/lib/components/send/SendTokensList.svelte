@@ -30,17 +30,26 @@
 		return isNetworkIdBTCMainnet(lockedNetworkIds[0]) ? 'single-token' : 'multi-token';
 	});
 
+	// Multi-network locks (EVM mainnets) leave the filter button interactive so the user
+	// can drill into a specific chain; the popup then restricts the choices to the locked
+	// subset. Single-network locks and URL-route filters keep the historical view-only
+	// behaviour — there's no meaningful drill-down for a single network.
+	let networkSelectorViewOnly = $derived.by(() => {
+		if (nonNullish(lockedNetworkIds) && lockedNetworkIds.length > 1) {
+			return false;
+		}
+		return (
+			(nonNullish(lockedNetworkIds) && lockedNetworkIds.length === 1) ||
+			nonNullish($selectedNetwork)
+		);
+	});
+
 	const onTokenButtonClick = (token: Token) => {
 		onSendToken(token);
 	};
 </script>
 
-<ModalTokensList
-	networkSelectorViewOnly={(nonNullish(lockedNetworkIds) && lockedNetworkIds.length > 0) ||
-		nonNullish($selectedNetwork)}
-	{onSelectNetworkFilter}
-	{onTokenButtonClick}
->
+<ModalTokensList {networkSelectorViewOnly} {onSelectNetworkFilter} {onTokenButtonClick}>
 	{#snippet topBanner()}
 		<ScannedPlainAddressNotice variant={noticeVariant} />
 	{/snippet}
