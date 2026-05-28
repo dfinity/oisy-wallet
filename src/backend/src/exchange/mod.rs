@@ -54,6 +54,13 @@ const PRICE_FRESHNESS_GRACE_NS: u64 = (PRICE_REFRESH_INTERVAL_SEC / 2) * 1_000_0
 /// honours the contract that prices are at most this many seconds old.
 pub const PRICE_STALENESS_THRESHOLD_SEC: u64 = 2 * 60;
 
+/// Upper bound for considering a refresh legitimately in flight.
+///
+/// A refresh normally completes within one HTTP outcall round. If a later
+/// async continuation traps before releasing the lock, the committed
+/// in-flight marker would otherwise block refreshes until the next upgrade.
+const REFRESH_LOCK_TIMEOUT_NS: u64 = 10 * PRICE_REFRESH_INTERVAL_SEC * 1_000_000_000;
+
 /// Native tokens whose prices are always fetched, regardless of user activity.
 fn native_token_ids() -> Vec<StoredTokenId> {
     vec![
@@ -68,50 +75,78 @@ fn native_token_ids() -> Vec<StoredTokenId> {
     ]
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) struct RefreshLock {
+    generation: u64,
+    acquired_at_ns: u64,
+}
+
 thread_local! {
-    /// Set to `true` while *any* provider refresh (timer-driven or
+    /// Set while *any* provider refresh (timer-driven or
     /// caller-triggered background refresh from `get_exchange_rates`) is
     /// awaiting outcalls. Both call sites cooperate via this single flag so
     /// they don't duplicate outcalls for the same tokens — if the timer is
     /// refreshing, a concurrent on-demand call is a no-op (the timer is
     /// already fetching the superset); if an on-demand refresh is in
     /// flight, the next timer tick is a no-op until it completes.
-    static REFRESH_IN_FLIGHT: Cell<bool> = const { Cell::new(false) };
+    static REFRESH_IN_FLIGHT: Cell<Option<RefreshLock>> = const { Cell::new(None) };
+    static REFRESH_LOCK_GENERATION: Cell<u64> = const { Cell::new(0) };
 }
 
-/// Tries to set [`REFRESH_IN_FLIGHT`]; returns `true` if the caller acquired
-/// the lock, `false` if a refresh was already in flight. Callers that
-/// acquire the lock are responsible for calling [`release_refresh_lock`] in
-/// every completion path.
-pub(crate) fn try_acquire_refresh_lock() -> bool {
-    REFRESH_IN_FLIGHT.with(|f| {
-        if f.get() {
-            false
-        } else {
-            f.set(true);
-            true
+fn next_refresh_lock_generation() -> u64 {
+    REFRESH_LOCK_GENERATION.with(|generation| {
+        let next = generation.get().wrapping_add(1);
+        generation.set(next);
+        next
+    })
+}
+
+fn refresh_lock_expired(lock: RefreshLock, now_ns: u64) -> bool {
+    now_ns.saturating_sub(lock.acquired_at_ns) >= REFRESH_LOCK_TIMEOUT_NS
+}
+
+fn try_acquire_refresh_lock_at(now_ns: u64) -> Option<RefreshLock> {
+    REFRESH_IN_FLIGHT.with(|in_flight| match in_flight.get() {
+        Some(lock) if !refresh_lock_expired(lock, now_ns) => None,
+        _ => {
+            let lock = RefreshLock {
+                generation: next_refresh_lock_generation(),
+                acquired_at_ns: now_ns,
+            };
+            in_flight.set(Some(lock));
+            Some(lock)
         }
     })
 }
 
-/// Clears [`REFRESH_IN_FLIGHT`]. Must only be called by the holder of the
-/// lock (i.e. after a successful [`try_acquire_refresh_lock`]).
-pub(crate) fn release_refresh_lock() {
-    REFRESH_IN_FLIGHT.with(|f| f.set(false));
+/// Tries to set [`REFRESH_IN_FLIGHT`]; returns the acquired lock if no
+/// refresh is currently in flight. A stale lock is treated as abandoned so a
+/// trapped refresh continuation cannot permanently stop future refreshes.
+pub(crate) fn try_acquire_refresh_lock() -> Option<RefreshLock> {
+    try_acquire_refresh_lock_at(time())
+}
+
+/// Clears [`REFRESH_IN_FLIGHT`] if it still belongs to the supplied holder.
+pub(crate) fn release_refresh_lock(lock: RefreshLock) {
+    REFRESH_IN_FLIGHT.with(|in_flight| {
+        if in_flight.get() == Some(lock) {
+            in_flight.set(None);
+        }
+    });
 }
 
 /// Wraps [`refresh_exchange_rates`] with the in-flight guard so concurrent
 /// timer invocations (e.g. overlapping ticks) become no-ops rather than
 /// starting a parallel refresh.
 async fn refresh_exchange_rates_guarded(source: &'static str) {
-    if !try_acquire_refresh_lock() {
+    let Some(lock) = try_acquire_refresh_lock() else {
         ic_cdk::println!("Exchange rate {source} skipped: previous refresh still in flight");
         return;
-    }
+    };
 
     let outcome = refresh_exchange_rates().await;
 
-    release_refresh_lock();
+    release_refresh_lock(lock);
 
     if let Err(err) = outcome {
         ic_cdk::println!("Exchange rate {source} failed: {err:?}");
@@ -315,4 +350,48 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     });
 
     fetch_and_update_prices(&tokens_to_fetch).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        release_refresh_lock, try_acquire_refresh_lock_at, REFRESH_IN_FLIGHT,
+        REFRESH_LOCK_GENERATION, REFRESH_LOCK_TIMEOUT_NS,
+    };
+
+    const NOW_NS: u64 = 1_000_000_000;
+
+    fn reset_refresh_lock() {
+        REFRESH_IN_FLIGHT.with(|in_flight| in_flight.set(None));
+        REFRESH_LOCK_GENERATION.with(|generation| generation.set(0));
+    }
+
+    #[test]
+    fn refresh_lock_blocks_concurrent_acquire_until_released() {
+        reset_refresh_lock();
+
+        let first = try_acquire_refresh_lock_at(NOW_NS).unwrap();
+
+        assert!(try_acquire_refresh_lock_at(NOW_NS + REFRESH_LOCK_TIMEOUT_NS - 1).is_none());
+
+        release_refresh_lock(first);
+
+        assert!(try_acquire_refresh_lock_at(NOW_NS + REFRESH_LOCK_TIMEOUT_NS - 1).is_some());
+    }
+
+    #[test]
+    fn refresh_lock_recovers_after_timeout() {
+        reset_refresh_lock();
+
+        let abandoned = try_acquire_refresh_lock_at(NOW_NS).unwrap();
+        let recovered = try_acquire_refresh_lock_at(NOW_NS + REFRESH_LOCK_TIMEOUT_NS).unwrap();
+
+        release_refresh_lock(abandoned);
+
+        assert!(try_acquire_refresh_lock_at(NOW_NS + REFRESH_LOCK_TIMEOUT_NS + 1).is_none());
+
+        release_refresh_lock(recovered);
+
+        assert!(try_acquire_refresh_lock_at(NOW_NS + REFRESH_LOCK_TIMEOUT_NS + 1).is_some());
+    }
 }
