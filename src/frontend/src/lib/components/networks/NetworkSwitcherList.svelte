@@ -20,6 +20,7 @@
 		labelsSize?: LabelSize;
 		supportedNetworks?: NetworkType[];
 		allNetworksEnabled?: boolean;
+		allNetworksLabel?: string;
 		showTestnets?: boolean;
 		showStakeBalance?: boolean;
 		onSelected?: (networkId: OptionNetworkId) => void;
@@ -30,6 +31,7 @@
 		labelsSize = 'md',
 		supportedNetworks,
 		allNetworksEnabled = true,
+		allNetworksLabel,
 		showTestnets = true,
 		showStakeBalance = true,
 		onSelected
@@ -50,6 +52,7 @@
 
 {#if allNetworksEnabled}
 	<NetworkButton
+		{allNetworksLabel}
 		{labelsSize}
 		{onSelected}
 		{selectedNetworkId}
