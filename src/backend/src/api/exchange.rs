@@ -54,7 +54,13 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     token::mark_tokens_active(&active_ids);
 
     let stale = stale_or_missing_tokens(&tokens);
-    if !stale.is_empty() && try_acquire_refresh_lock() {
+    let refresh_lock = if stale.is_empty() {
+        None
+    } else {
+        try_acquire_refresh_lock()
+    };
+
+    if let Some(lock) = refresh_lock {
         // Background-spawn the refresh so the response isn't gated on the
         // outcall round-trip. The 60s recurring refresh will also pick these
         // up; this spawn just shortens the convergence window for tokens the
@@ -68,7 +74,7 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
         // cache).
         ic_cdk::futures::spawn(async move {
             let outcome = fetch_and_update_prices(&stale).await;
-            release_refresh_lock();
+            release_refresh_lock(lock);
             if let Err(err) = outcome {
                 ic_cdk::println!("get_exchange_rates background refresh failed: {err:?}");
             }

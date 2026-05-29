@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
+	import { isEmptyString, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { Principal } from '@icp-sdk/core/principal';
 	import { getContext, onDestroy } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
 	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 	import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 	import { OCP_PAY_WITH_BTC_ENABLED } from '$env/open-crypto-pay.env';
 	import IconChain from '$lib/components/icons/IconChain.svelte';
 	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
@@ -33,6 +35,7 @@
 	import { isMobile } from '$lib/utils/device.utils';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 	import { AVAILABLE_SCREENS, filterScreens, MIN_SCREEN } from '$lib/utils/screens.utils';
+	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
 	import { isSolAddress } from '$sol/utils/sol-address.utils';
 
@@ -79,6 +82,15 @@
 
 	const { setData, setAvailableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
+	const isIcPrincipal = (value: string): boolean => {
+		try {
+			Principal.fromText(value);
+			return true;
+		} catch (_: unknown) {
+			return false;
+		}
+	};
+
 	const processCode = async (code: string) => {
 		if (code.startsWith(WALLET_CONNECT_URI_PREFIX)) {
 			onNext({ results: ScannerResults.WALLET_CONNECT, code });
@@ -88,6 +100,19 @@
 		const trimmed = code.trim();
 		if (isSolAddress(trimmed)) {
 			onNext({ results: ScannerResults.SOL_SEND, code: trimmed });
+			return;
+		}
+
+		if (
+			notEmptyString(trimmed) &&
+			!isInvalidDestinationBtc({ destination: trimmed, networkId: BTC_MAINNET_NETWORK_ID })
+		) {
+			onNext({ results: ScannerResults.BTC_SEND, code: trimmed });
+			return;
+		}
+
+		if (isIcPrincipal(trimmed)) {
+			onNext({ results: ScannerResults.IC_SEND, code: trimmed });
 			return;
 		}
 

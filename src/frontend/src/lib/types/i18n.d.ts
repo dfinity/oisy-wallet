@@ -700,6 +700,7 @@ interface I18nSend {
 		unknown_destination: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
+		scanned_address_only_destination_single_token: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -908,6 +909,7 @@ interface I18nSwap {
 		kong_not_available: string;
 		unexpected: string;
 		unexpected_missing_data: string;
+		failed_unexpectedly: string;
 		slippage_exceeded: string;
 		pool_not_found: string;
 		deposit_error: string;

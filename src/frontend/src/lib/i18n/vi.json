@@ -968,7 +968,8 @@
 			"no_available_utxos": "Bạn sẽ không có UTXO khả dụng để thực hiện giao dịch này.",
 			"unknown_destination": "Bạn chưa tương tác với địa chỉ này trước đây. Vui lòng đảm bảo bạn biết người nhận.",
 			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>",
-			"scanned_address_only_destination": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn chọn đúng token, nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!"
+			"scanned_address_only_destination": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn chọn đúng token, nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!",
+			"scanned_address_only_destination_single_token": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Địa chỉ ví không hợp lệ",
@@ -1191,6 +1192,7 @@
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
 			"unexpected": "Đã xảy ra lỗi trong khi hoán đổi token.",
 			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch hoán đổi.",
+			"failed_unexpectedly": "Không thể hoàn tất giao dịch hoán đổi. Vui lòng kiểm tra số dư ví của bạn và thử lại, hoặc chọn nhà cung cấp khác.",
 			"slippage_exceeded": "$oisy_short bảo vệ bạn: Giao dịch nằm ngoài giới hạn trượt giá $maxSlippage% của bạn. Vui lòng điều chỉnh độ trượt tối đa và thử lại.",
 			"pool_not_found": "Hoán đổi thất bại. Không tìm thấy bể thanh khoản.",
 			"deposit_error": "Nạp tiền cho giao dịch hoán đổi (swap) của bạn không thành công. Vui lòng thử lại hoặc đổi nhà cung cấp dịch vụ hoán đổi.",

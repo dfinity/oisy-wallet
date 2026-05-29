@@ -968,7 +968,8 @@
 			"no_available_utxos": "このトランザクションを行うための利用可能なUTXOが不足しています。",
 			"unknown_destination": "このアドレスとやり取りは初めてです。送信先を確認してください。",
 			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>",
-			"scanned_address_only_destination": "スキャンしたコードには宛先アドレスのみが含まれていました。正しいトークンを選択し、正しい数量を入力し、宛先アドレスを慎重に確認してください！"
+			"scanned_address_only_destination": "スキャンしたコードには宛先アドレスのみが含まれていました。正しいトークンを選択し、正しい数量を入力し、宛先アドレスを慎重に確認してください！",
+			"scanned_address_only_destination_single_token": "スキャンしたコードには宛先アドレスのみが含まれていました。正しい数量を入力し、宛先アドレスを慎重に確認してください！"
 		},
 		"assertion": {
 			"invalid_destination_address": "送信先アドレスが無効です",
@@ -1191,6 +1192,7 @@
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",
 			"unexpected": "トークンをスワップ中に問題が発生しました。",
 			"unexpected_missing_data": "スワップトランザクションの開始中に予期しない問題が発生しました。",
+			"failed_unexpectedly": "スワップを完了できませんでした。ウォレットの残高をご確認のうえ、再度お試しいただくか、別のプロバイダーをお選びください。",
 			"slippage_exceeded": "$oisy_short が保護しています：取引がスリッページ許容範囲の $maxSlippage% を超えています。最大スリッページを調整して再試行してください。",
 			"pool_not_found": "スワップ失敗。プールが見つかりません。",
 			"deposit_error": "スワップの資金を入金できませんでした。再度お試しいただくか、スワッププロバイダーを変更してください。",
