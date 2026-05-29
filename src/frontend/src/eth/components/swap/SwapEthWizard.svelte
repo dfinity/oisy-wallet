@@ -379,17 +379,13 @@
 			// left their wallet; success/failure of the background phase is tracked
 			// separately via the AUT store. Other providers (Velora, Near) still
 			// complete fully inside `await` and reach this point only on success.
-			if ($swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC) {
-				trackEvent({
-					name: TRACK_COUNT_SWAP_SUBMITTED,
-					metadata: swapTrackingMetadata
-				});
-			} else {
-				trackEvent({
-					name: TRACK_COUNT_SWAP_SUCCESS,
-					metadata: swapTrackingMetadata
-				});
-			}
+			trackEvent({
+				name:
+					$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+						? TRACK_COUNT_SWAP_SUBMITTED
+						: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: swapTrackingMetadata
+			});
 
 			setTimeout(() => {
 				try {

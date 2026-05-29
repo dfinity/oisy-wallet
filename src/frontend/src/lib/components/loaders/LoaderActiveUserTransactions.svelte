@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Identity } from '@icp-sdk/core/agent';
 	import { onDestroy } from 'svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
@@ -29,8 +28,18 @@
 	let timer: ReturnType<typeof setInterval> | undefined;
 	let inflight = false;
 
-	const tick = async (identity: Identity) => {
-		if (inflight || document.hidden || $activeUserTransactionsPending.length === 0) {
+	// Reads the latest `$authIdentity` at fire time rather than closing over a
+	// captured value, so a delegation refresh (new identity object, no nullish
+	// in between) doesn't leave the poller authenticating with a stale identity.
+	const tick = async () => {
+		const identity = $authIdentity;
+
+		if (
+			isNullish(identity) ||
+			inflight ||
+			document.hidden ||
+			$activeUserTransactionsPending.length === 0
+		) {
 			return;
 		}
 
@@ -55,14 +64,12 @@
 		}
 	};
 
-	const start = (identity: Identity) => {
+	const start = () => {
 		if (nonNullish(timer)) {
 			return;
 		}
 
-		timer = setInterval(() => {
-			tick(identity);
-		}, ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+		timer = setInterval(tick, ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
 	};
 
 	$effect(() => {
@@ -73,7 +80,7 @@
 			return;
 		}
 
-		start($authIdentity);
+		start();
 	});
 
 	onDestroy(stop);

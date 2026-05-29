@@ -299,6 +299,10 @@ const createAutAndDetachCloser = async ({
 		...extraRefs
 	};
 
+	// AUT persistence is best-effort: a failed `createActiveUserTransaction`
+	// must NOT abort the plan. The user has already committed funds (point of
+	// no return), so the closer is the only path that completes the bridge —
+	// it always runs, persisted row or not.
 	try {
 		await createActiveUserTransaction({
 			identity,
@@ -306,11 +310,11 @@ const createAutAndDetachCloser = async ({
 			data,
 			externalRefs: toOneSecExternalRefs(initialRefs)
 		});
-
-		finishOneSecBridgingInSession({ identity, id: swapId, plan, initialRefs });
 	} catch (err: unknown) {
 		consoleError(err);
 	}
+
+	finishOneSecBridgingInSession({ identity, id: swapId, plan, initialRefs });
 };
 
 // Foreground resolves once the ICP-side transfer is initiated (point of no
