@@ -89,6 +89,8 @@ mod tests {
     use super::*;
     use crate::exchange::supplemental::SupplementalPricesFuture;
 
+    type RequestedTokensLog = Rc<RefCell<Vec<Vec<StoredTokenId>>>>;
+
     #[derive(Clone)]
     struct MockPrimaryProvider {
         result: Result<Vec<(StoredTokenId, ExchangeData)>, String>,
@@ -105,13 +107,13 @@ mod tests {
 
     struct MockSupplementalProvider {
         result: Result<Vec<(StoredTokenId, ExchangeData)>, String>,
-        requested: Rc<RefCell<Vec<Vec<StoredTokenId>>>>,
+        requested: RequestedTokensLog,
     }
 
     impl MockSupplementalProvider {
         fn boxed(
             result: Result<Vec<(StoredTokenId, ExchangeData)>, String>,
-        ) -> (Box<Self>, Rc<RefCell<Vec<Vec<StoredTokenId>>>>) {
+        ) -> (Box<Self>, RequestedTokensLog) {
             let requested = Rc::new(RefCell::new(Vec::new()));
             let provider = Box::new(Self {
                 result,
