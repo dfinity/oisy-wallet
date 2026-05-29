@@ -112,7 +112,7 @@ fn try_acquire_refresh_lock_at(now_ns: u64) -> Option<RefreshLock> {
                 return None;
             }
 
-            ic_cdk::println!(
+            ic_cdk::eprintln!(
                 "Exchange rate refresh appears stuck (started {}s ago), forcing unlock",
                 elapsed / 1_000_000_000
             );
