@@ -633,7 +633,9 @@ describe('onesec-swap.utils', () => {
 		});
 
 		it('omits the error field when the row has no error', () => {
-			expect(buildOneSecSwapTrackingMetadata({ tx: txWithRefs({ refs: [] }) })).not.toHaveProperty('error');
+			expect(buildOneSecSwapTrackingMetadata({ tx: txWithRefs({ refs: [] }) })).not.toHaveProperty(
+				'error'
+			);
 		});
 	});
 });
