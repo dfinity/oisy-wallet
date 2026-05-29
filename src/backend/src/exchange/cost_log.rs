@@ -25,7 +25,8 @@ use ic_cdk::api::time;
 use shared::{
     metrics::MetricsEncoder,
     types::exchange_cost::{
-        ExchangeCostSummary, ExchangeCostWindow, ExchangeOutcallRecord, ExchangeProviderWindowStats,
+        ExchangeCostSummary, ExchangeCostWindow, ExchangeOutcallRecord,
+        ExchangeProviderWindowStats, ExchangeRefreshTickStats,
     },
 };
 
@@ -57,6 +58,17 @@ thread_local! {
 
     static COUNTERS: std::cell::RefCell<BTreeMap<&'static str, ProviderCounters>> =
         const { std::cell::RefCell::new(BTreeMap::new()) };
+
+    /// Aggregate canister-balance deltas observed around each call to
+    /// [`crate::exchange::refresh_exchange_rates`]. Updated from
+    /// [`record_refresh_tick`]. Acts as ground-truth cycles burnt by
+    /// the refresh path, to validate the per-call formula.
+    static REFRESH_TICK: std::cell::RefCell<ExchangeRefreshTickStats> =
+        const { std::cell::RefCell::new(ExchangeRefreshTickStats {
+            tick_count: 0,
+            balance_delta_total: 0,
+            outcall_count_total: 0,
+        }) };
 }
 
 /// Records one outcall outcome.
@@ -129,6 +141,30 @@ pub(crate) fn counters_snapshot() -> BTreeMap<&'static str, ProviderCounters> {
     COUNTERS.with(|c| c.borrow().clone())
 }
 
+/// Records one refresh-tick balance delta.
+///
+/// `balance_delta_cycles` should be `balance_before - balance_after`
+/// measured around `refresh_exchange_rates`. `outcall_count` is the
+/// number of outcalls issued during that tick (so we can divide later
+/// for an "average per-call burn" cross-check).
+///
+/// This is the ground-truth alternative to summing per-call formula
+/// values. The two should converge if the IC pricing constants in
+/// `outcall_cost_cycles` are right.
+pub(crate) fn record_refresh_tick(balance_delta_cycles: u128, outcall_count: u64) {
+    REFRESH_TICK.with(|t| {
+        let mut t = t.borrow_mut();
+        t.tick_count = t.tick_count.saturating_add(1);
+        t.balance_delta_total = t.balance_delta_total.saturating_add(balance_delta_cycles);
+        t.outcall_count_total = t.outcall_count_total.saturating_add(outcall_count);
+    });
+}
+
+/// Returns the per-refresh-tick balance-delta aggregate.
+pub(crate) fn refresh_tick_snapshot() -> ExchangeRefreshTickStats {
+    REFRESH_TICK.with(|t| t.borrow().clone())
+}
+
 /// Builds the summary returned by `exchange_rate_cost_summary()`.
 pub(crate) fn summarize() -> ExchangeCostSummary {
     let now = time();
@@ -146,6 +182,7 @@ pub(crate) fn summarize() -> ExchangeCostSummary {
         buffer_len: records.len() as u64,
         cycles_total_buffered,
         windows,
+        refresh_tick: refresh_tick_snapshot(),
     }
 }
 

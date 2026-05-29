@@ -732,6 +732,11 @@ export interface EvmTransactionData {
  */
 export interface ExchangeCostSummary {
 	now_ns: bigint;
+	/**
+	 * Ground-truth balance-delta measurement per refresh tick. See
+	 * [`ExchangeRefreshTickStats`].
+	 */
+	refresh_tick: ExchangeRefreshTickStats;
 	buffer_capacity: bigint;
 	buffer_len: bigint;
 	/**
@@ -781,10 +786,15 @@ export interface ExchangeOutcallRecord {
 	 */
 	provider: string;
 	/**
-	 * Cycles deducted from the canister balance for this outcall,
-	 * measured as `balance_before - balance_after`. Encoded as the
-	 * stringified `u128` to keep the candid `nat` representation human
-	 * readable in `dfx` output.
+	 * Cycles charged by the management canister for this outcall.
+	 *
+	 * Computed deterministically from the IC HTTPS-outcall pricing
+	 * formula using `request_bytes + max_response_bytes +
+	 * actual_response_bytes` for a 13-node application subnet (not a
+	 * `canister_cycle_balance()` delta, which would be polluted by
+	 * concurrent fan-out). See
+	 * `crate::utils::http_outcall::outcall_cost_cycles` for the
+	 * formula and constants.
 	 */
 	cycles_charged: bigint;
 	/**
@@ -822,6 +832,36 @@ export interface ExchangeProviderWindowStats {
 }
 export interface ExchangeRate {
 	usd: ExchangeData;
+}
+/**
+ * Ground-truth cycle burn measured per refresh tick by reading the
+ * canister balance immediately before and after the entire refresh
+ * completes (i.e. around `refresh_exchange_rates`, not around each
+ * individual outcall). Used as a sanity check on the per-call
+ * formula sum: if the formula constants are right, the sum of
+ * `cycles_charged` across all outcalls in a tick should be close to
+ * `balance_delta` for the same tick.
+ *
+ * Less polluted than per-`await` deltas because the in-flight lock
+ * keeps refreshes serial; the only confounders are concurrent
+ * inter-canister activity (rare on the exchange path) and short
+ * query-burst work in between the two balance reads.
+ */
+export interface ExchangeRefreshTickStats {
+	tick_count: bigint;
+	/**
+	 * Number of outcalls issued across all refresh ticks since
+	 * canister start (may exceed buffered outcalls because the ring
+	 * buffer overwrites old entries).
+	 */
+	outcall_count_total: bigint;
+	/**
+	 * Sum of `(balance_before - balance_after)` deltas observed
+	 * across all refresh ticks since canister start. Compare to the
+	 * formula-derived `cycles_total_buffered` to see if the IC
+	 * pricing constants in `outcall_cost_cycles` are correct.
+	 */
+	balance_delta_total: bigint;
 }
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;

@@ -20,10 +20,15 @@ pub struct ExchangeOutcallRecord {
     /// provider for. Empty for endpoints whose request payload is not
     /// per-token (none today, but reserved).
     pub requested_tokens: Vec<String>,
-    /// Cycles deducted from the canister balance for this outcall,
-    /// measured as `balance_before - balance_after`. Encoded as the
-    /// stringified `u128` to keep the candid `nat` representation human
-    /// readable in `dfx` output.
+    /// Cycles charged by the management canister for this outcall.
+    ///
+    /// Computed deterministically from the IC HTTPS-outcall pricing
+    /// formula using `request_bytes + max_response_bytes +
+    /// actual_response_bytes` for a 13-node application subnet (not a
+    /// `canister_cycle_balance()` delta, which would be polluted by
+    /// concurrent fan-out). See
+    /// `crate::utils::http_outcall::outcall_cost_cycles` for the
+    /// formula and constants.
     pub cycles_charged: u128,
     /// Bytes returned in the response body (`0` on transport error).
     pub response_bytes: u64,
@@ -59,6 +64,32 @@ pub struct ExchangeCostWindow {
     pub providers: Vec<ExchangeProviderWindowStats>,
 }
 
+/// Ground-truth cycle burn measured per refresh tick by reading the
+/// canister balance immediately before and after the entire refresh
+/// completes (i.e. around `refresh_exchange_rates`, not around each
+/// individual outcall). Used as a sanity check on the per-call
+/// formula sum: if the formula constants are right, the sum of
+/// `cycles_charged` across all outcalls in a tick should be close to
+/// `balance_delta` for the same tick.
+///
+/// Less polluted than per-`await` deltas because the in-flight lock
+/// keeps refreshes serial; the only confounders are concurrent
+/// inter-canister activity (rare on the exchange path) and short
+/// query-burst work in between the two balance reads.
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq, Default)]
+pub struct ExchangeRefreshTickStats {
+    pub tick_count: u64,
+    /// Sum of `(balance_before - balance_after)` deltas observed
+    /// across all refresh ticks since canister start. Compare to the
+    /// formula-derived `cycles_total_buffered` to see if the IC
+    /// pricing constants in `outcall_cost_cycles` are correct.
+    pub balance_delta_total: u128,
+    /// Number of outcalls issued across all refresh ticks since
+    /// canister start (may exceed buffered outcalls because the ring
+    /// buffer overwrites old entries).
+    pub outcall_count_total: u64,
+}
+
 /// Response of `exchange_rate_cost_summary()`.
 ///
 /// Holds aggregates over four nested windows (1 min / 5 min / 1 h /
@@ -73,4 +104,7 @@ pub struct ExchangeCostSummary {
     /// Useful for sanity-checking the per-window aggregates.
     pub cycles_total_buffered: u128,
     pub windows: Vec<ExchangeCostWindow>,
+    /// Ground-truth balance-delta measurement per refresh tick. See
+    /// [`ExchangeRefreshTickStats`].
+    pub refresh_tick: ExchangeRefreshTickStats,
 }

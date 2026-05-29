@@ -6,7 +6,7 @@ mod supplemental;
 
 use std::{cell::Cell, time::Duration};
 
-use ic_cdk::api::time;
+use ic_cdk::api::{canister_cycle_balance, time};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::{
     exchange::{ExchangeData, ExchangeError, ExchangeRate},
@@ -104,13 +104,35 @@ pub(crate) fn release_refresh_lock() {
 /// Wraps [`refresh_exchange_rates`] with the in-flight guard so concurrent
 /// timer invocations (e.g. overlapping ticks) become no-ops rather than
 /// starting a parallel refresh.
+///
+/// Also reads `canister_cycle_balance()` around the refresh and records
+/// the delta into [`cost_log::record_refresh_tick`] as a ground-truth
+/// cycle-burn signal. Compared with the formula-based per-call totals,
+/// this tells us whether the IC pricing constants we use are right.
 async fn refresh_exchange_rates_guarded(source: &'static str) {
     if !try_acquire_refresh_lock() {
         ic_cdk::println!("Exchange rate {source} skipped: previous refresh still in flight");
         return;
     }
 
+    let balance_before = canister_cycle_balance();
+    let outcalls_before = cost_log::counters_snapshot()
+        .values()
+        .map(|c| c.call_count)
+        .sum::<u64>();
+
     let outcome = refresh_exchange_rates().await;
+
+    let balance_after = canister_cycle_balance();
+    let outcalls_after = cost_log::counters_snapshot()
+        .values()
+        .map(|c| c.call_count)
+        .sum::<u64>();
+
+    cost_log::record_refresh_tick(
+        balance_before.saturating_sub(balance_after),
+        outcalls_after.saturating_sub(outcalls_before),
+    );
 
     release_refresh_lock();
 

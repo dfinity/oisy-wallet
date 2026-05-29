@@ -438,6 +438,11 @@ export const idlFactory = ({ IDL }) => {
 		duration_ns: IDL.Nat64,
 		response_bytes: IDL.Nat64
 	});
+	const ExchangeRefreshTickStats = IDL.Record({
+		tick_count: IDL.Nat64,
+		outcall_count_total: IDL.Nat64,
+		balance_delta_total: IDL.Nat
+	});
 	const ExchangeProviderWindowStats = IDL.Record({
 		error_count: IDL.Nat64,
 		bytes_total: IDL.Nat64,
@@ -455,6 +460,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const ExchangeCostSummary = IDL.Record({
 		now_ns: IDL.Nat64,
+		refresh_tick: ExchangeRefreshTickStats,
 		buffer_capacity: IDL.Nat64,
 		buffer_len: IDL.Nat64,
 		cycles_total_buffered: IDL.Nat,
