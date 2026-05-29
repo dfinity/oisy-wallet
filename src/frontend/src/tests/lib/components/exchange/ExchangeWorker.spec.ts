@@ -127,4 +127,29 @@ describe('ExchangeWorker', () => {
 		expect(stopExchangeTimer).toHaveBeenCalledOnce();
 		expect(startExchangeTimer).toHaveBeenCalledOnce();
 	});
+
+	it('runs in backend mode and still restarts on always-relevant input change', async () => {
+		vi.spyOn(backendExchangeEnabledServices, 'loadBackendExchangeEnabled').mockResolvedValue(true);
+
+		render(ExchangeWorker);
+
+		await waitTimer();
+
+		// Started against the backend cache once the runtime flag resolves.
+		expect(startExchangeTimer).toHaveBeenLastCalledWith(
+			expect.objectContaining({ backendExchangeEnabled: true })
+		);
+
+		const callsBeforeCurrencyChange = startExchangeTimer.mock.calls.length;
+
+		// Currency is relevant to the backend branch too, so it must still restart.
+		currencyStore.switchCurrency(Currency.CHF);
+
+		await waitTimer();
+
+		expect(startExchangeTimer.mock.calls).toHaveLength(callsBeforeCurrencyChange + 1);
+		expect(startExchangeTimer).toHaveBeenLastCalledWith(
+			expect.objectContaining({ currentCurrency: Currency.CHF, backendExchangeEnabled: true })
+		);
+	});
 });
