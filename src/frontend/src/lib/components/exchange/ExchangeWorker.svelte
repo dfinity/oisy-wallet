@@ -48,16 +48,22 @@
 	const debounceSyncTimer = debounce(syncTimer, 1000);
 
 	$effect(() => {
-		[
-			worker,
-			backendExchangeEnabled,
-			$authIdentity,
-			$currentCurrency,
-			$enabledMergedErc20TokensAddresses,
-			$enabledIcrcLedgerCanisterIdsNoCk,
-			$enabledSplTokenAddresses,
-			$erc4626TokensExchangeData
-		];
+		// Inputs that matter to both data sources (and the source toggle itself).
+		[worker, backendExchangeEnabled, $authIdentity, $currentCurrency, $erc4626TokensExchangeData];
+
+		// The token-list inputs only matter to the public-provider branch: in
+		// backend mode the canister derives the caller's token set server-side
+		// (see `fetchExchangeRatesFromBackend`), so a change here would restart
+		// the worker and fire a redundant `get_exchange_rates` update for an
+		// identical result. Reading them only in provider mode keeps them out of
+		// this effect's dependency set when the backend cache is the source.
+		if (!backendExchangeEnabled) {
+			[
+				$enabledMergedErc20TokensAddresses,
+				$enabledIcrcLedgerCanisterIdsNoCk,
+				$enabledSplTokenAddresses
+			];
+		}
 
 		debounceSyncTimer();
 	});
