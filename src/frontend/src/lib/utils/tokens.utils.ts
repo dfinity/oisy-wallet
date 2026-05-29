@@ -442,19 +442,22 @@ export const pinEnabledTokensAtTop = <T extends Token>(
 	$tokens: TokenToggleable<T>[]
 ): TokenToggleable<T>[] => $tokens.sort(({ enabled: a }, { enabled: b }) => Number(b) - Number(a));
 
-/** Filters provided tokens list according to a filter keyword
+/** Tells whether a single token matches a free-text filter on name, symbol or
+ * the token's contract identifier (Ethereum / Solana address, IC ledger /
+ * index / NFT canister id, ICRC custom alternative name). For IC ck-tokens
+ * the underlying twin token is also considered.
  *
- * @param tokens - The list of tokens.
+ * @param token - The token to test.
  * @param filter - filter keyword.
- * @returns Filtered list of tokens.
- * */
-export const filterTokens = <T extends Token>({
-	tokens,
+ * @returns Whether the token matches the filter.
+ */
+export const doesTokenMatchFilter = ({
+	token,
 	filter
 }: {
-	tokens: T[];
+	token: Token;
 	filter: string;
-}): T[] => {
+}): boolean => {
 	const matchingToken = (token: Token): boolean => {
 		const { name, symbol } = token;
 
@@ -474,18 +477,22 @@ export const filterTokens = <T extends Token>({
 		}
 
 		if (isTokenErc20(token) || isTokenErc721(token) || isTokenErc1155(token) || isTokenSpl(token)) {
-			return areAddressesPartiallyEqual({
-				address1: token.address,
-				address2: filter,
-				networkId: token.network.id
-			});
+			return (
+				nonNullish(token.address) &&
+				areAddressesPartiallyEqual({
+					address1: token.address,
+					address2: filter,
+					networkId: token.network.id
+				})
+			);
 		}
 
 		if (isTokenIc(token)) {
 			const { ledgerCanisterId, indexCanisterId } = token;
 
 			return (
-				ledgerCanisterId.toLowerCase().includes(filter.toLowerCase()) ||
+				(nonNullish(ledgerCanisterId) &&
+					ledgerCanisterId.toLowerCase().includes(filter.toLowerCase())) ||
 				(nonNullish(indexCanisterId) &&
 					indexCanisterId.toLowerCase().includes(filter.toLowerCase()))
 			);
@@ -494,19 +501,32 @@ export const filterTokens = <T extends Token>({
 		if (isTokenIcNft(token)) {
 			const { canisterId } = token;
 
-			return canisterId.toLowerCase().includes(filter.toLowerCase());
+			return nonNullish(canisterId) && canisterId.toLowerCase().includes(filter.toLowerCase());
 		}
 
 		return false;
 	};
 
-	return isNullishOrEmpty(filter)
-		? tokens
-		: tokens.filter((token) => {
-				const twinToken = isIcCkToken(token) ? token.twinToken : undefined;
-				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
-			});
+	const twinToken = isIcCkToken(token) ? token.twinToken : undefined;
+	return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
 };
+
+/** Filters provided tokens list according to a filter keyword
+ *
+ * @param tokens - The list of tokens.
+ * @param filter - filter keyword.
+ * @returns Filtered list of tokens.
+ * */
+export const filterTokens = <T extends Token>({
+	tokens,
+	filter
+}: {
+	tokens: T[];
+	filter: string;
+}): T[] =>
+	isNullishOrEmpty(filter)
+		? tokens
+		: tokens.filter((token) => doesTokenMatchFilter({ token, filter }));
 
 /** Finds the token with the given symbol
  *
