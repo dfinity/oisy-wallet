@@ -305,10 +305,9 @@ pub(crate) fn custom_tokens_to_mark(tokens: &[StoredTokenId]) -> Vec<TokenId> {
 }
 
 /// Single-pass read of the cache for `token_ids`. Returns:
-/// - the per-token snapshot in input order — `None` when the cache has no
-///   entry or it is older than [`PRICE_STALENESS_THRESHOLD_SEC`] seconds — and
-/// - the subset whose snapshot entry is `None`, i.e. the tokens that need a
-///   refresh outcall.
+/// - the per-token snapshot in input order — `None` when the cache has no entry or it is older than
+///   [`PRICE_STALENESS_THRESHOLD_SEC`] seconds — and
+/// - the subset whose snapshot entry is `None`, i.e. the tokens that need a refresh outcall.
 ///
 /// The two outputs are exact complements, so `get_exchange_rates` derives both
 /// from one state borrow and one Candid decode per token. (The previous
