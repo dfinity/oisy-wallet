@@ -3,10 +3,7 @@ use std::collections::BTreeMap;
 use shared::types::exchange::ExchangeData;
 
 use crate::{
-    exchange::{
-        provider::ExchangePriceProvider, providers::coingecko::CoinGeckoProvider,
-        supplemental::SupplementalPriceProvider,
-    },
+    exchange::{provider::ExchangePriceProvider, supplemental::SupplementalPriceProvider},
     types::storable::StoredTokenId,
 };
 
@@ -38,8 +35,8 @@ fn still_missing(
 /// Runs the primary provider, then each supplemental in order, merging only valid prices.
 ///
 /// Later supplementals only see tokens that still lack a valid price after earlier steps.
-pub(crate) async fn fetch_all_prices(
-    primary: &CoinGeckoProvider,
+pub(crate) async fn fetch_all_prices<P: ExchangePriceProvider>(
+    primary: &P,
     supplementals: &[Box<dyn SupplementalPriceProvider>],
     token_ids: &[StoredTokenId],
 ) -> Vec<(StoredTokenId, ExchangeData)> {
@@ -82,10 +79,75 @@ pub(crate) async fn fetch_all_prices(
 
 #[cfg(test)]
 mod tests {
+    use std::{cell::RefCell, rc::Rc};
+
     use candid::Principal;
+    use futures::executor::block_on;
+    use pretty_assertions::assert_eq;
     use shared::types::token_id::TokenId;
 
     use super::*;
+    use crate::exchange::supplemental::SupplementalPricesFuture;
+
+    #[derive(Clone)]
+    struct MockPrimaryProvider {
+        result: Result<Vec<(StoredTokenId, ExchangeData)>, String>,
+    }
+
+    impl ExchangePriceProvider for MockPrimaryProvider {
+        async fn fetch_prices(
+            &self,
+            _token_ids: &[StoredTokenId],
+        ) -> Result<Vec<(StoredTokenId, ExchangeData)>, String> {
+            self.result.clone()
+        }
+    }
+
+    struct MockSupplementalProvider {
+        result: Result<Vec<(StoredTokenId, ExchangeData)>, String>,
+        requested: Rc<RefCell<Vec<Vec<StoredTokenId>>>>,
+    }
+
+    impl MockSupplementalProvider {
+        fn boxed(
+            result: Result<Vec<(StoredTokenId, ExchangeData)>, String>,
+        ) -> (Box<Self>, Rc<RefCell<Vec<Vec<StoredTokenId>>>>) {
+            let requested = Rc::new(RefCell::new(Vec::new()));
+            let provider = Box::new(Self {
+                result,
+                requested: Rc::clone(&requested),
+            });
+            (provider, requested)
+        }
+    }
+
+    impl SupplementalPriceProvider for MockSupplementalProvider {
+        fn id(&self) -> &'static str {
+            "mock"
+        }
+
+        fn supplement<'a>(&'a self, missing: &'a [StoredTokenId]) -> SupplementalPricesFuture<'a> {
+            self.requested.borrow_mut().push(missing.to_vec());
+            Box::pin(async move { self.result.clone() })
+        }
+    }
+
+    fn data(price: Option<f64>) -> ExchangeData {
+        ExchangeData {
+            timestamp_ns: 0,
+            price,
+            price_24h_change_pct: None,
+            market_cap: None,
+        }
+    }
+
+    fn icrc_token(id: &str) -> StoredTokenId {
+        StoredTokenId(TokenId::Icrc(Principal::from_text(id).unwrap()))
+    }
+
+    fn native_token() -> StoredTokenId {
+        StoredTokenId(TokenId::IcpNative)
+    }
 
     #[test]
     fn has_valid_price_accepts_positive_finite() {
@@ -141,5 +203,73 @@ mod tests {
         );
         let requested = vec![t.clone()];
         assert!(still_missing(&requested, &map).is_empty());
+    }
+
+    #[test]
+    fn fetch_all_prices_uses_supplemental_when_primary_fails() {
+        let first = native_token();
+        let second = icrc_token("ryjl3-tyaaa-aaaaa-aaaba-cai");
+        let requested = vec![first.clone(), second.clone()];
+        let primary = MockPrimaryProvider {
+            result: Err("primary unavailable".to_string()),
+        };
+        let (supplemental, requested_by_supplemental) = MockSupplementalProvider::boxed(Ok(vec![
+            (second.clone(), data(Some(2.0))),
+            (first.clone(), data(Some(1.0))),
+        ]));
+        let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![supplemental];
+
+        let prices = block_on(fetch_all_prices(&primary, &supplementals, &requested));
+
+        assert_eq!(
+            prices,
+            vec![(first, data(Some(1.0))), (second, data(Some(2.0)))]
+        );
+        assert_eq!(*requested_by_supplemental.borrow(), vec![requested]);
+    }
+
+    #[test]
+    fn fetch_all_prices_retries_only_invalid_primary_prices() {
+        let valid = native_token();
+        let invalid = icrc_token("ryjl3-tyaaa-aaaaa-aaaba-cai");
+        let requested = vec![valid.clone(), invalid.clone()];
+        let primary = MockPrimaryProvider {
+            result: Ok(vec![
+                (valid.clone(), data(Some(1.0))),
+                (invalid.clone(), data(None)),
+            ]),
+        };
+        let (supplemental, requested_by_supplemental) =
+            MockSupplementalProvider::boxed(Ok(vec![(invalid.clone(), data(Some(2.0)))]));
+        let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![supplemental];
+
+        let prices = block_on(fetch_all_prices(&primary, &supplementals, &requested));
+
+        assert_eq!(
+            *requested_by_supplemental.borrow(),
+            vec![vec![invalid.clone()]]
+        );
+        assert_eq!(
+            prices,
+            vec![(valid, data(Some(1.0))), (invalid, data(Some(2.0)))]
+        );
+    }
+
+    #[test]
+    fn fetch_all_prices_keeps_primary_prices_when_supplemental_fails() {
+        let valid = native_token();
+        let missing = icrc_token("ryjl3-tyaaa-aaaaa-aaaba-cai");
+        let requested = vec![valid.clone(), missing.clone()];
+        let primary = MockPrimaryProvider {
+            result: Ok(vec![(valid.clone(), data(Some(1.0)))]),
+        };
+        let (supplemental, requested_by_supplemental) =
+            MockSupplementalProvider::boxed(Err("supplemental unavailable".to_string()));
+        let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![supplemental];
+
+        let prices = block_on(fetch_all_prices(&primary, &supplementals, &requested));
+
+        assert_eq!(prices, vec![(valid, data(Some(1.0)))]);
+        assert_eq!(*requested_by_supplemental.borrow(), vec![vec![missing]]);
     }
 }
