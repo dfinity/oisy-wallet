@@ -288,47 +288,54 @@ pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<Stored
     tokens
 }
 
-/// Returns the subset of `token_ids` whose cached USD price is either
-/// missing or older than [`PRICE_STALENESS_THRESHOLD_SEC`] seconds.
+/// Filters `tokens` to the non-native subset, as `TokenId`s ready for
+/// [`crate::token::mark_tokens_active`].
 ///
-/// Used by `get_exchange_rates` to decide which tokens require a
-/// blocking outcall before the response can satisfy its freshness contract.
-pub(crate) fn stale_or_missing_tokens(token_ids: &[StoredTokenId]) -> Vec<StoredTokenId> {
-    let now = time();
-    let staleness_floor_ns = now.saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * 1_000_000_000);
-
-    read_state(|s| {
-        token_ids
-            .iter()
-            .filter(|t| {
-                s.exchange_rates
-                    .get(t)
-                    .is_none_or(|r| r.0.usd.timestamp_ns < staleness_floor_ns)
-            })
-            .cloned()
-            .collect()
-    })
+/// The always-on native tokens are deliberately excluded: [`refresh_exchange_rates`]
+/// fetches them unconditionally and never consults `token_activity` for them,
+/// so marking them active only adds a per-call stable write and an entry that
+/// can never be evicted (it would be re-marked on every call forever).
+pub(crate) fn custom_tokens_to_mark(tokens: &[StoredTokenId]) -> Vec<TokenId> {
+    let natives = native_token_ids();
+    tokens
+        .iter()
+        .filter(|&stored| !natives.contains(stored))
+        .map(|stored| stored.0.clone())
+        .collect()
 }
 
-/// Reads the on-canister exchange rate cache for the supplied tokens and
-/// returns one `(TokenId, Option<ExchangeRate>)` entry per input id, in the
-/// same order. `None` means the cache has no fresh entry for that token.
-pub(crate) fn cached_rates_snapshot(
+/// Single-pass read of the cache for `token_ids`. Returns:
+/// - the per-token snapshot in input order — `None` when the cache has no
+///   entry or it is older than [`PRICE_STALENESS_THRESHOLD_SEC`] seconds — and
+/// - the subset whose snapshot entry is `None`, i.e. the tokens that need a
+///   refresh outcall.
+///
+/// The two outputs are exact complements, so `get_exchange_rates` derives both
+/// from one state borrow and one Candid decode per token. (The previous
+/// two-function form read and decoded the cache twice per call: once to find
+/// the stale set, once to build the snapshot.)
+pub(crate) fn snapshot_and_stale(
     token_ids: Vec<StoredTokenId>,
-) -> Vec<(TokenId, Option<ExchangeRate>)> {
+) -> (Vec<(TokenId, Option<ExchangeRate>)>, Vec<StoredTokenId>) {
     let freshness_floor_ns = time().saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * 1_000_000_000);
 
     read_state(|s| {
-        token_ids
-            .into_iter()
-            .map(|stored| {
-                let rate = s
-                    .exchange_rates
-                    .get(&stored)
-                    .and_then(|c| (c.0.usd.timestamp_ns >= freshness_floor_ns).then_some(c.0));
-                (stored.0, rate)
-            })
-            .collect()
+        let mut snapshot = Vec::with_capacity(token_ids.len());
+        let mut stale = Vec::new();
+
+        for stored in token_ids {
+            let rate = s
+                .exchange_rates
+                .get(&stored)
+                .and_then(|c| (c.0.usd.timestamp_ns >= freshness_floor_ns).then_some(c.0));
+
+            if rate.is_none() {
+                stale.push(stored.clone());
+            }
+            snapshot.push((stored.0, rate));
+        }
+
+        (snapshot, stale)
     })
 }
 
@@ -364,14 +371,33 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
 
 #[cfg(test)]
 mod tests {
+    use candid::Principal;
+    use shared::types::token_id::TokenId;
+
     use super::{
-        release_refresh_lock, try_acquire_refresh_lock_at, REFRESH_IN_FLIGHT,
-        REFRESH_LOCK_GENERATION, REFRESH_LOCK_TIMEOUT_NS,
+        custom_tokens_to_mark, native_token_ids, release_refresh_lock, try_acquire_refresh_lock_at,
+        StoredTokenId, REFRESH_IN_FLIGHT, REFRESH_LOCK_GENERATION, REFRESH_LOCK_TIMEOUT_NS,
     };
 
     fn reset_refresh_lock() {
         REFRESH_IN_FLIGHT.with(|cell| cell.set(None));
         REFRESH_LOCK_GENERATION.with(|cell| cell.set(0));
+    }
+
+    #[test]
+    fn custom_tokens_to_mark_excludes_natives_keeps_custom() {
+        let icrc = StoredTokenId(TokenId::Icrc(Principal::anonymous()));
+
+        let mut input = native_token_ids();
+        input.push(icrc.clone());
+
+        // Only the custom (non-native) token is returned for activity marking.
+        assert_eq!(custom_tokens_to_mark(&input), vec![icrc.0]);
+    }
+
+    #[test]
+    fn custom_tokens_to_mark_empty_for_natives_only() {
+        assert!(custom_tokens_to_mark(&native_token_ids()).is_empty());
     }
 
     #[test]

@@ -3,8 +3,8 @@ use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 
 use crate::{
     exchange::{
-        cached_rates_snapshot, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
-        priceable_tokens_for_caller, release_refresh_lock, stale_or_missing_tokens,
+        custom_tokens_to_mark, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
+        priceable_tokens_for_caller, release_refresh_lock, snapshot_and_stale,
         try_acquire_refresh_lock,
     },
     state::read_state,
@@ -20,8 +20,9 @@ use crate::{
 /// - the caller's custom tokens, filtered to variants the configured providers can actually price
 ///   (testnets, NFTs and ERC-4626 vaults are excluded).
 ///
-/// The endpoint also re-marks the returned tokens as active so the
-/// background refresh timer keeps them warm. If any cached price is
+/// The endpoint also re-marks the caller's **custom** tokens as active so the
+/// background refresh timer keeps them warm; the always-on native tokens are
+/// refreshed unconditionally and so are not marked. If any cached price is
 /// missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 /// seconds, the endpoint kicks off a refresh for that subset **in the
 /// background** (via `ic_cdk::futures::spawn`) and returns the current cache
@@ -50,10 +51,9 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
         return Vec::new();
     }
 
-    let active_ids: Vec<TokenId> = tokens.iter().map(|s| s.0.clone()).collect();
-    token::mark_tokens_active(&active_ids);
+    token::mark_tokens_active(&custom_tokens_to_mark(&tokens));
 
-    let stale = stale_or_missing_tokens(&tokens);
+    let (snapshot, stale) = snapshot_and_stale(tokens);
     let refresh_lock = if stale.is_empty() {
         None
     } else {
@@ -81,7 +81,7 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
         });
     }
 
-    cached_rates_snapshot(tokens)
+    snapshot
 }
 
 #[query(guard = "caller_is_not_anonymous")]
