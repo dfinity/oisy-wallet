@@ -15,7 +15,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft } from '$lib/types/nft';
 	import { isDesktop } from '$lib/utils/device.utils';
-	import { findNftsByNetwork } from '$lib/utils/nfts.utils';
+	import { filterSortByCollection, findNftsByNetwork } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		onSelect: (nft: Nft) => void;
@@ -28,16 +28,18 @@
 
 	let filter = $state('');
 
-	const filteredByInputAndSection: Nft[] = $derived(
+	const visible: Nft[] = $derived(
 		($nftStore ?? []).filter(
 			(nft) =>
-				nft?.name?.toLowerCase().includes(filter.toLowerCase()) &&
 				nft?.collection?.section !== CustomTokenSection.SPAM &&
 				nft?.collection?.section !== CustomTokenSection.HIDDEN
 		)
 	);
 	const filtered: Nft[] = $derived(
-		findNftsByNetwork({ nfts: filteredByInputAndSection, networkId: $filterNetwork?.id })
+		filterSortByCollection({
+			items: findNftsByNetwork({ nfts: visible, networkId: $filterNetwork?.id }),
+			filter
+		})
 	);
 
 	let noNftsMatch = $derived(filtered.length === 0);
