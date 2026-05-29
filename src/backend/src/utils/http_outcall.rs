@@ -41,32 +41,24 @@ const HTTP_RESPONSE_PER_BYTE_FEE: u128 = 800;
 ///
 /// `request_bytes` is the serialised size of URL + headers + body sent
 /// to the management canister. `max_response_bytes` is the upfront
-/// reservation; `actual_response_bytes` is what came back (or `0` for a
-/// transport failure, in which case no response refund is applied —
-/// upfront still includes the response reservation).
+/// reservation declared by the caller.
 ///
-/// Net cost = `base + n × per_req_byte × request_bytes
-///                  + n × per_resp_byte × max(actual, refund_floor)`.
+/// Cost = `base + n × per_req_byte × request_bytes
+///              + n × per_resp_byte × max_response_bytes`
 ///
-/// On success the unused portion of `max_response_bytes` is refunded by
-/// the management canister, so we use `actual_response_bytes`. On
-/// transport failure we have no response, so charge for
-/// `max_response_bytes` (the conservative upper bound).
-pub(crate) fn outcall_cost_cycles(
-    request_bytes: u64,
-    max_response_bytes: u64,
-    actual_response_bytes: u64,
-    transport_succeeded: bool,
-) -> u128 {
+/// Per <https://docs.internetcomputer.org/concepts/https-outcalls/#cycle-costs>:
+/// *"`max_response_bytes`: the maximum response size you declare. This
+/// is what you're charged for, not the actual response size."* So the
+/// response term uses `max_response_bytes` regardless of how much
+/// actually came back; there is no refund based on actual response
+/// size. (The doc's "Unused cycles are refunded" sentence refers to
+/// attached cycles in excess of the call fee, not response-size-based
+/// refunds.)
+pub(crate) fn outcall_cost_cycles(request_bytes: u64, max_response_bytes: u64) -> u128 {
     let n = SUBNET_REPLICATION_FACTOR;
     let base = (HTTP_REQUEST_LINEAR_BASELINE_FEE + HTTP_REQUEST_QUADRATIC_BASELINE_FEE * n) * n;
     let req = HTTP_REQUEST_PER_BYTE_FEE * n * u128::from(request_bytes);
-    let response_bytes_for_cost = if transport_succeeded {
-        actual_response_bytes.min(max_response_bytes)
-    } else {
-        max_response_bytes
-    };
-    let resp = HTTP_RESPONSE_PER_BYTE_FEE * n * u128::from(response_bytes_for_cost);
+    let resp = HTTP_RESPONSE_PER_BYTE_FEE * n * u128::from(max_response_bytes);
     base + req + resp
 }
 
@@ -228,12 +220,7 @@ pub(crate) async fn get_tagged(
         Err(_) => (0, 0),
     };
 
-    let cycles_charged = outcall_cost_cycles(
-        request_bytes,
-        max_response_bytes,
-        response_bytes,
-        outcome.is_ok(),
-    );
+    let cycles_charged = outcall_cost_cycles(request_bytes, max_response_bytes);
 
     cost_log::record(ExchangeOutcallRecord {
         timestamp_ns: started_ns,
@@ -579,69 +566,69 @@ mod tests {
         assert!(validate_response(response).is_err());
     }
 
-    fn expected_cost(req: u64, resp: u64) -> u128 {
+    fn expected_cost(req: u64, max_resp: u64) -> u128 {
         let n = SUBNET_REPLICATION_FACTOR;
         let base = (HTTP_REQUEST_LINEAR_BASELINE_FEE + HTTP_REQUEST_QUADRATIC_BASELINE_FEE * n) * n;
         let req_fee = HTTP_REQUEST_PER_BYTE_FEE * n * u128::from(req);
-        let resp_fee = HTTP_RESPONSE_PER_BYTE_FEE * n * u128::from(resp);
+        let resp_fee = HTTP_RESPONSE_PER_BYTE_FEE * n * u128::from(max_resp);
         base + req_fee + resp_fee
     }
 
     #[test]
-    fn outcall_cost_uses_actual_response_bytes_on_success() {
-        // 200-byte request, 8 KiB cap, 489-byte actual response.
-        let cost = outcall_cost_cycles(200, 8_192, 489, true);
-        assert_eq!(cost, expected_cost(200, 489));
+    fn outcall_cost_charges_on_max_response_bytes_not_actual() {
+        // Per IC docs: cost depends on max_response_bytes, not what
+        // actually came back. So both calls below cost the same as long
+        // as max_response_bytes and request_bytes match.
+        let cost = outcall_cost_cycles(200, 8_192);
+        assert_eq!(cost, expected_cost(200, 8_192));
     }
 
     #[test]
-    fn outcall_cost_caps_actual_at_max_response_bytes() {
-        // If the reported actual exceeds the cap (defensive), we use the cap.
-        let cost = outcall_cost_cycles(100, 1_024, 9_999, true);
-        assert_eq!(cost, expected_cost(100, 1_024));
-    }
-
-    #[test]
-    fn outcall_cost_charges_max_on_transport_failure() {
-        // No response → no refund: charge the full max_response_bytes.
-        let cost = outcall_cost_cycles(100, 8_192, 0, false);
-        assert_eq!(cost, expected_cost(100, 8_192));
-    }
-
-    #[test]
-    fn outcall_cost_is_minimum_for_empty_response() {
-        let cost = outcall_cost_cycles(0, 1_024, 0, true);
-        // No request bytes, no response bytes → just the base fee.
+    fn outcall_cost_is_minimum_when_inputs_are_zero() {
+        let cost = outcall_cost_cycles(0, 0);
+        // No request bytes, no response cap → just the base fee.
         let n = SUBNET_REPLICATION_FACTOR;
         let base = (HTTP_REQUEST_LINEAR_BASELINE_FEE + HTTP_REQUEST_QUADRATIC_BASELINE_FEE * n) * n;
         assert_eq!(cost, base);
     }
 
     #[test]
+    fn outcall_cost_matches_docs_two_mb_example() {
+        // Per https://docs.internetcomputer.org/concepts/https-outcalls/#cycle-costs:
+        //   "If you omit max_response_bytes, the system assumes the maximum of
+        //   2 MB and charges accordingly: roughly 21.5 billion cycles on a
+        //   13-node subnet."
+        // Sanity-check our constants against the published example.
+        let two_mb: u64 = 2 * 1024 * 1024;
+        let cost = outcall_cost_cycles(0, two_mb);
+        // Allow 2 % slack vs. the doc's "roughly 21.5 B" figure.
+        let lower: u128 = 21_000_000_000;
+        let upper: u128 = 22_000_000_000;
+        assert!(
+            cost >= lower && cost <= upper,
+            "2 MB cost {cost} not within docs' ~21.5 B range"
+        );
+    }
+
+    #[test]
     fn outcall_cost_known_icpswap_call() {
         // ICPSwap call shape: max_response_bytes = 8_192,
         // request URL ≈ 60 bytes + Accept header ≈ 22 bytes + UA = ~110 bytes.
-        // Actual response observed in staging ≈ 489 bytes.
-        let cost = outcall_cost_cycles(110, 8_192, 489, true);
-        // Sanity bound: should sit in the 50 M – 200 M cycle range with
-        // current constants (base ≈ 49 M + ~5 M response).
+        let cost = outcall_cost_cycles(110, 8_192);
+        // Expected: ~49 M base + ~85 M response = ~135 M.
         assert!(
-            cost > 49_000_000 && cost < 200_000_000,
+            cost > 130_000_000 && cost < 145_000_000,
             "icpswap per-call cost out of expected range: {cost}"
         );
     }
 
     #[test]
     fn outcall_cost_known_coingecko_call() {
-        // CoinGecko call shape: max_response_bytes = 51_200,
-        // realistic response 3–8 KiB.
-        let cost = outcall_cost_cycles(200, 51_200, 5_000, true);
-        // Expected upper bound much higher because the upfront response
-        // reservation is 6× larger than ICPSwap's even though we
-        // refund unused — but we *do* refund here, so this should still
-        // be modest.
+        // CoinGecko call: max_response_bytes = 51_200, request ~200 B.
+        let cost = outcall_cost_cycles(200, 51_200);
+        // Expected: ~49 M base + ~1 M request + ~532 M response = ~582 M.
         assert!(
-            cost > 49_000_000 && cost < 200_000_000,
+            cost > 575_000_000 && cost < 590_000_000,
             "coingecko per-call cost out of expected range: {cost}"
         );
     }

@@ -23,10 +23,9 @@ pub struct ExchangeOutcallRecord {
     /// Cycles charged by the management canister for this outcall.
     ///
     /// Computed deterministically from the IC HTTPS-outcall pricing
-    /// formula using `request_bytes + max_response_bytes +
-    /// actual_response_bytes` for a 13-node application subnet (not a
-    /// `canister_cycle_balance()` delta, which would be polluted by
-    /// concurrent fan-out). See
+    /// formula using `request_bytes + max_response_bytes` for a 13-node
+    /// application subnet. Per the IC docs, the response term is on
+    /// `max_response_bytes`, not actual response size — see
     /// `crate::utils::http_outcall::outcall_cost_cycles` for the
     /// formula and constants.
     pub cycles_charged: u128,
