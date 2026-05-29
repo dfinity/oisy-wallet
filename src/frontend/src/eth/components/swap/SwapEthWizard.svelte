@@ -25,6 +25,7 @@
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
+		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -358,7 +359,8 @@
 					userEthAddress: $ethAddress,
 					gas,
 					maxFeePerGas,
-					maxPriorityFeePerGas
+					maxPriorityFeePerGas,
+					swapId: crypto.randomUUID()
 				});
 			} else {
 				toastsError({
@@ -373,10 +375,21 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
-				metadata: swapTrackingMetadata
-			});
+			// For OneSec swaps, the foreground completes once the user's funds have
+			// left their wallet; success/failure of the background phase is tracked
+			// separately via the AUT store. Other providers (Velora, Near) still
+			// complete fully inside `await` and reach this point only on success.
+			if ($swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC) {
+				trackEvent({
+					name: TRACK_COUNT_SWAP_SUBMITTED,
+					metadata: swapTrackingMetadata
+				});
+			} else {
+				trackEvent({
+					name: TRACK_COUNT_SWAP_SUCCESS,
+					metadata: swapTrackingMetadata
+				});
+			}
 
 			setTimeout(() => {
 				try {
@@ -473,7 +486,8 @@
 					sendWithApproval={swapEmitsApprovalSteps}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
-					swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
+					swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
+						SwapProvider.ONE_SEC}
 				/>
 			{/if}
 		{/key}

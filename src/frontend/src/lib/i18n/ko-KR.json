@@ -1044,6 +1044,20 @@
 			"burn_review_subtitle": "소각 금액"
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "QR 코드 스캔",
@@ -1160,6 +1174,8 @@
 			"executing_transaction": "트랜잭션 실행 중...",
 			"initializing": "트랜잭션 초기화 중...",
 			"swapping": "스왑 중...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "UI 새로고침 중",
 			"swap_provider": "스왑 제공자",
 			"swap_provider_website": "웹사이트",
@@ -1176,7 +1192,6 @@
 			"select_token": "토큰 선택",
 			"select_network_filter": "네트워크 선택",
 			"withdrawing": "출금 중...",
-			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 2분 정도 소요될 수 있습니다.)",
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
@@ -1206,7 +1221,8 @@
 			"swap_sucess_withdraw_failed": "스왑은 완료되었으나 토큰을 자동으로 출금할 수 없습니다. 아래 출금 버튼을 클릭하여 수동으로 출금하세요.<br> 또는 다음을 따르세요",
 			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {

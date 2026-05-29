@@ -770,6 +770,19 @@ interface I18nBurn {
 	text: { burn: string; burning: string; burn_review_subtitle: string };
 }
 
+interface I18nActive_user_transactions {
+	text: {
+		button_label: string;
+		open_aria_label: string;
+		empty: string;
+		section_in_progress: string;
+		section_failed: string;
+		section_previous: string;
+		dismiss_aria_label: string;
+	};
+	error: { dismiss_failed: string };
+}
+
 interface I18nScanner {
 	text: {
 		scan_qr_code: string;
@@ -877,6 +890,8 @@ interface I18nSwap {
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
+		starting_to_swap: string;
+		starting_to_bridge: string;
 		refreshing_ui: string;
 		swap_provider: string;
 		swap_provider_website: string;
@@ -893,7 +908,6 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
-		bridging: string;
 		network_cost: string;
 		gasless: string;
 		swap_fees: string;
@@ -924,6 +938,7 @@ interface I18nSwap {
 		swap_sucess_manually_withdraw_success: string;
 		swap_completed_close_failed: string;
 		cannot_save_provider_agreement: string;
+		swap_refunded: string;
 	};
 }
 
@@ -1794,6 +1809,7 @@ interface I18n {
 	send: I18nSend;
 	mint: I18nMint;
 	burn: I18nBurn;
+	active_user_transactions: I18nActive_user_transactions;
 	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;

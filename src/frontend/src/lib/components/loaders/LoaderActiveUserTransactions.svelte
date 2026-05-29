@@ -1,0 +1,124 @@
+<script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
+	import { onDestroy } from 'svelte';
+	import {
+		TRACK_COUNT_SWAP_ERROR,
+		TRACK_COUNT_SWAP_SUCCESS
+	} from '$lib/constants/analytics.constants';
+	import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { loadActiveUserTransactions } from '$lib/services/active-user-transactions.services';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { pollOneSecActiveUserTransactions } from '$lib/services/onesec-swap.services';
+	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
+	import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
+	import { consoleError } from '$lib/utils/console.utils';
+	import {
+		buildOneSecSwapTrackingMetadata,
+		isOneSecActiveUserTransaction
+	} from '$lib/utils/onesec-swap.utils';
+	import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+
+	// `loadActiveUserTransactions` resets the store on nullish identity.
+	$effect(() => {
+		loadActiveUserTransactions({ identity: $authIdentity });
+	});
+
+	let timer: ReturnType<typeof setInterval> | undefined;
+	let inflight = false;
+
+	const tick = async (identity: Identity) => {
+		if (inflight || document.hidden || $activeUserTransactionsPending.length === 0) {
+			return;
+		}
+
+		inflight = true;
+		try {
+			const oneSec = $activeUserTransactionsPending.filter(isOneSecActiveUserTransaction);
+
+			if (oneSec.length > 0) {
+				await pollOneSecActiveUserTransactions({ identity, transactions: oneSec });
+			}
+		} catch (err: unknown) {
+			consoleError(err);
+		} finally {
+			inflight = false;
+		}
+	};
+
+	const stop = () => {
+		if (nonNullish(timer)) {
+			clearInterval(timer);
+			timer = undefined;
+		}
+	};
+
+	const start = (identity: Identity) => {
+		if (nonNullish(timer)) {
+			return;
+		}
+
+		timer = setInterval(() => {
+			tick(identity);
+		}, ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+	};
+
+	$effect(() => {
+		const hasPending = $activeUserTransactionsPending.length > 0;
+
+		if (isNullish($authIdentity) || !hasPending) {
+			stop();
+			return;
+		}
+
+		start($authIdentity);
+	});
+
+	onDestroy(stop);
+
+	// Fires wallet refresh + analytics exactly once per terminal row.
+	// Idempotency lives in `terminalSideEffectsApplied` on the store, so a
+	// row that finalizes across a refresh still fires once on next load.
+	$effect(() => {
+		if (isNullish($activeUserTransactionsStore)) {
+			return;
+		}
+
+		const newlyAppliedIds: string[] = [];
+		let shouldRefresh = false;
+
+		for (const tx of Object.values($activeUserTransactionsStore.data)) {
+			const alreadyApplied =
+				$activeUserTransactionsStore.terminalSideEffectsApplied[tx.id] === true;
+
+			if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isOneSecActiveUserTransaction(tx)
+			) {
+				const isSucceeded = 'Succeeded' in tx.status;
+
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildOneSecSwapTrackingMetadata({ tx })
+				});
+
+				if (isSucceeded) {
+					shouldRefresh = true;
+				}
+			}
+		}
+
+		if (newlyAppliedIds.length > 0) {
+			activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: newlyAppliedIds });
+		}
+
+		if (shouldRefresh) {
+			waitAndTriggerWallet().catch(consoleError);
+		}
+	});
+</script>
