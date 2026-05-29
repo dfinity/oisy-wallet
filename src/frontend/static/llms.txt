@@ -80,7 +80,7 @@ Key facts:
 
 ### New Features
 
-- Support for the NFT standard IKCRC-7
+- Support for the NFT standard ICRC-7
 - Export functionality for tokens and transactions as csv text file
 
 ### Improvements
