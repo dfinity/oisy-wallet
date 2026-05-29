@@ -408,7 +408,7 @@ mod tests {
 
         release_refresh_lock(lock);
 
-        assert!(REFRESH_IN_FLIGHT.with(|cell| cell.get()).is_none());
+        assert!(REFRESH_IN_FLIGHT.with(std::cell::Cell::get).is_none());
     }
 
     #[test]
@@ -426,6 +426,6 @@ mod tests {
         }));
 
         release_refresh_lock(second);
-        assert!(REFRESH_IN_FLIGHT.with(|cell| cell.get()).is_none());
+        assert!(REFRESH_IN_FLIGHT.with(std::cell::Cell::get).is_none());
     }
 }
