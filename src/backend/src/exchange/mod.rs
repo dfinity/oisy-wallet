@@ -89,6 +89,36 @@ thread_local! {
     /// flight, the next timer tick is a no-op until it completes.
     static REFRESH_IN_FLIGHT: Cell<Option<RefreshLock>> = const { Cell::new(None) };
     static REFRESH_LOCK_GENERATION: Cell<u64> = const { Cell::new(0) };
+
+    /// IC timestamp of the most recent caller-driven rate request (or canister
+    /// start). The recurring timer keeps the always-on native tokens warm only
+    /// while this is recent: with no caller within
+    /// [`PRICE_ACTIVITY_THRESHOLD_SEC`], there is no point spending outcall
+    /// cycles refreshing native prices for nobody. Ephemeral by design — it is
+    /// re-armed on every init / upgrade (see [`start_exchange_rate_timer`]) and
+    /// by every `get_exchange_rates` call.
+    static LAST_RATE_REQUEST_AT: Cell<Option<u64>> = const { Cell::new(None) };
+}
+
+/// Records that a caller requested exchange rates at `now_ns`, re-arming the
+/// native-token refresh performed by [`refresh_exchange_rates`].
+pub(crate) fn note_rate_request_at(now_ns: u64) {
+    LAST_RATE_REQUEST_AT.with(|c| c.set(Some(now_ns)));
+}
+
+/// [`note_rate_request_at`] using the current IC time.
+pub(crate) fn note_rate_request() {
+    note_rate_request_at(time());
+}
+
+/// Whether the always-on native tokens should be refreshed this tick: only if
+/// a caller has requested rates within [`PRICE_ACTIVITY_THRESHOLD_SEC`]. When
+/// nobody has, the timer skips natives (and, with no active custom tokens
+/// either, issues zero outcalls).
+fn should_refresh_natives(now_ns: u64, last_request_ns: Option<u64>) -> bool {
+    last_request_ns.is_some_and(|last| {
+        now_ns.saturating_sub(last) <= PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000
+    })
 }
 
 fn next_refresh_lock(now_ns: u64) -> RefreshLock {
@@ -169,6 +199,10 @@ async fn refresh_exchange_rates_guarded(source: &'static str) {
 /// An immediate one-shot refresh runs first so that rates are available right
 /// after canister init / upgrade instead of waiting for the first interval tick.
 pub(crate) fn start_exchange_rate_timer() {
+    // Arm the native refresh so prices are warmed for the first activity window
+    // right after init / upgrade, matching the previous always-on behaviour.
+    note_rate_request();
+
     set_timer(Duration::ZERO, || {
         ic_cdk::futures::spawn(refresh_exchange_rates_guarded("initial refresh"));
     });
@@ -336,7 +370,12 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     let now = time();
     let threshold = now.saturating_sub(PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000);
 
-    let mut tokens_to_fetch: Vec<StoredTokenId> = native_token_ids();
+    let mut tokens_to_fetch: Vec<StoredTokenId> =
+        if should_refresh_natives(now, LAST_RATE_REQUEST_AT.with(Cell::get)) {
+            native_token_ids()
+        } else {
+            Vec::new()
+        };
 
     let active_custom_tokens: Vec<StoredTokenId> = read_state(|s| {
         s.token_activity
@@ -365,9 +404,37 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
 #[cfg(test)]
 mod tests {
     use super::{
-        release_refresh_lock, try_acquire_refresh_lock_at, REFRESH_IN_FLIGHT,
-        REFRESH_LOCK_GENERATION, REFRESH_LOCK_TIMEOUT_NS,
+        release_refresh_lock, should_refresh_natives, try_acquire_refresh_lock_at,
+        PRICE_ACTIVITY_THRESHOLD_SEC, REFRESH_IN_FLIGHT, REFRESH_LOCK_GENERATION,
+        REFRESH_LOCK_TIMEOUT_NS,
     };
+
+    const ACTIVITY_THRESHOLD_NS: u64 = PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000;
+
+    #[test]
+    fn natives_refresh_when_request_within_threshold() {
+        let now = 10 * ACTIVITY_THRESHOLD_NS;
+        assert!(should_refresh_natives(now, Some(now)));
+        // Exactly at the threshold boundary still refreshes (<=).
+        assert!(should_refresh_natives(
+            now,
+            Some(now - ACTIVITY_THRESHOLD_NS)
+        ));
+    }
+
+    #[test]
+    fn natives_skip_when_request_older_than_threshold() {
+        let now = 10 * ACTIVITY_THRESHOLD_NS;
+        assert!(!should_refresh_natives(
+            now,
+            Some(now - ACTIVITY_THRESHOLD_NS - 1)
+        ));
+    }
+
+    #[test]
+    fn natives_skip_when_never_requested() {
+        assert!(!should_refresh_natives(10 * ACTIVITY_THRESHOLD_NS, None));
+    }
 
     fn reset_refresh_lock() {
         REFRESH_IN_FLIGHT.with(|cell| cell.set(None));
