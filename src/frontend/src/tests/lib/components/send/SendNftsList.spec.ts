@@ -100,7 +100,14 @@ describe('SendNftsList.spec', () => {
 		labels: string[];
 	}): string[] => {
 		const text = container.textContent ?? '';
-		return [...labels].sort((a, b) => text.indexOf(a) - text.indexOf(b));
+		const positions = labels.map((label) => {
+			const index = text.indexOf(label);
+			if (index === -1) {
+				throw new Error(`Expected label not found in rendered output: ${label}`);
+			}
+			return { label, index };
+		});
+		return positions.sort((a, b) => a.index - b.index).map(({ label }) => label);
 	};
 
 	it('sorts NFTs by collection name asc by default', () => {
