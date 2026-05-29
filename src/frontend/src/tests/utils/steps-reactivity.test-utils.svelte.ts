@@ -1,5 +1,6 @@
-// Test-only helper that exercises the exact reactivity pattern used in
-// `SendModal.svelte` for the `steps` derivation, with two variants:
+// Test-only helpers that exercise reactivity patterns used in `SendModal.svelte`.
+//
+// The steps helper mirrors the `steps` derivation, with two variants:
 //
 // 1. Inline `nonNullish(nft)` directly in the `steps` derivation.
 // 2. An intermediate boolean `$derived(nonNullish(nft))` whose value is then
@@ -16,7 +17,7 @@
 //
 // Lives in `tests/utils` (not next to the spec) because it mirrors the
 // existing `*.test-utils` convention in this folder. The `.svelte.ts`
-// extension is required because the harness uses runes (`$state`, `$derived`).
+// extension is required because the harnesses use runes.
 
 import { nonNullish } from '@dfinity/utils';
 
@@ -30,6 +31,16 @@ interface StepsHarness {
 	readExtractedSteps: () => readonly string[];
 	getInlineRecomputeCount: () => number;
 	getExtractedRecomputeCount: () => number;
+}
+
+interface SelectedNftHarness {
+	setPageNft: (nft: Nft | undefined) => void;
+	selectWithDerived: (nft: Nft) => void;
+	readDerivedSelectedNft: () => Nft | undefined;
+	selectWithState: (nft: Nft) => void;
+	readStateSelectedNft: () => Nft | undefined;
+	resetStateSelection: () => void;
+	destroy: () => void;
 }
 
 export const createStepsHarness = (): StepsHarness => {
@@ -58,5 +69,40 @@ export const createStepsHarness = (): StepsHarness => {
 		readExtractedSteps: () => extractedSteps,
 		getInlineRecomputeCount: () => inlineRecomputes,
 		getExtractedRecomputeCount: () => extractedRecomputes
+	};
+};
+
+export const createSelectedNftHarness = (): SelectedNftHarness => {
+	const initialPageNft = { id: 'route' };
+	let pageNft = $state.raw<Nft | undefined>(initialPageNft);
+	let derivedSelectedNft = $derived(pageNft);
+	let stateSelectedNft = $state.raw<Nft | undefined>(initialPageNft);
+
+	const destroy = $effect.root(() => {
+		$effect(() => {
+			const nft = pageNft;
+
+			if (nft !== undefined) {
+				stateSelectedNft = nft;
+			}
+		});
+	});
+
+	return {
+		setPageNft: (next) => {
+			pageNft = next;
+		},
+		selectWithDerived: (nft) => {
+			derivedSelectedNft = nft;
+		},
+		readDerivedSelectedNft: () => derivedSelectedNft,
+		selectWithState: (nft) => {
+			stateSelectedNft = nft;
+		},
+		readStateSelectedNft: () => stateSelectedNft,
+		resetStateSelection: () => {
+			stateSelectedNft = undefined;
+		},
+		destroy
 	};
 };
