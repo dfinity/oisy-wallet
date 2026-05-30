@@ -14,6 +14,7 @@ import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
 vi.mock('$app/navigation', () => ({
+	afterNavigate: vi.fn(),
 	goto: vi.fn()
 }));
 
