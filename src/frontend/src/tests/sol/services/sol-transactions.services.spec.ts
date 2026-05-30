@@ -805,6 +805,21 @@ describe('sol-transactions.services', () => {
 			expect(get(solTransactionsStore)?.[mockToken.id]).toBeNull();
 		});
 
+		it('should preserve loaded transactions when a pagination request fails', async () => {
+			const before = mockSolSignature();
+			const error = new Error('Failed to load next transactions');
+
+			solTransactionsStore.append({
+				tokenId: mockToken.id,
+				transactions: mockCertifiedTransactions
+			});
+			spyGetTransactions.mockRejectedValue(error);
+
+			await loadNextSolTransactions({ ...mockParams, before });
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(mockCertifiedTransactions);
+		});
+
 		it('should work with different networks', async () => {
 			await loadNextSolTransactions({
 				...mockParams,
