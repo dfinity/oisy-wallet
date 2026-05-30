@@ -75,12 +75,12 @@
 
 	const tokensListContext = initModalTokensListContext({
 		tokens: [],
-		filterNetwork:
+		selectedFilterNetwork:
 			nonNullish($selectedNetwork) &&
 			$crossChainSwapNetworksMainnetsIds.includes($selectedNetwork.id)
 				? $selectedNetwork
 				: undefined,
-		filterNetworksIds: $crossChainSwapNetworksMainnetsIds
+		availableFilterNetworks: $crossChainSwapNetworksMainnets
 	});
 
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
@@ -96,7 +96,7 @@
 	});
 
 	$effect(() => {
-		tokensListContext.setFilterNetworksIds($crossChainSwapNetworksMainnetsIds);
+		tokensListContext.setAvailableFilterNetworks($crossChainSwapNetworksMainnets);
 	});
 
 	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {

@@ -1,6 +1,6 @@
 import type { ProgressStepsSend, ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
-import type { NetworkId } from '$lib/types/network';
+import type { Network } from '$lib/types/network';
 import type { NftId, NonFungibleToken } from '$lib/types/nft';
 
 export interface TransferParams {
@@ -28,5 +28,5 @@ export type SendDestinationTab = 'recentlyUsed' | 'contacts';
 
 export interface SendModalData {
 	destination: string;
-	lockedNetworkId: NetworkId;
+	allowedNetworks: Network[];
 }

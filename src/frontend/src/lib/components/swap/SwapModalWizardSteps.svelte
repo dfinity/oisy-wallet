@@ -72,7 +72,7 @@
 		receiveSupportedData
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { setFilterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
+	const { setSelectedFilterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
 	);
 
@@ -166,7 +166,7 @@
 		if (side === 'source') {
 			setNetworksMode({ enabled: true });
 
-			setFilterNetwork(getPreferredNetworkForSide({ side }));
+			setSelectedFilterNetwork(getPreferredNetworkForSide({ side }));
 
 			return;
 		}
@@ -176,7 +176,7 @@
 			// no source yet: no constraints
 			setNetworksMode({ enabled: false });
 
-			setFilterNetwork(getPreferredNetworkForSide({ side }));
+			setSelectedFilterNetwork(getPreferredNetworkForSide({ side }));
 
 			return;
 		}
@@ -187,7 +187,7 @@
 
 		setNetworksMode({ enabled: false, allowedIds });
 
-		setFilterNetwork(getPreferredNetworkForSide({ side, allowedIds }));
+		setSelectedFilterNetwork(getPreferredNetworkForSide({ side, allowedIds }));
 	};
 
 	const enterTokenList = (side: TokenSide) => {
@@ -218,11 +218,11 @@
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
 
-			setFilterNetwork(token.network);
+			setSelectedFilterNetwork(token.network);
 		} else if (selectTokenType === 'destination') {
 			setDestinationToken(token);
 
-			setFilterNetwork(token.network);
+			setSelectedFilterNetwork(token.network);
 		}
 
 		closeTokenList();

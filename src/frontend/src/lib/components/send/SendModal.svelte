@@ -34,7 +34,6 @@
 	} from '$lib/derived/address.derived';
 	import { modalSendData } from '$lib/derived/modal.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { networks } from '$lib/derived/networks.derived';
 	import { pageNft } from '$lib/derived/page-nft.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -50,6 +49,7 @@
 	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Network } from '$lib/types/network';
 	import type { Nft } from '$lib/types/nft';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
@@ -78,9 +78,15 @@
 	let { isTransactionsPage, isNftsPage }: Props = $props();
 
 	const initialModalData = $modalSendData;
-	const lockedNetworkId = initialModalData?.lockedNetworkId;
-	let lockedNetwork = $derived(
-		nonNullish(lockedNetworkId) ? $networks.find(({ id }) => id === lockedNetworkId) : undefined
+	// Single source of truth for the set of networks the send modal is restricted to.
+	// Scanner-driven dispatches (Sol/BTC/IC, future EVM) populate it via `SendModalData`;
+	// the URL-route filter (`$selectedNetwork`, e.g. `/tokens?network=ethereum`) folds in
+	// as a single-element array fallback so downstream code only needs to read one field.
+	const allowedNetworks: Network[] | undefined =
+		initialModalData?.allowedNetworks ??
+		(nonNullish($selectedNetwork) ? [$selectedNetwork] : undefined);
+	let allowedNetwork = $derived(
+		nonNullish(allowedNetworks) && allowedNetworks.length === 1 ? allowedNetworks[0] : undefined
 	);
 
 	let destination = $state(initialModalData?.destination ?? '');
@@ -147,8 +153,11 @@
 			tokens: $enabledTokens,
 			filterZeroBalance: true,
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
-			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
-			filterNetwork: lockedNetwork ?? $selectedNetwork
+			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `allowedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
+			selectedFilterNetwork: allowedNetwork,
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally -- same as above for the array form
+			availableFilterNetworks: allowedNetworks
 		})
 	);
 
@@ -271,7 +280,7 @@
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 				<SendTokensList
-					{lockedNetwork}
+					{allowedNetworks}
 					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 					{onSendToken}
 				/>
@@ -282,6 +291,7 @@
 				/>
 			{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 				<ModalNetworksFilter
+					filteredNetworks={allowedNetworks}
 					onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 					showStakeBalance={false}
 				/>

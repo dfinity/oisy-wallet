@@ -24,7 +24,9 @@
 
 	let { onSelect, onSelectNetwork }: Props = $props();
 
-	const { filterNetwork } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+	const { selectedFilterNetwork } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
 
 	let filter = $state('');
 
@@ -37,7 +39,7 @@
 		)
 	);
 	const filtered: Nft[] = $derived(
-		findNftsByNetwork({ nfts: filteredByInputAndSection, networkId: $filterNetwork?.id })
+		findNftsByNetwork({ nfts: filteredByInputAndSection, networkId: $selectedFilterNetwork?.id })
 	);
 
 	let noNftsMatch = $derived(filtered.length === 0);
@@ -56,10 +58,10 @@
 	<div class="flex items-center">
 		<button
 			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
-			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+			aria-label={$selectedFilterNetwork?.name ?? $i18n.networks.chain_fusion}
 			onclick={onSelectNetwork}
 		>
-			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
+			<span class="font-medium">{$selectedFilterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 			<IconExpandMore size="24" />
 		</button>
 	</div>

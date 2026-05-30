@@ -77,12 +77,12 @@ describe('SwapContexts', () => {
 				MODAL_TOKENS_LIST_CONTEXT_KEY,
 				expect.objectContaining({
 					filterQuery: expect.any(Object),
-					filterNetwork: expect.any(Object),
+					selectedFilterNetwork: expect.any(Object),
 					filteredTokens: expect.any(Object),
 					setTokens: expect.any(Function),
 					setFilterQuery: expect.any(Function),
-					setFilterNetwork: expect.any(Function),
-					setFilterNetworksIds: expect.any(Function),
+					setSelectedFilterNetwork: expect.any(Function),
+					setAvailableFilterNetworks: expect.any(Function),
 					resetFilters: expect.any(Function)
 				})
 			);
