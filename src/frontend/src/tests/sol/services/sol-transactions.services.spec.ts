@@ -805,6 +805,23 @@ describe('sol-transactions.services', () => {
 			expect(get(solTransactionsStore)?.[mockToken.id]).toBeNull();
 		});
 
+		it('should keep loaded transactions if loading the next page raises an error', async () => {
+			const initialTransactions = createMockSolTransactionsUi(11).map((transaction) => ({
+				data: transaction,
+				certified: false
+			}));
+			const before = mockSolSignature();
+			const error = new Error('Failed to load transactions');
+
+			solTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
+			spyGetTransactions.mockRejectedValue(error);
+
+			await loadNextSolTransactions({ ...mockParams, before });
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toStrictEqual(initialTransactions);
+			expect(signalEnd).toHaveBeenCalledOnce();
+		});
+
 		it('should work with different networks', async () => {
 			await loadNextSolTransactions({
 				...mockParams,
