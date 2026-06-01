@@ -459,11 +459,12 @@ export const doesTokenMatchFilter = ({
 	filter: string;
 }): boolean => {
 	const matchingToken = (token: Token): boolean => {
-		const { name, symbol } = token;
+		const { name, symbol, standard } = token;
 
 		if (
 			name.toLowerCase().includes(filter.toLowerCase()) ||
-			symbol.toLowerCase().includes(filter.toLowerCase())
+			symbol.toLowerCase().includes(filter.toLowerCase()) ||
+			standard.code.toLowerCase().includes(filter.toLowerCase())
 		) {
 			return true;
 		}
