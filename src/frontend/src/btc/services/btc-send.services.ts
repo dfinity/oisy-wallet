@@ -39,6 +39,28 @@ export type SignBtcParams = CommonBtcServiceParams & {
 	satoshisAmount: bigint;
 };
 
+// Validation errors whose handling is a uniform toast differing only by the
+// i18n key. AuthenticationRequired and the unexpected fallback are kept as
+// explicit special cases below, so they intentionally do not appear here.
+const btcValidationErrorMessages: Partial<Record<BtcSendValidationError, (i18n: I18n) => string>> =
+	{
+		[BtcSendValidationError.NoNetworkId]: (i18n) => i18n.send.error.no_btc_network_id,
+		[BtcSendValidationError.InvalidDestination]: (i18n) =>
+			i18n.send.assertion.destination_address_invalid,
+		[BtcSendValidationError.InvalidAmount]: (i18n) => i18n.send.assertion.amount_invalid,
+		[BtcSendValidationError.UtxoFeeMissing]: (i18n) => i18n.send.assertion.utxos_fee_missing,
+		[BtcSendValidationError.TokenUndefined]: (i18n) => i18n.tokens.error.unexpected_undefined,
+		[BtcSendValidationError.InsufficientBalance]: (i18n) =>
+			i18n.send.assertion.btc_insufficient_balance,
+		[BtcSendValidationError.InsufficientBalanceForFee]: (i18n) =>
+			i18n.send.assertion.btc_insufficient_balance_for_fee,
+		[BtcSendValidationError.InvalidUtxoData]: (i18n) => i18n.send.assertion.btc_invalid_utxo_data,
+		[BtcSendValidationError.UtxoLocked]: (i18n) => i18n.send.assertion.btc_utxo_locked,
+		[BtcSendValidationError.InvalidFeeCalculation]: (i18n) =>
+			i18n.send.assertion.btc_invalid_fee_calculation,
+		[BtcSendValidationError.MinimumBalance]: (i18n) => i18n.send.assertion.minimum_btc_amount
+	};
+
 /**
  * This function handles the validation errors thrown by the validateUtxosForSend function
  * It has been moved to a service so it can be shared between the BTC Send and Convert Wizard
@@ -47,71 +69,22 @@ export type SignBtcParams = CommonBtcServiceParams & {
  * @returns Promise<void> - Returns void if successful, may throw errors if validation fails
  */
 export const handleBtcValidationError = ({ err }: { err: BtcValidationError }) => {
-	switch (err.type) {
-		case BtcSendValidationError.AuthenticationRequired:
-			return;
-		case BtcSendValidationError.NoNetworkId:
-			toastsError({
-				msg: { text: get(i18n).send.error.no_btc_network_id }
-			});
-			break;
-		case BtcSendValidationError.InvalidDestination:
-			toastsError({
-				msg: { text: get(i18n).send.assertion.destination_address_invalid }
-			});
-			break;
-		case BtcSendValidationError.InvalidAmount:
-			toastsError({
-				msg: { text: get(i18n).send.assertion.amount_invalid }
-			});
-			break;
-		case BtcSendValidationError.UtxoFeeMissing:
-			toastsError({
-				msg: { text: get(i18n).send.assertion.utxos_fee_missing }
-			});
-			break;
-		case BtcSendValidationError.TokenUndefined:
-			toastsError({
-				msg: { text: get(i18n).tokens.error.unexpected_undefined }
-			});
-			break;
-		case BtcSendValidationError.InsufficientBalance:
-			toastsError({
-				msg: { text: get(i18n).send.assertion.btc_insufficient_balance }
-			});
-			break;
-		case BtcSendValidationError.InsufficientBalanceForFee:
-			toastsError({
-				msg: { text: get(i18n).send.assertion.btc_insufficient_balance_for_fee }
-			});
-			break;
-		case BtcSendValidationError.InvalidUtxoData:
-			toastsError({
-				msg: { text: get(i18n).send.assertion.btc_invalid_utxo_data }
-			});
-			break;
-		case BtcSendValidationError.UtxoLocked:
-			toastsError({
-				msg: { text: get(i18n).send.assertion.btc_utxo_locked }
-			});
-			break;
-		case BtcSendValidationError.InvalidFeeCalculation:
-			toastsError({
-				msg: { text: get(i18n).send.assertion.btc_invalid_fee_calculation }
-			});
-			break;
-		case BtcSendValidationError.MinimumBalance:
-			toastsError({
-				msg: { text: get(i18n).send.assertion.minimum_btc_amount }
-			});
-			break;
-		default:
-			toastsError({
-				msg: { text: get(i18n).send.error.unexpected },
-				err
-			});
-			break;
+	if (err.type === BtcSendValidationError.AuthenticationRequired) {
+		return;
 	}
+
+	const $i18n = get(i18n);
+
+	const message = btcValidationErrorMessages[err.type];
+	if (nonNullish(message)) {
+		toastsError({ msg: { text: message($i18n) } });
+		return;
+	}
+
+	toastsError({
+		msg: { text: $i18n.send.error.unexpected },
+		err
+	});
 };
 
 /**
