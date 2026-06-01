@@ -194,7 +194,7 @@ describe('export-data.services', () => {
 	});
 
 	describe('exportTransactionsCsv', () => {
-		it('does nothing when the identity is missing', async () => {
+		it('tracks a no_identity error and skips the export when the identity is missing', async () => {
 			const buildTransactions = vi.fn(() => []);
 
 			const result = await exportTransactionsCsv({
