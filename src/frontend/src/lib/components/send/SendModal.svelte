@@ -130,7 +130,16 @@
 
 	let currentStep = $state<WizardStep<WizardStepsSend> | undefined>();
 	let modal = $state<WizardModal<WizardStepsSend>>();
-	let selectedNft = $derived($pageNft);
+	let selectedNft = $state.raw<Nft | undefined>($pageNft);
+
+	// `$pageNft` can be undefined during NFT store refreshes; do not clear a manual list selection.
+	$effect(() => {
+		const nft = $pageNft;
+
+		if (nft !== undefined) {
+			selectedNft = nft;
+		}
+	});
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -154,6 +163,7 @@
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
 		currentStep = undefined;
+		selectedNft = undefined;
 	};
 
 	const close = () =>

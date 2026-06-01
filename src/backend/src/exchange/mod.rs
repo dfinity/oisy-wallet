@@ -36,6 +36,8 @@ const PRICE_REFRESH_INTERVAL_SEC: u64 = 60;
 /// and skipped during price refreshes (10 minutes).
 pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 10 * 60;
 
+const NANOS_PER_SEC: u64 = 1_000_000_000;
+
 /// A token's cached price is considered "fresh enough" if its
 /// [`ExchangeData::timestamp_ns`] (the provider-reported `last_updated_at`,
 /// or `time()` when the provider doesn't supply one) is within
@@ -54,6 +56,17 @@ const PRICE_FRESHNESS_GRACE_NS: u64 = (PRICE_REFRESH_INTERVAL_SEC / 2) * 1_000_0
 /// honours the contract that prices are at most this many seconds old.
 pub const PRICE_STALENESS_THRESHOLD_SEC: u64 = 2 * 60;
 
+/// Safety timeout for the cross-refresh in-flight guard. If a spawned refresh
+/// traps before releasing its lock, future ticks can recover instead of
+/// permanently serving stale/missing rates. Set to 5x the refresh interval.
+const REFRESH_LOCK_TIMEOUT_NS: u64 = 5 * PRICE_REFRESH_INTERVAL_SEC * 1_000_000_000;
+
+#[derive(Clone, Copy)]
+pub(crate) struct RefreshLock {
+    generation: u64,
+    started_at_ns: u64,
+}
+
 /// Native tokens whose prices are always fetched, regardless of user activity.
 fn native_token_ids() -> Vec<StoredTokenId> {
     vec![
@@ -69,53 +82,144 @@ fn native_token_ids() -> Vec<StoredTokenId> {
 }
 
 thread_local! {
-    /// Set to `true` while *any* provider refresh (timer-driven or
+    /// Set while *any* provider refresh (timer-driven or
     /// caller-triggered background refresh from `get_exchange_rates`) is
     /// awaiting outcalls. Both call sites cooperate via this single flag so
     /// they don't duplicate outcalls for the same tokens — if the timer is
     /// refreshing, a concurrent on-demand call is a no-op (the timer is
     /// already fetching the superset); if an on-demand refresh is in
     /// flight, the next timer tick is a no-op until it completes.
-    static REFRESH_IN_FLIGHT: Cell<bool> = const { Cell::new(false) };
+    static REFRESH_IN_FLIGHT: Cell<Option<RefreshLock>> = const { Cell::new(None) };
+    static REFRESH_LOCK_GENERATION: Cell<u64> = const { Cell::new(0) };
 }
 
-/// Tries to set [`REFRESH_IN_FLIGHT`]; returns `true` if the caller acquired
-/// the lock, `false` if a refresh was already in flight. Callers that
-/// acquire the lock are responsible for calling [`release_refresh_lock`] in
-/// every completion path.
-pub(crate) fn try_acquire_refresh_lock() -> bool {
+fn next_refresh_lock(now_ns: u64) -> RefreshLock {
+    let generation = REFRESH_LOCK_GENERATION.with(|g| {
+        let next = g.get().wrapping_add(1);
+        g.set(next);
+        next
+    });
+
+    RefreshLock {
+        generation,
+        started_at_ns: now_ns,
+    }
+}
+
+fn try_acquire_refresh_lock_at(now_ns: u64) -> Option<RefreshLock> {
     REFRESH_IN_FLIGHT.with(|f| {
-        if f.get() {
-            false
-        } else {
-            f.set(true);
-            true
+        if let Some(lock) = f.get() {
+            let elapsed = now_ns.saturating_sub(lock.started_at_ns);
+            if elapsed <= REFRESH_LOCK_TIMEOUT_NS {
+                return None;
+            }
+
+            ic_cdk::eprintln!(
+                "Exchange rate refresh appears stuck (started {}s ago), forcing unlock",
+                elapsed / 1_000_000_000
+            );
         }
+
+        let lock = next_refresh_lock(now_ns);
+        f.set(Some(lock));
+        Some(lock)
     })
 }
 
-/// Clears [`REFRESH_IN_FLIGHT`]. Must only be called by the holder of the
-/// lock (i.e. after a successful [`try_acquire_refresh_lock`]).
-pub(crate) fn release_refresh_lock() {
-    REFRESH_IN_FLIGHT.with(|f| f.set(false));
+/// Tries to set [`REFRESH_IN_FLIGHT`]; returns a lock token if the caller
+/// acquired it, or `None` if a non-stale refresh was already in flight.
+/// Callers that acquire the lock are responsible for calling
+/// [`release_refresh_lock`] in every completion path.
+pub(crate) fn try_acquire_refresh_lock() -> Option<RefreshLock> {
+    try_acquire_refresh_lock_at(time())
+}
+
+/// Clears [`REFRESH_IN_FLIGHT`] if the supplied token is still the current
+/// holder. Stale holders are ignored so they cannot release a newer refresh
+/// that force-unlocked and reacquired the guard after a timeout.
+pub(crate) fn release_refresh_lock(lock: RefreshLock) {
+    REFRESH_IN_FLIGHT.with(|f| {
+        if f.get()
+            .is_some_and(|current| current.generation == lock.generation)
+        {
+            f.set(None);
+        }
+    });
 }
 
 /// Wraps [`refresh_exchange_rates`] with the in-flight guard so concurrent
 /// timer invocations (e.g. overlapping ticks) become no-ops rather than
 /// starting a parallel refresh.
 async fn refresh_exchange_rates_guarded(source: &'static str) {
-    if !try_acquire_refresh_lock() {
+    let Some(lock) = try_acquire_refresh_lock() else {
         ic_cdk::println!("Exchange rate {source} skipped: previous refresh still in flight");
         return;
-    }
+    };
 
     let outcome = refresh_exchange_rates().await;
 
-    release_refresh_lock();
+    release_refresh_lock(lock);
 
     if let Err(err) = outcome {
         ic_cdk::println!("Exchange rate {source} failed: {err:?}");
     }
+}
+
+fn activity_threshold_ns(now: u64) -> u64 {
+    now.saturating_sub(PRICE_ACTIVITY_THRESHOLD_SEC * NANOS_PER_SEC)
+}
+
+fn staleness_floor_ns(now: u64) -> u64 {
+    now.saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * NANOS_PER_SEC)
+}
+
+fn active_custom_tokens_for_refresh(
+    activity: impl IntoIterator<Item = (StoredTokenId, u64)>,
+    now: u64,
+) -> Vec<StoredTokenId> {
+    let threshold = activity_threshold_ns(now);
+
+    activity
+        .into_iter()
+        .filter(|(_, last_active_ns)| *last_active_ns > threshold)
+        .map(|(token_id, _)| token_id)
+        .collect()
+}
+
+fn exchange_rate_is_fresh_enough(rate: &ExchangeRate, freshness_floor_ns: u64) -> bool {
+    rate.usd.timestamp_ns >= freshness_floor_ns
+}
+
+fn exchange_rate_is_missing_or_older_than(
+    rate: Option<&ExchangeRate>,
+    freshness_floor_ns: u64,
+) -> bool {
+    rate.is_none_or(|r| !exchange_rate_is_fresh_enough(r, freshness_floor_ns))
+}
+
+fn tokens_missing_or_older_than(
+    token_ids: &[StoredTokenId],
+    mut cached_rate: impl FnMut(&StoredTokenId) -> Option<ExchangeRate>,
+    freshness_floor_ns: u64,
+) -> Vec<StoredTokenId> {
+    token_ids
+        .iter()
+        .filter(|token_id| {
+            let rate = cached_rate(token_id);
+            exchange_rate_is_missing_or_older_than(rate.as_ref(), freshness_floor_ns)
+        })
+        .cloned()
+        .collect()
+}
+
+fn refresh_candidates(
+    active_custom_tokens: impl IntoIterator<Item = StoredTokenId>,
+) -> Vec<StoredTokenId> {
+    let mut tokens_to_fetch = native_token_ids();
+    tokens_to_fetch.extend(active_custom_tokens);
+    tokens_to_fetch.sort_unstable();
+    tokens_to_fetch.dedup();
+    tokens_to_fetch
 }
 
 /// Starts a recurring timer that refreshes exchange rates for active tokens
@@ -250,18 +354,14 @@ pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<Stored
 /// blocking outcall before the response can satisfy its freshness contract.
 pub(crate) fn stale_or_missing_tokens(token_ids: &[StoredTokenId]) -> Vec<StoredTokenId> {
     let now = time();
-    let staleness_floor_ns = now.saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * 1_000_000_000);
+    let floor_ns = staleness_floor_ns(now);
 
     read_state(|s| {
-        token_ids
-            .iter()
-            .filter(|t| {
-                s.exchange_rates
-                    .get(t)
-                    .is_none_or(|r| r.0.usd.timestamp_ns < staleness_floor_ns)
-            })
-            .cloned()
-            .collect()
+        tokens_missing_or_older_than(
+            token_ids,
+            |token_id| s.exchange_rates.get(token_id).map(|rate| rate.0),
+            floor_ns,
+        )
     })
 }
 
@@ -271,16 +371,15 @@ pub(crate) fn stale_or_missing_tokens(token_ids: &[StoredTokenId]) -> Vec<Stored
 pub(crate) fn cached_rates_snapshot(
     token_ids: Vec<StoredTokenId>,
 ) -> Vec<(TokenId, Option<ExchangeRate>)> {
-    let freshness_floor_ns = time().saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * 1_000_000_000);
+    let freshness_floor_ns = staleness_floor_ns(time());
 
     read_state(|s| {
         token_ids
             .into_iter()
             .map(|stored| {
-                let rate = s
-                    .exchange_rates
-                    .get(&stored)
-                    .and_then(|c| (c.0.usd.timestamp_ns >= freshness_floor_ns).then_some(c.0));
+                let rate = s.exchange_rates.get(&stored).and_then(|c| {
+                    exchange_rate_is_fresh_enough(&c.0, freshness_floor_ns).then_some(c.0)
+                });
                 (stored.0, rate)
             })
             .collect()
@@ -289,30 +388,200 @@ pub(crate) fn cached_rates_snapshot(
 
 pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     let now = time();
-    let threshold = now.saturating_sub(PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000);
-
-    let mut tokens_to_fetch: Vec<StoredTokenId> = native_token_ids();
 
     let active_custom_tokens: Vec<StoredTokenId> = read_state(|s| {
-        s.token_activity
-            .iter()
-            .filter(|entry| entry.value() > threshold)
-            .map(|entry| entry.key().clone())
-            .collect()
+        active_custom_tokens_for_refresh(
+            s.token_activity
+                .iter()
+                .map(|entry| (entry.key().clone(), entry.value())),
+            now,
+        )
     });
 
-    tokens_to_fetch.extend(active_custom_tokens);
-    tokens_to_fetch.sort_unstable();
-    tokens_to_fetch.dedup();
+    let tokens_to_fetch = refresh_candidates(active_custom_tokens);
 
     let freshness_floor_ns = now.saturating_sub(PRICE_FRESHNESS_GRACE_NS);
-    read_state(|s| {
-        tokens_to_fetch.retain(|t| {
-            s.exchange_rates
-                .get(t)
-                .is_none_or(|r| r.0.usd.timestamp_ns < freshness_floor_ns)
-        });
+    let tokens_to_fetch = read_state(|s| {
+        tokens_missing_or_older_than(
+            &tokens_to_fetch,
+            |token_id| s.exchange_rates.get(token_id).map(|rate| rate.0),
+            freshness_floor_ns,
+        )
     });
 
     fetch_and_update_prices(&tokens_to_fetch).await
+}
+
+#[cfg(test)]
+mod tests {
+    use candid::Principal;
+    use pretty_assertions::assert_eq;
+    use shared::types::exchange::ExchangeData;
+
+    use super::*;
+
+    fn reset_refresh_lock() {
+        REFRESH_IN_FLIGHT.with(|cell| cell.set(None));
+        REFRESH_LOCK_GENERATION.with(|cell| cell.set(0));
+    }
+
+    #[test]
+    fn refresh_lock_acquires_when_idle() {
+        reset_refresh_lock();
+
+        assert!(try_acquire_refresh_lock_at(1_000_000_000).is_some());
+    }
+
+    #[test]
+    fn refresh_lock_rejects_concurrent_refresh_within_timeout() {
+        reset_refresh_lock();
+        let start = 1_000_000_000;
+
+        assert!(try_acquire_refresh_lock_at(start).is_some());
+        assert!(try_acquire_refresh_lock_at(start + REFRESH_LOCK_TIMEOUT_NS).is_none());
+    }
+
+    #[test]
+    fn refresh_lock_force_unlocks_after_timeout() {
+        reset_refresh_lock();
+        let start = 1_000_000_000;
+        let first = try_acquire_refresh_lock_at(start).unwrap();
+
+        let second = try_acquire_refresh_lock_at(start + REFRESH_LOCK_TIMEOUT_NS + 1).unwrap();
+
+        assert!(first.generation != second.generation);
+    }
+
+    #[test]
+    fn refresh_lock_release_clears_matching_holder() {
+        reset_refresh_lock();
+        let lock = try_acquire_refresh_lock_at(1_000_000_000).unwrap();
+
+        release_refresh_lock(lock);
+
+        assert!(REFRESH_IN_FLIGHT.with(std::cell::Cell::get).is_none());
+    }
+
+    #[test]
+    fn refresh_lock_stale_holder_cannot_release_new_holder() {
+        reset_refresh_lock();
+        let start = 1_000_000_000;
+        let first = try_acquire_refresh_lock_at(start).unwrap();
+        let second = try_acquire_refresh_lock_at(start + REFRESH_LOCK_TIMEOUT_NS + 1).unwrap();
+
+        release_refresh_lock(first);
+
+        assert!(REFRESH_IN_FLIGHT.with(|cell| {
+            cell.get()
+                .is_some_and(|current| current.generation == second.generation)
+        }));
+
+        release_refresh_lock(second);
+        assert!(REFRESH_IN_FLIGHT.with(std::cell::Cell::get).is_none());
+    }
+
+    fn custom_token(seed: u8) -> StoredTokenId {
+        StoredTokenId(TokenId::Icrc(Principal::from_slice(&[seed])))
+    }
+
+    fn exchange_rate(timestamp_ns: u64) -> ExchangeRate {
+        ExchangeRate {
+            usd: ExchangeData {
+                timestamp_ns,
+                price: Some(1.0),
+                price_24h_change_pct: None,
+                market_cap: None,
+            },
+        }
+    }
+
+    #[test]
+    fn active_custom_tokens_for_refresh_uses_strict_activity_window() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let active = custom_token(1);
+        let exactly_at_threshold = custom_token(2);
+        let inactive = custom_token(3);
+
+        let tokens = active_custom_tokens_for_refresh(
+            vec![
+                (
+                    active.clone(),
+                    now - (PRICE_ACTIVITY_THRESHOLD_SEC - 60) * NANOS_PER_SEC,
+                ),
+                (
+                    exactly_at_threshold,
+                    now - PRICE_ACTIVITY_THRESHOLD_SEC * NANOS_PER_SEC,
+                ),
+                (
+                    inactive,
+                    now - (PRICE_ACTIVITY_THRESHOLD_SEC + 60) * NANOS_PER_SEC,
+                ),
+            ],
+            now,
+        );
+
+        assert_eq!(tokens, vec![active]);
+    }
+
+    #[test]
+    fn refresh_candidates_include_native_tokens_and_deduplicate_activity() {
+        let native = StoredTokenId(TokenId::EvmNative(1));
+        let custom = custom_token(1);
+
+        let candidates = refresh_candidates(vec![custom.clone(), native.clone(), custom.clone()]);
+
+        assert_eq!(candidates.len(), native_token_ids().len() + 1);
+        assert!(candidates.contains(&native));
+        assert!(candidates.contains(&custom));
+    }
+
+    #[test]
+    fn tokens_missing_or_older_than_keeps_only_missing_and_stale_entries() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let floor = now - PRICE_FRESHNESS_GRACE_NS;
+        let missing = custom_token(1);
+        let stale = custom_token(2);
+        let boundary = custom_token(3);
+        let fresh = custom_token(4);
+        let tokens = vec![
+            missing.clone(),
+            stale.clone(),
+            boundary.clone(),
+            fresh.clone(),
+        ];
+
+        let due = tokens_missing_or_older_than(
+            &tokens,
+            |token_id| {
+                if *token_id == stale {
+                    Some(exchange_rate(floor - 1))
+                } else if *token_id == boundary {
+                    Some(exchange_rate(floor))
+                } else if *token_id == fresh {
+                    Some(exchange_rate(now))
+                } else {
+                    None
+                }
+            },
+            floor,
+        );
+
+        assert_eq!(due, vec![missing, stale]);
+    }
+
+    #[test]
+    fn staleness_floor_uses_two_minute_caller_freshness_contract() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let floor = staleness_floor_ns(now);
+
+        assert_eq!(floor, now - PRICE_STALENESS_THRESHOLD_SEC * NANOS_PER_SEC);
+        assert!(exchange_rate_is_missing_or_older_than(
+            Some(&exchange_rate(floor - 1)),
+            floor
+        ));
+        assert!(!exchange_rate_is_missing_or_older_than(
+            Some(&exchange_rate(floor)),
+            floor
+        ));
+    }
 }

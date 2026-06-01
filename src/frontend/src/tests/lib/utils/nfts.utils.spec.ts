@@ -878,7 +878,7 @@ describe('nfts.utils', () => {
 			});
 
 			const result = await getMediaStatus(
-				'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3Aabc&owner_id=sey3i-jyaaa-aaaap-quo3q-cai&project_id=019de6f2-675c-775e-9eda-2adf4341566c'
+				'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3Aabc&owner_id=ipchn-lqaaa-aaaam-qizkq-cai&project_id=019de6f2-675c-775e-9eda-2adf4341566c'
 			);
 
 			expect(result).toBe(MediaStatusEnum.OK);

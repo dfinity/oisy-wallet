@@ -238,7 +238,7 @@ describe('nft.utils', () => {
 			name: 'ICRC-7 NFT #50',
 			description: 'A byte-stream-backed NFT',
 			imageUrl:
-				'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A3dafe45&owner_id=sey3i-jyaaa-aaaap-quo3q-cai',
+				'https://blob.caffeine.ai/v1/blob/?blob_hash=sha256%3A3dafe45&owner_id=ipchn-lqaaa-aaaam-qizkq-cai',
 			attributes: [{ traitType: 'Level', value: '50' }]
 		};
 
