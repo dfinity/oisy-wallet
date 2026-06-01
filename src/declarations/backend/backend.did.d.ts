@@ -211,9 +211,9 @@ export interface ApiKeys {
 	etherscan_api_key: [] | [string];
 	coingecko_api_key: [] | [string];
 	/**
-	 * HMAC-SHA256 secret used to sign OnRamper widget URLs. Provided by OnRamper support and
+	 * HMAC-SHA256 secret used to sign `OnRamper` widget URLs. Provided by `OnRamper` support and
 	 * rotated via `set_api_keys`. When `None`, the signing endpoint reports the secret as
-	 * missing and the OnRamper widget cannot be loaded.
+	 * missing and the `OnRamper` widget cannot be loaded.
 	 */
 	onramper_signing_secret: [] | [string];
 	infura_api_key: [] | [string];
@@ -1125,7 +1125,7 @@ export interface OneSecIcpToEvmData {
 	dest_token: TokenId;
 }
 /**
- * A `(key, value)` entry of an OnRamper signed parameter — e.g. `(btc, <address>)` inside
+ * A `(key, value)` entry of an `OnRamper` signed parameter — e.g. `(btc, <address>)` inside
  * `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
  * `key` to lowercase before signing.
  */
@@ -1233,14 +1233,14 @@ export interface Settings {
  */
 export type SignOnramperWidgetUrlError = {
 	/**
-	 * Controllers have not yet provisioned the OnRamper signing secret via `set_api_keys`. The
+	 * Controllers have not yet provisioned the `OnRamper` signing secret via `set_api_keys`. The
 	 * frontend should treat this the same as a hard failure: the widget cannot be opened until
 	 * the secret is configured.
 	 */
 	SecretNotConfigured: null;
 };
 /**
- * Request body for `sign_onramper_widget_url`. Each field maps directly to one of OnRamper's
+ * Request body for `sign_onramper_widget_url`. Each field maps directly to one of `OnRamper`'s
  * signed query parameters. Empty fields are omitted from the canonicalized sign-content.
  */
 export interface SignOnramperWidgetUrlRequest {
@@ -2041,7 +2041,7 @@ export interface _SERVICE {
 	 */
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
 	/**
-	 * Sign the three sensitive OnRamper widget parameters with the controller-managed HMAC secret.
+	 * Sign the three sensitive `OnRamper` widget parameters with the controller-managed HMAC secret.
 	 *
 	 * Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
 	 * Authenticated callers only: anonymous principals cannot extract signatures.
