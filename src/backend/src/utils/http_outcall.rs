@@ -2,8 +2,8 @@ use candid::Nat;
 use ic_cdk::{
     api::time,
     management_canister::{
-        http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
-        HttpRequestResult, TransformArgs,
+        cost_http_request, http_request, transform_context_from_query, HttpHeader, HttpMethod,
+        HttpRequestArgs, HttpRequestResult, TransformArgs,
     },
     query,
 };
@@ -12,74 +12,6 @@ use shared::types::exchange_cost::ExchangeOutcallRecord;
 use crate::exchange::cost_log;
 
 const USER_AGENT: &str = "OisyWalletBackend";
-
-// --- IC HTTPS-outcall pricing constants ------------------------------------
-//
-// Source: <https://internetcomputer.org/docs/building-apps/essentials/gas-cost>
-// (Application subnets, replication factor 13, last verified 2026-05).
-//
-// We compute outcall cost from these constants **deterministically** rather
-// than reading `canister_cycle_balance()` around the `await`. The balance
-// approach is polluted by concurrent fan-out: the exchange refresh issues
-// many outcalls in parallel via `join_all`, so each measurement also
-// captures its siblings' charges. The formula is exact per call and
-// composes correctly to a total.
-//
-// If IC pricing changes, update the four constants below and the
-// `last verified` date.
-
-/// Replication factor of an IC application subnet. Used as the `n` multiplier
-/// in every term of the HTTPS-outcall fee.
-const SUBNET_REPLICATION_FACTOR: u128 = 13;
-const HTTP_REQUEST_LINEAR_BASELINE_FEE: u128 = 3_000_000;
-const HTTP_REQUEST_QUADRATIC_BASELINE_FEE: u128 = 60_000;
-const HTTP_REQUEST_PER_BYTE_FEE: u128 = 400;
-const HTTP_RESPONSE_PER_BYTE_FEE: u128 = 800;
-
-/// Returns the deterministic IC cycle cost of one HTTPS outcall on a
-/// 13-node application subnet.
-///
-/// `request_bytes` is the serialised size of URL + headers + body sent
-/// to the management canister. `max_response_bytes` is the upfront
-/// reservation declared by the caller.
-///
-/// Cost = `base + n × per_req_byte × request_bytes
-///              + n × per_resp_byte × max_response_bytes`
-///
-/// Per <https://docs.internetcomputer.org/concepts/https-outcalls/#cycle-costs>:
-/// *"`max_response_bytes`: the maximum response size you declare. This
-/// is what you're charged for, not the actual response size."* So the
-/// response term uses `max_response_bytes` regardless of how much
-/// actually came back; there is no refund based on actual response
-/// size. (The doc's "Unused cycles are refunded" sentence refers to
-/// attached cycles in excess of the call fee, not response-size-based
-/// refunds.)
-pub(crate) fn outcall_cost_cycles(request_bytes: u64, max_response_bytes: u64) -> u128 {
-    let n = SUBNET_REPLICATION_FACTOR;
-    let base = (HTTP_REQUEST_LINEAR_BASELINE_FEE + HTTP_REQUEST_QUADRATIC_BASELINE_FEE * n) * n;
-    let req = HTTP_REQUEST_PER_BYTE_FEE * n * u128::from(request_bytes);
-    let resp = HTTP_RESPONSE_PER_BYTE_FEE * n * u128::from(max_response_bytes);
-    base + req + resp
-}
-
-/// Sum of the byte sizes of `url + headers (names and values) + body` for
-/// a request the canister will send. Approximates the
-/// `request_bytes` parameter the IC charges on. Excludes Candid framing
-/// overhead, so this is a tight lower bound — close enough for cost
-/// attribution (request bytes are a minor term anyway).
-fn request_size_bytes(url: &str, headers: &[HttpHeader], body: Option<&[u8]>) -> u64 {
-    let mut total: u64 = url.len() as u64;
-    // build_request always prepends a User-Agent header before the caller's
-    // headers; include it so the size matches what we actually send.
-    total += "User-Agent".len() as u64 + USER_AGENT.len() as u64;
-    for h in headers {
-        total += h.name.len() as u64 + h.value.len() as u64;
-    }
-    if let Some(b) = body {
-        total += b.len() as u64;
-    }
-    total
-}
 
 /// Strips volatile HTTP headers so that IC replicas can reach consensus.
 ///
@@ -149,22 +81,24 @@ async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> 
     }
 }
 
-/// Performs an HTTP GET outcall.
+/// Builds the canonical GET [`HttpRequestArgs`] (with the consensus
+/// transform attached) that [`get_tagged`] dispatches.
 ///
-/// Sends a GET request to `url` with a `User-Agent` header and validates
-/// that the response status is in the 2xx range. Attaches
-/// [`http_request_transform`] so IC replicas can reach consensus.
+/// Factored out so [`get_tagged`] can hand the *exact* request to
+/// [`cost_http_request`] before sending it — the cost the IC charges is
+/// a function of this struct (URL + headers + body + transform name and
+/// context), so costing anything else would diverge from reality.
 ///
 /// # Arguments
 /// * `url` - The URL to fetch.
 /// * `headers` - Additional headers appended after `User-Agent`.
 /// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
-///   to minimise cycle costs.
-pub(crate) async fn get(
+///   to minimise cycle costs (the IC charges against this, not the actual response size).
+fn build_get_request(
     url: &str,
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
-) -> Result<HttpRequestResult, String> {
+) -> HttpRequestArgs {
     let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
 
     request.transform = Some(transform_context_from_query(
@@ -172,7 +106,7 @@ pub(crate) async fn get(
         vec![],
     ));
 
-    execute(request).await
+    request
 }
 
 /// Telemetry tag for an outgoing exchange-rate outcall. Threaded into
@@ -194,14 +128,14 @@ pub(crate) struct OutcallTag<'a> {
 /// the controller-facing report can attribute cycle cost to each
 /// provider call.
 ///
-/// Cycle cost is computed deterministically via [`outcall_cost_cycles`]
-/// from `request_bytes + max_response_bytes + actual_response_bytes`.
-/// We do **not** read `canister_cycle_balance()` around the `await`: the
-/// exchange path issues many outcalls concurrently via `join_all`, and a
-/// balance delta during one `await` is polluted by every concurrent
-/// sibling's charges (each measurement ends up off by roughly the
-/// fan-out width). The formula avoids this entirely and matches what
-/// the management canister actually deducts.
+/// Cycle cost is taken from the [`cost_http_request`] system API on the
+/// exact request we dispatch. That is what `http_request` itself uses to
+/// attach cycles, so the recorded value is the precise amount the IC
+/// charges — for the actual subnet size, and automatically correct if IC
+/// pricing changes. We deliberately do **not** read
+/// `canister_cycle_balance()` around the `await`: the exchange path issues
+/// many outcalls concurrently via `join_all`, so a balance delta during
+/// one `await` is polluted by every concurrent sibling's charge.
 pub(crate) async fn get_tagged(
     url: &str,
     headers: Vec<HttpHeader>,
@@ -209,9 +143,11 @@ pub(crate) async fn get_tagged(
     tag: OutcallTag<'_>,
 ) -> Result<HttpRequestResult, String> {
     let started_ns = time();
-    let request_bytes = request_size_bytes(url, &headers, None);
 
-    let outcome = get(url, headers, max_response_bytes).await;
+    let request = build_get_request(url, headers, max_response_bytes);
+    let cycles_charged = cost_http_request(&request);
+
+    let outcome = execute(request).await;
 
     let ended_ns = time();
 
@@ -219,8 +155,6 @@ pub(crate) async fn get_tagged(
         Ok(resp) => (status_to_u32(&resp.status), resp.body.len() as u64),
         Err(_) => (0, 0),
     };
-
-    let cycles_charged = outcall_cost_cycles(request_bytes, max_response_bytes);
 
     cost_log::record(ExchangeOutcallRecord {
         timestamp_ns: started_ns,
@@ -315,12 +249,7 @@ mod tests {
     use ic_cdk::management_canister::{HttpHeader, HttpMethod, HttpRequestResult};
     use pretty_assertions::assert_eq;
 
-    use super::{
-        build_request, outcall_cost_cycles, request_size_bytes, validate_response,
-        HTTP_REQUEST_LINEAR_BASELINE_FEE, HTTP_REQUEST_PER_BYTE_FEE,
-        HTTP_REQUEST_QUADRATIC_BASELINE_FEE, HTTP_RESPONSE_PER_BYTE_FEE, SUBNET_REPLICATION_FACTOR,
-        USER_AGENT,
-    };
+    use super::{build_request, validate_response, USER_AGENT};
 
     #[test]
     fn test_build_request_sets_url() {
@@ -564,103 +493,5 @@ mod tests {
         };
 
         assert!(validate_response(response).is_err());
-    }
-
-    fn expected_cost(req: u64, max_resp: u64) -> u128 {
-        let n = SUBNET_REPLICATION_FACTOR;
-        let base = (HTTP_REQUEST_LINEAR_BASELINE_FEE + HTTP_REQUEST_QUADRATIC_BASELINE_FEE * n) * n;
-        let req_fee = HTTP_REQUEST_PER_BYTE_FEE * n * u128::from(req);
-        let resp_fee = HTTP_RESPONSE_PER_BYTE_FEE * n * u128::from(max_resp);
-        base + req_fee + resp_fee
-    }
-
-    #[test]
-    fn outcall_cost_charges_on_max_response_bytes_not_actual() {
-        // Per IC docs: cost depends on max_response_bytes, not what
-        // actually came back. So both calls below cost the same as long
-        // as max_response_bytes and request_bytes match.
-        let cost = outcall_cost_cycles(200, 8_192);
-        assert_eq!(cost, expected_cost(200, 8_192));
-    }
-
-    #[test]
-    fn outcall_cost_is_minimum_when_inputs_are_zero() {
-        let cost = outcall_cost_cycles(0, 0);
-        // No request bytes, no response cap → just the base fee.
-        let n = SUBNET_REPLICATION_FACTOR;
-        let base = (HTTP_REQUEST_LINEAR_BASELINE_FEE + HTTP_REQUEST_QUADRATIC_BASELINE_FEE * n) * n;
-        assert_eq!(cost, base);
-    }
-
-    #[test]
-    fn outcall_cost_matches_docs_two_mb_example() {
-        // Per https://docs.internetcomputer.org/concepts/https-outcalls/#cycle-costs:
-        //   "If you omit max_response_bytes, the system assumes the maximum of
-        //   2 MB and charges accordingly: roughly 21.5 billion cycles on a
-        //   13-node subnet."
-        // Sanity-check our constants against the published example.
-        let two_mb: u64 = 2 * 1024 * 1024;
-        let cost = outcall_cost_cycles(0, two_mb);
-        // Allow 2 % slack vs. the doc's "roughly 21.5 B" figure.
-        let lower: u128 = 21_000_000_000;
-        let upper: u128 = 22_000_000_000;
-        assert!(
-            cost >= lower && cost <= upper,
-            "2 MB cost {cost} not within docs' ~21.5 B range"
-        );
-    }
-
-    #[test]
-    fn outcall_cost_known_icpswap_call() {
-        // ICPSwap call shape: max_response_bytes = 8_192,
-        // request URL ≈ 60 bytes + Accept header ≈ 22 bytes + UA = ~110 bytes.
-        let cost = outcall_cost_cycles(110, 8_192);
-        // Expected: ~49 M base + ~85 M response = ~135 M.
-        assert!(
-            cost > 130_000_000 && cost < 145_000_000,
-            "icpswap per-call cost out of expected range: {cost}"
-        );
-    }
-
-    #[test]
-    fn outcall_cost_known_coingecko_call() {
-        // CoinGecko call: max_response_bytes = 51_200, request ~200 B.
-        let cost = outcall_cost_cycles(200, 51_200);
-        // Expected: ~49 M base + ~1 M request + ~532 M response = ~582 M.
-        assert!(
-            cost > 575_000_000 && cost < 590_000_000,
-            "coingecko per-call cost out of expected range: {cost}"
-        );
-    }
-
-    #[test]
-    fn request_size_bytes_counts_url_headers_and_useragent() {
-        let url = "https://api.example.com/v1/x";
-        let headers = vec![
-            HttpHeader {
-                name: "Accept".to_string(),
-                value: "application/json".to_string(),
-            },
-            HttpHeader {
-                name: "Authorization".to_string(),
-                value: "Bearer abc".to_string(),
-            },
-        ];
-        let size = request_size_bytes(url, &headers, None);
-        // url + (User-Agent + UA value) + (Accept + value) + (Authorization + value)
-        let expected = url.len() as u64
-            + ("User-Agent".len() + USER_AGENT.len()) as u64
-            + ("Accept".len() + "application/json".len()) as u64
-            + ("Authorization".len() + "Bearer abc".len()) as u64;
-        assert_eq!(size, expected);
-    }
-
-    #[test]
-    fn request_size_bytes_includes_body() {
-        let body = b"{\"foo\":1}";
-        let size = request_size_bytes("https://x/y", &[], Some(body));
-        let expected =
-            "https://x/y".len() as u64 + ("User-Agent".len() + USER_AGENT.len()) as u64 + 9;
-        assert_eq!(size, expected);
     }
 }
