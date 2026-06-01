@@ -7,10 +7,10 @@ use crate::{
         priceable_tokens_for_caller, release_refresh_lock, stale_or_missing_tokens,
         try_acquire_refresh_lock,
     },
-    state::read_state,
+    state::{mutate_api_keys, read_state},
     token,
     types::{StoredPrincipal, StoredTokenId},
-    utils::guards::caller_is_not_anonymous,
+    utils::guards::{caller_is_controller, caller_is_not_anonymous},
 };
 
 /// Returns the latest USD prices for the caller's priceable tokens.
@@ -101,4 +101,17 @@ pub fn get_exchange_rate(token_id: TokenId) -> Option<ExchangeRate> {
 #[must_use]
 pub fn exchange_rate_enabled() -> bool {
     is_exchange_rate_refresh_enabled()
+}
+
+/// Enables or disables periodic exchange-rate refresh without touching the stored API keys.
+///
+/// Sets `exchange_rate_enabled` to `Some(enabled)`, leaving the configured `CoinGecko` (and other)
+/// keys intact. Disabling stops the refresh outcalls even while a key is configured; enabling lets
+/// them resume (still gated on a `CoinGecko` key being set, see
+/// [`is_exchange_rate_refresh_enabled`]).
+///
+/// Restricted to canister controllers only.
+#[update(guard = "caller_is_controller")]
+pub fn set_exchange_rate_enabled(enabled: bool) {
+    mutate_api_keys(|keys| keys.exchange_rate_enabled = Some(enabled));
 }
