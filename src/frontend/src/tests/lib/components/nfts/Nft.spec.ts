@@ -59,6 +59,7 @@ describe('Nft', () => {
 		const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
 
 		render(Nft);
+		await tick();
 
 		await vi.advanceTimersByTimeAsync(FALLBACK_TIMEOUT);
 
