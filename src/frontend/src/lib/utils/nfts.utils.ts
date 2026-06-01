@@ -10,6 +10,7 @@ import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { getNftIdentifier } from '$lib/utils/nft.utils';
+import { standardLabel } from '$lib/utils/tokens.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { SvelteMap } from 'svelte/reactivity';
@@ -254,11 +255,6 @@ const matchesFilter = ({
 	filter: string;
 }): boolean => {
 	const lower = filter.toLowerCase();
-
-	// Match against the UI-rendered `code version` label (e.g. "ext v2"), so typing
-	// the version alone, the code alone, or the combined string all work.
-	const standardLabel = (standard: NftCollection['standard'] | undefined): string =>
-		nonNullish(standard) ? `${standard.code} ${standard.version ?? ''}`.trim().toLowerCase() : '';
 
 	if (isCollectionUi(item)) {
 		// search by collection name or standard
