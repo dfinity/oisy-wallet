@@ -3,6 +3,7 @@
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { setContext } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -35,7 +36,7 @@
 	import { modalSendData } from '$lib/derived/modal.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
-	import { pageNft } from '$lib/derived/page-nft.derived';
+	import { pageCollectionNfts, pageNft } from '$lib/derived/page-nft.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -65,7 +66,7 @@
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
-	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken, getNftSendRedirectUrl } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { shouldSkipDestinationStep } from '$lib/utils/send.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -166,10 +167,17 @@
 		selectedNft = undefined;
 	};
 
-	const close = () =>
+	const close = () => {
+		// Sending the last NFT from a collection's detail page would leave the user on a URL whose
+		// NFT has been wiped from the store at the next poll, so steer them to a still-renderable page.
+		if (isNftsPage && sendProgressStep === ProgressStepsSend.DONE && nonNullish(selectedNft)) {
+			goto(getNftSendRedirectUrl({ sentNft: selectedNft, collectionNfts: $pageCollectionNfts }));
+		}
+
 		closeModal(() => {
 			reset();
 		});
+	};
 
 	const isDisabled = ({ network: { id } }: Token): boolean =>
 		isNetworkIdEthereum(id) || isNetworkIdEvm(id)
