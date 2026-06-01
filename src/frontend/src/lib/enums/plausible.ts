@@ -18,7 +18,8 @@ export enum PLAUSIBLE_EVENTS {
 	NETWORK_FILTER = 'network_filter',
 	NETWORK_MANAGE = 'network_manage',
 	TRANSACTION_FILTER = 'transaction_filter',
-	TOKEN_MANAGE = 'token_manage'
+	TOKEN_MANAGE = 'token_manage',
+	EXPORT_DATA = 'export_data'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -35,7 +36,9 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
-	ICRC = 'icrc'
+	ICRC = 'icrc',
+	BASIC = 'basic',
+	EXTENDED = 'extended'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_EARN {
@@ -53,7 +56,9 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
-	UNCERTIFIED_REMOVED = 'uncertified_removed'
+	UNCERTIFIED_REMOVED = 'uncertified_removed',
+	BASIC = 'basic',
+	EXTENDED = 'extended'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
@@ -86,7 +91,8 @@ export enum PLAUSIBLE_EVENT_SOURCES {
 export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	ACTIVITY_PAGE = 'activity_page',
 	MANAGE_TOKENS = 'manage_tokens',
-	TOKEN_DETAILS = 'token_details'
+	TOKEN_DETAILS = 'token_details',
+	SETTINGS_PAGE = 'settings_page'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
