@@ -1,13 +1,13 @@
+import type { NftCollection } from '$lib/types/nft';
+import type { Token } from '$lib/types/token';
 import {
 	collectionStandardGuard,
 	toggleableTokenGuard,
 	tokenStandardGuard
-} from '$eth/utils/erc-guards.utils';
-import type { NftCollection } from '$lib/types/nft';
-import type { Token } from '$lib/types/token';
+} from '$lib/utils/token-guards.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 
-describe('erc-guards.utils', () => {
+describe('token-guards.utils', () => {
 	describe('tokenStandardGuard', () => {
 		const isErc20 = tokenStandardGuard('erc20');
 

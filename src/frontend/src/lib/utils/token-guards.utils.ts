@@ -13,6 +13,6 @@ export const collectionStandardGuard =
 		collection.standard.code === code;
 
 export const toggleableTokenGuard =
-	<T extends Token>(isStandard: (token: Token) => boolean) =>
-	(token: Token): token is T =>
+	<T extends In, In extends Token = Token>(isStandard: (token: In) => boolean) =>
+	(token: In): token is T =>
 		isStandard(token) && isTokenToggleable(token);

@@ -4,7 +4,7 @@ import {
 	collectionStandardGuard,
 	toggleableTokenGuard,
 	tokenStandardGuard
-} from '$eth/utils/erc-guards.utils';
+} from '$lib/utils/token-guards.utils';
 
 export const isTokenErc721 = tokenStandardGuard<Erc721Token>('erc721');
 

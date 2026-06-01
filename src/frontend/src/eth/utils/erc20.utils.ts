@@ -1,10 +1,10 @@
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken, EthereumCustomToken } from '$eth/types/erc20-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
-import { toggleableTokenGuard, tokenStandardGuard } from '$eth/utils/erc-guards.utils';
 import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { Token } from '$lib/types/token';
+import { toggleableTokenGuard, tokenStandardGuard } from '$lib/utils/token-guards.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 type MapErc20TokenParams = Erc20Contract &
