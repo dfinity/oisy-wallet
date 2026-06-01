@@ -92,6 +92,27 @@ describe('SendNftsList.spec', () => {
 		expect(onSelectNetwork).toHaveBeenCalledOnce();
 	});
 
+	it('renders NFTs that have no name', () => {
+		const namelessNfts = [
+			{
+				...mockValidErc1155Nft,
+				name: undefined,
+				id: parseNftId('42'),
+				collection: { ...mockValidErc1155Nft.collection, name: 'NamelessOnes' }
+			}
+		];
+
+		nftStore.addAll(namelessNfts);
+		const { getByText } = render(SendNftsListTestHost, {
+			onSelect: vi.fn(),
+			filterNetwork: undefined,
+			onSelectNetwork: vi.fn()
+		});
+
+		expect(getByText('NamelessOnes')).toBeInTheDocument();
+		expect(getByText('#42')).toBeInTheDocument();
+	});
+
 	const orderOf = ({
 		container,
 		labels

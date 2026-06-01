@@ -29,17 +29,17 @@
 
 	let filter = $state('');
 
-	const filteredByInputAndSection: Nft[] = $derived(
+	const visible: Nft[] = $derived(
 		($nftStore ?? []).filter(
 			(nft) =>
-				nft?.name?.toLowerCase().includes(filter.toLowerCase()) &&
 				nft?.collection?.section !== CustomTokenSection.SPAM &&
 				nft?.collection?.section !== CustomTokenSection.HIDDEN
 		)
 	);
 	const filtered: Nft[] = $derived(
 		filterSortByCollection({
-			items: findNftsByNetwork({ nfts: filteredByInputAndSection, networkId: $filterNetwork?.id }),
+			items: findNftsByNetwork({ nfts: visible, networkId: $filterNetwork?.id }),
+			filter,
 			sort: $nftSortStore
 		})
 	);
