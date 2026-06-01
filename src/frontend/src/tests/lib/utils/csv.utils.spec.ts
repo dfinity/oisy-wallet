@@ -102,10 +102,10 @@ describe('csv.utils', () => {
 				[
 					'A',
 					`"'=HYPERLINK(""https://example.com"")"`,
-					"'+SUM(1,1)",
-					"'-SUM(1,1)",
-					"'@SUM(1,1)",
-					"'  =SUM(1,1)"
+					`"'+SUM(1,1)"`,
+					`"'-SUM(1,1)"`,
+					`"'@SUM(1,1)"`,
+					`"'  =SUM(1,1)"`
 				].join('\r\n')
 			);
 		});
