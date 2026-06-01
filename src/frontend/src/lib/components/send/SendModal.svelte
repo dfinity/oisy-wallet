@@ -34,6 +34,7 @@
 		solAddressMainnetNotLoaded
 	} from '$lib/derived/address.derived';
 	import { modalSendData } from '$lib/derived/modal.derived';
+	import { routeNft } from '$lib/derived/nav.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { pageCollectionNfts, pageNft } from '$lib/derived/page-nft.derived';
@@ -171,7 +172,15 @@
 	const close = () => {
 		// Sending the last NFT from a collection's detail page would leave the user on a URL whose
 		// NFT has been wiped from the store at the next poll, so steer them to a still-renderable page.
-		if (isNftsPage && sendProgressStep === ProgressStepsSend.DONE && nonNullish(selectedNft)) {
+		// Gate on `$routeNft` rather than the `isNftsPage` prop alone so the redirect is anchored to
+		// the actual NFT detail URL — a future caller flipping the prop on a list page wouldn't drop
+		// query params like the selected network.
+		if (
+			isNftsPage &&
+			nonNullish($routeNft) &&
+			sendProgressStep === ProgressStepsSend.DONE &&
+			nonNullish(selectedNft)
+		) {
 			// `InProgressWizard` arms a `beforeNavigate` guard via `dirtyWizardState`; the send is
 			// already done at this point, so clear it to avoid a "navigate away?" confirm popup.
 			dirtyWizardState.set(false);
