@@ -1,10 +1,10 @@
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken, EthereumCustomToken } from '$eth/types/erc20-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
+import { toggleableTokenGuard, tokenStandardGuard } from '$eth/utils/erc-guards.utils';
 import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { Token } from '$lib/types/token';
-import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 type MapErc20TokenParams = Erc20Contract &
@@ -21,10 +21,10 @@ export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams
 	...rest
 });
 
-export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard.code === 'erc20';
+export const isTokenErc20 = tokenStandardGuard<Erc20Token>('erc20');
 
-export const isTokenErc20CustomToken = (token: Token): token is Erc20CustomToken =>
-	isTokenErc20(token) && isTokenToggleable(token);
+export const isTokenErc20CustomToken = toggleableTokenGuard<Erc20CustomToken>(isTokenErc20);
 
-export const isTokenEthereumCustomToken = (token: Token): token is EthereumCustomToken =>
-	(isTokenEthereumNative(token) || isTokenErc20(token)) && isTokenToggleable(token);
+export const isTokenEthereumCustomToken = toggleableTokenGuard<EthereumCustomToken>(
+	(token: Token) => isTokenEthereumNative(token) || isTokenErc20(token)
+);
