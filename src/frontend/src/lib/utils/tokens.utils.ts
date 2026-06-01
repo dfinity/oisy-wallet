@@ -442,10 +442,11 @@ export const pinEnabledTokensAtTop = <T extends Token>(
 	$tokens: TokenToggleable<T>[]
 ): TokenToggleable<T>[] => $tokens.sort(({ enabled: a }, { enabled: b }) => Number(b) - Number(a));
 
-/** Tells whether a single token matches a free-text filter on name, symbol or
- * the token's contract identifier (Ethereum / Solana address, IC ledger /
- * index / NFT canister id, ICRC custom alternative name). For IC ck-tokens
- * the underlying twin token is also considered.
+/** Tells whether a single token matches a free-text filter on name, symbol,
+ * the UI-rendered standard label (`<code> <version>`, e.g. "erc20" or
+ * "ext v2"), or the token's contract identifier (Ethereum / Solana address,
+ * IC ledger / index / NFT canister id, ICRC custom alternative name). For IC
+ * ck-tokens the underlying twin token is also considered.
  *
  * @param token - The token to test.
  * @param filter - filter keyword.
