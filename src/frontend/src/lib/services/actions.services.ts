@@ -35,7 +35,7 @@ export const openOnWalletReady = async ({
 	open
 }: {
 	isDisabled: () => boolean;
-	open: () => void;
+	open: () => void | Promise<void>;
 }): Promise<void> => {
 	if (isDisabled()) {
 		const status = await waitWalletReady(isDisabled);
@@ -45,5 +45,5 @@ export const openOnWalletReady = async ({
 		}
 	}
 
-	open();
+	await open();
 };

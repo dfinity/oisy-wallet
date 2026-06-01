@@ -10,6 +10,11 @@ describe('actions.services', () => {
 			busy.stop();
 		});
 
+		afterEach(() => {
+			vi.useRealTimers();
+			vi.restoreAllMocks();
+		});
+
 		it('calls open immediately when not disabled', async () => {
 			const open = vi.fn();
 
@@ -18,17 +23,29 @@ describe('actions.services', () => {
 			expect(open).toHaveBeenCalledOnce();
 		});
 
-		it('waits for the wallet to be ready, then calls open', async () => {
+		it('waits at least one retry interval before calling open once the wallet is ready', async () => {
 			vi.useFakeTimers();
 
 			const open = vi.fn();
 
-			// Disabled on the first check (triggering the wait), then ready.
-			const isDisabled = vi.fn().mockReturnValueOnce(true).mockReturnValue(false);
+			// Disabled on the outer guard check and the first `waitReady` check (so a
+			// retry interval must elapse), then ready on the subsequent check.
+			const isDisabled = vi
+				.fn()
+				.mockReturnValueOnce(true)
+				.mockReturnValueOnce(true)
+				.mockReturnValue(false);
 
 			const promise = openOnWalletReady({ isDisabled, open });
 
-			await vi.runAllTimersAsync();
+			// Let microtasks settle without advancing the retry timer: `open` must not
+			// have been called yet because the wallet is still disabled.
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(open).not.toHaveBeenCalled();
+
+			// Advance past one 500ms retry interval so the next readiness check runs.
+			await vi.advanceTimersByTimeAsync(500);
 			await promise;
 
 			expect(open).toHaveBeenCalledOnce();
