@@ -9,7 +9,6 @@ import { render, screen } from '@testing-library/svelte';
 describe('ManageTokensModal', () => {
 	beforeEach(() => {
 		mockPage.reset();
-		mockPage.mockUrl(new URL('https://oisy.com/tokens'));
 	});
 
 	it('should open the import step with the initial Ethereum token address', async () => {
