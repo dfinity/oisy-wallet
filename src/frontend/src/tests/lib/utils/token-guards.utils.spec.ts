@@ -1,5 +1,6 @@
 import type { NftCollection } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import {
 	collectionStandardGuard,
 	toggleableTokenGuard,
@@ -39,8 +40,10 @@ describe('token-guards.utils', () => {
 	describe('toggleableTokenGuard', () => {
 		const guard = toggleableTokenGuard((token: Token) => token.standard.code === 'erc20');
 
+		const toggleableErc20: TokenToggleable<Token> = { ...mockValidErc20Token, enabled: true };
+
 		it('returns true only when the standard matches and the token is toggleable', () => {
-			expect(guard({ ...mockValidErc20Token, enabled: true })).toBeTruthy();
+			expect(guard(toggleableErc20)).toBeTruthy();
 		});
 
 		it('returns false when the token is not toggleable', () => {
@@ -48,9 +51,11 @@ describe('token-guards.utils', () => {
 		});
 
 		it('returns false when the standard does not match', () => {
-			expect(
-				guard({ ...mockValidErc20Token, standard: { code: 'erc721' }, enabled: true })
-			).toBeFalsy();
+			const wrongStandard: TokenToggleable<Token> = {
+				...toggleableErc20,
+				standard: { code: 'erc721' }
+			};
+			expect(guard(wrongStandard)).toBeFalsy();
 		});
 	});
 });
