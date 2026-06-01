@@ -11,7 +11,7 @@ import type {
 	ValidatedBtcPaymentData
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
-import { enrichSingleTokenPayableToken } from '$lib/utils/open-crypto-pay.utils';
+import { enrichSingleTokenPayableToken } from '$lib/utils/open-crypto-pay-enrich.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';

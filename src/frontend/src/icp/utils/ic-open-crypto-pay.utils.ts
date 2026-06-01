@@ -13,7 +13,7 @@ import type {
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
-import { enrichSingleTokenPayableToken } from '$lib/utils/open-crypto-pay.utils';
+import { enrichSingleTokenPayableToken } from '$lib/utils/open-crypto-pay-enrich.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { PrincipalText } from '@dfinity/zod-schemas';

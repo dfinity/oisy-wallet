@@ -12,7 +12,6 @@ import {
 	isIcPayableToken,
 	validateIcTransfer
 } from '$icp/utils/ic-open-crypto-pay.utils';
-import { ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_EVENTS_KEYS } from '$lib/enums/plausible';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -33,79 +32,9 @@ import type {
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
-import { formatToken } from '$lib/utils/format.utils';
-import { parseToken } from '$lib/utils/parse.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
 import { get } from 'svelte/store';
-
-/**
- * Enriches a single-token payable token (fee paid in the same token, single
- * exchange rate) with USD values, after validating sufficient balance.
- *
- * Shared by Bitcoin and ICP/ICRC, which only differ in how the fee amount is
- * derived from the chain-specific `token.fee`. Chains where the fee is paid in
- * a distinct native token and priced separately (ETH/EVM) are not covered here.
- *
- * @param token - Token with fee data to enrich
- * @param exchanges - Exchange rates for price lookup
- * @param balances - User token balances
- * @param getFee - Resolves the fee amount (in the token's smallest unit) from
- *   the chain-specific fee, or `undefined` when the fee is missing or invalid
- */
-export const enrichSingleTokenPayableToken = ({
-	token,
-	exchanges,
-	balances,
-	getFee
-}: {
-	token: PayableTokenWithFees;
-	exchanges: ExchangesData | undefined;
-	balances: CertifiedStoreData<BalancesData>;
-	getFee: (fee: PayableTokenWithFees['fee']) => bigint | undefined;
-}): PayableTokenWithConvertedAmount | undefined => {
-	const { id: tokenId, fee, amount, decimals } = token;
-
-	const feeAmount = getFee(fee);
-
-	if (isNullish(feeAmount)) {
-		return;
-	}
-
-	const exchangeRate = exchanges?.[tokenId]?.usd;
-	const balance = balances?.[tokenId]?.data ?? ZERO;
-
-	if (isNullish(exchangeRate)) {
-		return;
-	}
-
-	const amountToPay = parseToken({
-		value: amount,
-		unitName: decimals
-	});
-
-	if (balance < amountToPay + feeAmount) {
-		return;
-	}
-
-	const formattedFee = Number(
-		formatToken({
-			value: feeAmount,
-			unitName: decimals,
-			displayDecimals: decimals
-		})
-	);
-
-	const amountInUSD = Number(amount) * exchangeRate;
-	const feeInUSD = formattedFee * exchangeRate;
-
-	return {
-		...token,
-		amountInUSD,
-		feeInUSD,
-		sumInUSD: amountInUSD + feeInUSD
-	};
-};
 
 /**
  * Decodes LNURL according to LNURL-01 standard
