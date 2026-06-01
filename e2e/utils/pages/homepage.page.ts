@@ -487,8 +487,32 @@ abstract class Homepage {
 		return currentHeight;
 	}
 
+	// Web fonts and lazily-imported images (e.g. the landing page hero) can
+	// finish loading *after* `networkidle` and reflow the page by tens of
+	// pixels. Measuring the height before they settle bakes a
+	// non-deterministic value into the screenshot viewport, which is why the
+	// full-page snapshots regenerate on every run. Block on them first.
+	private async waitForStableLayout(): Promise<void> {
+		await this.#page.evaluate(async () => {
+			await document.fonts.ready;
+
+			await Promise.all(
+				Array.from(document.querySelectorAll('img'))
+					.filter((img) => !img.complete)
+					.map(
+						(img) =>
+							new Promise<void>((resolve) => {
+								img.addEventListener('load', () => resolve(), { once: true });
+								img.addEventListener('error', () => resolve(), { once: true });
+							})
+					)
+			);
+		});
+	}
+
 	private async viewportAdjuster(): Promise<void> {
 		await this.waitForLoadState();
+		await this.waitForStableLayout();
 		const stablePageHeight = await this.getStableViewportHeight();
 
 		const currentViewport = this.#page.viewportSize();
