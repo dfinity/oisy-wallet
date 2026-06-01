@@ -1234,9 +1234,49 @@ describe('tokens.utils', () => {
 		];
 
 		it('should filter tokens by symbol correctly when filter is provided', () => {
-			expect(filterTokens({ tokens, filter: 'ICP' })).toStrictEqual([ICP_TOKEN]);
 			expect(filterTokens({ tokens, filter: 'BTC' })).toStrictEqual([BTC_MAINNET_TOKEN]);
 			expect(filterTokens({ tokens, filter: 'PEPE' })).toStrictEqual([]);
+		});
+
+		it('should filter tokens by standard correctly when filter is provided', () => {
+			expect(filterTokens({ tokens, filter: 'spl' })).toStrictEqual([mockValidSplToken]);
+			expect(filterTokens({ tokens, filter: 'dip721' })).toStrictEqual([mockValidDip721Token]);
+
+			expect(filterTokens({ tokens, filter: 'BITCOIN' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+
+			// substring matches every ERC variant; mockValidIcCkToken matches via its erc20 twin
+			expect(filterTokens({ tokens, filter: 'erc' })).toStrictEqual([
+				mockValidIcCkToken,
+				mockValidErc20Token,
+				mockValidErc721Token,
+				mockValidErc1155Token
+			]);
+
+			// 'icp' is a substring of both 'icp' and 'icpunks'
+			expect(filterTokens({ tokens, filter: 'icp' })).toStrictEqual([
+				ICP_TOKEN,
+				mockValidIcCkToken,
+				mockValidIcPunksToken
+			]);
+		});
+
+		it('should filter tokens by standard version when filter is provided', () => {
+			const extV2Token = {
+				...mockValidExtV2Token,
+				standard: { code: 'ext' as const, version: 'v2' }
+			};
+			const tokensWithVersion = [extV2Token, ...mockTokens];
+
+			// version alone
+			expect(filterTokens({ tokens: tokensWithVersion, filter: 'v2' })).toStrictEqual([extV2Token]);
+			// combined `code version` UI label
+			expect(filterTokens({ tokens: tokensWithVersion, filter: 'ext v2' })).toStrictEqual([
+				extV2Token
+			]);
+			// case-insensitive
+			expect(filterTokens({ tokens: tokensWithVersion, filter: 'EXT V2' })).toStrictEqual([
+				extV2Token
+			]);
 		});
 
 		it('should filter tokens by name correctly when filter is provided', () => {
