@@ -42,31 +42,36 @@ export type SignBtcParams = CommonBtcServiceParams & {
 // Validation errors whose handling is a uniform toast differing only by the
 // i18n key. AuthenticationRequired and the unexpected fallback are kept as
 // explicit special cases below, so they intentionally do not appear here.
-const btcValidationErrorMessages: Partial<Record<BtcSendValidationError, (i18n: I18n) => string>> =
+const btcValidationErrorMessages: Partial<Record<BtcSendValidationError, ($i18n: I18n) => string>> =
 	{
-		[BtcSendValidationError.NoNetworkId]: (i18n) => i18n.send.error.no_btc_network_id,
-		[BtcSendValidationError.InvalidDestination]: (i18n) =>
-			i18n.send.assertion.destination_address_invalid,
-		[BtcSendValidationError.InvalidAmount]: (i18n) => i18n.send.assertion.amount_invalid,
-		[BtcSendValidationError.UtxoFeeMissing]: (i18n) => i18n.send.assertion.utxos_fee_missing,
-		[BtcSendValidationError.TokenUndefined]: (i18n) => i18n.tokens.error.unexpected_undefined,
-		[BtcSendValidationError.InsufficientBalance]: (i18n) =>
-			i18n.send.assertion.btc_insufficient_balance,
-		[BtcSendValidationError.InsufficientBalanceForFee]: (i18n) =>
-			i18n.send.assertion.btc_insufficient_balance_for_fee,
-		[BtcSendValidationError.InvalidUtxoData]: (i18n) => i18n.send.assertion.btc_invalid_utxo_data,
-		[BtcSendValidationError.UtxoLocked]: (i18n) => i18n.send.assertion.btc_utxo_locked,
-		[BtcSendValidationError.InvalidFeeCalculation]: (i18n) =>
-			i18n.send.assertion.btc_invalid_fee_calculation,
-		[BtcSendValidationError.MinimumBalance]: (i18n) => i18n.send.assertion.minimum_btc_amount
+		[BtcSendValidationError.NoNetworkId]: ($i18n) => $i18n.send.error.no_btc_network_id,
+		[BtcSendValidationError.InvalidDestination]: ($i18n) =>
+			$i18n.send.assertion.destination_address_invalid,
+		[BtcSendValidationError.InvalidAmount]: ($i18n) => $i18n.send.assertion.amount_invalid,
+		[BtcSendValidationError.UtxoFeeMissing]: ($i18n) => $i18n.send.assertion.utxos_fee_missing,
+		[BtcSendValidationError.TokenUndefined]: ($i18n) => $i18n.tokens.error.unexpected_undefined,
+		[BtcSendValidationError.InsufficientBalance]: ($i18n) =>
+			$i18n.send.assertion.btc_insufficient_balance,
+		[BtcSendValidationError.InsufficientBalanceForFee]: ($i18n) =>
+			$i18n.send.assertion.btc_insufficient_balance_for_fee,
+		[BtcSendValidationError.InvalidUtxoData]: ($i18n) => $i18n.send.assertion.btc_invalid_utxo_data,
+		[BtcSendValidationError.UtxoLocked]: ($i18n) => $i18n.send.assertion.btc_utxo_locked,
+		[BtcSendValidationError.InvalidFeeCalculation]: ($i18n) =>
+			$i18n.send.assertion.btc_invalid_fee_calculation,
+		[BtcSendValidationError.MinimumBalance]: ($i18n) => $i18n.send.assertion.minimum_btc_amount
 	};
 
 /**
- * This function handles the validation errors thrown by the validateUtxosForSend function
- * It has been moved to a service so it can be shared between the BTC Send and Convert Wizard
- * @param err BtcValidationError - The validation error that was thrown
- * @param $i18n I18n - The i18n store containing translation strings
- * @returns Promise<void> - Returns void if successful, may throw errors if validation fails
+ * Shows a toast for a BTC validation error, mapping each error type to its message.
+ *
+ * Shared between the BTC Send and Convert Wizard flows. Reads the current i18n store
+ * internally, so no translation strings need to be passed in. `AuthenticationRequired`
+ * is silently ignored and any unmapped error type falls back to a generic toast.
+ *
+ * This function is synchronous and returns void.
+ *
+ * @param params - Object containing the validation error
+ * @param params.err - The {@link BtcValidationError} to surface as a toast
  */
 export const handleBtcValidationError = ({ err }: { err: BtcValidationError }) => {
 	if (err.type === BtcSendValidationError.AuthenticationRequired) {
