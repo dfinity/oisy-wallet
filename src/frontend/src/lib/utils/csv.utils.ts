@@ -9,12 +9,15 @@ export interface CsvColumn<R extends CsvRow> {
 	header: string;
 }
 
+const SPREADSHEET_FORMULA_PATTERN = /^[\t\r\n]*[=+\-@]|^\s+[=+\-@]/;
+
 const escapeCsvCell = (cell: CsvCell): string => {
 	if (isNullish(cell)) {
 		return '';
 	}
 
-	const value = typeof cell === 'bigint' ? cell.toString() : String(cell);
+	const rawValue = typeof cell === 'bigint' ? cell.toString() : String(cell);
+	const value = SPREADSHEET_FORMULA_PATTERN.test(rawValue) ? `'${rawValue}` : rawValue;
 
 	return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 };

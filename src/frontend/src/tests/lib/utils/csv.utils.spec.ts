@@ -86,6 +86,30 @@ describe('csv.utils', () => {
 			expect(csv).toBe('A\r\n"say ""hi"""');
 		});
 
+		it('neutralizes cells that spreadsheets could evaluate as formulas', () => {
+			const csv = toCsv({
+				columns: [{ key: 'a', header: 'A' }],
+				rows: [
+					{ a: '=HYPERLINK("https://example.com")', b: null, c: undefined },
+					{ a: '+SUM(1,1)', b: null, c: undefined },
+					{ a: '-SUM(1,1)', b: null, c: undefined },
+					{ a: '@SUM(1,1)', b: null, c: undefined },
+					{ a: '  =SUM(1,1)', b: null, c: undefined }
+				]
+			});
+
+			expect(csv).toBe(
+				[
+					'A',
+					`"'=HYPERLINK(""https://example.com"")"`,
+					"'+SUM(1,1)",
+					"'-SUM(1,1)",
+					"'@SUM(1,1)",
+					"'  =SUM(1,1)"
+				].join('\r\n')
+			);
+		});
+
 		it('quotes header cells when they contain a special character', () => {
 			const csv = toCsv({
 				columns: [{ key: 'a', header: 'A, with comma' }],
