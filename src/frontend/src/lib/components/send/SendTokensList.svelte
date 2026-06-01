@@ -8,6 +8,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
 	interface Props {
 		onSendToken: (token: Token) => void;
@@ -16,6 +17,8 @@
 	}
 
 	let { onSendToken, onSelectNetworkFilter, lockedNetwork }: Props = $props();
+
+	let lockedSingleToken = $derived(isNetworkIdBTCMainnet(lockedNetwork?.id));
 
 	const onTokenButtonClick = (token: Token) => {
 		onSendToken(token);
@@ -28,7 +31,7 @@
 	{onTokenButtonClick}
 >
 	{#snippet topBanner()}
-		<ScannedPlainAddressNotice />
+		<ScannedPlainAddressNotice singleToken={lockedSingleToken} />
 	{/snippet}
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />

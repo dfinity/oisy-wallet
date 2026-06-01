@@ -26,5 +26,6 @@
 	"OISY_CREATING_A_WALLET_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/creating-a-wallet",
 	"OISY_SCAN_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/universal-scanner",
 	"OISY_PAY_URL": "https://docs.oisy.com/using-oisy-wallet/oisy-pay",
-	"OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL": "https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions"
+	"OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL": "https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions",
+	"OISY_EXPORT_DATA_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/exporting-tokens-and-transactions"
 }

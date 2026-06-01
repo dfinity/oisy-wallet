@@ -76,27 +76,31 @@ Key facts:
 
 - [Release Notes](https://docs.oisy.com/introduction/whats-new): Version history and release notes.
 
-## Latest Release (v2.0.8)
+## Latest Release (v2.1.0)
 
 ### New Features
 
-- A new transaction filter on the Activity page now allows to filter transactions by contact, token or transaction type.
+- Support for the NFT standard ICRC-7
+- Export functionality for tokens and transactions as csv text file
 
 ### Improvements
 
-- The swap review page now shows a warning, which the user must confirm, if one of the tokens has no price available and OISY can't verify if the offer is a fair deal or not.
-- Optimized Bitcoin sending by optimizing for the cheapest transaction cost by using the ideal UTXO(s).
-- Allow creating multiple unconfirmed Bitcoin transactions by improving the locking concept to now work at the UTXO level.
-- Improved the behavior of the swap form by additionally filtering the receive token and network list by the selected pay token, respecting the swap capabilities of all available providers.
+- Token list can now also be filtered by the address of the token contract.
+- BTC transaction details now also show the provided fee amount.
+- OISY Scan now also allows to initiate a send transaction when scanning an ICP principal, a bitcoin address or a solana address.
+- When a swap fails with a generic error coming from the provider side, OISY now shows an information element on the swap review page.
 
 ### Bug Fixes
 
-- -
+- Fixed a bug where the OISY scanner went into inactive mode on mobiles after scanning an unsupported qr code.
+- Fixed an issue where Velora swaps showed no active state for the first few seconds of the swap.
+- Fixed a bug where some error toasts were shown behind the blur layer when a modal is open.
 
 ## Most recent Features and Improvements
 
 ### New Features
 
+- A new transaction filter on the Activity page now allows to filter transactions by contact, token or transaction type.
 - Integration to 1Sec to offer bridging several tokens from ICP to Ethereum, Base, and Arbitrum, or vice versa.
 - Allow to quickly sign up or sign in with Google, Apple, or Microsoft accounts.
 - Micro transaction filter that filters out small value transactions from the user's activity list.
@@ -106,6 +110,10 @@ Key facts:
 
 ### Improvements
 
+- The swap review page now shows a warning, which the user must confirm, if one of the tokens has no price available and OISY can't verify if the offer is a fair deal or not.
+- Optimized Bitcoin sending by optimizing for the cheapest transaction cost by using the ideal UTXO(s).
+- Allow creating multiple unconfirmed Bitcoin transactions by improving the locking concept to now work at the UTXO level.
+- Improved the behavior of the swap form by additionally filtering the receive token and network list by the selected pay token, respecting the swap capabilities of all available providers.
 - Move the help menu into the user menu to get more space available on the header row.
 - Keep the text based token filter when switching between Tokens, NFTs and Earning.
 - Use ICPSwap as fallback price source if we don't get a price for an icrc token.

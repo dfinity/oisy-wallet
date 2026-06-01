@@ -108,6 +108,15 @@ export const newUserSignupsAllowed = async ({
 	return newUserSignupsAllowed({ certified });
 };
 
+export const exchangeRateEnabled = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<boolean> => {
+	const { exchangeRateEnabled } = await backendCanister({ identity });
+
+	return exchangeRateEnabled({ certified });
+};
+
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params

@@ -1,4 +1,7 @@
-import { createStepsHarness } from '$tests/utils/steps-reactivity.test-utils.svelte';
+import {
+	createSelectedNftHarness,
+	createStepsHarness
+} from '$tests/utils/steps-reactivity.test-utils.svelte';
 import { flushSync } from 'svelte';
 
 describe('SendModal', () => {
@@ -73,6 +76,62 @@ describe('SendModal', () => {
 			expect(harness.getExtractedRecomputeCount()).toBe(2);
 
 			expect(second).not.toBe(first);
+		});
+	});
+
+	describe('selected NFT reactivity (regression coverage)', () => {
+		it('writable derived overrides are reset when the page NFT becomes undefined', () => {
+			const harness = createSelectedNftHarness();
+			const selectedNft = { id: 'selected' };
+
+			try {
+				harness.selectWithDerived(selectedNft);
+
+				expect(harness.readDerivedSelectedNft()).toBe(selectedNft);
+
+				harness.setPageNft(undefined);
+				flushSync();
+
+				expect(harness.readDerivedSelectedNft()).toBeUndefined();
+			} finally {
+				harness.destroy();
+			}
+		});
+
+		it('explicit state preserves manual list selections while the page NFT is undefined', () => {
+			const harness = createSelectedNftHarness();
+			const selectedNft = { id: 'selected' };
+
+			try {
+				harness.selectWithState(selectedNft);
+
+				expect(harness.readStateSelectedNft()).toBe(selectedNft);
+
+				harness.setPageNft(undefined);
+				flushSync();
+
+				expect(harness.readStateSelectedNft()).toBe(selectedNft);
+			} finally {
+				harness.destroy();
+			}
+		});
+
+		it('explicit state syncs routed NFTs and reset clears the selection', () => {
+			const harness = createSelectedNftHarness();
+			const routedNft = { id: 'route-b' };
+
+			try {
+				harness.setPageNft(routedNft);
+				flushSync();
+
+				expect(harness.readStateSelectedNft()).toBe(routedNft);
+
+				harness.resetStateSelection();
+
+				expect(harness.readStateSelectedNft()).toBeUndefined();
+			} finally {
+				harness.destroy();
+			}
 		});
 	});
 });

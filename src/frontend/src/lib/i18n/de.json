@@ -29,6 +29,7 @@
 			"not_available": "k. A.",
 			"new": "Neu",
 			"edit": "Bearbeiten",
+			"download": "Herunterladen",
 			"no_results": "Keine Ergebnisse",
 			"paste": "Einfügen",
 			"to": "An",
@@ -797,7 +798,15 @@
 			"enable_show_token_standard_filter": "",
 			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "Ihre Spam-Filter-Einstellungen wurden aktualisiert.",
-			"learn_more": ""
+			"export_data": "Daten exportieren",
+			"export_data_description": "Lade deine Tokens und Transaktionen als CSV herunter — Basic für das Wesentliche, Extended für zusätzliche Attribute.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Tokens exportieren",
+			"export_transactions": "Transaktionen exportieren",
+			"export_tokens_success": "CSV mit Tokens heruntergeladen.",
+			"export_transactions_success": "CSV mit Transaktionen heruntergeladen.",
+			"learn_more": "Erfahre mehr"
 		},
 		"alt": {
 			"testnets_toggle": "Umschalten, um Testnetzwerke anzuzeigen oder zu verbergen",
@@ -807,7 +816,9 @@
 			"appearance_system": "Aktiviert den Farbmodus deines Betriebssystems"
 		},
 		"error": {
-			"loading_profile": "Fehler beim Laden des Profils. Bitte aktualisiere die Seite, um das volle Erlebnis zu haben."
+			"loading_profile": "Fehler beim Laden des Profils. Bitte aktualisiere die Seite, um das volle Erlebnis zu haben.",
+			"export_exchange_rate_unavailable": "Wechselkurse werden noch geladen. Versuche es in einem Moment erneut.",
+			"export_failed": "Wir konnten deinen Export nicht erstellen. Bitte versuche es erneut."
 		}
 	},
 	"shortcuts": {
@@ -961,7 +972,8 @@
 			"no_available_utxos": "Du hast keine verfügbaren UTXOs für diese Transaktion.",
 			"unknown_destination": "Du hast zuvor nicht mit dieser Adresse interagiert. Stelle sicher, dass du den Empfänger kennst.",
 			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>",
-			"scanned_address_only_destination": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du das richtige Token auswählst, den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!"
+			"scanned_address_only_destination": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du das richtige Token auswählst, den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!",
+			"scanned_address_only_destination_single_token": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Ungültige Zieladresse",
@@ -1184,6 +1196,7 @@
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
 			"unexpected": "Beim Tauschen der Token ist etwas schiefgelaufen.",
 			"unexpected_missing_data": "Beim Starten der Tauschtransaktion ist etwas schiefgelaufen.",
+			"failed_unexpectedly": "Der Tausch konnte nicht abgeschlossen werden. Bitte überprüfe dein Wallet-Guthaben und versuche es erneut, oder wähle einen anderen Anbieter.",
 			"slippage_exceeded": "$oisy_short schützt Dich: Der Handel liegt außerhalb deiner Slippage-Toleranz von $maxSlippage%. Bitte passe die maximale Slippage an und versuche es erneut.",
 			"pool_not_found": "Tausch fehlgeschlagen. Pool nicht gefunden.",
 			"deposit_error": "Das Senden der Token für den Tausch ist fehlgeschlagen. Please try again or change the swap provider. Versuche es erneut oder wähle einen anderen Anbieter.",
