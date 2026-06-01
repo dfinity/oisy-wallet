@@ -797,7 +797,13 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should handle errors and reset store', async () => {
+			const initialTransactions = createMockSolTransactionsUi(11).map((transaction) => ({
+				data: transaction,
+				certified: false
+			}));
 			const error = new Error('Failed to load transactions');
+
+			solTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
 			spyGetTransactions.mockRejectedValue(error);
 
 			await loadNextSolTransactions(mockParams);
