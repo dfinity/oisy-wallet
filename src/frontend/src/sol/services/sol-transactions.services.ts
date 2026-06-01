@@ -472,9 +472,10 @@ const loadSolTransactions = async ({
 	before,
 	...rest
 }: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
+	const isHeadLoad = isNullish(before);
+
 	try {
 		const backendTokenId = solBackendTokenId({ network, tokenAddress });
-		const isHeadLoad = isNullish(before);
 		const backendCursor = solBackendPaginationCursors.get(tokenId);
 
 		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && !isHeadLoad && nonNullish(backendCursor)) {
@@ -585,7 +586,9 @@ const loadSolTransactions = async ({
 
 		return mapSolCertifiedTransactions(freshTransactions);
 	} catch (error: unknown) {
-		solTransactionsStore.reset(tokenId);
+		if (isHeadLoad) {
+			solTransactionsStore.reset(tokenId);
+		}
 
 		consoleError(`Failed to load transactions for ${tokenId.description}:`, error);
 		return [];
