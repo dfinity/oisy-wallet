@@ -1,9 +1,4 @@
-import {
-	PLAUSIBLE_EVENT_CONTEXTS,
-	PLAUSIBLE_EVENT_RESULT_STATUSES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS,
-	PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS
-} from '$lib/enums/plausible';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { trackExportData } from '$lib/services/export-data-analytics.services';
 
@@ -17,36 +12,32 @@ describe('export-data-analytics.services', () => {
 	});
 
 	describe('trackExportData', () => {
-		it('tracks a tokens basic success event', () => {
+		it('tracks a tokens_basic success event', () => {
 			trackExportData({
-				context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.BASIC,
+				context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS_BASIC,
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: 'export_data',
 				metadata: {
-					event_context: 'tokens',
-					event_subcontext: 'basic',
+					event_context: 'tokens_basic',
 					source_location: 'settings_page',
 					result_status: 'success'
 				}
 			});
 		});
 
-		it('tracks a transactions extended success event', () => {
+		it('tracks a transactions_extended success event', () => {
 			trackExportData({
-				context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.EXTENDED,
+				context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS_EXTENDED,
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: 'export_data',
 				metadata: {
-					event_context: 'transactions',
-					event_subcontext: 'extended',
+					event_context: 'transactions_extended',
 					source_location: 'settings_page',
 					result_status: 'success'
 				}
@@ -55,8 +46,7 @@ describe('export-data-analytics.services', () => {
 
 		it('attaches result_error and result_error_code on the error path', () => {
 			trackExportData({
-				context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.BASIC,
+				context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS_BASIC,
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				error: 'row build failed',
 				errorCode: 'build_failed'
@@ -65,8 +55,7 @@ describe('export-data-analytics.services', () => {
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: 'export_data',
 				metadata: {
-					event_context: 'transactions',
-					event_subcontext: 'basic',
+					event_context: 'transactions_basic',
 					source_location: 'settings_page',
 					result_status: 'error',
 					result_error: 'row build failed',
@@ -77,8 +66,7 @@ describe('export-data-analytics.services', () => {
 
 		it('omits result_error when only an error code is provided', () => {
 			trackExportData({
-				context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.EXTENDED,
+				context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS_EXTENDED,
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				errorCode: 'fx_rate_unavailable'
 			});
@@ -86,8 +74,7 @@ describe('export-data-analytics.services', () => {
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: 'export_data',
 				metadata: {
-					event_context: 'tokens',
-					event_subcontext: 'extended',
+					event_context: 'tokens_extended',
 					source_location: 'settings_page',
 					result_status: 'error',
 					result_error_code: 'fx_rate_unavailable'

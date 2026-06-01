@@ -2,36 +2,26 @@ import {
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENTS,
 	type PLAUSIBLE_EVENT_CONTEXTS,
-	type PLAUSIBLE_EVENT_RESULT_STATUSES,
-	type PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS,
-	type PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS
+	type PLAUSIBLE_EVENT_RESULT_STATUSES
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { nonNullish } from '@dfinity/utils';
 
-type ExportDataContextSelector =
-	| {
-			context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS;
-			subcontext:
-				| PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.BASIC
-				| PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.EXTENDED;
-	  }
-	| {
-			context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS;
-			subcontext:
-				| PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.BASIC
-				| PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.EXTENDED;
-	  };
+export type ExportDataContext =
+	| PLAUSIBLE_EVENT_CONTEXTS.TOKENS_BASIC
+	| PLAUSIBLE_EVENT_CONTEXTS.TOKENS_EXTENDED
+	| PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS_BASIC
+	| PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS_EXTENDED;
 
-export type TrackExportDataParams = ExportDataContextSelector & {
+export interface TrackExportDataParams {
+	context: ExportDataContext;
 	resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES;
 	error?: string;
 	errorCode?: string;
-};
+}
 
 export const trackExportData = ({
 	context,
-	subcontext,
 	resultStatus,
 	error,
 	errorCode
@@ -40,7 +30,6 @@ export const trackExportData = ({
 		name: PLAUSIBLE_EVENTS.EXPORT_DATA,
 		metadata: {
 			event_context: context,
-			event_subcontext: subcontext,
 			source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
 			result_status: resultStatus,
 			...(nonNullish(error) && { result_error: error }),

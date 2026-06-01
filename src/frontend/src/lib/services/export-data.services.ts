@@ -2,12 +2,7 @@ import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.se
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
-import {
-	PLAUSIBLE_EVENT_CONTEXTS,
-	PLAUSIBLE_EVENT_RESULT_STATUSES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS,
-	PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS
-} from '$lib/enums/plausible';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { trackExportData } from '$lib/services/export-data-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsShow } from '$lib/stores/toasts.store';
@@ -53,9 +48,9 @@ const TOKEN_CSV_FILENAME_BASE_BY_VARIANT = {
 	extended: 'oisy-tokens'
 } as const;
 
-const TOKEN_CSV_SUBCONTEXT_BY_VARIANT = {
-	basic: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.BASIC,
-	extended: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.EXTENDED
+const TOKEN_CSV_CONTEXT_BY_VARIANT = {
+	basic: PLAUSIBLE_EVENT_CONTEXTS.TOKENS_BASIC,
+	extended: PLAUSIBLE_EVENT_CONTEXTS.TOKENS_EXTENDED
 } as const;
 
 export const exportTokensCsv = ({
@@ -70,7 +65,7 @@ export const exportTokensCsv = ({
 	variant?: TokenCsvVariant;
 }): boolean => {
 	const $i18n = get(i18n);
-	const subcontext = TOKEN_CSV_SUBCONTEXT_BY_VARIANT[variant];
+	const context = TOKEN_CSV_CONTEXT_BY_VARIANT[variant];
 
 	if (currency !== Currency.USD && isNullish(exchangeRateToUsd)) {
 		toastsShow({
@@ -79,8 +74,7 @@ export const exportTokensCsv = ({
 			duration: 4000
 		});
 		trackExportData({
-			context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
-			subcontext,
+			context,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 			errorCode: 'fx_rate_unavailable'
 		});
@@ -106,8 +100,7 @@ export const exportTokensCsv = ({
 	});
 
 	trackExportData({
-		context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
-		subcontext,
+		context,
 		resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 	});
 
@@ -190,9 +183,9 @@ const TRANSACTION_CSV_FILENAME_BASE_BY_VARIANT = {
 	extended: 'oisy-transactions'
 } as const;
 
-const TRANSACTION_CSV_SUBCONTEXT_BY_VARIANT = {
-	basic: PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.BASIC,
-	extended: PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS.EXTENDED
+const TRANSACTION_CSV_CONTEXT_BY_VARIANT = {
+	basic: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS_BASIC,
+	extended: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS_EXTENDED
 } as const;
 
 export const exportTransactionsCsv = async ({
@@ -213,12 +206,11 @@ export const exportTransactionsCsv = async ({
 	variant?: TransactionCsvVariant;
 }): Promise<boolean> => {
 	const $i18n = get(i18n);
-	const subcontext = TRANSACTION_CSV_SUBCONTEXT_BY_VARIANT[variant];
+	const context = TRANSACTION_CSV_CONTEXT_BY_VARIANT[variant];
 
 	if (isNullish(identity)) {
 		trackExportData({
-			context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS,
-			subcontext,
+			context,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 			errorCode: 'no_identity'
 		});
@@ -259,8 +251,7 @@ export const exportTransactionsCsv = async ({
 		});
 
 		trackExportData({
-			context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS,
-			subcontext,
+			context,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 		});
 
@@ -273,8 +264,7 @@ export const exportTransactionsCsv = async ({
 			duration: 4000
 		});
 		trackExportData({
-			context: PLAUSIBLE_EVENT_CONTEXTS.TRANSACTIONS,
-			subcontext,
+			context,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 			errorCode: 'build_failed',
 			error: error instanceof Error ? error.message : String(error)

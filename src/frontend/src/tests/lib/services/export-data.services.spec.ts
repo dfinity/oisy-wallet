@@ -162,8 +162,7 @@ describe('export-data.services', () => {
 				duration: 4000
 			});
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'tokens',
-				subcontext: 'extended',
+				context: 'tokens_extended',
 				resultStatus: 'error',
 				errorCode: 'fx_rate_unavailable'
 			});
@@ -188,8 +187,7 @@ describe('export-data.services', () => {
 				duration: 2000
 			});
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'tokens',
-				subcontext: 'basic',
+				context: 'tokens_basic',
 				resultStatus: 'success'
 			});
 		});
@@ -213,8 +211,7 @@ describe('export-data.services', () => {
 			expect(mockDownloadCsv).not.toHaveBeenCalled();
 			expect(mockToastsShow).not.toHaveBeenCalled();
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'transactions',
-				subcontext: 'basic',
+				context: 'transactions_basic',
 				resultStatus: 'error',
 				errorCode: 'no_identity'
 			});
@@ -257,8 +254,7 @@ describe('export-data.services', () => {
 				duration: 2000
 			});
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'transactions',
-				subcontext: 'basic',
+				context: 'transactions_basic',
 				resultStatus: 'success'
 			});
 		});
@@ -280,8 +276,7 @@ describe('export-data.services', () => {
 				duration: 4000
 			});
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'transactions',
-				subcontext: 'extended',
+				context: 'transactions_extended',
 				resultStatus: 'error',
 				errorCode: 'build_failed',
 				error: 'row build failed'
