@@ -788,12 +788,12 @@ export interface ExchangeOutcallRecord {
 	/**
 	 * Cycles charged by the management canister for this outcall.
 	 *
-	 * Computed deterministically from the IC HTTPS-outcall pricing
-	 * formula using `request_bytes + max_response_bytes` for a 13-node
-	 * application subnet. Per the IC docs, the response term is on
-	 * `max_response_bytes`, not actual response size — see
-	 * `crate::utils::http_outcall::outcall_cost_cycles` for the
-	 * formula and constants.
+	 * Taken from the `ic0.cost_http_request` system API (via
+	 * `ic_cdk::management_canister::cost_http_request`) on the exact
+	 * request dispatched — the same value `http_request` uses to attach
+	 * cycles. Exact for the actual subnet size and automatically correct
+	 * across IC pricing changes. The charge is against
+	 * `max_response_bytes`, not the actual response size.
 	 */
 	cycles_charged: bigint;
 	/**
