@@ -460,11 +460,14 @@ export const doesTokenMatchFilter = ({
 }): boolean => {
 	const matchingToken = (token: Token): boolean => {
 		const { name, symbol, standard } = token;
+		// Match against the UI-rendered `code version` label (e.g. "ext v2"), so typing
+		// the version alone, the code alone, or the combined string all work.
+		const standardLabel = `${standard.code} ${standard.version ?? ''}`.trim().toLowerCase();
 
 		if (
 			name.toLowerCase().includes(filter.toLowerCase()) ||
 			symbol.toLowerCase().includes(filter.toLowerCase()) ||
-			standard.code.toLowerCase().includes(filter.toLowerCase())
+			standardLabel.includes(filter.toLowerCase())
 		) {
 			return true;
 		}

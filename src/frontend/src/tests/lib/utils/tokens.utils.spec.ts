@@ -1260,6 +1260,25 @@ describe('tokens.utils', () => {
 			]);
 		});
 
+		it('should filter tokens by standard version when filter is provided', () => {
+			const extV2Token = {
+				...mockValidExtV2Token,
+				standard: { code: 'ext' as const, version: 'v2' }
+			};
+			const tokensWithVersion = [extV2Token, ...mockTokens];
+
+			// version alone
+			expect(filterTokens({ tokens: tokensWithVersion, filter: 'v2' })).toStrictEqual([extV2Token]);
+			// combined `code version` UI label
+			expect(filterTokens({ tokens: tokensWithVersion, filter: 'ext v2' })).toStrictEqual([
+				extV2Token
+			]);
+			// case-insensitive
+			expect(filterTokens({ tokens: tokensWithVersion, filter: 'EXT V2' })).toStrictEqual([
+				extV2Token
+			]);
+		});
+
 		it('should filter tokens by name correctly when filter is provided', () => {
 			expect(filterTokens({ tokens, filter: 'Bit' })).toStrictEqual([BTC_MAINNET_TOKEN]);
 			expect(filterTokens({ tokens, filter: 'Eth' })).toStrictEqual([ETHEREUM_TOKEN]);
