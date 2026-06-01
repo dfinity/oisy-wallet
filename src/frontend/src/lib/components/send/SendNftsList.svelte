@@ -13,6 +13,7 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { nftStore } from '$lib/stores/nft.store';
+	import { nftSortStore } from '$lib/stores/settings.store';
 	import type { Nft } from '$lib/types/nft';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { filterSortByCollection, findNftsByNetwork } from '$lib/utils/nfts.utils';
@@ -38,7 +39,8 @@
 	const filtered: Nft[] = $derived(
 		filterSortByCollection({
 			items: findNftsByNetwork({ nfts: visible, networkId: $filterNetwork?.id }),
-			filter
+			filter,
+			sort: $nftSortStore
 		})
 	);
 
