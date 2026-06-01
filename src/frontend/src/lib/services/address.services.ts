@@ -22,9 +22,10 @@ export interface LoadTokenAddressParams<T extends Address> {
  * Shared frontend address-derivation flow used by the chain-specific address services.
  *
  * When frontend derivation is enabled and the signer master public key is known, the address is
- * derived locally (mirroring the canister logic) instead of calling the signer API. Each chain
- * only differs in which master public key it consumes, the derive call and the signer-API fallback,
- * so those are injected by the caller while the guarding logic stays here.
+ * derived locally (mirroring the canister logic) instead of calling the signer API. The shared
+ * global `SIGNER_MASTER_PUB_KEY` is always used; each chain only differs in which field(s) of it it
+ * reads (e.g. ECDSA `ecdsa.secp256k1` vs Schnorr `schnorr.ed25519`), the derive call and the
+ * signer-API fallback, so those are injected by the caller while the guarding logic stays here.
  */
 export const deriveTokenAddress = async <T>({
 	identity,
