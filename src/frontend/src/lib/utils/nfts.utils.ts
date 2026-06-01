@@ -256,9 +256,10 @@ const matchesFilter = ({
 	const lower = filter.toLowerCase();
 
 	if (isCollectionUi(item)) {
-		// search by collection name
+		// search by collection name or standard
 		const collectionName = item.collection?.name?.toLowerCase() ?? '';
-		if (collectionName.includes(lower)) {
+		const collectionStandard = item.collection?.standard?.code?.toLowerCase() ?? '';
+		if (collectionName.includes(lower) || collectionStandard.includes(lower)) {
 			return true;
 		}
 		// search by collections nfts name or id
@@ -269,12 +270,13 @@ const matchesFilter = ({
 		);
 	}
 
-	// search nfts by id, name or collection name
+	// search nfts by id, name, collection name or collection standard
 	if (isNft(item)) {
 		return (
 			(String(item.id)?.toLowerCase().includes(lower) ?? false) ||
 			(item.name?.toLowerCase().includes(lower) ?? false) ||
-			(item.collection?.name?.toLowerCase().includes(lower) ?? false)
+			(item.collection?.name?.toLowerCase().includes(lower) ?? false) ||
+			(item.collection?.standard?.code?.toLowerCase().includes(lower) ?? false)
 		);
 	}
 

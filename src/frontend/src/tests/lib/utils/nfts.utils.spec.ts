@@ -551,6 +551,24 @@ describe('nfts.utils', () => {
 			expect(res[0].nfts).toEqual([custom]);
 		});
 
+		it('filters NFTs by collection.standard.code (case-insensitive substring)', () => {
+			// every item in base has collection.standard.code === 'erc721'
+			expect(filterSortByCollection({ items: base, filter: 'erc721' })).toEqual(base);
+			expect(filterSortByCollection({ items: base, filter: 'ERC' })).toEqual(base);
+			expect(filterSortByCollection({ items: base, filter: 'dip721' })).toEqual([]);
+		});
+
+		it('filters collection UIs by collection.standard.code (case-insensitive substring)', () => {
+			// both collections are erc721
+			const matched = filterSortByCollection({ items: collections, filter: 'erc721' });
+
+			expect(matched).toHaveLength(2);
+			expect(matched.every((c) => c.collection.standard?.code === 'erc721')).toBeTruthy();
+
+			expect(filterSortByCollection({ items: collections, filter: 'ERC' })).toHaveLength(2);
+			expect(filterSortByCollection({ items: collections, filter: 'dip721' })).toEqual([]);
+		});
+
 		it('sorts NFTs by collection name ascending', () => {
 			const res = filterSortByCollection({
 				items: base,
