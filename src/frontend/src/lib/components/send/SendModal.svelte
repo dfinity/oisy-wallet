@@ -48,6 +48,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
 	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -171,6 +172,9 @@
 		// Sending the last NFT from a collection's detail page would leave the user on a URL whose
 		// NFT has been wiped from the store at the next poll, so steer them to a still-renderable page.
 		if (isNftsPage && sendProgressStep === ProgressStepsSend.DONE && nonNullish(selectedNft)) {
+			// `InProgressWizard` arms a `beforeNavigate` guard via `dirtyWizardState`; the send is
+			// already done at this point, so clear it to avoid a "navigate away?" confirm popup.
+			dirtyWizardState.set(false);
 			goto(getNftSendRedirectUrl({ sentNft: selectedNft, collectionNfts: $pageCollectionNfts }));
 		}
 
