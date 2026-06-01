@@ -32,6 +32,7 @@ interface I18nCore {
 		not_available: string;
 		new: string;
 		edit: string;
+		download: string;
 		no_results: string;
 		paste: string;
 		to: string;
@@ -531,6 +532,14 @@ interface I18nSettings {
 		enable_hide_micro_transactions: string;
 		disable_hide_micro_transactions: string;
 		save_spam_filter_success: string;
+		export_data: string;
+		export_data_description: string;
+		export_basic: string;
+		export_extended: string;
+		export_tokens: string;
+		export_transactions: string;
+		export_tokens_success: string;
+		export_transactions_success: string;
 		learn_more: string;
 	};
 	alt: {
@@ -540,7 +549,11 @@ interface I18nSettings {
 		appearance_dark: string;
 		appearance_system: string;
 	};
-	error: { loading_profile: string };
+	error: {
+		loading_profile: string;
+		export_exchange_rate_unavailable: string;
+		export_failed: string;
+	};
 }
 
 interface I18nShortcuts {
@@ -687,6 +700,7 @@ interface I18nSend {
 		unknown_destination: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
+		scanned_address_only_destination_single_token: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -895,6 +909,7 @@ interface I18nSwap {
 		kong_not_available: string;
 		unexpected: string;
 		unexpected_missing_data: string;
+		failed_unexpectedly: string;
 		slippage_exceeded: string;
 		pool_not_found: string;
 		deposit_error: string;

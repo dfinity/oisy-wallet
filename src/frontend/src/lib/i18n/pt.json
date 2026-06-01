@@ -29,6 +29,7 @@
 			"not_available": "não disponível",
 			"new": "Novo",
 			"edit": "Editar",
+			"download": "Baixar",
 			"no_results": "Sem resultados",
 			"paste": "Colar",
 			"to": "Para",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "Ativar a ocultação de transações com valores muito pequenos",
 			"disable_hide_micro_transactions": "Desativar a ocultação de transações com valores muito pequenos",
 			"save_spam_filter_success": "As configurações do seu filtro de spam foram atualizadas.",
-			"learn_more": ""
+			"export_data": "Exportar dados",
+			"export_data_description": "Baixe seus tokens e transações como CSV — Basic para o essencial, Extended para atributos adicionais.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Exportar tokens",
+			"export_transactions": "Exportar transações",
+			"export_tokens_success": "CSV de tokens baixado.",
+			"export_transactions_success": "CSV de transações baixado.",
+			"learn_more": "Saber mais"
 		},
 		"alt": {
 			"testnets_toggle": "Alternar para mostrar ou ocultar testnets",
@@ -803,7 +812,9 @@
 			"appearance_system": "Habilita o modo de cor do seu sistema operacional"
 		},
 		"error": {
-			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa."
+			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa.",
+			"export_exchange_rate_unavailable": "As taxas de câmbio ainda estão carregando. Tente novamente em alguns instantes.",
+			"export_failed": "Não foi possível gerar sua exportação. Tente novamente."
 		}
 	},
 	"shortcuts": {
@@ -957,7 +968,8 @@
 			"no_available_utxos": "Você não terá UTXOs disponíveis para realizar esta transação.",
 			"unknown_destination": "Você ainda não interagiu com este endereço. Por favor, certifique-se de conhecer o destinatário.",
 			"fee_info": "A taxa será paga em $feeSymbol. Disponível: <strong>$feeBalance $feeSymbol</strong>",
-			"scanned_address_only_destination": "O código escaneado continha apenas um endereço de destino. Certifique-se de selecionar o token correto, inserir o valor certo e revisar o endereço de destino com atenção!"
+			"scanned_address_only_destination": "O código escaneado continha apenas um endereço de destino. Certifique-se de selecionar o token correto, inserir o valor certo e revisar o endereço de destino com atenção!",
+			"scanned_address_only_destination_single_token": "O código escaneado continha apenas um endereço de destino. Certifique-se de inserir o valor certo e revisar o endereço de destino com atenção!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Endereço de destino inválido",
@@ -1180,6 +1192,7 @@
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",
 			"unexpected": "Algo deu errado ao trocar tokens.",
 			"unexpected_missing_data": "Algo deu errado ao iniciar uma transação de troca.",
+			"failed_unexpectedly": "A troca não pôde ser concluída. Verifique o saldo da sua carteira e tente novamente, ou escolha outro provedor.",
 			"slippage_exceeded": "$oisy_short protege você: A negociação está fora da sua tolerância de deslizamento de $maxSlippage%. Por favor, ajuste o deslizamento máximo e tente novamente.",
 			"pool_not_found": "Troca falhou. Pool não encontrada.",
 			"deposit_error": "O depósito dos fundos para a troca falhou. Tente novamente ou altere o provedor da troca.",

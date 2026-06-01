@@ -29,6 +29,7 @@
 			"not_available": "n/a",
 			"new": "New",
 			"edit": "Edit",
+			"download": "Download",
 			"no_results": "No results",
 			"paste": "Paste",
 			"to": "To",
@@ -793,6 +794,14 @@
 			"enable_hide_micro_transactions": "Enable hiding of transactions with very small values",
 			"disable_hide_micro_transactions": "Disable hiding of transactions with very small values",
 			"save_spam_filter_success": "Your spam filter settings have been updated.",
+			"export_data": "Export data",
+			"export_data_description": "Download your tokens and transactions as CSV — Basic for the essentials, Extended for additional attributes.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Export tokens",
+			"export_transactions": "Export transactions",
+			"export_tokens_success": "Tokens CSV downloaded.",
+			"export_transactions_success": "Transactions CSV downloaded.",
 			"learn_more": "Learn more"
 		},
 		"alt": {
@@ -803,7 +812,9 @@
 			"appearance_system": "Enables your operating systems color mode"
 		},
 		"error": {
-			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience.",
+			"export_exchange_rate_unavailable": "Exchange rates are still loading. Try again in a moment.",
+			"export_failed": "We couldn't generate your export. Please try again."
 		}
 	},
 	"shortcuts": {
@@ -957,7 +968,8 @@
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
-			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!"
+			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
+			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -1180,6 +1192,7 @@
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
+			"failed_unexpectedly": "The swap could not be completed. Please check your wallet balance and try again, or choose a different provider.",
 			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
 			"pool_not_found": "Swap failed. Pool not found.",
 			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",

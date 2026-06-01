@@ -7,15 +7,18 @@
 
 	interface Props {
 		styleClass?: string;
+		singleToken?: boolean;
 	}
 
-	let { styleClass }: Props = $props();
+	let { styleClass, singleToken = false }: Props = $props();
 
 	const show = getContext<boolean>(SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY) ?? false;
 </script>
 
 {#if show}
 	<MessageBox level="warning" {styleClass} testId={SEND_SCANNED_PLAIN_ADDRESS_NOTICE}>
-		{$i18n.send.info.scanned_address_only_destination}
+		{singleToken
+			? $i18n.send.info.scanned_address_only_destination_single_token
+			: $i18n.send.info.scanned_address_only_destination}
 	</MessageBox>
 {/if}

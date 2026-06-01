@@ -1780,6 +1780,16 @@ export interface _SERVICE {
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	/**
+	 * Returns whether the backend is currently fetching and caching exchange rates.
+	 *
+	 * Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
+	 * actual refresh predicate used by [`fetch_and_update_prices`].
+	 *
+	 * Exposed as an unauthenticated query so the frontend worker can decide whether to read
+	 * cached rates from the backend or fetch directly from public providers.
+	 */
+	exchange_rate_enabled: ActorMethod<[], boolean>;
+	/**
 	 * Gets account creation timestamps.
 	 */
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;

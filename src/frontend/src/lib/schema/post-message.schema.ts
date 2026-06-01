@@ -68,7 +68,11 @@ export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>()),
-	erc4626TokensExchangeData: z.array(z.custom<Erc4626TokensExchangeData>())
+	erc4626TokensExchangeData: z.array(z.custom<Erc4626TokensExchangeData>()),
+	// Effective backend `exchange_rate_enabled` flag, resolved at runtime via the backend
+	// `exchange_rate_enabled` query. Optional for backwards compatibility — when absent,
+	// the worker falls back to the build-time `BACKEND_EXCHANGE_ENABLED` env constant.
+	backendExchangeEnabled: z.boolean().optional()
 });
 
 export const PostMessageDataRequestIcrcSchema = z.object({

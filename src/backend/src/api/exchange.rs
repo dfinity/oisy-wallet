@@ -3,8 +3,9 @@ use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 
 use crate::{
     exchange::{
-        cached_rates_snapshot, fetch_and_update_prices, priceable_tokens_for_caller,
-        release_refresh_lock, stale_or_missing_tokens, try_acquire_refresh_lock,
+        cached_rates_snapshot, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
+        priceable_tokens_for_caller, release_refresh_lock, stale_or_missing_tokens,
+        try_acquire_refresh_lock,
     },
     state::read_state,
     token,
@@ -53,7 +54,13 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     token::mark_tokens_active(&active_ids);
 
     let stale = stale_or_missing_tokens(&tokens);
-    if !stale.is_empty() && try_acquire_refresh_lock() {
+    let refresh_lock = if stale.is_empty() {
+        None
+    } else {
+        try_acquire_refresh_lock()
+    };
+
+    if let Some(lock) = refresh_lock {
         // Background-spawn the refresh so the response isn't gated on the
         // outcall round-trip. The 60s recurring refresh will also pick these
         // up; this spawn just shortens the convergence window for tokens the
@@ -67,7 +74,7 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
         // cache).
         ic_cdk::futures::spawn(async move {
             let outcome = fetch_and_update_prices(&stale).await;
-            release_refresh_lock();
+            release_refresh_lock(lock);
             if let Err(err) = outcome {
                 ic_cdk::println!("get_exchange_rates background refresh failed: {err:?}");
             }
@@ -81,4 +88,17 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
 #[must_use]
 pub fn get_exchange_rate(token_id: TokenId) -> Option<ExchangeRate> {
     read_state(|s| s.exchange_rates.get(&StoredTokenId(token_id)).map(|c| c.0))
+}
+
+/// Returns whether the backend is currently fetching and caching exchange rates.
+///
+/// Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
+/// actual refresh predicate used by [`fetch_and_update_prices`].
+///
+/// Exposed as an unauthenticated query so the frontend worker can decide whether to read
+/// cached rates from the backend or fetch directly from public providers.
+#[query]
+#[must_use]
+pub fn exchange_rate_enabled() -> bool {
+    is_exchange_rate_refresh_enabled()
 }
