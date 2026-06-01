@@ -36,7 +36,9 @@ const walletToParam = ({ wallet, ...rest }: OnramperCryptoWallet | OnramperNetwo
 const walletsToParam = (wallets: OnramperCryptoWallet[] | OnramperNetworkWallet[]) =>
 	arrayToParam(wallets.map(walletToParam));
 
-const toQueryString = (params: Omit<BuildOnramperLinkParams, 'wallets' | 'networkWallets'>) =>
+const toQueryString = (
+	params: Omit<BuildOnramperLinkParams, 'identity' | 'wallets' | 'networkWallets'>
+) =>
 	Object.entries(params)
 		.reduce<string[]>(
 			(acc, [key, value]) =>
