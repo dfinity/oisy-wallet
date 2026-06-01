@@ -9,7 +9,17 @@ export interface CsvColumn<R extends CsvRow> {
 	header: string;
 }
 
-const SPREADSHEET_FORMULA_PATTERN = /^[\t\r\n]*[=+\-@]|^\s+[=+\-@]/;
+const SPREADSHEET_FORMULA_PATTERN = /^[=+@]/;
+const NEGATIVE_NUMBER_PATTERN = /^-\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i;
+
+const isSpreadsheetFormula = (value: string): boolean => {
+	const trimmedValue = value.trim();
+
+	return (
+		SPREADSHEET_FORMULA_PATTERN.test(trimmedValue) ||
+		(trimmedValue.startsWith('-') && !NEGATIVE_NUMBER_PATTERN.test(trimmedValue))
+	);
+};
 
 const escapeCsvCell = (cell: CsvCell): string => {
 	if (isNullish(cell)) {
@@ -17,7 +27,7 @@ const escapeCsvCell = (cell: CsvCell): string => {
 	}
 
 	const rawValue = typeof cell === 'bigint' ? cell.toString() : String(cell);
-	const value = SPREADSHEET_FORMULA_PATTERN.test(rawValue) ? `'${rawValue}` : rawValue;
+	const value = isSpreadsheetFormula(rawValue) ? `'${rawValue}` : rawValue;
 
 	return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 };

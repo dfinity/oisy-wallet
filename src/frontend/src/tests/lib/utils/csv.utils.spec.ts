@@ -110,6 +110,18 @@ describe('csv.utils', () => {
 			);
 		});
 
+		it('keeps negative numeric cells parseable by spreadsheets', () => {
+			const csv = toCsv({
+				columns: [{ key: 'a', header: 'A' }],
+				rows: [
+					{ a: '-1.0001', b: null, c: undefined },
+					{ a: '-1e-8', b: null, c: undefined }
+				]
+			});
+
+			expect(csv).toBe('A\r\n-1.0001\r\n-1e-8');
+		});
+
 		it('quotes header cells when they contain a special character', () => {
 			const csv = toCsv({
 				columns: [{ key: 'a', header: 'A, with comma' }],
