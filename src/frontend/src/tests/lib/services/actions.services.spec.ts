@@ -2,7 +2,6 @@ import { openOnWalletReady } from '$lib/services/actions.services';
 import { busy } from '$lib/stores/busy.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 
-
 describe('actions.services', () => {
 	describe('openOnWalletReady', () => {
 		beforeEach(() => {
