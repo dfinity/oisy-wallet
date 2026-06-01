@@ -29,6 +29,7 @@
 			"not_available": "該当なし",
 			"new": "New",
 			"edit": "編集",
+			"download": "ダウンロード",
 			"no_results": "一致する結果はありません。",
 			"paste": "貼り付け",
 			"to": "宛先",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を有効にする",
 			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
 			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
-			"learn_more": ""
+			"export_data": "データをエクスポート",
+			"export_data_description": "トークンと取引をCSVとしてダウンロード — 基本情報には Basic、追加項目には Extended をご利用ください。",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "トークンをエクスポート",
+			"export_transactions": "取引をエクスポート",
+			"export_tokens_success": "トークンCSVをダウンロードしました。",
+			"export_transactions_success": "取引CSVをダウンロードしました。",
+			"learn_more": "詳細を見る"
 		},
 		"alt": {
 			"testnets_toggle": "テストネットの表示/非表示を切り替え",
@@ -803,7 +812,9 @@
 			"appearance_system": "OSのテーマ設定に従う"
 		},
 		"error": {
-			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。"
+			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。",
+			"export_exchange_rate_unavailable": "為替レートを読み込み中です。しばらくしてから再度お試しください。",
+			"export_failed": "エクスポートを作成できませんでした。もう一度お試しください。"
 		}
 	},
 	"shortcuts": {
@@ -956,7 +967,9 @@
 			"pending_bitcoin_transaction": "現在のBTCトランザクションが完了するまで、新たな送信はできません。",
 			"no_available_utxos": "このトランザクションを行うための利用可能なUTXOが不足しています。",
 			"unknown_destination": "このアドレスとやり取りは初めてです。送信先を確認してください。",
-			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "スキャンしたコードには宛先アドレスのみが含まれていました。正しいトークンを選択し、正しい数量を入力し、宛先アドレスを慎重に確認してください！",
+			"scanned_address_only_destination_single_token": "スキャンしたコードには宛先アドレスのみが含まれていました。正しい数量を入力し、宛先アドレスを慎重に確認してください！"
 		},
 		"assertion": {
 			"invalid_destination_address": "送信先アドレスが無効です",
@@ -1179,6 +1192,7 @@
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",
 			"unexpected": "トークンをスワップ中に問題が発生しました。",
 			"unexpected_missing_data": "スワップトランザクションの開始中に予期しない問題が発生しました。",
+			"failed_unexpectedly": "スワップを完了できませんでした。ウォレットの残高をご確認のうえ、再度お試しいただくか、別のプロバイダーをお選びください。",
 			"slippage_exceeded": "$oisy_short が保護しています：取引がスリッページ許容範囲の $maxSlippage% を超えています。最大スリッページを調整して再試行してください。",
 			"pool_not_found": "スワップ失敗。プールが見つかりません。",
 			"deposit_error": "スワップの資金を入金できませんでした。再度お試しいただくか、スワッププロバイダーを変更してください。",

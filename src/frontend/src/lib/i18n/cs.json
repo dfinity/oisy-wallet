@@ -29,6 +29,7 @@
 			"not_available": "n/a",
 			"new": "Nový",
 			"edit": "Upravit",
+			"download": "Stáhnout",
 			"no_results": "Žádné výsledky",
 			"paste": "Vložit",
 			"to": "Do",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "Povolit skrývání transakcí s velmi malými hodnotami",
 			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
 			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
-			"learn_more": ""
+			"export_data": "Exportovat data",
+			"export_data_description": "Stáhněte si své tokeny a transakce jako CSV — Basic pro to nejdůležitější, Extended pro další atributy.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Exportovat tokeny",
+			"export_transactions": "Exportovat transakce",
+			"export_tokens_success": "CSV s tokeny bylo staženo.",
+			"export_transactions_success": "CSV s transakcemi bylo staženo.",
+			"learn_more": "Zjistit více"
 		},
 		"alt": {
 			"testnets_toggle": "Přepnout pro zobrazení nebo skrytí testovacích sítí",
@@ -803,7 +812,9 @@
 			"appearance_system": "Povolí barevný režim vašeho operačního systému"
 		},
 		"error": {
-			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku."
+			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku.",
+			"export_exchange_rate_unavailable": "Směnné kurzy se stále načítají. Zkuste to za chvíli znovu.",
+			"export_failed": "Nepodařilo se nám vygenerovat váš export. Zkuste to prosím znovu."
 		}
 	},
 	"shortcuts": {
@@ -956,7 +967,9 @@
 			"pending_bitcoin_transaction": "Po dokončení čekající transakce můžete odeslat další transakci Bitcoin.",
 			"no_available_utxos": "Nebudete mít k dispozici žádné UTXO k provedení této transakce.",
 			"unknown_destination": "S touto adresou jste dosud neinteragovali. Ujistěte se, že znáte příjemce.",
-			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že vyberete správný token, zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!",
+			"scanned_address_only_destination_single_token": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Neplatná cílová adresa",
@@ -1179,6 +1192,7 @@
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
 			"unexpected": "Při výměně tokenů se něco pokazilo.",
 			"unexpected_missing_data": "Při zahájení transakce výměny se něco pokazilo.",
+			"failed_unexpectedly": "Swap se nepodařilo dokončit. Zkontrolujte prosím zůstatek své peněženky a zkuste to znovu, nebo zvolte jiného poskytovatele.",
 			"slippage_exceeded": "$oisy_short vás chrání: Obchod je mimo vaši toleranci skluzu $maxSlippage%. Upravte prosím maximální skluz a zkuste to znovu.",
 			"pool_not_found": "Výměna se nezdařila. Pool nebyl nalezen.",
 			"deposit_error": "Vklad finančních prostředků na váš swap selhal. Zkuste to prosím znovu nebo změňte poskytovatele swapu.",

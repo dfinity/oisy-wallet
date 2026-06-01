@@ -1832,6 +1832,16 @@ export interface _SERVICE {
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	/**
+	 * Returns whether the backend is currently fetching and caching exchange rates.
+	 *
+	 * Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
+	 * actual refresh predicate used by [`fetch_and_update_prices`].
+	 *
+	 * Exposed as an unauthenticated query so the frontend worker can decide whether to read
+	 * cached rates from the backend or fetch directly from public providers.
+	 */
+	exchange_rate_enabled: ActorMethod<[], boolean>;
+	/**
 	 * Gets account creation timestamps.
 	 */
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
@@ -1893,14 +1903,24 @@ export interface _SERVICE {
 	 * (testnets, NFTs and ERC-4626 vaults are excluded).
 	 *
 	 * The endpoint also re-marks the returned tokens as active so the
-	 * background refresh timer keeps them warm. If any cached price is older
-	 * than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`] seconds or
-	 * missing, the endpoint awaits a one-shot fetch for that subset before
-	 * responding. Entries that remain stale or missing after that attempt are
-	 * returned as `None` so returned prices honour the freshness contract.
+	 * background refresh timer keeps them warm. If any cached price is
+	 * missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
+	 * seconds, the endpoint kicks off a refresh for that subset **in the
+	 * background** (via `ic_cdk::futures::spawn`) and returns the current cache
+	 * snapshot immediately. Entries that are still missing or stale at the
+	 * moment of the call are returned as `None`; subsequent calls will pick up
+	 * the refreshed values once the spawned fetch lands.
 	 *
-	 * This is an `update` (rather than a `query`) because it mutates state
-	 * (`token_activity`) and may issue HTTP outcalls.
+	 * This trade-off (return fast, refresh async) is intentional: under the
+	 * previous "await-the-fetch" shape, a cold-cache caller could wait on the
+	 * full outcall fan-in before getting any response. The frontend already
+	 * tolerates `None` entries (renders no value rather than blocking), and
+	 * the background refresh + the 60s recurring timer together converge the
+	 * cache to fresh within ~one outcall round.
+	 *
+	 * This is still an `update` (rather than a `query`) because it mutates
+	 * state (`token_activity`) and may need an update context to schedule the
+	 * background fetch.
 	 */
 	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**

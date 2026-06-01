@@ -1348,9 +1348,96 @@ describe('exchange.worker', () => {
 				});
 			});
 
-			it('should post syncExchangeError when backend call fails', async () => {
+			it('should still post a sync success message when only the FX call fails', async () => {
+				vi.mocked(simplePrice).mockRejectedValueOnce(new Error('Coingecko unavailable'));
+				vi.mocked(getExchangeRates).mockResolvedValue(
+					mockMyRates([{ EvmNative: 1n } as TokenId, mockExchangeRate])
+				);
+				vi.mocked(calculateErc4626Prices).mockResolvedValue({});
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.EUR,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.objectContaining({
+						currentExchangeRate: {
+							exchangeRateToUsd: null,
+							exchangeRate24hChangeMultiplier: null,
+							currency: Currency.EUR
+						},
+						currentEthPrice: {
+							ethereum: {
+								usd: 42000,
+								usd_24h_change: 1.5,
+								usd_market_cap: 800_000_000_000,
+								last_updated_at: 1000
+							}
+						}
+					})
+				});
+			});
+
+			it('should still post a sync success message when only the backend call fails', async () => {
 				vi.mocked(getExchangeRates).mockRejectedValue(new Error('Backend unavailable'));
 				vi.mocked(calculateErc4626Prices).mockResolvedValue({});
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: {
+						currentExchangeRate: {
+							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1,
+							currency: Currency.USD
+						},
+						currentEthPrice: undefined,
+						currentBtcPrice: undefined,
+						currentErc20Prices: {},
+						currentIcpPrice: undefined,
+						currentIcrcPrices: {},
+						currentSolPrice: undefined,
+						currentSplPrices: {},
+						currentErc4626Prices: {},
+						currentBnbPrice: undefined,
+						currentPolPrice: undefined,
+						currentArbitrumEthPrice: undefined,
+						currentBaseEthPrice: undefined
+					}
+				});
+			});
+
+			it('should post syncExchangeError only when an unexpected error occurs', async () => {
+				vi.mocked(getExchangeRates).mockResolvedValue([]);
+				vi.mocked(calculateErc4626Prices).mockRejectedValue(new Error('Unexpected'));
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
 					...createEvent(msg),

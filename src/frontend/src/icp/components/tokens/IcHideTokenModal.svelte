@@ -54,6 +54,11 @@
 			metadata: {
 				ledgerCanisterId,
 				indexCanisterId: `${indexCanisterId}`,
+				...(nonNullish(selectedToken?.symbol) && { tokenSymbol: selectedToken.symbol }),
+				...(nonNullish(selectedToken?.name) && { tokenName: selectedToken.name }),
+				...(nonNullish(selectedToken?.standard) && {
+					tokenStandard: selectedToken.standard.code
+				}),
 				networkId: 'ICP',
 				source: HIDE_TOKEN_MODAL_ROUTE
 			}

@@ -3,7 +3,7 @@ import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services'
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
+import { getSyncExchangeTimerInterval } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import {
@@ -70,13 +70,16 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 	}
 
 	const scheduleNext = (): void => {
-		timer = setTimeout(async () => {
-			await syncLatestExchange(generation);
+		timer = setTimeout(
+			async () => {
+				await syncLatestExchange(generation);
 
-			if (generation === timerGeneration) {
-				scheduleNext();
-			}
-		}, SYNC_EXCHANGE_TIMER_INTERVAL);
+				if (generation === timerGeneration) {
+					scheduleNext();
+				}
+			},
+			getSyncExchangeTimerInterval(backendExchangeEnabledFromTimerData(latestTimerData))
+		);
 	};
 
 	scheduleNext();
@@ -167,10 +170,25 @@ const syncExchangeFromBackend = async ({
 		};
 	}
 
-	const [currentExchangeRate, backendPrices] = await Promise.all([
+	const [currentExchangeRateResult, backendPricesResult] = await Promise.allSettled([
 		exchangeRateUsdToCurrency(currentCurrency),
 		fetchExchangeRatesFromBackend({ identity })
 	]);
+
+	if (currentExchangeRateResult.status === 'rejected') {
+		consoleError('Error while fetching exchange rate:', currentExchangeRateResult.reason);
+	}
+
+	if (backendPricesResult.status === 'rejected') {
+		consoleError(
+			'Error while fetching exchange rate:',
+			'Failed to fetch backend exchange rates:',
+			backendPricesResult.reason
+		);
+	}
+
+	const currentExchangeRate =
+		currentExchangeRateResult.status === 'fulfilled' ? currentExchangeRateResult.value : undefined;
 
 	const {
 		currentEthPrice,
@@ -184,7 +202,22 @@ const syncExchangeFromBackend = async ({
 		currentErc20Prices,
 		currentIcrcPrices,
 		currentSplPrices
-	} = backendPrices;
+	} =
+		backendPricesResult.status === 'fulfilled'
+			? backendPricesResult.value
+			: {
+					currentEthPrice: undefined,
+					currentBtcPrice: undefined,
+					currentIcpPrice: undefined,
+					currentSolPrice: undefined,
+					currentBnbPrice: undefined,
+					currentPolPrice: undefined,
+					currentArbitrumEthPrice: undefined,
+					currentBaseEthPrice: undefined,
+					currentErc20Prices: {},
+					currentIcrcPrices: {},
+					currentSplPrices: {}
+				};
 
 	const currentErc4626Prices = await calculateErc4626Prices({
 		erc20Prices: currentErc20Prices,
@@ -320,6 +353,10 @@ const paramsFromTimerData = (
 	erc4626TokensExchangeData: data?.erc4626TokensExchangeData ?? []
 });
 
+const backendExchangeEnabledFromTimerData = (
+	data: PostMessageDataRequestExchangeTimer | undefined
+): boolean => data?.backendExchangeEnabled ?? BACKEND_EXCHANGE_ENABLED;
+
 const syncLatestExchange = async (generation: number) => {
 	if (generation !== timerGeneration) {
 		return;
@@ -354,7 +391,7 @@ const syncLatestExchange = async (generation: number) => {
 
 const syncExchange = async (params: SyncExchangeParams) => {
 	try {
-		const data = BACKEND_EXCHANGE_ENABLED
+		const data = backendExchangeEnabledFromTimerData(latestTimerData)
 			? await syncExchangeFromBackend(params)
 			: await syncExchangeFromProviders(params);
 

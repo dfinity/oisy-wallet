@@ -1,10 +1,13 @@
 <script lang="ts">
-	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { isEmptyString, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { Principal } from '@icp-sdk/core/principal';
+	import { getContext, onDestroy } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
 	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 	import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 	import { OCP_PAY_WITH_BTC_ENABLED } from '$env/open-crypto-pay.env';
 	import IconChain from '$lib/components/icons/IconChain.svelte';
 	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
@@ -15,6 +18,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { btcAddressMainnet } from '$lib/derived/address.derived';
 	import { networksMainnets } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
@@ -25,10 +29,15 @@
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import { screensStore } from '$lib/stores/screens.store';
 	import type { QrStatus } from '$lib/types/qr-code';
 	import { ScannerResults } from '$lib/types/scanner';
+	import { isMobile } from '$lib/utils/device.utils';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
+	import { AVAILABLE_SCREENS, filterScreens, MIN_SCREEN } from '$lib/utils/screens.utils';
+	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import { isSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {
 		onNext: (params: { results: ScannerResults; code?: string }) => void;
@@ -39,17 +48,71 @@
 
 	const WALLET_CONNECT_URI_PREFIX = 'wc:';
 
+	const MOBILE_ERROR_BANNER_DURATION = 3500;
+
 	let openBottomSheet = $state(false);
 	let openInfoBottomSheet = $state(false);
 	let uri = $state('');
 	let error = $state('');
+	let showMobileError = $state(false);
+	let mobileErrorTimeout: ReturnType<typeof setTimeout> | undefined;
 	let isEmptyUri = $derived(isEmptyString(uri));
 
+	// Whether to render the address input inside a bottom sheet (with an "Enter
+	// manually" trigger) instead of inline next to the camera. Requires both a
+	// mobile device (touch-first ergonomics) and a viewport below `lg` (1024px):
+	// gix-components' BottomSheet drops its sticky `position: fixed` styling at
+	// >=1024px, so a wide-viewport mobile (dev-tools emulation, landscape
+	// phablets, some Android tablets) would render the sheet inline in the
+	// document flow and the trigger would appear broken — fall back to the
+	// inline input in that case.
+	//
+	// Note: this is intentionally *not* the same predicate as the scanner
+	// auto-start in QrCodeScanner.svelte, which uses `isMobile()` alone (no
+	// viewport gate) because auto-starting the camera is a device-ergonomic
+	// decision and the camera area has no layout constraint at >=lg.
+	const BOTTOM_SHEET_INPUT_SCREENS = filterScreens({
+		availableScreens: AVAILABLE_SCREENS,
+		up: MIN_SCREEN,
+		down: 'lg'
+	});
+	let useBottomSheetInput = $derived(
+		isMobile() && BOTTOM_SHEET_INPUT_SCREENS.includes($screensStore)
+	);
+
 	const { setData, setAvailableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
+
+	const isIcPrincipal = (value: string): boolean => {
+		try {
+			Principal.fromText(value);
+			return true;
+		} catch (_: unknown) {
+			return false;
+		}
+	};
 
 	const processCode = async (code: string) => {
 		if (code.startsWith(WALLET_CONNECT_URI_PREFIX)) {
 			onNext({ results: ScannerResults.WALLET_CONNECT, code });
+			return;
+		}
+
+		const trimmed = code.trim();
+		if (isSolAddress(trimmed)) {
+			onNext({ results: ScannerResults.SOL_SEND, code: trimmed });
+			return;
+		}
+
+		if (
+			notEmptyString(trimmed) &&
+			!isInvalidDestinationBtc({ destination: trimmed, networkId: BTC_MAINNET_NETWORK_ID })
+		) {
+			onNext({ results: ScannerResults.BTC_SEND, code: trimmed });
+			return;
+		}
+
+		if (isIcPrincipal(trimmed)) {
+			onNext({ results: ScannerResults.IC_SEND, code: trimmed });
 			return;
 		}
 
@@ -84,7 +147,15 @@
 
 			onNext({ results: ScannerResults.PAY });
 		} catch (_: unknown) {
-			error = $i18n.scanner.error.code_link_is_not_valid;
+			if (isMobile()) {
+				showMobileError = true;
+				clearTimeout(mobileErrorTimeout);
+				mobileErrorTimeout = setTimeout(() => {
+					showMobileError = false;
+				}, MOBILE_ERROR_BANNER_DURATION);
+			} else {
+				error = $i18n.scanner.error.code_link_is_not_valid;
+			}
 		} finally {
 			busy.stop();
 		}
@@ -105,14 +176,26 @@
 	$effect(() => {
 		if (isEmptyUri) {
 			error = '';
+			showMobileError = false;
 		}
 	});
+
+	onDestroy(() => clearTimeout(mobileErrorTimeout));
 </script>
 
 <div class="relative flex w-full flex-col bg-tertiary">
 	<QrCodeScanner onScan={handleScan} universalScanner />
 
-	<Responsive up="md">
+	{#if showMobileError}
+		<div
+			class="absolute top-4 right-0 left-0 mx-auto w-[90%] rounded-lg border border-error-solid bg-error-subtle-10 p-3 text-center text-sm font-bold text-error-primary"
+			transition:slide={SLIDE_DURATION}
+		>
+			{$i18n.scanner.error.code_link_is_not_valid}
+		</div>
+	{/if}
+
+	{#if !useBottomSheetInput}
 		<ScannerCodeInput
 			name="uri"
 			{error}
@@ -125,9 +208,7 @@
 				{$i18n.core.text.continue}
 			</Button>
 		</ScannerCodeInput>
-	</Responsive>
-
-	<Responsive down="sm">
+	{:else}
 		<BottomSheet contentClass="min-h-[10vh]" bind:visible={openBottomSheet}>
 			{#snippet content()}
 				<ScannerCodeInput
@@ -160,7 +241,7 @@
 				<IconChain />
 			</Button>
 		</div>
-	</Responsive>
+	{/if}
 
 	<Responsive up="md">
 		<ScannerCodeInfoButton onclick={onOpenInfo} />

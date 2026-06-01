@@ -22,7 +22,8 @@ describe('token-manage-analytics.services', () => {
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				token: {
 					network: 'ICP',
-					address: 'sey3i-jyaaa-aaaap-quo3q-cai',
+					address: 'ipchn-lqaaa-aaaam-qizkq-cai',
+					standard: 'icrc7',
 					symbol: 'CCC',
 					name: 'CCC NFT Platform'
 				}
@@ -33,7 +34,8 @@ describe('token-manage-analytics.services', () => {
 				metadata: {
 					event_modifier: 'import',
 					token_network: 'ICP',
-					token_address: 'sey3i-jyaaa-aaaap-quo3q-cai',
+					token_address: 'ipchn-lqaaa-aaaam-qizkq-cai',
+					token_standard: 'icrc7',
 					token_symbol: 'CCC',
 					token_name: 'CCC NFT Platform',
 					source_location: 'manage_tokens',

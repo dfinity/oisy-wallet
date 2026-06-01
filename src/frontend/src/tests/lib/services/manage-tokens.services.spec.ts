@@ -114,6 +114,8 @@ describe('manage-tokens.services', () => {
 						indexCanisterId: 'indexCanisterId' in token ? token.indexCanisterId : undefined,
 						tokenId: token.id?.description,
 						tokenSymbol: token.symbol,
+						tokenName: token.name,
+						tokenStandard: token.standard.code,
 						networkId: token.network?.id.description,
 						source: MANAGE_TOKENS_MODAL_ROUTE
 					}
@@ -129,6 +131,7 @@ describe('manage-tokens.services', () => {
 								: 'ledgerCanisterId' in token
 									? token.ledgerCanisterId
 									: token.id.description,
+						standard: token.standard.code,
 						symbol: token.symbol,
 						name: token.name
 					},
@@ -235,6 +238,7 @@ describe('manage-tokens.services', () => {
 								: 'ledgerCanisterId' in token
 									? token.ledgerCanisterId
 									: token.id.description,
+						standard: token.standard.code,
 						symbol: token.symbol,
 						name: token.name
 					},
@@ -277,6 +281,7 @@ describe('manage-tokens.services', () => {
 								: 'ledgerCanisterId' in token
 									? token.ledgerCanisterId
 									: token.id.description,
+						standard: token.standard.code,
 						symbol: token.symbol,
 						name: token.name
 					},

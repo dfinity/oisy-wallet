@@ -102,6 +102,7 @@ describe('swapStore', () => {
 			destinationTokenExchangeRate,
 			destinationTokenBalance,
 			destinationToken,
+			failedSwapError,
 			reset
 		} = initSwapContext({
 			destinationToken: mockToken1,
@@ -119,6 +120,8 @@ describe('swapStore', () => {
 			data: { data: icpBalance, certified: true }
 		});
 
+		failedSwapError.set({ message: 'stale error from previous swap', variant: 'error' });
+
 		reset();
 
 		expect(get(sourceToken)).toBe(undefined);
@@ -129,6 +132,8 @@ describe('swapStore', () => {
 
 		expect(get(sourceTokenExchangeRate)).toBe(undefined);
 		expect(get(destinationTokenExchangeRate)).toBe(undefined);
+
+		expect(get(failedSwapError)).toBe(undefined);
 	});
 
 	it('should set tokens correctly', () => {

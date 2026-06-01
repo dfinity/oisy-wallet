@@ -29,6 +29,7 @@
 			"not_available": "niedostępne",
 			"new": "Nowy",
 			"edit": "Edytuj",
+			"download": "Pobierz",
 			"no_results": "Brak wyników",
 			"paste": "Wklej",
 			"to": "Do",
@@ -793,7 +794,15 @@
 			"enable_hide_micro_transactions": "Włącz ukrywanie transakcji o bardzo małych wartościach",
 			"disable_hide_micro_transactions": "Wyłącz ukrywanie transakcji o bardzo małych wartościach",
 			"save_spam_filter_success": "Ustawienia filtra spamu zostały zaktualizowane.",
-			"learn_more": ""
+			"export_data": "Eksportuj dane",
+			"export_data_description": "Pobierz swoje tokeny i transakcje w formacie CSV — Basic dla najważniejszych informacji, Extended dla dodatkowych atrybutów.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Eksportuj tokeny",
+			"export_transactions": "Eksportuj transakcje",
+			"export_tokens_success": "Pobrano plik CSV z tokenami.",
+			"export_transactions_success": "Pobrano plik CSV z transakcjami.",
+			"learn_more": "Dowiedz się więcej"
 		},
 		"alt": {
 			"testnets_toggle": "Przełącz, aby pokazać lub ukryć sieci testowe",
@@ -803,7 +812,9 @@
 			"appearance_system": "Włącza tryb kolorów systemu operacyjnego"
 		},
 		"error": {
-			"loading_profile": "Błąd podczas ładowania profilu. Odśwież stronę, aby uzyskać pełne wrażenia."
+			"loading_profile": "Błąd podczas ładowania profilu. Odśwież stronę, aby uzyskać pełne wrażenia.",
+			"export_exchange_rate_unavailable": "Kursy wymiany wciąż się ładują. Spróbuj ponownie za chwilę.",
+			"export_failed": "Nie udało się wygenerować eksportu. Spróbuj ponownie."
 		}
 	},
 	"shortcuts": {
@@ -956,7 +967,9 @@
 			"pending_bitcoin_transaction": "Możesz wysłać kolejną transakcję Bitcoin po zakończeniu oczekującej.",
 			"no_available_utxos": "Nie będziesz mieć dostępnych UTXO do wykonania tej transakcji.",
 			"unknown_destination": "Nigdy wcześniej nie wchodziłeś w interakcję z tym adresem. Upewnij się, że znasz odbiorcę.",
-			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wybierasz właściwy token, wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!",
+			"scanned_address_only_destination_single_token": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Nieprawidłowy adres docelowy",
@@ -1179,6 +1192,7 @@
 			"kong_not_available": "Obecnie nie ma dostępnej giełdy do wymiany tokenów. Spróbuj ponownie później.",
 			"unexpected": "Coś poszło nie tak podczas wymiany tokenów.",
 			"unexpected_missing_data": "Coś poszło nie tak podczas inicjowania transakcji wymiany.",
+			"failed_unexpectedly": "Nie udało się zrealizować wymiany. Sprawdź saldo portfela i spróbuj ponownie lub wybierz innego dostawcę.",
 			"slippage_exceeded": "$oisy_short chroni Cię: Transakcja jest poza Twoją tolerancją poślizgu wynoszącą $maxSlippage%. Dostosuj maksymalny poślizg i spróbuj ponownie.",
 			"pool_not_found": "Wymiana nie powiodła się. Nie znaleziono puli.",
 			"deposit_error": "Wpłata środków na wymianę nie powiodła się. Spróbuj ponownie lub zmień dostawcę wymiany.",

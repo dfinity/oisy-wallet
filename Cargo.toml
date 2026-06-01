@@ -39,6 +39,10 @@ pocket-ic = "13.0.0"
 pretty_assertions = "1.4"
 bitcoin = "0.32"
 paste = "1.0"
+# Used for `futures::future::join_all` to run independent HTTP outcalls in
+# parallel (e.g. exchange price providers). Already a transitive dep via the
+# ic-cdk stack; this declaration just makes it directly available to our crates.
+futures = "0.3"
 
 [workspace.lints.rust]
 deprecated = "allow" # Why is this allowed?

@@ -129,6 +129,12 @@ export class BackendCanister extends Canister<BackendService> {
 		return new_user_signups_allowed();
 	};
 
+	exchangeRateEnabled = ({ certified }: QueryParams): Promise<boolean> => {
+		const { exchange_rate_enabled } = this.caller({ certified });
+
+		return exchange_rate_enabled();
+	};
+
 	btcAddPendingTransaction = async ({
 		txId,
 		iiDelegationChain,
