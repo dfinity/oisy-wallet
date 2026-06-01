@@ -569,6 +569,29 @@ describe('nfts.utils', () => {
 			expect(filterSortByCollection({ items: collections, filter: 'dip721' })).toEqual([]);
 		});
 
+		it('filters NFTs by collection.standard.version and the combined `code version` label', () => {
+			const extV2Nft = {
+				...nftDeGods,
+				collection: {
+					...nftDeGods.collection,
+					standard: { code: 'ext' as const, version: 'v2' }
+				}
+			};
+
+			// version alone
+			expect(filterSortByCollection({ items: [extV2Nft, ...base], filter: 'v2' })).toEqual([
+				extV2Nft
+			]);
+			// combined `code version` UI label
+			expect(filterSortByCollection({ items: [extV2Nft, ...base], filter: 'ext v2' })).toEqual([
+				extV2Nft
+			]);
+			// case-insensitive
+			expect(filterSortByCollection({ items: [extV2Nft, ...base], filter: 'EXT V2' })).toEqual([
+				extV2Nft
+			]);
+		});
+
 		it('sorts NFTs by collection name ascending', () => {
 			const res = filterSortByCollection({
 				items: base,

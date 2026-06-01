@@ -255,11 +255,18 @@ const matchesFilter = ({
 }): boolean => {
 	const lower = filter.toLowerCase();
 
+	// Match against the UI-rendered `code version` label (e.g. "ext v2"), so typing
+	// the version alone, the code alone, or the combined string all work.
+	const standardLabel = (standard: NftCollection['standard'] | undefined): string =>
+		nonNullish(standard) ? `${standard.code} ${standard.version ?? ''}`.trim().toLowerCase() : '';
+
 	if (isCollectionUi(item)) {
 		// search by collection name or standard
 		const collectionName = item.collection?.name?.toLowerCase() ?? '';
-		const collectionStandard = item.collection?.standard?.code?.toLowerCase() ?? '';
-		if (collectionName.includes(lower) || collectionStandard.includes(lower)) {
+		if (
+			collectionName.includes(lower) ||
+			standardLabel(item.collection?.standard).includes(lower)
+		) {
 			return true;
 		}
 		// search by collections nfts name or id
@@ -276,7 +283,7 @@ const matchesFilter = ({
 			(String(item.id)?.toLowerCase().includes(lower) ?? false) ||
 			(item.name?.toLowerCase().includes(lower) ?? false) ||
 			(item.collection?.name?.toLowerCase().includes(lower) ?? false) ||
-			(item.collection?.standard?.code?.toLowerCase().includes(lower) ?? false)
+			standardLabel(item.collection?.standard).includes(lower)
 		);
 	}
 
