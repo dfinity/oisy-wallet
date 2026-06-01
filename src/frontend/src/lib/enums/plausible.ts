@@ -27,14 +27,10 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	NFT = 'nft',
 	ASSETS_TAB = 'assets_tab',
 	TOKENS = 'tokens',
-	TOKENS_BASIC = 'tokens_basic',
-	TOKENS_EXTENDED = 'tokens_extended',
 	DFX = 'dfx',
 	OPEN_CRYPTOPAY = 'open_cryptopay',
 	EARN = 'earn',
 	TRANSACTIONS = 'transactions',
-	TRANSACTIONS_BASIC = 'transactions_basic',
-	TRANSACTIONS_EXTENDED = 'transactions_extended',
 	SIGNER = 'signer',
 	NETWORKS = 'networks'
 }
@@ -74,7 +70,11 @@ export enum PLAUSIBLE_EVENT_VALUES {
 	NFT_PAGE = 'nft-page',
 	EARN_PAGE = 'earn-page',
 	HARVEST_AUTOPILOTS_PAGE = 'harvest-autopilots-page',
-	HARVEST_AUTOPILOT_DETAIL_PAGE = 'harvest-autopilot-detail-page'
+	HARVEST_AUTOPILOT_DETAIL_PAGE = 'harvest-autopilot-detail-page',
+	TOKENS_BASIC = 'tokens_basic',
+	TOKENS_EXTENDED = 'tokens_extended',
+	TRANSACTIONS_BASIC = 'transactions_basic',
+	TRANSACTIONS_EXTENDED = 'transactions_extended'
 }
 
 export enum PLAUSIBLE_EVENT_SOURCES {
@@ -105,7 +105,8 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	NETWORK = 'network',
 	TRANSACTION_TYPE = 'transaction_type',
 	TOKEN = 'token',
-	CONTACT = 'contact'
+	CONTACT = 'contact',
+	TYPE = 'type'
 }
 
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {
