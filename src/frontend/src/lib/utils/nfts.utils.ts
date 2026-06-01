@@ -10,7 +10,7 @@ import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { getNftIdentifier } from '$lib/utils/nft.utils';
-import { standardLabel } from '$lib/utils/tokens.utils';
+import { standardLabel } from '$lib/utils/token.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { SvelteMap } from 'svelte/reactivity';

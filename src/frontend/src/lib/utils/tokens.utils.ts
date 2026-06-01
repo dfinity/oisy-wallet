@@ -20,7 +20,7 @@ import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { NullishIdentity } from '$lib/types/identity';
-import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -38,7 +38,7 @@ import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-import { filterEnabledToken } from '$lib/utils/token.utils';
+import { filterEnabledToken, standardLabel } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -441,14 +441,6 @@ export const filterEnabledTokens = <T extends Token>([$tokens]: [$tokens: T[]]):
 export const pinEnabledTokensAtTop = <T extends Token>(
 	$tokens: TokenToggleable<T>[]
 ): TokenToggleable<T>[] => $tokens.sort(({ enabled: a }, { enabled: b }) => Number(b) - Number(a));
-
-/** UI-rendered token-standard label, lowercased and trimmed: `<code> <version>`
- * (e.g. "ext v2", or just "erc20" when no version). Returns an empty string
- * for a nullish standard. Shared by token and NFT filters so the filter input
- * matches what users see on the details page.
- */
-export const standardLabel = (standard: TokenStandard | undefined): string =>
-	nonNullish(standard) ? `${standard.code} ${standard.version ?? ''}`.trim().toLowerCase() : '';
 
 /** Tells whether a single token matches a free-text filter on name, symbol,
  * the UI-rendered standard label (`<code> <version>`, e.g. "erc20" or
