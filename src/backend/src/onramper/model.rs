@@ -1,13 +1,13 @@
-//! Pure signing logic for OnRamper widget URLs.
+//! Pure signing logic for `OnRamper` widget URLs.
 //!
 //! Two responsibilities, deliberately kept independent of canister state so they can be
 //! exhaustively unit-tested:
 //!
 //! 1. [`build_sign_content`] canonicalizes the three sensitive widget parameters into the exact
-//!    byte sequence OnRamper expects to verify (alphabetically sorted top-level + nested keys,
+//!    byte sequence `OnRamper` expects to verify (alphabetically sorted top-level + nested keys,
 //!    lowercase crypto / network ids, no URL encoding).
 //! 2. [`hmac_sha256`] computes the HMAC-SHA256 of that byte sequence using the controller-provided
-//!    secret, delegating to the audited RustCrypto `hmac` crate.
+//!    secret, delegating to the audited `RustCrypto` `hmac` crate.
 
 use hmac::{digest::KeyInit, Hmac, Mac};
 use sha2::Sha256;
@@ -18,7 +18,7 @@ type HmacSha256 = Hmac<Sha256>;
 /// SHA-256 output size, used as the buffer size for the final MAC.
 const SHA256_OUTPUT_SIZE: usize = 32;
 
-/// HMAC-SHA256 via the audited RustCrypto `hmac` crate. HMAC accepts keys of any length (RFC 2104
+/// HMAC-SHA256 via the audited `RustCrypto` `hmac` crate. HMAC accepts keys of any length (RFC 2104
 /// §2: short keys are zero-padded, long keys are hashed first), so `new_from_slice` is
 /// effectively infallible — the `Result` exists for `KeyInit` trait uniformity across MAC
 /// algorithms that do have key-length constraints.
@@ -29,7 +29,7 @@ pub(crate) fn hmac_sha256(key: &[u8], message: &[u8]) -> [u8; SHA256_OUTPUT_SIZE
     mac.finalize().into_bytes().into()
 }
 
-/// Canonicalize the three sensitive OnRamper parameters into the exact string that gets fed to
+/// Canonicalize the three sensitive `OnRamper` parameters into the exact string that gets fed to
 /// HMAC. Rules per <https://docs.onramper.com/docs/signing-widget-url>:
 ///
 /// - Only `wallets`, `networkWallets`, `walletAddressTags` are signed. Empty fields are omitted
@@ -80,7 +80,7 @@ pub(crate) fn build_sign_content(
 }
 
 /// One-shot helper: build the canonical sign-content and HMAC-SHA256 it, returning the hex digest
-/// OnRamper expects as the `signature` query parameter.
+/// `OnRamper` expects as the `signature` query parameter.
 #[must_use]
 pub(crate) fn sign_widget_url(
     secret: &str,

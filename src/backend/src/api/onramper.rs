@@ -5,7 +5,7 @@ use shared::types::{
 
 use crate::{onramper::service, utils::guards::caller_is_not_anonymous};
 
-/// Sign the three sensitive OnRamper widget parameters with the controller-managed HMAC secret.
+/// Sign the three sensitive `OnRamper` widget parameters with the controller-managed HMAC secret.
 ///
 /// Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
 /// Authenticated callers only: anonymous principals cannot extract signatures.

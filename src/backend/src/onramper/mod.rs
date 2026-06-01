@@ -1,8 +1,8 @@
-//! OnRamper widget URL signing.
+//! `OnRamper` widget URL signing.
 //!
-//! The frontend opens OnRamper's buy/sell widget by constructing a query-string URL with
+//! The frontend opens `OnRamper`'s buy/sell widget by constructing a query-string URL with
 //! sensitive parameters (recipient wallet addresses, address tags, per-network wallets). As of
-//! April 2025 OnRamper rejects unsigned URLs with `Invalid Signature`. The signing secret is
+//! April 2025 `OnRamper` rejects unsigned URLs with `Invalid Signature`. The signing secret is
 //! held by this canister (controller-managed via `set_api_keys`) so it never reaches the
 //! frontend bundle.
 //!
