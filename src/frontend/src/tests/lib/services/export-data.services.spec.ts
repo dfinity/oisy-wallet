@@ -162,7 +162,7 @@ describe('export-data.services', () => {
 				duration: 4000
 			});
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'tokens_extended',
+				type: 'tokens_extended',
 				resultStatus: 'error',
 				errorCode: 'fx_rate_unavailable'
 			});
@@ -187,7 +187,7 @@ describe('export-data.services', () => {
 				duration: 2000
 			});
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'tokens_basic',
+				type: 'tokens_basic',
 				resultStatus: 'success'
 			});
 		});
@@ -211,7 +211,7 @@ describe('export-data.services', () => {
 			expect(mockDownloadCsv).not.toHaveBeenCalled();
 			expect(mockToastsShow).not.toHaveBeenCalled();
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'transactions_basic',
+				type: 'transactions_basic',
 				resultStatus: 'error',
 				errorCode: 'no_identity'
 			});
@@ -254,7 +254,7 @@ describe('export-data.services', () => {
 				duration: 2000
 			});
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'transactions_basic',
+				type: 'transactions_basic',
 				resultStatus: 'success'
 			});
 		});
@@ -276,7 +276,7 @@ describe('export-data.services', () => {
 				duration: 4000
 			});
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
-				context: 'transactions_extended',
+				type: 'transactions_extended',
 				resultStatus: 'error',
 				errorCode: 'build_failed',
 				error: 'row build failed'
