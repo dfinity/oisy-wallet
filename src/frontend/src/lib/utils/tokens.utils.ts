@@ -38,7 +38,7 @@ import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-import { filterEnabledToken } from '$lib/utils/token.utils';
+import { filterEnabledToken, standardLabel } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -442,10 +442,11 @@ export const pinEnabledTokensAtTop = <T extends Token>(
 	$tokens: TokenToggleable<T>[]
 ): TokenToggleable<T>[] => $tokens.sort(({ enabled: a }, { enabled: b }) => Number(b) - Number(a));
 
-/** Tells whether a single token matches a free-text filter on name, symbol or
- * the token's contract identifier (Ethereum / Solana address, IC ledger /
- * index / NFT canister id, ICRC custom alternative name). For IC ck-tokens
- * the underlying twin token is also considered.
+/** Tells whether a single token matches a free-text filter on name, symbol,
+ * the UI-rendered standard label (`<code> <version>`, e.g. "erc20" or
+ * "ext v2"), or the token's contract identifier (Ethereum / Solana address,
+ * IC ledger / index / NFT canister id, ICRC custom alternative name). For IC
+ * ck-tokens the underlying twin token is also considered.
  *
  * @param token - The token to test.
  * @param filter - filter keyword.
@@ -459,11 +460,12 @@ export const doesTokenMatchFilter = ({
 	filter: string;
 }): boolean => {
 	const matchingToken = (token: Token): boolean => {
-		const { name, symbol } = token;
+		const { name, symbol, standard } = token;
 
 		if (
 			name.toLowerCase().includes(filter.toLowerCase()) ||
-			symbol.toLowerCase().includes(filter.toLowerCase())
+			symbol.toLowerCase().includes(filter.toLowerCase()) ||
+			standardLabel(standard).includes(filter.toLowerCase())
 		) {
 			return true;
 		}
