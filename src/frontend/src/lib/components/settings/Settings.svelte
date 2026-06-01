@@ -17,6 +17,7 @@
 		SETTINGS_ADDRESS_LABEL
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { showTokenStandardFilter } from '$lib/derived/settings.derived';
 	import { hideMicroTransactions, userProfileVersion } from '$lib/derived/user-profile.derived';
 	import {
 		type SettingsModalType,
@@ -25,7 +26,10 @@
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { hiddenMicroTransactionsResetStore } from '$lib/stores/settings.store';
+	import {
+		hiddenMicroTransactionsResetStore,
+		showTokenStandardFilterStore
+	} from '$lib/stores/settings.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { emit } from '$lib/utils/events.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -37,6 +41,13 @@
 		modalStore.openSettings({ id: modalId, data: t });
 
 	let filterLoading = $state(false);
+
+	const toggleShowTokenStandardFilter = () => {
+		showTokenStandardFilterStore.set({
+			key: 'show-token-standard-filter',
+			value: { enabled: !$showTokenStandardFilter }
+		});
+	};
 
 	const toggleMicroTransactions = async () => {
 		if (isNullish($authIdentity)) {
@@ -141,6 +152,26 @@
 					iconVisible={false}>{$i18n.settings.text.learn_more}</ExternalLink
 				>
 			</span>
+		{/snippet}
+	</SettingsCardItem>
+
+	<SettingsCardItem>
+		{#snippet key()}
+			{$i18n.settings.text.show_token_standard_filter}
+		{/snippet}
+
+		{#snippet value()}
+			<Toggle
+				ariaLabel={$showTokenStandardFilter
+					? $i18n.settings.text.disable_show_token_standard_filter
+					: $i18n.settings.text.enable_show_token_standard_filter}
+				checked={$showTokenStandardFilter}
+				on:nnsToggle={toggleShowTokenStandardFilter}
+			/>
+		{/snippet}
+
+		{#snippet info()}
+			{$i18n.settings.text.show_token_standard_filter_description}
 		{/snippet}
 	</SettingsCardItem>
 </SettingsCard>

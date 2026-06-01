@@ -12,7 +12,7 @@
 		MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
 		MODAL_TOKENS_LIST
 	} from '$lib/constants/test-ids.constants';
-	import { showTokenCategoryFilter } from '$lib/derived/settings.derived';
+	import { showTokenCategoryFilter, showTokenStandardFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -153,11 +153,13 @@
 			/>
 		{/if}
 
-		<TokenStandardFilterDropdown
-			{availableStandards}
-			onSelect={setFilterStandard}
-			selectedStandard={$filterStandard}
-		/>
+		{#if $showTokenStandardFilter}
+			<TokenStandardFilterDropdown
+				{availableStandards}
+				onSelect={setFilterStandard}
+				selectedStandard={$filterStandard}
+			/>
+		{/if}
 	</div>
 </div>
 
