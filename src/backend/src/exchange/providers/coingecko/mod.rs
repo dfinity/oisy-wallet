@@ -268,7 +268,7 @@ mod tests {
         let btc_testnet = StoredTokenId(TokenId::BtcNativeTestnet);
         let sol_devnet = StoredTokenId(TokenId::SolNativeDevnet);
 
-        let classified = classify_tokens(&[
+        let tokens = [
             eth.clone(),
             base_eth.clone(),
             bnb.clone(),
@@ -278,7 +278,8 @@ mod tests {
             unsupported_evm,
             btc_testnet,
             sol_devnet,
-        ]);
+        ];
+        let classified = classify_tokens(&tokens);
 
         assert_eq!(
             classified.native_coins.get("ethereum"),
@@ -305,14 +306,15 @@ mod tests {
         let unsupported_chain = erc20("0xUnsupported", 999);
         let erc721 = StoredTokenId(TokenId::Erc721(ErcTokenId("0xNFT".to_string()), 1));
 
-        let classified = classify_tokens(&[
+        let tokens = [
             ethereum.clone(),
             base.clone(),
             icrc.clone(),
             spl.clone(),
             unsupported_chain,
             erc721,
-        ]);
+        ];
+        let classified = classify_tokens(&tokens);
 
         assert!(classified.native_coins.is_empty());
         assert_eq!(
@@ -329,7 +331,9 @@ mod tests {
         );
         assert_eq!(
             classified.contract_platforms.get("solana"),
-            Some(&vec!["So11111111111111111111111111111111111111112".to_string()])
+            Some(&vec![
+                "So11111111111111111111111111111111111111112".to_string()
+            ])
         );
         assert_eq!(classified.contract_platforms.len(), 4);
         assert_eq!(
