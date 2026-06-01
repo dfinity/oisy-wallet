@@ -55,6 +55,7 @@ describe('token-guards.utils', () => {
 				...toggleableErc20,
 				standard: { code: 'erc721' }
 			};
+
 			expect(guard(wrongStandard)).toBeFalsy();
 		});
 	});
