@@ -2,6 +2,7 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
+import { nftSortStore } from '$lib/stores/settings.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import SendNftsListTestHost from '$tests/lib/components/send/SendNftsListTestHost.svelte';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
@@ -17,6 +18,7 @@ const mockNfts = [
 describe('SendNftsList.spec', () => {
 	beforeEach(() => {
 		nftStore.resetAll();
+		nftSortStore.reset({ key: 'nft-sort' });
 	});
 
 	it('renders NFTs from the store', () => {
@@ -88,6 +90,112 @@ describe('SendNftsList.spec', () => {
 		await fireEvent.click(btn);
 
 		expect(onSelectNetwork).toHaveBeenCalledOnce();
+	});
+
+	it('renders NFTs that have no name', () => {
+		const namelessNfts = [
+			{
+				...mockValidErc1155Nft,
+				name: undefined,
+				id: parseNftId('42'),
+				collection: { ...mockValidErc1155Nft.collection, name: 'NamelessOnes' }
+			}
+		];
+
+		nftStore.addAll(namelessNfts);
+		const { getByText } = render(SendNftsListTestHost, {
+			onSelect: vi.fn(),
+			filterNetwork: undefined,
+			onSelectNetwork: vi.fn()
+		});
+
+		expect(getByText('NamelessOnes')).toBeInTheDocument();
+		expect(getByText('#42')).toBeInTheDocument();
+	});
+
+	const orderOf = ({
+		container,
+		labels
+	}: {
+		container: HTMLElement;
+		labels: string[];
+	}): string[] => {
+		const text = container.textContent ?? '';
+		const positions = labels.map((label) => {
+			const index = text.indexOf(label);
+			if (index === -1) {
+				throw new Error(`Expected label not found in rendered output: ${label}`);
+			}
+			return { label, index };
+		});
+		return positions.sort((a, b) => a.index - b.index).map(({ label }) => label);
+	};
+
+	it('sorts NFTs by collection name asc by default', () => {
+		const unsorted = [
+			{
+				...mockValidErc1155Nft,
+				name: 'A',
+				id: parseNftId('10'),
+				collection: { ...mockValidErc1155Nft.collection, name: 'Charlie' }
+			},
+			{
+				...mockValidErc1155Nft,
+				name: 'B',
+				id: parseNftId('11'),
+				collection: { ...mockValidErc1155Nft.collection, name: 'Alpha' }
+			},
+			{
+				...mockValidErc1155Nft,
+				name: 'C',
+				id: parseNftId('12'),
+				collection: { ...mockValidErc1155Nft.collection, name: 'Bravo' }
+			}
+		];
+
+		nftStore.addAll(unsorted);
+		const { container } = render(SendNftsListTestHost, {
+			onSelect: vi.fn(),
+			filterNetwork: undefined,
+			onSelectNetwork: vi.fn()
+		});
+
+		expect(orderOf({ container, labels: ['#11 – B', '#12 – C', '#10 – A'] })).toEqual([
+			'#11 – B',
+			'#12 – C',
+			'#10 – A'
+		]);
+	});
+
+	it('follows the nftSortStore (collection name desc)', () => {
+		const unsorted = [
+			{
+				...mockValidErc1155Nft,
+				name: 'A',
+				id: parseNftId('10'),
+				collection: { ...mockValidErc1155Nft.collection, name: 'Alpha' }
+			},
+			{
+				...mockValidErc1155Nft,
+				name: 'B',
+				id: parseNftId('11'),
+				collection: { ...mockValidErc1155Nft.collection, name: 'Bravo' }
+			}
+		];
+
+		nftStore.addAll(unsorted);
+		nftSortStore.set({
+			key: 'nft-sort',
+			value: { order: 'desc', type: 'collection-name' }
+		});
+
+		const { container } = render(SendNftsListTestHost, {
+			onSelect: vi.fn(),
+			filterNetwork: undefined,
+			onSelectNetwork: vi.fn()
+		});
+
+		expect(orderOf({ container, labels: ['#10 – A', '#11 – B'] })).toEqual(['#11 – B', '#10 – A']);
 	});
 
 	it('calls onSelect when an NFT card is clicked', async () => {
