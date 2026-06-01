@@ -792,6 +792,10 @@
 			"hide_micro_transactions_description": "बहुत छोटे मूल्यों वाले लेनदेन आमतौर पर स्पैम होते हैं और उपयोगकर्ता को वैध पते के बजाय प्रेषक के पते को कॉपी करने के लिए धोखा देने का इरादा रखते हैं। इन्हें लेनदेन सूचियों में छिपाने की अनुशंसा की जाती है।",
 			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
 			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
 			"learn_more": ""
 		},

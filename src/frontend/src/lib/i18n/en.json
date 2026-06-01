@@ -792,6 +792,10 @@
 			"hide_micro_transactions_description": "Transactions with very small values are typically spam and intend to trick a user into copying their sender address instead of a valid one. Hiding them in transaction lists is recommended.",
 			"enable_hide_micro_transactions": "Enable hiding of transactions with very small values",
 			"disable_hide_micro_transactions": "Disable hiding of transactions with very small values",
+			"show_token_standard_filter": "Show token standard filter",
+			"show_token_standard_filter_description": "Adds a token standard filter to the manage tokens modal, so you can narrow the list by standard (e.g. ICRC, ERC20, EXT v2).",
+			"enable_show_token_standard_filter": "Enable the token standard filter",
+			"disable_show_token_standard_filter": "Disable the token standard filter",
 			"save_spam_filter_success": "Your spam filter settings have been updated.",
 			"learn_more": "Learn more"
 		},

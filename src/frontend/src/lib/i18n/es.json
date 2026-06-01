@@ -792,6 +792,10 @@
 			"hide_micro_transactions_description": "Las transacciones con valores muy pequeños suelen ser spam y tienen la intención de engañar al usuario para que copie la dirección del remitente en lugar de una válida. Se recomienda ocultarlas en las listas de transacciones.",
 			"enable_hide_micro_transactions": "Habilitar la ocultación de transacciones con valores muy pequeños",
 			"disable_hide_micro_transactions": "Deshabilitar la ocultación de transacciones con valores muy pequeños",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "La configuración de tu filtro de spam se ha actualizado.",
 			"learn_more": ""
 		},

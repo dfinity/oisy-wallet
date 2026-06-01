@@ -792,6 +792,10 @@
 			"hide_micro_transactions_description": "Transakcje o bardzo małych wartościach są zazwyczaj spamem i mają na celu oszukanie użytkownika, aby skopiował adres nadawcy zamiast prawidłowego. Zaleca się ich ukrywanie na listach transakcji.",
 			"enable_hide_micro_transactions": "Włącz ukrywanie transakcji o bardzo małych wartościach",
 			"disable_hide_micro_transactions": "Wyłącz ukrywanie transakcji o bardzo małych wartościach",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "Ustawienia filtra spamu zostały zaktualizowane.",
 			"learn_more": ""
 		},

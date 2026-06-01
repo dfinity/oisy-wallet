@@ -530,6 +530,10 @@ interface I18nSettings {
 		hide_micro_transactions_description: string;
 		enable_hide_micro_transactions: string;
 		disable_hide_micro_transactions: string;
+		show_token_standard_filter: string;
+		show_token_standard_filter_description: string;
+		enable_show_token_standard_filter: string;
+		disable_show_token_standard_filter: string;
 		save_spam_filter_success: string;
 		learn_more: string;
 	};

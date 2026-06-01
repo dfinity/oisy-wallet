@@ -792,6 +792,10 @@
 			"hide_micro_transactions_description": "Транзакции с очень маленькими значениями обычно являются спамом и предназначены для того, чтобы обманом заставить пользователя скопировать адрес отправителя вместо действительного. Рекомендуется скрывать их в списках транзакций.",
 			"enable_hide_micro_transactions": "Включить скрытие транзакций с очень маленькими значениями",
 			"disable_hide_micro_transactions": "Отключить скрытие транзакций с очень маленькими значениями",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "Настройки вашего спам-фильтра были обновлены.",
 			"learn_more": ""
 		},

@@ -792,6 +792,10 @@
 			"hide_micro_transactions_description": "Transakce s velmi malými hodnotami jsou obvykle spam a mají za cíl uživatele oklamat, aby zkopíroval adresu odesílatele místo platné adresy. Doporučujeme je v seznamech transakcí skrýt.",
 			"enable_hide_micro_transactions": "Povolit skrývání transakcí s velmi malými hodnotami",
 			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
 			"learn_more": ""
 		},

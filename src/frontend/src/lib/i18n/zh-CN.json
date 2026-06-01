@@ -792,6 +792,10 @@
 			"hide_micro_transactions_description": "价值非常小的交易通常是垃圾信息，目的是诱骗用户复制发送方地址而不是有效地址。建议在交易列表中隐藏它们。",
 			"enable_hide_micro_transactions": "启用隐藏价值非常小的交易",
 			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
 			"learn_more": ""
 		},

@@ -792,6 +792,10 @@
 			"hide_micro_transactions_description": "매우 작은 가치의 거래는 일반적으로 스팸이며 사용자가 유효한 주소 대신 발신자 주소를 복사하도록 속이려는 의도를 가지고 있습니다. 거래 목록에서 숨기는 것을 권장합니다.",
 			"enable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 활성화",
 			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
 			"learn_more": ""
 		},

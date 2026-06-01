@@ -792,6 +792,10 @@
 			"hide_micro_transactions_description": "非常に小さな価値のトランザクションは通常スパムであり、ユーザーを騙して有効なアドレスではなく送信者のアドレスをコピーさせることを目的としています。トランザクション一覧で非表示にすることを推奨します。",
 			"enable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を有効にする",
 			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
 			"learn_more": ""
 		},
