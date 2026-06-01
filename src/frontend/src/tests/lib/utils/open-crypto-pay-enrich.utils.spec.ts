@@ -10,13 +10,16 @@ describe('open-crypto-pay-enrich.utils', () => {
 		const exchangeRate = 50000;
 		const feeAmount = 1000n;
 
-		const token: PayableTokenWithFees = {
+		// The fee/network shapes are intentionally synthetic: each test injects its own
+		// getFee accessor, so the real fee union (UtxosFee | EthFeeResult | IcFeeResult)
+		// and PayableNetwork are never exercised here — hence the cast through unknown.
+		const token = {
 			...BTC_MAINNET_TOKEN,
 			amount: '0.001',
 			minFee: 0.00001,
 			tokenNetwork: 'Bitcoin',
 			fee: { feeSatoshis: feeAmount }
-		} as PayableTokenWithFees;
+		} as unknown as PayableTokenWithFees;
 
 		const exchanges: ExchangesData = {
 			[BTC_MAINNET_TOKEN.id]: { usd: exchangeRate }
