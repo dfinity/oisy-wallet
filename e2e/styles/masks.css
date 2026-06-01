@@ -3,3 +3,12 @@
 .carousel-container {
 	visibility: hidden;
 }
+
+/* `backdrop-filter` blur is rasterised by the GPU and renders with sub-pixel
+   differences between runs (e.g. the landing page feature cards), tripping
+   the snapshot diff. Neutralise it so only deterministic pixels are compared.
+   Screenshot-only: this stylesheet is injected via `toHaveScreenshot.stylePath`. */
+* {
+	backdrop-filter: none !important;
+	-webkit-backdrop-filter: none !important;
+}
