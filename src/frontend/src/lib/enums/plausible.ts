@@ -27,18 +27,20 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	NFT = 'nft',
 	ASSETS_TAB = 'assets_tab',
 	TOKENS = 'tokens',
+	TOKENS_BASIC = 'tokens_basic',
+	TOKENS_EXTENDED = 'tokens_extended',
 	DFX = 'dfx',
 	OPEN_CRYPTOPAY = 'open_cryptopay',
 	EARN = 'earn',
 	TRANSACTIONS = 'transactions',
+	TRANSACTIONS_BASIC = 'transactions_basic',
+	TRANSACTIONS_EXTENDED = 'transactions_extended',
 	SIGNER = 'signer',
 	NETWORKS = 'networks'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
-	ICRC = 'icrc',
-	BASIC = 'basic',
-	EXTENDED = 'extended'
+	ICRC = 'icrc'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_EARN {
@@ -56,9 +58,7 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
-	UNCERTIFIED_REMOVED = 'uncertified_removed',
-	BASIC = 'basic',
-	EXTENDED = 'extended'
+	UNCERTIFIED_REMOVED = 'uncertified_removed'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
