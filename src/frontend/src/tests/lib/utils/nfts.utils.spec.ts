@@ -6,6 +6,7 @@ import {
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { AppPath } from '$lib/constants/routes.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import { NetworkSchema } from '$lib/schema/network.schema';
@@ -21,6 +22,7 @@ import {
 	getMediaStatus,
 	getMediaStatusOrCache,
 	getNftCollectionUi,
+	getNftSendRedirectUrl,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
 } from '$lib/utils/nfts.utils';
@@ -223,6 +225,48 @@ describe('nfts.utils', () => {
 			});
 
 			expect(nfts).toEqual([mockMainnetNft]);
+		});
+	});
+
+	describe('getNftSendRedirectUrl', () => {
+		it('returns the collection URL when other NFTs remain in the same collection', () => {
+			const result = getNftSendRedirectUrl({
+				sentNft: mockNft1,
+				collectionNfts: [mockNft1, mockNft2]
+			});
+
+			expect(result).toBe(
+				`${AppPath.Nfts}?collection=${mockNft1.collection.address}&network=${mockNft1.collection.network.id.description}`
+			);
+		});
+
+		it('returns the NFTs root URL when the sent NFT was the last in its collection', () => {
+			const result = getNftSendRedirectUrl({
+				sentNft: mockNft1,
+				collectionNfts: [mockNft1]
+			});
+
+			expect(result).toBe(AppPath.Nfts);
+		});
+
+		it('returns the NFTs root URL when the sent NFT is already absent from an empty collection list', () => {
+			const result = getNftSendRedirectUrl({
+				sentNft: mockNft1,
+				collectionNfts: []
+			});
+
+			expect(result).toBe(AppPath.Nfts);
+		});
+
+		it('returns the collection URL when the sent NFT was already removed but siblings remain', () => {
+			const result = getNftSendRedirectUrl({
+				sentNft: mockNft1,
+				collectionNfts: [mockNft2]
+			});
+
+			expect(result).toBe(
+				`${AppPath.Nfts}?collection=${mockNft1.collection.address}&network=${mockNft1.collection.network.id.description}`
+			);
 		});
 	});
 
@@ -549,6 +593,47 @@ describe('nfts.utils', () => {
 
 			expect(res).toHaveLength(1);
 			expect(res[0].nfts).toEqual([custom]);
+		});
+
+		it('filters NFTs by collection.standard.code (case-insensitive substring)', () => {
+			// every item in base has collection.standard.code === 'erc721'
+			expect(filterSortByCollection({ items: base, filter: 'erc721' })).toEqual(base);
+			expect(filterSortByCollection({ items: base, filter: 'ERC' })).toEqual(base);
+			expect(filterSortByCollection({ items: base, filter: 'dip721' })).toEqual([]);
+		});
+
+		it('filters collection UIs by collection.standard.code (case-insensitive substring)', () => {
+			// both collections are erc721
+			const matched = filterSortByCollection({ items: collections, filter: 'erc721' });
+
+			expect(matched).toHaveLength(2);
+			expect(matched.every((c) => c.collection.standard?.code === 'erc721')).toBeTruthy();
+
+			expect(filterSortByCollection({ items: collections, filter: 'ERC' })).toHaveLength(2);
+			expect(filterSortByCollection({ items: collections, filter: 'dip721' })).toEqual([]);
+		});
+
+		it('filters NFTs by collection.standard.version and the combined `code version` label', () => {
+			const extV2Nft = {
+				...nftDeGods,
+				collection: {
+					...nftDeGods.collection,
+					standard: { code: 'ext' as const, version: 'v2' }
+				}
+			};
+
+			// version alone
+			expect(filterSortByCollection({ items: [extV2Nft, ...base], filter: 'v2' })).toEqual([
+				extV2Nft
+			]);
+			// combined `code version` UI label
+			expect(filterSortByCollection({ items: [extV2Nft, ...base], filter: 'ext v2' })).toEqual([
+				extV2Nft
+			]);
+			// case-insensitive
+			expect(filterSortByCollection({ items: [extV2Nft, ...base], filter: 'EXT V2' })).toEqual([
+				extV2Nft
+			]);
 		});
 
 		it('sorts NFTs by collection name ascending', () => {
