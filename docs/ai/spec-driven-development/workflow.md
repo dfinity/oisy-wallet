@@ -29,7 +29,11 @@ dfinity/oisy-wallet/
 
 ### Step 1 — Describe (Cowork)
 
-You describe the feature, improvement, or bugfix in Cowork. No need to be precise — rough intent is enough to start.
+Open a new Cowork session and say:
+
+> "I want to spec a new feature for dfinity/oisy-wallet using the spec-driven development workflow in `docs/ai/spec-driven-development/workflow.md`."
+
+Cowork will read the workflow from the repo and guide you through the process. You describe the feature, improvement, or bugfix — no need to be precise, rough intent is enough to start.
 
 ### Step 2 — Clarify (Cowork)
 
@@ -96,3 +100,4 @@ Before closing a PR, Claude Code diffs the final implementation against the spec
 ## Future Improvement (when available)
 
 Once a custom GitHub MCP connector can be added to Cowork, the manual copy step (Step 3) can be automated — Cowork would commit the spec file directly to a branch in the repo.
+
