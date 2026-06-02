@@ -354,6 +354,54 @@ describe('plausible analytics service', () => {
 		});
 	});
 
+	describe('buildLearnMoreEvent', () => {
+		it('returns the open_documentation payload without source_sublocation when omitted', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
+				eventSubcontext: 'lock.text.learn_more',
+				url: 'https://docs.oisy.com/locking'
+			});
+
+			expect(result).toEqual({
+				name: 'open_documentation',
+				metadata: {
+					event_context: 'learn_more',
+					event_subcontext: 'lock.text.learn_more',
+					event_key: 'link',
+					event_value: 'https://docs.oisy.com/locking',
+					source_location: 'lock'
+				}
+			});
+		});
+
+		it('includes source_sublocation in the payload when provided', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
+				sourceSublocation: 'scan',
+				eventSubcontext: 'scanner.text.learn_more_about_scan',
+				url: 'https://docs.oisy.com/scan'
+			});
+
+			expect(result).toEqual({
+				name: 'open_documentation',
+				metadata: {
+					event_context: 'learn_more',
+					event_subcontext: 'scanner.text.learn_more_about_scan',
+					event_key: 'link',
+					event_value: 'https://docs.oisy.com/scan',
+					source_location: 'scanner',
+					source_sublocation: 'scan'
+				}
+			});
+		});
+	});
+
 	it('should console.debug the error in STAGING when tracker.track throws', async () => {
 		mockStaging = true;
 
