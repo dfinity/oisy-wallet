@@ -26,6 +26,8 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 	import { enabledFungibleTokens, nativeTokens } from '$lib/derived/tokens.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import {
 		exportTokensCsv,
 		exportTransactionsCsv,
@@ -122,7 +124,13 @@
 				<ExternalLink
 					ariaLabel={$i18n.settings.text.learn_more}
 					href={OISY_EXPORT_DATA_DOCS_URL}
-					iconVisible={false}>{$i18n.settings.text.learn_more}</ExternalLink
+					iconVisible={false}
+					trackEvent={buildLearnMoreEvent({
+						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
+						sourceSublocation: 'export_data',
+						eventSubcontext: 'settings.text.learn_more',
+						url: OISY_EXPORT_DATA_DOCS_URL
+					})}>{$i18n.settings.text.learn_more}</ExternalLink
 				>
 			</span>
 		</span>
