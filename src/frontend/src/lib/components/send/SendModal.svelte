@@ -3,6 +3,7 @@
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { setContext } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -33,9 +34,10 @@
 		solAddressMainnetNotLoaded
 	} from '$lib/derived/address.derived';
 	import { modalSendData } from '$lib/derived/modal.derived';
+	import { routeNft } from '$lib/derived/nav.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
-	import { pageNft } from '$lib/derived/page-nft.derived';
+	import { pageCollectionNfts, pageNft } from '$lib/derived/page-nft.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -47,6 +49,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
 	import { SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY } from '$lib/stores/scanned-plain-address-send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -65,7 +68,7 @@
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
-	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken, getNftSendRedirectUrl } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { shouldSkipDestinationStep } from '$lib/utils/send.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -166,10 +169,28 @@
 		selectedNft = undefined;
 	};
 
-	const close = () =>
+	const close = () => {
+		// Sending the last NFT from a collection's detail page would leave the user on a URL whose
+		// NFT has been wiped from the store at the next poll, so steer them to a still-renderable page.
+		// Gate on `$routeNft` rather than the `isNftsPage` prop alone so the redirect is anchored to
+		// the actual NFT detail URL — a future caller flipping the prop on a list page wouldn't drop
+		// query params like the selected network.
+		if (
+			isNftsPage &&
+			nonNullish($routeNft) &&
+			sendProgressStep === ProgressStepsSend.DONE &&
+			nonNullish(selectedNft)
+		) {
+			// `InProgressWizard` arms a `beforeNavigate` guard via `dirtyWizardState`; the send is
+			// already done at this point, so clear it to avoid a "navigate away?" confirm popup.
+			dirtyWizardState.set(false);
+			goto(getNftSendRedirectUrl({ sentNft: selectedNft, collectionNfts: $pageCollectionNfts }));
+		}
+
 		closeModal(() => {
 			reset();
 		});
+	};
 
 	const isDisabled = ({ network: { id } }: Token): boolean =>
 		isNetworkIdEthereum(id) || isNetworkIdEvm(id)

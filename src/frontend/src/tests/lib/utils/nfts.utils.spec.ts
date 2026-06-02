@@ -6,6 +6,7 @@ import {
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { AppPath } from '$lib/constants/routes.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import { NetworkSchema } from '$lib/schema/network.schema';
@@ -21,6 +22,7 @@ import {
 	getMediaStatus,
 	getMediaStatusOrCache,
 	getNftCollectionUi,
+	getNftSendRedirectUrl,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
 } from '$lib/utils/nfts.utils';
@@ -223,6 +225,48 @@ describe('nfts.utils', () => {
 			});
 
 			expect(nfts).toEqual([mockMainnetNft]);
+		});
+	});
+
+	describe('getNftSendRedirectUrl', () => {
+		it('returns the collection URL when other NFTs remain in the same collection', () => {
+			const result = getNftSendRedirectUrl({
+				sentNft: mockNft1,
+				collectionNfts: [mockNft1, mockNft2]
+			});
+
+			expect(result).toBe(
+				`${AppPath.Nfts}?collection=${mockNft1.collection.address}&network=${mockNft1.collection.network.id.description}`
+			);
+		});
+
+		it('returns the NFTs root URL when the sent NFT was the last in its collection', () => {
+			const result = getNftSendRedirectUrl({
+				sentNft: mockNft1,
+				collectionNfts: [mockNft1]
+			});
+
+			expect(result).toBe(AppPath.Nfts);
+		});
+
+		it('returns the NFTs root URL when the sent NFT is already absent from an empty collection list', () => {
+			const result = getNftSendRedirectUrl({
+				sentNft: mockNft1,
+				collectionNfts: []
+			});
+
+			expect(result).toBe(AppPath.Nfts);
+		});
+
+		it('returns the collection URL when the sent NFT was already removed but siblings remain', () => {
+			const result = getNftSendRedirectUrl({
+				sentNft: mockNft1,
+				collectionNfts: [mockNft2]
+			});
+
+			expect(result).toBe(
+				`${AppPath.Nfts}?collection=${mockNft1.collection.address}&network=${mockNft1.collection.network.id.description}`
+			);
 		});
 	});
 
