@@ -92,7 +92,11 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	ACTIVITY_PAGE = 'activity_page',
 	MANAGE_TOKENS = 'manage_tokens',
 	TOKEN_DETAILS = 'token_details',
-	SETTINGS_PAGE = 'settings_page'
+	SETTINGS_PAGE = 'settings_page',
+	LOCK = 'lock',
+	NFT = 'nft',
+	REFERRAL = 'referral',
+	SCANNER = 'scanner'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
