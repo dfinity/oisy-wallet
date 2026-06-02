@@ -117,35 +117,6 @@ export const trackRateLimited = ({ endpoint, limiter }: RateLimitInfo) => {
  *   names / ids) to analytics; `event_modifier` already tells us whether the
  *   user added or removed a contact filter.
  */
-/**
- * Build a `TrackEventParams` payload for a "Learn more" documentation link click.
- *
- * Returns the params object rather than firing the event so callers can pass it
- * straight to `ExternalLink.trackEvent`, which fires on click. Centralising the
- * payload keeps the seven UI usage sites in sync with the schema.
- */
-export const buildLearnMoreEvent = ({
-	sourceLocation,
-	sourceSublocation,
-	eventSubcontext,
-	url
-}: {
-	sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
-	sourceSublocation?: string;
-	eventSubcontext: string;
-	url: string;
-}): TrackEventParams => ({
-	name: TRACK_OPEN_DOCUMENTATION,
-	metadata: {
-		event_context: 'learn_more',
-		event_subcontext: eventSubcontext,
-		event_key: 'link',
-		event_value: url,
-		source_location: sourceLocation,
-		...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation })
-	}
-});
-
 export const trackTransactionFilter = ({
 	modifier,
 	key,
@@ -174,3 +145,32 @@ export const trackTransactionFilter = ({
 		}
 	});
 };
+
+/**
+ * Build a `TrackEventParams` payload for a "Learn more" documentation link click.
+ *
+ * Returns the params object rather than firing the event so callers can pass it
+ * straight to `ExternalLink.trackEvent`, which fires on click. Centralising the
+ * payload keeps the seven UI usage sites in sync with the schema.
+ */
+export const buildLearnMoreEvent = ({
+	sourceLocation,
+	sourceSublocation,
+	eventSubcontext,
+	url
+}: {
+	sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
+	sourceSublocation?: string;
+	eventSubcontext: string;
+	url: string;
+}): TrackEventParams => ({
+	name: TRACK_OPEN_DOCUMENTATION,
+	metadata: {
+		event_context: 'learn_more',
+		event_subcontext: eventSubcontext,
+		event_key: 'link',
+		event_value: url,
+		source_location: sourceLocation,
+		...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation })
+	}
+});
