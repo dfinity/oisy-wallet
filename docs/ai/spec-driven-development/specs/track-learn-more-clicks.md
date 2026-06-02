@@ -40,6 +40,7 @@ All "Learn more" clicks fire the existing `open_documentation` event with the fo
 | ScannerInfo (scan link)      | `src/frontend/src/lib/components/scanner/ScannerInfo.svelte`                   | `scanner`         | `scan`                    | `scanner.text.learn_more_about_scan`  | `OISY_SCAN_URL`                         |
 | ScannerInfo (pay link)       | `src/frontend/src/lib/components/scanner/ScannerInfo.svelte`                   | `scanner`         | `pay`                     | `scanner.text.learn_more_about_pay`   | `OISY_PAY_URL`                          |
 | Settings                     | `src/frontend/src/lib/components/settings/Settings.svelte`                     | `settings_page`   | `hide_micro_transactions` | `settings.text.learn_more`            | `OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL` |
+| SettingsExportData           | `src/frontend/src/lib/components/settings/SettingsExportData.svelte`           | `settings_page`   | `export_data`             | `settings.text.learn_more`            | `OISY_EXPORT_DATA_DOCS_URL`             |
 | SettingsExperimentalFeatures | `src/frontend/src/lib/components/settings/SettingsExperimentalFeatures.svelte` | `settings_page`   | `experimental_features`   | `rewards.text.learn_more`             | `OISY_AI_ASSISTANT_DOCS_URL`            |
 
 > **Note:** `source_location` values use snake_case to match the existing convention in `PLAUSIBLE_EVENT_SOURCE_LOCATIONS` (`activity_page`, `manage_tokens`, `token_details`). New entries are added to that enum.
@@ -47,6 +48,8 @@ All "Learn more" clicks fire the existing `open_documentation` event with the fo
 > **Note:** `HarvestAutopilotOverview` has a "Learn more" link that scrolls to an on-page anchor (not an external URL) — exclude it from this change.
 >
 > **Note:** `SettingsExperimentalFeatures` reuses the `rewards.text.learn_more` i18n key — this is a pre-existing issue, leave it for a separate fix.
+>
+> **Note:** `Settings` and `SettingsExportData` both use `settings.text.learn_more` as their `event_subcontext`. They remain distinguishable in analytics via `source_sublocation` (`hide_micro_transactions` vs `export_data`).
 
 ---
 
@@ -62,7 +65,7 @@ Add `LOCK = 'lock'`, `NFT = 'nft'`, `REFERRAL = 'referral'`, `SCANNER = 'scanner
 
 ### 3. Add a shared `buildLearnMoreEvent` helper
 
-`ExternalLink.trackEvent` is a `TrackEventParams` object that the component fires on click. To avoid repeating the full object literal at every usage site, add a factory helper in `src/frontend/src/lib/services/analytics.services.ts` that returns the params:
+`ExternalLink.trackEvent` is a `TrackEventParams` object that the component fires on click. To avoid repeating the full object literal at every usage site (eight in total), add a factory helper in `src/frontend/src/lib/services/analytics.services.ts` that returns the params:
 
 ```ts
 export const buildLearnMoreEvent = ({
@@ -120,10 +123,10 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 
 ## Acceptance Criteria
 
-- [ ] All seven links listed in the table fire an `open_documentation` Plausible event on click.
+- [ ] All eight links listed in the table fire an `open_documentation` Plausible event on click.
 - [ ] Each event has `event_context = learn_more`, the correct `event_subcontext` i18n key, `event_key = link`, `event_value` = the destination URL, and the correct `source_location`.
 - [ ] `ScannerInfo` links additionally set `source_sublocation` (`scan` / `pay`).
-- [ ] `Settings` and `SettingsExperimentalFeatures` set `source_sublocation` (`hide_micro_transactions` / `experimental_features`).
+- [ ] `Settings`, `SettingsExportData` and `SettingsExperimentalFeatures` set `source_sublocation` (`hide_micro_transactions` / `export_data` / `experimental_features`).
 - [ ] No existing tracking on `RewardModal` / `RewardStateModal` is changed.
 - [ ] `HarvestAutopilotOverview` is not changed.
 - [ ] Analytics never throws — errors are caught and do not affect the user flow.
