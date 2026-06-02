@@ -400,6 +400,30 @@ describe('plausible analytics service', () => {
 				}
 			});
 		});
+
+		it('pins the export_data variant under settings_page', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
+				sourceSublocation: 'export_data',
+				eventSubcontext: 'settings.text.learn_more',
+				url: 'https://docs.oisy.com/export'
+			});
+
+			expect(result).toEqual({
+				name: 'open_documentation',
+				metadata: {
+					event_context: 'learn_more',
+					event_subcontext: 'settings.text.learn_more',
+					event_key: 'link',
+					event_value: 'https://docs.oisy.com/export',
+					source_location: 'settings_page',
+					source_sublocation: 'export_data'
+				}
+			});
+		});
 	});
 
 	it('should console.debug the error in STAGING when tracker.track throws', async () => {
