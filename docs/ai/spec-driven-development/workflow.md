@@ -100,4 +100,3 @@ Before closing a PR, Claude Code diffs the final implementation against the spec
 ## Future Improvement (when available)
 
 Once a custom GitHub MCP connector can be added to Cowork, the manual copy step (Step 3) can be automated — Cowork would commit the spec file directly to a branch in the repo.
-
