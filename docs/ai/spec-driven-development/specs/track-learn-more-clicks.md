@@ -18,29 +18,29 @@ Plausible events are fired via `trackEvent()` in `src/frontend/src/lib/services/
 
 All "Learn more" clicks fire the existing `open_documentation` event with the following attributes, following the schema defined in the [Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events) Confluence page.
 
-| Attribute | Value |
-|---|---|
-| **Event** | `open_documentation` |
-| `event_context` | `learn_more` |
-| `event_subcontext` | i18n key of the link label (e.g. `lock.text.learn_more`) |
-| `event_key` | `link` |
-| `event_value` | the destination URL |
-| `source_location` | component/page name, snake_case (see table below) |
+| Attribute            | Value                                                                       |
+| -------------------- | --------------------------------------------------------------------------- |
+| **Event**            | `open_documentation`                                                        |
+| `event_context`      | `learn_more`                                                                |
+| `event_subcontext`   | i18n key of the link label (e.g. `lock.text.learn_more`)                    |
+| `event_key`          | `link`                                                                      |
+| `event_value`        | the destination URL                                                         |
+| `source_location`    | component/page name, snake_case (see table below)                           |
 | `source_sublocation` | only set when a component has multiple "Learn more" links (see table below) |
 
 ---
 
 ## Links to Instrument
 
-| Component | File | `source_location` | `source_sublocation` | `event_subcontext` (i18n key) | `event_value` (URL) |
-|---|---|---|---|---|---|
-| LockPage | `src/frontend/src/lib/components/auth/LockPage.svelte` | `lock` | — | `lock.text.learn_more` | hardcoded URL in component |
-| NftImageConsentModal | `src/frontend/src/lib/components/nfts/NftImageConsentModal.svelte` | `nft` | — | `nfts.text.learn_more` | `OISY_NFT_DOCS_URL` |
-| ReferralCodeModal | `src/frontend/src/lib/components/referral/ReferralCodeModal.svelte` | `referral` | — | `referral.invitation.text.learn_more` | `OISY_REFERRAL_URL` |
-| ScannerInfo (scan link) | `src/frontend/src/lib/components/scanner/ScannerInfo.svelte` | `scanner` | `scan` | `scanner.text.learn_more_about_scan` | `OISY_SCAN_URL` |
-| ScannerInfo (pay link) | `src/frontend/src/lib/components/scanner/ScannerInfo.svelte` | `scanner` | `pay` | `scanner.text.learn_more_about_pay` | `OISY_PAY_URL` |
-| Settings | `src/frontend/src/lib/components/settings/Settings.svelte` | `settings_page` | `hide_micro_transactions` | `settings.text.learn_more` | `OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL` |
-| SettingsExperimentalFeatures | `src/frontend/src/lib/components/settings/SettingsExperimentalFeatures.svelte` | `settings_page` | `experimental_features` | `rewards.text.learn_more` | `OISY_AI_ASSISTANT_DOCS_URL` |
+| Component                    | File                                                                           | `source_location` | `source_sublocation`      | `event_subcontext` (i18n key)         | `event_value` (URL)                     |
+| ---------------------------- | ------------------------------------------------------------------------------ | ----------------- | ------------------------- | ------------------------------------- | --------------------------------------- |
+| LockPage                     | `src/frontend/src/lib/components/auth/LockPage.svelte`                         | `lock`            | —                         | `lock.text.learn_more`                | hardcoded URL in component              |
+| NftImageConsentModal         | `src/frontend/src/lib/components/nfts/NftImageConsentModal.svelte`             | `nft`             | —                         | `nfts.text.learn_more`                | `OISY_NFT_DOCS_URL`                     |
+| ReferralCodeModal            | `src/frontend/src/lib/components/referral/ReferralCodeModal.svelte`            | `referral`        | —                         | `referral.invitation.text.learn_more` | `OISY_REFERRAL_URL`                     |
+| ScannerInfo (scan link)      | `src/frontend/src/lib/components/scanner/ScannerInfo.svelte`                   | `scanner`         | `scan`                    | `scanner.text.learn_more_about_scan`  | `OISY_SCAN_URL`                         |
+| ScannerInfo (pay link)       | `src/frontend/src/lib/components/scanner/ScannerInfo.svelte`                   | `scanner`         | `pay`                     | `scanner.text.learn_more_about_pay`   | `OISY_PAY_URL`                          |
+| Settings                     | `src/frontend/src/lib/components/settings/Settings.svelte`                     | `settings_page`   | `hide_micro_transactions` | `settings.text.learn_more`            | `OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL` |
+| SettingsExperimentalFeatures | `src/frontend/src/lib/components/settings/SettingsExperimentalFeatures.svelte` | `settings_page`   | `experimental_features`   | `rewards.text.learn_more`             | `OISY_AI_ASSISTANT_DOCS_URL`            |
 
 > **Note:** `source_location` values use snake_case to match the existing convention in `PLAUSIBLE_EVENT_SOURCE_LOCATIONS` (`activity_page`, `manage_tokens`, `token_details`). New entries are added to that enum.
 >
@@ -66,25 +66,25 @@ Add `LOCK = 'lock'`, `NFT = 'nft'`, `REFERRAL = 'referral'`, `SCANNER = 'scanner
 
 ```ts
 export const buildLearnMoreEvent = ({
-  sourceLocation,
-  sourceSublocation,
-  eventSubcontext,
-  url
+	sourceLocation,
+	sourceSublocation,
+	eventSubcontext,
+	url
 }: {
-  sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
-  sourceSublocation?: string;
-  eventSubcontext: string;
-  url: string;
+	sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
+	sourceSublocation?: string;
+	eventSubcontext: string;
+	url: string;
 }): TrackEventParams => ({
-  name: TRACK_OPEN_DOCUMENTATION,
-  metadata: {
-    event_context: 'learn_more',
-    event_subcontext: eventSubcontext,
-    event_key: 'link',
-    event_value: url,
-    source_location: sourceLocation,
-    ...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation })
-  }
+	name: TRACK_OPEN_DOCUMENTATION,
+	metadata: {
+		event_context: 'learn_more',
+		event_subcontext: eventSubcontext,
+		event_key: 'link',
+		event_value: url,
+		source_location: sourceLocation,
+		...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation })
+	}
 });
 ```
 
@@ -94,15 +94,15 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 
 ```svelte
 <ExternalLink
-  href={LOCK_DOCS_URL}
-  ariaLabel={$i18n.lock.text.learn_more}
-  trackEvent={buildLearnMoreEvent({
-    sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
-    eventSubcontext: 'lock.text.learn_more',
-    url: LOCK_DOCS_URL
-  })}
+	href={LOCK_DOCS_URL}
+	ariaLabel={$i18n.lock.text.learn_more}
+	trackEvent={buildLearnMoreEvent({
+		sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
+		eventSubcontext: 'lock.text.learn_more',
+		url: LOCK_DOCS_URL
+	})}
 >
-  {$i18n.lock.text.learn_more}
+	{$i18n.lock.text.learn_more}
 </ExternalLink>
 ```
 
