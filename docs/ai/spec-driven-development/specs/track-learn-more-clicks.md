@@ -39,8 +39,8 @@ All "Learn more" clicks fire the existing `open_documentation` event with the fo
 | ReferralCodeModal | `src/frontend/src/lib/components/referral/ReferralCodeModal.svelte` | `referral` | — | `referral.invitation.text.learn_more` | `OISY_REFERRAL_URL` |
 | ScannerInfo (scan link) | `src/frontend/src/lib/components/scanner/ScannerInfo.svelte` | `scanner` | `scan` | `scanner.text.learn_more_about_scan` | `OISY_SCAN_URL` |
 | ScannerInfo (pay link) | `src/frontend/src/lib/components/scanner/ScannerInfo.svelte` | `scanner` | `pay` | `scanner.text.learn_more_about_pay` | `OISY_PAY_URL` |
-| Settings | `src/frontend/src/lib/components/settings/Settings.svelte` | `settings` | `hide_micro_transactions` | `settings.text.learn_more` | `OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL` |
-| SettingsExperimentalFeatures | `src/frontend/src/lib/components/settings/SettingsExperimentalFeatures.svelte` | `settings` | `experimental_features` | `rewards.text.learn_more` | `OISY_AI_ASSISTANT_DOCS_URL` |
+| Settings | `src/frontend/src/lib/components/settings/Settings.svelte` | `settings_page` | `hide_micro_transactions` | `settings.text.learn_more` | `OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL` |
+| SettingsExperimentalFeatures | `src/frontend/src/lib/components/settings/SettingsExperimentalFeatures.svelte` | `settings_page` | `experimental_features` | `rewards.text.learn_more` | `OISY_AI_ASSISTANT_DOCS_URL` |
 
 > **Note:** `source_location` values use snake_case to match the existing convention in `PLAUSIBLE_EVENT_SOURCE_LOCATIONS` (`activity_page`, `manage_tokens`, `token_details`). New entries are added to that enum.
 >
@@ -58,7 +58,7 @@ The `open_documentation` event already exists as `TRACK_OPEN_DOCUMENTATION` in `
 
 ### 2. Extend `PLAUSIBLE_EVENT_SOURCE_LOCATIONS`
 
-Add `LOCK`, `NFT`, `REFERRAL`, `SCANNER`, `SETTINGS` entries (snake_case string values) so the helper can be type-safe and source locations stay centralised.
+Add `LOCK = 'lock'`, `NFT = 'nft'`, `REFERRAL = 'referral'`, `SCANNER = 'scanner'` entries so the helper can be type-safe and source locations stay centralised. The existing `SETTINGS_PAGE = 'settings_page'` entry is reused for both settings components.
 
 ### 3. Add a shared `buildLearnMoreEvent` helper
 
