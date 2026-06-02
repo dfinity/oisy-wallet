@@ -9,6 +9,8 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userExperimentalFeatures } from '$lib/derived/user-experimental-features.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import type {
@@ -90,7 +92,13 @@
 						<ExternalLink
 							ariaLabel={$i18n.rewards.text.learn_more}
 							href={labelsByFeatureId[feature].learnMore}
-							iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
+							iconVisible={false}
+							trackEvent={buildLearnMoreEvent({
+								sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
+								sourceSublocation: 'experimental_features',
+								eventSubcontext: 'rewards.text.learn_more',
+								url: labelsByFeatureId[feature].learnMore
+							})}>{$i18n.rewards.text.learn_more}</ExternalLink
 						>
 					{/if}
 				</span>

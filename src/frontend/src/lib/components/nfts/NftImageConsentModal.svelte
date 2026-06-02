@@ -18,10 +18,11 @@
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 		PLAUSIBLE_EVENT_SOURCES,
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
-	import { trackEvent } from '$lib/services/analytics.services';
+	import { buildLearnMoreEvent, trackEvent } from '$lib/services/analytics.services';
 	import { updateNftMediaConsent } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -131,7 +132,12 @@
 					href={OISY_NFT_DOCS_URL}
 					iconAsLast
 					iconSize="18"
-					styleClass="font-bold ml-2">{$i18n.nfts.text.learn_more}</ExternalLink
+					styleClass="font-bold ml-2"
+					trackEvent={buildLearnMoreEvent({
+						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NFT,
+						eventSubcontext: 'nfts.text.learn_more',
+						url: OISY_NFT_DOCS_URL
+					})}>{$i18n.nfts.text.learn_more}</ExternalLink
 				>
 			</p>
 
