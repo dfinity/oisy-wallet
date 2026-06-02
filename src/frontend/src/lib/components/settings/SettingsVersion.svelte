@@ -18,7 +18,7 @@
 	const branch = GIT_BRANCH_NAME;
 </script>
 
-<p class="mb-0 text-center text-xs text-primary">
+<p class="text-center text-xs text-primary">
 	<span class="opacity-50">{OISY_NAME}</span>
 	<ExternalLink
 		ariaLabel={replaceOisyPlaceholders($i18n.settings.alt.github_release)}
@@ -28,7 +28,7 @@
 </p>
 
 {#if TEST_FE && notEmptyString(branch) && notEmptyString(commit)}
-	<p class="mt-24 mb-0 text-center text-xs text-primary">
+	<p class="mt-24 text-center text-xs text-primary">
 		{$i18n.settings.text.git_disclaimer}<br />
 		<b>{$i18n.settings.text.git_branch_name}</b>
 		{branch}<br />

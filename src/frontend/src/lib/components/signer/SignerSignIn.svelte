@@ -43,7 +43,9 @@
 
 <ButtonAuthenticateWithHelp asPopup fullWidth helpAlignment="center" needHelpLink={false} />
 
-<SettingsVersion />
+<div class="[&_p]:mb-0">
+	<SettingsVersion />
+</div>
 
 {#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
 	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
