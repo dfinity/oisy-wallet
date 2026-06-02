@@ -4,7 +4,6 @@
 	import { fade, type FadeParams } from 'svelte/transition';
 	import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
-	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import SignerAccounts from '$lib/components/signer/SignerAccounts.svelte';
 	import SignerCallCanister from '$lib/components/signer/SignerCallCanister.svelte';
 	import SignerConsentMessage from '$lib/components/signer/SignerConsentMessage.svelte';
@@ -80,7 +79,3 @@
 		</LoaderUserProfile>
 	{/if}
 </article>
-
-{#if $authNotSignedIn}
-	<SettingsVersion />
-{/if}
