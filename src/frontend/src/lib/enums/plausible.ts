@@ -32,7 +32,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	EARN = 'earn',
 	TRANSACTIONS = 'transactions',
 	SIGNER = 'signer',
-	NETWORKS = 'networks'
+	NETWORKS = 'networks',
+	LEARN_MORE = 'learn_more'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -115,7 +116,8 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	TRANSACTION_TYPE = 'transaction_type',
 	TOKEN = 'token',
 	CONTACT = 'contact',
-	TYPE = 'type'
+	TYPE = 'type',
+	LINK = 'link'
 }
 
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {

@@ -4,7 +4,7 @@ import { TRACK_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
-	type PLAUSIBLE_EVENT_EVENTS_KEYS,
+	PLAUSIBLE_EVENT_EVENTS_KEYS,
 	type PLAUSIBLE_EVENT_FILTER_MODIFIERS,
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
@@ -197,8 +197,8 @@ export const buildLearnMoreEvent = ({
 	return {
 		name: TRACK_OPEN_DOCUMENTATION,
 		metadata: {
-			event_context: 'learn_more',
-			event_key: 'link',
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.LEARN_MORE,
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.LINK,
 			event_value: url,
 			source_location: sourceLocation,
 			...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation }),
