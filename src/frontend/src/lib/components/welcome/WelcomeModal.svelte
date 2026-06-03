@@ -15,6 +15,8 @@
 		WELCOME_MODAL_LEARN_MORE_ANCHOR,
 		WELCOME_MODAL_SHARE_ANCHOR
 	} from '$lib/constants/test-ids.constants';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders, resolveText } from '$lib/utils/i18n.utils';
@@ -75,6 +77,11 @@
 					iconVisible={false}
 					styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
 					testId={WELCOME_MODAL_LEARN_MORE_ANCHOR}
+					trackEvent={buildLearnMoreEvent({
+						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.WELCOME,
+						eventSubcontext: 'rewards.text.learn_more',
+						url: OISY_REWARDS_URL
+					})}
 				>
 					{$i18n.rewards.text.learn_more}
 				</ExternalLink>

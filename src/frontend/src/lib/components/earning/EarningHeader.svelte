@@ -9,6 +9,8 @@
 		allEarningYearlyAmountUsd,
 		highestEarningPotentialUsd
 	} from '$lib/derived/earning.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
@@ -21,7 +23,16 @@
 	{#snippet content()}
 		<p class="w-full text-center">
 			{$i18n.earning.text.header_description}
-			<ExternalLink ariaLabel={$i18n.core.alt.learn_more} href={OISY_EARN_URL} iconAsLast>
+			<ExternalLink
+				ariaLabel={$i18n.core.alt.learn_more}
+				href={OISY_EARN_URL}
+				iconAsLast
+				trackEvent={buildLearnMoreEvent({
+					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN,
+					eventSubcontext: 'core.text.learn_more',
+					url: OISY_EARN_URL
+				})}
+			>
 				{$i18n.core.text.learn_more}
 			</ExternalLink>
 		</p>
