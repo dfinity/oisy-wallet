@@ -202,9 +202,9 @@ export type AllowSigningResult =
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export interface ApiKeys {
 	/**
-	 * When `Some(false)`, periodic exchange-rate HTTP outcalls are disabled (even with a
-	 * `CoinGecko` key). When `None` or `Some(true)`, outcalls run iff `coingecko_api_key` is set
-	 * (misconfiguration with no key does not run refresh).
+	 * Periodic exchange-rate HTTP outcalls are opt-in: they run only when this is
+	 * `Some(true)` and a `CoinGecko` key is set. `None` (the default) and `Some(false)`
+	 * both keep refresh disabled (and a missing key never runs refresh either).
 	 */
 	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
