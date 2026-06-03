@@ -372,7 +372,8 @@ describe('plausible analytics service', () => {
 					event_subcontext: 'lock.text.learn_more',
 					event_key: 'link',
 					event_value: 'https://docs.oisy.com/locking',
-					source_location: 'lock'
+					source_location: 'lock',
+					source_path: 'lock / Learn more'
 				}
 			});
 		});
@@ -396,7 +397,8 @@ describe('plausible analytics service', () => {
 					event_key: 'link',
 					event_value: 'https://docs.oisy.com/scan',
 					source_location: 'scanner',
-					source_sublocation: 'scan'
+					source_sublocation: 'scan',
+					source_path: 'scanner / scan / Learn more about the scanner'
 				}
 			});
 		});
@@ -420,9 +422,39 @@ describe('plausible analytics service', () => {
 					event_key: 'link',
 					event_value: 'https://docs.oisy.com/export',
 					source_location: 'settings_page',
-					source_sublocation: 'export_data'
+					source_sublocation: 'export_data',
+					source_path: 'settings_page / export_data / Learn more'
 				}
 			});
+		});
+
+		it('expands OISY placeholders in the source_path label (scanner pay)', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
+				sourceSublocation: 'pay',
+				eventSubcontext: 'scanner.text.learn_more_about_pay',
+				url: 'https://docs.oisy.com/pay'
+			});
+
+			// `scanner.text.learn_more_about_pay` is "Learn more about $oisy_short Pay";
+			// the helper must expand `$oisy_short` so the dashboard column reads cleanly.
+			expect(result.metadata?.source_path).toBe('scanner / pay / Learn more about OISY Pay');
+		});
+
+		it('omits the label segment when the i18n key cannot be resolved', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
+				eventSubcontext: 'nonexistent.key.path',
+				url: 'https://example.com'
+			});
+
+			expect(result.metadata?.source_path).toBe('lock');
 		});
 	});
 
