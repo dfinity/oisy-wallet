@@ -68,9 +68,9 @@
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
-	import { findNonFungibleToken, getNftSendRedirectUrl } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
-	import { shouldSkipDestinationStep } from '$lib/utils/send.utils';
+	import { getNftSendCloseRedirectUrl, shouldSkipDestinationStep } from '$lib/utils/send.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
@@ -175,16 +175,19 @@
 		// Gate on `$routeNft` rather than the `isNftsPage` prop alone so the redirect is anchored to
 		// the actual NFT detail URL — a future caller flipping the prop on a list page wouldn't drop
 		// query params like the selected network.
-		if (
-			isNftsPage &&
-			nonNullish($routeNft) &&
-			sendProgressStep === ProgressStepsSend.DONE &&
-			nonNullish(selectedNft)
-		) {
+		const redirectUrl = getNftSendCloseRedirectUrl({
+			isNftsPage,
+			routeNft: $routeNft,
+			sendProgressStep,
+			selectedNft,
+			collectionNfts: $pageCollectionNfts
+		});
+
+		if (nonNullish(redirectUrl)) {
 			// `InProgressWizard` arms a `beforeNavigate` guard via `dirtyWizardState`; the send is
 			// already done at this point, so clear it to avoid a "navigate away?" confirm popup.
 			dirtyWizardState.set(false);
-			goto(getNftSendRedirectUrl({ sentNft: selectedNft, collectionNfts: $pageCollectionNfts }));
+			goto(redirectUrl);
 		}
 
 		closeModal(() => {

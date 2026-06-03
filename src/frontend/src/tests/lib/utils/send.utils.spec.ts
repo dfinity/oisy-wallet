@@ -7,10 +7,18 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { isInvalidDestinationBtc, shouldSkipDestinationStep } from '$lib/utils/send.utils';
+import { AppPath } from '$lib/constants/routes.constants';
+import { ProgressStepsSend } from '$lib/enums/progress-steps';
+import {
+	getNftSendCloseRedirectUrl,
+	isInvalidDestinationBtc,
+	shouldSkipDestinationStep
+} from '$lib/utils/send.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 
 describe('send.utils', () => {
@@ -115,6 +123,56 @@ describe('send.utils', () => {
 			expect(
 				shouldSkipDestinationStep({ destination: mockEthAddress, token: ETHEREUM_TOKEN })
 			).toBeFalsy();
+		});
+	});
+
+	describe('getNftSendCloseRedirectUrl', () => {
+		const sentNft = mockValidErc721Nft;
+		const remainingNft = { ...mockValidErc721Nft, id: parseNftId('173564') };
+
+		const detailSendDone = {
+			isNftsPage: true,
+			routeNft: sentNft.id,
+			sendProgressStep: ProgressStepsSend.DONE,
+			selectedNft: sentNft
+		};
+
+		it('returns the collection URL after a completed NFT detail-page send with siblings left', () => {
+			expect(
+				getNftSendCloseRedirectUrl({
+					...detailSendDone,
+					collectionNfts: [sentNft, remainingNft]
+				})
+			).toBe(
+				`${AppPath.Nfts}?collection=${sentNft.collection.address}&network=${sentNft.collection.network.id.description}`
+			);
+		});
+
+		it('returns the NFT root URL after a completed NFT detail-page send of the last item', () => {
+			expect(
+				getNftSendCloseRedirectUrl({
+					...detailSendDone,
+					collectionNfts: [sentNft]
+				})
+			).toBe(AppPath.Nfts);
+		});
+
+		it.each([
+			{ description: 'is not on the NFTs page', override: { isNftsPage: false } },
+			{ description: 'has no NFT route parameter', override: { routeNft: undefined } },
+			{
+				description: 'has not completed the send',
+				override: { sendProgressStep: ProgressStepsSend.INITIALIZATION }
+			},
+			{ description: 'has no selected NFT', override: { selectedNft: undefined } }
+		])('returns undefined when the modal $description', ({ override }) => {
+			expect(
+				getNftSendCloseRedirectUrl({
+					...detailSendDone,
+					...override,
+					collectionNfts: [sentNft, remainingNft]
+				})
+			).toBeUndefined();
 		});
 	});
 });

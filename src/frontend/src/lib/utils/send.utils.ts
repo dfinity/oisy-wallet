@@ -1,5 +1,8 @@
 import { invalidBtcAddress } from '$btc/utils/btc-address.utils';
+import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import type { NetworkId } from '$lib/types/network';
+import type { Nft } from '$lib/types/nft';
+import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import {
@@ -9,8 +12,9 @@ import {
 	isNetworkIdICP,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import { getNftSendRedirectUrl } from '$lib/utils/nfts.utils';
 import { invalidSolAddress } from '$sol/utils/sol-address.utils';
-import { notEmptyString } from '@dfinity/utils';
+import { nonNullish, notEmptyString } from '@dfinity/utils';
 import { BtcNetwork } from '@icp-sdk/canisters/ckbtc';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -71,3 +75,23 @@ export const shouldSkipDestinationStep = ({
 
 	return false;
 };
+
+export const getNftSendCloseRedirectUrl = ({
+	isNftsPage,
+	routeNft,
+	sendProgressStep,
+	selectedNft,
+	collectionNfts
+}: {
+	isNftsPage: boolean;
+	routeNft: OptionString;
+	sendProgressStep: ProgressStepsSend;
+	selectedNft: Nft | undefined;
+	collectionNfts: Nft[];
+}): string | undefined =>
+	isNftsPage &&
+	nonNullish(routeNft) &&
+	sendProgressStep === ProgressStepsSend.DONE &&
+	nonNullish(selectedNft)
+		? getNftSendRedirectUrl({ sentNft: selectedNft, collectionNfts })
+		: undefined;
