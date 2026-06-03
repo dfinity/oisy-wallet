@@ -31,7 +31,7 @@
 			>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong
 		>{$i18n.transaction.filter.contacts_empty_description}<br />
 		<ExternalLink
-			ariaLabel={$i18n.core.alt.learn_more}
+			ariaLabel={$i18n.core.text.learn_more}
 			color="blue"
 			href={learnMoreUrl}
 			iconVisible={false}
