@@ -18,8 +18,8 @@ dfinity/oisy-wallet/
         └── spec-driven-development/
             ├── workflow.md    # This document
             └── specs/
-                ├── add-token-swapping.md
-                ├── fix-wallet-sync-race.md
+                ├── 2026-05-10-feat-add-token-swapping.md
+                ├── 2026-05-24-fix-wallet-sync-race.md
                 └── ...
 ```
 
@@ -29,7 +29,11 @@ dfinity/oisy-wallet/
 
 ### Step 1 — Describe (Cowork)
 
-You describe the feature, improvement, or bugfix in Cowork. No need to be precise — rough intent is enough to start.
+Open a new Cowork session and say:
+
+> "I want to spec a new feature for dfinity/oisy-wallet using the spec-driven development workflow in `docs/ai/spec-driven-development/workflow.md`."
+
+Cowork will read the workflow from the repo and guide you through the process. You describe the feature, improvement, or bugfix — no need to be precise, rough intent is enough to start.
 
 ### Step 2 — Clarify (Cowork)
 
@@ -38,6 +42,21 @@ We work through open questions together: scope, edge cases, constraints, accepta
 ### Step 3 — Spec (Cowork → You)
 
 Cowork produces a spec file. You copy it into `docs/ai/spec-driven-development/specs/` in your local repo. The spec is intentionally written for Claude Code — it references real file paths, component names, and existing patterns where possible.
+
+**Spec filename convention:** `YYYY-MM-DD-<type>-<short-description>.md`
+
+The date prefix keeps specs sorted chronologically in the directory. The type prefix signals the nature of the work at a glance:
+
+| Prefix  | When to use                       |
+| ------- | --------------------------------- |
+| `feat`  | New feature                       |
+| `impr`  | Improvement to existing behaviour |
+| `fix`   | Bug fix                           |
+| `chore` | Refactor, tooling, housekeeping   |
+
+Example: `2026-06-02-impr-track-learn-more-clicks.md`
+
+**Cowork session naming:** Name the session to match the spec — same type prefix and short description, without the date. E.g. `impr: Track Learn More clicks in Plausible`. This keeps the sidebar readable and makes it easy to link a session back to its spec.
 
 ### Step 4 — Build (Claude Code)
 
@@ -49,7 +68,11 @@ Claude Code reads the spec, reads `docs/ai/PRODUCT.md` for system context, and b
 
 ### Step 5 — Adjust (Claude Code ↔ Spec)
 
-If the implementation reveals gaps or the spec needs updating, edit the spec file and tell Claude Code. The spec is the source of truth — keep it in sync with reality.
+If the implementation reveals gaps or the spec needs updating, the spec is the source of truth — keep it in sync with reality.
+
+**Fix it in Code directly** if it's a small gap — a missing edge case, an unclear description, a file path that turned out to be wrong. Code can edit the spec file itself as it works.
+
+**Come back to Cowork** if the gap reveals a deeper ambiguity — something that requires rethinking scope, resolving a product question, or deciding between approaches. Cowork is better for that dialogue, and the updated spec should reflect the decision before Code continues.
 
 ### Step 6 — Merge & Update (Claude Code)
 
