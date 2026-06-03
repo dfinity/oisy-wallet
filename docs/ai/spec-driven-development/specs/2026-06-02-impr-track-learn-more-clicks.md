@@ -8,7 +8,7 @@ Track every "Learn more" link click in Plausible so we can see how often users s
 
 ## Background
 
-Oisy uses the `ExternalLink` component (`src/frontend/src/lib/components/ui/ExternalLink.svelte`) throughout the UI for "Learn more" links. This component already supports a `trackEvent` prop that fires a Plausible event on click. Some links (RewardModal, RewardStateModal) already use it; most do not.
+Oisy uses the `ExternalLink` component (`src/frontend/src/lib/components/ui/ExternalLink.svelte`) throughout the UI for "Learn more" links. This component already supports a `trackEvent` prop that fires a Plausible event on click. Some links already use it; most do not.
 
 Plausible events are fired via `trackEvent()` in `src/frontend/src/lib/services/analytics.services.ts`. Event names live in `src/frontend/src/lib/enums/plausible.ts` (`PLAUSIBLE_EVENTS`) and `src/frontend/src/lib/constants/analytics.constants.ts`.
 
@@ -42,10 +42,20 @@ All "Learn more" clicks fire the existing `open_documentation` event with the fo
 | Settings                     | `src/frontend/src/lib/components/settings/Settings.svelte`                     | `settings_page`   | `hide_micro_transactions` | `settings.text.learn_more`            | `OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL` |
 | SettingsExportData           | `src/frontend/src/lib/components/settings/SettingsExportData.svelte`           | `settings_page`   | `export_data`             | `settings.text.learn_more`            | `OISY_EXPORT_DATA_DOCS_URL`             |
 | SettingsExperimentalFeatures | `src/frontend/src/lib/components/settings/SettingsExperimentalFeatures.svelte` | `settings_page`   | `experimental_features`   | `rewards.text.learn_more`             | `OISY_AI_ASSISTANT_DOCS_URL`            |
+| WelcomeModal                 | `src/frontend/src/lib/components/welcome/WelcomeModal.svelte`                  | `welcome`         | —                         | `rewards.text.learn_more`             | `OISY_REWARDS_URL`                      |
+| EarningHeader                | `src/frontend/src/lib/components/earning/EarningHeader.svelte`                 | `earn`            | —                         | `core.text.learn_more`                | `OISY_EARN_URL`                         |
+| SignerSignIn                 | `src/frontend/src/lib/components/signer/SignerSignIn.svelte`                   | `signer`          | —                         | `core.text.learn_more`                | `OISY_SIGNER_CONNECT_DOCS_URL`          |
+| RewardsRequirements          | `src/frontend/src/lib/components/rewards/RewardsRequirements.svelte`           | `rewards`         | `requirements`            | `rewards.text.learn_more`             | `reward.learnMoreHref` (dynamic prop)   |
+| TransactionsFilterContactsEmptyState | `src/frontend/src/lib/components/transactions/filter/TransactionsFilterContactsEmptyState.svelte` | `transactions` | — | `core.text.learn_more` | hardcoded URL in component |
+| Erc20Icp                     | `src/frontend/src/lib/components/core/Erc20Icp.svelte`                         | `erc20_icp`       | —                         | `hero.text.learn_more_about_erc20_icp` | `ERC20_ICP_REPO_URL`                   |
 
 > **Note:** `source_location` values use snake_case to match the existing convention in `PLAUSIBLE_EVENT_SOURCE_LOCATIONS` (`activity_page`, `manage_tokens`, `token_details`). New entries are added to that enum.
 >
 > **Note:** `HarvestAutopilotOverview` has a "Learn more" link that scrolls to an on-page anchor (not an external URL) — exclude it from this change.
+>
+> **Note:** `DappsCarouselSlide` and `DappCard` use `dapps.alt.learn_more` only as an `aria-label` on a `<button>` with no href — these are not "Learn more" links and are excluded.
+>
+> **Note:** `Rewards.svelte` already tracks its "Learn more" link with a custom `TRACK_REWARD_LEARN_MORE` event — leave it untouched.
 >
 > **Note:** `SettingsExperimentalFeatures` reuses the `rewards.text.learn_more` i18n key — this is a pre-existing issue, leave it for a separate fix.
 >
@@ -61,11 +71,11 @@ The `open_documentation` event already exists as `TRACK_OPEN_DOCUMENTATION` in `
 
 ### 2. Extend `PLAUSIBLE_EVENT_SOURCE_LOCATIONS`
 
-Add `LOCK = 'lock'`, `NFT = 'nft'`, `REFERRAL = 'referral'`, `SCANNER = 'scanner'` entries so the helper can be type-safe and source locations stay centralised. The existing `SETTINGS_PAGE = 'settings_page'` entry is reused for both settings components.
+Add entries for all new `source_location` values used in the table above (`lock`, `nft`, `referral`, `scanner`, `welcome`, `earn`, `signer`, `rewards`, `transactions`, `erc20_icp`) so the helper remains type-safe and source locations stay centralised. The existing `SETTINGS_PAGE = 'settings_page'` entry is reused for the three settings components.
 
 ### 3. Add a shared `buildLearnMoreEvent` helper
 
-`ExternalLink.trackEvent` is a `TrackEventParams` object that the component fires on click. To avoid repeating the full object literal at every usage site (eight in total), add a factory helper in `src/frontend/src/lib/services/analytics.services.ts` that returns the params:
+`ExternalLink.trackEvent` is a `TrackEventParams` object that the component fires on click. To avoid repeating the full object literal at every usage site (14 in total), add a factory helper in `src/frontend/src/lib/services/analytics.services.ts` that returns the params:
 
 ```ts
 export const buildLearnMoreEvent = ({
@@ -91,7 +101,11 @@ export const buildLearnMoreEvent = ({
 });
 ```
 
-### 4. Wire up each ExternalLink
+### 4. Convert raw `<a>` tags to `ExternalLink`
+
+`TransactionsFilterContactsEmptyState` and `Erc20Icp` use raw `<a>` tags instead of `ExternalLink`. Convert them to `ExternalLink` first, then add the `trackEvent` prop. Match the style of surrounding elements.
+
+### 5. Wire up each ExternalLink
 
 For each component in the table above, pass a `trackEvent` prop to the relevant `ExternalLink`, building the params with `buildLearnMoreEvent(...)`. Example for `LockPage`:
 
@@ -117,16 +131,19 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 
 - Fixing the `SettingsExperimentalFeatures` i18n key (`rewards.text.learn_more` → a proper key)
 - `HarvestAutopilotOverview` scroll anchor link
-- Already-tracked links in `RewardModal` and `RewardStateModal`
+- `DappsCarouselSlide` / `DappCard` button elements
+- Already-tracked links in `RewardModal`, `RewardStateModal`, and `Rewards.svelte`
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] All eight links listed in the table fire an `open_documentation` Plausible event on click.
+- [ ] All 14 links listed in the table fire an `open_documentation` Plausible event on click.
 - [ ] Each event has `event_context = learn_more`, the correct `event_subcontext` i18n key, `event_key = link`, `event_value` = the destination URL, and the correct `source_location`.
-- [ ] `ScannerInfo` links additionally set `source_sublocation` (`scan` / `pay`).
-- [ ] `Settings`, `SettingsExportData` and `SettingsExperimentalFeatures` set `source_sublocation` (`hide_micro_transactions` / `export_data` / `experimental_features`).
-- [ ] No existing tracking on `RewardModal` / `RewardStateModal` is changed.
+- [ ] `ScannerInfo` links set `source_sublocation` (`scan` / `pay`).
+- [ ] `Settings`, `SettingsExportData`, and `SettingsExperimentalFeatures` set `source_sublocation` (`hide_micro_transactions` / `export_data` / `experimental_features`).
+- [ ] `RewardsRequirements` sets `source_sublocation = requirements`.
+- [ ] `TransactionsFilterContactsEmptyState` and `Erc20Icp` are converted from raw `<a>` tags to `ExternalLink` before tracking is added.
+- [ ] No existing tracking on `RewardModal`, `RewardStateModal`, or `Rewards.svelte` is changed.
 - [ ] `HarvestAutopilotOverview` is not changed.
 - [ ] Analytics never throws — errors are caught and do not affect the user flow.
