@@ -18,15 +18,15 @@ Plausible events are fired via `trackEvent()` in `src/frontend/src/lib/services/
 
 All "Learn more" clicks fire the existing `open_documentation` event with the following attributes, following the schema defined in the [Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events) Confluence page.
 
-| Attribute            | Value                                                                                                                              |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Event**            | `open_documentation`                                                                                                               |
-| `event_context`      | `learn_more`                                                                                                                       |
-| `event_subcontext`   | i18n key of the link label (e.g. `lock.text.learn_more`)                                                                           |
-| `event_key`          | `link`                                                                                                                             |
-| `event_value`        | the destination URL                                                                                                                |
-| `source_location`    | component/page name, snake_case (see table below)                                                                                  |
-| `source_sublocation` | only set when a component has multiple "Learn more" links (see table below)                                                        |
+| Attribute            | Value                                                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Event**            | `open_documentation`                                                                                                                |
+| `event_context`      | `learn_more`                                                                                                                        |
+| `event_subcontext`   | i18n key of the link label (e.g. `lock.text.learn_more`)                                                                            |
+| `event_key`          | `link`                                                                                                                              |
+| `event_value`        | the destination URL                                                                                                                 |
+| `source_location`    | component/page name, snake_case (see table below)                                                                                   |
+| `source_sublocation` | only set when a component has multiple "Learn more" links (see table below)                                                         |
 | `source_path`        | slash-joined human-readable identity: `<source_location> / <source_sublocation?> / <English label>` (see note below for resolution) |
 
 ---
@@ -158,7 +158,7 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 
 - [ ] All 13 links listed in the table fire an `open_documentation` Plausible event on click.
 - [ ] Each event has `event_context = learn_more`, the correct `event_subcontext` i18n key, `event_key = link`, `event_value` = the destination URL, and the correct `source_location`.
-- [ ] Each event includes a `source_path` field that joins `source_location`, optional `source_sublocation`, and the English-resolved label with ` / `, with OISY placeholders expanded.
+- [ ] Each event includes a `source_path` field that joins `source_location`, optional `source_sublocation`, and the English-resolved label with `/`, with OISY placeholders expanded.
 - [ ] `ScannerInfo` links set `source_sublocation` (`scan` / `pay`).
 - [ ] `Settings`, `SettingsExportData`, and `SettingsExperimentalFeatures` set `source_sublocation` (`hide_micro_transactions` / `export_data` / `experimental_features`).
 - [ ] `RewardsRequirements` sets `source_sublocation = requirements`.

@@ -155,13 +155,15 @@ export const trackTransactionFilter = ({
  * `undefined` if the key cannot be resolved or does not point at a string.
  */
 const resolveEnglishLabel = (key: string): string | undefined => {
-	const value = key.split('.').reduce<unknown>(
-		(acc, segment) =>
-			typeof acc === 'object' && nonNullish(acc)
-				? (acc as Record<string, unknown>)[segment]
-				: undefined,
-		en
-	);
+	const value = key
+		.split('.')
+		.reduce<unknown>(
+			(acc, segment) =>
+				typeof acc === 'object' && nonNullish(acc)
+					? (acc as Record<string, unknown>)[segment]
+					: undefined,
+			en
+		);
 
 	return typeof value === 'string' ? replaceOisyPlaceholders(value) : undefined;
 };
