@@ -47,12 +47,12 @@ Cowork produces a spec file. You copy it into `docs/ai/spec-driven-development/s
 
 The date prefix keeps specs sorted chronologically in the directory. The type prefix signals the nature of the work at a glance:
 
-| Prefix | When to use |
-| -------- | --------------------------------- |
-| `feat`   | New feature                       |
-| `impr`   | Improvement to existing behaviour |
-| `fix`    | Bug fix                           |
-| `chore`  | Refactor, tooling, housekeeping   |
+| Prefix  | When to use                       |
+| ------- | --------------------------------- |
+| `feat`  | New feature                       |
+| `impr`  | Improvement to existing behaviour |
+| `fix`   | Bug fix                           |
+| `chore` | Refactor, tooling, housekeeping   |
 
 Example: `2026-06-02-impr-track-learn-more-clicks.md`
 
