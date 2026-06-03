@@ -71,11 +71,11 @@ The `open_documentation` event already exists as `TRACK_OPEN_DOCUMENTATION` in `
 
 ### 2. Extend `PLAUSIBLE_EVENT_SOURCE_LOCATIONS`
 
-Add entries for all new `source_location` values used in the table above (`lock`, `nft`, `referral`, `scanner`, `welcome`, `earn`, `signer`, `rewards`, `transactions`, `erc20_icp`) so the helper remains type-safe and source locations stay centralised. The existing `SETTINGS_PAGE = 'settings_page'` entry is reused for the three settings components.
+Add entries for all new `source_location` values used in the table above (`lock`, `nft`, `referral`, `scanner`, `welcome`, `earn`, `signer`, `rewards`, `transactions`) so the helper remains type-safe and source locations stay centralised. The existing `SETTINGS_PAGE = 'settings_page'` entry is reused for the three settings components.
 
 ### 3. Add a shared `buildLearnMoreEvent` helper
 
-`ExternalLink.trackEvent` is a `TrackEventParams` object that the component fires on click. To avoid repeating the full object literal at every usage site (14 in total), add a factory helper in `src/frontend/src/lib/services/analytics.services.ts` that returns the params:
+`ExternalLink.trackEvent` is a `TrackEventParams` object that the component fires on click. To avoid repeating the full object literal at every usage site (13 in total), add a factory helper in `src/frontend/src/lib/services/analytics.services.ts` that returns the params:
 
 ```ts
 export const buildLearnMoreEvent = ({
@@ -103,7 +103,7 @@ export const buildLearnMoreEvent = ({
 
 ### 4. Convert raw `<a>` tags to `ExternalLink`
 
-`TransactionsFilterContactsEmptyState` and `Erc20Icp` use raw `<a>` tags instead of `ExternalLink`. Convert them to `ExternalLink` first, then add the `trackEvent` prop. Match the style of surrounding elements.
+`TransactionsFilterContactsEmptyState` uses a raw `<a>` tag instead of `ExternalLink`. Convert it to `ExternalLink` first (with `color="blue"`, `iconVisible={false}` to match the existing blue, icon-less inline link), then add the `trackEvent` prop.
 
 ### 5. Wire up each ExternalLink
 
@@ -133,17 +133,18 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 - `HarvestAutopilotOverview` scroll anchor link
 - `DappsCarouselSlide` / `DappCard` button elements
 - Already-tracked links in `RewardModal`, `RewardStateModal`, and `Rewards.svelte`
+- `Erc20Icp` (`src/frontend/src/lib/components/core/Erc20Icp.svelte`): uses a custom `IconInfo` icon and a scoped white-text style block that `ExternalLink` cannot represent without a custom-icon slot. Defer until either `ExternalLink` gains an icon slot or the design changes.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] All 14 links listed in the table fire an `open_documentation` Plausible event on click.
+- [ ] All 13 links listed in the table fire an `open_documentation` Plausible event on click.
 - [ ] Each event has `event_context = learn_more`, the correct `event_subcontext` i18n key, `event_key = link`, `event_value` = the destination URL, and the correct `source_location`.
 - [ ] `ScannerInfo` links set `source_sublocation` (`scan` / `pay`).
 - [ ] `Settings`, `SettingsExportData`, and `SettingsExperimentalFeatures` set `source_sublocation` (`hide_micro_transactions` / `export_data` / `experimental_features`).
 - [ ] `RewardsRequirements` sets `source_sublocation = requirements`.
-- [ ] `TransactionsFilterContactsEmptyState` and `Erc20Icp` are converted from raw `<a>` tags to `ExternalLink` before tracking is added.
+- [ ] `TransactionsFilterContactsEmptyState` is converted from a raw `<a>` tag to `ExternalLink` before tracking is added.
 - [ ] No existing tracking on `RewardModal`, `RewardStateModal`, or `Rewards.svelte` is changed.
 - [ ] `HarvestAutopilotOverview` is not changed.
 - [ ] Analytics never throws — errors are caught and do not affect the user flow.
