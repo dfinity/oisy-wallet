@@ -53,7 +53,11 @@ Claude Code reads the spec, reads `docs/ai/PRODUCT.md` for system context, and b
 
 ### Step 5 — Adjust (Claude Code ↔ Spec)
 
-If the implementation reveals gaps or the spec needs updating, edit the spec file and tell Claude Code. The spec is the source of truth — keep it in sync with reality.
+If the implementation reveals gaps or the spec needs updating, the spec is the source of truth — keep it in sync with reality.
+
+**Fix it in Code directly** if it's a small gap — a missing edge case, an unclear description, a file path that turned out to be wrong. Code can edit the spec file itself as it works.
+
+**Come back to Cowork** if the gap reveals a deeper ambiguity — something that requires rethinking scope, resolving a product question, or deciding between approaches. Cowork is better for that dialogue, and the updated spec should reflect the decision before Code continues.
 
 ### Step 6 — Merge & Update (Claude Code)
 
