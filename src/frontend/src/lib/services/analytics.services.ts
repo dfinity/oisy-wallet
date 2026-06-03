@@ -151,7 +151,7 @@ export const trackTransactionFilter = ({
  *
  * Returns the params object rather than firing the event so callers can pass it
  * straight to `ExternalLink.trackEvent`, which fires on click. Centralising the
- * payload keeps the seven UI usage sites in sync with the schema.
+ * payload keeps the thirteen UI usage sites in sync with the schema.
  */
 export const buildLearnMoreEvent = ({
 	sourceLocation,

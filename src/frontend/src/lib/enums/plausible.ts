@@ -96,7 +96,12 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	LOCK = 'lock',
 	NFT = 'nft',
 	REFERRAL = 'referral',
-	SCANNER = 'scanner'
+	SCANNER = 'scanner',
+	WELCOME = 'welcome',
+	EARN = 'earn',
+	SIGNER = 'signer',
+	REWARDS = 'rewards',
+	TRANSACTIONS = 'transactions'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
