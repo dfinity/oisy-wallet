@@ -271,17 +271,19 @@ fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
 ///
 /// Returns:
 /// - `Ok(())` once the (possibly empty) set of fresh prices has been written.
-/// - `Err(ExchangeError::Disabled)` if `exchange_rate_enabled` is `Some(false)`.
+/// - `Err(ExchangeError::Disabled)` if refresh is not enabled (see
+///   [`is_exchange_rate_refresh_enabled`]).
 /// - `Err(ExchangeError::ApiKeyNotSet)` if no `CoinGecko` API key is configured.
 ///
 /// Returns whether the backend will actually issue exchange-rate refresh outcalls.
 ///
-/// `true` iff a `CoinGecko` API key is configured and `exchange_rate_enabled` is not
-/// explicitly set to `Some(false)`. Single source of truth for both the refresh
+/// `true` iff a `CoinGecko` API key is configured and `exchange_rate_enabled` is
+/// explicitly set to `Some(true)`. Refresh is opt-in: `None` (the default) and
+/// `Some(false)` both keep it disabled. Single source of truth for both the refresh
 /// timer ([`fetch_and_update_prices`]) and the public `exchange_rate_enabled` query.
 pub(crate) fn is_exchange_rate_refresh_enabled() -> bool {
     with_api_keys(|keys| {
-        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled != Some(false)
+        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled == Some(true)
     })
 }
 
@@ -478,6 +480,33 @@ mod tests {
 
         release_refresh_lock(second);
         assert!(REFRESH_IN_FLIGHT.with(std::cell::Cell::get).is_none());
+    }
+
+    fn set_exchange_config(coingecko_api_key: Option<&str>, exchange_rate_enabled: Option<bool>) {
+        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
+            coingecko_api_key: coingecko_api_key.map(str::to_string),
+            exchange_rate_enabled,
+            ..Default::default()
+        });
+    }
+
+    #[test]
+    fn refresh_enabled_only_when_explicitly_opted_in() {
+        // Opt-in: a key plus an explicit `Some(true)` is the only enabled combination.
+        set_exchange_config(Some("key"), Some(true));
+        assert!(is_exchange_rate_refresh_enabled());
+
+        // Unset defaults to disabled, even with a key configured.
+        set_exchange_config(Some("key"), None);
+        assert!(!is_exchange_rate_refresh_enabled());
+
+        // Explicitly disabled.
+        set_exchange_config(Some("key"), Some(false));
+        assert!(!is_exchange_rate_refresh_enabled());
+
+        // No key never refreshes, regardless of the flag.
+        set_exchange_config(None, Some(true));
+        assert!(!is_exchange_rate_refresh_enabled());
     }
 
     fn custom_token(seed: u8) -> StoredTokenId {

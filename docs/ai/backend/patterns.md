@@ -147,8 +147,8 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
   of the existing entry points and ensure both `init` and `post_upgrade`
   trigger it.
 - **Exchange rates:** Controllers store API keys via `set_api_keys`. Periodic
-  refreshes run when `coingecko_api_key` is set and `exchange_rate_enabled` is not
-  `opt false`. See
+  refreshes are opt-in: they run only when `coingecko_api_key` is set and
+  `exchange_rate_enabled` is `opt true` (`null` / unset is treated as disabled). See
   [`shared::types::api_keys::ApiKeys`](../../../src/shared/src/types/api_keys.rs).
   - `get_exchange_rates` is the per-caller fetch endpoint: it returns the
     USD price for each of the caller's priceable tokens (native + custom,
