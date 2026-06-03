@@ -18,8 +18,8 @@ dfinity/oisy-wallet/
         └── spec-driven-development/
             ├── workflow.md    # This document
             └── specs/
-                ├── add-token-swapping.md
-                ├── fix-wallet-sync-race.md
+                ├── 2026-05-10-feat-add-token-swapping.md
+                ├── 2026-05-24-fix-wallet-sync-race.md
                 └── ...
 ```
 
@@ -42,6 +42,19 @@ We work through open questions together: scope, edge cases, constraints, accepta
 ### Step 3 — Spec (Cowork → You)
 
 Cowork produces a spec file. You copy it into `docs/ai/spec-driven-development/specs/` in your local repo. The spec is intentionally written for Claude Code — it references real file paths, component names, and existing patterns where possible.
+
+**Spec filename convention:** `YYYY-MM-DD-<type>-<short-description>.md`
+
+The date prefix keeps specs sorted chronologically in the directory. The type prefix signals the nature of the work at a glance:
+
+| Prefix | When to use |
+| -------- | --------------------------------- |
+| `feat`   | New feature                       |
+| `impr`   | Improvement to existing behaviour |
+| `fix`    | Bug fix                           |
+| `chore`  | Refactor, tooling, housekeeping   |
+
+Example: `2026-06-02-impr-track-learn-more-clicks.md`
 
 ### Step 4 — Build (Claude Code)
 
