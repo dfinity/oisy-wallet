@@ -18,15 +18,16 @@ Plausible events are fired via `trackEvent()` in `src/frontend/src/lib/services/
 
 All "Learn more" clicks fire the existing `open_documentation` event with the following attributes, following the schema defined in the [Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events) Confluence page.
 
-| Attribute            | Value                                                                       |
-| -------------------- | --------------------------------------------------------------------------- |
-| **Event**            | `open_documentation`                                                        |
-| `event_context`      | `learn_more`                                                                |
-| `event_subcontext`   | i18n key of the link label (e.g. `lock.text.learn_more`)                    |
-| `event_key`          | `link`                                                                      |
-| `event_value`        | the destination URL                                                         |
-| `source_location`    | component/page name, snake_case (see table below)                           |
-| `source_sublocation` | only set when a component has multiple "Learn more" links (see table below) |
+| Attribute            | Value                                                                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Event**            | `open_documentation`                                                                                                               |
+| `event_context`      | `learn_more`                                                                                                                       |
+| `event_subcontext`   | i18n key of the link label (e.g. `lock.text.learn_more`)                                                                           |
+| `event_key`          | `link`                                                                                                                             |
+| `event_value`        | the destination URL                                                                                                                |
+| `source_location`    | component/page name, snake_case (see table below)                                                                                  |
+| `source_sublocation` | only set when a component has multiple "Learn more" links (see table below)                                                        |
+| `source_path`        | slash-joined human-readable identity: `<source_location> / <source_sublocation?> / <English label>` (see note below for resolution) |
 
 ---
 
@@ -60,6 +61,8 @@ All "Learn more" clicks fire the existing `open_documentation` event with the fo
 > **Note:** `SettingsExperimentalFeatures` reuses the `rewards.text.learn_more` i18n key — this is a pre-existing issue, leave it for a separate fix.
 >
 > **Note:** `Settings` and `SettingsExportData` both use `settings.text.learn_more` as their `event_subcontext`. They remain distinguishable in analytics via `source_sublocation` (`hide_micro_transactions` vs `export_data`).
+>
+> **Note:** `source_path` is a derived dashboard-ergonomics field. The English label is resolved from the bundled `src/frontend/src/lib/i18n/en.json` via the `event_subcontext` key (always English, regardless of the user's locale, so dashboards stay consistent), then run through `replaceOisyPlaceholders` so tokens like `$oisy_short` become `OISY`. If the key fails to resolve, the label segment is omitted. Examples: `settings_page / export_data / Learn more`, `scanner / pay / Learn more about OISY Pay`, `lock / Learn more`.
 
 ---
 
@@ -88,18 +91,26 @@ export const buildLearnMoreEvent = ({
 	sourceSublocation?: string;
 	eventSubcontext: string;
 	url: string;
-}): TrackEventParams => ({
-	name: TRACK_OPEN_DOCUMENTATION,
-	metadata: {
-		event_context: 'learn_more',
-		event_subcontext: eventSubcontext,
-		event_key: 'link',
-		event_value: url,
-		source_location: sourceLocation,
-		...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation })
-	}
-});
+}): TrackEventParams => {
+	const label = resolveEnglishLabel(eventSubcontext);
+	const source_path = [sourceLocation, sourceSublocation, label].filter(nonNullish).join(' / ');
+
+	return {
+		name: TRACK_OPEN_DOCUMENTATION,
+		metadata: {
+			event_context: 'learn_more',
+			event_subcontext: eventSubcontext,
+			event_key: 'link',
+			event_value: url,
+			source_location: sourceLocation,
+			...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation }),
+			source_path
+		}
+	};
+};
 ```
+
+`resolveEnglishLabel` is a small private helper that walks the dot-path against the bundled `en.json` and runs the result through `replaceOisyPlaceholders`. Call-site signatures are unchanged.
 
 ### 4. Convert raw `<a>` tags to `ExternalLink`
 
@@ -147,6 +158,7 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 
 - [ ] All 13 links listed in the table fire an `open_documentation` Plausible event on click.
 - [ ] Each event has `event_context = learn_more`, the correct `event_subcontext` i18n key, `event_key = link`, `event_value` = the destination URL, and the correct `source_location`.
+- [ ] Each event includes a `source_path` field that joins `source_location`, optional `source_sublocation`, and the English-resolved label with ` / `, with OISY placeholders expanded.
 - [ ] `ScannerInfo` links set `source_sublocation` (`scan` / `pay`).
 - [ ] `Settings`, `SettingsExportData`, and `SettingsExperimentalFeatures` set `source_sublocation` (`hide_micro_transactions` / `export_data` / `experimental_features`).
 - [ ] `RewardsRequirements` sets `source_sublocation = requirements`.
