@@ -96,7 +96,7 @@
 							trackEvent={buildLearnMoreEvent({
 								sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
 								sourceSublocation: 'experimental_features',
-								eventSubcontext: 'rewards.text.learn_more',
+								labelKey: 'rewards.text.learn_more',
 								url: labelsByFeatureId[feature].learnMore
 							})}>{$i18n.rewards.text.learn_more}</ExternalLink
 						>

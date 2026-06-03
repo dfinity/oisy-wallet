@@ -29,7 +29,7 @@
 				iconAsLast
 				trackEvent={buildLearnMoreEvent({
 					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN,
-					eventSubcontext: 'core.text.learn_more',
+					labelKey: 'core.text.learn_more',
 					url: OISY_EARN_URL
 				})}
 			>

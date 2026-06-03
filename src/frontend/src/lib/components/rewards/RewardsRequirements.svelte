@@ -76,7 +76,7 @@
 					trackEvent={buildLearnMoreEvent({
 						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.REWARDS,
 						sourceSublocation: 'requirements',
-						eventSubcontext: 'rewards.text.learn_more',
+						labelKey: 'rewards.text.learn_more',
 						url: reward.learnMoreHref
 					})}>{$i18n.rewards.text.learn_more}</ExternalLink
 				>

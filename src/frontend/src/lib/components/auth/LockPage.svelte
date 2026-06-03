@@ -105,7 +105,7 @@
 			styleClass="mt-4"
 			trackEvent={buildLearnMoreEvent({
 				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
-				eventSubcontext: 'lock.text.learn_more',
+				labelKey: 'lock.text.learn_more',
 				url: learnMoreUrl
 			})}
 		>

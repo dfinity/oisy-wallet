@@ -135,7 +135,7 @@
 					styleClass="font-bold ml-2"
 					trackEvent={buildLearnMoreEvent({
 						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NFT,
-						eventSubcontext: 'nfts.text.learn_more',
+						labelKey: 'nfts.text.learn_more',
 						url: OISY_NFT_DOCS_URL
 					})}>{$i18n.nfts.text.learn_more}</ExternalLink
 				>

@@ -39,7 +39,7 @@
 		styleClass="ml-[1.25em]"
 		trackEvent={buildLearnMoreEvent({
 			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SIGNER,
-			eventSubcontext: 'core.text.learn_more',
+			labelKey: 'core.text.learn_more',
 			url: OISY_SIGNER_CONNECT_DOCS_URL
 		})}
 	>

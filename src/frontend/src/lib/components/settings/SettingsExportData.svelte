@@ -128,7 +128,7 @@
 					trackEvent={buildLearnMoreEvent({
 						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
 						sourceSublocation: 'export_data',
-						eventSubcontext: 'settings.text.learn_more',
+						labelKey: 'settings.text.learn_more',
 						url: OISY_EXPORT_DATA_DOCS_URL
 					})}>{$i18n.settings.text.learn_more}</ExternalLink
 				>

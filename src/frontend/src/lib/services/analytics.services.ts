@@ -183,22 +183,21 @@ const resolveEnglishLabel = (key: string): string | undefined => {
 export const buildLearnMoreEvent = ({
 	sourceLocation,
 	sourceSublocation,
-	eventSubcontext,
+	labelKey,
 	url
 }: {
 	sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
 	sourceSublocation?: string;
-	eventSubcontext: string;
+	labelKey: string;
 	url: string;
 }): TrackEventParams => {
-	const label = resolveEnglishLabel(eventSubcontext);
+	const label = resolveEnglishLabel(labelKey);
 	const source_path = [sourceLocation, sourceSublocation, label].filter(nonNullish).join(' / ');
 
 	return {
 		name: TRACK_OPEN_DOCUMENTATION,
 		metadata: {
 			event_context: 'learn_more',
-			event_subcontext: eventSubcontext,
 			event_key: 'link',
 			event_value: url,
 			source_location: sourceLocation,

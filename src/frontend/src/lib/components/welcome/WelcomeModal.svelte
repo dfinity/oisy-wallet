@@ -79,7 +79,7 @@
 					testId={WELCOME_MODAL_LEARN_MORE_ANCHOR}
 					trackEvent={buildLearnMoreEvent({
 						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.WELCOME,
-						eventSubcontext: 'rewards.text.learn_more',
+						labelKey: 'rewards.text.learn_more',
 						url: OISY_REWARDS_URL
 					})}
 				>

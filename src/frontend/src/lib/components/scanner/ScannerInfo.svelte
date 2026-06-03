@@ -44,7 +44,7 @@
 				trackEvent={buildLearnMoreEvent({
 					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
 					sourceSublocation: 'scan',
-					eventSubcontext: 'scanner.text.learn_more_about_scan',
+					labelKey: 'scanner.text.learn_more_about_scan',
 					url: OISY_SCAN_URL
 				})}
 			>
@@ -64,7 +64,7 @@
 				trackEvent={buildLearnMoreEvent({
 					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
 					sourceSublocation: 'pay',
-					eventSubcontext: 'scanner.text.learn_more_about_pay',
+					labelKey: 'scanner.text.learn_more_about_pay',
 					url: OISY_PAY_URL
 				})}
 			>

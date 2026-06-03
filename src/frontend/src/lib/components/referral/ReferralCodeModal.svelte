@@ -104,7 +104,7 @@
 					testId={REFERRAL_CODE_LEARN_MORE}
 					trackEvent={buildLearnMoreEvent({
 						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.REFERRAL,
-						eventSubcontext: 'referral.invitation.text.learn_more',
+						labelKey: 'referral.invitation.text.learn_more',
 						url: OISY_REFERRAL_URL
 					})}
 				>

@@ -361,7 +361,7 @@ describe('plausible analytics service', () => {
 
 			const result = buildLearnMoreEvent({
 				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
-				eventSubcontext: 'lock.text.learn_more',
+				labelKey: 'lock.text.learn_more',
 				url: 'https://docs.oisy.com/locking'
 			});
 
@@ -369,7 +369,6 @@ describe('plausible analytics service', () => {
 				name: 'open_documentation',
 				metadata: {
 					event_context: 'learn_more',
-					event_subcontext: 'lock.text.learn_more',
 					event_key: 'link',
 					event_value: 'https://docs.oisy.com/locking',
 					source_location: 'lock',
@@ -385,7 +384,7 @@ describe('plausible analytics service', () => {
 			const result = buildLearnMoreEvent({
 				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
 				sourceSublocation: 'scan',
-				eventSubcontext: 'scanner.text.learn_more_about_scan',
+				labelKey: 'scanner.text.learn_more_about_scan',
 				url: 'https://docs.oisy.com/scan'
 			});
 
@@ -393,7 +392,6 @@ describe('plausible analytics service', () => {
 				name: 'open_documentation',
 				metadata: {
 					event_context: 'learn_more',
-					event_subcontext: 'scanner.text.learn_more_about_scan',
 					event_key: 'link',
 					event_value: 'https://docs.oisy.com/scan',
 					source_location: 'scanner',
@@ -410,7 +408,7 @@ describe('plausible analytics service', () => {
 			const result = buildLearnMoreEvent({
 				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
 				sourceSublocation: 'export_data',
-				eventSubcontext: 'settings.text.learn_more',
+				labelKey: 'settings.text.learn_more',
 				url: 'https://docs.oisy.com/export'
 			});
 
@@ -418,7 +416,6 @@ describe('plausible analytics service', () => {
 				name: 'open_documentation',
 				metadata: {
 					event_context: 'learn_more',
-					event_subcontext: 'settings.text.learn_more',
 					event_key: 'link',
 					event_value: 'https://docs.oisy.com/export',
 					source_location: 'settings_page',
@@ -435,7 +432,7 @@ describe('plausible analytics service', () => {
 			const result = buildLearnMoreEvent({
 				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
 				sourceSublocation: 'pay',
-				eventSubcontext: 'scanner.text.learn_more_about_pay',
+				labelKey: 'scanner.text.learn_more_about_pay',
 				url: 'https://docs.oisy.com/pay'
 			});
 
@@ -450,7 +447,7 @@ describe('plausible analytics service', () => {
 
 			const result = buildLearnMoreEvent({
 				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
-				eventSubcontext: 'nonexistent.key.path',
+				labelKey: 'nonexistent.key.path',
 				url: 'https://example.com'
 			});
 

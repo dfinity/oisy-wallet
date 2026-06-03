@@ -145,7 +145,7 @@
 					trackEvent={buildLearnMoreEvent({
 						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
 						sourceSublocation: 'hide_micro_transactions',
-						eventSubcontext: 'settings.text.learn_more',
+						labelKey: 'settings.text.learn_more',
 						url: OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL
 					})}>{$i18n.settings.text.learn_more}</ExternalLink
 				>

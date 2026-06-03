@@ -37,7 +37,7 @@
 			iconVisible={false}
 			trackEvent={buildLearnMoreEvent({
 				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TRANSACTIONS,
-				eventSubcontext: 'core.text.learn_more',
+				labelKey: 'core.text.learn_more',
 				url: learnMoreUrl
 			})}>{$i18n.core.text.learn_more}</ExternalLink
 		>
