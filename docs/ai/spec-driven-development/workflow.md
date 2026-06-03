@@ -47,14 +47,16 @@ Cowork produces a spec file. You copy it into `docs/ai/spec-driven-development/s
 
 The date prefix keeps specs sorted chronologically in the directory. The type prefix signals the nature of the work at a glance:
 
-| Prefix  | When to use                       |
-| ------- | --------------------------------- |
-| `feat`  | New feature                       |
-| `impr`  | Improvement to existing behaviour |
-| `fix`   | Bug fix                           |
-| `chore` | Refactor, tooling, housekeeping   |
+| Prefix | When to use |
+| -------- | --------------------------------- |
+| `feat`   | New feature                       |
+| `impr`   | Improvement to existing behaviour |
+| `fix`    | Bug fix                           |
+| `chore`  | Refactor, tooling, housekeeping   |
 
 Example: `2026-06-02-impr-track-learn-more-clicks.md`
+
+**Cowork session naming:** Name the session to match the spec — same type prefix and short description, without the date. E.g. `impr: Track Learn More clicks in Plausible`. This keeps the sidebar readable and makes it easy to link a session back to its spec.
 
 ### Step 4 — Build (Claude Code)
 
