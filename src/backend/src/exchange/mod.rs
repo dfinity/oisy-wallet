@@ -151,6 +151,12 @@ pub(crate) fn release_refresh_lock(lock: RefreshLock) {
 /// timer invocations (e.g. overlapping ticks) become no-ops rather than
 /// starting a parallel refresh.
 async fn refresh_exchange_rates_guarded(source: &'static str) {
+    // Refresh is opt-in; when it's off this is a no-op rather than acquiring the
+    // lock and logging an `Err(Disabled)` on every tick.
+    if !is_exchange_rate_refresh_enabled() {
+        return;
+    }
+
     let Some(lock) = try_acquire_refresh_lock() else {
         ic_cdk::println!("Exchange rate {source} skipped: previous refresh still in flight");
         return;
@@ -260,6 +266,18 @@ fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
     vec![Box::new(IcpSwapProvider::default())]
 }
 
+/// Returns whether the backend will actually issue exchange-rate refresh outcalls.
+///
+/// `true` iff a `CoinGecko` API key is configured and `exchange_rate_enabled` is
+/// explicitly set to `Some(true)`. Refresh is opt-in: `None` (the default) and
+/// `Some(false)` both keep it disabled. Single source of truth for both the refresh
+/// timer ([`fetch_and_update_prices`]) and the public `exchange_rate_enabled` query.
+pub(crate) fn is_exchange_rate_refresh_enabled() -> bool {
+    with_api_keys(|keys| {
+        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled == Some(true)
+    })
+}
+
 /// Fetches USD prices for `token_ids` from the configured providers and
 /// writes the results into the on-canister cache.
 ///
@@ -274,19 +292,6 @@ fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
 /// - `Err(ExchangeError::Disabled)` if refresh is not enabled (see
 ///   [`is_exchange_rate_refresh_enabled`]).
 /// - `Err(ExchangeError::ApiKeyNotSet)` if no `CoinGecko` API key is configured.
-///
-/// Returns whether the backend will actually issue exchange-rate refresh outcalls.
-///
-/// `true` iff a `CoinGecko` API key is configured and `exchange_rate_enabled` is
-/// explicitly set to `Some(true)`. Refresh is opt-in: `None` (the default) and
-/// `Some(false)` both keep it disabled. Single source of truth for both the refresh
-/// timer ([`fetch_and_update_prices`]) and the public `exchange_rate_enabled` query.
-pub(crate) fn is_exchange_rate_refresh_enabled() -> bool {
-    with_api_keys(|keys| {
-        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled == Some(true)
-    })
-}
-
 pub(crate) async fn fetch_and_update_prices(
     token_ids: &[StoredTokenId],
 ) -> Result<(), ExchangeError> {
