@@ -134,6 +134,12 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 - `DappsCarouselSlide` / `DappCard` button elements
 - Already-tracked links in `RewardModal`, `RewardStateModal`, and `Rewards.svelte`
 - `Erc20Icp` (`src/frontend/src/lib/components/core/Erc20Icp.svelte`): uses a custom `IconInfo` icon and a scoped white-text style block that `ExternalLink` cannot represent without a custom-icon slot. Defer until either `ExternalLink` gains an icon slot or the design changes.
+- **Documentation links embedded as raw `<a>` tags inside i18n strings** (rendered via `<Html text={...}>` / `{@html}`) cannot be wired through `ExternalLink.trackEvent` without either an i18n refactor (split the string at a placeholder and render the link separately in the component) or a delegated click handler. Known cases:
+  - `activity.info.hidden_micro_transactions` — "Learn more" → `docs.oisy.com/.../filter-for-small-transactions` (in `HiddenMicroTransactionsInfoBox`)
+  - `core.warning.standalone_mode` — "Read more" → `docs.oisy.com/.../saving-oisy-web-app-to-your-device`
+  - `tokens.warning.trust_token` — "here" → external MetaMask docs
+
+  Defer to a follow-up spec; the refactor approach affects every locale of the touched key and should be planned separately.
 
 ---
 
