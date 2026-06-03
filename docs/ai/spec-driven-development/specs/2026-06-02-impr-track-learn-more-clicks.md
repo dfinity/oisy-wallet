@@ -153,8 +153,28 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 
 ---
 
+## Discussion Notes
+
+### Test strategy: per-component tests vs. one `ExternalLink` test
+
+**Suggestion (Cowork):** add unit tests for each wired-up component that assert a `trackEvent` call fires on click, so CI gates the acceptance criteria.
+
+**Decision:** add a single unit test on `ExternalLink.svelte` instead — `src/frontend/src/tests/lib/components/ui/ExternalLink.spec.ts` — asserting that when a `trackEvent` prop is set, clicking the rendered `<a>` calls `trackEvent` with the prop verbatim (and that no call happens when the prop is omitted). This covers all 13 call sites by construction because they all rely on the same `ExternalLink.trackEvent` plumbing.
+
+**Why not per-component tests:**
+
+- The schema is already pinned at the helper level: `buildLearnMoreEvent` has 5 `toEqual` cases in `analytics.service.spec.ts` covering payload shape with and without `source_sublocation`, OISY-placeholder expansion in `source_path`, and unresolved-key fallback. A per-component test would re-assert the same shape 13 times.
+- The wiring contract — "click invokes `trackEvent` with this payload" — is owned by `ExternalLink`, not the parents. Per-component tests would mostly re-test `ExternalLink` 13 times under different parent renders.
+- TypeScript already gates correct enum values and helper params at compile time, and `npm run check` keeps it honest.
+- The only failure mode uniquely caught by per-component tests is "someone removes the `trackEvent` prop from one component". That's better caught by review on a small diff than by 13 near-identical specs with non-trivial `vi.mock` setups.
+
+**Possible future hardening (out of scope here):** a parameterised integration test that loops over `[{ Component, expectedSourceLocation, expectedSublocation? }, ...]` or a static lint guard that requires every `ExternalLink` matching certain patterns to carry a `trackEvent` prop.
+
+---
+
 ## Acceptance Criteria
 
+- [ ] `ExternalLink` fires its `trackEvent` prop verbatim on click, and skips firing when the prop is absent — pinned by `src/frontend/src/tests/lib/components/ui/ExternalLink.spec.ts`. This is the structural gate for every wired-up call site below.
 - [ ] All 13 links listed in the table fire an `open_documentation` Plausible event on click.
 - [ ] Each event has `event_context = learn_more`, the correct `event_subcontext` i18n key, `event_key = link`, `event_value` = the destination URL, and the correct `source_location`.
 - [ ] Each event includes a `source_path` field that joins `source_location`, optional `source_sublocation`, and the English-resolved label with `/`, with OISY placeholders expanded.
