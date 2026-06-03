@@ -22,7 +22,6 @@ All "Learn more" clicks fire the existing `open_documentation` event with the fo
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **Event**            | `open_documentation`                                                                                                                |
 | `event_context`      | `learn_more`                                                                                                                        |
-| `event_subcontext`   | i18n key of the link label (e.g. `lock.text.learn_more`)                                                                            |
 | `event_key`          | `link`                                                                                                                              |
 | `event_value`        | the destination URL                                                                                                                 |
 | `source_location`    | component/page name, snake_case (see table below)                                                                                   |
@@ -33,7 +32,7 @@ All "Learn more" clicks fire the existing `open_documentation` event with the fo
 
 ## Links to Instrument
 
-| Component                            | File                                                                                              | `source_location` | `source_sublocation`      | `event_subcontext` (i18n key)         | `event_value` (URL)                     |
+| Component                            | File                                                                                              | `source_location` | `source_sublocation`      | label i18n key (`labelKey`)           | `event_value` (URL)                     |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------- | ----------------- | ------------------------- | ------------------------------------- | --------------------------------------- |
 | LockPage                             | `src/frontend/src/lib/components/auth/LockPage.svelte`                                            | `lock`            | —                         | `lock.text.learn_more`                | hardcoded URL in component              |
 | NftImageConsentModal                 | `src/frontend/src/lib/components/nfts/NftImageConsentModal.svelte`                                | `nft`             | —                         | `nfts.text.learn_more`                | `OISY_NFT_DOCS_URL`                     |
@@ -59,9 +58,9 @@ All "Learn more" clicks fire the existing `open_documentation` event with the fo
 >
 > **Note:** `SettingsExperimentalFeatures` reuses the `rewards.text.learn_more` i18n key — this is a pre-existing issue, leave it for a separate fix.
 >
-> **Note:** `Settings` and `SettingsExportData` both use `settings.text.learn_more` as their `event_subcontext`. They remain distinguishable in analytics via `source_sublocation` (`hide_micro_transactions` vs `export_data`).
+> **Note:** `Settings` and `SettingsExportData` both use `settings.text.learn_more` as their `labelKey`. They remain distinguishable in analytics via `source_sublocation` (`hide_micro_transactions` vs `export_data`).
 >
-> **Note:** `source_path` is a derived dashboard-ergonomics field. The English label is resolved from the bundled `src/frontend/src/lib/i18n/en.json` via the `event_subcontext` key (always English, regardless of the user's locale, so dashboards stay consistent), then run through `replaceOisyPlaceholders` so tokens like `$oisy_short` become `OISY`. If the key fails to resolve, the label segment is omitted. Examples: `settings_page / export_data / Learn more`, `scanner / pay / Learn more about OISY Pay`, `lock / Learn more`.
+> **Note:** `source_path` is a derived dashboard-ergonomics field. The English label is resolved from the bundled `src/frontend/src/lib/i18n/en.json` via the `labelKey` param (always English, regardless of the user's locale, so dashboards stay consistent), then run through `replaceOisyPlaceholders` so tokens like `$oisy_short` become `OISY`. If the key fails to resolve, the label segment is omitted. Examples: `settings_page / export_data / Learn more`, `scanner / pay / Learn more about OISY Pay`, `lock / Learn more`.
 
 ---
 
@@ -83,22 +82,21 @@ Add entries for all new `source_location` values used in the table above (`lock`
 export const buildLearnMoreEvent = ({
 	sourceLocation,
 	sourceSublocation,
-	eventSubcontext,
+	labelKey,
 	url
 }: {
 	sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
 	sourceSublocation?: string;
-	eventSubcontext: string;
+	labelKey: string;
 	url: string;
 }): TrackEventParams => {
-	const label = resolveEnglishLabel(eventSubcontext);
+	const label = resolveEnglishLabel(labelKey);
 	const source_path = [sourceLocation, sourceSublocation, label].filter(nonNullish).join(' / ');
 
 	return {
 		name: TRACK_OPEN_DOCUMENTATION,
 		metadata: {
 			event_context: 'learn_more',
-			event_subcontext: eventSubcontext,
 			event_key: 'link',
 			event_value: url,
 			source_location: sourceLocation,
@@ -109,7 +107,7 @@ export const buildLearnMoreEvent = ({
 };
 ```
 
-`resolveEnglishLabel` is a small private helper that walks the dot-path against the bundled `en.json` and runs the result through `replaceOisyPlaceholders`. Call-site signatures are unchanged.
+`resolveEnglishLabel` is a small private helper that walks the dot-path against the bundled `en.json` and runs the result through `replaceOisyPlaceholders`. The i18n key is only used for label resolution — it is no longer emitted as an `event_subcontext` field (the slash-joined `source_path` plus the discrete `source_*` fields already identify the click; adding the raw i18n key on top was redundant noise in the dashboards).
 
 ### 4. Convert raw `<a>` tags to `ExternalLink`
 
@@ -125,7 +123,7 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 	ariaLabel={$i18n.lock.text.learn_more}
 	trackEvent={buildLearnMoreEvent({
 		sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
-		eventSubcontext: 'lock.text.learn_more',
+		labelKey: 'lock.text.learn_more',
 		url: LOCK_DOCS_URL
 	})}
 >
@@ -176,7 +174,7 @@ For each component in the table above, pass a `trackEvent` prop to the relevant 
 
 - [ ] `ExternalLink` fires its `trackEvent` prop verbatim on click, and skips firing when the prop is absent — pinned by `src/frontend/src/tests/lib/components/ui/ExternalLink.spec.ts`. This is the structural gate for every wired-up call site below.
 - [ ] All 13 links listed in the table fire an `open_documentation` Plausible event on click.
-- [ ] Each event has `event_context = learn_more`, the correct `event_subcontext` i18n key, `event_key = link`, `event_value` = the destination URL, and the correct `source_location`.
+- [ ] Each event has `event_context = learn_more`, `event_key = link`, `event_value` = the destination URL, and the correct `source_location`.
 - [ ] Each event includes a `source_path` field that joins `source_location`, optional `source_sublocation`, and the English-resolved label with `/`, with OISY placeholders expanded.
 - [ ] `ScannerInfo` links set `source_sublocation` (`scan` / `pay`).
 - [ ] `Settings`, `SettingsExportData`, and `SettingsExperimentalFeatures` set `source_sublocation` (`hide_micro_transactions` / `export_data` / `experimental_features`).
