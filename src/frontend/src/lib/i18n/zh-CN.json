@@ -1604,6 +1604,7 @@
 			"wallet_not_initialized": "意外错误：钱包地址尚未初始化。",
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
+			"ambiguous_transaction": "",
 			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
 			"unexpected_processing_request": "处理 WalletConnect 请求时发生意外错误。"
 		}
