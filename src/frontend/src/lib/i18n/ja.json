@@ -1604,7 +1604,7 @@
 			"wallet_not_initialized": "予期しないエラー。ウォレットアドレスが初期化されていません。",
 			"from_address_not_wallet": "トランザクションで要求された送信元アドレスがこのウォレットのアドレスではありません。",
 			"unknown_destination": "不明な宛先アドレスです。",
-			"ambiguous_transaction": "",
+			"ambiguous_transaction": "このトランザクションは複数のアドレス間で資金を移動するため、確認のために正確に表示できません。安全のため、署名されませんでした。",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
 			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"
 		}

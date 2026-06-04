@@ -1604,7 +1604,7 @@
 			"wallet_not_initialized": "Error inesperado. La dirección de tu billetera no está inicializada.",
 			"from_address_not_wallet": "La dirección de origen solicitada para la transacción no es la dirección de esta billetera.",
 			"unknown_destination": "Dirección de destino desconocida.",
-			"ambiguous_transaction": "",
+			"ambiguous_transaction": "Esta transacción mueve fondos entre varias direcciones y no se puede mostrar con precisión para su revisión. Por tu seguridad, no se ha firmado.",
 			"request_not_defined": "Error inesperado: La solicitud no está definida, por lo tanto no se puede procesar.",
 			"unexpected_processing_request": "Error inesperado al procesar la solicitud con WalletConnect."
 		}
