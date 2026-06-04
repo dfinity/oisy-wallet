@@ -139,7 +139,7 @@ describe('sol-transactions.utils', () => {
 			});
 		});
 
-		it('should set source to the last non-undefined value encountered', () => {
+		it('should flag a transaction as ambiguous when the source changes across instructions', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: bn1Bi })
 				.mockReturnValueOnce({
@@ -154,11 +154,12 @@ describe('sol-transactions.utils', () => {
 				amount: bn3Bi,
 				source: mockAtaAddress,
 				destination: mockSolAddress2,
-				payer: mockSolAddress3
+				payer: mockSolAddress3,
+				ambiguous: true
 			});
 		});
 
-		it('should set destination to the last non-undefined value encountered', () => {
+		it('should flag a transaction as ambiguous when the destination changes across instructions', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: bn1Bi })
 				.mockReturnValueOnce({
@@ -173,11 +174,12 @@ describe('sol-transactions.utils', () => {
 				amount: bn3Bi,
 				source: mockSolAddress,
 				destination: mockAtaAddress,
-				payer: mockSolAddress3
+				payer: mockSolAddress3,
+				ambiguous: true
 			});
 		});
 
-		it('should set payer to the last non-undefined value encountered', () => {
+		it('should flag a transaction as ambiguous when the payer changes across instructions', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: bn1Bi })
 				.mockReturnValueOnce({
@@ -192,7 +194,43 @@ describe('sol-transactions.utils', () => {
 				amount: bn3Bi,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				payer: mockAtaAddress
+				payer: mockAtaAddress,
+				ambiguous: true
+			});
+		});
+
+		it('should flag an attacker transfer hidden behind a benign trailing transfer as ambiguous', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 9n, source: mockSolAddress, destination: mockSolAddress2 })
+				.mockReturnValueOnce({ amount: 1n, source: mockSolAddress, destination: mockAtaAddress });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({
+				amount: 10n,
+				source: mockSolAddress,
+				destination: mockAtaAddress,
+				ambiguous: true
+			});
+		});
+
+		it('should not flag repeated transfers to the same destination as ambiguous', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 9n, source: mockSolAddress, destination: mockSolAddress2 })
+				.mockReturnValueOnce({ amount: 1n, source: mockSolAddress, destination: mockSolAddress2 });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({
+				amount: 10n,
+				source: mockSolAddress,
+				destination: mockSolAddress2
 			});
 		});
 

@@ -4,6 +4,7 @@ mod bitcoin;
 mod config;
 mod contacts;
 mod custom_token;
+mod exchange;
 mod onramper;
 mod settings;
 mod signer;

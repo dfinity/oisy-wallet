@@ -1,5 +1,6 @@
 import type { EthAddress } from '$eth/types/address';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { AppPath } from '$lib/constants/routes.constants';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import { MediaType } from '$lib/enums/media-type';
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
@@ -9,6 +10,7 @@ import type { NftError } from '$lib/types/errors';
 import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { nftsUrl } from '$lib/utils/nav.utils';
 import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { standardLabel } from '$lib/utils/token.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
@@ -312,6 +314,18 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 	}
 
 	return result;
+};
+
+export const getNftSendRedirectUrl = ({
+	sentNft,
+	collectionNfts
+}: {
+	sentNft: Nft;
+	collectionNfts: Nft[];
+}): string => {
+	const hasRemaining = collectionNfts.some(({ id }) => id !== sentNft.id);
+
+	return hasRemaining ? nftsUrl({ collection: sentNft.collection }) : AppPath.Nfts;
 };
 
 export const findNonFungibleToken = ({

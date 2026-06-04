@@ -164,3 +164,13 @@ pub(crate) fn write_api_keys(api_keys: ApiKeys) {
         state.api_keys.set(Some(Candid(api_keys)));
     });
 }
+
+/// Mutates the stored API keys in place, preserving any field the closure leaves untouched.
+///
+/// Use this instead of [`write_api_keys`] when a single field needs to change without
+/// overwriting the others (e.g. toggling `exchange_rate_enabled` without re-supplying keys).
+pub(crate) fn mutate_api_keys(f: impl FnOnce(&mut ApiKeys)) {
+    let mut api_keys = with_api_keys(Clone::clone);
+    f(&mut api_keys);
+    write_api_keys(api_keys);
+}

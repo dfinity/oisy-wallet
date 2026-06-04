@@ -1604,6 +1604,7 @@
 			"wallet_not_initialized": "Unexpected error. Your wallet address is not initialized.",
 			"from_address_not_wallet": "From address requested for the transaction is not the address of this wallet.",
 			"unknown_destination": "Unknown destination address.",
+			"ambiguous_transaction": "This transaction moves funds between several addresses and can't be shown accurately for review. For your security, it was not signed.",
 			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
 			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
 		}
