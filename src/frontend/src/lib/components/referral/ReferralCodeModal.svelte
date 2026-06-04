@@ -19,6 +19,8 @@
 		REFERRAL_CODE_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { getReferrerInfo } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -100,6 +102,11 @@
 					iconAsLast
 					styleClass="font-semibold min-w-30"
 					testId={REFERRAL_CODE_LEARN_MORE}
+					trackEvent={buildLearnMoreEvent({
+						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.REFERRAL,
+						labelKey: 'referral.invitation.text.learn_more',
+						url: OISY_REFERRAL_URL
+					})}
 				>
 					{$i18n.referral.invitation.text.learn_more}
 				</ExternalLink>
