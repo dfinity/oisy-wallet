@@ -26,7 +26,11 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { TokenInstruction } from '@solana-program/token';
+import {
+	getApproveCheckedInstruction,
+	getApproveInstruction,
+	TokenInstruction
+} from '@solana-program/token';
 import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
@@ -943,6 +947,38 @@ describe('sol-instructions.utils', () => {
 				2,
 				`Could not map Solana Token instruction of type ${TokenInstruction.CloseAccount}`
 			);
+		});
+
+		it('should forward the delegate as destination for an `Approve` instruction', () => {
+			const instruction = getApproveInstruction({
+				source: address(mockSolAddress),
+				delegate: address(mockSolAddress2),
+				owner: address(mockSolAddress),
+				amount: 100n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2
+			});
+		});
+
+		it('should forward the delegate as destination for an `ApproveChecked` instruction', () => {
+			const instruction = getApproveCheckedInstruction({
+				source: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				delegate: address(mockSolAddress2),
+				owner: address(mockSolAddress),
+				amount: 100n,
+				decimals: 6
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2
+			});
 		});
 
 		it('should return undefined for unrecognized instruction', () => {
