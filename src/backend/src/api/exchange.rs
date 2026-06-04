@@ -20,9 +20,8 @@ use crate::{
 /// - the caller's custom tokens, filtered to variants the configured providers can actually price
 ///   (testnets, NFTs and ERC-4626 vaults are excluded).
 ///
-/// The endpoint also re-marks the caller's **custom** tokens as active so the
-/// background refresh timer keeps them warm; the always-on native tokens are
-/// refreshed unconditionally and so are not marked. If any cached price is
+/// The endpoint also re-marks the returned tokens as active so the
+/// background refresh timer keeps them warm. If any cached price is
 /// missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 /// seconds, the endpoint kicks off a refresh for that subset **in the
 /// background** (via `ic_cdk::futures::spawn`) and returns the current cache
