@@ -186,4 +186,6 @@
 	<SettingsExperimentalFeatures />
 {/if}
 
-<SettingsVersion />
+<div class="mt-24">
+	<SettingsVersion />
+</div>

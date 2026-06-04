@@ -3,6 +3,7 @@
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import SignerAnimatedAstronaut from '$lib/components/signer/SignerAnimatedAstronaut.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_SIGNER_CONNECT_DOCS_URL } from '$lib/constants/oisy.constants';
@@ -48,6 +49,10 @@
 </p>
 
 <ButtonAuthenticateWithHelp asPopup fullWidth helpAlignment="center" needHelpLink={false} />
+
+<div class="[&_p]:mb-0">
+	<SettingsVersion />
+</div>
 
 {#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
 	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
