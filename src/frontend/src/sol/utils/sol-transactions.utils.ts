@@ -66,7 +66,7 @@ export const mapSolTransactionMessage = ({
 				...(nonNullish(source) && { source }),
 				...(nonNullish(destination) && { destination }),
 				...(nonNullish(payer) && { payer }),
-				...(ambiguous && { ambiguous: true })
+				...(ambiguous && { ambiguous })
 			};
 		},
 		{ amount: undefined }
