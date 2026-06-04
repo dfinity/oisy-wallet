@@ -439,13 +439,15 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		const {
 			data: { amount },
 			accounts: {
-				source: { address: source }
+				source: { address: source },
+				delegate: { address: destination }
 			}
 		} = instruction;
 
 		return {
 			amount,
-			source
+			source,
+			destination
 		};
 	}
 
@@ -469,13 +471,15 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		const {
 			data: { amount },
 			accounts: {
-				source: { address: source }
+				source: { address: source },
+				delegate: { address: destination }
 			}
 		} = instruction;
 
 		return {
 			amount,
-			source
+			source,
+			destination
 		};
 	}
 
