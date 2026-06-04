@@ -2,6 +2,8 @@ import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.se
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
+import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENT_VALUES } from '$lib/enums/plausible';
+import { trackExportData } from '$lib/services/export-data-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ContactUi } from '$lib/types/contact';
@@ -46,6 +48,11 @@ const TOKEN_CSV_FILENAME_BASE_BY_VARIANT = {
 	extended: 'oisy-tokens'
 } as const;
 
+const TOKEN_CSV_TYPE_BY_VARIANT = {
+	basic: PLAUSIBLE_EVENT_VALUES.TOKENS_BASIC,
+	extended: PLAUSIBLE_EVENT_VALUES.TOKENS_EXTENDED
+} as const;
+
 export const exportTokensCsv = ({
 	tokens,
 	currency,
@@ -58,12 +65,18 @@ export const exportTokensCsv = ({
 	variant?: TokenCsvVariant;
 }): boolean => {
 	const $i18n = get(i18n);
+	const type = TOKEN_CSV_TYPE_BY_VARIANT[variant];
 
 	if (currency !== Currency.USD && isNullish(exchangeRateToUsd)) {
 		toastsShow({
 			text: $i18n.settings.error.export_exchange_rate_unavailable,
 			level: 'error',
 			duration: 4000
+		});
+		trackExportData({
+			type,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			errorCode: 'fx_rate_unavailable'
 		});
 		return false;
 	}
@@ -84,6 +97,11 @@ export const exportTokensCsv = ({
 		text: $i18n.settings.text.export_tokens_success,
 		level: 'success',
 		duration: 2000
+	});
+
+	trackExportData({
+		type,
+		resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 	});
 
 	return true;
@@ -165,6 +183,11 @@ const TRANSACTION_CSV_FILENAME_BASE_BY_VARIANT = {
 	extended: 'oisy-transactions'
 } as const;
 
+const TRANSACTION_CSV_TYPE_BY_VARIANT = {
+	basic: PLAUSIBLE_EVENT_VALUES.TRANSACTIONS_BASIC,
+	extended: PLAUSIBLE_EVENT_VALUES.TRANSACTIONS_EXTENDED
+} as const;
+
 export const exportTransactionsCsv = async ({
 	identity,
 	tokens,
@@ -183,8 +206,14 @@ export const exportTransactionsCsv = async ({
 	variant?: TransactionCsvVariant;
 }): Promise<boolean> => {
 	const $i18n = get(i18n);
+	const type = TRANSACTION_CSV_TYPE_BY_VARIANT[variant];
 
 	if (isNullish(identity)) {
+		trackExportData({
+			type,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			errorCode: 'no_identity'
+		});
 		return false;
 	}
 
@@ -221,6 +250,11 @@ export const exportTransactionsCsv = async ({
 			duration: 2000
 		});
 
+		trackExportData({
+			type,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+		});
+
 		return true;
 	} catch (error: unknown) {
 		consoleError(error);
@@ -228,6 +262,12 @@ export const exportTransactionsCsv = async ({
 			text: $i18n.settings.error.export_failed,
 			level: 'error',
 			duration: 4000
+		});
+		trackExportData({
+			type,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			errorCode: 'build_failed',
+			error: error instanceof Error ? error.message : String(error)
 		});
 		return false;
 	}

@@ -36,6 +36,8 @@ const PRICE_REFRESH_INTERVAL_SEC: u64 = 60;
 /// and skipped during price refreshes (10 minutes).
 pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 10 * 60;
 
+const NANOS_PER_SEC: u64 = 1_000_000_000;
+
 /// A token's cached price is considered "fresh enough" if its
 /// [`ExchangeData::timestamp_ns`] (the provider-reported `last_updated_at`,
 /// or `time()` when the provider doesn't supply one) is within
@@ -89,6 +91,40 @@ thread_local! {
     /// flight, the next timer tick is a no-op until it completes.
     static REFRESH_IN_FLIGHT: Cell<Option<RefreshLock>> = const { Cell::new(None) };
     static REFRESH_LOCK_GENERATION: Cell<u64> = const { Cell::new(0) };
+
+    /// IC timestamp of the most recent caller-driven rate request (or canister
+    /// start). The recurring timer keeps the always-on native tokens warm only
+    /// while this is recent: with no caller within
+    /// [`PRICE_ACTIVITY_THRESHOLD_SEC`], there is no point spending outcall
+    /// cycles refreshing native prices for nobody. Ephemeral by design — it is
+    /// re-armed on every init / upgrade (see [`start_exchange_rate_timer`]) and
+    /// by every `get_exchange_rates` call.
+    static LAST_RATE_REQUEST_AT: Cell<Option<u64>> = const { Cell::new(None) };
+}
+
+/// Records that a caller requested exchange rates at `now_ns`, re-arming the
+/// native-token refresh performed by [`refresh_exchange_rates`].
+pub(crate) fn note_rate_request_at(now_ns: u64) {
+    LAST_RATE_REQUEST_AT.with(|c| c.set(Some(now_ns)));
+}
+
+/// [`note_rate_request_at`] using the current IC time.
+pub(crate) fn note_rate_request() {
+    note_rate_request_at(time());
+}
+
+/// Whether the always-on native tokens should be refreshed this tick: only if
+/// a caller has requested rates within [`PRICE_ACTIVITY_THRESHOLD_SEC`]. When
+/// nobody has, the timer skips natives (and, with no active custom tokens
+/// either, issues zero outcalls).
+///
+/// Uses a strict `<` to match the custom-token activity window in
+/// [`active_custom_tokens_for_refresh`] (`entry.value() > threshold`), so a
+/// request exactly at the boundary is treated as inactive in both paths.
+fn should_refresh_natives(now_ns: u64, last_request_ns: Option<u64>) -> bool {
+    last_request_ns.is_some_and(|last| {
+        now_ns.saturating_sub(last) < PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000
+    })
 }
 
 fn next_refresh_lock(now_ns: u64) -> RefreshLock {
@@ -163,12 +199,78 @@ async fn refresh_exchange_rates_guarded(source: &'static str) {
     }
 }
 
+fn activity_threshold_ns(now: u64) -> u64 {
+    now.saturating_sub(PRICE_ACTIVITY_THRESHOLD_SEC * NANOS_PER_SEC)
+}
+
+fn staleness_floor_ns(now: u64) -> u64 {
+    now.saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * NANOS_PER_SEC)
+}
+
+fn active_custom_tokens_for_refresh(
+    activity: impl IntoIterator<Item = (StoredTokenId, u64)>,
+    now: u64,
+) -> Vec<StoredTokenId> {
+    let threshold = activity_threshold_ns(now);
+
+    activity
+        .into_iter()
+        .filter(|(_, last_active_ns)| *last_active_ns > threshold)
+        .map(|(token_id, _)| token_id)
+        .collect()
+}
+
+fn exchange_rate_is_fresh_enough(rate: &ExchangeRate, freshness_floor_ns: u64) -> bool {
+    rate.usd.timestamp_ns >= freshness_floor_ns
+}
+
+fn exchange_rate_is_missing_or_older_than(
+    rate: Option<&ExchangeRate>,
+    freshness_floor_ns: u64,
+) -> bool {
+    rate.is_none_or(|r| !exchange_rate_is_fresh_enough(r, freshness_floor_ns))
+}
+
+fn tokens_missing_or_older_than(
+    token_ids: &[StoredTokenId],
+    mut cached_rate: impl FnMut(&StoredTokenId) -> Option<ExchangeRate>,
+    freshness_floor_ns: u64,
+) -> Vec<StoredTokenId> {
+    token_ids
+        .iter()
+        .filter(|token_id| {
+            let rate = cached_rate(token_id);
+            exchange_rate_is_missing_or_older_than(rate.as_ref(), freshness_floor_ns)
+        })
+        .cloned()
+        .collect()
+}
+
+fn refresh_candidates(
+    active_custom_tokens: impl IntoIterator<Item = StoredTokenId>,
+    include_natives: bool,
+) -> Vec<StoredTokenId> {
+    let mut tokens_to_fetch = if include_natives {
+        native_token_ids()
+    } else {
+        Vec::new()
+    };
+    tokens_to_fetch.extend(active_custom_tokens);
+    tokens_to_fetch.sort_unstable();
+    tokens_to_fetch.dedup();
+    tokens_to_fetch
+}
+
 /// Starts a recurring timer that refreshes exchange rates for active tokens
 /// every [`PRICE_REFRESH_INTERVAL_SEC`] seconds.
 ///
 /// An immediate one-shot refresh runs first so that rates are available right
 /// after canister init / upgrade instead of waiting for the first interval tick.
 pub(crate) fn start_exchange_rate_timer() {
+    // Arm the native refresh so prices are warmed for the first activity window
+    // right after init / upgrade, matching the previous always-on behaviour.
+    note_rate_request();
+
     set_timer(Duration::ZERO, || {
         ic_cdk::futures::spawn(refresh_exchange_rates_guarded("initial refresh"));
     });
@@ -316,17 +418,16 @@ pub(crate) fn custom_tokens_to_mark(tokens: &[StoredTokenId]) -> Vec<TokenId> {
 pub(crate) fn snapshot_and_stale(
     token_ids: Vec<StoredTokenId>,
 ) -> (Vec<(TokenId, Option<ExchangeRate>)>, Vec<StoredTokenId>) {
-    let freshness_floor_ns = time().saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * 1_000_000_000);
+    let freshness_floor_ns = staleness_floor_ns(time());
 
     read_state(|s| {
         let mut snapshot = Vec::with_capacity(token_ids.len());
         let mut stale = Vec::new();
 
         for stored in token_ids {
-            let rate = s
-                .exchange_rates
-                .get(&stored)
-                .and_then(|c| (c.0.usd.timestamp_ns >= freshness_floor_ns).then_some(c.0));
+            let rate = s.exchange_rates.get(&stored).and_then(|c| {
+                exchange_rate_is_fresh_enough(&c.0, freshness_floor_ns).then_some(c.0)
+            });
 
             if rate.is_none() {
                 stale.push(stored.clone());
@@ -340,29 +441,28 @@ pub(crate) fn snapshot_and_stale(
 
 pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     let now = time();
-    let threshold = now.saturating_sub(PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000);
-
-    let mut tokens_to_fetch: Vec<StoredTokenId> = native_token_ids();
 
     let active_custom_tokens: Vec<StoredTokenId> = read_state(|s| {
-        s.token_activity
-            .iter()
-            .filter(|entry| entry.value() > threshold)
-            .map(|entry| entry.key().clone())
-            .collect()
+        active_custom_tokens_for_refresh(
+            s.token_activity
+                .iter()
+                .map(|entry| (entry.key().clone(), entry.value())),
+            now,
+        )
     });
 
-    tokens_to_fetch.extend(active_custom_tokens);
-    tokens_to_fetch.sort_unstable();
-    tokens_to_fetch.dedup();
+    // Idle gating: only keep the always-on natives warm while a caller has
+    // requested rates recently — otherwise skip them to save outcall cycles.
+    let include_natives = should_refresh_natives(now, LAST_RATE_REQUEST_AT.with(Cell::get));
+    let tokens_to_fetch = refresh_candidates(active_custom_tokens, include_natives);
 
     let freshness_floor_ns = now.saturating_sub(PRICE_FRESHNESS_GRACE_NS);
-    read_state(|s| {
-        tokens_to_fetch.retain(|t| {
-            s.exchange_rates
-                .get(t)
-                .is_none_or(|r| r.0.usd.timestamp_ns < freshness_floor_ns)
-        });
+    let tokens_to_fetch = read_state(|s| {
+        tokens_missing_or_older_than(
+            &tokens_to_fetch,
+            |token_id| s.exchange_rates.get(token_id).map(|rate| rate.0),
+            freshness_floor_ns,
+        )
     });
 
     fetch_and_update_prices(&tokens_to_fetch).await
@@ -371,12 +471,43 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
 #[cfg(test)]
 mod tests {
     use candid::Principal;
-    use shared::types::token_id::TokenId;
+    use pretty_assertions::assert_eq;
+    use shared::types::exchange::ExchangeData;
 
-    use super::{
-        custom_tokens_to_mark, native_token_ids, release_refresh_lock, try_acquire_refresh_lock_at,
-        StoredTokenId, REFRESH_IN_FLIGHT, REFRESH_LOCK_GENERATION, REFRESH_LOCK_TIMEOUT_NS,
-    };
+    use super::*;
+
+    const ACTIVITY_THRESHOLD_NS: u64 = PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000;
+
+    #[test]
+    fn natives_refresh_when_request_strictly_within_threshold() {
+        let now = 10 * ACTIVITY_THRESHOLD_NS;
+        assert!(should_refresh_natives(now, Some(now)));
+        // Strictly inside the window (one ns before the boundary).
+        assert!(should_refresh_natives(
+            now,
+            Some(now - (ACTIVITY_THRESHOLD_NS - 1))
+        ));
+    }
+
+    #[test]
+    fn natives_skip_at_or_after_threshold() {
+        let now = 10 * ACTIVITY_THRESHOLD_NS;
+        // Exactly at the boundary is excluded (strict `<`, matching the
+        // custom-token activity window).
+        assert!(!should_refresh_natives(
+            now,
+            Some(now - ACTIVITY_THRESHOLD_NS)
+        ));
+        assert!(!should_refresh_natives(
+            now,
+            Some(now - (ACTIVITY_THRESHOLD_NS + 1))
+        ));
+    }
+
+    #[test]
+    fn natives_skip_when_never_requested() {
+        assert!(!should_refresh_natives(10 * ACTIVITY_THRESHOLD_NS, None));
+    }
 
     fn reset_refresh_lock() {
         REFRESH_IN_FLIGHT.with(|cell| cell.set(None));
@@ -452,5 +583,120 @@ mod tests {
 
         release_refresh_lock(second);
         assert!(REFRESH_IN_FLIGHT.with(std::cell::Cell::get).is_none());
+    }
+
+    fn custom_token(seed: u8) -> StoredTokenId {
+        StoredTokenId(TokenId::Icrc(Principal::from_slice(&[seed])))
+    }
+
+    fn exchange_rate(timestamp_ns: u64) -> ExchangeRate {
+        ExchangeRate {
+            usd: ExchangeData {
+                timestamp_ns,
+                price: Some(1.0),
+                price_24h_change_pct: None,
+                market_cap: None,
+            },
+        }
+    }
+
+    #[test]
+    fn active_custom_tokens_for_refresh_uses_strict_activity_window() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let active = custom_token(1);
+        let exactly_at_threshold = custom_token(2);
+        let inactive = custom_token(3);
+
+        let tokens = active_custom_tokens_for_refresh(
+            vec![
+                (
+                    active.clone(),
+                    now - (PRICE_ACTIVITY_THRESHOLD_SEC - 60) * NANOS_PER_SEC,
+                ),
+                (
+                    exactly_at_threshold,
+                    now - PRICE_ACTIVITY_THRESHOLD_SEC * NANOS_PER_SEC,
+                ),
+                (
+                    inactive,
+                    now - (PRICE_ACTIVITY_THRESHOLD_SEC + 60) * NANOS_PER_SEC,
+                ),
+            ],
+            now,
+        );
+
+        assert_eq!(tokens, vec![active]);
+    }
+
+    #[test]
+    fn refresh_candidates_include_native_tokens_and_deduplicate_activity() {
+        let native = StoredTokenId(TokenId::EvmNative(1));
+        let custom = custom_token(1);
+
+        let candidates =
+            refresh_candidates(vec![custom.clone(), native.clone(), custom.clone()], true);
+
+        assert_eq!(candidates.len(), native_token_ids().len() + 1);
+        assert!(candidates.contains(&native));
+        assert!(candidates.contains(&custom));
+    }
+
+    #[test]
+    fn refresh_candidates_excludes_natives_when_not_requested() {
+        let custom = custom_token(1);
+
+        let candidates = refresh_candidates(vec![custom.clone()], false);
+
+        assert_eq!(candidates, vec![custom]);
+    }
+
+    #[test]
+    fn tokens_missing_or_older_than_keeps_only_missing_and_stale_entries() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let floor = now - PRICE_FRESHNESS_GRACE_NS;
+        let missing = custom_token(1);
+        let stale = custom_token(2);
+        let boundary = custom_token(3);
+        let fresh = custom_token(4);
+        let tokens = vec![
+            missing.clone(),
+            stale.clone(),
+            boundary.clone(),
+            fresh.clone(),
+        ];
+
+        let due = tokens_missing_or_older_than(
+            &tokens,
+            |token_id| {
+                if *token_id == stale {
+                    Some(exchange_rate(floor - 1))
+                } else if *token_id == boundary {
+                    Some(exchange_rate(floor))
+                } else if *token_id == fresh {
+                    Some(exchange_rate(now))
+                } else {
+                    None
+                }
+            },
+            floor,
+        );
+
+        assert_eq!(due, vec![missing, stale]);
+    }
+
+    #[test]
+    fn staleness_floor_uses_two_minute_caller_freshness_contract() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let floor = staleness_floor_ns(now);
+
+        assert_eq!(floor, now - PRICE_STALENESS_THRESHOLD_SEC * NANOS_PER_SEC);
+        assert!(exchange_rate_is_missing_or_older_than(
+            Some(&exchange_rate(floor - 1)),
+            floor
+        ));
+        assert!(!exchange_rate_is_missing_or_older_than(
+            Some(&exchange_rate(floor)),
+            floor
+        ));
     }
 }

@@ -487,8 +487,46 @@ abstract class Homepage {
 		return currentHeight;
 	}
 
+	// Web fonts and lazily-imported images (e.g. the landing page hero) can
+	// finish loading *after* `networkidle` and reflow the page by tens of
+	// pixels. Measuring the height before they settle bakes a
+	// non-deterministic value into the screenshot viewport, which is why the
+	// full-page snapshots regenerate on every run. Block on them first.
+	private async waitForStableLayout(): Promise<void> {
+		await this.#page.evaluate(async () => {
+			await document.fonts.ready;
+
+			// A `loading="lazy"` image below the fold may never start loading, so
+			// awaiting its `load` event would hang until the test timeout. Only
+			// block on images that are actually loading: eager ones, or lazy ones
+			// already within the viewport (which load immediately).
+			const inViewport = (img: HTMLImageElement): boolean => {
+				const { top, bottom } = img.getBoundingClientRect();
+				return bottom > 0 && top < window.innerHeight;
+			};
+
+			// Safety net so a single stalled download can't block the helper
+			// indefinitely.
+			const PER_IMAGE_TIMEOUT_MS = 5_000;
+
+			await Promise.all(
+				Array.from(document.querySelectorAll('img'))
+					.filter((img) => !img.complete && (img.loading !== 'lazy' || inViewport(img)))
+					.map(
+						(img) =>
+							new Promise<void>((resolve) => {
+								img.addEventListener('load', () => resolve(), { once: true });
+								img.addEventListener('error', () => resolve(), { once: true });
+								setTimeout(resolve, PER_IMAGE_TIMEOUT_MS);
+							})
+					)
+			);
+		});
+	}
+
 	private async viewportAdjuster(): Promise<void> {
 		await this.waitForLoadState();
+		await this.waitForStableLayout();
 		const stablePageHeight = await this.getStableViewportHeight();
 
 		const currentViewport = this.#page.viewportSize();

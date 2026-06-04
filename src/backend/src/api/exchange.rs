@@ -4,7 +4,7 @@ use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 use crate::{
     exchange::{
         custom_tokens_to_mark, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
-        priceable_tokens_for_caller, release_refresh_lock, snapshot_and_stale,
+        note_rate_request, priceable_tokens_for_caller, release_refresh_lock, snapshot_and_stale,
         try_acquire_refresh_lock,
     },
     state::read_state,
@@ -44,6 +44,10 @@ use crate::{
 #[must_use]
 pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     let caller = StoredPrincipal(msg_caller());
+
+    // Signal that a caller wants rates, so the recurring timer keeps the
+    // always-on native tokens warm (see `should_refresh_natives`).
+    note_rate_request();
 
     let tokens = priceable_tokens_for_caller(caller);
 

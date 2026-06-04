@@ -94,7 +94,7 @@ const loadNextIcTransactionsRequest = ({
 			});
 		},
 		onUpdateError: ({ error }) => {
-			onLoadTransactionsError({ tokenId: token.id, error });
+			trackLoadTransactionsError({ tokenId: token.id, error });
 
 			signalEnd();
 		},
@@ -218,7 +218,7 @@ const loadNextIcrc7TransactionsRequest = ({
 			}
 		},
 		onUpdateError: ({ error }) => {
-			onLoadTransactionsError({ tokenId: token.id, error });
+			trackLoadTransactionsError({ tokenId: token.id, error });
 
 			signalEnd();
 		},
@@ -237,6 +237,16 @@ export const onLoadTransactionsError = ({
 	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
 	balancesStore.reset(tokenId);
 
+	trackLoadTransactionsError({ tokenId, error: err });
+};
+
+const trackLoadTransactionsError = ({
+	tokenId,
+	error: err
+}: {
+	tokenId: TokenId;
+	error: unknown;
+}) => {
 	trackEvent({
 		name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 		metadata: {
