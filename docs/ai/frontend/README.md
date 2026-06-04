@@ -38,8 +38,11 @@ Framework, UI lib, chain SDKs, and dev tooling are discoverable from
   stay in place — do not migrate them in unrelated PRs. See
   [`stack-and-patterns.md`](./stack-and-patterns.md).
 - **i18n** keys are generated from `src/frontend/src/lib/i18n/en.json` via
-  `npm run i18n`. Non-`en` locales are auto-translated by the
-  `auto-update-i18n` workflow — never hand-edit them.
+  `npm run i18n`. The `auto-update-i18n` workflow only structurally syncs
+  non-`en` locales (missing keys → empty string, extra keys dropped,
+  existing values preserved) — it does **not** translate. Don't author
+  non-`en` translations unless the developer explicitly asks. See
+  [`i18n-and-a11y.md`](./i18n-and-a11y.md#i18n).
 - **Testing.** Vitest 4 + `@testing-library/svelte` + `jsdom`, sharded 20×
   in CI. Specs live under `src/frontend/src/tests/` mirroring source
   (never co-located). Playwright (`e2e/`) is maintenance-only.
