@@ -13,7 +13,7 @@ import type {
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
-import { formatToken } from '$lib/utils/format.utils';
+import { enrichSingleTokenPayableToken } from '$lib/utils/open-crypto-pay-enrich.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { PrincipalText } from '@dfinity/zod-schemas';
@@ -34,54 +34,13 @@ export const enrichIcPayableToken = ({
 	token: PayableTokenWithFees;
 	exchanges: ExchangesData;
 	balances: CertifiedStoreData<BalancesData>;
-}): PayableTokenWithConvertedAmount | undefined => {
-	const { id: tokenId, fee, amount, decimals } = token;
-
-	if (!isIcFeeResult(fee)) {
-		return;
-	}
-
-	const { totalFee } = fee;
-
-	const exchangeRate = exchanges[tokenId]?.usd;
-
-	if (isNullish(exchangeRate)) {
-		return;
-	}
-
-	const balance = balances?.[tokenId]?.data;
-
-	if (isNullish(balance)) {
-		return;
-	}
-
-	const amountToPay = parseToken({
-		value: amount,
-		unitName: decimals
+}): PayableTokenWithConvertedAmount | undefined =>
+	enrichSingleTokenPayableToken({
+		token,
+		exchanges,
+		balances,
+		getFee: (fee) => (isIcFeeResult(fee) ? fee.totalFee : undefined)
 	});
-
-	if (balance < amountToPay + totalFee) {
-		return;
-	}
-
-	const formattedFee = Number(
-		formatToken({
-			value: totalFee,
-			unitName: decimals,
-			displayDecimals: decimals
-		})
-	);
-
-	const amountInUSD = Number(amount) * exchangeRate;
-	const feeInUSD = formattedFee * exchangeRate;
-
-	return {
-		...token,
-		amountInUSD,
-		feeInUSD,
-		sumInUSD: amountInUSD + feeInUSD
-	};
-};
 
 /**
  * Validates the decoded URN matches the expected ICP URI format.
