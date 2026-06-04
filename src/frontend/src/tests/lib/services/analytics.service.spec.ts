@@ -354,6 +354,107 @@ describe('plausible analytics service', () => {
 		});
 	});
 
+	describe('buildLearnMoreEvent', () => {
+		it('returns the open_documentation payload without source_sublocation when omitted', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
+				labelKey: 'lock.text.learn_more',
+				url: 'https://docs.oisy.com/locking'
+			});
+
+			expect(result).toEqual({
+				name: 'open_documentation',
+				metadata: {
+					event_context: 'learn_more',
+					event_key: 'link',
+					event_value: 'https://docs.oisy.com/locking',
+					source_location: 'lock',
+					source_path: 'lock / Learn more'
+				}
+			});
+		});
+
+		it('includes source_sublocation in the payload when provided', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
+				sourceSublocation: 'scan',
+				labelKey: 'scanner.text.learn_more_about_scan',
+				url: 'https://docs.oisy.com/scan'
+			});
+
+			expect(result).toEqual({
+				name: 'open_documentation',
+				metadata: {
+					event_context: 'learn_more',
+					event_key: 'link',
+					event_value: 'https://docs.oisy.com/scan',
+					source_location: 'scanner',
+					source_sublocation: 'scan',
+					source_path: 'scanner / scan / Learn more about the scanner'
+				}
+			});
+		});
+
+		it('pins the export_data variant under settings_page', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
+				sourceSublocation: 'export_data',
+				labelKey: 'settings.text.learn_more',
+				url: 'https://docs.oisy.com/export'
+			});
+
+			expect(result).toEqual({
+				name: 'open_documentation',
+				metadata: {
+					event_context: 'learn_more',
+					event_key: 'link',
+					event_value: 'https://docs.oisy.com/export',
+					source_location: 'settings_page',
+					source_sublocation: 'export_data',
+					source_path: 'settings_page / export_data / Learn more'
+				}
+			});
+		});
+
+		it('expands OISY placeholders in the source_path label (scanner pay)', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
+				sourceSublocation: 'pay',
+				labelKey: 'scanner.text.learn_more_about_pay',
+				url: 'https://docs.oisy.com/pay'
+			});
+
+			// `scanner.text.learn_more_about_pay` is "Learn more about $oisy_short Pay";
+			// the helper must expand `$oisy_short` so the dashboard column reads cleanly.
+			expect(result.metadata?.source_path).toBe('scanner / pay / Learn more about OISY Pay');
+		});
+
+		it('omits the label segment when the i18n key cannot be resolved', async () => {
+			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
+				labelKey: 'nonexistent.key.path',
+				url: 'https://example.com'
+			});
+
+			expect(result.metadata?.source_path).toBe('lock');
+		});
+	});
+
 	it('should console.debug the error in STAGING when tracker.track throws', async () => {
 		mockStaging = true;
 

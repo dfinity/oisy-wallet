@@ -19,10 +19,12 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { hideMicroTransactions, userProfileVersion } from '$lib/derived/user-profile.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import {
 		type SettingsModalType,
 		SettingsModalType as SettingsModalEnum
 	} from '$lib/enums/settings-modal-types';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -139,7 +141,13 @@
 				<ExternalLink
 					ariaLabel={$i18n.settings.text.learn_more}
 					href={OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL}
-					iconVisible={false}>{$i18n.settings.text.learn_more}</ExternalLink
+					iconVisible={false}
+					trackEvent={buildLearnMoreEvent({
+						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
+						sourceSublocation: 'hide_micro_transactions',
+						labelKey: 'settings.text.learn_more',
+						url: OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL
+					})}>{$i18n.settings.text.learn_more}</ExternalLink
 				>
 			</span>
 		{/snippet}

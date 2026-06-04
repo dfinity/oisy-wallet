@@ -7,6 +7,8 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_SIGNER_CONNECT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
@@ -35,6 +37,11 @@
 		href={OISY_SIGNER_CONNECT_DOCS_URL}
 		iconVisible={false}
 		styleClass="ml-[1.25em]"
+		trackEvent={buildLearnMoreEvent({
+			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SIGNER,
+			labelKey: 'core.text.learn_more',
+			url: OISY_SIGNER_CONNECT_DOCS_URL
+		})}
 	>
 		{$i18n.core.text.learn_more}
 	</ExternalLink>
