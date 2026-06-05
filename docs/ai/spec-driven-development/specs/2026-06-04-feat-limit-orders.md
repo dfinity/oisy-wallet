@@ -23,12 +23,12 @@ Not in v1: order expiry, market orders, order book depth view, multiple DEX inte
 
 ### Canister
 
-|                  |                               |
+| | |
 | ---------------- | ----------------------------- |
-| Display name     | OISY DEX                      |
-| Repo             | `dfinity/dex` (private)       |
+| Display name | OISY DEX |
+| Repo | `dfinity/dex` (private) |
 | Staging canister | `proc5-daaaa-aaaar-qb5va-cai` |
-| Mainnet canister | TBD — update when deployed    |
+| Mainnet canister | TBD — update when deployed |
 
 The full Candid interface is at `canister/dex.did` in the `dfinity/dex` repo.
 
@@ -79,7 +79,7 @@ The top-level navigation stays unchanged: **Assets · Activity · Earn · Explor
 
 This feature adds one new surface:
 
-| Surface                         | Type        | Purpose                                                           |
+| Surface | Type | Purpose |
 | ------------------------------- | ----------- | ----------------------------------------------------------------- |
 | **Trading tab** (inside Assets) | Status view | "Where is my money?" — DEX deposits and active orders at a glance |
 
@@ -146,13 +146,13 @@ Layout follows oisy's existing swap form: amount on the left (left-aligned), tok
 2. **You receive** — same layout. Amount and fiat equivalent shown. Token selector on the right.
 
 3. **Price section** — a separate block below the two token fields. Contains:
-   - **Dynamic label**: "When 1 [pay token] reaches" / "When 1 [pay token] drops to" / "When 1 [receive token] dropped to" / "When 1 [receive token] rises to" — see label logic below.
+   - **Dynamic label**: see label logic below.
    - **Quick-set text links**: Spot · +1% · +5% — sets the price relative to current market. Active selection shown in bold without underline.
    - **Reciprocal toggle** (icon button): flips the price display between pay-token-per-receive-token and receive-token-per-pay-token (i.e. the reciprocal value). Same underlying price, different display direction.
    - **Lock toggle** (icon button): when locked, changing "You receive" adjusts "You pay" while keeping the price fixed. When unlocked (default), changing "You receive" adjusts the price while keeping "You pay" fixed. Changing "You pay" always updates "You receive" regardless of lock state. When locked, the price section shows a subtle highlight and a hint line: "Price pinned — changing receive amount updates what you pay."
    - **Price input** — large editable number. Changing it always updates "You receive" and keeps "You pay" fixed.
    - **Price unit** — e.g. "ckUSDC / ICP" or "ICP / ckUSDC" depending on reciprocal state.
-   - **Value difference** — shown inline on the right of the price value: `(fiat value of receive − fiat value of pay) / fiat value of pay` as a percentage with colour coding (green positive, amber negative, red below −5%). If below −5% on submit, show the same confirmation modal as swaps.
+   - **Value difference** — shown inline on the right of the price value: `(fiat value of receive − fiat value of pay) / fiat value of pay` as a percentage with colour coding (green positive, amber negative, red below −5%).
    - **Market reference** — small text below price: "market 2.69 ckUSDC / ICP".
    - **Below-market warning** — shown instead of market reference when the order will fill immediately (see label logic).
 
@@ -164,14 +164,28 @@ A flip button between "You pay" and "You receive" lets the user reverse directio
 
 The dynamic label and warning depend on two factors: which token is currently shown in the price display, and whether the limit price is above or below market in that display direction.
 
-| Price display | vs market    | Label                               | Warning                                                                         |
-| ------------- | ------------ | ----------------------------------- | ------------------------------------------------------------------------------- |
-| Pay token     | above market | "When 1 [pay token] reaches"        | none                                                                            |
-| Pay token     | below market | "When 1 [pay token] drops to"       | "This price is already below market — your order will fill almost immediately." |
-| Receive token | above market | "When 1 [receive token] rises to"   | "This price is already above market — your order will fill almost immediately." |
-| Receive token | below market | "When 1 [receive token] dropped to" | none                                                                            |
+| Price display | vs market | Label | Warning |
+| ------------- | ------------ | --------------------------------------- | --------------------------------------------------------------------------- |
+| Pay token | above market | "When 1 [pay token] reaches" | none |
+| Pay token | below market | "When 1 [pay token] is at least" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
+| Receive token | above market | "When 1 [receive token] is at most" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
+| Receive token | below market | "When 1 [receive token] dropped to" | none |
 
-The warning replaces the market reference line when shown.
+Notes on the label choice:
+- "reaches" implies waiting for the price to rise to the target — correct when the limit is above market.
+- "is at least" and "is at most" reflect a condition that is already met (>= / <=) — correct when the limit is below market and the order will fill immediately.
+- "dropped to" implies waiting for the price to fall to the target — correct when the receive-token price needs to decrease.
+
+The warning replaces the market reference line when shown. It includes the approximate fiat loss (e.g. "$5.38 less") so the user understands the cost of the decision. The warning is amber when value difference is between −5% and 0%, and red when below −5%.
+
+### Below-market confirmation
+
+- **Value difference < 0%**: warning shown on form and review steps. No checkbox required — the user can still proceed.
+- **Value difference < −5%**: warning shown on form and review steps. On the review step, a confirmation checkbox is required before "Place order" is enabled. The checkbox and warning are combined into a single box. This matches the existing swap behaviour for significant value differences.
+
+On the form step the warning text reads: **"This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price."**
+
+On the review step the warning text reads: **"The specified price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price."** (refers to the limit price row visible directly above it).
 
 ### Pay / receive / price linkage
 
@@ -232,7 +246,7 @@ The Limit Order tab follows the same wizard pattern as the existing swap flow: *
 - Limit price row: "When 1 ICP reaches 2.75 ckUSDC" with market reference.
 - Value difference (same `SwapValueDifference` component).
 - DEX row: "OISY DEX".
-- If value difference is below −5%: same warning confirmation checkbox as swap (must be checked to enable confirm button).
+- If value difference is below 0%: warning box shown (amber or red depending on severity). If below −5%, a confirmation checkbox is required inside the same box before "Place order" is enabled.
 - Back + "Place order" buttons.
 
 **Progress step** — single step: submitting the order to the DEX. On success, closes the modal and the order appears in the Trading tab Active Orders with status Pending. Status updates via polling.
@@ -333,10 +347,11 @@ Status is refreshed by polling while the Trading tab is visible. When an order t
 - [ ] Price section is a separate block below the two token fields.
 - [ ] Quick-set text links (Spot · +1% · +5%) set the price relative to current market; active selection shown in bold without underline.
 - [ ] Reciprocal toggle flips the price display between the two token directions.
-- [ ] Dynamic label ("When 1 X reaches / drops to / dropped to / rises to") reflects pay/receive token perspective and above/below market correctly.
-- [ ] Below-market warning shown when order will fill immediately; replaces market reference line.
+- [ ] Dynamic label reflects pay/receive token perspective and above/below market correctly: "reaches" / "is at least" / "is at most" / "dropped to".
+- [ ] Below-market warning (amber) shown when value difference < 0%; replaces market reference line; includes fiat loss amount.
+- [ ] Below-market warning turns red when value difference < −5%.
 - [ ] Value difference shown inline on the right of the price value, with colour coding (green / amber / red below −5%).
-- [ ] Submitting below −5% value difference triggers the same confirmation modal as swaps.
+- [ ] On review, if value difference < 0%: warning box shown. If < −5%: confirmation checkbox required inside the same box before "Place order" is enabled.
 - [ ] Lock toggle: when locked, changing receive updates pay (price stays); when unlocked, changing receive updates price (pay stays).
 - [ ] Changing pay always updates receive regardless of lock state.
 - [ ] Changing price always updates receive regardless of lock state.
@@ -346,7 +361,7 @@ Status is refreshed by polling while the Trading tab is visible. When an order t
 - [ ] Both pay and receive fields update to reflect rounded values before the user confirms.
 - [ ] Confirm is blocked when DEX free balance is insufficient; inline deposit is offered instead.
 - [ ] Limit Order tab follows Form → Review → Progress wizard steps.
-- [ ] Review step shows token amounts, limit price, value difference, DEX, and warning checkbox when below −5%.
+- [ ] Review step shows token amounts, limit price, value difference, DEX, and warning/checkbox when applicable.
 - [ ] Placed order appears immediately in Trading tab Active Orders with status Pending.
 - [ ] Active orders update via polling without requiring a page reload.
 - [ ] Cancel returns reserved funds to free balance.
