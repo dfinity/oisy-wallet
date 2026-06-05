@@ -23,12 +23,12 @@ Not in v1: order expiry, market orders, order book depth view, multiple DEX inte
 
 ### Canister
 
-| | |
-|---|---|
-| Display name | OISY DEX |
-| Repo | `dfinity/dex` (private) |
+|                  |                               |
+| ---------------- | ----------------------------- |
+| Display name     | OISY DEX                      |
+| Repo             | `dfinity/dex` (private)       |
 | Staging canister | `proc5-daaaa-aaaar-qb5va-cai` |
-| Mainnet canister | TBD — update when deployed |
+| Mainnet canister | TBD — update when deployed    |
 
 The full Candid interface is at `canister/dex.did` in the `dfinity/dex` repo.
 
@@ -79,8 +79,8 @@ The top-level navigation stays unchanged: **Assets · Activity · Earn · Explor
 
 This feature adds one new surface:
 
-| Surface | Type | Purpose |
-|---|---|---|
+| Surface                         | Type        | Purpose                                                           |
+| ------------------------------- | ----------- | ----------------------------------------------------------------- |
 | **Trading tab** (inside Assets) | Status view | "Where is my money?" — DEX deposits and active orders at a glance |
 
 The existing **"Swap" hero button** opens a combined Trade modal with two tabs: **Swap** (default) and **Limit order**. This is the primary entry point for all trading actions. The modal is the same component regardless of which tab is selected — switching tabs preserves token context and updates amounts accordingly.
@@ -110,16 +110,19 @@ Tabbed: **Active** (Pending + Open) and **History** (Filled + Cancelled). Each r
 **Three states:**
 
 _New user_ — no assets, no orders:
+
 - My assets: empty row with a prominent "Deposit" button.
 - Orders header: "+ Limit order" is greyed out (disabled — requires assets first).
 - Active tab: "No active orders" with no CTA.
 
 _Has assets, no orders:_
+
 - My assets: token rows with Withdraw actions.
 - Orders header: "+ Limit order" becomes active (link).
 - Active tab: "No active orders" with a "Limit order" button.
 
 _Has assets and orders:_
+
 - My assets: token rows with Withdraw actions.
 - Active tab: order rows with status pills.
 - History tab: filled and cancelled orders.
@@ -161,12 +164,12 @@ A flip button between "You pay" and "You receive" lets the user reverse directio
 
 The dynamic label and warning depend on two factors: which token is currently shown in the price display, and whether the limit price is above or below market in that display direction.
 
-| Price display | vs market | Label | Warning |
-|---|---|---|---|
-| Pay token | above market | "When 1 [pay token] reaches" | none |
-| Pay token | below market | "When 1 [pay token] drops to" | "This price is already below market — your order will fill almost immediately." |
-| Receive token | above market | "When 1 [receive token] rises to" | "This price is already above market — your order will fill almost immediately." |
-| Receive token | below market | "When 1 [receive token] dropped to" | none |
+| Price display | vs market    | Label                               | Warning                                                                         |
+| ------------- | ------------ | ----------------------------------- | ------------------------------------------------------------------------------- |
+| Pay token     | above market | "When 1 [pay token] reaches"        | none                                                                            |
+| Pay token     | below market | "When 1 [pay token] drops to"       | "This price is already below market — your order will fill almost immediately." |
+| Receive token | above market | "When 1 [receive token] rises to"   | "This price is already above market — your order will fill almost immediately." |
+| Receive token | below market | "When 1 [receive token] dropped to" | none                                                                            |
 
 The warning replaces the market reference line when shown.
 
@@ -198,6 +201,7 @@ The "You pay" field always shows both balances: DEX free balance and wallet bala
 - **DEX selected** → Price section becomes active.
 
 **When "You pay" token changes after "You receive" and/or DEX are already filled:**
+
 - Keep "You receive" if it still forms a valid pair with the new token. Clear it otherwise.
 - Keep DEX if the new pair is still available on it. Clear it otherwise.
 - Always show cleared fields visually in their empty/placeholder state. Never silently retain an invalid value.
@@ -229,12 +233,14 @@ Triggered from: "+ Deposit" link in the Trading tab, or inline when placing an o
 The flow mirrors the Harvest Autopilot stake wizard pattern: Form → Review → Progress.
 
 **Form step:**
+
 - Token selector (only tokens the DEX supports that the user holds in their wallet).
 - Amount input with wallet balance shown below and fiat equivalent.
 - Transaction fee row (collapsible, same pattern as swap fees): collapsed header shows total in fiat ("Transaction fee · <$0.01"), expands to show individual lines ("Approval fee · 0.0001 ICP" and "Transfer fee · 0.0001 ICP").
 - Agreement checkbox: "I understand my tokens will be held by the OISY DEX canister and are subject to on-chain smart contract risk." Review button is disabled until checked.
 
 **Review step:**
+
 - Hero: token amount and fiat equivalent.
 - "To: OISY DEX" row.
 - Transaction fee (collapsible, same as form).
@@ -242,6 +248,7 @@ The flow mirrors the Harvest Autopilot stake wizard pattern: Form → Review →
 - Back + Deposit buttons.
 
 **Progress step:**
+
 - Step 1: Approving (ICRC-2 approve on the token ledger).
 - Step 2: Depositing (DEX deposit call).
 - Done.
@@ -255,6 +262,7 @@ Triggered from: "Withdraw" link on a token balance row in the Trading tab.
 The flow mirrors deposit: Form → Review → Progress.
 
 **Form step:**
+
 - Token pre-selected from context (no selector shown).
 - Amount input with fiat equivalent.
 - Free balance shown as a clickable shortcut that fills the input with the free amount. This is the maximum withdrawable amount — the user cannot withdraw more than their free balance.
@@ -262,6 +270,7 @@ The flow mirrors deposit: Form → Review → Progress.
 - Transaction fee row (collapsible): single "Transfer fee · 0.0001 ICP".
 
 **Review step:**
+
 - Hero: amount and fiat.
 - "From: OISY DEX" row.
 - Transaction fee (collapsible).
@@ -269,8 +278,8 @@ The flow mirrors deposit: Form → Review → Progress.
 - Back + Withdraw buttons.
 
 **Progress step:**
-- Single step: Withdrawing → Done.
 
+- Single step: Withdrawing → Done.
 
 ---
 
