@@ -23,12 +23,12 @@ Not in v1: order expiry, market orders, order book depth view, multiple DEX inte
 
 ### Canister
 
-| | |
+|                  |                               |
 | ---------------- | ----------------------------- |
-| Display name | OISY DEX |
-| Repo | `dfinity/dex` (private) |
+| Display name     | OISY DEX                      |
+| Repo             | `dfinity/dex` (private)       |
 | Staging canister | `proc5-daaaa-aaaar-qb5va-cai` |
-| Mainnet canister | TBD — update when deployed |
+| Mainnet canister | TBD — update when deployed    |
 
 The full Candid interface is at `canister/dex.did` in the `dfinity/dex` repo.
 
@@ -88,7 +88,7 @@ The top-level navigation stays unchanged: **Assets · Activity · Earn · Explor
 
 This feature adds one new surface:
 
-| Surface | Type | Purpose |
+| Surface                         | Type        | Purpose                                                           |
 | ------------------------------- | ----------- | ----------------------------------------------------------------- |
 | **Trading tab** (inside Assets) | Status view | "Where is my money?" — DEX deposits and active orders at a glance |
 
@@ -175,14 +175,15 @@ A flip button between "You pay" and "You receive" lets the user reverse directio
 
 The dynamic label and warning depend on two factors: which token is currently shown in the price display, and whether the limit price is above or below market in that display direction.
 
-| Price display | vs market | Label | Warning |
-| ------------- | ------------ | --------------------------------------- | --------------------------------------------------------------------------- |
-| Pay token | above market | "When 1 [pay token] reaches" | none |
-| Pay token | below market | "When 1 [pay token] is at least" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
+| Price display | vs market    | Label                               | Warning                                                                                                                            |
+| ------------- | ------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Pay token     | above market | "When 1 [pay token] reaches"        | none                                                                                                                               |
+| Pay token     | below market | "When 1 [pay token] is at least"    | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
 | Receive token | above market | "When 1 [receive token] is at most" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
-| Receive token | below market | "When 1 [receive token] dropped to" | none |
+| Receive token | below market | "When 1 [receive token] dropped to" | none                                                                                                                               |
 
 Notes on the label choice:
+
 - "reaches" implies waiting for the price to rise to the target — correct when the limit is above market.
 - "is at least" and "is at most" reflect a condition that is already met (>= / <=) — correct when the limit is below market and the order will fill immediately.
 - "dropped to" implies waiting for the price to fall to the target — correct when the receive-token price needs to decrease.
@@ -203,6 +204,7 @@ On the review step the warning text reads: **"The specified price is below marke
 Three values are always linked: "You sell", "You buy", and price. The relationship is always `quote = base × price`, where the base token may be in either "You sell" or "You buy" depending on the trade direction (flip).
 
 **Two constraints apply:**
+
 - The **base token amount** must be a positive multiple of `lot_size` — always rounded down.
 - The **price** must be a positive multiple of `tick_size` — always rounded down.
 - The **quote token amount** is always derived and has no constraint of its own.
@@ -211,14 +213,15 @@ Three values are always linked: "You sell", "You buy", and price. The relationsh
 
 The base token field and price field are the two primary inputs. The quote token field is always the output — it is recomputed last after all rounding is applied.
 
-| What user edits | Base direction | Lock | What happens |
-|---|---|---|---|
-| Base token field | either | either | Round base to lot_size. Recompute quote = rounded_base × price. |
-| Price field | either | either | Round price to tick_size. Recompute quote = base × rounded_price. |
-| Quote token field | either | off | Derive price = quote ÷ base. Round price to tick_size. Recompute quote = base × rounded_price. |
-| Quote token field | either | on | Derive base = quote ÷ price. Round base to lot_size. Recompute quote = rounded_base × price. |
+| What user edits   | Base direction | Lock   | What happens                                                                                   |
+| ----------------- | -------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| Base token field  | either         | either | Round base to lot_size. Recompute quote = rounded_base × price.                                |
+| Price field       | either         | either | Round price to tick_size. Recompute quote = base × rounded_price.                              |
+| Quote token field | either         | off    | Derive price = quote ÷ base. Round price to tick_size. Recompute quote = base × rounded_price. |
+| Quote token field | either         | on     | Derive base = quote ÷ price. Round base to lot_size. Recompute quote = rounded_base × price.   |
 
 **Decorations** — shown inline below the relevant field when rounding causes a visible difference:
+
 - Base token field: "→ Order quantity: X [token]" (amber) when the entered value is not a valid lot_size multiple.
 - Price field: "→ Rounded to: X" (amber) when the entered or derived price is not a valid tick_size multiple.
 - Quote token field: "→ Actual: X [token]" (blue) when the final computed quote differs from what the user typed, due to rounding of base or price.
@@ -282,6 +285,7 @@ Both entry points use the same form. The only difference is which fields arrive 
 The "You buy" amount always shows the **gross amount before fees**. Fees are deducted from proceeds at fill time. Whether the order fills as maker or taker is not known at placement time — it depends on the order book state at execution.
 
 **On the form** — the DEX selector row is expandable (same pattern as swap fees). Collapsed it shows the DEX name and the CLOB best ask (labelled "best ask", clearly distinct from the oisy price feed market reference shown in the price section). Expanded it shows two lines:
+
 - "Maker fee · 0% (No fee)" — shown in green when 0 bps
 - "Taker fee · 0.05% (5 bps)"
 
