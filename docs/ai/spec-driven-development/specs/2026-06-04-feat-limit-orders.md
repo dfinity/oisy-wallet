@@ -62,15 +62,14 @@ cancel_limit_order(orderId) → Ok(OrderRecord) | Err
 get_order_status(orderId)   → Pending | Open | Filled | Canceled | NotFound
 ```
 
-### Missing endpoint — prerequisite
+### Listing user orders (v1 fallback)
 
-There is currently no way to list all orders for a user. `get_order_status` requires a known `OrderId`. Before implementation, request the following endpoint from the `dfinity/dex` team:
+There is currently no canister method that returns all orders for a user — `get_order_status` requires a known `OrderId`. A paginated `get_user_orders` query is being added to `dfinity/dex` over two PRs:
 
-```
-get_user_orders(principal) → vec { order_id, record }
-```
+- [`dfinity/dex#111`](https://github.com/dfinity/dex/pull/111) — adds the per-user order index (PR 2 of 3).
+- A follow-up PR will expose the paginated query (PR 3 of 3).
 
-If this is delayed, fall back to persisting `OrderId`s locally when placing orders and polling each one.
+**v1 does not depend on the new endpoint.** When the user places an order, oisy persists the returned `OrderId` locally and polls each known order via `get_order_status`. The paginated query will be adopted as a follow-up once shipped, replacing the local-only listing.
 
 ---
 
@@ -333,7 +332,6 @@ Status is refreshed by polling while the Trading tab is visible. When an order t
 
 ## Open questions
 
-1. **`get_user_orders` timeline** — confirm with `dfinity/dex` team before starting implementation.
-2. **Mainnet canister ID** — fill in once the DEX is deployed to mainnet.
-3. **Token logos** — `list_supported_tokens` returns symbol and decimals but no logo URL. Confirm whether the existing oisy token registry covers all DEX-listed tokens, or whether a fallback is needed.
-4. **USD price feeds** — confirm that all DEX-listed tokens already have USD price data in the existing price store (needed for the hero total).
+1. **Mainnet canister ID** — fill in once the DEX is deployed to mainnet.
+2. **Token logos** — `list_supported_tokens` returns symbol and decimals but no logo URL. Confirm whether the existing oisy token registry covers all DEX-listed tokens, or whether a fallback is needed.
+3. **USD price feeds** — confirm that all DEX-listed tokens already have USD price data in the existing price store (needed for the hero total).
