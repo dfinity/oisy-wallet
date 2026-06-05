@@ -240,7 +240,7 @@ The apply box is dismissed and Review re-enabled only after the user explicitly 
 
 Note: when the user clicks Review while a field is focused, the browser fires blur before the click. The blur triggers the apply box and disables Review, so the click lands on a disabled button. The user sees the apply box and must confirm before proceeding. This is the correct outcome.
 
-See the interactive HTML wireframe `wireframe-rounding-demo.html` for a live demonstration of all 8 cases (4 edit scenarios × 2 base directions).
+See the interactive HTML wireframe [`2026-06-04-feat-limit-orders/wireframes/rounding-demo.html`](./2026-06-04-feat-limit-orders/wireframes/rounding-demo.html) for a live demonstration of all 8 cases (4 edit scenarios × 2 base directions).
 
 **Lot size rounding.** `lot_size` constrains the base token quantity (e.g. ICP in an ICP/ckUSDC pair). The rounding always applies to the base token amount regardless of which field the user typed into. When the user enters a quote token amount that produces a non-integer base amount, the base is rounded down to the nearest valid lot size multiple and both fields update to reflect the rounded values. The user always sees the final rounded amounts before confirming.
 
