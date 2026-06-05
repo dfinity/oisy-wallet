@@ -23,12 +23,12 @@ Not in v1: order expiry, market orders, order book depth view, multiple DEX inte
 
 ### Canister
 
-| | |
+|                  |                               |
 | ---------------- | ----------------------------- |
-| Display name | OISY DEX |
-| Repo | `dfinity/dex` (private) |
+| Display name     | OISY DEX                      |
+| Repo             | `dfinity/dex` (private)       |
 | Staging canister | `proc5-daaaa-aaaar-qb5va-cai` |
-| Mainnet canister | TBD — update when deployed |
+| Mainnet canister | TBD — update when deployed    |
 
 The full Candid interface is at `canister/dex.did` in the `dfinity/dex` repo.
 
@@ -79,7 +79,7 @@ The top-level navigation stays unchanged: **Assets · Activity · Earn · Explor
 
 This feature adds one new surface:
 
-| Surface | Type | Purpose |
+| Surface                         | Type        | Purpose                                                           |
 | ------------------------------- | ----------- | ----------------------------------------------------------------- |
 | **Trading tab** (inside Assets) | Status view | "Where is my money?" — DEX deposits and active orders at a glance |
 
@@ -164,14 +164,15 @@ A flip button between "You pay" and "You receive" lets the user reverse directio
 
 The dynamic label and warning depend on two factors: which token is currently shown in the price display, and whether the limit price is above or below market in that display direction.
 
-| Price display | vs market | Label | Warning |
-| ------------- | ------------ | --------------------------------------- | --------------------------------------------------------------------------- |
-| Pay token | above market | "When 1 [pay token] reaches" | none |
-| Pay token | below market | "When 1 [pay token] is at least" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
+| Price display | vs market    | Label                               | Warning                                                                                                                            |
+| ------------- | ------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Pay token     | above market | "When 1 [pay token] reaches"        | none                                                                                                                               |
+| Pay token     | below market | "When 1 [pay token] is at least"    | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
 | Receive token | above market | "When 1 [receive token] is at most" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
-| Receive token | below market | "When 1 [receive token] dropped to" | none |
+| Receive token | below market | "When 1 [receive token] dropped to" | none                                                                                                                               |
 
 Notes on the label choice:
+
 - "reaches" implies waiting for the price to rise to the target — correct when the limit is above market.
 - "is at least" and "is at most" reflect a condition that is already met (>= / <=) — correct when the limit is below market and the order will fill immediately.
 - "dropped to" implies waiting for the price to fall to the target — correct when the receive-token price needs to decrease.
