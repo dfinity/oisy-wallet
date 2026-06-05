@@ -23,12 +23,12 @@ Not in v1: order expiry, market orders, order book depth view, multiple DEX inte
 
 ### Canister
 
-| | |
+|                  |                               |
 | ---------------- | ----------------------------- |
-| Display name | OISY DEX |
-| Repo | `dfinity/dex` (private) |
+| Display name     | OISY DEX                      |
+| Repo             | `dfinity/dex` (private)       |
 | Staging canister | `proc5-daaaa-aaaar-qb5va-cai` |
-| Mainnet canister | TBD — update when deployed |
+| Mainnet canister | TBD — update when deployed    |
 
 The full Candid interface is at `canister/dex.did` in the `dfinity/dex` repo.
 
@@ -79,7 +79,7 @@ The top-level navigation stays unchanged: **Assets · Activity · Earn · Explor
 
 This feature adds one new surface:
 
-| Surface | Type | Purpose |
+| Surface                         | Type        | Purpose                                                           |
 | ------------------------------- | ----------- | ----------------------------------------------------------------- |
 | **Trading tab** (inside Assets) | Status view | "Where is my money?" — DEX deposits and active orders at a glance |
 
@@ -164,12 +164,12 @@ A flip button between "You pay" and "You receive" lets the user reverse directio
 
 The dynamic label and warning depend on two factors: which token is currently shown in the price display, and whether the limit price is above or below market in that display direction.
 
-| Price display | vs market | Label | Warning |
+| Price display | vs market    | Label                               | Warning                                                                         |
 | ------------- | ------------ | ----------------------------------- | ------------------------------------------------------------------------------- |
-| Pay token | above market | "When 1 [pay token] reaches" | none |
-| Pay token | below market | "When 1 [pay token] drops to" | "This price is already below market — your order will fill almost immediately." |
-| Receive token | above market | "When 1 [receive token] rises to" | "This price is already above market — your order will fill almost immediately." |
-| Receive token | below market | "When 1 [receive token] dropped to" | none |
+| Pay token     | above market | "When 1 [pay token] reaches"        | none                                                                            |
+| Pay token     | below market | "When 1 [pay token] drops to"       | "This price is already below market — your order will fill almost immediately." |
+| Receive token | above market | "When 1 [receive token] rises to"   | "This price is already above market — your order will fill almost immediately." |
+| Receive token | below market | "When 1 [receive token] dropped to" | none                                                                            |
 
 The warning replaces the market reference line when shown.
 
@@ -227,6 +227,7 @@ The Limit Order tab follows the same wizard pattern as the existing swap flow: *
 **Form step** — the full form described above. Button label: "Review".
 
 **Review step** — mirrors `SwapReview`. Shows:
+
 - Token amounts: "You pay X ICP / You receive Y ckUSDC" (same `TokensReview` component as swap).
 - Limit price row: "When 1 ICP reaches 2.75 ckUSDC" with market reference.
 - Value difference (same `SwapValueDifference` component).
