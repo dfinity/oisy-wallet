@@ -1,303 +1,1114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trade Modal — Complete</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-:root {
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f5f5f3;
-  --color-background-tertiary: #eeede9;
-  --color-background-info: #e6f1fb;
-  --color-background-success: #eaf3de;
-  --color-background-warning: #faeeda;
-  --color-background-danger: #fcebeb;
-  --color-text-primary: #1a1a18;
-  --color-text-secondary: #5f5e5a;
-  --color-text-tertiary: #888780;
-  --color-text-info: #185fa5;
-  --color-text-success: #3b6d11;
-  --color-text-warning: #854f0b;
-  --color-text-danger: #a32d2d;
-  --color-border-tertiary: rgba(0,0,0,0.12);
-  --color-border-secondary: rgba(0,0,0,0.25);
-  --color-border-info: #185fa5;
-  --color-border-success: #3b6d11;
-  --color-border-warning: #854f0b;
-  --color-border-danger: #a32d2d;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --font-sans: system-ui, -apple-system, sans-serif;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); background: var(--color-background-tertiary); padding: 1.5rem; }
-.scene { background: var(--color-background-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem; max-width: 480px; margin: 0 auto; }
-.steps { display: flex; gap: 6px; margin-bottom: 1.25rem; align-items: center; }
-.step-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.2); }
-.step-dot.active { background: var(--color-text-primary); }
-.step-dot.done { background: var(--color-text-secondary); }
-.step-label { font-size: 11px; color: var(--color-text-tertiary); margin-left: 4px; }
-.modal { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); max-width: 380px; margin: 0 auto; overflow: hidden; }
-.modal-tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); }
-.modal-tab { flex: 1; padding: 12px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
-.modal-tab.active { border-bottom-color: var(--color-text-primary); }
-.tab-name { font-size: 14px; font-weight: 500; color: var(--color-text-secondary); }
-.modal-tab.active .tab-name { color: var(--color-text-primary); }
-.tab-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 1px; }
-.modal-tab.active .tab-sub { color: var(--color-text-secondary); }
-.body { padding: 1.25rem; }
-.taf { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; }
-.taf-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.taf-label { font-size: 12px; color: var(--color-text-secondary); }
-.bal-line { font-size: 11px; color: var(--color-text-tertiary); }
-.taf-main { display: flex; align-items: center; gap: 8px; }
-.amt-side { flex: 1; }
-.amt-input { font-size: 20px; font-weight: 500; color: var(--color-text-primary); background: none; border: none; outline: none; width: 100%; font-family: var(--font-sans); }
-.amt-fiat { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
-.tok-pill { display: flex; align-items: center; gap: 5px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: 20px; padding: 4px 8px 4px 6px; cursor: pointer; flex-shrink: 0; }
-.tok-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--color-background-info); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 500; color: var(--color-text-info); }
-.tok-dot-u { background: var(--color-background-success); color: var(--color-text-success); }
-.tok-sym { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
-.flip-row { display: flex; justify-content: center; margin: -2px 0; position: relative; z-index: 1; }
-.flip-btn { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text-secondary); font-size: 14px; }
-.price-section { border-radius: var(--border-radius-md); padding: 10px 12px; margin-top: 8px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); }
-.price-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.price-lbl { font-size: 12px; color: var(--color-text-secondary); }
-.price-lbl strong { color: var(--color-text-primary); font-weight: 500; }
-.price-controls { display: flex; align-items: center; gap: 4px; }
-.preset-link { font-size: 11px; color: var(--color-text-info); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; user-select: none; }
-.preset-link.ap { font-weight: 500; text-decoration: none; color: var(--color-text-primary); }
-.preset-sep { font-size: 11px; color: var(--color-text-tertiary); }
-.icon-btn { width: 22px; height: 22px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text-secondary); font-size: 12px; flex-shrink: 0; }
-.icon-btn.locked { border-color: var(--color-border-info); color: var(--color-text-info); background: var(--color-background-info); }
-.price-value-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
-.price-input { font-size: 20px; font-weight: 500; color: var(--color-text-primary); background: none; border: none; outline: none; font-family: var(--font-sans); width: 120px; }
-.price-unit { font-size: 12px; color: var(--color-text-secondary); margin-left: 4px; }
-.diff { font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 4px; }
-.diff-pos { background: var(--color-background-success); color: var(--color-text-success); }
-.diff-neg { background: var(--color-background-warning); color: var(--color-text-warning); }
-.diff-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
-.price-ctx { font-size: 11px; color: var(--color-text-tertiary); }
-.warn-box { border-radius: var(--border-radius-md); padding: 8px 10px; margin-top: 6px; font-size: 11px; line-height: 1.5; display: flex; align-items: flex-start; gap: 6px; }
-.warn-box.amber { background: var(--color-background-warning); color: var(--color-text-warning); }
-.warn-box.red { background: var(--color-background-danger); color: var(--color-text-danger); }
-.lock-hint { font-size: 11px; color: var(--color-text-info); margin-top: 5px; display: none; }
-.prov-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-info); background: var(--color-background-info); margin-top: 8px; }
-.prov-dot { width: 18px; height: 18px; border-radius: 4px; background: var(--color-background-success); flex-shrink: 0; }
-.prov-name { font-size: 13px; font-weight: 500; color: var(--color-text-info); flex: 1; }
-.prov-detail { font-size: 11px; color: var(--color-text-info); }
-.slip-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); margin-top: 8px; font-size: 12px; }
-.btn-group { display: flex; gap: 8px; margin-top: 12px; }
-.btn { flex: 1; padding: 10px; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); }
-.btn-primary { background: var(--color-text-primary); color: var(--color-background-primary); border-color: transparent; }
-.btn-primary:disabled { opacity: 0.35; cursor: default; }
-.hero-rows { display: flex; flex-direction: column; gap: 4px; margin-bottom: 1rem; }
-.hero-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); }
-.hero-token { display: flex; align-items: center; gap: 8px; }
-.hero-sym { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
-.hero-amount { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
-.hero-fiat-sm { font-size: 11px; color: var(--color-text-tertiary); text-align: right; }
-.arrow-row { display: flex; justify-content: center; font-size: 14px; color: var(--color-text-tertiary); }
-.mv { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
-.mv.nb { border-bottom: none; }
-.mv-lbl { color: var(--color-text-secondary); }
-.mv-val { font-weight: 500; color: var(--color-text-primary); text-align: right; }
-.mv-sub { font-size: 11px; color: var(--color-text-tertiary); text-align: right; }
-.confirm-box { border-radius: var(--border-radius-md); padding: 10px 12px; margin-top: 10px; font-size: 12px; line-height: 1.5; }
-.confirm-box.amber { background: var(--color-background-warning); border: 0.5px solid var(--color-border-warning); color: var(--color-text-warning); }
-.confirm-box.red { background: var(--color-background-danger); border: 0.5px solid var(--color-border-danger); color: var(--color-text-danger); }
-.confirm-check { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; padding-top: 8px; border-top: 0.5px solid rgba(0,0,0,0.1); margin-top: 8px; }
-.checkbox { width: 18px; height: 18px; border-radius: 4px; border: 0.5px solid currentColor; background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-size: 12px; }
-.modal-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1.25rem; }
-.prog-steps { display: flex; flex-direction: column; gap: 14px; padding: 1rem 0; }
-.prog-step { display: flex; align-items: center; gap: 12px; }
-.prog-dot { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-.prog-dot.active { background: var(--color-background-warning); border-color: var(--color-border-warning); color: var(--color-text-warning); }
-.prog-dot.done { background: var(--color-background-success); border-color: var(--color-border-success); color: var(--color-text-success); }
-.prog-dot.pending { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
-.prog-lbl { font-size: 13px; color: var(--color-text-primary); }
-.prog-sub { font-size: 11px; color: var(--color-text-tertiary); }
-@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-</style>
-</head>
-<body>
-<div class="scene">
-  <div class="steps">
-    <div class="step-dot active" id="d1"></div>
-    <div class="step-dot" id="d2"></div>
-    <div class="step-dot" id="d3"></div>
-    <span class="step-label" id="step-lbl">Form</span>
-  </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Trade Modal — Complete</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f5f5f3;
+				--color-background-tertiary: #eeede9;
+				--color-background-info: #e6f1fb;
+				--color-background-success: #eaf3de;
+				--color-background-warning: #faeeda;
+				--color-background-danger: #fcebeb;
+				--color-text-primary: #1a1a18;
+				--color-text-secondary: #5f5e5a;
+				--color-text-tertiary: #888780;
+				--color-text-info: #185fa5;
+				--color-text-success: #3b6d11;
+				--color-text-warning: #854f0b;
+				--color-text-danger: #a32d2d;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.25);
+				--color-border-info: #185fa5;
+				--color-border-success: #3b6d11;
+				--color-border-warning: #854f0b;
+				--color-border-danger: #a32d2d;
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--font-sans: system-ui, -apple-system, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: var(--font-sans);
+				background: var(--color-background-tertiary);
+				padding: 1.5rem;
+			}
+			.scene {
+				background: var(--color-background-tertiary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.5rem;
+				max-width: 480px;
+				margin: 0 auto;
+			}
+			.steps {
+				display: flex;
+				gap: 6px;
+				margin-bottom: 1.25rem;
+				align-items: center;
+			}
+			.step-dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: rgba(0, 0, 0, 0.2);
+			}
+			.step-dot.active {
+				background: var(--color-text-primary);
+			}
+			.step-dot.done {
+				background: var(--color-text-secondary);
+			}
+			.step-label {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-left: 4px;
+			}
+			.modal {
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				max-width: 380px;
+				margin: 0 auto;
+				overflow: hidden;
+			}
+			.modal-tabs {
+				display: flex;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.modal-tab {
+				flex: 1;
+				padding: 12px 14px;
+				cursor: pointer;
+				border-bottom: 2px solid transparent;
+				margin-bottom: -0.5px;
+			}
+			.modal-tab.active {
+				border-bottom-color: var(--color-text-primary);
+			}
+			.tab-name {
+				font-size: 14px;
+				font-weight: 500;
+				color: var(--color-text-secondary);
+			}
+			.modal-tab.active .tab-name {
+				color: var(--color-text-primary);
+			}
+			.tab-sub {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 1px;
+			}
+			.modal-tab.active .tab-sub {
+				color: var(--color-text-secondary);
+			}
+			.body {
+				padding: 1.25rem;
+			}
+			.taf {
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				padding: 10px 12px;
+			}
+			.taf-top {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 6px;
+			}
+			.taf-label {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+			}
+			.bal-line {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.taf-main {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.amt-side {
+				flex: 1;
+			}
+			.amt-input {
+				font-size: 20px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				background: none;
+				border: none;
+				outline: none;
+				width: 100%;
+				font-family: var(--font-sans);
+			}
+			.amt-fiat {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 2px;
+			}
+			.tok-pill {
+				display: flex;
+				align-items: center;
+				gap: 5px;
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: 20px;
+				padding: 4px 8px 4px 6px;
+				cursor: pointer;
+				flex-shrink: 0;
+			}
+			.tok-dot {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 9px;
+				font-weight: 500;
+				color: var(--color-text-info);
+			}
+			.tok-dot-u {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.tok-sym {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.flip-row {
+				display: flex;
+				justify-content: center;
+				margin: -2px 0;
+				position: relative;
+				z-index: 1;
+			}
+			.flip-btn {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				color: var(--color-text-secondary);
+				font-size: 14px;
+			}
+			.price-section {
+				border-radius: var(--border-radius-md);
+				padding: 10px 12px;
+				margin-top: 8px;
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-tertiary);
+			}
+			.price-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 8px;
+			}
+			.price-lbl {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+			}
+			.price-lbl strong {
+				color: var(--color-text-primary);
+				font-weight: 500;
+			}
+			.price-controls {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+			}
+			.preset-link {
+				font-size: 11px;
+				color: var(--color-text-info);
+				cursor: pointer;
+				text-decoration: underline;
+				text-underline-offset: 2px;
+				user-select: none;
+			}
+			.preset-link.ap {
+				font-weight: 500;
+				text-decoration: none;
+				color: var(--color-text-primary);
+			}
+			.preset-sep {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.icon-btn {
+				width: 22px;
+				height: 22px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				color: var(--color-text-secondary);
+				font-size: 12px;
+				flex-shrink: 0;
+			}
+			.icon-btn.locked {
+				border-color: var(--color-border-info);
+				color: var(--color-text-info);
+				background: var(--color-background-info);
+			}
+			.price-value-row {
+				display: flex;
+				align-items: baseline;
+				justify-content: space-between;
+				margin-bottom: 4px;
+			}
+			.price-input {
+				font-size: 20px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				background: none;
+				border: none;
+				outline: none;
+				font-family: var(--font-sans);
+				width: 120px;
+			}
+			.price-unit {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+				margin-left: 4px;
+			}
+			.diff {
+				font-size: 13px;
+				font-weight: 500;
+				padding: 2px 8px;
+				border-radius: 4px;
+			}
+			.diff-pos {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.diff-neg {
+				background: var(--color-background-warning);
+				color: var(--color-text-warning);
+			}
+			.diff-danger {
+				background: var(--color-background-danger);
+				color: var(--color-text-danger);
+			}
+			.price-ctx {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.warn-box {
+				border-radius: var(--border-radius-md);
+				padding: 8px 10px;
+				margin-top: 6px;
+				font-size: 11px;
+				line-height: 1.5;
+				display: flex;
+				align-items: flex-start;
+				gap: 6px;
+			}
+			.warn-box.amber {
+				background: var(--color-background-warning);
+				color: var(--color-text-warning);
+			}
+			.warn-box.red {
+				background: var(--color-background-danger);
+				color: var(--color-text-danger);
+			}
+			.lock-hint {
+				font-size: 11px;
+				color: var(--color-text-info);
+				margin-top: 5px;
+				display: none;
+			}
+			.prov-row {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 7px 10px;
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-info);
+				background: var(--color-background-info);
+				margin-top: 8px;
+			}
+			.prov-dot {
+				width: 18px;
+				height: 18px;
+				border-radius: 4px;
+				background: var(--color-background-success);
+				flex-shrink: 0;
+			}
+			.prov-name {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-info);
+				flex: 1;
+			}
+			.prov-detail {
+				font-size: 11px;
+				color: var(--color-text-info);
+			}
+			.slip-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 8px 10px;
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				margin-top: 8px;
+				font-size: 12px;
+			}
+			.btn-group {
+				display: flex;
+				gap: 8px;
+				margin-top: 12px;
+			}
+			.btn {
+				flex: 1;
+				padding: 10px;
+				border-radius: var(--border-radius-md);
+				font-size: 14px;
+				font-weight: 500;
+				cursor: pointer;
+				font-family: var(--font-sans);
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				color: var(--color-text-primary);
+			}
+			.btn-primary {
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				border-color: transparent;
+			}
+			.btn-primary:disabled {
+				opacity: 0.35;
+				cursor: default;
+			}
+			.hero-rows {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				margin-bottom: 1rem;
+			}
+			.hero-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 10px 12px;
+				background: var(--color-background-secondary);
+				border-radius: var(--border-radius-md);
+			}
+			.hero-token {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.hero-sym {
+				font-size: 14px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.hero-amount {
+				font-size: 15px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.hero-fiat-sm {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				text-align: right;
+			}
+			.arrow-row {
+				display: flex;
+				justify-content: center;
+				font-size: 14px;
+				color: var(--color-text-tertiary);
+			}
+			.mv {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 9px 0;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+				font-size: 13px;
+			}
+			.mv.nb {
+				border-bottom: none;
+			}
+			.mv-lbl {
+				color: var(--color-text-secondary);
+			}
+			.mv-val {
+				font-weight: 500;
+				color: var(--color-text-primary);
+				text-align: right;
+			}
+			.mv-sub {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				text-align: right;
+			}
+			.confirm-box {
+				border-radius: var(--border-radius-md);
+				padding: 10px 12px;
+				margin-top: 10px;
+				font-size: 12px;
+				line-height: 1.5;
+			}
+			.confirm-box.amber {
+				background: var(--color-background-warning);
+				border: 0.5px solid var(--color-border-warning);
+				color: var(--color-text-warning);
+			}
+			.confirm-box.red {
+				background: var(--color-background-danger);
+				border: 0.5px solid var(--color-border-danger);
+				color: var(--color-text-danger);
+			}
+			.confirm-check {
+				display: flex;
+				align-items: flex-start;
+				gap: 8px;
+				cursor: pointer;
+				padding-top: 8px;
+				border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+				margin-top: 8px;
+			}
+			.checkbox {
+				width: 18px;
+				height: 18px;
+				border-radius: 4px;
+				border: 0.5px solid currentColor;
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-shrink: 0;
+				margin-top: 1px;
+				font-size: 12px;
+			}
+			.modal-title {
+				font-size: 15px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				margin-bottom: 1.25rem;
+			}
+			.prog-steps {
+				display: flex;
+				flex-direction: column;
+				gap: 14px;
+				padding: 1rem 0;
+			}
+			.prog-step {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			.prog-dot {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-secondary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 13px;
+				flex-shrink: 0;
+			}
+			.prog-dot.active {
+				background: var(--color-background-warning);
+				border-color: var(--color-border-warning);
+				color: var(--color-text-warning);
+			}
+			.prog-dot.done {
+				background: var(--color-background-success);
+				border-color: var(--color-border-success);
+				color: var(--color-text-success);
+			}
+			.prog-dot.pending {
+				background: var(--color-background-secondary);
+				color: var(--color-text-tertiary);
+			}
+			.prog-lbl {
+				font-size: 13px;
+				color: var(--color-text-primary);
+			}
+			.prog-sub {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			@keyframes spin {
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(360deg);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="scene">
+			<div class="steps">
+				<div class="step-dot active" id="d1"></div>
+				<div class="step-dot" id="d2"></div>
+				<div class="step-dot" id="d3"></div>
+				<span class="step-label" id="step-lbl">Form</span>
+			</div>
 
-  <div id="s-form">
-    <div class="modal">
-      <div class="modal-tabs">
-        <div class="modal-tab" id="t-swap" onclick="setTab('swap')"><div class="tab-name">Swap</div><div class="tab-sub">Executes now at market price</div></div>
-        <div class="modal-tab active" id="t-lo" onclick="setTab('lo')"><div class="tab-name">Limit order</div><div class="tab-sub">Executes at your target price</div></div>
-      </div>
-      <div class="body">
-        <div class="taf">
-          <div class="taf-top"><span class="taf-label">You sell</span><span class="bal-line">250 ICP on DEX · 80 ICP in wallet</span></div>
-          <div class="taf-main"><div class="amt-side"><input class="amt-input" id="ip" type="text" value="100" oninput="onPay()"><div class="amt-fiat" id="fp">≈ $269.00</div></div><div class="tok-pill"><div class="tok-dot">ICP</div><span class="tok-sym">ICP</span><i class="ti ti-chevron-down" style="font-size:11px;color:var(--color-text-tertiary)"></i></div></div>
-        </div>
-        <div class="flip-row"><div class="flip-btn"><i class="ti ti-arrows-down-up"></i></div></div>
-        <div class="taf" style="margin-top:4px;">
-          <div class="taf-top"><span class="taf-label">You buy</span></div>
-          <div class="taf-main"><div class="amt-side"><input class="amt-input" id="ig" type="text" value="275.00" oninput="onGet()"><div class="amt-fiat" id="fg">≈ $275.00</div></div><div class="tok-pill"><div class="tok-dot tok-dot-u">USD</div><span class="tok-sym">ckUSDC</span><i class="ti ti-chevron-down" style="font-size:11px;color:var(--color-text-tertiary)"></i></div></div>
-        </div>
-        <div id="lo-sec">
-          <div class="price-section" id="psec">
-            <div class="price-header">
-              <span class="price-lbl" id="plbl">When 1 <strong>ICP</strong> reaches</span>
-              <div class="price-controls">
-                <span class="preset-link" id="ps" onclick="setP('spot')">Spot</span><span class="preset-sep">·</span>
-                <span class="preset-link" id="p1" onclick="setP(1)">+1%</span><span class="preset-sep">·</span>
-                <span class="preset-link" id="p5" onclick="setP(5)">+5%</span>
-                <div class="icon-btn" onclick="toggleRecip()"><i class="ti ti-switch-horizontal"></i></div>
-                <div class="icon-btn" id="lbtn" onclick="toggleLock()"><i class="ti ti-lock-open" id="lico"></i></div>
-              </div>
-            </div>
-            <div class="price-value-row">
-              <div style="display:flex;align-items:baseline;gap:4px;"><input class="price-input" id="ipr" type="text" value="2.75" oninput="onPrice()"><span class="price-unit" id="punit">ckUSDC / ICP</span></div>
-              <span class="diff diff-pos" id="dbadge">+2.23%</span>
-            </div>
-            <div class="price-ctx" id="pctx">market 2.69 ckUSDC / ICP</div>
-            <div class="warn-box amber" id="wbox" style="display:none;"><i class="ti ti-alert-triangle" style="font-size:13px;flex-shrink:0;margin-top:1px;"></i><span>This price is below market — your order will fill almost immediately. You'll receive approximately <strong id="wloss"></strong> less than at market price.</span></div>
-            <div class="lock-hint" id="lhint">Price pinned — changing receive amount updates what you pay</div>
-          </div>
-        </div>
-        <div id="swap-sec" style="display:none;"><div class="slip-row"><span style="color:var(--color-text-secondary)">Max slippage</span><span style="font-weight:500;">1.5% ›</span></div></div>
-        <div id="lo-prov" style="margin-top:8px;border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);background:var(--color-background-info);overflow:hidden;">
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;" onclick="toggleProvFees()">
-            <div class="prov-dot"></div>
-            <span style="font-size:13px;font-weight:500;color:var(--color-text-info);flex:1;" id="pname">OISY DEX</span>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;">
-              <span style="font-size:10px;color:var(--color-text-info);opacity:.7;">best ask</span>
-              <span style="font-size:11px;font-weight:500;color:var(--color-text-info);" id="pdet">2.70 ckUSDC / ICP</span>
-            </div>
-            <i class="ti ti-chevron-down" id="prov-icon" style="font-size:12px;color:var(--color-text-info);margin-left:4px;transition:transform .2s;"></i>
-          </div>
-          <div id="prov-fees" style="display:none;border-top:0.5px solid rgba(24,95,165,.2);">
-            <div style="display:flex;justify-content:space-between;padding:7px 10px;font-size:12px;border-bottom:0.5px solid rgba(24,95,165,.1);">
-              <span style="color:var(--color-text-info);opacity:.8;">Maker fee</span>
-              <span style="font-weight:500;color:var(--color-text-success);">No fee</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding:7px 10px;font-size:12px;">
-              <span style="color:var(--color-text-info);opacity:.8;">Taker fee</span>
-              <span style="font-weight:500;color:var(--color-text-info);">0.05% (5 bps)</span>
-            </div>
-          </div>
-        </div>
-        <div id="swap-prov" class="prov-row" style="display:none;"><div class="prov-dot"></div><span class="prov-name">KongSwap</span><span class="prov-detail">best rate</span></div>
-        <div class="btn-group"><button class="btn">Cancel</button><button class="btn btn-primary" onclick="goReview()">Review</button></div>
-      </div>
-    </div>
-  </div>
+			<div id="s-form">
+				<div class="modal">
+					<div class="modal-tabs">
+						<div class="modal-tab" id="t-swap" onclick="setTab('swap')">
+							<div class="tab-name">Swap</div>
+							<div class="tab-sub">Executes now at market price</div>
+						</div>
+						<div class="modal-tab active" id="t-lo" onclick="setTab('lo')">
+							<div class="tab-name">Limit order</div>
+							<div class="tab-sub">Executes at your target price</div>
+						</div>
+					</div>
+					<div class="body">
+						<div class="taf">
+							<div class="taf-top">
+								<span class="taf-label">You sell</span
+								><span class="bal-line">250 ICP on DEX · 80 ICP in wallet</span>
+							</div>
+							<div class="taf-main">
+								<div class="amt-side">
+									<input class="amt-input" id="ip" type="text" value="100" oninput="onPay()" />
+									<div class="amt-fiat" id="fp">≈ $269.00</div>
+								</div>
+								<div class="tok-pill">
+									<div class="tok-dot">ICP</div>
+									<span class="tok-sym">ICP</span
+									><i
+										class="ti ti-chevron-down"
+										style="font-size: 11px; color: var(--color-text-tertiary)"
+									></i>
+								</div>
+							</div>
+						</div>
+						<div class="flip-row">
+							<div class="flip-btn"><i class="ti ti-arrows-down-up"></i></div>
+						</div>
+						<div class="taf" style="margin-top: 4px">
+							<div class="taf-top"><span class="taf-label">You buy</span></div>
+							<div class="taf-main">
+								<div class="amt-side">
+									<input class="amt-input" id="ig" type="text" value="275.00" oninput="onGet()" />
+									<div class="amt-fiat" id="fg">≈ $275.00</div>
+								</div>
+								<div class="tok-pill">
+									<div class="tok-dot tok-dot-u">USD</div>
+									<span class="tok-sym">ckUSDC</span
+									><i
+										class="ti ti-chevron-down"
+										style="font-size: 11px; color: var(--color-text-tertiary)"
+									></i>
+								</div>
+							</div>
+						</div>
+						<div id="lo-sec">
+							<div class="price-section" id="psec">
+								<div class="price-header">
+									<span class="price-lbl" id="plbl">When 1 <strong>ICP</strong> reaches</span>
+									<div class="price-controls">
+										<span class="preset-link" id="ps" onclick="setP('spot')">Spot</span
+										><span class="preset-sep">·</span>
+										<span class="preset-link" id="p1" onclick="setP(1)">+1%</span
+										><span class="preset-sep">·</span>
+										<span class="preset-link" id="p5" onclick="setP(5)">+5%</span>
+										<div class="icon-btn" onclick="toggleRecip()">
+											<i class="ti ti-switch-horizontal"></i>
+										</div>
+										<div class="icon-btn" id="lbtn" onclick="toggleLock()">
+											<i class="ti ti-lock-open" id="lico"></i>
+										</div>
+									</div>
+								</div>
+								<div class="price-value-row">
+									<div style="display: flex; align-items: baseline; gap: 4px">
+										<input
+											class="price-input"
+											id="ipr"
+											type="text"
+											value="2.75"
+											oninput="onPrice()"
+										/><span class="price-unit" id="punit">ckUSDC / ICP</span>
+									</div>
+									<span class="diff diff-pos" id="dbadge">+2.23%</span>
+								</div>
+								<div class="price-ctx" id="pctx">market 2.69 ckUSDC / ICP</div>
+								<div class="warn-box amber" id="wbox" style="display: none">
+									<i
+										class="ti ti-alert-triangle"
+										style="font-size: 13px; flex-shrink: 0; margin-top: 1px"
+									></i
+									><span
+										>This price is below market — your order will fill almost immediately. You'll
+										receive approximately <strong id="wloss"></strong> less than at market
+										price.</span
+									>
+								</div>
+								<div class="lock-hint" id="lhint">
+									Price pinned — changing receive amount updates what you pay
+								</div>
+							</div>
+						</div>
+						<div id="swap-sec" style="display: none">
+							<div class="slip-row">
+								<span style="color: var(--color-text-secondary)">Max slippage</span
+								><span style="font-weight: 500">1.5% ›</span>
+							</div>
+						</div>
+						<div
+							id="lo-prov"
+							style="
+								margin-top: 8px;
+								border: 0.5px solid var(--color-border-info);
+								border-radius: var(--border-radius-md);
+								background: var(--color-background-info);
+								overflow: hidden;
+							"
+						>
+							<div
+								style="
+									display: flex;
+									align-items: center;
+									gap: 8px;
+									padding: 8px 10px;
+									cursor: pointer;
+								"
+								onclick="toggleProvFees()"
+							>
+								<div class="prov-dot"></div>
+								<span
+									style="font-size: 13px; font-weight: 500; color: var(--color-text-info); flex: 1"
+									id="pname"
+									>OISY DEX</span
+								>
+								<div style="display: flex; flex-direction: column; align-items: flex-end">
+									<span style="font-size: 10px; color: var(--color-text-info); opacity: 0.7"
+										>best ask</span
+									>
+									<span
+										style="font-size: 11px; font-weight: 500; color: var(--color-text-info)"
+										id="pdet"
+										>2.70 ckUSDC / ICP</span
+									>
+								</div>
+								<i
+									class="ti ti-chevron-down"
+									id="prov-icon"
+									style="
+										font-size: 12px;
+										color: var(--color-text-info);
+										margin-left: 4px;
+										transition: transform 0.2s;
+									"
+								></i>
+							</div>
+							<div
+								id="prov-fees"
+								style="display: none; border-top: 0.5px solid rgba(24, 95, 165, 0.2)"
+							>
+								<div
+									style="
+										display: flex;
+										justify-content: space-between;
+										padding: 7px 10px;
+										font-size: 12px;
+										border-bottom: 0.5px solid rgba(24, 95, 165, 0.1);
+									"
+								>
+									<span style="color: var(--color-text-info); opacity: 0.8">Maker fee</span>
+									<span style="font-weight: 500; color: var(--color-text-success)">No fee</span>
+								</div>
+								<div
+									style="
+										display: flex;
+										justify-content: space-between;
+										padding: 7px 10px;
+										font-size: 12px;
+									"
+								>
+									<span style="color: var(--color-text-info); opacity: 0.8">Taker fee</span>
+									<span style="font-weight: 500; color: var(--color-text-info)">0.05% (5 bps)</span>
+								</div>
+							</div>
+						</div>
+						<div id="swap-prov" class="prov-row" style="display: none">
+							<div class="prov-dot"></div>
+							<span class="prov-name">KongSwap</span><span class="prov-detail">best rate</span>
+						</div>
+						<div class="btn-group">
+							<button class="btn">Cancel</button
+							><button class="btn btn-primary" onclick="goReview()">Review</button>
+						</div>
+					</div>
+				</div>
+			</div>
 
-  <div id="s-review" style="display:none;">
-    <div class="modal"><div class="body">
-      <div class="modal-title">Review limit order</div>
-      <div class="hero-rows">
-        <div class="hero-row"><div class="hero-token"><div class="tok-dot">ICP</div><span class="hero-sym">ICP</span></div><div style="text-align:right;"><div style="font-size:11px;color:var(--color-text-tertiary);">You sell</div><div class="hero-amount" id="rpa">100 ICP</div><div class="hero-fiat-sm" id="rpf">$269.00</div></div></div>
-        <div class="arrow-row"><i class="ti ti-arrow-down"></i></div>
-        <div class="hero-row"><div class="hero-token"><div class="tok-dot tok-dot-u">USD</div><span class="hero-sym">ckUSDC</span></div><div style="text-align:right;"><div style="font-size:11px;color:var(--color-text-tertiary);">You buy</div><div class="hero-amount" id="rga">275.00 ckUSDC</div><div class="hero-fiat-sm" id="rgf">$275.00</div></div></div>
-      </div>
-      <div class="mv"><span class="mv-lbl">Limit price</span><div><div class="mv-val" id="rpr">2.75 ckUSDC / ICP</div><div class="mv-sub">market 2.69 (oisy price feed)</div></div></div>
-      <div class="mv"><span class="mv-lbl">Value difference</span><span class="diff diff-pos" id="rdf">+2.23%</span></div>
-      <div class="mv"><span class="mv-lbl">DEX</span><span class="mv-val">OISY DEX</span></div>
-      <div style="border-bottom:0.5px solid var(--color-border-tertiary);">
-        <div class="mv nb" style="padding-bottom:0;">
-          <span class="mv-lbl" style="display:flex;align-items:center;gap:5px;">Fee (maker / taker) <span onclick="toggleFeeTip()" style="width:16px;height:16px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--color-text-tertiary);cursor:pointer;">?</span></span>
-          <span class="mv-val">0% / 0.05%</span>
-        </div>
-        <div id="fee-tip" style="display:none;font-size:11px;color:var(--color-text-secondary);background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px;margin:4px 0 8px;line-height:1.5;">Fees are deducted from your proceeds at fill time. Whether your order fills as maker or taker depends on the order book state at execution and cannot be predicted. <span style="color:var(--color-text-info);text-decoration:underline;cursor:pointer;">Learn more ↗</span></div>
-      </div>
-      <div class="confirm-box amber" id="rbox" style="display:none;margin-top:10px;">
-        <div><i class="ti ti-alert-triangle" style="font-size:12px;margin-right:4px;"></i>The specified price is below market — your order will fill almost immediately. You'll receive approximately <strong id="rloss"></strong> less than at market price.</div>
-        <div id="rchkrow" style="display:none;" class="confirm-check" onclick="toggleChk()"><div class="checkbox" id="rchk"></div><span style="font-size:11px;line-height:1.4;">I understand I will receive considerably less than market value.</span></div>
-      </div>
-      <div class="btn-group"><button class="btn" onclick="goStep('form')"><i class="ti ti-arrow-left"></i> Back</button><button class="btn btn-primary" id="rconf" onclick="goStep('progress')">Place order</button></div>
-    </div></div>
-  </div>
+			<div id="s-review" style="display: none">
+				<div class="modal">
+					<div class="body">
+						<div class="modal-title">Review limit order</div>
+						<div class="hero-rows">
+							<div class="hero-row">
+								<div class="hero-token">
+									<div class="tok-dot">ICP</div>
+									<span class="hero-sym">ICP</span>
+								</div>
+								<div style="text-align: right">
+									<div style="font-size: 11px; color: var(--color-text-tertiary)">You sell</div>
+									<div class="hero-amount" id="rpa">100 ICP</div>
+									<div class="hero-fiat-sm" id="rpf">$269.00</div>
+								</div>
+							</div>
+							<div class="arrow-row"><i class="ti ti-arrow-down"></i></div>
+							<div class="hero-row">
+								<div class="hero-token">
+									<div class="tok-dot tok-dot-u">USD</div>
+									<span class="hero-sym">ckUSDC</span>
+								</div>
+								<div style="text-align: right">
+									<div style="font-size: 11px; color: var(--color-text-tertiary)">You buy</div>
+									<div class="hero-amount" id="rga">275.00 ckUSDC</div>
+									<div class="hero-fiat-sm" id="rgf">$275.00</div>
+								</div>
+							</div>
+						</div>
+						<div class="mv">
+							<span class="mv-lbl">Limit price</span>
+							<div>
+								<div class="mv-val" id="rpr">2.75 ckUSDC / ICP</div>
+								<div class="mv-sub">market 2.69 (oisy price feed)</div>
+							</div>
+						</div>
+						<div class="mv">
+							<span class="mv-lbl">Value difference</span
+							><span class="diff diff-pos" id="rdf">+2.23%</span>
+						</div>
+						<div class="mv">
+							<span class="mv-lbl">DEX</span><span class="mv-val">OISY DEX</span>
+						</div>
+						<div style="border-bottom: 0.5px solid var(--color-border-tertiary)">
+							<div class="mv nb" style="padding-bottom: 0">
+								<span class="mv-lbl" style="display: flex; align-items: center; gap: 5px"
+									>Fee (maker / taker)
+									<span
+										onclick="toggleFeeTip()"
+										style="
+											width: 16px;
+											height: 16px;
+											border-radius: 50%;
+											border: 0.5px solid var(--color-border-secondary);
+											background: var(--color-background-secondary);
+											display: inline-flex;
+											align-items: center;
+											justify-content: center;
+											font-size: 10px;
+											color: var(--color-text-tertiary);
+											cursor: pointer;
+										"
+										>?</span
+									></span
+								>
+								<span class="mv-val">0% / 0.05%</span>
+							</div>
+							<div
+								id="fee-tip"
+								style="
+									display: none;
+									font-size: 11px;
+									color: var(--color-text-secondary);
+									background: var(--color-background-secondary);
+									border-radius: var(--border-radius-md);
+									padding: 8px 10px;
+									margin: 4px 0 8px;
+									line-height: 1.5;
+								"
+							>
+								Fees are deducted from your proceeds at fill time. Whether your order fills as maker
+								or taker depends on the order book state at execution and cannot be predicted.
+								<span
+									style="color: var(--color-text-info); text-decoration: underline; cursor: pointer"
+									>Learn more ↗</span
+								>
+							</div>
+						</div>
+						<div class="confirm-box amber" id="rbox" style="display: none; margin-top: 10px">
+							<div>
+								<i class="ti ti-alert-triangle" style="font-size: 12px; margin-right: 4px"></i>The
+								specified price is below market — your order will fill almost immediately. You'll
+								receive approximately <strong id="rloss"></strong> less than at market price.
+							</div>
+							<div id="rchkrow" style="display: none" class="confirm-check" onclick="toggleChk()">
+								<div class="checkbox" id="rchk"></div>
+								<span style="font-size: 11px; line-height: 1.4"
+									>I understand I will receive considerably less than market value.</span
+								>
+							</div>
+						</div>
+						<div class="btn-group">
+							<button class="btn" onclick="goStep('form')">
+								<i class="ti ti-arrow-left"></i> Back</button
+							><button class="btn btn-primary" id="rconf" onclick="goStep('progress')">
+								Place order
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
 
-  <div id="s-progress" style="display:none;">
-    <div class="modal"><div class="body">
-      <div class="modal-title" id="ptitle">Placing order</div>
-      <div class="prog-steps">
-        <div class="prog-step"><div class="prog-dot active" id="pp1"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i></div><div><div class="prog-lbl">Submitting order</div><div class="prog-sub">Sending limit order to OISY DEX</div></div></div>
-        <div class="prog-step"><div class="prog-dot pending" id="pp2"><i class="ti ti-check"></i></div><div><div class="prog-lbl" id="pp2l" style="color:var(--color-text-tertiary)">Done</div></div></div>
-      </div>
-    </div></div>
-  </div>
-</div>
+			<div id="s-progress" style="display: none">
+				<div class="modal">
+					<div class="body">
+						<div class="modal-title" id="ptitle">Placing order</div>
+						<div class="prog-steps">
+							<div class="prog-step">
+								<div class="prog-dot active" id="pp1">
+									<i class="ti ti-loader-2" style="animation: spin 1s linear infinite"></i>
+								</div>
+								<div>
+									<div class="prog-lbl">Submitting order</div>
+									<div class="prog-sub">Sending limit order to OISY DEX</div>
+								</div>
+							</div>
+							<div class="prog-step">
+								<div class="prog-dot pending" id="pp2"><i class="ti ti-check"></i></div>
+								<div>
+									<div class="prog-lbl" id="pp2l" style="color: var(--color-text-tertiary)">
+										Done
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-<script>
-const MKT=2.69; let isR=false,locked=false,chk=false,ap=null;
-const g=id=>document.getElementById(id);
-const fmt=(n,d)=>isNaN(n)?'0':parseFloat(n.toFixed(d)).toString();
-function pib(){const r=parseFloat(g('ipr').value)||0;return isR?(r>0?1/r:0):r;}
-function diff(pay,get){const s=pay*MKT,u=get;return s>0?((u-s)/s)*100:0;}
-function loss(pay,get){return Math.abs(get-(pay*MKT)).toFixed(2);}
-function upd(){
-  const pay=parseFloat(g('ip').value)||0,get=parseFloat(g('ig').value)||0,pb=pib(),d=diff(pay,get);
-  g('fp').textContent='≈ $'+fmt(pay*MKT,2);g('fg').textContent='≈ $'+fmt(get,2);
-  const db=g('dbadge');db.textContent=(d>=0?'+':'')+d.toFixed(2)+'%';
-  db.className='diff '+(d>=0?'diff-pos':d>=-5?'diff-neg':'diff-danger');
-  updLbl(pb,pay,get,d);
-}
-function updLbl(pb,pay,get,d){
-  const wb=g('wbox'),lbl=g('plbl'),ctx=g('pctx'),psec=g('psec');
-  g('wloss').textContent='$'+loss(pay,get);
-  if(!isR){
-    g('punit').textContent='ckUSDC / ICP';ctx.textContent='market '+MKT.toFixed(2)+' ckUSDC / ICP';
-    if(pb>=MKT){lbl.innerHTML='When 1 <strong>ICP</strong> reaches';wb.style.display='none';psec.style.borderColor='';}
-    else{lbl.innerHTML='When 1 <strong>ICP</strong> is at least';wb.style.display='flex';wb.className='warn-box '+(d>=-5?'amber':'red');psec.style.borderColor=d>=-5?'var(--color-border-warning)':'var(--color-border-danger)';}
-  }else{
-    const mr=1/MKT,dp=pb>0?1/pb:0;
-    g('punit').textContent='ICP / ckUSDC';ctx.textContent='market '+mr.toFixed(6)+' ICP / ckUSDC';
-    if(dp<=mr){lbl.innerHTML='When 1 <strong>ckUSDC</strong> dropped to';wb.style.display='none';psec.style.borderColor='';}
-    else{lbl.innerHTML='When 1 <strong>ckUSDC</strong> is at most';wb.style.display='flex';wb.className='warn-box '+(d>=-5?'amber':'red');psec.style.borderColor=d>=-5?'var(--color-border-warning)':'var(--color-border-danger)';}
-  }
-}
-function onPay(){const pay=parseFloat(g('ip').value)||0;g('ig').value=fmt(pay*pib(),2);ap=null;updP();upd();}
-function onGet(){
-  const pay=parseFloat(g('ip').value)||0,get=parseFloat(g('ig').value)||0;
-  if(locked){const pb=pib();g('ip').value=pb>0?fmt(get/pb,4):'0';}
-  else{const pb=pay>0?get/pay:0;g('ipr').value=isR?(pb>0?fmt(1/pb,6):'0'):fmt(pb,4);ap=null;updP();}
-  upd();
-}
-function onPrice(){const pay=parseFloat(g('ip').value)||0;g('ig').value=fmt(pay*pib(),2);ap=null;updP();upd();}
-function setP(v){ap=v;updP();const pb=v==='spot'?MKT:MKT*(1+v/100);g('ipr').value=isR?fmt(1/pb,6):fmt(pb,4);g('ig').value=fmt((parseFloat(g('ip').value)||0)*pb,2);upd();}
-function updP(){['ps','p1','p5'].forEach((id,i)=>{const v=i===0?'spot':i;g(id).className='preset-link'+(ap===v?' ap':'');});}
-function toggleRecip(){const r=parseFloat(g('ipr').value)||0;const pb=isR?(r>0?1/r:0):r;isR=!isR;g('ipr').value=isR?fmt(1/pb,6):fmt(pb,4);upd();}
-function toggleLock(){locked=!locked;g('lbtn').className=locked?'icon-btn locked':'icon-btn';g('lico').className=locked?'ti ti-lock':'ti ti-lock-open';g('lhint').style.display=locked?'block':'none';}
-function toggleProvFees(){const f=g('prov-fees'),i=g('prov-icon');const open=f.style.display==='none';f.style.display=open?'block':'none';i.style.transform=open?'rotate(180deg)':'';}
-function toggleFeeTip(){const t=g('fee-tip');t.style.display=t.style.display==='none'?'block':'none';}
-function setTab(t){g('t-swap').className='modal-tab'+(t==='swap'?' active':'');g('t-lo').className='modal-tab'+(t==='lo'?' active':'');g('lo-sec').style.display=t==='lo'?'block':'none';g('swap-sec').style.display=t==='swap'?'block':'none';g('lo-prov').style.display=t==='lo'?'block':'none';g('swap-prov').style.display=t==='swap'?'block':'none';if(t==='swap'){g('ig').value=fmt((parseFloat(g('ip').value)||0)*MKT*0.9986,2);}else{g('ig').value=fmt((parseFloat(g('ip').value)||0)*pib(),2);}upd();}
-function goReview(){
-  const pay=parseFloat(g('ip').value)||0,get=parseFloat(g('ig').value)||0;
-  const d=diff(pay,get),l=loss(pay,get),pr=g('ipr').value+' '+g('punit').textContent;
-  g('rpa').textContent=pay+' ICP';g('rpf').textContent='$'+fmt(pay*MKT,2);
-  g('rga').textContent=get+' ckUSDC';g('rgf').textContent='$'+fmt(get,2);
-  g('rpr').textContent=pr;
-  const rd=g('rdf');rd.textContent=(d>=0?'+':'')+d.toFixed(2)+'%';rd.className='diff '+(d>=0?'diff-pos':d>=-5?'diff-neg':'diff-danger');
-  const sw=d<0,sc=d<-5;
-  g('rbox').style.display=sw?'block':'none';g('rbox').className=d>=-5?'confirm-box amber':'confirm-box red';
-  g('rloss').textContent='$'+l;g('rchkrow').style.display=sc?'flex':'none';
-  chk=false;g('rchk').textContent='';g('rconf').disabled=sc;
-  goStep('review');
-}
-function toggleChk(){chk=!chk;g('rchk').textContent=chk?'✓':'';g('rconf').disabled=!chk;}
-function goStep(s){
-  ['form','review','progress'].forEach(x=>g('s-'+x).style.display='none');g('s-'+s).style.display='block';
-  const nums={form:1,review:2,progress:3},labels={form:'Form',review:'Review',progress:'Placing order'};
-  g('step-lbl').textContent=labels[s];
-  [1,2,3].forEach(i=>{const n=nums[s];g('d'+i).className='step-dot'+(i===n?' active':i<n?' done':'');});
-  if(s==='progress')setTimeout(()=>{g('pp1').className='prog-dot done';g('pp1').innerHTML='<i class="ti ti-check"></i>';g('pp2').className='prog-dot done';g('pp2l').style.color='var(--color-text-success)';g('ptitle').textContent='Order placed';},2000);
-}
-setP(1);
-</script>
-</body>
+		<script>
+			const MKT = 2.69;
+			let isR = false,
+				locked = false,
+				chk = false,
+				ap = null;
+			const g = (id) => document.getElementById(id);
+			const fmt = (n, d) => (isNaN(n) ? '0' : parseFloat(n.toFixed(d)).toString());
+			function pib() {
+				const r = parseFloat(g('ipr').value) || 0;
+				return isR ? (r > 0 ? 1 / r : 0) : r;
+			}
+			function diff(pay, get) {
+				const s = pay * MKT,
+					u = get;
+				return s > 0 ? ((u - s) / s) * 100 : 0;
+			}
+			function loss(pay, get) {
+				return Math.abs(get - pay * MKT).toFixed(2);
+			}
+			function upd() {
+				const pay = parseFloat(g('ip').value) || 0,
+					get = parseFloat(g('ig').value) || 0,
+					pb = pib(),
+					d = diff(pay, get);
+				g('fp').textContent = '≈ $' + fmt(pay * MKT, 2);
+				g('fg').textContent = '≈ $' + fmt(get, 2);
+				const db = g('dbadge');
+				db.textContent = (d >= 0 ? '+' : '') + d.toFixed(2) + '%';
+				db.className = 'diff ' + (d >= 0 ? 'diff-pos' : d >= -5 ? 'diff-neg' : 'diff-danger');
+				updLbl(pb, pay, get, d);
+			}
+			function updLbl(pb, pay, get, d) {
+				const wb = g('wbox'),
+					lbl = g('plbl'),
+					ctx = g('pctx'),
+					psec = g('psec');
+				g('wloss').textContent = '$' + loss(pay, get);
+				if (!isR) {
+					g('punit').textContent = 'ckUSDC / ICP';
+					ctx.textContent = 'market ' + MKT.toFixed(2) + ' ckUSDC / ICP';
+					if (pb >= MKT) {
+						lbl.innerHTML = 'When 1 <strong>ICP</strong> reaches';
+						wb.style.display = 'none';
+						psec.style.borderColor = '';
+					} else {
+						lbl.innerHTML = 'When 1 <strong>ICP</strong> is at least';
+						wb.style.display = 'flex';
+						wb.className = 'warn-box ' + (d >= -5 ? 'amber' : 'red');
+						psec.style.borderColor =
+							d >= -5 ? 'var(--color-border-warning)' : 'var(--color-border-danger)';
+					}
+				} else {
+					const mr = 1 / MKT,
+						dp = pb > 0 ? 1 / pb : 0;
+					g('punit').textContent = 'ICP / ckUSDC';
+					ctx.textContent = 'market ' + mr.toFixed(6) + ' ICP / ckUSDC';
+					if (dp <= mr) {
+						lbl.innerHTML = 'When 1 <strong>ckUSDC</strong> dropped to';
+						wb.style.display = 'none';
+						psec.style.borderColor = '';
+					} else {
+						lbl.innerHTML = 'When 1 <strong>ckUSDC</strong> is at most';
+						wb.style.display = 'flex';
+						wb.className = 'warn-box ' + (d >= -5 ? 'amber' : 'red');
+						psec.style.borderColor =
+							d >= -5 ? 'var(--color-border-warning)' : 'var(--color-border-danger)';
+					}
+				}
+			}
+			function onPay() {
+				const pay = parseFloat(g('ip').value) || 0;
+				g('ig').value = fmt(pay * pib(), 2);
+				ap = null;
+				updP();
+				upd();
+			}
+			function onGet() {
+				const pay = parseFloat(g('ip').value) || 0,
+					get = parseFloat(g('ig').value) || 0;
+				if (locked) {
+					const pb = pib();
+					g('ip').value = pb > 0 ? fmt(get / pb, 4) : '0';
+				} else {
+					const pb = pay > 0 ? get / pay : 0;
+					g('ipr').value = isR ? (pb > 0 ? fmt(1 / pb, 6) : '0') : fmt(pb, 4);
+					ap = null;
+					updP();
+				}
+				upd();
+			}
+			function onPrice() {
+				const pay = parseFloat(g('ip').value) || 0;
+				g('ig').value = fmt(pay * pib(), 2);
+				ap = null;
+				updP();
+				upd();
+			}
+			function setP(v) {
+				ap = v;
+				updP();
+				const pb = v === 'spot' ? MKT : MKT * (1 + v / 100);
+				g('ipr').value = isR ? fmt(1 / pb, 6) : fmt(pb, 4);
+				g('ig').value = fmt((parseFloat(g('ip').value) || 0) * pb, 2);
+				upd();
+			}
+			function updP() {
+				['ps', 'p1', 'p5'].forEach((id, i) => {
+					const v = i === 0 ? 'spot' : i;
+					g(id).className = 'preset-link' + (ap === v ? ' ap' : '');
+				});
+			}
+			function toggleRecip() {
+				const r = parseFloat(g('ipr').value) || 0;
+				const pb = isR ? (r > 0 ? 1 / r : 0) : r;
+				isR = !isR;
+				g('ipr').value = isR ? fmt(1 / pb, 6) : fmt(pb, 4);
+				upd();
+			}
+			function toggleLock() {
+				locked = !locked;
+				g('lbtn').className = locked ? 'icon-btn locked' : 'icon-btn';
+				g('lico').className = locked ? 'ti ti-lock' : 'ti ti-lock-open';
+				g('lhint').style.display = locked ? 'block' : 'none';
+			}
+			function toggleProvFees() {
+				const f = g('prov-fees'),
+					i = g('prov-icon');
+				const open = f.style.display === 'none';
+				f.style.display = open ? 'block' : 'none';
+				i.style.transform = open ? 'rotate(180deg)' : '';
+			}
+			function toggleFeeTip() {
+				const t = g('fee-tip');
+				t.style.display = t.style.display === 'none' ? 'block' : 'none';
+			}
+			function setTab(t) {
+				g('t-swap').className = 'modal-tab' + (t === 'swap' ? ' active' : '');
+				g('t-lo').className = 'modal-tab' + (t === 'lo' ? ' active' : '');
+				g('lo-sec').style.display = t === 'lo' ? 'block' : 'none';
+				g('swap-sec').style.display = t === 'swap' ? 'block' : 'none';
+				g('lo-prov').style.display = t === 'lo' ? 'block' : 'none';
+				g('swap-prov').style.display = t === 'swap' ? 'block' : 'none';
+				if (t === 'swap') {
+					g('ig').value = fmt((parseFloat(g('ip').value) || 0) * MKT * 0.9986, 2);
+				} else {
+					g('ig').value = fmt((parseFloat(g('ip').value) || 0) * pib(), 2);
+				}
+				upd();
+			}
+			function goReview() {
+				const pay = parseFloat(g('ip').value) || 0,
+					get = parseFloat(g('ig').value) || 0;
+				const d = diff(pay, get),
+					l = loss(pay, get),
+					pr = g('ipr').value + ' ' + g('punit').textContent;
+				g('rpa').textContent = pay + ' ICP';
+				g('rpf').textContent = '$' + fmt(pay * MKT, 2);
+				g('rga').textContent = get + ' ckUSDC';
+				g('rgf').textContent = '$' + fmt(get, 2);
+				g('rpr').textContent = pr;
+				const rd = g('rdf');
+				rd.textContent = (d >= 0 ? '+' : '') + d.toFixed(2) + '%';
+				rd.className = 'diff ' + (d >= 0 ? 'diff-pos' : d >= -5 ? 'diff-neg' : 'diff-danger');
+				const sw = d < 0,
+					sc = d < -5;
+				g('rbox').style.display = sw ? 'block' : 'none';
+				g('rbox').className = d >= -5 ? 'confirm-box amber' : 'confirm-box red';
+				g('rloss').textContent = '$' + l;
+				g('rchkrow').style.display = sc ? 'flex' : 'none';
+				chk = false;
+				g('rchk').textContent = '';
+				g('rconf').disabled = sc;
+				goStep('review');
+			}
+			function toggleChk() {
+				chk = !chk;
+				g('rchk').textContent = chk ? '✓' : '';
+				g('rconf').disabled = !chk;
+			}
+			function goStep(s) {
+				['form', 'review', 'progress'].forEach((x) => (g('s-' + x).style.display = 'none'));
+				g('s-' + s).style.display = 'block';
+				const nums = { form: 1, review: 2, progress: 3 },
+					labels = { form: 'Form', review: 'Review', progress: 'Placing order' };
+				g('step-lbl').textContent = labels[s];
+				[1, 2, 3].forEach((i) => {
+					const n = nums[s];
+					g('d' + i).className = 'step-dot' + (i === n ? ' active' : i < n ? ' done' : '');
+				});
+				if (s === 'progress')
+					setTimeout(() => {
+						g('pp1').className = 'prog-dot done';
+						g('pp1').innerHTML = '<i class="ti ti-check"></i>';
+						g('pp2').className = 'prog-dot done';
+						g('pp2l').style.color = 'var(--color-text-success)';
+						g('ptitle').textContent = 'Order placed';
+					}, 2000);
+			}
+			setP(1);
+		</script>
+	</body>
 </html>

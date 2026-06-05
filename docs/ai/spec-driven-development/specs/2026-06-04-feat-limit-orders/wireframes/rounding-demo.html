@@ -1,217 +1,576 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lot Size & Tick Size Rounding Demo</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-:root {
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f5f5f3;
-  --color-background-tertiary: #eeede9;
-  --color-background-info: #e6f1fb;
-  --color-background-success: #eaf3de;
-  --color-background-warning: #faeeda;
-  --color-background-danger: #fcebeb;
-  --color-text-primary: #1a1a18;
-  --color-text-secondary: #5f5e5a;
-  --color-text-tertiary: #888780;
-  --color-text-info: #185fa5;
-  --color-text-success: #3b6d11;
-  --color-text-warning: #854f0b;
-  --color-text-danger: #a32d2d;
-  --color-border-tertiary: rgba(0,0,0,0.12);
-  --color-border-secondary: rgba(0,0,0,0.25);
-  --color-border-info: #185fa5;
-  --color-border-success: #3b6d11;
-  --color-border-warning: #854f0b;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --font-sans: system-ui, -apple-system, sans-serif;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); background: var(--color-background-tertiary); padding: 1.5rem; }
-.scene { background: var(--color-background-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem; max-width: 480px; margin: 0 auto; }
-.config { display: flex; gap: 8px; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
-.config-field { display: flex; align-items: center; gap: 6px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 5px 10px; }
-.config-label { font-size: 11px; color: var(--color-text-secondary); }
-.config-input { font-size: 13px; font-weight: 500; color: var(--color-text-primary); background: none; border: none; outline: none; width: 60px; font-family: var(--font-sans); }
-.base-toggle { display: flex; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); overflow: hidden; }
-.base-opt { font-size: 11px; padding: 5px 10px; cursor: pointer; color: var(--color-text-secondary); border: none; background: none; font-family: var(--font-sans); }
-.base-opt.active { background: var(--color-text-primary); color: var(--color-background-primary); }
-.modal { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); max-width: 380px; margin: 0 auto; padding: 1.25rem; }
-.field { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; margin-bottom: 4px; }
-.field-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.field-label { font-size: 12px; color: var(--color-text-secondary); }
-.field-constraint { font-size: 10px; color: var(--color-text-info); font-weight: 500; }
-.field-main { display: flex; align-items: center; gap: 8px; }
-.f-input { font-size: 20px; font-weight: 500; color: var(--color-text-primary); background: none; border: none; outline: none; flex: 1; font-family: var(--font-sans); }
-.f-derived { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
-.tok { display: flex; align-items: center; gap: 5px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: 20px; padding: 4px 10px 4px 6px; flex-shrink: 0; font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
-.tok-dot { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 500; }
-.icp-dot { background: var(--color-background-info); color: var(--color-text-info); }
-.usd-dot { background: var(--color-background-success); color: var(--color-text-success); }
-.flip-row { display: flex; justify-content: center; margin: 2px 0; }
-.flip-btn { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text-secondary); font-size: 14px; }
-.price-sec { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; margin: 4px 0; }
-.price-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.price-lbl { font-size: 12px; color: var(--color-text-secondary); }
-.price-row { display: flex; align-items: baseline; gap: 6px; }
-.p-input { font-size: 20px; font-weight: 500; color: var(--color-text-primary); background: none; border: none; outline: none; width: 140px; font-family: var(--font-sans); }
-.p-unit { font-size: 12px; color: var(--color-text-secondary); }
-.lock-btn { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text-secondary); font-size: 13px; }
-.lock-btn.on { border-color: var(--color-border-info); color: var(--color-text-info); background: var(--color-background-info); }
-.apply-box { background: var(--color-background-warning); border: 0.5px solid var(--color-border-warning); border-radius: var(--border-radius-md); padding: 10px 12px; margin-top: 8px; display: none; }
-.apply-title { font-size: 12px; color: var(--color-text-warning); font-weight: 500; margin-bottom: 5px; }
-.apply-changes { font-size: 11px; color: var(--color-text-warning); line-height: 1.7; margin-bottom: 8px; }
-.apply-btn { font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: var(--border-radius-md); background: var(--color-text-warning); color: var(--color-background-primary); border: none; cursor: pointer; font-family: var(--font-sans); }
-.btn-group { display: flex; gap: 8px; margin-top: 10px; }
-.btn { flex: 1; padding: 10px; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); }
-.btn-primary { background: var(--color-text-primary); color: var(--color-background-primary); border-color: transparent; }
-.btn-primary:disabled { opacity: 0.35; cursor: default; }
-</style>
-</head>
-<body>
-<div class="scene">
-  <div class="config">
-    <div class="config-field"><span class="config-label">lot size</span><input class="config-input" id="ls" type="text" value="0.1" oninput="recalcConfig()"></div>
-    <div class="config-field"><span class="config-label">tick size</span><input class="config-input" id="ts" type="text" value="0.025" oninput="recalcConfig()"></div>
-    <div>
-      <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:3px;">Base token in</div>
-      <div class="base-toggle">
-        <button class="base-opt active" id="opt-sell" onclick="setBase('sell')">You sell</button>
-        <button class="base-opt" id="opt-buy" onclick="setBase('buy')">You buy</button>
-      </div>
-    </div>
-  </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Lot Size & Tick Size Rounding Demo</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f5f5f3;
+				--color-background-tertiary: #eeede9;
+				--color-background-info: #e6f1fb;
+				--color-background-success: #eaf3de;
+				--color-background-warning: #faeeda;
+				--color-background-danger: #fcebeb;
+				--color-text-primary: #1a1a18;
+				--color-text-secondary: #5f5e5a;
+				--color-text-tertiary: #888780;
+				--color-text-info: #185fa5;
+				--color-text-success: #3b6d11;
+				--color-text-warning: #854f0b;
+				--color-text-danger: #a32d2d;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.25);
+				--color-border-info: #185fa5;
+				--color-border-success: #3b6d11;
+				--color-border-warning: #854f0b;
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--font-sans: system-ui, -apple-system, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: var(--font-sans);
+				background: var(--color-background-tertiary);
+				padding: 1.5rem;
+			}
+			.scene {
+				background: var(--color-background-tertiary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.5rem;
+				max-width: 480px;
+				margin: 0 auto;
+			}
+			.config {
+				display: flex;
+				gap: 8px;
+				margin-bottom: 1rem;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+			.config-field {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: var(--border-radius-md);
+				padding: 5px 10px;
+			}
+			.config-label {
+				font-size: 11px;
+				color: var(--color-text-secondary);
+			}
+			.config-input {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				background: none;
+				border: none;
+				outline: none;
+				width: 60px;
+				font-family: var(--font-sans);
+			}
+			.base-toggle {
+				display: flex;
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: var(--border-radius-md);
+				overflow: hidden;
+			}
+			.base-opt {
+				font-size: 11px;
+				padding: 5px 10px;
+				cursor: pointer;
+				color: var(--color-text-secondary);
+				border: none;
+				background: none;
+				font-family: var(--font-sans);
+			}
+			.base-opt.active {
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+			}
+			.modal {
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				max-width: 380px;
+				margin: 0 auto;
+				padding: 1.25rem;
+			}
+			.field {
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				padding: 10px 12px;
+				margin-bottom: 4px;
+			}
+			.field-top {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 6px;
+			}
+			.field-label {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+			}
+			.field-constraint {
+				font-size: 10px;
+				color: var(--color-text-info);
+				font-weight: 500;
+			}
+			.field-main {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.f-input {
+				font-size: 20px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				background: none;
+				border: none;
+				outline: none;
+				flex: 1;
+				font-family: var(--font-sans);
+			}
+			.f-derived {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 2px;
+			}
+			.tok {
+				display: flex;
+				align-items: center;
+				gap: 5px;
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: 20px;
+				padding: 4px 10px 4px 6px;
+				flex-shrink: 0;
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.tok-dot {
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 8px;
+				font-weight: 500;
+			}
+			.icp-dot {
+				background: var(--color-background-info);
+				color: var(--color-text-info);
+			}
+			.usd-dot {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.flip-row {
+				display: flex;
+				justify-content: center;
+				margin: 2px 0;
+			}
+			.flip-btn {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				color: var(--color-text-secondary);
+				font-size: 14px;
+			}
+			.price-sec {
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				padding: 10px 12px;
+				margin: 4px 0;
+			}
+			.price-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 6px;
+			}
+			.price-lbl {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+			}
+			.price-row {
+				display: flex;
+				align-items: baseline;
+				gap: 6px;
+			}
+			.p-input {
+				font-size: 20px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				background: none;
+				border: none;
+				outline: none;
+				width: 140px;
+				font-family: var(--font-sans);
+			}
+			.p-unit {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+			}
+			.lock-btn {
+				width: 26px;
+				height: 26px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				color: var(--color-text-secondary);
+				font-size: 13px;
+			}
+			.lock-btn.on {
+				border-color: var(--color-border-info);
+				color: var(--color-text-info);
+				background: var(--color-background-info);
+			}
+			.apply-box {
+				background: var(--color-background-warning);
+				border: 0.5px solid var(--color-border-warning);
+				border-radius: var(--border-radius-md);
+				padding: 10px 12px;
+				margin-top: 8px;
+				display: none;
+			}
+			.apply-title {
+				font-size: 12px;
+				color: var(--color-text-warning);
+				font-weight: 500;
+				margin-bottom: 5px;
+			}
+			.apply-changes {
+				font-size: 11px;
+				color: var(--color-text-warning);
+				line-height: 1.7;
+				margin-bottom: 8px;
+			}
+			.apply-btn {
+				font-size: 12px;
+				font-weight: 500;
+				padding: 6px 14px;
+				border-radius: var(--border-radius-md);
+				background: var(--color-text-warning);
+				color: var(--color-background-primary);
+				border: none;
+				cursor: pointer;
+				font-family: var(--font-sans);
+			}
+			.btn-group {
+				display: flex;
+				gap: 8px;
+				margin-top: 10px;
+			}
+			.btn {
+				flex: 1;
+				padding: 10px;
+				border-radius: var(--border-radius-md);
+				font-size: 14px;
+				font-weight: 500;
+				cursor: pointer;
+				font-family: var(--font-sans);
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				color: var(--color-text-primary);
+			}
+			.btn-primary {
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				border-color: transparent;
+			}
+			.btn-primary:disabled {
+				opacity: 0.35;
+				cursor: default;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="scene">
+			<div class="config">
+				<div class="config-field">
+					<span class="config-label">lot size</span
+					><input class="config-input" id="ls" type="text" value="0.1" oninput="recalcConfig()" />
+				</div>
+				<div class="config-field">
+					<span class="config-label">tick size</span
+					><input class="config-input" id="ts" type="text" value="0.025" oninput="recalcConfig()" />
+				</div>
+				<div>
+					<div style="font-size: 10px; color: var(--color-text-tertiary); margin-bottom: 3px">
+						Base token in
+					</div>
+					<div class="base-toggle">
+						<button class="base-opt active" id="opt-sell" onclick="setBase('sell')">
+							You sell
+						</button>
+						<button class="base-opt" id="opt-buy" onclick="setBase('buy')">You buy</button>
+					</div>
+				</div>
+			</div>
 
-  <div class="modal">
-    <div class="field">
-      <div class="field-top"><span class="field-label">You sell</span><span class="field-constraint" id="con-sell">lot size: 0.1</span></div>
-      <div class="field-main">
-        <div style="flex:1;">
-          <input class="f-input" id="inp-sell" type="text" value="10" oninput="onSell()" onblur="checkRounding()">
-          <div class="f-derived" id="drv-sell"></div>
-        </div>
-        <div class="tok"><div class="tok-dot icp-dot">ICP</div>ICP</div>
-      </div>
-    </div>
+			<div class="modal">
+				<div class="field">
+					<div class="field-top">
+						<span class="field-label">You sell</span
+						><span class="field-constraint" id="con-sell">lot size: 0.1</span>
+					</div>
+					<div class="field-main">
+						<div style="flex: 1">
+							<input
+								class="f-input"
+								id="inp-sell"
+								type="text"
+								value="10"
+								oninput="onSell()"
+								onblur="checkRounding()"
+							/>
+							<div class="f-derived" id="drv-sell"></div>
+						</div>
+						<div class="tok">
+							<div class="tok-dot icp-dot">ICP</div>
+							ICP
+						</div>
+					</div>
+				</div>
 
-    <div class="flip-row"><div class="flip-btn"><i class="ti ti-arrows-down-up"></i></div></div>
+				<div class="flip-row">
+					<div class="flip-btn"><i class="ti ti-arrows-down-up"></i></div>
+				</div>
 
-    <div class="field">
-      <div class="field-top"><span class="field-label">You buy</span><span class="field-constraint" id="con-buy"></span></div>
-      <div class="field-main">
-        <div style="flex:1;">
-          <input class="f-input" id="inp-buy" type="text" value="26.9" oninput="onBuy()" onblur="checkRounding()">
-          <div class="f-derived" id="drv-buy"></div>
-        </div>
-        <div class="tok"><div class="tok-dot usd-dot">$</div>ckUSDC</div>
-      </div>
-    </div>
+				<div class="field">
+					<div class="field-top">
+						<span class="field-label">You buy</span
+						><span class="field-constraint" id="con-buy"></span>
+					</div>
+					<div class="field-main">
+						<div style="flex: 1">
+							<input
+								class="f-input"
+								id="inp-buy"
+								type="text"
+								value="26.9"
+								oninput="onBuy()"
+								onblur="checkRounding()"
+							/>
+							<div class="f-derived" id="drv-buy"></div>
+						</div>
+						<div class="tok">
+							<div class="tok-dot usd-dot">$</div>
+							ckUSDC
+						</div>
+					</div>
+				</div>
 
-    <div class="price-sec">
-      <div class="price-header">
-        <span class="price-lbl">Price <span style="font-size:10px;color:var(--color-text-tertiary);">tick: <span id="ts-disp">0.025</span></span></span>
-        <div class="lock-btn" id="lock-btn" onclick="toggleLock()"><i class="ti ti-lock-open" id="lock-icon"></i></div>
-      </div>
-      <div class="price-row">
-        <input class="p-input" id="inp-price" type="text" value="2.69" oninput="onPrice()" onblur="checkRounding()">
-        <span class="p-unit">ckUSDC / ICP</span>
-      </div>
-      <div class="f-derived" id="drv-price"></div>
-    </div>
+				<div class="price-sec">
+					<div class="price-header">
+						<span class="price-lbl"
+							>Price
+							<span style="font-size: 10px; color: var(--color-text-tertiary)"
+								>tick: <span id="ts-disp">0.025</span></span
+							></span
+						>
+						<div class="lock-btn" id="lock-btn" onclick="toggleLock()">
+							<i class="ti ti-lock-open" id="lock-icon"></i>
+						</div>
+					</div>
+					<div class="price-row">
+						<input
+							class="p-input"
+							id="inp-price"
+							type="text"
+							value="2.69"
+							oninput="onPrice()"
+							onblur="checkRounding()"
+						/>
+						<span class="p-unit">ckUSDC / ICP</span>
+					</div>
+					<div class="f-derived" id="drv-price"></div>
+				</div>
 
-    <div class="apply-box" id="apply-box">
-      <div class="apply-title"><i class="ti ti-adjustments-horizontal" style="font-size:12px;margin-right:4px;"></i>Values need adjustment for this order book</div>
-      <div class="apply-changes" id="apply-changes"></div>
-      <button class="apply-btn" onclick="applyRounding()">Use these values</button>
-    </div>
+				<div class="apply-box" id="apply-box">
+					<div class="apply-title">
+						<i class="ti ti-adjustments-horizontal" style="font-size: 12px; margin-right: 4px"></i
+						>Values need adjustment for this order book
+					</div>
+					<div class="apply-changes" id="apply-changes"></div>
+					<button class="apply-btn" onclick="applyRounding()">Use these values</button>
+				</div>
 
-    <div class="btn-group">
-      <button class="btn">Cancel</button>
-      <button class="btn btn-primary" id="review-btn">Review</button>
-    </div>
-  </div>
-</div>
+				<div class="btn-group">
+					<button class="btn">Cancel</button>
+					<button class="btn btn-primary" id="review-btn">Review</button>
+				</div>
+			</div>
+		</div>
 
-<script>
-let locked=false, baseIsSell=true, roundedVals=null;
-const g=id=>document.getElementById(id);
-const rd=(v,s)=>s>0?Math.floor(v/s+1e-9)*s:v;
-const valid=(v,s)=>Math.abs(rd(v,s)-v)<1e-9;
-const fn=n=>parseFloat(n.toFixed(8)).toString();
-const ls=()=>parseFloat(g('ls').value)||0.1;
-const ts=()=>parseFloat(g('ts').value)||0.025;
+		<script>
+			let locked = false,
+				baseIsSell = true,
+				roundedVals = null;
+			const g = (id) => document.getElementById(id);
+			const rd = (v, s) => (s > 0 ? Math.floor(v / s + 1e-9) * s : v);
+			const valid = (v, s) => Math.abs(rd(v, s) - v) < 1e-9;
+			const fn = (n) => parseFloat(n.toFixed(8)).toString();
+			const ls = () => parseFloat(g('ls').value) || 0.1;
+			const ts = () => parseFloat(g('ts').value) || 0.025;
 
-function onSell(){
-  const sell=parseFloat(g('inp-sell').value)||0, price=parseFloat(g('inp-price').value)||0;
-  if(baseIsSell){g('inp-buy').value=fn(sell*price);}
-  else{if(locked){g('inp-buy').value=price>0?fn(sell/price):g('inp-buy').value;}else{const buy=parseFloat(g('inp-buy').value)||0;g('inp-price').value=buy>0?fn(sell/buy):g('inp-price').value;}}
-  hideApply();
-}
-function onBuy(){
-  const buy=parseFloat(g('inp-buy').value)||0, price=parseFloat(g('inp-price').value)||0;
-  if(!baseIsSell){g('inp-sell').value=fn(buy*price);}
-  else{if(locked){g('inp-sell').value=price>0?fn(buy/price):g('inp-sell').value;}else{const sell=parseFloat(g('inp-sell').value)||0;g('inp-price').value=sell>0?fn(buy/sell):g('inp-price').value;}}
-  hideApply();
-}
-function onPrice(){
-  const price=parseFloat(g('inp-price').value)||0;
-  if(baseIsSell){g('inp-buy').value=fn((parseFloat(g('inp-sell').value)||0)*price);}
-  else{g('inp-sell').value=fn((parseFloat(g('inp-buy').value)||0)*price);}
-  hideApply();
-}
+			function onSell() {
+				const sell = parseFloat(g('inp-sell').value) || 0,
+					price = parseFloat(g('inp-price').value) || 0;
+				if (baseIsSell) {
+					g('inp-buy').value = fn(sell * price);
+				} else {
+					if (locked) {
+						g('inp-buy').value = price > 0 ? fn(sell / price) : g('inp-buy').value;
+					} else {
+						const buy = parseFloat(g('inp-buy').value) || 0;
+						g('inp-price').value = buy > 0 ? fn(sell / buy) : g('inp-price').value;
+					}
+				}
+				hideApply();
+			}
+			function onBuy() {
+				const buy = parseFloat(g('inp-buy').value) || 0,
+					price = parseFloat(g('inp-price').value) || 0;
+				if (!baseIsSell) {
+					g('inp-sell').value = fn(buy * price);
+				} else {
+					if (locked) {
+						g('inp-sell').value = price > 0 ? fn(buy / price) : g('inp-sell').value;
+					} else {
+						const sell = parseFloat(g('inp-sell').value) || 0;
+						g('inp-price').value = sell > 0 ? fn(buy / sell) : g('inp-price').value;
+					}
+				}
+				hideApply();
+			}
+			function onPrice() {
+				const price = parseFloat(g('inp-price').value) || 0;
+				if (baseIsSell) {
+					g('inp-buy').value = fn((parseFloat(g('inp-sell').value) || 0) * price);
+				} else {
+					g('inp-sell').value = fn((parseFloat(g('inp-buy').value) || 0) * price);
+				}
+				hideApply();
+			}
 
-function checkRounding(){
-  const sellRaw=parseFloat(g('inp-sell').value)||0, buyRaw=parseFloat(g('inp-buy').value)||0, priceRaw=parseFloat(g('inp-price').value)||0;
-  const L=ls(),T=ts(); const changes=[];
-  let sell=sellRaw,buy=buyRaw,price=priceRaw;
-  if(baseIsSell){
-    if(!valid(sellRaw,L)){sell=rd(sellRaw,L);changes.push('You sell: '+fn(sellRaw)+' → '+fn(sell)+' ICP (lot size '+L+')');}
-    if(!valid(priceRaw,T)){price=rd(priceRaw,T);changes.push('Price: '+fn(priceRaw)+' → '+fn(price)+' ckUSDC/ICP (tick size '+T+')');}
-    const bc=sell*price; if(Math.abs(bc-buyRaw)>1e-9){buy=bc;changes.push('You buy: '+fn(buyRaw)+' → '+fn(buy)+' ckUSDC (recalculated)');}
-  } else {
-    if(!valid(buyRaw,L)){buy=rd(buyRaw,L);changes.push('You buy: '+fn(buyRaw)+' → '+fn(buy)+' ICP (lot size '+L+')');}
-    if(!valid(priceRaw,T)){price=rd(priceRaw,T);changes.push('Price: '+fn(priceRaw)+' → '+fn(price)+' ckUSDC/ICP (tick size '+T+')');}
-    const sc=buy*price; if(Math.abs(sc-sellRaw)>1e-9){sell=sc;changes.push('You sell: '+fn(sellRaw)+' → '+fn(sell)+' ckUSDC (recalculated)');}
-  }
-  if(changes.length>0){
-    roundedVals={sell:fn(sell),buy:fn(buy),price:fn(price)};
-    g('apply-changes').innerHTML=changes.map(c=>'· '+c+'<br>').join('');
-    g('apply-box').style.display='block'; g('review-btn').disabled=true;
-  } else { hideApply(); }
-}
+			function checkRounding() {
+				const sellRaw = parseFloat(g('inp-sell').value) || 0,
+					buyRaw = parseFloat(g('inp-buy').value) || 0,
+					priceRaw = parseFloat(g('inp-price').value) || 0;
+				const L = ls(),
+					T = ts();
+				const changes = [];
+				let sell = sellRaw,
+					buy = buyRaw,
+					price = priceRaw;
+				if (baseIsSell) {
+					if (!valid(sellRaw, L)) {
+						sell = rd(sellRaw, L);
+						changes.push(
+							'You sell: ' + fn(sellRaw) + ' → ' + fn(sell) + ' ICP (lot size ' + L + ')'
+						);
+					}
+					if (!valid(priceRaw, T)) {
+						price = rd(priceRaw, T);
+						changes.push(
+							'Price: ' + fn(priceRaw) + ' → ' + fn(price) + ' ckUSDC/ICP (tick size ' + T + ')'
+						);
+					}
+					const bc = sell * price;
+					if (Math.abs(bc - buyRaw) > 1e-9) {
+						buy = bc;
+						changes.push('You buy: ' + fn(buyRaw) + ' → ' + fn(buy) + ' ckUSDC (recalculated)');
+					}
+				} else {
+					if (!valid(buyRaw, L)) {
+						buy = rd(buyRaw, L);
+						changes.push('You buy: ' + fn(buyRaw) + ' → ' + fn(buy) + ' ICP (lot size ' + L + ')');
+					}
+					if (!valid(priceRaw, T)) {
+						price = rd(priceRaw, T);
+						changes.push(
+							'Price: ' + fn(priceRaw) + ' → ' + fn(price) + ' ckUSDC/ICP (tick size ' + T + ')'
+						);
+					}
+					const sc = buy * price;
+					if (Math.abs(sc - sellRaw) > 1e-9) {
+						sell = sc;
+						changes.push('You sell: ' + fn(sellRaw) + ' → ' + fn(sell) + ' ckUSDC (recalculated)');
+					}
+				}
+				if (changes.length > 0) {
+					roundedVals = { sell: fn(sell), buy: fn(buy), price: fn(price) };
+					g('apply-changes').innerHTML = changes.map((c) => '· ' + c + '<br>').join('');
+					g('apply-box').style.display = 'block';
+					g('review-btn').disabled = true;
+				} else {
+					hideApply();
+				}
+			}
 
-function hideApply(){roundedVals=null;g('apply-box').style.display='none';g('review-btn').disabled=false;}
+			function hideApply() {
+				roundedVals = null;
+				g('apply-box').style.display = 'none';
+				g('review-btn').disabled = false;
+			}
 
-function applyRounding(){
-  if(!roundedVals)return;
-  g('inp-sell').value=roundedVals.sell; g('inp-buy').value=roundedVals.buy; g('inp-price').value=roundedVals.price;
-  hideApply();
-}
+			function applyRounding() {
+				if (!roundedVals) return;
+				g('inp-sell').value = roundedVals.sell;
+				g('inp-buy').value = roundedVals.buy;
+				g('inp-price').value = roundedVals.price;
+				hideApply();
+			}
 
-function setBase(which){
-  baseIsSell=which==='sell';
-  g('opt-sell').className='base-opt'+(baseIsSell?' active':'');
-  g('opt-buy').className='base-opt'+(!baseIsSell?' active':'');
-  g('con-sell').textContent=baseIsSell?'lot size: '+ls():'';
-  g('con-buy').textContent=!baseIsSell?'lot size: '+ls():'';
-  hideApply();
-}
+			function setBase(which) {
+				baseIsSell = which === 'sell';
+				g('opt-sell').className = 'base-opt' + (baseIsSell ? ' active' : '');
+				g('opt-buy').className = 'base-opt' + (!baseIsSell ? ' active' : '');
+				g('con-sell').textContent = baseIsSell ? 'lot size: ' + ls() : '';
+				g('con-buy').textContent = !baseIsSell ? 'lot size: ' + ls() : '';
+				hideApply();
+			}
 
-function recalcConfig(){
-  g('ts-disp').textContent=ts();
-  g('con-sell').textContent=baseIsSell?'lot size: '+ls():'';
-  g('con-buy').textContent=!baseIsSell?'lot size: '+ls():'';
-}
+			function recalcConfig() {
+				g('ts-disp').textContent = ts();
+				g('con-sell').textContent = baseIsSell ? 'lot size: ' + ls() : '';
+				g('con-buy').textContent = !baseIsSell ? 'lot size: ' + ls() : '';
+			}
 
-function toggleLock(){
-  locked=!locked;
-  g('lock-btn').className=locked?'lock-btn on':'lock-btn';
-  g('lock-icon').className=locked?'ti ti-lock':'ti ti-lock-open';
-}
-</script>
-</body>
+			function toggleLock() {
+				locked = !locked;
+				g('lock-btn').className = locked ? 'lock-btn on' : 'lock-btn';
+				g('lock-icon').className = locked ? 'ti ti-lock' : 'ti ti-lock-open';
+			}
+		</script>
+	</body>
 </html>

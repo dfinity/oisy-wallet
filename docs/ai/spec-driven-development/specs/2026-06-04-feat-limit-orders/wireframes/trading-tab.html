@@ -1,163 +1,512 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trading Tab — Three States</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-:root {
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f5f5f3;
-  --color-background-tertiary: #eeede9;
-  --color-background-info: #e6f1fb;
-  --color-background-success: #eaf3de;
-  --color-background-warning: #faeeda;
-  --color-background-danger: #fcebeb;
-  --color-text-primary: #1a1a18;
-  --color-text-secondary: #5f5e5a;
-  --color-text-tertiary: #888780;
-  --color-text-info: #185fa5;
-  --color-text-success: #3b6d11;
-  --color-text-warning: #854f0b;
-  --color-text-danger: #a32d2d;
-  --color-border-tertiary: rgba(0,0,0,0.12);
-  --color-border-secondary: rgba(0,0,0,0.25);
-  --color-border-primary: rgba(0,0,0,0.35);
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --font-sans: system-ui, -apple-system, sans-serif;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); background: #f0efeb; padding: 1.5rem; }
-.state-toggle { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
-.toggle-btn { font-size: 12px; padding: 5px 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); }
-.toggle-btn.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: transparent; }
-.page { max-width: 600px; margin: 0 auto; font-family: var(--font-sans); }
-.hero { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem 1rem; text-align: center; margin-bottom: 1rem; }
-.hero-balance { font-size: 28px; font-weight: 500; color: var(--color-text-primary); }
-.hero-fiat { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; margin-bottom: 1rem; }
-.hero-actions { display: flex; justify-content: center; gap: 16px; }
-.hero-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.hero-btn-circle { width: 42px; height: 42px; border-radius: 50%; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; font-size: 17px; color: var(--color-text-secondary); }
-.hero-btn-label { font-size: 11px; color: var(--color-text-secondary); }
-.tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); padding: 0 1rem; margin-bottom: 1rem; }
-.tab { font-size: 13px; padding: 8px 12px; color: var(--color-text-secondary); border-bottom: 2px solid transparent; margin-bottom: -0.5px; white-space: nowrap; }
-.tab.active { color: var(--color-text-primary); font-weight: 500; border-bottom-color: var(--color-text-primary); }
-.content { padding: 0 1rem; }
-.intro { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.25rem; line-height: 1.5; }
-.learn-more { color: var(--color-text-info); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
-.section { margin-bottom: 1.5rem; }
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.section-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
-.section-action { font-size: 12px; color: var(--color-text-info); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
-.section-action.disabled { color: var(--color-text-tertiary); text-decoration: none; cursor: default; }
-.list { display: flex; flex-direction: column; gap: 1px; background: var(--color-border-tertiary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
-.row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--color-background-primary); }
-.tok-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--color-background-info); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 500; color: var(--color-text-info); flex-shrink: 0; }
-.tok-dot-u { background: var(--color-background-success); color: var(--color-text-success); }
-.row-info { flex: 1; }
-.row-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
-.row-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 1px; }
-.row-right { text-align: right; }
-.row-main { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
-.row-secondary { font-size: 11px; color: var(--color-text-tertiary); }
-.row-fiat { font-size: 11px; color: var(--color-text-secondary); }
-.row-action { font-size: 11px; color: var(--color-text-info); text-decoration: underline; cursor: pointer; margin-left: 8px; flex-shrink: 0; }
-.empty-row { padding: 1.25rem 14px; background: var(--color-background-primary); display: flex; align-items: center; justify-content: space-between; }
-.empty-text { font-size: 13px; color: var(--color-text-tertiary); }
-.empty-cta { font-size: 13px; font-weight: 500; padding: 7px 16px; border-radius: var(--border-radius-md); background: var(--color-text-primary); color: var(--color-background-primary); cursor: pointer; border: none; font-family: var(--font-sans); }
-.status-pill { font-size: 11px; padding: 2px 7px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
-.s-open { background: var(--color-background-success); color: var(--color-text-success); }
-.s-pending { background: var(--color-background-warning); color: var(--color-text-warning); }
-.s-filled { background: var(--color-background-secondary); color: var(--color-text-secondary); }
-.s-cancelled { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
-.orders-wrap { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
-.orders-tabs { display: flex; background: var(--color-background-primary); border-bottom: 0.5px solid var(--color-border-tertiary); }
-.orders-tab { font-size: 13px; padding: 8px 14px; cursor: pointer; color: var(--color-text-secondary); border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
-.orders-tab.active { color: var(--color-text-primary); font-weight: 500; border-bottom-color: var(--color-text-primary); }
-.orders-body { display: flex; flex-direction: column; gap: 1px; background: var(--color-border-tertiary); }
-.empty-orders { padding: 12px 14px; background: var(--color-background-primary); display: flex; align-items: center; justify-content: space-between; }
-.empty-orders-text { font-size: 13px; color: var(--color-text-tertiary); }
-.empty-orders-btn { font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: var(--border-radius-md); background: var(--color-text-primary); color: var(--color-background-primary); cursor: pointer; border: none; font-family: var(--font-sans); }
-</style>
-</head>
-<body>
-<div class="state-toggle">
-  <button class="toggle-btn active" onclick="showState('new', this)">New user</button>
-  <button class="toggle-btn" onclick="showState('assets', this)">Assets, no orders</button>
-  <button class="toggle-btn" onclick="showState('full', this)">Assets & orders</button>
-</div>
-<div class="page">
-  <div class="hero">
-    <div class="hero-balance">$1,234.56</div>
-    <div class="hero-fiat">Total balance</div>
-    <div class="hero-actions">
-      <div class="hero-btn"><div class="hero-btn-circle"><i class="ti ti-arrow-up"></i></div><span class="hero-btn-label">Send</span></div>
-      <div class="hero-btn"><div class="hero-btn-circle"><i class="ti ti-arrow-down"></i></div><span class="hero-btn-label">Receive</span></div>
-      <div class="hero-btn"><div class="hero-btn-circle"><i class="ti ti-credit-card"></i></div><span class="hero-btn-label">Buy</span></div>
-      <div class="hero-btn"><div class="hero-btn-circle"><i class="ti ti-arrows-right-left"></i></div><span class="hero-btn-label">Swap</span></div>
-    </div>
-  </div>
-  <div class="tabs">
-    <div class="tab">Tokens</div><div class="tab">NFTs</div><div class="tab">Earning</div><div class="tab active">Trading</div>
-  </div>
-  <div class="content">
-    <div class="intro">Place limit orders and swaps on fully on-chain exchanges. <span class="learn-more">Learn more ↗</span></div>
-    <div class="section">
-      <div class="section-header"><div class="section-title">My assets</div><span class="section-action">+ Deposit</span></div>
-      <div id="assets-empty" class="list"><div class="empty-row"><span class="empty-text">No assets deposited yet</span><button class="empty-cta">Deposit</button></div></div>
-      <div id="assets-list" class="list" style="display:none;">
-        <div class="row"><div class="tok-dot">ICP</div><div class="row-info"><div class="row-name">ICP</div><div class="row-sub">OISY DEX</div></div><div class="row-right"><div class="row-main">250 ICP</div><div class="row-secondary">100 ICP reserved</div><div class="row-fiat">$672.50</div></div><span class="row-action">Withdraw</span></div>
-        <div class="row"><div class="tok-dot tok-dot-u">USD</div><div class="row-info"><div class="row-name">ckUSDC</div><div class="row-sub">OISY DEX</div></div><div class="row-right"><div class="row-main">150.00 ckUSDC</div><div class="row-fiat">$150.00</div></div><span class="row-action">Withdraw</span></div>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-header"><div class="section-title">Orders</div><span class="section-action" id="order-action">+ Limit order</span></div>
-      <div class="orders-wrap">
-        <div class="orders-tabs">
-          <div class="orders-tab active" onclick="switchOrderTab('active',this)">Active</div>
-          <div class="orders-tab" onclick="switchOrderTab('history',this)">History</div>
-        </div>
-        <div id="orders-active-pane">
-          <div id="orders-no-assets" class="empty-orders"><span class="empty-orders-text">No active orders</span></div>
-          <div id="orders-has-assets" class="empty-orders" style="display:none;"><span class="empty-orders-text">No active orders</span><button class="empty-orders-btn">Limit order</button></div>
-          <div id="orders-list" class="orders-body" style="display:none;">
-            <div class="row"><div class="tok-dot" style="width:24px;height:24px;font-size:8px;">ICP</div><div class="row-info"><div class="row-name">ICP → ckUSDC</div><div class="row-sub">OISY DEX · @ 2.75 · 100 ICP</div></div><span class="status-pill s-open">Open</span></div>
-            <div class="row"><div class="tok-dot" style="width:24px;height:24px;font-size:8px;">ICP</div><div class="row-info"><div class="row-name">ICP → ckUSDC</div><div class="row-sub">OISY DEX · @ 2.90 · 50 ICP</div></div><span class="status-pill s-pending">Pending</span></div>
-          </div>
-        </div>
-        <div id="orders-history-pane" style="display:none;" class="orders-body">
-          <div class="row"><div class="tok-dot" style="width:24px;height:24px;font-size:8px;">ICP</div><div class="row-info"><div class="row-name">ICP → ckUSDC</div><div class="row-sub">OISY DEX · @ 2.60 · 200 ICP</div></div><span class="status-pill s-filled">Filled</span></div>
-          <div class="row"><div class="tok-dot" style="width:24px;height:24px;font-size:8px;">ICP</div><div class="row-info"><div class="row-name">ICP → ckUSDC</div><div class="row-sub">OISY DEX · @ 3.10 · 75 ICP</div></div><span class="status-pill s-cancelled">Cancelled</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
-function showState(state, el) {
-  const hasAssets = state !== 'new', hasOrders = state === 'full';
-  document.getElementById('assets-empty').style.display = hasAssets ? 'none' : 'flex';
-  document.getElementById('assets-empty').style.flexDirection = 'column';
-  document.getElementById('assets-list').style.display = hasAssets ? 'flex' : 'none';
-  document.getElementById('assets-list').style.flexDirection = 'column';
-  document.getElementById('orders-no-assets').style.display = !hasAssets ? 'flex' : 'none';
-  document.getElementById('orders-has-assets').style.display = (hasAssets && !hasOrders) ? 'flex' : 'none';
-  document.getElementById('orders-list').style.display = hasOrders ? 'flex' : 'none';
-  document.getElementById('orders-list').style.flexDirection = 'column';
-  document.getElementById('order-action').className = 'section-action' + (hasAssets ? '' : ' disabled');
-  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
-function switchOrderTab(tab, el) {
-  document.getElementById('orders-active-pane').style.display = tab === 'active' ? 'block' : 'none';
-  document.getElementById('orders-history-pane').style.display = tab === 'history' ? 'flex' : 'none';
-  if (tab === 'history') document.getElementById('orders-history-pane').style.flexDirection = 'column';
-  document.querySelectorAll('.orders-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-}
-showState('new', document.querySelector('.toggle-btn'));
-</script>
-</body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Trading Tab — Three States</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f5f5f3;
+				--color-background-tertiary: #eeede9;
+				--color-background-info: #e6f1fb;
+				--color-background-success: #eaf3de;
+				--color-background-warning: #faeeda;
+				--color-background-danger: #fcebeb;
+				--color-text-primary: #1a1a18;
+				--color-text-secondary: #5f5e5a;
+				--color-text-tertiary: #888780;
+				--color-text-info: #185fa5;
+				--color-text-success: #3b6d11;
+				--color-text-warning: #854f0b;
+				--color-text-danger: #a32d2d;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.25);
+				--color-border-primary: rgba(0, 0, 0, 0.35);
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--font-sans: system-ui, -apple-system, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: var(--font-sans);
+				background: #f0efeb;
+				padding: 1.5rem;
+			}
+			.state-toggle {
+				display: flex;
+				gap: 6px;
+				margin-bottom: 1.5rem;
+				flex-wrap: wrap;
+			}
+			.toggle-btn {
+				font-size: 12px;
+				padding: 5px 12px;
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				color: var(--color-text-secondary);
+				cursor: pointer;
+				font-family: var(--font-sans);
+			}
+			.toggle-btn.active {
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				border-color: transparent;
+			}
+			.page {
+				max-width: 600px;
+				margin: 0 auto;
+				font-family: var(--font-sans);
+			}
+			.hero {
+				background: var(--color-background-secondary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.25rem 1rem;
+				text-align: center;
+				margin-bottom: 1rem;
+			}
+			.hero-balance {
+				font-size: 28px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.hero-fiat {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				margin-top: 2px;
+				margin-bottom: 1rem;
+			}
+			.hero-actions {
+				display: flex;
+				justify-content: center;
+				gap: 16px;
+			}
+			.hero-btn {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 5px;
+			}
+			.hero-btn-circle {
+				width: 42px;
+				height: 42px;
+				border-radius: 50%;
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 17px;
+				color: var(--color-text-secondary);
+			}
+			.hero-btn-label {
+				font-size: 11px;
+				color: var(--color-text-secondary);
+			}
+			.tabs {
+				display: flex;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+				padding: 0 1rem;
+				margin-bottom: 1rem;
+			}
+			.tab {
+				font-size: 13px;
+				padding: 8px 12px;
+				color: var(--color-text-secondary);
+				border-bottom: 2px solid transparent;
+				margin-bottom: -0.5px;
+				white-space: nowrap;
+			}
+			.tab.active {
+				color: var(--color-text-primary);
+				font-weight: 500;
+				border-bottom-color: var(--color-text-primary);
+			}
+			.content {
+				padding: 0 1rem;
+			}
+			.intro {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				margin-bottom: 1.25rem;
+				line-height: 1.5;
+			}
+			.learn-more {
+				color: var(--color-text-info);
+				text-decoration: underline;
+				text-underline-offset: 2px;
+				cursor: pointer;
+			}
+			.section {
+				margin-bottom: 1.5rem;
+			}
+			.section-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 8px;
+			}
+			.section-title {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.section-action {
+				font-size: 12px;
+				color: var(--color-text-info);
+				cursor: pointer;
+				text-decoration: underline;
+				text-underline-offset: 2px;
+			}
+			.section-action.disabled {
+				color: var(--color-text-tertiary);
+				text-decoration: none;
+				cursor: default;
+			}
+			.list {
+				display: flex;
+				flex-direction: column;
+				gap: 1px;
+				background: var(--color-border-tertiary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				overflow: hidden;
+			}
+			.row {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 10px 14px;
+				background: var(--color-background-primary);
+			}
+			.tok-dot {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 9px;
+				font-weight: 500;
+				color: var(--color-text-info);
+				flex-shrink: 0;
+			}
+			.tok-dot-u {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.row-info {
+				flex: 1;
+			}
+			.row-name {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.row-sub {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 1px;
+			}
+			.row-right {
+				text-align: right;
+			}
+			.row-main {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.row-secondary {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.row-fiat {
+				font-size: 11px;
+				color: var(--color-text-secondary);
+			}
+			.row-action {
+				font-size: 11px;
+				color: var(--color-text-info);
+				text-decoration: underline;
+				cursor: pointer;
+				margin-left: 8px;
+				flex-shrink: 0;
+			}
+			.empty-row {
+				padding: 1.25rem 14px;
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+			.empty-text {
+				font-size: 13px;
+				color: var(--color-text-tertiary);
+			}
+			.empty-cta {
+				font-size: 13px;
+				font-weight: 500;
+				padding: 7px 16px;
+				border-radius: var(--border-radius-md);
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				cursor: pointer;
+				border: none;
+				font-family: var(--font-sans);
+			}
+			.status-pill {
+				font-size: 11px;
+				padding: 2px 7px;
+				border-radius: 10px;
+				white-space: nowrap;
+				flex-shrink: 0;
+			}
+			.s-open {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.s-pending {
+				background: var(--color-background-warning);
+				color: var(--color-text-warning);
+			}
+			.s-filled {
+				background: var(--color-background-secondary);
+				color: var(--color-text-secondary);
+			}
+			.s-cancelled {
+				background: var(--color-background-secondary);
+				color: var(--color-text-tertiary);
+			}
+			.orders-wrap {
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				overflow: hidden;
+			}
+			.orders-tabs {
+				display: flex;
+				background: var(--color-background-primary);
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.orders-tab {
+				font-size: 13px;
+				padding: 8px 14px;
+				cursor: pointer;
+				color: var(--color-text-secondary);
+				border-bottom: 2px solid transparent;
+				margin-bottom: -0.5px;
+			}
+			.orders-tab.active {
+				color: var(--color-text-primary);
+				font-weight: 500;
+				border-bottom-color: var(--color-text-primary);
+			}
+			.orders-body {
+				display: flex;
+				flex-direction: column;
+				gap: 1px;
+				background: var(--color-border-tertiary);
+			}
+			.empty-orders {
+				padding: 12px 14px;
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+			.empty-orders-text {
+				font-size: 13px;
+				color: var(--color-text-tertiary);
+			}
+			.empty-orders-btn {
+				font-size: 12px;
+				font-weight: 500;
+				padding: 6px 14px;
+				border-radius: var(--border-radius-md);
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				cursor: pointer;
+				border: none;
+				font-family: var(--font-sans);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="state-toggle">
+			<button class="toggle-btn active" onclick="showState('new', this)">New user</button>
+			<button class="toggle-btn" onclick="showState('assets', this)">Assets, no orders</button>
+			<button class="toggle-btn" onclick="showState('full', this)">Assets & orders</button>
+		</div>
+		<div class="page">
+			<div class="hero">
+				<div class="hero-balance">$1,234.56</div>
+				<div class="hero-fiat">Total balance</div>
+				<div class="hero-actions">
+					<div class="hero-btn">
+						<div class="hero-btn-circle"><i class="ti ti-arrow-up"></i></div>
+						<span class="hero-btn-label">Send</span>
+					</div>
+					<div class="hero-btn">
+						<div class="hero-btn-circle"><i class="ti ti-arrow-down"></i></div>
+						<span class="hero-btn-label">Receive</span>
+					</div>
+					<div class="hero-btn">
+						<div class="hero-btn-circle"><i class="ti ti-credit-card"></i></div>
+						<span class="hero-btn-label">Buy</span>
+					</div>
+					<div class="hero-btn">
+						<div class="hero-btn-circle"><i class="ti ti-arrows-right-left"></i></div>
+						<span class="hero-btn-label">Swap</span>
+					</div>
+				</div>
+			</div>
+			<div class="tabs">
+				<div class="tab">Tokens</div>
+				<div class="tab">NFTs</div>
+				<div class="tab">Earning</div>
+				<div class="tab active">Trading</div>
+			</div>
+			<div class="content">
+				<div class="intro">
+					Place limit orders and swaps on fully on-chain exchanges.
+					<span class="learn-more">Learn more ↗</span>
+				</div>
+				<div class="section">
+					<div class="section-header">
+						<div class="section-title">My assets</div>
+						<span class="section-action">+ Deposit</span>
+					</div>
+					<div id="assets-empty" class="list">
+						<div class="empty-row">
+							<span class="empty-text">No assets deposited yet</span
+							><button class="empty-cta">Deposit</button>
+						</div>
+					</div>
+					<div id="assets-list" class="list" style="display: none">
+						<div class="row">
+							<div class="tok-dot">ICP</div>
+							<div class="row-info">
+								<div class="row-name">ICP</div>
+								<div class="row-sub">OISY DEX</div>
+							</div>
+							<div class="row-right">
+								<div class="row-main">250 ICP</div>
+								<div class="row-secondary">100 ICP reserved</div>
+								<div class="row-fiat">$672.50</div>
+							</div>
+							<span class="row-action">Withdraw</span>
+						</div>
+						<div class="row">
+							<div class="tok-dot tok-dot-u">USD</div>
+							<div class="row-info">
+								<div class="row-name">ckUSDC</div>
+								<div class="row-sub">OISY DEX</div>
+							</div>
+							<div class="row-right">
+								<div class="row-main">150.00 ckUSDC</div>
+								<div class="row-fiat">$150.00</div>
+							</div>
+							<span class="row-action">Withdraw</span>
+						</div>
+					</div>
+				</div>
+				<div class="section">
+					<div class="section-header">
+						<div class="section-title">Orders</div>
+						<span class="section-action" id="order-action">+ Limit order</span>
+					</div>
+					<div class="orders-wrap">
+						<div class="orders-tabs">
+							<div class="orders-tab active" onclick="switchOrderTab('active', this)">Active</div>
+							<div class="orders-tab" onclick="switchOrderTab('history', this)">History</div>
+						</div>
+						<div id="orders-active-pane">
+							<div id="orders-no-assets" class="empty-orders">
+								<span class="empty-orders-text">No active orders</span>
+							</div>
+							<div id="orders-has-assets" class="empty-orders" style="display: none">
+								<span class="empty-orders-text">No active orders</span
+								><button class="empty-orders-btn">Limit order</button>
+							</div>
+							<div id="orders-list" class="orders-body" style="display: none">
+								<div class="row">
+									<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
+									<div class="row-info">
+										<div class="row-name">ICP → ckUSDC</div>
+										<div class="row-sub">OISY DEX · @ 2.75 · 100 ICP</div>
+									</div>
+									<span class="status-pill s-open">Open</span>
+								</div>
+								<div class="row">
+									<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
+									<div class="row-info">
+										<div class="row-name">ICP → ckUSDC</div>
+										<div class="row-sub">OISY DEX · @ 2.90 · 50 ICP</div>
+									</div>
+									<span class="status-pill s-pending">Pending</span>
+								</div>
+							</div>
+						</div>
+						<div id="orders-history-pane" style="display: none" class="orders-body">
+							<div class="row">
+								<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
+								<div class="row-info">
+									<div class="row-name">ICP → ckUSDC</div>
+									<div class="row-sub">OISY DEX · @ 2.60 · 200 ICP</div>
+								</div>
+								<span class="status-pill s-filled">Filled</span>
+							</div>
+							<div class="row">
+								<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
+								<div class="row-info">
+									<div class="row-name">ICP → ckUSDC</div>
+									<div class="row-sub">OISY DEX · @ 3.10 · 75 ICP</div>
+								</div>
+								<span class="status-pill s-cancelled">Cancelled</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			function showState(state, el) {
+				const hasAssets = state !== 'new',
+					hasOrders = state === 'full';
+				document.getElementById('assets-empty').style.display = hasAssets ? 'none' : 'flex';
+				document.getElementById('assets-empty').style.flexDirection = 'column';
+				document.getElementById('assets-list').style.display = hasAssets ? 'flex' : 'none';
+				document.getElementById('assets-list').style.flexDirection = 'column';
+				document.getElementById('orders-no-assets').style.display = !hasAssets ? 'flex' : 'none';
+				document.getElementById('orders-has-assets').style.display =
+					hasAssets && !hasOrders ? 'flex' : 'none';
+				document.getElementById('orders-list').style.display = hasOrders ? 'flex' : 'none';
+				document.getElementById('orders-list').style.flexDirection = 'column';
+				document.getElementById('order-action').className =
+					'section-action' + (hasAssets ? '' : ' disabled');
+				document.querySelectorAll('.toggle-btn').forEach((b) => b.classList.remove('active'));
+				el.classList.add('active');
+			}
+			function switchOrderTab(tab, el) {
+				document.getElementById('orders-active-pane').style.display =
+					tab === 'active' ? 'block' : 'none';
+				document.getElementById('orders-history-pane').style.display =
+					tab === 'history' ? 'flex' : 'none';
+				if (tab === 'history')
+					document.getElementById('orders-history-pane').style.flexDirection = 'column';
+				document.querySelectorAll('.orders-tab').forEach((t) => t.classList.remove('active'));
+				el.classList.add('active');
+			}
+			showState('new', document.querySelector('.toggle-btn'));
+		</script>
+	</body>
 </html>
